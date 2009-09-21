@@ -31,9 +31,53 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		protected internal CatalogDeviceSession(Schema.Device ADevice, ServerProcess AServerProcess, DeviceSessionInfo ADeviceSessionInfo) : base(ADevice, AServerProcess, ADeviceSessionInfo){}
 		
 		public Schema.Catalog Catalog { get { return ((Server.Engine)ServerProcess.ServerSession.Server).Catalog; } }
-		
-		public new CatalogDevice Device { get { return (CatalogDevice)base.Device; } }
 
+		#region Execute
+		
+		protected override object InternalExecute(Program AProgram, Schema.DevicePlan ADevicePlan)
+		{
+			if ((ADevicePlan.Node is BaseTableVarNode) || (ADevicePlan.Node is OrderNode))
+			{
+				Schema.TableVar LTableVar = null;
+				if (ADevicePlan.Node is BaseTableVarNode)
+					LTableVar = ((BaseTableVarNode)ADevicePlan.Node).TableVar;
+				else if (ADevicePlan.Node is OrderNode)
+					LTableVar = ((BaseTableVarNode)ADevicePlan.Node.Nodes[0]).TableVar;
+				if (LTableVar != null)
+				{
+					lock (Device.Headers)
+					{
+						CatalogHeader LHeader = Device.Headers[LTableVar];
+						if ((LHeader.CacheLevel == CatalogCacheLevel.None) || ((LHeader.CacheLevel == CatalogCacheLevel.Normal) && (Catalog.TimeStamp > LHeader.TimeStamp)) || ((LHeader.CacheLevel == CatalogCacheLevel.Maintained) && !LHeader.Cached))
+						{
+							Device.PopulateTableVar(AProgram, LHeader);
+							if ((LHeader.CacheLevel == CatalogCacheLevel.Maintained) && !LHeader.Cached)
+								LHeader.Cached = true;
+						}
+					}
+				}
+			}
+			object LResult = base.InternalExecute(AProgram, ADevicePlan);
+			if (ADevicePlan.Node is CreateTableNode)
+			{
+				Schema.TableVar LTableVar = ((CreateTableNode)ADevicePlan.Node).Table;
+				CatalogCacheLevel LCacheLevel = (CatalogCacheLevel)Enum.Parse(typeof(CatalogCacheLevel), MetaData.GetTag(LTableVar.MetaData, "Catalog.CacheLevel", "Normal"), true);
+				if (!((LCacheLevel == CatalogCacheLevel.StoreTable) || (LCacheLevel == CatalogCacheLevel.StoreView)))
+				{
+					lock (Device.Headers)
+					{
+						CatalogHeader LHeader = new CatalogHeader(LTableVar, Device.Tables[LTableVar], Int64.MinValue, LCacheLevel);
+						Device.Headers.Add(LHeader);
+					}
+				}
+			}
+			return LResult;
+		}
+
+		#endregion
+				
+		#region Instructions
+		
 		#if LOGDDLINSTRUCTIONS
 		private abstract class DDLInstruction 
 		{
@@ -1402,7 +1446,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		private DDLInstructionLog FInstructions = new DDLInstructionLog();
 		#endif
+		
+		#endregion
 
+		#region Transactions
+		
 		protected override void InternalBeginTransaction(IsolationLevel AIsolationLevel)
 		{
 			base.InternalBeginTransaction(AIsolationLevel);
@@ -1482,46 +1530,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			// virtual
 		}
 		
-		protected override object InternalExecute(Program AProgram, Schema.DevicePlan ADevicePlan)
-		{
-			if ((ADevicePlan.Node is BaseTableVarNode) || (ADevicePlan.Node is OrderNode))
-			{
-				Schema.TableVar LTableVar = null;
-				if (ADevicePlan.Node is BaseTableVarNode)
-					LTableVar = ((BaseTableVarNode)ADevicePlan.Node).TableVar;
-				else if (ADevicePlan.Node is OrderNode)
-					LTableVar = ((BaseTableVarNode)ADevicePlan.Node.Nodes[0]).TableVar;
-				if (LTableVar != null)
-				{
-					lock (Device.Headers)
-					{
-						CatalogHeader LHeader = Device.Headers[LTableVar];
-						if ((LHeader.CacheLevel == CatalogCacheLevel.None) || ((LHeader.CacheLevel == CatalogCacheLevel.Normal) && (Catalog.TimeStamp > LHeader.TimeStamp)) || ((LHeader.CacheLevel == CatalogCacheLevel.Maintained) && !LHeader.Cached))
-						{
-							Device.PopulateTableVar(AProgram, LHeader);
-							if ((LHeader.CacheLevel == CatalogCacheLevel.Maintained) && !LHeader.Cached)
-								LHeader.Cached = true;
-						}
-					}
-				}
-			}
-			object LResult = base.InternalExecute(AProgram, ADevicePlan);
-			if (ADevicePlan.Node is CreateTableNode)
-			{
-				Schema.TableVar LTableVar = ((CreateTableNode)ADevicePlan.Node).Table;
-				CatalogCacheLevel LCacheLevel = (CatalogCacheLevel)Enum.Parse(typeof(CatalogCacheLevel), MetaData.GetTag(LTableVar.MetaData, "Catalog.CacheLevel", "Normal"), true);
-				if (!((LCacheLevel == CatalogCacheLevel.StoreTable) || (LCacheLevel == CatalogCacheLevel.StoreView)))
-				{
-					lock (Device.Headers)
-					{
-						CatalogHeader LHeader = new CatalogHeader(LTableVar, Device.Tables[LTableVar], Int64.MinValue, LCacheLevel);
-						Device.Headers.Add(LHeader);
-					}
-				}
-			}
-			return LResult;
-		}
+		#endregion
 		
+		#region Updates
+				
 		protected override void InternalInsertRow(Program AProgram, Schema.TableVar ATableVar, Row ARow, BitArray AValueFlags)
 		{
 			switch (ATableVar.Name)
@@ -1538,9 +1550,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				case "System.TableDee" : break;
 				case "System.TableDum" : break;
-				case "System.ServerSettings" : UpdateServerSettings(AProgram, ATableVar, AOldRow, ANewRow); return;
-				case "System.Sessions" : UpdateSessions(AProgram, ATableVar, AOldRow, ANewRow); return;
-				case "System.Processes" : UpdateProcesses(AProgram, ATableVar, AOldRow, ANewRow); return;
 			}
 			base.InternalUpdateRow(AProgram, ATableVar, AOldRow, ANewRow, AValueFlags);
 		}
@@ -1555,85 +1564,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			base.InternalDeleteRow(AProgram, ATableVar, ARow);
 		}
 		
-		protected void UpdateServerSettings(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
-		{
-			if ((bool)AOldRow["LogErrors"] ^ (bool)ANewRow["LogErrors"])
-				ServerProcess.ServerSession.Server.LogErrors = (bool)ANewRow["LogErrors"];
-				
-			if ((int)AOldRow["MaxConcurrentProcesses"] != (int)ANewRow["MaxConcurrentProcesses"])
-				ServerProcess.ServerSession.Server.MaxConcurrentProcesses = (int)ANewRow["MaxConcurrentProcesses"];
-
-			if ((TimeSpan)AOldRow["ProcessWaitTimeout"] != (TimeSpan)ANewRow["ProcessWaitTimeout"])
-				ServerProcess.ServerSession.Server.ProcessWaitTimeout = (TimeSpan)ANewRow["ProcessWaitTimeout"];
-				
-			if ((TimeSpan)AOldRow["ProcessTerminateTimeout"] != (TimeSpan)ANewRow["ProcessTerminateTimeout"])
-				ServerProcess.ServerSession.Server.ProcessTerminationTimeout = (TimeSpan)ANewRow["ProcessTerminateTimeout"];
-
-			if ((int)AOldRow["PlanCacheSize"] != (int)ANewRow["PlanCacheSize"])
-				ServerProcess.ServerSession.Server.PlanCacheSize = (int)ANewRow["PlanCacheSize"];
-				
-			SaveServerSettings(ServerProcess.ServerSession.Server);
-		}
+		#endregion
 		
-		protected void UpdateSessions(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
-		{
-			ServerSession LSession = ServerProcess.ServerSession.Server.Sessions.GetSession((int)ANewRow["ID"]);
-			
-			if (LSession.SessionID != ServerProcess.ServerSession.SessionID)
-				CheckUserHasRight(ServerProcess.ServerSession.User.ID, Schema.RightNames.MaintainUserSessions);
-			
-			if ((string)AOldRow["Current_Library_Name"] != (string)ANewRow["Current_Library_Name"])
-				LSession.CurrentLibrary = ServerProcess.CatalogDeviceSession.ResolveLoadedLibrary((string)ANewRow["Current_Library_Name"]);
-				
-			if ((string)AOldRow["DefaultIsolationLevel"] != (string)ANewRow["DefaultIsolationLevel"])
-				LSession.SessionInfo.DefaultIsolationLevel = (IsolationLevel)Enum.Parse(typeof(IsolationLevel), (string)ANewRow["DefaultIsolationLevel"], true);
-
-			if ((bool)AOldRow["DefaultUseDTC"] ^ (bool)ANewRow["DefaultUseDTC"])
-				LSession.SessionInfo.DefaultUseDTC = (bool)ANewRow["DefaultUseDTC"];
-				
-			if ((bool)AOldRow["DefaultUseImplicitTransactions"] ^ (bool)ANewRow["DefaultUseImplicitTransactions"])
-				LSession.SessionInfo.DefaultUseImplicitTransactions = (bool)ANewRow["DefaultUseImplicitTransactions"];
-				
-			if ((string)AOldRow["Language"] != (string)ANewRow["Language"])
-				LSession.SessionInfo.Language = (QueryLanguage)Enum.Parse(typeof(QueryLanguage), (string)ANewRow["Language"], true);
-
-			if ((int)AOldRow["DefaultMaxStackDepth"] != (int)ANewRow["DefaultMaxStackDepth"])
-				LSession.SessionInfo.DefaultMaxStackDepth = (int)ANewRow["DefaultMaxStackDepth"];
-				
-			if ((int)AOldRow["DefaultMaxCallDepth"] != (int)ANewRow["DefaultMaxCallDepth"])
-				LSession.SessionInfo.DefaultMaxCallDepth = (int)ANewRow["DefaultMaxCallDepth"];
-				
-			if ((bool)AOldRow["UsePlanCache"] ^ (bool)ANewRow["UsePlanCache"])
-				LSession.SessionInfo.UsePlanCache = (bool)ANewRow["UsePlanCache"];
-
-			if ((bool)AOldRow["ShouldEmitIL"] ^ (bool)ANewRow["ShouldEmitIL"])
-				LSession.SessionInfo.ShouldEmitIL = (bool)ANewRow["ShouldEmitIL"];
-		}
-		
-		protected void UpdateProcesses(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
-		{
-			ServerSession LSession = ServerProcess.ServerSession.Server.Sessions.GetSession((int)ANewRow["Session_ID"]);
-			
-			if (LSession.SessionID != ServerProcess.ServerSession.SessionID)
-				CheckUserHasRight(ServerProcess.ServerSession.User.ID, Schema.RightNames.MaintainUserSessions);
-				
-			ServerProcess LProcess = LSession.Processes.GetProcess((int)ANewRow["ID"]);
-				
-			if ((string)AOldRow["DefaultIsolationLevel"] != (string)ANewRow["DefaultIsolationLevel"])
-				LProcess.DefaultIsolationLevel = (IsolationLevel)Enum.Parse(typeof(IsolationLevel), (string)ANewRow["DefaultIsolationLevel"], true);
-
-			if ((bool)AOldRow["UseDTC"] ^ (bool)ANewRow["UseDTC"])
-				LProcess.UseDTC = (bool)ANewRow["UseDTC"];
-				
-			if ((bool)AOldRow["UseImplicitTransactions"] ^ (bool)ANewRow["UseImplicitTransactions"])
-				LProcess.UseImplicitTransactions = (bool)ANewRow["UseImplicitTransactions"];
-				
-			if ((int)AOldRow["MaxStackDepth"] != (int)ANewRow["MaxStackDepth"])
-				LProcess.MaxStackDepth = (int)ANewRow["MaxStackDepth"];
-				
-			if ((int)AOldRow["MaxCallDepth"] != (int)ANewRow["MaxCallDepth"])
-				LProcess.MaxCallDepth = (int)ANewRow["MaxCallDepth"];
-		}
+		#region Emission
 		
 		private static D4TextEmitter FEmitter = new D4TextEmitter();
 		
@@ -1647,16 +1580,15 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			return FEmitter.Emit(Catalog.EmitStatement(this, EmitMode.ForStorage, new string[] { AObject.Name }, String.Empty, true, true, false, true));
 		}
 		
+		#endregion
+		
+		#region Resolution
+		
 		/// <summary>Resolves the given name and returns the catalog object, if an unambiguous match is found. Otherwise, returns null.</summary>
 		public virtual Schema.CatalogObject ResolveName(string AName, NameResolutionPath APath, List<string> ANames)
 		{
 			int LIndex = Catalog.ResolveName(AName, APath, ANames);
 			return LIndex >= 0 ? (Schema.CatalogObject)Catalog[LIndex] : null;
-		}
-
-		protected virtual Schema.CatalogObjectHeaders CachedResolveOperatorName(string AName)
-		{
-			return Device.FOperatorNameCache.Resolve(AName);
 		}
 
 		/// <summary>Ensures that any potential match with the given operator name is in the cache so that operator resolution can occur.</summary>
@@ -1690,32 +1622,26 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					return null;
 			}
 		}
-
-		private void FixupSystemScalarTypeReferences(ScalarType LScalarType)
+		
+		public Schema.Object ResolveObject(int AObjectID)
 		{
-			switch (LScalarType.Name)
-			{
-				case Schema.DataTypes.CSystemScalar: Catalog.DataTypes.SystemScalar = LScalarType; break;
-				case Schema.DataTypes.CSystemBoolean: Catalog.DataTypes.SystemBoolean = LScalarType; LScalarType.NativeType = typeof(bool); break;
-				case Schema.DataTypes.CSystemDecimal: Catalog.DataTypes.SystemDecimal = LScalarType; LScalarType.NativeType = typeof(decimal); break;
-				case Schema.DataTypes.CSystemLong: Catalog.DataTypes.SystemLong = LScalarType; LScalarType.NativeType = typeof(long); break;
-				case Schema.DataTypes.CSystemInteger: Catalog.DataTypes.SystemInteger = LScalarType; LScalarType.NativeType = typeof(int); break;
-				case Schema.DataTypes.CSystemShort: Catalog.DataTypes.SystemShort = LScalarType; LScalarType.NativeType = typeof(short); break;
-				case Schema.DataTypes.CSystemByte: Catalog.DataTypes.SystemByte = LScalarType; LScalarType.NativeType = typeof(byte); break;
-				case Schema.DataTypes.CSystemString: Catalog.DataTypes.SystemString = LScalarType; LScalarType.NativeType = typeof(string); break;
-				case Schema.DataTypes.CSystemTimeSpan: Catalog.DataTypes.SystemTimeSpan = LScalarType; LScalarType.NativeType = typeof(TimeSpan); break;
-				case Schema.DataTypes.CSystemDateTime: Catalog.DataTypes.SystemDateTime = LScalarType; LScalarType.NativeType = typeof(DateTime); break;
-				case Schema.DataTypes.CSystemDate: Catalog.DataTypes.SystemDate = LScalarType; LScalarType.NativeType = typeof(DateTime); break;
-				case Schema.DataTypes.CSystemTime: Catalog.DataTypes.SystemTime = LScalarType; LScalarType.NativeType = typeof(DateTime); break;
-				case Schema.DataTypes.CSystemMoney: Catalog.DataTypes.SystemMoney = LScalarType; LScalarType.NativeType = typeof(decimal); break;
-				case Schema.DataTypes.CSystemGuid: Catalog.DataTypes.SystemGuid = LScalarType; LScalarType.NativeType = typeof(Guid); break;
-				case Schema.DataTypes.CSystemBinary: Catalog.DataTypes.SystemBinary = LScalarType; LScalarType.NativeType = typeof(byte[]); break;
-				case Schema.DataTypes.CSystemGraphic: Catalog.DataTypes.SystemGraphic = LScalarType; LScalarType.NativeType = typeof(byte[]); break;
-				case Schema.DataTypes.CSystemError: Catalog.DataTypes.SystemError = LScalarType; LScalarType.NativeType = typeof(Exception); break;
-				case Schema.DataTypes.CSystemName: Catalog.DataTypes.SystemName = LScalarType; LScalarType.NativeType = typeof(string); break;
-			}
+			Schema.ObjectHeader LHeader = GetObjectHeader(AObjectID);
+			if (LHeader.CatalogObjectID == -1)
+				return ResolveCatalogObject(AObjectID);
+				
+			Schema.CatalogObject LCatalogObject = ResolveCatalogObject(LHeader.CatalogObjectID);
+			return LCatalogObject.GetObjectFromHeader(LHeader);
 		}
 		
+		#endregion
+
+		#region Cache
+		
+		protected virtual Schema.CatalogObjectHeaders CachedResolveOperatorName(string AName)
+		{
+			return Device.FOperatorNameCache.Resolve(AName);
+		}
+
 		/// <summary>Returns the cached object for the given object id, if it exists and is in the cache, null otherwise.</summary>
 		public Schema.CatalogObject ResolveCachedCatalogObject(int AObjectID)
 		{
@@ -1855,6 +1781,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
+		#endregion
+		
+		#region Catalog object
+		
 		/// <summary>Returns true if the given object is not an A/T object.</summary>
 		public bool ShouldSerializeCatalogObject(Schema.CatalogObject AObject)
 		{
@@ -1862,7 +1792,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		}
 		
 		/// <summary>Inserts the given object into the catalog cache. If this is not a repository, also inserts the object into the catalog store.</summary>
-		public void InsertCatalogObject(Schema.CatalogObject AObject)
+		public virtual void InsertCatalogObject(Schema.CatalogObject AObject)
 		{
 			// Cache the object
 			CacheCatalogObject(AObject);
@@ -1876,10 +1806,13 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					FInstructions.Add(new CreateCatalogObjectInstruction(AObject));
 				#endif
 
-				// If this is not a repository, and we are not deserializing, and the object should be persisted, save the object to the catalog store
-				if (!ServerProcess.ServerSession.Server.IsEngine && ShouldSerializeCatalogObject(AObject))
-					InsertPersistentObject(AObject);
+				InternalInsertCatalogObject(AObject);
 			}
+		}
+
+		protected virtual void InternalInsertCatalogObject(Schema.CatalogObject AObject)
+		{
+			// virtual
 		}
 		
 		/// <summary>Updates the given object in the catalog cache. If this is not a repository, also updates the object in the catalog store.</summary>
@@ -1887,11 +1820,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			// If we are not deserializing
 			if (!ServerProcess.InLoadingContext())
-			{
-				// If this is not a repository, and we are not deserializing, and the object should be persisted, update the object in the catalog store
-				if (!ServerProcess.ServerSession.Server.IsEngine && ShouldSerializeCatalogObject(AObject))
-					UpdatePersistentObject(AObject);
-			}
+				InternalUpdateCatalogObject(AObject);
+		}
+
+		protected virtual void InternalUpdateCatalogObject(Schema.CatalogObject AObject)
+		{
+			// virtual
 		}
 		
 		/// <summary>Deletes the given object in the catalog cache. If this is not a repository, also deletes the object in the catalog store.</summary>
@@ -1912,950 +1846,18 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					FInstructions.Add(new DropCatalogObjectInstruction(AObject));
 				#endif
 
-				// If this is not a repository, and the object should be persisted, remove the object from the catalog store
-				if (!ServerProcess.ServerSession.Server.IsEngine && (!ServerProcess.InLoadingContext()) && ShouldSerializeCatalogObject(AObject))
-					DeletePersistentObject(AObject);
-			}
-		}
-		
-		public Schema.ObjectHeader SelectObjectHeader(int AObjectID)
-		{
-			AcquireCatalogStoreConnection(false);
-			try
-			{
-				return CatalogStoreConnection.SelectObject(AObjectID);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-		
-		public Schema.ObjectHeader GetObjectHeader(int AObjectID)
-		{
-			AcquireCatalogStoreConnection(false);
-			try
-			{
-				Schema.ObjectHeader LHeader = CatalogStoreConnection.SelectObject(AObjectID);
-				if (LHeader == null)
-					throw new Schema.SchemaException(Schema.SchemaException.Codes.ObjectHeaderNotFound, AObjectID);
-					
-				return LHeader;
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-		
-		public Schema.Object ResolveObject(int AObjectID)
-		{
-			Schema.ObjectHeader LHeader = GetObjectHeader(AObjectID);
-			if (LHeader.CatalogObjectID == -1)
-				return ResolveCatalogObject(AObjectID);
-				
-			Schema.CatalogObject LCatalogObject = ResolveCatalogObject(LHeader.CatalogObjectID);
-			return LCatalogObject.GetObjectFromHeader(LHeader);
-		}
-		
-		public List<int> SelectOperatorHandlers(int AOperatorID)
-		{
-			if (!ServerProcess.ServerSession.Server.IsEngine)
-			{
-				AcquireCatalogStoreConnection(false);
-				try
-				{
-					return CatalogStoreConnection.SelectOperatorHandlers(AOperatorID);
-				}
-				finally
-				{
-					ReleaseCatalogStoreConnection();
-				}
-			}
-			return new List<int>();
-		}
-		
-		public List<int> SelectObjectHandlers(int ASourceObjectID)
-		{
-			if (!ServerProcess.ServerSession.Server.IsEngine)
-			{
-				AcquireCatalogStoreConnection(false);
-				try
-				{
-					return CatalogStoreConnection.SelectObjectHandlers(ASourceObjectID);
-				}
-				finally
-				{
-					ReleaseCatalogStoreConnection();
-				}
-			}
-			return new List<int>();
-		}
-
-		public Schema.DependentObjectHeaders SelectObjectDependents(int AObjectID, bool ARecursive)
-		{
-			if (!ServerProcess.ServerSession.Server.IsEngine)
-			{
-				AcquireCatalogStoreConnection(false);
-				try
-				{
-					return CatalogStoreConnection.SelectObjectDependents(AObjectID, ARecursive);
-				}
-				finally
-				{
-					ReleaseCatalogStoreConnection();
-				}
-			}
-			return new Schema.DependentObjectHeaders();
-		}
-		
-		public Schema.DependentObjectHeaders SelectObjectDependencies(int AObjectID, bool ARecursive)
-		{
-			AcquireCatalogStoreConnection(false);
-			try
-			{
-				return CatalogStoreConnection.SelectObjectDependencies(AObjectID, ARecursive);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-		
-		public Right ResolveRight(string ARightName, bool AMustResolve)
-		{
-			AcquireCatalogStoreConnection(false);
-			try
-			{
-				Right LRight = CatalogStoreConnection.SelectRight(ARightName);
-				if ((LRight == null) && AMustResolve)
-					throw new Schema.SchemaException(Schema.SchemaException.Codes.RightNotFound, ARightName);
-				return LRight;
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-		
-		public Right ResolveRight(string ARightName)
-		{
-			return ResolveRight(ARightName, true);
-		}
-		
-		public bool RightExists(string ARightName)
-		{
-			return ResolveRight(ARightName, false) != null;
-		}
-		
-		public void InsertRight(string ARightName, string AUserID)
-		{
-			AcquireCatalogStoreConnection(true);
-			try
-			{
-				CatalogStoreConnection.InsertRight(ARightName, AUserID);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-		
-		public void DeleteRight(string ARightName)
-		{
-			lock (Catalog)
-			{
-				// TODO: Look at speeding this up with an index of users for each right? Memory usage may outweigh the benefits of this index...
-				foreach (Schema.User LUser in Device.UsersCache.Values)
-					LUser.ClearCachedRightAssignment(ARightName);
-			}
-			
-			AcquireCatalogStoreConnection(true);
-			try
-			{
-				CatalogStoreConnection.DeleteRight(ARightName);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-		
-		public void InsertRole(Schema.Role ARole)
-		{
-			// Add the role to the Cache
-			CacheCatalogObject(ARole);
-			
-			// Clear the name cache (this is done in InsertPersistentObject for all other catalog objects)
-			Device.FNameCache.Clear();
-			
-			// If we are not deserializing
-			if (!ServerProcess.InLoadingContext())
-			{
-				#if LOGDDLINSTRUCTIONS
-				// log the DDL instruction
-				if (ServerProcess.InTransaction)
-					FInstructions.Add(new CreateCatalogObjectInstruction(ARole));
-				#endif
-
-				// If this is not a repository, save it to the catalog store
-				if (!ServerProcess.ServerSession.Server.IsEngine && (!ServerProcess.InLoadingContext()))
-				{
-					AcquireCatalogStoreConnection(true);
-					try
-					{
-						CatalogStoreConnection.InsertRole(ARole, ScriptCatalogObject(ARole));
-					}
-					finally
-					{
-						ReleaseCatalogStoreConnection();
-					}
-				}
-			}
-		}
-		
-		public void DeleteRole(Schema.Role ARole)
-		{
-			lock (Catalog)
-			{
-				// Remove the object from the catalog cache
-				ClearCatalogObject(ARole);
-			}
-			
-			if (!ServerProcess.InLoadingContext())
-			{
-				#if LOGDDLINSTRUCTIONS
-				// log the DDL instruction
-				if (ServerProcess.InTransaction)
-					FInstructions.Add(new DropCatalogObjectInstruction(ARole));
-				#endif
-				
-				// If this is not a repository, remove it from the catalog store
-				if (!ServerProcess.ServerSession.Server.IsEngine)
-				{
-					AcquireCatalogStoreConnection(true);
-					try
-					{
-						CatalogStoreConnection.DeleteRole(ARole);
-					}
-					finally
-					{
-						ReleaseCatalogStoreConnection();
-					}
-				}
-			}
-		}
-		
-		public bool RoleHasRight(Schema.Role ARole, string ARightName)
-		{
-			// TODO: Implement role right assignments caching
-			AcquireCatalogStoreConnection(false);
-			try
-			{
-				RightAssignment LRightAssignment = CatalogStoreConnection.SelectRoleRightAssignment(ARole.ID, ARightName);
-				return (LRightAssignment != null) && LRightAssignment.Granted;
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-		
-		public Schema.User ResolveUser(string AUserID, bool AMustResolve)
-		{
-			lock (Catalog)
-			{
-				Schema.User LUser;
-				if (!Device.UsersCache.TryGetValue(AUserID, out LUser))
-				{
-					AcquireCatalogStoreConnection(false);
-					try
-					{
-						LUser = CatalogStoreConnection.SelectUser(AUserID);
-						if (LUser != null)
-							Device.UsersCache.Add(LUser);
-					}
-					finally
-					{
-						ReleaseCatalogStoreConnection();
-					}
-				}
-				
-				if ((LUser == null) && AMustResolve)
-					throw new Schema.SchemaException(Schema.SchemaException.Codes.UserNotFound, AUserID);
-				
-				return LUser;
-			}
-		}
-		
-		public Schema.User ResolveUser(string AUserID)
-		{
-			return ResolveUser(AUserID, true);
-		}
-
-		/// <summary>Adds the given user to the cache, without affecting the underlying store.</summary>
-		public void CacheUser(User AUser)
-		{
-			lock (Catalog)
-			{
-				Device.UsersCache.Add(AUser);
-			}
-		}
-		
-		/// <summary>Removes the given user from the cache, without affecting the underlying store.</summary>		
-		public void ClearUser(string AUserID)
-		{
-			lock (Catalog)
-			{
-				Device.UsersCache.Remove(AUserID);
+				InternalDeleteCatalogObject(AObject);
 			}
 		}
 
-		/// <summary>Clears the users cache, without affecting the underlying store.</summary>		
-		public void ClearUsers()
+		protected virtual void InternalDeleteCatalogObject(Schema.CatalogObject AObject)
 		{
-			lock (Catalog)
-			{
-				Device.UsersCache.Clear();
-			}
+			// virtual
 		}
 		
-		public bool UserExists(string AUserID)
-		{
-			return ResolveUser(AUserID, false) != null;
-		}
+		#endregion
 		
-		public void InsertUser(Schema.User AUser)
-		{
-			CacheUser(AUser);
-			
-			#if LOGDDLINSTRUCTIONS
-			if (ServerProcess.InTransaction)
-				FInstructions.Add(new CreateUserInstruction(AUser));
-			#endif
-			
-			if (!ServerProcess.ServerSession.Server.IsEngine)
-			{
-				AcquireCatalogStoreConnection(true);
-				try
-				{
-					CatalogStoreConnection.InsertUser(AUser);
-				}
-				finally
-				{
-					ReleaseCatalogStoreConnection();
-				}
-			}
-		}
-
-		public void SetUserPassword(string AUserID, string APassword)
-		{
-			Schema.User LUser = null;
-			
-			lock (Catalog)
-			{
-				LUser = ResolveUser(AUserID);
-					
-				#if LOGDDLINSTRUCTIONS
-				string LUserPassword = LUser.Password;
-				#endif
-				LUser.Password = APassword;
-				#if LOGDDLINSTRUCTIONS
-				if (ServerProcess.InTransaction)
-					FInstructions.Add(new SetUserPasswordInstruction(LUser, LUserPassword));
-				#endif
-			}
-
-			if (!ServerProcess.ServerSession.Server.IsEngine)
-			{
-				AcquireCatalogStoreConnection(true);
-				try
-				{
-					CatalogStoreConnection.UpdateUser(LUser);
-				}
-				finally
-				{
-					ReleaseCatalogStoreConnection();
-				}
-			}
-		}
-		
-		public void SetUserName(string AUserID, string AUserName)
-		{
-			Schema.User LUser = null;
-			
-			lock (Catalog)
-			{
-				LUser = ResolveUser(AUserID);
-
-				#if LOGDDLINSTRUCTIONS
-				string LUserName = LUser.Name;
-				#endif
-				LUser.Name = AUserName;
-				#if LOGDDLINSTRUCTIONS
-				if (ServerProcess.InTransaction)
-					FInstructions.Add(new SetUserNameInstruction(LUser, LUserName));
-				#endif
-			}
-			
-			if (!ServerProcess.ServerSession.Server.IsEngine)
-			{
-				AcquireCatalogStoreConnection(true);
-				try
-				{
-					CatalogStoreConnection.UpdateUser(LUser);
-				}
-				finally
-				{
-					ReleaseCatalogStoreConnection();
-				}
-			}
-		}
-		
-		public void DeleteUser(Schema.User AUser)
-		{
-			ClearUser(AUser.ID);
-			
-			#if LOGDDLINSTRUCTIONS
-			if (ServerProcess.InTransaction)
-				FInstructions.Add(new DropUserInstruction(AUser));
-			#endif
-
-			if (!ServerProcess.ServerSession.Server.IsEngine)
-			{
-				AcquireCatalogStoreConnection(true);
-				try
-				{
-					CatalogStoreConnection.DeleteUser(AUser.ID);
-				}
-				finally
-				{
-					ReleaseCatalogStoreConnection();
-				}
-			}
-		}
-		
-		public bool UserOwnsObjects(string AUserID)
-		{
-			AcquireCatalogStoreConnection(false);
-			try
-			{
-				return CatalogStoreConnection.UserOwnsObjects(AUserID);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-		
-		public bool UserOwnsRights(string AUserID)
-		{
-			AcquireCatalogStoreConnection(false);
-			try
-			{
-				return CatalogStoreConnection.UserOwnsRights(AUserID);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-		
-		public bool UserHasRight(string AUserID, string ARightName)
-		{
-			if (ServerProcess.IsLoading() || (String.Compare(AUserID, Server.Engine.CSystemUserID, true) == 0) || (String.Compare(AUserID, Server.Engine.CAdminUserID, true) == 0))
-				return true;
-
-			lock (Catalog)
-			{
-				Schema.User LUser = ResolveUser(AUserID);
-				
-				Schema.RightAssignment LRightAssignment = LUser.FindCachedRightAssignment(ARightName);
-				
-				if (LRightAssignment == null)
-				{
-					AcquireCatalogStoreConnection(false);
-					try
-					{
-						LRightAssignment = new Schema.RightAssignment(ARightName, CatalogStoreConnection.UserHasRight(AUserID, ARightName));
-						LUser.CacheRightAssignment(LRightAssignment);
-					}
-					finally
-					{
-						ReleaseCatalogStoreConnection();
-					}
-				}
-				
-				return LRightAssignment.Granted;
-			}
-		}
-		
-		public void CheckUserHasRight(string AUserID, string ARightName)
-		{
-			if (!UserHasRight(AUserID, ARightName))
-				throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, AUserID, ARightName);
-		}
-		
-		public void InsertUserRole(string AUserID, int ARoleID)
-		{
-			AcquireCatalogStoreConnection(true);
-			try
-			{
-				CatalogStoreConnection.InsertUserRole(AUserID, ARoleID);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-
-			Schema.User LUser;
-			if (Device.UsersCache.TryGetValue(AUserID, out LUser))
-				LUser.ClearCachedRightAssignments();
-		}
-		
-		public void DeleteUserRole(string AUserID, int ARoleID)
-		{
-			AcquireCatalogStoreConnection(true);
-			try
-			{
-				CatalogStoreConnection.DeleteUserRole(AUserID, ARoleID);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-
-			Schema.User LUser;
-			if (Device.UsersCache.TryGetValue(AUserID, out LUser))
-				LUser.ClearCachedRightAssignments();
-			
-			if (!ServerProcess.IsLoading())
-				MarkUserOperatorsForRecompile(AUserID);
-		}
-		
-		private void MarkRoleOperatorsForRecompile(int ARoleID)
-		{
-			AcquireCatalogStoreConnection(false);
-			try
-			{
-				List<String> LUsers = CatalogStoreConnection.SelectRoleUsers(ARoleID);
-				for (int LIndex = 0; LIndex < LUsers.Count; LIndex++)
-					MarkUserOperatorsForRecompile(LUsers[LIndex]);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-		
-		private void MarkUserOperatorsForRecompile(string AUserID)
-		{
-			AcquireCatalogStoreConnection(false);
-			try
-			{
-				string LObjectName;
-				Schema.CatalogObjectHeaders LHeaders = CatalogStoreConnection.SelectUserOperators(AUserID);
-				for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
-					if (Device.FCatalogIndex.TryGetValue(LHeaders[LIndex].ID, out LObjectName))
-						((Schema.Operator)Catalog[LObjectName]).ShouldRecompile = true;
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-		
-		public void MarkViewForRecompile(int AObjectID)
-		{
-			string LObjectName;
-			if (Device.FCatalogIndex.TryGetValue(AObjectID, out LObjectName))
-				((Schema.DerivedTableVar)Catalog[LObjectName]).ShouldReinferReferences = true;
-		}
-		
-		public void GrantRightToRole(string ARightName, int ARoleID)
-		{
-			lock (Catalog)
-			{
-				foreach (Schema.User LUser in Device.UsersCache.Values)
-					LUser.ClearCachedRightAssignment(ARightName);
-			}
-			
-			AcquireCatalogStoreConnection(true);
-			try
-			{
-				CatalogStoreConnection.EnsureRoleRightAssignment(ARoleID, ARightName, true);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-			
-			// Mark operators for each user that is a member of this role to be recompiled on next execution
-			if (!ServerProcess.IsLoading())
-				MarkRoleOperatorsForRecompile(ARoleID);
-		}
-		
-		public void GrantRightToUser(string ARightName, string AUserID)
-		{
-			lock (Catalog)
-			{
-				Schema.User LUser;
-				if (Device.UsersCache.TryGetValue(AUserID, out LUser))
-					LUser.ClearCachedRightAssignment(ARightName);
-			}
-			
-			AcquireCatalogStoreConnection(true);
-			try
-			{
-				CatalogStoreConnection.EnsureUserRightAssignment(AUserID, ARightName, true);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-			
-			// Mark operators for this user to be recompiled on next execution
-			if (!ServerProcess.IsLoading())
-				MarkUserOperatorsForRecompile(AUserID);
-		}
-		
-		public void RevokeRightFromRole(string ARightName, int ARoleID)
-		{
-			lock (Catalog)
-			{
-				foreach (Schema.User LUser in Device.UsersCache.Values)
-					LUser.ClearCachedRightAssignment(ARightName);
-			}
-			
-			AcquireCatalogStoreConnection(true);
-			try
-			{
-				CatalogStoreConnection.EnsureRoleRightAssignment(ARoleID, ARightName, false);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-
-			if (!ServerProcess.IsLoading())
-				MarkRoleOperatorsForRecompile(ARoleID);
-		}
-		
-		public void RevokeRightFromUser(string ARightName, string AUserID)
-		{
-			lock (Catalog)
-			{
-				Schema.User LUser;
-				if (Device.UsersCache.TryGetValue(AUserID, out LUser))
-					LUser.ClearCachedRightAssignment(ARightName);
-			}
-			
-			AcquireCatalogStoreConnection(true);
-			try
-			{
-				CatalogStoreConnection.EnsureUserRightAssignment(AUserID, ARightName, false);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-
-			if (!ServerProcess.IsLoading())
-				MarkUserOperatorsForRecompile(AUserID);
-		}
-		
-		public void RevertRightForRole(string ARightName, int ARoleID)
-		{
-			lock (Catalog)
-			{
-				foreach (Schema.User LUser in Device.UsersCache.Values)
-					LUser.ClearCachedRightAssignment(ARightName);
-			}
-			
-			AcquireCatalogStoreConnection(true);
-			try
-			{
-				CatalogStoreConnection.DeleteRoleRightAssignment(ARoleID, ARightName);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-
-			if (!ServerProcess.IsLoading())
-				MarkRoleOperatorsForRecompile(ARoleID);
-		}
-		
-		public void RevertRightForUser(string ARightName, string AUserID)
-		{
-			lock (Catalog)
-			{
-				Schema.User LUser;
-				if (Device.UsersCache.TryGetValue(AUserID, out LUser))
-					LUser.ClearCachedRightAssignment(ARightName);
-			}
-			
-			AcquireCatalogStoreConnection(true);
-			try
-			{
-				CatalogStoreConnection.DeleteUserRightAssignment(AUserID, ARightName);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-
-			if (!ServerProcess.IsLoading())
-				MarkUserOperatorsForRecompile(AUserID);
-		}
-		
-		public void SetCatalogObjectOwner(int ACatalogObjectID, string AUserID)
-		{
-			lock (Catalog)
-			{
-				Schema.User LUser;
-				if (Device.UsersCache.TryGetValue(AUserID, out LUser))
-					LUser.ClearCachedRightAssignments();
-			}
-			
-			AcquireCatalogStoreConnection(true);
-			try
-			{
-				CatalogStoreConnection.SetCatalogObjectOwner(ACatalogObjectID, AUserID);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-			
-			// TODO: If the object is an operator, and we are not loading, and the object is not generated, and the object is in the cache, mark it for recompile
-			// TODO: If we are not loading, for each immediate dependent of this object that is a non-generated operator currently in the cache, mark it for recompile
-		}
-		
-		public void SetRightOwner(string ARightName, string AUserID)
-		{
-			lock (Catalog)
-			{
-				Schema.User LUser;
-				if (Device.UsersCache.TryGetValue(AUserID, out LUser))
-					LUser.ClearCachedRightAssignments();
-			}
-			
-			AcquireCatalogStoreConnection(true);
-			try
-			{
-				CatalogStoreConnection.UpdateRight(ARightName, AUserID);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-		
-		public Schema.DeviceUser ResolveDeviceUser(Schema.Device ADevice, Schema.User AUser, bool AMustResolve)
-		{
-			lock (ADevice.Users)
-			{
-				Schema.DeviceUser LDeviceUser;
-				if (!ADevice.Users.TryGetValue(AUser.ID, out LDeviceUser))
-				{
-					AcquireCatalogStoreConnection(false);
-					try
-					{
-						LDeviceUser = CatalogStoreConnection.SelectDeviceUser(ADevice, AUser);
-						if (LDeviceUser != null)
-							ADevice.Users.Add(LDeviceUser);
-					}
-					finally
-					{
-						ReleaseCatalogStoreConnection();
-					}
-				}
-					
-				if ((LDeviceUser == null) && AMustResolve)
-					throw new Schema.SchemaException(Schema.SchemaException.Codes.DeviceUserNotFound, AUser.ID);
-					
-				return LDeviceUser;
-			}
-		}
-		
-		public Schema.DeviceUser ResolveDeviceUser(Schema.Device ADevice, Schema.User AUser)
-		{
-			return ResolveDeviceUser(ADevice, AUser, true);
-		}
-		
-		public bool DeviceUserExists(Schema.Device ADevice, Schema.User AUser)
-		{
-			return ResolveDeviceUser(ADevice, AUser, false) != null;
-		}
-		
-		private void CacheDeviceUser(Schema.DeviceUser ADeviceUser)
-		{
-			lock (ADeviceUser.Device.Users)
-			{
-				ADeviceUser.Device.Users.Add(ADeviceUser);
-			}
-		}
-		
-		private void ClearDeviceUser(Schema.DeviceUser ADeviceUser)
-		{
-			lock (ADeviceUser.Device.Users)
-			{
-				ADeviceUser.Device.Users.Remove(ADeviceUser.User.ID);
-			}
-		}
-		
-		public void InsertDeviceUser(Schema.DeviceUser ADeviceUser)
-		{
-			CacheDeviceUser(ADeviceUser);
-			
-			#if LOGDDLINSTRUCTIONS
-			if (ServerProcess.InTransaction)
-				FInstructions.Add(new CreateDeviceUserInstruction(ADeviceUser));
-			#endif
-			
-			AcquireCatalogStoreConnection(true);
-			try
-			{
-				CatalogStoreConnection.InsertDeviceUser(ADeviceUser);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-		
-		public void SetDeviceUserID(DeviceUser ADeviceUser, string AUserID)
-		{
-			#if LOGDDLINSTRUCTIONS
-			string LOriginalDeviceUserID = ADeviceUser.DeviceUserID;
-			#endif
-			ADeviceUser.DeviceUserID = AUserID;
-			#if LOGDDLINSTRUCTIONS
-			if (ServerProcess.InTransaction)
-				FInstructions.Add(new SetDeviceUserIDInstruction(ADeviceUser, LOriginalDeviceUserID));
-			#endif
-			
-			AcquireCatalogStoreConnection(true);
-			try
-			{
-				CatalogStoreConnection.UpdateDeviceUser(ADeviceUser);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-
-		public void SetDeviceUserPassword(DeviceUser ADeviceUser, string APassword)
-		{
-			#if LOGDDLINSTRUCTIONS
-			string LOriginalDevicePassword = ADeviceUser.DevicePassword;
-			#endif
-			ADeviceUser.DevicePassword = APassword;
-			#if LOGDDLINSTRUCTIONS
-			if (ServerProcess.InTransaction)
-				FInstructions.Add(new SetDeviceUserPasswordInstruction(ADeviceUser, LOriginalDevicePassword));
-			#endif
-			
-			AcquireCatalogStoreConnection(true);
-			try
-			{
-				CatalogStoreConnection.UpdateDeviceUser(ADeviceUser);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-
-		public void SetDeviceUserConnectionParameters(DeviceUser ADeviceUser, string AConnectionParameters)
-		{
-			#if LOGDDLINSTRUCTIONS
-			string LOriginalConnectionParameters = ADeviceUser.ConnectionParameters;
-			#endif
-			ADeviceUser.ConnectionParameters = AConnectionParameters;
-			#if LOGDDLINSTRUCTIONS
-			if (ServerProcess.InTransaction)
-				FInstructions.Add(new SetDeviceUserConnectionParametersInstruction(ADeviceUser, LOriginalConnectionParameters));
-			#endif
-			
-			AcquireCatalogStoreConnection(true);
-			try
-			{
-				CatalogStoreConnection.UpdateDeviceUser(ADeviceUser);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-
-		public void DeleteDeviceUser(Schema.DeviceUser ADeviceUser)
-		{
-			ClearDeviceUser(ADeviceUser);
-			
-			#if LOGDDLINSTRUCTIONS
-			if (ServerProcess.InTransaction)
-				FInstructions.Add(new DropDeviceUserInstruction(ADeviceUser));
-			#endif
-
-			AcquireCatalogStoreConnection(true);
-			try
-			{
-				CatalogStoreConnection.DeleteDeviceUser(ADeviceUser);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-		
-		public bool HasDeviceObjects(Schema.Device ADevice)
-		{
-			AcquireCatalogStoreConnection(false);
-			try
-			{
-				return CatalogStoreConnection.HasDeviceObjects(ADevice.ID);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-
-		public Schema.DeviceObject ResolveDeviceObject(Schema.Device ADevice, Schema.Object AObject)
-		{
-			AcquireCatalogStoreConnection(false);
-			try
-			{
-				int LDeviceObjectID = CatalogStoreConnection.SelectDeviceObjectID(ADevice.ID, AObject.ID);
-				if (LDeviceObjectID >= 0)
-				{
-					// If we are already loading, then a resolve that must load from the cache will fail, 
-					// and is a dependency on an object mapping that did not exist when the initial object was created.
-					// Therefore if the object is not present in the cache, it is as though the object does not exist.
-					if (ServerProcess.InLoadingContext())
-						return ResolveCachedCatalogObject(LDeviceObjectID, false) as Schema.DeviceObject;
-					return ResolveCatalogObject(LDeviceObjectID) as Schema.DeviceObject;
-				}
-				return null;
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-
-		public Schema.DeviceOperator ResolveDeviceOperator(Schema.Device ADevice, Schema.Operator AOperator)
-		{
-			return ResolveDeviceObject(ADevice, AOperator) as Schema.DeviceOperator;
-		}
-
-		public Schema.DeviceScalarType ResolveDeviceScalarType(Schema.Device ADevice, Schema.ScalarType AScalarType)
-		{
-			return ResolveDeviceObject(ADevice, AScalarType) as Schema.DeviceScalarType;
-		}
+		#region Loaded library
 		
 		private void CacheLoadedLibrary(Schema.LoadedLibrary ALoadedLibrary)
 		{
@@ -2877,20 +1879,13 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			if (ServerProcess.InTransaction)
 				FInstructions.Add(new InsertLoadedLibraryInstruction(ALoadedLibrary));
 			#endif
-			
-			// If this is not a repository, and we are not deserializing, insert the loaded library in the catalog store
-			if (!ServerProcess.ServerSession.Server.IsEngine && (!ServerProcess.InLoadingContext()))
-			{
-				AcquireCatalogStoreConnection(true);
-				try
-				{
-					CatalogStoreConnection.InsertLoadedLibrary(ALoadedLibrary.Name);
-				}
-				finally
-				{
-					ReleaseCatalogStoreConnection();
-				}
-			}
+
+			InternalInsertLoadedLibrary(ALoadedLibrary);
+		}
+
+		protected virtual void InternalInsertLoadedLibrary(Schema.LoadedLibrary ALoadedLibrary)
+		{
+			// virtual
 		}
 
 		public void DeleteLoadedLibrary(Schema.LoadedLibrary ALoadedLibrary)
@@ -2904,37 +1899,17 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				FInstructions.Add(new DeleteLoadedLibraryInstruction(ALoadedLibrary));
 			#endif
 			
-			// If this is not a repository, delete the loaded library from the catalog store
-			if (!ServerProcess.ServerSession.Server.IsEngine)
-			{
-				AcquireCatalogStoreConnection(true);
-				try
-				{
-					CatalogStoreConnection.DeleteLoadedLibrary(ALoadedLibrary.Name);
-				}
-				finally
-				{
-					ReleaseCatalogStoreConnection();
-				}
-			}
+			InternalDeleteLoadedLibrary(ALoadedLibrary);
+		}
+
+		protected virtual void InternalDeleteLoadedLibrary(Schema.LoadedLibrary ALoadedLibrary)
+		{
+			// virtual
 		}
 		
-		public void ResolveLoadedLibraries()
+		public virtual void ResolveLoadedLibraries()
 		{
-			// TODO: I don't have a better way to ensure that these are always in memory. The footprint should be small, but how else do you answer the question, who's looking at me?
-			if (!ServerProcess.ServerSession.Server.IsEngine)
-			{
-				AcquireCatalogStoreConnection(false);
-				try
-				{
-					foreach (string LLibraryName in CatalogStoreConnection.SelectLoadedLibraries())
-						ResolveLoadedLibrary(LLibraryName);
-				}
-				finally
-				{
-					ReleaseCatalogStoreConnection();
-				}
-			}
+			// virtual
 		}
 		
 		public bool IsLoadedLibrary(string ALibraryName)
@@ -2955,39 +1930,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			if (LIndex >= 0)
 				return Catalog.LoadedLibraries[LIndex];
 				
-			if (!ServerProcess.ServerSession.Server.IsEngine)	
-			{
-				AcquireCatalogStoreConnection(false);
-				try
-				{
-					if (CatalogStoreConnection.LoadedLibraryExists(LLibrary.Name))
-					{
-						ServerProcess.PushLoadingContext(new LoadingContext(ServerProcess.ServerSession.User, String.Empty));
-						try
-						{
-							Program LProgram = new Program(ServerProcess);
-							LProgram.Start(null);
-							try
-							{
-								SystemLoadLibraryNode.LoadLibrary(LProgram, LLibrary.Name);
-								return Catalog.LoadedLibraries[LLibrary.Name];
-							}
-							finally
-							{
-								LProgram.Stop(null);
-							}
-						}
-						finally
-						{
-							ServerProcess.PopLoadingContext();
-						}
-					}
-				}
-				finally
-				{
-					ReleaseCatalogStoreConnection();
-				}
-			}
+			var LResult = InternalResolveLoadedLibrary(LLibrary);
+			if (LResult != null)
+				return LResult;
 			
 			if (AMustResolve)
 				throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryNotRegistered, LLibrary.Name);
@@ -2995,18 +1940,14 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			return null;
 		}
 
-		public List<string> SelectLoadedLibraries()
+		protected virtual LoadedLibrary InternalResolveLoadedLibrary(Schema.Library LLibrary)
 		{
-			AcquireCatalogStoreConnection(false);
-			try
-			{
-				return CatalogStoreConnection.SelectLoadedLibraries();
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
+			return null;
 		}
+		
+		#endregion
+
+		#region Assembly registration
 		
 		private void InternalRegisterAssembly(Schema.LoadedLibrary ALoadedLibrary, Assembly AAssembly)
 		{
@@ -3040,116 +1981,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			#endif
 		}
 
-		private void ClearTableCache(string ATableName)
-		{
-			int LIndex = Catalog.IndexOfName(ATableName);
-			if (LIndex >= 0)
-			{
-				lock (Device.Headers)
-				{
-					Device.Headers[(Schema.TableVar)Catalog[LIndex]].Cached = false;
-				}
-			}
-		}
-		
-		public string GetLibraryOwner(string ALibraryName)
-		{
-			AcquireCatalogStoreConnection(false);
-			try
-			{
-				string LOwnerID = CatalogStoreConnection.SelectLibraryOwner(ALibraryName);
-				return LOwnerID == null ? Server.Engine.CAdminUserID : LOwnerID;
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
+		#endregion
 
-		public void SetLibraryOwner(string ALibraryName, string AUserID)
-		{
-			AcquireCatalogStoreConnection(true);
-			try
-			{
-				string LOwnerID = CatalogStoreConnection.SelectLibraryOwner(ALibraryName);
-				if ((LOwnerID == null) || (LOwnerID != AUserID))
-				{
-					ClearTableCache("System.LibraryOwners");
-					if (LOwnerID == null)
-						CatalogStoreConnection.InsertLibraryOwner(ALibraryName, AUserID);
-					else
-						CatalogStoreConnection.UpdateLibraryOwner(ALibraryName, AUserID);
-				}
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-
-		public void ClearLibraryOwner(string ALibraryName)
-		{
-			ClearTableCache("System.LibraryOwners");
-			AcquireCatalogStoreConnection(true);
-			try
-			{
-				CatalogStoreConnection.DeleteLibraryOwner(ALibraryName);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-
-		public VersionNumber GetCurrentLibraryVersion(string ALibraryName)
-		{
-			AcquireCatalogStoreConnection(false);
-			try
-			{
-				string LVersion = CatalogStoreConnection.SelectLibraryVersion(ALibraryName);
-				return LVersion == null ? Catalog.Libraries[ALibraryName].Version : VersionNumber.Parse(LVersion);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-
-		public void SetCurrentLibraryVersion(string ALibraryName, VersionNumber AVersionNumber)
-		{
-			AcquireCatalogStoreConnection(true);
-			try
-			{
-				string LVersion = CatalogStoreConnection.SelectLibraryVersion(ALibraryName);
-				if ((LVersion == null) || !VersionNumber.Parse(LVersion).Equals(AVersionNumber))
-				{
-					ClearTableCache("System.LibraryVersions");
-					if (LVersion == null)
-						CatalogStoreConnection.InsertLibraryVersion(ALibraryName, AVersionNumber);
-					else
-						CatalogStoreConnection.UpdateLibraryVersion(ALibraryName, AVersionNumber);
-				}
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-
-		public void ClearCurrentLibraryVersion(string ALibraryName)
-		{
-			ClearTableCache("System.LibraryVersions");
-			AcquireCatalogStoreConnection(true);
-			try
-			{
-				CatalogStoreConnection.DeleteLibraryVersion(ALibraryName);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
-			}
-		}
-		
+		#region Session Objects
+				
 		private void CreateSessionObject(Schema.CatalogObject ASessionObject)
 		{
 			lock (ServerProcess.ServerSession.SessionObjects)
@@ -3177,33 +2012,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			ServerProcess.ServerSession.Server.DropSessionOperator(ASessionOperator);
 		}
 		
-		private void CreateDeviceTable(Schema.BaseTableVar ATable)
-		{
-			Program LProgram = new Program(ServerProcess);
-			LProgram.Start(null);
-			try
-			{
-				LProgram.DeviceExecute(ATable.Device, new CreateTableNode(ATable));
-			}
-			finally
-			{
-				LProgram.Stop(null);
-			}
-		}
+		#endregion
 		
-		private void DropDeviceTable(Schema.BaseTableVar ATable)
-		{
-			Program LProgram = new Program(ServerProcess);
-			LProgram.Start(null);
-			try
-			{
-				LProgram.DeviceExecute(ATable.Device, new DropTableNode(ATable));
-			}
-			finally
-			{
-				LProgram.Stop(null);
-			}
-		}
+		#region Table
 		
 		public void CreateTable(Schema.BaseTableVar ATable)
 		{
@@ -3251,6 +2062,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
+		#endregion
+		
+		#region View
+		
 		public void CreateView(Schema.DerivedTableVar AView)
 		{
 			InsertCatalogObject(AView);
@@ -3278,6 +2093,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				#endif
 			}
 		}
+		
+		#endregion
+		
+		#region Conversions
 		
 		private void AddImplicitConversion(Schema.Conversion AConversion)
 		{
@@ -3316,6 +2135,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				FInstructions.Add(new RemoveImplicitConversionInstruction(AConversion));
 			#endif
 		}
+		
+		#endregion
+		
+		#region Sort
 		
 		private void SetScalarTypeSort(Schema.ScalarType AScalarType, Schema.Sort ASort, bool AIsUnique)
 		{
@@ -3356,6 +2179,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			#endif
 		}
 		
+		#endregion
+		
+		#region Metadata
+		
 		public void AlterMetaData(Schema.Object AObject, AlterMetaData AAlterMetaData)
 		{
 			if (AAlterMetaData != null)
@@ -3378,6 +2205,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
+		#endregion
+		
+		#region Scalar type
+		
 		public void CreateScalarType(Schema.ScalarType AScalarType)
 		{
 			InsertCatalogObject(AScalarType);
@@ -3387,6 +2218,35 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			DeleteCatalogObject(AScalarType);
 		}
+		
+		private void FixupSystemScalarTypeReferences(ScalarType LScalarType)
+		{
+			switch (LScalarType.Name)
+			{
+				case Schema.DataTypes.CSystemScalar: Catalog.DataTypes.SystemScalar = LScalarType; break;
+				case Schema.DataTypes.CSystemBoolean: Catalog.DataTypes.SystemBoolean = LScalarType; LScalarType.NativeType = typeof(bool); break;
+				case Schema.DataTypes.CSystemDecimal: Catalog.DataTypes.SystemDecimal = LScalarType; LScalarType.NativeType = typeof(decimal); break;
+				case Schema.DataTypes.CSystemLong: Catalog.DataTypes.SystemLong = LScalarType; LScalarType.NativeType = typeof(long); break;
+				case Schema.DataTypes.CSystemInteger: Catalog.DataTypes.SystemInteger = LScalarType; LScalarType.NativeType = typeof(int); break;
+				case Schema.DataTypes.CSystemShort: Catalog.DataTypes.SystemShort = LScalarType; LScalarType.NativeType = typeof(short); break;
+				case Schema.DataTypes.CSystemByte: Catalog.DataTypes.SystemByte = LScalarType; LScalarType.NativeType = typeof(byte); break;
+				case Schema.DataTypes.CSystemString: Catalog.DataTypes.SystemString = LScalarType; LScalarType.NativeType = typeof(string); break;
+				case Schema.DataTypes.CSystemTimeSpan: Catalog.DataTypes.SystemTimeSpan = LScalarType; LScalarType.NativeType = typeof(TimeSpan); break;
+				case Schema.DataTypes.CSystemDateTime: Catalog.DataTypes.SystemDateTime = LScalarType; LScalarType.NativeType = typeof(DateTime); break;
+				case Schema.DataTypes.CSystemDate: Catalog.DataTypes.SystemDate = LScalarType; LScalarType.NativeType = typeof(DateTime); break;
+				case Schema.DataTypes.CSystemTime: Catalog.DataTypes.SystemTime = LScalarType; LScalarType.NativeType = typeof(DateTime); break;
+				case Schema.DataTypes.CSystemMoney: Catalog.DataTypes.SystemMoney = LScalarType; LScalarType.NativeType = typeof(decimal); break;
+				case Schema.DataTypes.CSystemGuid: Catalog.DataTypes.SystemGuid = LScalarType; LScalarType.NativeType = typeof(Guid); break;
+				case Schema.DataTypes.CSystemBinary: Catalog.DataTypes.SystemBinary = LScalarType; LScalarType.NativeType = typeof(byte[]); break;
+				case Schema.DataTypes.CSystemGraphic: Catalog.DataTypes.SystemGraphic = LScalarType; LScalarType.NativeType = typeof(byte[]); break;
+				case Schema.DataTypes.CSystemError: Catalog.DataTypes.SystemError = LScalarType; LScalarType.NativeType = typeof(Exception); break;
+				case Schema.DataTypes.CSystemName: Catalog.DataTypes.SystemName = LScalarType; LScalarType.NativeType = typeof(string); break;
+			}
+		}
+
+		#endregion
+		
+		#region Operator
 		
 		public void CreateOperator(Schema.Operator AOperator)
 		{	
@@ -3449,6 +2309,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				#endif
 			}
 		}
+		
+		#endregion
+		
+		#region Constraint
 		
 		public void CreateConstraint(Schema.CatalogConstraint AConstraint)
 		{
@@ -3541,6 +2405,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				#endif
 			}
 		}
+		
+		#endregion
+		
+		#region Reference
 		
 		private void AttachReference(Schema.Reference AReference)
 		{
@@ -3677,104 +2545,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		public void CreateDevice(Schema.Device ADevice)
-		{
-			InsertCatalogObject(ADevice);
-			#if LOGDDLINSTRUCTIONS
-			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-			{
-				FInstructions.Add(new StartDeviceInstruction(ADevice));
-			}
-			#endif
-		}
+		#endregion
 		
-		public void StartDevice(Schema.Device ADevice)
-		{
-			ADevice.Start(ServerProcess);
-			#if LOGDDLINSTRUCTIONS
-			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new StartDeviceInstruction(ADevice));
-			#endif
-		}
+		#region Event handler
 		
-		public void RegisterDevice(Schema.Device ADevice)
-		{
-			if (!ADevice.Registered)
-			{
-				ADevice.Register(ServerProcess);
-				UpdateCatalogObject(ADevice);
-				#if LOGDDLINSTRUCTIONS
-				if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-					FInstructions.Add(new RegisterDeviceInstruction(ADevice));
-				#endif
-			}
-		}
-		
-		public void UnregisterDevice(Schema.Device ADevice)
-		{
-			ADevice.ClearRegistered();
-		}
-		
-		public void StopDevice(Schema.Device ADevice)
-		{
-			StopDevice(ADevice, false);
-		}
-		
-		private List<Schema.Device> FDeferredDeviceStops;
-		private void AddDeferredDeviceStop(Schema.Device ADevice)
-		{
-			if (FDeferredDeviceStops == null)
-				FDeferredDeviceStops = new List<Schema.Device>();
-			FDeferredDeviceStops.Add(ADevice);
-		}
-		
-		private void ExecuteDeferredDeviceStops()
-		{
-			if (FDeferredDeviceStops != null)
-			{
-				while (FDeferredDeviceStops.Count > 0)
-				{
-					InternalStopDevice(FDeferredDeviceStops[0]);
-					FDeferredDeviceStops.RemoveAt(0);
-				}
-				
-				FDeferredDeviceStops = null;
-			}
-		}
-		
-		private void ClearDeferredDeviceStops()
-		{
-			if (FDeferredDeviceStops != null)
-				FDeferredDeviceStops = null;
-		}
-		
-		private void InternalStopDevice(Schema.Device ADevice)
-		{
-			if (ADevice.Running)
-			{
-				if (ADevice.Sessions.Count > 0)
-					for (int LIndex = ADevice.Sessions.Count - 1; LIndex >= 0; LIndex--)
-						ADevice.Sessions.Dispose();
-				// TODO: implement checking and error handling for in use device sessions on this device
-				//throw new RuntimeException(RuntimeException.Codes.DeviceInUse, ADevice.Name);
-
-				ADevice.Stop(ServerProcess);					
-			}
-		}
-		
-		private void StopDevice(Schema.Device ADevice, bool AIsUndo)
-		{
-			if ((ServerProcess.InTransaction) && !AIsUndo)
-				AddDeferredDeviceStop(ADevice);
-			else
-				InternalStopDevice(ADevice);
-		}
-		
-		public void DropDevice(Schema.Device ADevice)
-		{
-			DeleteCatalogObject(ADevice);
-		}
-
 		private void AttachEventHandler(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, List<string> ABeforeOperatorNames)
 		{
 			Schema.TableVar LTableVar = AEventSource as Schema.TableVar;
@@ -3883,6 +2657,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			#endif
 		}
 		
+		#endregion
+		
+		#region Class definitions
+		
 		public void AlterClassDefinition(ClassDefinition AClassDefinition, AlterClassDefinition AAlterClassDefinition)
 		{
 			AlterClassDefinition(AClassDefinition, AAlterClassDefinition, null);
@@ -3900,6 +2678,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				#endif
 			}
 		}
+		
+		#endregion
+		
+		#region Key
 		
 		private void AttachKey(TableVar ATableVar, Key AKey)
 		{
@@ -3938,6 +2720,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			#endif
 		}
 
+		#endregion
+		
+		#region Order
+		
 		private void AttachOrder(TableVar ATableVar, Order AOrder)
 		{
 			ATableVar.Orders.Add(AOrder);
@@ -3965,6 +2751,66 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				FInstructions.Add(new DetachOrderInstruction(ATableVar, AOrder));
 			#endif
 		}
+		
+		#endregion
+		
+		#region TableVar column
+		
+		private void AttachTableVarColumn(Schema.BaseTableVar ATable, Schema.TableVarColumn AColumn)
+		{
+			ATable.DataType.Columns.Add(AColumn.Column);
+			ATable.Columns.Add(AColumn);
+			ATable.DataType.ResetRowType();
+		}
+
+		private void DetachTableVarColumn(Schema.BaseTableVar ATable, Schema.TableVarColumn AColumn)
+		{
+			ATable.DataType.Columns.SafeRemove(AColumn.Column);
+			ATable.Columns.SafeRemove(AColumn);
+			ATable.DataType.ResetRowType();
+		}
+
+		public void CreateTableVarColumn(Schema.BaseTableVar ATable, Schema.TableVarColumn AColumn)
+		{
+			AttachTableVarColumn(ATable, AColumn);
+			#if LOGDDLINSTRUCTIONS
+			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
+				FInstructions.Add(new AttachTableVarColumnInstruction(ATable, AColumn));
+			#endif
+		}
+
+		public void DropTableVarColumn(Schema.BaseTableVar ATable, Schema.TableVarColumn AColumn)
+		{
+			DetachTableVarColumn(ATable, AColumn);
+			#if LOGDDLINSTRUCTIONS
+			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
+				FInstructions.Add(new DetachTableVarColumnInstruction(ATable, AColumn));
+			#endif
+		}
+
+		public void SetTableVarColumnDefault(Schema.TableVarColumn LColumn, Schema.TableVarColumnDefault ADefault)
+		{
+			TableVarColumnDefault LOriginalDefault = LColumn.Default;
+			LColumn.Default = ADefault;
+			#if LOGDDLINSTRUCTIONS
+			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
+				FInstructions.Add(new SetTableVarColumnDefaultInstruction(LColumn, LOriginalDefault));
+			#endif
+		}
+
+		public void SetTableVarColumnIsNilable(TableVarColumn LColumn, bool AIsNilable)
+		{
+			bool LOriginalIsNilable = LColumn.IsNilable;
+			LColumn.IsNilable = AIsNilable;
+			#if LOGDDLINSTRUCTIONS
+			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
+				FInstructions.Add(new SetTableVarColumnIsNilableInstruction(LColumn, LOriginalIsNilable));
+			#endif
+		}
+		
+		#endregion
+
+		#region TableVar constraint
 		
 		private void AttachTableVarConstraint(Schema.TableVar ATableVar, Schema.TableVarConstraint AConstraint)
 		{
@@ -4018,34 +2864,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			#endif
 		}
 		
-		private void AttachScalarTypeConstraint(Schema.ScalarType AScalarType, Schema.ScalarTypeConstraint AConstraint)
-		{
-			AScalarType.Constraints.Add(AConstraint);
-		}
-
-		private void DetachScalarTypeConstraint(Schema.ScalarType AScalarType, Schema.ScalarTypeConstraint AConstraint)
-		{
-			AScalarType.Constraints.SafeRemove(AConstraint);
-		}
+		#endregion
 		
-		public void CreateScalarTypeConstraint(ScalarType AScalarType, ScalarTypeConstraint AConstraint)
-		{
-			AttachScalarTypeConstraint(AScalarType, AConstraint);
-			#if LOGDDLINSTRUCTIONS
-			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new AttachScalarTypeConstraintInstruction(AScalarType, AConstraint));
-			#endif
-		}
-
-		public void DropScalarTypeConstraint(ScalarType AScalarType, ScalarTypeConstraint AConstraint)
-		{
-			DetachScalarTypeConstraint(AScalarType, AConstraint);
-			#if LOGDDLINSTRUCTIONS
-			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new DetachScalarTypeConstraintInstruction(AScalarType, AConstraint));
-			#endif
-		}
-
+		#region TableVar column constraint
+		
 		private void AttachTableVarColumnConstraint(Schema.TableVarColumn ATableVarColumn, Schema.TableVarColumnConstraint AConstraint)
 		{
 			ATableVarColumn.Constraints.Add(AConstraint);
@@ -4071,6 +2893,38 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
 				FInstructions.Add(new DetachTableVarColumnConstraintInstruction(AColumn, AConstraint));
+			#endif
+		}
+
+		#endregion
+		
+		#region Scalar type
+		
+		private void AttachScalarTypeConstraint(Schema.ScalarType AScalarType, Schema.ScalarTypeConstraint AConstraint)
+		{
+			AScalarType.Constraints.Add(AConstraint);
+		}
+
+		private void DetachScalarTypeConstraint(Schema.ScalarType AScalarType, Schema.ScalarTypeConstraint AConstraint)
+		{
+			AScalarType.Constraints.SafeRemove(AConstraint);
+		}
+		
+		public void CreateScalarTypeConstraint(ScalarType AScalarType, ScalarTypeConstraint AConstraint)
+		{
+			AttachScalarTypeConstraint(AScalarType, AConstraint);
+			#if LOGDDLINSTRUCTIONS
+			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
+				FInstructions.Add(new AttachScalarTypeConstraintInstruction(AScalarType, AConstraint));
+			#endif
+		}
+
+		public void DropScalarTypeConstraint(ScalarType AScalarType, ScalarTypeConstraint AConstraint)
+		{
+			DetachScalarTypeConstraint(AScalarType, AConstraint);
+			#if LOGDDLINSTRUCTIONS
+			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
+				FInstructions.Add(new DetachScalarTypeConstraintInstruction(AScalarType, AConstraint));
 			#endif
 		}
 
@@ -4180,6 +3034,134 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			#endif
 		}
 
+		#endregion
+		
+		#region Device
+		
+		public new CatalogDevice Device { get { return (CatalogDevice)base.Device; } }
+
+		public void CreateDevice(Schema.Device ADevice)
+		{
+			InsertCatalogObject(ADevice);
+			#if LOGDDLINSTRUCTIONS
+			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
+			{
+				FInstructions.Add(new StartDeviceInstruction(ADevice));
+			}
+			#endif
+		}
+		
+		public void StartDevice(Schema.Device ADevice)
+		{
+			ADevice.Start(ServerProcess);
+			#if LOGDDLINSTRUCTIONS
+			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
+				FInstructions.Add(new StartDeviceInstruction(ADevice));
+			#endif
+		}
+		
+		public void RegisterDevice(Schema.Device ADevice)
+		{
+			if (!ADevice.Registered)
+			{
+				ADevice.Register(ServerProcess);
+				UpdateCatalogObject(ADevice);
+				#if LOGDDLINSTRUCTIONS
+				if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
+					FInstructions.Add(new RegisterDeviceInstruction(ADevice));
+				#endif
+			}
+		}
+		
+		public void UnregisterDevice(Schema.Device ADevice)
+		{
+			ADevice.ClearRegistered();
+		}
+		
+		public void StopDevice(Schema.Device ADevice)
+		{
+			StopDevice(ADevice, false);
+		}
+		
+		private List<Schema.Device> FDeferredDeviceStops;
+		private void AddDeferredDeviceStop(Schema.Device ADevice)
+		{
+			if (FDeferredDeviceStops == null)
+				FDeferredDeviceStops = new List<Schema.Device>();
+			FDeferredDeviceStops.Add(ADevice);
+		}
+		
+		private void ExecuteDeferredDeviceStops()
+		{
+			if (FDeferredDeviceStops != null)
+			{
+				while (FDeferredDeviceStops.Count > 0)
+				{
+					InternalStopDevice(FDeferredDeviceStops[0]);
+					FDeferredDeviceStops.RemoveAt(0);
+				}
+				
+				FDeferredDeviceStops = null;
+			}
+		}
+		
+		private void ClearDeferredDeviceStops()
+		{
+			if (FDeferredDeviceStops != null)
+				FDeferredDeviceStops = null;
+		}
+		
+		private void InternalStopDevice(Schema.Device ADevice)
+		{
+			if (ADevice.Running)
+			{
+				if (ADevice.Sessions.Count > 0)
+					for (int LIndex = ADevice.Sessions.Count - 1; LIndex >= 0; LIndex--)
+						ADevice.Sessions.Dispose();
+				// TODO: implement checking and error handling for in use device sessions on this device
+				//throw new RuntimeException(RuntimeException.Codes.DeviceInUse, ADevice.Name);
+
+				ADevice.Stop(ServerProcess);					
+			}
+		}
+		
+		private void StopDevice(Schema.Device ADevice, bool AIsUndo)
+		{
+			if ((ServerProcess.InTransaction) && !AIsUndo)
+				AddDeferredDeviceStop(ADevice);
+			else
+				InternalStopDevice(ADevice);
+		}
+		
+		public void DropDevice(Schema.Device ADevice)
+		{
+			DeleteCatalogObject(ADevice);
+		}
+
+		public void SetDeviceReconcileMode(Schema.Device ADevice, ReconcileMode AReconcileMode)
+		{
+			ReconcileMode LOriginalReconcileMode = ADevice.ReconcileMode;
+			ADevice.ReconcileMode = AReconcileMode;
+			#if LOGDDLINSTRUCTIONS
+			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
+				FInstructions.Add(new SetDeviceReconcileModeInstruction(ADevice, LOriginalReconcileMode));
+			#endif
+		}
+
+		public void SetDeviceReconcileMaster(Schema.Device ADevice, ReconcileMaster AReconcileMaster)
+		{
+			ReconcileMaster LOriginalReconcileMaster = ADevice.ReconcileMaster;
+			ADevice.ReconcileMaster = AReconcileMaster;
+			#if LOGDDLINSTRUCTIONS
+			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
+				FInstructions.Add(new SetDeviceReconcileMasterInstruction(ADevice, LOriginalReconcileMaster));
+			#endif
+		}
+		
+		#endregion
+		
+		#region Device scalar type
+		
 		private void AttachDeviceScalarType(Schema.DeviceScalarType ADeviceScalarType)
 		{
 			ADeviceScalarType.Device.AddDeviceScalarType(ADeviceScalarType);
@@ -4212,6 +3194,70 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			#endif
 		}
 
+		#endregion
+		
+		#region Device table
+		
+		private void CreateDeviceTable(Schema.BaseTableVar ATable)
+		{
+			Program LProgram = new Program(ServerProcess);
+			LProgram.Start(null);
+			try
+			{
+				LProgram.DeviceExecute(ATable.Device, new CreateTableNode(ATable));
+			}
+			finally
+			{
+				LProgram.Stop(null);
+			}
+		}
+		
+		private void DropDeviceTable(Schema.BaseTableVar ATable)
+		{
+			Program LProgram = new Program(ServerProcess);
+			LProgram.Start(null);
+			try
+			{
+				LProgram.DeviceExecute(ATable.Device, new DropTableNode(ATable));
+			}
+			finally
+			{
+				LProgram.Stop(null);
+			}
+		}
+		
+		private void AttachTableMap(ApplicationTransactionDevice ADevice, TableMap ATableMap)
+		{
+			ADevice.TableMaps.Add(ATableMap);
+		}
+		
+		private void DetachTableMap(ApplicationTransactionDevice ADevice, TableMap ATableMap)
+		{
+			ADevice.TableMaps.RemoveAt(ADevice.TableMaps.IndexOfName(ATableMap.SourceTableVar.Name));
+		}
+		
+		public void AddTableMap(ApplicationTransactionDevice ADevice, TableMap ATableMap)
+		{
+			AttachTableMap(ADevice, ATableMap);
+			#if LOGDDLINSTRUCTIONS
+			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
+				FInstructions.Add(new AttachTableMapInstruction(ADevice, ATableMap));
+			#endif
+		}
+		
+		public void RemoveTableMap(ApplicationTransactionDevice ADevice, TableMap ATableMap)
+		{
+			DetachTableMap(ADevice, ATableMap);
+			#if LOGDDLINSTRUCTIONS
+			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
+				FInstructions.Add(new DetachTableMapInstruction(ADevice, ATableMap));
+			#endif
+		}
+		
+		#endregion
+		
+		#region Device operator
+		
 		private void AttachDeviceOperator(Schema.DeviceOperator ADeviceOperator)
 		{
 			ADeviceOperator.Device.AddDeviceOperator(ADeviceOperator);
@@ -4244,34 +3290,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			#endif
 		}
 		
-		private void AttachTableMap(ApplicationTransactionDevice ADevice, TableMap ATableMap)
-		{
-			ADevice.TableMaps.Add(ATableMap);
-		}
-		
-		private void DetachTableMap(ApplicationTransactionDevice ADevice, TableMap ATableMap)
-		{
-			ADevice.TableMaps.RemoveAt(ADevice.TableMaps.IndexOfName(ATableMap.SourceTableVar.Name));
-		}
-		
-		public void AddTableMap(ApplicationTransactionDevice ADevice, TableMap ATableMap)
-		{
-			AttachTableMap(ADevice, ATableMap);
-			#if LOGDDLINSTRUCTIONS
-			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new AttachTableMapInstruction(ADevice, ATableMap));
-			#endif
-		}
-		
-		public void RemoveTableMap(ApplicationTransactionDevice ADevice, TableMap ATableMap)
-		{
-			DetachTableMap(ADevice, ATableMap);
-			#if LOGDDLINSTRUCTIONS
-			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new DetachTableMapInstruction(ADevice, ATableMap));
-			#endif
-		}
-		
 		private void AttachOperatorMap(ApplicationTransaction.OperatorMap AOperatorMap, Schema.Operator AOperator)
 		{
 			AOperatorMap.Operators.Add(AOperator);
@@ -4300,99 +3318,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			#endif
 		}
 		
-		public void SetDeviceReconcileMode(Schema.Device ADevice, ReconcileMode AReconcileMode)
-		{
-			ReconcileMode LOriginalReconcileMode = ADevice.ReconcileMode;
-			ADevice.ReconcileMode = AReconcileMode;
-			#if LOGDDLINSTRUCTIONS
-			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new SetDeviceReconcileModeInstruction(ADevice, LOriginalReconcileMode));
-			#endif
-		}
-
-		public void SetDeviceReconcileMaster(Schema.Device ADevice, ReconcileMaster AReconcileMaster)
-		{
-			ReconcileMaster LOriginalReconcileMaster = ADevice.ReconcileMaster;
-			ADevice.ReconcileMaster = AReconcileMaster;
-			#if LOGDDLINSTRUCTIONS
-			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new SetDeviceReconcileMasterInstruction(ADevice, LOriginalReconcileMaster));
-			#endif
-		}
-		
-		private void AttachTableVarColumn(Schema.BaseTableVar ATable, Schema.TableVarColumn AColumn)
-		{
-			ATable.DataType.Columns.Add(AColumn.Column);
-			ATable.Columns.Add(AColumn);
-			ATable.DataType.ResetRowType();
-		}
-
-		private void DetachTableVarColumn(Schema.BaseTableVar ATable, Schema.TableVarColumn AColumn)
-		{
-			ATable.DataType.Columns.SafeRemove(AColumn.Column);
-			ATable.Columns.SafeRemove(AColumn);
-			ATable.DataType.ResetRowType();
-		}
-
-		public void CreateTableVarColumn(Schema.BaseTableVar ATable, Schema.TableVarColumn AColumn)
-		{
-			AttachTableVarColumn(ATable, AColumn);
-			#if LOGDDLINSTRUCTIONS
-			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new AttachTableVarColumnInstruction(ATable, AColumn));
-			#endif
-		}
-
-		public void DropTableVarColumn(Schema.BaseTableVar ATable, Schema.TableVarColumn AColumn)
-		{
-			DetachTableVarColumn(ATable, AColumn);
-			#if LOGDDLINSTRUCTIONS
-			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new DetachTableVarColumnInstruction(ATable, AColumn));
-			#endif
-		}
-
-		public void SetTableVarColumnDefault(Schema.TableVarColumn LColumn, Schema.TableVarColumnDefault ADefault)
-		{
-			TableVarColumnDefault LOriginalDefault = LColumn.Default;
-			LColumn.Default = ADefault;
-			#if LOGDDLINSTRUCTIONS
-			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new SetTableVarColumnDefaultInstruction(LColumn, LOriginalDefault));
-			#endif
-		}
-
-		public void SetTableVarColumnIsNilable(TableVarColumn LColumn, bool AIsNilable)
-		{
-			bool LOriginalIsNilable = LColumn.IsNilable;
-			LColumn.IsNilable = AIsNilable;
-			#if LOGDDLINSTRUCTIONS
-			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new SetTableVarColumnIsNilableInstruction(LColumn, LOriginalIsNilable));
-			#endif
-		}
-		
-		public void PopulateStoreCounters(Table ATable, Row ARow)
-		{
-			SQLStoreCounter LCounter;
-			for (int LIndex = 0; LIndex < Device.Store.Counters.Count; LIndex++)
-			{
-			    LCounter = Device.Store.Counters[LIndex];
-			    ARow[0] = LIndex;
-			    ARow[1] = LCounter.Operation;
-			    ARow[2] = LCounter.TableName;
-			    ARow[3] = LCounter.IndexName;
-			    ARow[4] = LCounter.IsMatched;
-			    ARow[5] = LCounter.IsRanged;
-			    ARow[6] = LCounter.IsUpdatable;
-			    ARow[7] = LCounter.Duration;
-			    ATable.Insert(ARow);
-			}
-		}
-
-		public void ClearStoreCounters()
-		{
-			Device.Store.Counters.Clear();
-		}
+		#endregion
 	}
 }

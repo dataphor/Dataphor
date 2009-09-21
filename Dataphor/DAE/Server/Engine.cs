@@ -601,7 +601,7 @@ namespace Alphora.Dataphor.DAE.Server
 		internal protected ServerSession FSystemSession;
 
 		private ServerSessions FSessions;
-		internal ServerSessions Sessions { get { return FSessions; } }
+		protected internal ServerSessions Sessions { get { return FSessions; } }
 
 		private int FNextSessionID = 1;
 		private int GetNextSessionID()

@@ -6,6 +6,7 @@ using Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Store;
 using Alphora.Dataphor.DAE.Runtime;
+using Alphora.Dataphor.DAE.Server;
 
 namespace Alphora.Dataphor.DAE.Device.Catalog
 {
@@ -17,6 +18,31 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 			DisposeCatalogStoreConnection();
 		}
+
+		#region Execute
+		
+		protected override object InternalExecute(Program AProgram, Schema.DevicePlan ADevicePlan)
+		{
+			CatalogDevicePlan LDevicePlan = (CatalogDevicePlan)ADevicePlan;
+			if (LDevicePlan.IsStorePlan)
+			{
+				CatalogDeviceTable LTable = new CatalogDeviceTable(LDevicePlan.Node.DeviceNode as CatalogDevicePlanNode, AProgram, this);
+				try
+				{
+					LTable.Open();
+					return LTable;
+				}
+				catch
+				{
+					LTable.Dispose();
+					throw;
+				}
+			}
+			else
+				return base.InternalExecute(AProgram, ADevicePlan);
+		}
+		
+		#endregion
 
 		#region Catalog Store
 
@@ -86,6 +112,29 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				FCatalogStoreConnection.Dispose();
 				FCatalogStoreConnection = null;
 			}
+		}
+
+		public void PopulateStoreCounters(Table ATable, Row ARow)
+		{
+			SQLStoreCounter LCounter;
+			for (int LIndex = 0; LIndex < Device.Store.Counters.Count; LIndex++)
+			{
+			    LCounter = Device.Store.Counters[LIndex];
+			    ARow[0] = LIndex;
+			    ARow[1] = LCounter.Operation;
+			    ARow[2] = LCounter.TableName;
+			    ARow[3] = LCounter.IndexName;
+			    ARow[4] = LCounter.IsMatched;
+			    ARow[5] = LCounter.IsRanged;
+			    ARow[6] = LCounter.IsUpdatable;
+			    ARow[7] = LCounter.Duration;
+			    ATable.Insert(ARow);
+			}
+		}
+
+		public void ClearStoreCounters()
+		{
+			Device.Store.Counters.Clear();
 		}
 
 		#endregion
@@ -635,7 +684,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			SystemSetLibraryDescriptorNode.RemoveLibraryFile(AProgram, Schema.Object.EnsureRooted((string)ARow[0]), new FileReference((string)ARow[1], (bool)ARow[2]));
 		}
 
-
 		protected internal void SelectLibraryVersions(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			AcquireCatalogStoreConnection(false);
@@ -839,18 +887,17 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			base.InternalInsertRow(AProgram, ATableVar, ARow, AValueFlags);
 		}
 		
-		protected override void InternalUpdateRow(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+		private void LibraryUpdateRow(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow, BitArray AValueFlags)
 		{
 			switch (ATableVar.Name)
 			{
-				case "System.LibraryVersions" : UpdateLibraryVersion(AProgram, ATableVar, AOldRow, ANewRow); break;
+				case "System.LibraryVersions": UpdateLibraryVersion(AProgram, ATableVar, AOldRow, ANewRow); break;
 				case "System.LibraryOwners" : UpdateLibraryOwner(AProgram, ATableVar, AOldRow, ANewRow); break;
 				case "System.Libraries" : UpdateLibrary(AProgram, ATableVar, AOldRow, ANewRow); break;
 				case "System.LibraryRequisites" : UpdateLibraryRequisite(AProgram, ATableVar, AOldRow, ANewRow); break;
 				case "System.LibrarySettings" : UpdateLibrarySetting(AProgram, ATableVar, AOldRow, ANewRow); break;
 				case "System.LibraryFiles" : UpdateLibraryFile(AProgram, ATableVar, AOldRow, ANewRow); break;
 			}
-			base.InternalUpdateRow(AProgram, ATableVar, AOldRow, ANewRow, AValueFlags);
 		}
 		
 		protected override void InternalDeleteRow(Program AProgram, Schema.TableVar ATableVar, Row ARow)
@@ -868,9 +915,212 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			base.InternalDeleteRow(AProgram, ATableVar, ARow);
 		}
 
+		protected override void InternalInsertLoadedLibrary(Schema.LoadedLibrary ALoadedLibrary)
+		{
+			// If this is not a repository, and we are not deserializing, insert the loaded library in the catalog store
+			if (!ServerProcess.InLoadingContext())
+			{
+				AcquireCatalogStoreConnection(true);
+				try
+				{
+					CatalogStoreConnection.InsertLoadedLibrary(ALoadedLibrary.Name);
+				}
+				finally
+				{
+					ReleaseCatalogStoreConnection();
+				}
+			}
+		}
+
+		protected override void InternalDeleteLoadedLibrary(Schema.LoadedLibrary ALoadedLibrary)
+		{
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				CatalogStoreConnection.DeleteLoadedLibrary(ALoadedLibrary.Name);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+		
+		public List<string> SelectLoadedLibraries()
+		{
+			AcquireCatalogStoreConnection(false);
+			try
+			{
+				return CatalogStoreConnection.SelectLoadedLibraries();
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+		
+		public override void ResolveLoadedLibraries()
+		{
+			// TODO: I don't have a better way to ensure that these are always in memory. The footprint should be small, but how else do you answer the question, who's looking at me?
+			AcquireCatalogStoreConnection(false);
+			try
+			{
+				foreach (string LLibraryName in CatalogStoreConnection.SelectLoadedLibraries())
+					ResolveLoadedLibrary(LLibraryName);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+		
+		protected override LoadedLibrary InternalResolveLoadedLibrary(Schema.Library LLibrary)
+		{
+			AcquireCatalogStoreConnection(false);
+			try
+			{
+				if (CatalogStoreConnection.LoadedLibraryExists(LLibrary.Name))
+				{
+					ServerProcess.PushLoadingContext(new LoadingContext(ServerProcess.ServerSession.User, String.Empty));
+					try
+					{
+						Program LProgram = new Program(ServerProcess);
+						LProgram.Start(null);
+						try
+						{
+							SystemLoadLibraryNode.LoadLibrary(LProgram, LLibrary.Name);
+							return Catalog.LoadedLibraries[LLibrary.Name];
+						}
+						finally
+						{
+							LProgram.Stop(null);
+						}
+					}
+					finally
+					{
+						ServerProcess.PopLoadingContext();
+					}
+				}
+				return null;
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		public string GetLibraryOwner(string ALibraryName)
+		{
+			AcquireCatalogStoreConnection(false);
+			try
+			{
+				string LOwnerID = CatalogStoreConnection.SelectLibraryOwner(ALibraryName);
+				return LOwnerID == null ? Server.Engine.CAdminUserID : LOwnerID;
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		private void ClearTableCache(string ATableName)
+		{
+			int LIndex = Catalog.IndexOfName(ATableName);
+			if (LIndex >= 0)
+			{
+				lock (Device.Headers)
+				{
+					Device.Headers[(Schema.TableVar)Catalog[LIndex]].Cached = false;
+				}
+			}
+		}
+		
+		public void SetLibraryOwner(string ALibraryName, string AUserID)
+		{
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				string LOwnerID = CatalogStoreConnection.SelectLibraryOwner(ALibraryName);
+				if ((LOwnerID == null) || (LOwnerID != AUserID))
+				{
+					ClearTableCache("System.LibraryOwners");
+					if (LOwnerID == null)
+						CatalogStoreConnection.InsertLibraryOwner(ALibraryName, AUserID);
+					else
+						CatalogStoreConnection.UpdateLibraryOwner(ALibraryName, AUserID);
+				}
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		public void ClearLibraryOwner(string ALibraryName)
+		{
+			ClearTableCache("System.LibraryOwners");
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				CatalogStoreConnection.DeleteLibraryOwner(ALibraryName);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		public VersionNumber GetCurrentLibraryVersion(string ALibraryName)
+		{
+			AcquireCatalogStoreConnection(false);
+			try
+			{
+				string LVersion = CatalogStoreConnection.SelectLibraryVersion(ALibraryName);
+				return LVersion == null ? Catalog.Libraries[ALibraryName].Version : VersionNumber.Parse(LVersion);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		public void SetCurrentLibraryVersion(string ALibraryName, VersionNumber AVersionNumber)
+		{
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				string LVersion = CatalogStoreConnection.SelectLibraryVersion(ALibraryName);
+				if ((LVersion == null) || !VersionNumber.Parse(LVersion).Equals(AVersionNumber))
+				{
+					ClearTableCache("System.LibraryVersions");
+					if (LVersion == null)
+						CatalogStoreConnection.InsertLibraryVersion(ALibraryName, AVersionNumber);
+					else
+						CatalogStoreConnection.UpdateLibraryVersion(ALibraryName, AVersionNumber);
+				}
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		public void ClearCurrentLibraryVersion(string ALibraryName)
+		{
+			ClearTableCache("System.LibraryVersions");
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				CatalogStoreConnection.DeleteLibraryVersion(ALibraryName);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+		
 		#endregion
 
-		#region ObjectLoad
+		#region Object Load
 		
 		/*
 			LoadCatalogObject ->
@@ -1215,8 +1465,63 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
+		public Schema.ObjectHeader SelectObjectHeader(int AObjectID)
+		{
+			AcquireCatalogStoreConnection(false);
+			try
+			{
+				return CatalogStoreConnection.SelectObject(AObjectID);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		public Schema.ObjectHeader GetObjectHeader(int AObjectID)
+		{
+			AcquireCatalogStoreConnection(false);
+			try
+			{
+				Schema.ObjectHeader LHeader = CatalogStoreConnection.SelectObject(AObjectID);
+				if (LHeader == null)
+					throw new Schema.SchemaException(Schema.SchemaException.Codes.ObjectHeaderNotFound, AObjectID);
+
+				return LHeader;
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
 		#endregion
 
+		#region Catalog Object Update
+
+		protected override void InternalInsertCatalogObject(Schema.CatalogObject AObject)
+		{
+			// If this is not a repository, and we are not deserializing, and the object should be persisted, save the object to the catalog store
+			if (ShouldSerializeCatalogObject(AObject))
+				InsertPersistentObject(AObject);
+		}
+
+		protected override void InternalUpdateCatalogObject(Schema.CatalogObject AObject)
+		{
+			// If this is not a repository, and we are not deserializing, and the object should be persisted, update the object in the catalog store
+			if (ShouldSerializeCatalogObject(AObject))
+				UpdatePersistentObject(AObject);
+		}
+
+		protected override void InternalDeleteCatalogObject(Schema.CatalogObject AObject)
+		{
+			// If this is not a repository, and the object should be persisted, remove the object from the catalog store
+			if (ShouldSerializeCatalogObject(AObject))
+				DeletePersistentObject(AObject);
+		}
+
+		#endregion
+		
 		#region Transaction
 		
 		protected override void InternalBeginTransaction(IsolationLevel AIsolationLevel)
@@ -1244,28 +1549,1016 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		}
 		
 		#endregion
-		
-		protected override object InternalExecute(Program AProgram, Schema.DevicePlan ADevicePlan)
+
+		#region Object Selection
+
+		public List<int> SelectOperatorHandlers(int AOperatorID)
 		{
-			CatalogDevicePlan LDevicePlan = (CatalogDevicePlan)ADevicePlan;
-			if (LDevicePlan.IsStorePlan)
+			if (!ServerProcess.ServerSession.Server.IsEngine)
 			{
-				CatalogDeviceTable LTable = new CatalogDeviceTable(LDevicePlan.Node.DeviceNode as CatalogDevicePlanNode, AProgram, this);
+				AcquireCatalogStoreConnection(false);
 				try
 				{
-					LTable.Open();
-					return LTable;
+					return CatalogStoreConnection.SelectOperatorHandlers(AOperatorID);
 				}
-				catch
+				finally
 				{
-					LTable.Dispose();
-					throw;
+					ReleaseCatalogStoreConnection();
 				}
 			}
-			else
-				return base.InternalExecute(AProgram, ADevicePlan);
+			return new List<int>();
 		}
+
+		public List<int> SelectObjectHandlers(int ASourceObjectID)
+		{
+			if (!ServerProcess.ServerSession.Server.IsEngine)
+			{
+				AcquireCatalogStoreConnection(false);
+				try
+				{
+					return CatalogStoreConnection.SelectObjectHandlers(ASourceObjectID);
+				}
+				finally
+				{
+					ReleaseCatalogStoreConnection();
+				}
+			}
+			return new List<int>();
+		}
+
+		public Schema.DependentObjectHeaders SelectObjectDependents(int AObjectID, bool ARecursive)
+		{
+			if (!ServerProcess.ServerSession.Server.IsEngine)
+			{
+				AcquireCatalogStoreConnection(false);
+				try
+				{
+					return CatalogStoreConnection.SelectObjectDependents(AObjectID, ARecursive);
+				}
+				finally
+				{
+					ReleaseCatalogStoreConnection();
+				}
+			}
+			return new Schema.DependentObjectHeaders();
+		}
+
+		public Schema.DependentObjectHeaders SelectObjectDependencies(int AObjectID, bool ARecursive)
+		{
+			AcquireCatalogStoreConnection(false);
+			try
+			{
+				return CatalogStoreConnection.SelectObjectDependencies(AObjectID, ARecursive);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		#endregion
+
+		#region Security
+
+		public Right ResolveRight(string ARightName, bool AMustResolve)
+		{
+			AcquireCatalogStoreConnection(false);
+			try
+			{
+				Right LRight = CatalogStoreConnection.SelectRight(ARightName);
+				if ((LRight == null) && AMustResolve)
+					throw new Schema.SchemaException(Schema.SchemaException.Codes.RightNotFound, ARightName);
+				return LRight;
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		public Right ResolveRight(string ARightName)
+		{
+			return ResolveRight(ARightName, true);
+		}
+
+		public bool RightExists(string ARightName)
+		{
+			return ResolveRight(ARightName, false) != null;
+		}
+
+		public void InsertRight(string ARightName, string AUserID)
+		{
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				CatalogStoreConnection.InsertRight(ARightName, AUserID);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		public void DeleteRight(string ARightName)
+		{
+			lock (Catalog)
+			{
+				// TODO: Look at speeding this up with an index of users for each right? Memory usage may outweigh the benefits of this index...
+				foreach (Schema.User LUser in Device.UsersCache.Values)
+					LUser.ClearCachedRightAssignment(ARightName);
+			}
+
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				CatalogStoreConnection.DeleteRight(ARightName);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		public void InsertRole(Schema.Role ARole)
+		{
+			// Add the role to the Cache
+			CacheCatalogObject(ARole);
+
+			// Clear the name cache (this is done in InsertPersistentObject for all other catalog objects)
+			Device.FNameCache.Clear();
+
+			// If we are not deserializing
+			if (!ServerProcess.InLoadingContext())
+			{
+#if LOGDDLINSTRUCTIONS
+				// log the DDL instruction
+				if (ServerProcess.InTransaction)
+					FInstructions.Add(new CreateCatalogObjectInstruction(ARole));
+#endif
+
+				// If this is not a repository, save it to the catalog store
+				if (!ServerProcess.ServerSession.Server.IsEngine && (!ServerProcess.InLoadingContext()))
+				{
+					AcquireCatalogStoreConnection(true);
+					try
+					{
+						CatalogStoreConnection.InsertRole(ARole, ScriptCatalogObject(ARole));
+					}
+					finally
+					{
+						ReleaseCatalogStoreConnection();
+					}
+				}
+			}
+		}
+
+		public void DeleteRole(Schema.Role ARole)
+		{
+			lock (Catalog)
+			{
+				// Remove the object from the catalog cache
+				ClearCatalogObject(ARole);
+			}
+
+			if (!ServerProcess.InLoadingContext())
+			{
+#if LOGDDLINSTRUCTIONS
+				// log the DDL instruction
+				if (ServerProcess.InTransaction)
+					FInstructions.Add(new DropCatalogObjectInstruction(ARole));
+#endif
+
+				// If this is not a repository, remove it from the catalog store
+				if (!ServerProcess.ServerSession.Server.IsEngine)
+				{
+					AcquireCatalogStoreConnection(true);
+					try
+					{
+						CatalogStoreConnection.DeleteRole(ARole);
+					}
+					finally
+					{
+						ReleaseCatalogStoreConnection();
+					}
+				}
+			}
+		}
+
+		public bool RoleHasRight(Schema.Role ARole, string ARightName)
+		{
+			// TODO: Implement role right assignments caching
+			AcquireCatalogStoreConnection(false);
+			try
+			{
+				RightAssignment LRightAssignment = CatalogStoreConnection.SelectRoleRightAssignment(ARole.ID, ARightName);
+				return (LRightAssignment != null) && LRightAssignment.Granted;
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		public Schema.User ResolveUser(string AUserID, bool AMustResolve)
+		{
+			lock (Catalog)
+			{
+				Schema.User LUser;
+				if (!Device.UsersCache.TryGetValue(AUserID, out LUser))
+				{
+					AcquireCatalogStoreConnection(false);
+					try
+					{
+						LUser = CatalogStoreConnection.SelectUser(AUserID);
+						if (LUser != null)
+							Device.UsersCache.Add(LUser);
+					}
+					finally
+					{
+						ReleaseCatalogStoreConnection();
+					}
+				}
+
+				if ((LUser == null) && AMustResolve)
+					throw new Schema.SchemaException(Schema.SchemaException.Codes.UserNotFound, AUserID);
+
+				return LUser;
+			}
+		}
+
+		public Schema.User ResolveUser(string AUserID)
+		{
+			return ResolveUser(AUserID, true);
+		}
+
+		/// <summary>Adds the given user to the cache, without affecting the underlying store.</summary>
+		public void CacheUser(User AUser)
+		{
+			lock (Catalog)
+			{
+				Device.UsersCache.Add(AUser);
+			}
+		}
+
+		/// <summary>Removes the given user from the cache, without affecting the underlying store.</summary>		
+		public void ClearUser(string AUserID)
+		{
+			lock (Catalog)
+			{
+				Device.UsersCache.Remove(AUserID);
+			}
+		}
+
+		/// <summary>Clears the users cache, without affecting the underlying store.</summary>		
+		public void ClearUsers()
+		{
+			lock (Catalog)
+			{
+				Device.UsersCache.Clear();
+			}
+		}
+
+		public bool UserExists(string AUserID)
+		{
+			return ResolveUser(AUserID, false) != null;
+		}
+
+		public void InsertUser(Schema.User AUser)
+		{
+			CacheUser(AUser);
+
+#if LOGDDLINSTRUCTIONS
+			if (ServerProcess.InTransaction)
+				FInstructions.Add(new CreateUserInstruction(AUser));
+#endif
+
+			if (!ServerProcess.ServerSession.Server.IsEngine)
+			{
+				AcquireCatalogStoreConnection(true);
+				try
+				{
+					CatalogStoreConnection.InsertUser(AUser);
+				}
+				finally
+				{
+					ReleaseCatalogStoreConnection();
+				}
+			}
+		}
+
+		public void SetUserPassword(string AUserID, string APassword)
+		{
+			Schema.User LUser = null;
+
+			lock (Catalog)
+			{
+				LUser = ResolveUser(AUserID);
+
+#if LOGDDLINSTRUCTIONS
+				string LUserPassword = LUser.Password;
+#endif
+				LUser.Password = APassword;
+#if LOGDDLINSTRUCTIONS
+				if (ServerProcess.InTransaction)
+					FInstructions.Add(new SetUserPasswordInstruction(LUser, LUserPassword));
+#endif
+			}
+
+			if (!ServerProcess.ServerSession.Server.IsEngine)
+			{
+				AcquireCatalogStoreConnection(true);
+				try
+				{
+					CatalogStoreConnection.UpdateUser(LUser);
+				}
+				finally
+				{
+					ReleaseCatalogStoreConnection();
+				}
+			}
+		}
+
+		public void SetUserName(string AUserID, string AUserName)
+		{
+			Schema.User LUser = null;
+
+			lock (Catalog)
+			{
+				LUser = ResolveUser(AUserID);
+
+#if LOGDDLINSTRUCTIONS
+				string LUserName = LUser.Name;
+#endif
+				LUser.Name = AUserName;
+#if LOGDDLINSTRUCTIONS
+				if (ServerProcess.InTransaction)
+					FInstructions.Add(new SetUserNameInstruction(LUser, LUserName));
+#endif
+			}
+
+			if (!ServerProcess.ServerSession.Server.IsEngine)
+			{
+				AcquireCatalogStoreConnection(true);
+				try
+				{
+					CatalogStoreConnection.UpdateUser(LUser);
+				}
+				finally
+				{
+					ReleaseCatalogStoreConnection();
+				}
+			}
+		}
+
+		public void DeleteUser(Schema.User AUser)
+		{
+			ClearUser(AUser.ID);
+
+#if LOGDDLINSTRUCTIONS
+			if (ServerProcess.InTransaction)
+				FInstructions.Add(new DropUserInstruction(AUser));
+#endif
+
+			if (!ServerProcess.ServerSession.Server.IsEngine)
+			{
+				AcquireCatalogStoreConnection(true);
+				try
+				{
+					CatalogStoreConnection.DeleteUser(AUser.ID);
+				}
+				finally
+				{
+					ReleaseCatalogStoreConnection();
+				}
+			}
+		}
+
+		public bool UserOwnsObjects(string AUserID)
+		{
+			AcquireCatalogStoreConnection(false);
+			try
+			{
+				return CatalogStoreConnection.UserOwnsObjects(AUserID);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		public bool UserOwnsRights(string AUserID)
+		{
+			AcquireCatalogStoreConnection(false);
+			try
+			{
+				return CatalogStoreConnection.UserOwnsRights(AUserID);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		public bool UserHasRight(string AUserID, string ARightName)
+		{
+			if (ServerProcess.IsLoading() || (String.Compare(AUserID, Server.Engine.CSystemUserID, true) == 0) || (String.Compare(AUserID, Server.Engine.CAdminUserID, true) == 0))
+				return true;
+
+			lock (Catalog)
+			{
+				Schema.User LUser = ResolveUser(AUserID);
+
+				Schema.RightAssignment LRightAssignment = LUser.FindCachedRightAssignment(ARightName);
+
+				if (LRightAssignment == null)
+				{
+					AcquireCatalogStoreConnection(false);
+					try
+					{
+						LRightAssignment = new Schema.RightAssignment(ARightName, CatalogStoreConnection.UserHasRight(AUserID, ARightName));
+						LUser.CacheRightAssignment(LRightAssignment);
+					}
+					finally
+					{
+						ReleaseCatalogStoreConnection();
+					}
+				}
+
+				return LRightAssignment.Granted;
+			}
+		}
+
+		public void CheckUserHasRight(string AUserID, string ARightName)
+		{
+			if (!UserHasRight(AUserID, ARightName))
+				throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, AUserID, ARightName);
+		}
+
+		public void InsertUserRole(string AUserID, int ARoleID)
+		{
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				CatalogStoreConnection.InsertUserRole(AUserID, ARoleID);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+
+			Schema.User LUser;
+			if (Device.UsersCache.TryGetValue(AUserID, out LUser))
+				LUser.ClearCachedRightAssignments();
+		}
+
+		public void DeleteUserRole(string AUserID, int ARoleID)
+		{
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				CatalogStoreConnection.DeleteUserRole(AUserID, ARoleID);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+
+			Schema.User LUser;
+			if (Device.UsersCache.TryGetValue(AUserID, out LUser))
+				LUser.ClearCachedRightAssignments();
+
+			if (!ServerProcess.IsLoading())
+				MarkUserOperatorsForRecompile(AUserID);
+		}
+
+		private void MarkRoleOperatorsForRecompile(int ARoleID)
+		{
+			AcquireCatalogStoreConnection(false);
+			try
+			{
+				List<String> LUsers = CatalogStoreConnection.SelectRoleUsers(ARoleID);
+				for (int LIndex = 0; LIndex < LUsers.Count; LIndex++)
+					MarkUserOperatorsForRecompile(LUsers[LIndex]);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		private void MarkUserOperatorsForRecompile(string AUserID)
+		{
+			AcquireCatalogStoreConnection(false);
+			try
+			{
+				string LObjectName;
+				Schema.CatalogObjectHeaders LHeaders = CatalogStoreConnection.SelectUserOperators(AUserID);
+				for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
+					if (Device.FCatalogIndex.TryGetValue(LHeaders[LIndex].ID, out LObjectName))
+						((Schema.Operator)Catalog[LObjectName]).ShouldRecompile = true;
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		public void MarkViewForRecompile(int AObjectID)
+		{
+			string LObjectName;
+			if (Device.FCatalogIndex.TryGetValue(AObjectID, out LObjectName))
+				((Schema.DerivedTableVar)Catalog[LObjectName]).ShouldReinferReferences = true;
+		}
+
+		public void GrantRightToRole(string ARightName, int ARoleID)
+		{
+			lock (Catalog)
+			{
+				foreach (Schema.User LUser in Device.UsersCache.Values)
+					LUser.ClearCachedRightAssignment(ARightName);
+			}
+
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				CatalogStoreConnection.EnsureRoleRightAssignment(ARoleID, ARightName, true);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+
+			// Mark operators for each user that is a member of this role to be recompiled on next execution
+			if (!ServerProcess.IsLoading())
+				MarkRoleOperatorsForRecompile(ARoleID);
+		}
+
+		public void GrantRightToUser(string ARightName, string AUserID)
+		{
+			lock (Catalog)
+			{
+				Schema.User LUser;
+				if (Device.UsersCache.TryGetValue(AUserID, out LUser))
+					LUser.ClearCachedRightAssignment(ARightName);
+			}
+
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				CatalogStoreConnection.EnsureUserRightAssignment(AUserID, ARightName, true);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+
+			// Mark operators for this user to be recompiled on next execution
+			if (!ServerProcess.IsLoading())
+				MarkUserOperatorsForRecompile(AUserID);
+		}
+
+		public void RevokeRightFromRole(string ARightName, int ARoleID)
+		{
+			lock (Catalog)
+			{
+				foreach (Schema.User LUser in Device.UsersCache.Values)
+					LUser.ClearCachedRightAssignment(ARightName);
+			}
+
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				CatalogStoreConnection.EnsureRoleRightAssignment(ARoleID, ARightName, false);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+
+			if (!ServerProcess.IsLoading())
+				MarkRoleOperatorsForRecompile(ARoleID);
+		}
+
+		public void RevokeRightFromUser(string ARightName, string AUserID)
+		{
+			lock (Catalog)
+			{
+				Schema.User LUser;
+				if (Device.UsersCache.TryGetValue(AUserID, out LUser))
+					LUser.ClearCachedRightAssignment(ARightName);
+			}
+
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				CatalogStoreConnection.EnsureUserRightAssignment(AUserID, ARightName, false);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+
+			if (!ServerProcess.IsLoading())
+				MarkUserOperatorsForRecompile(AUserID);
+		}
+
+		public void RevertRightForRole(string ARightName, int ARoleID)
+		{
+			lock (Catalog)
+			{
+				foreach (Schema.User LUser in Device.UsersCache.Values)
+					LUser.ClearCachedRightAssignment(ARightName);
+			}
+
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				CatalogStoreConnection.DeleteRoleRightAssignment(ARoleID, ARightName);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+
+			if (!ServerProcess.IsLoading())
+				MarkRoleOperatorsForRecompile(ARoleID);
+		}
+
+		public void RevertRightForUser(string ARightName, string AUserID)
+		{
+			lock (Catalog)
+			{
+				Schema.User LUser;
+				if (Device.UsersCache.TryGetValue(AUserID, out LUser))
+					LUser.ClearCachedRightAssignment(ARightName);
+			}
+
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				CatalogStoreConnection.DeleteUserRightAssignment(AUserID, ARightName);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+
+			if (!ServerProcess.IsLoading())
+				MarkUserOperatorsForRecompile(AUserID);
+		}
+
+		public void SetCatalogObjectOwner(int ACatalogObjectID, string AUserID)
+		{
+			lock (Catalog)
+			{
+				Schema.User LUser;
+				if (Device.UsersCache.TryGetValue(AUserID, out LUser))
+					LUser.ClearCachedRightAssignments();
+			}
+
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				CatalogStoreConnection.SetCatalogObjectOwner(ACatalogObjectID, AUserID);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+
+			// TODO: If the object is an operator, and we are not loading, and the object is not generated, and the object is in the cache, mark it for recompile
+			// TODO: If we are not loading, for each immediate dependent of this object that is a non-generated operator currently in the cache, mark it for recompile
+		}
+
+		public void SetRightOwner(string ARightName, string AUserID)
+		{
+			lock (Catalog)
+			{
+				Schema.User LUser;
+				if (Device.UsersCache.TryGetValue(AUserID, out LUser))
+					LUser.ClearCachedRightAssignments();
+			}
+
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				CatalogStoreConnection.UpdateRight(ARightName, AUserID);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		#endregion		
 		
+		#region Device Users
 		
+		public Schema.DeviceUser ResolveDeviceUser(Schema.Device ADevice, Schema.User AUser, bool AMustResolve)
+		{
+			lock (ADevice.Users)
+			{
+				Schema.DeviceUser LDeviceUser;
+				if (!ADevice.Users.TryGetValue(AUser.ID, out LDeviceUser))
+				{
+					AcquireCatalogStoreConnection(false);
+					try
+					{
+						LDeviceUser = CatalogStoreConnection.SelectDeviceUser(ADevice, AUser);
+						if (LDeviceUser != null)
+							ADevice.Users.Add(LDeviceUser);
+					}
+					finally
+					{
+						ReleaseCatalogStoreConnection();
+					}
+				}
+
+				if ((LDeviceUser == null) && AMustResolve)
+					throw new Schema.SchemaException(Schema.SchemaException.Codes.DeviceUserNotFound, AUser.ID);
+
+				return LDeviceUser;
+			}
+		}
+
+		public Schema.DeviceUser ResolveDeviceUser(Schema.Device ADevice, Schema.User AUser)
+		{
+			return ResolveDeviceUser(ADevice, AUser, true);
+		}
+
+		public bool DeviceUserExists(Schema.Device ADevice, Schema.User AUser)
+		{
+			return ResolveDeviceUser(ADevice, AUser, false) != null;
+		}
+
+		private void CacheDeviceUser(Schema.DeviceUser ADeviceUser)
+		{
+			lock (ADeviceUser.Device.Users)
+			{
+				ADeviceUser.Device.Users.Add(ADeviceUser);
+			}
+		}
+
+		private void ClearDeviceUser(Schema.DeviceUser ADeviceUser)
+		{
+			lock (ADeviceUser.Device.Users)
+			{
+				ADeviceUser.Device.Users.Remove(ADeviceUser.User.ID);
+			}
+		}
+
+		public void InsertDeviceUser(Schema.DeviceUser ADeviceUser)
+		{
+			CacheDeviceUser(ADeviceUser);
+
+			#if LOGDDLINSTRUCTIONS
+			if (ServerProcess.InTransaction)
+				FInstructions.Add(new CreateDeviceUserInstruction(ADeviceUser));
+			#endif
+
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				CatalogStoreConnection.InsertDeviceUser(ADeviceUser);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		public void SetDeviceUserID(DeviceUser ADeviceUser, string AUserID)
+		{
+			#if LOGDDLINSTRUCTIONS
+			string LOriginalDeviceUserID = ADeviceUser.DeviceUserID;
+			#endif
+			ADeviceUser.DeviceUserID = AUserID;
+			#if LOGDDLINSTRUCTIONS
+			if (ServerProcess.InTransaction)
+				FInstructions.Add(new SetDeviceUserIDInstruction(ADeviceUser, LOriginalDeviceUserID));
+			#endif
+
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				CatalogStoreConnection.UpdateDeviceUser(ADeviceUser);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		public void SetDeviceUserPassword(DeviceUser ADeviceUser, string APassword)
+		{
+			#if LOGDDLINSTRUCTIONS
+			string LOriginalDevicePassword = ADeviceUser.DevicePassword;
+			#endif
+			ADeviceUser.DevicePassword = APassword;
+			#if LOGDDLINSTRUCTIONS
+			if (ServerProcess.InTransaction)
+				FInstructions.Add(new SetDeviceUserPasswordInstruction(ADeviceUser, LOriginalDevicePassword));
+				#endif
+
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				CatalogStoreConnection.UpdateDeviceUser(ADeviceUser);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		public void SetDeviceUserConnectionParameters(DeviceUser ADeviceUser, string AConnectionParameters)
+		{
+			#if LOGDDLINSTRUCTIONS
+			string LOriginalConnectionParameters = ADeviceUser.ConnectionParameters;
+			#endif
+			ADeviceUser.ConnectionParameters = AConnectionParameters;
+			#if LOGDDLINSTRUCTIONS
+			if (ServerProcess.InTransaction)
+				FInstructions.Add(new SetDeviceUserConnectionParametersInstruction(ADeviceUser, LOriginalConnectionParameters));
+			#endif
+
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				CatalogStoreConnection.UpdateDeviceUser(ADeviceUser);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		public void DeleteDeviceUser(Schema.DeviceUser ADeviceUser)
+		{
+			ClearDeviceUser(ADeviceUser);
+
+			#if LOGDDLINSTRUCTIONS
+			if (ServerProcess.InTransaction)
+				FInstructions.Add(new DropDeviceUserInstruction(ADeviceUser));
+			#endif
+
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				CatalogStoreConnection.DeleteDeviceUser(ADeviceUser);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+				
+		#endregion
+
+		#region Device Objects
+
+		public bool HasDeviceObjects(Schema.Device ADevice)
+		{
+			AcquireCatalogStoreConnection(false);
+			try
+			{
+				return CatalogStoreConnection.HasDeviceObjects(ADevice.ID);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		public Schema.DeviceObject ResolveDeviceObject(Schema.Device ADevice, Schema.Object AObject)
+		{
+			AcquireCatalogStoreConnection(false);
+			try
+			{
+				int LDeviceObjectID = CatalogStoreConnection.SelectDeviceObjectID(ADevice.ID, AObject.ID);
+				if (LDeviceObjectID >= 0)
+				{
+					// If we are already loading, then a resolve that must load from the cache will fail, 
+					// and is a dependency on an object mapping that did not exist when the initial object was created.
+					// Therefore if the object is not present in the cache, it is as though the object does not exist.
+					if (ServerProcess.InLoadingContext())
+						return ResolveCachedCatalogObject(LDeviceObjectID, false) as Schema.DeviceObject;
+					return ResolveCatalogObject(LDeviceObjectID) as Schema.DeviceObject;
+				}
+				return null;
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		public Schema.DeviceOperator ResolveDeviceOperator(Schema.Device ADevice, Schema.Operator AOperator)
+		{
+			return ResolveDeviceObject(ADevice, AOperator) as Schema.DeviceOperator;
+		}
+
+		public Schema.DeviceScalarType ResolveDeviceScalarType(Schema.Device ADevice, Schema.ScalarType AScalarType)
+		{
+			return ResolveDeviceObject(ADevice, AScalarType) as Schema.DeviceScalarType;
+		}
+
+		#endregion
+			
+		#region Updates
+
+		protected override void InternalUpdateRow(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+		{
+			switch (ATableVar.Name)
+			{
+				case "System.ServerSettings": UpdateServerSettings(AProgram, ATableVar, AOldRow, ANewRow); return;
+				case "System.Sessions": UpdateSessions(AProgram, ATableVar, AOldRow, ANewRow); return;
+				case "System.Processes": UpdateProcesses(AProgram, ATableVar, AOldRow, ANewRow); return;
+			}
+			LibraryUpdateRow(AProgram, ATableVar, AOldRow, ANewRow, AValueFlags);
+			base.InternalUpdateRow(AProgram, ATableVar, AOldRow, ANewRow, AValueFlags);
+		}
+
+		protected void UpdateServerSettings(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
+		{
+			if ((bool)AOldRow["LogErrors"] ^ (bool)ANewRow["LogErrors"])
+				ServerProcess.ServerSession.Server.LogErrors = (bool)ANewRow["LogErrors"];
+
+			if ((int)AOldRow["MaxConcurrentProcesses"] != (int)ANewRow["MaxConcurrentProcesses"])
+				ServerProcess.ServerSession.Server.MaxConcurrentProcesses = (int)ANewRow["MaxConcurrentProcesses"];
+
+			if ((TimeSpan)AOldRow["ProcessWaitTimeout"] != (TimeSpan)ANewRow["ProcessWaitTimeout"])
+				ServerProcess.ServerSession.Server.ProcessWaitTimeout = (TimeSpan)ANewRow["ProcessWaitTimeout"];
+
+			if ((TimeSpan)AOldRow["ProcessTerminateTimeout"] != (TimeSpan)ANewRow["ProcessTerminateTimeout"])
+				ServerProcess.ServerSession.Server.ProcessTerminationTimeout = (TimeSpan)ANewRow["ProcessTerminateTimeout"];
+
+			if ((int)AOldRow["PlanCacheSize"] != (int)ANewRow["PlanCacheSize"])
+				ServerProcess.ServerSession.Server.PlanCacheSize = (int)ANewRow["PlanCacheSize"];
+
+			SaveServerSettings(ServerProcess.ServerSession.Server);
+		}
+
+		protected void UpdateSessions(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
+		{
+			ServerSession LSession = ServerProcess.ServerSession.Server.Sessions.GetSession((int)ANewRow["ID"]);
+
+			if (LSession.SessionID != ServerProcess.ServerSession.SessionID)
+				CheckUserHasRight(ServerProcess.ServerSession.User.ID, Schema.RightNames.MaintainUserSessions);
+
+			if ((string)AOldRow["Current_Library_Name"] != (string)ANewRow["Current_Library_Name"])
+				LSession.CurrentLibrary = ServerProcess.CatalogDeviceSession.ResolveLoadedLibrary((string)ANewRow["Current_Library_Name"]);
+
+			if ((string)AOldRow["DefaultIsolationLevel"] != (string)ANewRow["DefaultIsolationLevel"])
+				LSession.SessionInfo.DefaultIsolationLevel = (IsolationLevel)Enum.Parse(typeof(IsolationLevel), (string)ANewRow["DefaultIsolationLevel"], true);
+
+			if ((bool)AOldRow["DefaultUseDTC"] ^ (bool)ANewRow["DefaultUseDTC"])
+				LSession.SessionInfo.DefaultUseDTC = (bool)ANewRow["DefaultUseDTC"];
+
+			if ((bool)AOldRow["DefaultUseImplicitTransactions"] ^ (bool)ANewRow["DefaultUseImplicitTransactions"])
+				LSession.SessionInfo.DefaultUseImplicitTransactions = (bool)ANewRow["DefaultUseImplicitTransactions"];
+
+			if ((string)AOldRow["Language"] != (string)ANewRow["Language"])
+				LSession.SessionInfo.Language = (QueryLanguage)Enum.Parse(typeof(QueryLanguage), (string)ANewRow["Language"], true);
+
+			if ((int)AOldRow["DefaultMaxStackDepth"] != (int)ANewRow["DefaultMaxStackDepth"])
+				LSession.SessionInfo.DefaultMaxStackDepth = (int)ANewRow["DefaultMaxStackDepth"];
+
+			if ((int)AOldRow["DefaultMaxCallDepth"] != (int)ANewRow["DefaultMaxCallDepth"])
+				LSession.SessionInfo.DefaultMaxCallDepth = (int)ANewRow["DefaultMaxCallDepth"];
+
+			if ((bool)AOldRow["UsePlanCache"] ^ (bool)ANewRow["UsePlanCache"])
+				LSession.SessionInfo.UsePlanCache = (bool)ANewRow["UsePlanCache"];
+
+			if ((bool)AOldRow["ShouldEmitIL"] ^ (bool)ANewRow["ShouldEmitIL"])
+				LSession.SessionInfo.ShouldEmitIL = (bool)ANewRow["ShouldEmitIL"];
+		}
+
+		protected void UpdateProcesses(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
+		{
+			ServerSession LSession = ServerProcess.ServerSession.Server.Sessions.GetSession((int)ANewRow["Session_ID"]);
+
+			if (LSession.SessionID != ServerProcess.ServerSession.SessionID)
+				CheckUserHasRight(ServerProcess.ServerSession.User.ID, Schema.RightNames.MaintainUserSessions);
+
+			ServerProcess LProcess = LSession.Processes.GetProcess((int)ANewRow["ID"]);
+
+			if ((string)AOldRow["DefaultIsolationLevel"] != (string)ANewRow["DefaultIsolationLevel"])
+				LProcess.DefaultIsolationLevel = (IsolationLevel)Enum.Parse(typeof(IsolationLevel), (string)ANewRow["DefaultIsolationLevel"], true);
+
+			if ((bool)AOldRow["UseDTC"] ^ (bool)ANewRow["UseDTC"])
+				LProcess.UseDTC = (bool)ANewRow["UseDTC"];
+
+			if ((bool)AOldRow["UseImplicitTransactions"] ^ (bool)ANewRow["UseImplicitTransactions"])
+				LProcess.UseImplicitTransactions = (bool)ANewRow["UseImplicitTransactions"];
+
+			if ((int)AOldRow["MaxStackDepth"] != (int)ANewRow["MaxStackDepth"])
+				LProcess.MaxStackDepth = (int)ANewRow["MaxStackDepth"];
+
+			if ((int)AOldRow["MaxCallDepth"] != (int)ANewRow["MaxCallDepth"])
+				LProcess.MaxCallDepth = (int)ANewRow["MaxCallDepth"];
+		}
+
+		#endregion
 	}
 }
