@@ -228,7 +228,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						{
 							LColumnIndex = ARow.DataType.Columns.GetIndexOfColumn(LKey.DataType.Columns[LIndex].Name);
 							if (ARow.HasValue(LColumnIndex))
-								LKey[LIndex] = ARow[LColumnIndex];
+								LKey[LIndex] = ARow.GetNativeValue(LColumnIndex);
 							else
 								LKey.ClearValue(LIndex);
 						}
@@ -244,7 +244,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						{
 							LColumnIndex = ARow.DataType.Columns.GetIndexOfColumn(LData.DataType.Columns[LIndex].Name);
 							if (ARow.HasValue(LColumnIndex))
-								LData[LIndex] = ARow[LColumnIndex];
+								LData[LIndex] = ARow.GetNativeValue(LColumnIndex);
 							else
 								LData.ClearValue(LIndex);
 						}
@@ -298,7 +298,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						if (LColumnIndex >= 0)
 						{
 							if (LSourceRow.HasValue(LColumnIndex))
-								LRow[LIndex] = LSourceRow[LColumnIndex];
+								LRow[LIndex] = LSourceRow.GetNativeValue(LColumnIndex);
 							else
 								LRow.ClearValue(LIndex);
 							LFound = true;
