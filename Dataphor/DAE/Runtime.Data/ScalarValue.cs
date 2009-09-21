@@ -40,7 +40,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			{
 				if (ValuesOwned)
 					Manager.StreamManager.Deallocate(StreamID);
-				StreamID = StreamID.Null;
+				FStreamID = StreamID.Null;
 			}
 			base.Dispose(ADisposing);
 		}
