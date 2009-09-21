@@ -632,6 +632,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			this[AIndex] = AValue;
 		}
+		
+		public object GetNativeValue(int AIndex)
+		{
+			// TODO: This should recursively ensure that no contained values are non-native
+			return GetValue(AIndex).AsNative;
+		}
 
 		/// <summary>This is a by-reference access of the value, changes made to the resulting DataValue will be refelected in the actual row.</summary>
 		public object this[int AIndex]

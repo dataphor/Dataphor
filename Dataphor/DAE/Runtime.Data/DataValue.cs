@@ -689,16 +689,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		/// <remarks>
 		/// The method expects both values to be non-null.
 		/// The method uses direct comparison, it does not attempt to invoke the D4 equality operator for the values.
+		/// Note that this method expects that neither argument is null.
 		/// </remarks>
 		/// <returns>True if the values are equal, false otherwise.</returns>
 		public static bool NativeValuesEqual(IValueManager AManager, object LOldValue, object LCurrentValue)
 		{
-			if ((LOldValue is StreamID) && (LCurrentValue is StreamID))
+			if (((LOldValue is StreamID) || (LOldValue is byte[])) && ((LCurrentValue is StreamID) || (LCurrentValue is byte[])))
 			{
-				Stream LOldStream = AManager.StreamManager.Open((StreamID)LOldValue, LockMode.Exclusive);
+				Stream LOldStream = 
+					LOldValue is StreamID 
+						? AManager.StreamManager.Open((StreamID)LOldValue, LockMode.Exclusive)
+						: new MemoryStream((byte[])LOldValue, false);
 				try
 				{
-					Stream LCurrentStream = AManager.StreamManager.Open((StreamID)LCurrentValue, LockMode.Exclusive);
+					Stream LCurrentStream = 
+						LCurrentValue is StreamID
+							? AManager.StreamManager.Open((StreamID)LCurrentValue, LockMode.Exclusive)
+							: new MemoryStream((byte[])LCurrentValue, false);
 					try
 					{
 						bool LValuesEqual = true;
