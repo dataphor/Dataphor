@@ -22,15 +22,29 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			FLink.OnUpdateReadOnly += new EventHandler(UpdateReadOnly);
 			FLink.OnSaveRequested += new DAEClient.DataLinkHandler(SaveRequested);
 			FLink.OnFocusControl += new DataLinkFieldHandler(FocusControl);
+			FAutoUpdateInterval = 200;
+			FAutoUpdateTimer = new System.Windows.Forms.Timer();
+			FAutoUpdateTimer.Interval = FAutoUpdateInterval;
+			FAutoUpdateTimer.Tick += new EventHandler(AutoUpdateElapsed);
+			FAutoUpdateTimer.Enabled = false;
 			UpdateReadOnly(this, EventArgs.Empty);
 		}
 
 		protected override void Dispose(bool ADisposing)
 		{
-			if (FLink != null)
+			try
 			{
-				FLink.Dispose();
-				FLink = null;
+				FAutoUpdateTimer.Tick -= new EventHandler(AutoUpdateElapsed);
+				FAutoUpdateTimer.Dispose();
+				FAutoUpdateTimer = null;
+			}
+			finally
+			{
+				if (FLink != null)
+				{
+					FLink.Dispose();
+					FLink = null;
+				}
 			}
 			base.Dispose(ADisposing);
 		}
@@ -38,12 +52,44 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		private DAEClient.FieldDataLink FLink;
 		protected DAEClient.FieldDataLink Link { get { return FLink; } }
 
+		private int FAutoUpdateInterval;
+		/// <summary> Determines the amount of time to wait before updating a DataField's value. </summary>
+		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBRadioButtonGroup.dxd"/>
+		[DefaultValue(200)]
+		[Category("Behavior")]
+		public int AutoUpdateInterval
+		{
+			get { return FAutoUpdateInterval; }
+			set
+			{
+				if (FAutoUpdateInterval != value)
+					FAutoUpdateInterval = value;
+			}
+		}
+		
 		[DefaultValue(false)]
 		[Category("Behavior")]
 		public bool ReadOnly 
 		{
 			get { return FLink.ReadOnly; }
 			set { FLink.ReadOnly = value; }
+		}
+		
+		private System.Windows.Forms.Timer FAutoUpdateTimer;
+
+		private bool FAutoUpdate;
+		/// <summary> Determines if the control should automatically update the DataField's value on a given interval. </summary>
+		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBRadioButtonGroup.dxd"/>
+		[DefaultValue(false)]
+		[Category("Behavior")]
+		public bool AutoUpdate
+		{
+			get { return FAutoUpdate; }
+			set
+			{
+				if (FAutoUpdate != value)
+					FAutoUpdate = value;
+			}
 		}
 
 		[Category("Data")]
@@ -62,15 +108,6 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		{
 			get { return FLink.Source; }
 			set { FLink.Source = value;	 }
-		}
-
-		private bool FAutoUpdate = true;
-		[Category("Behavior")]
-		[DefaultValue(true)]
-		public bool AutoUpdate
-		{
-			get { return FAutoUpdate; }
-			set { FAutoUpdate = value; }
 		}
 
 		[Browsable(false)]
@@ -211,6 +248,16 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 
+		/// <summary> Called when the AutoUpdateTimer has elapsed. </summary>
+		/// <param name="ASender"> The object whose delegate is called. </param>
+		/// <param name="AArgs"> An EventArgs that contains data related to this event. </param>
+		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBRadioButtonGroup.dxd"/>
+		protected virtual void AutoUpdateElapsed(object ASender, EventArgs AArgs)
+		{
+			FAutoUpdateTimer.Stop();
+			FLink.SaveRequested();
+		}
+		
 		protected override void OnSelectedChange(EventArgs AArgs)
 		{
 			base.OnSelectedChange(AArgs);
@@ -218,7 +265,15 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			{
 				FDataValue = FValues[SelectedIndex];
 				if (FAutoUpdate)
-					FLink.SaveRequested();
+				{
+					if (FAutoUpdateInterval <= 0)
+						FLink.SaveRequested();
+					else
+					{
+						FAutoUpdateTimer.Interval = FAutoUpdateInterval;
+						FAutoUpdateTimer.Start();
+					}
+				}
 			}
 		}
 

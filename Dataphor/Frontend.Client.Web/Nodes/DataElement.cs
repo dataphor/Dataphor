@@ -302,6 +302,26 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			get { return FNilIfBlank; }
 			set { FNilIfBlank = value; }
 		}
+		
+		// AutoUpdate
+		
+		private bool FAutoUpdate = true;
+		public bool AutoUpdate
+		{
+			get { return FAutoUpdate; }
+			set { FAutoUpdate = value; }
+		}
+
+		// AutoUpdateInterval
+
+		// UNSUPPORTED IN WEB
+		        
+        private int FAutoUpdateInterval = 200;
+		public int AutoUpdateInterval
+		{
+			get { return FAutoUpdateInterval; }
+			set { FAutoUpdateInterval = value; }
+		}
 
 		// HasValueID
 
@@ -408,9 +428,12 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 					AWriter.RenderBeginTag(HtmlTextWriterTag.Input);
 					AWriter.RenderEndTag();
 				}
-			}
-		}
-
+				
+				// TODO: Reenable auto-update when there is a way to reset the focused control when posting (really annoying right now when turned on)
+	//			if (FAutoUpdate && !ReadOnly)
+	//				AWriter.AddAttribute(HtmlTextWriterAttribute.Onchange, "Submit('" + (string)Session["DefaultPage"] + "',event)");
+			}	
+		}	 
 	}
 
 	public class NumericTextBox : TextBox, INumericTextBox
@@ -632,6 +655,17 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		{
 			get { return FAutoUpdate; }
 			set { FAutoUpdate = value; }
+		}
+
+		// AutoUpdateInterval
+
+		// UNSUPPORTED IN WEB
+		        
+        private int FAutoUpdateInterval = 200;
+		public int AutoUpdateInterval
+		{
+			get { return FAutoUpdateInterval; }
+			set { FAutoUpdateInterval = value; }
 		}
 
 		// Width

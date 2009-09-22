@@ -31,20 +31,34 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			FLink.OnSaveRequested += new DataLinkHandler(SaveRequested);
 			FLink.OnFocusControl += new DataLinkFieldHandler(FocusControl);
 			FDisableWhenReadOnly = false;
+			FAutoUpdateInterval = 200;
+			FAutoUpdateTimer = new System.Windows.Forms.Timer();
+			FAutoUpdateTimer.Interval = FAutoUpdateInterval;
+			FAutoUpdateTimer.Tick += new EventHandler(AutoUpdateElapsed);
+			FAutoUpdateTimer.Enabled = false;
 			UpdateReadOnly(this, EventArgs.Empty);
 		}
 
 		protected override void Dispose(bool ADisposing)
 		{
 			base.Dispose(ADisposing);
-			if (FLink != null)
+			try
 			{
-				FLink.OnFieldChanged -= new DataLinkFieldHandler(FieldChanged);
-				FLink.OnUpdateReadOnly -= new EventHandler(UpdateReadOnly);
-				FLink.OnSaveRequested -= new DataLinkHandler(SaveRequested);
-				FLink.OnFocusControl -= new DataLinkFieldHandler(FocusControl);
-				FLink.Dispose();
-				FLink = null;
+				FAutoUpdateTimer.Tick -= new EventHandler(AutoUpdateElapsed);
+				FAutoUpdateTimer.Dispose();
+				FAutoUpdateTimer = null;
+			}
+			finally
+			{
+				if (FLink != null)
+				{
+					FLink.OnFieldChanged -= new DataLinkFieldHandler(FieldChanged);
+					FLink.OnUpdateReadOnly -= new EventHandler(UpdateReadOnly);
+					FLink.OnSaveRequested -= new DataLinkHandler(SaveRequested);
+					FLink.OnFocusControl -= new DataLinkFieldHandler(FocusControl);
+					FLink.Dispose();
+					FLink = null;
+				}
 			}
 		}
 
@@ -64,6 +78,38 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		{
 			get { return FLink.ReadOnly; }
 			set { FLink.ReadOnly = value; }
+		}
+		
+		private System.Windows.Forms.Timer FAutoUpdateTimer;
+
+		private bool FAutoUpdate;
+		/// <summary> Determines if the control should automatically update the DataField's value on a given interval. </summary>
+		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBTextBox.dxd"/>
+		[DefaultValue(false)]
+		[Category("Behavior")]
+		public bool AutoUpdate
+		{
+			get { return FAutoUpdate; }
+			set
+			{
+				if (FAutoUpdate != value)
+					FAutoUpdate = value;
+			}
+		}
+		
+		private int FAutoUpdateInterval;
+		/// <summary> Determines the amount of time to wait before updating a DataField's value. </summary>
+		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBTextBox.dxd"/>
+		[DefaultValue(200)]
+		[Category("Behavior")]
+		public int AutoUpdateInterval
+		{
+			get { return FAutoUpdateInterval; }
+			set
+			{
+				if (FAutoUpdateInterval != value)
+					FAutoUpdateInterval = value;
+			}
 		}
 
 		/// <summary> Gets or sets a value indicating the column in the DataView to link to. </summary>
@@ -182,14 +228,47 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				base.InternalUpdateBackColor();
 		}
 
+		private bool FRequestSaveOnChange;
+		/// <summary> Gets or sets a value indicating whether the control should request a save on every change.</summary>
+		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBTextBox.dxd"/>
+		[DefaultValue(false)]
+		[Category("Behavior")]
+		[Description("Save on every change?")]			
+		public bool RequestSaveOnChange
+		{
+			get { return FRequestSaveOnChange; }
+			set { FRequestSaveOnChange = value; }
+		}
+			
+		/// <summary> Called when the AutoUpdateTimer has elapsed. </summary>
+		/// <param name="ASender"> The object whose delegate is called. </param>
+		/// <param name="AArgs"> An EventArgs that contains data related to this event. </param>
+		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBTextBox.dxd"/>
+		protected virtual void AutoUpdateElapsed(object ASender, EventArgs AArgs)
+		{
+			FAutoUpdateTimer.Stop();
+			FLink.SaveRequested();
+		}
+		
 		private bool FSetting;
-
 		protected override void OnTextChanged(EventArgs AArgs)
 		{
 			base.OnTextChanged(AArgs);
 			SetHasValue((base.Text != String.Empty) || !NilIfBlank);
 			if (!FSetting)
+			{
 				EnsureEdit();
+				if (FAutoUpdate)
+				{
+					if (FAutoUpdateInterval <= 0)
+						FLink.SaveRequested();
+					else
+					{
+						FAutoUpdateTimer.Interval = FAutoUpdateInterval;
+						FAutoUpdateTimer.Start();
+					}
+				}
+			}
 		}
 
 		/// <summary> Directly sets the value of the text property without updating the DataField's value. </summary>
@@ -313,8 +392,9 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 					FLink.SaveRequested();
 				}
 				catch
-				{
+				{	  					
 					SelectAll();
+					Focus();
 					throw;
 				}
 				ResetCursor();
