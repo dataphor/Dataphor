@@ -46,6 +46,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			LControl.AcceptsReturn = !LControl.Multiline || FAcceptsReturn;
 			LControl.AcceptsTab = !LControl.Multiline || FAcceptsTabs;
 			LControl.NilIfBlank = FNilIfBlank;
+			LControl.AutoUpdate = FAutoUpdate;
+			LControl.AutoUpdateInterval = FAutoUpdateInterval;
 			if (LControl.Multiline)
 				if (FWordWrap)
 					LControl.ScrollBars = WinForms.ScrollBars.Vertical;
@@ -199,6 +201,42 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				}
 			}
 		}
+		
+		private bool FAutoUpdate = true;
+		[DefaultValue(true)]
+		[Description("Determines whether or not the control will automatically update the underlying data value.")]
+		public bool AutoUpdate
+		{
+			get { return FAutoUpdate; }
+			set
+			{
+				if (FAutoUpdate != value)
+				{
+					FAutoUpdate = value; 
+					if (Active)
+						InternalUpdateTextBox();
+				}
+			}
+		}  		   
+		
+		// AutoUpdateInterval
+		
+		private int FAutoUpdateInterval = 200;
+		[DefaultValue(200)]
+		[Description("Specifies the amount of time to wait before updating the underlying data value.")]
+		public int AutoUpdateInterval
+		{
+			get { return FAutoUpdateInterval; }
+			set
+			{
+				if (FAutoUpdateInterval != value)
+				{
+					FAutoUpdateInterval = value; 
+					if (Active)
+						InternalUpdateTextBox();
+				}
+			}
+		}  		
 		
 		// DataColumnElement
 
@@ -389,6 +427,42 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				}
 			}
 		}
+		
+		private bool FAutoUpdate = true;
+		[DefaultValue(true)]
+		[Description("Determines whether or not the control will automatically update the underlying data value.")]
+		public bool AutoUpdate
+		{
+			get { return FAutoUpdate; }
+			set
+			{
+				if (FAutoUpdate != value)
+				{
+					FAutoUpdate = value; 
+					if (Active)
+						InternalUpdateTextBox();
+				}
+			}
+		}
+			   		
+		// AutoUpdateInterval
+		
+		private int FAutoUpdateInterval = 200;
+		[DefaultValue(200)]
+		[Description("Specifies the amount of time to wait before updating the underlying data value.")]
+		public int AutoUpdateInterval
+		{
+			get { return FAutoUpdateInterval; }
+			set
+			{
+				if (FAutoUpdateInterval != value)
+				{
+					FAutoUpdateInterval = value; 
+					if (Active)
+						InternalUpdateTextBox();
+				}
+			}
+		}		   
 
 		private void InternalUpdateTextBox()
 		{
@@ -398,6 +472,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			LControl.MinimumValue = FMinimumValue;
 			LControl.MaximumValue = FMaximumValue;
 			LControl.TextBox.NilIfBlank = FNilIfBlank;
+			LControl.TextBox.AutoUpdate = FAutoUpdate;
+			LControl.TextBox.AutoUpdateInterval = FAutoUpdateInterval;
 		}
 
 		// DataColumnElement
@@ -504,6 +580,42 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				}
 			}
 		}
+		
+		private bool FAutoUpdate = true;
+		[DefaultValue(true)]
+		[Description("Determines whether or not the control will automatically update the underlying data value.")]
+		public bool AutoUpdate
+		{
+			get { return FAutoUpdate; }
+			set
+			{
+				if (FAutoUpdate != value)
+				{
+					FAutoUpdate = value; 
+					if (Active)
+						InternalUpdateTextBox();
+				}
+			}
+		}
+			   		
+		// AutoUpdateInterval
+		
+		private int FAutoUpdateInterval = 200;
+		[DefaultValue(200)]
+		[Description("Specifies the amount of time to wait before updating the underlying data value.")]
+		public int AutoUpdateInterval
+		{
+			get { return FAutoUpdateInterval; }
+			set
+			{
+				if (FAutoUpdateInterval != value)
+				{
+					FAutoUpdateInterval = value; 
+					if (Active)
+						InternalUpdateTextBox();
+				}
+			}
+		}
 
         private bool FHideDate = false;
         /// <summary> Do not display the date part. </summary>
@@ -554,6 +666,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		protected virtual void InternalUpdateTextBox()
 		{
 			DateLookupControl.TextBox.NilIfBlank = FNilIfBlank;
+			DateLookupControl.TextBox.AutoUpdate = FAutoUpdate;
+			DateLookupControl.TextBox.AutoUpdateInterval = FAutoUpdateInterval;
 		}
 
 		// LookupEditControl
