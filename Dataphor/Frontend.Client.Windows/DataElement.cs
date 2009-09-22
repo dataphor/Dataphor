@@ -340,6 +340,27 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			RadioControl.AutoUpdate = FAutoUpdate;
 		}
 		
+		// AutoUpdateInterval
+		
+		private int FAutoUpdateInterval = 200;
+		[DefaultValue(200)]
+		[Description("Specifies the amount of time to wait before updating the underlying data value.")]
+		public int AutoUpdateInterval
+		{
+			get { return FAutoUpdateInterval; }
+			set
+			{
+				FAutoUpdateInterval = value;
+				if (Active)
+					InternalUpdateAutoUpdateInterval();
+			}
+		}
+		
+		private void InternalUpdateAutoUpdateInterval()
+		{
+			RadioControl.AutoUpdateInterval = FAutoUpdateInterval;
+		}
+		
 		// DataColumnElement
 
 		protected override WinForms.Control CreateControl()

@@ -82,6 +82,17 @@ namespace Alphora.Dataphor.Frontend.Client
 	/// in the Sample10 [dfd] document.</example>
 	public interface IDateTimeBox : IAlignedElement
 	{
+		/// <summary> Determines whether or the not the check box will 
+		/// automatically update the underlying value when checked. </summary> <doc/>
+		/// <value> <para>Boolean: True|False</para>
+		/// <para>Default: false</para></value>
+		bool AutoUpdate { get; set; }
+		
+		/// <summary> Sets the number of milliseconds to wait before updating 
+		/// the underlying value when checked. </summary> <doc/>
+		/// <value> <para>Integer: </para>
+		/// <para>Default: 200</para></value>
+		int AutoUpdateInterval { get; set; }
 	}
 
 	/// <summary> Allows the triggering of an action (button). </summary> <doc/>
@@ -283,7 +294,19 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <remarks> When true, setting the contents of the control 
 		/// to an empty string ('""'), will clear (set to nil) the source column.
 		/// </remarks>
+		/// 
 		bool NilIfBlank { get; set; }
+		/// <summary> Determines whether or the not the check box will 
+		/// automatically update the underlying value when checked. </summary> <doc/>
+		/// <value> <para>Boolean: True|False</para>
+		/// <para>Default: false</para></value>
+		bool AutoUpdate { get; set; }
+		
+		/// <summary> Sets the number of milliseconds to wait before updating 
+		/// the underlying value when checked. </summary> <doc/>
+		/// <value> <para>Integer: </para>
+		/// <para>Default: 200</para></value>
+		int AutoUpdateInterval { get; set; }
 	}
 
 	/// <summary> A TextBox is a data-aware control component that allows 
@@ -624,6 +647,12 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <remarks> If false, the underlying value will be 
 		/// updated when focus leaves the control. </remarks>
 		bool AutoUpdate { get; set; }
+		
+		/// <summary> Sets the number of milliseconds to wait before updating 
+		/// the underlying value when checked. </summary> <doc/>
+		/// <value> <para>Integer: </para>
+		/// <para>Default: 200</para></value>
+		int AutoUpdateInterval { get; set; }
 
 		/// <summary> The number of columns to display radio buttons in. </summary> <doc/>
 		/// <value> <para>Integer</para>
