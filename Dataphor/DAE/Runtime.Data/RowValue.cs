@@ -748,7 +748,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 		public bool HasValue(int AIndex)
 		{
-			return FRow.Values[AIndex] != null;
+			return FRow != null && FRow.Values[AIndex] != null;
 		}
 		
 		public bool HasValue(string AColumnName)
