@@ -1006,42 +1006,141 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			}
 		}
 	}
-	
-	public class ApplicationTransactions : Dictionary<Guid, ApplicationTransaction>
+
+	public class SyncedDictionary<TKey, TValue> : IDictionary<TKey, TValue>
 	{
-		public ApplicationTransactions() : base() {}
-		
-		private object FSyncRoot = new System.Object();
-		
-		public new ApplicationTransaction this[Guid AKey]
-		{
-			get { return base[AKey]; }
-			set { lock(FSyncRoot) { base[AKey] = value; } }
-		}
-		
-		public override void Add(Guid AKey, ApplicationTransaction AValue)
+		private readonly object FSyncRoot = new object();
+		private Dictionary<TKey, TValue> FDictionary = new Dictionary<TKey, TValue>();
+
+		public void Add(TKey AKey, TValue AValue)
 		{
 			lock (FSyncRoot)
 			{
-				base.Add(AKey, AValue);
-			}
-		}
-		
-		public override void Remove(Guid AKey)
-		{
-			lock (FSyncRoot)
-			{
-				base.Remove(AKey);
+				FDictionary.Add(AKey, AValue);
 			}
 		}
 
-		public override void Clear()
+		public bool ContainsKey(TKey AKey)
+		{
+			return FDictionary.ContainsKey(AKey);
+		}
+
+		public ICollection<TKey> Keys
+		{
+			get
+			{
+				lock (FSyncRoot)
+				{
+					return FDictionary.Keys;
+				}
+			}
+		}
+
+		public bool Remove(TKey AKey)
 		{
 			lock (FSyncRoot)
 			{
-				base.Clear();
+				return FDictionary.Remove(AKey);
 			}
 		}
+
+		public bool TryGetValue(TKey AKey, out TValue AValue)
+		{
+			lock (FSyncRoot)
+			{
+				return FDictionary.TryGetValue(AKey, out AValue);
+			}
+		}
+
+		public ICollection<TValue> Values
+		{
+			get
+			{
+				lock (FSyncRoot)
+				{
+					return FDictionary.Values;
+				}
+			}
+		}
+
+		public TValue this[TKey AKey]
+		{
+			get
+			{
+				return FDictionary[AKey];
+			}
+			set
+			{
+				lock (FSyncRoot)
+				{
+					FDictionary[AKey] = value;
+				}
+			}
+		}
+
+		public void Add(KeyValuePair<TKey, TValue> AItem)
+		{
+			lock (FSyncRoot)
+			{
+				((ICollection<KeyValuePair<TKey, TValue>>)FDictionary).Add(AItem);
+			}
+		}
+
+		public void Clear()
+		{
+			lock (FSyncRoot)
+			{
+				FDictionary.Clear();
+			}
+		}
+
+		public bool Contains(KeyValuePair<TKey, TValue> AItem)
+		{
+			return ((ICollection<KeyValuePair<TKey, TValue>>)FDictionary).Contains(AItem);
+		}
+
+		public void CopyTo(KeyValuePair<TKey, TValue>[] AArray, int AArrayIndex)
+		{
+			lock (FSyncRoot)
+			{
+				((ICollection<KeyValuePair<TKey, TValue>>)FDictionary).CopyTo(AArray, AArrayIndex);
+			}
+		}
+
+		public int Count
+		{
+			get
+			{
+				return FDictionary.Count;
+			}
+		}
+
+		public bool IsReadOnly
+		{
+			get { return false; }
+		}
+
+		public bool Remove(KeyValuePair<TKey, TValue> AItem)
+		{
+			lock (FSyncRoot)
+			{
+				return ((ICollection<KeyValuePair<TKey, TValue>>)FDictionary).Remove(AItem);
+			}
+		}
+
+		public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
+		{
+			return ((ICollection<KeyValuePair<TKey, TValue>>)FDictionary).GetEnumerator();
+		}
+
+		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+		{
+			return ((System.Collections.IEnumerable)FDictionary).GetEnumerator();
+		}
+	}
+	
+	public class ApplicationTransactions : SyncedDictionary<Guid, ApplicationTransaction>
+	{
 	}
 	
 	public class ApplicationTransactionDevice : MemoryDevice
@@ -2031,7 +2130,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			get 
 			{ 
 				if (FTransaction == null)
-					FTransaction = Device.ApplicationTransactions[ServerProcess.ApplicationTransactionID];
+					Device.ApplicationTransactions.TryGetValue(ServerProcess.ApplicationTransactionID, out FTransaction);
 				return FTransaction;
 			} 
 		}

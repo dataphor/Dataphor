@@ -44,7 +44,10 @@ namespace Alphora.Dataphor.DAE.Streams
 	{
 		public MemoryStreamHeaders() : base(){}
 		
-		public MemoryStreamHeader this[StreamID AStreamID] { get { return (MemoryStreamHeader)base[AStreamID]; } }
+		public new MemoryStreamHeader this[StreamID AStreamID] 
+		{ 
+			get { return (MemoryStreamHeader)base[AStreamID]; } 
+		}
 		
 		#if USEFINALIZER
 		~MemoryStreamHeaders()

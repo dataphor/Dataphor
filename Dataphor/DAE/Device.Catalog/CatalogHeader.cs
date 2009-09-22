@@ -80,7 +80,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 	{		
 		public CatalogHeaders() : base(){}
 		
-		public CatalogHeader this[Schema.TableVar ATableVar]
+		public new CatalogHeader this[Schema.TableVar ATableVar]
 		{
 			get
 			{

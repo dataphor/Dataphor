@@ -52,7 +52,10 @@ namespace Alphora.Dataphor.DAE.Streams
 	{
 		public FileStreamHeaders() : base(){}
 		
-		public FileStreamHeader this[StreamID AStreamID] { get { return (FileStreamHeader)base[AStreamID]; } }
+		public new FileStreamHeader this[StreamID AStreamID] 
+		{ 
+			get { return (FileStreamHeader)base[AStreamID]; } 
+		}
 		
 		#if USEFINALIZER
 		~FileStreamHeaders()

@@ -251,7 +251,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	{		
 		public Rights() : base(){}
 		
-		public Right this[string AName]
+		public new Right this[string AName]
 		{
 			get
 			{
