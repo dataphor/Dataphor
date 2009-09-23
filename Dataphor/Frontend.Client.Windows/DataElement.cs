@@ -321,7 +321,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// AutoUpdate
 		
-		private bool FAutoUpdate = false;
+		private bool FAutoUpdate;
 		[DefaultValue(false)]
 		[Description("Determines whether or not the control will automatically update the underlying data value.")]
 		public bool AutoUpdate

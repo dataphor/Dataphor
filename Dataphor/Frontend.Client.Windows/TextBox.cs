@@ -202,8 +202,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 		
-		private bool FAutoUpdate = true;
-		[DefaultValue(true)]
+		private bool FAutoUpdate;
+		[DefaultValue(false)]
 		[Description("Determines whether or not the control will automatically update the underlying data value.")]
 		public bool AutoUpdate
 		{
@@ -428,8 +428,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 		
-		private bool FAutoUpdate = true;
-		[DefaultValue(true)]
+		private bool FAutoUpdate;
+		[DefaultValue(false)]
 		[Description("Determines whether or not the control will automatically update the underlying data value.")]
 		public bool AutoUpdate
 		{
@@ -581,8 +581,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 		
-		private bool FAutoUpdate = true;
-		[DefaultValue(true)]
+		private bool FAutoUpdate;
+		[DefaultValue(false)]
 		[Description("Determines whether or not the control will automatically update the underlying data value.")]
 		public bool AutoUpdate
 		{
