@@ -128,7 +128,7 @@ namespace Alphora.Dataphor.DAE.Server
 		protected Schema.IRowType FSourceRowType;
 		internal Schema.IRowType SourceRowType { get { return FSourceRowType; } }
 		
-		protected IStreamManager StreamManager { get {return (FPlan is IServerPlan) ? (IStreamManager)((IServerPlan)FPlan).Process : (IStreamManager)((IRemoteServerPlan)FPlan).Process; } }
+		protected IStreamManager StreamManager { get { return (IStreamManager)FPlan.Process; } }
 				
 		protected virtual void InternalOpen()
 		{
