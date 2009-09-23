@@ -15,6 +15,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	using Alphora.Dataphor.DAE.Language.D4;
 	using Alphora.Dataphor.DAE.Runtime;
 	using Schema = Alphora.Dataphor.DAE.Schema;
+	using Alphora.Dataphor.DAE.Server;
 
 	public abstract class DDLNode : PlanNode 
 	{
@@ -485,9 +486,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FRightName = value; }
 		}
 
+		public static void CreateRight(Program AProgram, string ARightName, string AUserID)
+		{
+			Schema.User LUser = AProgram.CatalogDeviceSession.ResolveUser(AUserID);
+			if (LUser.ID != AProgram.Plan.User.ID)
+				AProgram.Plan.CheckRight(Schema.RightNames.AlterUser);
+			
+			if (AProgram.CatalogDeviceSession.RightExists(ARightName))
+				throw new Schema.SchemaException(Schema.SchemaException.Codes.DuplicateRightName, ARightName);
+				
+			AProgram.CatalogDeviceSession.InsertRight(ARightName, LUser.ID);
+		}
+
 		public override object InternalExecute(Program AProgram)
 		{
-			SystemCreateRightNode.CreateRight(AProgram, FRightName, AProgram.User.ID);
+			CreateRight(AProgram, FRightName, AProgram.User.ID);
 			return null;
 		}
     }
@@ -501,9 +514,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FRightName = value; }
 		}
 
+		public static void DropRight(Program AProgram, string ARightName)
+		{
+			Schema.Right LRight = AProgram.CatalogDeviceSession.ResolveRight(ARightName);
+			if (LRight.OwnerID != AProgram.Plan.User.ID)
+				if ((LRight.OwnerID == Server.Engine.CSystemUserID) || (AProgram.Plan.User.ID != Server.Engine.CAdminUserID))
+					throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, AProgram.Plan.User.ID);
+			if (LRight.IsGenerated)
+				throw new ServerException(ServerException.Codes.CannotDropGeneratedRight, LRight.Name);
+				
+			AProgram.CatalogDeviceSession.DeleteRight(ARightName);
+		}
+		
 		public override object InternalExecute(Program AProgram)
 		{
-			SystemDropRightNode.DropRight(AProgram, FRightName);
+			DropRight(AProgram, FRightName);
 			return null;
 		}
     }

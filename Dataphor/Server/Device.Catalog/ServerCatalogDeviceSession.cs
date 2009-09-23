@@ -1625,7 +1625,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		#region Security
 
-		public Right ResolveRight(string ARightName, bool AMustResolve)
+		public override Right ResolveRight(string ARightName, bool AMustResolve)
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -1651,7 +1651,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			return ResolveRight(ARightName, false) != null;
 		}
 
-		public void InsertRight(string ARightName, string AUserID)
+		public override void InsertRight(string ARightName, string AUserID)
 		{
 			AcquireCatalogStoreConnection(true);
 			try
@@ -1664,14 +1664,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public void DeleteRight(string ARightName)
+		public override void DeleteRight(string ARightName)
 		{
-			lock (Catalog)
-			{
-				// TODO: Look at speeding this up with an index of users for each right? Memory usage may outweigh the benefits of this index...
-				foreach (Schema.User LUser in Device.UsersCache.Values)
-					LUser.ClearCachedRightAssignment(ARightName);
-			}
+			base.DeleteRight(ARightName);
 
 			AcquireCatalogStoreConnection(true);
 			try

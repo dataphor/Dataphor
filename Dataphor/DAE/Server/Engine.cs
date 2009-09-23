@@ -745,8 +745,6 @@ namespace Alphora.Dataphor.DAE.Server
 
 			if (!FFirstRun)
 				LoadServerState(); // Load server state from the persistent store
-
-			EnsureGeneralLibraryLoaded();
 		}
 
 		protected virtual void LoadServerState()
@@ -1160,7 +1158,7 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <summary>Event that is fired whenever a library begins loading.</summary>		
 		public event LibraryNotifyEvent OnLibraryLoading;
 
-		internal void DoLibraryLoading(string ALibraryName)
+		public void DoLibraryLoading(string ALibraryName)
 		{
 			if (OnLibraryLoading != null)
 				OnLibraryLoading(this, ALibraryName);
@@ -1169,7 +1167,7 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <summary>Event that is fired whenever a library is done being loaded.</summary>
 		public event LibraryNotifyEvent OnLibraryLoaded;
 
-		internal void DoLibraryLoaded(string ALibraryName)
+		public void DoLibraryLoaded(string ALibraryName)
 		{
 			if (OnLibraryLoaded != null)
 				OnLibraryLoaded(this, ALibraryName);
@@ -1204,28 +1202,6 @@ namespace Alphora.Dataphor.DAE.Server
 		protected virtual void InternalLoadAvailableLibraries()
 		{
 			// virtual
-		}
-
-		private void EnsureGeneralLibraryLoaded()
-		{
-			if (!IsEngine)
-			{
-				// Ensure the general library is loaded
-				if (!FCatalog.LoadedLibraries.Contains(CGeneralLibraryName))
-				{
-					Program LProgram = new Program(FSystemProcess);
-					LProgram.Start(null);
-					try
-					{
-						SystemEnsureLibraryRegisteredNode.EnsureLibraryRegistered(LProgram, CGeneralLibraryName, true);
-						FSystemSession.CurrentLibrary = FSystemLibrary; // reset current library of the system session because it will be set by registering General
-					}
-					finally
-					{
-						LProgram.Stop(null);
-					}
-				}
-			}
 		}
 
 		#endregion
@@ -1302,7 +1278,7 @@ namespace Alphora.Dataphor.DAE.Server
 				// Create the Catalog device
 				// Note that this must be the first object created to avoid the ID being different on subsequent loads
 				Schema.Object.SetNextObjectID(0);
-				FCatalogDevice = new CatalogDevice(Schema.Object.GetNextObjectID(), CCatalogDeviceName, CCatalogDeviceManagerID);
+				FCatalogDevice = new CatalogDevice(Schema.Object.GetNextObjectID(), CCatalogDeviceName);
 
 				// Create the system user
 				FSystemUser = new Schema.User(CSystemUserID, "System User", String.Empty);
@@ -1404,7 +1380,7 @@ namespace Alphora.Dataphor.DAE.Server
 			FCatalog.DataTypes.SystemGraphic.NativeType = typeof(byte[]);
 		}
 		
-		public void ClearCatalog()
+		public virtual void ClearCatalog()
 		{
 			InternalCreateCatalog();
 			FCatalogInitialized = false;
@@ -1412,7 +1388,6 @@ namespace Alphora.Dataphor.DAE.Server
 			FCatalogRegistered = false;
 			RegisterCatalog();
 			LoadServerState();
-			EnsureGeneralLibraryLoaded();
 		}
 
 		// CacheTimeStamp

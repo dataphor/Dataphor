@@ -51,6 +51,35 @@ namespace Alphora.Dataphor.DAE.Server
 			if (LibraryDirectory == String.Empty)
 				LibraryDirectory = GetDefaultLibraryDirectory();
 			base.InternalStart();
+			EnsureGeneralLibraryLoaded();
+		}
+
+		public override void ClearCatalog()
+		{
+			base.ClearCatalog();
+			EnsureGeneralLibraryLoaded();
+		}
+
+		private void EnsureGeneralLibraryLoaded()
+		{
+			if (!IsEngine)
+			{
+				// Ensure the general library is loaded
+				if (!Catalog.LoadedLibraries.Contains(CGeneralLibraryName))
+				{
+					Program LProgram = new Program(FSystemProcess);
+					LProgram.Start(null);
+					try
+					{
+						Schema.LibraryUtility.EnsureLibraryRegistered(LProgram, CGeneralLibraryName, true);
+						FSystemSession.CurrentLibrary = SystemLibrary; // reset current library of the system session because it will be set by registering General
+					}
+					finally
+					{
+						LProgram.Stop(null);
+					}
+				}
+			}
 		}
 
 		public static string GetDefaultLibraryDirectory()

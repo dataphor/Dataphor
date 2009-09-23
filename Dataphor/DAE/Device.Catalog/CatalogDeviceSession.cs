@@ -3348,6 +3348,38 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region Security
 		
+		public virtual Right ResolveRight(string ARightName, bool AMustResolve)
+		{
+			if (AMustResolve)
+				throw new Schema.SchemaException(Schema.SchemaException.Codes.RightNotFound, ARightName);
+			return null;
+		}
+
+		public Right ResolveRight(string ARightName)
+		{
+			return ResolveRight(ARightName, true);
+		}
+
+		public bool RightExists(string ARightName)
+		{
+			return ResolveRight(ARightName, false) != null;
+		}
+
+		public virtual void InsertRight(string ARightName, string AUserID)
+		{
+			// virtual
+		}
+
+		public virtual void DeleteRight(string ARightName)
+		{
+			lock (Catalog)
+			{
+				// TODO: Look at speeding this up with an index of users for each right? Memory usage may outweigh the benefits of this index...
+				foreach (Schema.User LUser in Device.UsersCache.Values)
+					LUser.ClearCachedRightAssignment(ARightName);
+			}
+		}
+
 		/// <summary>Adds the given user to the cache, without affecting the underlying store.</summary>
 		public void CacheUser(User AUser)
 		{

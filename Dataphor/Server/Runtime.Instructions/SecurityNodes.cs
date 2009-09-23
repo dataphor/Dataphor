@@ -26,21 +26,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator CreateRight(const ARightName : System.Name, const AUserID : System.String);</remarks>
     public class SystemCreateRightNode : InstructionNode
     {
-		public static void CreateRight(Program AProgram, string ARightName, string AUserID)
-		{
-			Schema.User LUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveUser(AUserID);
-			if (LUser.ID != AProgram.Plan.User.ID)
-				AProgram.Plan.CheckRight(Schema.RightNames.AlterUser);
-			
-			if (((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).RightExists(ARightName))
-				throw new Schema.SchemaException(Schema.SchemaException.Codes.DuplicateRightName, ARightName);
-				
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).InsertRight(ARightName, LUser.ID);
-		}
-		
 		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			CreateRight(AProgram, (string)AArguments[0], (AArguments.Length == 2) ? (string)AArguments[1] : AProgram.Plan.User.ID);
+			CreateRightNode.CreateRight(AProgram, (string)AArguments[0], (AArguments.Length == 2) ? (string)AArguments[1] : AProgram.Plan.User.ID);
 			return null;
 		}
     }
@@ -48,21 +36,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator DropRight(const ARightName : String); </remarks>
     public class SystemDropRightNode : InstructionNode
     {
-		public static void DropRight(Program AProgram, string ARightName)
-		{
-			Schema.Right LRight = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveRight(ARightName);
-			if (LRight.OwnerID != AProgram.Plan.User.ID)
-				if ((LRight.OwnerID == Server.Engine.CSystemUserID) || (AProgram.Plan.User.ID != Server.Engine.CAdminUserID))
-					throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, AProgram.Plan.User.ID);
-			if (LRight.IsGenerated)
-				throw new ServerException(ServerException.Codes.CannotDropGeneratedRight, LRight.Name);
-				
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).DeleteRight(ARightName);
-		}
-		
 		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			DropRight(AProgram, (string)AArguments[0]);
+			DropRightNode.DropRight(AProgram, (string)AArguments[0]);
 			return null;
 		}
     }

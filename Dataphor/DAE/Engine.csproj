@@ -575,9 +575,6 @@
     <Compile Include="Streams\CoverStream.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Streams\FileStreamProvider.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Streams\ManagedStream.cs">
       <SubType>Code</SubType>
     </Compile>
