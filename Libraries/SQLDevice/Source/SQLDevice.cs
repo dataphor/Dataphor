@@ -5226,7 +5226,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			string LTableType = String.Empty;
 			string LKeyDefinition = String.Empty;
 			
-			if (APlan.IsRepository && (Modifiers != null))
+			if (APlan.IsEngine && (Modifiers != null))
 			{
 				LTableType = LanguageModifiers.GetModifier(Modifiers, "TableType", LTableType);
 				LKeyDefinition = LanguageModifiers.GetModifier(Modifiers, "KeyInfo", LKeyDefinition);
@@ -5339,7 +5339,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			CursorType = APlan.CursorContext.CursorType;
 
 			SQLDeviceSession LDeviceSession = null;
-			if (!APlan.IsRepository)
+			if (!APlan.IsEngine)
 			{			
 				FSQLDevice = SQLDeviceUtility.ResolveSQLDevice(APlan, LDeviceName);
 				LDeviceSession = APlan.DeviceConnect(FSQLDevice) as SQLDeviceSession;
@@ -5449,7 +5449,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				foreach (Schema.Column LColumn in DataType.Columns)
 					TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 
-				if (!APlan.IsRepository)
+				if (!APlan.IsEngine)
 				{				
 					FSQLDevice.CheckSupported(APlan, FTableVar);
 					foreach (Schema.TableVarColumn LTableVarColumn in FTableVar.Columns)
@@ -5468,7 +5468,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 				
-			if (!APlan.IsRepository)
+			if (!APlan.IsEngine)
 			{
 				if (Modifiers == null)
 					Modifiers = new LanguageModifiers();

@@ -198,12 +198,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									}
 									else
 									{
-										Schema.ObjectHeader LHeader = APlan.CatalogDeviceSession.SelectObjectHeader(LNewConstraint.Dependencies.IDs[LIndex]);
-										if (!LHeader.IsRemotable)
-										{
-											LNewConstraint.IsRemotable = false;
-											break;
-										}
+										Error.Fail("Missing object dependency in AdornNode.");
+										//Schema.ObjectHeader LHeader = APlan.CatalogDeviceSession.SelectObjectHeader(LNewConstraint.Dependencies.IDs[LIndex]);
+										//if (!LHeader.IsRemotable)
+										//{
+										//    LNewConstraint.IsRemotable = false;
+										//    break;
+										//}
 									}
 								}
 
@@ -420,7 +421,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				TableVar.DerivedReferences.Add(LReference);					
 			}
 
-			if (!APlan.IsRepository)
+			if (!APlan.IsEngine)
 				foreach (AlterReferenceDefinition LAlterReference in FAlterReferences)
 				{
 					int LReferenceIndex = TableVar.DerivedReferences.IndexOf(LAlterReference.ReferenceName);

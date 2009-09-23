@@ -1,12 +1,28 @@
-﻿using System;
+﻿/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
 
-using Alphora.Dataphor.DAE.Runtime.Instructions;
-using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.Schema;
+#define LOGDDLINSTRUCTIONS
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Threading;
+
+using Alphora.Dataphor.DAE.Compiling;
+using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
+using Alphora.Dataphor.DAE.Device.Memory;
+using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
-using Alphora.Dataphor.DAE.Store;
 using Alphora.Dataphor.DAE.Runtime;
+using Alphora.Dataphor.DAE.Runtime.Data;
+using Alphora.Dataphor.DAE.Runtime.Instructions;
+using Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.DAE.Server;
+using Alphora.Dataphor.DAE.Store;
 
 namespace Alphora.Dataphor.DAE.Device.Catalog
 {
@@ -565,7 +581,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public bool CatalogObjectExists(string AObjectName)
+		public override bool CatalogObjectExists(string AObjectName)
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -1552,58 +1568,47 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		#region Object Selection
 
-		public List<int> SelectOperatorHandlers(int AOperatorID)
+		public override List<int> SelectOperatorHandlers(int AOperatorID)
 		{
-			if (!ServerProcess.ServerSession.Server.IsEngine)
+			AcquireCatalogStoreConnection(false);
+			try
 			{
-				AcquireCatalogStoreConnection(false);
-				try
-				{
-					return CatalogStoreConnection.SelectOperatorHandlers(AOperatorID);
-				}
-				finally
-				{
-					ReleaseCatalogStoreConnection();
-				}
+				return CatalogStoreConnection.SelectOperatorHandlers(AOperatorID);
 			}
-			return new List<int>();
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
 		}
 
-		public List<int> SelectObjectHandlers(int ASourceObjectID)
+		public override List<int> SelectObjectHandlers(int ASourceObjectID)
 		{
-			if (!ServerProcess.ServerSession.Server.IsEngine)
+			AcquireCatalogStoreConnection(false);
+			try
 			{
-				AcquireCatalogStoreConnection(false);
-				try
-				{
-					return CatalogStoreConnection.SelectObjectHandlers(ASourceObjectID);
-				}
-				finally
-				{
-					ReleaseCatalogStoreConnection();
-				}
+				return CatalogStoreConnection.SelectObjectHandlers(ASourceObjectID);
 			}
-			return new List<int>();
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+
 		}
 
-		public Schema.DependentObjectHeaders SelectObjectDependents(int AObjectID, bool ARecursive)
+		public override Schema.DependentObjectHeaders SelectObjectDependents(int AObjectID, bool ARecursive)
 		{
-			if (!ServerProcess.ServerSession.Server.IsEngine)
+			AcquireCatalogStoreConnection(false);
+			try
 			{
-				AcquireCatalogStoreConnection(false);
-				try
-				{
-					return CatalogStoreConnection.SelectObjectDependents(AObjectID, ARecursive);
-				}
-				finally
-				{
-					ReleaseCatalogStoreConnection();
-				}
+				return CatalogStoreConnection.SelectObjectDependents(AObjectID, ARecursive);
 			}
-			return new Schema.DependentObjectHeaders();
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
 		}
 
-		public Schema.DependentObjectHeaders SelectObjectDependencies(int AObjectID, bool ARecursive)
+		public override Schema.DependentObjectHeaders SelectObjectDependencies(int AObjectID, bool ARecursive)
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -1722,11 +1727,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 			if (!ServerProcess.InLoadingContext())
 			{
-#if LOGDDLINSTRUCTIONS
+				#if LOGDDLINSTRUCTIONS
 				// log the DDL instruction
 				if (ServerProcess.InTransaction)
 					FInstructions.Add(new DropCatalogObjectInstruction(ARole));
-#endif
+				#endif
 
 				// If this is not a repository, remove it from the catalog store
 				if (!ServerProcess.ServerSession.Server.IsEngine)
@@ -1827,10 +1832,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			CacheUser(AUser);
 
-#if LOGDDLINSTRUCTIONS
+			#if LOGDDLINSTRUCTIONS
 			if (ServerProcess.InTransaction)
 				FInstructions.Add(new CreateUserInstruction(AUser));
-#endif
+			#endif
 
 			if (!ServerProcess.ServerSession.Server.IsEngine)
 			{
@@ -1854,14 +1859,14 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				LUser = ResolveUser(AUserID);
 
-#if LOGDDLINSTRUCTIONS
+				#if LOGDDLINSTRUCTIONS
 				string LUserPassword = LUser.Password;
-#endif
+				#endif
 				LUser.Password = APassword;
-#if LOGDDLINSTRUCTIONS
+				#if LOGDDLINSTRUCTIONS
 				if (ServerProcess.InTransaction)
 					FInstructions.Add(new SetUserPasswordInstruction(LUser, LUserPassword));
-#endif
+				#endif
 			}
 
 			if (!ServerProcess.ServerSession.Server.IsEngine)
@@ -1886,14 +1891,14 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				LUser = ResolveUser(AUserID);
 
-#if LOGDDLINSTRUCTIONS
+				#if LOGDDLINSTRUCTIONS
 				string LUserName = LUser.Name;
-#endif
+				#endif
 				LUser.Name = AUserName;
-#if LOGDDLINSTRUCTIONS
+				#if LOGDDLINSTRUCTIONS
 				if (ServerProcess.InTransaction)
 					FInstructions.Add(new SetUserNameInstruction(LUser, LUserName));
-#endif
+				#endif
 			}
 
 			if (!ServerProcess.ServerSession.Server.IsEngine)
@@ -1914,10 +1919,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			ClearUser(AUser.ID);
 
-#if LOGDDLINSTRUCTIONS
+			#if LOGDDLINSTRUCTIONS
 			if (ServerProcess.InTransaction)
 				FInstructions.Add(new DropUserInstruction(AUser));
-#endif
+			#endif
 
 			if (!ServerProcess.ServerSession.Server.IsEngine)
 			{
@@ -2417,7 +2422,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		#region Device Objects
 
-		public bool HasDeviceObjects(Schema.Device ADevice)
+		public override bool HasDeviceObjects(Schema.Device ADevice)
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -2430,7 +2435,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public Schema.DeviceObject ResolveDeviceObject(Schema.Device ADevice, Schema.Object AObject)
+		public override Schema.DeviceObject ResolveDeviceObject(Schema.Device ADevice, Schema.Object AObject)
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -2451,16 +2456,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				ReleaseCatalogStoreConnection();
 			}
-		}
-
-		public Schema.DeviceOperator ResolveDeviceOperator(Schema.Device ADevice, Schema.Operator AOperator)
-		{
-			return ResolveDeviceObject(ADevice, AOperator) as Schema.DeviceOperator;
-		}
-
-		public Schema.DeviceScalarType ResolveDeviceScalarType(Schema.Device ADevice, Schema.ScalarType AScalarType)
-		{
-			return ResolveDeviceObject(ADevice, AScalarType) as Schema.DeviceScalarType;
 		}
 
 		#endregion
@@ -2558,6 +2553,161 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			if ((int)AOldRow["MaxCallDepth"] != (int)ANewRow["MaxCallDepth"])
 				LProcess.MaxCallDepth = (int)ANewRow["MaxCallDepth"];
 		}
+
+		#endregion
+		
+		#region Instructions
+		
+		private class CreateUserInstruction : DDLInstruction
+		{
+			public CreateUserInstruction(Schema.User AUser) : base()
+			{
+				FUser = AUser;
+			}
+			
+			private Schema.User FUser;
+			
+			public override void Undo(CatalogDeviceSession ASession)
+			{
+				((ServerCatalogDeviceSession)ASession).ClearUser(FUser.ID);
+			}
+		}
+		
+		private class DropUserInstruction : DDLInstruction
+		{
+			public DropUserInstruction(Schema.User AUser) : base()
+			{
+				FUser = AUser;
+			}
+			
+			private Schema.User FUser;
+			
+			public override void Undo(CatalogDeviceSession ASession)
+			{
+				((ServerCatalogDeviceSession)ASession).CacheUser(FUser);
+			}
+		}
+		
+		private class CreateDeviceUserInstruction : DDLInstruction
+		{
+			public CreateDeviceUserInstruction(Schema.DeviceUser ADeviceUser) : base()
+			{
+				FDeviceUser = ADeviceUser;
+			}
+			
+			private Schema.DeviceUser FDeviceUser;
+			
+			public override void Undo(CatalogDeviceSession ASession)
+			{
+				((ServerCatalogDeviceSession)ASession).ClearDeviceUser(FDeviceUser);
+			}
+		}
+		
+		private class DropDeviceUserInstruction : DDLInstruction
+		{
+			public DropDeviceUserInstruction(Schema.DeviceUser ADeviceUser) : base()
+			{
+				FDeviceUser = ADeviceUser;
+			}
+			
+			private Schema.DeviceUser FDeviceUser;
+			
+			public override void Undo(CatalogDeviceSession ASession)
+			{
+				((ServerCatalogDeviceSession)ASession).CacheDeviceUser(FDeviceUser);
+			}
+		}
+		
+		#endregion
+		
+		#region Emission
+		
+		private static D4TextEmitter FEmitter = new D4TextEmitter();
+		
+		public string ScriptPersistentObject(Schema.Object AObject)
+		{
+			return FEmitter.Emit(AObject.EmitStatement(EmitMode.ForStorage));
+		}
+		
+		public string ScriptCatalogObject(Schema.CatalogObject AObject)
+		{
+			return FEmitter.Emit(EmitStatement(EmitMode.ForStorage, new string[] { AObject.Name }, String.Empty, true, true, false, true));
+		}
+		
+		/// <summary>Emits a statement to reconstruct the catalog based on the given parameters.</summary>
+		/// <param name="AMode">Specifies the mode for statement emission.</param>
+		/// <param name="ARequestedObjectNames">Specifies a list of object names to be serialized.  If this list is empty, the entire catalog is emitted.</param>
+		/// <param name="ALibraryName">Specifies the name of the library to be emitted.  If this is the empty string, the system library will be emitted.</param>
+		/// <param name="AIncludeSystem">Specifies whether system objects should be included in the emitted catalog.</param>
+		/// <param name="AIncludeDependents">Specifies whether the dependents of the objects should be included in the emitted catalog.</param>
+		/// <param name="AIncludeObject">Specifies whether the object itself should be included in the emitted catalog.</param>
+		/// <remarks>
+		///	This is the main EmitStatement overload which all other EmitStatement overloads call.
+		/// </remarks>
+        public Statement EmitStatement
+        (
+			EmitMode AMode, 
+			string[] ARequestedObjectNames, 
+			string ALibraryName, 
+			bool AIncludeSystem, 
+			bool AIncludeGenerated, 
+			bool AIncludeDependents, 
+			bool AIncludeObject
+		)
+        {
+			ObjectList LRequestedObjects = new ObjectList();
+			
+			for (int LIndex = 0; LIndex < ARequestedObjectNames.Length; LIndex++)
+			{
+				int LObjectIndex = Catalog.IndexOf(ARequestedObjectNames[LIndex]);
+				if (LObjectIndex >= 0)
+				{
+					Schema.Object LObject = Catalog[LObjectIndex];
+					if ((AIncludeObject) && !LRequestedObjects.Contains(LObject.ID))
+						LRequestedObjects.Add(LObject.ID, LObject);
+					if (AIncludeDependents)
+						Catalog.GatherDependents(this, LObject, LRequestedObjects);
+				}
+			}
+			
+			EmissionContext LContext = new EmissionContext(this, Catalog, AMode, LRequestedObjects, ALibraryName, AIncludeSystem, AIncludeGenerated, AIncludeDependents, AIncludeObject);
+			if (LRequestedObjects.Count == 0)
+			{
+				if (ALibraryName == String.Empty)
+					Catalog.EmitLibraries(LContext, Catalog.LoadedLibraries);
+			}
+
+			if (LRequestedObjects.Count > 0)
+			{
+				for (int LIndex = 0; LIndex < LRequestedObjects.Count; LIndex++)
+					Catalog.EmitObject(LContext, LRequestedObjects.ResolveObject(this, LIndex));
+			}
+			else
+			{
+				foreach (CatalogObjectHeader LHeader in SelectLibraryCatalogObjects(ALibraryName))
+					Catalog.EmitObject(LContext, ResolveCatalogObject(LHeader.ID));
+			}
+
+			return LContext.Block;
+        }
+        
+		/// <summary>Emits a statement to reconstruct the entire catalog.</summary>
+        public Statement EmitStatement(EmitMode AMode, bool AIncludeSystem)
+        {
+			return EmitStatement(AMode, new string[0], String.Empty, AIncludeSystem, false, false, true);
+        }
+
+		/// <summary>Emits a statement to reconstruct the catalog for the given library.</summary>        
+        public Statement EmitStatement(EmitMode AMode, string ALibraryName, bool AIncludeSystem)
+        {
+			return EmitStatement(AMode, new string[0], ALibraryName, AIncludeSystem, false, false, true);
+        }
+
+		/// <summary>Emits a statement to reconstruct the specified list of catalog objects.</summary>        
+        public Statement EmitStatement(EmitMode AMode, string[] ARequestedObjectNames)
+        {
+			return EmitStatement(AMode, ARequestedObjectNames, String.Empty, true, false, false, true);
+        }
 
 		#endregion
 	}

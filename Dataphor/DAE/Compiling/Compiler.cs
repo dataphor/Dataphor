@@ -688,7 +688,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			try
 			{
-				if (!APlan.IsRepository)
+				if (!APlan.IsEngine)
 					APlanNode.DetermineBinding(APlan);
 			}
 			catch (Exception LException)
@@ -3458,7 +3458,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					if ((ANode.TableVar is Schema.BaseTableVar) && (!APlan.InLoadingContext()))
 						((Schema.BaseTableVar)ANode.TableVar).Device.CheckSupported(APlan, ANode.TableVar);
 					CompileTableVarConstraints(APlan, ANode.TableVar, AStatement.Constraints);
-					if (!APlan.IsRepository)
+					if (!APlan.IsEngine)
 						CompileTableVarKeyConstraints(APlan, ANode.TableVar);
 				}
 				finally
@@ -3795,7 +3795,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				if (LStatement.IsSession)
 				{
 					LSessionTableName = LTableName;
-					if (APlan.IsRepository)
+					if (APlan.IsEngine)
 						LTableName = MetaData.GetTag(LStatement.MetaData, "DAE.GlobalObjectName", Schema.Object.NameFromGuid(Guid.NewGuid()));
 					else
 						LTableName = Schema.Object.NameFromGuid(Guid.NewGuid());
@@ -3836,7 +3836,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					try
 					{
 						Schema.Object LObject = null;
-						if ((LStatement.DeviceName != null) && !APlan.IsRepository)
+						if ((LStatement.DeviceName != null) && !APlan.IsEngine)
 							LObject = ResolveCatalogIdentifier(APlan, LStatement.DeviceName.Identifier);
 
 						if (LObject == null)
@@ -3994,7 +3994,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			if (LStatement.IsSession)
 			{
 				LSessionViewName = LViewName;
-				if (APlan.IsRepository)
+				if (APlan.IsEngine)
 					LViewName = MetaData.GetTag(LStatement.MetaData, "DAE.GlobalObjectName", Schema.Object.NameFromGuid(Guid.NewGuid()));
 				else
 					LViewName = Schema.Object.NameFromGuid(Guid.NewGuid());
@@ -4016,7 +4016,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			LNode.View.Owner = APlan.User;
 			LNode.View.Library = LNode.View.IsGenerated ? null : APlan.CurrentLibrary;
 			LNode.View.MetaData = LStatement.MetaData;
-			if (!APlan.IsRepository) // if this is a repository, a view could be parameterized, because it will never be executed
+			if (!APlan.IsEngine) // if this is a repository, a view could be parameterized, because it will never be executed
 				APlan.Symbols.PushWindow(0); // make sure the view expression is evaluated in a private context
 			try
 			{
@@ -4083,14 +4083,14 @@ namespace Alphora.Dataphor.DAE.Compiling
 			}
 			finally
 			{
-				if (!APlan.IsRepository)
+				if (!APlan.IsEngine)
 					APlan.Symbols.PopWindow();
 			}
 		}
 		
 		public static void ReinferViewReferences(Plan APlan, Schema.DerivedTableVar AView)
 		{
-			if (!APlan.IsRepository && AView.ShouldReinferReferences)
+			if (!APlan.IsEngine && AView.ShouldReinferReferences)
 			{
 				Schema.Objects LSaveSourceReferences = new Schema.Objects();
 				Schema.Objects LSaveTargetReferences = new Schema.Objects();
@@ -5919,7 +5919,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						LOperatorName = ((Schema.SessionObject)APlan.SessionOperators[LIndex]).GlobalName;
 					else
 					{
-						if (APlan.IsRepository)
+						if (APlan.IsEngine)
 							LOperatorName = MetaData.GetTag(LStatement.MetaData, "DAE.GlobalObjectName", Schema.Object.NameFromGuid(Guid.NewGuid()));
 						else
 							LOperatorName = Schema.Object.NameFromGuid(Guid.NewGuid());
@@ -5959,7 +5959,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						// If this is a repository, and we are creating a duplicate operator, ignore this statement and move on
 						// This will allow us to move operators into the base catalog object set without having to upgrade the
 						// system catalog.
-						if (APlan.IsRepository)
+						if (APlan.IsEngine)
 							return new NoOpNode();
 						throw;
 					}
@@ -6262,7 +6262,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					LOperatorName = ((Schema.SessionObject)APlan.PlanSessionOperators[LIndex]).GlobalName;
 				else
 				{
-					if (APlan.IsRepository)
+					if (APlan.IsEngine)
 						LOperatorName = MetaData.GetTag(LStatement.MetaData, "DAE.GlobalObjectName", Schema.Object.NameFromGuid(Guid.NewGuid()));
 					else
 						LOperatorName = Schema.Object.NameFromGuid(Guid.NewGuid());
@@ -6708,7 +6708,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				if (LStatement.IsSession)
 				{
 					LSessionConstraintName = LConstraintName;
-					if (APlan.IsRepository)
+					if (APlan.IsEngine)
 						LConstraintName = MetaData.GetTag(LStatement.MetaData, "DAE.GlobalObjectName", Schema.Object.NameFromGuid(Guid.NewGuid()));
 					else
 						LConstraintName = Schema.Object.NameFromGuid(Guid.NewGuid());
@@ -7923,7 +7923,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				if (LStatement.IsSession)
 				{
 					LSessionReferenceName = LReferenceName;
-					if (APlan.IsRepository)
+					if (APlan.IsEngine)
 						LReferenceName = MetaData.GetTag(LStatement.MetaData, "DAE.GlobalObjectName", Schema.Object.NameFromGuid(Guid.NewGuid()));
 					else
 						LReferenceName = Schema.Object.NameFromGuid(Guid.NewGuid());
@@ -7990,7 +7990,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						LNode.Reference.UpdateReferenceAction = LStatement.ReferencesDefinition.UpdateReferenceAction;
 						LNode.Reference.DeleteReferenceAction = LStatement.ReferencesDefinition.DeleteReferenceAction;
 						
-						if (!APlan.IsRepository && LNode.Reference.Enforced)
+						if (!APlan.IsEngine && LNode.Reference.Enforced)
 						{
 							if ((LNode.Reference.SourceTable is Schema.BaseTableVar) && (LNode.Reference.TargetTable is Schema.BaseTableVar))
 							{
@@ -8673,7 +8673,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 		
 		public static void CheckValidCatalogObjectName(Plan APlan, Statement AStatement, string AObjectName)
 		{
-			if (!APlan.IsRepository && (!APlan.InLoadingContext()))
+			if (!APlan.IsEngine && (!APlan.InLoadingContext()))
 			{
 				if (APlan.CatalogDeviceSession.CatalogObjectExists(AObjectName))
 					throw new CompilerException(CompilerException.Codes.CreatingDuplicateObjectName, AStatement, AObjectName);
@@ -8710,7 +8710,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 		
 		public static void CheckValidCatalogOperatorName(Plan APlan, Statement AStatement, string AOperatorName, Schema.Signature ASignature)
 		{
-			if (!APlan.IsRepository && (!APlan.InLoadingContext()))
+			if (!APlan.IsEngine && (!APlan.InLoadingContext()))
 			{
 				APlan.CatalogDeviceSession.ResolveOperatorName(AOperatorName);
 				CheckValidOperatorName(APlan, APlan.Catalog, AStatement, AOperatorName, ASignature);
@@ -8837,7 +8837,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 							if ((AContext.Operator == null) || AContext.Matches.IsPartial)
 							{
 								// NOTE: If this is a repository, or we are currently loading, there is no need to force the resolve of arbitrary matches, the required operator will be in the cache because of the dependency loading mechanism in the catalog device
-								if (!APlan.IsRepository && (!APlan.InLoadingContext()))
+								if (!APlan.IsEngine && (!APlan.InLoadingContext()))
 									APlan.CatalogDeviceSession.ResolveOperatorName(AContext.OperatorName);
 								ResolveCall(APlan, APlan.Catalog, AContext);
 							}

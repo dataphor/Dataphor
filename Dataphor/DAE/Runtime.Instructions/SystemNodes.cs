@@ -1926,28 +1926,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	}
 	
-	// operator System.SetMaxConcurrentProcesses(const AMaxConcurrentProcesses : System.Integer);
-	public class SystemSetMaxConcurrentProcessesNode : InstructionNode
-	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
-		{
-			AProgram.ServerProcess.ServerSession.Server.MaxConcurrentProcesses = (int)AArguments[0];
-			AProgram.CatalogDeviceSession.SaveServerSettings(AProgram.ServerProcess.ServerSession.Server);
-			return null;
-		}
-	}
-
-	// operator System.SetProcessWaitTimeout(const AProcessWaitTimeout : System.TimeSpan);
-	public class SystemSetProcessWaitTimeoutNode: InstructionNode
-	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
-		{
-			AProgram.ServerProcess.ServerSession.Server.ProcessWaitTimeout = ((TimeSpan)AArguments[0]);
-			AProgram.CatalogDeviceSession.SaveServerSettings(AProgram.ServerProcess.ServerSession.Server);
-			return null;
-		}
-	}
-	
 	// operator SetLanguage(ALanguage : string);
 	public class SystemSetLanguageNode : InstructionNode
 	{

@@ -65,6 +65,7 @@
     <Compile Include="Device.Catalog\ServerCatalogDevice.cs" />
     <Compile Include="Device.Catalog\ServerCatalogDeviceSession.cs" />
     <Compile Include="RemoteCLI.cs" />
+    <Compile Include="Runtime.Instructions\CatalogNodes.cs" />
     <Compile Include="Runtime.Instructions\LibraryNodes.cs" />
     <Compile Include="Language.SQL\Emitter.cs" />
     <Compile Include="Language.SQL\Keywords.cs" />

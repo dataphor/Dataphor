@@ -575,7 +575,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public int SessionID { get { return FServerProcess.ServerSession.SessionID; } }
 		
 		// Catalog		
-		public bool IsRepository { get { return FServerProcess.ServerSession.Server.IsEngine; } }
+		public bool IsEngine { get { return FServerProcess.ServerSession.Server.IsEngine; } }
 		
 		public Schema.Catalog Catalog { get { return FServerProcess.ServerSession.Server.Catalog; } }
 		

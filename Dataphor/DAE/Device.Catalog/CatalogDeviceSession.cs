@@ -88,21 +88,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		private class BeginTransactionInstruction : DDLInstruction {}
 		
-		private class CreateUserInstruction : DDLInstruction
-		{
-			public CreateUserInstruction(Schema.User AUser) : base()
-			{
-				FUser = AUser;
-			}
-			
-			private Schema.User FUser;
-			
-			public override void Undo(CatalogDeviceSession ASession)
-			{
-				ASession.ClearUser(FUser.ID);
-			}
-		}
-		
 		private class SetUserNameInstruction : DDLInstruction
 		{
 			public SetUserNameInstruction(Schema.User AUser, string AOriginalName) : base()
@@ -134,36 +119,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			public override void Undo(CatalogDeviceSession ASession)
 			{
 				FUser.Password = FOriginalPassword;
-			}
-		}
-		
-		private class DropUserInstruction : DDLInstruction
-		{
-			public DropUserInstruction(Schema.User AUser) : base()
-			{
-				FUser = AUser;
-			}
-			
-			private Schema.User FUser;
-			
-			public override void Undo(CatalogDeviceSession ASession)
-			{
-				ASession.CacheUser(FUser);
-			}
-		}
-		
-		private class CreateDeviceUserInstruction : DDLInstruction
-		{
-			public CreateDeviceUserInstruction(Schema.DeviceUser ADeviceUser) : base()
-			{
-				FDeviceUser = ADeviceUser;
-			}
-			
-			private Schema.DeviceUser FDeviceUser;
-			
-			public override void Undo(CatalogDeviceSession ASession)
-			{
-				ASession.ClearDeviceUser(FDeviceUser);
 			}
 		}
 		
@@ -215,21 +170,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			public override void Undo(CatalogDeviceSession ASession)
 			{
 				FDeviceUser.ConnectionParameters = FOriginalConnectionParameters;
-			}
-		}
-		
-		private class DropDeviceUserInstruction : DDLInstruction
-		{
-			public DropDeviceUserInstruction(Schema.DeviceUser ADeviceUser) : base()
-			{
-				FDeviceUser = ADeviceUser;
-			}
-			
-			private Schema.DeviceUser FDeviceUser;
-			
-			public override void Undo(CatalogDeviceSession ASession)
-			{
-				ASession.CacheDeviceUser(FDeviceUser);
 			}
 		}
 		
@@ -1532,6 +1472,30 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#endregion
 		
+		#region Object Selection
+
+		public virtual List<int> SelectOperatorHandlers(int AOperatorID)
+		{
+			return new List<int>();
+		}
+
+		public virtual List<int> SelectObjectHandlers(int ASourceObjectID)
+		{
+			return new List<int>();
+		}
+
+		public virtual Schema.DependentObjectHeaders SelectObjectDependents(int AObjectID, bool ARecursive)
+		{
+			return new Schema.DependentObjectHeaders();
+		}
+
+		public virtual Schema.DependentObjectHeaders SelectObjectDependencies(int AObjectID, bool ARecursive)
+		{
+			return new Schema.DependentObjectHeaders();
+		}
+
+		#endregion
+
 		#region Updates
 				
 		protected override void InternalInsertRow(Program AProgram, Schema.TableVar ATableVar, Row ARow, BitArray AValueFlags)
@@ -1562,22 +1526,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				case "System.TableDum" : break;
 			}
 			base.InternalDeleteRow(AProgram, ATableVar, ARow);
-		}
-		
-		#endregion
-		
-		#region Emission
-		
-		private static D4TextEmitter FEmitter = new D4TextEmitter();
-		
-		public string ScriptPersistentObject(Schema.Object AObject)
-		{
-			return FEmitter.Emit(AObject.EmitStatement(EmitMode.ForStorage));
-		}
-		
-		public string ScriptCatalogObject(Schema.CatalogObject AObject)
-		{
-			return FEmitter.Emit(Catalog.EmitStatement(this, EmitMode.ForStorage, new string[] { AObject.Name }, String.Empty, true, true, false, true));
 		}
 		
 		#endregion
@@ -1853,6 +1801,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		protected virtual void InternalDeleteCatalogObject(Schema.CatalogObject AObject)
 		{
 			// virtual
+		}
+
+		public virtual bool CatalogObjectExists(string AObjectName)
+		{
+			return false;
 		}
 		
 		#endregion
@@ -3318,6 +3271,30 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			#endif
 		}
 		
+		#endregion
+		
+		#region Device Objects
+
+		public virtual bool HasDeviceObjects(Schema.Device ADevice)
+		{
+			return false;
+		}
+
+		public virtual Schema.DeviceObject ResolveDeviceObject(Schema.Device ADevice, Schema.Object AObject)
+		{
+			return null;
+		}
+
+		public Schema.DeviceOperator ResolveDeviceOperator(Schema.Device ADevice, Schema.Operator AOperator)
+		{
+			return ResolveDeviceObject(ADevice, AOperator) as Schema.DeviceOperator;
+		}
+
+		public Schema.DeviceScalarType ResolveDeviceScalarType(Schema.Device ADevice, Schema.ScalarType AScalarType)
+		{
+			return ResolveDeviceObject(ADevice, AScalarType) as Schema.DeviceScalarType;
+		}
+
 		#endregion
 	}
 }

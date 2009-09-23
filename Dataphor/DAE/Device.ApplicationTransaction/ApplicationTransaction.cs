@@ -1009,9 +1009,15 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 
 	public class SyncedDictionary<TKey, TValue> : IDictionary<TKey, TValue>
 	{
-		private readonly object FSyncRoot = new object();
 		private Dictionary<TKey, TValue> FDictionary = new Dictionary<TKey, TValue>();
 
+		private readonly object FSyncRoot = new object();
+		
+		public object SyncRoot
+		{
+			get { return FSyncRoot; }
+		}
+		
 		public void Add(TKey AKey, TValue AValue)
 		{
 			lock (FSyncRoot)
