@@ -95,7 +95,6 @@
     <Compile Include="Server\ServerDTCTransaction.cs" />
     <Compile Include="Server\ServerFactory.cs" />
     <Compile Include="Server\ServerHost.cs" />
-    <Compile Include="Streams\RemoteStream.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Language.SQL\BNF.txt" />

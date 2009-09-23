@@ -583,6 +583,7 @@
     <Compile Include="Streams\MemoryStreamProvider.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Streams\RemoteStream.cs" />
     <Compile Include="Streams\ServerStream.cs">
       <SubType>Code</SubType>
     </Compile>
