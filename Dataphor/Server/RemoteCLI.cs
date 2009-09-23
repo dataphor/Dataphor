@@ -10,6 +10,7 @@ using System.Collections;
 using System.Runtime.Remoting.Lifetime;
 
 using Alphora.Dataphor.DAE.Server;
+using Alphora.Dataphor.DAE.Contracts;
 using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
@@ -59,37 +60,6 @@ namespace Alphora.Dataphor.DAE
         void StopProcess(IRemoteServerProcess AProcess);
     }
 
-	[Serializable]    
-	/// <nodoc/>
-	public struct ProcessCleanupInfo
-    {
-		public IRemoteServerPlan[] UnprepareList;
-    }
-    
-    [Serializable]
-    /// <nodoc/>
-    public struct ProcessCallInfo
-    {
-		public IsolationLevel[] TransactionList;
-    }
-
-	[Serializable]
-	public class PlanDescriptor
-	{
-		public Guid ID;
-		public PlanStatistics Statistics;
-		public Exception[] Messages;
-		public CursorCapability Capabilities;
-		public CursorType CursorType;
-		public CursorIsolation CursorIsolation;
-		public long CacheTimeStamp;
-		public long ClientCacheTimeStamp;
-		public bool CacheChanged;
-		public string ObjectName;
-		public string Catalog;
-		public string Order;
-	}
-	
 	/// <nodoc/>
 	public interface IRemoteServerProcess : IServerProcessBase
     {
@@ -317,94 +287,6 @@ namespace Alphora.Dataphor.DAE
 		void Close(IRemoteServerCursor ACursor, ProcessCallInfo ACallInfo);
     }
 
-    [Flags]
-    [Serializable]
-	/// <nodoc/>
-	public enum RemoteCursorGetFlags : byte {None = 0, BOF = 1, EOF = 2}
-    
-	[Serializable]
-	/// <nodoc/>
-	public struct RemoteRowHeader
-    {
-		public string[] Columns;
-    }
-    
-	[Serializable]
-	/// <nodoc/>
-	public struct RemoteRowBody
-    {
-		public byte[] Data;
-    }
-    
-	[Serializable]
-	/// <nodoc/>
-	public struct RemoteRow
-    {
-		public RemoteRowHeader Header;
-		public RemoteRowBody Body;
-    }
-
-	/* HACK: We have discovered that while remoting, some types of complicated nested structs are not able to be
-	 * passed through the remoting layer.  A fix up error is given.  MOS noticed that there are at least two
-	 * different errors that can be received.
-	 * One case is where a struct contains an array of a different struct
-	 * in which that struct has an array of a native data type (or more complicated than this).
-	 * The other case is when a struct contains a struct which contains an enum.  This is a case in our system.
-	 * To overcome this bug, in two of our structs below, the enums were replaced with bytes (for they both fit in
-	 * a byte) and in the places that they are referenced they are cast from enum to byte or vice versa.
-	 * This bug was reported to microsoft, and should be fixed in version 1.1 of the framework.
-	 * MOS
-	*/	
-
-	[Serializable]
-	/// <nodoc/>
-	public struct RemoteFetchData
-    {
-		public RemoteRowBody[] Body;
-		public byte Flags; // hack: changed from 'RemoteCursorGetFlags' to 'byte' in order fix fixup error
-	}
-
-	[Serializable]
-	/// <nodoc/>
-	public struct RemoteProposeData
-    {
-		public bool Success;
-		public RemoteRowBody Body;
-    }
-
-    [Serializable]
-	/// <nodoc/>
-	public struct RemoteParam
-    {
-		public string Name;
-		public string TypeName;
-		public byte Modifier; // hack: changed from 'Modifier' to 'byte' to fix fixup error
-    }
-    
-    [Serializable]
-	/// <nodoc/>
-	public struct RemoteParamData
-    {
-		public RemoteParam[] Params;
-		public RemoteRowBody Data;
-    }
-
-    [Serializable]
-	/// <nodoc/>
-	public struct RemoteMoveData
-    {
-		public int Count;
-		public RemoteCursorGetFlags Flags;
-    }
-    
-	[Serializable]
-	/// <nodoc/>
-	public struct RemoteGotoData
-    {
-		public bool Success;
-		public RemoteCursorGetFlags Flags;
-    }
-    
     /// <summary> A cursor interface designed to be utilized through remoting. </summary>
 	/// <nodoc/>
 	public interface IRemoteServerCursor : IServerCursorBase, IRemoteProposable

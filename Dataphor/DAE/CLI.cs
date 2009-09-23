@@ -7,7 +7,6 @@
 using System;
 using System.IO;
 using System.Collections;
-using System.Runtime.Remoting.Lifetime;
 
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;

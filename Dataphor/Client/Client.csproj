@@ -55,6 +55,8 @@
     <Compile Include="Server\LocalServerObject.cs" />
     <Compile Include="Server\LocalServerStructures.cs" />
     <Compile Include="Server\LocalSession.cs" />
+    <Compile Include="Streams\LocalStream.cs" />
+    <Compile Include="Streams\LocalStreamManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Base.Windows\Base.Windows.csproj">

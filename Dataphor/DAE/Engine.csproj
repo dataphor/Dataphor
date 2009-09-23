@@ -99,6 +99,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Data" />
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
     </Reference>
@@ -223,7 +224,6 @@
     <Compile Include="Register.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="RemoteCLI.cs" />
     <Compile Include="Runtime.Data\AdornTable.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -577,19 +577,10 @@
     <Compile Include="Streams\FileStreamProvider.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Streams\LocalStream.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Streams\LocalStreamManager.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Streams\ManagedStream.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Streams\MemoryStreamProvider.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Streams\RemoteStream.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Streams\ServerStream.cs">
