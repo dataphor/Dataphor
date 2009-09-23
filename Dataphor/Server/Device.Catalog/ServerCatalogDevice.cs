@@ -3,17 +3,46 @@
 namespace Alphora.Dataphor.DAE.Device.Catalog
 {
 	using Alphora.Dataphor.DAE.Server;
+	using System.Collections.Generic;
 
 	public class ServerCatalogDevice : CatalogDevice
 	{
 		public ServerCatalogDevice(int AID, string AName) : base(AID, AName) { }
 		
+		private CatalogStore FStore;
+		internal CatalogStore Store
+		{
+			get
+			{
+				Error.AssertFail(FStore != null, "Server is configured as a repository and has no catalog store.");
+				return FStore;
+			}
+		}
+
+		public int MaxStoreConnections
+		{
+			get { return FStore.MaxConnections; }
+			set { FStore.MaxConnections = value; }
+		}
+
 		protected override DeviceSession InternalConnect(ServerProcess AServerProcess, DeviceSessionInfo ADeviceSessionInfo)
 		{
 			return new ServerCatalogDeviceSession(this, AServerProcess, ADeviceSessionInfo);
 		}
 
-		protected override void PopulateServerSettings(Program AProgram, NativeTable ANativeTable, Row ARow)
+		protected override void InternalStart(ServerProcess AProcess)
+		{
+			base.InternalStart(AProcess);
+			if (!AProcess.ServerSession.Server.IsEngine)
+			{
+				FStore = new CatalogStore();
+				FStore.StoreClassName = AProcess.ServerSession.Server.GetCatalogStoreClassName();
+				FStore.StoreConnectionString = AProcess.ServerSession.Server.GetCatalogStoreConnectionString();
+				FStore.Initialize(AProcess.ServerSession.Server);
+			}
+		}
+
+		private void PopulateServerSettings(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			DAE.Server.Server LServer = (DAE.Server.Server)AProgram.ServerProcess.ServerSession.Server;
 			ARow[0] = LServer.Name;
@@ -33,31 +62,35 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			ANativeTable.Insert(AProgram.ValueManager, ARow);
 		}
 
-		private CatalogStore FStore;
-		internal CatalogStore Store
+		private void PopulateLoadedLibraries(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			get
+			List<string> LLibraryNames = AProgram.CatalogDeviceSession.SelectLoadedLibraries();
+			for (int LIndex = 0; LIndex < LLibraryNames.Count; LIndex++)
 			{
-				Error.AssertFail(FStore != null, "Server is configured as a repository and has no catalog store.");
-				return FStore;
+				ARow[0] = LLibraryNames[LIndex];
+				ANativeTable.Insert(AProgram.ValueManager, ARow);
 			}
 		}
-
-		public int MaxStoreConnections
+		
+		private void PopulateLibraryOwners(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			get { return FStore.MaxConnections; }
-			set { FStore.MaxConnections = value; }
+			AProgram.CatalogDeviceSession.SelectLibraryOwners(AProgram, ANativeTable, ARow);
 		}
 
-		protected override void InternalStart(ServerProcess AProcess)
+		private void PopulateLibraryVersions(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			base.InternalStart(AProcess);
-			if (!AProcess.ServerSession.Server.IsEngine)
+			AProgram.CatalogDeviceSession.SelectLibraryVersions(AProgram, ANativeTable, ARow);
+		}
+
+		protected virtual void InternalPopulateTableVar(Program AProgram, CatalogHeader AHeader, Row ARow)
+		{
+			switch (AHeader.TableVar.Name)
 			{
-				FStore = new CatalogStore();
-				FStore.StoreClassName = AProcess.ServerSession.Server.GetCatalogStoreClassName();
-				FStore.StoreConnectionString = AProcess.ServerSession.Server.GetCatalogStoreConnectionString();
-				FStore.Initialize(AProcess.ServerSession.Server);
+				case "System.ServerSettings" : PopulateServerSettings(AProgram, AHeader.NativeTable, ARow); break;
+				case "System.LibraryOwners" : PopulateLibraryOwners(AProgram, AHeader.NativeTable, LRow); break;
+				case "System.LibraryVersions" : PopulateLibraryVersions(AProgram, AHeader.NativeTable, LRow); break;
+				case "System.LoadedLibraries" : PopulateLoadedLibraries(AProgram, AHeader.NativeTable, LRow); break;
+				default: base.InternalPopulateTableVar(AProgram, AHeader, ARow);
 			}
 		}
 	}

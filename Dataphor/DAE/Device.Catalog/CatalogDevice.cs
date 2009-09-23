@@ -493,10 +493,6 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 			return base.InternalPrepare(ADevicePlan, APlanNode);
 		}
 		
-		protected virtual void PopulateServerSettings(Program AProgram, NativeTable ANativeTable, Row ARow)
-		{
-		}
-
 		private void PopulateConnections(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 /*
@@ -660,16 +656,6 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 				}
 		}
 		
-		private void PopulateLibraryOwners(Program AProgram, NativeTable ANativeTable, Row ARow)
-		{
-			AProgram.CatalogDeviceSession.SelectLibraryOwners(AProgram, ANativeTable, ARow);
-		}
-
-		private void PopulateLibraryVersions(Program AProgram, NativeTable ANativeTable, Row ARow)
-		{
-			AProgram.CatalogDeviceSession.SelectLibraryVersions(AProgram, ANativeTable, ARow);
-		}
-
 		private void PopulateRegisteredAssemblies(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			foreach (RegisteredAssembly LAssembly in AProgram.Catalog.ClassLoader.Assemblies)
@@ -692,16 +678,6 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 				ANativeTable.Insert(AProgram.ValueManager, ARow);
 			}
 		}											
-		
-		private void PopulateLoadedLibraries(Program AProgram, NativeTable ANativeTable, Row ARow)
-		{
-			List<string> LLibraryNames = AProgram.CatalogDeviceSession.SelectLoadedLibraries();
-			for (int LIndex = 0; LIndex < LLibraryNames.Count; LIndex++)
-			{
-				ARow[0] = LLibraryNames[LIndex];
-				ANativeTable.Insert(AProgram.ValueManager, ARow);
-			}
-		}
 		
 		private void PopulateSessionCatalogObjects(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
@@ -825,41 +801,42 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 			}
 		}
 		
-		protected internal virtual void PopulateTableVar(Program AProgram, CatalogHeader AHeader)
+		protected virtual void InternalPopulateTableVar(Program AProgram, CatalogHeader AHeader, Row ARow)
+		{
+			switch (AHeader.TableVar.Name)
+			{
+				case "System.Connections" : PopulateConnections(AProgram, AHeader.NativeTable, ARow); break;
+				case "System.Sessions" : PopulateSessions(AProgram, AHeader.NativeTable, ARow); break;
+				case "System.Processes" : PopulateProcesses(AProgram, AHeader.NativeTable, ARow); break;
+				case "System.Locks" : PopulateLocks(AProgram, AHeader.NativeTable, ARow); break;
+				case "System.Scripts" : PopulateScripts(AProgram, AHeader.NativeTable, ARow); break;
+				case "System.Plans" : PopulatePlans(AProgram, AHeader.NativeTable, ARow); break;
+				case "System.Libraries" : PopulateLibraries(AProgram, AHeader.NativeTable, ARow); break;
+				case "System.LibraryFiles" : PopulateLibraryFiles(AProgram, AHeader.NativeTable, ARow); break;
+				case "System.LibraryRequisites" : PopulateLibraryRequisites(AProgram, AHeader.NativeTable, ARow); break;
+				case "System.LibrarySettings" : PopulateLibrarySettings(AProgram, AHeader.NativeTable, ARow); break;
+				case "System.RegisteredAssemblies" : PopulateRegisteredAssemblies(AProgram, AHeader.NativeTable, ARow); break;
+				case "System.RegisteredClasses" : PopulateRegisteredClasses(AProgram, AHeader.NativeTable, ARow); break;
+				case "System.SessionCatalogObjects" : PopulateSessionCatalogObjects(AProgram, AHeader.NativeTable, ARow); break;
+				#if USETYPEINHERITANCE
+				case "System.ScalarTypeParentScalarTypes" : PopulateScalarTypeParentScalarTypes(AProgram, AHeader.NativeTable, ARow); break;
+				case "System.ScalarTypeExplicitCastFunctions" : PopulateScalarTypeExplicitCastFunctions(AProgram, AHeader.NativeTable, ARow); break;
+				#endif
+				case "System.DeviceSessions" : PopulateDeviceSessions(AProgram, AHeader.NativeTable, ARow); break;
+				case "System.ApplicationTransactions" : PopulateApplicationTransactions(AProgram, AHeader.NativeTable, ARow); break;
+				case "System.ServerLinks": PopulateServerLinks(AProgram, AHeader.NativeTable, ARow); break;
+				case "System.ServerLinkUsers": PopulateServerLinkUsers(AProgram, AHeader.NativeTable, ARow); break;
+				case "System.RemoteSessions": PopulateRemoteSessions(AProgram, AHeader.NativeTable, ARow); break;
+			}
+		}
+		
+		protected internal void PopulateTableVar(Program AProgram, CatalogHeader AHeader)
 		{
 			AHeader.NativeTable.Truncate(AProgram.ValueManager);
 			Row LRow = new Row(AProgram.ValueManager, AHeader.TableVar.DataType.RowType);
 			try
 			{
-				switch (AHeader.TableVar.Name)
-				{
-					case "System.ServerSettings" : PopulateServerSettings(AProgram, AHeader.NativeTable, LRow); break;
-					case "System.Connections" : PopulateConnections(AProgram, AHeader.NativeTable, LRow); break;
-					case "System.Sessions" : PopulateSessions(AProgram, AHeader.NativeTable, LRow); break;
-					case "System.Processes" : PopulateProcesses(AProgram, AHeader.NativeTable, LRow); break;
-					case "System.Locks" : PopulateLocks(AProgram, AHeader.NativeTable, LRow); break;
-					case "System.Scripts" : PopulateScripts(AProgram, AHeader.NativeTable, LRow); break;
-					case "System.Plans" : PopulatePlans(AProgram, AHeader.NativeTable, LRow); break;
-					case "System.Libraries" : PopulateLibraries(AProgram, AHeader.NativeTable, LRow); break;
-					case "System.LibraryFiles" : PopulateLibraryFiles(AProgram, AHeader.NativeTable, LRow); break;
-					case "System.LibraryRequisites" : PopulateLibraryRequisites(AProgram, AHeader.NativeTable, LRow); break;
-					case "System.LibrarySettings" : PopulateLibrarySettings(AProgram, AHeader.NativeTable, LRow); break;
-					case "System.LibraryOwners" : PopulateLibraryOwners(AProgram, AHeader.NativeTable, LRow); break;
-					case "System.LibraryVersions" : PopulateLibraryVersions(AProgram, AHeader.NativeTable, LRow); break;
-					case "System.RegisteredAssemblies" : PopulateRegisteredAssemblies(AProgram, AHeader.NativeTable, LRow); break;
-					case "System.RegisteredClasses" : PopulateRegisteredClasses(AProgram, AHeader.NativeTable, LRow); break;
-					case "System.LoadedLibraries" : PopulateLoadedLibraries(AProgram, AHeader.NativeTable, LRow); break;
-					case "System.SessionCatalogObjects" : PopulateSessionCatalogObjects(AProgram, AHeader.NativeTable, LRow); break;
-					#if USETYPEINHERITANCE
-					case "System.ScalarTypeParentScalarTypes" : PopulateScalarTypeParentScalarTypes(AProgram, AHeader.NativeTable, LRow); break;
-					case "System.ScalarTypeExplicitCastFunctions" : PopulateScalarTypeExplicitCastFunctions(AProgram, AHeader.NativeTable, LRow); break;
-					#endif
-					case "System.DeviceSessions" : PopulateDeviceSessions(AProgram, AHeader.NativeTable, LRow); break;
-					case "System.ApplicationTransactions" : PopulateApplicationTransactions(AProgram, AHeader.NativeTable, LRow); break;
-					case "System.ServerLinks": PopulateServerLinks(AProgram, AHeader.NativeTable, LRow); break;
-					case "System.ServerLinkUsers": PopulateServerLinkUsers(AProgram, AHeader.NativeTable, LRow); break;
-					case "System.RemoteSessions": PopulateRemoteSessions(AProgram, AHeader.NativeTable, LRow); break;
-				}
+				InternalPopulateTableVar(AProgram, AHeader, LRow);
 			}
 			finally
 			{
