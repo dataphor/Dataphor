@@ -1,6 +1,6 @@
 /*
 	Dataphor
-	© Copyright 2000-2008 Alphora
+	© Copyright 2000-2009 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 using System;
@@ -235,6 +235,18 @@ namespace Alphora.Dataphor.DAE.Schema
 			return FOperatorMaps.ShowMaps();
         }
         
+        public void IncludeDependencies(CatalogDeviceSession ASession, Schema.Catalog ASourceCatalog, Schema.Object AObject, EmitMode AMode)
+        {
+			AObject.IncludeDependencies(ASession, ASourceCatalog, this, AMode);
+			foreach (Object LObject in this)
+				LObject.IncludeHandlers(ASession, ASourceCatalog, this, AMode);
+        }
+        
+        public void IncludeDependencies(CatalogDeviceSession ASession, Schema.Catalog ASourceCatalog, Schema.IDataType ADataType, EmitMode AMode)
+        {
+			ADataType.IncludeDependencies(ASession, ASourceCatalog, this, AMode);
+        }
+
         // Catalog Emission
         private void EmitDependencies(EmissionContext AContext, Object AObject)
         {
@@ -489,6 +501,82 @@ namespace Alphora.Dataphor.DAE.Schema
 					Schema.Object LObject = ASession.ResolveObject(LHeaders[LIndex].ID);
 					ADependents.Add(LObject.ID, LObject);
 				}
+        }
+        
+		/// <summary>Emits a statement to reconstruct the catalog based on the given parameters.</summary>
+		/// <param name="AMode">Specifies the mode for statement emission.</param>
+		/// <param name="ARequestedObjectNames">Specifies a list of object names to be serialized.  If this list is empty, the entire catalog is emitted.</param>
+		/// <param name="ALibraryName">Specifies the name of the library to be emitted.  If this is the empty string, the system library will be emitted.</param>
+		/// <param name="AIncludeSystem">Specifies whether system objects should be included in the emitted catalog.</param>
+		/// <param name="AIncludeDependents">Specifies whether the dependents of the objects should be included in the emitted catalog.</param>
+		/// <param name="AIncludeObject">Specifies whether the object itself should be included in the emitted catalog.</param>
+		/// <remarks>
+		///	This is the main EmitStatement overload which all other EmitStatement overloads call.
+		/// </remarks>
+        public Statement EmitStatement
+        (
+			CatalogDeviceSession ASession,
+			EmitMode AMode, 
+			string[] ARequestedObjectNames, 
+			string ALibraryName, 
+			bool AIncludeSystem, 
+			bool AIncludeGenerated, 
+			bool AIncludeDependents, 
+			bool AIncludeObject
+		)
+        {
+			ObjectList LRequestedObjects = new ObjectList();
+			
+			for (int LIndex = 0; LIndex < ARequestedObjectNames.Length; LIndex++)
+			{
+				int LObjectIndex = IndexOf(ARequestedObjectNames[LIndex]);
+				if (LObjectIndex >= 0)
+				{
+					Schema.Object LObject = this[LObjectIndex];
+					if ((AIncludeObject) && !LRequestedObjects.Contains(LObject.ID))
+						LRequestedObjects.Add(LObject.ID, LObject);
+					if (AIncludeDependents)
+						GatherDependents(ASession, LObject, LRequestedObjects);
+				}
+			}
+			
+			EmissionContext LContext = new EmissionContext(ASession, this, AMode, LRequestedObjects, ALibraryName, AIncludeSystem, AIncludeGenerated, AIncludeDependents, AIncludeObject);
+			if (LRequestedObjects.Count == 0)
+			{
+				if (ALibraryName == String.Empty)
+					EmitLibraries(LContext, FLoadedLibraries);
+			}
+
+			if (LRequestedObjects.Count > 0)
+			{
+				for (int LIndex = 0; LIndex < LRequestedObjects.Count; LIndex++)
+					EmitObject(LContext, LRequestedObjects.ResolveObject(ASession, LIndex));
+			}
+			else
+			{
+				foreach (CatalogObjectHeader LHeader in ASession.SelectLibraryCatalogObjects(ALibraryName))
+					EmitObject(LContext, ASession.ResolveCatalogObject(LHeader.ID));
+			}
+
+			return LContext.Block;
+        }
+        
+		/// <summary>Emits a statement to reconstruct the entire catalog.</summary>
+        public Statement EmitStatement(CatalogDeviceSession ASession, EmitMode AMode, bool AIncludeSystem)
+        {
+			return EmitStatement(ASession, AMode, new string[0], String.Empty, AIncludeSystem, false, false, true);
+        }
+
+		/// <summary>Emits a statement to reconstruct the catalog for the given library.</summary>        
+        public Statement EmitStatement(CatalogDeviceSession ASession, EmitMode AMode, string ALibraryName, bool AIncludeSystem)
+        {
+			return EmitStatement(ASession, AMode, new string[0], ALibraryName, AIncludeSystem, false, false, true);
+        }
+
+		/// <summary>Emits a statement to reconstruct the specified list of catalog objects.</summary>        
+        public Statement EmitStatement(CatalogDeviceSession ASession, EmitMode AMode, string[] ARequestedObjectNames)
+        {
+			return EmitStatement(ASession, AMode, ARequestedObjectNames, String.Empty, true, false, false, true);
         }
         
         protected void ReportDroppedObject(EmissionContext AContext, Schema.Object AObject)
@@ -848,18 +936,6 @@ namespace Alphora.Dataphor.DAE.Schema
         public Statement EmitDropStatement(CatalogDeviceSession ASession)
         {
 			return EmitDropStatement(ASession, new string[]{}, String.Empty, false, false, true, true);
-        }
-        
-        public void IncludeDependencies(CatalogDeviceSession ASession, Schema.Catalog ASourceCatalog, Schema.Object AObject, EmitMode AMode)
-        {
-			AObject.IncludeDependencies(ASession, ASourceCatalog, this, AMode);
-			foreach (Object LObject in this)
-				LObject.IncludeHandlers(ASession, ASourceCatalog, this, AMode);
-        }
-        
-        public void IncludeDependencies(CatalogDeviceSession ASession, Schema.Catalog ASourceCatalog, Schema.IDataType ADataType, EmitMode AMode)
-        {
-			ADataType.IncludeDependencies(ASession, ASourceCatalog, this, AMode);
         }
 	}
     
@@ -1258,100 +1334,6 @@ namespace Alphora.Dataphor.DAE.Schema
 				}
 				return FSystemCursor;
 			}
-		}
-    }
-    
-    public class EmissionContext : System.Object
-    {
-		public EmissionContext
-		(
-			CatalogDeviceSession ASession,
-			Catalog ACatalog,
-			EmitMode AMode, 
-			ObjectList ARequestedObjects, 
-			string ALibraryName, 
-			bool AIncludeSystem, 
-			bool AIncludeGenerated, 
-			bool AIncludeDependents, 
-			bool AIncludeObject
-		) : base()
-		{
-			Session = ASession;
-			Catalog = ACatalog;
-			Mode = AMode;
-			RequestedObjects = ARequestedObjects;
-			LibraryName = ALibraryName;
-			IncludeSystem = AIncludeSystem;
-			IncludeGenerated = AIncludeGenerated;
-			IncludeDependents = AIncludeDependents;
-			IncludeObject = AIncludeObject;
-		}
-
-		public CatalogDeviceSession Session;		
-		public Catalog Catalog;
-		public EmitMode Mode;
-		public ObjectList RequestedObjects;
-		public string LibraryName;
-		public bool IncludeSystem;
-		public bool IncludeGenerated;
-		public bool IncludeDependents;
-		public bool IncludeObject;
-		public Dictionary<int, Schema.Object> EmittedObjects = new Dictionary<int, Schema.Object>();
-		public LoadedLibraries EmittedLibraries = new LoadedLibraries();
-		public Block Block = new Block();
-		
-		public bool ShouldEmit(Schema.Object AObject)
-		{
-			return
-				(
-					(
-						(RequestedObjects.Count == 0) || 
-						(RequestedObjects.Contains(AObject.ID))
-					) && 
-					(IncludeSystem || !AObject.IsSystem) &&
-					(!(AObject is DeviceObject) || (Mode != EmitMode.ForRemote)) &&
-					(!AObject.IsGenerated || IncludeGenerated || (AObject.IsSessionObject) || (AObject.IsATObject && RequestedObjects.Contains(AObject.ID))) // an AT object will be generated, but must be emitted if specifically requested
-				);
-		}
-		
-		public bool ShouldEmitDrop(Schema.Object AObject)
-		{
-			return
-				(
-					(
-						(AObject is CatalogObject) && 
-						(
-							IncludeSystem || 
-							((LibraryName == String.Empty) && ((AObject.Library == null) || (AObject.Library.Name == Engine.CSystemLibraryName))) ||
-							(LibraryName != Engine.CSystemLibraryName)
-						) ||
-						(
-							!(AObject is CatalogObject) &&
-							(IncludeSystem || !AObject.IsSystem)
-						)
-					) &&
-					(!AObject.IsGenerated || IncludeGenerated || (AObject.IsSessionObject) || (RequestedObjects.Count > 0)) &&
-					(
-						(AObject is CatalogObject) ||
-						(AObject is Schema.Representation) ||
-						(AObject is Schema.Default) ||
-						(AObject is Schema.Special) ||
-						(AObject is Schema.Constraint)
-					)
-				);
-		}
-		
-		public bool ShouldEmitWithLibrary(Schema.Object AObject)
-		{
-			return 
-			(
-				(LibraryName == String.Empty) || 
-				(
-					(LibraryName != String.Empty) && 
-					(AObject.Library != null) &&
-					Schema.Object.NamesEqual(AObject.Library.Name, LibraryName)
-				)
-			);
 		}
     }
 }

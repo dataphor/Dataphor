@@ -1477,24 +1477,34 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		public virtual List<int> SelectOperatorHandlers(int AOperatorID)
 		{
-			return new List<int>();
+			throw new NotSupportedException();
 		}
 
 		public virtual List<int> SelectObjectHandlers(int ASourceObjectID)
 		{
-			return new List<int>();
+			throw new NotSupportedException();
 		}
 
 		public virtual Schema.DependentObjectHeaders SelectObjectDependents(int AObjectID, bool ARecursive)
 		{
-			return new Schema.DependentObjectHeaders();
+			throw new NotSupportedException();
 		}
 
 		public virtual Schema.DependentObjectHeaders SelectObjectDependencies(int AObjectID, bool ARecursive)
 		{
-			return new Schema.DependentObjectHeaders();
+			throw new NotSupportedException();
 		}
 
+		public virtual Schema.CatalogObjectHeaders SelectLibraryCatalogObjects(string ALibraryName)
+		{
+			throw new NotSupportedException();
+		}
+		
+		public virtual Schema.CatalogObjectHeaders SelectGeneratedObjects(int AObjectID)
+		{
+			throw new NotSupportedException();
+		}
+		
 		#endregion
 
 		#region Updates
@@ -1572,6 +1582,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
+		public virtual Schema.ObjectHeader GetObjectHeader(int AObjectID)
+		{
+			throw new NotSupportedException();
+		}
+
 		public Schema.Object ResolveObject(int AObjectID)
 		{
 			Schema.ObjectHeader LHeader = GetObjectHeader(AObjectID);
@@ -2048,6 +2063,13 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
+		public void MarkViewForRecompile(int AObjectID)
+		{
+			string LObjectName;
+			if (Device.FCatalogIndex.TryGetValue(AObjectID, out LObjectName))
+				((Schema.DerivedTableVar)Catalog[LObjectName]).ShouldReinferReferences = true;
+		}
+
 		#endregion
 		
 		#region Conversions

@@ -227,7 +227,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public Schema.CatalogObjectHeaders SelectLibraryCatalogObjects(string ALibraryName)
+		public override Schema.CatalogObjectHeaders SelectLibraryCatalogObjects(string ALibraryName)
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -240,7 +240,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public Schema.CatalogObjectHeaders SelectGeneratedObjects(int AObjectID)
+		public override Schema.CatalogObjectHeaders SelectGeneratedObjects(int AObjectID)
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -1494,7 +1494,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public Schema.ObjectHeader GetObjectHeader(int AObjectID)
+		public override Schema.ObjectHeader GetObjectHeader(int AObjectID)
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -1984,13 +1984,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				ReleaseCatalogStoreConnection();
 			}
-		}
-
-		public void MarkViewForRecompile(int AObjectID)
-		{
-			string LObjectName;
-			if (Device.FCatalogIndex.TryGetValue(AObjectID, out LObjectName))
-				((Schema.DerivedTableVar)Catalog[LObjectName]).ShouldReinferReferences = true;
 		}
 
 		public void GrantRightToRole(string ARightName, int ARoleID)
@@ -2519,83 +2512,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		public string ScriptCatalogObject(Schema.CatalogObject AObject)
 		{
-			return FEmitter.Emit(EmitStatement(EmitMode.ForStorage, new string[] { AObject.Name }, String.Empty, true, true, false, true));
+			return FEmitter.Emit(Catalog.EmitStatement(this, EmitMode.ForStorage, new string[] { AObject.Name }, String.Empty, true, true, false, true));
 		}
-		
-		/// <summary>Emits a statement to reconstruct the catalog based on the given parameters.</summary>
-		/// <param name="AMode">Specifies the mode for statement emission.</param>
-		/// <param name="ARequestedObjectNames">Specifies a list of object names to be serialized.  If this list is empty, the entire catalog is emitted.</param>
-		/// <param name="ALibraryName">Specifies the name of the library to be emitted.  If this is the empty string, the system library will be emitted.</param>
-		/// <param name="AIncludeSystem">Specifies whether system objects should be included in the emitted catalog.</param>
-		/// <param name="AIncludeDependents">Specifies whether the dependents of the objects should be included in the emitted catalog.</param>
-		/// <param name="AIncludeObject">Specifies whether the object itself should be included in the emitted catalog.</param>
-		/// <remarks>
-		///	This is the main EmitStatement overload which all other EmitStatement overloads call.
-		/// </remarks>
-        public Statement EmitStatement
-        (
-			EmitMode AMode, 
-			string[] ARequestedObjectNames, 
-			string ALibraryName, 
-			bool AIncludeSystem, 
-			bool AIncludeGenerated, 
-			bool AIncludeDependents, 
-			bool AIncludeObject
-		)
-        {
-			ObjectList LRequestedObjects = new ObjectList();
-			
-			for (int LIndex = 0; LIndex < ARequestedObjectNames.Length; LIndex++)
-			{
-				int LObjectIndex = Catalog.IndexOf(ARequestedObjectNames[LIndex]);
-				if (LObjectIndex >= 0)
-				{
-					Schema.Object LObject = Catalog[LObjectIndex];
-					if ((AIncludeObject) && !LRequestedObjects.Contains(LObject.ID))
-						LRequestedObjects.Add(LObject.ID, LObject);
-					if (AIncludeDependents)
-						Catalog.GatherDependents(this, LObject, LRequestedObjects);
-				}
-			}
-			
-			EmissionContext LContext = new EmissionContext(this, Catalog, AMode, LRequestedObjects, ALibraryName, AIncludeSystem, AIncludeGenerated, AIncludeDependents, AIncludeObject);
-			if (LRequestedObjects.Count == 0)
-			{
-				if (ALibraryName == String.Empty)
-					Catalog.EmitLibraries(LContext, Catalog.LoadedLibraries);
-			}
-
-			if (LRequestedObjects.Count > 0)
-			{
-				for (int LIndex = 0; LIndex < LRequestedObjects.Count; LIndex++)
-					Catalog.EmitObject(LContext, LRequestedObjects.ResolveObject(this, LIndex));
-			}
-			else
-			{
-				foreach (CatalogObjectHeader LHeader in SelectLibraryCatalogObjects(ALibraryName))
-					Catalog.EmitObject(LContext, ResolveCatalogObject(LHeader.ID));
-			}
-
-			return LContext.Block;
-        }
-        
-		/// <summary>Emits a statement to reconstruct the entire catalog.</summary>
-        public Statement EmitStatement(EmitMode AMode, bool AIncludeSystem)
-        {
-			return EmitStatement(AMode, new string[0], String.Empty, AIncludeSystem, false, false, true);
-        }
-
-		/// <summary>Emits a statement to reconstruct the catalog for the given library.</summary>        
-        public Statement EmitStatement(EmitMode AMode, string ALibraryName, bool AIncludeSystem)
-        {
-			return EmitStatement(AMode, new string[0], ALibraryName, AIncludeSystem, false, false, true);
-        }
-
-		/// <summary>Emits a statement to reconstruct the specified list of catalog objects.</summary>        
-        public Statement EmitStatement(EmitMode AMode, string[] ARequestedObjectNames)
-        {
-			return EmitStatement(AMode, ARequestedObjectNames, String.Empty, true, false, false, true);
-        }
 
 		#endregion
 	}
