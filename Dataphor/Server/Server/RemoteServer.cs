@@ -327,6 +327,10 @@ namespace Alphora.Dataphor.DAE.Server
 			}
         }
         
+        public RemoteServerConnection GetConnectionForSession(RemoteServerSession ASession)
+        {
+        }
+        
 		private void CloseConnections()
 		{
 			if (FConnections != null)

@@ -19,6 +19,8 @@ namespace Alphora.Dataphor.DAE.Service
 		private object FHandleSync = new object();
 
 		private Dictionary<int, object> FHandles = new Dictionary<int, object>();
+		
+		private Dictionary<object, int> FHandleIndex = new Dictionary<object, int>(new ReferenceEqualityComparer());
 
 		/// <summary>
 		/// Gets a handle for the given object and registers it in the handle dictionary.
@@ -32,7 +34,30 @@ namespace Alphora.Dataphor.DAE.Service
 				int LResult = FNextHandle;
 				FNextHandle++;
 				FHandles.Add(LResult, AObject);
+
+				IDisposableNotify LDisposableNotify = AObject as IDisposableNotify;
+				if (LDisposableNotify != null)
+				{
+					LDisposableNotify.Disposed += new EventHandler(ObjectDisposed);
+					FHandleIndex.Add(LDisposableNotify, LResult);
+				}
+
 				return LResult;
+			}
+		}
+
+		private void ObjectDisposed(object ASender, EventArgs AArgs)
+		{
+			((IDisposableNotify)ASender).Disposed -= new EventHandler(ObjectDisposed);
+
+			lock (FHandleSync)
+			{
+				int LHandle;
+				if (FHandleIndex.TryGetValue(ASender, out LHandle))
+				{
+					FHandles.Remove(LHandle);
+					FHandleIndex.Remove(ASender);
+				}
 			}
 		}
 		
@@ -60,6 +85,14 @@ namespace Alphora.Dataphor.DAE.Service
 				if (!FHandles.TryGetValue(AHandle, out LObject))
 					throw new ServerException(ServerException.Codes.UnknownObjectHandle, ErrorSeverity.System, AHandle);
 				FHandles.Remove(AHandle);
+
+				IDisposableNotify LDisposableNotify = LObject as IDisposableNotify;
+				if (LDisposableNotify != null)
+				{
+					LDisposableNotify.Disposed -= new EventHandler(ObjectDisposed);
+					FHandleIndex.Remove(LDisposableNotify);
+				}
+
 				return LObject;
 			}
 		}

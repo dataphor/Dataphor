@@ -1,4 +1,10 @@
-﻿using System;
+﻿/*
+	Alphora Dataphor
+	© Copyright 2000-2009 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
@@ -59,23 +65,6 @@ namespace Alphora.Dataphor
 	{
 		private class ObjectContext
 		{
-			private class ReferenceEqualityComparer : IEqualityComparer<object>
-			{
-				#region IEqualityComparer<object> Members
-				
-				public new bool Equals(object x, object y)
-				{
-					return Object.ReferenceEquals(x, y);
-				}
-
-				public int GetHashCode(object obj)
-				{
-					return obj.GetHashCode();
-				}
-
-				#endregion
-			}
-
 			private Dictionary<Object, Object> FVisitedObjects = new Dictionary<Object, Object>(new ReferenceEqualityComparer());
 			
 			public bool Visit(Object AObject)

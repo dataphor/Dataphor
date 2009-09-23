@@ -5,20 +5,23 @@
 */
 
 using System;
+using System.IO;
 using System.Text;
-using System.Collections.Generic;
-
-using System.Configuration;
 using System.Collections;
+using System.Collections.Generic;
+using System.Configuration;
+using System.ServiceModel;
 
 namespace Alphora.Dataphor.DAE.Service
 {
 	using Alphora.Dataphor.DAE.Server;
-	using Alphora.Dataphor.DAE.Contracts;
-	using System.IO;
 	using Alphora.Dataphor.DAE.Streams;
 	using Alphora.Dataphor.DAE.Runtime;
+	using Alphora.Dataphor.DAE.Contracts;
 
+	// TODO: Exception management
+	//[ExceptionShielding("WCF Exception Shielding")]
+	[ServiceBehavior(Namespace = "http://Alphora.Dataphor.ServiceContracts/2009/09", Name = "DataphorService")]
 	public class DataphorService : IDataphorService
 	{
 		public DataphorService()
@@ -57,8 +60,8 @@ namespace Alphora.Dataphor.DAE.Service
 
 		public void Disconnect(int ASessionHandle)
 		{
+			// TODO: Relinquish connection on last session disconnect... (may be done by lifetime management...)
 			FHandleManager.GetObject<RemoteServerSession>(ASessionHandle).Dispose();
-			// TODO: If this is the last session, relinquish the connection
 		}
 
 		public ProcessDescriptor StartProcess(int ASessionHandle, ProcessInfo AProcessInfo)
@@ -168,7 +171,7 @@ namespace Alphora.Dataphor.DAE.Service
 
 		public CursorDescriptor OpenPlanCursor(int APlanHandle, ProcessCallInfo ACallInfo, ref RemoteParamData AParams, out TimeSpan AExecuteTime, out Guid[] ABookmarks, int ACount, out RemoteFetchData AFetchData)
 		{
-			RemoteServerCursor LCursor = (RemoteServerCursor)FHandleManager.GetObject<RemoteServerExpressionPlan>(APlanHandle).Open(ref AParams, out AExecuteTime, out ABookmarks, ACount, out AFetchData, ACallInfo));
+			RemoteServerCursor LCursor = (RemoteServerCursor)FHandleManager.GetObject<RemoteServerExpressionPlan>(APlanHandle).Open(ref AParams, out AExecuteTime, out ABookmarks, ACount, out AFetchData, ACallInfo);
 			CursorDescriptor LDescriptor = new CursorDescriptor(FHandleManager.GetHandle(LCursor), LCursor.Capabilities, LCursor.CursorType, LCursor.Isolation);
 			return LDescriptor;
 		}
@@ -413,7 +416,7 @@ namespace Alphora.Dataphor.DAE.Service
 
 		public void CloseStream(int AStreamHandle)
 		{
-			FHandleManager.GetObject<Stream>(AStreamHandle).Close();
+			FHandleManager.ReleaseObject<Stream>(AStreamHandle).Close();
 		}
 
 		public long GetStreamLength(int AStreamHandle)

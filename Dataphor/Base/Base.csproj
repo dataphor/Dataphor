@@ -125,6 +125,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FixedSizeCache.cs" />
+    <Compile Include="ReferenceEqualityComparer.cs" />
     <Compile Include="Set.cs" />
     <Compile Include="MemoryUtility.cs" />
     <Compile Include="NonNullList.cs" />
