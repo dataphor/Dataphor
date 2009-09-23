@@ -421,6 +421,12 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			set { FInternalDisableAutoComplete = value; }
 		}
 
+		protected override void InternalAutoUpdate()
+		{
+			if (!FAutoComplete || (!InternalDisableAutoComplete && (GetFormatCellPos(EditingCell) == DateTimeEditCellPos.Third)))
+				base.InternalAutoUpdate();
+		}
+		
 		protected override void OnTextChanged(EventArgs AArgs)
 		{
 			base.OnTextChanged(AArgs);
