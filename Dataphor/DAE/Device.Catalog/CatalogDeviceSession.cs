@@ -79,12 +79,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		#region Instructions
 		
 		#if LOGDDLINSTRUCTIONS
-		private abstract class DDLInstruction 
+		protected abstract class DDLInstruction 
 		{
 			public virtual void Undo(CatalogDeviceSession ASession) {}
 		}
 
-		private class DDLInstructionLog : List<DDLInstruction> {}
+		protected class DDLInstructionLog : List<DDLInstruction> {}
 		
 		private class BeginTransactionInstruction : DDLInstruction {}
 		
@@ -1384,7 +1384,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private DDLInstructionLog FInstructions = new DDLInstructionLog();
+		protected DDLInstructionLog FInstructions = new DDLInstructionLog();
+		
 		#endif
 		
 		#endregion
@@ -1936,7 +1937,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		#endregion
 
-		#region Session Objects
+		#region Session objects
 				
 		private void CreateSessionObject(Schema.CatalogObject ASessionObject)
 		{
@@ -3273,7 +3274,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#endregion
 		
-		#region Device Objects
+		#region Device objects
 
 		public virtual bool HasDeviceObjects(Schema.Device ADevice)
 		{
@@ -3293,6 +3294,161 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		public Schema.DeviceScalarType ResolveDeviceScalarType(Schema.Device ADevice, Schema.ScalarType AScalarType)
 		{
 			return ResolveDeviceObject(ADevice, AScalarType) as Schema.DeviceScalarType;
+		}
+
+		#endregion
+		
+		#region Security
+		
+		/// <summary>Adds the given user to the cache, without affecting the underlying store.</summary>
+		public void CacheUser(User AUser)
+		{
+			lock (Catalog)
+			{
+				InternalCacheUser(AUser);
+			}
+		}
+
+		protected void InternalCacheUser(User AUser)
+		{
+			Device.UsersCache.Add(AUser);
+		}
+
+		/// <summary>Removes the given user from the cache, without affecting the underlying store.</summary>		
+		public void ClearUser(string AUserID)
+		{
+			lock (Catalog)
+			{
+				Device.UsersCache.Remove(AUserID);
+			}
+		}
+
+		/// <summary>Clears the users cache, without affecting the underlying store.</summary>		
+		public void ClearUsers()
+		{
+			lock (Catalog)
+			{
+				Device.UsersCache.Clear();
+			}
+		}
+
+		public virtual void InsertUser(Schema.User AUser)
+		{
+			CacheUser(AUser);
+
+			#if LOGDDLINSTRUCTIONS
+			if (ServerProcess.InTransaction)
+				FInstructions.Add(new CreateUserInstruction(AUser));
+			#endif
+		}
+
+		public Schema.User ResolveUser(string AUserID, bool AMustResolve)
+		{
+			lock (Catalog)
+			{
+				Schema.User LUser;
+				if (!Device.UsersCache.TryGetValue(AUserID, out LUser))
+				{
+					LUser = InternalResolveUser(AUserID, LUser);
+				}
+
+				if ((LUser == null) && AMustResolve)
+					throw new Schema.SchemaException(Schema.SchemaException.Codes.UserNotFound, AUserID);
+
+				return LUser;
+			}
+		}
+
+		protected virtual Schema.User InternalResolveUser(string AUserID, Schema.User LUser)
+		{
+			return null;
+		}
+
+		public Schema.User ResolveUser(string AUserID)
+		{
+			return ResolveUser(AUserID, true);
+		}
+
+		private class CreateUserInstruction : DDLInstruction
+		{
+			public CreateUserInstruction(Schema.User AUser) : base()
+			{
+				FUser = AUser;
+			}
+			
+			private Schema.User FUser;
+			
+			public override void Undo(CatalogDeviceSession ASession)
+			{
+				ASession.ClearUser(FUser.ID);
+			}
+		}
+		
+		private class DropUserInstruction : DDLInstruction
+		{
+			public DropUserInstruction(Schema.User AUser) : base()
+			{
+				FUser = AUser;
+			}
+			
+			private Schema.User FUser;
+			
+			public override void Undo(CatalogDeviceSession ASession)
+			{
+				ASession.CacheUser(FUser);
+			}
+		}
+		
+		public void InsertRole(Schema.Role ARole)
+		{
+			// Add the role to the Cache
+			CacheCatalogObject(ARole);
+
+			// Clear the name cache (this is done in InsertPersistentObject for all other catalog objects)
+			Device.FNameCache.Clear();
+
+			// If we are not deserializing
+			if (!ServerProcess.InLoadingContext())
+			{
+				#if LOGDDLINSTRUCTIONS
+				// log the DDL instruction
+				if (ServerProcess.InTransaction)
+					FInstructions.Add(new CreateCatalogObjectInstruction(ARole));
+				#endif
+
+				InternalInsertRole(ARole);
+			}
+		}
+
+		protected virtual void InternalInsertRole(Schema.Role ARole)
+		{
+			// virtual
+		}
+
+		public void DeleteRole(Schema.Role ARole)
+		{
+			lock (Catalog)
+			{
+				// Remove the object from the catalog cache
+				ClearCatalogObject(ARole);
+			}
+
+			if (!ServerProcess.InLoadingContext())
+			{
+				#if LOGDDLINSTRUCTIONS
+				// log the DDL instruction
+				if (ServerProcess.InTransaction)
+					FInstructions.Add(new DropCatalogObjectInstruction(ARole));
+				#endif
+
+				// If this is not a repository, remove it from the catalog store
+				InternalDeleteRole(ARole);
+			}
+		}
+
+		protected virtual void InternalDeleteRole(Schema.Role ARole)
+		{
+			// virtual
 		}
 
 		#endregion

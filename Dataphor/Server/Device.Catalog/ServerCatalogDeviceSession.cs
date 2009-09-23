@@ -1684,68 +1684,29 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public void InsertRole(Schema.Role ARole)
+		protected override void InternalInsertRole(Schema.Role ARole)
 		{
-			// Add the role to the Cache
-			CacheCatalogObject(ARole);
-
-			// Clear the name cache (this is done in InsertPersistentObject for all other catalog objects)
-			Device.FNameCache.Clear();
-
-			// If we are not deserializing
-			if (!ServerProcess.InLoadingContext())
+			AcquireCatalogStoreConnection(true);
+			try
 			{
-#if LOGDDLINSTRUCTIONS
-				// log the DDL instruction
-				if (ServerProcess.InTransaction)
-					FInstructions.Add(new CreateCatalogObjectInstruction(ARole));
-#endif
-
-				// If this is not a repository, save it to the catalog store
-				if (!ServerProcess.ServerSession.Server.IsEngine && (!ServerProcess.InLoadingContext()))
-				{
-					AcquireCatalogStoreConnection(true);
-					try
-					{
-						CatalogStoreConnection.InsertRole(ARole, ScriptCatalogObject(ARole));
-					}
-					finally
-					{
-						ReleaseCatalogStoreConnection();
-					}
-				}
+				CatalogStoreConnection.InsertRole(ARole, ScriptCatalogObject(ARole));
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
 			}
 		}
 
-		public void DeleteRole(Schema.Role ARole)
+		protected override void InternalDeleteRole(Schema.Role ARole)
 		{
-			lock (Catalog)
+			AcquireCatalogStoreConnection(true);
+			try
 			{
-				// Remove the object from the catalog cache
-				ClearCatalogObject(ARole);
+				CatalogStoreConnection.DeleteRole(ARole);
 			}
-
-			if (!ServerProcess.InLoadingContext())
+			finally
 			{
-				#if LOGDDLINSTRUCTIONS
-				// log the DDL instruction
-				if (ServerProcess.InTransaction)
-					FInstructions.Add(new DropCatalogObjectInstruction(ARole));
-				#endif
-
-				// If this is not a repository, remove it from the catalog store
-				if (!ServerProcess.ServerSession.Server.IsEngine)
-				{
-					AcquireCatalogStoreConnection(true);
-					try
-					{
-						CatalogStoreConnection.DeleteRole(ARole);
-					}
-					finally
-					{
-						ReleaseCatalogStoreConnection();
-					}
-				}
+				ReleaseCatalogStoreConnection();
 			}
 		}
 
@@ -1764,73 +1725,30 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public Schema.User ResolveUser(string AUserID, bool AMustResolve)
+		protected override Schema.User InternalResolveUser(string AUserID, Schema.User LUser)
 		{
-			lock (Catalog)
+			AcquireCatalogStoreConnection(false);
+			try
 			{
-				Schema.User LUser;
-				if (!Device.UsersCache.TryGetValue(AUserID, out LUser))
-				{
-					AcquireCatalogStoreConnection(false);
-					try
-					{
-						LUser = CatalogStoreConnection.SelectUser(AUserID);
-						if (LUser != null)
-							Device.UsersCache.Add(LUser);
-					}
-					finally
-					{
-						ReleaseCatalogStoreConnection();
-					}
-				}
-
-				if ((LUser == null) && AMustResolve)
-					throw new Schema.SchemaException(Schema.SchemaException.Codes.UserNotFound, AUserID);
-
-				return LUser;
+				LUser = CatalogStoreConnection.SelectUser(AUserID);
+				if (LUser != null)
+					InternalCacheUser(LUser);
 			}
-		}
-
-		public Schema.User ResolveUser(string AUserID)
-		{
-			return ResolveUser(AUserID, true);
-		}
-
-		/// <summary>Adds the given user to the cache, without affecting the underlying store.</summary>
-		public void CacheUser(User AUser)
-		{
-			lock (Catalog)
+			finally
 			{
-				Device.UsersCache.Add(AUser);
+				ReleaseCatalogStoreConnection();
 			}
+			return LUser;
 		}
-
-		/// <summary>Removes the given user from the cache, without affecting the underlying store.</summary>		
-		public void ClearUser(string AUserID)
-		{
-			lock (Catalog)
-			{
-				Device.UsersCache.Remove(AUserID);
-			}
-		}
-
-		/// <summary>Clears the users cache, without affecting the underlying store.</summary>		
-		public void ClearUsers()
-		{
-			lock (Catalog)
-			{
-				Device.UsersCache.Clear();
-			}
-		}
-
+		
 		public bool UserExists(string AUserID)
 		{
 			return ResolveUser(AUserID, false) != null;
 		}
 
-		public void InsertUser(Schema.User AUser)
+		public override void InsertUser(Schema.User AUser)
 		{
-			CacheUser(AUser);
+			base.InsertUser(AUser);
 
 			#if LOGDDLINSTRUCTIONS
 			if (ServerProcess.InTransaction)
@@ -2557,36 +2475,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		#endregion
 		
 		#region Instructions
-		
-		private class CreateUserInstruction : DDLInstruction
-		{
-			public CreateUserInstruction(Schema.User AUser) : base()
-			{
-				FUser = AUser;
-			}
-			
-			private Schema.User FUser;
-			
-			public override void Undo(CatalogDeviceSession ASession)
-			{
-				((ServerCatalogDeviceSession)ASession).ClearUser(FUser.ID);
-			}
-		}
-		
-		private class DropUserInstruction : DDLInstruction
-		{
-			public DropUserInstruction(Schema.User AUser) : base()
-			{
-				FUser = AUser;
-			}
-			
-			private Schema.User FUser;
-			
-			public override void Undo(CatalogDeviceSession ASession)
-			{
-				((ServerCatalogDeviceSession)ASession).CacheUser(FUser);
-			}
-		}
 		
 		private class CreateDeviceUserInstruction : DDLInstruction
 		{
