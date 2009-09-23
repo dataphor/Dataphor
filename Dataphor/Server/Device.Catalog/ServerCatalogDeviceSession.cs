@@ -1432,7 +1432,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			return null;
 		}
 
-		private Schema.CatalogObjectHeaders CachedResolveOperatorName(string AName)
+		protected override Schema.CatalogObjectHeaders CachedResolveOperatorName(string AName)
 		{
 			Schema.CatalogObjectHeaders LResult = base.CachedResolveOperatorName(AName);
 
@@ -1442,7 +1442,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				try
 				{
 					LResult = CatalogStoreConnection.ResolveOperatorName(AName);
-					Device.FOperatorNameCache.Add(AName, LResult);
+					CacheResolvedOperatorName(AName, LResult);
 				}
 				finally
 				{
@@ -1641,16 +1641,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				ReleaseCatalogStoreConnection();
 			}
-		}
-
-		public Right ResolveRight(string ARightName)
-		{
-			return ResolveRight(ARightName, true);
-		}
-
-		public bool RightExists(string ARightName)
-		{
-			return ResolveRight(ARightName, false) != null;
 		}
 
 		public override void InsertRight(string ARightName, string AUserID)

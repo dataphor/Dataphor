@@ -164,7 +164,7 @@ namespace Alphora.Dataphor.DAE.Connection
 			return new DotNetCursor(this, LCursor);
 		}
 		
-		protected internal override void InternalClose()
+		protected override void InternalClose()
 		{
 			if (FCommand != null)
 				UnprepareCommand();

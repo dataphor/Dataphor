@@ -13,6 +13,9 @@ namespace Alphora.Dataphor.DAE.Contracts
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Server;
 	using Alphora.Dataphor.DAE.Streams;
+	using Alphora.Dataphor.DAE.Debug;
+	using System.Collections;
+	using System.IO;
 
 	[ServiceContract(Namespace = "http://Alphora.Dataphor.ServiceContracts/2009/09", Name = "IDataphorService")]
 	public interface IDataphorService

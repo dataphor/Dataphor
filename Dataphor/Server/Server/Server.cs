@@ -562,7 +562,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		protected virtual void StartLog()
+		protected override void StartLog()
 		{
 			if (LoggingEnabled)
 			{
@@ -663,11 +663,6 @@ namespace Alphora.Dataphor.DAE.Server
 					return LReader.ReadToEnd();
 				}
 			}
-		}
-
-		public virtual List<string> ListLogs()
-		{
-			return new List<string>();
 		}
 
 		#endregion

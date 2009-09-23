@@ -91,7 +91,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SelectLibraryVersions(AProgram, ANativeTable, ARow);
 		}
 
-		protected virtual void InternalPopulateTableVar(Program AProgram, CatalogHeader AHeader, Row ARow)
+		protected override void InternalPopulateTableVar(Program AProgram, CatalogHeader AHeader, Row ARow)
 		{
 			switch (AHeader.TableVar.Name)
 			{
@@ -99,7 +99,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				case "System.LibraryOwners" : PopulateLibraryOwners(AProgram, AHeader.NativeTable, ARow); break;
 				case "System.LibraryVersions" : PopulateLibraryVersions(AProgram, AHeader.NativeTable, ARow); break;
 				case "System.LoadedLibraries" : PopulateLoadedLibraries(AProgram, AHeader.NativeTable, ARow); break;
-				default: base.InternalPopulateTableVar(AProgram, AHeader, ARow);
+				default: base.InternalPopulateTableVar(AProgram, AHeader, ARow); break;
 			}
 		}
 	}

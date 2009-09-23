@@ -1606,6 +1606,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			return Device.FOperatorNameCache.Resolve(AName);
 		}
 
+		protected void CacheResolvedOperatorName(string AName, Schema.CatalogObjectHeaders LResult)
+		{
+			Device.FOperatorNameCache.Add(AName, LResult);
+		}
+
 		/// <summary>Returns the cached object for the given object id, if it exists and is in the cache, null otherwise.</summary>
 		public Schema.CatalogObject ResolveCachedCatalogObject(int AObjectID)
 		{

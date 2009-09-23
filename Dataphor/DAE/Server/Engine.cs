@@ -1093,6 +1093,11 @@ namespace Alphora.Dataphor.DAE.Server
 			// abstract
 		}
 
+		public virtual List<string> ListLogs()
+		{
+			return new List<string>();
+		}
+
 		#endregion
 		
 		#region Internal API calls
