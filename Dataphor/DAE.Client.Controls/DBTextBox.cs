@@ -250,6 +250,20 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			FLink.SaveRequested();
 		}
 		
+		protected virtual void InternalAutoUpdate()
+		{
+			if (FAutoUpdate)
+			{
+				if (FAutoUpdateInterval <= 0)
+					FLink.SaveRequested();
+				else
+				{
+					FAutoUpdateTimer.Interval = FAutoUpdateInterval;
+					FAutoUpdateTimer.Start();
+				}
+			};
+		}
+		
 		private bool FSetting;
 		protected override void OnTextChanged(EventArgs AArgs)
 		{
@@ -258,16 +272,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			if (!FSetting)
 			{
 				EnsureEdit();
-				if (FAutoUpdate)
-				{
-					if (FAutoUpdateInterval <= 0)
-						FLink.SaveRequested();
-					else
-					{
-						FAutoUpdateTimer.Interval = FAutoUpdateInterval;
-						FAutoUpdateTimer.Start();
-					}
-				}
+				InternalAutoUpdate();
 			}
 		}
 
