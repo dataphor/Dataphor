@@ -977,17 +977,17 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		private RemoteCursorGetFlags InternalGetFlags()
+		private CursorGetFlags InternalGetFlags()
 		{
-			RemoteCursorGetFlags LGetFlags = RemoteCursorGetFlags.None;
+			CursorGetFlags LGetFlags = CursorGetFlags.None;
 			if (FSourceTable.BOF())
-				LGetFlags = LGetFlags | RemoteCursorGetFlags.BOF;
+				LGetFlags = LGetFlags | CursorGetFlags.BOF;
 			if (FSourceTable.EOF())
-				LGetFlags = LGetFlags | RemoteCursorGetFlags.EOF;
+				LGetFlags = LGetFlags | CursorGetFlags.EOF;
 			return LGetFlags;
 		}
 
-		internal RemoteCursorGetFlags GetFlags()
+		internal CursorGetFlags GetFlags()
 		{
 			Exception LException = null;
 			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
@@ -1015,7 +1015,7 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		// Fetch
-		internal int Fetch(Row[] ARows, Guid[] ABookmarks, int ACount, out RemoteCursorGetFlags AFlags)
+		internal int Fetch(Row[] ARows, Guid[] ABookmarks, int ACount, out CursorGetFlags AFlags)
 		{
 			Exception LException = null;
 			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
@@ -1071,7 +1071,7 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		// MoveBy
-		internal int MoveBy(int ADelta, out RemoteCursorGetFlags AFlags)
+		internal int MoveBy(int ADelta, out CursorGetFlags AFlags)
 		{
 			Exception LException = null;
 			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
@@ -1117,7 +1117,7 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		// MoveTo
-		internal RemoteCursorGetFlags MoveTo(bool AFirst)
+		internal CursorGetFlags MoveTo(bool AFirst)
 		{
 			Exception LException = null;
 			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
@@ -1148,7 +1148,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		internal RemoteCursorGetFlags ResetWithFlags()
+		internal CursorGetFlags ResetWithFlags()
 		{
 			Exception LException = null;
 			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
@@ -1176,7 +1176,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		internal bool GotoBookmark(Guid ABookmark, bool AForward, out RemoteCursorGetFlags AFlags)
+		internal bool GotoBookmark(Guid ABookmark, bool AForward, out CursorGetFlags AFlags)
 		{
 			Exception LException = null;
 			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
@@ -1205,7 +1205,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		internal bool FindKey(Row AKey, out RemoteCursorGetFlags AFlags)
+		internal bool FindKey(Row AKey, out CursorGetFlags AFlags)
 		{
 			Exception LException = null;
 			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
@@ -1234,7 +1234,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		internal void FindNearest(Row AKey, out RemoteCursorGetFlags AFlags)
+		internal void FindNearest(Row AKey, out CursorGetFlags AFlags)
 		{
 			Exception LException = null;
 			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
@@ -1262,7 +1262,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		internal bool Refresh(Row ARow, out RemoteCursorGetFlags AFlags)
+		internal bool Refresh(Row ARow, out CursorGetFlags AFlags)
 		{
 			Exception LException = null;
 			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();

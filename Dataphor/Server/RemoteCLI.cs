@@ -317,8 +317,8 @@ namespace Alphora.Dataphor.DAE
         RemoteFetchData Fetch(out Guid[] ABookmarks, int ACount, ProcessCallInfo ACallInfo);
 
         /// <summary> Indicates whether the cursor is on the BOF crack, the EOF crack, or both, which indicates an empty cursor. </summary>
-        /// <returns> A <see cref="RemoteCursorGetFlags"/> value indicating the current position of the cursor. </returns>
-        RemoteCursorGetFlags GetFlags(ProcessCallInfo ACallInfo);
+        /// <returns> A <see cref="CursorGetFlags"/> value indicating the current position of the cursor. </returns>
+        CursorGetFlags GetFlags(ProcessCallInfo ACallInfo);
 
         /// <summary> Provides a mechanism for navigating the cursor by a specified number of rows. </summary>        
         /// <param name='ADelta'> The number of rows to move by, with a negative value indicating backwards movement. </param>
@@ -326,16 +326,16 @@ namespace Alphora.Dataphor.DAE
         RemoteMoveData MoveBy(int ADelta, ProcessCallInfo ACallInfo);
 
         /// <summary> Positions the cursor on the BOF crack. </summary>
-        /// <returns> A <see cref="RemoteCursorGetFlags"/> value indicating the state of the cursor after the move. </returns>
-        RemoteCursorGetFlags First(ProcessCallInfo ACallInfo);
+        /// <returns> A <see cref="CursorGetFlags"/> value indicating the state of the cursor after the move. </returns>
+        CursorGetFlags First(ProcessCallInfo ACallInfo);
 
         /// <summary> Positions the cursor on the EOF crack. </summary>
-        /// <returns> A <see cref="RemoteCursorGetFlags"/> value indicating the state of the cursor after the move. </returns>
-        RemoteCursorGetFlags Last(ProcessCallInfo ACallInfo);
+        /// <returns> A <see cref="CursorGetFlags"/> value indicating the state of the cursor after the move. </returns>
+        CursorGetFlags Last(ProcessCallInfo ACallInfo);
 
         /// <summary> Resets the server-side cursor, causing any data to be re-read and leaving the cursor on the BOF crack. </summary>        
-        /// <returns> A <see cref="RemoteCursorGetFlags"/> value indicating the state of the cursor after the reset. </returns>
-        RemoteCursorGetFlags Reset(ProcessCallInfo ACallInfo);
+        /// <returns> A <see cref="CursorGetFlags"/> value indicating the state of the cursor after the reset. </returns>
+        CursorGetFlags Reset(ProcessCallInfo ACallInfo);
 
         /// <summary> Inserts the given <see cref="RemoteRow"/> into the cursor. </summary>        
         /// <param name="ARow"> A <see cref="RemoteRow"/> structure containing the Row to be inserted. </param>
@@ -388,8 +388,8 @@ namespace Alphora.Dataphor.DAE
         
         /// <summary> Positions the cursor on the row most closely matching the given key. </summary>
         /// <param name="AKey"> A <see cref="RemoteRow"/> structure containing the key to be found. </param>
-        /// <returns> A <see cref="RemoteCursorGetFlags"/> value indicating the state of the cursor after the search. </returns>
-        RemoteCursorGetFlags FindNearest(RemoteRow AKey, ProcessCallInfo ACallInfo);
+        /// <returns> A <see cref="CursorGetFlags"/> value indicating the state of the cursor after the search. </returns>
+        CursorGetFlags FindNearest(RemoteRow AKey, ProcessCallInfo ACallInfo);
         
         /// <summary> Refreshes the cursor and attempts to reposition it on the given row. </summary>
         /// <param name="ARow"> A <see cref="RemoteRow"/> structure containing the row to be positioned on after the refresh. </param>

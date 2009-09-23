@@ -302,8 +302,8 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="ACursorHandle">The handle of the cursor for which the navigation state will be returned.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
-		/// <returns>A RemoteCursorGetFlags describing the navigation state of the cursor.</returns>
-		RemoteCursorGetFlags GetFlags(int ACursorHandle, ProcessCallInfo ACallInfo);
+		/// <returns>A CursorGetFlags describing the navigation state of the cursor.</returns>
+		CursorGetFlags GetFlags(int ACursorHandle, ProcessCallInfo ACallInfo);
 		
 		/// <summary>
 		/// Moves a cursor a number of rows.
@@ -319,24 +319,24 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="ACursorHandle">The handle of the cursor to be navigated.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
-		/// <returns>A RemoteCursorGetFlags describing the navigation state of the cursor.</returns>
-        RemoteCursorGetFlags First(int ACursorHandle, ProcessCallInfo ACallInfo);
+		/// <returns>A CursorGetFlags describing the navigation state of the cursor.</returns>
+        CursorGetFlags First(int ACursorHandle, ProcessCallInfo ACallInfo);
 
 		/// <summary>
 		/// Positions a cursor after the last row.
 		/// </summary>
 		/// <param name="ACursorHandle">The handle of the cursor to be navigated.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
-		/// <returns>A RemoteCursorGetFlags describing the navigation state of the cursor.</returns>
-        RemoteCursorGetFlags Last(int ACursorHandle, ProcessCallInfo ACallInfo);
+		/// <returns>A CursorGetFlags describing the navigation state of the cursor.</returns>
+        CursorGetFlags Last(int ACursorHandle, ProcessCallInfo ACallInfo);
 
 		/// <summary>
 		/// Resets a cursor.
 		/// </summary>
 		/// <param name="ACursorHandle">The handle of the cursor to be reset.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
-		/// <returns>A RemoteCursorGetFlags describing the navigation state of the cursor.</returns>
-        RemoteCursorGetFlags Reset(int ACursorHandle, ProcessCallInfo ACallInfo);
+		/// <returns>A CursorGetFlags describing the navigation state of the cursor.</returns>
+        CursorGetFlags Reset(int ACursorHandle, ProcessCallInfo ACallInfo);
 
 		/// <summary>
 		/// Inserts a row into a cursor.
@@ -437,8 +437,8 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACursorHandle">The handle of the cursor to be navigated.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
         /// <param name="AKey">The key on which the should be positioned.</param>
-        /// <returns>A RemoteCursorGetFlags describing the resulting navigation state of the cursor.</returns>
-        RemoteCursorGetFlags FindNearest(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRow AKey);
+        /// <returns>A CursorGetFlags describing the resulting navigation state of the cursor.</returns>
+        CursorGetFlags FindNearest(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRow AKey);
         
         /// <summary>
         /// Refreshes a cursor.

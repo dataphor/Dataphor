@@ -5,11 +5,6 @@ using System.Text;
 
 namespace Alphora.Dataphor.DAE.Contracts
 {
-    [Flags]
-    [Serializable]
-	/// <nodoc/>
-	public enum RemoteCursorGetFlags : byte {None = 0, BOF = 1, EOF = 2}
-    
 	[Serializable]
 	/// <nodoc/>
 	public struct RemoteRowHeader
@@ -49,7 +44,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 	public struct RemoteFetchData
     {
 		public RemoteRowBody[] Body;
-		public byte Flags; // hack: changed from 'RemoteCursorGetFlags' to 'byte' in order fix fixup error
+		public byte Flags; // hack: changed from 'CursorGetFlags' to 'byte' in order fix fixup error
 	}
 
 	[Serializable]
@@ -82,7 +77,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 	public struct RemoteMoveData
     {
 		public int Count;
-		public RemoteCursorGetFlags Flags;
+		public CursorGetFlags Flags;
     }
     
 	[Serializable]
@@ -90,6 +85,6 @@ namespace Alphora.Dataphor.DAE.Contracts
 	public struct RemoteGotoData
     {
 		public bool Success;
-		public RemoteCursorGetFlags Flags;
+		public CursorGetFlags Flags;
     }
 }
