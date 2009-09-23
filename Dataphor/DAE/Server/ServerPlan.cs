@@ -26,11 +26,6 @@ namespace Alphora.Dataphor.DAE.Server
 			FPlan = new Plan(AProcess);
 			FProgram = new Program(AProcess, FID);
 			FProgram.ShouldPushLocals = true;
-
-			#if !DISABLE_PERFORMANCE_COUNTERS
-			if (FProcess.ServerSession.Server.FPlanCounter != null)
-				FProcess.ServerSession.Server.FPlanCounter.Increment();
-			#endif
 		}
 		
 		private bool FDisposed;
@@ -53,13 +48,7 @@ namespace Alphora.Dataphor.DAE.Server
 					}
 					
 					if (!FDisposed)
-					{
-						#if !DISABLE_PERFORMANCE_COUNTERS
-						if (FProcess.ServerSession.Server.FPlanCounter != null)
-							FProcess.ServerSession.Server.FPlanCounter.Decrement();
-						#endif
 						FDisposed = true;
-					}
 				}
 			}
 			finally

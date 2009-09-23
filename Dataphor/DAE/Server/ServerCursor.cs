@@ -24,11 +24,6 @@ namespace Alphora.Dataphor.DAE.Server
 			FPlan = APlan;
 			FProgram = AProgram;
 			FParams = AParams;
-
-			#if !DISABLE_PERFORMANCE_COUNTERS
-			if (FPlan.ServerProcess.ServerSession.Server.FCursorCounter != null)
-				FPlan.ServerProcess.ServerSession.Server.FCursorCounter.Increment();
-			#endif
 		}
 
 		private bool FDisposed;
@@ -41,10 +36,6 @@ namespace Alphora.Dataphor.DAE.Server
 				
 				if (!FDisposed)
 				{
-					#if !DISABLE_PERFORMANCE_COUNTERS
-					if (FPlan.ServerProcess.ServerSession.Server.FCursorCounter != null)
-						FPlan.ServerProcess.ServerSession.Server.FCursorCounter.Decrement();
-					#endif
 					FDisposed = true;
 				}
 			}

@@ -167,7 +167,7 @@ namespace Alphora.Dataphor.DAE.Server
 		#region Devices
 		
 		// TempDevice		
-		private MemoryDevice FTempDevice;
+		protected MemoryDevice FTempDevice;
 		public MemoryDevice TempDevice 
 		{ 
 			get 
@@ -179,7 +179,7 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		// CatalogDevice
-		private CatalogDevice FCatalogDevice;
+		protected CatalogDevice FCatalogDevice;
 		public CatalogDevice CatalogDevice 
 		{ 
 			get 
@@ -191,7 +191,7 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		// ATDevice		
-		private ApplicationTransactionDevice FATDevice;
+		protected ApplicationTransactionDevice FATDevice;
 		public ApplicationTransactionDevice ATDevice 
 		{ 
 			get 
@@ -361,7 +361,7 @@ namespace Alphora.Dataphor.DAE.Server
 		#region Security
 		
 		// User Role
-		private Schema.Role FUserRole;
+		protected Schema.Role FUserRole;
 		public Schema.Role UserRole
 		{
 			get
@@ -373,7 +373,7 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		// System User
-		private Schema.User FSystemUser;
+		protected Schema.User FSystemUser;
 		public Schema.User SystemUser
 		{
 			get
@@ -385,7 +385,7 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		// Admin User
-		private Schema.User FAdminUser;
+		protected Schema.User FAdminUser;
 		public Schema.User AdminUser
 		{
 			get
@@ -396,26 +396,9 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		private Schema.User ValidateLogin(int ASessionID, SessionInfo ASessionInfo)
+		protected virtual Schema.User ValidateLogin(int ASessionID, SessionInfo ASessionInfo)
 		{
-			if (ASessionInfo == null)
-				throw new ServerException(ServerException.Codes.SessionInformationRequired);
-
-			if (String.Compare(ASessionInfo.UserID, CSystemUserID, true) == 0)
-			{
-				if (!IsEngine && (ASessionID != CSystemSessionID))
-					throw new ServerException(ServerException.Codes.CannotLoginAsSystemUser);
-
-				return FSystemUser;
-			}
-			else
-			{
-				Schema.User LUser = FSystemProcess.CatalogDeviceSession.ResolveUser(ASessionInfo.UserID);
-				if (String.Compare(Schema.SecurityUtility.DecryptPassword(LUser.Password), ASessionInfo.Password, true) != 0)
-					throw new ServerException(ServerException.Codes.InvalidPassword);
-
-				return LUser;
-			}
+			return FSystemUser;
 		}
 
 		#endregion
@@ -704,7 +687,7 @@ namespace Alphora.Dataphor.DAE.Server
 			FState = ANewState;
 		}
 
-		private void CheckState(ServerState AState)
+		protected void CheckState(ServerState AState)
 		{
 			if (FState != AState)
 				throw new ServerException(ServerException.Codes.InvalidServerState, AState.ToString());
@@ -808,7 +791,7 @@ namespace Alphora.Dataphor.DAE.Server
 			FSystemProcess.CatalogDeviceSession.InsertCatalogObject(FCatalogDevice);
 
 			// Create the Temp Device
-			FTempDevice = new MemoryDevice(Schema.Object.GetNextObjectID(), CTempDeviceName, CTempDeviceManagerID);
+			FTempDevice = new MemoryDevice(Schema.Object.GetNextObjectID(), CTempDeviceName);
 			FTempDevice.Owner = FSystemUser;
 			FTempDevice.Library = FSystemLibrary;
 			FTempDevice.ClassDefinition = new ClassDefinition("System.MemoryDevice");
@@ -819,7 +802,7 @@ namespace Alphora.Dataphor.DAE.Server
 			FSystemProcess.CatalogDeviceSession.InsertCatalogObject(FTempDevice);
 
 			// Create the A/T Device
-			FATDevice = new ApplicationTransactionDevice(Schema.Object.GetNextObjectID(), CATDeviceName, CATDeviceManagerID);
+			FATDevice = new ApplicationTransactionDevice(Schema.Object.GetNextObjectID(), CATDeviceName);
 			FATDevice.Owner = FSystemUser;
 			FATDevice.Library = FSystemLibrary;
 			FATDevice.ClassDefinition = new ClassDefinition("System.ApplicationTransactionDevice");
@@ -1205,8 +1188,7 @@ namespace Alphora.Dataphor.DAE.Server
 			lock (FCatalog.Libraries)
 			{
 				FCatalog.UpdateTimeStamp();
-				if (!IsEngine)
-					Schema.Library.GetAvailableLibraries(InstanceDirectory, FLibraryDirectory, FCatalog.Libraries);
+				InternalLoadAvailableLibraries();
 
 				// Create the implicit system library
 				Schema.Library LSystemLibrary = new Schema.Library(CSystemLibraryName);
@@ -1217,6 +1199,11 @@ namespace Alphora.Dataphor.DAE.Server
 				FCatalog.Libraries.Add(LSystemLibrary);
 
 			}
+		}
+
+		protected virtual void InternalLoadAvailableLibraries()
+		{
+			// virtual
 		}
 
 		private void EnsureGeneralLibraryLoaded()
@@ -1256,7 +1243,7 @@ namespace Alphora.Dataphor.DAE.Server
 			if (FLockManager == null)
 				FLockManager = new LockManager();
 			if (FStreamManager == null)
-				FStreamManager = new ServerStreamManager(CStreamManagerID, FLockManager, this);
+				FStreamManager = new ServerStreamManager(FLockManager, this);
 		}
 
 		private bool FCatalogRegistered;
@@ -1286,12 +1273,6 @@ namespace Alphora.Dataphor.DAE.Server
 					}
 				}
 			}
-		}
-
-		internal Schema.Objects GetBaseCatalogObjects()
-		{
-			CheckState(ServerState.Started);
-			return FSystemProcess.CatalogDeviceSession.GetBaseCatalogObjects();
 		}
 
 		private bool FFirstRun; // Indicates whether or not this is the first time this server has run on the configured store

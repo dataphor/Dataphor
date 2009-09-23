@@ -277,7 +277,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 			return ListLocks(-1, -1, LockMode.Shared);
 		}
 		
-		public string ListLocks(int AOwner, int AOwnerID, LockMode AMode)
+		public string ListLocks(object AOwner, int AOwnerID, LockMode AMode)
 		{
 			StringBuilder LResult = new StringBuilder();
 			foreach (KeyValuePair<LockID, LockHeader> LEntry in FLocks)

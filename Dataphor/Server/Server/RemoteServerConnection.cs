@@ -25,11 +25,6 @@ namespace Alphora.Dataphor.DAE.Server
 			FHostName = AHostName;
 			FConnectionName = AConnectionName;
 			FSessions = new RemoteServerSessions(false);
-
-			#if !DISABLE_PERFORMANCE_COUNTERS
-			if (FServer.FConnectionCounter != null)
-				FServer.FConnectionCounter.Increment();
-			#endif
 		}
 		
 		protected bool FDisposed;
@@ -45,14 +40,6 @@ namespace Alphora.Dataphor.DAE.Server
 				finally
 				{
 					FServer.CatalogCaches.RemoveCache(FConnectionName);
-				}
-
-				if (!FDisposed)
-				{
-					#if !DISABLE_PERFORMANCE_COUNTERS
-					if (FServer.FConnectionCounter != null)
-						FServer.FConnectionCounter.Decrement();
-					#endif
 				}
 			}
 			finally

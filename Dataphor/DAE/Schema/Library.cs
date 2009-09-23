@@ -63,17 +63,17 @@ namespace Alphora.Dataphor.DAE.Schema
 			return FName.GetHashCode() ^ FVersion.GetHashCode();
 		}
 		
+		public object Clone()
+		{
+			return new LibraryReference(FName, FVersion);
+		}
+
 		public static int Compare(LibraryReference ALeftValue, LibraryReference ARightValue)
 		{
 			int LResult = String.Compare(ALeftValue.Name, ARightValue.Name);
 			if (LResult == 0)
 				LResult = VersionNumber.Compare(ALeftValue.Version, ARightValue.Version);
 			return LResult;
-		}
-		
-		public object Clone()
-		{
-			return new LibraryReference(FName, FVersion);
 		}
 	}
 
@@ -214,9 +214,6 @@ namespace Alphora.Dataphor.DAE.Schema
 	
 	public class LibraryInfo : System.Object, ICloneable
 	{
-		private static Serializer FSerializer = new Serializer();
-		private static Deserializer FDeserializer = new Deserializer();
-		
 		public LibraryInfo() : base() {}
 		public LibraryInfo(string AName, bool AIsSuspect, string ASuspectReason)
 		{
@@ -262,12 +259,12 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		public void SaveToStream(Stream AStream)
 		{
-			FSerializer.Serialize(AStream, this);
+			new Serializer().Serialize(AStream, this);
 		}
 		
 		public static LibraryInfo LoadFromStream(Stream AStream)
 		{
-			return FDeserializer.Deserialize(AStream, null) as LibraryInfo;
+			return new Deserializer().Deserialize(AStream, null) as LibraryInfo;
 		}
 	}
 	
@@ -328,12 +325,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				if ((value == null) || (value == String.Empty))
 					FDirectory = String.Empty; 
 				else
-				{
-					if (Path.IsPathRooted(value))
-						FDirectory = value;
-					else
-						FDirectory = Path.Combine(PathUtility.GetBinDirectory(), value);
-				}
+					FDirectory = value;
 			}
 		}
 		
@@ -461,139 +453,11 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
-		private static Serializer FSerializer = new Serializer();
-		private static Deserializer FDeserializer = new Deserializer();
-		
 		public void SaveToStream(Stream AStream)
 		{
-			FSerializer.Serialize(AStream, this);
+			new Serializer().Serialize(AStream, this);
 		}
 		
-		public static Library LoadFromStream(Stream AStream)
-		{
-			return FDeserializer.Deserialize(AStream, null) as Library;
-		}
-		
-		public static string GetFileName(string ALibraryName)
-		{
-			return String.Format("{0}.d4l", ALibraryName);
-		}
-		
-		public string GetLibraryDirectory(string AServerLibraryDirectory)
-		{
-			return GetLibraryDirectory(AServerLibraryDirectory, Name, FDirectory);
-		}
-		
-		public static string GetLibraryDirectory(string AServerLibraryDirectory, string ALibraryName, string ALibraryDirectory)
-		{
-			return ALibraryDirectory == String.Empty ? Path.Combine(GetDefaultLibraryDirectory(AServerLibraryDirectory), ALibraryName) : ALibraryDirectory;
-		}
-		
-		public static string GetDefaultLibraryDirectory(string AServerLibraryDirectory)
-		{
-			return AServerLibraryDirectory.Split(';')[0];
-		}
-		
-		public string GetInstanceLibraryDirectory(string AInstanceDirectory)
-		{
-			return GetInstanceLibraryDirectory(AInstanceDirectory, Name);
-		}
-		
-		public static string GetInstanceLibraryDirectory(string AInstanceDirectory, string ALibraryName)
-		{
-			string LResult = Path.Combine(Path.Combine(AInstanceDirectory, Server.Engine.CDefaultLibraryDataDirectory), ALibraryName);
-			System.IO.Directory.CreateDirectory(LResult);
-			return LResult;
-		}
-		
-		public void SaveToFile(string AFileName)
-		{
-			#if !RESPECTREADONLY
-			FileUtility.EnsureWriteable(AFileName);
-			#endif
-			using (FileStream LStream = new FileStream(AFileName, FileMode.Create, FileAccess.Write))
-			{
-				SaveToStream(LStream);
-			}
-		}
-		
-		public static Library LoadFromFile(string AFileName, string AInstanceDirectory)
-		{
-			using (FileStream LStream = new FileStream(AFileName, FileMode.Open, FileAccess.Read))
-			{
-				Library LLibrary = LoadFromStream(LStream);
-				LLibrary.Name = Path.GetFileNameWithoutExtension(AFileName);
-				LLibrary.LoadInfoFromFile(Path.Combine(GetInstanceLibraryDirectory(AInstanceDirectory, LLibrary.Name), GetInfoFileName(LLibrary.Name)));
-				return LLibrary;
-			}
-		}
-
-		public static string GetInfoFileName(string ALibraryName)
-		{
-			return String.Format("{0}.d4l.info", ALibraryName);
-		}
-		
-		public void SaveInfoToFile(string AFileName)
-		{
-			FileUtility.EnsureWriteable(AFileName);
-			using (FileStream LStream = new FileStream(AFileName, FileMode.Create, FileAccess.Write))
-			{
-				new LibraryInfo(Name, IsSuspect, SuspectReason).SaveToStream(LStream);
-			}
-		}
-		
-		public void LoadInfoFromFile(string AFileName)
-		{
-			if (File.Exists(AFileName))
-			{
-				using (FileStream LStream = new FileStream(AFileName, FileMode.Open, FileAccess.Read))
-				{
-					LibraryInfo LLibraryInfo = LibraryInfo.LoadFromStream(LStream);
-					FIsSuspect = LLibraryInfo.IsSuspect;
-					FSuspectReason = LLibraryInfo.SuspectReason;
-				}
-			}
-		}
-		
-		public static void GetAvailableLibraries(string AInstanceDirectory, string ALibraryDirectory, Libraries ALibraries)
-		{
-			ALibraries.Clear();
-			string[] LDirectories = ALibraryDirectory.Split(';');
-			for (int LIndex = 0; LIndex < LDirectories.Length; LIndex++)
-				GetAvailableLibraries(AInstanceDirectory, LDirectories[LIndex], ALibraries, LIndex > 0);
-		}
-		
-		public static void GetAvailableLibraries(string AInstanceDirectory, string ALibraryDirectory, Libraries ALibraries, bool ASetLibraryDirectory)
-		{
-			string LLibraryName;
-			string LLibraryFileName;
-			string[] LLibraries = System.IO.Directory.GetDirectories(ALibraryDirectory);
-			for (int LIndex = 0; LIndex < LLibraries.Length; LIndex++)
-			{
-				LLibraryName = Path.GetFileName(LLibraries[LIndex]);
-				LLibraryFileName = Path.Combine(LLibraries[LIndex], Schema.Library.GetFileName(LLibraryName));
-				if (File.Exists(LLibraryFileName))
-				{
-					Schema.Library LLibrary = LoadFromFile(LLibraryFileName, AInstanceDirectory);
-					if (ASetLibraryDirectory)
-						LLibrary.Directory = LLibraries[LIndex];
-					ALibraries.Add(LLibrary);
-				}
-			}
-		}
-		
-		public static Schema.Library GetAvailableLibrary(string AInstanceDirectory, string ALibraryName, string ALibraryDirectory)
-		{
-			string LLibraryFileName = Path.Combine(ALibraryDirectory, Schema.Library.GetFileName(ALibraryName));
-			if (File.Exists(LLibraryFileName))
-			{
-				Schema.Library LLibrary = LoadFromFile(LLibraryFileName, AInstanceDirectory);
-				LLibrary.Directory = ALibraryDirectory;
-				return LLibrary;
-			}
-			return null;
-		}
-
 		public object Clone()
 		{
 			Library LLibrary = new Library(Name, FVersion, FDefaultDeviceName);

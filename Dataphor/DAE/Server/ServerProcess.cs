@@ -67,11 +67,6 @@ namespace Alphora.Dataphor.DAE.Server
 			
 			if (FServerSession.DebuggedByID > 0)
 				FServerSession.Server.GetDebugger(FServerSession.DebuggedByID).Attach(this);
-
-			#if !DISABLE_PERFORMANCE_COUNTERS
-			if (FServerSession.Server.FProcessCounter != null)
-				FServerSession.Server.FProcessCounter.Increment();
-			#endif
 		}
 		
 		private bool FDisposed;
@@ -231,13 +226,7 @@ namespace Alphora.Dataphor.DAE.Server
 						}
 						
 						if (!FDisposed)
-						{
-							#if !DISABLE_PERFORMANCE_COUNTERS
-							if (FServerSession.Server.FProcessCounter != null)
-								FServerSession.Server.FProcessCounter.Decrement();
-							#endif
 							FDisposed = true;
-						}
 					}
 				}
 				finally
@@ -1800,11 +1789,6 @@ namespace Alphora.Dataphor.DAE.Server
 				Monitor.Enter(FExecutionSyncHandle);
 				try
 				{
-					#if !DISABLE_PERFORMANCE_COUNTERS
-					if (ServerSession.Server.FRunningProcessCounter != null)
-						ServerSession.Server.FRunningProcessCounter.Increment();
-					#endif
-
 					FExecutingThreadCount++;
 					if (FExecutingThreadCount == 1)
 					{
@@ -1828,11 +1812,6 @@ namespace Alphora.Dataphor.DAE.Server
 						Monitor.Enter(FExecutionSyncHandle);
 						try
 						{
-							#if !DISABLE_PERFORMANCE_COUNTERS
-							if (ServerSession.Server.FRunningProcessCounter != null)
-								ServerSession.Server.FRunningProcessCounter.Decrement();
-							#endif
-
 							FExecutingThreadCount--;
 							if (FExecutingThreadCount == 0)
 							{
@@ -1868,11 +1847,6 @@ namespace Alphora.Dataphor.DAE.Server
 					Monitor.Enter(FExecutionSyncHandle);
 					try
 					{
-						#if !DISABLE_PERFORMANCE_COUNTERS
-						if (ServerSession.Server.FRunningProcessCounter != null)
-							ServerSession.Server.FRunningProcessCounter.Decrement();
-						#endif
-
 						FExecutingThreadCount--;
 						if (FExecutingThreadCount == 0)
 						{

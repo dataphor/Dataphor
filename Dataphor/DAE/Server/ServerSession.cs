@@ -36,11 +36,6 @@ namespace Alphora.Dataphor.DAE.Server
 			FSessionOperators = new Schema.Objects();
 			FUser = AUser;
 			FProcesses = new ServerProcesses();
-
-			#if !DISABLE_PERFORMANCE_COUNTERS
-			if (FServer.FSessionCounter != null)
-				FServer.FSessionCounter.Increment();
-			#endif
 		}
 		
 		private bool FDisposed;
@@ -112,15 +107,6 @@ namespace Alphora.Dataphor.DAE.Server
 					FSessionInfo = null;
 					FSessionID = -1;
 					FUser = null;
-					
-					if (!FDisposed)
-					{
-						#if !DISABLE_PERFORMANCE_COUNTERS
-						if (FServer.FSessionCounter != null)
-							FServer.FSessionCounter.Decrement();
-						#endif
-					}
-
 					FServer = null;
 				}
 			}

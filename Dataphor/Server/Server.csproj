@@ -72,7 +72,9 @@
     <Compile Include="Language.SQL\Keywords.cs" />
     <Compile Include="Language.SQL\Language.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Runtime.Instructions\SecurityNodes.cs" />
     <Compile Include="Runtime.Instructions\SystemNodes.cs" />
+    <Compile Include="Schema\LibraryUtility.cs" />
     <Compile Include="Server\CatalogCache.cs" />
     <Compile Include="Server\InstanceManager.cs" />
     <Compile Include="Server\Listener.cs" />

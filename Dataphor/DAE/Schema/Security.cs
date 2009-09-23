@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 namespace Alphora.Dataphor.DAE.Schema
 {
-	internal sealed class SecurityUtility : System.Object
+	public static class SecurityUtility : System.Object
 	{
 		// Note: This Key and IV are also specified in the NativeCLI.SecurityUtility class
 		// This is sort of silly anyway because this code is open source. Security through obfuscation?

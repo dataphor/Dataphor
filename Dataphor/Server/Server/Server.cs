@@ -58,6 +58,11 @@ namespace Alphora.Dataphor.DAE.Server
 			return Path.Combine(PathUtility.GetBinDirectory(), CDefaultLibraryDirectory);
 		}
 
+		protected override void InternalLoadAvailableLibraries()
+		{
+			Schema.LibraryUtility.GetAvailableLibraries(InstanceDirectory, FLibraryDirectory, Catalog.Libraries);
+		}
+
 		private string FCatalogStoreClassName;
 		/// <summary>
 		/// Gets or sets the assembly qualified class name of the store used to persist the system catalog.
@@ -186,7 +191,7 @@ namespace Alphora.Dataphor.DAE.Server
 				{
 					Schema.Library LGeneralLibrary = new Schema.Library(CGeneralLibraryName);
 					LGeneralLibrary.Libraries.Add(new Schema.LibraryReference(CSystemLibraryName, new VersionNumber(-1, -1, -1, -1)));
-					FCatalog.Libraries.Add(LGeneralLibrary);
+					Catalog.Libraries.Add(LGeneralLibrary);
 					string LLibraryDirectory = Path.Combine(Schema.Library.GetDefaultLibraryDirectory(LibraryDirectory), LGeneralLibrary.Name);
 					if (!Directory.Exists(LLibraryDirectory))
 						Directory.CreateDirectory(LLibraryDirectory);
@@ -661,43 +666,73 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			base.InternalRegisterCoreSystemObjects();
 
+			var LCatalogSession = (ServerCatalogDeviceSession)FSystemProcess.CatalogDeviceSession;
+			
 			// Grant usage rights on the Temp and A/T devices to the User role
-			FSystemProcess.CatalogDeviceSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.CreateStore), FUserRole.ID);
-			FSystemProcess.CatalogDeviceSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.AlterStore), FUserRole.ID);
-			FSystemProcess.CatalogDeviceSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.DropStore), FUserRole.ID);
-			FSystemProcess.CatalogDeviceSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.Read), FUserRole.ID);
-			FSystemProcess.CatalogDeviceSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.Write), FUserRole.ID);
+			LCatalogSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.CreateStore), FUserRole.ID);
+			LCatalogSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.AlterStore), FUserRole.ID);
+			LCatalogSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.DropStore), FUserRole.ID);
+			LCatalogSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.Read), FUserRole.ID);
+			LCatalogSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.Write), FUserRole.ID);
 
-			FSystemProcess.CatalogDeviceSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.CreateStore), FUserRole.ID);
-			FSystemProcess.CatalogDeviceSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.AlterStore), FUserRole.ID);
-			FSystemProcess.CatalogDeviceSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.DropStore), FUserRole.ID);
-			FSystemProcess.CatalogDeviceSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.Read), FUserRole.ID);
-			FSystemProcess.CatalogDeviceSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.Write), FUserRole.ID);
+			LCatalogSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.CreateStore), FUserRole.ID);
+			LCatalogSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.AlterStore), FUserRole.ID);
+			LCatalogSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.DropStore), FUserRole.ID);
+			LCatalogSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.Read), FUserRole.ID);
+			LCatalogSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.Write), FUserRole.ID);
 
 			// Create and register the system rights
-			FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateType, FSystemUser.ID);
-			FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateTable, FSystemUser.ID);
-			FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateView, FSystemUser.ID);
-			FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateOperator, FSystemUser.ID);
-			FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateDevice, FSystemUser.ID);
-			FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateConstraint, FSystemUser.ID);
-			FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateReference, FSystemUser.ID);
-			FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateUser, FSystemUser.ID);
-			FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateRole, FSystemUser.ID);
-			FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.AlterUser, FSystemUser.ID);
-			FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.DropUser, FSystemUser.ID);
-			FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.MaintainSystemDeviceUsers, FSystemUser.ID);
-			FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.MaintainUserSessions, FSystemUser.ID);
-			FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.HostImplementation, FSystemUser.ID);
+			LCatalogSession.InsertRight(Schema.RightNames.CreateType, FSystemUser.ID);
+			LCatalogSession.InsertRight(Schema.RightNames.CreateTable, FSystemUser.ID);
+			LCatalogSession.InsertRight(Schema.RightNames.CreateView, FSystemUser.ID);
+			LCatalogSession.InsertRight(Schema.RightNames.CreateOperator, FSystemUser.ID);
+			LCatalogSession.InsertRight(Schema.RightNames.CreateDevice, FSystemUser.ID);
+			LCatalogSession.InsertRight(Schema.RightNames.CreateConstraint, FSystemUser.ID);
+			LCatalogSession.InsertRight(Schema.RightNames.CreateReference, FSystemUser.ID);
+			LCatalogSession.InsertRight(Schema.RightNames.CreateUser, FSystemUser.ID);
+			LCatalogSession.InsertRight(Schema.RightNames.CreateRole, FSystemUser.ID);
+			LCatalogSession.InsertRight(Schema.RightNames.AlterUser, FSystemUser.ID);
+			LCatalogSession.InsertRight(Schema.RightNames.DropUser, FSystemUser.ID);
+			LCatalogSession.InsertRight(Schema.RightNames.MaintainSystemDeviceUsers, FSystemUser.ID);
+			LCatalogSession.InsertRight(Schema.RightNames.MaintainUserSessions, FSystemUser.ID);
+			LCatalogSession.InsertRight(Schema.RightNames.HostImplementation, FSystemUser.ID);
 
 			// Grant create rights to the User role
-			FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateType, FUserRole.ID);
-			FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateTable, FUserRole.ID);
-			FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateView, FUserRole.ID);
-			FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateOperator, FUserRole.ID);
-			FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateDevice, FUserRole.ID);
-			FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateConstraint, FUserRole.ID);
-			FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateReference, FUserRole.ID);
+			LCatalogSession.GrantRightToRole(Schema.RightNames.CreateType, FUserRole.ID);
+			LCatalogSession.GrantRightToRole(Schema.RightNames.CreateTable, FUserRole.ID);
+			LCatalogSession.GrantRightToRole(Schema.RightNames.CreateView, FUserRole.ID);
+			LCatalogSession.GrantRightToRole(Schema.RightNames.CreateOperator, FUserRole.ID);
+			LCatalogSession.GrantRightToRole(Schema.RightNames.CreateDevice, FUserRole.ID);
+			LCatalogSession.GrantRightToRole(Schema.RightNames.CreateConstraint, FUserRole.ID);
+			LCatalogSession.GrantRightToRole(Schema.RightNames.CreateReference, FUserRole.ID);
+		}
+
+		internal Schema.Objects GetBaseCatalogObjects()
+		{
+			CheckState(ServerState.Started);
+			return ((ServerCatalogDeviceSession)FSystemProcess.CatalogDeviceSession).GetBaseCatalogObjects();
+		}
+
+		protected override Schema.User ValidateLogin(int ASessionID, SessionInfo ASessionInfo)
+		{
+			if (ASessionInfo == null)
+				throw new ServerException(ServerException.Codes.SessionInformationRequired);
+
+			if (String.Equals(ASessionInfo.UserID, CSystemUserID, StringComparison.OrdinalIgnoreCase))
+			{
+				if (!IsEngine && (ASessionID != CSystemSessionID))
+					throw new ServerException(ServerException.Codes.CannotLoginAsSystemUser);
+
+				return FSystemUser;
+			}
+			else
+			{
+				Schema.User LUser = ((ServerCatalogDeviceSession)FSystemProcess.CatalogDeviceSession).ResolveUser(ASessionInfo.UserID);
+				if (String.Compare(Schema.SecurityUtility.DecryptPassword(LUser.Password), ASessionInfo.Password, true) != 0)
+					throw new ServerException(ServerException.Codes.InvalidPassword);
+
+				return LUser;
+			}
 		}
 	}
 }
