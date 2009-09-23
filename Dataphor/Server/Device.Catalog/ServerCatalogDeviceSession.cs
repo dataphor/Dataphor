@@ -2170,7 +2170,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region Device Users
 		
-		public Schema.DeviceUser ResolveDeviceUser(Schema.Device ADevice, Schema.User AUser, bool AMustResolve)
+		public override Schema.DeviceUser ResolveDeviceUser(Schema.Device ADevice, Schema.User AUser, bool AMustResolve)
 		{
 			lock (ADevice.Users)
 			{
@@ -2195,16 +2195,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 				return LDeviceUser;
 			}
-		}
-
-		public Schema.DeviceUser ResolveDeviceUser(Schema.Device ADevice, Schema.User AUser)
-		{
-			return ResolveDeviceUser(ADevice, AUser, true);
-		}
-
-		public bool DeviceUserExists(Schema.Device ADevice, Schema.User AUser)
-		{
-			return ResolveDeviceUser(ADevice, AUser, false) != null;
 		}
 
 		private void CacheDeviceUser(Schema.DeviceUser ADeviceUser)

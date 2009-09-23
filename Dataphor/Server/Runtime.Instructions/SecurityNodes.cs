@@ -640,7 +640,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (LUser.ID != AProgram.Plan.User.ID)
 				AProgram.Plan.CheckAuthorized(LUser.ID);
 			AProgram.Plan.CheckRight(LDevice.GetRight(Schema.RightNames.MaintainUsers));
-			Schema.DeviceUser LDeviceUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveDeviceUser(LDevice, LUser);
+			Schema.DeviceUser LDeviceUser = AProgram.CatalogDeviceSession.ResolveDeviceUser(LDevice, LUser);
 			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetDeviceUserID(LDeviceUser, (string)AArguments[2]);
 			//LDeviceUser.DeviceUserID = (string)AArguments[2];
 			//((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).UpdateDeviceUser(LDeviceUser);
@@ -662,7 +662,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (LUser.ID != AProgram.Plan.User.ID)
 				AProgram.Plan.CheckAuthorized(LUser.ID);
 			AProgram.Plan.CheckRight(LDevice.GetRight(Schema.RightNames.MaintainUsers));
-			Schema.DeviceUser LDeviceUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveDeviceUser(LDevice, LUser);
+			Schema.DeviceUser LDeviceUser = AProgram.CatalogDeviceSession.ResolveDeviceUser(LDevice, LUser);
 			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetDeviceUserConnectionParameters(LDeviceUser, (string)AArguments[2]);
 			//LDeviceUser.ConnectionParameters = (string)AArguments[2];
 			//((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).UpdateDeviceUser(LDeviceUser);
@@ -684,7 +684,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (LUser.ID != AProgram.Plan.User.ID)
 				AProgram.Plan.CheckAuthorized(LUser.ID);
 			AProgram.Plan.CheckRight(LDevice.GetRight(Schema.RightNames.MaintainUsers));
-			Schema.DeviceUser LDeviceUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveDeviceUser(LDevice, LUser);
+			Schema.DeviceUser LDeviceUser = AProgram.CatalogDeviceSession.ResolveDeviceUser(LDevice, LUser);
 			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetDeviceUserPassword(LDeviceUser, Schema.SecurityUtility.EncryptPassword((string)AArguments[2]));
 			//LDeviceUser.DevicePassword = Schema.SecurityUtility.EncryptPassword((string)AArguments[2]);
 			//((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).UpdateDeviceUser(LDeviceUser);
@@ -704,7 +704,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (LUser.ID != AProgram.Plan.User.ID)
 				throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, AProgram.Plan.User.ID);
 				
-			Schema.DeviceUser LDeviceUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveDeviceUser(LDevice, LUser);
+			Schema.DeviceUser LDeviceUser = AProgram.CatalogDeviceSession.ResolveDeviceUser(LDevice, LUser);
 			if (String.Compare((string)AArguments[1], Schema.SecurityUtility.DecryptPassword(LDeviceUser.DevicePassword), true) != 0)
 				throw new ServerException(ServerException.Codes.InvalidPassword);
 			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetDeviceUserPassword(LDeviceUser, Schema.SecurityUtility.EncryptPassword((string)AArguments[2]));
@@ -728,7 +728,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (LUser.ID != AProgram.Plan.User.ID)
 				AProgram.Plan.CheckAuthorized(LUser.ID);
 			AProgram.Plan.CheckRight(LDevice.GetRight(Schema.RightNames.MaintainUsers));
-			Schema.DeviceUser LDeviceUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveDeviceUser(LDevice, LUser);
+			Schema.DeviceUser LDeviceUser = AProgram.CatalogDeviceSession.ResolveDeviceUser(LDevice, LUser);
 			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).DeleteDeviceUser(LDeviceUser);
 			return null;
 		}
@@ -743,7 +743,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[1], true) as Schema.Device;
 			if (LDevice == null)
 				throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected);
-			Schema.DeviceUser LDeviceUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveDeviceUser(LDevice, LUser, false);
+			Schema.DeviceUser LDeviceUser = AProgram.CatalogDeviceSession.ResolveDeviceUser(LDevice, LUser, false);
 			return LDeviceUser != null;
 		}
     }

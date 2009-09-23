@@ -3136,6 +3136,32 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#endregion
 		
+		#region Device user
+		
+		public virtual Schema.DeviceUser ResolveDeviceUser(Schema.Device ADevice, Schema.User AUser, bool AMustResolve)
+		{
+			lock (ADevice.Users)
+			{
+				Schema.DeviceUser LDeviceUser;
+				if (!ADevice.Users.TryGetValue(AUser.ID, out LDeviceUser) && AMustResolve)
+					throw new Schema.SchemaException(Schema.SchemaException.Codes.DeviceUserNotFound, AUser.ID);
+
+				return LDeviceUser;
+			}
+		}
+
+		public Schema.DeviceUser ResolveDeviceUser(Schema.Device ADevice, Schema.User AUser)
+		{
+			return ResolveDeviceUser(ADevice, AUser, true);
+		}
+
+		public bool DeviceUserExists(Schema.Device ADevice, Schema.User AUser)
+		{
+			return ResolveDeviceUser(ADevice, AUser, false) != null;
+		}
+
+		#endregion
+		
 		#region Device scalar type
 		
 		private void AttachDeviceScalarType(Schema.DeviceScalarType ADeviceScalarType)
