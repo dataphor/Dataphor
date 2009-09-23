@@ -305,7 +305,8 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		
 		// AutoUpdate
 		
-		private bool FAutoUpdate = true;
+		private bool FAutoUpdate;
+		[DefaultValue(false)]
 		public bool AutoUpdate
 		{
 			get { return FAutoUpdate; }
@@ -527,6 +528,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		// AutoUpdate
 
 		private bool FAutoUpdate = true;
+		[DefaultValue(true)]
 		public bool AutoUpdate
 		{
 			get { return FAutoUpdate; }
@@ -649,7 +651,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// TODO: Support auto update (and interval) by posting back
 
-		private bool FAutoUpdate = false;
+		private bool FAutoUpdate;
 		[DefaultValue(false)]
 		public bool AutoUpdate
 		{
