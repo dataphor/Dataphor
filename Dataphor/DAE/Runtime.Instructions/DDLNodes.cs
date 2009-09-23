@@ -744,8 +744,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(Program AProgram)
 		{
-			// Now handled by the RemoteSessionImplementation class
-			//FServerLink.ApplyMetaData();
+			FServerLink.ApplyMetaData();
 			AProgram.CatalogDeviceSession.InsertCatalogObject(FServerLink);
 			return null;
 		}
@@ -2564,8 +2563,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			// TODO: Prevent altering the server link with active sessions? (May not be necessary, the active sessions would just continue to use the current settings)
 			AProgram.CatalogDeviceSession.AlterMetaData(LServer, FAlterServerStatement.AlterMetaData);
-			//LServer.ResetServerLink(); // Now handled by the RemoteSessionImplementation class
-			//LServer.ApplyMetaData();
+			LServer.ResetServerLink();
+			LServer.ApplyMetaData();
 			AProgram.CatalogDeviceSession.UpdateCatalogObject(LServer);
 
 			return null;

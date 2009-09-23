@@ -63,6 +63,25 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FUseSessionInfo = value; }
 		}
 		
+		public void ResetServerLink()
+		{
+			FHostName = String.Empty;
+			FInstanceName = String.Empty;
+			FOverridePortNumber = 0;
+			FUseSessionInfo = true;
+		}
+		
+		public void ApplyMetaData()
+		{
+			if (MetaData != null)
+			{
+				FHostName = MetaData.Tags.GetTagValue("HostName", "localhost");
+				FInstanceName = MetaData.Tags.GetTagValue("InstanceName", Engine.CDefaultServerName);
+				FOverridePortNumber = Convert.ToInt32(MetaData.Tags.GetTagValue("OverridePortNumber", "0"));
+				FUseSessionInfo = Convert.ToBoolean(MetaData.Tags.GetTagValue("UseSessionInfo", "true"));
+			}
+		}
+
 		// ServerLinkUsers
 		private ServerLinkUsers FUsers = new ServerLinkUsers();
 		public ServerLinkUsers Users { get { return FUsers; } }

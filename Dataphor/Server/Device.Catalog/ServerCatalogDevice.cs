@@ -45,8 +45,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			if (!AProcess.ServerSession.Server.IsEngine)
 			{
 				FStore = new CatalogStore();
-				FStore.StoreClassName = AProcess.ServerSession.Server.GetCatalogStoreClassName();
-				FStore.StoreConnectionString = AProcess.ServerSession.Server.GetCatalogStoreConnectionString();
+				FStore.StoreClassName = ((Server)AProcess.ServerSession.Server).GetCatalogStoreClassName();
+				FStore.StoreConnectionString = ((Server)AProcess.ServerSession.Server).GetCatalogStoreConnectionString();
 				FStore.Initialize(AProcess.ServerSession.Server);
 			}
 		}

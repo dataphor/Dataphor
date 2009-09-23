@@ -90,6 +90,9 @@
     <Reference Include="System.Management">
       <Name>System.Management</Name>
     </Reference>
+    <Reference Include="System.ServiceModel">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.ServiceProcess">
       <Name>System.ServiceProcess</Name>
     </Reference>

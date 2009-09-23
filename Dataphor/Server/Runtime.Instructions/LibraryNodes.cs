@@ -31,14 +31,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			lock (AProgram.Catalog.Libraries)
 			{
-				string LLibraryDirectory = ALibrary.GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory);
+				string LLibraryDirectory = ALibrary.GetLibraryDirectory(((Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory);
 				if (AProgram.Catalog.Libraries.Contains(ALibrary.Name))
 				{
 					Schema.Library LExistingLibrary = AProgram.Catalog.Libraries[ALibrary.Name];
 
 					if (ALibrary.Directory != String.Empty)
 					{
-						string LExistingLibraryDirectory = LExistingLibrary.GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory);
+						string LExistingLibraryDirectory = LExistingLibrary.GetLibraryDirectory(((Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory);
 						if (Directory.Exists(LExistingLibraryDirectory))
 						{
 							#if !RESPECTREADONLY

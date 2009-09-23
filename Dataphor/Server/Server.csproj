@@ -46,6 +46,9 @@
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Contracts\BatchDescriptor.cs" />
@@ -99,7 +102,6 @@
     <Compile Include="Server\Server.cs" />
     <Compile Include="Server\ServerConfiguration.cs" />
     <Compile Include="Server\ServerDTCTransaction.cs" />
-    <Compile Include="Server\ServerFactory.cs" />
     <Compile Include="Server\ServerHost.cs" />
     <Compile Include="Service\ConnectionManager.cs" />
     <Compile Include="Service\DataphorService.cs" />

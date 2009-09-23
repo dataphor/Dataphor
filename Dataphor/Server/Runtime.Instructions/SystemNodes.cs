@@ -42,7 +42,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			return AProgram.ServerProcess.ServerSession.Server.ShowLog(AArguments.Length == 0 ? 0 : (int)AArguments[0]);
+			return ((Server)AProgram.ServerProcess.ServerSession.Server).ShowLog(AArguments.Length == 0 ? 0 : (int)AArguments[0]);
 		}
 	}
 	

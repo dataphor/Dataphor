@@ -15,7 +15,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 	{
 		[DataMember]
 		private int FHandle;
-		public int Handle { get { return FHandle; } set { FHandle = value } }
+		public int Handle { get { return FHandle; } set { FHandle = value; } }
 		
 		[DataMember]
 		private Guid FID;

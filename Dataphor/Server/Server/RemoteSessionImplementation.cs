@@ -36,12 +36,6 @@ namespace Alphora.Dataphor.DAE.Server
 			base.Dispose(ADisposing);
 		}
 		
-		private ServerProcess FServerProcess;
-		public ServerProcess ServerProcess { get { return FServerProcess; } }
-
-		private Schema.ServerLink FServerLink;
-		public Schema.ServerLink ServerLink { get { return FServerLink; } }
-		
 		public NativeSessionInfo GetNativeSessionInfoFromProcess(ServerProcess AProcess)
 		{
 			NativeSessionInfo LNativeSessionInfo = new NativeSessionInfo();
@@ -70,10 +64,79 @@ namespace Alphora.Dataphor.DAE.Server
 			return LNativeSessionInfo;
 		}
 		
+		private NativeSessionInfo GetServerLinkNativeSessionInfo()
+		{
+			NativeSessionInfo LNativeSessionInfo = null;
+			
+			if (ServerLink.MetaData != null)
+			{
+				Tag LTag;
+				
+				LTag = ServerLink.MetaData.Tags.GetTag("DefaultIsolationLevel");
+				if (LTag != Tag.None)
+				{
+					if (LNativeSessionInfo == null) LNativeSessionInfo = new NativeSessionInfo();
+					LNativeSessionInfo.DefaultIsolationLevel = (System.Data.IsolationLevel)Enum.Parse(typeof(System.Data.IsolationLevel), LTag.Value);
+				}
+					
+				LTag = ServerLink.MetaData.Tags.GetTag("DefaultLibraryName");
+				if (LTag != Tag.None)
+				{
+					if (LNativeSessionInfo == null) LNativeSessionInfo = new NativeSessionInfo();
+					LNativeSessionInfo.DefaultLibraryName = LTag.Value;
+				}
+					
+				LTag = ServerLink.MetaData.Tags.GetTag("DefaultMaxCallDepth");
+				if (LTag != Tag.None)
+				{
+					if (LNativeSessionInfo == null) LNativeSessionInfo = new NativeSessionInfo();
+					LNativeSessionInfo.DefaultMaxCallDepth = Convert.ToInt32(LTag.Value);
+				}
+					
+				LTag = ServerLink.MetaData.Tags.GetTag("DefaultMaxStackDepth");
+				if (LTag != Tag.None)
+				{
+					if (LNativeSessionInfo == null) LNativeSessionInfo = new NativeSessionInfo();
+					LNativeSessionInfo.DefaultMaxStackDepth = Convert.ToInt32(LTag.Value);
+				}
+
+				LTag = ServerLink.MetaData.Tags.GetTag("DefaultUseDTC");
+				if (LTag != Tag.None)
+				{
+					if (LNativeSessionInfo == null) LNativeSessionInfo = new NativeSessionInfo();
+					LNativeSessionInfo.DefaultUseDTC = Convert.ToBoolean(LTag.Value);
+				}
+
+				LTag = ServerLink.MetaData.Tags.GetTag("DefaultUseImplicitTransactions");
+				if (LTag != Tag.None)
+				{
+					if (LNativeSessionInfo == null) LNativeSessionInfo = new NativeSessionInfo();
+					LNativeSessionInfo.DefaultUseImplicitTransactions = Convert.ToBoolean(LTag.Value);
+				}
+				
+				LTag = ServerLink.MetaData.Tags.GetTag("ShouldEmitIL");
+				if (LTag != Tag.None)
+				{
+					if (LNativeSessionInfo == null) LNativeSessionInfo = new NativeSessionInfo();
+					LNativeSessionInfo.ShouldEmitIL = Convert.ToBoolean(LTag.Value);
+				}
+				
+				LTag = ServerLink.MetaData.Tags.GetTag("UsePlanCache");
+				if (LTag != Tag.None)
+				{
+					if (LNativeSessionInfo == null) LNativeSessionInfo = new NativeSessionInfo();
+					LNativeSessionInfo.UsePlanCache = Convert.ToBoolean(LTag.Value);
+				}
+			}
+
+			return LNativeSessionInfo;
+		}
+		
 		public NativeSessionInfo GetDefaultNativeSessionInfo()
 		{
-			if (FServerLink.DefaultNativeSessionInfo != null)
-				return FServerLink.DefaultNativeSessionInfo.Copy();
+			NativeSessionInfo LSessionInfo = GetServerLinkNativeSessionInfo();
+			if (LSessionInfo != null)
+				return LSessionInfo;
 				
 			if (FServerLink.UseSessionInfo)
 				return GetNativeSessionInfoFromSessionInfo(FServerProcess.ServerSession.SessionInfo, FServerProcess.ProcessInfo);
@@ -93,117 +156,41 @@ namespace Alphora.Dataphor.DAE.Server
 			return LNativeSessionInfo;
 		}
 		
-/*
- * Previously in Schema.ServerLink
-		private NativeSessionInfo FDefaultNativeSessionInfo;
-		public NativeSessionInfo DefaultNativeSessionInfo
-		{
-			get { return FDefaultNativeSessionInfo; }
-		}
-		
-		private NativeSessionInfo EnsureDefaultNativeSessionInfo()
-		{
-			if (FDefaultNativeSessionInfo == null)
-				FDefaultNativeSessionInfo = new NativeSessionInfo();
-				
-			return FDefaultNativeSessionInfo;
-		}
-		
-		public void ResetServerLink()
-		{
-			FHostName = String.Empty;
-			FInstanceName = String.Empty;
-			FOverridePortNumber = 0;
-			FUseSessionInfo = true;
-			FDefaultNativeSessionInfo = null;
-		}
-		
-		public void ApplyMetaData()
-		{
-			if (MetaData != null)
-			{
-				FHostName = MetaData.Tags.GetTagValue("HostName", "localhost");
-				FInstanceName = MetaData.Tags.GetTagValue("InstanceName", Server.Server.CDefaultServerName);
-				FOverridePortNumber = Convert.ToInt32(MetaData.Tags.GetTagValue("OverridePortNumber", "0"));
-				FUseSessionInfo = Convert.ToBoolean(MetaData.Tags.GetTagValue("UseSessionInfo", "true"));
-				
-				Tag LTag;
-				
-				LTag = MetaData.Tags.GetTag("DefaultIsolationLevel");
-				if (LTag != Tag.None)
-					EnsureDefaultNativeSessionInfo().DefaultIsolationLevel = (System.Data.IsolationLevel)Enum.Parse(typeof(System.Data.IsolationLevel), LTag.Value);
-					
-				LTag = MetaData.Tags.GetTag("DefaultLibraryName");
-				if (LTag != Tag.None)
-					EnsureDefaultNativeSessionInfo().DefaultLibraryName = LTag.Value;
-					
-				LTag = MetaData.Tags.GetTag("DefaultMaxCallDepth");
-				if (LTag != Tag.None)
-					EnsureDefaultNativeSessionInfo().DefaultMaxCallDepth = Convert.ToInt32(LTag.Value);
-					
-				LTag = MetaData.Tags.GetTag("DefaultMaxStackDepth");
-				if (LTag != Tag.None)
-					EnsureDefaultNativeSessionInfo().DefaultMaxStackDepth = Convert.ToInt32(LTag.Value);
-
-				LTag = MetaData.Tags.GetTag("DefaultUseDTC");
-				if (LTag != Tag.None)
-					EnsureDefaultNativeSessionInfo().DefaultUseDTC = Convert.ToBoolean(LTag.Value);
-
-				LTag = MetaData.Tags.GetTag("DefaultUseImplicitTransactions");
-				if (LTag != Tag.None)
-					EnsureDefaultNativeSessionInfo().DefaultUseImplicitTransactions = Convert.ToBoolean(LTag.Value);
-				
-				LTag = MetaData.Tags.GetTag("ShouldEmitIL");
-				if (LTag != Tag.None)
-					EnsureDefaultNativeSessionInfo().ShouldEmitIL = Convert.ToBoolean(LTag.Value);
-				
-				LTag = MetaData.Tags.GetTag("UsePlanCache");
-				if (LTag != Tag.None)
-					EnsureDefaultNativeSessionInfo().UsePlanCache = Convert.ToBoolean(LTag.Value);
-			}
-		}
-*/
-
 		private NativeCLISession FNativeCLISession;
 		
-		public int TransactionCount
+		public override int TransactionCount
 		{
 			get { return FNativeCLISession.GetTransactionCount(); }
 		}
 		
-		public bool InTransaction
-		{
-			get { return TransactionCount > 0; }
-		}
-		
-		public void BeginTransaction(IsolationLevel AIsolationLevel)
+		public override void BeginTransaction(IsolationLevel AIsolationLevel)
 		{
 			FNativeCLISession.BeginTransaction(NativeCLIUtility.IsolationLevelToSystemDataIsolationLevel(AIsolationLevel));
 		}
 		
-		public void PrepareTransaction()
+		public override void PrepareTransaction()
 		{
 			FNativeCLISession.PrepareTransaction();
 		}
 		
-		public void CommitTransaction()
+		public override void CommitTransaction()
 		{
 			FNativeCLISession.CommitTransaction();
 		}
 		
-		public void RollbackTransaction()
+		public override void RollbackTransaction()
 		{
 			FNativeCLISession.RollbackTransaction();
 		}
 		
-		public void Execute(string AStatement, DataParams AParams)
+		public override void Execute(string AStatement, DataParams AParams)
 		{
 			NativeParam[] LParams = NativeMarshal.DataParamsToNativeParams(FServerProcess, AParams);
 			FNativeCLISession.Execute(AStatement, LParams);
 			NativeMarshal.SetDataOutputParams(FServerProcess, AParams, LParams);
 		}
 		
-		public DataValue Evaluate(string AExpression, DataParams AParams)
+		public override DataValue Evaluate(string AExpression, DataParams AParams)
 		{
 			NativeParam[] LParams = NativeMarshal.DataParamsToNativeParams(FServerProcess, AParams);
 			NativeResult LResult = FNativeCLISession.Execute(AExpression, LParams);
@@ -211,7 +198,7 @@ namespace Alphora.Dataphor.DAE.Server
 			return NativeMarshal.NativeValueToDataValue(FServerProcess, LResult.Value);
 		}
 		
-		public Schema.TableVar PrepareTableVar(Plan APlan, string AExpression, DataParams AParams)
+		public override Schema.TableVar PrepareTableVar(Plan APlan, string AExpression, DataParams AParams)
 		{
 			NativeParam[] LParams = NativeMarshal.DataParamsToNativeParams(FServerProcess, AParams);
 			NativeResult LResult = FNativeCLISession.Execute(AExpression, LParams, NativeExecutionOptions.SchemaOnly);
