@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.ServiceModel;
+using Alphora.Dataphor.DAE.Runtime;
 
 namespace Alphora.Dataphor.DAE.Contracts
 {
@@ -37,9 +38,10 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <summary>
 		/// Starts a server process.
 		/// </summary>
+		/// <param name="ASessionHandle">The handle of the session that will be used to start the process.</param>
 		/// <param name="AProcessInfo">The process information used to describe the new process.</param>
 		/// <returns>A process descriptor that describes the new process.</returns>
-		ProcessDescriptor StartProcess(ProcessInfo AProcessInfo);
+		ProcessDescriptor StartProcess(int ASessionHandle, ProcessInfo AProcessInfo);
 		
 		/// <summary>
 		/// Stops a server process.
@@ -168,17 +170,6 @@ namespace Alphora.Dataphor.DAE.Contracts
 		void UnprepareStatement(int APlanHandle);
 		
 		/// <summary>
-		/// Executes a statement.
-		/// </summary>
-		/// <param name="AProcessHandle">The handle of the process.</param>
-        /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
-		/// <param name="ACleanupInfo">A CleanupInfo containing information to be processed prior to the call.</param>
-		/// <param name="AStatement">The statement to be executed.</param>
-		/// <param name="AParams">The parameters to the statement.</param>
-		/// <param name="ALocator">A debug locator describing the source of the statement.</param>
-		void Execute(int AProcessHandle, ProcessCallInfo ACallInfo, ProcessCleanupInfo ACleanupInfo, string AStatement, ref RemoteParamData AParams, DebugLocator ALocator);
-		
-		/// <summary>
 		/// Prepares an expression for evaluation.
 		/// </summary>
 		/// <param name="AProcessHandle">The handle to the process.</param>
@@ -218,40 +209,11 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="APlanHandle">The handle of the plan to be unprepared.</param>
 		void UnprepareExpression(int APlanHandle);
 		
-		/// <summary>
-		/// Evaluates an expression.
-		/// </summary>
-		/// <param name="AProcessHandle">The handle of the process.</param>
-        /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
-		/// <param name="ACleanupInfo">A CleanupInfo containing information to be processed prior to the call.</param>
-		/// <param name="AExpression">The expression to be evaluated.</param>
-		/// <param name="AParams">The parameters to the expression.</param>
-		/// <param name="ALocator">A debug locator describing the source of the expression.</param>
-		/// <param name="ADescriptor">A plan descriptor describing the plan that was prepared to perform the evaluation.</param>
-		/// <returns>The result of evaluating the plan in it's physical representation.</returns>
-		byte[] Evaluate(int AProcessHandle, ProcessCallInfo ACallInfo, ProcessCleanupInfo ACleanupInfo, string AExpression, ref RemoteParamData AParams, DebugLocator ALocator, out PlanDescriptor ADescriptor);
-		
 		#endregion
 		
 		// Cursor
 		#region Cursor
 		
-		/// <summary>
-		/// Opens a cursor based on an expression.
-		/// </summary>
-		/// <param name="AProcessHandle">The handle of the process.</param>
-        /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
-		/// <param name="ACleanupInfo">A CleanupInfo containing information to be processed prior to the call.</param>
-		/// <param name="AExpression">The expression that describes the cursor to be opened.</param>
-		/// <param name="AParams">The parameters to the expression.</param>
-		/// <param name="ALocator">A debug locator describing the source of the expression.</param>
-		/// <param name="ADescriptor">A plan descriptor describing the plan that was prepared to open the cursor.</param>
-		/// <param name="ABookmarks">A list of bookmarks associated with the initial fetch.</param>
-		/// <param name="ACount">The number of rows to be fetched as part of the open.</param>
-		/// <param name="AFetchData">A FetchData describing the result of the initial fetch.</param>
-		/// <returns>A CursorDescriptor describing the new cursor.</returns>
-		CursorDescriptor OpenCursor(int AProcessHandle, ProcessCallInfo ACallInfo, ProcessCleanupInfo ACleanupInfo, string AExpression, ref RemoteParamData AParams, DebugLocator ALocator, out PlanDescriptor ADescriptor, out Guid[] ABookmarks, int ACount, out RemoteFetchData AFetchData);
-
 		/// <summary>
 		/// Closes an active cursor.
 		/// </summary>
@@ -515,15 +477,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AProcessHandle">The handle of the process on which the execution will be performed.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="AScript">The script to be executed.</param>
-		/// <param name="ALocator">A debug locator describing the source of the script.</param>
-		void ExecuteScript(int AProcessHandle, ProcessCallInfo ACallInfo, string AScript, DebugLocator ALocator);
-		
-		/// <summary>
-		/// Gets whether or not a batch is an expression.
-		/// </summary>
-		/// <param name="ABatchHandle">The handle of the batch to be queried.</param>
-		/// <returns>True if the batch is an expression, false otherwise.</returns>
-		bool GetBatchIsExpression(int ABatchHandle);
+		void ExecuteScript(int AProcessHandle, ProcessCallInfo ACallInfo, string AScript);
 		
 		/// <summary>
 		/// Gets the text of a batch.
@@ -531,13 +485,6 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ABatchHandle">The handle of the batch for which the text is to be returned.</param>
 		/// <returns>The text of the batch as a string.</returns>
 		string GetBatchText(int ABatchHandle);
-		
-		/// <summary>
-		/// Gets the starting line number of a batch.
-		/// </summary>
-		/// <param name="ABatchHandle">The handle of the batch for which the starting line number is to be returned.</param>
-		/// <returns>The starting line number of the batch.</returns>
-		int GetBatchLine(int ABatchHandle);
 		
 		/// <summary>
 		/// Prepares a batch for execution.
@@ -634,8 +581,9 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="AProcessHandle">The handle of the process on which the stream will be opened.</param>
 		/// <param name="AStreamID">The ID of the stream to be opened.</param>
+		/// <param name="ALockMode">The locking to be used to open the stream.</param>
 		/// <returns>The handle of the new stream.</returns>
-		int OpenStream(int AProcessHandle, StreamID AStreamID);
+		int OpenStream(int AProcessHandle, StreamID AStreamID, LockMode ALockMode);
 		
 		/// <summary>
 		/// Closes an open stream.
@@ -683,6 +631,10 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AStreamHandle">The handle of the stream to be read.</param>
 		/// <param name="ACount">The number of bytes to read.</param>
 		/// <returns>A byte[] containing the bytes read.</returns>
+		/// <remarks>
+		/// Note that the result byte[] may contain less than ACount bytes if the actual number of bytes available to be read in the stream
+		/// was less than the requested number.
+		/// </remarks>
 		byte[] ReadStream(int AStreamHandle, int ACount);
 		
 		/// <summary>

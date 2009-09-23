@@ -185,7 +185,7 @@ namespace Alphora.Dataphor.DAE.Server
 		protected override void Validate(RemoteServerChildObject AObject)
 		{
 			if (!(AObject is RemoteServerConnection))
-				throw new ServerException(ServerException.Codes.TypedObjectContainer, "RemoteServeConnection");
+				throw new ServerException(ServerException.Codes.TypedObjectContainer, "RemoteServerConnection");
 		}
 		
 		public new RemoteServerConnection this[int AIndex]

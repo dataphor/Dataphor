@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
+using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -176,7 +177,7 @@ namespace Alphora.Dataphor.DAE.Server
 					LRows[LIndex].ValuesOwned = false;
 				}
 				
-				RemoteCursorGetFlags LFlags;
+				CursorGetFlags LFlags;
 				int LCount = FServerCursor.Fetch(LRows, ABookmarks, ACount, out LFlags);
 				
 				RemoteFetchData LFetchData = new RemoteFetchData();
@@ -229,8 +230,8 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		/// <summary> Indicates whether the cursor is on the BOF crack, the EOF crack, or both, which indicates an empty cursor. </summary>
-		/// <returns> A <see cref="RemoteCursorGetFlags"/> value indicating the current state of the cursor. </returns>
-		public RemoteCursorGetFlags GetFlags(ProcessCallInfo ACallInfo)
+		/// <returns> A <see cref="CursorGetFlags"/> value indicating the current state of the cursor. </returns>
+		public CursorGetFlags GetFlags(ProcessCallInfo ACallInfo)
 		{
 			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
@@ -262,8 +263,8 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		/// <summary> Positions the cursor on the BOF crack. </summary>
-		/// <returns> A <see cref="RemoteCursorGetFlags"/> value indicating the state of the cursor after the move. </returns>
-		public RemoteCursorGetFlags First(ProcessCallInfo ACallInfo)
+		/// <returns> A <see cref="CursorGetFlags"/> value indicating the state of the cursor after the move. </returns>
+		public CursorGetFlags First(ProcessCallInfo ACallInfo)
 		{
 			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
@@ -277,8 +278,8 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		/// <summary> Positions the cursor on the EOF crack. </summary>
-		/// <returns> A <see cref="RemoteCursorGetFlags"/> value indicating the state of the cursor after the move. </returns>
-		public RemoteCursorGetFlags Last(ProcessCallInfo ACallInfo)
+		/// <returns> A <see cref="CursorGetFlags"/> value indicating the state of the cursor after the move. </returns>
+		public CursorGetFlags Last(ProcessCallInfo ACallInfo)
 		{
 			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
@@ -292,8 +293,8 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		/// <summary> Resets the server-side cursor, causing any data to be re-read and leaving the cursor on the BOF crack. </summary>        
-		/// <returns> A <see cref="RemoteCursorGetFlags"/> value indicating the state of the cursor after the reset. </returns>
-		public RemoteCursorGetFlags Reset(ProcessCallInfo ACallInfo)
+		/// <returns> A <see cref="CursorGetFlags"/> value indicating the state of the cursor after the reset. </returns>
+		public CursorGetFlags Reset(ProcessCallInfo ACallInfo)
 		{
 			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
@@ -518,8 +519,8 @@ namespace Alphora.Dataphor.DAE.Server
         
 		/// <summary> Positions the cursor on the record most closely matching the given key. </summary>
 		/// <param name="AKey"> A <see cref="RemoteRow"/> structure containing the key to be found. </param>
-		/// <returns> A <see cref="RemoteCursorGetFlags"/> value indicating the state of the cursor after the search. </returns>
-		public RemoteCursorGetFlags FindNearest(RemoteRow AKey, ProcessCallInfo ACallInfo)
+		/// <returns> A <see cref="CursorGetFlags"/> value indicating the state of the cursor after the search. </returns>
+		public CursorGetFlags FindNearest(RemoteRow AKey, ProcessCallInfo ACallInfo)
 		{
 			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
@@ -533,7 +534,7 @@ namespace Alphora.Dataphor.DAE.Server
 				{
 					LKey.ValuesOwned = false;
 					LKey.AsPhysical = AKey.Body.Data;
-					RemoteCursorGetFlags LFlags;
+					CursorGetFlags LFlags;
 					FServerCursor.FindNearest(LKey, out LFlags);
 					return LFlags;
 				}

@@ -15,6 +15,7 @@ using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Streams;
+using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -71,6 +72,11 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		private ServerProcess FServerProcess;
 		internal ServerProcess ServerProcess { get { return FServerProcess; } }
+		
+		public void Stop()
+		{
+			FSession.StopProcess(this);
+		}
 		
 		// Execution
 		internal Exception WrapException(Exception AException)

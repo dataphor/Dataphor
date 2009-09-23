@@ -13,6 +13,7 @@ using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Runtime.Data;
+using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -63,6 +64,8 @@ namespace Alphora.Dataphor.DAE.Server
 		protected ServerPlan FServerPlan;
 		internal ServerPlan ServerPlan { get { return FServerPlan; } }
 		
+		public abstract void Unprepare();
+		
 		// Execution
 		internal Exception WrapException(Exception AException)
 		{
@@ -99,6 +102,11 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		internal ServerStatementPlan ServerStatementPlan { get { return (ServerStatementPlan)FServerPlan; } }
 		
+		public override void Unprepare()
+		{
+			FProcess.UnprepareStatement(this);
+		}
+		
 		public void Execute(ref RemoteParamData AParams, out TimeSpan AExecuteTime, ProcessCallInfo ACallInfo)
 		{
 			FProcess.ProcessCallInfo(ACallInfo);
@@ -133,6 +141,11 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				base.Dispose(ADisposing);
 			}
+		}
+		
+		public override void Unprepare()
+		{
+			FProcess.UnprepareExpression(this);
 		}
 		
 		public byte[] Evaluate(ref RemoteParamData AParams, out TimeSpan AExecuteTime, ProcessCallInfo ACallInfo)

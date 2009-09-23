@@ -33,6 +33,11 @@ namespace Alphora.Dataphor.DAE.Server
 			base.Dispose(ADisposing);
 		}
 		
+		public void Unprepare()
+		{
+			FProcess.UnprepareScript(this);
+		}
+		
 		// Process        
 		private RemoteServerProcess FProcess;
 		public RemoteServerProcess Process { get { return FProcess; } }
