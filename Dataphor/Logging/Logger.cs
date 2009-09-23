@@ -11,14 +11,15 @@ namespace Alphora.Dataphor.Logging
         private static TraceSwitch SFTraceSwitch;
         private Type FType;
 
-        public Logger(string ADisplayName):this(ADisplayName,"TraceSwitch for "+ADisplayName)
+        public Logger(string ADisplayName)
+			: this(ADisplayName, "TraceSwitch for " + ADisplayName)
         {
             
         }
 
         public Logger(string ADisplayName, string ADescription)
         {
-            SFTraceSwitch=new TraceSwitch(ADisplayName,ADescription);
+            SFTraceSwitch = new TraceSwitch(ADisplayName,ADescription);
         }
 
         public Logger(Type AType) : this(AType.FullName)
@@ -32,7 +33,7 @@ namespace Alphora.Dataphor.Logging
             if (LWillWriteLine)
             {
                 String LCategoryName;
-                if(FType==null)
+                if (FType == null)
                 {
                     LCategoryName = SFTraceSwitch.DisplayName;
                 }
@@ -41,7 +42,7 @@ namespace Alphora.Dataphor.Logging
                     StackTrace LStackTrace = new StackTrace();
                     StackFrame LStackFrame = LStackTrace.GetFrame(1);
                     MethodBase LMethodBase = LStackFrame.GetMethod();
-                    LCategoryName = LMethodBase.ReflectedType+"."+LMethodBase.Name;
+                    LCategoryName = LMethodBase.ReflectedType + "." + LMethodBase.Name;
                 }
                 Debug.WriteLine(AFormat, LCategoryName);
             }
@@ -64,7 +65,7 @@ namespace Alphora.Dataphor.Logging
                     MethodBase LMethodBase = LStackFrame.GetMethod();
                     LCategoryName = LMethodBase.ReflectedType + "." + LMethodBase.Name;
                 }
-                Debug.WriteLine(string.Format(AFormat, AArgs), LCategoryName);
+                Debug.WriteLine(String.Format(AFormat, AArgs), LCategoryName);
             }
         }
     }

@@ -112,6 +112,9 @@
     <Compile Include="..\Base\NotifyingBaseList.cs">
       <Link>Base\NotifyingBaseList.cs</Link>
     </Compile>
+    <Compile Include="..\Base\ReferenceEqualityComparer.cs">
+      <Link>Base\ReferenceEqualityComparer.cs</Link>
+    </Compile>
     <Compile Include="..\Base\ReflectionUtility.cs">
       <Link>Base\ReflectionUtility.cs</Link>
     </Compile>

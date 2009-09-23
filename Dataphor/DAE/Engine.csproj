@@ -112,11 +112,6 @@
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
       <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Logging\Logging.csproj">
-      <Project>{47AC1A13-6F39-41CD-9F5F-7F5B1792CB84}</Project>
-      <Name>Logging</Name>
-      <Private>False</Private>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs">

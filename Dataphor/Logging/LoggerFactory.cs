@@ -6,20 +6,15 @@ namespace Alphora.Dataphor.Logging
 {
     public class LoggerFactory : ILoggerFactory
     {
+		private static readonly ILoggerFactory SRFInstance = new LoggerFactory();
 
-       private static readonly ILoggerFactory SRFInstance = new LoggerFactory();
+		private LoggerFactory() { }
 
-       private LoggerFactory() { }
+		public static ILoggerFactory Instance
+		{
+			get { return SRFInstance; }
+		}
 
-       public static ILoggerFactory Instance
-       {
-          get 
-          {
-              return SRFInstance; 
-          }
-       }
-
-        
         public ILogger CreateLogger(string ADisplayName, string ADescription)
         {
             return new Logger(ADisplayName, ADescription);

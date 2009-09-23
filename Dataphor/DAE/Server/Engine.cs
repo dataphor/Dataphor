@@ -73,7 +73,6 @@ namespace Alphora.Dataphor.DAE.Server
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 	using Alphora.Dataphor.DAE.Streams;
-	using Alphora.Dataphor.Logging;
 	using Schema = Alphora.Dataphor.DAE.Schema;
 
 	/// <summary> Dataphor DAE Server class. </summary>
