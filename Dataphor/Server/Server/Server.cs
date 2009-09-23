@@ -822,5 +822,58 @@ namespace Alphora.Dataphor.DAE.Server
 			Catalog.DataTypes.SystemError = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemError, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
 			Catalog.DataTypes.SystemName = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemName, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
 		}
+
+		internal ServerFileInfos GetFileNames(Schema.Library ALibrary)
+		{
+			ServerFileInfos LFileInfos = new ServerFileInfos();
+			Schema.Libraries LLibraries = new Schema.Libraries();
+			LLibraries.Add(ALibrary);
+			
+			while (LLibraries.Count > 0)
+			{
+				Schema.Library LLibrary = LLibraries[0];
+				LLibraries.RemoveAt(0);
+				
+				foreach (Schema.FileReference LReference in ALibrary.Files)
+				{
+					if (!LFileInfos.Contains(LReference.FileName))
+					{
+						string LFullFileName = GetFullFileName(ALibrary, LReference.FileName);
+						LFileInfos.Add
+						(
+							new ServerFileInfo 
+							{ 
+								LibraryName = ALibrary.Name, 
+								FileName = LReference.FileName, 
+								FileDate = File.GetLastWriteTimeUtc(LFullFileName), 
+								IsDotNetAssembly = FileUtility.IsAssembly(LFullFileName), 
+								ShouldRegister = LReference.IsAssembly 
+							}
+						);
+					} 
+				}
+				
+				foreach (Schema.LibraryReference LReference in LLibrary.Libraries)
+					if (!LLibraries.Contains(LReference.Name))
+						LLibraries.Add(Catalog.Libraries[LReference.Name]);
+			}
+			
+			return LFileInfos;
+		}
+
+		public string GetFullFileName(Schema.Library ALibrary, string AFileName)
+		{
+			#if LOADFROMLIBRARIES
+			return 
+				Path.IsPathRooted(AFileName) 
+					? AFileName 
+					: 
+						ALibrary.Name == Engine.CSystemLibraryName
+							? PathUtility.GetFullFileName(AFileName)
+							: Path.Combine(ALibrary.GetLibraryDirectory(LibraryDirectory), AFileName);
+			#else
+			return PathUtility.GetFullFileName(AFileName);
+			#endif
+		}
 	}
 }

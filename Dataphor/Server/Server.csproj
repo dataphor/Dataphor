@@ -65,6 +65,7 @@
     <Compile Include="Contracts\ScriptDescriptor.cs" />
     <Compile Include="Contracts\SessionDescriptor.cs" />
     <Compile Include="Contracts\Structures.cs" />
+    <Compile Include="Device.Catalog\CatalogDeviceTable.cs" />
     <Compile Include="Device.Catalog\ServerCatalogDevice.cs" />
     <Compile Include="Device.Catalog\ServerCatalogDeviceSession.cs" />
     <Compile Include="RemoteCLI.cs" />

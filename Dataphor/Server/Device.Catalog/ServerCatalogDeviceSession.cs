@@ -1879,7 +1879,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public bool UserHasRight(string AUserID, string ARightName)
+		public override bool UserHasRight(string AUserID, string ARightName)
 		{
 			if (ServerProcess.IsLoading() || (String.Compare(AUserID, Server.Engine.CSystemUserID, true) == 0) || (String.Compare(AUserID, Server.Engine.CAdminUserID, true) == 0))
 				return true;
@@ -1908,12 +1908,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public void CheckUserHasRight(string AUserID, string ARightName)
-		{
-			if (!UserHasRight(AUserID, ARightName))
-				throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, AUserID, ARightName);
-		}
-
 		public void InsertUserRole(string AUserID, int ARoleID)
 		{
 			AcquireCatalogStoreConnection(true);
@@ -1925,10 +1919,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				ReleaseCatalogStoreConnection();
 			}
-
-			Schema.User LUser;
-			if (Device.UsersCache.TryGetValue(AUserID, out LUser))
-				LUser.ClearCachedRightAssignments();
+			ClearUserCachedRightAssignments(AUserID);
 		}
 
 		public void DeleteUserRole(string AUserID, int ARoleID)
@@ -1943,9 +1934,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				ReleaseCatalogStoreConnection();
 			}
 
-			Schema.User LUser;
-			if (Device.UsersCache.TryGetValue(AUserID, out LUser))
-				LUser.ClearCachedRightAssignments();
+			ClearUserCachedRightAssignments(AUserID);
 
 			if (!ServerProcess.IsLoading())
 				MarkUserOperatorsForRecompile(AUserID);

@@ -163,7 +163,6 @@
     </Compile>
     <Compile Include="Device.Catalog\CatalogDevicePlan.cs" />
     <Compile Include="Device.Catalog\CatalogDeviceSession.cs" />
-    <Compile Include="Device.Catalog\CatalogDeviceTable.cs" />
     <Compile Include="Device.Catalog\CatalogException.cs">
       <SubType>Code</SubType>
     </Compile>

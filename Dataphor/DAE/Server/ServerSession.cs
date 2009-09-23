@@ -38,8 +38,6 @@ namespace Alphora.Dataphor.DAE.Server
 			FProcesses = new ServerProcesses();
 		}
 		
-		private bool FDisposed;
-		
 		// Dispose
 		protected override void Dispose(bool ADisposing)
 		{
@@ -112,7 +110,6 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 			finally
 			{
-				FDisposed = true;
 				base.Dispose(ADisposing);
 			}
 		}

@@ -3380,6 +3380,24 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
+		public virtual bool UserHasRight(string AUserID, string ARightName)
+		{
+			return true;
+		}
+
+		public void CheckUserHasRight(string AUserID, string ARightName)
+		{
+			if (!UserHasRight(AUserID, ARightName))
+				throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, AUserID, ARightName);
+		}
+
+		protected void ClearUserCachedRightAssignments(string AUserID)
+		{
+			Schema.User LUser;
+			if (Device.UsersCache.TryGetValue(AUserID, out LUser))
+				LUser.ClearCachedRightAssignments();
+		}
+
 		/// <summary>Adds the given user to the cache, without affecting the underlying store.</summary>
 		public void CacheUser(User AUser)
 		{
