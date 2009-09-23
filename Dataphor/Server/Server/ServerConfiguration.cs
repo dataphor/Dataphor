@@ -66,7 +66,7 @@ namespace Alphora.Dataphor.DAE.Server
 			get { return FDeviceSettings; }
 		}
 		
-		public void ApplyTo(Engine AServer)
+		public void ApplyTo(Server AServer)
 		{
 			AServer.Name = FName;
 			AServer.LibraryDirectory = FLibraryDirectories;

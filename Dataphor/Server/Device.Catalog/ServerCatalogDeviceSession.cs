@@ -28,6 +28,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 {
 	class ServerCatalogDeviceSession : CatalogDeviceSession
 	{
+		protected internal ServerCatalogDeviceSession(Schema.Device ADevice, ServerProcess AServerProcess, DeviceSessionInfo ADeviceSessionInfo) : base(ADevice, AServerProcess, ADeviceSessionInfo){}
+		
 		protected override void Dispose(bool ADisposing)
 		{
 			base.Dispose(ADisposing);

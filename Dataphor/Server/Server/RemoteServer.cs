@@ -44,7 +44,7 @@ namespace Alphora.Dataphor.DAE.Server
         private static readonly ILogger SRFLogger = LoggerFactory.Instance.CreateLogger(typeof(RemoteServer));
 		
 		// constructor		
-		internal RemoteServer(Engine AServer) : base()
+		internal RemoteServer(Server AServer) : base()
 		{
 			FServer = AServer;
 			FConnections = new RemoteServerConnections(false);
@@ -100,8 +100,8 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		// Server
-		private Engine FServer;
-		internal Engine Server { get { return FServer; } }
+		private Server FServer;
+		internal Server Server { get { return FServer; } }
 
 		// Catalog Caches
 		private CatalogCaches FCatalogCaches;
@@ -325,10 +325,6 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				throw WrapException(E);
 			}
-        }
-        
-        public RemoteServerConnection GetConnectionForSession(RemoteServerSession ASession)
-        {
         }
         
 		private void CloseConnections()

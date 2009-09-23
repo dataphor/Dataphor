@@ -1,9 +1,18 @@
-﻿using System;
+﻿/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+using System;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.DAE.Device.Catalog
 {
 	using Alphora.Dataphor.DAE.Server;
-	using System.Collections.Generic;
+	using Alphora.Dataphor.DAE.Schema;
+	using Alphora.Dataphor.DAE.Runtime;
+	using Alphora.Dataphor.DAE.Runtime.Data;
 
 	public class ServerCatalogDevice : CatalogDevice
 	{
@@ -64,7 +73,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		private void PopulateLoadedLibraries(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			List<string> LLibraryNames = AProgram.CatalogDeviceSession.SelectLoadedLibraries();
+			List<string> LLibraryNames = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SelectLoadedLibraries();
 			for (int LIndex = 0; LIndex < LLibraryNames.Count; LIndex++)
 			{
 				ARow[0] = LLibraryNames[LIndex];
@@ -74,12 +83,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		private void PopulateLibraryOwners(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			AProgram.CatalogDeviceSession.SelectLibraryOwners(AProgram, ANativeTable, ARow);
+			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SelectLibraryOwners(AProgram, ANativeTable, ARow);
 		}
 
 		private void PopulateLibraryVersions(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			AProgram.CatalogDeviceSession.SelectLibraryVersions(AProgram, ANativeTable, ARow);
+			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SelectLibraryVersions(AProgram, ANativeTable, ARow);
 		}
 
 		protected virtual void InternalPopulateTableVar(Program AProgram, CatalogHeader AHeader, Row ARow)
@@ -87,9 +96,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			switch (AHeader.TableVar.Name)
 			{
 				case "System.ServerSettings" : PopulateServerSettings(AProgram, AHeader.NativeTable, ARow); break;
-				case "System.LibraryOwners" : PopulateLibraryOwners(AProgram, AHeader.NativeTable, LRow); break;
-				case "System.LibraryVersions" : PopulateLibraryVersions(AProgram, AHeader.NativeTable, LRow); break;
-				case "System.LoadedLibraries" : PopulateLoadedLibraries(AProgram, AHeader.NativeTable, LRow); break;
+				case "System.LibraryOwners" : PopulateLibraryOwners(AProgram, AHeader.NativeTable, ARow); break;
+				case "System.LibraryVersions" : PopulateLibraryVersions(AProgram, AHeader.NativeTable, ARow); break;
+				case "System.LoadedLibraries" : PopulateLoadedLibraries(AProgram, AHeader.NativeTable, ARow); break;
 				default: base.InternalPopulateTableVar(AProgram, AHeader, ARow);
 			}
 		}

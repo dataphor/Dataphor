@@ -13,86 +13,56 @@ namespace Alphora.Dataphor.DAE.Contracts
 	[DataContract]
 	public class PlanDescriptor
 	{
-		public PlanDescriptor
-		(
-			int AHandle,
-			Guid AID,
-			PlanStatistics AStatistics,
-			Exception[] AMessages,
-			CursorCapability ACapabilities,
-			CursorType ACursorType,
-			CursorIsolation ACursorIsolation,
-			long ACacheTimeStamp,
-			long AClientCacheTimeStamp,
-			bool ACacheChanged,
-			string AObjectName,
-			string ACatalog
-		) : base()
-		{
-			FHandle = AHandle;
-			FID = AID;
-			FStatistics = AStatistics;
-			FMessages = AMessages;
-			FCapabilities = ACapabilities;
-			FCursorType = ACursorType;
-			FCursorIsolation = ACursorIsolation;
-			FCacheTimeStamp = ACacheTimeStamp;
-			FClientCacheTimeStamp = AClientCacheTimeStamp;
-			ACacheChanged = FCacheChanged;
-			FObjectName = AObjectName;
-			FCatalog = ACatalog;
-		}
-		
 		[DataMember]
 		private int FHandle;
-		public int Handle { get { return FHandle; } }
+		public int Handle { get { return FHandle; } set { FHandle = value } }
 		
 		[DataMember]
 		private Guid FID;
-		public Guid ID { get { return FID; } }
+		public Guid ID { get { return FID; } set { FID = value; } }
 		
 		[DataMember]
 		private PlanStatistics FStatistics;
-		public PlanStatistics Statistics { get { return FStatistics; } }
+		public PlanStatistics Statistics { get { return FStatistics; } set { FStatistics = value; } }
 
 		[DataMember]
 		private Exception[] FMessages;
-		public Exception[] Messages { get { return FMessages; } }
+		public Exception[] Messages { get { return FMessages; } set { FMessages = value; } }
 		
 		[DataMember]
 		private CursorCapability FCapabilities;
-		public CursorCapability Capabilities { get { return FCapabilities; } }
+		public CursorCapability Capabilities { get { return FCapabilities; } set { FCapabilities = value; } }
 		
 		[DataMember]
 		private CursorType FCursorType;
-		public CursorType CursorType { get { return FCursorType; } }
+		public CursorType CursorType { get { return FCursorType; } set { FCursorType = value; } }
 
 		[DataMember]
 		private CursorIsolation FCursorIsolation;
-		public CursorIsolation CursorIsolation { get { return FCursorIsolation; } }
+		public CursorIsolation CursorIsolation { get { return FCursorIsolation; } set { FCursorIsolation = value; } }
 		
 		[DataMember]
 		private long FCacheTimeStamp;
-		public long CacheTimeStamp { get { return FCacheTimeStamp; } }
+		public long CacheTimeStamp { get { return FCacheTimeStamp; } set { FCacheTimeStamp = value; } }
 		
 		[DataMember]
 		private long FClientCacheTimeStamp;
-		public long ClientCacheTimeStamp { get { return FClientCacheTimeStamp; } }
+		public long ClientCacheTimeStamp { get { return FClientCacheTimeStamp; } set { FClientCacheTimeStamp = value; } }
 		
 		[DataMember]
 		private bool FCacheChanged;
-		public bool CacheChanged { get { return FCacheChanged; } }
+		public bool CacheChanged { get { return FCacheChanged; } set { FCacheChanged = value; } }
 		
 		[DataMember]
 		private string FObjectName;
-		public string ObjectName { get { return FObjectName; } }
+		public string ObjectName { get { return FObjectName; } set { FObjectName = value; } }
 		
 		[DataMember]
 		private string FCatalog;
-		public string Catalog { get { return FCatalog; } }
+		public string Catalog { get { return FCatalog; } set { FCatalog = value; } }
 		
 		[DataMember]
 		private string FOrder;
-		public string Order { get { return FOrder; } }
+		public string Order { get { return FOrder; } set { FOrder = value; } }
 	}
 }

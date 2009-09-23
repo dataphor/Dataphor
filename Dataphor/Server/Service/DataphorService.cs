@@ -18,6 +18,7 @@ namespace Alphora.Dataphor.DAE.Service
 	using Alphora.Dataphor.DAE.Streams;
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Contracts;
+	using Alphora.Dataphor.DAE.Debug;
 
 	// TODO: Exception management
 	//[ExceptionShielding("WCF Exception Shielding")]
@@ -40,6 +41,13 @@ namespace Alphora.Dataphor.DAE.Service
 			FServer.Start();
 			FRemoteServer = new RemoteServer(FServer);
 			
+			FConnectionManager = new ConnectionManager(FRemoteServer);
+		}
+		
+		public DataphorService(RemoteServer ARemoteServer)
+		{
+			FServer = ARemoteServer.Server;
+			FRemoteServer = ARemoteServer;
 			FConnectionManager = new ConnectionManager(FRemoteServer);
 		}
 		
