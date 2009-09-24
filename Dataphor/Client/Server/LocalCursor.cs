@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
+using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -274,15 +275,15 @@ namespace Alphora.Dataphor.DAE.Server
 
 		// Flags tracks the current status of the remote cursor, BOF, EOF, none, or both
 		protected bool FFlagsCached;
-		protected RemoteCursorGetFlags FFlags;
+		protected CursorGetFlags FFlags;
 		
-		protected void SetFlags(RemoteCursorGetFlags AFlags)
+		protected void SetFlags(CursorGetFlags AFlags)
 		{
 			FFlags = AFlags;
 			FFlagsCached = true;
 		}
 		
-		protected RemoteCursorGetFlags GetFlags()
+		protected CursorGetFlags GetFlags()
 		{
 			if (!FFlagsCached)
 			{
