@@ -313,6 +313,12 @@ namespace Alphora.Dataphor.DAE.Server
 			
 			/// <summary>Error code 106204: "The debugger cannot be attached to an in-process session."</summary>
 			CannotAttachToAnInProcessSession = 106204,
+			
+			/// <summary>Error code 106205: "Unknown object handle."</summary>
+			UnknownObjectHandle = 106205,
+			
+			/// <summary>Error code 106206: "Plan "{0}" not found."</summary>
+			PlanNotFound = 106206,
 		}
 		
 		// Resource manager for this exception class

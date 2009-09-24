@@ -1575,7 +1575,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				// Lookup the object in the catalog index
 				string LObjectName;
-				if (Device.FCatalogIndex.TryGetValue(AObjectID, out LObjectName))
+				if (Device.CatalogIndex.TryGetValue(AObjectID, out LObjectName))
 					return (Schema.CatalogObject)Catalog[LObjectName];
 				else
 					return null;
@@ -1603,12 +1603,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		protected virtual Schema.CatalogObjectHeaders CachedResolveOperatorName(string AName)
 		{
-			return Device.FOperatorNameCache.Resolve(AName);
-		}
-
-		protected void CacheResolvedOperatorName(string AName, Schema.CatalogObjectHeaders LResult)
-		{
-			Device.FOperatorNameCache.Add(AName, LResult);
+			return Device.OperatorNameCache.Resolve(AName);
 		}
 
 		/// <summary>Returns the cached object for the given object id, if it exists and is in the cache, null otherwise.</summary>
@@ -1623,7 +1618,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			lock (Catalog)
 			{
 				string LObjectName;
-				if (Device.FCatalogIndex.TryGetValue(AObjectID, out LObjectName))
+				if (Device.CatalogIndex.TryGetValue(AObjectID, out LObjectName))
 					return (Schema.CatalogObject)Catalog[LObjectName];
 					
 				if (AMustResolve)
@@ -1727,7 +1722,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				Catalog.Add(AObject);
 				
 				// Add the object to the cache index
-				Device.FCatalogIndex.Add(AObject.ID, Schema.Object.EnsureRooted(AObject.Name));
+				Device.CatalogIndex.Add(AObject.ID, Schema.Object.EnsureRooted(AObject.Name));
 			}
 		}
 		
@@ -1737,16 +1732,16 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			lock (Catalog)
 			{
 				// Remove the object from the cache index
-				Device.FCatalogIndex.Remove(AObject.ID);
+				Device.CatalogIndex.Remove(AObject.ID);
 				
 				// Remove the object from the cache
 				Catalog.SafeRemove(AObject);
 				
 				// Clear the name resolution cache
-				Device.FNameCache.Clear();
+				Device.NameCache.Clear();
 				
 				// Clear the operator name resolution cache
-				Device.FOperatorNameCache.Clear();
+				Device.OperatorNameCache.Clear();
 			}
 		}
 		
@@ -2071,7 +2066,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		public void MarkViewForRecompile(int AObjectID)
 		{
 			string LObjectName;
-			if (Device.FCatalogIndex.TryGetValue(AObjectID, out LObjectName))
+			if (Device.CatalogIndex.TryGetValue(AObjectID, out LObjectName))
 				((Schema.DerivedTableVar)Catalog[LObjectName]).ShouldReinferReferences = true;
 		}
 
@@ -3483,7 +3478,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			CacheCatalogObject(ARole);
 
 			// Clear the name cache (this is done in InsertPersistentObject for all other catalog objects)
-			Device.FNameCache.Clear();
+			Device.NameCache.Clear();
 
 			// If we are not deserializing
 			if (!ServerProcess.InLoadingContext())

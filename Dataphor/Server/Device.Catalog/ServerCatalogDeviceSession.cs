@@ -38,7 +38,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		}
 
 		public new ServerCatalogDevice Device { get { return (ServerCatalogDevice)base.Device; } }
-
+		
 		#region Execute
 		
 		protected override object InternalExecute(Program AProgram, Schema.DevicePlan ADevicePlan)
@@ -329,10 +329,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		private void InsertPersistentObject(Schema.Object AObject)
 		{
 			if (AObject is CatalogObject)
-				Device.FNameCache.Clear();
+				Device.NameCache.Clear();
 
 			if (AObject is Operator)
-				Device.FOperatorNameCache.Clear();
+				Device.OperatorNameCache.Clear();
 
 			AcquireCatalogStoreConnection(true);
 			try
@@ -376,10 +376,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		private void DeletePersistentObject(Schema.Object AObject)
 		{
 			if (AObject is Schema.CatalogObject)
-				Device.FNameCache.Clear();
+				Device.NameCache.Clear();
 
 			if (AObject is Schema.Operator)
-				Device.FOperatorNameCache.Clear();
+				Device.OperatorNameCache.Clear();
 
 			AcquireCatalogStoreConnection(true);
 			try
@@ -438,8 +438,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			if
 			(
 				(
-					((ACatalogObjectID < 0) && !Device.FCatalogIndex.ContainsKey(AObjectID)) ||
-					((ACatalogObjectID >= 0) && !Device.FCatalogIndex.ContainsKey(ACatalogObjectID))
+					((ACatalogObjectID < 0) && !Device.CatalogIndex.ContainsKey(AObjectID)) ||
+					((ACatalogObjectID >= 0) && !Device.CatalogIndex.ContainsKey(ACatalogObjectID))
 				) &&
 				!ALoadOrder.Contains(AObjectID)
 			)
@@ -1245,7 +1245,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			LoadPersistentObject(AProgram, AObjectID, AUser, ALibraryName, AScript, AIsATObject);
 
 			string LObjectName;
-			if (Device.FCatalogIndex.TryGetValue(AObjectID, out LObjectName))
+			if (Device.CatalogIndex.TryGetValue(AObjectID, out LObjectName))
 			{
 				Schema.CatalogObject LResult = (Schema.CatalogObject)Catalog[LObjectName];
 				if (AIsGenerated)
@@ -1377,7 +1377,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		private Schema.CatalogObjectHeaders CachedResolveCatalogObjectName(string AName)
 		{
-			Schema.CatalogObjectHeaders LResult = Device.FNameCache.Resolve(AName);
+			Schema.CatalogObjectHeaders LResult = Device.NameCache.Resolve(AName);
 
 			if (LResult == null)
 			{
@@ -1385,7 +1385,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				try
 				{
 					LResult = CatalogStoreConnection.ResolveCatalogObjectName(AName);
-					Device.FNameCache.Add(AName, LResult);
+					Device.NameCache.Add(AName, LResult);
 				}
 				finally
 				{
@@ -1469,7 +1469,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				try
 				{
 					LResult = CatalogStoreConnection.ResolveOperatorName(AName);
-					CacheResolvedOperatorName(AName, LResult);
+					Device.OperatorNameCache.Add(AName, LResult);
 				}
 				finally
 				{
@@ -1980,7 +1980,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				string LObjectName;
 				Schema.CatalogObjectHeaders LHeaders = CatalogStoreConnection.SelectUserOperators(AUserID);
 				for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
-					if (Device.FCatalogIndex.TryGetValue(LHeaders[LIndex].ID, out LObjectName))
+					if (Device.CatalogIndex.TryGetValue(LHeaders[LIndex].ID, out LObjectName))
 						((Schema.Operator)Catalog[LObjectName]).ShouldRecompile = true;
 			}
 			finally

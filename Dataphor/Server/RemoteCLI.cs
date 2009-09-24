@@ -7,7 +7,6 @@
 using System;
 using System.IO;
 using System.Collections;
-using System.Runtime.Remoting.Lifetime;
 
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Contracts;
@@ -101,18 +100,18 @@ namespace Alphora.Dataphor.DAE
         /// <summary> Prepares the given statement for remote execution. </summary>
         /// <param name='AStatement'> A single valid Dataphor statement to prepare. </param>
         /// <returns> An <see cref="IServerStatementPlan"/> instance for the prepared statement. </returns>
-        IRemoteServerStatementPlan PrepareStatement(string AStatement, RemoteParam[] AParams, DebugLocator ALocator, out PlanDescriptor APlanDescriptor, ProcessCleanupInfo ACleanupInfo);
+        IRemoteServerStatementPlan PrepareStatement(string AStatement, RemoteParam[] AParams, DebugLocator ALocator, out PlanDescriptor APlanDescriptor, RemoteProcessCleanupInfo ACleanupInfo);
         
         /// <summary> Unprepares a statement plan. </summary>
         /// <param name="APlan"> A reference to a plan object returned from a call to PrepareStatement. </param>
         void UnprepareStatement(IRemoteServerStatementPlan APlan);
         
-        void Execute(string AStatement, ref RemoteParamData AParams, ProcessCallInfo ACallInfo, ProcessCleanupInfo ACleanupInfo);
+        void Execute(string AStatement, ref RemoteParamData AParams, ProcessCallInfo ACallInfo, RemoteProcessCleanupInfo ACleanupInfo);
         
         /// <summary> Prepares the given expression for remote selection. </summary>
         /// <param name='AExpression'> A single valid Dataphor expression to prepare. </param>
         /// <returns> An <see cref="IServerExpressionPlan"/> instance for the prepared expression. </returns>
-        IRemoteServerExpressionPlan PrepareExpression(string AExpression, RemoteParam[] AParams, DebugLocator ALocator, out PlanDescriptor APlanDescriptor, ProcessCleanupInfo ACleanupInfo);
+        IRemoteServerExpressionPlan PrepareExpression(string AExpression, RemoteParam[] AParams, DebugLocator ALocator, out PlanDescriptor APlanDescriptor, RemoteProcessCleanupInfo ACleanupInfo);
         
         /// <summary> Unprepares an expression plan. </summary>
         /// <param name="APlan"> A reference to a plan object returned from a call to PrepareExpression. </param>
@@ -125,7 +124,7 @@ namespace Alphora.Dataphor.DAE
 			out IRemoteServerExpressionPlan APlan, 
 			out PlanDescriptor APlanDescriptor, 
 			ProcessCallInfo ACallInfo, 
-			ProcessCleanupInfo ACleanupInfo
+			RemoteProcessCleanupInfo ACleanupInfo
 		);
         
         /// <summary> Opens a remote, server-side cursor based on the prepared statement this plan represents. </summary>        
@@ -137,7 +136,7 @@ namespace Alphora.Dataphor.DAE
 			out IRemoteServerExpressionPlan APlan, 
 			out PlanDescriptor APlanDescriptor, 
 			ProcessCallInfo ACallInfo,
-			ProcessCleanupInfo ACleanupInfo
+			RemoteProcessCleanupInfo ACleanupInfo
 		);
 		
 		/// <summary>Opens a remote, server-side cursor based on the prepared statement this plan represents, and fetches count rows.</summary>
@@ -151,7 +150,7 @@ namespace Alphora.Dataphor.DAE
 			out IRemoteServerExpressionPlan APlan,
 			out PlanDescriptor APlanDescriptor,
 			ProcessCallInfo ACallInfo,
-			ProcessCleanupInfo ACleanupInfo,
+			RemoteProcessCleanupInfo ACleanupInfo,
 			out Guid[] ABookmarks, 
 			int ACount, 
 			out RemoteFetchData AFetchData
@@ -406,4 +405,11 @@ namespace Alphora.Dataphor.DAE
 	{
 		void Ping(); // this doesn't really need to do anything, just allow the server to contact this client or vise versa
 	}
+
+	/// <nodoc/>
+	public struct RemoteProcessCleanupInfo
+    {
+		public IRemoteServerPlan[] UnprepareList;
+    }
 }
+

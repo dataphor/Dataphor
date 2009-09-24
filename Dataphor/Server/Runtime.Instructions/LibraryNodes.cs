@@ -998,7 +998,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					SessionInfo LSessionInfo = new SessionInfo(LLoadedLibrary.Owner.ID == Server.CSystemUserID ? Server.CAdminUserID : LLoadedLibrary.Owner.ID, "", LLoadedLibrary.Name);
 					LSessionInfo.DefaultUseImplicitTransactions = false;
-					IServerSession LSession = AProgram.ServerProcess.ServerSession.Server.ConnectAs(LSessionInfo);
+					IServerSession LSession = ((Server)AProgram.ServerProcess.ServerSession.Server).ConnectAs(LSessionInfo);
 					try
 					{
 						ServerProcess LProcess = LSession.StartProcess(new ProcessInfo(LSession.SessionInfo)) as ServerProcess;

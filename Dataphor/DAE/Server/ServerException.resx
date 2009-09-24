@@ -419,4 +419,7 @@
   <data name="106204" xml:space="preserve">
     <value>The debugger cannot be attached to an in-process session.</value>
   </data>
+  <data name="106205" xml:space="preserve">
+    <value>Unknown object handle.</value>
+  </data>
 </root>

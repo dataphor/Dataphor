@@ -174,6 +174,30 @@ namespace Alphora.Dataphor.DAE.Server
 			get { return (ServerPlan)base[AIndex]; }
 			set { base[AIndex] = value; }
 		}
+		
+		public int IndexOf(Guid APlanID)
+		{
+			for (int LIndex = 0; LIndex < Count; LIndex++)
+				if (this[LIndex].ID == APlanID)
+					return LIndex;
+			return -1;
+		}
+		
+		public bool Contains(Guid APlanID)
+		{
+			return IndexOf(APlanID) >= 0;
+		}
+		
+		public ServerPlan this[Guid APlanID]
+		{
+			get
+			{
+				int LIndex = IndexOf(APlanID);
+				if (LIndex >= 0)
+					return this[LIndex];
+				throw new ServerException(ServerException.Codes.PlanNotFound, APlanID);
+			}
+		}
 	}
 
 	// ServerStatementPlan	

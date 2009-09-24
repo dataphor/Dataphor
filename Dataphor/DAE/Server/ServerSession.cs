@@ -116,7 +116,7 @@ namespace Alphora.Dataphor.DAE.Server
         
 		// Processes
 		private ServerProcesses FProcesses;
-		protected internal ServerProcesses Processes { get { return FProcesses; } }		
+		public ServerProcesses Processes { get { return FProcesses; } }		
 
 		// Server
 		private Engine FServer;

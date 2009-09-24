@@ -1,91 +1,108 @@
-﻿using System;
+﻿/*
+	Alphora Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Runtime.Serialization;
+
 using Alphora.Dataphor.DAE.Server;
+using Alphora.Dataphor.DAE.Language;
 
 namespace Alphora.Dataphor.DAE.Contracts
 {
-	[Serializable]
 	/// <nodoc/>
+	[DataContract]
 	public struct RemoteRowHeader
     {
+		[DataMember]
 		public string[] Columns;
     }
     
-	[Serializable]
 	/// <nodoc/>
+	[DataContract]
 	public struct RemoteRowBody
     {
+		[DataMember]
 		public byte[] Data;
     }
     
-	[Serializable]
 	/// <nodoc/>
+	[DataContract]
 	public struct RemoteRow
     {
+		[DataMember]
 		public RemoteRowHeader Header;
+
+		[DataMember]
 		public RemoteRowBody Body;
     }
 
-	/* HACK: We have discovered that while remoting, some types of complicated nested structs are not able to be
-	 * passed through the remoting layer.  A fix up error is given.  MOS noticed that there are at least two
-	 * different errors that can be received.
-	 * One case is where a struct contains an array of a different struct
-	 * in which that struct has an array of a native data type (or more complicated than this).
-	 * The other case is when a struct contains a struct which contains an enum.  This is a case in our system.
-	 * To overcome this bug, in two of our structs below, the enums were replaced with bytes (for they both fit in
-	 * a byte) and in the places that they are referenced they are cast from enum to byte or vice versa.
-	 * This bug was reported to microsoft, and should be fixed in version 1.1 of the framework.
-	 * MOS
-	*/	
-
-	[Serializable]
 	/// <nodoc/>
+	[DataContract]
 	public struct RemoteFetchData
     {
+		[DataMember]
 		public RemoteRowBody[] Body;
-		public byte Flags; // hack: changed from 'CursorGetFlags' to 'byte' in order fix fixup error
+
+		[DataMember]
+		public CursorGetFlags Flags;
 	}
 
-	[Serializable]
 	/// <nodoc/>
+	[DataContract]
 	public struct RemoteProposeData
     {
 		public bool Success;
 		public RemoteRowBody Body;
     }
 
-    [Serializable]
 	/// <nodoc/>
+	[DataContract]
 	public struct RemoteParam
     {
+		[DataMember]
 		public string Name;
+
+		[DataMember]
 		public string TypeName;
-		public byte Modifier; // hack: changed from 'Modifier' to 'byte' to fix fixup error
+
+		[DataMember]
+		public Modifier Modifier; // hack: changed from 'Modifier' to 'byte' to fix fixup error
     }
     
-    [Serializable]
 	/// <nodoc/>
+	[DataContract]
 	public struct RemoteParamData
     {
+		[DataMember]
 		public RemoteParam[] Params;
+
+		[DataMember]
 		public RemoteRowBody Data;
     }
 
-    [Serializable]
 	/// <nodoc/>
+	[DataContract]
 	public struct RemoteMoveData
     {
+		[DataMember]
 		public int Count;
+
+		[DataMember]
 		public CursorGetFlags Flags;
     }
     
-	[Serializable]
 	/// <nodoc/>
+	[DataContract]
 	public struct RemoteGotoData
     {
+		[DataMember]
 		public bool Success;
+
+		[DataMember]
 		public CursorGetFlags Flags;
     }
 }

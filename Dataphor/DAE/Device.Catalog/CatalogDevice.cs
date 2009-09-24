@@ -44,16 +44,19 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		// Users cache, maintained exclusively through the catalog maintenance API on the CatalogDeviceSession		
 		private Users FUsersCache = new Users();
-		internal Users UsersCache { get { return FUsersCache; } }
+		protected internal Users UsersCache { get { return FUsersCache; } }
 		
 		// Catalog index, maintained exclusively through the catalog maintenance API on the CatalogDeviceSession
 		// The catalog index stores the name of each object in the catalog cache by it's object ID
 		// Note that the names are stored rooted in this index.
-		internal Dictionary<int, string> FCatalogIndex = new Dictionary<int, string>();
+		private Dictionary<int, string> FCatalogIndex = new Dictionary<int, string>();
+		protected internal Dictionary<int, string> CatalogIndex { get { return FCatalogIndex; } }
 		
-		internal NameResolutionCache FNameCache = new NameResolutionCache(CDefaultNameResolutionCacheSize);
+		private NameResolutionCache FNameCache = new NameResolutionCache(CDefaultNameResolutionCacheSize);
+		protected internal NameResolutionCache NameCache { get { return FNameCache; } }
 		
-		internal NameResolutionCache FOperatorNameCache = new NameResolutionCache(CDefaultNameResolutionCacheSize);
+		private NameResolutionCache FOperatorNameCache = new NameResolutionCache(CDefaultNameResolutionCacheSize);
+		protected internal NameResolutionCache OperatorNameCache { get { return FOperatorNameCache; } }
 		
 		public const int CDefaultNameResolutionCacheSize = 1000;
 

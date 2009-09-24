@@ -171,7 +171,7 @@ namespace Alphora.Dataphor.DAE.Language
     public abstract class Expression : Statement {}
 
 	[DataContract]    
-	public enum Modifier : byte {In, Var, Out, Const}
+	public enum Modifier : byte { In, Var, Out, Const }
 	
 	public class ParameterExpression : Expression
 	{

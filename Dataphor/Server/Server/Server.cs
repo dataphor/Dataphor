@@ -44,6 +44,13 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			Alphora.Dataphor.Windows.AssemblyUtility.Initialize();
 		}
+		
+		internal new ServerSessions Sessions { get { return base.Sessions; } }
+		
+		internal new IServerSession ConnectAs(SessionInfo ASessionInfo)
+		{
+			return base.ConnectAs(ASessionInfo);
+		}
 
 		protected override void InternalStart()
 		{

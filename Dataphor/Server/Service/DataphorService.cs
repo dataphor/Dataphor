@@ -154,7 +154,7 @@ namespace Alphora.Dataphor.DAE.Service
 			// It seems to me we should be able to perform the assignment directly to LDescriptor because it will be assigned by the out
 			// evaluation in the PrepareStatement call, but the C# compiler is complaining that this is a use of unassigned local variable.
 			//LDescriptor.Handle = FHandleManager.GetHandle(FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).PrepareStatement(AStatement, AParams, ALocator, out LDescriptor, ACleanupInfo));
-			int LHandle = FHandleManager.GetHandle(FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).PrepareStatement(AStatement, AParams, ALocator, out LDescriptor, ACleanupInfo));
+			int LHandle = FHandleManager.GetHandle(FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).PrepareStatement(AStatement, AParams, ALocator, out LDescriptor, GetRemoteProcessCleanupInfo(ACleanupInfo)));
 			LDescriptor.Handle = LHandle;
 			return LDescriptor;
 		}
@@ -168,11 +168,20 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 			FHandleManager.GetObject<RemoteServerStatementPlan>(APlanHandle).Unprepare();
 		}
+		
+		private RemoteProcessCleanupInfo GetRemoteProcessCleanupInfo(ProcessCleanupInfo ACleanupInfo)
+		{
+			RemoteProcessCleanupInfo LCleanupInfo = new RemoteProcessCleanupInfo();
+			LCleanupInfo.UnprepareList = new IRemoteServerPlan[ACleanupInfo.UnprepareList.Length];
+			for (int LIndex = 0; LIndex < ACleanupInfo.UnprepareList.Length; LIndex++)
+				LCleanupInfo.UnprepareList[LIndex] = FHandleManager.GetObject<RemoteServerPlan>(ACleanupInfo.UnprepareList[LIndex]);
+			return LCleanupInfo;
+		}
 
 		public PlanDescriptor PrepareExpression(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, string AExpression, RemoteParam[] AParams, DebugLocator ALocator)
 		{
 			PlanDescriptor LDescriptor;
-			int LHandle = FHandleManager.GetHandle(FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).PrepareExpression(AExpression, AParams, ALocator, out LDescriptor, ACleanupInfo));
+			int LHandle = FHandleManager.GetHandle(FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).PrepareExpression(AExpression, AParams, ALocator, out LDescriptor, GetRemoteProcessCleanupInfo(ACleanupInfo)));
 			LDescriptor.Handle = LHandle;
 			return LDescriptor;
 		}

@@ -185,7 +185,7 @@ namespace Alphora.Dataphor.DAE.Server
 				for (int LIndex = 0; LIndex < LCount; LIndex++)
 					LFetchData.Body[LIndex].Data = LRows[LIndex].AsPhysical;
 				
-				LFetchData.Flags = (byte)LFlags; //HACK: cast to fix MSs error
+				LFetchData.Flags = LFlags;
 				return LFetchData;
 			}
 			finally

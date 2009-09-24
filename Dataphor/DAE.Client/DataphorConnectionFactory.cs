@@ -34,8 +34,8 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 
-		public List<ServerInfo> ServerList = new List<ServerInfo>();
-		public Hashtable ServerHash = new Hashtable();
+		private List<ServerInfo> ServerList = new List<ServerInfo>();
+		private Hashtable ServerHash = new Hashtable();
 
 		public void AddServer(ServerAlias AAlias, string ALogin, string APassword)
 		{

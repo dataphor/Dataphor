@@ -583,7 +583,7 @@ namespace Alphora.Dataphor.DAE.Server
 		internal protected ServerSession FSystemSession;
 
 		private ServerSessions FSessions;
-		protected internal ServerSessions Sessions { get { return FSessions; } }
+		public ServerSessions Sessions { get { return FSessions; } }
 
 		private int FNextSessionID = 1;
 		private int GetNextSessionID()
@@ -949,7 +949,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		internal IServerSession ConnectAs(SessionInfo ASessionInfo)
+		protected internal IServerSession ConnectAs(SessionInfo ASessionInfo)
 		{
 			ASessionInfo.Password = Schema.SecurityUtility.DecryptPassword(FSystemProcess.CatalogDeviceSession.ResolveUser(ASessionInfo.UserID).Password);
 			return ((IServer)this).Connect(ASessionInfo);
@@ -1152,7 +1152,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		internal void LibraryUnloaded(string ALibraryName)
+		public void LibraryUnloaded(string ALibraryName)
 		{
 			foreach (ServerSession LSession in Sessions)
 				if (LSession.CurrentLibrary.Name == ALibraryName)

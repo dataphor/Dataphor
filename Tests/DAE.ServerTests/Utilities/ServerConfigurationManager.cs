@@ -10,6 +10,6 @@ namespace Alphora.Dataphor.DAE.ServerTests.Utilities
 
 		ServerConfiguration GetTestConfiguration(string AInstanceName);
 		void ResetInstance();
-		Server.Engine GetServer();
+		Server.Server GetServer();
 	}
 }

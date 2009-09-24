@@ -141,7 +141,7 @@ namespace Alphora.Dataphor.DAE.Server
 			
 			// Build the list of all files required to load the assemblies in all libraries required by the library for the given class
 			Schema.Library LLibrary = FServerProcess.ServerSession.Server.Catalog.Libraries[LClass.Library.Name];
-			ServerFileInfos LFileInfos = FServerProcess.GetFileNames(LLibrary);
+			ServerFileInfos LFileInfos = FSession.Server.Server.GetFileNames(LLibrary);
 			
 			// Return the results in reverse order to ensure that dependencies are loaded in the correct order
 			ServerFileInfo[] LResults = new ServerFileInfo[LFileInfos.Count];
@@ -158,7 +158,7 @@ namespace Alphora.Dataphor.DAE.Server
 				(
 					new FileStream
 					(
-						FServerProcess.GetFullFileName(FServerProcess.ServerSession.Server.Catalog.Libraries[ALibraryName], AFileName), 
+						FSession.Server.Server.GetFullFileName(FServerProcess.ServerSession.Server.Catalog.Libraries[ALibraryName], AFileName), 
 						FileMode.Open, 
 						FileAccess.Read, 
 						FileShare.Read
@@ -177,7 +177,7 @@ namespace Alphora.Dataphor.DAE.Server
 			return LDescriptor;
 		}
 		
-		private void CleanupPlans(ProcessCleanupInfo ACleanupInfo)
+		private void CleanupPlans(RemoteProcessCleanupInfo ACleanupInfo)
 		{
 			int LPlanIndex;
 			for (int LIndex = 0; LIndex < ACleanupInfo.UnprepareList.Length; LIndex++)
@@ -193,7 +193,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		public IRemoteServerStatementPlan PrepareStatement(string AStatement, RemoteParam[] AParams, DebugLocator ALocator, out PlanDescriptor APlanDescriptor, ProcessCleanupInfo ACleanupInfo)
+		public IRemoteServerStatementPlan PrepareStatement(string AStatement, RemoteParam[] AParams, DebugLocator ALocator, out PlanDescriptor APlanDescriptor, RemoteProcessCleanupInfo ACleanupInfo)
 		{
 			try
 			{
@@ -222,7 +222,7 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		// Execute
-		public void Execute(string AStatement, ref RemoteParamData AParams, ProcessCallInfo ACallInfo, ProcessCleanupInfo ACleanupInfo)
+		public void Execute(string AStatement, ref RemoteParamData AParams, ProcessCallInfo ACallInfo, RemoteProcessCleanupInfo ACleanupInfo)
 		{
 			ProcessCallInfo(ACallInfo);
 			DataParams LParams = RemoteParamsToDataParams(AParams.Params);
@@ -250,7 +250,7 @@ namespace Alphora.Dataphor.DAE.Server
 			return LDescriptor;
 		}
 		
-		public IRemoteServerExpressionPlan PrepareExpression(string AExpression, RemoteParam[] AParams, DebugLocator ALocator, out PlanDescriptor APlanDescriptor, ProcessCleanupInfo ACleanupInfo)
+		public IRemoteServerExpressionPlan PrepareExpression(string AExpression, RemoteParam[] AParams, DebugLocator ALocator, out PlanDescriptor APlanDescriptor, RemoteProcessCleanupInfo ACleanupInfo)
 		{
 			try
 			{
@@ -285,7 +285,7 @@ namespace Alphora.Dataphor.DAE.Server
 			out IRemoteServerExpressionPlan APlan, 
 			out PlanDescriptor APlanDescriptor, 
 			ProcessCallInfo ACallInfo,
-			ProcessCleanupInfo ACleanupInfo
+			RemoteProcessCleanupInfo ACleanupInfo
 		)
 		{
 			ProcessCallInfo(ACallInfo);
@@ -313,7 +313,7 @@ namespace Alphora.Dataphor.DAE.Server
 			out IRemoteServerExpressionPlan APlan, 
 			out PlanDescriptor APlanDescriptor, 
 			ProcessCallInfo ACallInfo,
-			ProcessCleanupInfo ACleanupInfo
+			RemoteProcessCleanupInfo ACleanupInfo
 		)
 		{
 			ProcessCallInfo(ACallInfo);
@@ -341,7 +341,7 @@ namespace Alphora.Dataphor.DAE.Server
 			out IRemoteServerExpressionPlan APlan,
 			out PlanDescriptor APlanDescriptor,
 			ProcessCallInfo ACallInfo,
-			ProcessCleanupInfo ACleanupInfo,
+			RemoteProcessCleanupInfo ACleanupInfo,
 			out Guid[] ABookmarks,
 			int ACount,
 			out RemoteFetchData AFetchData

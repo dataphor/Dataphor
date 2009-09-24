@@ -14,55 +14,42 @@ namespace Alphora.Dataphor.DAE.Contracts
 	public class PlanDescriptor
 	{
 		[DataMember]
-		private int FHandle;
-		public int Handle { get { return FHandle; } set { FHandle = value; } }
+		public int Handle;
 		
 		[DataMember]
-		private Guid FID;
-		public Guid ID { get { return FID; } set { FID = value; } }
+		public Guid ID;
 		
 		[DataMember]
-		private PlanStatistics FStatistics;
-		public PlanStatistics Statistics { get { return FStatistics; } set { FStatistics = value; } }
+		public PlanStatistics Statistics;
 
 		[DataMember]
-		private Exception[] FMessages;
-		public Exception[] Messages { get { return FMessages; } set { FMessages = value; } }
+		public Exception[] Messages;
 		
 		[DataMember]
-		private CursorCapability FCapabilities;
-		public CursorCapability Capabilities { get { return FCapabilities; } set { FCapabilities = value; } }
+		public CursorCapability Capabilities;
 		
 		[DataMember]
-		private CursorType FCursorType;
-		public CursorType CursorType { get { return FCursorType; } set { FCursorType = value; } }
+		public CursorType CursorType;
 
 		[DataMember]
-		private CursorIsolation FCursorIsolation;
-		public CursorIsolation CursorIsolation { get { return FCursorIsolation; } set { FCursorIsolation = value; } }
+		public CursorIsolation CursorIsolation;
 		
 		[DataMember]
-		private long FCacheTimeStamp;
-		public long CacheTimeStamp { get { return FCacheTimeStamp; } set { FCacheTimeStamp = value; } }
+		public long CacheTimeStamp;
 		
 		[DataMember]
-		private long FClientCacheTimeStamp;
-		public long ClientCacheTimeStamp { get { return FClientCacheTimeStamp; } set { FClientCacheTimeStamp = value; } }
+		public long ClientCacheTimeStamp;
 		
 		[DataMember]
-		private bool FCacheChanged;
-		public bool CacheChanged { get { return FCacheChanged; } set { FCacheChanged = value; } }
+		public bool CacheChanged;
 		
 		[DataMember]
-		private string FObjectName;
-		public string ObjectName { get { return FObjectName; } set { FObjectName = value; } }
+		public string ObjectName;
 		
 		[DataMember]
-		private string FCatalog;
-		public string Catalog { get { return FCatalog; } set { FCatalog = value; } }
+		public string Catalog;
 		
 		[DataMember]
-		private string FOrder;
-		public string Order { get { return FOrder; } set { FOrder = value; } }
+		public string Order;
 	}
 }

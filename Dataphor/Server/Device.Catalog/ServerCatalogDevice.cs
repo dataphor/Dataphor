@@ -27,6 +27,14 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				return FStore;
 			}
 		}
+		
+		internal new Users UsersCache { get { return base.UsersCache; } }
+		
+		internal new Dictionary<int, string> CatalogIndex { get { return base.CatalogIndex; } }
+		
+		internal new NameResolutionCache NameCache { get { return base.NameCache; } }
+		
+		internal new NameResolutionCache OperatorNameCache { get { return base.OperatorNameCache; } }
 
 		public int MaxStoreConnections
 		{

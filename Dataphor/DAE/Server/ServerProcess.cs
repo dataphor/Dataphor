@@ -1107,7 +1107,7 @@ namespace Alphora.Dataphor.DAE.Server
 		// Transaction		
 		private IServerDTCTransaction FDTCTransaction;
 		private ServerTransactions FTransactions = new ServerTransactions();
-		internal ServerTransactions Transactions { get { return FTransactions; } }
+		public ServerTransactions Transactions { get { return FTransactions; } }
 
 		internal ServerTransaction CurrentTransaction { get { return FTransactions.CurrentTransaction(); } }
 		internal ServerTransaction RootTransaction { get { return FTransactions.RootTransaction(); } }

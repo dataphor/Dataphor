@@ -11,12 +11,12 @@ using System.Text;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
-using Alphora.Dataphor.DAE.ServerTests.Utilities;
-using Alphora.Dataphor.Logging;
+
 using NUnit.Framework;
 
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Language.D4;
+using Alphora.Dataphor.DAE.ServerTests.Utilities;
 
 /*
 create table SQLCETiming from
@@ -57,8 +57,6 @@ namespace Alphora.Dataphor.DAE.ServerTests
 	[TestFixture]
 	public class CatalogStoreTest
 	{
-		private static readonly ILogger SRFLogger = LoggerFactory.Instance.CreateLogger(typeof (CatalogStoreTest));
-		
 		private void CatalogRegressionTest(ServerConfigurationManager AServerConfigurationManager)
 		{
 			// Create a test configuration

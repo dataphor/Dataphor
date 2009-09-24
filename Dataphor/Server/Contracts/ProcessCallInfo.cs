@@ -11,9 +11,10 @@ using System.Runtime.Serialization;
 namespace Alphora.Dataphor.DAE.Contracts
 {
     /// <nodoc/>
-    [Serializable]
+	[DataContract]
     public struct ProcessCallInfo
     {
+		[DataMember]
 		public IsolationLevel[] TransactionList;
     }
 }

@@ -635,12 +635,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			if (AProgram.ServerProcess.ServerSession.User.ID != AProgram.ServerProcess.ServerSession.Server.AdminUser.ID)
-				throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, AProgram.ServerProcess.ServerSession.User.ID);
-			AProgram.ServerProcess.ServerSession.Server.ClearCatalog();
-			AProgram.ServerProcess.ServerSession.SetUser(AProgram.ServerProcess.ServerSession.Server.AdminUser);
-			AProgram.Plan.UpdateSecurityContexts(AProgram.ServerProcess.ServerSession.User);
-			return null;
+			throw new NotSupportedException();
+			// This hasn't worked for a long time anyway, so rather than try to expose SetUser safely, just commenting it out.
+			//if (AProgram.ServerProcess.ServerSession.User.ID != AProgram.ServerProcess.ServerSession.Server.AdminUser.ID)
+			//    throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, AProgram.ServerProcess.ServerSession.User.ID);
+			//AProgram.ServerProcess.ServerSession.Server.ClearCatalog();
+			//AProgram.ServerProcess.ServerSession.SetUser(AProgram.ServerProcess.ServerSession.Server.AdminUser);
+			//AProgram.Plan.UpdateSecurityContexts(AProgram.ServerProcess.ServerSession.User);
+			//return null;
 		}
     }
     

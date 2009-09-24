@@ -67,7 +67,7 @@ namespace Alphora.Dataphor.DAE.Service
 			{
 				object LObject;
 				if (!FHandles.TryGetValue(AHandle, out LObject))
-					throw new ServerException(ServerException.Codes.UnknownObjectHandle, ErrorSeverity.System, AHandle);
+					throw new ServerException(ServerException.Codes.UnknownObjectHandle, ErrorSeverity.System);
 				return LObject;
 			}
 		}
@@ -83,7 +83,7 @@ namespace Alphora.Dataphor.DAE.Service
 			{
 				object LObject;
 				if (!FHandles.TryGetValue(AHandle, out LObject))
-					throw new ServerException(ServerException.Codes.UnknownObjectHandle, ErrorSeverity.System, AHandle);
+					throw new ServerException(ServerException.Codes.UnknownObjectHandle, ErrorSeverity.System);
 				FHandles.Remove(AHandle);
 
 				IDisposableNotify LDisposableNotify = LObject as IDisposableNotify;
