@@ -156,7 +156,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public override bool Equals(object AObject)
 		{
 			FileReference LObject = AObject as FileReference;
-			return (LObject != null) && (String.Compare(FFileName, LObject.FileName, true) == 0) && (FIsAssembly == LObject.IsAssembly);
+			return (LObject != null) && String.Equals(FFileName, LObject.FileName, StringComparison.OrdinalIgnoreCase) && (FIsAssembly == LObject.IsAssembly);
 		}
 		
 		public override int GetHashCode()
@@ -201,7 +201,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public int IndexOf(string AFileName)
 		{
 			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (String.Compare(this[LIndex].FileName, AFileName, true) == 0)
+				if (String.Equals(this[LIndex].FileName, AFileName, StringComparison.OrdinalIgnoreCase))
 					return LIndex;
 			return -1;
 		}

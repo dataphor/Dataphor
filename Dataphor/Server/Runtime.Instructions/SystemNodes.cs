@@ -129,4 +129,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return null;
 		}
 	}
+
+	/// <remarks>operator MachineName() : String;</remarks>
+	public class SystemMachineNameNode : InstructionNode
+	{
+		public override object InternalExecute(Program AProgram, object[] AArguments)
+		{
+			return System.Environment.MachineName;
+		}
+	}
+	
+	/// <remarks>operator HostName() : String;</remarks>
+	public class SystemHostNameNode : InstructionNode
+	{
+		public override object InternalExecute(Program AProgram, object[] AArguments)
+		{
+			return AProgram.ServerProcess.ServerSession.SessionInfo.HostName;
+		}
+	}
 }

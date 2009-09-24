@@ -271,7 +271,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 					if (Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemString))
 						if (Operator.Operands[1].DataType.Is(AProgram.DataTypes.SystemString))
-							return new DataphorException((ErrorSeverity)Enum.Parse(typeof(ErrorSeverity), (string)AArguments[0]), DataphorException.CApplicationError, (string)AArguments[1]);
+							return new DataphorException((ErrorSeverity)Enum.Parse(typeof(ErrorSeverity), (string)AArguments[0], false), DataphorException.CApplicationError, (string)AArguments[1]);
 						else
 							return new DataphorException(ErrorSeverity.User, DataphorException.CApplicationError, (string)AArguments[0], (Exception)AArguments[1]);
 
@@ -291,9 +291,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					else
 					{
 						if (Operator.Operands[1].DataType.Is(AProgram.DataTypes.SystemInteger))
-							return new DataphorException((ErrorSeverity)Enum.Parse(typeof(ErrorSeverity), (string)AArguments[0]), (int)AArguments[1], (string)AArguments[2]);
+							return new DataphorException((ErrorSeverity)Enum.Parse(typeof(ErrorSeverity), (string)AArguments[0], false), (int)AArguments[1], (string)AArguments[2]);
 						else
-							return new DataphorException((ErrorSeverity)Enum.Parse(typeof(ErrorSeverity), (string)AArguments[0]), DataphorException.CApplicationError, (string)AArguments[1], (Exception)AArguments[2]);
+							return new DataphorException((ErrorSeverity)Enum.Parse(typeof(ErrorSeverity), (string)AArguments[0], false), DataphorException.CApplicationError, (string)AArguments[1], (Exception)AArguments[2]);
 					}
 				
 				default :
@@ -303,7 +303,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						return null;
 					#endif
 					
-					return new DataphorException((ErrorSeverity)Enum.Parse(typeof(ErrorSeverity), (string)AArguments[0]), (int)AArguments[1], (string)AArguments[2], (Exception)AArguments[3]);
+					return new DataphorException((ErrorSeverity)Enum.Parse(typeof(ErrorSeverity), (string)AArguments[0], false), (int)AArguments[1], (string)AArguments[2], (Exception)AArguments[3]);
 			}
 		}
 	}
@@ -336,9 +336,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Exception LException = (Exception)AArguments[0];
 			DataphorException LDataphorException = LException as DataphorException;
 			if (LDataphorException != null)
-				return new DataphorException((ErrorSeverity)Enum.Parse(typeof(ErrorSeverity), (string)AArguments[1]), LDataphorException.Code, LDataphorException.Message, LDataphorException.InnerException);
+				return new DataphorException((ErrorSeverity)Enum.Parse(typeof(ErrorSeverity), (string)AArguments[1], false), LDataphorException.Code, LDataphorException.Message, LDataphorException.InnerException);
 			else
-				return new DataphorException((ErrorSeverity)Enum.Parse(typeof(ErrorSeverity), (string)AArguments[1]), DataphorException.CApplicationError, LException.Message, LException.InnerException);
+				return new DataphorException((ErrorSeverity)Enum.Parse(typeof(ErrorSeverity), (string)AArguments[1], false), DataphorException.CApplicationError, LException.Message, LException.InnerException);
 		}
 	}
 	
@@ -1018,9 +1018,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					throw new ServerException(ServerException.Codes.UncompiledPlan, LPlan.Messages.ToString(CompilerErrorLevel.NonFatal));
 
 				System.IO.StringWriter LStringWriter = new System.IO.StringWriter();
-				System.Xml.XmlTextWriter LWriter = new System.Xml.XmlTextWriter(LStringWriter);
-				LWriter.Formatting = System.Xml.Formatting.Indented;
-				LWriter.Indentation = 4;
+				System.Xml.XmlWriter LWriter = System.Xml.XmlWriter.Create(LStringWriter, new System.Xml.XmlWriterSettings { Indent = true });
 				LNode.WritePlan(LWriter);
 				LWriter.Flush();
 
@@ -1586,24 +1584,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	}
 	
-	/// <remarks>operator MachineName() : String;</remarks>
-	public class SystemMachineNameNode : InstructionNode
-	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
-		{
-			return System.Environment.MachineName;
-		}
-	}
-	
-	/// <remarks>operator HostName() : String;</remarks>
-	public class SystemHostNameNode : InstructionNode
-	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
-		{
-			return AProgram.ServerProcess.ServerSession.SessionInfo.HostName;
-		}
-	}
-
     /// <remarks> operator NewGuid() : Guid </remarks>
     public class NewGuidNode : InstructionNode
     {
@@ -1733,7 +1713,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected);
 			Schema.ServerLink LServerLink = (Schema.ServerLink)LObject;
 			Schema.User LUser = AProgram.ServerProcess.ServerSession.User;
-			if (String.Compare((string)AArguments[1], Schema.SecurityUtility.DecryptPassword(LServerLink.Users[LUser.ID].ServerLinkPassword), true) != 0)
+			if (!String.Equals((string)AArguments[1], Schema.SecurityUtility.DecryptPassword(LServerLink.Users[LUser.ID].ServerLinkPassword), StringComparison.OrdinalIgnoreCase))
 				throw new ServerException(ServerException.Codes.InvalidPassword);
 			LServerLink.Users[LUser.ID].ServerLinkPassword = Schema.SecurityUtility.EncryptPassword((string)AArguments[2]);
 			AProgram.CatalogDeviceSession.UpdateCatalogObject(LServerLink);

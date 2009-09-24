@@ -240,7 +240,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-				return String.Compare((string)AArgument1, (string)AArgument2, false) == 0;
+				return String.Equals((string)AArgument1, (string)AArgument2, StringComparison.OrdinalIgnoreCase);
 		}
 	}
 
@@ -495,7 +495,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-				return String.Compare((string)AArgument1, (string)AArgument2, false) != 0;
+				return !String.Equals((string)AArgument1, (string)AArgument2, StringComparison.OrdinalIgnoreCase);
 		}
 	}
 
@@ -724,7 +724,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-				return String.Compare((string)AArgument1, (string)AArgument2, false) > 0;
+				return String.Compare((string)AArgument1, (string)AArgument2, StringComparison.OrdinalIgnoreCase) > 0;
 		}
 	}
 
@@ -953,7 +953,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-				return String.Compare((string)AArgument1, (string)AArgument2, false) < 0;
+				return String.Compare((string)AArgument1, (string)AArgument2, StringComparison.OrdinalIgnoreCase) < 0;
 		}
 	}
 
@@ -1178,7 +1178,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-				return String.Compare((string)AArgument1, (string)AArgument2, false) >= 0;
+				return String.Compare((string)AArgument1, (string)AArgument2, StringComparison.OrdinalIgnoreCase) >= 0;
 		}
 	}
 
@@ -1408,7 +1408,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-				return String.Compare((string)AArgument1, (string)AArgument2, false) <= 0;
+				return String.Compare((string)AArgument1, (string)AArgument2, StringComparison.OrdinalIgnoreCase) <= 0;
 		}
 	}
     
@@ -2441,7 +2441,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				string LValue = (string)AArgument1;
 				string LLowerBound = (string)AArgument2;
 				string LUpperBound = (string)AArgument3;
-				return (String.Compare(LValue, LLowerBound, false) >= 0) && (String.Compare(LValue, LUpperBound, false) <= 0);
+				return (String.Compare(LValue, LLowerBound, StringComparison.OrdinalIgnoreCase) >= 0) && (String.Compare(LValue, LUpperBound, StringComparison.OrdinalIgnoreCase) <= 0);
 			}
 		}
     }

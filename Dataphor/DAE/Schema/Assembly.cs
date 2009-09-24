@@ -50,7 +50,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public int IndexOf(AssemblyName AName)
 		{
 			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (String.Compare(AName.FullName, this[LIndex].Name.FullName, true) == 0)
+				if (String.Equals(AName.FullName, this[LIndex].Name.FullName, StringComparison.OrdinalIgnoreCase))
 					return LIndex;
 			return -1;
 		}
@@ -141,7 +141,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			PropertyInfo LPropertyInfo = AObject.GetType().GetProperty(APropertyName);
 			if (LPropertyInfo == null)
 				throw new Alphora.Dataphor.DAE.Server.ServerException(Alphora.Dataphor.DAE.Server.ServerException.Codes.PropertyNotFound, AObject.GetType().Name, APropertyName);
-			LPropertyInfo.SetValue(AObject, Convert.ChangeType(APropertyValue, LPropertyInfo.PropertyType), null);
+			LPropertyInfo.SetValue(AObject, Convert.ChangeType(APropertyValue, LPropertyInfo.PropertyType, System.Threading.Thread.CurrentThread.CurrentCulture), null);
 		}
 		
 		public object CreateObject(ClassDefinition AClassDefinition, object[] AActualParameters)
@@ -192,7 +192,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			if ((LClassName == null) || (LClassName == String.Empty))
 				throw new ServerException(ServerException.Codes.RegisterClassNameNotFound, AAssembly.FullName);
 
-			Type LType = AAssembly.GetType(LClassName, true, true);
+			Type LType = AAssembly.GetType(LClassName, true);
 			System.Reflection.MethodInfo LMethodInfo = LType.GetMethod(CDAERegisterGetClassesMethodName);
 			return (SettingsList)LMethodInfo.Invoke(null, new object[]{});
 		}

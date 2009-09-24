@@ -697,7 +697,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(Program AProgram)
 		{
 			if (AProgram.Stack[0] != null)
-				if (AProgram.Stack[1] == null || (String.Compare((string)AProgram.Stack[0], (string)AProgram.Stack[1], false) < 0))
+				if (AProgram.Stack[1] == null || (String.Compare((string)AProgram.Stack[0], (string)AProgram.Stack[1], StringComparison.OrdinalIgnoreCase) < 0))
 					AProgram.Stack[1] = AProgram.Stack[0];
 			return null;
 		}
@@ -708,7 +708,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(Program AProgram)
 		{
 			if (AProgram.Stack[0] != null)
-				if (AProgram.Stack[1] == null || (String.Compare((string)AProgram.Stack[0], (string)AProgram.Stack[1], false) > 0))
+				if (AProgram.Stack[1] == null || (String.Compare((string)AProgram.Stack[0], (string)AProgram.Stack[1], StringComparison.OrdinalIgnoreCase) > 0))
 					AProgram.Stack[1] = AProgram.Stack[0];
 			return null;
 		}

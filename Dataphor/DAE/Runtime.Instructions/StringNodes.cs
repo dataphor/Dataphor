@@ -994,7 +994,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			#endif
 
-			return String.Compare((string)AArgument1, (string)AArgument2, true);
+			return String.Compare((string)AArgument1, (string)AArgument2, StringComparison.OrdinalIgnoreCase);
 		}
 	}
 	
@@ -1191,7 +1191,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					#endif
 					LEncodedValue[LIndex] = (byte)LList[LIndex];
 				}
+				#if SILVERLIGHT
+				Decoder LDecoder = UnicodeEncoding.UTF8.GetDecoder();
+				#else
 				Decoder LDecoder = UnicodeEncoding.ASCII.GetDecoder();
+				#endif
 				char[] LDecodedValue = new char[LDecoder.GetCharCount(LEncodedValue, 0, LEncodedValue.Length)];
 				LDecoder.GetChars(LEncodedValue, 0, LEncodedValue.Length, LDecodedValue, 0);
 				return new String(LDecodedValue);
@@ -1213,7 +1217,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				string LString = (string)AArgument1;
 				char[] LDecodedValue = new char[LString.Length];
 				LString.CopyTo(0, LDecodedValue, 0, LString.Length);
+				#if SILVERLIGHT
+				Encoder LEncoder = UnicodeEncoding.UTF8.GetEncoder();
+				#else
 				Encoder LEncoder = UnicodeEncoding.ASCII.GetEncoder();
+				#endif
 				byte[] LEncodedValue = new byte[LEncoder.GetByteCount(LDecodedValue, 0, LDecodedValue.Length, false)];
 				LEncoder.GetBytes(LDecodedValue, 0, LDecodedValue.Length, LEncodedValue, 0, true);
 				ListValue LListValue = new ListValue(AProgram.ValueManager, (Schema.ListType)FDataType);
@@ -1245,7 +1253,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					#endif
 					LEncodedValue[LIndex] = (byte)LList[LIndex];
 				}
+				#if SILVERLIGHT
+				Decoder LDecoder = UnicodeEncoding.UTF8.GetDecoder();
+				#else
 				Decoder LDecoder = UnicodeEncoding.ASCII.GetDecoder();
+				#endif
 				char[] LDecodedValue = new char[LDecoder.GetCharCount(LEncodedValue, 0, LEncodedValue.Length)];
 				LDecoder.GetChars(LEncodedValue, 0, LEncodedValue.Length, LDecodedValue, 0);
 				return new String(LDecodedValue);
