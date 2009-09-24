@@ -140,6 +140,11 @@
     <Compile Include="Connection\SQLSchema.cs" />
     <Compile Include="Connection\SQLTypes.cs" />
     <Compile Include="Connection\SQLUtility.cs" />
+    <Compile Include="Contracts\PlanDescriptor.cs" />
+    <Compile Include="Contracts\ProcessCallInfo.cs" />
+    <Compile Include="Contracts\ProcessCleanupInfo.cs" />
+    <Compile Include="Contracts\RemoteCLI.cs" />
+    <Compile Include="Contracts\Structures.cs" />
     <Compile Include="DAEException.cs">
       <SubType>Code</SubType>
     </Compile>

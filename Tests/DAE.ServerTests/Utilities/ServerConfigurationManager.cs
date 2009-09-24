@@ -7,7 +7,6 @@ namespace Alphora.Dataphor.DAE.ServerTests.Utilities
 {
 	interface ServerConfigurationManager
 	{
-
 		ServerConfiguration GetTestConfiguration(string AInstanceName);
 		void ResetInstance();
 		Server.Server GetServer();

@@ -61,17 +61,12 @@
     <Compile Include="Connection\MSSQLCommand.cs" />
     <Compile Include="Connection\MSSQLConnection.cs" />
     <Compile Include="Connection\MSSQLServerCursor.cs" />
-    <Compile Include="Contracts\PlanDescriptor.cs" />
-    <Compile Include="Contracts\ProcessCallInfo.cs" />
-    <Compile Include="Contracts\ProcessCleanupInfo.cs" />
     <Compile Include="Contracts\ProcessDescriptor.cs" />
     <Compile Include="Contracts\ScriptDescriptor.cs" />
     <Compile Include="Contracts\SessionDescriptor.cs" />
-    <Compile Include="Contracts\Structures.cs" />
     <Compile Include="Device.Catalog\CatalogDeviceTable.cs" />
     <Compile Include="Device.Catalog\ServerCatalogDevice.cs" />
     <Compile Include="Device.Catalog\ServerCatalogDeviceSession.cs" />
-    <Compile Include="RemoteCLI.cs" />
     <Compile Include="Runtime.Instructions\CatalogNodes.cs" />
     <Compile Include="Runtime.Instructions\LibraryNodes.cs" />
     <Compile Include="Language.SQL\Emitter.cs" />

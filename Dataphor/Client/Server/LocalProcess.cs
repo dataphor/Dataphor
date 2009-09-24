@@ -20,14 +20,11 @@ using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Debug;
-using Alphora.Dataphor.Logging;
 
 namespace Alphora.Dataphor.DAE.Server
 {
     public class LocalProcess : LocalServerChildObject, IServerProcess
     {
-    	private static readonly ILogger SRFLogger = LoggerFactory.Instance.CreateLogger(typeof (LocalProcess));
-		
 		public const int CStreamManagerID = 10;
 
 		public LocalProcess(LocalSession ASession, ProcessInfo AProcessInfo, int AProcessID, IRemoteServerProcess AProcess) : base()
@@ -538,7 +535,6 @@ namespace Alphora.Dataphor.DAE.Server
         /// <summary>Begins a new transaction on this process.  Transactions may be nested.</summary>
         public void BeginTransaction(IsolationLevel AIsolationLevel)
 		{
-			SRFLogger.WriteLine(TraceLevel.Verbose, "Will begin transaction {0}", AIsolationLevel);
 			FTransactionList.Add(AIsolationLevel);
 			//FProcess.BeginTransaction(AIsolationLevel);
 		}
@@ -557,7 +553,6 @@ namespace Alphora.Dataphor.DAE.Server
         /// </summary>
         public void CommitTransaction()
         {
-			SRFLogger.WriteLine(TraceLevel.Verbose, "Will commit transaction");
 			if (FTransactionList.Count > 0)
 				FTransactionList.RemoveAt(FTransactionList.Count - 1);
 			else
