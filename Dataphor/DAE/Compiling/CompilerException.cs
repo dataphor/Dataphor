@@ -800,13 +800,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 			}
 		}
 		
-		public CompilerException(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext) : base (AInfo, AContext) 
-		{
-			FErrorLevel = (CompilerErrorLevel)AInfo.GetValue("ErrorLevel", typeof(CompilerErrorLevel));
-			FLine = AInfo.GetInt32("Line");
-			FLinePos = AInfo.GetInt32("LinePos");
-		}
-		
 		public override void GetObjectData(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext)
 		{
 			base.GetObjectData(AInfo, AContext);

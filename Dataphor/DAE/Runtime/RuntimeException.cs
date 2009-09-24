@@ -510,23 +510,6 @@ using Alphora.Dataphor.DAE.Debug;
 			SetLocator(ALocator);
 		}
 		
-		public RuntimeException(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext) : base(AInfo, AContext) 
-		{
-			FLocator = AInfo.GetString("Locator");
-			FLine = AInfo.GetInt32("Line");
-			FLinePos = AInfo.GetInt32("LinePos");
-			FContext = AInfo.GetString("Context");
-		}
-		
-		public override void GetObjectData(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext)
-		{
-			base.GetObjectData(AInfo, AContext);
-			AInfo.AddValue("Locator", FLocator);
-			AInfo.AddValue("Line", FLine);
-			AInfo.AddValue("LinePos", FLinePos);
-			AInfo.AddValue("Context", FContext);
-		}
-		
 		public override string GetDetails()
 		{
 			if (FContext != null)

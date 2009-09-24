@@ -120,11 +120,6 @@ namespace Alphora.Dataphor.DAE.Connection
 		
 		protected ConnectionException(ResourceManager AResourceManager, int AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, params object[] AParams) : base(AResourceManager, AErrorCode, ASeverity, AInnerException, AParams) {}
 		
-		public ConnectionException(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext) : base(AInfo, AContext) 
-		{
-			FStatement = AInfo.GetString("Statement");
-		}
-		
 		public override void GetObjectData(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext)
 		{
 			base.GetObjectData(AInfo, AContext);

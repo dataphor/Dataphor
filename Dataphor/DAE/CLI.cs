@@ -310,7 +310,7 @@ namespace Alphora.Dataphor.DAE
 	/// levels allow the transaction to ensure that only resources it has changed cannot be changed by other transactions,
 	/// and control whether or not changes made by other transactions are visible within the transaction.
 	/// </remarks>
-	[DataMember]
+	[DataContract]
 	public enum IsolationLevel
 	{
 		/// <summary>
