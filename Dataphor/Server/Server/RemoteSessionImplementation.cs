@@ -138,10 +138,10 @@ namespace Alphora.Dataphor.DAE.Server
 			if (LSessionInfo != null)
 				return LSessionInfo;
 				
-			if (FServerLink.UseSessionInfo)
-				return GetNativeSessionInfoFromSessionInfo(FServerProcess.ServerSession.SessionInfo, FServerProcess.ProcessInfo);
+			if (ServerLink.UseSessionInfo)
+				return GetNativeSessionInfoFromSessionInfo(ServerProcess.ServerSession.SessionInfo, ServerProcess.ProcessInfo);
 				
-			return GetNativeSessionInfoFromProcess(FServerProcess);
+			return GetNativeSessionInfoFromProcess(ServerProcess);
 		}
 		
 		private NativeSessionInfo GetNativeSessionInfo()
@@ -149,8 +149,8 @@ namespace Alphora.Dataphor.DAE.Server
 			NativeSessionInfo LNativeSessionInfo = GetDefaultNativeSessionInfo();
 			
 			// Determine credentials
-			Schema.ServerLinkUser LLinkUser = FServerLink.GetUser(FServerProcess.ServerSession.User.ID);
-			LNativeSessionInfo.HostName = FServerProcess.ServerSession.SessionInfo.HostName;
+			Schema.ServerLinkUser LLinkUser = ServerLink.GetUser(ServerProcess.ServerSession.User.ID);
+			LNativeSessionInfo.HostName = ServerProcess.ServerSession.SessionInfo.HostName;
 			LNativeSessionInfo.UserID = LLinkUser.ServerLinkUserID;
 			LNativeSessionInfo.Password = Schema.SecurityUtility.DecryptPassword(LLinkUser.ServerLinkPassword);
 			return LNativeSessionInfo;
@@ -185,22 +185,22 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public override void Execute(string AStatement, DataParams AParams)
 		{
-			NativeParam[] LParams = NativeMarshal.DataParamsToNativeParams(FServerProcess, AParams);
+			NativeParam[] LParams = NativeMarshal.DataParamsToNativeParams(ServerProcess, AParams);
 			FNativeCLISession.Execute(AStatement, LParams);
-			NativeMarshal.SetDataOutputParams(FServerProcess, AParams, LParams);
+			NativeMarshal.SetDataOutputParams(ServerProcess, AParams, LParams);
 		}
 		
 		public override DataValue Evaluate(string AExpression, DataParams AParams)
 		{
-			NativeParam[] LParams = NativeMarshal.DataParamsToNativeParams(FServerProcess, AParams);
+			NativeParam[] LParams = NativeMarshal.DataParamsToNativeParams(ServerProcess, AParams);
 			NativeResult LResult = FNativeCLISession.Execute(AExpression, LParams);
-			NativeMarshal.SetDataOutputParams(FServerProcess, AParams, LResult.Params);
-			return NativeMarshal.NativeValueToDataValue(FServerProcess, LResult.Value);
+			NativeMarshal.SetDataOutputParams(ServerProcess, AParams, LResult.Params);
+			return NativeMarshal.NativeValueToDataValue(ServerProcess, LResult.Value);
 		}
 		
 		public override Schema.TableVar PrepareTableVar(Plan APlan, string AExpression, DataParams AParams)
 		{
-			NativeParam[] LParams = NativeMarshal.DataParamsToNativeParams(FServerProcess, AParams);
+			NativeParam[] LParams = NativeMarshal.DataParamsToNativeParams(ServerProcess, AParams);
 			NativeResult LResult = FNativeCLISession.Execute(AExpression, LParams, NativeExecutionOptions.SchemaOnly);
 			if (LResult.Value is NativeTableValue)
 				return NativeMarshal.NativeTableToTableVar(APlan, (NativeTableValue)LResult.Value);

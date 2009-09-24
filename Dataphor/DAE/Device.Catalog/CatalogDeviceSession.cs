@@ -86,9 +86,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		protected class DDLInstructionLog : List<DDLInstruction> {}
 		
-		private class BeginTransactionInstruction : DDLInstruction {}
+		protected class BeginTransactionInstruction : DDLInstruction {}
 		
-		private class SetUserNameInstruction : DDLInstruction
+		protected class SetUserNameInstruction : DDLInstruction
 		{
 			public SetUserNameInstruction(Schema.User AUser, string AOriginalName) : base()
 			{
@@ -105,7 +105,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class SetUserPasswordInstruction : DDLInstruction
+		protected class SetUserPasswordInstruction : DDLInstruction
 		{
 			public SetUserPasswordInstruction(Schema.User AUser, string AOriginalPassword) : base()
 			{
@@ -122,7 +122,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class SetDeviceUserIDInstruction : DDLInstruction
+		protected class SetDeviceUserIDInstruction : DDLInstruction
 		{
 			public SetDeviceUserIDInstruction(Schema.DeviceUser ADeviceUser, string AOriginalUserID) : base()
 			{
@@ -139,7 +139,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class SetDeviceUserPasswordInstruction : DDLInstruction
+		protected class SetDeviceUserPasswordInstruction : DDLInstruction
 		{
 			public SetDeviceUserPasswordInstruction(Schema.DeviceUser ADeviceUser, string AOriginalPassword) : base()
 			{
@@ -156,7 +156,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class SetDeviceUserConnectionParametersInstruction : DDLInstruction
+		protected class SetDeviceUserConnectionParametersInstruction : DDLInstruction
 		{
 			public SetDeviceUserConnectionParametersInstruction(Schema.DeviceUser ADeviceUser, string AOriginalConnectionParameters) : base()
 			{
@@ -173,7 +173,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class InsertLoadedLibraryInstruction : DDLInstruction
+		protected class InsertLoadedLibraryInstruction : DDLInstruction
 		{
 			public InsertLoadedLibraryInstruction(Schema.LoadedLibrary ALoadedLibrary) : base()
 			{
@@ -188,7 +188,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class DeleteLoadedLibraryInstruction : DDLInstruction
+		protected class DeleteLoadedLibraryInstruction : DDLInstruction
 		{
 			public DeleteLoadedLibraryInstruction(Schema.LoadedLibrary ALoadedLibrary) : base()
 			{
@@ -203,7 +203,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class RegisterAssemblyInstruction : DDLInstruction
+		protected class RegisterAssemblyInstruction : DDLInstruction
 		{
 			public RegisterAssemblyInstruction(Schema.LoadedLibrary ALoadedLibrary, Assembly AAssembly) : base()
 			{
@@ -220,7 +220,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class UnregisterAssemblyInstruction : DDLInstruction
+		protected class UnregisterAssemblyInstruction : DDLInstruction
 		{
 			public UnregisterAssemblyInstruction(Schema.LoadedLibrary ALoadedLibrary, Assembly AAssembly) : base()
 			{
@@ -237,7 +237,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class CreateCatalogObjectInstruction : DDLInstruction
+		protected class CreateCatalogObjectInstruction : DDLInstruction
 		{
 			public CreateCatalogObjectInstruction(Schema.CatalogObject ACatalogObject) : base()
 			{
@@ -252,7 +252,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class DropCatalogObjectInstruction : DDLInstruction
+		protected class DropCatalogObjectInstruction : DDLInstruction
 		{
 			public DropCatalogObjectInstruction(Schema.CatalogObject ACatalogObject) : base()
 			{
@@ -267,7 +267,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class AddDependenciesInstruction : DDLInstruction
+		protected class AddDependenciesInstruction : DDLInstruction
 		{
 			public AddDependenciesInstruction(Schema.Object AObject) : base()
 			{
@@ -282,7 +282,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class RemoveDependenciesInstruction : DDLInstruction
+		protected class RemoveDependenciesInstruction : DDLInstruction
 		{
 			public RemoveDependenciesInstruction(Schema.Object AObject, Schema.ObjectList AOriginalDependencies) : base()
 			{
@@ -300,7 +300,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class CreateDeviceTableInstruction : DDLInstruction
+		protected class CreateDeviceTableInstruction : DDLInstruction
 		{
 			public CreateDeviceTableInstruction(Schema.BaseTableVar ABaseTableVar) : base()
 			{
@@ -315,7 +315,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class DropDeviceTableInstruction : DDLInstruction
+		protected class DropDeviceTableInstruction : DDLInstruction
 		{
 			public DropDeviceTableInstruction(Schema.BaseTableVar ABaseTableVar) : base()
 			{
@@ -330,7 +330,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class CreateSessionObjectInstruction : DDLInstruction
+		protected class CreateSessionObjectInstruction : DDLInstruction
 		{
 			public CreateSessionObjectInstruction(Schema.CatalogObject ASessionObject)
 			{
@@ -345,7 +345,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class DropSessionObjectInstruction : DDLInstruction
+		protected class DropSessionObjectInstruction : DDLInstruction
 		{
 			public DropSessionObjectInstruction(Schema.CatalogObject ASessionObject)
 			{
@@ -360,7 +360,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class CreateSessionOperatorInstruction : DDLInstruction
+		protected class CreateSessionOperatorInstruction : DDLInstruction
 		{
 			public CreateSessionOperatorInstruction(Schema.Operator ASessionOperator)
 			{
@@ -375,7 +375,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class DropSessionOperatorInstruction : DDLInstruction
+		protected class DropSessionOperatorInstruction : DDLInstruction
 		{
 			public DropSessionOperatorInstruction(Schema.Operator ASessionOperator)
 			{
@@ -390,7 +390,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class AddImplicitConversionInstruction : DDLInstruction
+		protected class AddImplicitConversionInstruction : DDLInstruction
 		{
 			public AddImplicitConversionInstruction(Schema.Conversion AConversion) : base()
 			{
@@ -405,7 +405,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class RemoveImplicitConversionInstruction : DDLInstruction
+		protected class RemoveImplicitConversionInstruction : DDLInstruction
 		{
 			public RemoveImplicitConversionInstruction(Schema.Conversion AConversion) : base()
 			{
@@ -420,7 +420,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class SetScalarTypeSortInstruction : DDLInstruction
+		protected class SetScalarTypeSortInstruction : DDLInstruction
 		{
 			public SetScalarTypeSortInstruction(Schema.ScalarType AScalarType, Schema.Sort AOriginalSort, bool AIsUnique)
 			{
@@ -439,7 +439,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class ClearScalarTypeEqualityOperatorInstruction : DDLInstruction
+		protected class ClearScalarTypeEqualityOperatorInstruction : DDLInstruction
 		{
 			public ClearScalarTypeEqualityOperatorInstruction(Schema.ScalarType AScalarType, Schema.Operator AOriginalEqualityOperator)
 			{
@@ -456,7 +456,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class ClearScalarTypeComparisonOperatorInstruction : DDLInstruction
+		protected class ClearScalarTypeComparisonOperatorInstruction : DDLInstruction
 		{
 			public ClearScalarTypeComparisonOperatorInstruction(Schema.ScalarType AScalarType, Schema.Operator AOriginalComparisonOperator)
 			{
@@ -473,7 +473,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class ClearScalarTypeIsSpecialOperatorInstruction : DDLInstruction
+		protected class ClearScalarTypeIsSpecialOperatorInstruction : DDLInstruction
 		{
 			public ClearScalarTypeIsSpecialOperatorInstruction(Schema.ScalarType AScalarType, Schema.Operator AOriginalIsSpecialOperator)
 			{
@@ -490,7 +490,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class ClearRepresentationSelectorInstruction : DDLInstruction
+		protected class ClearRepresentationSelectorInstruction : DDLInstruction
 		{
 			public ClearRepresentationSelectorInstruction(Schema.Representation ARepresentation, Schema.Operator AOriginalSelector)
 			{
@@ -507,7 +507,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class ClearPropertyReadAccessorInstruction : DDLInstruction
+		protected class ClearPropertyReadAccessorInstruction : DDLInstruction
 		{
 			public ClearPropertyReadAccessorInstruction(Schema.Property AProperty, Schema.Operator AOriginalReadAccessor)
 			{
@@ -524,7 +524,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class ClearPropertyWriteAccessorInstruction : DDLInstruction
+		protected class ClearPropertyWriteAccessorInstruction : DDLInstruction
 		{
 			public ClearPropertyWriteAccessorInstruction(Schema.Property AProperty, Schema.Operator AOriginalWriteAccessor)
 			{
@@ -541,7 +541,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class ClearSpecialSelectorInstruction : DDLInstruction
+		protected class ClearSpecialSelectorInstruction : DDLInstruction
 		{
 			public ClearSpecialSelectorInstruction(Schema.Special ASpecial, Schema.Operator AOriginalSelector)
 			{
@@ -558,7 +558,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class ClearSpecialComparerInstruction : DDLInstruction
+		protected class ClearSpecialComparerInstruction : DDLInstruction
 		{
 			public ClearSpecialComparerInstruction(Schema.Special ASpecial, Schema.Operator AOriginalComparer)
 			{
@@ -575,7 +575,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class AlterMetaDataInstruction : DDLInstruction
+		protected class AlterMetaDataInstruction : DDLInstruction
 		{
 			public AlterMetaDataInstruction(Schema.Object AObject, MetaData AOriginalMetaData)
 			{
@@ -592,7 +592,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class AlterClassDefinitionInstruction : DDLInstruction
+		protected class AlterClassDefinitionInstruction : DDLInstruction
 		{
 			public AlterClassDefinitionInstruction(ClassDefinition AClassDefinition, AlterClassDefinition AAlterClassDefinition, ClassDefinition AOriginalClassDefinition, object AInstance)
 			{
@@ -625,7 +625,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class AttachCatalogConstraintInstruction : DDLInstruction
+		protected class AttachCatalogConstraintInstruction : DDLInstruction
 		{
 			public AttachCatalogConstraintInstruction(Schema.CatalogConstraint ACatalogConstraint)
 			{
@@ -640,7 +640,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class DetachCatalogConstraintInstruction : DDLInstruction
+		protected class DetachCatalogConstraintInstruction : DDLInstruction
 		{
 			public DetachCatalogConstraintInstruction(Schema.CatalogConstraint ACatalogConstraint)
 			{
@@ -655,7 +655,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class SetCatalogConstraintNodeInstruction : DDLInstruction
+		protected class SetCatalogConstraintNodeInstruction : DDLInstruction
 		{
 			public SetCatalogConstraintNodeInstruction(Schema.CatalogConstraint ACatalogConstraint, PlanNode AOriginalNode)
 			{
@@ -672,7 +672,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class AttachKeyInstruction : DDLInstruction
+		protected class AttachKeyInstruction : DDLInstruction
 		{
 			public AttachKeyInstruction(Schema.TableVar ATableVar, Schema.Key AKey)
 			{
@@ -689,7 +689,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class DetachKeyInstruction : DDLInstruction
+		protected class DetachKeyInstruction : DDLInstruction
 		{
 			public DetachKeyInstruction(Schema.TableVar ATableVar, Schema.Key AKey)
 			{
@@ -706,7 +706,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class AttachOrderInstruction : DDLInstruction
+		protected class AttachOrderInstruction : DDLInstruction
 		{
 			public AttachOrderInstruction(Schema.TableVar ATableVar, Schema.Order AOrder)
 			{
@@ -723,7 +723,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class DetachOrderInstruction : DDLInstruction
+		protected class DetachOrderInstruction : DDLInstruction
 		{
 			public DetachOrderInstruction(Schema.TableVar ATableVar, Schema.Order AOrder)
 			{
@@ -740,7 +740,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class AttachTableVarConstraintInstruction : DDLInstruction
+		protected class AttachTableVarConstraintInstruction : DDLInstruction
 		{
 			public AttachTableVarConstraintInstruction(Schema.TableVar ATableVar, Schema.TableVarConstraint ATableVarConstraint)
 			{
@@ -757,7 +757,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class DetachTableVarConstraintInstruction : DDLInstruction
+		protected class DetachTableVarConstraintInstruction : DDLInstruction
 		{
 			public DetachTableVarConstraintInstruction(Schema.TableVar ATableVar, Schema.TableVarConstraint ATableVarConstraint)
 			{
@@ -774,7 +774,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class AttachTableVarColumnInstruction : DDLInstruction
+		protected class AttachTableVarColumnInstruction : DDLInstruction
 		{
 			public AttachTableVarColumnInstruction(Schema.BaseTableVar ATableVar, Schema.TableVarColumn ATableVarColumn)
 			{
@@ -791,7 +791,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class DetachTableVarColumnInstruction : DDLInstruction
+		protected class DetachTableVarColumnInstruction : DDLInstruction
 		{
 			public DetachTableVarColumnInstruction(Schema.BaseTableVar ATableVar, Schema.TableVarColumn ATableVarColumn)
 			{
@@ -808,7 +808,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class AttachScalarTypeConstraintInstruction : DDLInstruction
+		protected class AttachScalarTypeConstraintInstruction : DDLInstruction
 		{
 			public AttachScalarTypeConstraintInstruction(Schema.ScalarType AScalarType, Schema.ScalarTypeConstraint AScalarTypeConstraint)
 			{
@@ -825,7 +825,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class DetachScalarTypeConstraintInstruction : DDLInstruction
+		protected class DetachScalarTypeConstraintInstruction : DDLInstruction
 		{
 			public DetachScalarTypeConstraintInstruction(Schema.ScalarType AScalarType, Schema.ScalarTypeConstraint AScalarTypeConstraint)
 			{
@@ -842,7 +842,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class AttachTableVarColumnConstraintInstruction : DDLInstruction
+		protected class AttachTableVarColumnConstraintInstruction : DDLInstruction
 		{
 			public AttachTableVarColumnConstraintInstruction(Schema.TableVarColumn ATableVarColumn, Schema.TableVarColumnConstraint ATableVarColumnConstraint)
 			{
@@ -859,7 +859,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class DetachTableVarColumnConstraintInstruction : DDLInstruction
+		protected class DetachTableVarColumnConstraintInstruction : DDLInstruction
 		{
 			public DetachTableVarColumnConstraintInstruction(Schema.TableVarColumn ATableVarColumn, Schema.TableVarColumnConstraint ATableVarColumnConstraint)
 			{
@@ -876,7 +876,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class AttachSpecialInstruction : DDLInstruction
+		protected class AttachSpecialInstruction : DDLInstruction
 		{
 			public AttachSpecialInstruction(Schema.ScalarType AScalarType, Schema.Special ASpecial)
 			{
@@ -893,7 +893,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class DetachSpecialInstruction : DDLInstruction
+		protected class DetachSpecialInstruction : DDLInstruction
 		{
 			public DetachSpecialInstruction(Schema.ScalarType AScalarType, Schema.Special ASpecial)
 			{
@@ -910,7 +910,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class AttachRepresentationInstruction : DDLInstruction
+		protected class AttachRepresentationInstruction : DDLInstruction
 		{
 			public AttachRepresentationInstruction(Schema.ScalarType AScalarType, Schema.Representation ARepresentation)
 			{
@@ -927,7 +927,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class DetachRepresentationInstruction : DDLInstruction
+		protected class DetachRepresentationInstruction : DDLInstruction
 		{
 			public DetachRepresentationInstruction(Schema.ScalarType AScalarType, Schema.Representation ARepresentation)
 			{
@@ -944,7 +944,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class AttachPropertyInstruction : DDLInstruction
+		protected class AttachPropertyInstruction : DDLInstruction
 		{
 			public AttachPropertyInstruction(Schema.Representation ARepresentation, Schema.Property AProperty)
 			{
@@ -961,7 +961,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class DetachPropertyInstruction : DDLInstruction
+		protected class DetachPropertyInstruction : DDLInstruction
 		{
 			public DetachPropertyInstruction(Schema.Representation ARepresentation, Schema.Property AProperty)
 			{
@@ -978,7 +978,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class SetScalarTypeDefaultInstruction : DDLInstruction
+		protected class SetScalarTypeDefaultInstruction : DDLInstruction
 		{
 			public SetScalarTypeDefaultInstruction(Schema.ScalarType AScalarType, Schema.ScalarTypeDefault AOriginalDefault)
 			{
@@ -995,7 +995,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class SetTableVarColumnDefaultInstruction : DDLInstruction
+		protected class SetTableVarColumnDefaultInstruction : DDLInstruction
 		{
 			public SetTableVarColumnDefaultInstruction(Schema.TableVarColumn ATableVarColumn, Schema.TableVarColumnDefault AOriginalDefault)
 			{
@@ -1012,7 +1012,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class SetTableVarColumnIsNilableInstruction : DDLInstruction
+		protected class SetTableVarColumnIsNilableInstruction : DDLInstruction
 		{
 			public SetTableVarColumnIsNilableInstruction(Schema.TableVarColumn ATableVarColumn, bool AOriginalIsNilable)
 			{
@@ -1029,7 +1029,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class SetScalarTypeIsSpecialOperatorInstruction : DDLInstruction
+		protected class SetScalarTypeIsSpecialOperatorInstruction : DDLInstruction
 		{
 			public SetScalarTypeIsSpecialOperatorInstruction(Schema.ScalarType AScalarType, Schema.Operator AOriginalOperator)
 			{
@@ -1046,7 +1046,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class SetOperatorBlockNodeInstruction : DDLInstruction
+		protected class SetOperatorBlockNodeInstruction : DDLInstruction
 		{
 			public SetOperatorBlockNodeInstruction(Schema.OperatorBlock AOperatorBlock, PlanNode AOriginalNode)
 			{
@@ -1063,7 +1063,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class AttachReferenceInstruction : DDLInstruction
+		protected class AttachReferenceInstruction : DDLInstruction
 		{
 			public AttachReferenceInstruction(Schema.Reference AReference)
 			{
@@ -1078,7 +1078,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class DetachReferenceInstruction : DDLInstruction
+		protected class DetachReferenceInstruction : DDLInstruction
 		{
 			public DetachReferenceInstruction(Schema.Reference AReference)
 			{
@@ -1093,7 +1093,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class AttachDeviceScalarTypeInstruction : DDLInstruction
+		protected class AttachDeviceScalarTypeInstruction : DDLInstruction
 		{
 			public AttachDeviceScalarTypeInstruction(Schema.DeviceScalarType ADeviceScalarType)
 			{
@@ -1108,7 +1108,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class DetachDeviceScalarTypeInstruction : DDLInstruction
+		protected class DetachDeviceScalarTypeInstruction : DDLInstruction
 		{
 			public DetachDeviceScalarTypeInstruction(Schema.DeviceScalarType ADeviceScalarType)
 			{
@@ -1123,7 +1123,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class AttachDeviceOperatorInstruction : DDLInstruction
+		protected class AttachDeviceOperatorInstruction : DDLInstruction
 		{
 			public AttachDeviceOperatorInstruction(Schema.DeviceOperator ADeviceOperator)
 			{
@@ -1138,7 +1138,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class DetachDeviceOperatorInstruction : DDLInstruction
+		protected class DetachDeviceOperatorInstruction : DDLInstruction
 		{
 			public DetachDeviceOperatorInstruction(Schema.DeviceOperator ADeviceOperator)
 			{
@@ -1153,7 +1153,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class AttachTableMapInstruction : DDLInstruction
+		protected class AttachTableMapInstruction : DDLInstruction
 		{
 			public AttachTableMapInstruction(ApplicationTransactionDevice ADevice, TableMap ATableMap)
 			{
@@ -1170,7 +1170,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class DetachTableMapInstruction : DDLInstruction
+		protected class DetachTableMapInstruction : DDLInstruction
 		{
 			public DetachTableMapInstruction(ApplicationTransactionDevice ADevice, TableMap ATableMap)
 			{
@@ -1187,7 +1187,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class AttachOperatorMapInstruction : DDLInstruction
+		protected class AttachOperatorMapInstruction : DDLInstruction
 		{
 			public AttachOperatorMapInstruction(ApplicationTransaction.OperatorMap AOperatorMap, Schema.Operator AOperator)
 			{
@@ -1204,7 +1204,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class DetachOperatorMapInstruction : DDLInstruction
+		protected class DetachOperatorMapInstruction : DDLInstruction
 		{
 			public DetachOperatorMapInstruction(ApplicationTransaction.OperatorMap AOperatorMap, Schema.Operator AOperator)
 			{
@@ -1222,7 +1222,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		}
 		
 /*
-		private class AttachDeviceScalarTypeDeviceOperatorInstruction : DDLInstruction
+		protected class AttachDeviceScalarTypeDeviceOperatorInstruction : DDLInstruction
 		{
 			public AttachDeviceScalarTypeDeviceOperatorInstruction(Schema.DeviceScalarType ADeviceScalarType, Schema.DeviceOperator ADeviceOperator)
 			{
@@ -1239,7 +1239,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class DetachDeviceScalarTypeDeviceOperatorInstruction : DDLInstruction
+		protected class DetachDeviceScalarTypeDeviceOperatorInstruction : DDLInstruction
 		{
 			public DetachDeviceScalarTypeDeviceOperatorInstruction(Schema.DeviceScalarType ADeviceScalarType, Schema.DeviceOperator ADeviceOperator)
 			{
@@ -1257,7 +1257,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		}
 */
 		
-		private class SetDeviceReconcileModeInstruction : DDLInstruction
+		protected class SetDeviceReconcileModeInstruction : DDLInstruction
 		{
 			public SetDeviceReconcileModeInstruction(Schema.Device ADevice, ReconcileMode AOriginalReconcileMode)
 			{
@@ -1274,7 +1274,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class SetDeviceReconcileMasterInstruction : DDLInstruction
+		protected class SetDeviceReconcileMasterInstruction : DDLInstruction
 		{
 			public SetDeviceReconcileMasterInstruction(Schema.Device ADevice, ReconcileMaster AOriginalReconcileMaster)
 			{
@@ -1291,7 +1291,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		private class StartDeviceInstruction : DDLInstruction
+		protected class StartDeviceInstruction : DDLInstruction
 		{
 			public StartDeviceInstruction(Schema.Device ADevice) : base()
 			{
@@ -1306,7 +1306,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class RegisterDeviceInstruction : DDLInstruction
+		protected class RegisterDeviceInstruction : DDLInstruction
 		{
 			public RegisterDeviceInstruction(Schema.Device ADevice) : base()
 			{
@@ -1321,7 +1321,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class AttachEventHandlerInstruction : DDLInstruction
+		protected class AttachEventHandlerInstruction : DDLInstruction
 		{
 			public AttachEventHandlerInstruction(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, List<string> ABeforeOperatorNames)
 			{
@@ -1342,7 +1342,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class MoveEventHandlerInstruction : DDLInstruction
+		protected class MoveEventHandlerInstruction : DDLInstruction
 		{
 			public MoveEventHandlerInstruction(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, List<string> ABeforeOperatorNames)
 			{
@@ -1363,7 +1363,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class DetachEventHandlerInstruction : DDLInstruction
+		protected class DetachEventHandlerInstruction : DDLInstruction
 		{
 			public DetachEventHandlerInstruction(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, List<string> ABeforeOperatorNames)
 			{
@@ -2200,31 +2200,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			DeleteCatalogObject(AScalarType);
 		}
 		
-		private void FixupSystemScalarTypeReferences(ScalarType LScalarType)
-		{
-			switch (LScalarType.Name)
-			{
-				case Schema.DataTypes.CSystemScalar: Catalog.DataTypes.SystemScalar = LScalarType; break;
-				case Schema.DataTypes.CSystemBoolean: Catalog.DataTypes.SystemBoolean = LScalarType; LScalarType.NativeType = typeof(bool); break;
-				case Schema.DataTypes.CSystemDecimal: Catalog.DataTypes.SystemDecimal = LScalarType; LScalarType.NativeType = typeof(decimal); break;
-				case Schema.DataTypes.CSystemLong: Catalog.DataTypes.SystemLong = LScalarType; LScalarType.NativeType = typeof(long); break;
-				case Schema.DataTypes.CSystemInteger: Catalog.DataTypes.SystemInteger = LScalarType; LScalarType.NativeType = typeof(int); break;
-				case Schema.DataTypes.CSystemShort: Catalog.DataTypes.SystemShort = LScalarType; LScalarType.NativeType = typeof(short); break;
-				case Schema.DataTypes.CSystemByte: Catalog.DataTypes.SystemByte = LScalarType; LScalarType.NativeType = typeof(byte); break;
-				case Schema.DataTypes.CSystemString: Catalog.DataTypes.SystemString = LScalarType; LScalarType.NativeType = typeof(string); break;
-				case Schema.DataTypes.CSystemTimeSpan: Catalog.DataTypes.SystemTimeSpan = LScalarType; LScalarType.NativeType = typeof(TimeSpan); break;
-				case Schema.DataTypes.CSystemDateTime: Catalog.DataTypes.SystemDateTime = LScalarType; LScalarType.NativeType = typeof(DateTime); break;
-				case Schema.DataTypes.CSystemDate: Catalog.DataTypes.SystemDate = LScalarType; LScalarType.NativeType = typeof(DateTime); break;
-				case Schema.DataTypes.CSystemTime: Catalog.DataTypes.SystemTime = LScalarType; LScalarType.NativeType = typeof(DateTime); break;
-				case Schema.DataTypes.CSystemMoney: Catalog.DataTypes.SystemMoney = LScalarType; LScalarType.NativeType = typeof(decimal); break;
-				case Schema.DataTypes.CSystemGuid: Catalog.DataTypes.SystemGuid = LScalarType; LScalarType.NativeType = typeof(Guid); break;
-				case Schema.DataTypes.CSystemBinary: Catalog.DataTypes.SystemBinary = LScalarType; LScalarType.NativeType = typeof(byte[]); break;
-				case Schema.DataTypes.CSystemGraphic: Catalog.DataTypes.SystemGraphic = LScalarType; LScalarType.NativeType = typeof(byte[]); break;
-				case Schema.DataTypes.CSystemError: Catalog.DataTypes.SystemError = LScalarType; LScalarType.NativeType = typeof(Exception); break;
-				case Schema.DataTypes.CSystemName: Catalog.DataTypes.SystemName = LScalarType; LScalarType.NativeType = typeof(string); break;
-			}
-		}
-
 		#endregion
 		
 		#region Operator
@@ -3472,7 +3447,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			return ResolveUser(AUserID, true);
 		}
 
-		private class CreateUserInstruction : DDLInstruction
+		protected class CreateUserInstruction : DDLInstruction
 		{
 			public CreateUserInstruction(Schema.User AUser) : base()
 			{
@@ -3487,7 +3462,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private class DropUserInstruction : DDLInstruction
+		protected class DropUserInstruction : DDLInstruction
 		{
 			public DropUserInstruction(Schema.User AUser) : base()
 			{

@@ -25,7 +25,6 @@ namespace Alphora.Dataphor.DAE.Server
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 	using Alphora.Dataphor.DAE.Streams;
-	using Alphora.Dataphor.Logging;
 	using Schema = Alphora.Dataphor.DAE.Schema;
 	using Alphora.Dataphor.Windows;
 
@@ -231,10 +230,10 @@ namespace Alphora.Dataphor.DAE.Server
 					Schema.Library LGeneralLibrary = new Schema.Library(CGeneralLibraryName);
 					LGeneralLibrary.Libraries.Add(new Schema.LibraryReference(CSystemLibraryName, new VersionNumber(-1, -1, -1, -1)));
 					Catalog.Libraries.Add(LGeneralLibrary);
-					string LLibraryDirectory = Path.Combine(Schema.Library.GetDefaultLibraryDirectory(LibraryDirectory), LGeneralLibrary.Name);
+					string LLibraryDirectory = Path.Combine(Schema.LibraryUtility.GetDefaultLibraryDirectory(LibraryDirectory), LGeneralLibrary.Name);
 					if (!Directory.Exists(LLibraryDirectory))
 						Directory.CreateDirectory(LLibraryDirectory);
-					LGeneralLibrary.SaveToFile(Path.Combine(LLibraryDirectory, Schema.Library.GetFileName(LGeneralLibrary.Name)));
+					Schema.LibraryUtility.SaveToFile(LGeneralLibrary, Path.Combine(LLibraryDirectory, Schema.LibraryUtility.GetFileName(LGeneralLibrary.Name)));
 				}
 			}
 		}
@@ -461,14 +460,16 @@ namespace Alphora.Dataphor.DAE.Server
 
 		protected override void LoadServerState()
 		{
+			ServerCatalogDeviceSession LCatalogDeviceSession = (ServerCatalogDeviceSession)FSystemProcess.CatalogDeviceSession;
+			
 			// Load server configuration settings
-			FSystemProcess.CatalogDeviceSession.LoadServerSettings(this);
+			LCatalogDeviceSession.LoadServerSettings(this);
 
 			// Attaches any libraries that were attached from an explicit library directory
-			FSystemProcess.CatalogDeviceSession.AttachLibraries();
+			LCatalogDeviceSession.AttachLibraries();
 
 			// Set the object ID generator				
-			Schema.Object.SetNextObjectID(FSystemProcess.CatalogDeviceSession.GetMaxObjectID() + 1);
+			Schema.Object.SetNextObjectID(LCatalogDeviceSession.GetMaxObjectID() + 1);
 
 			// Insert a row into TableDee...
 			RunScript(FSystemProcess, "insert table { row { } } into TableDee;");

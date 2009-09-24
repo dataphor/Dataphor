@@ -1141,7 +1141,7 @@ namespace Alphora.Dataphor.DAE.Server
 		public const string CGeneralLibraryName = @"General";
 
 		// SystemLibrary		
-		private Schema.LoadedLibrary FSystemLibrary;
+		protected Schema.LoadedLibrary FSystemLibrary;
 		public Schema.LoadedLibrary SystemLibrary
 		{
 			get

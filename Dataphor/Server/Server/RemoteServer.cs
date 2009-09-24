@@ -22,7 +22,6 @@ using System.Runtime.Remoting.Services;
 using System.Security.Principal;
 
 using Alphora.Dataphor;
-using Alphora.Dataphor.Logging;
 using Alphora.Dataphor.BOP;
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Server;
@@ -41,8 +40,6 @@ namespace Alphora.Dataphor.DAE.Server
 {
 	public class RemoteServer : RemoteServerObject, IDisposable, IRemoteServer, ITrackingHandler
 	{
-        private static readonly ILogger SRFLogger = LoggerFactory.Instance.CreateLogger(typeof(RemoteServer));
-		
 		// constructor		
 		internal RemoteServer(Server AServer) : base()
 		{
@@ -138,7 +135,6 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			if (!IsRemotableException(AException))
 			{
-                SRFLogger.WriteLine(TraceLevel.Warning,"Exception is not remotable: {0}", AException);
                 Exception LInnerException = null;
 				if (AException.InnerException != null)
 					LInnerException = EnsureRemotableException(AException.InnerException);
@@ -258,10 +254,9 @@ namespace Alphora.Dataphor.DAE.Server
 					LConnection.Dispose();
 				}
 			}
-			catch (Exception E)
+			catch
 			{
 				// Don't allow exceptions to go unhandled... the framework will abort the application
-				SRFLogger.WriteLine(TraceLevel.Error, "Unhandled exception disposing connection: {0}", E.Message);
 			}
 		}
 
@@ -339,7 +334,7 @@ namespace Alphora.Dataphor.DAE.Server
 					}
 					catch (Exception E)
 					{
-						SRFLogger.WriteLine(TraceLevel.Error, "Error occurred relinquishing connections: {0}", E.Message);
+						FServer.LogError(E);
 					}
 				}
 			}

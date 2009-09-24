@@ -33,14 +33,14 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 {
 	public class CatalogDeviceTable : Table
 	{
-		public CatalogDeviceTable(CatalogDevicePlanNode ADevicePlanNode, Program AProgram, CatalogDeviceSession ASession) : base(ADevicePlanNode.Node as TableNode, AProgram)
+		public CatalogDeviceTable(CatalogDevicePlanNode ADevicePlanNode, Program AProgram, ServerCatalogDeviceSession ASession) : base(ADevicePlanNode.Node as TableNode, AProgram)
 		{
 			FDevicePlanNode = ADevicePlanNode;
 			FSession = ASession;
 		}
 		
-		private CatalogDeviceSession FSession; 
-		public CatalogDeviceSession Session { get { return FSession; } }
+		private ServerCatalogDeviceSession FSession; 
+		public ServerCatalogDeviceSession Session { get { return FSession; } }
 		
 		private CatalogDevicePlanNode FDevicePlanNode;
 		public CatalogDevicePlanNode DevicePlanNode { get { return FDevicePlanNode; } }

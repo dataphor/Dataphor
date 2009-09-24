@@ -312,8 +312,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return 
 				LEmitter.Emit
 				(
-					((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).EmitStatement
+					AProgram.Catalog.EmitStatement
 					(
+						AProgram.CatalogDeviceSession,
 						EmitMode.ForCopy, 
 						new string[] { LObject.Name }, 
 						String.Empty, 
@@ -337,7 +338,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			try
 			{
 				LPlan.CheckCompiled();
-				return LEmitter.Emit(((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).EmitStatement(EmitMode.ForCopy, new string[] { LPlan.TableVar.Name } ));
+				return LEmitter.Emit(LPlan.Catalog.EmitStatement(AProgram.CatalogDeviceSession, EmitMode.ForCopy, new string[] { LPlan.TableVar.Name } ));
 			}
 			finally
 			{

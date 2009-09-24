@@ -1,11 +1,18 @@
-﻿using System;
+﻿/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+using System;
 using System.IO;
+using System.Reflection;
+
 using Alphora.Dataphor.BOP;
 using Alphora.Dataphor.Windows;
-using Alphora.Dataphor.DAE.Runtime;
-using Alphora.Dataphor.DAE.Device.Catalog;
-using System.Reflection;
 using Alphora.Dataphor.DAE.Server;
+using Alphora.Dataphor.DAE.Device.Catalog;
+using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 
 namespace Alphora.Dataphor.DAE.Schema
@@ -163,7 +170,8 @@ namespace Alphora.Dataphor.DAE.Schema
 			// Get the list of available libraries from the library directory
 			Schema.Libraries LLibraries = new Schema.Libraries();
 			Schema.Libraries LOldLibraries = new Schema.Libraries();
-			Schema.Library.GetAvailableLibraries(((Server.Server)AProgram.ServerProcess.ServerSession.Server).InstanceDirectory, AProgram.ServerProcess.ServerSession.Server.LibraryDirectory, LLibraries);
+			Server.Server LServer = (Server.Server)AProgram.ServerProcess.ServerSession.Server;
+			GetAvailableLibraries(LServer.InstanceDirectory, LServer.LibraryDirectory, LLibraries);
 			
 			lock (AProgram.Catalog.Libraries)
 			{
@@ -311,17 +319,31 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// <summary>Attaches the library given by ALibraryName from ALibraryDirectory. AIsAttached indicates whether this library is being attached as part of catalog startup.</summary>
 		public static void AttachLibrary(Program AProgram, string ALibraryName, string ALibraryDirectory, bool AIsAttached)
 		{
-			Schema.Library LLibrary = Schema.Library.GetAvailableLibrary(((Server.Server)AProgram.ServerProcess.ServerSession.Server).InstanceDirectory, ALibraryName, ALibraryDirectory);
+			Schema.Library LLibrary = GetAvailableLibrary(((Server.Server)AProgram.ServerProcess.ServerSession.Server).InstanceDirectory, ALibraryName, ALibraryDirectory);
 			if ((LLibrary != null) && !AProgram.Catalog.Libraries.ContainsName(LLibrary.Name))
 				AttachLibrary(AProgram, LLibrary, AIsAttached);
 		}
 
+		public static void AttachLibrary(Program AProgram, Schema.Library ALibrary, bool AIsAttached)
+		{
+			lock (AProgram.Catalog.Libraries)
+			{
+				string LLibraryDirectory = ALibrary.GetLibraryDirectory(((Server.Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory);
+
+				AProgram.Catalog.Libraries.Add(ALibrary);
+				AProgram.Catalog.UpdateTimeStamp();
+				AProgram.Catalog.Libraries.DoLibraryAdded(AProgram, ALibrary.Name);
+				if ((ALibrary.Directory != String.Empty) && !AIsAttached)
+					((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetLibraryDirectory(ALibrary.Name, LLibraryDirectory);
+			}
+		}
+		
 		public static void EnsureLibraryRegistered(Program AProgram, string ALibraryName, bool AWithReconciliation)
 		{
 			lock (AProgram.Catalog.Libraries)
 			{
 				if (AProgram.CatalogDeviceSession.ResolveLoadedLibrary(ALibraryName, false) == null)
-					LibraryUtility.RegisterLibrary(AProgram, ALibraryName, AWithReconciliation);
+					RegisterLibrary(AProgram, ALibraryName, AWithReconciliation);
 			}
 		}
 		
@@ -357,7 +379,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			#if !LOADFROMLIBRARIES
 			foreach (Schema.FileReference LFile in ALibrary.Files)
 			{
-				string LSourceFile = Path.IsPathRooted(LFile.FileName) ? LFile.FileName : Path.Combine(ALibrary.GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory), LFile.FileName);
+				string LSourceFile = Path.IsPathRooted(LFile.FileName) ? LFile.FileName : Path.Combine(ALibrary.GetLibraryDirectory(((Server.Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), LFile.FileName);
 				string LTargetFile = Path.Combine(PathUtility.GetBinDirectory(), Path.GetFileName(LFile.FileName));
 				
 				if (!File.Exists(LSourceFile))
@@ -467,7 +489,7 @@ namespace Alphora.Dataphor.DAE.Schema
 								{
 									//	run the register.d4 script if it exists in the library
 									//		catalog objects created in this script are part of this library
-									string LRegisterFileName = Path.Combine(LLibrary.GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory), CRegisterFileName);
+									string LRegisterFileName = Path.Combine(LLibrary.GetLibraryDirectory(((Server.Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), CRegisterFileName);
 									if (File.Exists(LRegisterFileName))
 									{
 										try
@@ -494,7 +516,7 @@ namespace Alphora.Dataphor.DAE.Schema
 									if (LLibrary.IsSuspect)
 									{
 										LLibrary.IsSuspect = false;
-										LLibrary.SaveInfoToFile(Path.Combine(LLibrary.GetInstanceLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.InstanceDirectory), Schema.Library.GetInfoFileName(LLibrary.Name)));
+										LLibrary.SaveInfoToFile(Path.Combine(LLibrary.GetInstanceLibraryDirectory(((Server.Server)AProgram.ServerProcess.ServerSession.Server).InstanceDirectory), GetInfoFileName(LLibrary.Name)));
 									}					
 								}
 								catch
@@ -551,7 +573,7 @@ namespace Alphora.Dataphor.DAE.Schema
 					try
 					{
 						LLoadedLibrary = new Schema.LoadedLibrary(ALibraryName);
-						LLoadedLibrary.Owner = AProgram.CatalogDeviceSession.ResolveUser(AProgram.CatalogDeviceSession.GetLibraryOwner(ALibraryName));
+						LLoadedLibrary.Owner = AProgram.CatalogDeviceSession.ResolveUser(((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).GetLibraryOwner(ALibraryName));
 							
 						//	Ensure that each required library is loaded
 						foreach (Schema.LibraryReference LReference in LLibrary.Libraries)
@@ -597,7 +619,7 @@ namespace Alphora.Dataphor.DAE.Schema
 							if (LLibrary.IsSuspect)
 							{
 								LLibrary.IsSuspect = false;
-								LLibrary.SaveInfoToFile(Path.Combine(LLibrary.GetInstanceLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.InstanceDirectory), Schema.Library.GetInfoFileName(LLibrary.Name)));
+								LLibrary.SaveInfoToFile(Path.Combine(LLibrary.GetInstanceLibraryDirectory(((Server.Server)AProgram.ServerProcess.ServerSession.Server).InstanceDirectory), Schema.LibraryUtility.GetInfoFileName(LLibrary.Name)));
 							}					
 						}
 						finally
@@ -610,7 +632,7 @@ namespace Alphora.Dataphor.DAE.Schema
 						AProgram.ServerProcess.ServerSession.Server.LogError(LException);
 						LLibrary.IsSuspect = true;
 						LLibrary.SuspectReason = ExceptionUtility.DetailedDescription(LException);
-						LLibrary.SaveInfoToFile(Path.Combine(LLibrary.GetInstanceLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.InstanceDirectory), Schema.Library.GetInfoFileName(LLibrary.Name)));
+						LLibrary.SaveInfoToFile(Path.Combine(LLibrary.GetInstanceLibraryDirectory(((Server.Server)AProgram.ServerProcess.ServerSession.Server).InstanceDirectory), Schema.LibraryUtility.GetInfoFileName(LLibrary.Name)));
 						
 						if (LIsLoaded)
 							UnregisterLibrary(AProgram, ALibraryName, false);

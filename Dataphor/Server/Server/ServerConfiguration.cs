@@ -6,6 +6,7 @@
 
 using System;
 using System.IO;
+using Alphora.Dataphor.Windows;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -81,7 +82,7 @@ namespace Alphora.Dataphor.DAE.Server
 			ServerConfiguration LInstance = new ServerConfiguration();
 			LInstance.Name = String.IsNullOrEmpty(AInstanceName) ? Engine.CDefaultServerName : AInstanceName;
 			LInstance.PortNumber = CDefaultPortNumber;
-			LInstance.LibraryDirectories = Path.Combine(PathUtility.GetInstallationDirectory(), Engine.CDefaultLibraryDirectory);
+			LInstance.LibraryDirectories = Path.Combine(PathUtility.GetInstallationDirectory(), Server.CDefaultLibraryDirectory);
 			return LInstance;
 		}
 		
@@ -90,7 +91,7 @@ namespace Alphora.Dataphor.DAE.Server
 			ServerConfiguration LInstance = new ServerConfiguration();
 			LInstance.Name = CDefaultLocalInstanceName;
 			LInstance.PortNumber = CDefaultLocalPortNumber; // don't use the same default port as the service
-			LInstance.LibraryDirectories = Path.Combine(PathUtility.GetInstallationDirectory(), Engine.CDefaultLibraryDirectory);
+			LInstance.LibraryDirectories = Path.Combine(PathUtility.GetInstallationDirectory(), Server.CDefaultLibraryDirectory);
 			return LInstance;
 		}
 	}

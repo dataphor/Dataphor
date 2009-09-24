@@ -14,7 +14,6 @@ using Alphora.Dataphor.DAE.Connection;
 using Alphora.Dataphor.DAE.Store;
 using Alphora.Dataphor.DAE.Store.MSSQL;
 using Alphora.Dataphor.DAE.Store.SQLCE;
-using Alphora.Dataphor.Logging;
 using NUnit.Framework;
 using System.Data.SqlServerCe;
 using System.IO;
@@ -24,8 +23,6 @@ namespace Alphora.Dataphor.DAE.ServerTests
     [TestFixture]
     public class SQLStoreTest
     {
-    	private static readonly ILogger SRFLogger = LoggerFactory.Instance.CreateLogger(typeof (SQLStoreTest));
-		
 		private void SQLStoreReadAfterUpdateTest(SQLStore ASQLStore)
 		{
 			using (SQLStoreConnection LConnection = ASQLStore.Connect())

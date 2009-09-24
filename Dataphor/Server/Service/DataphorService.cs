@@ -151,7 +151,11 @@ namespace Alphora.Dataphor.DAE.Service
 		public PlanDescriptor PrepareStatement(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, string AStatement, RemoteParam[] AParams, DebugLocator ALocator)
 		{
 			PlanDescriptor LDescriptor;
-			LDescriptor.Handle = FHandleManager.GetHandle(FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).PrepareStatement(AStatement, AParams, ALocator, out LDescriptor, ACleanupInfo));
+			// It seems to me we should be able to perform the assignment directly to LDescriptor because it will be assigned by the out
+			// evaluation in the PrepareStatement call, but the C# compiler is complaining that this is a use of unassigned local variable.
+			//LDescriptor.Handle = FHandleManager.GetHandle(FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).PrepareStatement(AStatement, AParams, ALocator, out LDescriptor, ACleanupInfo));
+			int LHandle = FHandleManager.GetHandle(FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).PrepareStatement(AStatement, AParams, ALocator, out LDescriptor, ACleanupInfo));
+			LDescriptor.Handle = LHandle;
 			return LDescriptor;
 		}
 
@@ -168,7 +172,8 @@ namespace Alphora.Dataphor.DAE.Service
 		public PlanDescriptor PrepareExpression(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, string AExpression, RemoteParam[] AParams, DebugLocator ALocator)
 		{
 			PlanDescriptor LDescriptor;
-			LDescriptor.Handle = FHandleManager.GetHandle(FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).PrepareExpression(AExpression, AParams, ALocator, out LDescriptor, ACleanupInfo));
+			int LHandle = FHandleManager.GetHandle(FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).PrepareExpression(AExpression, AParams, ALocator, out LDescriptor, ACleanupInfo));
+			LDescriptor.Handle = LHandle;
 			return LDescriptor;
 		}
 
@@ -356,13 +361,15 @@ namespace Alphora.Dataphor.DAE.Service
 			if (LBatch.IsExpression())
 			{
 				PlanDescriptor LDescriptor;
-				LDescriptor.Handle = FHandleManager.GetHandle(LBatch.PrepareExpression(AParams, out LDescriptor));
+				int LHandle = FHandleManager.GetHandle(LBatch.PrepareExpression(AParams, out LDescriptor));
+				LDescriptor.Handle = LHandle;
 				return LDescriptor;
 			}
 			else
 			{
 				PlanDescriptor LDescriptor;
-				LDescriptor.Handle = FHandleManager.GetHandle(LBatch.PrepareStatement(AParams, out LDescriptor));
+				int LHandle = FHandleManager.GetHandle(LBatch.PrepareStatement(AParams, out LDescriptor));
+				LDescriptor.Handle = LHandle;
 				return LDescriptor;
 			}
 		}

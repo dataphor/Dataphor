@@ -26,7 +26,7 @@ using Alphora.Dataphor.DAE.Store;
 
 namespace Alphora.Dataphor.DAE.Device.Catalog
 {
-	class ServerCatalogDeviceSession : CatalogDeviceSession
+	public class ServerCatalogDeviceSession : CatalogDeviceSession
 	{
 		protected internal ServerCatalogDeviceSession(Schema.Device ADevice, ServerProcess AServerProcess, DeviceSessionInfo ADeviceSessionInfo) : base(ADevice, AServerProcess, ADeviceSessionInfo){}
 		
@@ -36,6 +36,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 			DisposeCatalogStoreConnection();
 		}
+
+		public new ServerCatalogDevice Device { get { return (ServerCatalogDevice)base.Device; } }
 
 		#region Execute
 		
@@ -629,7 +631,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		protected void DeleteLibrary(Program AProgram, Schema.TableVar ATableVar, Row ARow)
 		{
-			SystemDropLibraryNode.DropLibrary(AProgram, Schema.Object.EnsureRooted((string)ARow[0]), true);
+			LibraryUtility.DropLibrary(AProgram, Schema.Object.EnsureRooted((string)ARow[0]), true);
 		}
 
 		protected void InsertLibraryRequisite(Program AProgram, Schema.TableVar ATableVar, Row ARow)
@@ -847,7 +849,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					using (SQLStoreCursor LCursor = CatalogStoreConnection.SelectLibraryDirectories())
 					{
 						while (LCursor.Next())
-							SystemAttachLibraryNode.AttachLibrary(LProgram, (string)LCursor[0], (string)LCursor[1], true);
+							LibraryUtility.AttachLibrary(LProgram, (string)LCursor[0], (string)LCursor[1], true);
 					}
 				}
 				finally
@@ -1005,7 +1007,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 						LProgram.Start(null);
 						try
 						{
-							SystemLoadLibraryNode.LoadLibrary(LProgram, LLibrary.Name);
+							LibraryUtility.LoadLibrary(LProgram, LLibrary.Name);
 							return Catalog.LoadedLibraries[LLibrary.Name];
 						}
 						finally
@@ -1140,6 +1142,31 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		#region Object Load
 		
+		private void FixupSystemScalarTypeReferences(ScalarType LScalarType)
+		{
+			switch (LScalarType.Name)
+			{
+				case Schema.DataTypes.CSystemScalar: Catalog.DataTypes.SystemScalar = LScalarType; break;
+				case Schema.DataTypes.CSystemBoolean: Catalog.DataTypes.SystemBoolean = LScalarType; LScalarType.NativeType = typeof(bool); break;
+				case Schema.DataTypes.CSystemDecimal: Catalog.DataTypes.SystemDecimal = LScalarType; LScalarType.NativeType = typeof(decimal); break;
+				case Schema.DataTypes.CSystemLong: Catalog.DataTypes.SystemLong = LScalarType; LScalarType.NativeType = typeof(long); break;
+				case Schema.DataTypes.CSystemInteger: Catalog.DataTypes.SystemInteger = LScalarType; LScalarType.NativeType = typeof(int); break;
+				case Schema.DataTypes.CSystemShort: Catalog.DataTypes.SystemShort = LScalarType; LScalarType.NativeType = typeof(short); break;
+				case Schema.DataTypes.CSystemByte: Catalog.DataTypes.SystemByte = LScalarType; LScalarType.NativeType = typeof(byte); break;
+				case Schema.DataTypes.CSystemString: Catalog.DataTypes.SystemString = LScalarType; LScalarType.NativeType = typeof(string); break;
+				case Schema.DataTypes.CSystemTimeSpan: Catalog.DataTypes.SystemTimeSpan = LScalarType; LScalarType.NativeType = typeof(TimeSpan); break;
+				case Schema.DataTypes.CSystemDateTime: Catalog.DataTypes.SystemDateTime = LScalarType; LScalarType.NativeType = typeof(DateTime); break;
+				case Schema.DataTypes.CSystemDate: Catalog.DataTypes.SystemDate = LScalarType; LScalarType.NativeType = typeof(DateTime); break;
+				case Schema.DataTypes.CSystemTime: Catalog.DataTypes.SystemTime = LScalarType; LScalarType.NativeType = typeof(DateTime); break;
+				case Schema.DataTypes.CSystemMoney: Catalog.DataTypes.SystemMoney = LScalarType; LScalarType.NativeType = typeof(decimal); break;
+				case Schema.DataTypes.CSystemGuid: Catalog.DataTypes.SystemGuid = LScalarType; LScalarType.NativeType = typeof(Guid); break;
+				case Schema.DataTypes.CSystemBinary: Catalog.DataTypes.SystemBinary = LScalarType; LScalarType.NativeType = typeof(byte[]); break;
+				case Schema.DataTypes.CSystemGraphic: Catalog.DataTypes.SystemGraphic = LScalarType; LScalarType.NativeType = typeof(byte[]); break;
+				case Schema.DataTypes.CSystemError: Catalog.DataTypes.SystemError = LScalarType; LScalarType.NativeType = typeof(Exception); break;
+				case Schema.DataTypes.CSystemName: Catalog.DataTypes.SystemName = LScalarType; LScalarType.NativeType = typeof(string); break;
+			}
+		}
+
 		/*
 			LoadCatalogObject ->
 			
@@ -1266,7 +1293,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				ServerProcess.PushLoadingContext(new LoadingContext(AUser, String.Empty));
 				try
 				{
-					SystemLoadLibraryNode.LoadLibrary(AProgram, ALibraryName);
+					LibraryUtility.LoadLibrary(AProgram, ALibraryName);
 				}
 				finally
 				{

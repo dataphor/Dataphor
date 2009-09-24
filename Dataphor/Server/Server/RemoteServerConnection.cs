@@ -9,7 +9,6 @@ using System.Text;
 using System.Threading;
 using System.Collections.Generic;
 using System.Runtime.Remoting.Lifetime;
-using Alphora.Dataphor.Logging;
 using System.Diagnostics;
 
 namespace Alphora.Dataphor.DAE.Server
@@ -17,8 +16,6 @@ namespace Alphora.Dataphor.DAE.Server
 	// RemoteServerConnection
 	public class RemoteServerConnection : RemoteServerChildObject, IRemoteServerConnection
 	{
-        private static readonly ILogger SRFLogger = LoggerFactory.Instance.CreateLogger(typeof(RemoteServer));
-		
 		internal RemoteServerConnection(RemoteServer AServer, string AConnectionName, string AHostName)
 		{
 			FServer = AServer;
@@ -125,7 +122,7 @@ namespace Alphora.Dataphor.DAE.Server
 					}
 					catch (Exception E)
 					{
-						SRFLogger.WriteLine(TraceLevel.Error, "Error occurred closing connection sessions: {0}", E.Message);
+						FServer.Server.LogError(E);
 					}
 				}
 			}

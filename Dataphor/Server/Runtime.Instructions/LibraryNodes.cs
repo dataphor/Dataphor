@@ -23,6 +23,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	using Schema = Alphora.Dataphor.DAE.Schema;
 	using Alphora.Dataphor.Windows;
 	using Alphora.Dataphor.DAE.Schema;
+	using Alphora.Dataphor.DAE.Device.Catalog;
 
 	// operator CreateLibrary(const ALibraryDescriptor : LibraryDescriptor);
 	public class SystemCreateLibraryNode : InstructionNode
@@ -51,9 +52,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 						if (!Directory.Exists(LLibraryDirectory))
 							Directory.CreateDirectory(LLibraryDirectory);
-						LExistingLibrary.SaveToFile(Path.Combine(LLibraryDirectory, Schema.Library.GetFileName(LExistingLibrary.Name)));
+						LExistingLibrary.SaveToFile(Path.Combine(LLibraryDirectory, Schema.LibraryUtility.GetFileName(LExistingLibrary.Name)));
 
-						AProgram.CatalogDeviceSession.SetLibraryDirectory(ALibrary.Name, LLibraryDirectory);
+						((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetLibraryDirectory(ALibrary.Name, LLibraryDirectory);
 					}
 
 					SystemSetLibraryDescriptorNode.ChangeLibraryVersion(AProgram, ALibrary.Name, ALibrary.Version, AUpdateCatalogTimeStamp);
@@ -84,17 +85,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					{
 						if (AUpdateCatalogTimeStamp)
 							AProgram.Catalog.UpdateTimeStamp();
-						AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = true;
-						try
-						{
-							if (!Directory.Exists(LLibraryDirectory))
-								Directory.CreateDirectory(LLibraryDirectory);
-							ALibrary.SaveToFile(Path.Combine(LLibraryDirectory, Schema.Library.GetFileName(ALibrary.Name)));
-						}
-						finally
-						{
-							AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = false;
-						}
+
+						if (!Directory.Exists(LLibraryDirectory))
+							Directory.CreateDirectory(LLibraryDirectory);
+						ALibrary.SaveToFile(Path.Combine(LLibraryDirectory, Schema.LibraryUtility.GetFileName(ALibrary.Name)));
 					}
 					catch
 					{
@@ -108,22 +102,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					AProgram.Catalog.Libraries.DoLibraryCreated(AProgram, ALibrary.Name);
 					AProgram.Catalog.Libraries.DoLibraryAdded(AProgram, ALibrary.Name);
 					if (ALibrary.Directory != String.Empty)
-						AProgram.CatalogDeviceSession.SetLibraryDirectory(ALibrary.Name, LLibraryDirectory);
+						((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetLibraryDirectory(ALibrary.Name, LLibraryDirectory);
 				}
-			}
-		}
-		
-		public static void AttachLibrary(Program AProgram, Schema.Library ALibrary, bool AIsAttached)
-		{
-			lock (AProgram.Catalog.Libraries)
-			{
-				string LLibraryDirectory = ALibrary.GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory);
-
-				AProgram.Catalog.Libraries.Add(ALibrary);
-				AProgram.Catalog.UpdateTimeStamp();
-				AProgram.Catalog.Libraries.DoLibraryAdded(AProgram, ALibrary.Name);
-				if ((ALibrary.Directory != String.Empty) && !AIsAttached)
-					AProgram.CatalogDeviceSession.SetLibraryDirectory(ALibrary.Name, LLibraryDirectory);
 			}
 		}
 		
@@ -169,44 +149,36 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					{
 						LLibrary.Name = ANewLibraryName;
 						
-						string LOldLibraryDirectory = Schema.Library.GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory, LOldName, LLibrary.Directory);
-						string LLibraryDirectory = LLibrary.GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory);
-						string LOldLibraryName = Path.Combine(LLibraryDirectory, Schema.Library.GetFileName(LOldName));
-						string LLibraryName = Path.Combine(LLibraryDirectory, Schema.Library.GetFileName(LLibrary.Name));
+						string LOldLibraryDirectory = Schema.LibraryUtility.GetLibraryDirectory(((Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory, LOldName, LLibrary.Directory);
+						string LLibraryDirectory = LLibrary.GetLibraryDirectory(((Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory);
+						string LOldLibraryName = Path.Combine(LLibraryDirectory, Schema.LibraryUtility.GetFileName(LOldName));
+						string LLibraryName = Path.Combine(LLibraryDirectory, Schema.LibraryUtility.GetFileName(LLibrary.Name));
 						try
 						{
 							AProgram.Catalog.Libraries.Add(LLibrary);
 							try
 							{
-								AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = true;
+								#if !RESPECTREADONLY
+								PathUtility.EnsureWriteable(LOldLibraryDirectory, true);
+								#endif
+								if (LOldLibraryDirectory != LLibraryDirectory)
+									Directory.Move(LOldLibraryDirectory, LLibraryDirectory);
 								try
 								{
 									#if !RESPECTREADONLY
-									PathUtility.EnsureWriteable(LOldLibraryDirectory, true);
+									FileUtility.EnsureWriteable(LOldLibraryName);
 									#endif
-									if (LOldLibraryDirectory != LLibraryDirectory)
-										Directory.Move(LOldLibraryDirectory, LLibraryDirectory);
-									try
-									{
-										#if !RESPECTREADONLY
-										FileUtility.EnsureWriteable(LOldLibraryName);
-										#endif
-										File.Delete(LOldLibraryName);
-										LLibrary.SaveToFile(LLibraryName);
-									}
-									catch
-									{
-										if (LOldLibraryDirectory != LLibraryDirectory)
-											Directory.Move(LLibraryDirectory, LOldLibraryDirectory);
-										LOldLibraryName = Path.Combine(LOldLibraryDirectory, Schema.Library.GetFileName(LLibrary.Name));
-										if (File.Exists(LOldLibraryName))
-											File.Delete(LOldLibraryName);
-										throw;
-									}
+									File.Delete(LOldLibraryName);
+									LLibrary.SaveToFile(LLibraryName);
 								}
-								finally
+								catch
 								{
-									AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = false;
+									if (LOldLibraryDirectory != LLibraryDirectory)
+										Directory.Move(LLibraryDirectory, LOldLibraryDirectory);
+									LOldLibraryName = Path.Combine(LOldLibraryDirectory, Schema.LibraryUtility.GetFileName(LLibrary.Name));
+									if (File.Exists(LOldLibraryName))
+										File.Delete(LOldLibraryName);
+									throw;
 								}
 
 								if (AUpdateCatalogTimeStamp)
@@ -221,15 +193,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						catch
 						{
 							LLibrary.Name = LOldName;
-							AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = true;
-							try
-							{
-								LLibrary.SaveToFile(Path.Combine(LOldLibraryDirectory, Schema.Library.GetFileName(LLibrary.Name))); // ensure that the file is restored to its original state
-							}
-							finally
-							{
-								AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = false;
-							}
+							LLibrary.SaveToFile(Path.Combine(LOldLibraryDirectory, Schema.LibraryUtility.GetFileName(LLibrary.Name))); // ensure that the file is restored to its original state
 							throw;
 						}
 					}
@@ -269,7 +233,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			string LLibraryDirectory = (string)AArguments[0];
 			
 			Schema.Libraries LLibraries = new Schema.Libraries();
-			Schema.Library.GetAvailableLibraries(AProgram.ServerProcess.ServerSession.Server.InstanceDirectory, LLibraryDirectory, LLibraries, true);
+			Schema.LibraryUtility.GetAvailableLibraries(((Server)AProgram.ServerProcess.ServerSession.Server).InstanceDirectory, LLibraryDirectory, LLibraries, true);
 
 			lock (AProgram.Catalog.Libraries)
 			{
@@ -303,7 +267,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			string LLibraryName = (string)AArguments[0];
-			SystemDropLibraryNode.DetachLibrary(AProgram, LLibraryName);
+
+			LibraryUtility.DetachLibrary(AProgram, LLibraryName);
 			
 			return null;
 		}
@@ -316,8 +281,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			lock (AProgram.Catalog.Libraries)
 			{
-				Schema.Library LLibrary = AProgram.Catalog.Libraries[(string)AArguments[0]];
-				return (Schema.Library)LLibrary.Clone();
+				return (Schema.Library)AProgram.Catalog.Libraries[(string)AArguments[0]].Clone();
 			}
 		}
 	}
@@ -348,18 +312,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					if (AUpdateTimeStamp)
 						AProgram.Catalog.UpdateTimeStamp();
 
-					AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = true;
-					try
-					{
-						LLibrary.SaveToFile(Path.Combine(LLibrary.GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory), Schema.Library.GetFileName(LLibrary.Name)));
-					}
-					finally
-					{
-						AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = false;
-					}
+					LLibrary.SaveToFile(Path.Combine(LLibrary.GetLibraryDirectory(((Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), Schema.LibraryUtility.GetFileName(LLibrary.Name)));
 				
 					if (AProgram.CatalogDeviceSession.IsLoadedLibrary(LLibrary.Name))	
-						AProgram.CatalogDeviceSession.SetCurrentLibraryVersion(LLibrary.Name, LLibrary.Version);
+						((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetCurrentLibraryVersion(LLibrary.Name, LLibrary.Version);
 				}
 			}
 		}
@@ -375,15 +331,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					if (AUpdateTimeStamp)
 						AProgram.Catalog.UpdateTimeStamp();
 
-					AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = true;
-					try
-					{
-						LLibrary.SaveToFile(Path.Combine(LLibrary.GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory), Schema.Library.GetFileName(LLibrary.Name)));
-					}
-					finally
-					{
-						AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = false;
-					}
+					LLibrary.SaveToFile(Path.Combine(LLibrary.GetLibraryDirectory(((Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), Schema.LibraryUtility.GetFileName(LLibrary.Name)));
 				}
 			}
 		}
@@ -405,11 +353,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				LLibrary.Libraries.Add(ARequisiteLibrary);
 				try
 				{
-					SystemRegisterLibraryNode.CheckCircularLibraryReference(AProgram, LLibrary, ARequisiteLibrary.Name);
+					LibraryUtility.CheckCircularLibraryReference(AProgram, LLibrary, ARequisiteLibrary.Name);
 					Schema.LoadedLibrary LLoadedLibrary = AProgram.CatalogDeviceSession.ResolveLoadedLibrary(LLibrary.Name, false);
 					if (LLoadedLibrary != null)
 					{
-						SystemRegisterLibraryNode.EnsureLibraryRegistered(AProgram, ARequisiteLibrary, true);
+						LibraryUtility.EnsureLibraryRegistered(AProgram, ARequisiteLibrary, true);
 						if (!LLoadedLibrary.RequiredLibraries.Contains(ARequisiteLibrary.Name))
 						{
 							LLoadedLibrary.RequiredLibraries.Add(AProgram.CatalogDeviceSession.ResolveLoadedLibrary(ARequisiteLibrary.Name));
@@ -419,15 +367,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						LLoadedLibrary.AttachLibrary();
 					}
 
-					AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = true;
-					try
-					{
-						LLibrary.SaveToFile(Path.Combine(LLibrary.GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory), Schema.Library.GetFileName(LLibrary.Name)));
-					}
-					finally
-					{
-						AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = false;
-					}
+					LLibrary.SaveToFile(Path.Combine(LLibrary.GetLibraryDirectory(((Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), Schema.LibraryUtility.GetFileName(LLibrary.Name)));
 				}
 				catch
 				{
@@ -467,15 +407,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 						LLibrary.Libraries[AOldReference.Name].Version = ANewReference.Version;
 
-						AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = true;
-						try
-						{
-							LLibrary.SaveToFile(Path.Combine(LLibrary.GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory), Schema.Library.GetFileName(LLibrary.Name)));
-						}
-						finally
-						{
-							AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = false;
-						}
+						LLibrary.SaveToFile(Path.Combine(LLibrary.GetLibraryDirectory(((Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), Schema.LibraryUtility.GetFileName(LLibrary.Name)));
 					}
 				}
 			}
@@ -496,15 +428,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotRemoveRequisitesFromRegisteredLibrary, LLibrary.Name);
 
 				LLibrary.Libraries.Remove(ARequisiteLibrary);
-				AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = true;
-				try
-				{
-					LLibrary.SaveToFile(Path.Combine(LLibrary.GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory), Schema.Library.GetFileName(LLibrary.Name)));
-				}
-				finally
-				{
-					AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = false;
-				}
+				LLibrary.SaveToFile(Path.Combine(LLibrary.GetLibraryDirectory(((Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), Schema.LibraryUtility.GetFileName(LLibrary.Name)));
 			}
 		}
 
@@ -528,17 +452,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					// ensure that all assemblies are registered
 					Schema.LoadedLibrary LLoadedLibrary = AProgram.CatalogDeviceSession.ResolveLoadedLibrary(LLibrary.Name, false);
 					if (LLoadedLibrary != null)
-						SystemRegisterLibraryNode.RegisterLibraryFiles(AProgram, LLibrary, LLoadedLibrary);
+						LibraryUtility.RegisterLibraryFiles(AProgram, LLibrary, LLoadedLibrary);
 
-					AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = true;
-					try
-					{
-						LLibrary.SaveToFile(Path.Combine(LLibrary.GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory), Schema.Library.GetFileName(LLibrary.Name)));
-					}
-					finally
-					{
-						AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = false;
-					}
+					LLibrary.SaveToFile(Path.Combine(LLibrary.GetLibraryDirectory(((Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), Schema.LibraryUtility.GetFileName(LLibrary.Name)));
 				}
 				catch
 				{
@@ -562,15 +478,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				LLibrary.Files.Remove(AFile);
 				try
 				{
-					AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = true;
-					try
-					{
-						LLibrary.SaveToFile(Path.Combine(LLibrary.GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory), Schema.Library.GetFileName(LLibrary.Name)));
-					}
-					finally
-					{
-						AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = false;
-					}
+					LLibrary.SaveToFile(Path.Combine(LLibrary.GetLibraryDirectory(((Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), Schema.LibraryUtility.GetFileName(LLibrary.Name)));
 				}
 				catch
 				{
@@ -600,15 +508,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				LLibrary.MetaData.Tags.Add(ASetting);
 				try
 				{
-					AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = true;
-					try
-					{
-						LLibrary.SaveToFile(Path.Combine(LLibrary.GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory), Schema.Library.GetFileName(LLibrary.Name)));
-					}
-					finally
-					{
-						AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = false;
-					}
+					LLibrary.SaveToFile(Path.Combine(LLibrary.GetLibraryDirectory(((Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), Schema.LibraryUtility.GetFileName(LLibrary.Name)));
 				}
 				catch
 				{
@@ -638,15 +538,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					LLibrary.MetaData.Tags.Update(AOldSetting.Name, ANewSetting.Value);
 				try
 				{
-					AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = true;
-					try
-					{
-						LLibrary.SaveToFile(Path.Combine(LLibrary.GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory), Schema.Library.GetFileName(LLibrary.Name)));
-					}
-					finally
-					{
-						AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = false;
-					}
+					LLibrary.SaveToFile(Path.Combine(LLibrary.GetLibraryDirectory(((Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), Schema.LibraryUtility.GetFileName(LLibrary.Name)));
 				}
 				catch
 				{
@@ -678,15 +570,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				LLibrary.MetaData.Tags.Remove(ATag.Name);
 				try
 				{
-					AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = true;
-					try
-					{
-						LLibrary.SaveToFile(Path.Combine(LLibrary.GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory), Schema.Library.GetFileName(LLibrary.Name)));
-					}
-					finally
-					{
-						AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = false;
-					}
+					LLibrary.SaveToFile(Path.Combine(LLibrary.GetLibraryDirectory(((Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), Schema.LibraryUtility.GetFileName(LLibrary.Name)));
 				}
 				catch
 				{
@@ -714,7 +598,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (AProgram.CatalogDeviceSession.IsLoadedLibrary(LOldLibrary.Name))
 				{
 					foreach (Schema.LibraryReference LReference in ANewLibrary.Libraries)
-						SystemRegisterLibraryNode.CheckCircularLibraryReference(AProgram, ANewLibrary, LReference.Name);
+						LibraryUtility.CheckCircularLibraryReference(AProgram, ANewLibrary, LReference.Name);
 
 					// cannot rename a loaded library
 					if (LOldLibrary.Name != ANewLibrary.Name)
@@ -732,7 +616,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					Schema.LoadedLibrary LLoadedLibrary = AProgram.CatalogDeviceSession.ResolveLoadedLibrary(ANewLibrary.Name);
 					foreach (Schema.LibraryReference LReference in ANewLibrary.Libraries)
 					{
-						EnsureLibraryRegistered(AProgram, LReference, true);
+						LibraryUtility.EnsureLibraryRegistered(AProgram, LReference, true);
 						if (!LLoadedLibrary.RequiredLibraries.Contains(LReference.Name))
 						{
 							LLoadedLibrary.RequiredLibraries.Add(AProgram.CatalogDeviceSession.ResolveLoadedLibrary(LReference.Name));
@@ -743,7 +627,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					LLoadedLibrary.AttachLibrary();
 
 					// ensure that all assemblies are registered
-					RegisterLibraryFiles(AProgram, ANewLibrary, AProgram.CatalogDeviceSession.ResolveLoadedLibrary(ANewLibrary.Name));
+					LibraryUtility.RegisterLibraryFiles(AProgram, ANewLibrary, AProgram.CatalogDeviceSession.ResolveLoadedLibrary(ANewLibrary.Name));
 				}
 
 				AProgram.Catalog.Libraries.Remove(LOldLibrary);
@@ -756,13 +640,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							AProgram.Catalog.UpdateTimeStamp();
 
 						string LLibraryDirectory = ANewLibrary.GetLibraryDirectory(((Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory);
-						string LLibraryName = Path.Combine(LLibraryDirectory, Schema.Library.GetFileName(ANewLibrary.Name));
+						string LLibraryName = Path.Combine(LLibraryDirectory, Schema.LibraryUtility.GetFileName(ANewLibrary.Name));
 						try
 						{
 							if (LOldLibrary.Name != ANewLibrary.Name)
 							{
 								string LOldLibraryDirectory = LOldLibrary.GetLibraryDirectory(((Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory);
-								string LOldLibraryName = Path.Combine(LLibraryDirectory, Schema.Library.GetFileName(LOldLibrary.Name));
+								string LOldLibraryName = Path.Combine(LLibraryDirectory, Schema.LibraryUtility.GetFileName(LOldLibrary.Name));
 								#if !RESPECTREADONLY
 								PathUtility.EnsureWriteable(LOldLibraryDirectory, true);
 								FileUtility.EnsureWriteable(LOldLibraryName);
@@ -784,7 +668,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						catch
 						{
 							if (LOldLibrary.Name != ANewLibrary.Name)
-								LOldLibrary.SaveToFile(Path.Combine(LOldLibrary.GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory), Schema.Library.GetFileName(LOldLibrary.Name)));
+								LOldLibrary.SaveToFile(Path.Combine(LOldLibrary.GetLibraryDirectory(((Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), Schema.LibraryUtility.GetFileName(LOldLibrary.Name)));
 							throw;
 						}
 					}
@@ -1109,7 +993,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				Schema.Library LLibrary = AProgram.Catalog.Libraries[ALibraryName];
 				Schema.LoadedLibrary LLoadedLibrary = AProgram.CatalogDeviceSession.ResolveLoadedLibrary(ALibraryName);
-				VersionNumber LCurrentVersion = AProgram.CatalogDeviceSession.GetCurrentLibraryVersion(ALibraryName);
+				VersionNumber LCurrentVersion = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).GetCurrentLibraryVersion(ALibraryName);
 				if (VersionNumber.Compare(LLibrary.Version, LCurrentVersion) > 0)
 				{
 					SessionInfo LSessionInfo = new SessionInfo(LLoadedLibrary.Owner.ID == Server.CSystemUserID ? Server.CAdminUserID : LLoadedLibrary.Owner.ID, "", LLoadedLibrary.Name);
@@ -1140,7 +1024,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					{
 						((IServer)AProgram.ServerProcess.ServerSession.Server).Disconnect(LSession);
 					}
-					AProgram.CatalogDeviceSession.SetCurrentLibraryVersion(ALibraryName, LLibrary.Version);
+					((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetCurrentLibraryVersion(ALibraryName, LLibrary.Version);
 				}
 			}				
 		}
@@ -1244,7 +1128,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		public static string GetUpgradeDirectory(Program AProgram, string ALibraryName, string ALibraryDirectory)
 		{
-			return Path.Combine(Schema.Library.GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory, ALibraryName, ALibraryDirectory), CUpgradeDirectory);
+			return Path.Combine(Schema.LibraryUtility.GetLibraryDirectory(((Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory, ALibraryName, ALibraryDirectory), CUpgradeDirectory);
 		}
 		
 		public static void EnsureUpgradeDirectory(Program AProgram, string ALibraryName, string ALibraryDirectory)
