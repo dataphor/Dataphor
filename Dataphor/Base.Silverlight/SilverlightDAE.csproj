@@ -140,8 +140,119 @@
     <Compile Include="..\DAE\CLI.cs">
       <Link>DAE\CLI.cs</Link>
     </Compile>
+    <Compile Include="..\DAE\Compiling\Compiler.cs">
+      <Link>DAE\Compiling\Compiler.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Compiling\CompilerException.cs">
+      <Link>DAE\Compiling\CompilerException.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Compiling\OperatorMap.cs">
+      <Link>DAE\Compiling\OperatorMap.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Compiling\OperatorMatch.cs">
+      <Link>DAE\Compiling\OperatorMatch.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Compiling\OperatorResolutionCache.cs">
+      <Link>DAE\Compiling\OperatorResolutionCache.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Compiling\OperatorSignature.cs">
+      <Link>DAE\Compiling\OperatorSignature.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Compiling\Plan.cs">
+      <Link>DAE\Compiling\Plan.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Compiling\PlanStructures.cs">
+      <Link>DAE\Compiling\PlanStructures.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Compiling\Symbols.cs">
+      <Link>DAE\Compiling\Symbols.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Contracts\PlanDescriptor.cs">
+      <Link>DAE\Contracts\PlanDescriptor.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Contracts\ProcessCallInfo.cs">
+      <Link>DAE\Contracts\ProcessCallInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Contracts\ProcessCleanupInfo.cs">
+      <Link>DAE\Contracts\ProcessCleanupInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Contracts\RemoteCLI.cs">
+      <Link>DAE\Contracts\RemoteCLI.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Contracts\Structures.cs">
+      <Link>DAE\Contracts\Structures.cs</Link>
+    </Compile>
     <Compile Include="..\DAE\DAEException.cs">
       <Link>DAE\DAEException.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Debug\Breakpoint.cs">
+      <Link>DAE\Debug\Breakpoint.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Debug\CallStackEntry.cs">
+      <Link>DAE\Debug\CallStackEntry.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Debug\DebugContext.cs">
+      <Link>DAE\Debug\DebugContext.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Debug\Debugger.cs">
+      <Link>DAE\Debug\Debugger.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Debug\DebugLocator.cs">
+      <Link>DAE\Debug\DebugLocator.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Debug\DebugNodes.cs">
+      <Link>DAE\Debug\DebugNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Debug\DebugProcessInfo.cs">
+      <Link>DAE\Debug\DebugProcessInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Debug\DebugSessionInfo.cs">
+      <Link>DAE\Debug\DebugSessionInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Debug\SourceContext.cs">
+      <Link>DAE\Debug\SourceContext.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Debug\SourceUtility.cs">
+      <Link>DAE\Debug\SourceUtility.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Debug\StackEntry.cs">
+      <Link>DAE\Debug\StackEntry.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Device.ApplicationTransaction\ApplicationTransaction.cs">
+      <Link>DAE\Device.ApplicationTransaction\ApplicationTransaction.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Device.ApplicationTransaction\ApplicationTransactionException.cs">
+      <Link>DAE\Device.ApplicationTransaction\ApplicationTransactionException.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Device.Catalog\CatalogDevice.cs">
+      <Link>DAE\Device.Catalog\CatalogDevice.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Device.Catalog\CatalogDevicePlan.cs">
+      <Link>DAE\Device.Catalog\CatalogDevicePlan.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Device.Catalog\CatalogDeviceSession.cs">
+      <Link>DAE\Device.Catalog\CatalogDeviceSession.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Device.Catalog\CatalogException.cs">
+      <Link>DAE\Device.Catalog\CatalogException.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Device.Catalog\CatalogHeader.cs">
+      <Link>DAE\Device.Catalog\CatalogHeader.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Device.Catalog\CatalogStore.cs">
+      <Link>DAE\Device.Catalog\CatalogStore.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Device.Catalog\NameResolutionCache.cs">
+      <Link>DAE\Device.Catalog\NameResolutionCache.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Device.Memory\MemoryDevice.cs">
+      <Link>DAE\Device.Memory\MemoryDevice.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Device.Memory\MemoryDeviceException.cs">
+      <Link>DAE\Device.Memory\MemoryDeviceException.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Device\DeviceException.cs">
+      <Link>DAE\Device\DeviceException.cs</Link>
     </Compile>
     <Compile Include="..\DAE\Frame.cs">
       <Link>DAE\Frame.cs</Link>
@@ -188,6 +299,375 @@
     <Compile Include="..\DAE\Language\SyntaxException.cs">
       <Link>DAE\Language\SyntaxException.cs</Link>
     </Compile>
+    <Compile Include="..\DAE\Runtime.Data\AdornTable.cs">
+      <Link>DAE\Runtime.Data\AdornTable.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\AggregateTable.cs">
+      <Link>DAE\Runtime.Data\AggregateTable.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\CursorValue.cs">
+      <Link>DAE\Runtime.Data\CursorValue.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\DataValue.cs">
+      <Link>DAE\Runtime.Data\DataValue.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\DifferenceTable.cs">
+      <Link>DAE\Runtime.Data\DifferenceTable.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\ExplodeTable.cs">
+      <Link>DAE\Runtime.Data\ExplodeTable.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\ExtendTable.cs">
+      <Link>DAE\Runtime.Data\ExtendTable.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\IndexException.cs">
+      <Link>DAE\Runtime.Data\IndexException.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\JoinTables.cs">
+      <Link>DAE\Runtime.Data\JoinTables.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\ListValue.cs">
+      <Link>DAE\Runtime.Data\ListValue.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\LocalTable.cs">
+      <Link>DAE\Runtime.Data\LocalTable.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\NativeAccessor.cs">
+      <Link>DAE\Runtime.Data\NativeAccessor.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\NativeRowIndex.cs">
+      <Link>DAE\Runtime.Data\NativeRowIndex.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\NativeTable.cs">
+      <Link>DAE\Runtime.Data\NativeTable.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\Operation.cs">
+      <Link>DAE\Runtime.Data\Operation.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\OperatorValue.cs">
+      <Link>DAE\Runtime.Data\OperatorValue.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\OrderTables.cs">
+      <Link>DAE\Runtime.Data\OrderTables.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\ProjectTable.cs">
+      <Link>DAE\Runtime.Data\ProjectTable.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\QuotaTable.cs">
+      <Link>DAE\Runtime.Data\QuotaTable.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\RedefineTable.cs">
+      <Link>DAE\Runtime.Data\RedefineTable.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\RenameTable.cs">
+      <Link>DAE\Runtime.Data\RenameTable.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\RestrictTables.cs">
+      <Link>DAE\Runtime.Data\RestrictTables.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\RowManager.cs">
+      <Link>DAE\Runtime.Data\RowManager.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\RowTree.cs">
+      <Link>DAE\Runtime.Data\RowTree.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\RowTreeScan.cs">
+      <Link>DAE\Runtime.Data\RowTreeScan.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\RowValue.cs">
+      <Link>DAE\Runtime.Data\RowValue.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\ScalarValue.cs">
+      <Link>DAE\Runtime.Data\ScalarValue.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\ScanException.cs">
+      <Link>DAE\Runtime.Data\ScanException.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\SystemTableValues.cs">
+      <Link>DAE\Runtime.Data\SystemTableValues.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\TableBuffer.cs">
+      <Link>DAE\Runtime.Data\TableBuffer.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\UnionTable.cs">
+      <Link>DAE\Runtime.Data\UnionTable.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Data\VersionNumber.cs">
+      <Link>DAE\Runtime.Data\VersionNumber.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\AdornNode.cs">
+      <Link>DAE\Runtime.Instructions\AdornNode.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\AggregateNode.cs">
+      <Link>DAE\Runtime.Instructions\AggregateNode.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\AggregateNodes.cs">
+      <Link>DAE\Runtime.Instructions\AggregateNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\ArithmeticNodes.cs">
+      <Link>DAE\Runtime.Instructions\ArithmeticNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\BinaryNodes.cs">
+      <Link>DAE\Runtime.Instructions\BinaryNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\BitwiseNodes.cs">
+      <Link>DAE\Runtime.Instructions\BitwiseNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\BooleanNodes.cs">
+      <Link>DAE\Runtime.Instructions\BooleanNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\CatalogNodes.cs">
+      <Link>DAE\Runtime.Instructions\CatalogNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\ComparisonNodes.cs">
+      <Link>DAE\Runtime.Instructions\ComparisonNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\ConversionNodes.cs">
+      <Link>DAE\Runtime.Instructions\ConversionNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\CursorNodes.cs">
+      <Link>DAE\Runtime.Instructions\CursorNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\DateTimeNodes.cs">
+      <Link>DAE\Runtime.Instructions\DateTimeNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\DDLNodes.cs">
+      <Link>DAE\Runtime.Instructions\DDLNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\DifferenceNode.cs">
+      <Link>DAE\Runtime.Instructions\DifferenceNode.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\ExplodeNode.cs">
+      <Link>DAE\Runtime.Instructions\ExplodeNode.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\ExtendNode.cs">
+      <Link>DAE\Runtime.Instructions\ExtendNode.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\ExtractionNodes.cs">
+      <Link>DAE\Runtime.Instructions\ExtractionNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\ImperativeNodes.cs">
+      <Link>DAE\Runtime.Instructions\ImperativeNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\InNodes.cs">
+      <Link>DAE\Runtime.Instructions\InNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\InstructionNode.cs">
+      <Link>DAE\Runtime.Instructions\InstructionNode.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\JoinNodes.cs">
+      <Link>DAE\Runtime.Instructions\JoinNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\LibraryNodes.cs">
+      <Link>DAE\Runtime.Instructions\LibraryNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\ListNodes.cs">
+      <Link>DAE\Runtime.Instructions\ListNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\MathNodes.cs">
+      <Link>DAE\Runtime.Instructions\MathNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\NativeAccessorNodes.cs">
+      <Link>DAE\Runtime.Instructions\NativeAccessorNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\OrderNodes.cs">
+      <Link>DAE\Runtime.Instructions\OrderNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\PlanNode.cs">
+      <Link>DAE\Runtime.Instructions\PlanNode.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\ProjectNode.cs">
+      <Link>DAE\Runtime.Instructions\ProjectNode.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\QuotaNode.cs">
+      <Link>DAE\Runtime.Instructions\QuotaNode.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\RedefineNode.cs">
+      <Link>DAE\Runtime.Instructions\RedefineNode.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\RenameNode.cs">
+      <Link>DAE\Runtime.Instructions\RenameNode.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\RestrictNode.cs">
+      <Link>DAE\Runtime.Instructions\RestrictNode.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\RowComparisonNodes.cs">
+      <Link>DAE\Runtime.Instructions\RowComparisonNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\RowNodes.cs">
+      <Link>DAE\Runtime.Instructions\RowNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\SecurityNodes.cs">
+      <Link>DAE\Runtime.Instructions\SecurityNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\StringNodes.cs">
+      <Link>DAE\Runtime.Instructions\StringNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\SystemNodes.cs">
+      <Link>DAE\Runtime.Instructions\SystemNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\TableComparisonNodes.cs">
+      <Link>DAE\Runtime.Instructions\TableComparisonNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\TableNode.cs">
+      <Link>DAE\Runtime.Instructions\TableNode.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\TableNodes.cs">
+      <Link>DAE\Runtime.Instructions\TableNodes.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime.Instructions\UnionNode.cs">
+      <Link>DAE\Runtime.Instructions\UnionNode.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime\DataParam.cs">
+      <Link>DAE\Runtime\DataParam.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime\LockManager.cs">
+      <Link>DAE\Runtime\LockManager.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime\Program.cs">
+      <Link>DAE\Runtime\Program.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime\RuntimeException.cs">
+      <Link>DAE\Runtime\RuntimeException.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime\RuntimeStackWindow.cs">
+      <Link>DAE\Runtime\RuntimeStackWindow.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime\Semaphore.cs">
+      <Link>DAE\Runtime\Semaphore.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime\Stack.cs">
+      <Link>DAE\Runtime\Stack.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime\ValueManager.cs">
+      <Link>DAE\Runtime\ValueManager.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Runtime\ValueUtility.cs">
+      <Link>DAE\Runtime\ValueUtility.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\Assembly.cs">
+      <Link>DAE\Schema\Assembly.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\Catalog.cs">
+      <Link>DAE\Schema\Catalog.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\Column.cs">
+      <Link>DAE\Schema\Column.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\Comparer.cs">
+      <Link>DAE\Schema\Comparer.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\Constraint.cs">
+      <Link>DAE\Schema\Constraint.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\CursorType.cs">
+      <Link>DAE\Schema\CursorType.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\DataType.cs">
+      <Link>DAE\Schema\DataType.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\Default.cs">
+      <Link>DAE\Schema\Default.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\Device.cs">
+      <Link>DAE\Schema\Device.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\EmissionContext.cs">
+      <Link>DAE\Schema\EmissionContext.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\EventHandlers.cs">
+      <Link>DAE\Schema\EventHandlers.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\GenericType.cs">
+      <Link>DAE\Schema\GenericType.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\Library.cs">
+      <Link>DAE\Schema\Library.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\ListType.cs">
+      <Link>DAE\Schema\ListType.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\Operator.cs">
+      <Link>DAE\Schema\Operator.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\Reference.cs">
+      <Link>DAE\Schema\Reference.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\RowType.cs">
+      <Link>DAE\Schema\RowType.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\ScalarType.cs">
+      <Link>DAE\Schema\ScalarType.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\Schema.cs">
+      <Link>DAE\Schema\Schema.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\SchemaException.cs">
+      <Link>DAE\Schema\SchemaException.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\Security.cs">
+      <Link>DAE\Schema\Security.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\ServerLink.cs">
+      <Link>DAE\Schema\ServerLink.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\Signature.cs">
+      <Link>DAE\Schema\Signature.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\TableType.cs">
+      <Link>DAE\Schema\TableType.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Schema\TableVar.cs">
+      <Link>DAE\Schema\TableVar.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Server\DAERegisterAttribute.cs">
+      <Link>DAE\Server\DAERegisterAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Server\Engine.cs">
+      <Link>DAE\Server\Engine.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Server\IServerDTCTransaction.cs">
+      <Link>DAE\Server\IServerDTCTransaction.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Server\PlanCache.cs">
+      <Link>DAE\Server\PlanCache.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Server\RemoteSession.cs">
+      <Link>DAE\Server\RemoteSession.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Server\ServerBatch.cs">
+      <Link>DAE\Server\ServerBatch.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Server\ServerCursor.cs">
+      <Link>DAE\Server\ServerCursor.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Server\ServerException.cs">
+      <Link>DAE\Server\ServerException.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Server\ServerObject.cs">
+      <Link>DAE\Server\ServerObject.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Server\ServerPlan.cs">
+      <Link>DAE\Server\ServerPlan.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Server\ServerProcess.cs">
+      <Link>DAE\Server\ServerProcess.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Server\ServerScript.cs">
+      <Link>DAE\Server\ServerScript.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Server\ServerSession.cs">
+      <Link>DAE\Server\ServerSession.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Server\ServerStructures.cs">
+      <Link>DAE\Server\ServerStructures.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Server\ServerTransaction.cs">
+      <Link>DAE\Server\ServerTransaction.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Server\SignalPool.cs">
+      <Link>DAE\Server\SignalPool.cs</Link>
+    </Compile>
     <Compile Include="..\DAE\SessionInfo.cs">
       <Link>DAE\SessionInfo.cs</Link>
     </Compile>
@@ -196,6 +676,39 @@
     </Compile>
     <Compile Include="..\DAE\StackWindow.cs">
       <Link>DAE\StackWindow.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Streams\Conveyor.cs">
+      <Link>DAE\Streams\Conveyor.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Streams\ConveyorException.cs">
+      <Link>DAE\Streams\ConveyorException.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Streams\CopyOnWriteStream.cs">
+      <Link>DAE\Streams\CopyOnWriteStream.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Streams\CoverStream.cs">
+      <Link>DAE\Streams\CoverStream.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Streams\ManagedStream.cs">
+      <Link>DAE\Streams\ManagedStream.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Streams\MemoryStreamProvider.cs">
+      <Link>DAE\Streams\MemoryStreamProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Streams\RemoteStream.cs">
+      <Link>DAE\Streams\RemoteStream.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Streams\ServerStream.cs">
+      <Link>DAE\Streams\ServerStream.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Streams\ServerStreamManager.cs">
+      <Link>DAE\Streams\ServerStreamManager.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Streams\StreamManager.cs">
+      <Link>DAE\Streams\StreamManager.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Streams\StreamsException.cs">
+      <Link>DAE\Streams\StreamsException.cs</Link>
     </Compile>
     <Compile Include="..\DAE\Strings.cs">
       <Link>DAE\Strings.cs</Link>
@@ -221,6 +734,10 @@
     <EmbeddedResource Include="..\Base\BOP\BOPException.resx">
       <Link>BOP\BOPException.resx</Link>
       <DependentUpon>BOPException.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\DAE\Compiling\CompilerException.resx">
+      <Link>DAE\Compiling\CompilerException.resx</Link>
+      <DependentUpon>CompilerException.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="..\DAE\Language\LanguageException.resx">
       <Link>DAE\Language\LanguageException.resx</Link>
@@ -253,6 +770,64 @@
     <Content Include="..\DAE\Language\ManifestoCompliance.txt">
       <Link>DAE\Language\ManifestoCompliance.txt</Link>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\DAE\Debug\Debug.d4">
+      <Link>DAE\Debug\Debug.d4</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\DAE\Device.ApplicationTransaction\ApplicationTransactionException.resx">
+      <Link>DAE\Device.ApplicationTransaction\ApplicationTransactionException.resx</Link>
+      <DependentUpon>ApplicationTransactionException.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\DAE\Device.Catalog\CatalogException.resx">
+      <Link>DAE\Device.Catalog\CatalogException.resx</Link>
+      <DependentUpon>CatalogException.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\DAE\Device.Memory\MemoryDeviceException.resx">
+      <Link>DAE\Device.Memory\MemoryDeviceException.resx</Link>
+      <DependentUpon>MemoryDeviceException.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\DAE\Device\DeviceException.resx">
+      <Link>DAE\Device\DeviceException.resx</Link>
+      <DependentUpon>DeviceException.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\DAE\Runtime.Data\IndexException.resx">
+      <Link>DAE\Runtime.Data\IndexException.resx</Link>
+      <DependentUpon>IndexException.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\DAE\Runtime.Data\ScanException.resx">
+      <Link>DAE\Runtime.Data\ScanException.resx</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\DAE\Runtime\RuntimeException.resx">
+      <Link>DAE\Runtime\RuntimeException.resx</Link>
+      <DependentUpon>RuntimeException.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\DAE\Schema\SchemaException.resx">
+      <Link>DAE\Schema\SchemaException.resx</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\DAE\Schema\DataTypes.d4">
+      <Link>DAE\Schema\DataTypes.d4</Link>
+    </EmbeddedResource>
+    <None Include="..\DAE\Schema\SQLDeviceMappings.d4">
+      <Link>DAE\Schema\SQLDeviceMappings.d4</Link>
+    </None>
+    <EmbeddedResource Include="..\DAE\Schema\SystemCatalog.d4">
+      <Link>DAE\Schema\SystemCatalog.d4</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\DAE\Server\ServerException.resx">
+      <Link>DAE\Server\ServerException.resx</Link>
+      <DependentUpon>ServerException.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\DAE\Streams\ConveyorException.resx">
+      <Link>DAE\Streams\ConveyorException.resx</Link>
+      <DependentUpon>ConveyorException.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\DAE\Streams\StreamsException.resx">
+      <Link>DAE\Streams\StreamsException.resx</Link>
+      <DependentUpon>StreamsException.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\v3.0\Microsoft.Silverlight.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
