@@ -124,7 +124,7 @@ namespace Alphora.Dataphor.DAE.Language
 		public int IndexOfName(string AName)
 		{
 			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (String.Compare(this[LIndex].Name, AName, false) == 0)
+				if (String.Equals(this[LIndex].Name, AName, StringComparison.OrdinalIgnoreCase))
 					return LIndex;
 			return -1;
 		}

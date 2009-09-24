@@ -1052,16 +1052,6 @@ namespace Alphora.Dataphor.DAE.Server
 			set { FLogErrors = value; }
 		}
 		
-		public EventLogEntryType LogEntryTypeToEventLogEntryType(LogEntryType AEntryType)
-		{
-			switch (AEntryType)
-			{
-				case LogEntryType.Error : return EventLogEntryType.Error;
-				case LogEntryType.Warning : return EventLogEntryType.Warning;
-				default : return EventLogEntryType.Information;
-			}
-		}
-		
 		public void LogError(Exception AException)
 		{
 			LogMessage(LogEntryType.Error, ExceptionUtility.DetailedDescription(AException));

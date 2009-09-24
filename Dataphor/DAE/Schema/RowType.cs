@@ -151,7 +151,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 */
 		#else
-		public unsafe int StaticByteSize
+		public int StaticByteSize
 		{
 			get
 			{

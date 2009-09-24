@@ -227,13 +227,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	public class ControlError : Exception
 	{
 		public ControlError() : base(){} 
-		public ControlError(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext) : base(AInfo, AContext){}
 	}
 
 	public class ExitError : ControlError
 	{
 		public ExitError() : base(){}
-		public ExitError(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext) : base(AInfo, AContext){}
 	}
 	
 	public class ExitNode : PlanNode
@@ -632,7 +630,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	public class BreakError : ControlError
 	{
 		public BreakError() : base(){}
-		public BreakError(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext) : base(AInfo, AContext){}
 	}
 	
 	public class BreakNode : PlanNode
@@ -663,7 +660,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	public class ContinueError : ControlError
 	{
 		public ContinueError() : base(){}
-		public ContinueError(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext) : base(AInfo, AContext){}
 	}
 	
 	public class ContinueNode : PlanNode

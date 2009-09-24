@@ -414,7 +414,7 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 		protected NativeTable EnsureNativeTable(Schema.TableVar ATableVar)
 		{
 			if (!ATableVar.IsSessionObject && !ATableVar.IsATObject)
-				ATableVar.Scope = (Schema.TableVarScope)Enum.Parse(typeof(Schema.TableVarScope), MetaData.GetTag(ATableVar.MetaData, "Storage.Scope", "Database"));
+				ATableVar.Scope = (Schema.TableVarScope)Enum.Parse(typeof(Schema.TableVarScope), MetaData.GetTag(ATableVar.MetaData, "Storage.Scope", "Database"), false);
 
 			NativeTables LTables = GetTables(ATableVar.Scope);
 			lock (LTables)

@@ -9,11 +9,11 @@ namespace Alphora.Dataphor.DAE.Streams
     using System.IO;
 	using System.Text;
     using System.Collections;
-    using System.Runtime.Serialization.Formatters.Binary;
 
     using Alphora.Dataphor;
 	using Alphora.Dataphor.BOP;
 	using Alphora.Dataphor.DAE.Runtime.Data;
+	using System.Runtime.Serialization;
 	
 	/// <remarks>    
     /// A Conveyor provides host language access to the physical representation of Dataphor values stored in streams
@@ -461,25 +461,6 @@ namespace Alphora.Dataphor.DAE.Streams
 		#endif
     }
     
-	public class ObjectConveyor : Conveyor
-	{
-		public ObjectConveyor() : base() {}
-		
-		public override bool IsStreaming { get { return true; } }
-		
-		private BinaryFormatter FSerializer = new BinaryFormatter();
-		
-		public override object Read(Stream AStream)
-		{
-			return FSerializer.Deserialize(AStream);
-		}
-		
-		public override void Write(object AValue, Stream AStream)
-		{
-			FSerializer.Serialize(AStream, AValue);
-		}
-	}
-
 	public class BOPObjectConveyor : Conveyor
 	{
 		public BOPObjectConveyor() : base() {}
@@ -503,8 +484,6 @@ namespace Alphora.Dataphor.DAE.Streams
 	public class BinaryConveyor : Conveyor
 	{
 		public override bool IsStreaming { get { return true; } }
-		
-		private BinaryFormatter FSerializer = new BinaryFormatter();
 		
 		public override object Read(Stream AStream)
 		{

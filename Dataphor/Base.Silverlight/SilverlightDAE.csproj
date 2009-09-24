@@ -20,7 +20,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>Bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;TRACE;SILVERLIGHT</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;SILVERLIGHT;USENATIVE;NATIVEROW;ACCUMULATOR;USEOBJECTVALIDATE;NILPROPOGATION</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
@@ -239,9 +239,6 @@
     <Compile Include="..\DAE\Device.Catalog\CatalogHeader.cs">
       <Link>DAE\Device.Catalog\CatalogHeader.cs</Link>
     </Compile>
-    <Compile Include="..\DAE\Device.Catalog\CatalogStore.cs">
-      <Link>DAE\Device.Catalog\CatalogStore.cs</Link>
-    </Compile>
     <Compile Include="..\DAE\Device.Catalog\NameResolutionCache.cs">
       <Link>DAE\Device.Catalog\NameResolutionCache.cs</Link>
     </Compile>
@@ -386,8 +383,8 @@
     <Compile Include="..\DAE\Runtime.Data\SystemTableValues.cs">
       <Link>DAE\Runtime.Data\SystemTableValues.cs</Link>
     </Compile>
-    <Compile Include="..\DAE\Runtime.Data\TableBuffer.cs">
-      <Link>DAE\Runtime.Data\TableBuffer.cs</Link>
+    <Compile Include="..\DAE\Runtime.Data\TableValue.cs">
+      <Link>DAE\Runtime.Data\TableValue.cs</Link>
     </Compile>
     <Compile Include="..\DAE\Runtime.Data\UnionTable.cs">
       <Link>DAE\Runtime.Data\UnionTable.cs</Link>

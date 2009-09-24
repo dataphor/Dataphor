@@ -5,7 +5,6 @@
 */
 using System;
 using System.IO;
-using System.Runtime.Remoting.Lifetime;
 using System.Runtime.InteropServices;
 
 using Alphora.Dataphor;
@@ -41,11 +40,6 @@ namespace Alphora.Dataphor.DAE.Streams
 
 			FOffset = AOffset;
 			FCount = ACount;
-		}
-		
-		public override object InitializeLifetimeService()
-		{
-			return null;
 		}
 		
 		private bool FShouldClose;

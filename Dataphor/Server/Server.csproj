@@ -64,6 +64,7 @@
     <Compile Include="Contracts\ProcessDescriptor.cs" />
     <Compile Include="Contracts\ScriptDescriptor.cs" />
     <Compile Include="Contracts\SessionDescriptor.cs" />
+    <Compile Include="Device.Catalog\CatalogDevicePlan.cs" />
     <Compile Include="Device.Catalog\CatalogDeviceTable.cs" />
     <Compile Include="Device.Catalog\ServerCatalogDevice.cs" />
     <Compile Include="Device.Catalog\ServerCatalogDeviceSession.cs" />

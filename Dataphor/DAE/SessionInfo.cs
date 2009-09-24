@@ -16,7 +16,9 @@ namespace Alphora.Dataphor.DAE
 	
     /// <summary> Contains settings relevant to a server session. </summary>
 	[DataContract]
+	#if !SILVERLIGHT
 	[System.ComponentModel.TypeConverter(typeof(System.ComponentModel.ExpandableObjectConverter))]
+	#endif
 	public class SessionInfo
     {
 		public const int CDefaultFetchCount = 20;
@@ -270,7 +272,9 @@ namespace Alphora.Dataphor.DAE
 	}
     
     [DataContract]
+    #if !SILVERLIGHT
  	[System.ComponentModel.TypeConverter(typeof(System.ComponentModel.ExpandableObjectConverter))]
+ 	#endif
 	public class ProcessInfo
 	{
 		public ProcessInfo() : base() {}

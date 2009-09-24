@@ -7,7 +7,6 @@ namespace Alphora.Dataphor.DAE.Streams
 {
 	using System;
 	using System.IO;
-	using System.Runtime.Remoting.Lifetime;
 
 	using Alphora.Dataphor;
 

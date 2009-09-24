@@ -609,7 +609,9 @@ namespace Alphora.Dataphor.DAE.Debug
 							Monitor.Exit(FSyncHandle);
 							try
 							{
+								#if !SILVERLIGHT
 								WaitHandle.SignalAndWait(FWaitSignal, FPauseSignal);
+								#endif
 							}
 							finally
 							{

@@ -25,7 +25,6 @@ using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Device.Memory;
 using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
-using Alphora.Dataphor.DAE.Connection;
 using Schema = Alphora.Dataphor.DAE.Schema;
 
 namespace Alphora.Dataphor.DAE.Device.Catalog

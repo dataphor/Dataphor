@@ -8,10 +8,9 @@ namespace Alphora.Dataphor.DAE.Streams
 	using System;
 	using System.IO;
 	using System.Collections;
-	using System.Runtime.Remoting.Lifetime;
 	using System.Collections.Generic;
 	
-	public class MemoryStreamHeader : Disposable, ISponsor
+	public class MemoryStreamHeader : Disposable
 	{
 		public MemoryStreamHeader(StreamID AStreamID)
 		{
@@ -28,12 +27,6 @@ namespace Alphora.Dataphor.DAE.Streams
 			}
 
 			base.Dispose(ADisposing);
-		}
-		
-		// ISponsor
-		TimeSpan ISponsor.Renewal(ILease ALease)
-		{
-			return TimeSpan.FromMinutes(5);
 		}
 		
 		public StreamID StreamID;

@@ -5149,7 +5149,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public int IndexOf(string AName)
 		{
 			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (String.Compare(this[LIndex].AttributeName, AName, true) == 0)
+				if (String.Equals(this[LIndex].AttributeName, AName, StringComparison.OrdinalIgnoreCase))
 					return LIndex;
 			return -1;
 		}

@@ -702,7 +702,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		/// <summary>Raises an error if the current user is not authorized to administer the given user.</summary>		
 		public void CheckAuthorized(string AUserID)
 		{
-			if (!User.IsAdminUser() || !User.IsSystemUser() || (String.Compare(AUserID, User.ID, true) != 0))
+			if (!User.IsAdminUser() || !User.IsSystemUser() || (!String.Equals(AUserID, User.ID, StringComparison.OrdinalIgnoreCase)))
 				CheckRight(Schema.RightNames.AlterUser);
 		}
 		
@@ -825,7 +825,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 							Schema.LoadedLibrary LDependentLibrary = AObject.Library;
 							if (LDependentLibrary == null)
 								throw new Schema.SchemaException(Schema.SchemaException.Codes.NonLibraryDependency, LObject.Name, LLibrary.Name, AObject.Name);
-							if (!LLibrary.IsRequiredLibrary(LDependentLibrary) && (String.Compare(LDependentLibrary.Name, Engine.CSystemLibraryName, false) != 0)) // Ignore dependencies to the system library, these are implicitly available
+							if (!LLibrary.IsRequiredLibrary(LDependentLibrary) && (!String.Equals(LDependentLibrary.Name, Engine.CSystemLibraryName, StringComparison.OrdinalIgnoreCase))) // Ignore dependencies to the system library, these are implicitly available
 								throw new Schema.SchemaException(Schema.SchemaException.Codes.NonRequiredLibraryDependency, LObject.Name, LLibrary.Name, AObject.Name, LDependentLibrary.Name);
 						}
 						

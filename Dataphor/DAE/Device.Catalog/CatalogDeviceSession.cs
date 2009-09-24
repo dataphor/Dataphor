@@ -22,7 +22,6 @@ using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Store;
 
 namespace Alphora.Dataphor.DAE.Device.Catalog
 {

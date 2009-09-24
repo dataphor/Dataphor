@@ -535,6 +535,16 @@ namespace Alphora.Dataphor.DAE.Server
 		private FileStream FLogFile;
 		private StreamWriter FLog;
 
+		public EventLogEntryType LogEntryTypeToEventLogEntryType(LogEntryType AEntryType)
+		{
+			switch (AEntryType)
+			{
+				case LogEntryType.Error : return EventLogEntryType.Error;
+				case LogEntryType.Warning : return EventLogEntryType.Warning;
+				default : return EventLogEntryType.Information;
+			}
+		}
+		
 		public override void LogMessage(LogEntryType AEntryType, string ADescription)
 		{
 			if (LoggingEnabled)

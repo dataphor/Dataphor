@@ -522,7 +522,7 @@ create type Error
 			write class "System.ErrorAsDisplayStringWriteAccessorNode"
 	} class "System.ErrorAsDisplayStringSelectorNode"
 }
-	class "System.ObjectConveyor"
+	class "System.BOPObjectConveyor"
 	static tags 
 	{ 
 		Catalog.Comment = "System Error",
