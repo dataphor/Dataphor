@@ -714,6 +714,7 @@
       <Link>DAE\Utility.cs</Link>
     </Compile>
     <Compile Include="System\ComponentModel.cs" />
+    <Compile Include="System\ICloneable.cs" />
     <Compile Include="System\MD5CryptoServiceProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="System\Stopwatch.cs" />
