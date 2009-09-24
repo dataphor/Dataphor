@@ -52,4 +52,14 @@ namespace System.ComponentModel
 			return (Site != null ? Site.GetService(AService) : false);
 		}
 	}
+	
+	public class EditorAttribute : Attribute
+	{
+		public EditorAttribute(string AClassName, string AUITypeEditor) { }
+	}
+	
+	public class BrowsableAttribute : Attribute
+	{
+		public BrowsableAttribute(bool AValue) { }
+	}
 }

@@ -12,7 +12,6 @@ namespace Alphora.Dataphor.DAE.Runtime
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Debug;
 
-	[Serializable]
 	public class RuntimeException : DAEException, ILocatedException
 	{
 		public enum Codes 

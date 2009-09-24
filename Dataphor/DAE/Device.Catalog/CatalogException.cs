@@ -10,7 +10,6 @@ using Alphora.Dataphor.DAE.Device;
 
 namespace Alphora.Dataphor.DAE.Device.Catalog
 {
-	[Serializable]
 	public class CatalogException : DeviceException
 	{
 		public new enum Codes : int

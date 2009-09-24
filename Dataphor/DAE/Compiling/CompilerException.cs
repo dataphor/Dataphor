@@ -30,7 +30,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 	///	processing the abstract syntax tree for a given program.  The line number and position of the
 	/// invalid constructs will be given if possible.  Only the compiler should throw exceptions of this type.
 	/// </remarks>
-	[Serializable]
 	public class CompilerException : DAEException, ILocatedException
 	{
 		public enum Codes : int

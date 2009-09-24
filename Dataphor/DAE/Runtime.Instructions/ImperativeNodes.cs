@@ -224,14 +224,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	}
 	
-	[Serializable]
 	public class ControlError : Exception
 	{
 		public ControlError() : base(){} 
 		public ControlError(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext) : base(AInfo, AContext){}
 	}
 
-	[Serializable]	
 	public class ExitError : ControlError
 	{
 		public ExitError() : base(){}
@@ -631,7 +629,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	}
 
-	[Serializable]	
 	public class BreakError : ControlError
 	{
 		public BreakError() : base(){}
@@ -663,7 +660,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	}
 
-	[Serializable]	
 	public class ContinueError : ControlError
 	{
 		public ContinueError() : base(){}

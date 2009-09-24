@@ -11,6 +11,7 @@ namespace Alphora.Dataphor.DAE.Language
     using System.ComponentModel;
     
     using Alphora.Dataphor;
+	using System.Runtime.Serialization;
     
     /*
 		Class Hierarchy ->
@@ -68,7 +69,6 @@ namespace Alphora.Dataphor.DAE.Language
 		public static LineInfo StartingLine = new LineInfo(1, 1, 1, 1);
     }
     
-	[Serializable]
 	public abstract class Statement : Object 
 	{
 		public Statement() : base() {}
@@ -170,7 +170,7 @@ namespace Alphora.Dataphor.DAE.Language
     
     public abstract class Expression : Statement {}
 
-	[Serializable]    
+	[DataContract]    
 	public enum Modifier : byte {In, Var, Out, Const}
 	
 	public class ParameterExpression : Expression

@@ -12,7 +12,6 @@ using Alphora.Dataphor.DAE;
 namespace Alphora.Dataphor.DAE.Connection
 {
 	/// <summary>The base exception class for all exceptions thrown by the Connection classes. </summary>
-	[Serializable]
 	public class ConnectionException : DAEException
 	{
 		public enum Codes : int

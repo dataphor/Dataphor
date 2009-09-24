@@ -11,7 +11,6 @@ using Alphora.Dataphor.DAE.Device;
 
 namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 {
-	[Serializable]
 	public class ApplicationTransactionException : DeviceException
 	{
 		public new enum Codes : int

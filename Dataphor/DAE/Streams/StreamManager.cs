@@ -7,11 +7,12 @@ namespace Alphora.Dataphor.DAE.Streams
 {
 	using System;
 	using System.IO;
+	using System.Runtime.Serialization;
 	
 	using Alphora.Dataphor.DAE.Runtime;
 	
 	/// <remarks>Value type for a stream identifier.</remarks>
-	[Serializable]
+	[DataContract]
 	public struct StreamID : IComparable
 	{
 		public const int CSizeOf = sizeof(UInt64);
@@ -22,6 +23,7 @@ namespace Alphora.Dataphor.DAE.Streams
 			Value = AValue;
 		}
 
+		[DataMember]
 		public UInt64 Value;
 
 		public override string ToString()

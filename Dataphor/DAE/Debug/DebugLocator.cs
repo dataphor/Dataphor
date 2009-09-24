@@ -7,13 +7,14 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace Alphora.Dataphor.DAE.Debug
 {
 	/// <summary>
 	/// Represents a debug locator used to specify the originating location for the source text of a compiled plan.
 	/// </summary>
-	[Serializable]
+	[DataContract]
 	public class DebugLocator
 	{
 		/// <summary>
@@ -42,18 +43,22 @@ namespace Alphora.Dataphor.DAE.Debug
 			FLinePos = ALocator.Line == ALine ? Math.Max(ALocator.LinePos - 1, 0) + ALinePos : ALinePos;
 		}
 		
+		[DataMember(Name = "Locator")]
 		private string FLocator;
 		/// <summary>
 		/// Gets the locator reference for this instance.
 		/// </summary>
 		public string Locator { get { return FLocator; } }
 		
+		[DataMember(Name = "Line")]
 		private int FLine;
 		/// <summary>
 		/// Gets the line number (1-based) at which the locator begins.
 		/// </summary>
+		[DataMember]
 		public int Line { get { return FLine; } }
 		
+		[DataMember(Name = "LinePos")]
 		private int FLinePos;
 		/// <summary>
 		/// Gets the character position (1-based) at which the locator begins.

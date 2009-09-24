@@ -156,7 +156,6 @@ namespace Alphora.Dataphor.DAE.Server
 	}
 	
 	// ServerBatches
-	[Serializable]
 	public class ServerBatches : ServerChildObjects, IServerBatches
 	{		
 		protected override void Validate(ServerChildObject AObject)

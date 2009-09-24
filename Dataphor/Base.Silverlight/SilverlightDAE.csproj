@@ -38,6 +38,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.Net" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Windows" />
     <Reference Include="mscorlib" />
     <Reference Include="system" />
@@ -136,7 +137,73 @@
     <Compile Include="..\Base\ValidatingBaseList.cs">
       <Link>Base\ValidatingBaseList.cs</Link>
     </Compile>
-    <Compile Include="System\Component.cs" />
+    <Compile Include="..\DAE\CLI.cs">
+      <Link>DAE\CLI.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\DAEException.cs">
+      <Link>DAE\DAEException.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Frame.cs">
+      <Link>DAE\Frame.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Language.D4\D4Emitter.cs">
+      <Link>DAE\Language.D4\D4Emitter.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Language.D4\Instructions.cs">
+      <Link>DAE\Language.D4\Instructions.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Language.D4\Keywords.cs">
+      <Link>DAE\Language.D4\Keywords.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Language.D4\Language.cs">
+      <Link>DAE\Language.D4\Language.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Language.D4\MetaData.cs">
+      <Link>DAE\Language.D4\MetaData.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Language.D4\Parser.cs">
+      <Link>DAE\Language.D4\Parser.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Language\Emitter.cs">
+      <Link>DAE\Language\Emitter.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Language\Language.cs">
+      <Link>DAE\Language\Language.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Language\LanguageException.cs">
+      <Link>DAE\Language\LanguageException.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Language\Lexer.cs">
+      <Link>DAE\Language\Lexer.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Language\LexerException.cs">
+      <Link>DAE\Language\LexerException.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Language\Modifiers.cs">
+      <Link>DAE\Language\Modifiers.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Language\ParserException.cs">
+      <Link>DAE\Language\ParserException.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Language\SyntaxException.cs">
+      <Link>DAE\Language\SyntaxException.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\SessionInfo.cs">
+      <Link>DAE\SessionInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Stack.cs">
+      <Link>DAE\Stack.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\StackWindow.cs">
+      <Link>DAE\StackWindow.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Strings.cs">
+      <Link>DAE\Strings.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Utility.cs">
+      <Link>DAE\Utility.cs</Link>
+    </Compile>
+    <Compile Include="System\ComponentModel.cs" />
     <Compile Include="System\MD5CryptoServiceProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="System\Stopwatch.cs" />
@@ -155,6 +222,37 @@
       <Link>BOP\BOPException.resx</Link>
       <DependentUpon>BOPException.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="..\DAE\Language\LanguageException.resx">
+      <Link>DAE\Language\LanguageException.resx</Link>
+      <DependentUpon>LanguageException.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\DAE\Language\LexerException.resx">
+      <Link>DAE\Language\LexerException.resx</Link>
+      <DependentUpon>LexerException.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\DAE\Language\ParserException.resx">
+      <Link>DAE\Language\ParserException.resx</Link>
+      <DependentUpon>ParserException.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\DAE\Language\SyntaxException.resx">
+      <Link>DAE\Language\SyntaxException.resx</Link>
+      <DependentUpon>SyntaxException.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\DAE\Strings.resx">
+      <Link>DAE\Strings.resx</Link>
+      <DependentUpon>Strings.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\DAE\Language.D4\BNF.txt">
+      <Link>DAE\Language.D4\BNF.txt</Link>
+    </Content>
+    <Content Include="..\DAE\Language\BNF.txt">
+      <Link>DAE\Language\BNF.txt</Link>
+    </Content>
+    <Content Include="..\DAE\Language\ManifestoCompliance.txt">
+      <Link>DAE\Language\ManifestoCompliance.txt</Link>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\v3.0\Microsoft.Silverlight.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

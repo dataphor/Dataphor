@@ -7,6 +7,7 @@
 using System;
 using System.IO;
 using System.Collections;
+using System.Runtime.Serialization;
 
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
@@ -309,6 +310,7 @@ namespace Alphora.Dataphor.DAE
 	/// levels allow the transaction to ensure that only resources it has changed cannot be changed by other transactions,
 	/// and control whether or not changes made by other transactions are visible within the transaction.
 	/// </remarks>
+	[DataMember]
 	public enum IsolationLevel
 	{
 		/// <summary>
@@ -594,20 +596,24 @@ namespace Alphora.Dataphor.DAE
 		void Execute(DataParams AParams);
     }
 
-	[Serializable]
+	[DataContract]
 	public class PlanStatistics
 	{
 		/// <summary>Returns the total prepare time for the plan.</summary>
 		/// <remarks>PrepareTime is the total of CompileTime, OptimizeTime, and BindingTime, plus any incidental overhead between these phases.</remarks>
+		[DataMember]
 		public TimeSpan PrepareTime;
 
 		/// <summary>Returns the compile time for the plan.</summary>
+		[DataMember]
 		public TimeSpan CompileTime;
 
 		/// <summary>Returns the optimize time for the plan.</summary>
+		[DataMember]
 		public TimeSpan OptimizeTime;
 
 		/// <summary>Returns the bind time for the plan.</summary>
+		[DataMember]
 		public TimeSpan BindingTime;
 
 		/// <summary>Returns the total execution time for the plan.</summary>
@@ -615,6 +621,7 @@ namespace Alphora.Dataphor.DAE
 		///	Execution time is the total time spent executing on this plan. 
 		/// This includes all calls made through this plan, or cursors opened from this plan.
 		/// </remarks>
+		[DataMember]
 		public TimeSpan ExecuteTime;
 		
 		/// <summary>Returns the amount of time spent executing in devices.</summary>
@@ -622,10 +629,11 @@ namespace Alphora.Dataphor.DAE
 		/// This statistic tracks the total amount of time spent waiting for execution on other systems, 
 		/// as opposed to time spent within the Dataphor query processor.
 		/// </remarks>
+		[DataMember]
 		public TimeSpan DeviceExecuteTime;
 	}
 	
-	[Serializable]
+	[DataContract]
 	public class ProgramStatistics
 	{
 		/// <summary>Returns the total execution time for the program.</summary>
@@ -633,6 +641,7 @@ namespace Alphora.Dataphor.DAE
 		///	Execution time is the total time spent executing on this program. 
 		/// This includes all calls made through this program, or cursors based on the program.
 		/// </remarks>
+		[DataMember]
 		public TimeSpan ExecuteTime;
 		
 		/// <summary>Returns the amount of time spent executing in devices.</summary>
@@ -640,6 +649,7 @@ namespace Alphora.Dataphor.DAE
 		/// This statistic tracks the total amount of time spent waiting for execution on other systems, 
 		/// as opposed to time spent within the Dataphor query processor.
 		/// </remarks>
+		[DataMember]
 		public TimeSpan DeviceExecuteTime;
 	}
 	

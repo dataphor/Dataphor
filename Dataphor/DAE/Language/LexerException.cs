@@ -15,7 +15,6 @@ namespace Alphora.Dataphor.DAE.Language
 	/// The LexerException is thrown whenever the lexical analyzer encouters an error state.
 	/// Only the lexer should throw exceptions of this type.
 	/// </remarks>
-	[Serializable]
 	public class LexerException : DAEException
 	{
 		public enum Codes : int
@@ -57,6 +56,5 @@ namespace Alphora.Dataphor.DAE.Language
 		public LexerException(Codes AErrorCode, ErrorSeverity ASeverity, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, null, AParams) {}
 		public LexerException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, null) {}
 		public LexerException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, AParams) {}
-		public LexerException(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext) : base(AInfo, AContext) {}
 	}
 }

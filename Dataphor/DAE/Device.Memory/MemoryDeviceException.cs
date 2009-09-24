@@ -10,7 +10,6 @@ using Alphora.Dataphor.DAE.Device;
 
 namespace Alphora.Dataphor.DAE.Device.Memory
 {
-	[Serializable]
 	public class MemoryDeviceException : DeviceException
 	{
 		public new enum Codes : int

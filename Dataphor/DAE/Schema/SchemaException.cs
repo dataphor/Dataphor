@@ -10,7 +10,6 @@ using Alphora.Dataphor.DAE;
 
 namespace Alphora.Dataphor.DAE.Schema
 {
-	[Serializable]
 	public class SchemaException : DAEException
 	{
 		public enum Codes : int

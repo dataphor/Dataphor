@@ -11,7 +11,6 @@ using Alphora.Dataphor.DAE;
 
 namespace Alphora.Dataphor.DAE.Device
 {
-	[Serializable]
 	// The base exception class for all exceptions thrown by the Device classes.
 	public class DeviceException : DAEException
 	{

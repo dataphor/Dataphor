@@ -16,7 +16,6 @@ namespace Alphora.Dataphor.DAE.Language
 	/// LanguageExceptions are thrown when an attempt is made to construct an invalid abstract syntax tree.
 	/// Only the parser should throw this exceptions of this type.
 	/// </remarks>
-	[Serializable]
 	public class LanguageException : DAEException
 	{
 		public enum Codes : int
@@ -376,6 +375,5 @@ namespace Alphora.Dataphor.DAE.Language
 		public LanguageException(Codes AErrorCode, ErrorSeverity ASeverity, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, null, AParams) {}
 		public LanguageException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, null) {}
 		public LanguageException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, AParams) {}
-		public LanguageException(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext) : base(AInfo, AContext) {}
 	}
 }

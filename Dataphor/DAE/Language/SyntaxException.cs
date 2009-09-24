@@ -6,6 +6,7 @@
 using System;
 using System.Resources;
 using System.Reflection;
+using System.Runtime.Serialization;
 
 using Alphora.Dataphor.DAE;
 
@@ -17,7 +18,7 @@ namespace Alphora.Dataphor.DAE.Language
 	/// during lexical analysis or parsing.  Any exception encountered during these phases will be wrapped with an exception
 	/// of this type.  Only the parser should throw exceptions of this type.
 	/// </remarks>
-	[Serializable]
+	[DataContract]
 	public class SyntaxException : DAEException, ILocatedException
 	{
 		public enum Codes : int
@@ -37,24 +38,8 @@ namespace Alphora.Dataphor.DAE.Language
 			FToken = ALexer[0, false].Token;
 		}
 			
-		public SyntaxException(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext) : base(AInfo, AContext)
-		{
-			FLine = AInfo.GetInt32("Line");
-			FLinePos = AInfo.GetInt32("LinePos");
-			FTokenType = (TokenType)AInfo.GetValue("Type", typeof(TokenType));
-			FToken = AInfo.GetString("Token");
-		}
-		
-		public override void GetObjectData(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext)
-		{
-			base.GetObjectData(AInfo, AContext);
-			AInfo.AddValue("Line", FLine);
-			AInfo.AddValue("LinePos", FLinePos);
-			AInfo.AddValue("Type", FTokenType);
-			AInfo.AddValue("Token", FToken);
-		}
-
 		private int FLine;
+		[DataMember]
 		public int Line 
 		{ 
 			get { return FLine; } 
@@ -62,6 +47,7 @@ namespace Alphora.Dataphor.DAE.Language
 		}
 			
 		private int FLinePos;
+		[DataMember]
 		public int LinePos 
 		{ 
 			get { return FLinePos; } 
@@ -69,9 +55,11 @@ namespace Alphora.Dataphor.DAE.Language
 		}
 			
 		private TokenType FTokenType;
+		[DataMember]
 		public TokenType TokenType { get { return FTokenType; } }
 			
 		private string FToken;
+		[DataMember]
 		public string Token { get { return FToken; } }
 	}
 }

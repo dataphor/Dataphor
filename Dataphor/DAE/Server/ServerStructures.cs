@@ -7,13 +7,14 @@
 using System;
 using System.Text;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 using Alphora.Dataphor.DAE.Runtime.Data;
 
 namespace Alphora.Dataphor.DAE.Server
 {
     [Flags]
-    [Serializable]
+    [DataContract]
 	/// <nodoc/>
 	public enum CursorGetFlags : byte {None = 0, BOF = 1, EOF = 2}
     
@@ -97,13 +98,18 @@ namespace Alphora.Dataphor.DAE.Server
 	{
 	}
 	
-	[Serializable]
+	[DataContract]
 	public class ServerFileInfo
 	{
+		[DataMember]
 		public string LibraryName;
+		[DataMember]
 		public string FileName;
+		[DataMember]
 		public DateTime FileDate;
+		[DataMember]
 		public bool IsDotNetAssembly;
+		[DataMember]
 		public bool ShouldRegister;
 	}
 	

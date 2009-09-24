@@ -8,7 +8,6 @@ using System.Resources;
 
 namespace Alphora.Dataphor.DAE.Store
 {
-	[Serializable]
 	public class StoreException : DAEException
 	{
 		public enum Codes : int

@@ -10,7 +10,6 @@ using Alphora.Dataphor.DAE;
 
 namespace Alphora.Dataphor.DAE.Runtime.Data
 {
-	[Serializable]
 	public class ScanException : DAEException
 	{
 		public enum Codes : int

@@ -11,12 +11,13 @@ using System.Security.Permissions;
 namespace Alphora.Dataphor.DAE
 {
     /// <nodoc/>
+	[DataContract]
 	public enum QueryLanguage { D4, RealSQL }
 	
     /// <summary> Contains settings relevant to a server session. </summary>
-	[Serializable]
+	[DataContract]
 	[System.ComponentModel.TypeConverter(typeof(System.ComponentModel.ExpandableObjectConverter))]
-	public class SessionInfo : ICloneable, ISerializable
+	public class SessionInfo
     {
 		public const int CDefaultFetchCount = 20;
 		public const string CDefaultUserName = "Admin";
@@ -68,6 +69,7 @@ namespace Alphora.Dataphor.DAE
         /// <remarks>The Dataphor Server user ID of the session.  The default login for the Dataphor Server is Admin with a blank password.</remarks>
         [System.ComponentModel.DefaultValue(CDefaultUserName)]
         [System.ComponentModel.Description("User ID used to login to the Dataphor Server.  The default login for the Dataphor Server is Admin with a blank password.")]
+		[DataMember]
         public string UserID
         {
 			get { return FUserID; }
@@ -90,6 +92,7 @@ namespace Alphora.Dataphor.DAE
 		}
 
 		[System.ComponentModel.Browsable(false)]
+		[DataMember]
 		public string UnstructuredData
 		{
 			get { return Schema.SecurityUtility.EncryptPassword(FPassword); }
@@ -99,6 +102,7 @@ namespace Alphora.Dataphor.DAE
 		// HostName
 		private string FHostName = String.Empty;
 		[System.ComponentModel.Browsable(false)]
+		[DataMember]
 		public string HostName
 		{
 			get { return FHostName; }
@@ -108,6 +112,7 @@ namespace Alphora.Dataphor.DAE
 		// CatalogCacheName
 		private string FCatalogCacheName = String.Empty;
 		[System.ComponentModel.Browsable(false)]
+		[DataMember]
 		public string CatalogCacheName
 		{
 			get { return FCatalogCacheName; }
@@ -120,6 +125,7 @@ namespace Alphora.Dataphor.DAE
 		/// <remarks>The current library is used when resolving or creating catalog objects. The default value is blank. </remarks>
 		[System.ComponentModel.DefaultValue("")]
 		[System.ComponentModel.Description("Determines the default library for the session. If specified, the current library for the session is initially set to this value.")]
+		[DataMember]
         public string DefaultLibraryName
         {
 			get { return FDefaultLibraryName; }
@@ -131,6 +137,7 @@ namespace Alphora.Dataphor.DAE
 		/// <remarks> Defaults to false. </remarks>
 		[System.ComponentModel.DefaultValue(false)]
 		[System.ComponentModel.Description("Determines the default UseDTC setting for processes started on this session. Defaults to false.")]
+		[DataMember]
 		public bool DefaultUseDTC
 		{
 			get { return FDefaultUseDTC; }
@@ -142,6 +149,7 @@ namespace Alphora.Dataphor.DAE
 		/// <summary>Determines the default UseImplicitTransactions setting for processes started on this session. Defaults to true.</summary>
 		[System.ComponentModel.DefaultValue(true)]
 		[System.ComponentModel.Description("Determines the default UseImplicitTransactions setting for processes started on this session. Defaults to true.")]
+		[DataMember]
 		public bool DefaultUseImplicitTransactions
 		{
 			get { return FDefaultUseImplicitTransactions; }
@@ -156,6 +164,7 @@ namespace Alphora.Dataphor.DAE
 		#if DAC
 		[System.ComponentModel.Browsable(false)]
 		#endif
+		[DataMember]
 		public QueryLanguage Language
 		{
 			get { return FLanguage; }
@@ -166,6 +175,7 @@ namespace Alphora.Dataphor.DAE
 		/// <summary>Determines the number of rows which will be buffered by the CLI.  A FetchCount of 1 effectively disables row buffering.</summary>
 		[System.ComponentModel.DefaultValue(CDefaultFetchCount)]
 		[System.ComponentModel.Description("Determines the number of rows which will be buffered by the CLI.  A FetchCount of 1 effectively disables row buffering.")]
+		[DataMember]
 		public int FetchCount
 		{
 			get { return FFetchCount; }
@@ -176,6 +186,7 @@ namespace Alphora.Dataphor.DAE
 		/// <summary>Determines whether or not the CLI will fetch as part of the open call.</summary>
 		[System.ComponentModel.DefaultValue(false)]
 		[System.ComponentModel.Description("Determines whether or not the CLI will fetch as part of the open call.")]
+		[DataMember]
 		public bool FetchAtOpen
 		{
 			get { return FFetchAtOpen; }
@@ -186,6 +197,7 @@ namespace Alphora.Dataphor.DAE
 		/// <summary>Determines the default isolation level setting for processes started on this session.</summary>
 		[System.ComponentModel.DefaultValue(IsolationLevel.CursorStability)]
 		[System.ComponentModel.Description("Determines the default isolation level setting for processes started on this session.")]
+		[DataMember]
 		public IsolationLevel DefaultIsolationLevel
 		{
 			get { return FDefaultIsolationLevel; }
@@ -196,6 +208,7 @@ namespace Alphora.Dataphor.DAE
 		/// <summary>Determines the default maximum stack depth for processes on this session.</summary>
 		[System.ComponentModel.DefaultValue(DAE.Server.Engine.CDefaultMaxStackDepth)]
 		[System.ComponentModel.Description("Determines the default maximum stack depth for processes on this session.")]
+		[DataMember]
 		public int DefaultMaxStackDepth
 		{
 			get { return FDefaultMaxStackDepth; }
@@ -206,6 +219,7 @@ namespace Alphora.Dataphor.DAE
 		/// <summary>Determines the default maximum call depth for processes on this session.</summary>
 		[System.ComponentModel.DefaultValue(DAE.Server.Engine.CDefaultMaxCallDepth)]
 		[System.ComponentModel.Description("Determines the default maximum call depth for processes on this session.")]
+		[DataMember]
 		public int DefaultMaxCallDepth
 		{
 			get { return FDefaultMaxCallDepth; }
@@ -216,6 +230,7 @@ namespace Alphora.Dataphor.DAE
 		/// <summary>Detetrmines whether or not to use the server plan cache on this session.</summary>
 		[System.ComponentModel.DefaultValue(true)]
 		[System.ComponentModel.Description("Determines whether or not to use the server plan cache on this session.")]
+		[DataMember]
 		public bool UsePlanCache
 		{
 			get { return FUsePlanCache; }
@@ -226,6 +241,7 @@ namespace Alphora.Dataphor.DAE
 		/// <summary>Detetrmines whether or not the compiler will emit IL instructions for the nodes that support IL compilation.</summary>
 		[System.ComponentModel.DefaultValue(false)]
 		[System.ComponentModel.Description("Detetrmines whether or not the compiler will emit IL instructions for the nodes that support IL compilation.")]
+		[DataMember]
 		public bool ShouldEmitIL
 		{
 			get { return FShouldEmitIL; }
@@ -251,54 +267,11 @@ namespace Alphora.Dataphor.DAE
 			//LSessionInfo.PlanCacheSize = FPlanCacheSize;
 			return LSessionInfo;
 		}
-
-		#region ISerializable Members
-
-		[SecurityPermissionAttribute(SecurityAction.Demand,SerializationFormatter=true)]
-		public void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			info.AddValue("UserID", UserID);
-			info.AddValue("UnstructuredData", UnstructuredData);
-			info.AddValue("HostName", HostName);
-			info.AddValue("CatalogCacheName", CatalogCacheName);
-			info.AddValue("DefaultLibraryName", DefaultLibraryName);
-			info.AddValue("DefaultUseDTC", DefaultUseDTC);
-			info.AddValue("DefaultUseImplicitTransactions", DefaultUseImplicitTransactions);
-			info.AddValue("Language", Language);
-			info.AddValue("FetchCount", FetchCount);
-			info.AddValue("FetchAtOpen", FetchAtOpen);
-			info.AddValue("DefaultIsolationLevel", DefaultIsolationLevel);
-			info.AddValue("DefaultMaxStackDepth", DefaultMaxStackDepth);
-			info.AddValue("DefaultMaxCallDepth", DefaultMaxCallDepth);
-			info.AddValue("UsePlanCache", UsePlanCache);
-			info.AddValue("ShouldEmitIL", ShouldEmitIL);
-		}
-		
-		protected SessionInfo(SerializationInfo info, StreamingContext context)
-		{
-			UserID = info.GetString("UserID");
-			UnstructuredData = info.GetString("UnstructuredData");
-			HostName = info.GetString("HostName");
-			CatalogCacheName = info.GetString("CatalogCacheName");
-			DefaultLibraryName = info.GetString("DefaultLibraryName");
-			DefaultUseDTC = info.GetBoolean("DefaultUseDTC");
-			DefaultUseImplicitTransactions = info.GetBoolean("DefaultUseImplicitTransactions");
-			Language = (QueryLanguage)info.GetValue("Language", typeof(QueryLanguage));
-			FetchCount = info.GetInt32("FetchCount");
-			FetchAtOpen = info.GetBoolean("FetchAtOpen");
-			DefaultIsolationLevel = (IsolationLevel)info.GetValue("DefaultIsolationLevel", typeof(IsolationLevel));
-			DefaultMaxStackDepth = info.GetInt32("DefaultMaxStackDepth");
-			DefaultMaxCallDepth = info.GetInt32("DefaultMaxCallDepth");
-			UsePlanCache = info.GetBoolean("UsePlanCache");
-			ShouldEmitIL = info.GetBoolean("ShouldEmitIL");
-		}
-
-		#endregion
 	}
     
-    [Serializable]
+    [DataContract]
  	[System.ComponentModel.TypeConverter(typeof(System.ComponentModel.ExpandableObjectConverter))]
-	public class ProcessInfo : ICloneable
+	public class ProcessInfo
 	{
 		public ProcessInfo() : base() {}
 		public ProcessInfo(SessionInfo ASessionInfo) : base()
@@ -315,6 +288,7 @@ namespace Alphora.Dataphor.DAE
 		/// <summary>Determines whether a transaction will be implicitly started when a call is made on this process.</summary>
 		[System.ComponentModel.DefaultValue(true)]
 		[System.ComponentModel.Description("Determines whether a transaction will be implicitly started when a call is made on this process.")]
+		[DataMember]
 		public bool UseImplicitTransactions
 		{
 			get { return FUseImplicitTransactions; }
@@ -330,6 +304,7 @@ namespace Alphora.Dataphor.DAE
 		/// </remarks>
 		[System.ComponentModel.DefaultValue(false)]
 		[System.ComponentModel.Description("Determines whether the Microsoft Distributed Transaction Coordinator will be used to control distributed transactions for this session.")]
+		[DataMember]
 		public bool UseDTC
 		{
 			get { return FUseDTC; }
@@ -340,6 +315,7 @@ namespace Alphora.Dataphor.DAE
 		/// <summary>Determines the default isolation level for transactions on this process.</summary>
 		[System.ComponentModel.DefaultValue(IsolationLevel.CursorStability)]
 		[System.ComponentModel.Description("Determines the default isolation level for transactions on this process.")]
+		[DataMember]
 		public IsolationLevel DefaultIsolationLevel
 		{
 			get { return FDefaultIsolationLevel; }
@@ -350,6 +326,7 @@ namespace Alphora.Dataphor.DAE
 		/// <summary>Determines the number of rows which will be buffered by the CLI.  A FetchCount of 1 effectively disables row buffering.</summary>
 		[System.ComponentModel.DefaultValue(SessionInfo.CDefaultFetchCount)]
 		[System.ComponentModel.Description("Determines the number of rows which will be buffered by the CLI.  A FetchCount of 1 effectively disables row buffering.")]
+		[DataMember]
 		public int FetchCount
 		{
 			get { return FFetchCount; }
@@ -360,6 +337,7 @@ namespace Alphora.Dataphor.DAE
 		/// <summary>Determines whether or not the CLI will fetch as part of the open call.</summary>
 		[System.ComponentModel.DefaultValue(false)]
 		[System.ComponentModel.Description("Determines whether or not the CLI will fetch as part of the open call.")]
+		[DataMember]
 		public bool FetchAtOpen
 		{
 			get { return FFetchAtOpen; }
@@ -370,6 +348,7 @@ namespace Alphora.Dataphor.DAE
 		/// <summary>Determines whether or not the compiler will report warnings encountered when compiling statements on this process.</summary>
 		[System.ComponentModel.DefaultValue(false)]
 		[System.ComponentModel.Description("Determines whether or not the compiler will report warnings encountered when compiling statements on this process.")]
+		[DataMember]
 		public bool SuppressWarnings
 		{
 			get { return FSuppressWarnings; }

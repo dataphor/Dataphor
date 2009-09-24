@@ -18,7 +18,6 @@ namespace Alphora.Dataphor.DAE.Language
 	/// These exceptions indicate an invalid input string is being parsed.
 	/// Only the parser should throw exceptions of this type.
 	/// </remarks>
-	[Serializable]
 	public class ParserException : DAEException
 	{
 		public enum Codes : int
@@ -123,7 +122,6 @@ namespace Alphora.Dataphor.DAE.Language
 		public ParserException(Codes AErrorCode, ErrorSeverity ASeverity, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, null, AParams) {}
 		public ParserException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, null) {}
 		public ParserException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, AParams) {}
-		public ParserException(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext) : base(AInfo, AContext) {}
 	}
 
 	#if USETYPEDLIST

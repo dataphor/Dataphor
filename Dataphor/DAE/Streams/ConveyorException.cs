@@ -10,7 +10,6 @@ using Alphora.Dataphor.DAE;
 
 namespace Alphora.Dataphor.DAE.Streams
 {
-	[Serializable]
 	public class ConveyorException : DAEException 
 	{
 		public enum Codes : int

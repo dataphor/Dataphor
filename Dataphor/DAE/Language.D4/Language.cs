@@ -4452,7 +4452,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		// Expression		
 		protected Expression FExpression;
 		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public Expression Expression
 		{
 			get { return FExpression; }
@@ -4974,7 +4973,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		
 		// Expression		
 		protected Expression FExpression;
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
 		public Expression Expression
 		{
@@ -5051,7 +5049,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	
 	public class DropDefaultDefinition : DefaultDefinitionBase{}
 	
-	public class ClassDefinition : D4Statement, ICloneable
+	public class ClassDefinition : D4Statement
 	{
 		// constructor
 		public ClassDefinition() : base(){}
@@ -5157,7 +5155,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		}
 	}
     
-	public class ClassAttributeDefinition : D4Statement, ICloneable
+	public class ClassAttributeDefinition : D4Statement
 	{
 		// constructor
 		public ClassAttributeDefinition() : base(){}
