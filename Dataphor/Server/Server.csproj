@@ -51,8 +51,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Contracts\BatchDescriptor.cs" />
-    <Compile Include="Contracts\CursorDescriptor.cs" />
     <Compile Include="Contracts\IDataphorService.cs" />
     <Compile Include="Connection\DotNetCommand.cs" />
     <Compile Include="Connection\DotNetConnection.cs" />
@@ -61,9 +59,6 @@
     <Compile Include="Connection\MSSQLCommand.cs" />
     <Compile Include="Connection\MSSQLConnection.cs" />
     <Compile Include="Connection\MSSQLServerCursor.cs" />
-    <Compile Include="Contracts\ProcessDescriptor.cs" />
-    <Compile Include="Contracts\ScriptDescriptor.cs" />
-    <Compile Include="Contracts\SessionDescriptor.cs" />
     <Compile Include="Device.Catalog\CatalogDevicePlan.cs" />
     <Compile Include="Device.Catalog\CatalogDeviceTable.cs" />
     <Compile Include="Device.Catalog\ServerCatalogDevice.cs" />
@@ -125,6 +120,9 @@
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
       <Name>Engine</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

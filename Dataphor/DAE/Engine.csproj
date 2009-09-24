@@ -117,6 +117,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Contracts\BatchDescriptor.cs" />
+    <Compile Include="Contracts\CursorDescriptor.cs" />
+    <Compile Include="Contracts\ProcessDescriptor.cs" />
+    <Compile Include="Contracts\ScriptDescriptor.cs" />
+    <Compile Include="Contracts\SessionDescriptor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
