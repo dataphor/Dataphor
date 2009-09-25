@@ -42,7 +42,6 @@ namespace Alphora.Dataphor.DAE.Streams
 		
 		public override void Close()
 		{
-			System.Runtime.Remoting.RemotingServices.Disconnect(this);
 			FSourceStream = null;
 			base.Close();
 		}

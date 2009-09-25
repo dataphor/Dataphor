@@ -428,56 +428,20 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		private int FRunningProcesses = 0;
-		private List<Thread> FWaitingProcesses = new List<Thread>();
+		private AutoResetEvent FProcessWaitEvent = new AutoResetEvent(true);
 		
 		internal void BeginProcessCall(ServerProcess AProcess)
 		{
-			lock (FWaitingProcesses)
-			{
-				if (FRunningProcesses < FMaxConcurrentProcesses)
-				{
-					FRunningProcesses++;
-					return;
-				}
-				
-				FWaitingProcesses.Add(Thread.CurrentThread);
-			}
-
-			try
-			{
-				System.Threading.Thread.Sleep(FProcessWaitTimeout);
-			}
-			catch (ThreadInterruptedException)
-			{
-				lock (FWaitingProcesses)
-				{
-					if (FRunningProcesses < FMaxConcurrentProcesses)
-					{
-						FRunningProcesses++;
-						return;
-					}
-				}
-			}
-			
-			throw new ServerException(ServerException.Codes.ProcessWaitTimeout);
+			int LRunningProcesses = Interlocked.Increment(ref FRunningProcesses);
+			if (LRunningProcesses > FMaxConcurrentProcesses)
+				if (!FProcessWaitEvent.WaitOne(FProcessWaitTimeout))
+					throw new ServerException(ServerException.Codes.ProcessWaitTimeout);
 		}
 		
 		internal void EndProcessCall(ServerProcess AProcess)
 		{
-			lock (FWaitingProcesses)
-			{
-				FRunningProcesses--;
-				while (FWaitingProcesses.Count > 0)
-				{
-					System.Threading.Thread LThread = FWaitingProcesses[0];
-					FWaitingProcesses.RemoveAt(0);
-					if ((LThread.ThreadState & System.Threading.ThreadState.WaitSleepJoin) != 0)
-					{
-						LThread.Interrupt();
-						break;
-					}
-				}
-			}
+			int LRunningProcesses = Interlocked.Decrement(ref FRunningProcesses);
+			FProcessWaitEvent.Set();
 		}
 		
 		public ServerProcess FindProcess(int AProcessID)
@@ -890,8 +854,10 @@ namespace Alphora.Dataphor.DAE.Server
 				System.Diagnostics.Debug.WriteLine(String.Format("{0} -- IServer.Connect", DateTime.Now.ToString("hh:mm:ss.ffff")));
 				#endif
 				CheckState(ServerState.Started);
-				if ((ASessionInfo.HostName == null) || (ASessionInfo.HostName == ""))
+				#if !SILVERLIGHT
+				if (String.IsNullOrEmpty(ASessionInfo.HostName))
 					ASessionInfo.HostName = System.Environment.MachineName;
+				#endif
 				return (IServerSession)InternalConnect(GetNextSessionID(), ASessionInfo);
 			}
 			catch (Exception E)

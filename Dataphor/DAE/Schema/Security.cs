@@ -348,12 +348,14 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public bool IsSystemUser()
 		{
-			return (String.Compare(ID, Server.Engine.CSystemUserID, true) == 0);
+			return String.Equals(ID, Server.Engine.CSystemUserID, StringComparison.OrdinalIgnoreCase);
 		}
 		
 		public bool IsAdminUser()
 		{
-			return ((String.Compare(ID, Server.Engine.CSystemUserID, true) == 0) || (String.Compare(ID, Server.Engine.CAdminUserID, true) == 0));
+			return 
+				String.Equals(ID, Server.Engine.CSystemUserID, StringComparison.OrdinalIgnoreCase) 
+					|| String.Equals(ID, Server.Engine.CAdminUserID, StringComparison.OrdinalIgnoreCase);
 		}
 	}
 	

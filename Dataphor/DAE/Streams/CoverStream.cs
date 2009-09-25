@@ -54,7 +54,6 @@ namespace Alphora.Dataphor.DAE.Streams
 			if ((FSource != null) && FShouldClose)
 				FSource.Close();
 			FSource = null;
-			System.Runtime.Remoting.RemotingServices.Disconnect(this);
 			base.Close();
 		}
 
