@@ -27,6 +27,7 @@ using Alphora.Dataphor.Frontend.Client.Windows;
 using Session = Alphora.Dataphor.Frontend.Client.Windows.Session;
 
 using WeifenLuo.WinFormsUI.Docking;
+using System.Xml.Linq;
 
 namespace Alphora.Dataphor.Dataphoria.FormDesigner
 {
@@ -416,7 +417,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 		protected virtual void RequestSave(DesignService AService, DesignBuffer ABuffer)
 		{
 			Serializer LSerializer = FrontendSession.CreateSerializer();
-			var LDocument = new XmlDocument();
+			var LDocument = new XDocument();
 			LSerializer.Serialize(LDocument, FDesignHost.Children[0]);
 			Dataphoria.Warnings.AppendErrors(this, LSerializer.Errors, true);
 
@@ -702,7 +703,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			return HostFromDocumentData(ABuffer.LoadData(), GetDocumentExpression(ABuffer));
 		}
 
-		protected IHost HostFromDocumentData(XmlDocument ADocumentData, string ADocumentExpression)
+		protected IHost HostFromDocumentData(XDocument ADocumentData, string ADocumentExpression)
 		{
 			IHost LHost = FrontendSession.CreateHost();
 			try

@@ -14,6 +14,7 @@ using System.Windows.Forms;
 
 using Alphora.Dataphor.Dataphoria.Visual;
 using Alphora.Dataphor.Frontend.Client.Windows;
+using System.Xml.Linq;
 
 namespace Alphora.Dataphor.Dataphoria.Analyzer
 {
@@ -27,7 +28,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			return LBox;
 		}
 
-		public void Set(XmlElement ARoot)
+		public void Set(XElement ARoot)
 		{
 			BeginUpdate();
 			AddNode(Nodes, ARoot).Expand(false);
@@ -41,16 +42,14 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			EndUpdate();
 		}
 
-		private Visual.TreeNode AddNode(TreeNodes ANodes, XmlElement AElement)
+		private Visual.TreeNode AddNode(TreeNodes ANodes, XElement AElement)
 		{
 			Visual.TreeNode LNode = new Visual.TreeNode();
 			LNode.IsExpanded = !FExpandOnDemand;
 			LNode.Element = AElement;
-			XmlElement LChild;
-			foreach (XmlNode LXmlNode in AElement.ChildNodes)
+			foreach (XElement LChild in AElement.Elements())
 			{
-				LChild = LXmlNode as XmlElement;
-				if ((LChild != null) && (LChild.LocalName.IndexOf(".") < 1))
+				if (LChild.Name.LocalName.IndexOf(".") < 1)
 					AddNode(LNode.Children, LChild);
 			}
 			ANodes.Add(LNode);
@@ -104,21 +103,21 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 		public SimplePlanNodeBox(Visual.TreeNode ANode)
 		{
 			FNode = ANode;
-			XmlElement LElement = (XmlElement)((Visual.TreeNode)ANode).Element;
+			XElement LElement = (XElement)((Visual.TreeNode)ANode).Element;
 
-			XmlAttribute LDescription = LElement.Attributes["Description"];
+			XAttribute LDescription = LElement.Attribute("Description");
 			if ((LDescription == null) || (LDescription.Value == String.Empty))
-				Text = LElement.LocalName;
+				Text = LElement.Name.LocalName;
 			else
 				Text = LDescription.Value;
 
-			XmlAttribute LDeviceSupported = LElement.Attributes["DeviceSupported"];
+			XAttribute LDeviceSupported = LElement.Attribute("DeviceSupported");
 			if ((LDeviceSupported == null) || (LDeviceSupported.Value.ToLower() != "true"))
 				SurfaceColor = Color.FromArgb(200, 230, 200);
 			else
 				SurfaceColor = Color.FromArgb(230, 200, 200);
 
-			XmlAttribute LCategory = LElement.Attributes["Category"];
+			XAttribute LCategory = LElement.Attribute("Category");
 			if (LCategory != null)
 				if (LCategory.Value == "Instruction")
 					RoundRadius = 10;
@@ -133,7 +132,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 
 		public override void ZoomIn()
 		{
-			XmlElement LElement = (XmlElement)Node.Element;
+			XElement LElement = (XElement)Node.Element;
 			
 			DetailedPlanNodeBox LBox = new DetailedPlanNodeBox(LElement);
 			LBox.RoundRadius = this.RoundRadius;
@@ -164,7 +163,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 	{
 		public static Color CTabSurfaceColor = Color.FromArgb(200, 230, 230);
 
-		public DetailedPlanNodeBox(XmlElement AElement)
+		public DetailedPlanNodeBox(XElement AElement)
 		{
 			SuspendLayout();
 
@@ -193,7 +192,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			FProperties.OnGetDesignerRequired += new GetTableDesignerRequiredHandler(PropertiesGetDesignerRequired);
 			FProperties.OnGetDesigner += new GetTableDesignerHandler(PropertiesGetDesigner);
 			Controls.Add(FProperties);
-			foreach (XmlAttribute LAttribute in FElement.Attributes)
+			foreach (XAttribute LAttribute in FElement.Attributes())
 				FProperties.Rows.Add(LAttribute);
 			FProperties.EndUpdate();
 
@@ -217,7 +216,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			ResumeLayout(false);
 		}
 
-		private XmlElement FElement;
+		private XElement FElement;
 		public object Element { get { return FElement; } }
 
 		#region Properties
@@ -234,9 +233,9 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 
 		private string PropertiesGetValue(Table ATable, Point ACell)
 		{
-			XmlAttribute LAttribute = (XmlAttribute)FProperties.Rows[ACell.Y];
+			XAttribute LAttribute = (XAttribute)FProperties.Rows[ACell.Y];
 			if (ACell.X == 0)
-				return LAttribute.LocalName;
+				return LAttribute.Name.LocalName;
 			else
 				return LAttribute.Value;
 		}
@@ -268,15 +267,13 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 		private IDictionary GetChildGroups()
 		{
 			HybridDictionary LGroups = new HybridDictionary();
-			XmlElement LElement;
 			string LQualifierName;
 			ElementGroup LGroup;
-			foreach (XmlNode LNode in FElement.ChildNodes)
+			foreach (XElement LElement in FElement.Elements())
 			{
-				LElement = LNode as XmlElement;
-				if ((LElement != null) && (LElement.LocalName.IndexOf(".") >= 0))
+				if (LElement.Name.LocalName.IndexOf(".") >= 0)
 				{
-					LQualifierName = LElement.LocalName.Substring(0, LElement.LocalName.IndexOf("."));
+					LQualifierName = LElement.Name.LocalName.Substring(0, LElement.Name.LocalName.IndexOf("."));
 					LGroup = LGroups[LQualifierName] as ElementGroup;
 					if (LGroup != null)
 						LGroup.Add(LElement);
@@ -292,14 +289,6 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			return LGroups;
 		}
 
-		private bool HasChildElement(XmlElement AElement)
-		{
-			foreach (XmlNode LNode in AElement.ChildNodes)
-				if (LNode is XmlElement)
-					return true;
-			return false;
-		}
-
 		private Table CreateGroupTable(ElementGroup AGroup)
 		{
 			Table LGroupTable = new Table();
@@ -310,23 +299,23 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			LGroupTable.OnGetDesigner += new GetTableDesignerHandler(GroupsGetDesigner);
 			LGroupTable.BeginUpdate();
 			TableColumn LColumn;
-			foreach (XmlElement LElement in AGroup)
+			foreach (XElement LElement in AGroup)
 			{
 				// Ensure that there are columns for each attribute
-				foreach (XmlAttribute LAttribute in LElement.Attributes)
+				foreach (XAttribute LAttribute in LElement.Attributes())
 				{
-					LColumn = LGroupTable.Columns[LAttribute.LocalName];
+					LColumn = LGroupTable.Columns[LAttribute.Name.LocalName];
 					if (LColumn == null)
 					{
 						LColumn = new TableColumn(LGroupTable);
-						LColumn.Name = LAttribute.LocalName;
-						LColumn.Title = LAttribute.LocalName;
+						LColumn.Name = LAttribute.Name.LocalName;
+						LColumn.Title = LAttribute.Name.LocalName;
 						LGroupTable.Columns.Add(LColumn);
 					}
 				}
 
 				// Ensure that there is a 'Details' column if there are any child elements
-				if (HasChildElement(LElement))
+				if (LElement.HasElements)
 				{
 					LColumn = LGroupTable.Columns["InternalDetails"];
 					if (LColumn == null)
@@ -348,13 +337,13 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 		private string GroupsGetValue(Table ATable, Point ACell)
 		{
 			string LColumnName = ATable.Columns[ACell.X].Name;
-			XmlElement LElement = (XmlElement)((ElementGroup)ATable.Tag)[ACell.Y];
+			XElement LElement = (XElement)((ElementGroup)ATable.Tag)[ACell.Y];
 
 			if (LColumnName == "InternalDetails")
 				return String.Empty;
 			else
 			{
-				XmlAttribute LAttribute = LElement.Attributes[LColumnName];
+				XAttribute LAttribute = LElement.Attribute(LColumnName);
 				if (LAttribute == null)
 					return String.Empty;
 				else
@@ -379,7 +368,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 		{
 			string LColumnName = ATable.Columns[ACell.X].Name;
 			if (LColumnName == "InternalDetails")
-				return new DetailsCellDesignerBox((XmlElement)((ElementGroup)ATable.Tag)[ACell.Y]);
+				return new DetailsCellDesignerBox((XElement)((ElementGroup)ATable.Tag)[ACell.Y]);
 			else
 			{
 				CellDesignerBox LBox = new CellDesignerBox();
@@ -424,7 +413,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 
 	public class DetailsCellDesignerBox : TextDesignerBox, IElementDesigner
 	{
-		public DetailsCellDesignerBox(XmlElement AElement)
+		public DetailsCellDesignerBox(XElement AElement)
 		{
 			SuspendLayout();
 			FElement = AElement;
@@ -437,16 +426,14 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			ResumeLayout(false);
 		}
 
-		private XmlElement FElement;
+		private XElement FElement;
 		public object Element { get { return FElement; } }
 
-		private bool HasUnqualifiedChildElement(XmlElement AElement)
+		private bool HasUnqualifiedChildElement(XElement AElement)
 		{
-			XmlElement LChild;
-			foreach (XmlNode LNode in AElement.ChildNodes)
+			foreach (XElement LChild in AElement.Elements())
 			{
-				LChild = LNode as XmlElement;
-				if ((LChild != null) && (LChild.LocalName.IndexOf(".") < 0))
+				if (LChild.Name.LocalName.IndexOf(".") < 0)
 					return true;
 			}
 			return false;
@@ -458,10 +445,10 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			{
 				PlanTree LSurface = new PlanTree();
 				LSurface.Set(FElement);
-				DesignerControl.GetDesigner(this).Push(LSurface, String.Format(Strings.Analyzer_PlanNodeTitle, FElement.LocalName));
+				DesignerControl.GetDesigner(this).Push(LSurface, String.Format(Strings.Analyzer_PlanNodeTitle, FElement.Name.LocalName));
 			}
 			else
-				DesignerControl.GetDesigner(this).Push(new SingleElementSurface(FElement, new DetailedPlanNodeBox(FElement)), String.Format(Strings.Analyzer_DetailNodeTitle, FElement.LocalName));
+				DesignerControl.GetDesigner(this).Push(new SingleElementSurface(FElement, new DetailedPlanNodeBox(FElement)), String.Format(Strings.Analyzer_DetailNodeTitle, FElement.Name.LocalName));
 		}
 
 		public override bool CanZoomIn()

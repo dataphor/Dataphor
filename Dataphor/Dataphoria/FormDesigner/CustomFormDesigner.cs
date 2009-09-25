@@ -15,6 +15,7 @@ using Alphora.Dataphor.Frontend.Client;
 using Alphora.Dataphor.Frontend.Client.Windows;
 using Serializer=Alphora.Dataphor.Frontend.Client.Serializer;
 using Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree;
+using System.Xml.Linq;
 
 namespace Alphora.Dataphor.Dataphoria.FormDesigner
 {
@@ -65,7 +66,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
         /// <param name="AAncestors"> List of ancestor document expressions. Must be non-empty. </param>
         public void New(Ancestors AAncestors)
         {
-            XmlDocument LAncestor = MergeAncestors(AAncestors);
+            XDocument LAncestor = MergeAncestors(AAncestors);
             InternalNew(HostFromDocumentData(LAncestor, String.Empty), true);
             UpdateReadOnly(LAncestor);
             FAncestors = AAncestors;
@@ -93,7 +94,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             Service.ValidateBuffer(LBuffer);
             var LDocument = new DilxDocument();
             LDocument.Read(LBuffer.LoadData());
-            XmlDocument LMergedAncestors = MergeAncestors(LDocument.Ancestors); // do this first in case of errors
+            XDocument LMergedAncestors = MergeAncestors(LDocument.Ancestors); // do this first in case of errors
             SetDesignHost(AHost, false);
             Service.SetBuffer(LBuffer);
             Service.SetModified(false);
@@ -108,14 +109,14 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
             Ancestors LAncestors;
             IHost LHost;
-            XmlDocument LAncestor = null;
+            XDocument LAncestor = null;
             if (LDocument.Ancestors.Count >= 1)
             {
                 LAncestors = LDocument.Ancestors;
                 LAncestor = MergeAncestors(LAncestors);
-                var LMerge = new XmlDocument();
-                LMerge.LoadXml(LDocument.Content);
-                var LCurrent = (XmlDocument) LAncestor.CloneNode(true);
+                var LMerge = XDocument.Load(LDocument.Content);
+                var LCurrent = new XDocument();
+                LCurrent.Add(new XElement(LAncestor.Root));
                 Inheritance.Merge(LCurrent, LMerge);
                 LHost = HostFromDocumentData(LCurrent, GetDocumentExpression(ABuffer));
             }
@@ -129,9 +130,9 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             FAncestors = LAncestors;
         }
 
-        private XmlDocument MergeAncestors(Ancestors AAncestors)
+        private XDocument MergeAncestors(Ancestors AAncestors)
         {
-            XmlDocument LDocument = null;
+            XDocument LDocument = null;
             // Process any ancestors
             foreach (string LAncestor in AAncestors)
             {
@@ -143,14 +144,13 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             return LDocument;
         }
 
-        private XmlDocument LoadDocument(string ADocument)
+        private XDocument LoadDocument(string ADocument)
         {
-            var LResult = new XmlDocument();
             using (Scalar LResultData = FrontendSession.Pipe.RequestDocument(ADocument))
             {
                 try
                 {
-                    LResult.LoadXml(LResultData.AsString);
+                    return XDocument.Load(LResultData.AsString);
                 }
                 catch (Exception LException)
                 {
@@ -158,10 +158,9 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
                                                   LResultData.ToString());
                 }
             }
-            return LResult;
         }
 
-        private static string XmlDocumentToString(XmlDocument ADocument)
+        private static string XDocumentToString(XDocument ADocument)
         {
             var LWriter = new StringWriter();
             ADocument.Save(LWriter);
@@ -174,7 +173,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             if (FAncestors != null)
                 LDocument.Ancestors = FAncestors;
 
-            var LContent = new XmlDocument();
+            var LContent = new XDocument();
             Serializer LSerializer = FrontendSession.CreateSerializer();
             LSerializer.Serialize(LContent, DesignHost.Children[0]);
             Dataphoria.Warnings.AppendErrors(this, LSerializer.Errors, true);
@@ -185,22 +184,22 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             var LXmlWriter = new XmlTextWriter(LWriter);
             LXmlWriter.Formatting = Formatting.Indented;
             LXmlWriter.Indentation = 3;
-            LContent.WriteContentTo(LXmlWriter);
+            LContent.WriteTo(LXmlWriter);
             LDocument.Content = LWriter.ToString(); // only the document node
 
             ABuffer.SaveData(LDocument.Write());
             UpdateHostsDocument(ABuffer);
         }
 
-        private void UpdateReadOnly(XmlDocument AAncestor)
+        private void UpdateReadOnly(XDocument AAncestor)
         {
-            var LRootNode = (DesignerNode) FNodesTree.Nodes[0];
+            var LRootNode = (DesignerNode)FNodesTree.Nodes[0];
             if (AAncestor != null)
             {
                 var LNodesByName = new Hashtable(StringComparer.OrdinalIgnoreCase);
                 BuildNodesByName(LNodesByName, LRootNode);
-                if (AAncestor.DocumentElement != null)
-                    foreach (XmlNode LNode in AAncestor.DocumentElement.ChildNodes) // (skips root interface)
+                if (AAncestor.Root != null)
+                    foreach (XElement LNode in AAncestor.Root.Elements()) // (skips root interface)
                         UpdateNodeReadOnly(LNode, LNodesByName);
             }
         }
@@ -213,16 +212,16 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
                 BuildNodesByName(ANodesByName, LNode);
         }
 
-        private static void UpdateNodeReadOnly(XmlNode ANode, Hashtable ANodesByName)
+        private static void UpdateNodeReadOnly(XElement ANode, Hashtable ANodesByName)
         {
-            XmlAttribute LName = ANode.Attributes[Persistence.CXmlBOPName];
+            XAttribute LName = ANode.Attribute(Persistence.CXmlBOPName);
             if (LName != null)
             {
-                var LDesignerNode = (DesignerNode) ANodesByName[LName.Value];
+                var LDesignerNode = (DesignerNode)ANodesByName[LName.Value];
                 if (LDesignerNode != null)
                     LDesignerNode.SetReadOnly(true, false);
             }
-            foreach (XmlNode LNode in ANode.ChildNodes)
+            foreach (XElement LNode in ANode.Elements())
                 UpdateNodeReadOnly(LNode, ANodesByName);
         }
 

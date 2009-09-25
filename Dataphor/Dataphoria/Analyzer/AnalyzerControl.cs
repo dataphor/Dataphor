@@ -9,8 +9,10 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Xml;
 using System.Drawing;
+using System.Xml.Linq;
 
 using Alphora.Dataphor.Dataphoria.Visual;
+using System.IO;
 
 namespace Alphora.Dataphor.Dataphoria.Analyzer
 {
@@ -25,15 +27,14 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 		private PlanTree FMainSurface;
 		public PlanTree MainSurface { get { return FMainSurface; } }
 
-		private XmlDocument FDocument;
-		private XmlElement FRoot;
+		private XDocument FDocument;
+		private XElement FRoot;
 
 		public void Load(string APlan)
 		{
-			XmlDocument LDocument = new XmlDocument();
-			LDocument.LoadXml(APlan);
+			XDocument LDocument = XDocument.Load(new StringReader(APlan));
 			Clear();
-			Set(LDocument.DocumentElement);
+			Set(LDocument.Root);
 			FDocument = LDocument;
 		}
 
@@ -57,7 +58,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			FMainSurface.Clear();
 		}
 
-		private void Set(XmlElement ARoot)
+		private void Set(XElement ARoot)
 		{
 			FRoot = ARoot;
 			FMainSurface.Set(ARoot);
