@@ -443,8 +443,9 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		internal void EndProcessCall(ServerProcess AProcess)
 		{
-			Interlocked.Decrement(ref FRunningProcesses);
-			FProcessWaitEvent.Set();
+			int LRunningProcesses = Interlocked.Decrement(ref FRunningProcesses);
+			if (LRunningProcesses >= FMaxConcurrentProcesses)
+				FProcessWaitEvent.Set();
 		}
 		
 		public ServerProcess FindProcess(int AProcessID)
