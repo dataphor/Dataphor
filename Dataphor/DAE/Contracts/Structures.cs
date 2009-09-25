@@ -13,6 +13,11 @@ using Alphora.Dataphor.DAE.Language;
 
 namespace Alphora.Dataphor.DAE.Contracts
 {
+    [Flags]
+    [DataContract]
+	/// <nodoc/>
+	public enum CursorGetFlags : byte { None = 0, BOF = 1, EOF = 2 }
+    
 	/// <nodoc/>
 	[DataContract]
 	public struct RemoteRowHeader

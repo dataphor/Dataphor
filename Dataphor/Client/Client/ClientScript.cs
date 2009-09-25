@@ -8,31 +8,62 @@ using System;
 using System.Collections.Generic;
 
 using Alphora.Dataphor.DAE;
+using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Dataphor.DAE.Client
 {
 	public class ClientScript : IRemoteServerScript
 	{
+		public ClientScript(ClientProcess AClientProcess, ScriptDescriptor AScriptDescriptor)
+		{
+			FClientProcess = AClientProcess;
+			FScriptDescriptor = AScriptDescriptor;
+			
+			FMessages = new Exception[FScriptDescriptor.Messages.Count];
+			for (int LIndex = 0; LIndex < FScriptDescriptor.Messages.Count; LIndex++)
+				FMessages[LIndex] = FScriptDescriptor.Messages[LIndex];
+			
+			foreach (BatchDescriptor LBatchDescriptor in FScriptDescriptor.Batches)
+				FClientBatches.Add(new ClientBatch(this, LBatchDescriptor));
+		}
+		
+		private ClientProcess FClientProcess;
+		public ClientProcess ClientProcess { get { return FClientProcess; } }
+		
+		private IClientDataphorService GetServiceInterface()
+		{
+			return FClientProcess.ClientSession.ClientConnection.ClientServer.GetServiceInterface();
+		}	
+		
+		private ScriptDescriptor FScriptDescriptor;
+		
+		public int ScriptHandle { get { return FScriptDescriptor.Handle; } }
+		
+		private Exception[] FMessages;
+		
+		private ClientBatches FClientBatches = new ClientBatches();
+		
 		#region IRemoteServerScript Members
 
 		public IRemoteServerProcess Process
 		{
-			get { throw new NotImplementedException(); }
+			get { return FClientProcess; }
 		}
 
-		public void Execute(ref Alphora.Dataphor.DAE.Contracts.RemoteParamData AParams, Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public void Execute(ref RemoteParamData AParams, ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			foreach (ClientBatch LBatch in FClientBatches)
+				LBatch.Execute(ref AParams, ACallInfo);
 		}
 
 		public Exception[] Messages
 		{
-			get { throw new NotImplementedException(); }
+			get { return FMessages; }
 		}
 
 		public IRemoteServerBatches Batches
 		{
-			get { throw new NotImplementedException(); }
+			get { return FClientBatches; }
 		}
 
 		#endregion

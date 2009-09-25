@@ -10,6 +10,7 @@ using System.Threading;
 using System.Collections.Generic;
 using System.Runtime.Remoting.Lifetime;
 using System.Diagnostics;
+using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Dataphor.DAE.Server
 {

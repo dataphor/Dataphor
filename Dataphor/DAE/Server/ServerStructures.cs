@@ -13,11 +13,6 @@ using Alphora.Dataphor.DAE.Runtime.Data;
 
 namespace Alphora.Dataphor.DAE.Server
 {
-    [Flags]
-    [DataContract]
-	/// <nodoc/>
-	public enum CursorGetFlags : byte {None = 0, BOF = 1, EOF = 2}
-    
 	public enum LogEvent
 	{
 		LogStarted,

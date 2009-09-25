@@ -6,23 +6,135 @@
 
 using System;
 using System.Collections.Generic;
+using System.ServiceModel;
 
 using Alphora.Dataphor.DAE;
+using Alphora.Dataphor.DAE.Contracts;
+using Alphora.Dataphor.DAE.Server;
 
-namespace Client.Server
+namespace Alphora.Dataphor.DAE.Client
 {
 	public class ClientServer : IRemoteServer
 	{
+		public ClientServer() { }
+		public ClientServer(string AHostName, int APortNumber, string AInstanceName)
+		{
+			FHostName = AHostName;
+			FPortNumber = APortNumber;
+			FInstanceName = AInstanceName;
+			Open();
+		}
+		
+		private string FHostName;
+		public string HostName
+		{
+			get	{ return FHostName; }
+			set 
+			{
+				CheckInactive();
+				FHostName = value;
+			}
+		}
+		
+		private int FPortNumber;
+		public int PortNumber
+		{
+			get { return FPortNumber; }
+			set
+			{
+				CheckInactive();
+				FPortNumber = value; 
+			}
+		}
+		
+		private string FInstanceName;
+		public string InstanceName
+		{
+			get { return FInstanceName; }
+			set
+			{
+				CheckInactive();
+				FInstanceName = value;
+			}
+		}
+		
+		private ChannelFactory<IClientDataphorService> FChannelFactory;
+		
+		public bool IsActive { get { return FChannelFactory != null; } }
+		
+		private void CheckActive()
+		{
+			if (!IsActive)
+				throw new ServerException(ServerException.Codes.ServerInactive);
+		}
+		
+		private void CheckInactive()
+		{
+			if (IsActive)
+				throw new ServerException(ServerException.Codes.ServerActive);
+		}
+		
+		public void Open()
+		{
+			if (!IsActive)
+				FChannelFactory = new ChannelFactory<IClientDataphorService>(new BasicHttpBinding(), DataphorServiceUtility.BuildURI(FHostName, FPortNumber, FInstanceName));
+		}
+		
+		public void Close()
+		{
+			if (IsActive)
+			{
+				SetChannel(null);
+				FChannelFactory = null;
+			}
+		}
+		
+		private IClientDataphorService FChannel;
+		
+		private bool IsChannelFaulted(IClientDataphorService AChannel)
+		{
+			return ((ICommunicationObject)AChannel).State == CommunicationState.Faulted;
+		}
+		
+		private bool IsChannelValid(IClientDataphorService AChannel)
+		{
+			return ((ICommunicationObject)AChannel).State == CommunicationState.Opened;
+		}
+		
+		private void SetChannel(IClientDataphorService AChannel)
+		{
+			if (FChannel != null)
+				((ICommunicationObject)FChannel).Faulted -= new EventHandler(ChannelFaulted);
+			FChannel = AChannel;
+			if (FChannel != null)
+				((ICommunicationObject)FChannel).Faulted += new EventHandler(ChannelFaulted);
+		}
+		
+		private void ChannelFaulted(object ASender, EventArgs AArgs)
+		{
+			((ICommunicationObject)ASender).Faulted -= new EventHandler(ChannelFaulted);
+			if (FChannel == ASender)
+				FChannel = null;
+		}
+		
+		public IClientDataphorService GetServiceInterface()
+		{
+			CheckActive();
+			if ((FChannel == null) || !IsChannelValid(FChannel))
+				SetChannel(FChannelFactory.CreateChannel());
+			return FChannel;
+		}
+
 		#region IRemoteServer Members
 
 		public IRemoteServerConnection Establish(string AConnectionName, string AHostName)
 		{
-			throw new NotImplementedException();
+			return new ClientConnection(this, AConnectionName, AHostName);
 		}
 
 		public void Relinquish(IRemoteServerConnection AConnection)
 		{
-			throw new NotImplementedException();
+			// Nothing to do here
 		}
 
 		#endregion

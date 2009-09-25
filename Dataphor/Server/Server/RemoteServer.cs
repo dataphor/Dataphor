@@ -35,6 +35,7 @@ using Alphora.Dataphor.DAE.Device.Memory;
 using Alphora.Dataphor.DAE.Device.Catalog;
 using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 using Schema = Alphora.Dataphor.DAE.Schema;
+using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Dataphor.DAE.Server
 {

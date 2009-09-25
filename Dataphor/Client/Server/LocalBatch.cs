@@ -12,6 +12,7 @@ using System.Text;
 using System.Collections.Generic;
 
 using Alphora.Dataphor.DAE.Runtime;
+using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Dataphor.DAE.Server
 {

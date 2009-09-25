@@ -8,26 +8,54 @@ using System;
 using System.Collections.Generic;
 
 using Alphora.Dataphor.DAE;
+using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Dataphor.DAE.Client
 {
 	public class ClientSession : IRemoteServerSession
 	{
+		public ClientSession(ClientConnection AClientConnection, SessionInfo ASessionInfo, SessionDescriptor ASessionDescriptor)
+		{
+			FClientConnection = AClientConnection;
+			FSessionInfo = ASessionInfo;
+			FSessionDescriptor = ASessionDescriptor;
+		}
+		
+		private ClientConnection FClientConnection;
+		public ClientConnection ClientConnection { get { return FClientConnection; } }
+		
+		private IClientDataphorService GetServiceInterface()
+		{
+			return FClientConnection.ClientServer.GetServiceInterface();
+		}
+		
+		private SessionInfo FSessionInfo;
+		
+		private SessionDescriptor FSessionDescriptor;
+
+		public int SessionHandle { get { return FSessionDescriptor.Handle; } }
+		
 		#region IRemoteServerSession Members
 
 		public IRemoteServer Server
 		{
-			get { throw new NotImplementedException(); }
+			get { return FClientConnection.ClientServer; }
 		}
 
 		public IRemoteServerProcess StartProcess(ProcessInfo AProcessInfo, out int AProcessID)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginStartProcess(FSessionDescriptor.Handle, AProcessInfo, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			ProcessDescriptor LProcessDescriptor = GetServiceInterface().EndStartProcess(LResult);
+			AProcessID = LProcessDescriptor.ID;
+			return new ClientProcess(this, AProcessInfo, LProcessDescriptor);
 		}
 
 		public void StopProcess(IRemoteServerProcess AProcess)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginStopProcess(((ClientProcess)AProcess).ProcessHandle, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			GetServiceInterface().EndStopProcess(LResult);
 		}
 
 		#endregion
@@ -36,12 +64,12 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public int SessionID
 		{
-			get { throw new NotImplementedException(); }
+			get { return FSessionDescriptor.ID; }
 		}
 
 		public SessionInfo SessionInfo
 		{
-			get { throw new NotImplementedException(); }
+			get { return FSessionInfo; }
 		}
 
 		#endregion

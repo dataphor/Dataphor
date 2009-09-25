@@ -229,7 +229,7 @@ namespace Alphora.Dataphor.DAE.Server
 				{
 					LParams[LIndex].Name = AParams[LIndex].Name;
 					LParams[LIndex].TypeName = AParams[LIndex].DataType.Name;
-					LParams[LIndex].Modifier = (byte)AParams[LIndex].Modifier;//hack: to fix fixup error
+					LParams[LIndex].Modifier = AParams[LIndex].Modifier;
 				}
 				return LParams;
 			}
@@ -255,7 +255,7 @@ namespace Alphora.Dataphor.DAE.Server
 					{
 						LParams.Params[LIndex].Name = AParams[LIndex].Name;
 						LParams.Params[LIndex].TypeName = AParams[LIndex].DataType.Name;
-						LParams.Params[LIndex].Modifier = (byte)AParams[LIndex].Modifier;//hack: cast to fix fixup error
+						LParams.Params[LIndex].Modifier = AParams[LIndex].Modifier;
 						if (AParams[LIndex].Value != null)
 							LRow[LIndex] = AParams[LIndex].Value;
 					}
@@ -330,10 +330,10 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 		}
 		
-		private ProcessCleanupInfo GetProcessCleanupInfo()
+		private RemoteProcessCleanupInfo GetProcessCleanupInfo()
 		{
-			ProcessCleanupInfo LInfo = 
-				new ProcessCleanupInfo()
+			RemoteProcessCleanupInfo LInfo = 
+				new RemoteProcessCleanupInfo()
 				{
 					UnprepareList = FUnprepareList.ToArray()
 				};

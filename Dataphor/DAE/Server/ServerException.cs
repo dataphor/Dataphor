@@ -319,6 +319,19 @@ namespace Alphora.Dataphor.DAE.Server
 			
 			/// <summary>Error code 106206: "Plan "{0}" not found."</summary>
 			PlanNotFound = 106206,
+			
+			/// <summary>Error code 106207: "Server connection must be inactive to perform this operation."</summary>
+			ServerActive = 106207,
+			
+			/// <summary>Error code 106208: "Server connection must be active to perform this operation."</summary>
+			ServerInactive = 106208,
+			
+			/// <summary>Error code 106209: "Service must be inactive to perform this operation."</summary>
+			ServiceActive = 106209,
+			
+			/// <summary>Error code 106210: "Service must be active to perform this operation."</summary>
+			ServiceInactive = 106210,
+			
 		}
 		
 		// Resource manager for this exception class

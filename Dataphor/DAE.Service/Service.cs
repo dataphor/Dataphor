@@ -11,13 +11,13 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
+using System.ServiceModel;
 using System.ServiceProcess;
 using System.Configuration.Install;
 using System.Reflection;
 
 using Alphora.Dataphor.BOP;
 using Alphora.Dataphor.DAE.Server;
-using System.ServiceModel;
 
 namespace Alphora.Dataphor.DAE.Service
 {

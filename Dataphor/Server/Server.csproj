@@ -96,6 +96,7 @@
     <Compile Include="Server\ServerHost.cs" />
     <Compile Include="Service\ConnectionManager.cs" />
     <Compile Include="Service\DataphorService.cs" />
+    <Compile Include="Service\DataphorServiceHost.cs" />
     <Compile Include="Service\HandleManager.cs" />
     <Compile Include="Streams\FileStreamProvider.cs" />
   </ItemGroup>
@@ -120,9 +121,6 @@
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
       <Name>Engine</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

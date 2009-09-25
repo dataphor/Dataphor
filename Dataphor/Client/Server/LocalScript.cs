@@ -13,6 +13,7 @@ using System.Text;
 
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Runtime;
+using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Dataphor.DAE.Server
 {

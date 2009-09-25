@@ -234,8 +234,8 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AExecuteTime">The execute time.</param>
 		/// <returns>The result of evaluating the plan in it's physical representation.</returns>
 		[OperationContract(AsyncPattern = true, Action = "EvaluatePlan", ReplyAction = "EvaluatePlanResponse")]
-		IAsyncResult EvaluatePlan(int APlanHandle, ProcessCallInfo ACallInfo, ref RemoteParamData AParams, out TimeSpan AExecuteTime, AsyncCallback ACallback, object AState);
-		byte[] BeginEnd(IAsyncResult AResult);
+		IAsyncResult BeginEvaluatePlan(int APlanHandle, ProcessCallInfo ACallInfo, ref RemoteParamData AParams, out TimeSpan AExecuteTime, AsyncCallback ACallback, object AState);
+		byte[] EndEvaluatePlan(IAsyncResult AResult);
 
 		/// <summary>
 		/// Opens a cursor from a prepared plan.

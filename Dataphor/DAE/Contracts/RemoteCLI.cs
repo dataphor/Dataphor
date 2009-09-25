@@ -9,7 +9,6 @@ using System.IO;
 using System.Collections;
 
 using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Contracts;
 using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
@@ -17,7 +16,7 @@ using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Debug;
 
-namespace Alphora.Dataphor.DAE
+namespace Alphora.Dataphor.DAE.Contracts
 {
     /// <nodoc/>
 	/// <summary> A server interface designed to be utilized through remoting. </summary>

@@ -17,6 +17,8 @@ using System.Threading;
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Streams;
+using Alphora.Dataphor.DAE.Contracts;
+using Alphora.Dataphor.Windows;
 
 namespace Alphora.Dataphor.DAE.Server
 {

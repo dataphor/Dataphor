@@ -422,4 +422,19 @@
   <data name="106205" xml:space="preserve">
     <value>Unknown object handle.</value>
   </data>
+  <data name="106206" xml:space="preserve">
+    <value>Plan "{0}" not found.</value>
+  </data>
+  <data name="106207" xml:space="preserve">
+    <value>Server connection must be inactive to perform this operation.</value>
+  </data>
+  <data name="106208" xml:space="preserve">
+    <value>Server connection must be active to perform this operation.</value>
+  </data>
+  <data name="106209" xml:space="preserve">
+    <value>Service must be inactive to perform this operation.</value>
+  </data>
+  <data name="106210" xml:space="preserve">
+    <value>Service must be active to perform this operation.</value>
+  </data>
 </root>

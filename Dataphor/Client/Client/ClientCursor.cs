@@ -8,131 +8,200 @@ using System;
 using System.Collections.Generic;
 
 using Alphora.Dataphor.DAE;
+using Alphora.Dataphor.DAE.Contracts;
+using Alphora.Dataphor.DAE.Server;
 
 namespace Alphora.Dataphor.DAE.Client
 {
 	public class ClientCursor : IRemoteServerCursor
 	{
+		public ClientCursor(ClientExpressionPlan AClientExpressionPlan, CursorDescriptor ACursorDescriptor)
+		{
+			FClientExpressionPlan = AClientExpressionPlan;
+			FCursorDescriptor = ACursorDescriptor;
+		}
+		
+		private ClientExpressionPlan FClientExpressionPlan;
+		public ClientExpressionPlan ClientExpressionPlan { get { return FClientExpressionPlan; } }
+		
+		private IClientDataphorService GetServiceInterface()
+		{
+			return FClientExpressionPlan.ClientProcess.ClientSession.ClientConnection.ClientServer.GetServiceInterface();
+		}
+		
+		private CursorDescriptor FCursorDescriptor;
+		
+		public int CursorHandle { get { return FCursorDescriptor.Handle; } }
+		
 		#region IRemoteServerCursor Members
 
 		public IRemoteServerExpressionPlan Plan
 		{
-			get { throw new NotImplementedException(); }
+			get { return FClientExpressionPlan; }
 		}
 
-		public Alphora.Dataphor.DAE.Contracts.RemoteRowBody Select(Alphora.Dataphor.DAE.Contracts.RemoteRowHeader AHeader, Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public RemoteRowBody Select(RemoteRowHeader AHeader, ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginSelectSpecific(CursorHandle, ACallInfo, AHeader, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			return GetServiceInterface().EndSelectSpecific(LResult);
 		}
 
-		public Alphora.Dataphor.DAE.Contracts.RemoteRowBody Select(Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public RemoteRowBody Select(ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginSelect(CursorHandle, ACallInfo, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			return GetServiceInterface().EndSelect(LResult);
 		}
 
-		public Alphora.Dataphor.DAE.Contracts.RemoteFetchData Fetch(Alphora.Dataphor.DAE.Contracts.RemoteRowHeader AHeader, out Guid[] ABookmarks, int ACount, Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public RemoteFetchData Fetch(RemoteRowHeader AHeader, out Guid[] ABookmarks, int ACount, ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginFetchSpecific(CursorHandle, ACallInfo, AHeader, out ABookmarks, ACount, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			return GetServiceInterface().EndFetchSpecific(LResult);
 		}
 
-		public Alphora.Dataphor.DAE.Contracts.RemoteFetchData Fetch(out Guid[] ABookmarks, int ACount, Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public RemoteFetchData Fetch(out Guid[] ABookmarks, int ACount, ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginFetch(CursorHandle, ACallInfo, out ABookmarks, ACount, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			return GetServiceInterface().EndFetch(LResult);
 		}
 
-		public Alphora.Dataphor.DAE.Server.CursorGetFlags GetFlags(Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public CursorGetFlags GetFlags(ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginGetFlags(CursorHandle, ACallInfo, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			return GetServiceInterface().EndGetFlags(LResult);
 		}
 
-		public Alphora.Dataphor.DAE.Contracts.RemoteMoveData MoveBy(int ADelta, Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public RemoteMoveData MoveBy(int ADelta, ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginMoveBy(CursorHandle, ACallInfo, ADelta, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			return GetServiceInterface().EndMoveBy(LResult);
 		}
 
-		public Alphora.Dataphor.DAE.Server.CursorGetFlags First(Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public CursorGetFlags First(ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginFirst(CursorHandle, ACallInfo, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			return GetServiceInterface().EndFirst(LResult);
 		}
 
-		public Alphora.Dataphor.DAE.Server.CursorGetFlags Last(Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public CursorGetFlags Last(ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginLast(CursorHandle, ACallInfo, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			return GetServiceInterface().EndLast(LResult);
 		}
 
-		public Alphora.Dataphor.DAE.Server.CursorGetFlags Reset(Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public CursorGetFlags Reset(ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginReset(CursorHandle, ACallInfo, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			return GetServiceInterface().EndReset(LResult);
 		}
 
-		public void Insert(Alphora.Dataphor.DAE.Contracts.RemoteRow ARow, System.Collections.BitArray AValueFlags, Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public void Insert(RemoteRow ARow, System.Collections.BitArray AValueFlags, ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginInsert(CursorHandle, ACallInfo, ARow, AValueFlags, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			GetServiceInterface().EndInsert(LResult);
 		}
 
-		public void Update(Alphora.Dataphor.DAE.Contracts.RemoteRow ARow, System.Collections.BitArray AValueFlags, Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public void Update(RemoteRow ARow, System.Collections.BitArray AValueFlags, ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginUpdate(CursorHandle, ACallInfo, ARow, AValueFlags, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			GetServiceInterface().EndUpdate(LResult);
 		}
 
-		public void Delete(Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public void Delete(ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginDelete(CursorHandle, ACallInfo, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			GetServiceInterface().EndDelete(LResult);
 		}
 
-		public Guid GetBookmark(Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public Guid GetBookmark(ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginGetBookmark(CursorHandle, ACallInfo, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			return GetServiceInterface().EndGetBookmark(LResult);
 		}
 
-		public Alphora.Dataphor.DAE.Contracts.RemoteGotoData GotoBookmark(Guid ABookmark, bool AForward, Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public RemoteGotoData GotoBookmark(Guid ABookmark, bool AForward, ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginGotoBookmark(CursorHandle, ACallInfo, ABookmark, AForward, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			return GetServiceInterface().EndGotoBookmark(LResult);
 		}
 
-		public int CompareBookmarks(Guid ABookmark1, Guid ABookmark2, Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public int CompareBookmarks(Guid ABookmark1, Guid ABookmark2, ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginCompareBookmarks(CursorHandle, ACallInfo, ABookmark1, ABookmark2, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			return GetServiceInterface().EndCompareBookmarks(LResult);
 		}
 
-		public void DisposeBookmark(Guid ABookmark, Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public void DisposeBookmark(Guid ABookmark, ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginDisposeBookmark(CursorHandle, ACallInfo, ABookmark, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			GetServiceInterface().EndDisposeBookmark(LResult);
 		}
 
-		public void DisposeBookmarks(Guid[] ABookmarks, Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public void DisposeBookmarks(Guid[] ABookmarks, ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginDisposeBookmarks(CursorHandle, ACallInfo, ABookmarks, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			GetServiceInterface().EndDisposeBookmarks(LResult);
 		}
 
 		public string Order
 		{
-			get { throw new NotImplementedException(); }
+			get 
+			{ 
+				IAsyncResult LResult = GetServiceInterface().BeginGetOrder(CursorHandle, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndGetOrder(LResult);
+			}
 		}
 
-		public Alphora.Dataphor.DAE.Contracts.RemoteRow GetKey(Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public RemoteRow GetKey(ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginGetKey(CursorHandle, ACallInfo, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			return GetServiceInterface().EndGetKey(LResult);
 		}
 
-		public Alphora.Dataphor.DAE.Contracts.RemoteGotoData FindKey(Alphora.Dataphor.DAE.Contracts.RemoteRow AKey, Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public RemoteGotoData FindKey(RemoteRow AKey, ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginFindKey(CursorHandle, ACallInfo, AKey, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			return GetServiceInterface().EndFindKey(LResult);
 		}
 
-		public Alphora.Dataphor.DAE.Server.CursorGetFlags FindNearest(Alphora.Dataphor.DAE.Contracts.RemoteRow AKey, Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public CursorGetFlags FindNearest(RemoteRow AKey, ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginFindNearest(CursorHandle, ACallInfo, AKey, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			return GetServiceInterface().EndFindNearest(LResult);
 		}
 
-		public Alphora.Dataphor.DAE.Contracts.RemoteGotoData Refresh(Alphora.Dataphor.DAE.Contracts.RemoteRow ARow, Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public RemoteGotoData Refresh(RemoteRow ARow, ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginRefresh(CursorHandle, ACallInfo, ARow, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			return GetServiceInterface().EndRefresh(LResult);
 		}
 
-		public int RowCount(Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public int RowCount(ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginGetRowCount(CursorHandle, ACallInfo, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			return GetServiceInterface().EndGetRowCount(LResult);
 		}
 
 		#endregion
@@ -141,7 +210,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public void Open()
 		{
-			throw new NotImplementedException();
+			// Nothing to do, the cursor is opened on creation
 		}
 
 		public void Close()
@@ -151,14 +220,8 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public bool Active
 		{
-			get
-			{
-				throw new NotImplementedException();
-			}
-			set
-			{
-				throw new NotImplementedException();
-			}
+			get { return true; }
+			set { throw new NotImplementedException(); }
 		}
 
 		#endregion
@@ -173,41 +236,47 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public CursorCapability Capabilities
 		{
-			get { throw new NotImplementedException(); }
+			get { return FCursorDescriptor.Capabilities; }
 		}
 
 		public CursorType CursorType
 		{
-			get { throw new NotImplementedException(); }
+			get { return FCursorDescriptor.CursorType; }
 		}
 
 		public bool Supports(CursorCapability ACapability)
 		{
-			throw new NotImplementedException();
+			return (Capabilities & ACapability) != 0;
 		}
 
 		public CursorIsolation Isolation
 		{
-			get { throw new NotImplementedException(); }
+			get { return FCursorDescriptor.CursorIsolation; }
 		}
 
 		#endregion
 
 		#region IRemoteProposable Members
 
-		public Alphora.Dataphor.DAE.Contracts.RemoteProposeData Default(Alphora.Dataphor.DAE.Contracts.RemoteRowBody ARow, string AColumn, Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public RemoteProposeData Default(RemoteRowBody ARow, string AColumn, ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginDefault(CursorHandle, ACallInfo, ARow, AColumn, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			return GetServiceInterface().EndDefault(LResult);
 		}
 
-		public Alphora.Dataphor.DAE.Contracts.RemoteProposeData Change(Alphora.Dataphor.DAE.Contracts.RemoteRowBody AOldRow, Alphora.Dataphor.DAE.Contracts.RemoteRowBody ANewRow, string AColumn, Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public RemoteProposeData Change(RemoteRowBody AOldRow, RemoteRowBody ANewRow, string AColumn, ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginChange(CursorHandle, ACallInfo, AOldRow, ANewRow, AColumn, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			return GetServiceInterface().EndChange(LResult);
 		}
 
-		public Alphora.Dataphor.DAE.Contracts.RemoteProposeData Validate(Alphora.Dataphor.DAE.Contracts.RemoteRowBody AOldRow, Alphora.Dataphor.DAE.Contracts.RemoteRowBody ANewRow, string AColumn, Alphora.Dataphor.DAE.Contracts.ProcessCallInfo ACallInfo)
+		public RemoteProposeData Validate(RemoteRowBody AOldRow, RemoteRowBody ANewRow, string AColumn, ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginValidate(CursorHandle, ACallInfo, AOldRow, ANewRow, AColumn, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			return GetServiceInterface().EndValidate(LResult);
 		}
 
 		#endregion

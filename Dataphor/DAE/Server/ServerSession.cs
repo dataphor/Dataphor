@@ -131,7 +131,7 @@ namespace Alphora.Dataphor.DAE.Server
 		// User        
 		private Schema.User FUser;
 		public Schema.User User { get { return FUser; } }
-		internal void SetUser(Schema.User AUser)
+		public void SetUser(Schema.User AUser)
 		{
 			FUser = AUser;
 		}

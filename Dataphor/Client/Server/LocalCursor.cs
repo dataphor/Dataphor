@@ -396,7 +396,7 @@ namespace Alphora.Dataphor.DAE.Server
 					FBufferIndex = -1;
 			}
 			
-			SetFlags((RemoteCursorGetFlags)AFetchData.Flags);//hack: cast to flag to fix MS bug
+			SetFlags(AFetchData.Flags);
 			FBufferFull = true;
 		}
 		
@@ -405,7 +405,7 @@ namespace Alphora.Dataphor.DAE.Server
 			RemoteMoveData LMoveData = FCursor.MoveBy(1, FPlan.FProcess.GetProcessCallInfo());
 			FPlan.FProgramStatisticsCached = false;
 			SetFlags(LMoveData.Flags);
-			return LMoveData.Flags == RemoteCursorGetFlags.None;
+			return LMoveData.Flags == CursorGetFlags.None;
 		}
 		
 		protected void SyncSource(bool AForward)
@@ -459,7 +459,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		protected bool SourceBOF()
 		{
-			return (GetFlags() & RemoteCursorGetFlags.BOF) != 0;
+			return (GetFlags() & CursorGetFlags.BOF) != 0;
 		}
 
         public bool BOF()
@@ -472,7 +472,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		protected bool SourceEOF()
 		{
-			return (GetFlags() & RemoteCursorGetFlags.EOF) != 0;
+			return (GetFlags() & CursorGetFlags.EOF) != 0;
 		}
 		
         public bool EOF()
@@ -567,7 +567,7 @@ namespace Alphora.Dataphor.DAE.Server
 			RemoteMoveData LMoveData = FCursor.MoveBy(-1, FPlan.FProcess.GetProcessCallInfo());
 			SetFlags(LMoveData.Flags);
 			FPlan.FProgramStatisticsCached = false;
-			return LMoveData.Flags == RemoteCursorGetFlags.None;
+			return LMoveData.Flags == CursorGetFlags.None;
 		}
 		
         public bool Prior()

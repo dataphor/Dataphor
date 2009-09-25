@@ -4,6 +4,7 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
+/*
 using System;
 using System.Collections;
 using System.Reflection;
@@ -13,7 +14,7 @@ using System.Runtime.Remoting.Channels.Tcp;
 using System.Runtime.Serialization.Formatters;
 
 using Alphora.Dataphor.DAE;
-using Alphora.Dataphor.DAE.NativeCLI;
+using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -47,3 +48,4 @@ namespace Alphora.Dataphor.DAE.Server
         }
 	}
 }
+*/
