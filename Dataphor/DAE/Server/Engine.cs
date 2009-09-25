@@ -440,7 +440,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		internal void EndProcessCall(ServerProcess AProcess)
 		{
-			int LRunningProcesses = Interlocked.Decrement(ref FRunningProcesses);
+			Interlocked.Decrement(ref FRunningProcesses);
 			FProcessWaitEvent.Set();
 		}
 		
