@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.ServiceModel;
+using System.ServiceModel.Channels;
 
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Contracts;
@@ -77,7 +78,12 @@ namespace Alphora.Dataphor.DAE.Client
 		public void Open()
 		{
 			if (!IsActive)
-				FChannelFactory = new ChannelFactory<IClientDataphorService>(new BasicHttpBinding(), DataphorServiceUtility.BuildURI(FHostName, FPortNumber, FInstanceName));
+				FChannelFactory = 
+					new ChannelFactory<IClientDataphorService>
+					(
+						new CustomBinding(new BinaryMessageEncodingBindingElement(), new HttpTransportBindingElement()), 
+						DataphorServiceUtility.BuildURI(FHostName, FPortNumber, FInstanceName)
+					);
 		}
 		
 		public void Close()

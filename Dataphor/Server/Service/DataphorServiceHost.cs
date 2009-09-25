@@ -11,6 +11,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.ServiceModel;
+using System.ServiceModel.Channels;
 
 namespace Alphora.Dataphor.DAE.Service
 {
@@ -69,10 +70,11 @@ namespace Alphora.Dataphor.DAE.Service
 
 					// TODO: Enable configuration of endpoints through instances or app.config files
 					FServiceHost = new ServiceHost(FService);
+					
 					FServiceHost.AddServiceEndpoint
 					(
 						typeof(IDataphorService), 
-						new BasicHttpBinding(), 
+						new CustomBinding(new BinaryMessageEncodingBindingElement(), new HttpTransportBindingElement()), 
 						DataphorServiceUtility.BuildURI(Environment.MachineName, LInstance.PortNumber, LInstance.Name)
 					);
 					FServiceHost.Open();
