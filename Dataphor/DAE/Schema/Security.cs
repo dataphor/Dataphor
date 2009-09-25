@@ -52,8 +52,8 @@ namespace Alphora.Dataphor.DAE.Schema
 				byte[] LEncryptedData;
 				using (MemoryStream LStream = new MemoryStream())
 				{
-					RijndaelManaged LRijndael = new RijndaelManaged();
-					using (CryptoStream LEncryptionStream = new CryptoStream(LStream, LRijndael.CreateEncryptor(AKey, AIV), CryptoStreamMode.Write))
+					AesManaged LProvider = new AesManaged();
+					using (CryptoStream LEncryptionStream = new CryptoStream(LStream, LProvider.CreateEncryptor(AKey, AIV), CryptoStreamMode.Write))
 					{
 						using (StreamWriter LWriter = new StreamWriter(LEncryptionStream))
 						{
@@ -86,8 +86,8 @@ namespace Alphora.Dataphor.DAE.Schema
 
 				using (Stream LStream = new MemoryStream(LEncryptedData))
 				{
-					RijndaelManaged LRijndael = new RijndaelManaged();
-					using (CryptoStream LDecryptionStream = new CryptoStream(LStream, LRijndael.CreateDecryptor(AKey, AIV), CryptoStreamMode.Read))
+					AesManaged LProvider = new AesManaged();
+					using (CryptoStream LDecryptionStream = new CryptoStream(LStream, LProvider.CreateDecryptor(AKey, AIV), CryptoStreamMode.Read))
 					{
 						using (StreamReader LReader = new StreamReader(LDecryptionStream))
 						{
@@ -125,8 +125,8 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			using (MemoryStream LStream = new MemoryStream())
 			{
-				RijndaelManaged LRijndael = new RijndaelManaged();
-				using (CryptoStream LEncryptionStream = new CryptoStream(LStream, LRijndael.CreateEncryptor(FStringKey, FStringIV), CryptoStreamMode.Write))
+				AesManaged LProvider = new AesManaged();
+				using (CryptoStream LEncryptionStream = new CryptoStream(LStream, LProvider.CreateEncryptor(FStringKey, FStringIV), CryptoStreamMode.Write))
 				{
 					using (BinaryWriter LWriter = new BinaryWriter(LEncryptionStream))
 					{
@@ -153,8 +153,8 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			using (Stream LStream = new MemoryStream(Convert.FromBase64String(AValue)))
 			{
-				RijndaelManaged LRijndael = new RijndaelManaged();
-				using (CryptoStream LDecryptionStream = new CryptoStream(LStream, LRijndael.CreateDecryptor(FStringKey, FStringIV), CryptoStreamMode.Read))
+				AesManaged LProvider = new AesManaged();
+				using (CryptoStream LDecryptionStream = new CryptoStream(LStream, LProvider.CreateDecryptor(FStringKey, FStringIV), CryptoStreamMode.Read))
 				{
 					using (BinaryReader LReader = new BinaryReader(LDecryptionStream))
 					{

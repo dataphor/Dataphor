@@ -319,9 +319,6 @@ using Alphora.Dataphor.DAE.Debug;
 			/// <summary>Error code 104203: "Timed out waiting for {0} lock on "{1}" owned by "{2}"."</summary>
 			LockTimeout = 104203,
 			
-			/// <summary>Error code 104204: "Maximum lock count exceeded in lock manager."</summary>
-			LockManagerOverflow = 104204,
-			
 			/// <summary>Error code 104205: "Version number components must be greater than or equal to -1."</summary>
 			InvalidVersionNumberComponent = 104205,
 			

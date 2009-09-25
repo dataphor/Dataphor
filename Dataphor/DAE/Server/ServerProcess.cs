@@ -102,133 +102,126 @@ namespace Alphora.Dataphor.DAE.Server
 											{
 												try
 												{
-													try
-													{
-														if (FDebuggedBy != null)
-															FDebuggedBy.Detach(this);
-															
-														if (FApplicationTransactionID != Guid.Empty)
-															LeaveApplicationTransaction();
-													}
-													finally
-													{
-														if (FTransactions != null)
-														{
-															// Rollback all active transactions
-															while (InTransaction)
-																RollbackTransaction();
-																
-															FTransactions.UnprepareDeferredConstraintChecks();
-														}
-													}
+													if (FDebuggedBy != null)
+														FDebuggedBy.Detach(this);
+														
+													if (FApplicationTransactionID != Guid.Empty)
+														LeaveApplicationTransaction();
 												}
 												finally
 												{
-													if (FPlans != null)
-														foreach (ServerPlan LPlan in FPlans)
-														{
-															if (LPlan.ActiveCursor != null)
-																LPlan.ActiveCursor.Dispose();
-														}
+													if (FTransactions != null)
+													{
+														// Rollback all active transactions
+														while (InTransaction)
+															RollbackTransaction();
+															
+														FTransactions.UnprepareDeferredConstraintChecks();
+													}
 												}
 											}
 											finally
 											{
-												if (FDeviceSessions != null)
-												{
-													try
+												if (FPlans != null)
+													foreach (ServerPlan LPlan in FPlans)
 													{
-														CloseDeviceSessions();
+														if (LPlan.ActiveCursor != null)
+															LPlan.ActiveCursor.Dispose();
 													}
-													finally
-													{
-														FDeviceSessions.Dispose();
-														FDeviceSessions = null;
-													}
-												}
 											}
 										}
 										finally
 										{
-											if (FRemoteSessions != null)
+											if (FDeviceSessions != null)
 											{
 												try
 												{
-													CloseRemoteSessions();
+													CloseDeviceSessions();
 												}
 												finally
 												{
-													FRemoteSessions.Dispose();
-													FRemoteSessions = null;
+													FDeviceSessions.Dispose();
+													FDeviceSessions = null;
 												}
 											}
 										}
 									}
 									finally
 									{
-										if (FTransactions != null)
+										if (FRemoteSessions != null)
 										{
-											FTransactions.Dispose();
-											FTransactions = null;
+											try
+											{
+												CloseRemoteSessions();
+											}
+											finally
+											{
+												FRemoteSessions.Dispose();
+												FRemoteSessions = null;
+											}
 										}
 									}
 								}
 								finally
 								{
-									if (FProcessProgram != null)
+									if (FTransactions != null)
 									{
-										FProcessProgram.Stop(null);
-										FProcessProgram = null;
+										FTransactions.Dispose();
+										FTransactions = null;
 									}
 								}
 							}
 							finally
 							{
-								if (FProcessLocalStack != null)
+								if (FProcessProgram != null)
 								{
-									DeallocateProcessLocalStack();
-									FProcessLocalStack = null;
+									FProcessProgram.Stop(null);
+									FProcessProgram = null;
 								}
 							}
 						}
 						finally
 						{
-							if (FScripts != null)
+							if (FProcessLocalStack != null)
 							{
-								try
-								{
-									UnprepareScripts();
-								}
-								finally
-								{
-									FScripts.Dispose();
-									FScripts = null;
-								}
+								DeallocateProcessLocalStack();
+								FProcessLocalStack = null;
 							}
 						}
 					}
 					finally
 					{
-						if (FPlans != null)
+						if (FScripts != null)
 						{
 							try
 							{
-								UnpreparePlans();
+								UnprepareScripts();
 							}
 							finally
 							{
-								FPlans.Dispose();
-								FPlans = null;
+								FScripts.Dispose();
+								FScripts = null;
 							}
 						}
-						
-						if (!FDisposed)
-							FDisposed = true;
 					}
 				}
 				finally
 				{
-					ReleaseLocks();
+					if (FPlans != null)
+					{
+						try
+						{
+							UnpreparePlans();
+						}
+						finally
+						{
+							FPlans.Dispose();
+							FPlans = null;
+						}
+					}
+					
+					if (!FDisposed)
+						FDisposed = true;
 				}
 			}
 			finally
@@ -406,29 +399,6 @@ namespace Alphora.Dataphor.DAE.Server
 		// ScalarManager
 		public ScalarManager ScalarManager { get { return FServerSession.Server.ScalarManager; } }
 		#endif
-		
-		// LockManager
-		public void Lock(LockID ALockID, LockMode AMode)
-		{
-			FServerSession.Server.LockManager.Lock(FProcessID, ALockID, AMode);
-		}
-		
-		public bool LockImmediate(LockID ALockID, LockMode AMode)
-		{
-			return FServerSession.Server.LockManager.LockImmediate(FProcessID, ALockID, AMode);
-		}
-		
-		public void Unlock(LockID ALockID)
-		{
-			FServerSession.Server.LockManager.Unlock(FProcessID, ALockID);
-		}
-		
-		// Release any locks associated with the process that have not yet been released
-		private void ReleaseLocks()
-		{
-			// TODO: Release locks taken for a given process (presumably keep a hash table of locks acquired on this process, which means every request for a lock must go through the process)
-			//FServerSession.Server.LockManager.Unlock(FProcessID);
-		}
 		
 		// IValueManager
 		private IValueManager FValueManager;

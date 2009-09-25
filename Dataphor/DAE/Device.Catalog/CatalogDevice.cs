@@ -134,33 +134,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				}
 		}
 		
-		private void PopulateLocks(Program AProgram, NativeTable ANativeTable, Row ARow)
-		{
-			LockManager LLockManager = AProgram.ServerProcess.ServerSession.Server.LockManager;
-			KeyValuePair<LockID, LockHeader>[] LEntries;
-			lock (LLockManager)
-			{
-				LEntries = new KeyValuePair<LockID, LockHeader>[LLockManager.Locks.Count];
-				var LIndex = 0;
-				foreach (KeyValuePair<LockID, LockHeader> LEntry in LLockManager.Locks)
-				{
-					LEntries[LIndex] = LEntry;
-					LIndex++;
-				}
-			}
-
-			foreach (KeyValuePair<LockID, LockHeader> LEntry in LEntries)
-			{
-				LockHeader LLockHeader = LEntry.Value;
-				ARow[0] = LLockHeader.LockID.Owner.ToString();
-				ARow[1] = LLockHeader.LockID.LockName;
-				ARow[2] = LLockHeader.Semaphore.Mode.ToString();
-				ARow[3] = LLockHeader.Semaphore.GrantCount();
-				ARow[4] = LLockHeader.Semaphore.WaitCount();
-				ANativeTable.Insert(AProgram.ValueManager, ARow);
-			}
-		}
-		
 		private void PopulateScripts(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			foreach (ServerSession LSession in AProgram.ServerProcess.ServerSession.Server.Sessions)
@@ -398,7 +371,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				case "System.Connections" : PopulateConnections(AProgram, AHeader.NativeTable, ARow); break;
 				case "System.Sessions" : PopulateSessions(AProgram, AHeader.NativeTable, ARow); break;
 				case "System.Processes" : PopulateProcesses(AProgram, AHeader.NativeTable, ARow); break;
-				case "System.Locks" : PopulateLocks(AProgram, AHeader.NativeTable, ARow); break;
 				case "System.Scripts" : PopulateScripts(AProgram, AHeader.NativeTable, ARow); break;
 				case "System.Plans" : PopulatePlans(AProgram, AHeader.NativeTable, ARow); break;
 				case "System.Libraries" : PopulateLibraries(AProgram, AHeader.NativeTable, ARow); break;

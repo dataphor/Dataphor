@@ -195,9 +195,8 @@ namespace Alphora.Dataphor.DAE.Streams
 	
 	public class ServerStreamManager : StreamManager
 	{
-		public ServerStreamManager(LockManager ALockManager, IServer AServer) : base()
+		public ServerStreamManager(IServer AServer) : base()
 		{
-			FLockManager = ALockManager;
 			#if UseFileStreamProvider
 			FDefaultProvider = new FileStreamProvider();
 			#else
@@ -214,7 +213,6 @@ namespace Alphora.Dataphor.DAE.Streams
 			}
 			
 			FHeaders = null;
-			FLockManager = null;
 
 			base.Dispose(ADisposing);
 		}
@@ -227,7 +225,6 @@ namespace Alphora.Dataphor.DAE.Streams
 		private StreamHeaders FHeaders = new StreamHeaders();
 		private Dictionary<StreamID, StreamID> FReferencingHeaders = new Dictionary<StreamID, StreamID>(); // <stream id key> references <stream id value>
 		private UInt64 FNextStreamID = 1; // must be 1 so that no stream could ever be 0 (the Null stream)
-		private LockManager FLockManager;
 		
 		private StreamEvents FStreamEvents;
 		public StreamEvents StreamEvents { get { return FStreamEvents; } }
@@ -378,16 +375,6 @@ namespace Alphora.Dataphor.DAE.Streams
 			lock (this)
 			{
 				StreamHeader LHeader = GetStreamHeader(AStreamID);
-				#if LOCKSTREAMS
-				if (FLockManager.IsLocked(LHeader.LockID))
-				{
-					if (StreamTracingEnabled)
-						FStreamOpens.Add(String.Format("Deallocation Exception {0}", AStreamID.ToString()));
-					#if FINDLEAKS
-					throw new StreamsException(StreamsException.Codes.StreamInUse, AStreamID.ToString());
-					#endif
-				}
-				#endif
 				if (StreamTracingEnabled)
 					StreamEvents.Deallocate(AStreamID);
 					
@@ -437,14 +424,9 @@ namespace Alphora.Dataphor.DAE.Streams
 			}
 		}
 
-		// here for diagnostics
 		public bool IsLocked(StreamID AStreamID)
 		{
-			#if LOCKSTREAMS
-			return FLockManager.IsLocked(GetStreamHeader(AStreamID).LockID);
-			#else
 			return false;
-			#endif
 		}
 		
 		public void Change(ServerStream AStream)
@@ -527,9 +509,6 @@ namespace Alphora.Dataphor.DAE.Streams
 					StreamOpens.Add(String.Format("Open {0}", AStreamID.Value.ToString()));
 				}
 				StreamHeader LHeader = GetStreamHeader(AStreamID);
-				#if LOCKSTREAMS
-				FLockManager.Lock(AOwnerID, LHeader.LockID, AMode);
-				#endif
 				return new ManagedStream(this, AOwnerID, AStreamID, InternalOpen(LHeader, false));
 			}
 		}
@@ -571,9 +550,6 @@ namespace Alphora.Dataphor.DAE.Streams
 				}
 				StreamHeader LHeader = GetStreamHeader(AStreamID);
 				InternalClose(LHeader);
-				#if LOCKSTREAMS
-				FLockManager.Unlock(AOwnerID, LHeader.LockID);
-				#endif
 			}
 		}
 	}

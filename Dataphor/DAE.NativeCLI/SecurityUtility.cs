@@ -36,8 +36,8 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 				byte[] LEncryptedData;
 				using (MemoryStream LStream = new MemoryStream())
 				{
-					RijndaelManaged LRijndael = new RijndaelManaged();
-					using (CryptoStream LEncryptionStream = new CryptoStream(LStream, LRijndael.CreateEncryptor(AKey, AIV), CryptoStreamMode.Write))
+					AesManaged LProvider = new AesManaged();
+					using (CryptoStream LEncryptionStream = new CryptoStream(LStream, LProvider.CreateEncryptor(AKey, AIV), CryptoStreamMode.Write))
 					{
 						using (StreamWriter LWriter = new StreamWriter(LEncryptionStream))
 						{
@@ -70,8 +70,8 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 
 				using (Stream LStream = new MemoryStream(LEncryptedData))
 				{
-					RijndaelManaged LRijndael = new RijndaelManaged();
-					using (CryptoStream LDecryptionStream = new CryptoStream(LStream, LRijndael.CreateDecryptor(AKey, AIV), CryptoStreamMode.Read))
+					AesManaged LProvider = new AesManaged();
+					using (CryptoStream LDecryptionStream = new CryptoStream(LStream, LProvider.CreateDecryptor(AKey, AIV), CryptoStreamMode.Read))
 					{
 						using (StreamReader LReader = new StreamReader(LDecryptionStream))
 						{

@@ -38,7 +38,7 @@ namespace Alphora.Dataphor.DAE.Client
 			0xF3, 0xFC, 0xFF, 0x48, 0xEC, 0x9A, 0xE0, 0x41
 		};
 
-		private static RijndaelManaged FRijndael = new RijndaelManaged();
+		private static AesManaged FProvider = new AesManaged();
 
 		[SecurityPermission(SecurityAction.Demand)]
 		public static string EncryptString(string AString)
@@ -50,7 +50,7 @@ namespace Alphora.Dataphor.DAE.Client
 				byte[] LEncryptedData;
 				using (MemoryStream LStream = new MemoryStream())
 				{
-					using (CryptoStream LEncryptionStream = new CryptoStream(LStream, FRijndael.CreateEncryptor(FKey, FIV), CryptoStreamMode.Write))
+					using (CryptoStream LEncryptionStream = new CryptoStream(LStream, FProvider.CreateEncryptor(FKey, FIV), CryptoStreamMode.Write))
 					{
 						using (StreamWriter LWriter = new StreamWriter(LEncryptionStream))
 						{
@@ -84,7 +84,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 				using (Stream LStream = new MemoryStream(LEncryptedData))
 				{
-					using (CryptoStream LDecryptionStream = new CryptoStream(LStream, FRijndael.CreateDecryptor(FKey, FIV), CryptoStreamMode.Read))
+					using (CryptoStream LDecryptionStream = new CryptoStream(LStream, FProvider.CreateDecryptor(FKey, FIV), CryptoStreamMode.Read))
 					{
 						using (StreamReader LReader = new StreamReader(LDecryptionStream))
 						{
@@ -106,7 +106,7 @@ namespace Alphora.Dataphor.DAE.Client
 					LLicenseData = LReader.ReadToEnd();
 				}
 
-			// This file will contain the string value "Data Access Components" as a Rijndael encrypted string using the given key and iv.
+			// This file will contain the string value "Data Access Components" as an AES encrypted string using the given key and iv.
 			if (LicenseUtility.DecryptString(LLicenseData) != LicenseUtility.CLicenseData)
 			{
 				// If the license check fails
@@ -114,7 +114,7 @@ namespace Alphora.Dataphor.DAE.Client
 				string LInstallData = String.Empty;
 				string LInstallDataFileName = String.Format("{0}{1}", Alphora.Dataphor.Windows.PathUtility.CommonAppDataPath(), LicenseUtility.CInstallDataFileName);
 
-				// This file will contain the date of the installation as a Rijndael encrypted string using the given key and iv.
+				// This file will contain the date of the installation as an AES encrypted string using the given key and iv.
 				if (File.Exists(LInstallDataFileName))
 					using (StreamReader LReader = new StreamReader(LInstallDataFileName))
 					{

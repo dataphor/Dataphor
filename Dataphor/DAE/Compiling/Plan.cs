@@ -29,7 +29,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public Plan(ServerProcess AServerProcess) : base()
 		{
 			FServerProcess = AServerProcess;
-			FCatalogLocks = new List<LockID>();
 			FSymbols = new Symbols(FServerProcess.ServerSession.SessionInfo.DefaultMaxStackDepth, FServerProcess.ServerSession.SessionInfo.DefaultMaxCallDepth);
 			PushSecurityContext(new SecurityContext(FServerProcess.ServerSession.User));
 			PushStatementContext(new StatementContext(StatementType.Select));
@@ -45,25 +44,14 @@ namespace Alphora.Dataphor.DAE.Compiling
 					{
 						try
 						{
-							try
-							{
-								if (FStatementContexts.Count > 0)
-									PopStatementContext();
-									
-							}
-							finally
-							{
-								if (FSecurityContexts.Count > 0)
-									PopSecurityContext();
-							}
+							if (FStatementContexts.Count > 0)
+								PopStatementContext();
+								
 						}
 						finally
 						{
-							if (FCatalogLocks != null)
-							{
-								ReleaseCatalogLocks();
-								FCatalogLocks = null;
-							}
+							if (FSecurityContexts.Count > 0)
+								PopSecurityContext();
 						}
 					}
 					finally
@@ -196,40 +184,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 			return InternalProgram.Execute(null);
 		}
 		
-		// CatalogLocks
-		protected List<LockID> FCatalogLocks; // cannot be a hash table because it must be able to contain multiple entries for the same LockID
-		public void AcquireCatalogLock(Schema.Object AObject, LockMode AMode)
-		{
-			#if USECATALOGLOCKS
-			LockID LLockID = new LockID(Server.CCatalogManagerID, AObject.Name);
-			if (FServerProcess.ServerSession.Server.LockManager.LockImmediate(FServerProcess.ProcessID, LLockID, AMode))
-				FCatalogLocks.Add(LLockID);
-			else
-				throw new RuntimeException(RuntimeException.Codes.UnableToLockObject, AObject);
-			#endif
-		}
-		
-		public void ReleaseCatalogLock(Schema.Object AObject)
-		{
-			#if USECATALOGLOCKS
-			LockID LLockID = new LockID(Server.CCatalogManagerID, AObject.Name);
-			if (FServerProcess.ServerSession.Server.LockManager.IsLocked(LLockID))
-				FServerProcess.ServerSession.Server.LockManager.Unlock(FServerProcess.ProcessID, LLockID);
-			#endif
-		}
-        
-		protected void ReleaseCatalogLocks()
-		{
-			#if USECATALOGLOCKS
-			for (int LIndex = FCatalogLocks.Count - 1; LIndex >= 0; LIndex--)
-			{
-				if (FServerProcess.ServerSession.Server.LockManager.IsLocked((LockID)FCatalogLocks[LIndex]))
-					FServerProcess.ServerSession.Server.LockManager.Unlock(FServerProcess.ProcessID, (LockID)FCatalogLocks[LIndex]);
-				FCatalogLocks.RemoveAt(LIndex);
-			}
-			#endif
-		}
-
 		// Symbols        
 		protected Symbols FSymbols;
 		public Symbols Symbols { get { return FSymbols; } }

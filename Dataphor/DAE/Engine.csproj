@@ -450,17 +450,12 @@
     </Compile>
     <Compile Include="Runtime\DataParam.cs" />
     <Compile Include="Frame.cs" />
-    <Compile Include="Runtime\LockManager.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Runtime\Program.cs" />
     <Compile Include="Runtime\RuntimeException.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Runtime\RuntimeStackWindow.cs" />
-    <Compile Include="Runtime\Semaphore.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Runtime\LockMode.cs" />
     <Compile Include="Runtime\Stack.cs" />
     <Compile Include="Schema\EmissionContext.cs" />
     <Compile Include="Server\IServerDTCTransaction.cs" />

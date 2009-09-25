@@ -4,12 +4,10 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 using System;
-using System.IO;
 using System.Collections;
-using System.Xml;
+using System.IO;
 using System.Text;
-using System.ComponentModel;
-using System.Security.Cryptography;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace Alphora.Dataphor
@@ -138,28 +136,19 @@ namespace Alphora.Dataphor
 		}
 
 		/// <summary> Returns true if the two provided streams are identical in content. </summary>
-		/// <remarks> This routine uses the MD5 hash provider to compute a hash for each segment of each stream, so 
-		/// technically this function does not perform an exact comparison.  There appears to be no really fast
-		/// way in .NET to do an exact comparison, so the astonomically small chance of a false positive makes this
-		/// routine reasonable for most purposes. </remarks>
 		public static bool StreamsEqual(Stream ASourceStream, Stream ATargetStream)
 		{
 			if ((ASourceStream.Length - ASourceStream.Position) != (ATargetStream.Length - ATargetStream.Position))
 				return false;
 			byte[] LSourceBuffer = new byte[CCopyBufferSize / 2];
 			byte[] LTargetBuffer = new byte[CCopyBufferSize / 2];
-			MD5CryptoServiceProvider LProvider = new MD5CryptoServiceProvider();
 			int LLength = Math.Min((int)(ASourceStream.Length - ASourceStream.Position), LSourceBuffer.Length);
 			while (LLength > 0)
 			{
 				ASourceStream.Read(LSourceBuffer, 0, LLength);
 				ATargetStream.Read(LTargetBuffer, 0, LLength);
-				byte[] LSourceHash = LProvider.ComputeHash(LSourceBuffer);
-				byte[] LTargetHash = LProvider.ComputeHash(LTargetBuffer);
-				if (LSourceHash.Length != LTargetHash.Length)
-					return false;
-				for (int i = 0; i < LSourceHash.Length; i++)
-					if (LSourceHash[i] != LTargetHash[i])
+				for (int i = 0; i < LLength; i++)
+					if (LSourceBuffer[i] != LTargetBuffer[i])
 						return false;
 				LLength = Math.Min((int)(ASourceStream.Length - ASourceStream.Position), LSourceBuffer.Length);
 			}

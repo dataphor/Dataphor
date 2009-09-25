@@ -2318,7 +2318,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			return AProgram.ServerProcess.ServerSession.Server.LockManager.Count();
+			// TODO: Restore lock management
+			return 0;
 		}
 	}
 	
@@ -2369,7 +2370,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			return AProgram.ServerProcess.ServerSession.Server.LockManager.LockEventsAsString();
+			// TODO: implement once a lock manager is reintroduced
+			return "";
 		}
 	}
 	

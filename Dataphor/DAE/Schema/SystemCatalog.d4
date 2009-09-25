@@ -1431,20 +1431,6 @@ begin
 	
 	grant usage on Processes to role CatalogUser;
 
-/*
-	create table Locks in Catalog
-	{
-		OwnerName : String, 
-		LockName : String, 
-		LockMode : String, 
-		GrantCount : Integer, 
-		WaitCount : Integer, 
-		key { OwnerName, LockName } static tags { DAE.Enforced = "False" }
-	} tags { Frontend.UseList = "True" } static tags { Catalog.CacheLevel = "None" };
-	
-	grant usage on Locks to role CatalogUser;
-*/
-
 	create table Scripts in Catalog
 	{
 		ID : Integer, 

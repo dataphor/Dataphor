@@ -327,21 +327,6 @@ namespace Alphora.Dataphor.DAE.Server
 
 		#endregion
 		
-		#region LockManager
-		
-		private LockManager FLockManager;
-		public LockManager LockManager 
-		{ 
-			get 
-			{ 
-				if (FLockManager == null)
-					throw new ServerException(ServerException.Codes.InvalidServerState, ServerState.Started.ToString());
-				return FLockManager; 
-			} 
-		}
-		
-		#endregion
-		
 		#region StreamManager
 		
 		private ServerStreamManager FStreamManager;
@@ -1210,10 +1195,8 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			FCatalog = new Schema.Catalog();
 			FPlanCache = new PlanCache(CDefaultPlanCacheSize);
-			if (FLockManager == null)
-				FLockManager = new LockManager();
 			if (FStreamManager == null)
-				FStreamManager = new ServerStreamManager(FLockManager, this);
+				FStreamManager = new ServerStreamManager(this);
 		}
 
 		private bool FCatalogRegistered;

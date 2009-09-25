@@ -518,8 +518,8 @@
     <Compile Include="..\DAE\Runtime\DataParam.cs">
       <Link>DAE\Runtime\DataParam.cs</Link>
     </Compile>
-    <Compile Include="..\DAE\Runtime\LockManager.cs">
-      <Link>DAE\Runtime\LockManager.cs</Link>
+    <Compile Include="..\DAE\Runtime\LockMode.cs">
+      <Link>DAE\Runtime\LockMode.cs</Link>
     </Compile>
     <Compile Include="..\DAE\Runtime\Program.cs">
       <Link>DAE\Runtime\Program.cs</Link>
@@ -529,9 +529,6 @@
     </Compile>
     <Compile Include="..\DAE\Runtime\RuntimeStackWindow.cs">
       <Link>DAE\Runtime\RuntimeStackWindow.cs</Link>
-    </Compile>
-    <Compile Include="..\DAE\Runtime\Semaphore.cs">
-      <Link>DAE\Runtime\Semaphore.cs</Link>
     </Compile>
     <Compile Include="..\DAE\Runtime\Stack.cs">
       <Link>DAE\Runtime\Stack.cs</Link>
@@ -715,7 +712,6 @@
     </Compile>
     <Compile Include="System\ComponentModel.cs" />
     <Compile Include="System\ICloneable.cs" />
-    <Compile Include="System\MD5CryptoServiceProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="System\Stopwatch.cs" />
   </ItemGroup>

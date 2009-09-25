@@ -1255,7 +1255,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			foreach (DropReferenceDefinition LReferenceDefinition in ADropReferences)
 			{
 				Schema.Reference LReference = (Schema.Reference)Compiler.ResolveCatalogIdentifier(AProgram.Plan, LReferenceDefinition.ReferenceName);
-				AProgram.Plan.AcquireCatalogLock(LReference, LockMode.Exclusive);
+				//AProgram.Plan.AcquireCatalogLock(LReference, LockMode.Exclusive);
 				new DropReferenceNode(LReference).Execute(AProgram);
 			}
 		}
@@ -1265,7 +1265,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			foreach (AlterReferenceDefinition LReferenceDefinition in AAlterReferences)
 			{
 				Schema.Reference LReference = (Schema.Reference)Compiler.ResolveCatalogIdentifier(AProgram.Plan, LReferenceDefinition.ReferenceName);
-				AProgram.Plan.AcquireCatalogLock(LReference, LockMode.Exclusive);
+				//AProgram.Plan.AcquireCatalogLock(LReference, LockMode.Exclusive);
 				AProgram.CatalogDeviceSession.AlterMetaData(LReference, LReferenceDefinition.AlterMetaData);
 			}
 		}

@@ -1722,7 +1722,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					if (LIndex >= 0)
 					{
 						AContext.Object = APlan.PlanCatalog[LIndex];
-						APlan.AcquireCatalogLock(AContext.Object, LockMode.Shared);
+						//APlan.AcquireCatalogLock(AContext.Object, LockMode.Shared);
 						return;
 					}
 				}
@@ -1738,7 +1738,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					if (AContext.Object != null)
 					{
 						//AContext.Object = APlan.Catalog[LIndex];
-						APlan.AcquireCatalogLock(AContext.Object, LockMode.Shared);
+						//APlan.AcquireCatalogLock(AContext.Object, LockMode.Shared);
 						return;
 					}
 				}
@@ -5980,7 +5980,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 							int LCatalogIndex = APlan.Catalog.IndexOfInherited(LNode.CreateOperator.Name, LNode.CreateOperator.Signature);
 							if (LCatalogIndex < 0)
 								throw new CompilerException(CompilerException.Codes.InvalidOverrideDirective, AStatement, LNode.CreateOperator.Name, LNode.CreateOperator.Signature.ToString());
-							APlan.AcquireCatalogLock(APlan.Catalog[LCatalogIndex], LockMode.Shared);
+							//APlan.AcquireCatalogLock(APlan.Catalog[LCatalogIndex], LockMode.Shared);
 							APlan.AttachDependency(APlan.Catalog[LCatalogIndex]);
 						}
 					}
@@ -6046,7 +6046,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static void RecompileOperator(Plan APlan, Schema.Operator AOperator)
 		{
-			APlan.AcquireCatalogLock(AOperator, LockMode.Exclusive);
+			//APlan.AcquireCatalogLock(AOperator, LockMode.Exclusive);
 			try
 			{
 				AOperator.ShouldRecompile = false;
@@ -6173,7 +6173,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			}
 			finally
 			{
-				APlan.ReleaseCatalogLock(AOperator);
+				//APlan.ReleaseCatalogLock(AOperator);
 			}
 		}
 		
@@ -6309,7 +6309,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 								int LCatalogIndex = APlan.Catalog.IndexOfInherited(LOperator.Name, LOperator.Signature);
 								if (LCatalogIndex < 0)
 									throw new CompilerException(CompilerException.Codes.InvalidOverrideDirective, AStatement, LOperator.Name, LOperator.Signature.ToString());
-								APlan.AcquireCatalogLock(APlan.Catalog[LCatalogIndex], LockMode.Shared);
+								//APlan.AcquireCatalogLock(APlan.Catalog[LCatalogIndex], LockMode.Shared);
 								APlan.AttachDependency(APlan.Catalog[LCatalogIndex]);
 							}
 						}
@@ -6454,7 +6454,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static void RecompileAggregateOperator(Plan APlan, Schema.AggregateOperator AOperator)
 		{
-			APlan.AcquireCatalogLock(AOperator, LockMode.Exclusive);
+			//APlan.AcquireCatalogLock(AOperator, LockMode.Exclusive);
 			try
 			{
 				ApplicationTransaction LTransaction = null;
@@ -6688,7 +6688,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			}
 			finally
 			{
-				APlan.ReleaseCatalogLock(AOperator);
+				//APlan.ReleaseCatalogLock(AOperator);
 			}
 		}
 		
@@ -8729,7 +8729,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				ACatalog.OperatorMaps.ResolveCall(APlan, AContext);
 				if ((LOperator == null) && (AContext.Operator != null))
 				{
-					APlan.AcquireCatalogLock(AContext.Operator, LockMode.Shared);
+					//APlan.AcquireCatalogLock(AContext.Operator, LockMode.Shared);
 					APlan.AttachDependency(AContext.Operator);
 				}
 			}
@@ -8826,7 +8826,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 							AContext.MergeBindingDataFromContext(LContext);
 							if (AContext.Operator != null)
 							{
-								APlan.AcquireCatalogLock(AContext.Operator, LockMode.Shared);
+								//APlan.AcquireCatalogLock(AContext.Operator, LockMode.Shared);
 								APlan.AttachDependency(AContext.Operator);
 							}
 						}
@@ -8991,14 +8991,14 @@ indicative of other problems, a reference will never be attached as an explicit 
 			return ResolveOperatorSpecifier(APlan, AOperatorSpecifier, true);
 		}
 		
-		public static void AcquireDependentLocks(Plan APlan, Schema.Object AObject, LockMode AMode)
-		{
-			#if USECATALOGLOCKS
-			APlan.AcquireCatalogLock(AObject, AMode);
-			for (int LIndex = 0; LIndex < AObject.Dependents.Count; LIndex++)
-				AcquireDependentLocks(APlan, AObject.Dependents.GetObjectForIndex(APlan.Catalog, LIndex), AMode);
-			#endif
-		}
+		//public static void AcquireDependentLocks(Plan APlan, Schema.Object AObject, LockMode AMode)
+		//{
+		//    #if USECATALOGLOCKS
+		//    APlan.AcquireCatalogLock(AObject, AMode);
+		//    for (int LIndex = 0; LIndex < AObject.Dependents.Count; LIndex++)
+		//        AcquireDependentLocks(APlan, AObject.Dependents.GetObjectForIndex(APlan.Catalog, LIndex), AMode);
+		//    #endif
+		//}
 		
 		public static PlanNode CompileCreateConversionStatement(Plan APlan, Statement AStatement)
 		{
@@ -9007,9 +9007,9 @@ indicative of other problems, a reference will never be attached as an explicit 
 
 			CreateConversionStatement LStatement = (CreateConversionStatement)AStatement;
 			Schema.ScalarType LSourceScalarType = (Schema.ScalarType)CompileScalarTypeSpecifier(APlan, LStatement.SourceScalarTypeName);
-			AcquireDependentLocks(APlan, LSourceScalarType, LockMode.Exclusive);
+			//AcquireDependentLocks(APlan, LSourceScalarType, LockMode.Exclusive);
 			Schema.ScalarType LTargetScalarType = (Schema.ScalarType)CompileScalarTypeSpecifier(APlan, LStatement.TargetScalarTypeName);
-			AcquireDependentLocks(APlan, LTargetScalarType, LockMode.Shared);
+			//AcquireDependentLocks(APlan, LTargetScalarType, LockMode.Shared);
 
 			OperatorBindingContext LContext = new OperatorBindingContext(LStatement.OperatorName, LStatement.OperatorName.Identifier, APlan.NameResolutionPath, new Schema.Signature(new Schema.SignatureElement[]{new Schema.SignatureElement(LSourceScalarType)}), false);
 			ResolveOperator(APlan, LContext);
@@ -9056,9 +9056,9 @@ indicative of other problems, a reference will never be attached as an explicit 
 			DropConversionStatement LStatement = (DropConversionStatement)AStatement;
 			DropConversionNode LNode = new DropConversionNode();
 			LNode.SourceScalarType = (Schema.ScalarType)CompileScalarTypeSpecifier(APlan, LStatement.SourceScalarTypeName);
-			AcquireDependentLocks(APlan, LNode.SourceScalarType, LockMode.Exclusive);
+			//AcquireDependentLocks(APlan, LNode.SourceScalarType, LockMode.Exclusive);
 			LNode.TargetScalarType = (Schema.ScalarType)CompileScalarTypeSpecifier(APlan, LStatement.TargetScalarTypeName);
-			AcquireDependentLocks(APlan, LNode.TargetScalarType, LockMode.Shared);
+			//AcquireDependentLocks(APlan, LNode.TargetScalarType, LockMode.Shared);
 
 			// Clear the conversion path and operator resolution caches
 			foreach (Schema.Conversion LConversion in LNode.SourceScalarType.ImplicitConversions)
@@ -9081,7 +9081,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			Schema.Object LObject = ResolveCatalogIdentifier(APlan, LStatement.ScalarTypeName, true);
 			if (!(LObject is Schema.IScalarType))
 				throw new CompilerException(CompilerException.Codes.ScalarTypeIdentifierExpected, AStatement);
-			AcquireDependentLocks(APlan, LObject, LockMode.Exclusive);
+			//AcquireDependentLocks(APlan, LObject, LockMode.Exclusive);
 			LNode.ScalarType = (Schema.ScalarType)LObject;
 			LNode.Sort = CompileSortDefinition(APlan, LNode.ScalarType, LStatement, true);
 			if (LNode.ScalarType.UniqueSortID == LNode.Sort.ID)
@@ -9104,7 +9104,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			Schema.Object LObject = ResolveCatalogIdentifier(APlan, LStatement.ScalarTypeName, true);
 			if (!(LObject is Schema.IScalarType))
 				throw new CompilerException(CompilerException.Codes.ScalarTypeIdentifierExpected, AStatement);
-			AcquireDependentLocks(APlan, LObject, LockMode.Exclusive);
+			//AcquireDependentLocks(APlan, LObject, LockMode.Exclusive);
 			LNode.ScalarType = (Schema.ScalarType)LObject;
 			LNode.Sort = CompileSortDefinition(APlan, LNode.ScalarType, new SortDefinition(LStatement.Expression), true);
 			return LNode;
@@ -9120,7 +9120,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			Schema.Object LObject = ResolveCatalogIdentifier(APlan, LStatement.ScalarTypeName, true);
 			if (!(LObject is Schema.IScalarType))
 				throw new CompilerException(CompilerException.Codes.ScalarTypeIdentifierExpected, AStatement);
-			AcquireDependentLocks(APlan, LObject, LockMode.Exclusive);
+			//AcquireDependentLocks(APlan, LObject, LockMode.Exclusive);
 			LNode.ScalarType = (Schema.ScalarType)LObject;
 			LNode.IsUnique = LStatement.IsUnique;
 			return LNode;
@@ -9230,7 +9230,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			if (!(LObject is Schema.BaseTableVar))
 				throw new CompilerException(CompilerException.Codes.TableIdentifierExpected, AStatement);
 			APlan.CheckRight(((Schema.BaseTableVar)LObject).GetRight(Schema.RightNames.Alter));
-			AcquireDependentLocks(APlan, LObject, LockMode.Exclusive);
+			//AcquireDependentLocks(APlan, LObject, LockMode.Exclusive);
 			return LNode;
 		}
 		
@@ -9247,7 +9247,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			if (!(LObject is Schema.DerivedTableVar))
 				throw new CompilerException(CompilerException.Codes.ViewIdentifierExpected, AStatement);
 			APlan.CheckRight(((Schema.DerivedTableVar)LObject).GetRight(Schema.RightNames.Alter));
-			AcquireDependentLocks(APlan, LObject, LockMode.Exclusive);
+			//AcquireDependentLocks(APlan, LObject, LockMode.Exclusive);
 			return LNode;
 		}
 		
@@ -9305,7 +9305,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			if (!(LObject is Schema.IScalarType))
 				throw new CompilerException(CompilerException.Codes.ScalarTypeIdentifierExpected, AStatement);
 			APlan.CheckRight(((Schema.ScalarType)LObject).GetRight(Schema.RightNames.Alter));
-			AcquireDependentLocks(APlan, LObject, LockMode.Exclusive);
+			//AcquireDependentLocks(APlan, LObject, LockMode.Exclusive);
 			return LNode;
 		}
 		
@@ -9319,7 +9319,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			LNode.AlterOperatorStatement = LStatement;
 			Schema.Operator LOperator = ResolveOperatorSpecifier(APlan, LStatement.OperatorSpecifier);
 			APlan.CheckRight(LOperator.GetRight(Schema.RightNames.Alter));
-			AcquireDependentLocks(APlan, LOperator, LockMode.Exclusive);
+			//AcquireDependentLocks(APlan, LOperator, LockMode.Exclusive);
 			return LNode;
 		}
 		
@@ -9333,7 +9333,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			LNode.AlterAggregateOperatorStatement = LStatement;
 			Schema.Operator LOperator = ResolveOperatorSpecifier(APlan, LStatement.OperatorSpecifier);
 			APlan.CheckRight(LOperator.GetRight(Schema.RightNames.Alter));
-			AcquireDependentLocks(APlan, LOperator, LockMode.Exclusive);
+			//AcquireDependentLocks(APlan, LOperator, LockMode.Exclusive);
 			return LNode;
 		}
 		
@@ -9349,7 +9349,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			if (!(LObject is Schema.CatalogConstraint))
 				throw new CompilerException(CompilerException.Codes.ConstraintIdentifierExpected, AStatement);
 			APlan.CheckRight(((Schema.CatalogConstraint)LObject).GetRight(Schema.RightNames.Alter));
-			AcquireDependentLocks(APlan, LObject, LockMode.Exclusive);
+			//AcquireDependentLocks(APlan, LObject, LockMode.Exclusive);
 			return LNode;
 		}
 		
@@ -9365,7 +9365,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			if (!(LObject is Schema.Reference))
 				throw new CompilerException(CompilerException.Codes.ReferenceIdentifierExpected, AStatement);
 			APlan.CheckRight(((Schema.Reference)LObject).GetRight(Schema.RightNames.Alter));
-			AcquireDependentLocks(APlan, LObject, LockMode.Exclusive);
+			//AcquireDependentLocks(APlan, LObject, LockMode.Exclusive);
 			return LNode;
 		}
 		
@@ -9381,7 +9381,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			if (!(LObject is Schema.Device))
 				throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected, AStatement);
 			APlan.CheckRight(((Schema.Device)LObject).GetRight(Schema.RightNames.Alter));
-			AcquireDependentLocks(APlan, LObject, LockMode.Exclusive);
+			//AcquireDependentLocks(APlan, LObject, LockMode.Exclusive);
 			return LNode;
 		}
 		
@@ -9397,7 +9397,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			if (!(LObject is Schema.ServerLink))
 				throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected, AStatement);
 			APlan.CheckRight(((Schema.ServerLink)LObject).GetRight(Schema.RightNames.Alter));
-			AcquireDependentLocks(APlan, LObject, LockMode.Exclusive);
+			//AcquireDependentLocks(APlan, LObject, LockMode.Exclusive);
 			return LNode;
 		}
 
@@ -9431,7 +9431,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				if (LObjectIndex >= 0)
 					APlan.PlanSessionObjects.RemoveAt(LObjectIndex);
 			}
-			APlan.AcquireCatalogLock(LObject, LockMode.Exclusive);
+			//APlan.AcquireCatalogLock(LObject, LockMode.Exclusive);
 			return new DropTableNode(LBaseTableVar, APlan.ShouldAffectTimeStamp);
 		}
 		
@@ -9454,7 +9454,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				if (LObjectIndex >= 0)
 					APlan.PlanSessionObjects.RemoveAt(LObjectIndex);
 			}
-			APlan.AcquireCatalogLock(LObject, LockMode.Exclusive);
+			//APlan.AcquireCatalogLock(LObject, LockMode.Exclusive);
 			return new DropViewNode(LDerivedTableVar, APlan.ShouldAffectTimeStamp);
 		}
 		
@@ -9472,7 +9472,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			APlan.CheckRight(LScalarType.GetRight(Schema.RightNames.Drop));
 			if (APlan.PlanCatalog.Contains(LObject.Name))
 				APlan.PlanCatalog.Remove(LObject);
-			APlan.AcquireCatalogLock(LObject, LockMode.Exclusive);
+			//APlan.AcquireCatalogLock(LObject, LockMode.Exclusive);
 			LNode.ScalarType = LScalarType;			
 			
 			// Remove the Equality and Comparison operators for this scalar type
@@ -9540,7 +9540,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			APlan.CheckRight(LNode.DropOperator.GetRight(Schema.RightNames.Drop));
 			if (APlan.PlanCatalog.Contains(LNode.DropOperator.Name))
 				APlan.PlanCatalog.Remove(LNode.DropOperator);
-			APlan.AcquireCatalogLock(LNode.DropOperator, LockMode.Exclusive);
+			//APlan.AcquireCatalogLock(LNode.DropOperator, LockMode.Exclusive);
 			APlan.Catalog.OperatorResolutionCache.Clear(LNode.DropOperator.OperatorName);
 			return LNode;
 		}
@@ -9565,7 +9565,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				if (LObjectIndex >= 0)
 					APlan.PlanSessionObjects.RemoveAt(LObjectIndex);
 			}				
-			APlan.AcquireCatalogLock(LObject, LockMode.Exclusive);
+			//APlan.AcquireCatalogLock(LObject, LockMode.Exclusive);
 			LNode.Constraint = LConstraint;
 			return LNode;
 		}
@@ -9591,7 +9591,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				if (LObjectIndex >= 0)
 					APlan.PlanSessionObjects.RemoveAt(LObjectIndex);
 			}
-			APlan.AcquireCatalogLock(LObject, LockMode.Exclusive);
+			//APlan.AcquireCatalogLock(LObject, LockMode.Exclusive);
 			return LNode;
 		}
 		
@@ -9608,7 +9608,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			APlan.CheckRight(((Schema.Device)LObject).GetRight(Schema.RightNames.Drop));
 			if (APlan.PlanCatalog.Contains(LObject.Name))
 				APlan.PlanCatalog.Remove(LObject);
-			APlan.AcquireCatalogLock(LObject, LockMode.Exclusive);
+			//APlan.AcquireCatalogLock(LObject, LockMode.Exclusive);
 			LNode.DropDevice = (Schema.Device)LObject;
 			return LNode;
 		}
@@ -9626,7 +9626,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			APlan.CheckRight(((Schema.ServerLink)LObject).GetRight(Schema.RightNames.Drop));
 			if (APlan.PlanCatalog.Contains(LObject.Name))
 				APlan.PlanCatalog.Remove(LObject);
-			APlan.AcquireCatalogLock(LObject, LockMode.Exclusive);
+			//APlan.AcquireCatalogLock(LObject, LockMode.Exclusive);
 			LNode.ServerLink = (Schema.ServerLink)LObject;
 			return LNode;
 		}
@@ -11549,7 +11549,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			{
 				if (AContext.Operator != null)
 				{
-					APlan.ReleaseCatalogLock(AContext.Operator);
+					//APlan.ReleaseCatalogLock(AContext.Operator);
 					AContext.Operator = null;
 				}
 				return null;
