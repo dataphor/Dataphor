@@ -61,6 +61,5 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 
 		// Constructors
 		public DesignException(Codes AErrorCode) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, null) {}
-		public DesignException(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext) : base(AInfo, AContext) {}
 	}
 }

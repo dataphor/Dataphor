@@ -98,6 +98,9 @@
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
     </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <ProjectReference Include="..\Base.Windows\Base.Windows.csproj">
       <Project>{24D70A7F-F43A-45A3-8C54-EA31764841C7}</Project>
       <Name>Base.Windows</Name>
@@ -122,6 +125,10 @@
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
       <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Server\Server.csproj">
+      <Project>{1DB01C91-3F92-4094-A8AE-1F7FF01F2E1B}</Project>
+      <Name>Server %28Server\Server%29</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

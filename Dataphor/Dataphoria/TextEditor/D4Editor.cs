@@ -23,7 +23,6 @@ using Alphora.Dataphor.DAE.Debug;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.Dataphoria.TextEditor.BlockActions;
 using Alphora.Dataphor.Frontend.Client.Windows;
-using Alphora.Dataphor.Logging;
 
 using ICSharpCode.TextEditor;
 using ICSharpCode.TextEditor.Document;
@@ -38,8 +37,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 	{
 		protected DockContent FDockContentResultPanel;
 		private ResultPanel FResultPanel;
-
-		private static readonly ILogger SRFLogger = LoggerFactory.Instance.CreateLogger(typeof (D4Editor));
 
 		public D4Editor() // dummy constructor for MDI menu merging
 		{
@@ -104,7 +101,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			FDockContentResultPanel.DockPanel = FDockPanel;
 			FDockContentResultPanel.Name = "DockContentResultPanel";
 		}
-
 
 		protected override IHighlightingStrategy GetHighlightingStrategy()
 		{

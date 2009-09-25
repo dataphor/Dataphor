@@ -22,6 +22,11 @@ namespace Alphora.Dataphor.DAE.Service
 	public class DataphorServiceHost
 	{
 		private Server FServer;
+		/// <summary>
+		/// Provides in-process access to the hosted server
+		/// </summary>
+		public IServer Server { get { return FServer; } }
+
 		private ServerHost FServerHost;
 		private DataphorService FService;
 		private ServiceHost FServiceHost;

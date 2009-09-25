@@ -53,7 +53,7 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		protected override void InternalOpen()
 		{
-			FServer = new Server.Server();
+			FServer = new Server();
 			FServer.Start();
 			SessionInfo LSessionInfo = (SessionInfo)SessionInfo.Clone();
 			LSessionInfo.UserID = Engine.CAdminUserID;

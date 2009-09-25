@@ -578,6 +578,7 @@
     <Compile Include="Streams\CoverStream.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Streams\DeferredWriteStream.cs" />
     <Compile Include="Streams\ManagedStream.cs">
       <SubType>Code</SubType>
     </Compile>

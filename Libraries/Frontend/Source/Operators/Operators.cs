@@ -23,6 +23,7 @@ using Alphora.Dataphor.Frontend.Server.Device;
 using Alphora.Dataphor.Frontend.Server.Derivation;
 using Alphora.Dataphor.Frontend.Server.Elaboration;
 using Alphora.Dataphor.Frontend.Server.Structuring;
+using Alphora.Dataphor.Windows;
 
 namespace Alphora.Dataphor.Frontend.Server
 {
@@ -436,7 +437,7 @@ namespace Alphora.Dataphor.Frontend.Server
 		{
 			foreach (Schema.FileReference LFile in ALibrary.Files)
 			{
-				string LFullFileName = AProgram.ServerProcess.GetFullFileName(ALibrary, LFile.FileName);
+				string LFullFileName = ((DAE.Server.Server)AProgram.ServerProcess.ServerSession.Server).GetFullFileName(ALibrary, LFile.FileName);
 				ARow["Library_Name"] = ALibrary.Name;
 				ARow["Name"] = LFile.FileName;
 				ARow["TimeStamp"] = File.GetLastWriteTimeUtc(LFullFileName);

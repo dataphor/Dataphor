@@ -371,7 +371,7 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 		private void LoadInstances(InstanceConfiguration AConfiguration)
 		{
 			cbInstance.Items.Clear();
-			foreach (ServerConfiguration LInstance in AConfiguration.Instances)
+			foreach (ServerConfiguration LInstance in AConfiguration.Instances.Values)
 				cbInstance.Items.Add(LInstance.Name);
 		}
 

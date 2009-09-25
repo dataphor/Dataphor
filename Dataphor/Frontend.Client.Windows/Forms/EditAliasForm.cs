@@ -431,7 +431,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void CopyInstance(object ASource, object ADestination)
 		{
-			System.Xml.XmlDocument LDocument = new System.Xml.XmlDocument();
+			System.Xml.Linq.XDocument LDocument = new System.Xml.Linq.XDocument();
 			new BOP.Serializer().Serialize(LDocument, ASource);
 			new BOP.Deserializer().Deserialize(LDocument, ADestination);
 		}

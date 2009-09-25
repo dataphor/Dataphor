@@ -336,7 +336,7 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 							finally
 							{
 								FSession = null;
-								DAE.Server.ServerFactory.Disconnect(FServer);
+								//DAE.Server.ServerFactory.Disconnect(FServer);
 							}
 						}
 						finally

@@ -9,6 +9,7 @@ using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Threading;
+using Alphora.Dataphor.Windows;
 
 namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 {

@@ -617,7 +617,7 @@ namespace DocSamples
 				FDataSession = new DAEClient.DataSession();
 				FDataSession.SessionInfo.UserID = AProgram.ServerProcess.ServerSession.SessionInfo.UserID;
 				FDataSession.SessionInfo.Password = AProgram.ServerProcess.ServerSession.SessionInfo.Password;
-				FDataSession.ServerConnection = new DAEClient.ServerConnection(AProgram.ServerProcess.ServerSession.Server);
+				//FDataSession.ServerConnection = new DAEClient.ServerConnection(AProgram.ServerProcess.ServerSession.Server);
 				FDataSession.Open();
 
 				ProcessTemplate(AProgram.ServerProcess, LOutputFilename);

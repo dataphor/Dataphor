@@ -61,8 +61,8 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			#if USEWATCHERS
 			FServerSession = AProcess.ServerSession;
 			#endif
-			FFrontendDirectory = AProcess.ServerSession.Server.Catalog.Libraries[Library.Name].GetInstanceLibraryDirectory(AProcess.ServerSession.Server.InstanceDirectory);
-			string LOldFrontendDirectory = Path.Combine(Schema.Library.GetDefaultLibraryDirectory(AProcess.ServerSession.Server.LibraryDirectory), Library.Name);
+			FFrontendDirectory = AProcess.ServerSession.Server.Catalog.Libraries[Library.Name].GetInstanceLibraryDirectory(((DAE.Server.Server)AProcess.ServerSession.Server).InstanceDirectory);
+			string LOldFrontendDirectory = Path.Combine(Schema.LibraryUtility.GetDefaultLibraryDirectory(((DAE.Server.Server)AProcess.ServerSession.Server).LibraryDirectory), Library.Name);
 
 			FDesignersFileName = Path.Combine(FFrontendDirectory, "Designers.bop");
 			string LOldDesignersFileName = Path.Combine(LOldFrontendDirectory, "Designers.bop");
@@ -648,8 +648,8 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		
 		private void EnsureRegisterScript(Program AProgram, string ALibraryName)
 		{
-			string LDocumentName = Path.GetFileNameWithoutExtension(DAE.Runtime.Instructions.SystemRegisterLibraryNode.CRegisterFileName);
-			string LDocumentType = Path.GetExtension(DAE.Runtime.Instructions.SystemRegisterLibraryNode.CRegisterFileName);
+			string LDocumentName = Path.GetFileNameWithoutExtension(Schema.LibraryUtility.CRegisterFileName);
+			string LDocumentType = Path.GetExtension(Schema.LibraryUtility.CRegisterFileName);
 			LDocumentType = LDocumentType.Substring(1, LDocumentType.Length - 1);
 			if (!HasDocument(AProgram, ALibraryName, Schema.Object.EnsureRooted(LDocumentName)))
 				CreateDocument(AProgram, ALibraryName, LDocumentName, LDocumentType, true);

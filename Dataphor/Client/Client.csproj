@@ -55,7 +55,6 @@
     <Compile Include="Contracts\IClientDataphorService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Client\ClientConnection.cs" />
-    <Compile Include="Client\ClientFactory.cs" />
     <Compile Include="Client\ClientServer.cs" />
     <Compile Include="Server\LocalBatch.cs" />
     <Compile Include="Server\LocalCursor.cs" />

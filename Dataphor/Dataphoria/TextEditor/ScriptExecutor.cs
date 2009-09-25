@@ -4,7 +4,6 @@ using System.Threading;
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Client;
 using Alphora.Dataphor.Frontend.Client.Windows;
-using Alphora.Dataphor.Logging;
 using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.Dataphoria.TextEditor
@@ -13,7 +12,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 	/// <remarks> Should not be used multiple times (discard and create another instance). </remarks>
 	internal class ScriptExecutor : Object
 	{
-		static readonly ILogger SRFLogger = LoggerFactory.Instance.CreateLogger(typeof(ScriptExecutor));
 		public const int CStopTimeout = 10000; // ten seconds to synchronously stop
 
 		private bool FIsRunning = false;
@@ -69,9 +67,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 				{
 					FSession.StopProcess(FProcess);
 				}
-				catch(Exception LException)
+				catch
 				{
-					SRFLogger.WriteLine(TraceLevel.Error, "Exception at CleanupProcess {0}", LException);
 					// Don't rethrow, the session may have already been stopped
 				}
 				FProcess = null;
@@ -135,9 +132,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 					Session.SafelyInvoke(new ExecuteFinishedHandler(AsyncFinish), new object[] {LErrors, LElapsed});
 				}
 			}
-			catch(Exception LException)
+			catch
 			{
-				SRFLogger.WriteLine(TraceLevel.Error, "Exception at ExecuteAsync {0}", LException);
 				// Don't allow exceptions to go unhandled... the framework will abort the application
 			}
 		}

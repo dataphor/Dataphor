@@ -20,6 +20,7 @@ using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Device.Memory;
 using Schema = Alphora.Dataphor.DAE.Schema;
+using Alphora.Dataphor.Windows;
 
 namespace Alphora.Dataphor.DAE.Device.Simple
 {
@@ -111,7 +112,7 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 			if (String.IsNullOrEmpty(FDirectoryName))
 				FDirectoryName = CDataDirectoryName;
 			if (!Path.IsPathRooted(FDirectoryName))
-				FDirectoryName = Path.Combine(AProcess.ServerSession.Server.InstanceDirectory, FDirectoryName);
+				FDirectoryName = Path.Combine(((Server.Server)AProcess.ServerSession.Server).InstanceDirectory, FDirectoryName);
 			if (!Directory.Exists(FDirectoryName))
 				Directory.CreateDirectory(FDirectoryName);
 			
@@ -120,7 +121,7 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 		
 		protected override void InternalStop(ServerProcess AProcess)
 		{
-			foreach (SimpleDeviceHeader LHeader in FHeaders)
+			foreach (SimpleDeviceHeader LHeader in FHeaders.Values)
 				if (LHeader.TimeStamp > LHeader.SaveTimeStamp)
 					SaveTable(AProcess, LHeader.TableVar);
 			base.InternalStop(AProcess);
@@ -396,20 +397,9 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 		public int UpdateCount = 0;
 	}
 	
-	public class SimpleDeviceHeaders : HashtableList
+	public class SimpleDeviceHeaders : HashtableList<Schema.TableVar, SimpleDeviceHeader>
 	{		
 		public SimpleDeviceHeaders() : base(){}
-		
-		public SimpleDeviceHeader this[Schema.TableVar ATableVar]
-		{
-			get
-			{
-				SimpleDeviceHeader LResult = (SimpleDeviceHeader)base[ATableVar];
-				if (LResult == null)
-					throw new SimpleDeviceException(SimpleDeviceException.Codes.SimpleDeviceHeaderNotFound, ATableVar.Name);
-				return LResult;
-			}
-		}
 		
 		public override int Add(object AValue)
 		{

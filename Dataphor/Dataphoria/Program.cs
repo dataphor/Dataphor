@@ -4,26 +4,15 @@ using System.IO;
 using System.Threading;
 using System.Windows.Forms;
 using Alphora.Dataphor.Frontend.Client.Windows;
-using Alphora.Dataphor.Logging;
 
 namespace Alphora.Dataphor.Dataphoria
 {
     internal class Program
     {
         private static IDataphoria SDataphoriaInstance;
+        public static IDataphoria DataphoriaInstance { get { return SDataphoriaInstance; } }
 
-
-        private static readonly ILogger SRFLogger = LoggerFactory.Instance.CreateLogger(typeof(Program));
-
-
-        public static IDataphoria DataphoriaInstance
-        {
-            get { return SDataphoriaInstance; }
-        }
-
-        private static void AppDomainException(object ASender, UnhandledExceptionEventArgs AArgs)
-        {
-        }
+        private static void AppDomainException(object ASender, UnhandledExceptionEventArgs AArgs) { }
 
         public static string DocumentTypeFromFileName(string AFileName)
         {
@@ -46,7 +35,6 @@ namespace Alphora.Dataphor.Dataphoria
         [STAThread]
         private static void Main(string[] AArgs)
         {
-            SRFLogger.WriteLine(TraceLevel.Info,"Starting program...");            
             AppDomain.CurrentDomain.UnhandledException += AppDomainException;
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException, true);
             Application.EnableVisualStyles();

@@ -10,6 +10,7 @@ using Alphora.Dataphor.BOP;
 using Alphora.Dataphor.DAE.NativeCLI;
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.Windows;
+using Alphora.Dataphor.DAE.Service;
 
 namespace Alphora.Dataphor.DAE.Client
 {
@@ -470,11 +471,6 @@ namespace Alphora.Dataphor.DAE.Client
 	/// </remarks>
 	public class ServerConnection : Disposable
 	{
-		public ServerConnection(IServer AExistingServer)
-		{
-			FExistingServer = AExistingServer;
-		}
-		
 		public ServerConnection(ServerAlias AServerAlias) : this(AServerAlias, true) {}
 		
 		public ServerConnection(ServerAlias AServerAlias, bool AAutoStart)
@@ -489,45 +485,26 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				if (LInProcessAlias != null)
 				{
-					ServerConfiguration LConfiguration = InstanceManager.GetInstance(LInProcessAlias.InstanceName);
-					FHostedServer = new Server.Engine();
-					LConfiguration.ApplyTo(FHostedServer);
-					
-					FHostedServer.IsEmbedded = LInProcessAlias.IsEmbedded;
-					FHostedServer.OnDeviceStarting += new DeviceNotifyEvent(FHostedServer_OnDeviceStarting);
-					FHostedServer.OnDeviceStarted += new DeviceNotifyEvent(FHostedServer_OnDeviceStarted);
-					FHostedServer.OnLibraryLoading += new LibraryNotifyEvent(FHostedServer_OnLibraryLoading);
-					FHostedServer.OnLibraryLoaded += new LibraryNotifyEvent(FHostedServer_OnLibraryLoaded);
-
-					if (!LInProcessAlias.IsEmbedded)
-						FServerHost = new ServerHost(FHostedServer, LConfiguration.PortNumber);
-					if (AAutoStart)
-						FHostedServer.Start();
+					if (LInProcessAlias.IsEmbedded)
+					{
+						ServerConfiguration LConfiguration = InstanceManager.GetInstance(LInProcessAlias.InstanceName);
+						FHostedServer = new Server.Server();
+						LConfiguration.ApplyTo(FHostedServer);
+						if (AAutoStart)
+							FHostedServer.Start();
+					}
+					else
+					{
+						FServiceHost = new DataphorServiceHost();
+						FServiceHost.InstanceName = LInProcessAlias.InstanceName;
+						if (AAutoStart)
+							FServiceHost.Start();
+					}
 				}
 				else
 				{
-					string LInstanceURI = null;
-					if (LConnectionAlias.OverridePortNumber != 0)
-						LInstanceURI = RemotingUtility.BuildInstanceURI(LConnectionAlias.HostName, LConnectionAlias.OverridePortNumber, LConnectionAlias.InstanceName);
-					else
-					{
-						try
-						{
-							LInstanceURI = ListenerFactory.GetInstanceURI(LConnectionAlias.HostName, LConnectionAlias.InstanceName);
-						}
-						catch (Exception LException)
-						{
-							throw new ClientException(ClientException.Codes.CouldNotDeterminePortNumber, LConnectionAlias.HostName, LException);
-						}
-					}
-					
-					FRemoteServer = 
-						ServerFactory.Connect
-						(
-							LInstanceURI, 
-							LConnectionAlias.ClientSideLoggingEnabled,
-							TerminalServiceUtility.ClientName
-						);
+					FClientServer = new ClientServer(LConnectionAlias.HostName, LConnectionAlias.OverridePortNumber, LConnectionAlias.InstanceName);
+					FLocalServer = new LocalServer(FClientServer, LConnectionAlias.ClientSideLoggingEnabled, TerminalServiceUtility.ClientName);
 				}
 			}
 			catch
@@ -535,46 +512,6 @@ namespace Alphora.Dataphor.DAE.Client
 				CleanUp();
 				throw;
 			}
-		}
-
-		// OnDeviceStarting
-		
-		public event DeviceNotifyEvent OnDeviceStarting;
-		
-		private void FHostedServer_OnDeviceStarting(Server.Engine AServer, Schema.Device ADevice)
-		{
-			if (OnDeviceStarting != null)
-				OnDeviceStarting(AServer, ADevice);
-		}
-		
-		// OnDeviceStarted
-		
-		public event DeviceNotifyEvent OnDeviceStarted;
-		
-		private void FHostedServer_OnDeviceStarted(Server.Engine AServer, Schema.Device ADevice)
-		{
-			if (OnDeviceStarted != null)
-				OnDeviceStarted(AServer, ADevice);
-		}
-		
-		// OnLibraryLoading
-		
-		public event LibraryNotifyEvent OnLibraryLoading;
-
-		private void FHostedServer_OnLibraryLoading(Server.Engine AServer, string ALibraryName)
-		{
-			if (OnLibraryLoading != null)
-				OnLibraryLoading(AServer, ALibraryName);
-		}
-		
-		// OnLibraryLoaded
-		
-		public event LibraryNotifyEvent OnLibraryLoaded;
-
-		private void FHostedServer_OnLibraryLoaded(Server.Engine AServer, string ALibraryName)
-		{
-			if (OnLibraryLoaded != null)
-				OnLibraryLoaded(AServer, ALibraryName);
 		}
 
 		protected override void Dispose(bool ADisposed)
@@ -585,29 +522,28 @@ namespace Alphora.Dataphor.DAE.Client
 
 		private void CleanUp()
 		{
-			if (FExistingServer != null)
-				FExistingServer = null;
-				
-			if (FServerHost != null)
-			{
-				FServerHost.Dispose();
-				FServerHost = null;
-			}
-			
 			if (FHostedServer != null)
 			{
-				FHostedServer.OnDeviceStarting -= new DeviceNotifyEvent(FHostedServer_OnDeviceStarting);
-				FHostedServer.OnDeviceStarted -= new DeviceNotifyEvent(FHostedServer_OnDeviceStarted);
-				FHostedServer.OnLibraryLoading -= new LibraryNotifyEvent(FHostedServer_OnLibraryLoading);
-				FHostedServer.OnLibraryLoaded -= new LibraryNotifyEvent(FHostedServer_OnLibraryLoaded);
-				FHostedServer.Dispose();
+				FHostedServer.Stop();
 				FHostedServer = null;
 			}
 			
-			if (FRemoteServer != null)
+			if (FServiceHost != null)
 			{
-				ServerFactory.Disconnect(FRemoteServer);
-				FRemoteServer = null;
+				FServiceHost.Stop();
+				FServiceHost = null;
+			}
+			
+			if (FLocalServer != null)
+			{
+				FLocalServer.Dispose();
+				FLocalServer = null;
+			}
+			
+			if (FClientServer != null)
+			{
+				FClientServer.Close();
+				FClientServer = null;
 			}
 		}
 
@@ -615,13 +551,13 @@ namespace Alphora.Dataphor.DAE.Client
 		/// <summary>The alias used to establish this connection.</summary>
 		public ServerAlias Alias { get { return FServerAlias; } }
 		
-		private ServerHost FServerHost;
-		private Server.Engine FHostedServer;
-		private IServer FRemoteServer;
-		private IServer FExistingServer;
+		private DataphorServiceHost FServiceHost; // Used for non-embedded in-process server
+		private Server.Server FHostedServer; // Used for embedded in-process server
+		private ClientServer FClientServer; // Used for out-of-process server
+		private LocalServer FLocalServer; // Used for out-of-process server
 
 		/// <summary>The IServer interface for the server connection.</summary>
-		public IServer Server { get { return (FExistingServer != null ? FExistingServer : (FHostedServer != null ? FHostedServer : FRemoteServer)); } }
+		public IServer Server { get { return FHostedServer != null ? FHostedServer : (FServiceHost != null ? FServiceHost.Server : FLocalServer); } }
 
 		public override string ToString()
 		{

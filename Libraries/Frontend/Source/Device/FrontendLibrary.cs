@@ -266,7 +266,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		public FrontendLibrary(Program AProgram, string AName) : base(AName) 
 		{
 			FFrontendDevice = FrontendDevice.GetFrontendDevice(AProgram);
-			FDirectoryName = AProgram.Catalog.Libraries[AName].GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory);
+			FDirectoryName = AProgram.Catalog.Libraries[AName].GetLibraryDirectory(((DAE.Server.Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory);
 			FDocumentsDirectoryName = Path.Combine(FDirectoryName, CDocumentsName);
 			LoadDocuments();
 			if (Directory.Exists(FDirectoryName))
