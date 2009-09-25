@@ -435,7 +435,10 @@ namespace Alphora.Dataphor.DAE.Server
 			int LRunningProcesses = Interlocked.Increment(ref FRunningProcesses);
 			if (LRunningProcesses > FMaxConcurrentProcesses)
 				if (!FProcessWaitEvent.WaitOne(FProcessWaitTimeout))
+				{
+					Interlocked.Decrement(ref FRunningProcesses);
 					throw new ServerException(ServerException.Codes.ProcessWaitTimeout);
+				}
 		}
 		
 		internal void EndProcessCall(ServerProcess AProcess)
