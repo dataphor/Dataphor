@@ -13,7 +13,7 @@ namespace Alphora.Dataphor.DAE.Client
 	using System.ComponentModel;
 	using System.ComponentModel.Design.Serialization;
 	using Alphora.Dataphor.DAE;
-	using Alphora.Dataphor.DAE.Client.Design;
+	//using Alphora.Dataphor.DAE.Client.Design;
 	using Alphora.Dataphor.DAE.Server;
 	using System.Collections.Generic;
     
@@ -100,11 +100,6 @@ namespace Alphora.Dataphor.DAE.Client
 
 	public abstract class DataSessionBase : Component, IDisposableNotify, ISupportInitialize
 	{
-		private BitVector32 FFlags = new BitVector32();
-		private static readonly int ActiveMask = BitVector32.CreateMask();
-		private static readonly int InitializingMask = BitVector32.CreateMask(ActiveMask);
-		private static readonly int DelayedActiveMask = BitVector32.CreateMask(InitializingMask);
-		
 		public DataSessionBase() : base()
 		{
 			InternalInitialize();
@@ -141,7 +136,7 @@ namespace Alphora.Dataphor.DAE.Client
 		private SessionInfo FSessionInfo;
 		/// <summary> The <see cref="SessionInfo"/> structure to use when connecting to the server. </summary>
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
-		[System.ComponentModel.TypeConverter(typeof(System.ComponentModel.ExpandableObjectConverter))]
+		[System.ComponentModel.TypeConverter("System.ComponentModel.ExpandableObjectConverter,Alphora.Dataphor.DAE.Client")]
 		[Description("Contextual information for server session initialization")]
 		[Category("Session")]
 		public SessionInfo SessionInfo
@@ -170,17 +165,9 @@ namespace Alphora.Dataphor.DAE.Client
 		}
 
 		//The Active properties value during the intialization period defined in ISupportInitialize.
-		private bool DelayedActive
-		{
-			get { return FFlags[DelayedActiveMask]; }
-			set { FFlags[DelayedActiveMask] = value; }
-		}
+		private bool DelayedActive { get; set; }
 
-		protected internal bool Initializing
-		{
-			get { return FFlags[InitializingMask]; }
-			set { FFlags[InitializingMask] = value; }
-		}
+		protected internal bool Initializing { get; set; }
 
 		public virtual void BeginInit()
 		{
@@ -200,25 +187,22 @@ namespace Alphora.Dataphor.DAE.Client
 		}
 			
 		// Active
-		private bool InternalActive
-		{
-			get { return FFlags[ActiveMask]; }
-			set { FFlags[ActiveMask] = value; }
-		}
+		private bool FActive;
+		
 		/// <summary> The current connection state of this session. </summary>
 		[DefaultValue(false)]
 		[Category("Session")]
 		[Description("Connection state of this session.")]
 		public bool Active
 		{
-			get { return InternalActive; }
+			get { return FActive; }
 			set
 			{
 				if (Initializing)
 					DelayedActive = value;
 				else
 				{
-					if (InternalActive != value)
+					if (FActive != value)
 					{
 						if (value)
 							Open();
@@ -233,10 +217,10 @@ namespace Alphora.Dataphor.DAE.Client
 		/// <summary> Connects to a server and retrieves a session from it. </summary>
 		public void Open()
 		{
-			if (!InternalActive)
+			if (!FActive)
 			{
 				InternalOpen();
-				InternalActive = true;
+				FActive = true;
 			}
 		}
 
@@ -244,7 +228,7 @@ namespace Alphora.Dataphor.DAE.Client
 		/// <summary> Dereferences the session and disconnects from the server. </summary>
 		public void Close()
 		{
-			if (InternalActive)
+			if (FActive)
 			{
 				try
 				{
@@ -265,21 +249,21 @@ namespace Alphora.Dataphor.DAE.Client
 				}
 				finally
 				{
-					InternalActive = false;
+					FActive = false;
 				}
 			}
 		}
 		
 		protected void CheckActive()
 		{
-			if (!InternalActive)
+			if (!FActive)
 				throw new ClientException(ClientException.Codes.DataSessionInactive);
 		}
 
 		/// <summary> Used internally to throw if the session isn't active. </summary>
 		protected void CheckInactive()
 		{
-			if (InternalActive)
+			if (FActive)
 				throw new ClientException(ClientException.Codes.DataSessionActive);
 		}
 
@@ -857,8 +841,8 @@ namespace Alphora.Dataphor.DAE.Client
 	}
 
 	/// <summary> Wraps the connection to, and session retrieval from a Server </summary>
-	[DesignerSerializer(typeof(Alphora.Dataphor.DAE.Client.Design.ActiveLastSerializer), typeof(CodeDomSerializer))]
-	[ToolboxBitmap(typeof(Alphora.Dataphor.DAE.Client.DataSession),"Icons.DataSession.bmp")]
+	[DesignerSerializer("Alphora.Dataphor.DAE.Client.Design.ActiveLastSerializer,Alphora.Dataphor.DAE.Client", "System.ComponentModel.Design.Serialization.CodeDomSerializer,System.Design")]
+	[ToolboxBitmap(typeof(Alphora.Dataphor.DAE.Client.DataSession), "Icons.DataSession.bmp")]
 	public class DataSession : DataSessionBase
 	{
 		public DataSession() : base() {}

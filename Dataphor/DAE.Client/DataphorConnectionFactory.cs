@@ -35,7 +35,7 @@ namespace Alphora.Dataphor.DAE.Client
 		}
 
 		private List<ServerInfo> ServerList = new List<ServerInfo>();
-		private Hashtable ServerHash = new Hashtable();
+		private Dictionary<string, ServerInfo> ServerHash = new Dictionary<string, ServerInfo>();
 
 		public void AddServer(ServerAlias AAlias, string ALogin, string APassword)
 		{
@@ -103,7 +103,7 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			if ((AConnection != null) && !IsServerAlive(AConnection.ServerConnection))
 			{
-				((ServerInfo)ServerHash[AConnection.Alias.Name]).ServerConnection = null;
+				ServerHash[AConnection.Alias.Name].ServerConnection = null;
 
 				try
 				{

@@ -8,17 +8,13 @@ using System;
 using System.ComponentModel;
 using System.Collections;
 using System.Collections.Specialized;
+using System.Drawing;
 
 namespace Alphora.Dataphor.DAE.Client
 {
 	[ToolboxItem(false)]
 	public class FieldDataLink : DataLink
 	{
-		private BitVector32 FFlags = new BitVector32();
-		private static readonly int ReadOnlyMask = BitVector32.CreateMask();
-		private static readonly int ModifiedMask = BitVector32.CreateMask(ReadOnlyMask);
-		private static readonly int InUpdateMask = BitVector32.CreateMask(ModifiedMask);
-
 		public DataField DataField
 		{
 			get

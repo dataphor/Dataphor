@@ -43,6 +43,7 @@ namespace Alphora.Dataphor.DAE.Client
 				return true;
 			}
 
+			#if !SILVERLIGHT
 			public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext AContext, object AInstance, Attribute[] AAttributes)
 			{
 				PropertyDescriptorCollection LCollection = TypeDescriptor.GetProperties(AInstance, AAttributes);
@@ -57,6 +58,7 @@ namespace Alphora.Dataphor.DAE.Client
 				}
 				return new PropertyDescriptorCollection(LFiltered);
 			}
+			#endif
 		}
 
 		[System.ComponentModel.TypeConverter(typeof(SessionInfoConverter))]

@@ -70,7 +70,6 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 		
-		[SecurityPermission(SecurityAction.Demand)]
 		public static string DecryptString(string AString)
 		{
 			if (AString == String.Empty)

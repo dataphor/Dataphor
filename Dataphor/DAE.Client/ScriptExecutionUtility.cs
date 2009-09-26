@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Xml;
-using System.Data;
 using System.Text;
 
 using Alphora.Dataphor.DAE;

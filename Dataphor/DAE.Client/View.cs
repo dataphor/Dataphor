@@ -38,12 +38,6 @@ namespace Alphora.Dataphor.DAE.Client
 	[DesignerSerializer(typeof(Alphora.Dataphor.DAE.Client.Design.ActiveLastSerializer), typeof(CodeDomSerializer))]
 	public class DataView : TableDataSet
 	{
-		protected static readonly int UseBrowseMask = BitVector32.CreateMask(RefreshAfterPostMask);
-		protected static readonly int WriteWhereClauseMask = BitVector32.CreateMask(UseBrowseMask);
-		protected static readonly int UseApplicationTransactionsMask = BitVector32.CreateMask(WriteWhereClauseMask);
-		protected static readonly int JoinAsInsertMask = BitVector32.CreateMask(UseApplicationTransactionsMask);
-		protected static readonly int IsJoinedMask = BitVector32.CreateMask(JoinAsInsertMask);
-		
 		public DataView()
 		{
 			InternalUseBrowse = true;
@@ -287,7 +281,7 @@ namespace Alphora.Dataphor.DAE.Client
 		[DefaultValue("")]
 		[Category("Data")]
 		[Description("Expression")]
-		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[EditorDocumentType("d4")]
 		public string Expression
 		{
@@ -589,7 +583,7 @@ namespace Alphora.Dataphor.DAE.Client
 		[DefaultValue("")]
 		[Category("Data")]
 		[Description("A D4 script that will be run on the view's process, just prior to opening the cursor for the view.")]
-		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[EditorDocumentType("d4")]
 		public string BeginScript
 		{
@@ -603,7 +597,7 @@ namespace Alphora.Dataphor.DAE.Client
 		[DefaultValue("")]
 		[Category("Data")]
 		[Description("A D4 script that will be run on the view's process, just after closing the cursor for the view.")]
-		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[EditorDocumentType("d4")]
 		public string EndScript
 		{
@@ -947,7 +941,7 @@ namespace Alphora.Dataphor.DAE.Client
 		[DefaultValue("")]														   
 		[Category("Data")]
 		[Description("A D4 statement that will be used to insert any new rows.")]
-		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[EditorDocumentType("d4")]
 		public string InsertStatement
 		{
@@ -962,7 +956,7 @@ namespace Alphora.Dataphor.DAE.Client
 		[DefaultValue("")]
 		[Category("Data")]
 		[Description("A D4 statement that will be used to update any new rows.")]
-		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[EditorDocumentType("d4")]
 		public string UpdateStatement
 		{
@@ -977,7 +971,7 @@ namespace Alphora.Dataphor.DAE.Client
 		[DefaultValue("")]
 		[Category("Data")]
 		[Description("A D4 statement that will be used to delete any new rows.")]
-		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[EditorDocumentType("d4")]
 		public string DeleteStatement
 		{

@@ -137,6 +137,51 @@
     <Compile Include="..\Base\ValidatingBaseList.cs">
       <Link>Base\ValidatingBaseList.cs</Link>
     </Compile>
+    <Compile Include="..\DAE.Client\ClientException.cs">
+      <Link>DAE.Client\ClientException.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE.Client\DACDataSession.cs">
+      <Link>DAE.Client\DACDataSession.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE.Client\DACLicenseProvider.cs">
+      <Link>DAE.Client\DACLicenseProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE.Client\DAEDataSet.cs">
+      <Link>DAE.Client\DAEDataSet.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE.Client\DataphorConnectionFactory.cs">
+      <Link>DAE.Client\DataphorConnectionFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE.Client\DataSet.cs">
+      <Link>DAE.Client\DataSet.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE.Client\Design\Editor.cs">
+      <Link>DAE.Client\Design\Editor.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE.Client\FieldDataLink.cs">
+      <Link>DAE.Client\FieldDataLink.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE.Client\ScriptExecutionUtility.cs">
+      <Link>DAE.Client\ScriptExecutionUtility.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE.Client\ServerConnection.cs">
+      <Link>DAE.Client\ServerConnection.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE.Client\Session.cs">
+      <Link>DAE.Client\Session.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE.Client\Strings.cs">
+      <Link>DAE.Client\Strings.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE.Client\TableDataSet.cs">
+      <Link>DAE.Client\TableDataSet.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE.Client\TerminalServices.cs">
+      <Link>DAE.Client\TerminalServices.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE.Client\View.cs">
+      <Link>DAE.Client\View.cs</Link>
+    </Compile>
     <Compile Include="..\DAE\CLI.cs">
       <Link>DAE\CLI.cs</Link>
     </Compile>
@@ -711,9 +756,11 @@
       <Link>DAE\Utility.cs</Link>
     </Compile>
     <Compile Include="System\ComponentModel.cs" />
+    <Compile Include="System\ComponentModel.Design.Serialization.cs" />
     <Compile Include="System\ICloneable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="System\Stopwatch.cs" />
+    <Compile Include="System\System.Drawing.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\Base\Base.resx">
@@ -801,6 +848,14 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="..\DAE.Client\ClientException.resx">
+      <Link>DAE.Client\ClientException.resx</Link>
+      <DependentUpon>ClientException.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\DAE.Client\Strings.resx">
+      <Link>DAE.Client\Strings.resx</Link>
+      <DependentUpon>Strings.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="..\DAE\Schema\DataTypes.d4">
       <Link>DAE\Schema\DataTypes.d4</Link>
     </EmbeddedResource>

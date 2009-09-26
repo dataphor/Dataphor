@@ -5,9 +5,11 @@
 */
 using System;
 using System.ComponentModel;
+#if !SILVERLIGHT
 using System.Windows.Forms;
 using System.Drawing.Design;
 using System.Windows.Forms.Design;
+#endif
 
 namespace Alphora.Dataphor.DAE.Client.Design
 {
@@ -28,6 +30,7 @@ namespace Alphora.Dataphor.DAE.Client.Design
 		}
 	}
 
+	#if !SILVERLIGHT
 	/// <summary> Creates a list of available column names if and only if the linked DataSet is active. </summary>
 	public class ColumnNameEditor : UITypeEditor
 	{
@@ -181,5 +184,5 @@ namespace Alphora.Dataphor.DAE.Client.Design
 			return base.GetEditStyle(AContext);
 		}
 	}
-
+	#endif
 }

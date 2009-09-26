@@ -18,7 +18,6 @@ using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Compiling;
 using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.Client.Design;
 using Schema = Alphora.Dataphor.DAE.Schema;
 
 namespace Alphora.Dataphor.DAE.Client
@@ -30,17 +29,6 @@ namespace Alphora.Dataphor.DAE.Client
 		// Do not localize
 		public readonly static Char[] CColumnNameDelimiters = new Char[] {',',';'};
 
-		protected BitVector32 FFlags = new BitVector32();
-		protected static readonly int DisposingMask = BitVector32.CreateMask();
-		protected static readonly int InitializingMask = BitVector32.CreateMask(DisposingMask);
-		protected static readonly int DelayedActiveMask = BitVector32.CreateMask(InitializingMask);
-		protected static readonly int BOFMask = BitVector32.CreateMask(DelayedActiveMask);
-		protected static readonly int EOFMask = BitVector32.CreateMask(BOFMask);
-		protected static readonly int IsModifiedMask = BitVector32.CreateMask(EOFMask);
-		protected static readonly int IsReadOnlyMask = BitVector32.CreateMask(IsModifiedMask);
-		protected static readonly int IsWriteOnlyMask = BitVector32.CreateMask(IsReadOnlyMask);
-		protected static readonly int RefreshAfterPostMask = BitVector32.CreateMask(IsWriteOnlyMask);
-		
 		public DataSet() : base()
 		{
 			FBuffer = new DataSetBuffer();

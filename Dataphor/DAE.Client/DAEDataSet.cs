@@ -17,7 +17,6 @@ using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Compiling;
 using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.Client.Design;
 using Schema = Alphora.Dataphor.DAE.Schema;
 
 namespace Alphora.Dataphor.DAE.Client
@@ -120,7 +119,7 @@ namespace Alphora.Dataphor.DAE.Client
 		[Category("Data")]
 		[Description("Connection to a Server.")]
 		[RefreshProperties(RefreshProperties.Repaint)]
-		[Editor(typeof(Alphora.Dataphor.DAE.Client.Design.SessionEditor), typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Design.SessionEditor,Alphora.Dataphor.DAE.Client", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		public string SessionName
 		{
 			get { return FSession != null ? FSession.SessionName : string.Empty; }
@@ -222,17 +221,19 @@ namespace Alphora.Dataphor.DAE.Client
 					InternalIsReadOnly = true;
 			}
 		}
-		
+
+		private bool FIsReadOnly;
+				
 		protected override bool InternalIsReadOnly
 		{
-			get { return FFlags[IsReadOnlyMask]; }
+			get { return FIsReadOnly; }
 			set 
 			{ 
 				if (value)
 					FRequestedCapabilities &= ~CursorCapability.Updateable;
 				else
 					FRequestedCapabilities |= CursorCapability.Updateable;
-				FFlags[IsReadOnlyMask] = value; 
+				FIsReadOnly = value; 
 			}
 		}
 
