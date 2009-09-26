@@ -13,7 +13,7 @@ using Alphora.Dataphor.DAE.Server;
 
 namespace Alphora.Dataphor.DAE.Client
 {
-	public class ClientCursor : IRemoteServerCursor
+	public class ClientCursor : ClientObject, IRemoteServerCursor
 	{
 		public ClientCursor(ClientExpressionPlan AClientExpressionPlan, CursorDescriptor ACursorDescriptor)
 		{
@@ -223,12 +223,6 @@ namespace Alphora.Dataphor.DAE.Client
 			get { return true; }
 			set { throw new NotImplementedException(); }
 		}
-
-		#endregion
-
-		#region IDisposableNotify Members
-
-		public event EventHandler Disposed;
 
 		#endregion
 

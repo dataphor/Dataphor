@@ -32,7 +32,7 @@ namespace Alphora.Dataphor.DAE.Server
 		public int ReferenceCount;
     }
     
-    public class LocalBookmarks : Hashtable
+    public class LocalBookmarks : Dictionary<Guid, LocalBookmark>
     {
 		public void Add(LocalBookmark ABookmark)
 		{

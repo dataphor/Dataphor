@@ -14,7 +14,7 @@ using Alphora.Dataphor.DAE.Server;
 
 namespace Alphora.Dataphor.DAE.Client
 {
-	public class ClientConnection : IRemoteServerConnection
+	public class ClientConnection : ClientObject, IRemoteServerConnection
 	{
 		public ClientConnection(ClientServer AClientServer, string AConnectionName, string AClientHostName)
 		{
@@ -52,12 +52,6 @@ namespace Alphora.Dataphor.DAE.Client
 			LResult.AsyncWaitHandle.WaitOne();
 			GetServiceInterface().EndDisconnect(LResult);
 		}
-
-		#endregion
-
-		#region IDisposableNotify Members
-
-		public event EventHandler Disposed;
 
 		#endregion
 

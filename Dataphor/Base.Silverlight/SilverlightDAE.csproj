@@ -147,6 +147,9 @@
     <Compile Include="..\Client\Client\ClientCursor.cs">
       <Link>Client\Client\ClientCursor.cs</Link>
     </Compile>
+    <Compile Include="..\Client\Client\ClientObject.cs">
+      <Link>Client\Client\ClientObject.cs</Link>
+    </Compile>
     <Compile Include="..\Client\Client\ClientPlan.cs">
       <Link>Client\Client\ClientPlan.cs</Link>
     </Compile>
@@ -166,43 +169,46 @@
       <Link>Client\Client\ClientStream.cs</Link>
     </Compile>
     <Compile Include="..\Client\Contracts\IClientDataphorService.cs">
-      <Link>Client\Contracts\IClientDataphorService.cs</Link>
+      <Link>Contracts\IClientDataphorService.cs</Link>
     </Compile>
     <Compile Include="..\Client\Server\LocalBatch.cs">
-      <Link>Client\Server\LocalBatch.cs</Link>
+      <Link>Server\LocalBatch.cs</Link>
     </Compile>
     <Compile Include="..\Client\Server\LocalCursor.cs">
-      <Link>Client\Server\LocalCursor.cs</Link>
+      <Link>Server\LocalCursor.cs</Link>
     </Compile>
     <Compile Include="..\Client\Server\LocalPlan.cs">
-      <Link>Client\Server\LocalPlan.cs</Link>
+      <Link>Server\LocalPlan.cs</Link>
     </Compile>
     <Compile Include="..\Client\Server\LocalProcess.cs">
-      <Link>Client\Server\LocalProcess.cs</Link>
+      <Link>Server\LocalProcess.cs</Link>
     </Compile>
     <Compile Include="..\Client\Server\LocalScript.cs">
-      <Link>Client\Server\LocalScript.cs</Link>
+      <Link>Server\LocalScript.cs</Link>
     </Compile>
     <Compile Include="..\Client\Server\LocalServer.cs">
-      <Link>Client\Server\LocalServer.cs</Link>
+      <Link>Server\LocalServer.cs</Link>
     </Compile>
     <Compile Include="..\Client\Server\LocalServerObject.cs">
-      <Link>Client\Server\LocalServerObject.cs</Link>
+      <Link>Server\LocalServerObject.cs</Link>
     </Compile>
     <Compile Include="..\Client\Server\LocalServerStructures.cs">
-      <Link>Client\Server\LocalServerStructures.cs</Link>
+      <Link>Server\LocalServerStructures.cs</Link>
     </Compile>
     <Compile Include="..\Client\Server\LocalSession.cs">
-      <Link>Client\Server\LocalSession.cs</Link>
+      <Link>Server\LocalSession.cs</Link>
     </Compile>
     <Compile Include="..\Client\Server\ServerFactory.cs">
-      <Link>Client\Server\ServerFactory.cs</Link>
+      <Link>Server\ServerFactory.cs</Link>
     </Compile>
     <Compile Include="..\Client\Streams\LocalStream.cs">
-      <Link>Client\Stream\LocalStream.cs</Link>
+      <Link>Streams\LocalStream.cs</Link>
     </Compile>
     <Compile Include="..\Client\Streams\LocalStreamManager.cs">
-      <Link>Client\Stream\LocalStreamManager.cs</Link>
+      <Link>Streams\LocalStreamManager.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE.Client\Alias.cs">
+      <Link>DAE.Client\Alias.cs</Link>
     </Compile>
     <Compile Include="..\DAE.Client\ClientException.cs">
       <Link>DAE.Client\ClientException.cs</Link>
@@ -279,6 +285,15 @@
     <Compile Include="..\DAE\Compiling\Symbols.cs">
       <Link>DAE\Compiling\Symbols.cs</Link>
     </Compile>
+    <Compile Include="..\DAE\Contracts\BatchDescriptor.cs">
+      <Link>DAE\Contracts\BatchDescriptor.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Contracts\CursorDescriptor.cs">
+      <Link>DAE\Contracts\CursorDescriptor.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Contracts\DataphorServiceUtility.cs">
+      <Link>DAE\Contracts\DataphorServiceUtility.cs</Link>
+    </Compile>
     <Compile Include="..\DAE\Contracts\PlanDescriptor.cs">
       <Link>DAE\Contracts\PlanDescriptor.cs</Link>
     </Compile>
@@ -288,8 +303,17 @@
     <Compile Include="..\DAE\Contracts\ProcessCleanupInfo.cs">
       <Link>DAE\Contracts\ProcessCleanupInfo.cs</Link>
     </Compile>
+    <Compile Include="..\DAE\Contracts\ProcessDescriptor.cs">
+      <Link>DAE\Contracts\ProcessDescriptor.cs</Link>
+    </Compile>
     <Compile Include="..\DAE\Contracts\RemoteCLI.cs">
       <Link>DAE\Contracts\RemoteCLI.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Contracts\ScriptDescriptor.cs">
+      <Link>DAE\Contracts\ScriptDescriptor.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Contracts\SessionDescriptor.cs">
+      <Link>DAE\Contracts\SessionDescriptor.cs</Link>
     </Compile>
     <Compile Include="..\DAE\Contracts\Structures.cs">
       <Link>DAE\Contracts\Structures.cs</Link>
@@ -795,6 +819,9 @@
     <Compile Include="..\DAE\Streams\CoverStream.cs">
       <Link>DAE\Streams\CoverStream.cs</Link>
     </Compile>
+    <Compile Include="..\DAE\Streams\DeferredWriteStream.cs">
+      <Link>DAE\Streams\DeferredWriteStream.cs</Link>
+    </Compile>
     <Compile Include="..\DAE\Streams\ManagedStream.cs">
       <Link>DAE\Streams\ManagedStream.cs</Link>
     </Compile>
@@ -826,6 +853,7 @@
     <Compile Include="System\ComponentModel.Design.Serialization.cs" />
     <Compile Include="System\ICloneable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="System\ReaderWriterLock.cs" />
     <Compile Include="System\Stopwatch.cs" />
     <Compile Include="System\System.Drawing.cs" />
   </ItemGroup>

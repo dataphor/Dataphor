@@ -13,7 +13,7 @@ using System.Collections.Generic;
 
 namespace Alphora.Dataphor.DAE.Server
 {
-	public class LocalServerObject : MarshalByRefObject, IDisposableNotify
+	public class LocalServerObject : IDisposableNotify
 	{
 		#if USEFINALIZER
 		~LocalServerObject()
@@ -40,14 +40,9 @@ namespace Alphora.Dataphor.DAE.Server
 			if (Disposed != null)
 				Disposed(this, EventArgs.Empty);
 		}
-
-		public override object InitializeLifetimeService()
-		{
-			return null;	// Should never get a lease as a service and client objects are always held
-		}
 	}
 	
-	public class LocalServerChildObject : MarshalByRefObject, IDisposableNotify
+	public class LocalServerChildObject : IDisposableNotify
 	{
 		#if USEFINALIZER
 		~LocalServerChildObject()
@@ -78,11 +73,6 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			if (Disposed != null)
 				Disposed(this, EventArgs.Empty);
-		}
-
-		public override object InitializeLifetimeService()
-		{
-			return null;	// Should never get a lease as a service and client objects are always held
 		}
 	}
 }

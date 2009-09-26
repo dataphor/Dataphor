@@ -16,7 +16,7 @@ using Alphora.Dataphor.DAE.Runtime;
 
 namespace Alphora.Dataphor.DAE.Client
 {
-	public class ClientProcess : IRemoteServerProcess
+	public class ClientProcess : ClientObject, IRemoteServerProcess
 	{
 		public ClientProcess(ClientSession AClientSession, ProcessInfo AProcessInfo, ProcessDescriptor AProcessDescriptor)
 		{
@@ -274,12 +274,6 @@ namespace Alphora.Dataphor.DAE.Client
 				return GetServiceInterface().EndGetTransactionCount(LResult);
 			}
 		}
-
-		#endregion
-
-		#region IDisposableNotify Members
-
-		public event EventHandler Disposed;
 
 		#endregion
 

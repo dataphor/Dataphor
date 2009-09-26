@@ -12,7 +12,7 @@ using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Dataphor.DAE.Client
 {
-	public class ClientBatch : IRemoteServerBatch
+	public class ClientBatch : ClientObject, IRemoteServerBatch
 	{
 		public ClientBatch(ClientScript AClientScript, BatchDescriptor ABatchDescriptor)
 		{
@@ -110,12 +110,6 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			get { return FBatchDescriptor.Line; }
 		}
-
-		#endregion
-
-		#region IDisposableNotify Members
-
-		public event EventHandler Disposed;
 
 		#endregion
 	}

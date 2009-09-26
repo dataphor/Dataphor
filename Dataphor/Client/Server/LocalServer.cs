@@ -8,17 +8,17 @@
 #define LOGFILECACHEEVENTS
 
 using System;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using System.Threading;
 
+using Alphora.Dataphor.Windows;
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Contracts;
-using Alphora.Dataphor.Windows;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -202,7 +202,7 @@ namespace Alphora.Dataphor.DAE.Server
 		#endif
 		
 		private SignalPool FCacheSignalPool = new SignalPool();
-		private Hashtable FCacheSignals = new Hashtable();
+		private Dictionary<long, ManualResetEvent> FCacheSignals = new Dictionary<long, ManualResetEvent>();
 
 		protected internal void WaitForCacheTimeStamp(IServerProcess AProcess, long AClientCacheTimeStamp)
 		{

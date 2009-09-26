@@ -12,7 +12,7 @@ using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Dataphor.DAE.Client
 {
-	public class ClientScript : IRemoteServerScript
+	public class ClientScript : ClientObject, IRemoteServerScript
 	{
 		public ClientScript(ClientProcess AClientProcess, ScriptDescriptor AScriptDescriptor)
 		{
@@ -65,12 +65,6 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			get { return FClientBatches; }
 		}
-
-		#endregion
-
-		#region IDisposableNotify Members
-
-		public event EventHandler Disposed;
 
 		#endregion
 	}

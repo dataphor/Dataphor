@@ -15,7 +15,7 @@ using Alphora.Dataphor.DAE.Server;
 
 namespace Alphora.Dataphor.DAE.Client
 {
-	public class ClientServer : IRemoteServer
+	public class ClientServer : ClientObject, IRemoteServer
 	{
 		public ClientServer() { }
 		public ClientServer(string AHostName, int APortNumber, string AInstanceName)
@@ -181,12 +181,6 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			get { throw new NotImplementedException(); }
 		}
-
-		#endregion
-
-		#region IDisposableNotify Members
-
-		public event EventHandler Disposed;
 
 		#endregion
 	}

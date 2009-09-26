@@ -12,7 +12,7 @@ using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Dataphor.DAE.Client
 {
-	public class ClientSession : IRemoteServerSession
+	public class ClientSession : ClientObject, IRemoteServerSession
 	{
 		public ClientSession(ClientConnection AClientConnection, SessionInfo ASessionInfo, SessionDescriptor ASessionDescriptor)
 		{
@@ -71,12 +71,6 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			get { return FSessionInfo; }
 		}
-
-		#endregion
-
-		#region IDisposableNotify Members
-
-		public event EventHandler Disposed;
 
 		#endregion
 	}

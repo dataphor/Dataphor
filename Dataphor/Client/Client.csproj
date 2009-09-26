@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="Client\ClientBatch.cs" />
     <Compile Include="Client\ClientCursor.cs" />
+    <Compile Include="Client\ClientObject.cs" />
     <Compile Include="Client\ClientPlan.cs" />
     <Compile Include="Client\ClientProcess.cs" />
     <Compile Include="Client\ClientScript.cs" />

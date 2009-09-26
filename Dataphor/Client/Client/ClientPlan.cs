@@ -12,7 +12,7 @@ using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Dataphor.DAE.Client
 {
-	public abstract class ClientPlan : IRemoteServerPlan
+	public abstract class ClientPlan : ClientObject, IRemoteServerPlan
 	{
 		public ClientPlan(ClientProcess AClientProcess, PlanDescriptor APlanDescriptor)
 		{
@@ -68,12 +68,6 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			get { throw new NotImplementedException(); }
 		}
-
-		#endregion
-
-		#region IDisposableNotify Members
-
-		public event EventHandler Disposed;
 
 		#endregion
 	}
