@@ -82,7 +82,7 @@ namespace Alphora.Dataphor.DAE.Client
 					new ChannelFactory<IClientDataphorService>
 					(
 						new CustomBinding(new BinaryMessageEncodingBindingElement(), new HttpTransportBindingElement()), 
-						DataphorServiceUtility.BuildURI(FHostName, FPortNumber, FInstanceName)
+						new EndpointAddress(DataphorServiceUtility.BuildURI(FHostName, FPortNumber, FInstanceName))
 					);
 		}
 		
