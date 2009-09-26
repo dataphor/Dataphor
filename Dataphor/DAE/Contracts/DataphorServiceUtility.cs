@@ -5,15 +5,15 @@
 */
 
 using System;
-using System.Collections.Generic;
+using System.ServiceModel;
 
 namespace Alphora.Dataphor.DAE.Contracts
 {
 	public static class DataphorServiceUtility
 	{
-		public static string BuildURI(string AHostName, int APortNumber, string AInstanceName)
+		public static EndpointAddress BuildURI(string AHostName, int APortNumber, string AInstanceName)
 		{
-			return String.Format("http://{0}:{1}/{2}/service", AHostName, APortNumber, AInstanceName);
+			return new EndpointAddress(String.Format("http://{0}:{1}/{2}/service", AHostName, APortNumber, AInstanceName));
 		}
 	}
 }

@@ -123,7 +123,7 @@ namespace Alphora.Dataphor.DAE.Server
 				while (!LSignaled)
 				{
 					// Wait for either a signal or a time-out
-					LSignaled = FKeepAliveSignal.WaitOne(CLocalKeepAliveInterval * 1000, false);
+					LSignaled = FKeepAliveSignal.WaitOne(CLocalKeepAliveInterval * 1000);
 
 					// If WaitOne ended due to timeout, send a keep-alive message (then wait again)
 					if (!LSignaled)

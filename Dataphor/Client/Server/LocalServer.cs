@@ -255,7 +255,7 @@ namespace Alphora.Dataphor.DAE.Server
 				
 				try
 				{
-					if (!(LSignal.WaitOne(CCacheSerializationTimeout, false)))
+					if (!(LSignal.WaitOne(CCacheSerializationTimeout)))
 						throw new ServerException(ServerException.Codes.CacheSerializationTimeout);
 				}
 				finally
@@ -405,6 +405,7 @@ namespace Alphora.Dataphor.DAE.Server
 		private List<string> FFilesCached = new List<string>();
 		private List<string> FAssembliesCached = new List<string>();
 		
+		#if !SILVERLIGHT
 		private string FLocalBinDirectory;
 		private string LocalBinDirectory
 		{
@@ -471,6 +472,7 @@ namespace Alphora.Dataphor.DAE.Server
 			
 			return LFullFileName;
 		}
+		#endif
 		
 		public void ClassLoaderMissed(LocalProcess AProcess, Schema.ClassLoader AClassLoader, ClassDefinition AClassDefinition)
 		{

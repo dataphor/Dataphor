@@ -61,11 +61,13 @@ namespace Alphora.Dataphor.DAE.Client
 
 		private bool ContainerContainsSession(DataSessionBase ASession)
 		{
+			#if !SILVERLIGHT
 			if ((ASession == null) || (Container == null))
 				return false;
 			foreach (Component LComponent in Container.Components)
 				if (LComponent == ASession)
 					return true;
+			#endif
 			return false;
 		}
 
