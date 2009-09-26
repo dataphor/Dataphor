@@ -198,9 +198,6 @@
     <Compile Include="..\Client\Server\LocalSession.cs">
       <Link>Server\LocalSession.cs</Link>
     </Compile>
-    <Compile Include="..\Client\Server\ServerFactory.cs">
-      <Link>Server\ServerFactory.cs</Link>
-    </Compile>
     <Compile Include="..\Client\Streams\LocalStream.cs">
       <Link>Streams\LocalStream.cs</Link>
     </Compile>

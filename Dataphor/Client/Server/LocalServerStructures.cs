@@ -38,8 +38,6 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			Add(ABookmark.Bookmark, ABookmark);
 		}
-		
-		public LocalBookmark this[Guid AGuid] { get { return (LocalBookmark)base[AGuid]; } }
     }
     
     public class LocalRow : Disposable
