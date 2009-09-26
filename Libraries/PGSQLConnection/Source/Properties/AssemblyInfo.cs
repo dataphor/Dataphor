@@ -1,4 +1,9 @@
-﻿using System.Reflection;
+﻿/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -32,8 +37,8 @@ using System.Runtime.InteropServices;
 //
 // Puede especificar todos los valores o establecer como predeterminados los números de versión de compilación y de revisión 
 // mediante el asterisco ('*'), como se muestra a continuación:
-// [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.2.*")]
+
+[assembly: AssemblyVersion("3.0.*")]
 
 //
 // In order to sign your assembly you must specify a key to use. Refer to the 
@@ -62,7 +67,7 @@ using System.Runtime.InteropServices;
 //
 [assembly: AssemblyDelaySign(false)]
 #if SIGNASSEMBLIES
-[assembly: AssemblyKeyFile("..\\..\\..\\..\\..\\Dataphor\\KeyFile.snk")]
+[assembly: AssemblyKeyFile("..\\..\\..\\..\\..\\Dataphor.snk")]
 #else
 [assembly: AssemblyKeyFile("")]
 #endif

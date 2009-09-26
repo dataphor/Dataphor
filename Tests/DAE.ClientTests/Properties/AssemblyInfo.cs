@@ -1,4 +1,9 @@
-﻿using System.Reflection;
+﻿/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -31,5 +36,6 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.2.*")]
+
+[assembly: AssemblyVersion("3.0.*")]
+
