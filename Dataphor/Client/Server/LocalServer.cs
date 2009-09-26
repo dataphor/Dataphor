@@ -14,7 +14,9 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 
+#if !SILVERLIGHT
 using Alphora.Dataphor.Windows;
+#endif
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Streams;
