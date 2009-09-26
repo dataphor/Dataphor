@@ -848,6 +848,7 @@ namespace Alphora.Dataphor.DAE.Client
 		public DataSession() : base() {}
 		public DataSession(IContainer AContainer) : base(AContainer) {}
 
+		#if !SILVERLIGHT
 		// AliasName
 		private string FAliasName = String.Empty;
 		/// <summary> The name of the alias to use to establish a connection to a Dataphor Server. </summary>
@@ -871,6 +872,7 @@ namespace Alphora.Dataphor.DAE.Client
 				}
 			}
 		}
+		#endif
 		
 		private void InternalSetAlias(ServerAlias AAlias)
 		{
@@ -908,7 +910,9 @@ namespace Alphora.Dataphor.DAE.Client
 				if (FAlias != value)
 				{
 					InternalSetAlias(value);
+					#if !SILVERLIGHT
 					FAliasName = String.Empty;
+					#endif
 				}
 			}
 		}

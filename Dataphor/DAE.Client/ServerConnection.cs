@@ -7,10 +7,12 @@ using System;
 using System.ComponentModel;
 using System.IO;
 using Alphora.Dataphor.BOP;
-using Alphora.Dataphor.DAE.NativeCLI;
 using Alphora.Dataphor.DAE.Server;
+#if !SILVERLIGHT
+using Alphora.Dataphor.DAE.NativeCLI;
 using Alphora.Dataphor.Windows;
 using Alphora.Dataphor.DAE.Service;
+#endif
 
 namespace Alphora.Dataphor.DAE.Client
 {
@@ -210,6 +212,7 @@ namespace Alphora.Dataphor.DAE.Client
 		}
 	}
 	
+	#if !SILVERLIGHT
 	// Alias Manager
 	/// <summary>Provides a class for managing the set of aliases available on this machine.</summary>
 	/// <remarks>
@@ -371,6 +374,7 @@ namespace Alphora.Dataphor.DAE.Client
 			Save();
 		}
 	}
+	#endif
 	
 	// Alias configuration
 	[PublishDefaultList("Aliases")]
@@ -427,11 +431,11 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			protected override Type GetClassType(string AName, string ANamespace)
 			{
-				if (String.Compare(AName, "AliasConfiguration", true) == 0)
+				if (String.Equals(AName, "AliasConfiguration", StringComparison.OrdinalIgnoreCase))
 					return typeof(AliasConfiguration);
-				if (String.Compare(AName, "ConnectionAlias", true) == 0)
+				if (String.Equals(AName, "ConnectionAlias", StringComparison.OrdinalIgnoreCase))
 					return typeof(ConnectionAlias);
-				if (String.Compare(AName, "InProcessAlias", true) == 0)
+				if (String.Equals(AName, "InProcessAlias", StringComparison.OrdinalIgnoreCase))
 					return typeof(InProcessAlias);
 				return base.GetClassType(AName, ANamespace);
 			}
@@ -481,10 +485,10 @@ namespace Alphora.Dataphor.DAE.Client
 				throw new ClientException(ClientException.Codes.ServerAliasRequired);
 				
 			FServerAlias = AServerAlias;
-			InProcessAlias LInProcessAlias = FServerAlias as InProcessAlias;
-			ConnectionAlias LConnectionAlias = FServerAlias as ConnectionAlias;
 			try
 			{
+				#if !SILVERLIGHT
+				InProcessAlias LInProcessAlias = FServerAlias as InProcessAlias;
 				if (LInProcessAlias != null)
 				{
 					if (LInProcessAlias.IsEmbedded)
@@ -505,9 +509,13 @@ namespace Alphora.Dataphor.DAE.Client
 				}
 				else
 				{
+				#endif
+					ConnectionAlias LConnectionAlias = FServerAlias as ConnectionAlias;
 					FClientServer = new ClientServer(LConnectionAlias.HostName, LConnectionAlias.OverridePortNumber, LConnectionAlias.InstanceName);
 					FLocalServer = new LocalServer(FClientServer, LConnectionAlias.ClientSideLoggingEnabled, TerminalServiceUtility.ClientName);
+				#if !SILVERLIGHT
 				}
+				#endif
 			}
 			catch
 			{
@@ -524,6 +532,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		private void CleanUp()
 		{
+			#if !SILVERLIGHT
 			if (FHostedServer != null)
 			{
 				FHostedServer.Stop();
@@ -535,7 +544,7 @@ namespace Alphora.Dataphor.DAE.Client
 				FServiceHost.Stop();
 				FServiceHost = null;
 			}
-			
+			#endif
 			if (FLocalServer != null)
 			{
 				FLocalServer.Dispose();
@@ -552,14 +561,20 @@ namespace Alphora.Dataphor.DAE.Client
 		private ServerAlias FServerAlias;
 		/// <summary>The alias used to establish this connection.</summary>
 		public ServerAlias Alias { get { return FServerAlias; } }
-		
-		private DataphorServiceHost FServiceHost; // Used for non-embedded in-process server
-		private Server.Server FHostedServer; // Used for embedded in-process server
+	
 		private ClientServer FClientServer; // Used for out-of-process server
 		private LocalServer FLocalServer; // Used for out-of-process server
 
+		#if !SILVERLIGHT	
+		private DataphorServiceHost FServiceHost; // Used for non-embedded in-process server
+		private Server.Server FHostedServer; // Used for embedded in-process server
+
 		/// <summary>The IServer interface for the server connection.</summary>
 		public IServer Server { get { return FHostedServer != null ? FHostedServer : (FServiceHost != null ? FServiceHost.Server : FLocalServer); } }
+		#else
+		/// <summary>The IServer interface for the server connection.</summary>
+		public IServer Server { get { return FLocalServer; } }
+		#endif
 
 		public override string ToString()
 		{

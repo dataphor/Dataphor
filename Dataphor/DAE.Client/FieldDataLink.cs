@@ -42,6 +42,8 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 
+		private bool FReadOnly;
+		
 		/// <summary> Indicates whether the DataView for this link can be modified. </summary>
 		/// <remarks>
 		/// Use ReadOnly to determine whether the DataView for this link can be modified.
@@ -51,18 +53,19 @@ namespace Alphora.Dataphor.DAE.Client
 		/// </remarks>
 		public bool ReadOnly
 		{
-			get { return FFlags[ReadOnlyMask]; }
+			get { return FReadOnly; }
 			set
 			{
-				if (FFlags[ReadOnlyMask] != value)
+				if (FReadOnly != value)
 				{
-					FFlags[ReadOnlyMask] = value;
+					FReadOnly = value;
 					UpdateReadOnly();
 				}
 			}
 		}
 
-		public bool InUpdate { get { return FFlags[InUpdateMask]; } }
+		private bool FInUpdate;
+		public bool InUpdate { get { return FInUpdate; } }
 
 		public event EventHandler OnUpdateReadOnly;
 		protected virtual void UpdateReadOnly()
@@ -100,12 +103,12 @@ namespace Alphora.Dataphor.DAE.Client
 
 		private void BeginUpdate()
 		{
-			FFlags[InUpdateMask] = true;
+			FInUpdate = true;
 		}
 
 		private void EndUpdate()
 		{
-			FFlags[InUpdateMask] = false;
+			FInUpdate = false;
 		}
 
 		public override void SaveRequested()
@@ -132,11 +135,7 @@ namespace Alphora.Dataphor.DAE.Client
 		}
 
 		/// <summary> True when a control contains unsaved information. </summary>
-		public bool Modified
-		{
-			get { return FFlags[ModifiedMask]; }
-			set { FFlags[ModifiedMask] = value; }
-		}
+		public bool Modified { get; set; }
 		
 		/// <summary> Called by the control before modification. </summary>
 		/// <returns> True if the control is allowed to begin modification. </returns>

@@ -312,7 +312,7 @@ namespace Alphora.Dataphor.DAE.Client
 										ARow[LDetailField.Name] = LField.Value;
 										try
 										{
-											InternalIsModified = InternalColumnChanging(LDetailField, LOriginalRow, ARow) || InternalIsModified;
+											FIsModified = InternalColumnChanging(LDetailField, LOriginalRow, ARow) || FIsModified;
 										}
 										catch
 										{
@@ -320,7 +320,7 @@ namespace Alphora.Dataphor.DAE.Client
 											throw;
 										}
 										
-										InternalIsModified = InternalColumnChanged(LDetailField, LOriginalRow, ARow) || InternalIsModified;
+										FIsModified = InternalColumnChanged(LDetailField, LOriginalRow, ARow) || FIsModified;
 									}
 									finally
 									{
@@ -336,14 +336,14 @@ namespace Alphora.Dataphor.DAE.Client
 					}
 				}
 					
-				bool LSaveIsModified = InternalIsModified;
+				bool LSaveIsModified = FIsModified;
 				try
 				{
 					base.InternalInitializeRow(ARow);
 				}
 				finally
 				{
-					InternalIsModified = LSaveIsModified;
+					FIsModified = LSaveIsModified;
 				}
 
 				Process.CommitTransaction();

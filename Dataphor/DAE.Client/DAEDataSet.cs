@@ -222,18 +222,16 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 
-		private bool FIsReadOnly;
-				
 		protected override bool InternalIsReadOnly
 		{
-			get { return FIsReadOnly; }
+			get { return base.InternalIsReadOnly; }
 			set 
 			{ 
 				if (value)
 					FRequestedCapabilities &= ~CursorCapability.Updateable;
 				else
 					FRequestedCapabilities |= CursorCapability.Updateable;
-				FIsReadOnly = value; 
+				base.InternalIsReadOnly = value; 
 			}
 		}
 

@@ -40,8 +40,8 @@ namespace Alphora.Dataphor.DAE.Client
 	{
 		public DataView()
 		{
-			InternalUseBrowse = true;
-			InternalWriteWhereClause = true;
+			FUseBrowse = true;
+			FWriteWhereClause = true;
 			UseApplicationTransactions = true;
 			FShouldEnlist = EnlistMode.Default;
 		}
@@ -120,7 +120,7 @@ namespace Alphora.Dataphor.DAE.Client
 						}
 					}
 				if (LChanged)
-					CursorSetChanged(null, IsApplicationTransactionClient && !IsJoined);
+					CursorSetChanged(null, IsApplicationTransactionClient && !FIsJoined);
 			}
 		}
 		
@@ -293,11 +293,7 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 		
-		protected bool InternalWriteWhereClause
-		{
-			get { return FFlags[WriteWhereClauseMask]; }
-			set { FFlags[WriteWhereClauseMask] = value; }
-		}
+		protected bool FWriteWhereClause;
 
 		/// <summary> When true, the DataSet will automatically restrict the expression based on the Master/Detail relationship. </summary>
 		/// <remarks> 
@@ -310,23 +306,19 @@ namespace Alphora.Dataphor.DAE.Client
 		[Description("When true, the DataSet will automatically restrict the expression based on the Master/Detail relationship.")]
 		public bool WriteWhereClause
 		{
-			get { return InternalWriteWhereClause; }
+			get { return FWriteWhereClause; }
 			set
 			{
-				if (InternalWriteWhereClause != value)
+				if (FWriteWhereClause != value)
 				{
-					InternalWriteWhereClause = value;
+					FWriteWhereClause = value;
 					if (Active)
 						CursorSetChanged(null, true);
 				}
 			}
 		}
 
-		protected bool InternalUseBrowse
-		{
-			get { return FFlags[UseBrowseMask]; }
-			set { FFlags[UseBrowseMask] = value; }
-		}
+		protected bool FUseBrowse;
 
 		/// <summary> When true, the DataView will use a "browse" rather than an "order" cursor. </summary>
 		/// <remarks> 
@@ -339,21 +331,21 @@ namespace Alphora.Dataphor.DAE.Client
 		[RefreshProperties(RefreshProperties.Repaint)]
 		public bool UseBrowse
 		{
-			get { return InternalUseBrowse; }
+			get { return FUseBrowse; }
 			set 
 			{
-				if (InternalUseBrowse != value)
+				if (FUseBrowse != value)
 				{
 					if (Active)
 					{
 						using (Row LRow = RememberActive())
 						{
-							InternalUseBrowse = value; 
+							FUseBrowse = value; 
 							CursorSetChanged(LRow, true);
 						}
 					}
 					else
-						InternalUseBrowse = value;
+						FUseBrowse = value;
 				}
 			}
 		}
@@ -474,7 +466,7 @@ namespace Alphora.Dataphor.DAE.Client
 				}
 			}
 			
-			if (IsMasterSetup() && InternalWriteWhereClause)
+			if (IsMasterSetup() && FWriteWhereClause)
 			{
 				LExpression = MergeRestrictCondition
 				(
@@ -505,7 +497,7 @@ namespace Alphora.Dataphor.DAE.Client
 			
 			if (FOrderDefinition != null)
 			{
-				if (InternalUseBrowse)
+				if (FUseBrowse)
 				{
 					LBrowseExpression = new Language.D4.BrowseExpression();
 					LBrowseExpression.Expression = LExpression;
@@ -522,7 +514,7 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 			else if (FOrder != null)
 			{
-				if (InternalUseBrowse)
+				if (FUseBrowse)
 				{
 					LBrowseExpression = new BrowseExpression();
 					foreach (Schema.OrderColumn LColumn in FOrder.Columns)
@@ -659,7 +651,7 @@ namespace Alphora.Dataphor.DAE.Client
 					RollbackApplicationTransaction();
 					UnprepareApplicationTransactionServer();
 				}
-				else if (IsApplicationTransactionClient && IsJoined)
+				else if (IsApplicationTransactionClient && FIsJoined)
 					LeaveApplicationTransaction();
 				throw;
 			}
@@ -707,7 +699,7 @@ namespace Alphora.Dataphor.DAE.Client
 					RollbackApplicationTransaction();
 					UnprepareApplicationTransactionServer();
 				}
-				else if (IsApplicationTransactionClient && IsJoined)
+				else if (IsApplicationTransactionClient && FIsJoined)
 					LeaveApplicationTransaction();
 			}
 		}
@@ -724,11 +716,7 @@ namespace Alphora.Dataphor.DAE.Client
 		[DefaultValue(true)]
 		[Category("Behavior")]
 		[Description("Specifies whether or not to start or enlist in application transactions.")]
-		public bool UseApplicationTransactions
-		{
-			get { return FFlags[UseApplicationTransactionsMask]; }
-			set { FFlags[UseApplicationTransactionsMask] = value; }
-		}
+		public bool UseApplicationTransactions { get; set; }
 		
 		private EnlistMode FShouldEnlist;
 		/// <summary> Specifies whether or not to enlist in the application transaction of the master DataView. </summary>
@@ -808,20 +796,20 @@ namespace Alphora.Dataphor.DAE.Client
 		private Guid BeginApplicationTransaction(bool AIsInsert)
 		{
 			Guid LATID = FProcess.BeginApplicationTransaction(true, AIsInsert);
-			IsJoined = true;
+			FIsJoined = true;
 			return LATID;
 		}
 		
 		private void JoinApplicationTransaction(bool AIsInsert)
 		{
 			FProcess.JoinApplicationTransaction(ApplicationTransactionServer.ApplicationTransactionID, AIsInsert);
-			IsJoined = true;
+			FIsJoined = true;
 		}
 		
 		private void LeaveApplicationTransaction()
 		{
 			FProcess.LeaveApplicationTransaction();
-			IsJoined = false;
+			FIsJoined = false;
 		}
 		
 		private void PrepareApplicationTransaction()
@@ -832,26 +820,16 @@ namespace Alphora.Dataphor.DAE.Client
 		private void CommitApplicationTransaction()
 		{
 			FProcess.CommitApplicationTransaction(FApplicationTransactionID);
-			IsJoined = false;
+			FIsJoined = false;
 		}
 
 		private void RollbackApplicationTransaction()
 		{
 			FProcess.RollbackApplicationTransaction(FApplicationTransactionID);
-			IsJoined = false;
+			FIsJoined = false;
 		}
 		
-		private bool JoinAsInsert
-		{
-			get { return FFlags[JoinAsInsertMask]; }
-			set { FFlags[JoinAsInsertMask] = value; }
-		}
-
-		private bool IsJoined
-		{
-			get { return FFlags[IsJoinedMask]; }
-			set { FFlags[IsJoinedMask] = value; }
-		}
+		private bool FIsJoined;
 
 		private void PrepareApplicationTransactionServer(bool AIsInsert)
 		{

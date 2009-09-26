@@ -36,7 +36,7 @@ namespace Alphora.Dataphor.DAE.Client
 			FFields = new Schema.Objects(10);
 			FDataFields = new DataFields(this);
 			RefreshAfterPost = true;
-			InternalIsWriteOnly = false;
+			FIsWriteOnly = false;
 		}
 
 		public DataSet(IContainer AContainer) : this()
@@ -52,7 +52,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		protected override void Dispose(bool ADisposing)
 		{
-			InternalDisposing = true;
+			FDisposing = true;
 			try
 			{
 				try
@@ -87,15 +87,11 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 			finally
 			{
-				InternalDisposing = false;
+				FDisposing = false;
 			}
 		}
 		
-		protected bool InternalDisposing
-		{
-			get { return FFlags[DisposingMask]; }
-			set { FFlags[DisposingMask] = value; }
-		}
+		protected bool FDisposing;
 		
 		#region Buffer Maintenance
 
@@ -282,8 +278,8 @@ namespace Alphora.Dataphor.DAE.Client
 			FEndOffset = -1;
 			FActiveOffset = 0;
 			FCurrentOffset = -1;
-			InternalBOF = true;
-			InternalEOF = true;
+			FInternalBOF = true;
+			FInternalEOF = true;
 		}
 		
 		private void BufferActivate()
@@ -291,8 +287,8 @@ namespace Alphora.Dataphor.DAE.Client
 			FEndOffset = 0;
 			FActiveOffset = 0;
 			FCurrentOffset = 0;
-			InternalBOF = false;
-			InternalEOF = false;
+			FInternalBOF = false;
+			FInternalEOF = false;
 		}
 		
 		// Closes the buffer, finalizing the rows it contains, but leaves the buffer space intact. Used when closing the underlying cursor.
@@ -493,7 +489,7 @@ namespace Alphora.Dataphor.DAE.Client
 				}
 				finally
 				{
-					InternalBOF = true;
+					FInternalBOF = true;
 					ForcedDataChanged();
 				}
 			}
@@ -775,7 +771,7 @@ namespace Alphora.Dataphor.DAE.Client
 				InternalOpen();
 				CreateFields();
 				BufferUpdateCount(true);
-				InternalBOF = true;
+				FInternalBOF = true;
 				try
 				{
 					SetState(DataSetState.Browse);
@@ -839,7 +835,7 @@ namespace Alphora.Dataphor.DAE.Client
 			if (FState != AState)
 			{
 				FState = AState;
-				InternalIsModified = false;
+				FIsModified = false;
 				StateChanged();
 			}
 		}
@@ -887,8 +883,8 @@ namespace Alphora.Dataphor.DAE.Client
 			get { return FState != DataSetState.Inactive; }
 			set
 			{
-				if (Initializing)
-					DelayedActive = value;
+				if (FInitializing)
+					FDelayedActive = value;
 				else
 				{
 					if (value != (FState != DataSetState.Inactive))
@@ -939,48 +935,36 @@ namespace Alphora.Dataphor.DAE.Client
 
 		#region ISupportInitialize
 
-		private bool Initializing
-		{
-			get { return FFlags[InitializingMask]; }
-			set { FFlags[InitializingMask] = value; }
-		}
+		private bool FInitializing;
 
 		// The Active properties value during the intialization period defined in ISupportInitialize.
-		private bool DelayedActive
-		{
-			get { return FFlags[DelayedActiveMask]; }
-			set { FFlags[DelayedActiveMask] = value; }
-		}
+		private bool FDelayedActive;
 
 		/// <summary> Called to indicate that the properties of the DataSet are being read (and therefore DataSet should not activate yet). </summary>
 		public void BeginInit()
 		{
-			Initializing = true;
+			FInitializing = true;
 		}
 
 		/// <summary> Called to indicate that the properties of the DataSet have been read (and therefore the DataSet can be activated). </summary>
 		public virtual void EndInit()
 		{
-			Initializing = false;
-			Active = DelayedActive;
+			FInitializing = false;
+			Active = FDelayedActive;
 		}
 
 		#endregion
 
 		#region Navigation
 		
-		private bool InternalBOF
-		{
-			get { return FFlags[BOFMask]; }
-			set { FFlags[BOFMask] = value; }
-		}
+		private bool FInternalBOF;
 
 		/// <summary> True when the DataSet is on its first row. </summary>
 		/// <remarks> Note that this may not be set until attempting to navigate past the first row. </remarks>
 		[Browsable(false)]
 		public bool IsFirstRow
 		{
-			get { return InternalBOF || ((FActiveOffset >= 0) && ((FBuffer[FActiveOffset].RowFlag & RowFlag.BOF) != 0)); }
+			get { return FInternalBOF || ((FActiveOffset >= 0) && ((FBuffer[FActiveOffset].RowFlag & RowFlag.BOF) != 0)); }
 		}
 		
 		/// <summary> True when the DataSet is on its first row. </summary>
@@ -988,21 +972,17 @@ namespace Alphora.Dataphor.DAE.Client
 		[Browsable(false)]
 		public bool BOF
 		{
-			get { return InternalBOF; }
+			get { return FInternalBOF; }
 		}
 
-		private bool InternalEOF
-		{
-			get { return FFlags[EOFMask]; }
-			set { FFlags[EOFMask] = value; }
-		}
+		private bool FInternalEOF;
 
 		/// <summary> True when the DataSet is on its last row. </summary>
 		/// <remarks> Note that this may not be set until attempting to navigate past the last row. </remarks>
 		[Browsable(false)]
 		public bool IsLastRow
 		{
-			get { return InternalEOF || ((FActiveOffset >= 0) && ((FBuffer[FActiveOffset].RowFlag & RowFlag.EOF) != 0)); }
+			get { return FInternalEOF || ((FActiveOffset >= 0) && ((FBuffer[FActiveOffset].RowFlag & RowFlag.EOF) != 0)); }
 		}
 		
 		/// <summary> True when the DataSet is on its last row. </summary>
@@ -1010,7 +990,7 @@ namespace Alphora.Dataphor.DAE.Client
 		[Browsable(false)]
 		public bool EOF
 		{
-			get { return InternalEOF; }
+			get { return FInternalEOF; }
 		}
 
 		/// <summary> Navigates the DataSet to the first row in the data set. </summary>
@@ -1028,7 +1008,7 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 			finally
 			{
-				InternalBOF = true;
+				FInternalBOF = true;
 				DoDataChanged();
 			}
 		}
@@ -1046,7 +1026,7 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 			finally
 			{
-				InternalEOF = true;
+				FInternalEOF = true;
 				DoDataChanged();
 			}
 		}
@@ -1063,8 +1043,8 @@ namespace Alphora.Dataphor.DAE.Client
 				EnsureBrowseState();
 				if (((ADelta > 0) && !IsLastRow) || ((ADelta < 0) && !IsFirstRow))
 				{
-					InternalBOF = false;
-					InternalEOF = false;
+					FInternalBOF = false;
+					FInternalEOF = false;
 					int LOffsetDelta = 0;
 					bool LWillScroll;
 					try
@@ -1090,7 +1070,7 @@ namespace Alphora.Dataphor.DAE.Client
 								}
 								else
 								{
-									InternalEOF = true;
+									FInternalEOF = true;
 									break;
 								}
 							}
@@ -1116,7 +1096,7 @@ namespace Alphora.Dataphor.DAE.Client
 								}
 								else
 								{
-									InternalBOF = true;
+									FInternalBOF = true;
 									break;
 								}
 							}
@@ -1218,11 +1198,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		#region Modification
 
-		protected bool InternalIsModified
-		{
-			get { return FFlags[IsModifiedMask]; }
-			set { FFlags[IsModifiedMask] = true; }
-		}
+		protected bool FIsModified;
 		
 		/// <summary> Indicates whether the DataSet has been modified. </summary>
 		[Browsable(false)]
@@ -1231,14 +1207,16 @@ namespace Alphora.Dataphor.DAE.Client
 			get
 			{
 				CheckActive();
-				return InternalIsModified;
+				return FIsModified;
 			}
 		}
 
+		private bool FIsReadOnly;
+
 		protected virtual bool InternalIsReadOnly
 		{
-			get { return FFlags[IsReadOnlyMask]; }
-			set { FFlags[IsReadOnlyMask] = value; }
+			get { return FIsReadOnly; }
+			set { FIsReadOnly = value; }
 		}
 
 		/// <summary> When true, the DataSet's data cannot be modified. </summary>
@@ -1266,11 +1244,7 @@ namespace Alphora.Dataphor.DAE.Client
 				throw new ClientException(ClientException.Codes.IsReadOnly);
 		}
 		
-		protected virtual bool InternalIsWriteOnly
-		{
-			get { return FFlags[IsWriteOnlyMask]; }
-			set { FFlags[IsWriteOnlyMask] = value; }
-		}
+		protected bool FIsWriteOnly;
 
 		/// <summary> When true, the underlying data for the dataset will not be retrieved. </summary>
 		/// <remarks> 
@@ -1284,13 +1258,13 @@ namespace Alphora.Dataphor.DAE.Client
 		[Description("Write only state")]
 		public bool IsWriteOnly
 		{
-			get { return InternalIsWriteOnly; }
+			get { return FIsWriteOnly; }
 			set
 			{
-				if (InternalIsWriteOnly != value)
+				if (FIsWriteOnly != value)
 				{
 					CheckState(DataSetState.Inactive);
-					InternalIsWriteOnly = value;
+					FIsWriteOnly = value;
 				}
 			}
 		}
@@ -1298,7 +1272,7 @@ namespace Alphora.Dataphor.DAE.Client
 		/// <summary> Throws an exception if the DataSet is in WriteOnly mode and cannot be used to Edit or Delete </summary>
 		public virtual void CheckCanRead()
 		{
-			if (InternalIsWriteOnly)
+			if (FIsWriteOnly)
 				throw new ClientException(ClientException.Codes.IsWriteOnly);
 		}
 
@@ -1362,7 +1336,7 @@ namespace Alphora.Dataphor.DAE.Client
 					
 				InternalChangeColumn(AField, FOldRow, LActiveRow);
 					
-				InternalIsModified = true;
+				FIsModified = true;
 			}
 			finally
 			{
@@ -1378,7 +1352,7 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				SetState(DataSetState.Insert);
 				InitializeRow(FActiveOffset);
-				InternalIsModified = false;
+				FIsModified = false;
 				DoDataChanged();
 				DoAfterInsert();
 			}
@@ -1461,7 +1435,7 @@ namespace Alphora.Dataphor.DAE.Client
 				LLastRow.RowFlag &= ~RowFlag.EOF;
 			}
 			FActiveOffset = FEndOffset;
-			InternalBOF = false;
+			FInternalBOF = false;
 			EndInsertAppend();
 		}
 
@@ -1549,11 +1523,7 @@ namespace Alphora.Dataphor.DAE.Client
 		[Category("Behavior")]
 		[DefaultValue(true)]
 		[Description("Determines whether or not the dataset will attempt to refresh from the underlying cursor after a post has occurred.")]
-		public bool RefreshAfterPost
-		{
-			get { return FFlags[RefreshAfterPostMask]; }
-			set { FFlags[RefreshAfterPostMask] = value; }
-		}
+		public bool RefreshAfterPost { get; set; }
 		
 		/// <summary> Attempts to post the edited or inserted row (if there is one pending). </summary>
 		/// <remarks> 
@@ -1573,7 +1543,7 @@ namespace Alphora.Dataphor.DAE.Client
 				// Make sure that all details have posted
 				DoPrepareToPost();
 				InternalPost(FBuffer[FActiveOffset].Row);
-				InternalIsModified = false;
+				FIsModified = false;
 				SetState(DataSetState.Browse);
 				if (RefreshAfterPost)
 					Resync(false, false);
