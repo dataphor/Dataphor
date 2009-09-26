@@ -114,7 +114,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             {
                 LAncestors = LDocument.Ancestors;
                 LAncestor = MergeAncestors(LAncestors);
-                var LMerge = XDocument.Load(LDocument.Content);
+                var LMerge = XDocument.Load(new StringReader(LDocument.Content));
                 var LCurrent = new XDocument();
                 LCurrent.Add(new XElement(LAncestor.Root));
                 Inheritance.Merge(LCurrent, LMerge);
@@ -150,7 +150,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             {
                 try
                 {
-                    return XDocument.Load(LResultData.AsString);
+                    return XDocument.Load(new StringReader(LResultData.AsString));
                 }
                 catch (Exception LException)
                 {

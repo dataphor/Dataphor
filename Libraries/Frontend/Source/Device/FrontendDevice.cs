@@ -28,6 +28,7 @@ using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 using Schema = Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.Frontend.Server;
 using Alphora.Dataphor.Windows;
+using System.Xml.Linq;
 
 namespace Alphora.Dataphor.Frontend.Server.Device
 {
@@ -979,10 +980,8 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 
 		public string Merge(string AForm, string ADelta)
 		{
-			XmlDocument LForm = new XmlDocument();
-			LForm.LoadXml(AForm);
-			XmlDocument LDelta = new XmlDocument();
-			LDelta.LoadXml(ADelta);
+			XDocument LForm = XDocument.Load(new StringReader(AForm));
+			XDocument LDelta = XDocument.Load(new StringReader(ADelta));
 			Inheritance.Merge(LForm, LDelta);
 			StringWriter LWriter = new StringWriter();
 			LForm.Save(LWriter);
@@ -991,10 +990,8 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 
 		public string Difference(string AForm, string ADelta)
 		{
-			XmlDocument LForm = new XmlDocument();
-			LForm.LoadXml(AForm);
-			XmlDocument LDelta = new XmlDocument();
-			LDelta.LoadXml(ADelta);
+			XDocument LForm = XDocument.Load(new StringReader(AForm));
+			XDocument LDelta = XDocument.Load(new StringReader(ADelta));
 			StringWriter LWriter = new StringWriter();
 			Inheritance.Diff(LForm, LDelta).Save(LWriter);
 			return LWriter.ToString();
@@ -1034,14 +1031,13 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		private static string ProcessDilxDocument(Program AProgram, DilxDocument ADocument)
 		{
 			// Process ancestors
-			XmlDocument LCurrent = MergeAncestors(AProgram, ADocument.Ancestors);
+			XDocument LCurrent = MergeAncestors(AProgram, ADocument.Ancestors);
 
 			if (LCurrent == null)
 				return ADocument.Content;
 			else
 			{
-				XmlDocument LMerge = new XmlDocument();
-				LMerge.LoadXml(ADocument.Content);
+				XDocument LMerge = XDocument.Load(new StringReader(ADocument.Content));
 				Inheritance.Merge(LCurrent, LMerge);
 				StringWriter LWriter = new StringWriter();
 				LCurrent.Save(LWriter);
@@ -1049,9 +1045,9 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 
-		private static XmlDocument MergeAncestors(Program AProgram, Ancestors AAncestors)
+		private static XDocument MergeAncestors(Program AProgram, Ancestors AAncestors)
 		{
-			XmlDocument LDocument = null;
+			XDocument LDocument = null;
 			// Process any ancestors
 			foreach (string LAncestor in AAncestors)
 			{
@@ -1063,7 +1059,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			return LDocument;
 		}
 
-		private static XmlDocument LoadAncestor(Program AProgram, string ADocumentExpression)
+		private static XDocument LoadAncestor(Program AProgram, string ADocumentExpression)
 		{
 			IServerProcess LProcess = ((IServerProcess)AProgram.ServerProcess);
 			IServerExpressionPlan LPlan = LProcess.PrepareExpression(ADocumentExpression, null);
@@ -1071,17 +1067,15 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			{
 				using (Scalar LScalar = (Scalar)LPlan.Evaluate(null))
 				{
-					XmlDocument LResult = new XmlDocument();
 					string LDocument = LScalar.AsString;
 					try
 					{
-						LResult.LoadXml(LDocument);
+						return XDocument.Load(new StringReader(LDocument));
 					}
 					catch (Exception AException)
 					{
 						throw new ServerException(ServerException.Codes.InvalidXMLDocument, AException, LDocument);
 					}
-					return LResult;
 				}
 			}
 			finally
