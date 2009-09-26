@@ -169,40 +169,40 @@
       <Link>Client\Client\ClientStream.cs</Link>
     </Compile>
     <Compile Include="..\Client\Contracts\IClientDataphorService.cs">
-      <Link>Contracts\IClientDataphorService.cs</Link>
+      <Link>Client\Contracts\IClientDataphorService.cs</Link>
     </Compile>
     <Compile Include="..\Client\Server\LocalBatch.cs">
-      <Link>Server\LocalBatch.cs</Link>
+      <Link>Client\Server\LocalBatch.cs</Link>
     </Compile>
     <Compile Include="..\Client\Server\LocalCursor.cs">
-      <Link>Server\LocalCursor.cs</Link>
+      <Link>Client\Server\LocalCursor.cs</Link>
     </Compile>
     <Compile Include="..\Client\Server\LocalPlan.cs">
-      <Link>Server\LocalPlan.cs</Link>
+      <Link>Client\Server\LocalPlan.cs</Link>
     </Compile>
     <Compile Include="..\Client\Server\LocalProcess.cs">
-      <Link>Server\LocalProcess.cs</Link>
+      <Link>Client\Server\LocalProcess.cs</Link>
     </Compile>
     <Compile Include="..\Client\Server\LocalScript.cs">
-      <Link>Server\LocalScript.cs</Link>
+      <Link>Client\Server\LocalScript.cs</Link>
     </Compile>
     <Compile Include="..\Client\Server\LocalServer.cs">
-      <Link>Server\LocalServer.cs</Link>
+      <Link>Client\Server\LocalServer.cs</Link>
     </Compile>
     <Compile Include="..\Client\Server\LocalServerObject.cs">
-      <Link>Server\LocalServerObject.cs</Link>
+      <Link>Client\Server\LocalServerObject.cs</Link>
     </Compile>
     <Compile Include="..\Client\Server\LocalServerStructures.cs">
-      <Link>Server\LocalServerStructures.cs</Link>
+      <Link>Client\Server\LocalServerStructures.cs</Link>
     </Compile>
     <Compile Include="..\Client\Server\LocalSession.cs">
-      <Link>Server\LocalSession.cs</Link>
+      <Link>Client\Server\LocalSession.cs</Link>
     </Compile>
     <Compile Include="..\Client\Streams\LocalStream.cs">
-      <Link>Streams\LocalStream.cs</Link>
+      <Link>Client\Streams\LocalStream.cs</Link>
     </Compile>
     <Compile Include="..\Client\Streams\LocalStreamManager.cs">
-      <Link>Streams\LocalStreamManager.cs</Link>
+      <Link>Client\Streams\LocalStreamManager.cs</Link>
     </Compile>
     <Compile Include="..\DAE.Client\Alias.cs">
       <Link>DAE.Client\Alias.cs</Link>
