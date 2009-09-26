@@ -39,6 +39,7 @@
   <ItemGroup>
     <Reference Include="System.Net" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Windows" />
     <Reference Include="mscorlib" />
     <Reference Include="system" />
@@ -136,6 +137,72 @@
     </Compile>
     <Compile Include="..\Base\ValidatingBaseList.cs">
       <Link>Base\ValidatingBaseList.cs</Link>
+    </Compile>
+    <Compile Include="..\Client\Client\ClientBatch.cs">
+      <Link>Client\Client\ClientBatch.cs</Link>
+    </Compile>
+    <Compile Include="..\Client\Client\ClientConnection.cs">
+      <Link>Client\Client\ClientConnection.cs</Link>
+    </Compile>
+    <Compile Include="..\Client\Client\ClientCursor.cs">
+      <Link>Client\Client\ClientCursor.cs</Link>
+    </Compile>
+    <Compile Include="..\Client\Client\ClientPlan.cs">
+      <Link>Client\Client\ClientPlan.cs</Link>
+    </Compile>
+    <Compile Include="..\Client\Client\ClientProcess.cs">
+      <Link>Client\Client\ClientProcess.cs</Link>
+    </Compile>
+    <Compile Include="..\Client\Client\ClientScript.cs">
+      <Link>Client\Client\ClientScript.cs</Link>
+    </Compile>
+    <Compile Include="..\Client\Client\ClientServer.cs">
+      <Link>Client\Client\ClientServer.cs</Link>
+    </Compile>
+    <Compile Include="..\Client\Client\ClientSession.cs">
+      <Link>Client\Client\ClientSession.cs</Link>
+    </Compile>
+    <Compile Include="..\Client\Client\ClientStream.cs">
+      <Link>Client\Client\ClientStream.cs</Link>
+    </Compile>
+    <Compile Include="..\Client\Contracts\IClientDataphorService.cs">
+      <Link>Client\Contracts\IClientDataphorService.cs</Link>
+    </Compile>
+    <Compile Include="..\Client\Server\LocalBatch.cs">
+      <Link>Client\Server\LocalBatch.cs</Link>
+    </Compile>
+    <Compile Include="..\Client\Server\LocalCursor.cs">
+      <Link>Client\Server\LocalCursor.cs</Link>
+    </Compile>
+    <Compile Include="..\Client\Server\LocalPlan.cs">
+      <Link>Client\Server\LocalPlan.cs</Link>
+    </Compile>
+    <Compile Include="..\Client\Server\LocalProcess.cs">
+      <Link>Client\Server\LocalProcess.cs</Link>
+    </Compile>
+    <Compile Include="..\Client\Server\LocalScript.cs">
+      <Link>Client\Server\LocalScript.cs</Link>
+    </Compile>
+    <Compile Include="..\Client\Server\LocalServer.cs">
+      <Link>Client\Server\LocalServer.cs</Link>
+    </Compile>
+    <Compile Include="..\Client\Server\LocalServerObject.cs">
+      <Link>Client\Server\LocalServerObject.cs</Link>
+    </Compile>
+    <Compile Include="..\Client\Server\LocalServerStructures.cs">
+      <Link>Client\Server\LocalServerStructures.cs</Link>
+    </Compile>
+    <Compile Include="..\Client\Server\LocalSession.cs">
+      <Link>Client\Server\LocalSession.cs</Link>
+    </Compile>
+    <Compile Include="..\Client\Server\ServerFactory.cs">
+      <Link>Client\Server\ServerFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\Client\Streams\LocalStream.cs">
+      <Link>Client\Stream\LocalStream.cs</Link>
+    </Compile>
+    <Compile Include="..\Client\Streams\LocalStreamManager.cs">
+      <Link>Client\Stream\LocalStreamManager.cs</Link>
     </Compile>
     <Compile Include="..\DAE.Client\ClientException.cs">
       <Link>DAE.Client\ClientException.cs</Link>
