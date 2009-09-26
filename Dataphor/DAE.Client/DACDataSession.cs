@@ -23,7 +23,9 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public DACDataSession() : base()
 		{
+			#if !SILVERLIGHT
 			LicenseUtility.Validate(this.GetType(), this);
+			#endif
 		}
 		
 		private Engine FServer;
