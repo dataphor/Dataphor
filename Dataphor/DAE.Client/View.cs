@@ -35,7 +35,7 @@ namespace Alphora.Dataphor.DAE.Client
 	/// </remarks>
 	[ToolboxItem(true)]
 	[ToolboxBitmap(typeof(Alphora.Dataphor.DAE.Client.DataView),"Icons.DataView.bmp")]
-	[DesignerSerializer(typeof(Alphora.Dataphor.DAE.Client.Design.ActiveLastSerializer), typeof(CodeDomSerializer))]
+	[DesignerSerializer("Alphora.Dataphor.DAE.Client.Design.ActiveLastSerializer,Alphora.Dataphor.DAE.Client", "System.ComponentModel.Design.Serialization.CodeDomSerializer,System.Design")]
 	public class DataView : TableDataSet
 	{
 		public DataView()

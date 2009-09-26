@@ -405,7 +405,57 @@ namespace Alphora.Dataphor.DAE.Server
 		private List<string> FFilesCached = new List<string>();
 		private List<string> FAssembliesCached = new List<string>();
 		
-		#if !SILVERLIGHT
+		#if SILVERLIGHT
+
+		public static byte[] LoadAssembyFromRemote(LocalProcess AProcess, string ALibraryName, string AFileName)
+		{
+			using (Stream LSourceStream = new RemoteStreamWrapper(AProcess.RemoteProcess.GetFile(ALibraryName, AFileName)))
+			{
+				byte[] LResult = new byte[LSourceStream.Length];
+				LSourceStream.Read(LResult, 0, LResult.Length);
+				return LResult;
+			}
+		}
+		
+		public void ClassLoaderMissed(LocalProcess AProcess, Schema.ClassLoader AClassLoader, ClassDefinition AClassDefinition)
+		{
+			AcquireCacheLock(AProcess, LockMode.Exclusive);
+			try
+			{
+				if (!AClassLoader.Classes.Contains(AClassDefinition.ClassName))
+				{
+					// The local process has attempted to create an object from an unknown class alias.
+					// Use the remote server to attempt to download and install the necessary assemblies.
+
+					// Retrieve the list of all files required to load the assemblies required to load the class.
+					ServerFileInfo[] LFileInfos = AProcess.RemoteProcess.GetFileNames(AClassDefinition.ClassName);
+
+					for (int LIndex = 0; LIndex < LFileInfos.Length; LIndex++)
+					{
+						if (LFileInfos[LIndex].IsDotNetAssembly && !FFilesCached.Contains(LFileInfos[LIndex].FileName))
+						{
+							try
+							{
+								Assembly LAssembly = Assembly.Load(LoadAssembyFromRemote(AProcess, LFileInfos[LIndex].LibraryName, LFileInfos[LIndex].FileName));
+								if (LFileInfos[LIndex].ShouldRegister && !AClassLoader.Assemblies.Contains(LAssembly.GetName()))
+									AClassLoader.RegisterAssembly(Catalog.LoadedLibraries[Engine.CSystemLibraryName], LAssembly);
+								FAssembliesCached.Add(LFileInfos[LIndex].FileName);
+								FFilesCached.Add(LFileInfos[LIndex].FileName);
+							}
+							catch (IOException E)
+							{
+								FInternalServer.LogError(E);
+							}
+						}
+					}
+				}
+			}
+			finally
+			{
+				ReleaseCacheLock(AProcess, LockMode.Exclusive);
+			}
+		}
+		#else
 		private string FLocalBinDirectory;
 		private string LocalBinDirectory
 		{
@@ -472,7 +522,6 @@ namespace Alphora.Dataphor.DAE.Server
 			
 			return LFullFileName;
 		}
-		#endif
 		
 		public void ClassLoaderMissed(LocalProcess AProcess, Schema.ClassLoader AClassLoader, ClassDefinition AClassDefinition)
 		{
@@ -510,6 +559,7 @@ namespace Alphora.Dataphor.DAE.Server
 				ReleaseCacheLock(AProcess, LockMode.Exclusive);
 			}
 		}
+		#endif
 
         /// <summary>Starts the server instance.  If it is already running, the call has no effect.</summary>
         public void Start()
