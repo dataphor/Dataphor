@@ -210,9 +210,6 @@
     <Compile Include="..\DAE.Client\ClientException.cs">
       <Link>DAE.Client\ClientException.cs</Link>
     </Compile>
-    <Compile Include="..\DAE.Client\DACLicenseProvider.cs">
-      <Link>DAE.Client\DACLicenseProvider.cs</Link>
-    </Compile>
     <Compile Include="..\DAE.Client\DAEDataSet.cs">
       <Link>DAE.Client\DAEDataSet.cs</Link>
     </Compile>
