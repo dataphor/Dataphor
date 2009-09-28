@@ -633,10 +633,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			this[AIndex] = AValue;
 		}
 		
+		/// <summary>
+		/// Returns the native representation if the value is stored in non-native form (as a StreamID)
+		/// </summary>
 		public object GetNativeValue(int AIndex)
 		{
 			// TODO: This should recursively ensure that no contained values are non-native
-			return GetValue(AIndex).AsNative;
+			if (HasNonNativeValue(AIndex))
+				return GetValue(AIndex).AsNative;
+				
+			return this[AIndex];
 		}
 
 		/// <summary>This is a by-reference access of the value, changes made to the resulting DataValue will be refelected in the actual row.</summary>
