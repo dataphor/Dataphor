@@ -10,9 +10,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.ServiceModel;
+using System.ServiceModel.Channels;
 
 using Alphora.Dataphor.DAE.Contracts;
-using System.ServiceModel.Channels;
+using Alphora.Dataphor.DAE.NativeCLI;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -88,7 +89,7 @@ namespace Alphora.Dataphor.DAE.Server
 					throw new NotSupportedException();
 					
 				ServerConfiguration LServer = InstanceManager.LoadConfiguration().Instances[AInstanceName];
-				return DataphorServiceUtility.BuildURI(Environment.MachineName, LServer.PortNumber, LServer.Name);
+				return DataphorServiceUtility.BuildInstanceURI(Environment.MachineName, LServer.PortNumber, LServer.Name);
 			}
 			catch (Exception LException)
 			{

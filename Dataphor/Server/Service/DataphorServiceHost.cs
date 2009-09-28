@@ -18,6 +18,7 @@ namespace Alphora.Dataphor.DAE.Service
 	using Alphora.Dataphor.BOP;
 	using Alphora.Dataphor.DAE.Server;
 	using Alphora.Dataphor.DAE.Contracts;
+	using Alphora.Dataphor.DAE.NativeCLI;
 
 	public class DataphorServiceHost
 	{
@@ -30,6 +31,9 @@ namespace Alphora.Dataphor.DAE.Service
 		private RemoteServer FRemoteServer;
 		private DataphorService FService;
 		private ServiceHost FServiceHost;
+		private NativeServer FNativeServer;
+		private NativeCLIService FNativeService;
+		private ServiceHost FNativeServiceHost;
 		
 		public bool IsActive { get { return FServer != null; } }
 		
@@ -76,8 +80,10 @@ namespace Alphora.Dataphor.DAE.Service
 					FServer = new Server();
 					LInstance.ApplyTo(FServer);
 					FRemoteServer = new RemoteServer(FServer);
+					FNativeServer = new NativeServer(FServer);
 					FServer.Start();
 					FService = new DataphorService(FRemoteServer);
+					FNativeService = new NativeCLIService(FNativeServer);
 
 					// TODO: Enable configuration of endpoints through instances or app.config files
 					FServiceHost = new ServiceHost(FService);
@@ -86,10 +92,21 @@ namespace Alphora.Dataphor.DAE.Service
 					(
 						typeof(IDataphorService), 
 						new CustomBinding(new BinaryMessageEncodingBindingElement(), new HttpTransportBindingElement()), 
-						DataphorServiceUtility.BuildURI(Environment.MachineName, LInstance.PortNumber, LInstance.Name)
+						DataphorServiceUtility.BuildInstanceURI(Environment.MachineName, LInstance.PortNumber, LInstance.Name)
 					);
 
 					FServiceHost.Open();
+					
+					FNativeServiceHost = new ServiceHost(FNativeService);
+					
+					FNativeServiceHost.AddServiceEndpoint
+					(
+						typeof(INativeCLIService),
+						new CustomBinding(new BinaryMessageEncodingBindingElement(), new HttpTransportBindingElement()),
+						DataphorServiceUtility.BuildNativeInstanceURI(Environment.MachineName, LInstance.PortNumber, LInstance.Name)
+					);
+					
+					FNativeServiceHost.Open();
 				}
 				catch
 				{
@@ -101,6 +118,13 @@ namespace Alphora.Dataphor.DAE.Service
 		
 		public void Stop()
 		{
+			if (FNativeServiceHost != null)
+			{
+				if (FNativeServiceHost.State != CommunicationState.Faulted)
+					FNativeServiceHost.BeginClose(null, null);
+				FNativeServiceHost = null;
+			}
+			
 			if (FServiceHost != null)
 			{
 				if (FServiceHost.State != CommunicationState.Faulted)

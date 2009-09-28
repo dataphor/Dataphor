@@ -8,38 +8,32 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 
-using Alphora.Dataphor.DAE.NativeCLI;
 using Alphora.Dataphor.DAE.Language;
 
-namespace Alphora.Dataphor.DAE.Server
+namespace Alphora.Dataphor.DAE.NativeCLI
 {
 	public static class NativeCLIUtility
 	{
-		public static IsolationLevel SystemDataIsolationLevelToIsolationLevel(System.Data.IsolationLevel AIsolationLevel)
+		public static IsolationLevel NativeIsolationLevelToIsolationLevel(NativeIsolationLevel AIsolationLevel)
 		{
 			switch (AIsolationLevel)
 			{
-				case System.Data.IsolationLevel.ReadUncommitted: return IsolationLevel.Browse;
-				case System.Data.IsolationLevel.ReadCommitted: return IsolationLevel.CursorStability;
-				case System.Data.IsolationLevel.RepeatableRead: 
-				case System.Data.IsolationLevel.Serializable: return IsolationLevel.Isolated;
-				case System.Data.IsolationLevel.Chaos:
-				case System.Data.IsolationLevel.Snapshot:
-				case System.Data.IsolationLevel.Unspecified: 
-				default: throw new ArgumentException("Chaos, snapshot, and unspecified isolation levels are not supported.");
+				case NativeIsolationLevel.Browse: return IsolationLevel.Browse;
+				case NativeIsolationLevel.CursorStability: return IsolationLevel.CursorStability;
+				case NativeIsolationLevel.Isolated: return IsolationLevel.Isolated;
+				default: throw new ArgumentOutOfRangeException("AIsolationLevel");
 			}
 		}
 		
-		public static System.Data.IsolationLevel IsolationLevelToSystemDataIsolationLevel(IsolationLevel AIsolationLevel)
+		public static NativeIsolationLevel IsolationLevelToNativeIsolationLevel(IsolationLevel AIsolationLevel)
 		{
 			switch (AIsolationLevel)
 			{
-				case IsolationLevel.Isolated : return System.Data.IsolationLevel.Serializable;
-				case IsolationLevel.CursorStability : return System.Data.IsolationLevel.ReadCommitted;
-				case IsolationLevel.Browse : return System.Data.IsolationLevel.ReadUncommitted;
+				case IsolationLevel.Isolated : return NativeIsolationLevel.Isolated;
+				case IsolationLevel.CursorStability : return NativeIsolationLevel.CursorStability;
+				case IsolationLevel.Browse : return NativeIsolationLevel.Browse;
+				default: throw new ArgumentOutOfRangeException("AIsolationLevel");
 			}
-			
-			return System.Data.IsolationLevel.Unspecified;
 		}
 
 		public static SessionInfo NativeSessionInfoToSessionInfo(NativeSessionInfo ANativeSessionInfo)
@@ -50,7 +44,7 @@ namespace Alphora.Dataphor.DAE.Server
 			LSessionInfo.DefaultLibraryName = ANativeSessionInfo.DefaultLibraryName;
 			LSessionInfo.HostName = ANativeSessionInfo.HostName;
 			LSessionInfo.DefaultUseDTC = ANativeSessionInfo.DefaultUseDTC;
-			LSessionInfo.DefaultIsolationLevel = NativeCLIUtility.SystemDataIsolationLevelToIsolationLevel(ANativeSessionInfo.DefaultIsolationLevel);
+			LSessionInfo.DefaultIsolationLevel = NativeIsolationLevelToIsolationLevel(ANativeSessionInfo.DefaultIsolationLevel);
 			LSessionInfo.DefaultUseImplicitTransactions = ANativeSessionInfo.DefaultUseImplicitTransactions;
 			LSessionInfo.DefaultMaxStackDepth = ANativeSessionInfo.DefaultMaxStackDepth;
 			LSessionInfo.DefaultMaxCallDepth = ANativeSessionInfo.DefaultMaxCallDepth;
@@ -59,14 +53,14 @@ namespace Alphora.Dataphor.DAE.Server
 			return LSessionInfo;
 		}
 
-		public static NativeCLI.ErrorSeverity DataphorSeverityToNativeCLISeverity(ErrorSeverity ASeverity)
+		public static NativeCLI.ErrorSeverity DataphorSeverityToNativeCLISeverity(Dataphor.ErrorSeverity ASeverity)
 		{
 			switch (ASeverity)
 			{
-				case ErrorSeverity.User : return NativeCLI.ErrorSeverity.User;
-				case ErrorSeverity.Application : return NativeCLI.ErrorSeverity.Application;
-				case ErrorSeverity.System : return NativeCLI.ErrorSeverity.System;
-				case ErrorSeverity.Environment : return NativeCLI.ErrorSeverity.Environment;
+				case Dataphor.ErrorSeverity.User : return NativeCLI.ErrorSeverity.User;
+				case Dataphor.ErrorSeverity.Application : return NativeCLI.ErrorSeverity.Application;
+				case Dataphor.ErrorSeverity.System : return NativeCLI.ErrorSeverity.System;
+				case Dataphor.ErrorSeverity.Environment : return NativeCLI.ErrorSeverity.Environment;
 			}
 			
 			return NativeCLI.ErrorSeverity.Unspecified;

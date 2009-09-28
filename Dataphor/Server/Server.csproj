@@ -60,6 +60,7 @@
     <Compile Include="Connection\MSSQLConnection.cs" />
     <Compile Include="Connection\MSSQLServerCursor.cs" />
     <Compile Include="Contracts\IListenerService.cs" />
+    <Compile Include="Contracts\INativeCLIService.cs" />
     <Compile Include="Device.Catalog\CatalogDevicePlan.cs" />
     <Compile Include="Device.Catalog\CatalogDeviceTable.cs" />
     <Compile Include="Device.Catalog\ServerCatalogDevice.cs" />
@@ -77,11 +78,11 @@
     <Compile Include="Server\CatalogCache.cs" />
     <Compile Include="Server\InstanceManager.cs" />
     <Compile Include="Service\ListenerService.cs" />
-    <Compile Include="Server\NativeCLIUtility.cs" />
-    <Compile Include="Server\NativeMarshal.cs" />
-    <Compile Include="Server\NativeServer.cs" />
-    <Compile Include="Server\NativeServerCLI.cs" />
-    <Compile Include="Server\NativeSession.cs" />
+    <Compile Include="NativeCLI\NativeCLIUtility.cs" />
+    <Compile Include="NativeCLI\NativeMarshal.cs" />
+    <Compile Include="NativeCLI\NativeServer.cs" />
+    <Compile Include="NativeCLI\NativeCLIService.cs" />
+    <Compile Include="NativeCLI\NativeSession.cs" />
     <Compile Include="Server\RemoteServer.cs" />
     <Compile Include="Server\RemoteServerBatch.cs" />
     <Compile Include="Server\RemoteServerConnection.cs" />

@@ -6,10 +6,11 @@
 using System;
 using System.Text;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace Alphora.Dataphor.DAE.NativeCLI
 {
-	[Serializable]	
+	[DataContract]
 	public class NativeSessionHandle
 	{
 		public NativeSessionHandle(Guid AID)
@@ -17,13 +18,17 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			ID = AID;
 		}
 		
+		[DataMember]
 		public Guid ID;
 	}
 	
-	[Serializable]
+	[DataContract]
+	public enum NativeIsolationLevel { Browse, CursorStability, Isolated };
+	
+	[DataContract]
 	public enum NativeModifier { In, Var, Out }
 	
-	[Serializable]	
+	[DataContract]
 	public struct NativeParam
 	{
 		public string Name;
@@ -32,10 +37,10 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		public object Value;
 	}
 	
-	[Serializable]
+	[DataContract]
 	public enum NativeExecutionOptions { Default, SchemaOnly }
 	
-	[Serializable]	
+	[DataContract]
 	public struct NativeExecuteOperation
 	{
 		public string Statement;
@@ -43,43 +48,43 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		public NativeExecutionOptions Options;
 	}
 	
-	[Serializable]	
+	[DataContract]
 	public abstract class NativeValue { }
 	
-	[Serializable]	
+	[DataContract]
 	public class NativeScalarValue : NativeValue
 	{
 		public string DataTypeName;
 		public object Value;
 	}
 	
-	[Serializable]	
+	[DataContract]
 	public class NativeListValue : NativeValue
 	{
 		public NativeValue[] Elements;
 	}
 	
-	[Serializable]	
+	[DataContract]
 	public struct NativeColumn
 	{
 		public string Name;
 		public string DataTypeName;
 	}
 	
-	[Serializable]
+	[DataContract]
 	public struct NativeKey
 	{
 		public string[] KeyColumns;
 	}
 	
-	[Serializable]	
+	[DataContract]
 	public class NativeRowValue : NativeValue
 	{
 		public NativeColumn[] Columns;
 		public object[] Values;
 	}
 
-	[Serializable]	
+	[DataContract]
 	public class NativeTableValue : NativeValue
 	{
 		public NativeColumn[] Columns;
@@ -87,7 +92,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		public object[][] Rows;
 	}
 	
-	[Serializable]
+	[DataContract]
 	public class NativeResult
 	{
 		public NativeParam[] Params;

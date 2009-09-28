@@ -12,9 +12,14 @@ namespace Alphora.Dataphor.DAE.Contracts
 	{
 		public const int CDefaultListenerPortNumber = 8060;
 		
-		public static string BuildURI(string AHostName, int APortNumber, string AInstanceName)
+		public static string BuildInstanceURI(string AHostName, int APortNumber, string AInstanceName)
 		{
 			return String.Format("http://{0}:{1}/{2}/service", AHostName, APortNumber, AInstanceName);
+		}
+		
+		public static string BuildNativeInstanceURI(string AHostName, int APortNumber, string AInstanceName)
+		{
+			return String.Format("http://{0}:{1}/{2}/service/native", AHostName, APortNumber, AInstanceName);
 		}
 		
 		public static string BuildListenerURI(string AHostName)

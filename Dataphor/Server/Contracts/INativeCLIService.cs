@@ -4,11 +4,13 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 using System;
-using System.Data;
 using System.Text;
 using System.Collections.Generic;
+using System.ServiceModel;
 
-namespace Alphora.Dataphor.DAE.NativeCLI
+using Alphora.Dataphor.DAE.NativeCLI;
+
+namespace Alphora.Dataphor.DAE.Contracts
 {
 	/// <summary>
 	/// Defines the interface for a simple, optionally stateless CLI for the Dataphor server.
@@ -29,7 +31,8 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 	/// server.
 	/// </para>
 	/// </remarks>
-	public interface INativeCLI
+	[ServiceContract]
+	public interface INativeCLIService
 	{
 		#region Session Management
 
@@ -42,6 +45,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		/// establish a connection as necessary.
 		/// </remarks>
 		/// <returns>A session handle that can be used in subsequent calls.</returns>
+		[OperationContract]
 		NativeSessionHandle StartSession(NativeSessionInfo ASessionInfo);
 		
 		/// <summary>
@@ -50,6 +54,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		/// <remarks>
 		/// Once a session has been stopped, the session handle is no longer valid.
 		/// </remarks>
+		[OperationContract]
 		void StopSession(NativeSessionHandle ASessionHandle);
 
 		#endregion
@@ -59,7 +64,8 @@ namespace Alphora.Dataphor.DAE.NativeCLI
         /// <summary>
 		/// Begins a new transaction.
 		/// </summary>
-        void BeginTransaction(NativeSessionHandle ASessionHandle, IsolationLevel AIsolationLevel);
+		[OperationContract]
+        void BeginTransaction(NativeSessionHandle ASessionHandle, NativeIsolationLevel AIsolationLevel);
         
         /// <summary>
 		/// Prepares a transaction for commit.
@@ -69,6 +75,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
         /// It is not necessary to call this to commit the transaction, it is exposed to allow the process to participate in
         /// 2PC distributed transactions.
         /// </remarks>
+		[OperationContract]
         void PrepareTransaction(NativeSessionHandle ASessionHandle);
         
         /// <summary>
@@ -79,6 +86,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
         /// Reduces the transaction nesting level by one.  
         /// Will raise if no transaction is currently active.
         /// </remarks>
+		[OperationContract]
         void CommitTransaction(NativeSessionHandle ASessionHandle);
         
         /// <summary>
@@ -88,11 +96,13 @@ namespace Alphora.Dataphor.DAE.NativeCLI
         /// Reduces the transaction nesting level by one.
         /// Will raise if no transaction is currently active.
         /// </remarks>
+		[OperationContract]
         void RollbackTransaction(NativeSessionHandle ASessionHandle);
         
         /// <summary>
 		/// Returns the number of active transactions.
 		/// </summary>
+		[OperationContract]
         int GetTransactionCount(NativeSessionHandle ASessionHandle);
 
 		#endregion
@@ -115,7 +125,8 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		/// </para>
 		/// </remarks>
 		/// <returns>The result of the execution, if the statement is an expression, null otherwise.</returns>
-		NativeResult Execute(NativeSessionInfo ASessionInfo, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions);
+		[OperationContract]
+		NativeResult ExecuteStatement(NativeSessionInfo ASessionInfo, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions);
 
 		/// <summary>
 		/// Executes a series of D4 statements and the returns the results, if any.
@@ -126,7 +137,8 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		/// </remarks>
 		/// <param name="AOperations">The operations to be executed.</param>
 		/// <returns>An array of NativeResult objects containing the results of the executions, if any.</returns>
-		NativeResult[] Execute(NativeSessionInfo ASessionInfo, NativeExecuteOperation[] AOperations);
+		[OperationContract]
+		NativeResult[] ExecuteStatements(NativeSessionInfo ASessionInfo, NativeExecuteOperation[] AOperations);
 		
 		/// <summary>
 		/// Executes a D4 statement and returns the result, if any.
@@ -140,14 +152,16 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		/// </para>
 		/// </remarks>
 		/// <returns>The result of the execution, if the statement is an expression, null otherwise.</returns>
-		NativeResult Execute(NativeSessionHandle ASessionHandle, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions);
+		[OperationContract]
+		NativeResult SessionExecuteStatement(NativeSessionHandle ASessionHandle, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions);
 
 		/// <summary>
-		/// Executes a series of D4 statements and the returns the results, if any.
+		/// Executes a series of D4 statements and returns the results, if any.
 		/// </summary>
 		/// <param name="AOperations">The operations to be executed.</param>
 		/// <returns>An array of NativeResult objects containing the results of the executions, if any.</returns>
-		NativeResult[] Execute(NativeSessionHandle ASessionHandle, NativeExecuteOperation[] AOperations);
+		[OperationContract]
+		NativeResult[] SessionExecuteStatements(NativeSessionHandle ASessionHandle, NativeExecuteOperation[] AOperations);
 		
 		#endregion
 	}

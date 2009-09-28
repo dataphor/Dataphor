@@ -32,27 +32,25 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Runtime.Remoting" />
+    <Reference Include="System.Runtime.Serialization">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.ServiceModel">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="INativeCLI.cs" />
-    <Compile Include="LoggingClientSink.cs" />
+    <Compile Include="IClientNativeCLIService.cs" />
     <Compile Include="NativeCLI.cs" />
     <Compile Include="NativeCLISession.cs" />
     <Compile Include="NativeCLIException.cs" />
     <Compile Include="NativeSessionInfo.cs" />
     <Compile Include="NativeStructures.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RemotingUtility.cs" />
     <Compile Include="SecurityUtility.cs" />
   </ItemGroup>
   <ItemGroup>

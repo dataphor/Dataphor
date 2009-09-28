@@ -8,9 +8,7 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 
-using Alphora.Dataphor.DAE.NativeCLI;
-
-namespace Alphora.Dataphor.DAE.Server
+namespace Alphora.Dataphor.DAE.NativeCLI
 {
 	/// <summary>
 	/// Manages incoming Native CLI requests for a specific Dataphor server instance.
@@ -125,11 +123,11 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		public void BeginTransaction(NativeSessionHandle ASessionHandle, System.Data.IsolationLevel AIsolationLevel)
+		public void BeginTransaction(NativeSessionHandle ASessionHandle, NativeIsolationLevel AIsolationLevel)
 		{
 			try
 			{
-				GetNativeSession(ASessionHandle).Process.BeginTransaction(NativeCLIUtility.SystemDataIsolationLevelToIsolationLevel(AIsolationLevel));
+				GetNativeSession(ASessionHandle).Process.BeginTransaction(NativeCLIUtility.NativeIsolationLevelToIsolationLevel(AIsolationLevel));
 			}
 			catch (Exception LException)
 			{

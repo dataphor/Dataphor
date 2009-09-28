@@ -1,94 +1,22 @@
-﻿using System;
+﻿/*
+	Dataphor
+	© Copyright 2000-2009 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.ServiceModel;
-using Alphora.Dataphor.DAE.Contracts;
 using System.ServiceModel.Channels;
+
+using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Dataphor.DAE.Listener
 {
-	public class ListenerClient : IDisposable
+	public class ListenerClient : ServiceClient<IClientListenerService>
 	{
-		public ListenerClient(string AHostName)
-		{
-			FChannelFactory =
-				new ChannelFactory<IClientListenerService>
-				(
-					new CustomBinding(new BinaryMessageEncodingBindingElement(), new HttpTransportBindingElement()), 
-					new EndpointAddress(DataphorServiceUtility.BuildListenerURI(AHostName))
-				);
-		}
+		public ListenerClient(string AHostName) : base(DataphorServiceUtility.BuildListenerURI(AHostName)) { }
 		
-		public void Dispose()
-		{
-			if (FChannel != null)
-			{
-				CloseChannel();
-				SetChannel(null);
-			}
-			
-			if (FChannelFactory != null)
-			{
-				CloseChannelFactory();
-				FChannelFactory = null;
-			}
-		}
-		
-		private ChannelFactory<IClientListenerService> FChannelFactory;
-		private IClientListenerService FChannel;
-		
-		private bool IsChannelFaulted(IClientListenerService AChannel)
-		{
-			return ((ICommunicationObject)AChannel).State == CommunicationState.Faulted;
-		}
-		
-		private bool IsChannelValid(IClientListenerService AChannel)
-		{
-			return ((ICommunicationObject)AChannel).State == CommunicationState.Opened;
-		}
-		
-		private void SetChannel(IClientListenerService AChannel)
-		{
-			if (FChannel != null)
-				((ICommunicationObject)FChannel).Faulted -= new EventHandler(ChannelFaulted);
-			FChannel = AChannel;
-			if (FChannel != null)
-				((ICommunicationObject)FChannel).Faulted += new EventHandler(ChannelFaulted);
-		}
-		
-		private void ChannelFaulted(object ASender, EventArgs AArgs)
-		{
-			((ICommunicationObject)ASender).Faulted -= new EventHandler(ChannelFaulted);
-			if (FChannel == ASender)
-				FChannel = null;
-		}
-		
-		private void CloseChannel()
-		{
-			ICommunicationObject LChannel = FChannel as ICommunicationObject;
-			if (LChannel != null)
-				if (LChannel.State == CommunicationState.Opened)
-					LChannel.Close();
-				else
-					LChannel.Abort();
-		}
-		
-		private void CloseChannelFactory()
-		{
-			if (FChannelFactory.State == CommunicationState.Opened)
-				FChannelFactory.Close();
-			else
-				FChannelFactory.Abort();
-		}
-		
-		private IClientListenerService GetInterface()
-		{
-			if ((FChannel == null) || !IsChannelValid(FChannel))
-				SetChannel(FChannelFactory.CreateChannel());
-			return FChannel;
-		}
-
 		public string[] EnumerateInstances()
 		{
 			IAsyncResult LResult = GetInterface().BeginEnumerateInstances(null, null);

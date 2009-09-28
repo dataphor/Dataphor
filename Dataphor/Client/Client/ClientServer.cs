@@ -15,7 +15,7 @@ using Alphora.Dataphor.DAE.Server;
 
 namespace Alphora.Dataphor.DAE.Client
 {
-	public class ClientServer : ClientObject, IRemoteServer, IDisposable
+	public class ClientServer : ClientObject, IRemoteServer
 	{
 		public ClientServer() { }
 		public ClientServer(string AHostName, int APortNumber, string AInstanceName)
@@ -82,7 +82,7 @@ namespace Alphora.Dataphor.DAE.Client
 					new ChannelFactory<IClientDataphorService>
 					(
 						new CustomBinding(new BinaryMessageEncodingBindingElement(), new HttpTransportBindingElement()), 
-						new EndpointAddress(DataphorServiceUtility.BuildURI(FHostName, FPortNumber, FInstanceName))
+						new EndpointAddress(DataphorServiceUtility.BuildInstanceURI(FHostName, FPortNumber, FInstanceName))
 					);
 		}
 		
@@ -100,8 +100,8 @@ namespace Alphora.Dataphor.DAE.Client
 				}
 			}
 		}
-		
-		void IDisposable.Dispose()
+
+		protected override void InternalDispose()
 		{
 			Close();
 		}

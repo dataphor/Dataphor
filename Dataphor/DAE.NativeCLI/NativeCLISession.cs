@@ -3,8 +3,8 @@
 	© Copyright 2000-2009 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
 using System;
-using System.Data;
 using System.Text;
 using System.Collections.Generic;
 
@@ -14,12 +14,12 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 	{
 		public NativeCLISession(string AHostName, string AInstanceName, int AOverridePortNumber, NativeSessionInfo ANativeSessionInfo)
 		{
-			FNativeCLI = new NativeSessionCLI(AHostName, AInstanceName, AOverridePortNumber);
+			FNativeCLI = new NativeSessionCLIClient(AHostName, AInstanceName, AOverridePortNumber);
 			FNativeSessionInfo = ANativeSessionInfo;
 			FSessionHandle = FNativeCLI.StartSession(ANativeSessionInfo);
 		}
 		
-		private NativeSessionCLI FNativeCLI;
+		private NativeSessionCLIClient FNativeCLI;
 		
 		public string HostName { get { return FNativeCLI.HostName; } }
 		
@@ -27,8 +27,6 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 
 		public int OverridePortNumber { get { return FNativeCLI.OverridePortNumber; } }
 		
-		public string ServerURI { get { return FNativeCLI.ServerURI; } }
-
 		private NativeSessionInfo FNativeSessionInfo;
 		public NativeSessionInfo NativeSessionInfo { get { return FNativeSessionInfo; } }
 		
@@ -47,7 +45,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 
 		#endregion
 		
-		public void BeginTransaction(IsolationLevel AIsolationLevel)
+		public void BeginTransaction(NativeIsolationLevel AIsolationLevel)
 		{
 			FNativeCLI.BeginTransaction(FSessionHandle, AIsolationLevel);
 		}

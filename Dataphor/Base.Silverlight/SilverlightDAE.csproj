@@ -210,6 +210,9 @@
     <Compile Include="..\Common\Contracts\IClientListenerService.cs">
       <Link>Common\Contracts\IClientListenerService.cs</Link>
     </Compile>
+    <Compile Include="..\Common\Contracts\ServiceClient.cs">
+      <Link>Common\Contracts\ServiceClient.cs</Link>
+    </Compile>
     <Compile Include="..\Common\Listener\ListenerClient.cs">
       <Link>Common\Listener\ListenerClient.cs</Link>
     </Compile>

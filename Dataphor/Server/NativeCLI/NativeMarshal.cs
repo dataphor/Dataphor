@@ -1,15 +1,21 @@
-﻿using System;
+﻿/*
+	Alphora Dataphor
+	© Copyright 2000-2009 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Alphora.Dataphor.DAE.Server
+namespace Alphora.Dataphor.DAE.NativeCLI
 {
 	using Alphora.Dataphor.DAE.Schema;
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Runtime.Data;
-	using Alphora.Dataphor.DAE.NativeCLI;
 	using Alphora.Dataphor.DAE.Language;
 	using Alphora.Dataphor.DAE.Compiling;
+	using Alphora.Dataphor.DAE.Server;
 
 	/// <summary>
 	/// Provides a utility class for translating values to and from 

@@ -8,12 +8,11 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 
-using Alphora.Dataphor.DAE.NativeCLI;
 using Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 
-namespace Alphora.Dataphor.DAE.Server
+namespace Alphora.Dataphor.DAE.NativeCLI
 {
 	public class NativeSession
 	{

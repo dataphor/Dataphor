@@ -39,7 +39,7 @@ namespace Alphora.Dataphor.DAE.Server
 		public NativeSessionInfo GetNativeSessionInfoFromProcess(ServerProcess AProcess)
 		{
 			NativeSessionInfo LNativeSessionInfo = new NativeSessionInfo();
-			LNativeSessionInfo.DefaultIsolationLevel = NativeCLIUtility.IsolationLevelToSystemDataIsolationLevel(AProcess.DefaultIsolationLevel);
+			LNativeSessionInfo.DefaultIsolationLevel = NativeCLIUtility.IsolationLevelToNativeIsolationLevel(AProcess.DefaultIsolationLevel);
 			//LNativeSessionInfo.DefaultLibraryName = AProcess.ServerSession.CurrentLibrary.Name; // Still not sure if this makes sense...
 			LNativeSessionInfo.DefaultMaxCallDepth = AProcess.ServerSession.SessionInfo.DefaultMaxCallDepth;
 			LNativeSessionInfo.DefaultMaxStackDepth = AProcess.ServerSession.SessionInfo.DefaultMaxStackDepth;
@@ -53,7 +53,7 @@ namespace Alphora.Dataphor.DAE.Server
 		public NativeSessionInfo GetNativeSessionInfoFromSessionInfo(SessionInfo ASessionInfo, ProcessInfo AProcessInfo)
 		{
 			NativeSessionInfo LNativeSessionInfo = new NativeSessionInfo();
-			LNativeSessionInfo.DefaultIsolationLevel = NativeCLIUtility.IsolationLevelToSystemDataIsolationLevel(AProcessInfo == null ? ASessionInfo.DefaultIsolationLevel : AProcessInfo.DefaultIsolationLevel);
+			LNativeSessionInfo.DefaultIsolationLevel = NativeCLIUtility.IsolationLevelToNativeIsolationLevel(AProcessInfo == null ? ASessionInfo.DefaultIsolationLevel : AProcessInfo.DefaultIsolationLevel);
 			//LNativeSessionInfo.DefaultLibraryName = ASessionInfo.DefaultLibraryName; // This doesn't make a lot of sense in the default scenario
 			LNativeSessionInfo.DefaultMaxCallDepth = ASessionInfo.DefaultMaxCallDepth;
 			LNativeSessionInfo.DefaultMaxStackDepth = ASessionInfo.DefaultMaxStackDepth;
@@ -76,7 +76,7 @@ namespace Alphora.Dataphor.DAE.Server
 				if (LTag != Tag.None)
 				{
 					if (LNativeSessionInfo == null) LNativeSessionInfo = new NativeSessionInfo();
-					LNativeSessionInfo.DefaultIsolationLevel = (System.Data.IsolationLevel)Enum.Parse(typeof(System.Data.IsolationLevel), LTag.Value);
+					LNativeSessionInfo.DefaultIsolationLevel = (NativeIsolationLevel)Enum.Parse(typeof(NativeIsolationLevel), LTag.Value);
 				}
 					
 				LTag = ServerLink.MetaData.Tags.GetTag("DefaultLibraryName");
@@ -165,7 +165,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public override void BeginTransaction(IsolationLevel AIsolationLevel)
 		{
-			FNativeCLISession.BeginTransaction(NativeCLIUtility.IsolationLevelToSystemDataIsolationLevel(AIsolationLevel));
+			FNativeCLISession.BeginTransaction(NativeCLIUtility.IsolationLevelToNativeIsolationLevel(AIsolationLevel));
 		}
 		
 		public override void PrepareTransaction()
