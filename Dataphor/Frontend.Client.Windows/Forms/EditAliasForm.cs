@@ -15,6 +15,7 @@ using Alphora.Dataphor.Frontend.Client;
 using Alphora.Dataphor.Frontend.Client.Windows;
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.NativeCLI;
+using Alphora.Dataphor.DAE.Listener;
 
 namespace Alphora.Dataphor.Frontend.Client.Windows
 {

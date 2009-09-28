@@ -17,6 +17,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 	using Alphora.Dataphor.DAE.Streams;
 	using Alphora.Dataphor.DAE.Debug;
 
+	[ServiceContract(Name = "IDataphorService")]
 	public interface IClientDataphorService
 	{
 		// Session

@@ -216,6 +216,18 @@ namespace Alphora.Dataphor.DAE.Server
 			FStreamManager.Close(AStreamID);
 		}
 		#endif
+		
+		public static RemoteParamModifier ModifierToRemoteModifier(Modifier AModifier)
+		{
+			switch (AModifier)
+			{
+				case Modifier.In : return RemoteParamModifier.In;
+				case Modifier.Out : return RemoteParamModifier.Out;
+				case Modifier.Var : return RemoteParamModifier.Var;
+				case Modifier.Const : return RemoteParamModifier.Const;
+				default: throw new ArgumentOutOfRangeException("AModifier");
+			}
+		}
 
 		// Parameter Translation
 		public RemoteParam[] DataParamsToRemoteParams(DataParams AParams)
@@ -229,7 +241,7 @@ namespace Alphora.Dataphor.DAE.Server
 				{
 					LParams[LIndex].Name = AParams[LIndex].Name;
 					LParams[LIndex].TypeName = AParams[LIndex].DataType.Name;
-					LParams[LIndex].Modifier = AParams[LIndex].Modifier;
+					LParams[LIndex].Modifier = ModifierToRemoteModifier(AParams[LIndex].Modifier);
 				}
 				return LParams;
 			}
@@ -255,7 +267,7 @@ namespace Alphora.Dataphor.DAE.Server
 					{
 						LParams.Params[LIndex].Name = AParams[LIndex].Name;
 						LParams.Params[LIndex].TypeName = AParams[LIndex].DataType.Name;
-						LParams.Params[LIndex].Modifier = AParams[LIndex].Modifier;
+						LParams.Params[LIndex].Modifier = ModifierToRemoteModifier(AParams[LIndex].Modifier);
 						if (AParams[LIndex].Value != null)
 							LRow[LIndex] = AParams[LIndex].Value;
 					}

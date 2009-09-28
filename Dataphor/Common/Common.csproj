@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{7CCBA92D-BB78-49E3-8C11-4CC29B173296}</ProjectGuid>
+    <ProjectGuid>{B488ECA3-95AD-4814-BC9B-69D062B7B333}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Alphora.Dataphor.DAE.NativeCLI</RootNamespace>
-    <AssemblyName>Alphora.Dataphor.DAE.NativeCLI</AssemblyName>
+    <RootNamespace>Alphora.Dataphor.DAE</RootNamespace>
+    <AssemblyName>AlphoraDataphorCommon</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\bin\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -25,41 +25,31 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\bin\</OutputPath>
-    <DefineConstants>SIGNASSEMBLIES</DefineConstants>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;SIGNASSEMBLIES</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
-    <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.ServiceModel">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="INativeCLI.cs" />
-    <Compile Include="LoggingClientSink.cs" />
-    <Compile Include="NativeCLI.cs" />
-    <Compile Include="NativeCLISession.cs" />
-    <Compile Include="NativeCLIException.cs" />
-    <Compile Include="NativeSessionInfo.cs" />
-    <Compile Include="NativeStructures.cs" />
+    <Compile Include="Contracts\DataphorServiceUtility.cs" />
+    <Compile Include="Contracts\IClientListenerService.cs" />
+    <Compile Include="Listener\ListenerClient.cs" />
+    <Compile Include="Listener\ListenerFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RemotingUtility.cs" />
-    <Compile Include="SecurityUtility.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Common\Common.csproj">
-      <Project>{B488ECA3-95AD-4814-BC9B-69D062B7B333}</Project>
-      <Name>Common %28Common\Common%29</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

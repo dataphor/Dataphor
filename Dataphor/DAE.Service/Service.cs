@@ -82,10 +82,7 @@ namespace Alphora.Dataphor.DAE.Service
 			);
 		}
 
-		public Server.Server FServer;
-		public ServerHost FServerHost;
-		public DataphorService FService;
-		public ServiceHost FServiceHost;
+		private DataphorServiceHost FDataphorServiceHost;
 		
 		/// <summary>
 		/// Set things in motion so your Dataphor service can do its work. Checks to see if the ServerSettings.dst file exists
@@ -95,24 +92,9 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 			try
 			{
-				InstanceManager.Load();
-				
-				string LInstanceName = GetInstanceName(args);
-				ServerConfiguration LInstance = InstanceManager.Instances[LInstanceName];
-				if (LInstance == null)
-				{
-					// Establish a default configuration
-					LInstance = ServerConfiguration.DefaultInstance(LInstanceName);
-					InstanceManager.Instances.Add(LInstance);
-					InstanceManager.Save();
-				}
-				
-				FServer = new Server.Server();
-				LInstance.ApplyTo(FServer);
-				FServerHost = new ServerHost(FServer, LInstance.PortNumber);
-				FServer.Start();
-				FService = new DataphorService(FServerHost.RemoteServer);
-				FServiceHost = new ServiceHost(FService);
+				FDataphorServiceHost = new DataphorServiceHost();
+				FDataphorServiceHost.InstanceName = GetInstanceName(args);
+				FDataphorServiceHost.Start();
 			}
 			catch (Exception LException)
 			{
@@ -125,7 +107,12 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 			try 
 			{
-				FServer.Stop();
+				if (FDataphorServiceHost != null)
+				{
+					if (FDataphorServiceHost.IsActive)
+						FDataphorServiceHost.Stop();
+					FDataphorServiceHost = null;
+				}
 			}
 			catch (Exception LException)
 			{

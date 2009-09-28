@@ -128,6 +128,10 @@
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
       <Private>False</Private>
     </ProjectReference>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{B488ECA3-95AD-4814-BC9B-69D062B7B333}</Project>
+      <Name>Common %28Common\Common%29</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DAE.Client.Controls\DAE.Client.Controls.csproj">
       <Name>DAE.Client.Controls</Name>
       <Project>{A295FB41-D9B6-418C-9EA7-0C0A17BA26DD}</Project>

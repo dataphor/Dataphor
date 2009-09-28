@@ -204,6 +204,18 @@
     <Compile Include="..\Client\Streams\LocalStreamManager.cs">
       <Link>Client\Streams\LocalStreamManager.cs</Link>
     </Compile>
+    <Compile Include="..\Common\Contracts\DataphorServiceUtility.cs">
+      <Link>Common\Contracts\DataphorServiceUtility.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Contracts\IClientListenerService.cs">
+      <Link>Common\Contracts\IClientListenerService.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Listener\ListenerClient.cs">
+      <Link>Common\Listener\ListenerClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Listener\ListenerFactory.cs">
+      <Link>Common\Listener\ListenerFactory.cs</Link>
+    </Compile>
     <Compile Include="..\DAE.Client\Alias.cs">
       <Link>DAE.Client\Alias.cs</Link>
     </Compile>
@@ -281,9 +293,6 @@
     </Compile>
     <Compile Include="..\DAE\Contracts\CursorDescriptor.cs">
       <Link>DAE\Contracts\CursorDescriptor.cs</Link>
-    </Compile>
-    <Compile Include="..\DAE\Contracts\DataphorServiceUtility.cs">
-      <Link>DAE\Contracts\DataphorServiceUtility.cs</Link>
     </Compile>
     <Compile Include="..\DAE\Contracts\PlanDescriptor.cs">
       <Link>DAE\Contracts\PlanDescriptor.cs</Link>

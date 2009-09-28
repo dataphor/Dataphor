@@ -8,9 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Language;
-
 namespace Alphora.Dataphor.DAE.Contracts
 {
     [Flags]
@@ -64,6 +61,9 @@ namespace Alphora.Dataphor.DAE.Contracts
 		public RemoteRowBody Body;
     }
 
+	[DataContract]
+	public enum RemoteParamModifier : byte { In, Var, Out, Const }
+	
 	/// <nodoc/>
 	[DataContract]
 	public struct RemoteParam
@@ -75,7 +75,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		public string TypeName;
 
 		[DataMember]
-		public Modifier Modifier; // hack: changed from 'Modifier' to 'byte' to fix fixup error
+		public RemoteParamModifier Modifier;
     }
     
 	/// <nodoc/>

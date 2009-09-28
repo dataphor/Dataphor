@@ -26,8 +26,8 @@ namespace Alphora.Dataphor.DAE.Service
 		/// Provides in-process access to the hosted server
 		/// </summary>
 		public IServer Server { get { return FServer; } }
-
-		private ServerHost FServerHost;
+		
+		private RemoteServer FRemoteServer;
 		private DataphorService FService;
 		private ServiceHost FServiceHost;
 		
@@ -37,6 +37,12 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 			if (IsActive)
 				throw new ServerException(ServerException.Codes.ServiceActive);
+		}
+		
+		private void CheckActive()
+		{
+			if (!IsActive)
+				throw new ServerException(ServerException.Codes.ServiceInactive);
 		}
 		
 		private string FInstanceName;
@@ -69,9 +75,9 @@ namespace Alphora.Dataphor.DAE.Service
 					
 					FServer = new Server();
 					LInstance.ApplyTo(FServer);
-					FServerHost = new ServerHost(FServer, LInstance.PortNumber);
+					FRemoteServer = new RemoteServer(FServer);
 					FServer.Start();
-					FService = new DataphorService(FServerHost.RemoteServer);
+					FService = new DataphorService(FRemoteServer);
 
 					// TODO: Enable configuration of endpoints through instances or app.config files
 					FServiceHost = new ServiceHost(FService);
@@ -82,6 +88,7 @@ namespace Alphora.Dataphor.DAE.Service
 						new CustomBinding(new BinaryMessageEncodingBindingElement(), new HttpTransportBindingElement()), 
 						DataphorServiceUtility.BuildURI(Environment.MachineName, LInstance.PortNumber, LInstance.Name)
 					);
+
 					FServiceHost.Open();
 				}
 				catch
@@ -107,10 +114,10 @@ namespace Alphora.Dataphor.DAE.Service
 				FService = null;
 			}
 			
-			if (FServerHost != null)
+			if (FRemoteServer != null)
 			{
-				FServerHost.Dispose();
-				FServerHost = null;
+				FRemoteServer.Dispose();
+				FRemoteServer = null;
 			}
 			
 			if (FServer != null)

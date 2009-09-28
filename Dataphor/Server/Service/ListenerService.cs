@@ -9,68 +9,54 @@ using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Channels;
-using System.Runtime.Remoting.Channels.Tcp;
-using System.Runtime.Serialization.Formatters;
+using System.ServiceModel;
 
-using Alphora.Dataphor.DAE.NativeCLI;
+using Alphora.Dataphor.DAE.Contracts;
+using System.ServiceModel.Channels;
 
 namespace Alphora.Dataphor.DAE.Server
 {
-	public class Listener : MarshalByRefObject, IListener
+	// TODO: Exception management
+	//[ExceptionShielding("WCF Exception Shielding")]
+	public class ListenerService : IListenerService
 	{
-		public const string CDefaultListenerChannelName = "DAEListener";
+		private static ServiceHost FListenerHost;
 		
-		private static TcpChannel FChannel;
-
 		/// <summary>
 		/// Establishes a listener in the current process, using the listener configuration settings if available.
 		/// </summary>
 		/// <returns>True if a listener is established in this app domain.</returns>
 		public static bool EstablishListener()
 		{
-			if (FChannel != null)
+			if (FListenerHost != null)
 				return true;
-			
+				
 			IDictionary LSettings = (IDictionary)ConfigurationManager.GetSection("listener");
 			
 			// Set shouldListen=false to turn off the listener for a process
 			if ((LSettings != null) && LSettings.Contains("shouldListen") && !Convert.ToBoolean(LSettings["shouldListen"]))
 				return false;
-
-			BinaryServerFormatterSinkProvider LProvider = new BinaryServerFormatterSinkProvider();
-			LProvider.TypeFilterLevel = TypeFilterLevel.Full;
-			if (RemotingConfiguration.CustomErrorsMode != CustomErrorsModes.Off)	// Must check, will throw if we attempt to set it again (regardless)
-				RemotingConfiguration.CustomErrorsMode = CustomErrorsModes.Off;
-
-			IDictionary LProperties = new System.Collections.Specialized.ListDictionary();
-			LProperties["port"] = (LSettings != null && LSettings.Contains("port")) ? LSettings["port"] : RemotingUtility.CDefaultListenerPort;
-			LProperties["name"] = (LSettings != null && LSettings.Contains("name")) ? LSettings["name"] : CDefaultListenerChannelName;
+				
+			FListenerHost = new ServiceHost(typeof(ListenerService));
+			
+			FListenerHost.AddServiceEndpoint
+			(
+				typeof(IListenerService), 
+				new CustomBinding(new BinaryMessageEncodingBindingElement(), new HttpTransportBindingElement()), 
+				DataphorServiceUtility.BuildListenerURI(Environment.MachineName)
+			);
 			
 			try
 			{
-				FChannel = new TcpChannel(LProperties, null, LProvider);
-				ChannelServices.RegisterChannel(FChannel, false);
+				FListenerHost.Open();
 			}
 			catch
 			{
-				// An error attempting to register the channel means there is another process with a listener already established
-				FChannel = null;
+				// An error indicates the service could not be started because there is already a listener running in another process.
 				return false;
 			}
 			
-			try
-			{
-				RemotingConfiguration.RegisterWellKnownServiceType(new WellKnownServiceTypeEntry(typeof(Listener), "DataphorListener", WellKnownObjectMode.SingleCall));
-				return true;
-			}
-			catch
-			{
-				ChannelServices.UnregisterChannel(FChannel);
-				FChannel = null;
-				throw;
-			}
+			return true;
 		}
 		
 		public string[] EnumerateInstances()
@@ -94,17 +80,25 @@ namespace Alphora.Dataphor.DAE.Server
 			return GetInstanceURI(AInstanceName, false);
 		}
 		
-		public string GetInstanceURI(string AInstanceName, bool AUseNative)
+		private string GetInstanceURI(string AInstanceName, bool AUseNative)
 		{
 			try
 			{
+				if (AUseNative)
+					throw new NotSupportedException();
+					
 				ServerConfiguration LServer = InstanceManager.LoadConfiguration().Instances[AInstanceName];
-				return RemotingUtility.BuildInstanceURI(Environment.MachineName, LServer.PortNumber, LServer.Name, AUseNative);
+				return DataphorServiceUtility.BuildURI(Environment.MachineName, LServer.PortNumber, LServer.Name);
 			}
 			catch (Exception LException)
 			{
 				throw NativeCLIUtility.WrapException(LException);
 			}
+		}
+		
+		public string GetNativeInstanceURI(string AInstanceName)
+		{
+			return GetInstanceURI(AInstanceName, true);
 		}
 	}
 }

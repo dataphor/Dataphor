@@ -5,29 +5,33 @@
 */
 
 using System;
+using System.ServiceModel;
 using System.Collections.Generic;
-using System.Text;
 
-namespace Alphora.Dataphor.DAE.NativeCLI
+namespace Alphora.Dataphor.DAE.Contracts
 {
 	/// <summary>
 	/// Describes the interface for the Dataphor listener.
 	/// </summary>
-	public interface IListener
+	[ServiceContract]
+	public interface IListenerService
 	{
 		/// <summary>
 		/// Enumerates the available Dataphor instances.
 		/// </summary>
+		[OperationContract]
 		string[] EnumerateInstances();
 		
 		/// <summary>
 		/// Returns the URI for an instance.
 		/// </summary>
+		[OperationContract]
 		string GetInstanceURI(string AInstanceName);
 		
 		/// <summary>
-		/// Returns the URI for the standard or native CLI of an instance.
+		/// Returns the URI for the native CLI of an instance.
 		/// </summary>
-		string GetInstanceURI(string AInstanceName, bool AUseNativeCLI);
+		[OperationContract]
+		string GetNativeInstanceURI(string AInstanceName);
 	}
 }

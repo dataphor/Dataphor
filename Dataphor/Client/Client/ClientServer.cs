@@ -15,7 +15,7 @@ using Alphora.Dataphor.DAE.Server;
 
 namespace Alphora.Dataphor.DAE.Client
 {
-	public class ClientServer : ClientObject, IRemoteServer
+	public class ClientServer : ClientObject, IRemoteServer, IDisposable
 	{
 		public ClientServer() { }
 		public ClientServer(string AHostName, int APortNumber, string AInstanceName)
@@ -90,9 +90,20 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			if (IsActive)
 			{
+				if (FChannel != null)
+					CloseChannel(FChannel);
 				SetChannel(null);
-				FChannelFactory = null;
+				if (FChannelFactory != null)
+				{
+					CloseChannelFactory();
+					FChannelFactory = null;
+				}
 			}
+		}
+		
+		void IDisposable.Dispose()
+		{
+			Close();
 		}
 		
 		private IClientDataphorService FChannel;
@@ -105,6 +116,23 @@ namespace Alphora.Dataphor.DAE.Client
 		private bool IsChannelValid(IClientDataphorService AChannel)
 		{
 			return ((ICommunicationObject)AChannel).State == CommunicationState.Opened;
+		}
+		
+		private void CloseChannel(IClientDataphorService AChannel)
+		{
+			ICommunicationObject LChannel = (ICommunicationObject)AChannel;
+			if (LChannel.State == CommunicationState.Opened)
+				LChannel.Close();
+			else
+				LChannel.Abort();
+		}
+		
+		private void CloseChannelFactory()
+		{
+			if (FChannelFactory.State == CommunicationState.Opened)
+				FChannelFactory.Close();
+			else
+				FChannelFactory.Abort();
 		}
 		
 		private void SetChannel(IClientDataphorService AChannel)

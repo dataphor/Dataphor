@@ -551,6 +551,18 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
+		public static Modifier RemoteModifierToModifier(RemoteParamModifier ARemoteModifier)
+		{
+			switch (ARemoteModifier)
+			{
+				case RemoteParamModifier.In : return Modifier.In;
+				case RemoteParamModifier.Out : return Modifier.Out;
+				case RemoteParamModifier.Var : return Modifier.Var;
+				case RemoteParamModifier.Const : return Modifier.Const;
+				default: throw new ArgumentOutOfRangeException("ARemoteModifier");
+			}
+		}
+		
 		// Parameter Translation
 		public DataParams RemoteParamsToDataParams(RemoteParam[] AParams)
 		{
@@ -558,7 +570,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				DataParams LParams = new DataParams();
 				foreach (RemoteParam LRemoteParam in AParams)
-					LParams.Add(new DataParam(LRemoteParam.Name, (Schema.ScalarType)FServerProcess.ServerSession.Server.Catalog[LRemoteParam.TypeName], (Modifier)LRemoteParam.Modifier));//hack: cast to fix fixup error
+					LParams.Add(new DataParam(LRemoteParam.Name, (Schema.ScalarType)FServerProcess.ServerSession.Server.Catalog[LRemoteParam.TypeName], RemoteModifierToModifier(LRemoteParam.Modifier)));
 
 				return LParams;
 			}
@@ -583,9 +595,9 @@ namespace Alphora.Dataphor.DAE.Server
 
 					for (int LIndex = 0; LIndex < AParams.Params.Length; LIndex++)
 						if (LRow.HasValue(LIndex))
-							LParams.Add(new DataParam(LRow.DataType.Columns[LIndex].Name, LRow.DataType.Columns[LIndex].DataType, (Modifier)AParams.Params[LIndex].Modifier, DataValue.CopyValue(FServerProcess.ValueManager, LRow[LIndex])));//Hack: cast to fix fixup error
+							LParams.Add(new DataParam(LRow.DataType.Columns[LIndex].Name, LRow.DataType.Columns[LIndex].DataType, RemoteModifierToModifier(AParams.Params[LIndex].Modifier), DataValue.CopyValue(FServerProcess.ValueManager, LRow[LIndex])));
 						else
-							LParams.Add(new DataParam(LRow.DataType.Columns[LIndex].Name, LRow.DataType.Columns[LIndex].DataType, (Modifier)AParams.Params[LIndex].Modifier, null));//Hack: cast to fix fixup error
+							LParams.Add(new DataParam(LRow.DataType.Columns[LIndex].Name, LRow.DataType.Columns[LIndex].DataType, RemoteModifierToModifier(AParams.Params[LIndex].Modifier), null));
 
 					return LParams;
 				}

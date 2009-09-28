@@ -86,7 +86,6 @@ namespace Alphora.Dataphor.DAE.Server
 				if (FServer != null)
 				{
 					DetachServer();
-					FServer.Dispose();
 					FServer = null;
 				}
 			}

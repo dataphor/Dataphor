@@ -7,6 +7,7 @@ using System;
 using System.Text;
 using System.Data;
 using System.Collections.Generic;
+using Alphora.Dataphor.DAE.Listener;
 
 namespace Alphora.Dataphor.DAE.NativeCLI
 {
@@ -23,7 +24,6 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			FOverridePortNumber = AOverridePortNumber;
 			FServerURI = GetNativeServerURI(FHostName, FInstanceName, FOverridePortNumber);
 		}
-
 		
 		private string FHostName;
 		public string HostName { get { return FHostName; } }
