@@ -16,7 +16,7 @@ namespace Alphora.Dataphor.DAE.Listener
 		{
 			using (ListenerClient LClient = new ListenerClient(AHostName))
 			{
-				return LClient.EnumerateInstances(AHostName);
+				return LClient.EnumerateInstances();
 			}
 		}
 		

@@ -89,7 +89,7 @@ namespace Alphora.Dataphor.DAE.Listener
 			return FChannel;
 		}
 
-		public string[] EnumerateInstances(string AHostName)
+		public string[] EnumerateInstances()
 		{
 			IAsyncResult LResult = GetInterface().BeginEnumerateInstances(null, null);
 			LResult.AsyncWaitHandle.WaitOne();
