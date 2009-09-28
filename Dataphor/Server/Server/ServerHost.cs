@@ -22,51 +22,51 @@ namespace Alphora.Dataphor.DAE.Server
 		public ServerHost(Server AServer, int APortNumber)
 		{
 			// Establish a listener to route instance port discovery traffic
-			Listener.EstablishListener();
+			//Listener.EstablishListener();
 
-			BinaryServerFormatterSinkProvider LProvider = new BinaryServerFormatterSinkProvider();
-			LProvider.TypeFilterLevel = TypeFilterLevel.Full;
-			if (RemotingConfiguration.CustomErrorsMode != CustomErrorsModes.Off)	// Must check, will throw if we attempt to set it again (regardless)
-				RemotingConfiguration.CustomErrorsMode = CustomErrorsModes.Off;
+			//BinaryServerFormatterSinkProvider LProvider = new BinaryServerFormatterSinkProvider();
+			//LProvider.TypeFilterLevel = TypeFilterLevel.Full;
+			//if (RemotingConfiguration.CustomErrorsMode != CustomErrorsModes.Off)	// Must check, will throw if we attempt to set it again (regardless)
+			//	RemotingConfiguration.CustomErrorsMode = CustomErrorsModes.Off;
 
-			IDictionary LProperties = new System.Collections.Specialized.ListDictionary();
-			LProperties["port"] = APortNumber;
-			string LChannelName = GetNextChannelName();
-			LProperties["name"] = LChannelName;
-			FChannel = new TcpChannel(LProperties, null, LProvider);
-			ChannelServices.RegisterChannel(FChannel, false);
-			try
-			{
+			//IDictionary LProperties = new System.Collections.Specialized.ListDictionary();
+			//LProperties["port"] = APortNumber;
+			//string LChannelName = GetNextChannelName();
+			//LProperties["name"] = LChannelName;
+			//FChannel = new TcpChannel(LProperties, null, LProvider);
+			//ChannelServices.RegisterChannel(FChannel, false);
+			//try
+			//{
 				FRemoteServer = new RemoteServer(AServer);
-				RemotingServices.Marshal
-				(
-					FRemoteServer, 
-					AServer.Name,
-					typeof(RemoteServer)
-				);
+				//RemotingServices.Marshal
+				//(
+				//	FRemoteServer, 
+				//	AServer.Name,
+				//	typeof(RemoteServer)
+				//);
 				FServer = AServer;
 
 				if (!NativeServerCLI.HasNativeServer())
 				{
 					FNativeServer = new NativeServer(AServer);
 					NativeServerCLI.SetNativeServer(FNativeServer);
-					RemotingConfiguration.RegisterWellKnownServiceType
-					(
-						new WellKnownServiceTypeEntry
-						(
-							typeof(NativeServerCLI), 
-							String.Format("{0}Native", AServer.Name), 
-							WellKnownObjectMode.SingleCall
-						)
-					);
+					//RemotingConfiguration.RegisterWellKnownServiceType
+					//(
+					//	new WellKnownServiceTypeEntry
+					//	(
+					//		typeof(NativeServerCLI), 
+					//		String.Format("{0}Native", AServer.Name), 
+					//		WellKnownObjectMode.SingleCall
+					//	)
+					//);
 				}
-			}
-			catch
-			{
-				ChannelServices.UnregisterChannel(FChannel);
-				FChannel = null;
-				throw;
-			}
+			//}
+			//catch
+			//{
+			//	ChannelServices.UnregisterChannel(FChannel);
+			//	FChannel = null;
+			//	throw;
+			//}
 		}
 
 		protected override void Dispose(bool ADisposing)
@@ -77,17 +77,17 @@ namespace Alphora.Dataphor.DAE.Server
 				{
 					if (FServer != null)
 					{
-						RemotingServices.Disconnect(FRemoteServer);
+						//RemotingServices.Disconnect(FRemoteServer);
 						FServer = null;
 					}
 				}
 				finally
 				{
-					if (FChannel != null)
-					{
-						ChannelServices.UnregisterChannel(FChannel);
-						FChannel = null;
-					}
+					//if (FChannel != null)
+					//{
+					//	ChannelServices.UnregisterChannel(FChannel);
+					//	FChannel = null;
+					//}
 				}
 			}
 			finally

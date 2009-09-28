@@ -160,6 +160,20 @@ namespace Alphora.Dataphor.DAE.Server
 			Add(LInstance.Name, LInstance);
 			return IndexOf(LInstance.Name);
 		}
+		
+		public new ServerConfiguration this[string AInstanceName]
+		{
+			get
+			{
+				ServerConfiguration LInstance = null;
+				TryGetValue(AInstanceName, out LInstance);
+				return LInstance;
+			}
+			set
+			{
+				base[AInstanceName] = value;
+			}
+		}
 
 		public ServerConfiguration GetInstance(string AInstanceName)
 		{

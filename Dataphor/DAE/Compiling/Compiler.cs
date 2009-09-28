@@ -8604,7 +8604,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			CreateDeviceNode LNode = new CreateDeviceNode();
 			APlan.CheckRight(Schema.RightNames.HostImplementation);
 			APlan.CheckClassDependency(APlan.CurrentLibrary, LStatement.ClassDefinition);
-			object LObject = APlan.Catalog.ClassLoader.CreateObject(LStatement.ClassDefinition, new object[]{Schema.Object.GetObjectID(LStatement.MetaData)});
+			object LObject = APlan.Catalog.ClassLoader.CreateObject(LStatement.ClassDefinition, new object[] { Schema.Object.GetObjectID(LStatement.MetaData), LDeviceName });
 			if (!(LObject is Schema.Device))
 				throw new CompilerException(CompilerException.Codes.DeviceClassExpected, LStatement.ClassDefinition, LObject == null ? "null" : LObject.GetType().AssemblyQualifiedName);
 			LNode.NewDevice = (Schema.Device)LObject;

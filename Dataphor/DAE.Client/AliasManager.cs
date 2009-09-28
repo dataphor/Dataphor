@@ -254,6 +254,20 @@ namespace Alphora.Dataphor.DAE.Client
 			Add(LAlias.Name, LAlias);
 			return IndexOf(LAlias.Name);
 		}
+		
+		public new ServerAlias this[string AAliasName]
+		{
+			get
+			{
+				ServerAlias LAlias = null;
+				TryGetValue(AAliasName, out LAlias);
+				return LAlias;
+			}
+			set
+			{
+				base[AAliasName] = value;
+			}
+		}
 
 		public ServerAlias GetAlias(string AAliasName)
 		{

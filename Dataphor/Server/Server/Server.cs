@@ -66,6 +66,12 @@ namespace Alphora.Dataphor.DAE.Server
 			EnsureGeneralLibraryLoaded();
 		}
 
+		// Indicates that this server is a full Dataphor server
+		public override bool IsEngine
+		{
+			get { return false; }
+		}
+
 		private void EnsureGeneralLibraryLoaded()
 		{
 			if (!IsEngine)
@@ -224,6 +230,20 @@ namespace Alphora.Dataphor.DAE.Server
 
 				FLibraryDirectory = LLibraryDirectory.ToString();
 			}
+		}
+
+		protected override CatalogDevice CreateCatalogDevice()
+		{
+			return new ServerCatalogDevice(Schema.Object.GetNextObjectID(), CCatalogDeviceName);
+		}
+		
+		protected override void LoadSystemAssemblies()
+		{
+			base.LoadSystemAssemblies();
+
+			Assembly LDAEAssembly = typeof(Server).Assembly;
+			FSystemLibrary.Assemblies.Add(LDAEAssembly);
+			Catalog.ClassLoader.RegisterAssembly(FSystemLibrary, LDAEAssembly);
 		}
 
 		public override void LoadAvailableLibraries()

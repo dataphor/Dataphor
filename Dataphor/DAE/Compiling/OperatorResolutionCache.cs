@@ -21,7 +21,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			get
 			{
-				return FResolutions[AContext];
+				OperatorBindingContext LContext = null;
+				FResolutions.TryGetValue(AContext, out LContext);
+				return LContext;
 			}
 		}		
 		

@@ -96,7 +96,8 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 			if (FServiceHost != null)
 			{
-				FServiceHost.BeginClose(null, null);
+				if (FServiceHost.State != CommunicationState.Faulted)
+					FServiceHost.BeginClose(null, null);
 				FServiceHost = null;
 			}
 			

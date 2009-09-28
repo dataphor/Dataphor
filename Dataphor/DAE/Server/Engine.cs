@@ -1180,13 +1180,13 @@ namespace Alphora.Dataphor.DAE.Server
 				if (!IsEngine && FFirstRun)
 				{
 					LogMessage("Registering system catalog...");
-					using (Stream LStream = GetType().Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.Schema.SystemCatalog.d4"))
+					using (Stream LStream = typeof(Engine).Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.Schema.SystemCatalog.d4"))
 					{
 						RunScript(new StreamReader(LStream).ReadToEnd(), CSystemLibraryName);
 					}
 					LogMessage("System catalog registered.");
 					LogMessage("Registering debug operators...");
-					using (Stream LStream = GetType().Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.Debug.Debug.d4"))
+					using (Stream LStream = typeof(Engine).Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.Debug.Debug.d4"))
 					{
 						RunScript(new StreamReader(LStream).ReadToEnd(), CSystemLibraryName);
 					}
@@ -1225,7 +1225,7 @@ namespace Alphora.Dataphor.DAE.Server
 				// Create the Catalog device
 				// Note that this must be the first object created to avoid the ID being different on subsequent loads
 				Schema.Object.SetNextObjectID(0);
-				FCatalogDevice = new CatalogDevice(Schema.Object.GetNextObjectID(), CCatalogDeviceName);
+				FCatalogDevice = CreateCatalogDevice();
 
 				// Create the system user
 				FSystemUser = new Schema.User(CSystemUserID, "System User", String.Empty);
@@ -1233,9 +1233,7 @@ namespace Alphora.Dataphor.DAE.Server
 				// Create the system library
 				FSystemLibrary = new Schema.LoadedLibrary(CSystemLibraryName);
 				FSystemLibrary.Owner = FSystemUser;
-				Assembly LDAEAssembly = GetType().Assembly;
-				FSystemLibrary.Assemblies.Add(LDAEAssembly);
-				FCatalog.ClassLoader.RegisterAssembly(FSystemLibrary, LDAEAssembly);
+				LoadSystemAssemblies();
 				FCatalog.LoadedLibraries.Add(FSystemLibrary);
 
 				// Load available libraries
@@ -1272,6 +1270,18 @@ namespace Alphora.Dataphor.DAE.Server
 				FCatalogInitialized = true;
 			}
 		}
+		
+		protected virtual CatalogDevice CreateCatalogDevice()
+		{
+			return new CatalogDevice(Schema.Object.GetNextObjectID(), CCatalogDeviceName);
+		}
+		
+		protected virtual void LoadSystemAssemblies()
+		{
+			Assembly LDAEAssembly = typeof(Engine).Assembly;
+			FSystemLibrary.Assemblies.Add(LDAEAssembly);
+			FCatalog.ClassLoader.RegisterAssembly(FSystemLibrary, LDAEAssembly);
+		}
 
 		protected virtual void InternalInitializeCatalog()
 		{
@@ -1297,7 +1307,7 @@ namespace Alphora.Dataphor.DAE.Server
 
 		private void RegisterSystemDataTypes()
 		{
-			using (Stream LStream = GetType().Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.Schema.DataTypes.d4"))
+			using (Stream LStream = typeof(Engine).Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.Schema.DataTypes.d4"))
 			{
 				RunScript(new StreamReader(LStream).ReadToEnd(), CSystemLibraryName);
 			}

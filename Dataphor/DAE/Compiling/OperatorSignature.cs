@@ -223,8 +223,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public void Resolve(Plan APlan, OperatorBindingContext AContext)
 		{
-			OperatorSignature LResultSignature = FSignatures[AContext.CallSignature] as OperatorSignature;
-			if (LResultSignature != null)
+			OperatorSignature LResultSignature = null;
+			if (FSignatures.TryGetValue(AContext.CallSignature, out LResultSignature))
 			{
 				if (!AContext.Matches.Contains(LResultSignature))
 					AContext.Matches.Add(new OperatorMatch(LResultSignature, true));

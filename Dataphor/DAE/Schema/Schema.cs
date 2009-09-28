@@ -1897,7 +1897,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			{
 				IntegerList LNameBucket;
 				Dictionary<string, IntegerList> LNameIndex = GetNameIndexForDepth(LIndex);
-				if (LNameIndex.TryGetValue(LName, out LNameBucket))
+				if (!LNameIndex.TryGetValue(LName, out LNameBucket))
 					throw new SchemaException(SchemaException.Codes.IndexBucketNotFound, LName);
 				LNameBucket.Remove(AOldIndex);
 				LNameBucket.Add(ANewIndex);
