@@ -145,7 +145,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 						(
 							"insert into DAEServerInfo (Name, Version, MaxConcurrentProcesses, ProcessWaitTimeout, ProcessTerminationTimeout, PlanCacheSize) values ('{0}', '{1}', {2}, {3}, {4}, {5})",
 							AServer.Name.Replace("'", "''"),
-							GetType().Assembly.GetName().Version.ToString(),
+							AServer.Catalog.Libraries[AServer.SystemLibrary.Name].Version.ToString(),
 							AServer.MaxConcurrentProcesses,
 							(int)AServer.ProcessWaitTimeout.TotalMilliseconds,
 							(int)AServer.ProcessTerminationTimeout.TotalMilliseconds,

@@ -1140,11 +1140,10 @@ namespace Alphora.Dataphor.DAE.Server
 				// Create the implicit system library
 				Schema.Library LSystemLibrary = new Schema.Library(CSystemLibraryName);
 				LSystemLibrary.Files.Add(new Schema.FileReference("Alphora.Dataphor.DAE.dll", true));
-				Version LVersion = GetType().Assembly.GetName().Version;
+				Version LVersion = typeof(Engine).Assembly.GetName().Version;
 				LSystemLibrary.Version = new VersionNumber(LVersion.Major, LVersion.Minor, LVersion.Build, LVersion.Revision);
 				LSystemLibrary.DefaultDeviceName = CTempDeviceName;
 				FCatalog.Libraries.Add(LSystemLibrary);
-
 			}
 		}
 
