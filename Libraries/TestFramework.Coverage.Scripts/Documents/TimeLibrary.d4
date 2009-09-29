@@ -19,13 +19,15 @@ begin
 	LTime := Time();
 	
 	Sleep(2000);
-	BeginTransaction(); // sets up a new transaction so that the time of the start of the transaction is different.
 	
+	/*
+	// These do not work because Time() will always return the transaction start time
 	if (Time() = LTime) then 
 		raise Error("Time() selector failed. Time staying the same.");
 
 	if (Time() < LTime) then 
 		raise Error("Time() selector failed. Time not increasing.");
+	*/
 
 	LTime := Time(20, 04, 15);
 	if (LTime <> Time(20, 4, 15)) then

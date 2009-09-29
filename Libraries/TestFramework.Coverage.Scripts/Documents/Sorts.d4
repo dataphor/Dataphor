@@ -33,7 +33,7 @@ ProperNames :=
 		row { 8 ID, 'D' ProperName }
 	};
 	
-//select ProperNames order by { ProperName };
+//select ProperNames order by { ProperName, ID };
 
 // Cursor
 begin
@@ -43,7 +43,7 @@ begin
 		while (LCursor.Next()) do
 		begin
 			if LCursor.Select().ID <> LIndex then
-				raise Error("ProperNames order by { ProperName } returned in invalid order.");
+				raise Error("ProperNames order by { ProperName, ID } returned in invalid order.");
 			LIndex := LIndex + 1;
 		end;
 	finally
@@ -61,7 +61,7 @@ begin
 		while (LCursor.Next()) do
 		begin
 			if LCursor.Select().ID <> LIndex then
-				raise Error("ProperNames order by { ProperName } returned in invalid order.");
+				raise Error("ProperNames order by { ProperName sort CompareText(left.value, right.value), ID } returned in invalid order.");
 			LIndex := LIndex + 1;
 		end;
 	finally
@@ -100,7 +100,7 @@ begin
 		while (LCursor.Next()) do
 		begin
 			if LCursor.Select().ID <> LIndex then
-				raise Error("ProperNames order by { ProperName } returned in invalid order.");
+				raise Error("ProperNames order by { ProperName sort CompareText(left.value, right.value), ID } returned in invalid order.");
 			LIndex := LIndex + 1;
 		end;
 	finally
@@ -120,15 +120,17 @@ create table ProperNames
 ProperNames :=
 	table
 	{
-		row { 1 ID, 'a' ProperName },
-		row { 2 ID, 'A' ProperName },
-		row { 3 ID, 'b' ProperName },
-		row { 4 ID, 'B' ProperName },
-		row { 5 ID, 'c' ProperName },
-		row { 6 ID, 'C' ProperName },
-		row { 7 ID, 'd' ProperName },
-		row { 8 ID, 'D' ProperName }
+		row { 1 ID, 'A' ProperName },
+		row { 2 ID, 'B' ProperName },
+		row { 3 ID, 'C' ProperName },
+		row { 4 ID, 'D' ProperName },
+		row { 5 ID, 'a' ProperName },
+		row { 6 ID, 'b' ProperName },
+		row { 7 ID, 'c' ProperName },
+		row { 8 ID, 'd' ProperName }
 	};
+	
+//select ProperNames order by { ProperName }
 
 // Cursor (order)
 begin

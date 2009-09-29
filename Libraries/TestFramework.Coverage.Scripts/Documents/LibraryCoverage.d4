@@ -88,8 +88,8 @@ if not exists (Libraries where Name = 'Test') then
 if GetLibraryDescriptor('Test') <> LibraryDescriptor('Test', VersionNumber(1, 0), "TestDevice", list(FileReference){}, {LibraryReference('System', VersionNumber(-1))}) then
 	raise Error('GetLibraryDescriptor failed.');
 	
-SetLibraryDescriptor('Test', LibraryDescriptor('Test', VersionNumber(2, 0), "TestingDevice", list(FileReference){}, {LibraryReference('System', VersionNumber(2))}));
-if GetLibraryDescriptor('Test') <> LibraryDescriptor('Test', VersionNumber(2, 0), "TestingDevice", list(FileReference){}, {LibraryReference('System', VersionNumber(2))}) then
+SetLibraryDescriptor('Test', LibraryDescriptor('Test', VersionNumber(2, 0), "TestingDevice", list(FileReference){}, {LibraryReference('System', VersionNumber(3))}));
+if GetLibraryDescriptor('Test') <> LibraryDescriptor('Test', VersionNumber(2, 0), "TestingDevice", list(FileReference){}, {LibraryReference('System', VersionNumber(3))}) then
 	raise Error("SetLibraryDescriptor failed.");
 	
 if (GetDefaultDeviceName("Test") <> "TestingDevice") then
@@ -212,7 +212,7 @@ begin
 		
 	LErrorHit := false;
 	try
-		SetLibraryDescriptor('Test', LibraryDescriptor('Test', VersionNumber(2, 0), "", list(FileReference){}, {LibraryReference('System', VersionNumber(1)), LibraryReference('TestDependent', VersionNumber(-1))}));
+		SetLibraryDescriptor('Test', LibraryDescriptor('Test', VersionNumber(2, 0), "", list(FileReference){}, {LibraryReference('System', VersionNumber(3)), LibraryReference('TestDependent', VersionNumber(-1))}));
 	except
 		LErrorHit := true;
 	end;

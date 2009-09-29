@@ -36,14 +36,14 @@ drop table Test;
 // Must be able to drop a table with event handlers attached
 create table Test { ID : Integer };
 
-create operator Test_ID_Validate(var ARow : typeof(Test[])) : Boolean
+create operator Test_ID_Validate(var ARow : row { ID : Integer }) : Boolean
 begin
 	result := false;
 end;
 
 attach operator Test_ID_Validate to ID in Test on { validate };
 
-create operator Test_Insert(var ARow : typeof(Test[]), var APerformUpdate : Boolean)
+create operator Test_Insert(var ARow : row { ID : Integer }, var APerformUpdate : Boolean)
 begin
 end;
 
