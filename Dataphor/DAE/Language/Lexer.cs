@@ -10,7 +10,6 @@ using System.Runtime.Serialization;
 
 namespace Alphora.Dataphor.DAE.Language
 {
-	[DataContract]
     public enum TokenType { Unknown, Symbol, Nil, Boolean, Integer, Hex, Float, Decimal, Money, String, EOF, Error }
 
 	public class LexerToken

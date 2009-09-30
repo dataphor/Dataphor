@@ -52,7 +52,6 @@ namespace Alphora.Dataphor.DAE.Server
 			FInternalServer.Name = Schema.Object.NameFromGuid(Guid.NewGuid());
 			FInternalServer.LoggingEnabled = AClientSideLoggingEnabled;
 			FInternalServer.Start();
-			FServerInstanceID = AServer.InstanceID;
 			FServerConnection = FServer.Establish(FInternalServer.Name, FHostName);
 			FServerCacheTimeStamp = AServer.CacheTimeStamp;
 			FClientCacheTimeStamp = 1;
@@ -100,11 +99,13 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		// Reference Counting
 		protected int FReferenceCount;
+
 		/// <summary> Increments the reference counter. </summary>
 		internal protected void AddReference()
 		{
 			FReferenceCount++;
 		}
+
 		/// <summary> Decrements the reference counter, disposes when no references. </summary>
 		internal protected void RemoveReference()
 		{
@@ -113,47 +114,23 @@ namespace Alphora.Dataphor.DAE.Server
 				Dispose();
 		}
 
+		private string FServerName;
 		public string Name 
 		{ 
 			get 
 			{ 
-				CheckServerConnection();
-				return FServer.Name; 
+				if (FServerName == null)
+					FServerName = FServer.Name;
+				return FServerName;
 			} 
 		}
-		
 		
 		protected IRemoteServer FServer;
-		public IRemoteServer RemoteServer 
-		{ 
-			get	
-			{ 
-				CheckServerConnection();
-				return FServer; 
-			} 
-		}
+		public IRemoteServer RemoteServer { get	{ return FServer; } }
 		
 		protected IRemoteServerConnection FServerConnection;
-		public IRemoteServerConnection ServerConnection
-		{
-			get { return FServerConnection; }
-		}
+		public IRemoteServerConnection ServerConnection { get { return FServerConnection; } }
 
-		protected internal Guid FServerInstanceID;
-		public Guid InstanceID { get { return FServerInstanceID; } }
-		
-		protected internal void CheckServerInstanceID()
-		{
-			if (FServerInstanceID != FServer.InstanceID)
-				throw new ServerException(ServerException.Codes.InvalidServerInstanceID);
-		}
-		
-		protected internal void CheckServerConnection()
-		{
-			CheckServerInstanceID();
-			string LConnectionName = FServerConnection.ConnectionName; // read connection name to validate the connection
-		}
-		
 		// An internal server used to evaluate remote proposable calls
 		protected internal Engine FInternalServer;
 		
@@ -344,23 +321,9 @@ namespace Alphora.Dataphor.DAE.Server
 				FCacheLock.ReleaseReaderLock();
 		}
 
-		public long CacheTimeStamp 
-		{ 
-			get 
-			{ 
-				CheckServerConnection();
-				return FServer.CacheTimeStamp;
-			} 
-		}
+		public long CacheTimeStamp { get { return FServer.CacheTimeStamp; } }
 		
-		public long DerivationTimeStamp 
-		{ 
-			get 
-			{ 
-				CheckServerConnection();
-				return FServer.DerivationTimeStamp; 
-			} 
-		}
+		public long DerivationTimeStamp { get { return FServer.DerivationTimeStamp; } }
 		
 		public event CacheClearedEvent OnCacheClearing;
 		private void DoCacheClearing()
@@ -564,28 +527,19 @@ namespace Alphora.Dataphor.DAE.Server
         /// <summary>Starts the server instance.  If it is already running, the call has no effect.</summary>
         public void Start()
         {
-			CheckServerConnection();
 			FServer.Start();
 		}
 		
         /// <summary>Stops the server instance.  If it is not running, the call has no effect.</summary>
         public void Stop()
         {
-			CheckServerConnection();
 			FServer.Stop();
         }
 
 		public Schema.Catalog Catalog { get { return FInternalServer.Catalog; } }
 		
 		/// <value>Returns the state of the server. </value>
-		public ServerState State 
-		{ 
-			get 
-			{ 
-				CheckServerConnection();
-				return FServer.State; 
-			} 
-		}
+		public ServerState State { get { return FServer.State; } }
         
 		/// <summary>
         ///     Connects to the server using the given parameters and returns an interface to the connection.
@@ -595,7 +549,6 @@ namespace Alphora.Dataphor.DAE.Server
         /// <returns>An <see cref="IServerSession"/> interface to the open session.</returns>
         public IServerSession Connect(SessionInfo ASessionInfo)
         {
-			CheckServerConnection();
 			if ((ASessionInfo.HostName == null) || (ASessionInfo.HostName == ""))
 				ASessionInfo.HostName = FHostName;
 			ASessionInfo.CatalogCacheName = FInternalServer.Name;
@@ -611,7 +564,6 @@ namespace Alphora.Dataphor.DAE.Server
         {
 			try
 			{
-				CheckServerConnection();
 				FServerConnection.Disconnect(((LocalSession)ASession).RemoteSession);
 			}
 			catch

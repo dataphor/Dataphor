@@ -12,27 +12,27 @@ using System.ServiceModel;
 
 namespace Alphora.Dataphor.DAE.Contracts
 {
-	[ServiceContract(Name = "IListenerService")]
+	[ServiceContract(Name = "IListenerService", Namespace = "http://dataphor.org/dataphor/3.0/")]
 	public interface IClientListenerService
 	{
 		/// <summary>
 		/// Enumerates the available Dataphor instances.
 		/// </summary>
-		[OperationContract(AsyncPattern = true, Action = "EnumerateInstances", ReplyAction = "EnumerateInstancesResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginEnumerateInstances(AsyncCallback ACallback, object AState);
 		string[] EndEnumerateInstances(IAsyncResult AResult);
 		
 		/// <summary>
 		/// Returns the URI for an instance.
 		/// </summary>
-		[OperationContract(AsyncPattern = true, Action = "GetInstanceURI", ReplyAction = "GetInstanceURIResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginGetInstanceURI(string AInstanceName, AsyncCallback ACallback, object AState);
 		string EndGetInstanceURI(IAsyncResult AResult);
 		
 		/// <summary>
 		/// Returns the URI for the standard or native CLI of an instance.
 		/// </summary>
-		[OperationContract(AsyncPattern = true, Action = "GetNativeInstanceURI", ReplyAction = "GetNativeInstanceURIResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginGetNativeInstanceURI(string AInstanceName, AsyncCallback ACallback, object AState);
 		string EndGetNativeInstanceURI(IAsyncResult AResult);
 	}

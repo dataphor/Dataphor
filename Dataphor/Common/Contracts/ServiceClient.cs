@@ -21,7 +21,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		public ServiceClient(string AEndpointURI) 
 			: this
 			(
-				new CustomBinding(new BinaryMessageEncodingBindingElement(), new HttpTransportBindingElement()), 
+				DataphorServiceUtility.GetBinding(), 
 				new EndpointAddress(AEndpointURI)
 			)
 		{

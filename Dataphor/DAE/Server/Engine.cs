@@ -159,10 +159,6 @@ namespace Alphora.Dataphor.DAE.Server
 			get { return true; }
 		}
 
-		// InstanceID
-		private Guid FInstanceID = Guid.NewGuid();
-		public Guid InstanceID { get { return FInstanceID; } }
-
 		#region Devices
 		
 		// TempDevice		

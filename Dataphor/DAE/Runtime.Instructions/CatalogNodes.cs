@@ -23,6 +23,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Schema = Alphora.Dataphor.DAE.Schema;
 
+	// operator ObjectExists(const AName : Name) : Boolean
+	// operator ObjectExists(const ASpecifier : String) : Boolean
+	public class ObjectExistsNode : UnaryInstructionNode
+	{
+		public override object InternalExecute(Program AProgram, object AArgument1)
+		{
+			#if NILPROPOGATION
+			if (AArgument1 == null)
+				return null;
+			else
+			#endif
+				if (Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemString))
+					return AProgram.ResolveCatalogObjectSpecifier((string)AArgument1, false) != null;
+				else
+					return AProgram.ResolveCatalogIdentifier((string)AArgument1, false) != null;
+		}
+	}
+	
 	// operator System.NameFromGuid(const AID : System.Guid) : System.Name
 	public class SystemNameFromGuidNode : UnaryInstructionNode
 	{

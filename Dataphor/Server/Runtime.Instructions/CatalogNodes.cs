@@ -42,24 +42,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	}
 
-	// operator ObjectExists(const AName : Name) : Boolean
-	// operator ObjectExists(const ASpecifier : String) : Boolean
-	public class ObjectExistsNode : UnaryInstructionNode
-	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
-		{
-			#if NILPROPOGATION
-			if (AArgument1 == null)
-				return null;
-			else
-			#endif
-				if (Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemString))
-					return AProgram.ResolveCatalogObjectSpecifier((string)AArgument1, false) != null;
-				else
-					return AProgram.ResolveCatalogIdentifier((string)AArgument1, false) != null;
-		}
-	}
-	
 	// operator System.ObjectID(System.Name) : System.Integer
 	// operator System.ObjectID(System.String) : System.Integer
 	public class SystemObjectIDNode : UnaryInstructionNode

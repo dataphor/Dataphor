@@ -91,7 +91,7 @@ namespace Alphora.Dataphor.DAE.Service
 					FServiceHost.AddServiceEndpoint
 					(
 						typeof(IDataphorService), 
-						new CustomBinding(new BinaryMessageEncodingBindingElement(), new HttpTransportBindingElement()), 
+						DataphorServiceUtility.GetBinding(), 
 						DataphorServiceUtility.BuildInstanceURI(Environment.MachineName, LInstance.PortNumber, LInstance.Name)
 					);
 
@@ -102,11 +102,14 @@ namespace Alphora.Dataphor.DAE.Service
 					FNativeServiceHost.AddServiceEndpoint
 					(
 						typeof(INativeCLIService),
-						new CustomBinding(new BinaryMessageEncodingBindingElement(), new HttpTransportBindingElement()),
+						DataphorServiceUtility.GetBinding(), 
 						DataphorServiceUtility.BuildNativeInstanceURI(Environment.MachineName, LInstance.PortNumber, LInstance.Name)
 					);
 					
 					FNativeServiceHost.Open();
+					
+					// Start the listener
+					ListenerService.EstablishListener();
 				}
 				catch
 				{

@@ -17,10 +17,33 @@ namespace Alphora.Dataphor.DAE.Contracts
 	using Alphora.Dataphor.DAE.Streams;
 	using Alphora.Dataphor.DAE.Debug;
 
-	//[ServiceContract(Namespace = "http://Alphora.Dataphor.ServiceContracts/2009/09", Name = "IDataphorService")]
-	[ServiceContract]
+	[ServiceContract(Name = "IDataphorService", Namespace = "http://dataphor.org/dataphor/3.0/")]
 	public interface IDataphorService
 	{
+		// Server
+		#region Server
+		
+		/// <summary>
+		/// Returns the name of the server.
+		/// </summary>
+		[OperationContract]
+		string GetServerName();
+		
+		/// <summary>
+		/// Returns the current cache timestamp of the catalog.
+		/// </summary>
+		/// <returns></returns>
+		[OperationContract]
+		long GetCacheTimeStamp();
+		
+		/// <summary>
+		/// Returns the current derivation timestamp of the catalog.
+		/// </summary>
+		[OperationContract]
+		long GetDerivationTimeStamp();
+		
+		#endregion
+		
 		// Session
 		#region Session
 

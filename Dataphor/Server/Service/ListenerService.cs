@@ -43,7 +43,7 @@ namespace Alphora.Dataphor.DAE.Server
 			FListenerHost.AddServiceEndpoint
 			(
 				typeof(IListenerService), 
-				new CustomBinding(new BinaryMessageEncodingBindingElement(), new HttpTransportBindingElement()), 
+				DataphorServiceUtility.GetBinding(), 
 				DataphorServiceUtility.BuildListenerURI(Environment.MachineName)
 			);
 			

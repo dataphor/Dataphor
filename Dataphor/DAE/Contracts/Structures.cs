@@ -11,7 +11,6 @@ using System.Runtime.Serialization;
 namespace Alphora.Dataphor.DAE.Contracts
 {
     [Flags]
-    [DataContract]
 	/// <nodoc/>
 	public enum CursorGetFlags : byte { None = 0, BOF = 1, EOF = 2 }
     
@@ -61,7 +60,6 @@ namespace Alphora.Dataphor.DAE.Contracts
 		public RemoteRowBody Body;
     }
 
-	[DataContract]
 	public enum RemoteParamModifier : byte { In, Var, Out, Const }
 	
 	/// <nodoc/>

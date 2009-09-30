@@ -11,7 +11,6 @@ using System.Security.Permissions;
 namespace Alphora.Dataphor.DAE
 {
     /// <nodoc/>
-	[DataContract]
 	public enum QueryLanguage { D4, RealSQL }
 	
     /// <summary> Contains settings relevant to a server session. </summary>

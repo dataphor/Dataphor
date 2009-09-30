@@ -17,9 +17,35 @@ namespace Alphora.Dataphor.DAE.Contracts
 	using Alphora.Dataphor.DAE.Streams;
 	using Alphora.Dataphor.DAE.Debug;
 
-	[ServiceContract(Name = "IDataphorService")]
+	[ServiceContract(Name = "IDataphorService", Namespace = "http://dataphor.org/dataphor/3.0/")]
 	public interface IClientDataphorService
 	{
+		// Server
+		#region Server
+		
+		/// <summary>
+		/// Returns the name of the server.
+		/// </summary>
+		[OperationContract(AsyncPattern = true)]
+		IAsyncResult BeginGetServerName(AsyncCallback ACallback, object AState);
+		string EndGetServerName(IAsyncResult AResult);
+		
+		/// <summary>
+		/// Returns the current cache timestamp of the catalog.
+		/// </summary>
+		[OperationContract(AsyncPattern = true)]
+		IAsyncResult BeginGetCacheTimeStamp(AsyncCallback ACallback, object AState);
+		long EndGetCacheTimeStamp(IAsyncResult AResult);
+		
+		/// <summary>
+		/// Returns the current derivation timestamp of the catalog.
+		/// </summary>
+		[OperationContract(AsyncPattern = true)]
+		IAsyncResult BeginGetDerivationTimeStamp(AsyncCallback ACallback, object AState);
+		long EndGetDerivationTimeStamp(IAsyncResult AResult);
+		
+		#endregion
+		
 		// Session
 		#region Session
 
@@ -28,7 +54,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="ASessionInfo">The session information used to authenticate and describe the session.</param>
 		/// <returns>A session descriptor that describes the new session.</returns>
-		[OperationContract(AsyncPattern = true, Action = "Connect", ReplyAction = "ConnectResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginConnect(SessionInfo ASessionInfo, AsyncCallback ACallback, object AState);
 		SessionDescriptor EndConnect(IAsyncResult AResult);
 
@@ -36,7 +62,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Disconnects an active Dataphor session.
 		/// </summary>
 		/// <param name="ASessionHandle">The handle to the session to be disconnected.</param>
-		[OperationContract(AsyncPattern = true, Action = "Disconnect", ReplyAction = "DisconnectResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginDisconnect(int ASessionHandle, AsyncCallback ACallback, object AState);
 		void EndDisconnect(IAsyncResult AResult);
 		
@@ -51,7 +77,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ASessionHandle">The handle of the session that will be used to start the process.</param>
 		/// <param name="AProcessInfo">The process information used to describe the new process.</param>
 		/// <returns>A process descriptor that describes the new process.</returns>
-		[OperationContract(AsyncPattern = true, Action = "StartProcess", ReplyAction = "StartProcessResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginStartProcess(int ASessionHandle, ProcessInfo AProcessInfo, AsyncCallback ACallback, object AState);
 		ProcessDescriptor EndStartProcess(IAsyncResult AResult);
 		
@@ -59,7 +85,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Stops a server process.
 		/// </summary>
 		/// <param name="AProcessHandle">The handle to the process to be stopped.</param>
-		[OperationContract(AsyncPattern = true, Action = "StopProcess", ReplyAction = "StopProcessResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginStopProcess(int AProcessHandle, AsyncCallback ACallback, object AState);
 		void EndStopProcess(IAsyncResult AResult);
 		
@@ -68,7 +94,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="AProcessHandle">The handle to the process on which the transaction will be started.</param>
 		/// <param name="AIsolationLevel">The isolation level of the new transaction.</param>
-		[OperationContract(AsyncPattern = true, Action = "BeginTransaction", ReplyAction = "BeginTransactionResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginBeginTransaction(int AProcessHandle, IsolationLevel AIsolationLevel, AsyncCallback ACallback, object AState);
 		void EndBeginTransaction(IAsyncResult AResult);
 		
@@ -76,7 +102,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Prepares an active transaction to be committed.
 		/// </summary>
 		/// <param name="AProcessHandle">The handle to the process on which the current transaction will be prepared.</param>
-		[OperationContract(AsyncPattern = true, Action = "PrepareTransaction", ReplyAction = "PrepareTransactionResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginPrepareTransaction(int AProcessHandle, AsyncCallback ACallback, object AState);
 		void EndPrepareTransaction(IAsyncResult AResult);
 		
@@ -84,7 +110,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Commits an active transaction.
 		/// </summary>
 		/// <param name="AProcessHandle">The handle to the process on which the current transaction will be committed.</param>
-		[OperationContract(AsyncPattern = true, Action = "CommitTransaction", ReplyAction = "CommitTransactionResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginCommitTransaction(int AProcessHandle, AsyncCallback ACallback, object AState);
 		void EndCommitTransaction(IAsyncResult AResult);
 		
@@ -92,7 +118,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Rolls back an active transaction.
 		/// </summary>
 		/// <param name="AProcessHandle">The handle to the process on which the current transaction will be rolled back.</param>
-		[OperationContract(AsyncPattern = true, Action = "RollbackTransaction", ReplyAction = "RollbackTransactionResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginRollbackTransaction(int AProcessHandle, AsyncCallback ACallback, object AState);
 		void EndRollbackTransaction(IAsyncResult AResult);
 		
@@ -101,7 +127,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="AProcessHandle">The handle to the process for which the number of active transactions will be returned.</param>
 		/// <returns>The number of active transactions.</returns>
-		[OperationContract(AsyncPattern = true, Action = "GetTransactionCount", ReplyAction = "GetTransactionCountResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginGetTransactionCount(int AProcessHandle, AsyncCallback ACallback, object AState);
 		int EndGetTransactionCount(IAsyncResult AResult);
 
@@ -113,7 +139,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AShouldJoin">Whether or not the process initiating the application transaction should immediately join the new transaction.</param>
 		/// <param name="AIsInsert">Whether or not the process should join in insert mode.</param>
 		/// <returns>The ID of the new application transaction.</returns>
-		[OperationContract(AsyncPattern = true, Action = "BeginApplicationTransaction", ReplyAction = "BeginApplicationTransactionResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginBeginApplicationTransaction(int AProcessHandle, ProcessCallInfo ACallInfo, bool AShouldJoin, bool AIsInsert, AsyncCallback ACallback, object AState);
         Guid EndBeginApplicationTransaction(IAsyncResult AResult);
         
@@ -123,7 +149,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="AProcessHandle">The handle to the process that will perform the prepare.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
         /// <param name="AID">The ID of the application transaction to be prepared.</param>
-		[OperationContract(AsyncPattern = true, Action = "PrepareApplicationTransaction", ReplyAction = "PrepareApplicationTransactionResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginPrepareApplicationTransaction(int AProcessHandle, ProcessCallInfo ACallInfo, Guid AID, AsyncCallback ACallback, object AState);
         void EndPrepareApplicationTransaction(IAsyncResult AResult);
 
@@ -133,7 +159,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AProcessHandle">The handle to the process that will perform the commit.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="AID">The ID of the application transaction to be committed.</param>
-		[OperationContract(AsyncPattern = true, Action = "CommitApplicationTransaction", ReplyAction = "CommitApplicationTransactionResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginCommitApplicationTransaction(int AProcessHandle, ProcessCallInfo ACallInfo, Guid AID, AsyncCallback ACallback, object AState);
         void EndCommitApplicationTransaction(IAsyncResult AResult);
         
@@ -143,7 +169,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="AProcessHandle">The handle to the process that will perform the rollback.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
         /// <param name="AID">The ID of the application transaction to be rolled back.</param>
-		[OperationContract(AsyncPattern = true, Action = "RollbackApplicationTransaction", ReplyAction = "RollbackApplicationTransactionResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginRollbackApplicationTransaction(int AProcessHandle, ProcessCallInfo ACallInfo, Guid AID, AsyncCallback ACallback, object AState);
         void EndRollbackApplicationTransaction(IAsyncResult AResult);
         
@@ -152,7 +178,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// </summary>
         /// <param name="AProcessHandle">The handle to the process.</param>
         /// <returns>The ID of the application transaction.</returns>
-		[OperationContract(AsyncPattern = true, Action = "GetApplicationTransactionID", ReplyAction = "GetApplicationTransactionIDResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginGetApplicationTransactionID(int AProcessHandle, AsyncCallback ACallback, object AState);
         Guid EndGetApplicationTransactionID(IAsyncResult AResult);
 
@@ -163,7 +189,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="AID">The ID of the application transaction to join.</param>
 		/// <param name="AIsInsert">Whether or not to join in insert mode.</param>
-		[OperationContract(AsyncPattern = true, Action = "JoinApplicationTransaction", ReplyAction = "JoinApplicationTransactionResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginJoinApplicationTransaction(int AProcessHandle, ProcessCallInfo ACallInfo, Guid AID, bool AIsInsert, AsyncCallback ACallback, object AState);
         void EndJoinApplicationTransaction(IAsyncResult AResult);
         
@@ -172,7 +198,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// </summary>
         /// <param name="AProcessHandle">The handle to the process.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
-		[OperationContract(AsyncPattern = true, Action = "LeaveApplicationTransaction", ReplyAction = "LeaveApplicationTransactionResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginLeaveApplicationTransaction(int AProcessHandle, ProcessCallInfo ACallInfo, AsyncCallback ACallback, object AState);
 		void EndLeaveApplicationTransaction(IAsyncResult AResult);
 		
@@ -190,7 +216,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AParams">Any parameters to the statement.</param>
 		/// <param name="ALocator">A locator describing the source of the statement.</param>
 		/// <returns>A PlanDescriptor describing the prepared plan.</returns>
-		[OperationContract(AsyncPattern = true, Action = "PrepareStatement", ReplyAction = "PrepareStatementResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginPrepareStatement(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, string AStatement, RemoteParam[] AParams, DebugLocator ALocator, AsyncCallback ACallback, object AState);
 		PlanDescriptor EndPrepareStatement(IAsyncResult AResult);
 		
@@ -201,7 +227,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="AParams">The parameters to the plan.</param>
 		/// <param name="AExecuteTime">The execution time.</param>
-		[OperationContract(AsyncPattern = true, Action = "ExecutePlan", ReplyAction = "ExecutePlanResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginExecutePlan(int APlanHandle, ProcessCallInfo ACallInfo, ref RemoteParamData AParams, out TimeSpan AExecuteTime, AsyncCallback ACallback, object AState);
 		void EndExecutePlan(IAsyncResult AResult);
 
@@ -209,7 +235,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Unprepares a prepared plan.
 		/// </summary>
 		/// <param name="APlanHandle">The handle of the plan to be unprepared.</param>
-		[OperationContract(AsyncPattern = true, Action = "UnprepareStatement", ReplyAction = "UnprepareStatementResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginUnprepareStatement(int APlanHandle, AsyncCallback ACallback, object AState);
 		void EndUnprepareStatement(IAsyncResult AResult);
 		
@@ -222,7 +248,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AParams">The parameters to the expression.</param>
 		/// <param name="ALocator">A debug locator describing the source of the expression.</param>
 		/// <returns>A PlanDescriptor describing the prepared plan.</returns>
-		[OperationContract(AsyncPattern = true, Action = "PrepareExpression", ReplyAction = "PrepareExpressionResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginPrepareExpression(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, string AExpression, RemoteParam[] AParams, DebugLocator ALocator, AsyncCallback ACallback, object AState);
 		PlanDescriptor EndPrepareExpression(IAsyncResult AResult);
 		
@@ -234,7 +260,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AParams">The parameters to the expression.</param>
 		/// <param name="AExecuteTime">The execute time.</param>
 		/// <returns>The result of evaluating the plan in it's physical representation.</returns>
-		[OperationContract(AsyncPattern = true, Action = "EvaluatePlan", ReplyAction = "EvaluatePlanResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginEvaluatePlan(int APlanHandle, ProcessCallInfo ACallInfo, ref RemoteParamData AParams, out TimeSpan AExecuteTime, AsyncCallback ACallback, object AState);
 		byte[] EndEvaluatePlan(IAsyncResult AResult);
 
@@ -249,7 +275,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ACount">The number of rows to be fetched as part of the open.</param>
 		/// <param name="AFetchData">A FetchData describing the results of the initial fetch.</param>
 		/// <returns>A CursorDescriptor describing the new cursor.</returns>
-		[OperationContract(AsyncPattern = true, Action = "OpenPlanCursor", ReplyAction = "OpenPlanCursorResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginOpenPlanCursor(int APlanHandle, ProcessCallInfo ACallInfo, ref RemoteParamData AParams, out TimeSpan AExecuteTime, out Guid[] ABookmarks, int ACount, out RemoteFetchData AFetchData, AsyncCallback ACallback, object AState);
 		CursorDescriptor EndOpenPlanCursor(IAsyncResult AResult);
 		
@@ -257,7 +283,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Unprepares a prepared expression plan.
 		/// </summary>
 		/// <param name="APlanHandle">The handle of the plan to be unprepared.</param>
-		[OperationContract(AsyncPattern = true, Action = "UnprepareExpression", ReplyAction = "UnprepareExpressionResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginUnprepareExpression(int APlanHandle, AsyncCallback ACallback, object AState);
 		void EndUnprepareExpression(IAsyncResult AResult);
 		
@@ -271,7 +297,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="ACursorHandle">The handle of the cursor to be closed.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
-		[OperationContract(AsyncPattern = true, Action = "CloseCursor", ReplyAction = "CloseCursorResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginCloseCursor(int ACursorHandle, ProcessCallInfo ACallInfo, AsyncCallback ACallback, object AState);
 		void EndCloseCursor(IAsyncResult AResult);
 		
@@ -281,7 +307,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AHandle">The handle of the cursor from which the row will be selected.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <returns>A RemoteRowBody describing the row in it's physical representation.</returns>
-		[OperationContract(AsyncPattern = true, Action = "Select", ReplyAction = "SelectResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginSelect(int ACursorHandle, ProcessCallInfo ACallInfo, AsyncCallback ACallback, object AState);
 		RemoteRowBody EndSelect(IAsyncResult AResult);
 		
@@ -292,7 +318,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="AHeader">A RemoteRowHeader describing the set of columns to be included in the resulting row.</param>
 		/// <returns>A RemoteRowBody describing the row in it's physical representation.</returns>
-		[OperationContract(AsyncPattern = true, Action = "SelectSpecific", ReplyAction = "SelectSpecificResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginSelectSpecific(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRowHeader AHeader, AsyncCallback ACallback, object AState);
 		RemoteRowBody EndSelectSpecific(IAsyncResult AResult);
 		
@@ -304,7 +330,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ABookmarks">A list of bookmarks associated with the fetched rows.</param>
 		/// <param name="ACount">The number of rows to be fetched.</param>
 		/// <returns>A RemoteFetchData describing the results of the fetch.</returns>
-		[OperationContract(AsyncPattern = true, Action = "Fetch", ReplyAction = "FetchResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginFetch(int ACursorHandle, ProcessCallInfo ACallInfo, out Guid[] ABookmarks, int ACount, AsyncCallback ACallback, object AState);
 		RemoteFetchData EndFetch(IAsyncResult AResult);
 		
@@ -317,7 +343,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ABookmarks">A list of bookmarks associated with the fetched rows.</param>
 		/// <param name="ACount">The number of rows to be fetched.</param>
 		/// <returns>A RemoteFetchData describing the results of the fetch.</returns>
-		[OperationContract(AsyncPattern = true, Action = "FetchSpecific", ReplyAction = "FetchSpecificResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginFetchSpecific(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRowHeader AHeader, out Guid[] ABookmarks, int ACount, AsyncCallback ACallback, object AState);
 		RemoteFetchData EndFetchSpecific(IAsyncResult AResult);
 		
@@ -327,7 +353,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ACursorHandle">The handle of the cursor for which the navigation state will be returned.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <returns>A CursorGetFlags describing the navigation state of the cursor.</returns>
-		[OperationContract(AsyncPattern = true, Action = "GetFlags", ReplyAction = "GetFlagsResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginGetFlags(int ACursorHandle, ProcessCallInfo ACallInfo, AsyncCallback ACallback, object AState);
 		CursorGetFlags EndGetFlags(IAsyncResult AResult);
 		
@@ -338,7 +364,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="ADelta">The number of rows to navigate, forward or backward (negative number)</param>
 		/// <returns>A RemoteMoveData describing the results of the move.</returns>
-		[OperationContract(AsyncPattern = true, Action = "MoveBy", ReplyAction = "MoveByResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginMoveBy(int ACursorHandle, ProcessCallInfo ACallInfo, int ADelta, AsyncCallback ACallback, object AState);
 		RemoteMoveData EndMoveBy(IAsyncResult AResult);
 
@@ -348,7 +374,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ACursorHandle">The handle of the cursor to be navigated.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <returns>A CursorGetFlags describing the navigation state of the cursor.</returns>
-		[OperationContract(AsyncPattern = true, Action = "First", ReplyAction = "FirstResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginFirst(int ACursorHandle, ProcessCallInfo ACallInfo, AsyncCallback ACallback, object AState);
         CursorGetFlags EndFirst(IAsyncResult AResult);
 
@@ -358,7 +384,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ACursorHandle">The handle of the cursor to be navigated.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <returns>A CursorGetFlags describing the navigation state of the cursor.</returns>
-		[OperationContract(AsyncPattern = true, Action = "Last", ReplyAction = "LastResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginLast(int ACursorHandle, ProcessCallInfo ACallInfo, AsyncCallback ACallback, object AState);
         CursorGetFlags EndLast(IAsyncResult AResult);
 
@@ -368,7 +394,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ACursorHandle">The handle of the cursor to be reset.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <returns>A CursorGetFlags describing the navigation state of the cursor.</returns>
-		[OperationContract(AsyncPattern = true, Action = "Reset", ReplyAction = "ResetResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginReset(int ACursorHandle, ProcessCallInfo ACallInfo, AsyncCallback ACallback, object AState);
         CursorGetFlags EndReset(IAsyncResult AResult);
 
@@ -379,7 +405,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="ARow">The row to be inserted.</param>
 		/// <param name="AValueFlags">A value flags array indicating which columns are explicitly specified in the row.</param>
-		[OperationContract(AsyncPattern = true, Action = "Insert", ReplyAction = "InsertResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginInsert(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRow ARow, BitArray AValueFlags, AsyncCallback ACallback, object AState);
         void EndInsert(IAsyncResult AResult);
 
@@ -390,7 +416,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="ARow">The new values for the row.</param>
 		/// <param name="AValueFlags">A value flags array indicating which columns are to be updated in the row.</param>
-		[OperationContract(AsyncPattern = true, Action = "Update", ReplyAction = "UpdateResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginUpdate(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRow ARow, BitArray AValueFlags, AsyncCallback ACallback, object AState);
         void EndUpdate(IAsyncResult AResult);
         
@@ -399,7 +425,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// </summary>
         /// <param name="ACursorHandle">The handle of the cursor from which the row will be deleted.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
-		[OperationContract(AsyncPattern = true, Action = "Delete", ReplyAction = "DeleteResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginDelete(int ACursorHandle, ProcessCallInfo ACallInfo, AsyncCallback ACallback, object AState);
         void EndDelete(IAsyncResult AResult);
 
@@ -409,7 +435,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACursorHandle">The handle of the cursor from which the bookmark will be returned.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <returns>The bookmark for the current row of the cursor.</returns>
-		[OperationContract(AsyncPattern = true, Action = "GetBookmark", ReplyAction = "GetBookmarkResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginGetBookmark(int ACursorHandle, ProcessCallInfo ACallInfo, AsyncCallback ACallback, object AState);
         Guid EndGetBookmark(IAsyncResult AResult);
 
@@ -421,7 +447,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ABookmark">The bookmark of the row on which the cursor will be positioned.</param>
 		/// <param name="AForward">A hint indicating the intended direction of navigation after the positioning call.</param>
 		/// <returns>A RemoteGotoData describing the results of the navigation.</returns>
-		[OperationContract(AsyncPattern = true, Action = "GotoBookmark", ReplyAction = "GotoBookmarkResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginGotoBookmark(int ACursorHandle, ProcessCallInfo ACallInfo, Guid ABookmark, bool AForward, AsyncCallback ACallback, object AState);
 		RemoteGotoData EndGotoBookmark(IAsyncResult AResult);
 
@@ -433,7 +459,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ABookmark1">The first bookmark to be compared.</param>
 		/// <param name="ABookmark2">The second bookmark to be compared.</param>
 		/// <returns>0 if the bookmarks are equal, -1 if the first bookmark is less than the second bookmark, and 1 if the first bookmark is greater than the second bookmark.</returns>
-		[OperationContract(AsyncPattern = true, Action = "CompareBookmarks", ReplyAction = "CompareBookmarksResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginCompareBookmarks(int ACursorHandle, ProcessCallInfo ACallInfo, Guid ABookmark1, Guid ABookmark2, AsyncCallback ACallback, object AState);
         int EndCompareBookmarks(IAsyncResult AResult);
 
@@ -443,7 +469,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ACursorHandle">The handle of the cursor for which the bookmark is to be disposed.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="ABookmark">The bookmark to be disposed.</param>
-		[OperationContract(AsyncPattern = true, Action = "DisposeBookmark", ReplyAction = "DisposeBookmarkResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginDisposeBookmark(int ACursorHandle, ProcessCallInfo ACallInfo, Guid ABookmark, AsyncCallback ACallback, object AState);
 		void EndDisposeBookmark(IAsyncResult AResult);
 
@@ -453,7 +479,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ACursorHandle">The handle of the cursor for which the bookmarks are to be disposed.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="ABookmarks">The list of bookmarks to be disposed.</param>
-		[OperationContract(AsyncPattern = true, Action = "DisposeBookmarks", ReplyAction = "DisposeBookmarksResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginDisposeBookmarks(int ACursorHandle, ProcessCallInfo ACallInfo, Guid[] ABookmarks, AsyncCallback ACallback, object AState);
 		void EndDisposeBookmarks(IAsyncResult AResult);
 
@@ -462,7 +488,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="ACursorHandle">The handle of the cursor for which the order is to be returned.</param>
 		/// <returns>The order of the cursor as a string.</returns>
-		[OperationContract(AsyncPattern = true, Action = "GetOrder", ReplyAction = "GetOrderResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginGetOrder(int ACursorHandle, AsyncCallback ACallback, object AState);
         string EndGetOrder(IAsyncResult AResult);
         
@@ -472,7 +498,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACursorHandle">The handle of the cursor from which the key is to be returned.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
         /// <returns>A RemoteRow representing the key in it's physical representation.</returns>
-		[OperationContract(AsyncPattern = true, Action = "GetKey", ReplyAction = "GetKeyResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginGetKey(int ACursorHandle, ProcessCallInfo ACallInfo, AsyncCallback ACallback, object AState);
         RemoteRow EndGetKey(IAsyncResult AResult);
         
@@ -483,7 +509,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
         /// <param name="AKey">The key on which the cursor should be positioned.</param>
         /// <returns>A RemoteGotoData describing the results of the navigation.</returns>
-		[OperationContract(AsyncPattern = true, Action = "FindKey", ReplyAction = "FindKeyResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginFindKey(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRow AKey, AsyncCallback ACallback, object AState);
         RemoteGotoData EndFindKey(IAsyncResult AResult);
         
@@ -494,7 +520,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
         /// <param name="AKey">The key on which the should be positioned.</param>
         /// <returns>A CursorGetFlags describing the resulting navigation state of the cursor.</returns>
-		[OperationContract(AsyncPattern = true, Action = "FindNearest", ReplyAction = "FindNearestResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginFindNearest(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRow AKey, AsyncCallback ACallback, object AState);
         CursorGetFlags EndFindNearest(IAsyncResult AResult);
         
@@ -505,7 +531,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
         /// <param name="ARow">The row on which the cursor should be positioned after the refresh.</param>
         /// <returns>A RemoteGotoData describing the results of the refresh.</returns>
-		[OperationContract(AsyncPattern = true, Action = "Refresh", ReplyAction = "RefreshResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginRefresh(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRow ARow, AsyncCallback ACallback, object AState);
         RemoteGotoData EndRefresh(IAsyncResult AResult);
 
@@ -515,7 +541,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ACursorHandle">The handle of the cursor to be counted.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <returns>The number of rows in the cursor.</returns>
-		[OperationContract(AsyncPattern = true, Action = "GetRowCount", ReplyAction = "GetRowCountResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginGetRowCount(int ACursorHandle, ProcessCallInfo ACallInfo, AsyncCallback ACallback, object AState);
         int EndGetRowCount(IAsyncResult AResult);
 
@@ -527,7 +553,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ARow">The row to be defaulted.</param>
 		/// <param name="AColumn">The name of a column that is being defaulted. Use the empty string to indicate that the entire row is being defaulted.</param>
 		/// <returns>A RemoteProposeData containing the results of the call.</returns>
-		[OperationContract(AsyncPattern = true, Action = "Default", ReplyAction = "DefaultResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginDefault(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRowBody ARow, string AColumn, AsyncCallback ACallback, object AState);
         RemoteProposeData EndDefault(IAsyncResult AResult);
         
@@ -540,7 +566,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ANewRow">The row after the change that triggered the change call.</param>
         /// <param name="AColumn">The name of the column that triggered the change. Use the empty string to indicate that the entire row is being changed.</param>
         /// <returns>A RemoteProposeData containing the results of the call.</returns>
-		[OperationContract(AsyncPattern = true, Action = "Change", ReplyAction = "ChangeResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginChange(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRowBody AOldRow, RemoteRowBody ANewRow, string AColumn, AsyncCallback ACallback, object AState);
         RemoteProposeData EndChange(IAsyncResult AResult);
 
@@ -553,7 +579,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ANewRow">The row after the change that triggered the validation call.</param>
 		/// <param name="AColumn">The name of the column that triggered the validation. Use the empty string to indiate that the entire row is being validated.</param>
 		/// <returns>A RemoteProposeData containing the results of the call.</returns>
-		[OperationContract(AsyncPattern = true, Action = "Validate", ReplyAction = "ValidateResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginValidate(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRowBody AOldRow, RemoteRowBody ANewRow, string AColumn, AsyncCallback ACallback, object AState);
         RemoteProposeData EndValidate(IAsyncResult AResult);
 
@@ -569,7 +595,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AScript">The script to be prepared.</param>
 		/// <param name="ALocator">A debug locator describing the source of the script.</param>
 		/// <returns>A ScriptDescriptor describing the new script.</returns>
-		[OperationContract(AsyncPattern = true, Action = "PrepareScript", ReplyAction = "PrepareScriptResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginPrepareScript(int AProcessHandle, string AScript, DebugLocator ALocator, AsyncCallback ACallback, object AState);
 		ScriptDescriptor EndPrepareScript(IAsyncResult AResult);
 
@@ -577,7 +603,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Unprepares a script for execution.
 		/// </summary>
 		/// <param name="AScriptHandle">The handle of the script to be unprepared.</param>
-		[OperationContract(AsyncPattern = true, Action = "UnprepareScript", ReplyAction = "UnprepareScriptResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginUnprepareScript(int AScriptHandle, AsyncCallback ACallback, object AState);
 		void EndUnprepareScript(IAsyncResult AResult);
 
@@ -587,7 +613,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AProcessHandle">The handle of the process on which the execution will be performed.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="AScript">The script to be executed.</param>
-		[OperationContract(AsyncPattern = true, Action = "ExecuteScript", ReplyAction = "ExecuteScriptResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginExecuteScript(int AProcessHandle, ProcessCallInfo ACallInfo, string AScript, AsyncCallback ACallback, object AState);
 		void EndExecuteScript(IAsyncResult AResult);
 		
@@ -596,7 +622,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="ABatchHandle">The handle of the batch for which the text is to be returned.</param>
 		/// <returns>The text of the batch as a string.</returns>
-		[OperationContract(AsyncPattern = true, Action = "GetBatchText", ReplyAction = "GetBatchTextResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginGetBatchText(int ABatchHandle, AsyncCallback ACallback, object AState);
 		string EndGetBatchText(IAsyncResult AResult);
 		
@@ -606,7 +632,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ABatchHandle">The handle of the batch to be prepared.</param>
 		/// <param name="AParams">The parameters to the batch.</param>
 		/// <returns>A PlanDescriptor describing the prepared plan.</returns>
-		[OperationContract(AsyncPattern = true, Action = "PrepareBatch", ReplyAction = "PrepareBatchResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginPrepareBatch(int ABatchHandle, RemoteParam[] AParams, AsyncCallback ACallback, object AState);
 		PlanDescriptor EndPrepareBatch(IAsyncResult AResult);
 		
@@ -614,7 +640,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Unprepares a batch.
 		/// </summary>
 		/// <param name="APlanHandle">The handle of the plan to be unprepared.</param>
-		[OperationContract(AsyncPattern = true, Action = "UnprepareBatch", ReplyAction = "UnprepareBatchResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginUnprepareBatch(int APlanHandle, AsyncCallback ACallback, object AState);
 		void EndUnprepareBatch(IAsyncResult AResult);
 		
@@ -624,7 +650,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ABatchHandle">The handle of the batch to be executed.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="AParams">The parameters to the batch.</param>
-		[OperationContract(AsyncPattern = true, Action = "ExecuteBatch", ReplyAction = "ExecuteBatchResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginExecuteBatch(int ABatchHandle, ProcessCallInfo ACallInfo, ref RemoteParamData AParams, AsyncCallback ACallback, object AState);
 		void EndExecuteBatch(IAsyncResult AResult);
 		
@@ -642,7 +668,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AClientCacheTimeStamp">The client cache time stamp.</param>
 		/// <param name="ACacheChanged">Indicates whether or not the cache changed.</param>
 		/// <returns>A D4 script to create the necessary objects.</returns>
-		[OperationContract(AsyncPattern = true, Action = "GetCatalog", ReplyAction = "GetCatalogResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginGetCatalog(int AProcessHandle, string AName, out long ACacheTimeStamp, out long AClientCacheTimeStamp, out bool ACacheChanged, AsyncCallback ACallback, object AState);
         string EndGetCatalog(IAsyncResult AResult);
 
@@ -652,7 +678,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AProcessHandle">The handle of the process to be used for the call.</param>
 		/// <param name="AClassName">The registered class name.</param>
 		/// <returns>The fully qualified class name as a string.</returns>
-		[OperationContract(AsyncPattern = true, Action = "GetClassName", ReplyAction = "GetClassNameResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginGetClassName(int AProcessHandle, string AClassName, AsyncCallback ACallback, object AState);
 		string EndGetClassName(IAsyncResult AResult);
 
@@ -662,7 +688,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AProcessHandle">The handle of the process to be used for the call.</param>
 		/// <param name="AClassName">The name of the registered class that needs to be instantiated.</param>
 		/// <returns>A list of ServerFileInfo describing the necessary files.</returns>
-		[OperationContract(AsyncPattern = true, Action = "GetFileNames", ReplyAction = "GetFileNamesResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginGetFileNames(int AProcessHandle, string AClassName, AsyncCallback ACallback, object AState);
 		ServerFileInfo[] EndGetFileNames(IAsyncResult AResult);
 
@@ -673,7 +699,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ALibraryName">The name of the library that contains the file.</param>
 		/// <param name="AFileName">The name of the file to be retrieved.</param>
 		/// <returns>A byte[] containing the contents of the file.</returns>
-		[OperationContract(AsyncPattern = true, Action = "GetFile", ReplyAction = "GetFileResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginGetFile(int AProcessHandle, string ALibraryName, string AFileName, AsyncCallback ACallback, object AState);
 		byte[] EndGetFile(IAsyncResult AResult);
 		
@@ -687,7 +713,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="AProcessHandle">The handle of the process on which the stream will be allocated.</param>
 		/// <returns>The ID of the new stream.</returns>
-		[OperationContract(AsyncPattern = true, Action = "AllocateStream", ReplyAction = "AllocateStreamResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginAllocateStream(int AProcessHandle, AsyncCallback ACallback, object AState);
 		StreamID EndAllocateStream(IAsyncResult AResult);
 		
@@ -697,7 +723,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AProcessHandle">The handle of the process on which the stream will be referenced.</param>
 		/// <param name="AStreamID">The ID of the stream to be referenced.</param>
 		/// <returns>The ID of the new stream.</returns>
-		[OperationContract(AsyncPattern = true, Action = "ReferenceStream", ReplyAction = "ReferenceStreamResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginReferenceStream(int AProcessHandle, StreamID AStreamID, AsyncCallback ACallback, object AState);
 		StreamID EndReferenceStream(IAsyncResult AResult);
 		
@@ -706,7 +732,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="AProcessHandle">The handle of the process on which the stream will be deallocated.</param>
 		/// <param name="AStreamID">The ID of the stream to be deallocated.</param>
-		[OperationContract(AsyncPattern = true, Action = "DeallocateStream", ReplyAction = "DeallocateStreamResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginDeallocateStream(int AProcessHandle, StreamID AStreamID, AsyncCallback ACallback, object AState);
 		void EndDeallocateStream(IAsyncResult AResult);
 		
@@ -717,7 +743,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AStreamID">The ID of the stream to be opened.</param>
 		/// <param name="ALockMode">The locking to be used to open the stream.</param>
 		/// <returns>The handle of the new stream.</returns>
-		[OperationContract(AsyncPattern = true, Action = "OpenStream", ReplyAction = "OpenStreamResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginOpenStream(int AProcessHandle, StreamID AStreamID, LockMode ALockMode, AsyncCallback ACallback, object AState);
 		int EndOpenStream(IAsyncResult AResult);
 		
@@ -725,7 +751,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Closes an open stream.
 		/// </summary>
 		/// <param name="AStreamHandle">The handle of the stream to be closed.</param>
-		[OperationContract(AsyncPattern = true, Action = "CloseStream", ReplyAction = "CloseStreamResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginCloseStream(int AStreamHandle, AsyncCallback ACallback, object AState);
 		void EndCloseStream(IAsyncResult AResult);
 		
@@ -734,7 +760,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="AStreamHandle">The handle of the stream for which the length will be returned.</param>
 		/// <returns>The number of bytes in the stream as a long.</returns>
-		[OperationContract(AsyncPattern = true, Action = "GetStreamLength", ReplyAction = "GetStreamLengthResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginGetStreamLength(int AStreamHandle, AsyncCallback ACallback, object AState);
 		long EndGetStreamLength(IAsyncResult AResult);
 		
@@ -743,7 +769,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="AStreamHandle">The handle of the stream for which the length will be set.</param>
 		/// <param name="AValue">The new length of the stream.</param>
-		[OperationContract(AsyncPattern = true, Action = "SetStreamLength", ReplyAction = "SetStreamLengthResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginSetStreamLength(int AStreamHandle, long AValue, AsyncCallback ACallback, object AState);
 		void EndSetStreamLength(IAsyncResult AResult);
 		
@@ -752,7 +778,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="AStreamHandle">The handle of the stream for which the current position is to be returned.</param>
 		/// <returns>The current position of the stream as a long.</returns>
-		[OperationContract(AsyncPattern = true, Action = "GetStreamPosition", ReplyAction = "GetStreamPositionResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginGetStreamPosition(int AStreamHandle, AsyncCallback ACallback, object AState);
 		long EndGetStreamPosition(IAsyncResult AResult);
 		
@@ -761,7 +787,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="AStreamHandle">The handle of the stream for which the current position is to be set.</param>
 		/// <param name="APosition">The new position of the stream.</param>
-		[OperationContract(AsyncPattern = true, Action = "SetStreamPosition", ReplyAction = "SetStreamPositionResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginSetStreamPosition(int AStreamHandle, long APosition, AsyncCallback ACallback, object AState);
 		void EndSetStreamPosition(IAsyncResult AResult);
 		
@@ -769,7 +795,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Flushes a stream.
 		/// </summary>
 		/// <param name="AStreamHandle">The handle of the stream to be flushed.</param>
-		[OperationContract(AsyncPattern = true, Action = "FlushStream", ReplyAction = "FlushStreamResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginFlushStream(int AStreamHandle, AsyncCallback ACallback, object AState);
 		void EndFlushStream(IAsyncResult AResult);
 
@@ -783,7 +809,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Note that the result byte[] may contain less than ACount bytes if the actual number of bytes available to be read in the stream
 		/// was less than the requested number.
 		/// </remarks>
-		[OperationContract(AsyncPattern = true, Action = "ReadStream", ReplyAction = "ReadStreamResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginReadStream(int AStreamHandle, int ACount, AsyncCallback ACallback, object AState);
 		byte[] EndReadStream(IAsyncResult AResult);
 		
@@ -794,7 +820,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AOffset">The number of bytes to seek.</param>
 		/// <param name="AOrigin">The origin of the seek.</param>
 		/// <returns>The new position of the stream.</returns>
-		[OperationContract(AsyncPattern = true, Action = "SeekStream", ReplyAction = "SeekStreamResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginSeekStream(int AStreamHandle, long AOffset, SeekOrigin AOrigin, AsyncCallback ACallback, object AState);
 		long EndSeekStream(IAsyncResult AResult);
 
@@ -803,7 +829,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="AStreamHandle">The handle of the stream to be written.</param>
 		/// <param name="AData">A byte[] containing the data to be written.</param>
-		[OperationContract(AsyncPattern = true, Action = "WriteStream", ReplyAction = "WriteStreamResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginWriteStream(int AStreamHandle, byte[] AData, AsyncCallback ACallback, object AState);
 		void EndWriteStream(IAsyncResult AResult);
 		

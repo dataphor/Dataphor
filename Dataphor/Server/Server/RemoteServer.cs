@@ -340,9 +340,6 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		// InstanceID
-		public Guid InstanceID { get { return FServer.InstanceID; } }
-		
 		// CacheTimeStamp
 		public long CacheTimeStamp { get { return FServer.CacheTimeStamp; } }
 		

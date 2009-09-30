@@ -12,16 +12,17 @@ using System.ServiceModel.Channels;
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Contracts;
 using Alphora.Dataphor.DAE.Server;
+using Alphora.Dataphor.DAE.Listener;
 
 namespace Alphora.Dataphor.DAE.Client
 {
 	public class ClientServer : ClientObject, IRemoteServer
 	{
 		public ClientServer() { }
-		public ClientServer(string AHostName, int APortNumber, string AInstanceName)
+		public ClientServer(string AHostName, int AOverridePortNumber, string AInstanceName)
 		{
 			FHostName = AHostName;
-			FPortNumber = APortNumber;
+			FOverridePortNumber = AOverridePortNumber;
 			FInstanceName = AInstanceName;
 			Open();
 		}
@@ -37,14 +38,14 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 		
-		private int FPortNumber;
-		public int PortNumber
+		private int FOverridePortNumber;
+		public int OverridePortNumber
 		{
-			get { return FPortNumber; }
+			get { return FOverridePortNumber; }
 			set
 			{
 				CheckInactive();
-				FPortNumber = value; 
+				FOverridePortNumber = value; 
 			}
 		}
 		
@@ -78,12 +79,24 @@ namespace Alphora.Dataphor.DAE.Client
 		public void Open()
 		{
 			if (!IsActive)
-				FChannelFactory = 
-					new ChannelFactory<IClientDataphorService>
-					(
-						new CustomBinding(new BinaryMessageEncodingBindingElement(), new HttpTransportBindingElement()), 
-						new EndpointAddress(DataphorServiceUtility.BuildInstanceURI(FHostName, FPortNumber, FInstanceName))
-					);
+				if (FOverridePortNumber == 0)
+				{
+					FChannelFactory =
+						new ChannelFactory<IClientDataphorService>
+						(
+							DataphorServiceUtility.GetBinding(), 
+							new EndpointAddress(ListenerFactory.GetInstanceURI(FHostName, FInstanceName))
+						);
+				}
+				else
+				{
+					FChannelFactory = 
+						new ChannelFactory<IClientDataphorService>
+						(
+							DataphorServiceUtility.GetBinding(), 
+							new EndpointAddress(DataphorServiceUtility.BuildInstanceURI(FHostName, FOverridePortNumber, FInstanceName))
+						);
+				}
 		}
 		
 		public void Close()
@@ -177,7 +190,12 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public string Name
 		{
-			get { throw new NotImplementedException(); }
+			get 
+			{ 
+				IAsyncResult LResult = GetServiceInterface().BeginGetServerName(null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndGetServerName(LResult);
+			}
 		}
 
 		public void Start()
@@ -192,22 +210,30 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public ServerState State
 		{
-			get { throw new NotImplementedException(); }
-		}
-
-		public Guid InstanceID
-		{
-			get { throw new NotImplementedException(); }
+			get 
+			{ 
+				throw new NotImplementedException();
+			}
 		}
 
 		public long CacheTimeStamp
 		{
-			get { throw new NotImplementedException(); }
+			get 
+			{ 
+				IAsyncResult LResult = GetServiceInterface().BeginGetCacheTimeStamp(null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndGetCacheTimeStamp(LResult);
+			}
 		}
 
 		public long DerivationTimeStamp
 		{
-			get { throw new NotImplementedException(); }
+			get 
+			{ 
+				IAsyncResult LResult = GetServiceInterface().BeginGetDerivationTimeStamp(null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndGetDerivationTimeStamp(LResult);
+			}
 		}
 
 		#endregion

@@ -5,6 +5,8 @@
 */
 
 using System;
+using System.ServiceModel.Channels;
+using System.ServiceModel;
 
 namespace Alphora.Dataphor.DAE.Contracts
 {
@@ -25,6 +27,12 @@ namespace Alphora.Dataphor.DAE.Contracts
 		public static string BuildListenerURI(string AHostName)
 		{
 			return String.Format("http://{0}:{1}/listener/service", AHostName, CDefaultListenerPortNumber);
+		}
+
+		public static Binding GetBinding()
+		{
+			return new BasicHttpBinding();
+			//return new CustomBinding(new BinaryMessageEncodingBindingElement(), new HttpTransportBindingElement());
 		}
 	}
 }

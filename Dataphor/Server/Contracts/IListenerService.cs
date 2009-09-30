@@ -13,7 +13,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 	/// <summary>
 	/// Describes the interface for the Dataphor listener.
 	/// </summary>
-	[ServiceContract]
+	[ServiceContract(Name = "IListenerService", Namespace = "http://dataphor.org/dataphor/3.0/")]
 	public interface IListenerService
 	{
 		/// <summary>

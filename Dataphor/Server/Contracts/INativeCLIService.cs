@@ -31,7 +31,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 	/// server.
 	/// </para>
 	/// </remarks>
-	[ServiceContract]
+	[ServiceContract(Name = "INativeCLIService", Namespace = "http://dataphor.org/dataphor/3.0/")]
 	public interface INativeCLIService
 	{
 		#region Session Management

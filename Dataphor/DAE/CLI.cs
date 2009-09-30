@@ -215,15 +215,6 @@ namespace Alphora.Dataphor.DAE
         /// </remarks>
         ServerState State { get; }
         
-        /// <summary>Retrieves the unique instance id for this server instance.</summary>
-        /// <remarks>
-        ///	The instance id for a Dataphor server is used to guarantee that different timestamps
-        /// are retrieved from the same instance. If the instance id for timestamp A is different
-        /// than the instance id for timestamp B, then they are incomparable and the cache being
-        /// timestamped should be cleared.
-        /// </remarks>
-        Guid InstanceID { get; }
-
         /// <summary>Retrieves the cache timestamp for this server instance.</summary>
 		/// <value> 
         ///	Returns the cache timestamp for this server instance.  
@@ -310,7 +301,6 @@ namespace Alphora.Dataphor.DAE
 	/// levels allow the transaction to ensure that only resources it has changed cannot be changed by other transactions,
 	/// and control whether or not changes made by other transactions are visible within the transaction.
 	/// </remarks>
-	[DataContract]
 	public enum IsolationLevel
 	{
 		/// <summary>

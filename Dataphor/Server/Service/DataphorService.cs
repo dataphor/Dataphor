@@ -59,6 +59,21 @@ namespace Alphora.Dataphor.DAE.Service
 		private ConnectionManager FConnectionManager;
 		
 		#region IDataphorService Members
+		
+		public string GetServerName()
+		{
+			return FServer.Name;
+		}
+		
+		public long GetCacheTimeStamp()
+		{
+			return FServer.CacheTimeStamp;
+		}
+		
+		public long GetDerivationTimeStamp()
+		{
+			return FServer.DerivationTimeStamp;
+		}
 
 		public SessionDescriptor Connect(SessionInfo ASessionInfo)
 		{

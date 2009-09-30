@@ -29,7 +29,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 	/// server.
 	/// </para>
 	/// </remarks>
-	[ServiceContract(Name = "INativeCLIService")]
+	[ServiceContract(Name = "INativeCLIService", Namespace = "http://dataphor.org/dataphor/3.0/")]
 	public interface IClientNativeCLIService
 	{
 		#region Session Management
@@ -43,7 +43,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		/// establish a connection as necessary.
 		/// </remarks>
 		/// <returns>A session handle that can be used in subsequent calls.</returns>
-		[OperationContract(AsyncPattern = true, Action = "StartSession", ReplyAction = "StartSessionResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginStartSession(NativeSessionInfo ASessionInfo, AsyncCallback ACallback, object AState);
 		NativeSessionHandle EndStartSession(IAsyncResult AResult);
 		
@@ -53,7 +53,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		/// <remarks>
 		/// Once a session has been stopped, the session handle is no longer valid.
 		/// </remarks>
-		[OperationContract(AsyncPattern = true, Action = "StopSession", ReplyAction = "StopSessionResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginStopSession(NativeSessionHandle ASessionHandle, AsyncCallback ACallback, object AState);
 		void EndStopSession(IAsyncResult AResult);
 
@@ -64,7 +64,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
         /// <summary>
 		/// Begins a new transaction.
 		/// </summary>
-		[OperationContract(AsyncPattern = true, Action = "BeginTransaction", ReplyAction = "BeginTransactionResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginBeginTransaction(NativeSessionHandle ASessionHandle, NativeIsolationLevel AIsolationLevel, AsyncCallback ACallback, object AState);
         void EndBeginTransaction(IAsyncResult AResult);
         
@@ -76,7 +76,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
         /// It is not necessary to call this to commit the transaction, it is exposed to allow the process to participate in
         /// 2PC distributed transactions.
         /// </remarks>
-		[OperationContract(AsyncPattern = true, Action = "PrepareTransaction", ReplyAction = "PrepareTransactionResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginPrepareTransaction(NativeSessionHandle ASessionHandle, AsyncCallback ACallback, object AState);
         void EndPrepareTransaction(IAsyncResult AResult);
         
@@ -88,7 +88,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
         /// Reduces the transaction nesting level by one.  
         /// Will raise if no transaction is currently active.
         /// </remarks>
-		[OperationContract(AsyncPattern = true, Action = "CommitTransaction", ReplyAction = "CommitTransactionResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginCommitTransaction(NativeSessionHandle ASessionHandle, AsyncCallback ACallback, object AState);
         void EndCommitTransaction(IAsyncResult AResult);
         
@@ -99,14 +99,14 @@ namespace Alphora.Dataphor.DAE.NativeCLI
         /// Reduces the transaction nesting level by one.
         /// Will raise if no transaction is currently active.
         /// </remarks>
-		[OperationContract(AsyncPattern = true, Action = "RollbackTransaction", ReplyAction = "RollbackTransactionResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginRollbackTransaction(NativeSessionHandle ASessionHandle, AsyncCallback ACallback, object AState);
         void EndRollbackTransaction(IAsyncResult AResult);
         
         /// <summary>
 		/// Returns the number of active transactions.
 		/// </summary>
-		[OperationContract(AsyncPattern = true, Action = "GetTransactionCount", ReplyAction = "GetTransactionCountResponse")]
+		[OperationContract(AsyncPattern = true)]
         IAsyncResult BeginGetTransactionCount(NativeSessionHandle ASessionHandle, AsyncCallback ACallback, object AState);
         int EndGetTransactionCount(IAsyncResult AResult);
 
@@ -130,7 +130,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		/// </para>
 		/// </remarks>
 		/// <returns>The result of the execution, if the statement is an expression, null otherwise.</returns>
-		[OperationContract(AsyncPattern = true, Action = "ExecuteStatement", ReplyAction = "ExecuteStatementResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginExecuteStatement(NativeSessionInfo ASessionInfo, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions, AsyncCallback ACallback, object AState);
 		NativeResult EndExecuteStatement(IAsyncResult AResult);
 
@@ -143,7 +143,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		/// </remarks>
 		/// <param name="AOperations">The operations to be executed.</param>
 		/// <returns>An array of NativeResult objects containing the results of the executions, if any.</returns>
-		[OperationContract(AsyncPattern = true, Action = "ExecuteStatements", ReplyAction = "ExecuteStatementsResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginExecuteStatements(NativeSessionInfo ASessionInfo, NativeExecuteOperation[] AOperations, AsyncCallback ACallback, object AState);
 		NativeResult[] EndExecuteStatements(IAsyncResult AResult);
 		
@@ -159,7 +159,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		/// </para>
 		/// </remarks>
 		/// <returns>The result of the execution, if the statement is an expression, null otherwise.</returns>
-		[OperationContract(AsyncPattern = true, Action = "SessionExecuteStatement", ReplyAction = "SessionExecuteStatementResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginSessionExecuteStatement(NativeSessionHandle ASessionHandle, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions, AsyncCallback ACallback, object AState);
 		NativeResult EndSessionExecuteStatement(IAsyncResult AResult);
 
@@ -168,7 +168,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		/// </summary>
 		/// <param name="AOperations">The operations to be executed.</param>
 		/// <returns>An array of NativeResult objects containing the results of the executions, if any.</returns>
-		[OperationContract(AsyncPattern = true, Action = "SessionExecuteStatements", ReplyAction = "SessionExecuteStatementsResponse")]
+		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginSessionExecuteStatements(NativeSessionHandle ASessionHandle, NativeExecuteOperation[] AOperations, AsyncCallback ACallback, object AState);
 		NativeResult[] EndSessionExecuteStatements(IAsyncResult AResult);
 		
