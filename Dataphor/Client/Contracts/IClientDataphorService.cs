@@ -226,10 +226,10 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="APlanHandle">The handle of the prepared plan to be executed.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="AParams">The parameters to the plan.</param>
-		/// <param name="AExecuteTime">The execution time.</param>
+		/// <returns>An ExecuteResult describing the results of the execution.</returns>
 		[OperationContract(AsyncPattern = true)]
-		IAsyncResult BeginExecutePlan(int APlanHandle, ProcessCallInfo ACallInfo, ref RemoteParamData AParams, out TimeSpan AExecuteTime, AsyncCallback ACallback, object AState);
-		void EndExecutePlan(IAsyncResult AResult);
+		IAsyncResult BeginExecutePlan(int APlanHandle, ProcessCallInfo ACallInfo, RemoteParamData AParams, AsyncCallback ACallback, object AState);
+		ExecuteResult EndExecutePlan(IAsyncResult AResult);
 
 		/// <summary>
 		/// Unprepares a prepared plan.
@@ -238,6 +238,18 @@ namespace Alphora.Dataphor.DAE.Contracts
 		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginUnprepareStatement(int APlanHandle, AsyncCallback ACallback, object AState);
 		void EndUnprepareStatement(IAsyncResult AResult);
+		
+		/// <summary>
+		/// Executes a statement.
+		/// </summary>
+		/// <param name="AProcessHandle">The handle to the process on which the statement will be executed.</param>
+		/// <param name="ACleanupInfo">A CleanupInfo containing information to be processed prior to the call.</param>
+		/// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
+		/// <param name="AStatement">The statement to be executed.</param>
+		/// <param name="AParams">Any parameters to the statement.</param>
+		[OperationContract(AsyncPattern = true)]
+		IAsyncResult BeginExecuteStatement(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, ProcessCallInfo ACallInfo, string AStatement, RemoteParamData AParams, AsyncCallback ACallback, object AState);
+		ExecuteResult EndExecuteStatement(IAsyncResult AResult);
 		
 		/// <summary>
 		/// Prepares an expression for evaluation.
@@ -258,11 +270,10 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="APlanHandle">The handle of the plan to be evaluated.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="AParams">The parameters to the expression.</param>
-		/// <param name="AExecuteTime">The execute time.</param>
-		/// <returns>The result of evaluating the plan in it's physical representation.</returns>
+		/// <returns>An EvaluateResult describing the results of the evaluation.</returns>
 		[OperationContract(AsyncPattern = true)]
-		IAsyncResult BeginEvaluatePlan(int APlanHandle, ProcessCallInfo ACallInfo, ref RemoteParamData AParams, out TimeSpan AExecuteTime, AsyncCallback ACallback, object AState);
-		byte[] EndEvaluatePlan(IAsyncResult AResult);
+		IAsyncResult BeginEvaluatePlan(int APlanHandle, ProcessCallInfo ACallInfo, RemoteParamData AParams, AsyncCallback ACallback, object AState);
+		EvaluateResult EndEvaluatePlan(IAsyncResult AResult);
 
 		/// <summary>
 		/// Opens a cursor from a prepared plan.
@@ -270,14 +281,22 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="APlanHandle">The handle of the plan to be evaluated.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="AParams">The parameters to the expression.</param>
-		/// <param name="AExecuteTime">The execution time.</param>
-		/// <param name="ABookmarks">A list of bookmarks associated with the inital fetch.</param>
-		/// <param name="ACount">The number of rows to be fetched as part of the open.</param>
-		/// <param name="AFetchData">A FetchData describing the results of the initial fetch.</param>
-		/// <returns>A CursorDescriptor describing the new cursor.</returns>
+		/// <returns>A CursorResult describing the result of the open.</returns>
 		[OperationContract(AsyncPattern = true)]
-		IAsyncResult BeginOpenPlanCursor(int APlanHandle, ProcessCallInfo ACallInfo, ref RemoteParamData AParams, out TimeSpan AExecuteTime, out Guid[] ABookmarks, int ACount, out RemoteFetchData AFetchData, AsyncCallback ACallback, object AState);
-		CursorDescriptor EndOpenPlanCursor(IAsyncResult AResult);
+		IAsyncResult BeginOpenPlanCursor(int APlanHandle, ProcessCallInfo ACallInfo, RemoteParamData AParams, AsyncCallback ACallback, object AState);
+		CursorResult EndOpenPlanCursor(IAsyncResult AResult);
+		
+		/// <summary>
+		/// Opens a cursor from a prepared plan and fetches the first batch of rows.
+		/// </summary>
+		/// <param name="APlanHandle">The handle of the plan to be evaluated.</param>
+        /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
+		/// <param name="AParams">The parameters to the expression.</param>
+		/// <param name="ACount">The number of rows to be fetched as part of the open.</param>
+		/// <returns>A CursorWithFetchResult describing the results of the open.</returns>
+		[OperationContract(AsyncPattern = true)]
+		IAsyncResult BeginOpenPlanCursorWithFetch(int APlanHandle, ProcessCallInfo ACallInfo, RemoteParamData AParams, int ACount, AsyncCallback ACallback, object AState);
+		CursorWithFetchResult EndOpenPlanCursorWithFetch(IAsyncResult AResult);
 		
 		/// <summary>
 		/// Unprepares a prepared expression plan.
@@ -286,6 +305,46 @@ namespace Alphora.Dataphor.DAE.Contracts
 		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginUnprepareExpression(int APlanHandle, AsyncCallback ACallback, object AState);
 		void EndUnprepareExpression(IAsyncResult AResult);
+		
+		/// <summary>
+		/// Evaluates an expression.
+		/// </summary>
+		/// <param name="AProcessHandle">The handle of the process on which the expression will be evaluated.</param>
+		/// <param name="ACleanupInfo">A CleanupInfo containing information to be processed prior to the call.</param>
+		/// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
+		/// <param name="AExpression">The expression to be evaluated.</param>
+		/// <param name="AParams">Any parameters to the expression.</param>
+		/// <returns>A DirectEvaluateResult describing the result of the evaluation.</returns>
+		[OperationContract(AsyncPattern = true)]
+		IAsyncResult BeginEvaluateExpression(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, ProcessCallInfo ACallInfo, string AExpression, RemoteParamData AParams, AsyncCallback ACallback, object AState);
+		DirectEvaluateResult EndEvaluateExpression(IAsyncResult AResult);
+		
+		/// <summary>
+		/// Opens a cursor.
+		/// </summary>
+		/// <param name="AProcessHandle">The handle of the process on which the cursor will be opened.</param>
+		/// <param name="ACleanupInfo">A CleanupInfo containing information to be processed prior to the call.</param>
+		/// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
+		/// <param name="AExpression">The expression defining the cursor to be opened.</param>
+		/// <param name="AParams">Any parameters to the expression.</param>
+		/// <returns>A DirectCursorResult describing the result of the open.</returns>
+		[OperationContract(AsyncPattern = true)]
+		IAsyncResult BeginOpenCursor(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, ProcessCallInfo ACallInfo, string AExpression, RemoteParamData AParams, AsyncCallback ACallback, object AState);
+		DirectCursorResult EndOpenCursor(IAsyncResult AResult);
+		
+		/// <summary>
+		/// Opens a cursor and fetchs the first batch of rows.
+		/// </summary>
+		/// <param name="AProcessHandle">The handle of the process on which the cursor will be opened.</param>
+		/// <param name="ACleanupInfo">A CleanupInfo containing information to be processed prior to the call.</param>
+		/// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
+		/// <param name="AExpression">The expression defining the cursor to be opened.</param>
+		/// <param name="AParams">Any parameters to the expression.</param>
+		/// <param name="ACount">The number of rows to be fetched as part of the open.</param>
+		/// <returns>A DirectCursorWithFetchResult describing the result of the open.</returns>
+		[OperationContract(AsyncPattern = true)]
+		IAsyncResult BeginOpenCursorWithFetch(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, ProcessCallInfo ACallInfo, string AExpression, RemoteParamData AParams, int ACount, AsyncCallback ACallback, object AState);
+		DirectCursorWithFetchResult EndOpenCursorWithFetch(IAsyncResult AResult);
 		
 		#endregion
 		
@@ -327,12 +386,11 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="ACursorHandle">The handle of the cursor from which the rows will be fetched.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
-		/// <param name="ABookmarks">A list of bookmarks associated with the fetched rows.</param>
 		/// <param name="ACount">The number of rows to be fetched.</param>
-		/// <returns>A RemoteFetchData describing the results of the fetch.</returns>
+		/// <returns>A FetchResult describing the results of the fetch.</returns>
 		[OperationContract(AsyncPattern = true)]
-		IAsyncResult BeginFetch(int ACursorHandle, ProcessCallInfo ACallInfo, out Guid[] ABookmarks, int ACount, AsyncCallback ACallback, object AState);
-		RemoteFetchData EndFetch(IAsyncResult AResult);
+		IAsyncResult BeginFetch(int ACursorHandle, ProcessCallInfo ACallInfo, int ACount, AsyncCallback ACallback, object AState);
+		FetchResult EndFetch(IAsyncResult AResult);
 		
 		/// <summary>
 		/// Fetches a number of rows with a specific set of columns from a cursor.
@@ -340,12 +398,11 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ACursorHandle">The handle of the cursor from which the rows will be fetched.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="AHeader">A RemoteRowHeader describing the set of columns to be included in the fetched rows.</param>
-		/// <param name="ABookmarks">A list of bookmarks associated with the fetched rows.</param>
 		/// <param name="ACount">The number of rows to be fetched.</param>
-		/// <returns>A RemoteFetchData describing the results of the fetch.</returns>
+		/// <returns>A FetchResult describing the results of the fetch.</returns>
 		[OperationContract(AsyncPattern = true)]
-		IAsyncResult BeginFetchSpecific(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRowHeader AHeader, out Guid[] ABookmarks, int ACount, AsyncCallback ACallback, object AState);
-		RemoteFetchData EndFetchSpecific(IAsyncResult AResult);
+		IAsyncResult BeginFetchSpecific(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRowHeader AHeader, int ACount, AsyncCallback ACallback, object AState);
+		FetchResult EndFetchSpecific(IAsyncResult AResult);
 		
 		/// <summary>
 		/// Gets the current navigation state of a cursor.
@@ -650,9 +707,10 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ABatchHandle">The handle of the batch to be executed.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="AParams">The parameters to the batch.</param>
+		/// <returns>An ExecuteResult describing the results of the execution.</returns>
 		[OperationContract(AsyncPattern = true)]
-		IAsyncResult BeginExecuteBatch(int ABatchHandle, ProcessCallInfo ACallInfo, ref RemoteParamData AParams, AsyncCallback ACallback, object AState);
-		void EndExecuteBatch(IAsyncResult AResult);
+		IAsyncResult BeginExecuteBatch(int ABatchHandle, ProcessCallInfo ACallInfo, RemoteParamData AParams, AsyncCallback ACallback, object AState);
+		ExecuteResult EndExecuteBatch(IAsyncResult AResult);
 		
 		#endregion
 		
@@ -664,13 +722,10 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="AProcessHandle">The handle of the process to be used for the call.</param>
 		/// <param name="AName">The name of the object to be created.</param>
-		/// <param name="ACacheTimeStamp">The cache time stamp.</param>
-		/// <param name="AClientCacheTimeStamp">The client cache time stamp.</param>
-		/// <param name="ACacheChanged">Indicates whether or not the cache changed.</param>
-		/// <returns>A D4 script to create the necessary objects.</returns>
+		/// <returns>A CatalogResult describing the result of the call.</returns>
 		[OperationContract(AsyncPattern = true)]
-        IAsyncResult BeginGetCatalog(int AProcessHandle, string AName, out long ACacheTimeStamp, out long AClientCacheTimeStamp, out bool ACacheChanged, AsyncCallback ACallback, object AState);
-        string EndGetCatalog(IAsyncResult AResult);
+        IAsyncResult BeginGetCatalog(int AProcessHandle, string AName, AsyncCallback ACallback, object AState);
+        CatalogResult EndGetCatalog(IAsyncResult AResult);
 
 		/// <summary>
 		/// Returns the fully qualified class name for a registered class.
@@ -698,10 +753,10 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AProcessHandle">The handle of the process to be used for the call.</param>
 		/// <param name="ALibraryName">The name of the library that contains the file.</param>
 		/// <param name="AFileName">The name of the file to be retrieved.</param>
-		/// <returns>A byte[] containing the contents of the file.</returns>
+		/// <returns>A handle to a stream containing the contents of the file.</returns>
 		[OperationContract(AsyncPattern = true)]
 		IAsyncResult BeginGetFile(int AProcessHandle, string ALibraryName, string AFileName, AsyncCallback ACallback, object AState);
-		byte[] EndGetFile(IAsyncResult AResult);
+		int EndGetFile(IAsyncResult AResult);
 		
 		#endregion
 

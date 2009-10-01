@@ -1476,17 +1476,17 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		public virtual List<int> SelectOperatorHandlers(int AOperatorID)
 		{
-			throw new NotSupportedException();
+			return new List<int>();
 		}
 
 		public virtual List<int> SelectObjectHandlers(int ASourceObjectID)
 		{
-			throw new NotSupportedException();
+			return new List<int>();
 		}
 
 		public virtual Schema.DependentObjectHeaders SelectObjectDependents(int AObjectID, bool ARecursive)
 		{
-			throw new NotSupportedException();
+			return new Schema.DependentObjectHeaders();
 		}
 
 		public virtual Schema.DependentObjectHeaders SelectObjectDependencies(int AObjectID, bool ARecursive)

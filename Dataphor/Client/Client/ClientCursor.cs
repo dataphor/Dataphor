@@ -56,16 +56,20 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public RemoteFetchData Fetch(RemoteRowHeader AHeader, out Guid[] ABookmarks, int ACount, ProcessCallInfo ACallInfo)
 		{
-			IAsyncResult LResult = GetServiceInterface().BeginFetchSpecific(CursorHandle, ACallInfo, AHeader, out ABookmarks, ACount, null, null);
+			IAsyncResult LResult = GetServiceInterface().BeginFetchSpecific(CursorHandle, ACallInfo, AHeader, ACount, null, null);
 			LResult.AsyncWaitHandle.WaitOne();
-			return GetServiceInterface().EndFetchSpecific(LResult);
+			FetchResult LFetchResult = GetServiceInterface().EndFetchSpecific(LResult);
+			ABookmarks = LFetchResult.Bookmarks;
+			return LFetchResult.FetchData;
 		}
 
 		public RemoteFetchData Fetch(out Guid[] ABookmarks, int ACount, ProcessCallInfo ACallInfo)
 		{
-			IAsyncResult LResult = GetServiceInterface().BeginFetch(CursorHandle, ACallInfo, out ABookmarks, ACount, null, null);
+			IAsyncResult LResult = GetServiceInterface().BeginFetch(CursorHandle, ACallInfo, ACount, null, null);
 			LResult.AsyncWaitHandle.WaitOne();
-			return GetServiceInterface().EndFetch(LResult);
+			FetchResult LFetchResult = GetServiceInterface().EndFetch(LResult);
+			ABookmarks = LFetchResult.Bookmarks;
+			return LFetchResult.FetchData;
 		}
 
 		public CursorGetFlags GetFlags(ProcessCallInfo ACallInfo)

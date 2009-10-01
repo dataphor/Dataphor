@@ -124,7 +124,10 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public void Execute(string AStatement, ref RemoteParamData AParams, ProcessCallInfo ACallInfo, RemoteProcessCleanupInfo ACleanupInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginExecuteStatement(ProcessHandle, GetCleanupInfo(ACleanupInfo), ACallInfo, AStatement, AParams, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			ExecuteResult LExecuteResult = GetServiceInterface().EndExecuteStatement(LResult);
+			AParams.Data = LExecuteResult.ParamData;
 		}
 
 		public IRemoteServerExpressionPlan PrepareExpression(string AExpression, RemoteParam[] AParams, DebugLocator ALocator, out PlanDescriptor APlanDescriptor, RemoteProcessCleanupInfo ACleanupInfo)
@@ -144,22 +147,44 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public byte[] Evaluate(string AExpression, ref RemoteParamData AParams, out IRemoteServerExpressionPlan APlan, out PlanDescriptor APlanDescriptor, ProcessCallInfo ACallInfo, RemoteProcessCleanupInfo ACleanupInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginEvaluateExpression(ProcessHandle, GetCleanupInfo(ACleanupInfo), ACallInfo, AExpression, AParams, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			DirectEvaluateResult LEvaluateResult = GetServiceInterface().EndEvaluateExpression(LResult);
+			AParams.Data = LEvaluateResult.ParamData;
+			APlanDescriptor = LEvaluateResult.PlanDescriptor;
+			APlan = new ClientExpressionPlan(this, APlanDescriptor);
+			return LEvaluateResult.Result;
 		}
 
 		public IRemoteServerCursor OpenCursor(string AExpression, ref RemoteParamData AParams, out IRemoteServerExpressionPlan APlan, out PlanDescriptor APlanDescriptor, ProcessCallInfo ACallInfo, RemoteProcessCleanupInfo ACleanupInfo)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginOpenCursor(ProcessHandle, GetCleanupInfo(ACleanupInfo), ACallInfo, AExpression, AParams, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			DirectCursorResult LCursorResult = GetServiceInterface().EndOpenCursor(LResult);
+			AParams.Data = LCursorResult.ParamData;
+			APlanDescriptor = LCursorResult.PlanDescriptor;
+			APlan = new ClientExpressionPlan(this, APlanDescriptor);
+			return new ClientCursor((ClientExpressionPlan)APlan, LCursorResult.CursorDescriptor);
 		}
 
 		public IRemoteServerCursor OpenCursor(string AExpression, ref RemoteParamData AParams, out IRemoteServerExpressionPlan APlan, out PlanDescriptor APlanDescriptor, ProcessCallInfo ACallInfo, RemoteProcessCleanupInfo ACleanupInfo, out Guid[] ABookmarks, int ACount, out RemoteFetchData AFetchData)
 		{
-			throw new NotImplementedException();
+			IAsyncResult LResult = GetServiceInterface().BeginOpenCursorWithFetch(ProcessHandle, GetCleanupInfo(ACleanupInfo), ACallInfo, AExpression, AParams, ACount, null, null);
+			LResult.AsyncWaitHandle.WaitOne();
+			DirectCursorWithFetchResult LCursorResult = GetServiceInterface().EndOpenCursorWithFetch(LResult);
+			AParams.Data = LCursorResult.ParamData;
+			APlanDescriptor = LCursorResult.PlanDescriptor;
+			ABookmarks = LCursorResult.Bookmarks;
+			AFetchData = LCursorResult.FetchData;
+			APlan = new ClientExpressionPlan(this, APlanDescriptor);
+			return new ClientCursor((ClientExpressionPlan)APlan, LCursorResult.CursorDescriptor);
 		}
 
 		public void CloseCursor(IRemoteServerCursor ACursor, ProcessCallInfo ACallInfo)
 		{
-			throw new NotImplementedException();
+			ClientExpressionPlan LPlan = (ClientExpressionPlan)ACursor.Plan;
+			LPlan.Close(ACursor, ACallInfo);
+			UnprepareExpression(LPlan);
 		}
 
 		public IRemoteServerScript PrepareScript(string AScript, DebugLocator ALocator)
@@ -185,9 +210,13 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public string GetCatalog(string AName, out long ACacheTimeStamp, out long AClientCacheTimeStamp, out bool ACacheChanged)
 		{
-			IAsyncResult LResult = GetServiceInterface().BeginGetCatalog(ProcessHandle, AName, out ACacheTimeStamp, out AClientCacheTimeStamp, out ACacheChanged, null, null);
+			IAsyncResult LResult = GetServiceInterface().BeginGetCatalog(ProcessHandle, AName, null, null);
 			LResult.AsyncWaitHandle.WaitOne();
-			return GetServiceInterface().EndGetCatalog(LResult);
+			CatalogResult LCatalogResult = GetServiceInterface().EndGetCatalog(LResult);
+			ACacheTimeStamp = LCatalogResult.CacheTimeStamp;
+			AClientCacheTimeStamp = LCatalogResult.ClientCacheTimeStamp;
+			ACacheChanged = LCatalogResult.CacheChanged;
+			return LCatalogResult.Catalog;
 		}
 
 		public string GetClassName(string AClassName)
@@ -208,9 +237,7 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			IAsyncResult LResult = GetServiceInterface().BeginGetFile(ProcessHandle, ALibraryName, AFileName, null, null);
 			LResult.AsyncWaitHandle.WaitOne();
-			byte[] LFile = GetServiceInterface().EndGetFile(LResult);
-			MemoryStream LStream = new MemoryStream(LFile);
-			return new CoverStream(LStream);
+			return new ClientStream(this, GetServiceInterface().EndGetFile(LResult));
 		}
 
 		#endregion

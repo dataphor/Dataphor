@@ -13,7 +13,24 @@ namespace Alphora.Dataphor.DAE.Contracts
     [Flags]
 	/// <nodoc/>
 	public enum CursorGetFlags : byte { None = 0, BOF = 1, EOF = 2 }
-    
+	
+	/// <nodoc/>
+	[DataContract]
+    public struct CatalogResult
+    {
+		[DataMember]
+		public string Catalog;
+
+		[DataMember]
+		public long CacheTimeStamp;
+
+		[DataMember]
+		public long ClientCacheTimeStamp;
+
+		[DataMember]
+		public bool CacheChanged;
+	}
+
 	/// <nodoc/>
 	[DataContract]
 	public struct RemoteRowHeader
@@ -85,6 +102,133 @@ namespace Alphora.Dataphor.DAE.Contracts
 
 		[DataMember]
 		public RemoteRowBody Data;
+    }
+    
+    /// <nodoc/>
+	[DataContract]
+    public struct ExecuteResult
+    {
+		[DataMember]
+		public TimeSpan ExecuteTime;
+		
+		[DataMember]
+		public RemoteRowBody ParamData;
+    }
+
+    /// <nodoc/>
+	[DataContract]
+    public struct EvaluateResult
+    {
+		[DataMember]
+		public TimeSpan ExecuteTime;
+		
+		[DataMember]
+		public RemoteRowBody ParamData;
+		
+		[DataMember]
+		public byte[] Result;
+    }
+
+    /// <nodoc/>
+	[DataContract]
+    public struct DirectEvaluateResult
+    {
+		[DataMember]
+		public TimeSpan ExecuteTime;
+		
+		[DataMember]
+		public RemoteRowBody ParamData;
+		
+		[DataMember]
+		public byte[] Result;
+		
+		[DataMember]
+		public PlanDescriptor PlanDescriptor;
+    }
+
+    /// <nodoc/>
+	[DataContract]
+    public struct CursorResult
+    {
+		[DataMember]
+		public TimeSpan ExecuteTime;
+		
+		[DataMember]
+		public RemoteRowBody ParamData;
+		
+		[DataMember]
+		public CursorDescriptor CursorDescriptor;
+    }
+
+    /// <nodoc/>
+	[DataContract]
+    public struct DirectCursorResult
+    {
+		[DataMember]
+		public TimeSpan ExecuteTime;
+		
+		[DataMember]
+		public RemoteRowBody ParamData;
+		
+		[DataMember]
+		public PlanDescriptor PlanDescriptor;
+		
+		[DataMember]
+		public CursorDescriptor CursorDescriptor;
+    }
+
+    /// <nodoc/>
+	[DataContract]
+    public struct CursorWithFetchResult
+    {
+		[DataMember]
+		public TimeSpan ExecuteTime;
+		
+		[DataMember]
+		public RemoteRowBody ParamData;
+		
+		[DataMember]
+		public CursorDescriptor CursorDescriptor;
+		
+		[DataMember]
+		public Guid[] Bookmarks;
+		
+		[DataMember]
+		public RemoteFetchData FetchData;
+    }
+    
+    /// <nodoc/>
+	[DataContract]
+    public struct DirectCursorWithFetchResult
+    {
+		[DataMember]
+		public TimeSpan ExecuteTime;
+		
+		[DataMember]
+		public RemoteRowBody ParamData;
+		
+		[DataMember]
+		public PlanDescriptor PlanDescriptor;
+		
+		[DataMember]
+		public CursorDescriptor CursorDescriptor;
+		
+		[DataMember]
+		public Guid[] Bookmarks;
+		
+		[DataMember]
+		public RemoteFetchData FetchData;
+    }
+    
+    /// <nodoc/>
+	[DataContract]
+    public struct FetchResult
+    {
+		[DataMember]
+		public Guid[] Bookmarks;
+		
+		[DataMember]
+		public RemoteFetchData FetchData;
     }
 
 	/// <nodoc/>

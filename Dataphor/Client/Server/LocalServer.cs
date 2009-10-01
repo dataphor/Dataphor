@@ -41,7 +41,7 @@ namespace Alphora.Dataphor.DAE.Server
     public class LocalServer : LocalServerObject, IServer, IDisposable
     {
 		/// <remarks>The buffer size to use when copying library files over the CLI.</remarks>
-		public const int CFileCopyBufferSize = 32768;
+		public const int CFileCopyBufferSize = 16384;
 		
 		public LocalServer(IRemoteServer AServer, bool AClientSideLoggingEnabled, string AHostName) : base()
 		{
@@ -281,8 +281,8 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				FClientCacheTimeStamp = AClientCacheTimeStamp;
 				
-				ManualResetEvent LSignal = (ManualResetEvent)FCacheSignals[AClientCacheTimeStamp];
-				if (LSignal != null)
+				ManualResetEvent LSignal;
+				if (FCacheSignals.TryGetValue(AClientCacheTimeStamp, out LSignal))
 					LSignal.Set();
 			}
 			#if USESPINLOCK

@@ -549,7 +549,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				LStatement.IsOverride = IsOverride;
 				LStatement.IsReintroduced = IsReintroduced;
 				#endif
-				if ((AMode == EmitMode.ForRemote) && (Block.BlockNode != null) && !IsRemotable)
+				if ((AMode == EmitMode.ForRemote) && !IsRemotable)
 					LStatement.Block.Block = new Block();
 				else
 					Block.EmitStatement(AMode, LStatement.Block);
