@@ -285,7 +285,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			return LHost;
 		}
 
-		private void DeserializationErrors(Host AHost, ErrorList AErrorList)
+		private void DeserializationErrors(IHost AHost, ErrorList AErrorList)
 		{
 			if ((AHost != null) && (AHost.Children.Count > 0))
 			{

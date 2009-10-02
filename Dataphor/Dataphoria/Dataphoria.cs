@@ -447,7 +447,7 @@ namespace Alphora.Dataphor.Dataphoria
 			InternalDisconnect();
 		}
 
-		private void FrontendSessionDeserializationErrors(Host AHost, ErrorList AErrors)
+		private void FrontendSessionDeserializationErrors(IHost AHost, ErrorList AErrors)
 		{
 			IErrorSource LSource = null;
 			

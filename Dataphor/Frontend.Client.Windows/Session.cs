@@ -598,7 +598,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		/// <remarks> If this event is set, then the default behavior will not be invoked. </remarks>
 		public event DeserializationErrorsHandler OnDeserializationErrors;
 
-		private void DeserializationErrors(Host AHost, ErrorList AErrorList)
+		private void DeserializationErrors(IHost AHost, ErrorList AErrorList)
 		{
 			if (OnDeserializationErrors != null)
 				OnDeserializationErrors(AHost, AErrorList);
