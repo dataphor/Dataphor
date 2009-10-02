@@ -5,7 +5,7 @@
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	mc:Ignorable="d"
 	xmlns:navigation="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Navigation"
-	x:Class="Frontend.Client.Silverlight.ConnectInstances" 
+	x:Class="Alphora.Dataphor.Frontend.Client.Silverlight.ConnectInstances" 
 	Title="Connection - Instances"
 	d:DesignWidth="240" d:DesignHeight="180">
 	

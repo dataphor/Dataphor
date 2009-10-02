@@ -4,7 +4,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     mc:Ignorable="d" 
 	xmlns:navigation="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Navigation" 
-	x:Class="Frontend.Client.Silverlight.ConnectPage"
+	x:Class="Alphora.Dataphor.Frontend.Client.Silverlight.ConnectPage"
     d:DesignWidth="640" d:DesignHeight="480">
   <Grid x:Name="LayoutRoot">
 

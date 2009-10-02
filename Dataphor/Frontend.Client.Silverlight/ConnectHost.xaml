@@ -5,7 +5,7 @@
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	mc:Ignorable="d"
 	xmlns:navigation="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Navigation"
-	x:Class="Frontend.Client.Silverlight.ConnectHost" 
+	x:Class="Alphora.Dataphor.Frontend.Client.Silverlight.ConnectHost" 
 	Title="Connect - Host Name"
 	>
 	

@@ -8,7 +8,7 @@
     <ProjectTypeGuids>{A1591282-1198-4647-A2B1-27E5FF5F6F3B};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Frontend.Client.Silverlight</RootNamespace>
+    <RootNamespace>Alphora.Dataphor</RootNamespace>
     <AssemblyName>Frontend.Client.Silverlight</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <SilverlightApplication>true</SilverlightApplication>
@@ -152,7 +152,7 @@
     </Compile>
     <Compile Include="Frontend.Client\Action.Image.cs" />
     <Compile Include="Frontend.Client\ImageUtility.cs" />
-    <Compile Include="Frontend.Client\Timer.cs" />
+    <Compile Include="Frontend.Client.Silverlight\Timer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

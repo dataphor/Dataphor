@@ -10,7 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 
-namespace Frontend.Client.Silverlight
+namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
 	public partial class ConnectPage : Page
 	{

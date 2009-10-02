@@ -76,7 +76,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <param name="ASource"> A stream containing an XML NodeTypeTable information. </param>
 		public void LoadFromStream(Stream ASource)
 		{
-			XDocument LDocument = XDocument.Load(ASource);
+			XDocument LDocument = XDocument.Load(new StreamReader(ASource));
 			InternalLoad(LDocument);
 		}
 

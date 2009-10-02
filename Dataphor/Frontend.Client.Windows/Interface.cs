@@ -10,6 +10,7 @@ using System.Drawing;
 using System.Drawing.Design;
 
 using Alphora.Dataphor.BOP;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.Frontend.Client.Windows
 {
@@ -74,9 +75,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// UserState
 
-		private System.Collections.Specialized.HybridDictionary FUserState = new System.Collections.Specialized.HybridDictionary();
+		private Dictionary<string, object> FUserState = new Dictionary<string, object>();
 		[Browsable(false)]
-		public System.Collections.Specialized.HybridDictionary UserState
+		public Dictionary<string, object> UserState
 		{
 			get { return FUserState; }
 		}

@@ -5,9 +5,12 @@
 */
 
 using System;
-using System.Drawing;
 using System.ComponentModel;
-using System.Windows.Media;
+#if SILVERLIGHT
+using Image=System.Windows.Media.ImageSource;
+#else
+using System.Drawing;
+#endif
 
 using Alphora.Dataphor.BOP;
 
@@ -187,7 +190,7 @@ namespace Alphora.Dataphor.Frontend.Client
 				InternalSetImage(null);
 		}
 
-		protected virtual void InternalSetImage(ImageSource AImage) {}
+		protected virtual void InternalSetImage(Image AImage) {}
 
 		// Hint
 

@@ -156,7 +156,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		protected virtual void InternalUpdateImage()
 		{
-			FButton.Image = (Action == null ? null : Action.LoadedImage);
+			FButton.Image = (Action == null ? null : ((Action)Action).LoadedImage);
 			FButton.TextAlign = (Button.Image == null ? ContentAlignment.MiddleCenter : ContentAlignment.MiddleRight);
 		}
 

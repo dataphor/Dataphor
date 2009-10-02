@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Windows.Controls;
 using System.Windows.Navigation;
 
-namespace Frontend.Client.Silverlight
+namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
     public partial class ConnectLogin : Page
     {

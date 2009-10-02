@@ -6,7 +6,7 @@ using System.Windows.Navigation;
 
 using Alphora.Dataphor.DAE.Listener;
 
-namespace Frontend.Client.Silverlight
+namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
     public partial class ConnectInstances : Page, INotifyPropertyChanged
     {
