@@ -34,3 +34,4 @@
 204: Frontend.Client.Web.WebClientException
 205: Frontend.Client.Windows.WindowsClientException
 206: Frontend.Client.Web.WebDAC.ControlsException
+207: Frontend.Client.Silverlight.SilverlightClientException

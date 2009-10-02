@@ -57,6 +57,10 @@
     <Reference Include="system" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net" />
+    <Reference Include="System.Windows.Controls.Layout.Toolkit, Version=2.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\System.Windows.Controls.Layout.Toolkit.dll</HintPath>
+    </Reference>
     <Reference Include="System.Windows.Controls.Navigation, Version=2.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Windows.Browser" />
@@ -138,21 +142,28 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Connect.xaml.cs">
+    <Compile Include="SilverlightClientException.cs" />
+    <Compile Include="Pages\Connect.xaml.cs">
       <DependentUpon>Connect.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ConnectHost.xaml.cs">
+    <Compile Include="Pages\ConnectHost.xaml.cs">
       <DependentUpon>ConnectHost.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ConnectInstances.xaml.cs">
+    <Compile Include="Pages\ConnectInstances.xaml.cs">
       <DependentUpon>ConnectInstances.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ConnectLogin.xaml.cs">
+    <Compile Include="Pages\ConnectLogin.xaml.cs">
       <DependentUpon>ConnectLogin.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Frontend.Client.Silverlight\DocumentExpression.cs" />
+    <Compile Include="Frontend.Client.Silverlight\ISilverlightFormInterface.cs" />
+    <Compile Include="Frontend.Client.Silverlight\Session.cs" />
     <Compile Include="Frontend.Client\Action.Image.cs" />
     <Compile Include="Frontend.Client\ImageUtility.cs" />
     <Compile Include="Frontend.Client.Silverlight\Timer.cs" />
+    <Compile Include="Pages\Main.xaml.cs">
+      <DependentUpon>Main.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -160,21 +171,25 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:MarkupCompilePass1</Generator>
     </ApplicationDefinition>
-    <Page Include="Connect.xaml">
+    <Page Include="Pages\Connect.xaml">
       <Generator>MSBuild:MarkupCompilePass1</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ConnectHost.xaml">
+    <Page Include="Pages\ConnectHost.xaml">
       <Generator>MSBuild:MarkupCompilePass1</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ConnectInstances.xaml">
+    <Page Include="Pages\ConnectInstances.xaml">
       <Generator>MSBuild:MarkupCompilePass1</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ConnectLogin.xaml">
+    <Page Include="Pages\ConnectLogin.xaml">
       <Generator>MSBuild:MarkupCompilePass1</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\Main.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:MarkupCompilePass1</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
@@ -193,6 +208,10 @@
     </EmbeddedResource>
     <EmbeddedResource Include="..\Frontend.Client\Strings.resx">
       <Link>Frontend.Client\Strings.resx</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SilverlightClientException.resx">
+      <DependentUpon>SilverlightClientException.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

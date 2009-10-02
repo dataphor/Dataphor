@@ -32,7 +32,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <summary> Initializez the private FNodeTypes hashtable. </summary>
 		public NodeTypeTable()
 		{
-			FNodeTypes = new Dictionary<string, NodeTypeEntry>(64);
+			FNodeTypes = new Dictionary<string, NodeTypeEntry>(64, StringComparer.OrdinalIgnoreCase);
 		}
 
 		private Dictionary<string, NodeTypeEntry> FNodeTypes;

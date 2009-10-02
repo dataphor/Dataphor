@@ -250,5 +250,5 @@ namespace Alphora.Dataphor.Frontend.Client
 		}
 	}
 
-	public delegate void DeserializationErrorsHandler(Host AHost, ErrorList AErrors);
+	public delegate void DeserializationErrorsHandler(IHost AHost, ErrorList AErrors);
 }

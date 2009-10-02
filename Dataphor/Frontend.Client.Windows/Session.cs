@@ -25,9 +25,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		public static int CDefaultDocumentCacheSize = 800;
 		public static int CDefaultImageCacheSize = 60;
 
-		public const string CFormDesignerNodeTypesExpression = @".Frontend.GetNodeTypes('Windows', Frontend.FormDesignerLibraries)";
-		public const string CLibraryNodeTypesExpression = @".Frontend.GetLibraryNodeTypes('Windows', ALibraryName)";
-		public const string CSettingsExpression = @".Frontend.GetWindowsSettings(AApplicationID)";
+		public const string CClientName = "Windows";
+		public const string CFormDesignerNodeTypesExpression = ".Frontend.GetNodeTypes('" + CClientName + "', Frontend.FormDesignerLibraries)";
+		public const string CLibraryNodeTypesExpression = ".Frontend.GetLibraryNodeTypes('" + CClientName + "', ALibraryName)";
+		public const string CSettingsExpression = ".Frontend.GetWindowsSettings(AApplicationID)";
 
 		public Session(Alphora.Dataphor.DAE.Client.DataSession ADataSession, bool AOwnsDataSession) : base(ADataSession, AOwnsDataSession) 
 		{
@@ -312,7 +313,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public string SetApplication(string AApplicationID)
 		{
-			return SetApplication(AApplicationID, "Windows");
+			return SetApplication(AApplicationID, CClientName);
 		}
 
 		private void ClearDocumentCache()
@@ -558,51 +559,6 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		#endregion
 
 		#region Shut-down
-
-		/// <summary> Attempts to close the session's forms and returns true if they closed. </summary>
-		/// <param name="AExclude"> When true, the given root form is omitted. </param>
-		public bool CloseAllForms(IHost AExclude, CloseBehavior ABehavior)
-		{
-			Frontend.Client.Forms.FormStack LFormStack;
-			Frontend.Client.Forms.FormStack LNext = this.Forms.First;
-			while (LNext != null)
-			{
-				LFormStack = LNext;
-				LNext = LNext.Next;	// remember the next item before it get's lost
-				while 
-				(
-					!LFormStack.IsEmpty() && 
-					(
-						(AExclude == null) || 
-						(LFormStack.GetTopmostForm().HostNode != AExclude)
-					)
-				)
-					if (!LFormStack.GetTopmostForm().Close(ABehavior))
-						return false;
-			}
-			return true;
-		}
-
-		/// <summary> Attempts to close all of a forms covering (child-modal) "children". </summary>
-		/// <returns> True if any covering forms were closed. </returns>
-		public bool UncoverForm(IFormInterface AForm, CloseBehavior ABehavior)
-		{
-			Frontend.Client.Forms.FormStack LFormStack = Forms.First;
-			int i;
-			while (LFormStack != null)
-			{
-				for (i = 0; i < LFormStack.Forms.Count; i++)
-					if (LFormStack.Forms[i] == AForm)
-					{
-						for (int j = LFormStack.Forms.Count - 1; j > i; j--)
-							if (!LFormStack.Forms[j].Close(ABehavior))
-								return false;
-						return true;
-					}
-				LFormStack = LFormStack.Next;
-			}
-			return true;
-		}
 
 		private void MainFormClosing(object ASender, System.ComponentModel.CancelEventArgs AArgs)
 		{

@@ -466,6 +466,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			set { FIconImage = value; }
 		}
 
+		/// <remarks> Frame does nothing with the ForceAcceptReject. Vestigial of IInterface ancestry. </remarks>
+		public bool ForceAcceptReject { get; set; }
+		
 		// Default Action
 
 		public override void PerformDefaultAction()

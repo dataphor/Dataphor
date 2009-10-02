@@ -57,6 +57,15 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 		}
 
+		#region Pipe
+
+		private Pipe FPipe;
+
+		public Pipe Pipe
+		{
+			get { return FPipe; }
+		}
+
 		protected virtual void InitializePipe()
 		{
 			FPipe = new Pipe(FDataSession.ServerSession);
@@ -70,15 +79,8 @@ namespace Alphora.Dataphor.Frontend.Client
 				FPipe = null;
 			}
 		}
-
-		// Pipe
-
-		private Pipe FPipe;
-
-		public Pipe Pipe
-		{
-			get { return FPipe; }
-		}
+		
+		#endregion
 
 		// AreImagesLoaded
 		
@@ -108,7 +110,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		public virtual void InvokeHelp(INode ASender, string AHelpKeyword, HelpKeywordBehavior AHelpKeywordBehavior, string AHelpString) {}
 
-		// NodeTypeTable
+		#region NodeTypeTable Setup
 
 		private NodeTypeTable FNodeTypeTable = new NodeTypeTable();
 
@@ -119,7 +121,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		protected void ValidateNodeTypeTable()
 		{
-			if (NodeTypeTable.Contains("FormInterface"))
+			if (!NodeTypeTable.Contains("FormInterface"))
 				throw new ClientException(ClientException.Codes.EmptyOrIncompleteNodeTypesTable);
 		}
 
@@ -195,8 +197,11 @@ namespace Alphora.Dataphor.Frontend.Client
 			
 			return LDocumentString;
 		}
+		
+		#endregion
 
-		// Utility methods
+		#region Utility methods
+		
 		// NOTE: These methods are essentially the same overloads as are provided by the DataSession, except that they participate in the error reporting system of the Frontend session.
 		
 		public void ExecuteScript(string AScript)
@@ -514,8 +519,10 @@ namespace Alphora.Dataphor.Frontend.Client
 			IServerProcess LProcess = DataSession.UtilityProcess;
 			return EvaluateScalarWith(LProcess, AID, AExpression, DAE.Client.DataSessionBase.DataParamsFromNativeParams(LProcess, AParams));
 		}
+		
+		#endregion
 
-		// Forms
+		#region Forms
 
 		private Forms FForms;
 		public Forms Forms
@@ -565,6 +572,53 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 		}
 
+		/// <summary> Attempts to close the session's forms and returns true if they closed. </summary>
+		/// <param name="AExclude"> When true, the given root form is omitted. </param>
+		public bool CloseAllForms(IHost AExclude, CloseBehavior ABehavior)
+		{
+			Frontend.Client.Forms.FormStack LFormStack;
+			Frontend.Client.Forms.FormStack LNext = this.Forms.First;
+			while (LNext != null)
+			{
+				LFormStack = LNext;
+				LNext = LNext.Next;	// remember the next item before it get's lost
+				while 
+				(
+					!LFormStack.IsEmpty() && 
+					(
+						(AExclude == null) || 
+						(LFormStack.GetTopmostForm().HostNode != AExclude)
+					)
+				)
+					if (!LFormStack.GetTopmostForm().Close(ABehavior))
+						return false;
+			}
+			return true;
+		}
+
+		/// <summary> Attempts to close all of a forms covering (child-modal) "children". </summary>
+		/// <returns> True if any covering forms were closed. </returns>
+		public bool UncoverForm(IFormInterface AForm, CloseBehavior ABehavior)
+		{
+			Frontend.Client.Forms.FormStack LFormStack = Forms.First;
+			int i;
+			while (LFormStack != null)
+			{
+				for (i = 0; i < LFormStack.Forms.Count; i++)
+					if (LFormStack.Forms[i] == AForm)
+					{
+						for (int j = LFormStack.Forms.Count - 1; j > i; j--)
+							if (!LFormStack.Forms[j].Close(ABehavior))
+								return false;
+						return true;
+					}
+				LFormStack = LFormStack.Next;
+			}
+			return true;
+		}
+		
+		#endregion
+		
 		/// <remarks> Used for frames and popups. </remarks>
 		public abstract IHost CreateHost();
 
