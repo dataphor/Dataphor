@@ -59,7 +59,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public void Ping()
 		{
-			throw new NotImplementedException();
+			// TODO: Lifetime management for the WCF objects
 		}
 
 		#endregion

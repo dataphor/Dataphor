@@ -5262,7 +5262,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 							if (!LNode.ScalarType.IsDefaultConveyor)
 								APlan.CheckRight(Schema.RightNames.HostImplementation);
 							APlan.CheckClassDependency(LNode.ScalarType.Library, LStatement.ClassDefinition);
-							Type LType = APlan.Catalog.ClassLoader.CreateType(LStatement.ClassDefinition);
+							Type LType = APlan.CreateType(LStatement.ClassDefinition);
 							if (!LType.IsSubclassOf(typeof(Conveyor)))
 								throw new CompilerException(CompilerException.Codes.ConveyorClassExpected, LStatement.ClassDefinition, LType.AssemblyQualifiedName);
 						}
@@ -8350,7 +8350,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 
 			int LObjectID = Schema.Object.GetObjectID(ADeviceScalarTypeMap.MetaData);
 			string LDeviceScalarTypeName = Schema.Object.GetGeneratedName(String.Format("{0}_{1}_Map", ADevice.Name, LDataType.Name), LObjectID);
-			object LDeviceScalarTypeObject = APlan.Catalog.ClassLoader.CreateObject(LClassDefinition, new object[]{LObjectID, LDeviceScalarTypeName});
+			object LDeviceScalarTypeObject = APlan.CreateObject(LClassDefinition, new object[]{LObjectID, LDeviceScalarTypeName});
 			if (!(LDeviceScalarTypeObject is Schema.DeviceScalarType))
 				throw new CompilerException(CompilerException.Codes.DeviceScalarTypeClassExpected, LClassDefinition, LDeviceScalarTypeObject == null ? "null" : LDeviceScalarTypeObject.GetType().AssemblyQualifiedName);
 				
@@ -8408,7 +8408,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				
 			int LObjectID = Schema.Object.GetObjectID(ADeviceOperatorMap.MetaData);
 			string LDeviceOperatorName = Schema.Object.GetGeneratedName(String.Format("{0}_{1}_Map", ADevice.Name, LOperator.Name), LObjectID);
-			object LDeviceOperatorObject = APlan.Catalog.ClassLoader.CreateObject(ADeviceOperatorMap.ClassDefinition, new object[]{LObjectID, LDeviceOperatorName});
+			object LDeviceOperatorObject = APlan.CreateObject(ADeviceOperatorMap.ClassDefinition, new object[]{LObjectID, LDeviceOperatorName});
 			if (!(LDeviceOperatorObject is Schema.DeviceOperator))
 				throw new CompilerException(CompilerException.Codes.DeviceOperatorClassExpected, ADeviceOperatorMap.ClassDefinition, LDeviceOperatorObject == null ? "null" : LDeviceOperatorObject.GetType().AssemblyQualifiedName);
 				
@@ -8442,7 +8442,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				ADeviceScalarType.AddDependency(ABaseDeviceScalarType);
 				int LObjectID = Schema.Object.GetNextObjectID();
 				string LDeviceOperatorName = Schema.Object.GetGeneratedName(String.Format("{0}_{1}_Map", ADevice.Name, AOperator.Name), LObjectID);
-				LDeviceOperator = (Schema.DeviceOperator)APlan.Catalog.ClassLoader.CreateObject(AClassDefinition, new object[] { LObjectID, LDeviceOperatorName });
+				LDeviceOperator = (Schema.DeviceOperator)APlan.CreateObject(AClassDefinition, new object[] { LObjectID, LDeviceOperatorName });
 				LDeviceOperator.Library = ADeviceScalarType.Library;
 				LDeviceOperator.Owner = ADeviceScalarType.Owner;
 				LDeviceOperator.IsGenerated = true;
@@ -8604,7 +8604,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			CreateDeviceNode LNode = new CreateDeviceNode();
 			APlan.CheckRight(Schema.RightNames.HostImplementation);
 			APlan.CheckClassDependency(APlan.CurrentLibrary, LStatement.ClassDefinition);
-			object LObject = APlan.Catalog.ClassLoader.CreateObject(LStatement.ClassDefinition, new object[] { Schema.Object.GetObjectID(LStatement.MetaData), LDeviceName });
+			object LObject = APlan.CreateObject(LStatement.ClassDefinition, new object[] { Schema.Object.GetObjectID(LStatement.MetaData), LDeviceName });
 			if (!(LObject is Schema.Device))
 				throw new CompilerException(CompilerException.Codes.DeviceClassExpected, LStatement.ClassDefinition, LObject == null ? "null" : LObject.GetType().AssemblyQualifiedName);
 			LNode.NewDevice = (Schema.Device)LObject;
@@ -11290,7 +11290,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			if (AOperator.Block.ClassDefinition != null)
 			{
 				APlan.CheckClassDependency(AOperator.Block.ClassDefinition);
-				LNode = (PlanNode)APlan.Catalog.ClassLoader.CreateObject(AOperator.Block.ClassDefinition, null);
+				LNode = (PlanNode)APlan.CreateObject(AOperator.Block.ClassDefinition, null);
 			}
 			else
 			{
@@ -11505,7 +11505,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			if (AOperator.Initialization.ClassDefinition != null)
 			{
 				APlan.CheckClassDependency(AOperator.Initialization.ClassDefinition);
-				PlanNode LInitializationNode = (PlanNode)APlan.Catalog.ClassLoader.CreateObject(AOperator.Initialization.ClassDefinition, null);
+				PlanNode LInitializationNode = (PlanNode)APlan.CreateObject(AOperator.Initialization.ClassDefinition, null);
 				LInitializationNode.DetermineCharacteristics(APlan);
 				LNode.Nodes.Add(LInitializationNode);
 			}
@@ -11515,7 +11515,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			if (AOperator.Aggregation.ClassDefinition != null)
 			{
 				APlan.CheckClassDependency(AOperator.Aggregation.ClassDefinition);
-				PlanNode LAggregationNode = (PlanNode)APlan.Catalog.ClassLoader.CreateObject(AOperator.Aggregation.ClassDefinition, null);
+				PlanNode LAggregationNode = (PlanNode)APlan.CreateObject(AOperator.Aggregation.ClassDefinition, null);
 				LAggregationNode.DetermineCharacteristics(APlan);
 				LNode.Nodes.Add(LAggregationNode);
 			}
@@ -11525,7 +11525,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			if (AOperator.Finalization.ClassDefinition != null)
 			{
 				APlan.CheckClassDependency(AOperator.Finalization.ClassDefinition);
-				PlanNode LFinalizationNode = (PlanNode)APlan.Catalog.ClassLoader.CreateObject(AOperator.Finalization.ClassDefinition, null);
+				PlanNode LFinalizationNode = (PlanNode)APlan.CreateObject(AOperator.Finalization.ClassDefinition, null);
 				LFinalizationNode.DetermineCharacteristics(APlan);
 				LNode.Nodes.Add(LFinalizationNode);
 			}

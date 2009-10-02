@@ -378,6 +378,9 @@
     <Compile Include="..\DAE\Device.Catalog\CatalogHeader.cs">
       <Link>DAE\Device.Catalog\CatalogHeader.cs</Link>
     </Compile>
+    <Compile Include="..\DAE\Device.Catalog\ClassLoader.cs">
+      <Link>DAE\Device.Catalog\ClassLoader.cs</Link>
+    </Compile>
     <Compile Include="..\DAE\Device.Catalog\NameResolutionCache.cs">
       <Link>DAE\Device.Catalog\NameResolutionCache.cs</Link>
     </Compile>

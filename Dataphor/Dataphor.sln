@@ -3,6 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9923DA0B-B157-41AA-AB27-E48F60EABD36}"
 	ProjectSection(SolutionItems) = preProject
 		CompilerDefines.txt = CompilerDefines.txt
+		Error Message Prefix Codes.txt = Error Message Prefix Codes.txt
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Base", "Base\Base.csproj", "{6EC1F378-510B-48D0-8D00-E36BEF214766}"

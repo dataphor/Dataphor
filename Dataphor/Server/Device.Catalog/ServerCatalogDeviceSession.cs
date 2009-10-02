@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 
+using Alphora.Dataphor.BOP;
 using Alphora.Dataphor.DAE.Compiling;
 using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 using Alphora.Dataphor.DAE.Device.Memory;
@@ -1284,8 +1285,13 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 			throw new Schema.SchemaException(Schema.SchemaException.Codes.CatalogObjectLoadFailed, ErrorSeverity.System, AObjectID);
 		}
+		
+		private void EnsureLibraryLoaded(Program AProgram, string ALibraryName)
+		{
+			EnsureLibraryLoaded(AProgram, ALibraryName, ResolveUser(GetLibraryOwner(ALibraryName)));
+		}
 
-		private void LoadPersistentObject(Program AProgram, int AObjectID, Schema.User AUser, string ALibraryName, string AScript, bool AIsATObject)
+		private void EnsureLibraryLoaded(Program AProgram, string ALibraryName, Schema.User AUser)
 		{
 			// Ensure that the required library is loaded
 			if ((ALibraryName != String.Empty) && !Catalog.LoadedLibraries.Contains(ALibraryName))
@@ -1300,6 +1306,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					ServerProcess.PopLoadingContext();
 				}
 			}
+		}
+		
+		private void LoadPersistentObject(Program AProgram, int AObjectID, Schema.User AUser, string ALibraryName, string AScript, bool AIsATObject)
+		{
+			// Ensure that the required library is loaded
+			EnsureLibraryLoaded(AProgram, ALibraryName, AUser);
 
 			// Compile and execute the object creation script
 			ServerProcess.PushLoadingContext(new LoadingContext(AUser, ALibraryName));
@@ -2355,6 +2367,66 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					return ResolveCatalogObject(LDeviceObjectID) as Schema.DeviceObject;
 				}
 				return null;
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		#endregion
+		
+		#region Classes
+		
+		public string GetClassLibrary(string AClassName)
+		{
+			AcquireCatalogStoreConnection(false);
+			try
+			{
+				string LLibraryName = CatalogStoreConnection.SelectClassLibrary(AClassName);
+				if (String.IsNullOrEmpty(LLibraryName))
+					throw new ServerException(ServerException.Codes.ClassAliasNotFound, AClassName);
+				return LLibraryName;
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+
+		public void LoadLibraryForClass(ClassDefinition AClassDefinition)
+		{
+			Program LProgram = new Program(ServerProcess);
+			LProgram.Start(null);
+			try
+			{
+				EnsureLibraryLoaded(LProgram, GetClassLibrary(AClassDefinition.ClassName));
+			}
+			finally
+			{
+				LProgram.Stop(null);
+			}
+		}
+
+		protected override void InsertRegisteredClasses(Schema.LoadedLibrary ALoadedLibrary, SettingsList ARegisteredClasses)
+		{
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				CatalogStoreConnection.InsertRegisteredClasses(ALoadedLibrary.Name, ARegisteredClasses);
+			}
+			finally
+			{
+				ReleaseCatalogStoreConnection();
+			}
+		}
+		
+		protected override void DeleteRegisteredClasses(Schema.LoadedLibrary ALoadedLibrary, SettingsList ARegisteredClasses)
+		{
+			AcquireCatalogStoreConnection(true);
+			try
+			{
+				CatalogStoreConnection.DeleteRegisteredClasses(ALoadedLibrary.Name, ARegisteredClasses);
 			}
 			finally
 			{

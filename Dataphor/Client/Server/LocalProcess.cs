@@ -21,6 +21,7 @@ using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Debug;
 using Alphora.Dataphor.DAE.Contracts;
+using Alphora.Dataphor.DAE.Device.Catalog;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -47,7 +48,7 @@ namespace Alphora.Dataphor.DAE.Server
 			if ((FSession != null) && (FSession.FServer != null))
 			{
 				if (FSession.FServer.Catalog != null)
-					FSession.FServer.Catalog.ClassLoader.OnMiss -= new Schema.ClassLoaderMissedEvent(ClassLoaderMissed);
+					FSession.FServer.Catalog.ClassLoader.OnMiss -= new ClassLoaderMissedEvent(ClassLoaderMissed);
 				FSession.FServer.OnCacheClearing -= new CacheClearedEvent(CacheClearing);
 				FSession.FServer.OnCacheCleared -= new CacheClearedEvent(CacheCleared);
 			}
@@ -89,7 +90,7 @@ namespace Alphora.Dataphor.DAE.Server
 		private Schema.DataTypes FDataTypes;
 		public Schema.DataTypes DataTypes { get { return FDataTypes; } }
 		
-		private void ClassLoaderMissed(Schema.ClassLoader AClassLoader, ClassDefinition AClassDefinition)
+		private void ClassLoaderMissed(ClassLoader AClassLoader, CatalogDeviceSession ASession, ClassDefinition AClassDefinition)
 		{
 			if ((FSession != null) && (FSession.FServer != null))
 				FSession.FServer.ClassLoaderMissed(this, AClassLoader, AClassDefinition);
@@ -97,17 +98,17 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public object CreateObject(ClassDefinition AClassDefinition, object[] AArguments)
 		{
-			return FSession.FServer.Catalog.ClassLoader.CreateObject(AClassDefinition, AArguments);
+			return FSession.FServer.Catalog.ClassLoader.CreateObject(FInternalProcess.CatalogDeviceSession, AClassDefinition, AArguments);
 		}
 		
 		public Type CreateType(ClassDefinition AClassDefinition)
 		{
-			return FSession.FServer.Catalog.ClassLoader.CreateType(AClassDefinition);
+			return FSession.FServer.Catalog.ClassLoader.CreateType(FInternalProcess.CatalogDeviceSession, AClassDefinition);
 		}
 		
 		private void CacheClearing(LocalServer AServer)
 		{
-			AServer.FInternalServer.Catalog.ClassLoader.OnMiss -= new Schema.ClassLoaderMissedEvent(ClassLoaderMissed);
+			AServer.FInternalServer.Catalog.ClassLoader.OnMiss -= new ClassLoaderMissedEvent(ClassLoaderMissed);
 		}
 		
 		private void CacheCleared(LocalServer AServer)
@@ -117,7 +118,7 @@ namespace Alphora.Dataphor.DAE.Server
 			FDataTypes = new Schema.DataTypes(AServer.FInternalServer.Catalog);
 			FDataTypes.OnCatalogLookupFailed += new Schema.CatalogLookupFailedEvent(CatalogLookupFailed);
 			
-			FSession.FServer.Catalog.ClassLoader.OnMiss += new Schema.ClassLoaderMissedEvent(ClassLoaderMissed);
+			FSession.FServer.Catalog.ClassLoader.OnMiss += new ClassLoaderMissedEvent(ClassLoaderMissed);
 		}
 		
 		private void CatalogLookupFailed(Schema.Catalog ACatalog, string AName)

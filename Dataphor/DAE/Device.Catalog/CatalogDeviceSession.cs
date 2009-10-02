@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 
+using Alphora.Dataphor.BOP;
 using Alphora.Dataphor.DAE.Compiling;
 using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 using Alphora.Dataphor.DAE.Device.Memory;
@@ -1917,15 +1918,19 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		#region Assembly registration
 		
-		private void InternalRegisterAssembly(Schema.LoadedLibrary ALoadedLibrary, Assembly AAssembly)
+		private SettingsList InternalRegisterAssembly(Schema.LoadedLibrary ALoadedLibrary, Assembly AAssembly)
 		{
-			Catalog.ClassLoader.RegisterAssembly(ALoadedLibrary, AAssembly);
+			SettingsList LClasses = Catalog.ClassLoader.RegisterAssembly(ALoadedLibrary, AAssembly);
 			ALoadedLibrary.Assemblies.Add(AAssembly);
+			return LClasses;
 		}
 		
 		public void RegisterAssembly(Schema.LoadedLibrary ALoadedLibrary, Assembly AAssembly)
 		{
-			InternalRegisterAssembly(ALoadedLibrary, AAssembly);
+			SettingsList LClasses = InternalRegisterAssembly(ALoadedLibrary, AAssembly);
+
+			if (!ServerProcess.InLoadingContext())
+				InsertRegisteredClasses(ALoadedLibrary, LClasses);
 
 			#if LOGDDLINSTRUCTIONS
 			if (ServerProcess.InTransaction)
@@ -1933,20 +1938,32 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			#endif
 		}
 
-		private void InternalUnregisterAssembly(Schema.LoadedLibrary ALoadedLibrary, Assembly AAssembly)
+		private SettingsList InternalUnregisterAssembly(Schema.LoadedLibrary ALoadedLibrary, Assembly AAssembly)
 		{
-			Catalog.ClassLoader.UnregisterAssembly(AAssembly);
+			SettingsList LClasses = Catalog.ClassLoader.UnregisterAssembly(ALoadedLibrary, AAssembly);
 			ALoadedLibrary.Assemblies.Remove(AAssembly);
+			return LClasses;
 		}
 
 		public void UnregisterAssembly(Schema.LoadedLibrary ALoadedLibrary, Assembly AAssembly)
 		{
-			InternalUnregisterAssembly(ALoadedLibrary, AAssembly);
+			SettingsList LClasses = InternalUnregisterAssembly(ALoadedLibrary, AAssembly);
+			
+			if (!ServerProcess.InLoadingContext())
+				DeleteRegisteredClasses(ALoadedLibrary, LClasses);
 
 			#if LOGDDLINSTRUCTIONS
 			if (ServerProcess.InTransaction)
 				FInstructions.Add(new UnregisterAssemblyInstruction(ALoadedLibrary, AAssembly));
 			#endif
+		}
+		
+		protected virtual void InsertRegisteredClasses(Schema.LoadedLibrary ALoadedLibrary, SettingsList ARegisteredClasses)
+		{
+		}
+		
+		protected virtual void DeleteRegisteredClasses(Schema.LoadedLibrary ALoadedLibrary, SettingsList ARegisteredClasses)
+		{
 		}
 
 		#endregion

@@ -18,6 +18,7 @@ using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Contracts;
+using Alphora.Dataphor.DAE.Device.Catalog;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -378,7 +379,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public void ClassLoaderMissed(LocalProcess AProcess, Schema.ClassLoader AClassLoader, ClassDefinition AClassDefinition)
+		public void ClassLoaderMissed(LocalProcess AProcess, ClassLoader AClassLoader, ClassDefinition AClassDefinition)
 		{
 			AcquireCacheLock(AProcess, LockMode.Exclusive);
 			try
@@ -404,7 +405,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		private void LoadAndRegister(LocalProcess AProcess, Schema.ClassLoader AClassLoader, string ALibraryName, string AFileName, bool AShouldRegister)
+		private void LoadAndRegister(LocalProcess AProcess, ClassLoader AClassLoader, string ALibraryName, string AFileName, bool AShouldRegister)
 		{
 			try
 			{
@@ -488,7 +489,7 @@ namespace Alphora.Dataphor.DAE.Server
 			return LFullFileName;
 		}
 		
-		public void ClassLoaderMissed(LocalProcess AProcess, Schema.ClassLoader AClassLoader, ClassDefinition AClassDefinition)
+		public void ClassLoaderMissed(LocalProcess AProcess, ClassLoader AClassLoader, ClassDefinition AClassDefinition)
 		{
 			AcquireCacheLock(AProcess, LockMode.Exclusive);
 			try

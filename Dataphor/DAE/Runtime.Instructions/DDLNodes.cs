@@ -14,8 +14,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	using Alphora.Dataphor.DAE.Language;
 	using Alphora.Dataphor.DAE.Language.D4;
 	using Alphora.Dataphor.DAE.Runtime;
-	using Schema = Alphora.Dataphor.DAE.Schema;
 	using Alphora.Dataphor.DAE.Server;
+	using Alphora.Dataphor.DAE.Device.Catalog;
+	using Schema = Alphora.Dataphor.DAE.Schema;
 
 	public abstract class DDLNode : PlanNode 
 	{
@@ -963,7 +964,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				foreach (ClassAttributeDefinition LAttributeDefinition in AAlterClassDefinition.AlterAttributes)
 				{
 					if (AInstance != null)
-						Schema.ClassLoader.SetProperty(AInstance, LAttributeDefinition.AttributeName, LAttributeDefinition.AttributeValue);
+						ClassLoader.SetProperty(AInstance, LAttributeDefinition.AttributeName, LAttributeDefinition.AttributeValue);
 					
 					AClassDefinition.Attributes[LAttributeDefinition.AttributeName].AttributeValue = LAttributeDefinition.AttributeValue;
 				}
@@ -971,7 +972,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				foreach (ClassAttributeDefinition LAttributeDefinition in AAlterClassDefinition.CreateAttributes)
 				{
 					if (AInstance != null)
-						Schema.ClassLoader.SetProperty(AInstance, LAttributeDefinition.AttributeName, LAttributeDefinition.AttributeValue);
+						ClassLoader.SetProperty(AInstance, LAttributeDefinition.AttributeName, LAttributeDefinition.AttributeValue);
 
 					AClassDefinition.Attributes.Add(LAttributeDefinition);
 				}

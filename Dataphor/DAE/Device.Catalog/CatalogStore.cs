@@ -27,6 +27,7 @@ using Alphora.Dataphor.DAE.Store;
 using Schema = Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 using Alphora.Dataphor.DAE.Connection;
+using Alphora.Dataphor.BOP;
 
 // TODO: Study the performance impact of using literals vs. parameterized statements, including the impact of the required String.Replace calls
 
@@ -437,6 +438,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					LColumns.Add("Device_ID");
 					LColumns.Add("Mapped_Object_ID");
 					return new StoreTableHeader(ATableName, LColumns, "PK_DAEDeviceObjects");
+					
+				case "DAEClasses" :
+					LColumns.Add("Name");
+					LColumns.Add("Library_Name");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAEClasses");
 			}
 
 			Error.Fail("Table header could not be constructed for store table \"{0}\".", ATableName);
@@ -660,6 +666,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					LColumns.Add("Device_ID");
 					LColumns.Add("Mapped_Object_ID");
 					return new StoreIndexHeader("DAEDeviceObjects", AIndexName, false, LColumns);
+					
+				case "PK_DAEClasses" :
+					LColumns.Add("Name");
+					LColumns.Add("Library_Name");
+					return new StoreIndexHeader("DAEClasses", AIndexName, true, LColumns);
 				
 			}
 
@@ -1740,7 +1751,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				CloseCursor(LCursor);
 			}
 		}
-
+		
 		public void InsertLibraryOwner(string ALibraryName, string AUserID)
 		{
 			InsertRow("DAELibraryOwners", ALibraryName, AUserID);
@@ -1813,6 +1824,33 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		public void DeleteLibraryVersion(string ALibraryName)
 		{
 			DeleteRows("PK_DAELibraryVersions", ALibraryName);
+		}
+
+		public string SelectClassLibrary(string AClassName)
+		{
+			SQLStoreCursor LCursor = OpenMatchedCursor("PK_DAEClasses", false, AClassName);
+			try
+			{
+				if (LCursor.Next())
+					return (string)LCursor[1];
+				return null;
+			}
+			finally
+			{
+				CloseCursor(LCursor);
+			}
+		}
+		
+		public void InsertRegisteredClasses(string ALibraryName, SettingsList ARegisteredClasses)
+		{
+			foreach (SettingsItem LRegisteredClass in ARegisteredClasses.Values)
+				InsertRow("DAEClasses", LRegisteredClass.Name, ALibraryName);
+		}
+		
+		public void DeleteRegisteredClasses(string ALibraryName, SettingsList ARegisteredClasses)
+		{
+			foreach (SettingsItem LRegisteredClass in ARegisteredClasses.Values)
+				DeleteRows("PK_DAEClasses", LRegisteredClass.Name);
 		}
 
 		/// <summary>Returns true if an object of the given name is already present in the database.</summary>

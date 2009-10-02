@@ -16,5 +16,15 @@ namespace Alphora.Dataphor.DAE.Contracts
     {
 		[DataMember]
 		public IsolationLevel[] TransactionList;
+		
+		public static ProcessCallInfo Empty
+		{
+			get
+			{
+				ProcessCallInfo LInfo = new ProcessCallInfo();
+				LInfo.TransactionList = new IsolationLevel[0];
+				return LInfo;
+			}
+		}
     }
 }

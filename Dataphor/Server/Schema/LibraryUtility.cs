@@ -231,7 +231,7 @@ namespace Alphora.Dataphor.DAE.Schema
 						
 						// Unregister each assembly that was loaded with this library
 						foreach (Assembly LAssembly in LLoadedLibrary.Assemblies)
-							AProgram.Catalog.ClassLoader.UnregisterAssembly(LAssembly);
+							AProgram.Catalog.ClassLoader.UnregisterAssembly(LLoadedLibrary, LAssembly);
 
 						// TODO: Unregister assemblies when the .NET framework supports it
 						

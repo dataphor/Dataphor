@@ -21,7 +21,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 	/// this class provides a remotable wrapper that routes Native CLI calls
 	/// to the NativeServer established by the ServerHost.
 	/// </remarks>
-	[ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
+	[ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, IncludeExceptionDetailInFaults = true)]
 	public class NativeCLIService : INativeCLIService
 	{
 		public NativeCLIService(NativeServer ANativeServer)

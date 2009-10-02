@@ -19,6 +19,7 @@ namespace Alphora.Dataphor.DAE.Server
 {
 	// TODO: Exception management
 	//[ExceptionShielding("WCF Exception Shielding")]
+	[ServiceBehavior(IncludeExceptionDetailInFaults = true)]
 	public class ListenerService : IListenerService
 	{
 		private static ServiceHost FListenerHost;

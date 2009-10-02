@@ -468,9 +468,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		internal ProcessCallInfo EmptyCallInfo()
 		{
-			ProcessCallInfo LInfo = new ProcessCallInfo();
-			LInfo.TransactionList = new IsolationLevel[0];
-			return LInfo;
+			return Contracts.ProcessCallInfo.Empty;
 		}
 		
 		public Guid BeginApplicationTransaction(bool AShouldJoin, bool AIsInsert, ProcessCallInfo ACallInfo)

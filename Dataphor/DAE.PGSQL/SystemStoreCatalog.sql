@@ -517,3 +517,19 @@ create table DAEDeviceObjects
 
 create index IDX_DAEDeviceObjects_Device_ID_Mapped_Object_ID on DAEDeviceObjects (Device_ID, Mapped_Object_ID)
 ;
+
+/*
+	Table: DAEClasses
+	
+	Stores the list of classes registered in all loaded libraries.
+*/
+
+create table DAEClasses
+(
+	Name character varying(200) not null,
+	Library_Name character varying(200) not null,
+	constraint PK_DAEClasses primary key (Name)
+	--reference Classes_LoadedLibraries { Library_Name } references LoadedLibraries { Library_Name },
+)
+;
+

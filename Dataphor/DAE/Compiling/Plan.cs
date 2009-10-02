@@ -4,11 +4,14 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
+//#define CHECKCLASSDEPENDENCY // Indicates whether or not class dependencies will be checked
+
 using System;
 using System.Text;
 using System.Threading;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Alphora.Dataphor.DAE.Compiling
 {
@@ -736,9 +739,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 			}
 		}
 		
+		[Conditional("CHECKCLASSDEPENDENCY")]
 		public void CheckClassDependency(Schema.LoadedLibrary ALibrary, ClassDefinition AClassDefinition)
 		{
-			Schema.RegisteredClass LClass = Catalog.ClassLoader.GetClass(AClassDefinition);
+			Schema.RegisteredClass LClass = Catalog.ClassLoader.GetClass(CatalogDeviceSession, AClassDefinition);
 			if (!ALibrary.IsRequiredLibrary(LClass.Library))
 				throw new Schema.SchemaException(Schema.SchemaException.Codes.NonRequiredClassDependency, LClass.Name, ALibrary.Name, LClass.Library.Name); // TODO: Better exception
 		}
@@ -868,5 +872,15 @@ namespace Alphora.Dataphor.DAE.Compiling
 		// Performance Tracking
 		public long Accumulator = 0;
 		#endif
+
+		public Type CreateType(ClassDefinition AClassDefinition)
+		{
+			return Catalog.ClassLoader.CreateType(CatalogDeviceSession, AClassDefinition);
+		}
+		
+		public object CreateObject(ClassDefinition AClassDefinition, object[] AActualParameters)
+		{
+			return Catalog.ClassLoader.CreateObject(CatalogDeviceSession, AClassDefinition, AActualParameters);
+		}
 	}
 }

@@ -483,14 +483,14 @@ namespace Alphora.Dataphor.DAE.Server
 		#endif
 		
 		// ClassLoader
-		object IServerProcess.CreateObject(ClassDefinition AClassDefinition, object[] AArguments)
+		public object CreateObject(ClassDefinition AClassDefinition, object[] AArguments)
 		{
-			return FServerSession.Server.Catalog.ClassLoader.CreateObject(AClassDefinition, AArguments);
+			return FServerSession.Server.Catalog.ClassLoader.CreateObject(CatalogDeviceSession, AClassDefinition, AArguments);
 		}
 		
-		Type IServerProcess.CreateType(ClassDefinition AClassDefinition)
+		public Type CreateType(ClassDefinition AClassDefinition)
 		{
-			return FServerSession.Server.Catalog.ClassLoader.CreateType(AClassDefinition);
+			return FServerSession.Server.Catalog.ClassLoader.CreateType(CatalogDeviceSession, AClassDefinition);
 		}
 		
 		// DeviceSessions		

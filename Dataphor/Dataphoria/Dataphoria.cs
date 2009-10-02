@@ -983,7 +983,7 @@ namespace Alphora.Dataphor.Dataphoria
 			}
 			finally
 			{
-				LCursor.Plan.Close(LCursor);
+				CloseCursor(LCursor);
 			}
 			return LFilter.ToString();
 		}

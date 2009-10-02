@@ -23,7 +23,7 @@ namespace Alphora.Dataphor.DAE.Service
 	// TODO: Exception management
 	//[ExceptionShielding("WCF Exception Shielding")]
 	//[ServiceBehavior(Namespace = "http://Alphora.Dataphor.ServiceContracts/2009/09", Name = "DataphorService")]
-	[ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
+	[ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, IncludeExceptionDetailInFaults = true)]
 	public class DataphorService : IDataphorService
 	{
 		public DataphorService()

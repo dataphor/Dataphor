@@ -1,3 +1,4 @@
+//#define CHECKCLASSDEPENDENCY in Alphora.Dataphor.DAE (currently disabled) // Indicates whether or not class dependencies will be checked
 #define DATAVIEWBOOKMARKS in Alphora.Dataphor.DAE.Client to enable the bookmark capabilities of the DataView
 //#define DISALLOWAMBIGUOUSNAMES in Alphora.Dataphor.DAE (currently disabled) // To prevent the compiler from allowing ambiguous names to be defined
 //#define DISALLOWMANYTOMANYOUTERJOINS in Alphora.Dataphor.DAE (currently disabled) // Disables support for many to many outer joins

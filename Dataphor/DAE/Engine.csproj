@@ -458,6 +458,7 @@
     <Compile Include="Runtime\LockMode.cs" />
     <Compile Include="Runtime\Stack.cs" />
     <Compile Include="Schema\EmissionContext.cs" />
+    <Compile Include="Device.Catalog\ClassLoader.cs" />
     <Compile Include="Server\IServerDTCTransaction.cs" />
     <Compile Include="Server\RemoteSession.cs" />
     <Compile Include="Stack.cs" />

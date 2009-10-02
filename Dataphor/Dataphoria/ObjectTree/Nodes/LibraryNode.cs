@@ -404,7 +404,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 					}
 					finally
 					{
-						LCursor.Close();
+						Dataphoria.CloseCursor(LCursor);
 					}
 					
 					Dataphoria.ExecuteScript(String.Format("RegisterLibrary(\"{0}\");", FLibraryName));
@@ -479,7 +479,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 					}
 					finally
 					{
-						LCursor.Close();
+						Dataphoria.CloseCursor(LCursor);
 					}
 					
 					Dataphoria.ExecuteScript(String.Format("RegisterLibrary('{0}', false);", FLibraryName));

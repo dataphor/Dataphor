@@ -27,6 +27,7 @@ namespace Alphora.Dataphor.DAE.Server
 	using Alphora.Dataphor.DAE.Streams;
 	using Schema = Alphora.Dataphor.DAE.Schema;
 	using Alphora.Dataphor.Windows;
+	using Alphora.Dataphor.BOP;
 
 	public class Server : Engine
 	{
@@ -62,6 +63,9 @@ namespace Alphora.Dataphor.DAE.Server
 
 		public override void ClearCatalog()
 		{
+			// Detach the class loader events
+			Catalog.ClassLoader.OnMiss -= new ClassLoaderMissedEvent(ClassLoaderMiss);
+			
 			base.ClearCatalog();
 			EnsureGeneralLibraryLoaded();
 		}
@@ -809,6 +813,9 @@ namespace Alphora.Dataphor.DAE.Server
 
 		protected override void InternalInitializeCatalog()
 		{
+			// Wire up the class loader events
+			Catalog.ClassLoader.OnMiss += new ClassLoaderMissedEvent(ClassLoaderMiss);
+			
 			if (FFirstRun)
 				base.InternalInitializeCatalog();
 			else
@@ -819,6 +826,12 @@ namespace Alphora.Dataphor.DAE.Server
 			    // resolve the system data types
 			    ResolveSystemDataTypes();
 			}
+		}
+
+		private void ClassLoaderMiss(ClassLoader AClassLoader, CatalogDeviceSession ASession, ClassDefinition AClassDefinition)
+		{
+			// Ensure that the library containing the class is loaded.
+			((ServerCatalogDeviceSession)ASession).LoadLibraryForClass(AClassDefinition);
 		}
 		
 		private void ResolveCoreSystemObjects()

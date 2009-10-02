@@ -219,7 +219,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public void Close()
 		{
-			throw new NotImplementedException();
+			ClientExpressionPlan.Close(this, ProcessCallInfo.Empty);
 		}
 
 		public bool Active
