@@ -371,7 +371,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                     );
             var LConnectionStringBuilder =
                 (ConnectionStringBuilder)
-                ServerProcess.Catalog.ClassLoader.CreateObject(LBuilderClass, new object[] {});
+                ServerProcess.CreateObject(LBuilderClass, new object[] {});
 
             var LTags = new Tags();
             LTags.AddOrUpdate("HostName", Device.HostName);
@@ -384,7 +384,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
             return
                 (SQLConnection)
-                ServerProcess.Catalog.ClassLoader.CreateObject(LClassDefinition, new object[] {LConnectionString});
+                ServerProcess.CreateObject(LClassDefinition, new object[] {LConnectionString});
         }
     }
 }

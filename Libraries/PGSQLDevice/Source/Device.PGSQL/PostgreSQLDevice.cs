@@ -531,7 +531,7 @@ if not exists (select * from pg_database where datname = '{0}')
 			var LBuilderClassDefinition =new ClassDefinition(LConnectionStringBuilderClassName);
 
             var LConnectionStringBuilder =
-                (ConnectionStringBuilder)ServerProcess.Catalog.ClassLoader.CreateObject
+                (ConnectionStringBuilder)ServerProcess.CreateObject
                 (
                     LBuilderClassDefinition,
                     new object[] { }
@@ -553,7 +553,7 @@ if not exists (select * from pg_database where datname = '{0}')
             Device.GetConnectionParameters(LTags, DeviceSessionInfo);
             string LConnectionString = SQLDevice.TagsToString(LTags);
             return
-                (SQLConnection)ServerProcess.Catalog.ClassLoader.CreateObject
+                (SQLConnection)ServerProcess.CreateObject
                 (
                     LClassDefinition,
                     new object[] { LConnectionString }

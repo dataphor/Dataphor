@@ -254,7 +254,7 @@ namespace Alphora.Dataphor.DAE.Device.Linter
 						"LinterDevice.LinterODBCConnectionStringBuilder" :
 						Device.ConnectionStringBuilderClass
 				);
-			ConnectionStringBuilder LConnectionStringBuilder = (ConnectionStringBuilder)ServerProcess.Catalog.ClassLoader.CreateObject(LBuilderClass, new object[]{});
+			ConnectionStringBuilder LConnectionStringBuilder = (ConnectionStringBuilder)ServerProcess.CreateObject(LBuilderClass, new object[]{});
 
 			D4.Tags LTags = new D4.Tags();
 			LTags.AddOrUpdate("DataSource", Device.DataSource);
@@ -265,7 +265,7 @@ namespace Alphora.Dataphor.DAE.Device.Linter
 			Device.GetConnectionParameters(LTags, DeviceSessionInfo);
 			string LConnectionString = SQLDevice.TagsToString(LTags);
 				
-			return (SQLConnection)ServerProcess.Catalog.ClassLoader.CreateObject(LClassDefinition, new object[]{LConnectionString});
+			return (SQLConnection)ServerProcess.CreateObject(LClassDefinition, new object[]{LConnectionString});
 		}
 	}
 

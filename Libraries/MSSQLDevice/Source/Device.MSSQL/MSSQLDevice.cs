@@ -693,7 +693,7 @@ if not exists (select * from sysdatabases where name = '{0}')
                     );
 
             var LConnectionStringBuilder = 
-				(ConnectionStringBuilder)ServerProcess.Catalog.ClassLoader.CreateObject
+				(ConnectionStringBuilder)ServerProcess.CreateObject
 				(
 					LBuilderClass, 
 					new object[] {}
@@ -715,7 +715,7 @@ if not exists (select * from sysdatabases where name = '{0}')
             Device.GetConnectionParameters(LTags, DeviceSessionInfo);
             string LConnectionString = SQLDevice.TagsToString(LTags);
             return
-                (SQLConnection)ServerProcess.Catalog.ClassLoader.CreateObject
+                (SQLConnection)ServerProcess.CreateObject
                 (
 					LClassDefinition, 
 					new object[] { LConnectionString }

@@ -292,7 +292,7 @@ order by libname, memname, indxname, indxpos
 						"SASDevice.SASOLEDBConnectionStringBuilder" :
 						Device.ConnectionStringBuilderClass
 				);
-			ConnectionStringBuilder LConnectionStringBuilder = (ConnectionStringBuilder)ServerProcess.Catalog.ClassLoader.CreateObject(LBuilderClass, new object[]{});
+			ConnectionStringBuilder LConnectionStringBuilder = (ConnectionStringBuilder)ServerProcess.CreateObject(LBuilderClass, new object[]{});
 				
 			D4.Tags LTags = new D4.Tags();
 			LTags.AddOrUpdate("ServerID", Device.ServerID);
@@ -304,7 +304,7 @@ order by libname, memname, indxname, indxpos
 			Device.GetConnectionParameters(LTags, DeviceSessionInfo);
 			string LConnectionString = SQLDevice.TagsToString(LTags);
 
-			SQLConnection LConnection = (SQLConnection)ServerProcess.Catalog.ClassLoader.CreateObject(LClassDefinition, new object[]{LConnectionString});
+			SQLConnection LConnection = (SQLConnection)ServerProcess.CreateObject(LClassDefinition, new object[]{LConnectionString});
 			LConnection.DefaultUseParametersForCursors = false;
 			return LConnection;
 		}

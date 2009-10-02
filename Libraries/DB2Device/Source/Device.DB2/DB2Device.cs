@@ -414,7 +414,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 						//"DB2Device.DB2ODBCConnectionStringBuilder" :
 						Device.ConnectionStringBuilderClass
 				);
-			ConnectionStringBuilder LConnectionStringBuilder = (ConnectionStringBuilder)ServerProcess.Catalog.ClassLoader.CreateObject(LBuilderClass, new object[]{});
+			ConnectionStringBuilder LConnectionStringBuilder = (ConnectionStringBuilder)ServerProcess.CreateObject(LBuilderClass, new object[]{});
 
 			D4.Tags LTags = new D4.Tags();
 			LTags.AddOrUpdate("DataSource", Device.DataSource);
@@ -427,7 +427,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			Device.GetConnectionParameters(LTags, DeviceSessionInfo);
 			string LConnectionString = SQLDevice.TagsToString(LTags);
 				
-			return (SQLConnection)ServerProcess.Catalog.ClassLoader.CreateObject(LClassDefinition, new object[]{LConnectionString});
+			return (SQLConnection)ServerProcess.CreateObject(LClassDefinition, new object[]{LConnectionString});
 		}
 		
 		protected override void InternalVerifyInsertStatement(TableVar ATable, Row ARow, InsertStatement AStatement) 

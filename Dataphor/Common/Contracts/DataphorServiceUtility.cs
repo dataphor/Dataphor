@@ -31,8 +31,8 @@ namespace Alphora.Dataphor.DAE.Contracts
 
 		public static Binding GetBinding()
 		{
-			return new BasicHttpBinding();
-			//return new CustomBinding(new BinaryMessageEncodingBindingElement(), new HttpTransportBindingElement());
+			//return new BasicHttpBinding();
+			return new CustomBinding(new BinaryMessageEncodingBindingElement(), new HttpTransportBindingElement());
 		}
 	}
 }
