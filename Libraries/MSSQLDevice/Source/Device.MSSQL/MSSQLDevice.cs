@@ -52,7 +52,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
     public class MSSQLDevice : SQLDevice
     {
-        public const string CMSSQLBinaryScalarType = "MSSQLDevice.MSSQLBinary";
+        public const string CMSSQLBinaryScalarType = "SQLDevice.MSSQLBinary";
 
         public static string CEnsureDatabase =
             @"

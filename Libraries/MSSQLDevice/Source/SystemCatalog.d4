@@ -200,10 +200,10 @@ begin
 		create type System.Graphic class "MSSQLDevice.MSSQLGraphic" static tags {{ DAE.IsSystem = "true" }},
 		create operator System.Graphic(System.String) class "SQLDevice.SQLScalarSelector" static tags {{ DAE.IsSystem = "true" }}, 
 		 
-		create type MSSQLDevice.MSSQLBinary class "MSSQLDevice.MSSQLMSSQLBinary" static tags {{ DAE.IsSystem = "true" }}, 
-		create operator MSSQLDevice.MSSQLBinary.AsBinary(System.Binary) class "SQLDevice.SQLScalarSelector" static tags {{ DAE.IsSystem = "true" }}, 
-		create operator MSSQLDevice.MSSQLBinary.ReadAsBinary(MSSQLDevice.MSSQLBinary) class "SQLDevice.SQLScalarReadAccessor" static tags {{ DAE.IsSystem = "true" }}, 
-		create operator MSSQLDevice.MSSQLBinary.WriteAsBinary(MSSQLDevice.MSSQLBinary, System.Binary) class "SQLDevice.SQLScalarWriteAccessor" static tags {{ DAE.IsSystem = "true" }}, 
+		create type SQLDevice.MSSQLBinary class "MSSQLDevice.MSSQLMSSQLBinary" static tags {{ DAE.IsSystem = "true" }}, 
+		create operator SQLDevice.MSSQLBinary.AsBinary(System.Binary) class "SQLDevice.SQLScalarSelector" static tags {{ DAE.IsSystem = "true" }}, 
+		create operator SQLDevice.MSSQLBinary.ReadAsBinary(SQLDevice.MSSQLBinary) class "SQLDevice.SQLScalarReadAccessor" static tags {{ DAE.IsSystem = "true" }}, 
+		create operator SQLDevice.MSSQLBinary.WriteAsBinary(SQLDevice.MSSQLBinary, System.Binary) class "SQLDevice.SQLScalarWriteAccessor" static tags {{ DAE.IsSystem = "true" }}, 
 
 		create type System.Guid class "MSSQLDevice.MSSQLGuid" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.Guid(System.String) class "SQLDevice.SQLScalarSelector" static tags {{ DAE.IsSystem = "true" }}, 
@@ -232,7 +232,7 @@ begin
 		create operator System.IsSpecial(System.Name) class "SQLDevice.SQLScalarIsSpecialOperator" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.IsSpecial(System.Time) class "SQLDevice.SQLScalarIsSpecialOperator" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.IsSpecial(System.UserID) class "SQLDevice.SQLScalarIsSpecialOperator" static tags {{ DAE.IsSystem = "true" }}, 
-		create operator MSSQLDevice.IsSpecial(MSSQLDevice.MSSQLBinary) class "SQLDevice.SQLScalarIsSpecialOperator" static tags {{ DAE.IsSystem = "true" }}, 
+		create operator SQLDevice.IsSpecial(SQLDevice.MSSQLBinary) class "SQLDevice.SQLScalarIsSpecialOperator" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.IsSpecial(System.VersionNumber) class "SQLDevice.SQLVersionNumberIsUndefinedOperator" static tags {{ DAE.IsSystem = "true" }},
 
 		create operator System.ToBoolean(System.Integer) class "MSSQLDevice.MSSQLToBit" static tags {{ DAE.IsSystem = "true" }}, 
@@ -287,7 +287,7 @@ begin
 		create operator System.iCompare(System.Short, System.Short) class "SQLDevice.SQLCompare" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iCompare(System.Integer, System.Integer) class "SQLDevice.SQLCompare" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iCompare(System.VersionNumber, System.VersionNumber) class "SQLDevice.SQLCompare" static tags {{ DAE.IsSystem = "true" }},
-		create operator MSSQLDevice.iCompare(MSSQLDevice.MSSQLBinary, MSSQLDevice.MSSQLBinary) class "SQLDevice.SQLCompare" static tags {{ DAE.IsSystem = "true" }}, 
+		create operator SQLDevice.iCompare(SQLDevice.MSSQLBinary, SQLDevice.MSSQLBinary) class "SQLDevice.SQLCompare" static tags {{ DAE.IsSystem = "true" }}, 
 
 		create operator System.Max(System.Byte, System.Byte) static tags {{ DAE.IsSystem = "true", Storage.TranslationString = "case when {{0}} is null then {{1}} when {{1}} is null then {{0}} when {{0}} > {{1}} then {{0}} else {{1}} end" }}, 
 		create operator System.Max(System.Short, System.Short) static tags {{ DAE.IsSystem = "true", Storage.TranslationString = "case when {{0}} is null then {{1}} when {{1}} is null then {{0}} when {{0}} > {{1}} then {{0}} else {{1}} end" }}, 
@@ -328,7 +328,7 @@ begin
         create operator System.iEqual(System.Name, System.Name) class "SQLDevice.SQLEqual" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iEqual(System.UserID, System.UserID) class "SQLDevice.SQLEqual" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iEqual(System.VersionNumber, System.VersionNumber) class "SQLDevice.SQLEqual" static tags {{ DAE.IsSystem = "true" }}, 
-		create operator MSSQLDevice.iEqual(MSSQLDevice.MSSQLBinary, MSSQLDevice.MSSQLBinary) class "SQLDevice.SQLEqual" static tags {{ DAE.IsSystem = "true" }},
+		create operator SQLDevice.iEqual(SQLDevice.MSSQLBinary, SQLDevice.MSSQLBinary) class "SQLDevice.SQLEqual" static tags {{ DAE.IsSystem = "true" }},
 
 		create operator System.iNotEqual(System.Long, System.Long) class "SQLDevice.SQLNotEqual" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iNotEqual(System.Byte, System.Byte) class "SQLDevice.SQLNotEqual" static tags {{ DAE.IsSystem = "true" }}, 
@@ -344,7 +344,7 @@ begin
 		create operator System.iNotEqual(System.Money, System.Money) class "SQLDevice.SQLNotEqual" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iNotEqual(System.Name, System.Name) class "SQLDevice.SQLNotEqual" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iNotEqual(System.VersionNumber, System.VersionNumber) class "SQLDevice.SQLNotEqual" static tags {{ DAE.IsSystem = "true" }}, 
-		create operator MSSQLDevice.iNotEqual(MSSQLDevice.MSSQLBinary, MSSQLDevice.MSSQLBinary) class "SQLDevice.SQLNotEqual" static tags {{ DAE.IsSystem = "true" }},
+		create operator SQLDevice.iNotEqual(SQLDevice.MSSQLBinary, SQLDevice.MSSQLBinary) class "SQLDevice.SQLNotEqual" static tags {{ DAE.IsSystem = "true" }},
 		
 		create operator System.iLess(System.Integer, System.Integer) class "SQLDevice.SQLLess" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iLess(System.Long, System.Long) class "SQLDevice.SQLLess" static tags {{ DAE.IsSystem = "true" }}, 
@@ -360,7 +360,7 @@ begin
 		create operator System.iLess(System.Byte, System.Byte) class "SQLDevice.SQLLess" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iLess(System.Name, System.Name) class "SQLDevice.SQLLess" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iLess(System.VersionNumber, System.VersionNumber) class "SQLDevice.SQLLess" static tags {{ DAE.IsSystem = "true" }}, 
-		create operator MSSQLDevice.iLess(MSSQLDevice.MSSQLBinary, MSSQLDevice.MSSQLBinary) class "SQLDevice.SQLLess" static tags {{ DAE.IsSystem = "true" }},
+		create operator SQLDevice.iLess(SQLDevice.MSSQLBinary, SQLDevice.MSSQLBinary) class "SQLDevice.SQLLess" static tags {{ DAE.IsSystem = "true" }},
 		
 		create operator System.iInclusiveLess(System.Decimal, System.Decimal) class "SQLDevice.SQLInclusiveLess" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iInclusiveLess(System.Byte, System.Byte) class "SQLDevice.SQLInclusiveLess" static tags {{ DAE.IsSystem = "true" }}, 
@@ -376,7 +376,7 @@ begin
 		create operator System.iInclusiveLess(System.Name, System.Name) class "SQLDevice.SQLInclusiveLess" static tags {{ DAE.IsSystem = "true" }},
 		create operator System.iInclusiveLess(System.Integer, System.Integer) class "SQLDevice.SQLInclusiveLess" static tags {{ DAE.IsSystem = "true" }},
 		create operator System.iInclusiveLess(System.VersionNumber, System.VersionNumber) class "SQLDevice.SQLInclusiveLess" static tags {{ DAE.IsSystem = "true" }},
-		create operator MSSQLDevice.iInclusiveLess(MSSQLDevice.MSSQLBinary, MSSQLDevice.MSSQLBinary) class "SQLDevice.SQLInclusiveLess" static tags {{ DAE.IsSystem = "true" }},
+		create operator SQLDevice.iInclusiveLess(SQLDevice.MSSQLBinary, SQLDevice.MSSQLBinary) class "SQLDevice.SQLInclusiveLess" static tags {{ DAE.IsSystem = "true" }},
 		
 		create operator System.iInclusiveGreater(System.Short, System.Short) class "SQLDevice.SQLInclusiveGreater" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iInclusiveGreater(System.Byte, System.Byte) class "SQLDevice.SQLInclusiveGreater" static tags {{ DAE.IsSystem = "true" }}, 
@@ -392,7 +392,7 @@ begin
 		create operator System.iInclusiveGreater(System.Guid, System.Guid) class "SQLDevice.SQLInclusiveGreater" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iInclusiveGreater(System.Name, System.Name) class "SQLDevice.SQLInclusiveGreater" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iInclusiveGreater(System.VersionNumber, System.VersionNumber) class "SQLDevice.SQLInclusiveGreater" static tags {{ DAE.IsSystem = "true" }}, 
-		create operator MSSQLDevice.iInclusiveGreater(MSSQLDevice.MSSQLBinary, MSSQLDevice.MSSQLBinary) class "SQLDevice.SQLInclusiveGreater" static tags {{ DAE.IsSystem = "true" }},
+		create operator SQLDevice.iInclusiveGreater(SQLDevice.MSSQLBinary, SQLDevice.MSSQLBinary) class "SQLDevice.SQLInclusiveGreater" static tags {{ DAE.IsSystem = "true" }},
 		
 		create operator System.iGreater(System.Byte, System.Byte) class "SQLDevice.SQLGreater" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iGreater(System.TimeSpan, System.TimeSpan) class "SQLDevice.SQLGreater" static tags {{ DAE.IsSystem = "true" }}, 
@@ -408,7 +408,7 @@ begin
 		create operator System.iGreater(System.Short, System.Short) class "SQLDevice.SQLGreater" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iGreater(System.Name, System.Name) class "SQLDevice.SQLGreater" static tags {{ DAE.IsSystem = "true" }}, 
       	create operator System.iGreater(System.VersionNumber, System.VersionNumber) class "SQLDevice.SQLGreater" static tags {{ DAE.IsSystem = "true" }}, 
-		create operator MSSQLDevice.iGreater(MSSQLDevice.MSSQLBinary, MSSQLDevice.MSSQLBinary) class "SQLDevice.SQLGreater" static tags {{ DAE.IsSystem = "true" }},
+		create operator SQLDevice.iGreater(SQLDevice.MSSQLBinary, SQLDevice.MSSQLBinary) class "SQLDevice.SQLGreater" static tags {{ DAE.IsSystem = "true" }},
 
 		create operator System.iNegate(System.Short) class "SQLDevice.SQLNegate" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iNegate(System.Long) class "SQLDevice.SQLNegate" static tags {{ DAE.IsSystem = "true" }}, 

@@ -3,21 +3,3 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
-create type MSSQLBinary like System.Binary tags { Frontend.Grid.ElementType = "TextColumn" };
-
-create operator iCompare(const ALeftValue : MSSQLBinary, const ARightValue : MSSQLBinary) : Integer class "MSSQLDevice.MSSQLMSSQLBinaryCompareNode" static tags { DAE.IsBuiltin = "true" };
-//create operator iEqual(const ALeftValue : MSSQLBinary, const ARightValue : MSSQLBinary) : Boolean class "MSSQLDevice.MSSQLMSSQLBinaryEqualNode" static tags { DAE.IsBuiltin = "true" };
-create operator iNotEqual(const ALeftValue : MSSQLBinary, const ARightValue : MSSQLBinary) : Boolean class "MSSQLDevice.MSSQLMSSQLBinaryNotEqualNode" static tags { DAE.IsBuiltin = "true" };
-create operator iLess(const ALeftValue : MSSQLBinary, const ARightValue : MSSQLBinary) : Boolean class "MSSQLDevice.MSSQLMSSQLBinaryLessNode" static tags { DAE.IsBuiltin = "true" };
-create operator iInclusiveLess(const ALeftValue : MSSQLBinary, const ARightValue : MSSQLBinary) : Boolean class "MSSQLDevice.MSSQLMSSQLBinaryInclusiveLessNode" static tags { DAE.IsBuiltin = "true" };
-create operator iInclusiveGreater(const ALeftValue : MSSQLBinary, const ARightValue : MSSQLBinary) : Boolean class "MSSQLDevice.MSSQLMSSQLBinaryInclusiveGreaterNode" static tags { DAE.IsBuiltin = "true" };
-create operator iGreater(const ALeftValue : MSSQLBinary, const ARightValue : MSSQLBinary) : Boolean class "MSSQLDevice.MSSQLMSSQLBinaryGreaterNode" static tags { DAE.IsBuiltin = "true" };
-
-grant usage on MSSQLBinary to role User;
-grant usage on iCompare(MSSQLBinary, MSSQLBinary) to role User;
-//grant usage on iEqual(MSSQLBinary, MSSQLBinary) to role User;
-grant usage on iNotEqual(MSSQLBinary, MSSQLBinary) to role User;
-grant usage on iLess(MSSQLBinary, MSSQLBinary) to role User;
-grant usage on iInclusiveLess(MSSQLBinary, MSSQLBinary) to role User;
-grant usage on iInclusiveGreater(MSSQLBinary, MSSQLBinary) to role User;
-grant usage on iGreater(MSSQLBinary, MSSQLBinary) to role User;
