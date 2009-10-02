@@ -157,68 +157,74 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			{
 				// Clean up the old frame if there is one
 				if (FFrameInterfaceNode != null)
-				{
-					// Optionally post the data changes
-					if (FPostBeforeClosingEmbedded)
-						FFrameInterfaceNode.PostChanges();
-
-					// Invoke the before close embedded handler
-					if (FBeforeCloseEmbedded != null)
-						FBeforeCloseEmbedded.Execute(this, new EventParams("AInterface", FFrameInterfaceNode));
-					
-					try
-					{
-						FFrameInterfaceNode.HostNode.BroadcastEvent(new DisableSourceEvent());
-						if (FSourceLink != null)
-							FSourceLink.TargetSource = null;
-					}
-					finally
-					{
-						try
-						{
-							FFrameInterfaceNode.HostNode.Dispose();
-						}
-						finally
-						{
-							FFrameInterfaceNode = null;
-							RemoveMenu();
-						}
-					}
-				}
+					EnsureFrameInterfaceClosed();
 				if (ABuild && (FDocument != String.Empty))
-				{
-					IHost LHost = HostNode.Session.CreateHost();
-					try
-					{
-						FFrameInterfaceNode = new FrameInterface(this);
-						try
-						{
-							LHost.Load(FDocument, FFrameInterfaceNode);
-							if (FSourceLink != null)
-								FSourceLink.TargetSource = FFrameInterfaceNode.MainSource;
-							LHost.Open(!Active);
-							if (Active)
-								BroadcastEvent(new FormShownEvent());
-						}
-						catch
-						{
-							FFrameInterfaceNode.Dispose();
-							FFrameInterfaceNode = null;
-							throw;
-						}
-					}
-					catch
-					{
-						LHost.Dispose();
-						throw;
-					}
-				}
+					LoadFrameInterface();
 			}
 			finally
 			{
 				if (Active)
 					UpdateLayout();
 				EndUpdate(Active);
+			}
+		}
+
+		private void LoadFrameInterface()
+		{
+			IHost LHost = HostNode.Session.CreateHost();
+			try
+			{
+				FFrameInterfaceNode = new FrameInterface(this);
+				try
+				{
+					LHost.Load(FDocument, FFrameInterfaceNode);
+					if (FSourceLink != null)
+						FSourceLink.TargetSource = FFrameInterfaceNode.MainSource;
+					LHost.Open(!Active);
+					if (Active)
+						BroadcastEvent(new FormShownEvent());
+				}
+				catch
+				{
+					FFrameInterfaceNode.Dispose();
+					FFrameInterfaceNode = null;
+					throw;
+				}
+			}
+			catch
+			{
+				LHost.Dispose();
+				throw;
+			}
+		}
+
+		private void EnsureFrameInterfaceClosed()
+		{
+			// Optionally post the data changes
+			if (FPostBeforeClosingEmbedded)
+				FFrameInterfaceNode.PostChanges();
+
+			// Invoke the before close embedded handler
+			if (FBeforeCloseEmbedded != null)
+				FBeforeCloseEmbedded.Execute(this, new EventParams("AInterface", FFrameInterfaceNode));
+
+			try
+			{
+				FFrameInterfaceNode.HostNode.BroadcastEvent(new DisableSourceEvent());
+				if (FSourceLink != null)
+					FSourceLink.TargetSource = null;
+			}
+			finally
+			{
+				try
+				{
+					FFrameInterfaceNode.HostNode.Dispose();
+				}
+				finally
+				{
+					FFrameInterfaceNode = null;
+					RemoveMenu();
+				}
 			}
 		}
 

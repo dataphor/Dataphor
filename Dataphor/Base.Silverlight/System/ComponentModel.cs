@@ -97,4 +97,9 @@ namespace System.ComponentModel
 	{
 		public DefaultEventAttribute(string A) { }
 	}
+	
+	public class DesignerCategoryAttribute : Attribute
+	{
+		public DesignerCategoryAttribute(string A) { }
+	}
 }

@@ -9,7 +9,6 @@ using System.Reflection;
 
 namespace Alphora.Dataphor.Frontend.Client
 {
-	[Serializable]
 	public class ClientException : DataphorException
 	{
 		public enum Codes : int
@@ -128,6 +127,5 @@ namespace Alphora.Dataphor.Frontend.Client
 		public ClientException(Codes AErrorCode, ErrorSeverity ASeverity, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, null, AParams) {}
 		public ClientException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, null) {}
 		public ClientException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, AParams) {}
-		public ClientException(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext) : base(AInfo, AContext) {}
 	}
 }

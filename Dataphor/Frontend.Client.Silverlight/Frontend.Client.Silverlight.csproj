@@ -60,8 +60,81 @@
     <Reference Include="System.Windows.Controls.Navigation, Version=2.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Windows.Browser" />
+    <Reference Include="System.Xml.Linq, Version=2.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Frontend.Client\Action.cs">
+      <Link>Frontend.Client\Action.cs</Link>
+    </Compile>
+    <Compile Include="..\Frontend.Client\ActionInterfaces.cs">
+      <Link>Frontend.Client\ActionInterfaces.cs</Link>
+    </Compile>
+    <Compile Include="..\Frontend.Client\ActionNode.cs">
+      <Link>Frontend.Client\ActionNode.cs</Link>
+    </Compile>
+    <Compile Include="..\Frontend.Client\ClientException.cs">
+      <Link>Frontend.Client\ClientException.cs</Link>
+    </Compile>
+    <Compile Include="..\Frontend.Client\Data.cs">
+      <Link>Frontend.Client\Data.cs</Link>
+    </Compile>
+    <Compile Include="..\Frontend.Client\DataAction.cs">
+      <Link>Frontend.Client\DataAction.cs</Link>
+    </Compile>
+    <Compile Include="..\Frontend.Client\DataInterfaces.cs">
+      <Link>Frontend.Client\DataInterfaces.cs</Link>
+    </Compile>
+    <Compile Include="..\Frontend.Client\DesignerAttributes.cs">
+      <Link>Frontend.Client\DesignerAttributes.cs</Link>
+    </Compile>
+    <Compile Include="..\Frontend.Client\ElementInterfaces.cs">
+      <Link>Frontend.Client\ElementInterfaces.cs</Link>
+    </Compile>
+    <Compile Include="..\Frontend.Client\FormAction.cs">
+      <Link>Frontend.Client\FormAction.cs</Link>
+    </Compile>
+    <Compile Include="..\Frontend.Client\Host.cs">
+      <Link>Frontend.Client\Host.cs</Link>
+    </Compile>
+    <Compile Include="..\Frontend.Client\IdentifierIndex.cs">
+      <Link>Frontend.Client\IdentifierIndex.cs</Link>
+    </Compile>
+    <Compile Include="..\Frontend.Client\IDocumentCache.cs">
+      <Link>Frontend.Client\IDocumentCache.cs</Link>
+    </Compile>
+    <Compile Include="..\Frontend.Client\Interfaces.cs">
+      <Link>Frontend.Client\Interfaces.cs</Link>
+    </Compile>
+    <Compile Include="..\Frontend.Client\LookupAction.cs">
+      <Link>Frontend.Client\LookupAction.cs</Link>
+    </Compile>
+    <Compile Include="..\Frontend.Client\LookupUtility.cs">
+      <Link>Frontend.Client\LookupUtility.cs</Link>
+    </Compile>
+    <Compile Include="..\Frontend.Client\Module.cs">
+      <Link>Frontend.Client\Module.cs</Link>
+    </Compile>
+    <Compile Include="..\Frontend.Client\Node.cs">
+      <Link>Frontend.Client\Node.cs</Link>
+    </Compile>
+    <Compile Include="..\Frontend.Client\Pipe.cs">
+      <Link>Frontend.Client\Pipe.cs</Link>
+    </Compile>
+    <Compile Include="..\Frontend.Client\Serializer.cs">
+      <Link>Frontend.Client\Serializer.cs</Link>
+    </Compile>
+    <Compile Include="..\Frontend.Client\Session.cs">
+      <Link>Frontend.Client\Session.cs</Link>
+    </Compile>
+    <Compile Include="..\Frontend.Client\SetPropertyAction.cs">
+      <Link>Frontend.Client\SetPropertyAction.cs</Link>
+    </Compile>
+    <Compile Include="..\Frontend.Client\Strings.Designer.cs">
+      <Link>Frontend.Client\Strings.Designer.cs</Link>
+    </Compile>
+    <Compile Include="..\Frontend.Client\Utility.cs">
+      <Link>Frontend.Client\Utility.cs</Link>
+    </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
@@ -77,6 +150,9 @@
     <Compile Include="ConnectLogin.xaml.cs">
       <DependentUpon>ConnectLogin.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Frontend.Client\Action.Image.cs" />
+    <Compile Include="Frontend.Client\ImageUtility.cs" />
+    <Compile Include="Frontend.Client\Timer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -109,6 +185,18 @@
       <Project>{B190A64D-B46B-4C63-A217-1ABD2C97021A}</Project>
       <Name>SilverlightDAE</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\Frontend.Client\ClientException.resx">
+      <Link>Frontend.Client\ClientException.resx</Link>
+      <DependentUpon>ClientException.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\Frontend.Client\Strings.resx">
+      <Link>Frontend.Client\Strings.resx</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Frontend.Client\Images\ImageError.png" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\v3.0\Microsoft.Silverlight.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

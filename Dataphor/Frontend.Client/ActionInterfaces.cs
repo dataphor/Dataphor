@@ -13,9 +13,6 @@ namespace Alphora.Dataphor.Frontend.Client
 	/// <summary> Base abstract node from which all actions descend. </summary>
 	public interface IAction : INode, IEnableable
 	{
-		/// <summary> The image that was loaded from the server. </summary>
-		System.Drawing.Image LoadedImage { get; }
-
 		/// <summary> Called when the action text property changes. </summary>
 		event EventHandler OnTextChanged;
 

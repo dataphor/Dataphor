@@ -302,6 +302,55 @@ namespace Alphora.Dataphor.Frontend.Client
 		SourceLink SourceLink { get; }
 	}
 
+	/// <summary> A Timer executes an action at regular intervals. </summary> <doc/>
+	/// <example> An example can be seen in the Sample.Components library
+	/// in the Sample10 [dfd] document.</example>
+	public interface ITimer : INode
+	{
+		/// <summary>Indicates whether the timer will run continuously, 
+		/// or only once.</summary> <doc/>
+		/// <value><para>Boolean: True|False</para>
+		/// <para>Default: True</para></value>
+		/// <remarks>
+		/// Setting this property to true will cause the timer to reset 
+		/// after each call to OnElapsed, meaning the event will be raised 
+		/// again after Interval milliseconds.  If this property is set to
+		/// false, the event will be raised only once, and the timer will stop.
+		/// </remarks>
+		bool AutoReset { get; set; }
+		
+		/// <summary>Indicates whether the timer is running.</summary> <doc/>
+		/// <value><para>Boolean: True|False</para>
+		/// <para>Default: False</para></value>
+		/// <remarks>
+		///	Setting this property to true will start the timer, setting 
+		///	it to false will stop it.  If the timer is already enabled, 
+		///	setting enabled to true will reset the interval.
+		/// </remarks>
+		bool Enabled { get; set; }
+		
+		/// <summary>The interval, in milliseconds between each OnElapsed 
+		/// call.</summary> <doc/>
+		/// <value><para>Double</para>
+		/// <para>Default: 100</para></value>
+		/// <remarks>Setting the interval when the timer is enabled has 
+		/// the effect of resetting the interval count.</remarks>
+		int Interval { get; set; }
+		
+		/// <summary>The action to bo executed when the timer elapses.</summary> <doc/>
+		/// <value><para>IAction: An action in the same node tree.</para>
+		/// <para>Default: (None)</para></value>
+		IAction OnElapsed { get; set; }
+
+		/// <summary>Starts the timer by setting enabled to true.</summary> <doc/>		
+		/// <remarks>Note that if the timer is already started, calling 
+		/// Start() will reset the interval.</remarks>
+		void Start();
+		
+		/// <summary>Stops the timer by setting enabled to false.</summary> <doc/>
+		void Stop();
+	}
+	
 	/**************  Interfaces  **************/
 
 	/// <summary> Hosts all other nodes. </summary>
@@ -506,6 +555,12 @@ namespace Alphora.Dataphor.Frontend.Client
 		IAction Action { get; set; }
 	}
 	
+	/// <summary> Used by MemberNameConverter to determine the referenced node. </summary>
+	public interface INodeReference
+	{ 
+		INode Node { get; } 
+	}
+
 	/**************  Enumerations, Delegates, Structs/Classes **************/
 
 	/// <summary> A request object used by IHost.NextRequest. </summary>

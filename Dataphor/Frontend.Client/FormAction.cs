@@ -5,7 +5,6 @@
 */
 
 using System;
-using System.Web;
 using System.ComponentModel;
 using System.Collections.Specialized;
 
@@ -209,7 +208,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// OnFormClose
 
 		protected IAction FOnFormClose;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action to execute after the form has been closed.")]
 		public IAction OnFormClose
 		{
@@ -232,7 +231,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// OnFormAccepted
 
 		protected IAction FOnFormAccepted;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action to execute when the form is accepted.  Only called for forms that are shown modally.")]
 		public IAction OnFormAccepted
 		{
@@ -255,7 +254,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// OnFormRejected
 
 		protected IAction FOnFormRejected;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action to execute when the form is rejected.  Only called for forms that are shown modally.")]
 		public IAction OnFormRejected
 		{
@@ -278,7 +277,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// BeforeFormActivated
 
 		protected IAction FBeforeFormActivated;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action to execute after the form is created, but before it is activated.")]
 		public IAction BeforeFormActivated
 		{
@@ -301,7 +300,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// AfterFormActivated
 
 		protected IAction FAfterFormActivated;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action to execute after the form is activated, but before it is shown.")]
 		public IAction AfterFormActivated
 		{
@@ -326,7 +325,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		private string FDocument = String.Empty;
 		[Description("A Document expression returning a form interface to be shown.")]
 		[DefaultValue("")]
-		[Editor("Alphora.Dataphor.Dataphoria.DocumentExpressionUIEditor,Dataphoria", typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.Dataphoria.DocumentExpressionUIEditor,Dataphoria", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DocumentExpressionOperator("Form")]
 		public string Document
 		{
@@ -346,7 +345,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		private string FFilter = String.Empty;
 		[DefaultValue("")]
 		[Description("Filter to apply to the main source of the target form.")]
-		[Editor(typeof(Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor), typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string Filter
 		{
@@ -725,7 +724,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		private string FDocument = String.Empty;
 		[DefaultValue("")]
 		[Description("The Document of the next user interface document to be loaded.")]
-		[Editor("Alphora.Dataphor.Dataphoria.DocumentExpressionUIEditor,Dataphoria", typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.Dataphoria.DocumentExpressionUIEditor,Dataphoria", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DocumentExpressionOperator("Form")]
 		public string Document
 		{

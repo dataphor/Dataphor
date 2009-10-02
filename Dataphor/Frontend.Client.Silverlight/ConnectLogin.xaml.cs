@@ -19,7 +19,7 @@ namespace Frontend.Client.Silverlight
 
         private void Button_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-        	// TODO: Add event handler implementation here.
+        	
         }
 		
 		public event PropertyChangedEventHandler PropertyChanged;

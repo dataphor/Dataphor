@@ -10,6 +10,7 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Text;
 using System.Net;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.Frontend.Client
 {
@@ -25,7 +26,7 @@ namespace Alphora.Dataphor.Frontend.Client
 	///		the loaded data.  If a hit, call Reference() to retrieve the data (and to inform the cache that the item has 
 	///		been recently used). </para>
 	/// </remarks>
-	public class DocumentCache : IDisposable
+	public class DocumentCache : IDisposable, IDocumentCache
 	{
 		public const string CIndexFileName = "Index.dfi";
 		public const string CCacheFileExtension = ".dfc";
@@ -41,7 +42,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 			// Prepare the structures
 			FIdentifiers = new IdentifierIndex();
-			FCRC32s = new Hashtable(ASize);
+			FCRC32s = new Dictionary<string, uint>(ASize);
 			FCache = new FixedSizeCache<string, string>(ASize);
 
 			LockDirectory();
@@ -212,7 +213,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 		}
 
-		private Hashtable FCRC32s;
+		private Dictionary<string, uint> FCRC32s;
 
 		private uint GetIdentifierCRC32(string AIdentifier)
 		{
@@ -226,7 +227,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		{
 			string LIdentifier = FIdentifiers[AName];
 			if (LIdentifier != null)
-				return (uint)FCRC32s[LIdentifier];
+				return FCRC32s[LIdentifier];
 			else
 				return 0;
 		}

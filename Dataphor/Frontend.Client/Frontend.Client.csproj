@@ -176,9 +176,6 @@
     <Compile Include="LookupAction.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MiscAction.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Module.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -215,6 +212,14 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Action.Image.cs" />
+    <Compile Include="DesignerAttributes.cs" />
+    <Compile Include="IDocumentCache.cs" />
+    <Compile Include="ImageUtility.cs" />
+    <Compile Include="LookupUtility.cs" />
+    <Compile Include="ScriptAction.cs" />
+    <Compile Include="SetPropertyAction.cs" />
+    <Compile Include="ShowLinkAction.cs" />
     <None Include="app.config" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

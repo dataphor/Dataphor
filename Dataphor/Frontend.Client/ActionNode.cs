@@ -7,6 +7,7 @@
 using System;
 using System.Drawing;
 using System.ComponentModel;
+using System.Windows.Media;
 
 using Alphora.Dataphor.BOP;
 
@@ -23,7 +24,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// Action
 
 		protected IAction FAction;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("Associated Action node.")]
 		public IAction Action
 		{
@@ -181,12 +182,12 @@ namespace Alphora.Dataphor.Frontend.Client
 		protected virtual void InternalUpdateImage()
 		{
 			if (Action != null)
-				InternalSetImage(Action.LoadedImage);
+				InternalSetImage(((Action)Action).LoadedImage);
 			else
 				InternalSetImage(null);
 		}
 
-		protected virtual void InternalSetImage(System.Drawing.Image AImage) {}
+		protected virtual void InternalSetImage(ImageSource AImage) {}
 
 		// Hint
 

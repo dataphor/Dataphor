@@ -5,9 +5,7 @@
 */
 
 using System;
-using System.Web;
 using System.ComponentModel;
-using System.Drawing.Design;
 
 using Alphora.Dataphor.BOP;
 using Alphora.Dataphor.DAE.Language.D4;
@@ -27,7 +25,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		
 		private ISource FSource;
 		/// <remarks> Hooks and unhooks SourceDataChanged and SourceDisposed to the Sources event hooks. </remarks>
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("The source that the data action will work on.")]
 		public ISource Source
 		{
@@ -148,7 +146,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		}
 
 		private string FColumnName = String.Empty;
-		[TypeConverter(typeof(ColumnNameConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.ColumnNameConverter,Alphora.Dataphor.Frontend.Client")]
 		[DefaultValue("")]
 		[Description("The column name to search by.")]
 		public string ColumnName
@@ -216,7 +214,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		private string FScript = String.Empty;
 		[DefaultValue("")]
 		[Description("The D4 script to run.  This script will be parameterized by any parameters specified using DataArgument child nodes.")]
-		[Editor(typeof(Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor), typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string Script
 		{
@@ -227,7 +225,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// EnlistWith
 
 		private ISource FEnlistWith;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("A Source node to enlist with for application transactions.  If the EnlistWith source is in an application transaction, this script will run within that transaction.")]
 		public ISource EnlistWith
 		{
@@ -349,7 +347,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// Source
 
 		private ISource FSource;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("The data source to use as arguments to the script.")]
 		public ISource Source
 		{

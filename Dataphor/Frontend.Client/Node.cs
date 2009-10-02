@@ -192,7 +192,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		public INode GetNode(string AName, INode AExcluding)
 		{
-			if ((Name != String.Empty) && (String.Compare(AName, Name, true) == 0) && !Object.ReferenceEquals(AExcluding, this))
+			if ((Name != String.Empty) && String.Equals(AName, Name, StringComparison.OrdinalIgnoreCase) && !Object.ReferenceEquals(AExcluding, this))
 				return this;
 			else
 			{

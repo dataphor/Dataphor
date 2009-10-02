@@ -14,9 +14,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 
-#if !SILVERLIGHT
-using Alphora.Dataphor.Windows;
-#endif
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Streams;
@@ -194,7 +191,8 @@ namespace Alphora.Dataphor.DAE.Server
 				bool LSignalAdded = false;
 				
 				#if USESPINLOCK
-				while (Interlocked.CompareExchange(ref FCacheSyncRoot, 1, 0) == 1);
+				while (Interlocked.CompareExchange(ref FCacheSyncRoot, 1, 0) == 1)
+					Thread.SpinWait(100);  // Prevents CPU starvation
 				try
 				#else
 				lock (FCacheSyncRoot)
@@ -240,7 +238,8 @@ namespace Alphora.Dataphor.DAE.Server
 					if (LSignalAdded)
 					{
 						#if USESPINLOCK
-						while (Interlocked.CompareExchange(ref FCacheSyncRoot, 1, 0) == 1);
+						while (Interlocked.CompareExchange(ref FCacheSyncRoot, 1, 0) == 1)
+							Thread.SpinWait(100); // Prevents CPU starvation
 						try
 						#else
 						lock (FCacheSyncRoot)
@@ -273,7 +272,8 @@ namespace Alphora.Dataphor.DAE.Server
 			#endif
 			
 			#if USESPINLOCK
-			while (Interlocked.CompareExchange(ref FCacheSyncRoot, 1, 0) == 1);
+			while (Interlocked.CompareExchange(ref FCacheSyncRoot, 1, 0) == 1)
+				Thread.SpinWait(100);
 			try
 			#else
 			lock (FCacheSyncRoot)
@@ -370,13 +370,11 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		#if SILVERLIGHT
 
-		public static byte[] LoadAssembyFromRemote(LocalProcess AProcess, string ALibraryName, string AFileName)
+		public static Assembly LoadAssembyFromRemote(LocalProcess AProcess, string ALibraryName, string AFileName)
 		{
 			using (Stream LSourceStream = new RemoteStreamWrapper(AProcess.RemoteProcess.GetFile(ALibraryName, AFileName)))
 			{
-				byte[] LResult = new byte[LSourceStream.Length];
-				LSourceStream.Read(LResult, 0, LResult.Length);
-				return LResult;
+				return new System.Windows.AssemblyPart().Load(LSourceStream);
 			}
 		}
 		
@@ -396,20 +394,7 @@ namespace Alphora.Dataphor.DAE.Server
 					for (int LIndex = 0; LIndex < LFileInfos.Length; LIndex++)
 					{
 						if (LFileInfos[LIndex].IsDotNetAssembly && !FFilesCached.Contains(LFileInfos[LIndex].FileName))
-						{
-							try
-							{
-								Assembly LAssembly = Assembly.Load(LoadAssembyFromRemote(AProcess, LFileInfos[LIndex].LibraryName, LFileInfos[LIndex].FileName));
-								if (LFileInfos[LIndex].ShouldRegister && !AClassLoader.Assemblies.Contains(LAssembly.GetName()))
-									AClassLoader.RegisterAssembly(Catalog.LoadedLibraries[Engine.CSystemLibraryName], LAssembly);
-								FAssembliesCached.Add(LFileInfos[LIndex].FileName);
-								FFilesCached.Add(LFileInfos[LIndex].FileName);
-							}
-							catch (IOException E)
-							{
-								FInternalServer.LogError(E);
-							}
-						}
+							LoadAndRegister(AProcess, AClassLoader, LFileInfos[LIndex].LibraryName, LFileInfos[LIndex].FileName, LFileInfos[LIndex].ShouldRegister);
 					}
 				}
 			}
@@ -418,6 +403,23 @@ namespace Alphora.Dataphor.DAE.Server
 				ReleaseCacheLock(AProcess, LockMode.Exclusive);
 			}
 		}
+
+		private void LoadAndRegister(LocalProcess AProcess, Schema.ClassLoader AClassLoader, string ALibraryName, string AFileName, bool AShouldRegister)
+		{
+			try
+			{
+				Assembly LAssembly = LoadAssembyFromRemote(AProcess, ALibraryName, AFileName);
+				if (AShouldRegister && !AClassLoader.Assemblies.Contains(LAssembly.GetName()))
+					AClassLoader.RegisterAssembly(Catalog.LoadedLibraries[Engine.CSystemLibraryName], LAssembly);
+				FAssembliesCached.Add(AFileName);
+				FFilesCached.Add(AFileName);
+			}
+			catch (IOException E)
+			{
+				FInternalServer.LogError(E);
+			}
+		}
+		
 		#else
 		private string FLocalBinDirectory;
 		private string LocalBinDirectory
@@ -426,7 +428,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				if (FLocalBinDirectory == null)
 				{
-					FLocalBinDirectory = Path.Combine(Path.Combine(PathUtility.GetBinDirectory(), "LocalBin"), FServer.Name);
+					FLocalBinDirectory = Path.Combine(Path.Combine(Alphora.Dataphor.Windows.PathUtility.GetBinDirectory(), "LocalBin"), FServer.Name);
 					Directory.CreateDirectory(FLocalBinDirectory);
 				}
 				return FLocalBinDirectory;
@@ -435,7 +437,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		private string GetLocalFileName(string ALibraryName, string AFileName, bool AIsDotNetAssembly)
 		{
-			return Path.Combine(((ALibraryName == Engine.CSystemLibraryName) || !AIsDotNetAssembly) ? PathUtility.GetBinDirectory() : LocalBinDirectory, Path.GetFileName(AFileName));
+			return Path.Combine(((ALibraryName == Engine.CSystemLibraryName) || !AIsDotNetAssembly) ? Alphora.Dataphor.Windows.PathUtility.GetBinDirectory() : LocalBinDirectory, Path.GetFileName(AFileName));
 		}
 		
 		public string GetFile(LocalProcess AProcess, string ALibraryName, string AFileName, DateTime AFileDate, bool AIsDotNetAssembly, out bool AShouldLoad)
@@ -455,7 +457,7 @@ namespace Alphora.Dataphor.DAE.Server
 					#endif
 					using (Stream LSourceStream = new RemoteStreamWrapper(AProcess.RemoteProcess.GetFile(ALibraryName, AFileName)))
 					{
-						FileUtility.EnsureWriteable(LFullFileName);
+						Alphora.Dataphor.Windows.FileUtility.EnsureWriteable(LFullFileName);
 						try
 						{
 							using (FileStream LTargetStream = File.Open(LFullFileName, FileMode.Create, FileAccess.Write, FileShare.None))

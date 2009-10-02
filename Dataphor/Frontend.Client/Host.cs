@@ -6,7 +6,6 @@
 
 using System;
 using System.IO;
-using System.Web;
 using System.Net;
 using System.Collections.Specialized;
 
@@ -144,21 +143,17 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		public INode Load(string ADocument, object AInstance)
 		{
+			string LDocumentValue = EvaluateDocument(ADocument);
 			Children.Clear();
  
 			Deserializer LDeserializer;
 
 			LDeserializer = Session.CreateDeserializer();
 
-			string LResult;
 			INode LNode;
-			using (DAE.Runtime.Data.Scalar LScalar = Pipe.RequestDocument(ADocument))
-			{
-				LResult = LScalar.AsString;
-			}
 			try
 			{
-				LNode = (INode)LDeserializer.Deserialize(LResult, AInstance);
+				LNode = (INode)LDeserializer.Deserialize(LDocumentValue, AInstance);
 				try
 				{
 					LNode.Owner = this;
@@ -171,13 +166,27 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 			catch (Exception E)
 			{
-				throw new ClientException(ClientException.Codes.DocumentDeserializationError, E, LResult);
+				throw new ClientException(ClientException.Codes.DocumentDeserializationError, E, LDocumentValue);
 			}
 			if (LDeserializer.Errors.Count > 0)
 				HandleDeserializationErrors(LDeserializer.Errors);
 			Children.Add(LNode);
 			Document = ADocument;
 			return LNode;
+		}
+
+		private string EvaluateDocument(string ADocument)
+		{
+			// Optimization: check to see if the document expression is merely a string literal before making a trip to the server
+			var LExpression = new DAE.Language.D4.Parser().ParseExpression(ADocument);
+			var LStringValue = LExpression as DAE.Language.ValueExpression;
+			if (LStringValue != null && LStringValue.Token == DAE.Language.TokenType.String)
+				return (string)LStringValue.Value;
+			else
+				using (DAE.Runtime.Data.Scalar LScalar = Pipe.RequestDocument(ADocument))
+				{
+					return LScalar.AsString;
+				}
 		}
 
 		public INode LoadNext(object AInstance)

@@ -5,9 +5,7 @@
 */
 
 using System;
-using System.Web;
 using System.ComponentModel;
-using System.Drawing.Design;
 
 using Alphora.Dataphor.BOP;
 using Alphora.Dataphor.DAE.Client;
@@ -99,7 +97,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		private string FDocument = String.Empty;
 		[DefaultValue("")]
 		[Description("A form interface document which will be shown to perform the lookup.")]
-		[Editor("Alphora.Dataphor.Dataphoria.DocumentExpressionUIEditor,Dataphoria", typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.Dataphoria.DocumentExpressionUIEditor,Dataphoria", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DocumentExpressionOperator("Form")]
 		public string Document
 		{
@@ -121,7 +119,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// OnLookupAccepted
 
 		private IAction FOnLookupAccepted;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action to execute after the lookup form has been accepted.")]
 		public IAction OnLookupAccepted
 		{
@@ -144,7 +142,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// OnLookupClose
 
 		protected IAction FOnLookupClose;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action to execute after the lookup form has been closed.")]
 		public IAction OnLookupClose
 		{
@@ -167,7 +165,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// OnLookupRejected
 
 		protected IAction FOnLookupRejected;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action to execute after the lookup form has been rejected.")]
 		public IAction OnLookupRejected
 		{
@@ -190,7 +188,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// BeforeLookupActivated
 
 		protected IAction FBeforeLookupActivated;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action to execute after the lookup form is created, but before it is activated.")]
 		public IAction BeforeLookupActivated
 		{

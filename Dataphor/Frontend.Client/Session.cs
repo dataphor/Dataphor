@@ -9,14 +9,13 @@ using System.ComponentModel;
 using System.Collections;
 using System.Collections.Specialized;
 using System.Net;
-using System.Web;
+using System.Collections.Generic;
+using System.Reflection;
 
 using DAE = Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Client;
 using Alphora.Dataphor.BOP;
-using System.Collections.Generic;
-using System.Reflection;
 
 namespace Alphora.Dataphor.Frontend.Client
 {
@@ -120,7 +119,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		protected void ValidateNodeTypeTable()
 		{
-			if (NodeTypeTable["FormInterface"] == null)
+			if (NodeTypeTable.Contains("FormInterface"))
 				throw new ClientException(ClientException.Codes.EmptyOrIncompleteNodeTypesTable);
 		}
 
@@ -147,6 +146,7 @@ namespace Alphora.Dataphor.Frontend.Client
 				LDocumentString = LStartingDocument.AsString;
 			}
 
+			#if !SILVERLIGHT
 			// Load the files required to register any nodes, if necessary				
 			// TODO: This should be better when we actually have a story here.
 			// The problem is that there is no way to distinguish between files required for different client types.
@@ -191,6 +191,7 @@ namespace Alphora.Dataphor.Frontend.Client
 					DataSession.CloseCursor(LCursor);
 				}
 			}
+			#endif
 			
 			return LDocumentString;
 		}

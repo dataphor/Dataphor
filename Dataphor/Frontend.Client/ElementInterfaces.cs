@@ -7,6 +7,7 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.Frontend.Client
 {
@@ -218,7 +219,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		IAction OnBeforeDeactivate { get; set; }
 
 		/// <summary> Dictionary of non-persisted miscellenious data. </summary> <doc/>
-		System.Collections.Specialized.HybridDictionary UserState { get; }
+		Dictionary<string, object> UserState { get; }
 	}
 
 	/// <summary> Data aware image element. </summary> <doc/>
@@ -1235,20 +1236,21 @@ namespace Alphora.Dataphor.Frontend.Client
 	// this is a duplication of System.Windows.Forms.HorizontalAlignment
 	public enum HorizontalAlignment 
 	{
-		Center = System.Windows.Forms.HorizontalAlignment.Center,
-		Left = System.Windows.Forms.HorizontalAlignment.Left,
-		Right = System.Windows.Forms.HorizontalAlignment.Right
+		Center = 2,		//System.Windows.Forms.HorizontalAlignment.Center,
+		Left = 0,		//System.Windows.Forms.HorizontalAlignment.Left,
+		Right = 1		//System.Windows.Forms.HorizontalAlignment.Right
 	}
 
 	// this is a duplication of System.Windows.Forms.HelpNavigator
 	public enum HelpKeywordBehavior
 	{
-		AssociateIndex = System.Windows.Forms.HelpNavigator.AssociateIndex,
-		Find = System.Windows.Forms.HelpNavigator.Find,
-		Index = System.Windows.Forms.HelpNavigator.Index,
-		KeywordIndex = System.Windows.Forms.HelpNavigator.KeywordIndex,
-		TableOfContents = System.Windows.Forms.HelpNavigator.TableOfContents,
-		Topic = System.Windows.Forms.HelpNavigator.Topic
+		AssociateIndex = -2147483643,	//System.Windows.Forms.HelpNavigator.AssociateIndex
+		Find = -2147483644,				//System.Windows.Forms.HelpNavigator.Find
+		Index = -2147483645,			//System.Windows.Forms.HelpNavigator.Index
+		KeywordIndex = -2147483642,		//System.Windows.Forms.HelpNavigator.KeywordIndex
+		TableOfContents = -2147483646,	//System.Windows.Forms.HelpNavigator.TableOfContents
+		Topic = -2147483647,			//System.Windows.Forms.HelpNavigator.Topic
+		TopicId = -2147483641			//System.Windows.Forms.HelpNavigator.TopicId
 	}
 
 	public delegate void FormInterfaceHandler(IFormInterface AForm); 

@@ -9,6 +9,8 @@ using System.Collections;
 using System.IO;
 using System.Reflection;
 using System.Xml;
+using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace Alphora.Dataphor.Frontend.Client
 {
@@ -30,14 +32,24 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <summary> Initializez the private FNodeTypes hashtable. </summary>
 		public NodeTypeTable()
 		{
-			FNodeTypes = new Hashtable(50);
+			FNodeTypes = new Dictionary<string, NodeTypeEntry>(64);
 		}
 
-		private Hashtable FNodeTypes;
+		private Dictionary<string, NodeTypeEntry> FNodeTypes;
 
 		public NodeTypeEntry this[string ANodeName]
 		{
-			get { return (NodeTypeEntry)FNodeTypes[ANodeName.ToLower()]; }
+			get { return FNodeTypes[ANodeName.ToLower()]; }
+		}
+		
+		public bool TryGetValue(string ANodeName, out NodeTypeEntry AEntry)
+		{
+			return FNodeTypes.TryGetValue(ANodeName, out AEntry);
+		}
+		
+		public bool Contains(string ANodeName)
+		{
+			return FNodeTypes.ContainsKey(ANodeName);
 		}
 
 		public ICollection Keys 
@@ -64,36 +76,28 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <param name="ASource"> A stream containing an XML NodeTypeTable information. </param>
 		public void LoadFromStream(Stream ASource)
 		{
-			XmlDocument LDocument = new XmlDocument();
-			LDocument.Load(ASource);
+			XDocument LDocument = XDocument.Load(ASource);
 			InternalLoad(LDocument);
 		}
 
 		/// <summary> Loads the NodeTypeTable from a given string. </summary>
 		public void LoadFromString(string ASource)
 		{
-			XmlDocument LDocument = new XmlDocument();
-			LDocument.Load(new StringReader(ASource));
+			XDocument LDocument = XDocument.Load(new StringReader(ASource));
 			InternalLoad(LDocument);
 		}
 
-		private void InternalLoad(XmlDocument ADocument)
+		private void InternalLoad(XDocument ADocument)
 		{
 			// TODO: Better XML validation on the NodeTypeTable load
 			NodeTypeEntry LNodeTypeEntry;
-			foreach (XmlNode LNode in ADocument.DocumentElement.ChildNodes)
+			foreach (XElement LNode in ADocument.Root.Elements())
 			{
-				if (LNode is XmlElement)
-				{
-					LNodeTypeEntry = new NodeTypeEntry();
-					LNodeTypeEntry.Namespace = LNode.Attributes[CNamespaceAttributeName].Value;
-					LNodeTypeEntry.Assembly = LNode.Attributes[CAssemblyAttributeName].Value;
-					foreach (XmlNode LChild in LNode.ChildNodes)
-					{
-						if (LChild is XmlElement)
-							FNodeTypes.Add(LChild.Attributes[CNodeNameAttributeName].Value.ToLower(), LNodeTypeEntry);
-					}
-				}
+				LNodeTypeEntry = new NodeTypeEntry();
+				LNodeTypeEntry.Namespace = LNode.Attribute(CNamespaceAttributeName).Value;
+				LNodeTypeEntry.Assembly = LNode.Attribute(CAssemblyAttributeName).Value;
+				foreach (XElement LChild in LNode.Elements())
+					FNodeTypes.Add(LChild.Attribute(CNodeNameAttributeName).Value.ToLower(), LNodeTypeEntry);
 			}
 
 		}
@@ -118,17 +122,18 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <summary> Searches thru the NodeTypeTable and returns a type for it. </summary>
 		public Type GetClassType(string AClassName)
 		{
-			NodeTypeEntry LEntry = this[AClassName];
-			if (LEntry == null)
+			NodeTypeEntry LEntry;
+			if (!FNodeTypes.TryGetValue(AClassName, out LEntry))
 				return null;
-			return Type.GetType(String.Format("{0}.{1},{2}", LEntry.Namespace, AClassName, LEntry.Assembly), true, true);
+			else
+				return Type.GetType(String.Format("{0}.{1},{2}", LEntry.Namespace, AClassName, LEntry.Assembly), true, true);
 		}
 
 		/// <summary> Creates an instance of the specified class using the NodeTypeTable. </summary>
 		public object CreateInstance(string AClassName)
 		{
-			NodeTypeEntry LEntry = this[AClassName];
-			if (LEntry == null)
+			NodeTypeEntry LEntry;
+			if (!FNodeTypes.TryGetValue(AClassName, out LEntry))
 				throw new Exception(String.Format("CreateInstance: Class ({0}) not found in node type list.", AClassName));
 			return Activator.CreateInstance(Type.GetType(String.Format("{0}.{1},{2}", LEntry.Namespace, AClassName, LEntry.Assembly), true, true));
 		}
@@ -160,15 +165,17 @@ namespace Alphora.Dataphor.Frontend.Client
 		{
 			if (ANamespace == String.Empty)
 			{
-				NodeTypeEntry LEntry = FTable[AName];
-				if (LEntry != null)
+				NodeTypeEntry LEntry;
+				if (FTable.TryGetValue(AName, out LEntry))
 					return 
 						Type.GetType
 						(
-							Assembly.CreateQualifiedName
+							String.Format
 							(
-								LEntry.Assembly,
-								String.Format("{0}.{1}", LEntry.Namespace, AName)
+								"{0}.{1},{2}",
+								LEntry.Namespace, 
+								AName,
+								LEntry.Assembly
 							), 
 							true, 
 							true

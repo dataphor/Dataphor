@@ -7,16 +7,15 @@
 using System;
 using System.IO;
 using System.ComponentModel;
-using System.Drawing;
-using System.Drawing.Design;
 using System.Collections.Specialized;
 
 using Alphora.Dataphor.BOP;
 using DAE = Alphora.Dataphor.DAE.Server;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.Frontend.Client
 {
-	public class EventParams : HybridDictionary 
+	public class EventParams : Dictionary<string, object>
 	{
 		public EventParams() : base() {}
 		
@@ -24,13 +23,13 @@ namespace Alphora.Dataphor.Frontend.Client
 		{
 			for (int LIndex = 0; LIndex < AParameters.Length; LIndex++)
 				if ((LIndex % 2) != 0)
-					Add(AParameters[LIndex - 1], AParameters[LIndex]);
+					Add((string)AParameters[LIndex - 1], AParameters[LIndex]);
 		}
 	}
 	
 	[DesignerImage("Image('Frontend', 'Nodes.Action')")]
 	[DesignerCategory("Actions")]
-	public abstract class Action : Node, IAction
+	public abstract partial class Action : Node, IAction
     {
 		protected override void Dispose(bool ADisposing)
 		{
@@ -76,7 +75,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// BeforeExecute		
 		private IAction FBeforeExecute;
 		[Description("Action to be called before the execute.")]
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		public IAction BeforeExecute
 		{
 			get { return FBeforeExecute; }
@@ -107,7 +106,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// AfterExecute		
 		private IAction FAfterExecute;
 		[Description("Action to be called after the execute.")]
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		public IAction AfterExecute
 		{
 			get { return FAfterExecute; }
@@ -232,111 +231,6 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 		}
 
-		// Image
-
-		public event EventHandler OnImageChanged;
-
-		private string FImage = String.Empty;
-		[DefaultValue("")]
-		[Description("An image used by this action's controls as an icon.")]
-		public string Image
-		{
-			get { return FImage; }
-			set
-			{
-				if (FImage != value)
-				{
-					FImage = value;
-					if (Active)
-						InternalUpdateImage();
-				}
-			}
-		}
-
-		private System.Drawing.Image FLoadedImage;
-		[Publish(PublishMethod.None)]
-		[Browsable(false)]
-		public System.Drawing.Image LoadedImage
-		{
-			get { return FLoadedImage; }
-		}
-
-		private void SetImage(System.Drawing.Image AValue)
-		{
-			if (FLoadedImage != null)
-				FLoadedImage.Dispose();
-			FLoadedImage = AValue;
-			if (OnImageChanged != null)
-				OnImageChanged(this, EventArgs.Empty);
-		}
-
-		private PipeRequest FImageRequest;
-
-		private void CancelImageRequest()
-		{
-			if (FImageRequest != null)
-			{
-				HostNode.Pipe.CancelRequest(FImageRequest);
-				FImageRequest = null;
-			}
-		}
-
-		// TODO: change this to use the AsyncImageRequest class
-
-		/// <summary> Make sure that the image is loaded or creates an async request for it. </summary>
-		private void InternalUpdateImage()
-		{
-			if (HostNode.Session.AreImagesLoaded())
-			{
-				CancelImageRequest();
-				if (Image == String.Empty)
-					SetImage(null);
-				else
-				{
-					// Queue up an asynchronous request
-					FImageRequest = new PipeRequest(Image, new PipeResponseHandler(ImageRead), new PipeErrorHandler(ImageError));
-					HostNode.Pipe.QueueRequest(FImageRequest);
-				}
-			}
-			else
-				SetImage(null);
-		}
-
-		private void ImageRead(PipeRequest ARequest, Pipe APipe)
-		{
-			if (Active)
-			{
-				FImageRequest = null;
-				try
-				{
-					if (ARequest.Result.IsNative)
-					{
-						byte[] LResultBytes = ARequest.Result.AsByteArray;
-						SetImage(System.Drawing.Image.FromStream(new MemoryStream(LResultBytes, 0, LResultBytes.Length, false, true)));
-					}
-					else
-					{
-						using (Stream LStream = ARequest.Result.OpenStream())
-						{
-							MemoryStream LCopyStream = new MemoryStream();
-							StreamUtility.CopyStream(LStream, LCopyStream);
-							SetImage(System.Drawing.Image.FromStream(LCopyStream));
-						}
-					}
-				}
-				catch
-				{
-					SetImage(ImageUtility.GetErrorImage());
-				}
-			}
-		}
-
-		private void ImageError(PipeRequest ARequest, Pipe APipe, Exception AException)
-		{
-			FImageRequest = null;
-			SetImage(ImageUtility.GetErrorImage());
-		}
-
 		// Visible
 
 		private bool FVisible = true;
@@ -431,7 +325,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		private IAction FAction;
 		[Description("Action to be called upon executing.")]
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		public IAction Action
 		{
 			get { return FAction; }
@@ -486,7 +380,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		private string FHelpString = String.Empty;
 		[DefaultValue("")]
 		[Description("The help text to display (if HelpKeyword is not specified).")]
-		[Editor(typeof(Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor), typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("txt")]
 		public string HelpString
 		{

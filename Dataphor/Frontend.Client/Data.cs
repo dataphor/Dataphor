@@ -5,9 +5,7 @@
 */
 
 using System;
-using System.Web;
 using System.ComponentModel;
-using System.Drawing.Design;
 using System.Collections.Specialized;
 
 using Alphora.Dataphor.BOP;
@@ -233,7 +231,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		private string FExpression = String.Empty;
 		[DefaultValue("")]
 		[Description("The expression to be used to select the data set.")]
-		[Editor(typeof(Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor), typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string Expression
 		{
@@ -254,7 +252,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		private string FInsertStatement = String.Empty;
 		[DefaultValue("")]
 		[Description("A single statement of D4 to be used to override the default insert behavior of the source. Columns of the row to be inserted can be accessed by name within the statement.")]
-		[Editor(typeof(Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor), typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string InsertStatement
 		{
@@ -275,7 +273,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		private string FUpdateStatement = String.Empty;
 		[DefaultValue("")]
 		[Description("A single statement of D4 to be used to override the default update behavior of the source. Columns of the row to be updated can be accessed by name within the statement.")]
-		[Editor(typeof(Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor), typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string UpdateStatement
 		{
@@ -296,7 +294,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		private string FDeleteStatement = String.Empty;
 		[DefaultValue("")]
 		[Description("A single statement of D4 to be used to override the default delete behavior of the source. Columns of the row to be deleted can be accessed by name within the statement.")]
-		[Editor(typeof(Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor), typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string DeleteStatement
 		{
@@ -317,7 +315,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		private string FFilter = String.Empty;
 		[DefaultValue("")]
 		[Description("The filter expression to apply to the data source.")]
-		[Editor(typeof(Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor), typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string Filter
 		{
@@ -355,7 +353,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// OnChange
 
 		protected IAction FOnChange;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed when a different row in the dataset is selected.")]
 		public IAction OnChange
 		{
@@ -387,7 +385,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// OnRowChanging
 
 		protected IAction FOnRowChanging;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed when a field in the current row in the dataset is changing.")]
 		public IAction OnRowChanging
 		{
@@ -419,7 +417,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// OnRowChange
 
 		protected IAction FOnRowChange;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed when a field in the current row in the dataset is changed.")]
 		public IAction OnRowChange
 		{
@@ -451,7 +449,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// OnActiveChange
 
 		protected IAction FOnActiveChange;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed when the dataset's active property changes.")]
 		public IAction OnActiveChange
 		{
@@ -483,7 +481,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// OnStateChange
 
 		protected IAction FOnStateChange;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed when a the dataset's state changes.")]
 		public IAction OnStateChange
 		{
@@ -515,7 +513,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// OnDefault
 
 		protected IAction FOnDefault;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed to allow for setting of default values for a new row. Values set during this action will not set the modified of the source.")]
 		public IAction OnDefault
 		{
@@ -547,7 +545,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// OnValidate
 
 		protected IAction FOnValidate;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed before the data set posts the current row.  An exception here will prevent the dataset from posting.")]
 		public IAction OnValidate
 		{
@@ -579,7 +577,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// BeforeOpen
 
 		protected IAction FBeforeOpen;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed before the data set opens.")]
 		public IAction BeforeOpen
 		{
@@ -611,7 +609,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// AfterOpen
 
 		protected IAction FAfterOpen;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed after the data set opens.")]
 		public IAction AfterOpen
 		{
@@ -643,7 +641,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// BeforeClose
 
 		protected IAction FBeforeClose;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed before the data set closes.")]
 		public IAction BeforeClose
 		{
@@ -675,7 +673,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// AfterClose
 
 		protected IAction FAfterClose;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed after the data set closes.")]
 		public IAction AfterClose
 		{
@@ -707,7 +705,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// BeforeInsert
 
 		protected IAction FBeforeInsert;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed before the data set enters insert state.")]
 		public IAction BeforeInsert
 		{
@@ -739,7 +737,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// AfterInsert
 
 		protected IAction FAfterInsert;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed after the data set enters insert state.")]
 		public IAction AfterInsert
 		{
@@ -771,7 +769,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// BeforeEdit
 
 		protected IAction FBeforeEdit;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed before the data set enters edit state.")]
 		public IAction BeforeEdit
 		{
@@ -803,7 +801,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// AfterEdit
 
 		protected IAction FAfterEdit;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed after the data set enters edit state.")]
 		public IAction AfterEdit
 		{
@@ -835,7 +833,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// BeforeDelete
 
 		protected IAction FBeforeDelete;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed before a row in the data set is deleted.")]
 		public IAction BeforeDelete
 		{
@@ -867,7 +865,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// AfterDelete
 
 		protected IAction FAfterDelete;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed after a row in the data set is deleted.")]
 		public IAction AfterDelete
 		{
@@ -899,7 +897,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// BeforePost
 
 		protected IAction FBeforePost;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed before the data set is posted.")]
 		public IAction BeforePost
 		{
@@ -931,7 +929,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// AfterPost
 
 		protected IAction FAfterPost;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed after the data set is posted.")]
 		public IAction AfterPost
 		{
@@ -963,7 +961,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// BeforeCancel
 
 		protected IAction FBeforeCancel;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed before the data set is canceled.")]
 		public IAction BeforeCancel
 		{
@@ -995,7 +993,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// AfterCancel
 
 		protected IAction FAfterCancel;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed after the data set is canceled.")]
 		public IAction AfterCancel
 		{
@@ -1303,7 +1301,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		private string FBeginScript = String.Empty;
 		[DefaultValue("")]
 		[Description("A script that will be executed when the source is activated (before opening the expression).")]
-		[Editor(typeof(Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor), typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string BeginScript
 		{
@@ -1316,7 +1314,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		private string FEndScript = String.Empty;
 		[DefaultValue("")]
 		[Description("A script that will be executed when the source is deactivated.")]
-		[Editor(typeof(Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor), typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string EndScript
 		{
@@ -1401,7 +1399,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		}
 
 		private ISource FMaster;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("When set, this source will be filtered and will re-query as the master source navigates.")]
 		public ISource Master
 		{
@@ -1853,7 +1851,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		Detail
 	}
 
-	[System.ComponentModel.TypeConverter(typeof(System.ComponentModel.ExpandableObjectConverter))]
+	[TypeConverter("System.ComponentModel.ExpandableObjectConverter,System")]
 	public abstract class SourceLink: Node
 	{
 		protected override void Dispose(bool ADisposing)
@@ -1878,7 +1876,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// Source
 
 		private ISource FSource;
-		[TypeConverter(typeof(NodeReferenceConverter))]
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("Specified the source node the element will be attached to.")]
 		public ISource Source
 		{

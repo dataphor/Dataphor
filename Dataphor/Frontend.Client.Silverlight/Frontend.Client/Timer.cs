@@ -6,7 +6,7 @@
 
 using System;
 using System.ComponentModel;
-using WinForms=System.Windows.Forms;
+using System.Windows.Threading;
 
 namespace Alphora.Dataphor.Frontend.Client
 {
@@ -27,7 +27,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 		}
 
-		private WinForms.Timer FTimer;
+		private DispatcherTimer FTimer;
 		
 		private void TimerElapsed(object ASource, EventArgs AArgs)
 		{
@@ -66,8 +66,8 @@ namespace Alphora.Dataphor.Frontend.Client
 		{
 			if (!FEnabled)
 			{
-				FTimer = new WinForms.Timer();
-				FTimer.Interval = FInterval;
+				FTimer = new DispatcherTimer();
+				FTimer.Interval = TimeSpan.FromMilliseconds(FInterval);
 				FTimer.Tick += new EventHandler(TimerElapsed);
 				FEnabled = true;
 			}
@@ -81,7 +81,6 @@ namespace Alphora.Dataphor.Frontend.Client
 			{
 				FTimer.Stop();
 				FTimer.Tick -= new EventHandler(TimerElapsed);
-				FTimer.Dispose();
 				FTimer = null;
 				FEnabled = false;
 			}
@@ -100,7 +99,7 @@ namespace Alphora.Dataphor.Frontend.Client
 				{
 					FInterval = value;
 					if (Enabled)
-						FTimer.Interval = FInterval;
+						FTimer.Interval = TimeSpan.FromMilliseconds(FInterval);
 				}
 			}
 		}
