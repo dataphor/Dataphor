@@ -8,7 +8,7 @@ using System;
 using System.ComponentModel;
 using System.Windows.Threading;
 
-namespace Alphora.Dataphor.Frontend.Client
+namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
 	[DesignerImage("Image('Frontend', 'Nodes.Timer')")]
 	[DesignerCategory("Non Visual")]
