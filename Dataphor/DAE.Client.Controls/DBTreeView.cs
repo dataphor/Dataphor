@@ -71,7 +71,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		
 		private void StartProcess()
 		{
-			DataSessionBase LSession = ((DAEDataSet)FLink.DataSet).Session;
+			DataSession LSession = ((DAEDataSet)FLink.DataSet).Session;
 			FProcess = LSession.ServerSession.StartProcess(new ProcessInfo(LSession.ServerSession.SessionInfo));
 			DataView LATServer = FLink.DataSet is DataView ? ((DataView)FLink.DataSet).ApplicationTransactionServer : null;
 			if (LATServer != null)

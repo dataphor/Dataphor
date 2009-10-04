@@ -315,7 +315,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			if (AProcess == null)
 				AProcess = DataSession.UtilityProcess;
 				
-			Execute(AProcess, AStatement, DAE.Client.DataSessionBase.DataParamsFromNativeParams(AProcess, AParams));
+			Execute(AProcess, AStatement, DAE.Client.DataSession.DataParamsFromNativeParams(AProcess, AParams));
 		}
 
 		public DAE.Runtime.Data.DataValue Evaluate(string AExpression)
@@ -365,7 +365,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			if (AProcess == null)
 				AProcess = DataSession.UtilityProcess;
 
-			return Evaluate(AProcess, AExpression, DAE.Client.DataSessionBase.DataParamsFromNativeParams(AProcess, AParams));
+			return Evaluate(AProcess, AExpression, DAE.Client.DataSession.DataParamsFromNativeParams(AProcess, AParams));
 		}
 
 		/// <summary>Evaluates the given expression on the given process and using the given parameter names and values.</summary>
@@ -374,7 +374,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			if (AProcess == null)
 				AProcess = DataSession.UtilityProcess;
 			
-			return Evaluate(AProcess, AExpression, DAE.Client.DataSessionBase.DataParamsFromNativeParams(AProcess, AParamNames, AParams));
+			return Evaluate(AProcess, AExpression, DAE.Client.DataSession.DataParamsFromNativeParams(AProcess, AParamNames, AParams));
 		}
 
 		public DAE.Runtime.Data.Scalar EvaluateScalar(string AExpression)
@@ -424,7 +424,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			if (AProcess == null)
 				AProcess = DataSession.UtilityProcess;
 
-			return EvaluateScalar(AProcess, AExpression, DAE.Client.DataSessionBase.DataParamsFromNativeParams(AProcess, AParams));
+			return EvaluateScalar(AProcess, AExpression, DAE.Client.DataSession.DataParamsFromNativeParams(AProcess, AParams));
 		}
 
 		/// <summary>EvaluateScalars the given expression on the given process and using the given parameter names and values.</summary>
@@ -433,7 +433,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			if (AProcess == null)
 				AProcess = DataSession.UtilityProcess;
 
-			return EvaluateScalar(AProcess, AExpression, DAE.Client.DataSessionBase.DataParamsFromNativeParams(AProcess, AParamNames, AParams));
+			return EvaluateScalar(AProcess, AExpression, DAE.Client.DataSession.DataParamsFromNativeParams(AProcess, AParamNames, AParams));
 		}
 
 		/// <summary>Evaluates the given expression enlisted within the specified application transaction.</summary>
@@ -468,14 +468,14 @@ namespace Alphora.Dataphor.Frontend.Client
 		public DAE.Runtime.Data.DataValue EvaluateWith(Guid AID, string AExpression, params object[] AParams)
 		{
 			IServerProcess LProcess = DataSession.UtilityProcess;
-			return EvaluateWith(LProcess, AID, AExpression, DAE.Client.DataSessionBase.DataParamsFromNativeParams(LProcess, AParams));
+			return EvaluateWith(LProcess, AID, AExpression, DAE.Client.DataSession.DataParamsFromNativeParams(LProcess, AParams));
 		}
 		
 		/// <summary>Evaluates the given expression enlisted within the given application transaction.</summary>
 		public DAE.Runtime.Data.DataValue EvaluateWith(Guid AID, string AExpression, string[] AParamNames, object[] AParams)
 		{
 			IServerProcess LProcess = DataSession.UtilityProcess;
-			return EvaluateWith(LProcess, AID, AExpression, DAE.Client.DataSessionBase.DataParamsFromNativeParams(LProcess, AParams));
+			return EvaluateWith(LProcess, AID, AExpression, DAE.Client.DataSession.DataParamsFromNativeParams(LProcess, AParams));
 		}
 
 		/// <summary>Evaluates the given expression enlisted within the specified application transaction.</summary>
@@ -510,14 +510,14 @@ namespace Alphora.Dataphor.Frontend.Client
 		public DAE.Runtime.Data.Scalar EvaluateScalarWith(Guid AID, string AExpression, params object[] AParams)
 		{
 			IServerProcess LProcess = DataSession.UtilityProcess;
-			return EvaluateScalarWith(LProcess, AID, AExpression, DAE.Client.DataSessionBase.DataParamsFromNativeParams(LProcess, AParams));
+			return EvaluateScalarWith(LProcess, AID, AExpression, DAE.Client.DataSession.DataParamsFromNativeParams(LProcess, AParams));
 		}
 
 		/// <summary>Evaluates the given expression enlisted within the given application transaction.</summary>
 		public DAE.Runtime.Data.Scalar EvaluateScalarWith(Guid AID, string AExpression, string[] AParamNames, object[] AParams)
 		{
 			IServerProcess LProcess = DataSession.UtilityProcess;
-			return EvaluateScalarWith(LProcess, AID, AExpression, DAE.Client.DataSessionBase.DataParamsFromNativeParams(LProcess, AParams));
+			return EvaluateScalarWith(LProcess, AID, AExpression, DAE.Client.DataSession.DataParamsFromNativeParams(LProcess, AParams));
 		}
 		
 		#endregion

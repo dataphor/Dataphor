@@ -12,11 +12,16 @@ using System.Windows.Shapes;
 
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
-	public partial class ConnectPage : Page
+	public partial class ConnectApplication : UserControl
 	{
-		public ConnectPage()
+		public ConnectApplication(ConnectWorkItem AWorkItem)
 		{
 			InitializeComponent();
+			
+			FWorkItem = AWorkItem;
+			DataContext = AWorkItem;
 		}
+		
+		private ConnectWorkItem FWorkItem;
 	}
 }

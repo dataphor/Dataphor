@@ -20,13 +20,16 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			this.Startup += this.Application_Startup;
 			this.Exit += this.Application_Exit;
 			this.UnhandledException += this.Application_UnhandledException;
-
+			
 			InitializeComponent();
 		}
 
 		private void Application_Startup(object sender, StartupEventArgs e)
 		{
-			this.RootVisual = new ConnectPage();
+			RootVisual = new Main();
+			
+			// Ensure that the silverlight frontend session has a static dispatcher
+			Silverlight.Session.Dispatcher = RootVisual.Dispatcher;
 		}
 
 		private void Application_Exit(object sender, EventArgs e)

@@ -59,7 +59,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		#region Session
 
-		private bool ContainerContainsSession(DataSessionBase ASession)
+		private bool ContainerContainsSession(DataSession ASession)
 		{
 			#if !SILVERLIGHT
 			if ((ASession == null) || (Container == null))
@@ -82,12 +82,12 @@ namespace Alphora.Dataphor.DAE.Client
 		}
 		
 		// Session
-		private DataSessionBase FSession;
+		private DataSession FSession;
 		/// <summary> Attached to a DataSession object for connection to a Server. </summary>
 		[Category("Data")]
 		[Description("Connection to a Server.")]
 		[RefreshProperties(RefreshProperties.Repaint)]
-		public DataSessionBase Session
+		public DataSession Session
 		{
 			get { return FSession; }
 			set
@@ -132,7 +132,7 @@ namespace Alphora.Dataphor.DAE.Client
 					if (value == string.Empty)
 						Session = null;
 					else
-						Session = DataSessionBase.Sessions[value];
+						Session = DataSession.Sessions[value];
 				}
 			}
 		}

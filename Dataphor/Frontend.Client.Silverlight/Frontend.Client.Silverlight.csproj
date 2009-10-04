@@ -18,7 +18,7 @@
     <GenerateSilverlightManifest>true</GenerateSilverlightManifest>
     <XapFilename>Frontend.Client.Silverlight.xap</XapFilename>
     <SilverlightManifestTemplate>Properties\AppManifest.xml</SilverlightManifestTemplate>
-    <SilverlightAppEntry>Frontend.Client.Silverlight.App</SilverlightAppEntry>
+    <SilverlightAppEntry>Alphora.Dataphor.Frontend.Client.Silverlight.App</SilverlightAppEntry>
     <TestPageFileName>TestPage.html</TestPageFileName>
     <CreateTestPage>true</CreateTestPage>
     <ValidateXaml>true</ValidateXaml>
@@ -142,26 +142,30 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SilverlightClientException.cs" />
-    <Compile Include="Pages\Connect.xaml.cs">
-      <DependentUpon>Connect.xaml</DependentUpon>
+    <Compile Include="Frontend.Client.Silverlight\Connection\ConnectApplication.xaml.cs">
+      <DependentUpon>ConnectApplication.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Pages\ConnectHost.xaml.cs">
+    <Compile Include="Frontend.Client.Silverlight\Connection\ConnectForm.xaml.cs">
+      <DependentUpon>ConnectForm.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Frontend.Client.Silverlight\Connection\ConnectHost.xaml.cs">
       <DependentUpon>ConnectHost.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Pages\ConnectInstances.xaml.cs">
+    <Compile Include="Frontend.Client.Silverlight\Connection\ConnectInstances.xaml.cs">
       <DependentUpon>ConnectInstances.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Pages\ConnectLogin.xaml.cs">
+    <Compile Include="Frontend.Client.Silverlight\Connection\ConnectLogin.xaml.cs">
       <DependentUpon>ConnectLogin.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Frontend.Client.Silverlight\Connection\ConnectWorkItem.cs" />
+    <Compile Include="Frontend.Client.Silverlight\Nodes\Timer.cs" />
+    <Compile Include="Frontend.Client.Silverlight\SilverlightClientException.cs" />
     <Compile Include="Frontend.Client.Silverlight\DocumentExpression.cs" />
     <Compile Include="Frontend.Client.Silverlight\ISilverlightFormInterface.cs" />
     <Compile Include="Frontend.Client.Silverlight\Session.cs" />
     <Compile Include="Frontend.Client\Action.Image.cs" />
     <Compile Include="Frontend.Client\ImageUtility.cs" />
-    <Compile Include="Frontend.Client.Silverlight\Timer.cs" />
-    <Compile Include="Pages\Main.xaml.cs">
+    <Compile Include="Main.xaml.cs">
       <DependentUpon>Main.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -171,23 +175,27 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:MarkupCompilePass1</Generator>
     </ApplicationDefinition>
-    <Page Include="Pages\Connect.xaml">
+    <Page Include="Frontend.Client.Silverlight\Connection\ConnectApplication.xaml">
       <Generator>MSBuild:MarkupCompilePass1</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Pages\ConnectHost.xaml">
+    <Page Include="Frontend.Client.Silverlight\Connection\ConnectForm.xaml">
       <Generator>MSBuild:MarkupCompilePass1</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Pages\ConnectInstances.xaml">
+    <Page Include="Frontend.Client.Silverlight\Connection\ConnectHost.xaml">
       <Generator>MSBuild:MarkupCompilePass1</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Pages\ConnectLogin.xaml">
+    <Page Include="Frontend.Client.Silverlight\Connection\ConnectInstances.xaml">
       <Generator>MSBuild:MarkupCompilePass1</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Pages\Main.xaml">
+    <Page Include="Frontend.Client.Silverlight\Connection\ConnectLogin.xaml">
+      <Generator>MSBuild:MarkupCompilePass1</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Main.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:MarkupCompilePass1</Generator>
     </Page>
@@ -209,9 +217,8 @@
     <EmbeddedResource Include="..\Frontend.Client\Strings.resx">
       <Link>Frontend.Client\Strings.resx</Link>
     </EmbeddedResource>
-    <EmbeddedResource Include="SilverlightClientException.resx">
+    <EmbeddedResource Include="Frontend.Client.Silverlight\SilverlightClientException.resx">
       <DependentUpon>SilverlightClientException.cs</DependentUpon>
-      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

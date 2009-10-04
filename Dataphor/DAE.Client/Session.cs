@@ -6,20 +6,17 @@
 namespace Alphora.Dataphor.DAE.Client
 {
 	using System;
-	using System.Threading;
-	using System.Drawing;
 	using System.Collections;
-	using System.Collections.Specialized;
+	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.ComponentModel.Design.Serialization;
+	using System.Drawing;
 	using Alphora.Dataphor.DAE;
-	//using Alphora.Dataphor.DAE.Client.Design;
 	using Alphora.Dataphor.DAE.Server;
-	using System.Collections.Generic;
     
 	public class Sessions : IEnumerable
 	{
-		List<DataSessionBase> FList = new List<DataSessionBase>();
+		List<DataSession> FList = new List<DataSession>();
 
 		public int Count
 		{
@@ -46,7 +43,7 @@ namespace Alphora.Dataphor.DAE.Client
 			return "Session" + LCount.ToString();
 		}
 
-		public bool Contains(DataSessionBase ASession)
+		public bool Contains(DataSession ASession)
 		{
 			return Contains(ASession.SessionName);
 		}
@@ -55,14 +52,14 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			lock (FSyncRoot)
 			{
-				foreach (DataSessionBase LSession in FList)
+				foreach (DataSession LSession in FList)
 					if ((LSession.SessionName == ASessionName))
 						return true;
 				return false;
 			}
 		}
 
-		public void Add(DataSessionBase ASession)
+		public void Add(DataSession ASession)
 		{
 			lock (FSyncRoot)
 			{
@@ -70,7 +67,7 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 
-		public bool Remove(DataSessionBase ASession)
+		public bool Remove(DataSession ASession)
 		{
 			lock (FSyncRoot)
 			{
@@ -78,13 +75,13 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 		
-		public DataSessionBase this[string ASessionName]
+		public DataSession this[string ASessionName]
 		{
 			get
 			{
 				lock (FSyncRoot)
 				{
-					foreach (DataSessionBase LSession in FList)
+					foreach (DataSession LSession in FList)
 						if ((LSession.SessionName == ASessionName))
 							return LSession;
 					throw new ClientException(ClientException.Codes.SessionNotFound, ASessionName);
@@ -98,29 +95,24 @@ namespace Alphora.Dataphor.DAE.Client
 		}
 	}
 
-	public abstract class DataSessionBase : Component, IDisposableNotify, ISupportInitialize
+	/// <summary> Wraps the connection to, and session retrieval from a Server </summary>
+	[DesignerSerializer("Alphora.Dataphor.DAE.Client.Design.ActiveLastSerializer,Alphora.Dataphor.DAE.Client", "System.ComponentModel.Design.Serialization.CodeDomSerializer,System.Design")]
+	[ToolboxBitmap(typeof(Alphora.Dataphor.DAE.Client.DataSession), "Icons.DataSession.bmp")]
+	public class DataSession : Component, IDisposableNotify, ISupportInitialize
 	{
-		public DataSessionBase() : base()
+		public DataSession() : base()
 		{
-			InternalInitialize();
+			FSessionInfo = new SessionInfo();
+			FSessionName = DataSession.Sessions.NextSessionName();
+			Sessions.Add(this);
 		}
 		
-		public DataSessionBase(IContainer AContainer)
+		public DataSession(IContainer AContainer)
+			: this()
 		{
-			InternalInitialize();
 			if (AContainer != null)
 				AContainer.Add(this);
 		}
-
-		private void InternalInitialize()
-		{
-			FSessionInfo = new SessionInfo();
-			FSessionName = DataSessionBase.Sessions.NextSessionName();
-			Sessions.Add(this);
-		}
-
-		/// <summary> Event to notify objects that this object has been disposed. </summary>
-		public event EventHandler OnClosing;
 
 		/// <summary> Disposes the object and notifies other objects </summary>
 		/// <seealso cref="IDisposable"/>
@@ -129,10 +121,9 @@ namespace Alphora.Dataphor.DAE.Client
 			base.Dispose(ADisposing);
 			Close();	// Must close after the Disposed event so that this class is still valid during disposal
 			SessionInfo = null;
-			if (Sessions.Contains(this))
-				Sessions.Remove(this);
+			DeinitializeSessions();
 		}
-		
+
 		private SessionInfo FSessionInfo;
 		/// <summary> The <see cref="SessionInfo"/> structure to use when connecting to the server. </summary>
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
@@ -144,8 +135,10 @@ namespace Alphora.Dataphor.DAE.Client
 			get { return FSessionInfo; }
 			set { FSessionInfo = value; }
 		}
+
+			
+		#region ServerSession
 		
-		// ServerSession
 		protected IServerSession FServerSession;
 		/// <summary> The CLI Session object obtained through connection. </summary>
 		[Browsable(false)]
@@ -163,10 +156,11 @@ namespace Alphora.Dataphor.DAE.Client
 			FServerSession = null;
 			Close();
 		}
+		
+		#endregion
 
-		//The Active properties value during the intialization period defined in ISupportInitialize.
-		private bool DelayedActive { get; set; }
-
+		#region Initializing
+		
 		protected internal bool Initializing { get; set; }
 
 		public virtual void BeginInit()
@@ -185,6 +179,51 @@ namespace Alphora.Dataphor.DAE.Client
 			Initializing = false;
 			Active = DelayedActive;
 		}
+		
+		//The Active properties value during the intialization period defined in ISupportInitialize.
+		private bool DelayedActive { get; set; }
+
+		#endregion
+		
+		#region Server connection
+
+		private bool FServerConnectionOwned = true;
+		private ServerConnection FServerConnection;
+		/// <summary>The server connection established to the Dataphor Server.</summary>
+		/// <remarks>
+		/// Setting this property allows the DataSession to use an existing ServerConnection.
+		/// If this property is not set, a ServerConnection will be created and maintained by
+		/// the DataSession component. If this property is set, the given ServerConnection
+		/// will be used and the management of that connection is left up to the user of the
+		/// component. Note that if this property is set, it is not necessary to set the
+		/// Alias or AliasName properties of the DataSession.
+		/// </remarks>
+		public ServerConnection ServerConnection
+		{
+			get { return FServerConnection; }
+			set
+			{
+				CheckInactive();
+				FServerConnection = value;
+				FServerConnectionOwned = false;
+			}
+		}
+		
+		/// <summary> The IServer interface to the server. </summary>
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
+		public IServer Server
+		{
+			get
+			{
+				CheckActive();
+				return FServerConnection.Server;
+			}
+		}
+		
+		#endregion
+		
+		#region Open/Close
 			
 		// Active
 		private bool FActive;
@@ -213,7 +252,19 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 
-		protected abstract void InternalOpen();		
+		protected void CheckActive()
+		{
+			if (!FActive)
+				throw new ClientException(ClientException.Codes.DataSessionInactive);
+		}
+
+		/// <summary> Used internally to throw if the session isn't active. </summary>
+		protected void CheckInactive()
+		{
+			if (FActive)
+				throw new ClientException(ClientException.Codes.DataSessionActive);
+		}
+
 		/// <summary> Connects to a server and retrieves a session from it. </summary>
 		public void Open()
 		{
@@ -224,7 +275,26 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 
-		protected abstract void InternalClose();		
+		protected void InternalOpen()
+		{
+			if (FServerConnection == null)
+			{
+				CheckAlias();
+				FServerConnection = new ServerConnection(FAlias);
+				FServerConnectionOwned = true;
+			}
+			try
+			{
+				FServerSession = FServerConnection.Server.Connect(SessionInfo);
+				FServerSession.Disposed += new EventHandler(ServerSessionDisposed);
+			}
+			catch
+			{
+				CloseConnection();
+				throw;
+			}
+		}
+
 		/// <summary> Dereferences the session and disconnects from the server. </summary>
 		public void Close()
 		{
@@ -254,19 +324,50 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 		
-		protected void CheckActive()
+		private void ServerStoppedOrDisposed(object ASender, EventArgs AArgs)
 		{
-			if (!FActive)
-				throw new ClientException(ClientException.Codes.DataSessionInactive);
+			Close();
+		}
+		
+		protected void InternalClose()
+		{
+			try
+			{
+				try
+				{
+					if (FServerSession != null)
+					{
+						FServerSession.Disposed -= new EventHandler(ServerSessionDisposed);
+						Server.Disconnect(FServerSession);
+					}
+				}
+				finally
+				{
+					FServerSession = null;
+				}
+			}
+			finally
+			{
+				CloseConnection();
+			}
 		}
 
-		/// <summary> Used internally to throw if the session isn't active. </summary>
-		protected void CheckInactive()
+		private void CloseConnection()
 		{
-			if (FActive)
-				throw new ClientException(ClientException.Codes.DataSessionActive);
+			if (FServerConnectionOwned && (FServerConnection != null))
+			{
+				FServerConnection.Dispose();
+				FServerConnection = null;
+			}
 		}
+		
+		/// <summary> Event to notify objects that this object has been disposed. </summary>
+		public event EventHandler OnClosing;
 
+		#endregion
+
+		#region Session Name / Sessions static
+		
 		private string FSessionName;
 		/// <summary> Associates a global name with the session. </summary>
 		/// <remarks> The SessionName can be used to reference the DataSession instance elsewere in the application. </remarks>
@@ -279,7 +380,7 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				if (FSessionName != value)
 				{
-					if (DataSessionBase.Sessions.Contains(value))
+					if (DataSession.Sessions.Contains(value))
 						throw new ClientException(ClientException.Codes.SessionExists, value);
 					FSessionName = value;
 				}
@@ -297,6 +398,16 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 
+		private void DeinitializeSessions()
+		{
+			if (Sessions.Contains(this))
+				Sessions.Remove(this);
+		}
+		
+		#endregion
+		
+		#region Utility process
+		
 		private IServerProcess FUtilityProcess = null;
 		public IServerProcess UtilityProcess
 		{
@@ -310,6 +421,10 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 
+		#endregion
+		
+		#region Type helpers
+		
 		/// <summary>Returns the equivalent D4 type for the given native (CLR) type. Will throw a ClientException if there is no mapping for the given native (CLR) type.</summary>
 		public static DAE.Schema.IScalarType ScalarTypeFromNativeType(IServerProcess AProcess, Type AType)
 		{
@@ -329,6 +444,10 @@ namespace Alphora.Dataphor.DAE.Client
 				default : throw new ClientException(ClientException.Codes.InvalidParamType, AType.Name);
 			}
 		}
+		
+		#endregion
+		
+		#region Param helpers
 		
 		/// <summary>Constructs a DataParams from the given native value array, automatically naming the parameters A0..An-1.</summary>
 		public static DAE.Runtime.DataParams DataParamsFromNativeParams(IServerProcess AProcess, params object[] AParams)
@@ -361,6 +480,8 @@ namespace Alphora.Dataphor.DAE.Client
             }
             return LParams;
         }
+        
+        #endregion
         
         #region ExecuteScript
 
@@ -838,16 +959,9 @@ namespace Alphora.Dataphor.DAE.Client
 		}
 		
 		#endregion
-	}
 
-	/// <summary> Wraps the connection to, and session retrieval from a Server </summary>
-	[DesignerSerializer("Alphora.Dataphor.DAE.Client.Design.ActiveLastSerializer,Alphora.Dataphor.DAE.Client", "System.ComponentModel.Design.Serialization.CodeDomSerializer,System.Design")]
-	[ToolboxBitmap(typeof(Alphora.Dataphor.DAE.Client.DataSession), "Icons.DataSession.bmp")]
-	public class DataSession : DataSessionBase
-	{
-		public DataSession() : base() {}
-		public DataSession(IContainer AContainer) : base(AContainer) {}
-
+		#region Alias
+		
 		#if !SILVERLIGHT
 		// AliasName
 		private string FAliasName = String.Empty;
@@ -917,99 +1031,6 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 		
-		// Server
-
-		private bool FServerConnectionOwned = true;
-		private ServerConnection FServerConnection;
-		/// <summary>The server connection established to the Dataphor Server.</summary>
-		/// <remarks>
-		/// Setting this property allows the DataSession to use an existing ServerConnection.
-		/// If this property is not set, a ServerConnection will be created and maintained by
-		/// the DataSession component. If this property is set, the given ServerConnection
-		/// will be used and the management of that connection is left up to the user of the
-		/// component. Note that if this property is set, it is not necessary to set the
-		/// Alias or AliasName properties of the DataSession.
-		/// </remarks>
-		public ServerConnection ServerConnection
-		{
-			get { return FServerConnection; }
-			set
-			{
-				CheckInactive();
-				FServerConnection = value;
-				FServerConnectionOwned = false;
-			}
-		}
-		
-		/// <summary> The IServer interface to the server. </summary>
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[Browsable(false)]
-		public IServer Server
-		{
-			get
-			{
-				CheckActive();
-				return FServerConnection.Server;
-			}
-		}
-		
-		// Open/Close
-
-		private void ServerStoppedOrDisposed(object ASender, EventArgs AArgs)
-		{
-			Close();
-		}
-		
-		protected override void InternalOpen()
-		{
-			if (FServerConnection == null)
-			{
-				CheckAlias();
-				FServerConnection = new ServerConnection(FAlias);
-				FServerConnectionOwned = true;
-			}
-			try
-			{
-				FServerSession = FServerConnection.Server.Connect(SessionInfo);
-				FServerSession.Disposed += new EventHandler(ServerSessionDisposed);
-			}
-			catch
-			{
-				CloseConnection();
-				throw;
-			}
-		}
-
-		protected override void InternalClose()
-		{
-			try
-			{
-				try
-				{
-					if (FServerSession != null)
-					{
-						FServerSession.Disposed -= new EventHandler(ServerSessionDisposed);
-						Server.Disconnect(FServerSession);
-					}
-				}
-				finally
-				{
-					FServerSession = null;
-				}
-			}
-			finally
-			{
-				CloseConnection();
-			}
-		}
-
-		private void CloseConnection()
-		{
-			if (FServerConnectionOwned && (FServerConnection != null))
-			{
-				FServerConnection.Dispose();
-				FServerConnection = null;
-			}
-		}
+		#endregion
 	}
 }

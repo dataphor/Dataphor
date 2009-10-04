@@ -217,18 +217,77 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		#region Dispatcher
 
-		public static Dispatcher FDispatcher;
+		public static Dispatcher Dispatcher { get; set; }
+
+		/// <summary> Returns the verified non-null dispatcher. </summary>
+		public static Dispatcher CheckedDispatcher
+		{
+			get
+			{
+				Dispatcher LDispatcher = Dispatcher;	// Capture locally for thread safety
+				if (LDispatcher == null)
+					throw new SilverlightClientException(SilverlightClientException.Codes.MissingDispatcher);
+				return LDispatcher;
+			}
+		}
 
 		/// <summary> Executes a delegate in the context of the main thread. </summary>
 		public static object SafelyInvoke(Delegate ADelegate, object[] AArguments)
 		{
-			Dispatcher LDispatcher = FDispatcher;
-			if (LDispatcher != null)
-				return LDispatcher.BeginInvoke(ADelegate, AArguments);
-			else
-				throw new SilverlightClientException(SilverlightClientException.Codes.MissingDispatcher);
+			return CheckedDispatcher.BeginInvoke(ADelegate, AArguments);
 		}
 
+		/// <summary>Executes the given delegate on another thread, then calls back to the main thread for error or completion. </summary>
+		public static void BeginInvoke(Delegate ADelegate, ErrorHandler AOnError, System.Action AOnCompletion, params object[] AArguments)
+		{
+			Dispatcher LDispatcher = CheckedDispatcher;	
+			new Thread
+			(
+				() =>
+				{
+					try
+					{
+						ADelegate.DynamicInvoke(AArguments);
+						if (AOnCompletion != null)
+							LDispatcher.BeginInvoke(AOnCompletion);
+					}
+					catch (Exception LException)
+					{
+						if (AOnError != null)
+							LDispatcher.BeginInvoke(AOnError, LException);
+						else
+							System.Diagnostics.Debug.WriteLine("Unhandled exception: ", LException);
+					}
+				}
+			).Start();
+		}
+
+		public static void BeginInvoke<T>(Func<T> ADelegate, ErrorHandler AOnError, System.Action<T> AOnCompletion, params object[] AArguments)
+		{
+		    Dispatcher LDispatcher = CheckedDispatcher;	
+		    new Thread
+		    (
+		        () =>
+		        {
+		            try
+		            {
+		                var LResult = (T)ADelegate.DynamicInvoke(AArguments);
+		                if (AOnCompletion != null)
+		                    LDispatcher.BeginInvoke(AOnCompletion, LResult);
+		            }
+		            catch (Exception LException)
+		            {
+		                if (AOnError != null)
+		                    LDispatcher.BeginInvoke(AOnError, LException);
+		                else
+		                    System.Diagnostics.Debug.WriteLine("Unhandled exception: ", LException);
+		            }
+		        }
+		    ).Start();
+		}
+		
 		#endregion
 	}
+	
+	public delegate void ErrorHandler(Exception AException);
 }

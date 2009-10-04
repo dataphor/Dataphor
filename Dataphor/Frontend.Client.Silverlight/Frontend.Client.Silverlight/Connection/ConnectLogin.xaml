@@ -1,21 +1,22 @@
-﻿<navigation:Page 
+﻿<UserControl 
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	mc:Ignorable="d"
-	xmlns:navigation="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Navigation"
 	x:Class="Alphora.Dataphor.Frontend.Client.Silverlight.ConnectLogin" 
-	Title="Connection - Login"
 	d:DesignWidth="240">
 	
 	<StackPanel x:Name="LayoutRoot">
 		<TextBlock Text="User Name"/>
-		<TextBox x:Name="UserNameTextBox" MinWidth="200" HorizontalAlignment="Left" TextChanged="UserNameTextBox_TextChanged"/>
+		<TextBox Text="{Binding UserName, Mode=TwoWay}" MinWidth="200" HorizontalAlignment="Left" />
 		<TextBlock Text="Password"/>
-		<PasswordBox x:Name="PasswordTextBox" MinWidth="150" HorizontalAlignment="Left" PasswordChanged="PasswordTextBox_PasswordChanged"/>
+		<PasswordBox Password="{Binding Password, Mode=TwoWay}" MinWidth="150" HorizontalAlignment="Left" />
 		<Grid Margin="0,4,0,0">
 			<Button x:Name="LoginButton" Content="Login" HorizontalAlignment="Right" Click="Button_Click" />
 		</Grid>
+		<Border x:Name="ErrorBorder" BorderBrush="#FFF44747" BorderThickness="1" CornerRadius="4" Margin="0,4,0,0" Visibility="Collapsed">
+			<TextBox x:Name="ErrorText" TextWrapping="Wrap" IsReadOnly="True" Background="{x:Null}" BorderBrush="{x:Null}" BorderThickness="0" Foreground="#FFC10000" ScrollViewer.VerticalScrollBarVisibility="Auto" IsTabStop="False"/>
+		</Border>
 	</StackPanel>
-</navigation:Page>
+</UserControl>

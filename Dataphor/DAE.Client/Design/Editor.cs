@@ -128,12 +128,12 @@ namespace Alphora.Dataphor.DAE.Client.Design
 		protected virtual void SetEditorProperties(ListBox AControl, string AValue)
 		{
 			AControl.BorderStyle = BorderStyle.None;
-			if (DataSessionBase.Sessions.Count > 0)
+			if (DataSession.Sessions.Count > 0)
 			{
 				AControl.Items.Add("(none)");
-				lock (DataSessionBase.Sessions.SyncRoot)
+				lock (DataSession.Sessions.SyncRoot)
 				{
-					foreach (DataSessionBase LSession in DataSessionBase.Sessions)
+					foreach (DataSession LSession in DataSession.Sessions)
 						AControl.Items.Add(LSession.SessionName);
 				}
 				if ((AValue == null) || (AValue == String.Empty))

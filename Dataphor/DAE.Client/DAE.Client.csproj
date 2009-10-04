@@ -140,12 +140,6 @@
     <Compile Include="ClientException.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DACDataSession.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="DACLicenseProvider.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="DAEDataSet.cs">
       <SubType>Component</SubType>
     </Compile>
