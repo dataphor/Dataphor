@@ -14,62 +14,13 @@ using System.ServiceModel.Channels;
 
 using Alphora.Dataphor.DAE.Contracts;
 using Alphora.Dataphor.DAE.NativeCLI;
+using Alphora.Dataphor.DAE.Server;
 
-namespace Alphora.Dataphor.DAE.Server
+namespace Alphora.Dataphor.DAE.Service
 {
-	// TODO: Exception management
-	//[ExceptionShielding("WCF Exception Shielding")]
 	[ServiceBehavior(IncludeExceptionDetailInFaults = true)]
 	public class ListenerService : IListenerService
 	{
-		private static ServiceHost FListenerHost;
-		
-		/// <summary>
-		/// Establishes a listener in the current process, using the listener configuration settings if available.
-		/// </summary>
-		/// <returns>True if a listener is established in this app domain.</returns>
-		public static bool StartListener()
-		{
-			if (FListenerHost != null)
-				return true;
-				
-			IDictionary LSettings = (IDictionary)ConfigurationManager.GetSection("listener");
-			
-			// Set shouldListen=false to turn off the listener for a process
-			if ((LSettings != null) && LSettings.Contains("shouldListen") && !Convert.ToBoolean(LSettings["shouldListen"]))
-				return false;
-				
-			FListenerHost = new ServiceHost(typeof(ListenerService));
-			
-			FListenerHost.AddServiceEndpoint
-			(
-				typeof(IListenerService), 
-				DataphorServiceUtility.GetBinding(), 
-				DataphorServiceUtility.BuildListenerURI(Environment.MachineName)
-			);
-			
-			try
-			{
-				FListenerHost.Open();
-			}
-			catch
-			{
-				// An error indicates the service could not be started because there is already a listener running in another process.
-				return false;
-			}
-			
-			return true;
-		}
-		
-		public static void StopListener()
-		{
-			if (FListenerHost != null)
-			{
-				FListenerHost.Close();
-				FListenerHost = null;
-			}
-		}
-		
 		public string[] EnumerateInstances()
 		{
 			try

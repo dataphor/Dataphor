@@ -34,6 +34,8 @@ namespace Alphora.Dataphor.DAE.Service
 		private NativeServer FNativeServer;
 		private NativeCLIService FNativeService;
 		private ServiceHost FNativeServiceHost;
+		private ListenerServiceHost FListenerServiceHost;
+		private CrossDomainServiceHost FCrossDomainServiceHost;
 		
 		public bool IsActive { get { return FServer != null; } }
 		
@@ -109,12 +111,12 @@ namespace Alphora.Dataphor.DAE.Service
 					FNativeServiceHost.Open();
 					
 					// Start the listener
-					ListenerService.StartListener();
+					FListenerServiceHost = new ListenerServiceHost();
 					
 					// Start the CrossDomainServer
 					// This is required in order to serve a ClientAccessPolicy to enable cross-domain access in a sliverlight application.
 					// Without this, the Silverlight client will not work correctly.
-					CrossDomainService.StartCrossDomainService("localhost", LInstance.PortNumber);
+					FCrossDomainServiceHost = new CrossDomainServiceHost(Environment.MachineName, LInstance.PortNumber);
 				}
 				catch
 				{
@@ -126,6 +128,18 @@ namespace Alphora.Dataphor.DAE.Service
 		
 		public void Stop()
 		{
+			if (FCrossDomainServiceHost != null)
+			{
+				FCrossDomainServiceHost.Dispose();
+				FCrossDomainServiceHost = null;
+			}
+			
+			if (FListenerServiceHost != null)
+			{
+				FListenerServiceHost.Dispose();
+				FListenerServiceHost = null;
+			}
+			
 			if (FNativeServiceHost != null)
 			{
 				if (FNativeServiceHost.State != CommunicationState.Faulted)

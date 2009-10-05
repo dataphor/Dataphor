@@ -82,6 +82,7 @@
     <Compile Include="Server\CatalogCache.cs" />
     <Compile Include="Server\InstanceManager.cs" />
     <Compile Include="Service\CrossDomainService.cs" />
+    <Compile Include="Service\CrossDomainServiceHost.cs" />
     <Compile Include="Service\ListenerService.cs" />
     <Compile Include="NativeCLI\NativeCLIUtility.cs" />
     <Compile Include="NativeCLI\NativeMarshal.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="Service\DataphorService.cs" />
     <Compile Include="Service\DataphorServiceHost.cs" />
     <Compile Include="Service\HandleManager.cs" />
+    <Compile Include="Service\ListenerServiceHost.cs" />
     <Compile Include="Streams\FileStreamProvider.cs" />
   </ItemGroup>
   <ItemGroup>
