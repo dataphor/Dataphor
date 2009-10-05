@@ -8,12 +8,12 @@
 
 using System;
 using System.IO;
-using System.Reflection;
 using System.Text;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
-	using System.Collections.Generic;
 	using Alphora.Dataphor.DAE.Compiling;
 	using Alphora.Dataphor.DAE.Language;
 	using Alphora.Dataphor.DAE.Language.D4;
@@ -23,15 +23,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	using Schema = Alphora.Dataphor.DAE.Schema;
 
 	// operator FileReference(const AName : Name, const AIsAssembly : Boolean) : FileReference
+	// operator FileReference(const AName : Name, const AIsAssembly : Boolean, const AEnvironments : list(String)) : FileReference
 	public class FileReferenceNode : InstructionNode
 	{
 		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null || AArguments[1] == null)
+			if (AArguments[0] == null || AArguments[1] == null || (AArguments.Length >= 3 && AArguments[2] == null)) 
 				return null;
 			#endif
-			return new Schema.FileReference((string)AArguments[0], (bool)AArguments[1]);
+			if (AArguments.Length == 2)
+				return new Schema.FileReference((string)AArguments[0], (bool)AArguments[1]);
+			
+			return new Schema.FileReference((string)AArguments[0], (bool)AArguments[1], ((ListValue)AArguments[2]).ToList<string>());
 		}
 	}
 	
@@ -87,6 +91,35 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			Schema.FileReference LFile = (Schema.FileReference)AArguments[0];
 			LFile.IsAssembly = (bool)AArguments[1];
+			return LFile;
+		}
+	}
+	
+	// operator FileReferenceReadEnvironments(const AValue : FileReference) : Boolean
+	public class FileReferenceReadEnvironmentsNode : InstructionNode
+	{
+		public override object InternalExecute(Program AProgram, object[] AArguments)
+		{
+			#if NILPROPOGATION
+			if (AArguments[0] == null)
+				return null;
+			#endif
+			return new ListValue(AProgram.ValueManager, (Schema.IListType)FDataType, ((Schema.FileReference)AArguments[0]).Environments);
+		}
+	}
+	
+	// operator FileReferenceWriteEnvironments(const AValue : FileReference, list(String) AEnvironments : Boolean) : FileReference
+	public class FileReferenceWriteEnvironmentsNode : InstructionNode
+	{
+		public override object InternalExecute(Program AProgram, object[] AArguments)
+		{
+			#if NILPROPOGATION
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
+			#endif
+			Schema.FileReference LFile = (Schema.FileReference)AArguments[0];
+			LFile.Environments.Clear();
+			LFile.Environments.AddRange(((ListValue)AArguments[1]).ToList<string>());
 			return LFile;
 		}
 	}

@@ -66,6 +66,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			FList = AList;
 		}
+		
+		public ListValue(IValueManager AManager, Schema.IListType ADataType, IEnumerable ASourceList) : base(AManager, ADataType)
+		{
+			FList = new NativeList();
+			foreach (object LObject in ASourceList)
+				Add(LObject);
+		}
 
 		private NativeList FList;
 		
@@ -633,6 +640,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		public int Count()
 		{
 			return FList.DataTypes.Count;
+		}
+		
+		public List<T> ToList<T>()
+		{
+			List<T> LList = new List<T>();
+			for (int LIndex = 0; LIndex < Count(); LIndex++)
+				LList.Add((T)this[LIndex]);
+			return LList;
 		}
 
 		public override object CopyNativeAs(Schema.IDataType ADataType)

@@ -676,9 +676,10 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="AProcessHandle">The handle of the process to be used for the call.</param>
 		/// <param name="AClassName">The name of the registered class that needs to be instantiated.</param>
+		/// <param name="AEnvironment">The client environment in which the class is to be instantiated.</param>
 		/// <returns>A list of ServerFileInfo describing the necessary files.</returns>
 		[OperationContract]
-		ServerFileInfo[] GetFileNames(int AProcessHandle, string AClassName);
+		ServerFileInfo[] GetFileNames(int AProcessHandle, string AClassName, string AEnvironment);
 
 		/// <summary>
 		/// Gets a file.

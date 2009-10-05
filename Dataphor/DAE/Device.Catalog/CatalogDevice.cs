@@ -185,6 +185,19 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				}
 		}											
 		
+		private void PopulateLibraryFileEnvironments(Program AProgram, NativeTable ANativeTable, Row ARow)
+		{
+			foreach (Library LLibrary in AProgram.Catalog.Libraries)
+				foreach (Schema.FileReference LReference in LLibrary.Files)
+					foreach (string LEnvironment in LReference.Environments)
+					{
+						ARow[0] = LLibrary.Name;
+						ARow[1] = LReference.FileName;
+						ARow[2] = LEnvironment;
+						ANativeTable.Insert(AProgram.ValueManager, ARow);
+					}
+		}
+		
 		private void PopulateLibraryRequisites(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			foreach (Library LLibrary in AProgram.Catalog.Libraries)
@@ -375,6 +388,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				case "System.Plans" : PopulatePlans(AProgram, AHeader.NativeTable, ARow); break;
 				case "System.Libraries" : PopulateLibraries(AProgram, AHeader.NativeTable, ARow); break;
 				case "System.LibraryFiles" : PopulateLibraryFiles(AProgram, AHeader.NativeTable, ARow); break;
+				case "System.LibraryFileEnvironments" : PopulateLibraryFileEnvironments(AProgram, AHeader.NativeTable, ARow); break;
 				case "System.LibraryRequisites" : PopulateLibraryRequisites(AProgram, AHeader.NativeTable, ARow); break;
 				case "System.LibrarySettings" : PopulateLibrarySettings(AProgram, AHeader.NativeTable, ARow); break;
 				case "System.RegisteredAssemblies" : PopulateRegisteredAssemblies(AProgram, AHeader.NativeTable, ARow); break;

@@ -106,7 +106,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				try
 				{
 					RegisteredAssembly LAssembly = new RegisteredAssembly(AAssembly, ALibrary);
-					if (!FAssemblies.Contains(LAssembly))
+					if (!FAssemblies.Contains(AAssembly.GetName()))
 					{
 						SettingsList LClasses = GetClassList(AAssembly);
 						foreach (SettingsItem LSetting in LClasses.Values)

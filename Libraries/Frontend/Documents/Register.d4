@@ -1,4 +1,4 @@
-﻿/*
+/*
 	Frontend Server Registration Script
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
@@ -257,6 +257,7 @@ create table ClientTypes in ServerStore
 {
 	ID : String,
 	Description : String tags { Frontend.Width = "35" },
+	Environment : String tags { Frontend.Width = "35" },
 	key { ID }
 } tags { Frontend.Title = "Client Types" };
 grant usage on ClientTypes to role User;
@@ -265,8 +266,9 @@ if not exists (ClientTypes) then
 	insert
 		table
 		{
-			row { "Windows" ID, "Dataphor Windows Client" Description },
-			row { "Web" ID, "Dataphor Web Client" Description }
+			row { "Windows" ID, "Dataphor Windows Client" Description, "WindowsClient" Environment },
+			row { "Web" ID, "Dataphor Web Client" Description, "WebClient" Environment },
+			row { "Silverlight" ID, "Silverlight Client" Description, "SilverlightClient" Environment }
 		}
 		into ClientTypes;
 
@@ -560,9 +562,9 @@ end;
 grant usage on GetWindowsSettings(Name) to role User;
 
 //* Operator: GetLibraryFiles
-create operator GetLibraryFiles(const ALibraries : table { Library_Name : Name }) : table { Library_Name : String, Name : String, TimeStamp : DateTime, IsDotNetAssembly : Boolean }
+create operator GetLibraryFiles(const AEnvironment : String, const ALibraries : table { Library_Name : Name }) : table { Library_Name : String, Name : String, TimeStamp : DateTime, IsDotNetAssembly : Boolean }
 	class "Frontend.GetLibraryFilesNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
-grant usage on GetLibraryFiles(table { Library_Name : Name }) to role User;
+grant usage on GetLibraryFiles(String, table { Library_Name : Name }) to role User;
 
 //* Operator: PrepareApplication
 // SafeDrop('PrepareApplication(Name)');

@@ -644,7 +644,10 @@ create type FileReference
 			write class "System.FileReferenceWriteNameNode",
 		IsAssembly : Boolean
 			read class "System.FileReferenceReadIsAssemblyNode"
-			write class "System.FileReferenceWriteIsAssemblyNode"
+			write class "System.FileReferenceWriteIsAssemblyNode",
+		Environments : list(System.String)
+			read class "System.FileReferenceReadEnvironmentsNode"
+			write class "System.FileReferenceWriteEnvironmentsNode"
 	} class "System.FileReferenceNode"
 } class "System.BOPObjectConveyor";
 
@@ -1305,6 +1308,17 @@ begin
 	} tags { Frontend.Title = "Files" };
 
 	grant usage on LibraryFiles to role CatalogUser;
+	
+	create table LibraryFileEnvironments
+	{
+		Library_Name : Name tags { Frontend.Title = "Library Name" },
+		LibraryFile_FileName : String tags { Frontend.Title = "File Name", Frontend.Width = "50" },
+		Environment : String tags { Frontend.Title = "Environment", Frontend.Width = "50" },
+		key { Library_Name, LibraryFile_FileName, Environment },
+		reference LibraryFileEnvironments_LibraryFiles { Library_Name, LibraryFile_FileName } references LibraryFiles { Library_Name, FileName } tags { Frontend.Add.Detail.Embedded = "True", Frontend.Edit.Detail.Embedded = "True" } static tags { DAE.Enforced = "False" }
+	} tags { Frontend.Title = "Environments" };
+	
+	grant usage on LibraryFileEnvironments to role CatalogUser;
 	
 	create table LibraryRequisites in Catalog
 	{

@@ -693,7 +693,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			SystemSetLibraryDescriptorNode.AddLibraryFile(AProgram, Schema.Object.EnsureRooted((string)ARow[0]), new FileReference((string)ARow[1], (bool)ARow[2]));
 		}
-
+		
 		protected void UpdateLibraryFile(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
 		{
 			SystemSetLibraryDescriptorNode.RemoveLibraryFile(AProgram, Schema.Object.EnsureRooted((string)AOldRow[0]), new FileReference((string)AOldRow[1], (bool)AOldRow[2]));
@@ -703,6 +703,22 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		protected void DeleteLibraryFile(Program AProgram, Schema.TableVar ATableVar, Row ARow)
 		{
 			SystemSetLibraryDescriptorNode.RemoveLibraryFile(AProgram, Schema.Object.EnsureRooted((string)ARow[0]), new FileReference((string)ARow[1], (bool)ARow[2]));
+		}
+		
+		protected void InsertLibraryFileEnvironment(Program AProgram, Schema.TableVar ATableVar, Row ARow)
+		{
+			SystemSetLibraryDescriptorNode.AddLibraryFileEnvironment(AProgram, Schema.Object.EnsureRooted((string)ARow[0]), (string)ARow[1], (string)ARow[2]);
+		}
+		
+		protected void UpdateLibraryFileEnvironment(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
+		{
+			SystemSetLibraryDescriptorNode.RemoveLibraryFileEnvironment(AProgram, Schema.Object.EnsureRooted((string)AOldRow[0]), (string)AOldRow[1], (string)AOldRow[2]);
+			SystemSetLibraryDescriptorNode.AddLibraryFileEnvironment(AProgram, Schema.Object.EnsureRooted((string)ANewRow[0]), (string)ANewRow[1], (string)ANewRow[2]);
+		}
+		
+		protected void DeleteLibraryFileEnvironment(Program AProgram, Schema.TableVar ATableVar, Row ARow)
+		{
+			SystemSetLibraryDescriptorNode.RemoveLibraryFileEnvironment(AProgram, Schema.Object.EnsureRooted((string)ARow[0]), (string)ARow[1], (string)ARow[2]);
 		}
 
 		protected internal void SelectLibraryVersions(Program AProgram, NativeTable ANativeTable, Row ARow)
@@ -900,6 +916,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				case "System.LibraryRequisites" : InsertLibraryRequisite(AProgram, ATableVar, ARow); break;
 				case "System.LibrarySettings" : InsertLibrarySetting(AProgram, ATableVar, ARow); break;
 				case "System.LibraryFiles" : InsertLibraryFile(AProgram, ATableVar, ARow); break;
+				case "System.LibraryFileEnvironments" : InsertLibraryFileEnvironment(AProgram, ATableVar, ARow); break;
 			}
 			// TODO: This hack enables A/T style editing of a library (the requisites and files adds will automatically create a library)
 			// Basically it's a deferred constraint check
@@ -918,6 +935,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				case "System.LibraryRequisites" : UpdateLibraryRequisite(AProgram, ATableVar, AOldRow, ANewRow); break;
 				case "System.LibrarySettings" : UpdateLibrarySetting(AProgram, ATableVar, AOldRow, ANewRow); break;
 				case "System.LibraryFiles" : UpdateLibraryFile(AProgram, ATableVar, AOldRow, ANewRow); break;
+				case "System.LibraryFileEnvironments" : UpdateLibraryFileEnvironment(AProgram, ATableVar, AOldRow, ANewRow); break;
 			}
 		}
 		
@@ -931,6 +949,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				case "System.LibraryRequisites" : DeleteLibraryRequisite(AProgram, ATableVar, ARow); break;
 				case "System.LibrarySettings" : DeleteLibrarySetting(AProgram, ATableVar, ARow); break;
 				case "System.LibraryFiles" : DeleteLibraryFile(AProgram, ATableVar, ARow); break;
+				case "System.LibraryFileEnvironments" : DeleteLibraryFileEnvironment(AProgram, ATableVar, ARow); break;
 				default : throw new CatalogException(CatalogException.Codes.UnsupportedUpdate, ATableVar.Name);
 			}
 			base.InternalDeleteRow(AProgram, ATableVar, ARow);

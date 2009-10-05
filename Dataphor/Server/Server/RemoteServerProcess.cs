@@ -130,7 +130,7 @@ namespace Alphora.Dataphor.DAE.Server
 			return FServerProcess.ServerSession.Server.Catalog.ClassLoader.Classes[AClassName].ClassName;
 		}
 		
-		public ServerFileInfo[] GetFileNames(string AClassName)
+		public ServerFileInfo[] GetFileNames(string AClassName, string AEnvironment)
 		{
 			Schema.RegisteredClass LClass = FServerProcess.ServerSession.Server.Catalog.ClassLoader.Classes[AClassName];
 
@@ -141,7 +141,7 @@ namespace Alphora.Dataphor.DAE.Server
 			
 			// Build the list of all files required to load the assemblies in all libraries required by the library for the given class
 			Schema.Library LLibrary = FServerProcess.ServerSession.Server.Catalog.Libraries[LClass.Library.Name];
-			ServerFileInfos LFileInfos = FSession.Server.Server.GetFileNames(LLibrary);
+			ServerFileInfos LFileInfos = FSession.Server.Server.GetFileNames(LLibrary, AEnvironment);
 			
 			// Return the results in reverse order to ensure that dependencies are loaded in the correct order
 			ServerFileInfo[] LResults = new ServerFileInfo[LFileInfos.Count];

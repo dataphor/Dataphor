@@ -172,7 +172,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		string GetClassName(string AClassName);
 		
 		/// <summary>Returns the names of the files and assemblies required to load the given registered class name.</summary>
-		ServerFileInfo[] GetFileNames(string AClassName);
+		ServerFileInfo[] GetFileNames(string AClassName, string AEnvironment);
 		
 		/// <summary>Retrieves the file for the given file name.</summary>
 		IRemoteStream GetFile(string ALibraryName, string AFileName);

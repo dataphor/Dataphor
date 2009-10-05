@@ -742,9 +742,10 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="AProcessHandle">The handle of the process to be used for the call.</param>
 		/// <param name="AClassName">The name of the registered class that needs to be instantiated.</param>
+		/// <param name="AEnvironment">The target environment in which the class will be instantiated.</param>
 		/// <returns>A list of ServerFileInfo describing the necessary files.</returns>
 		[OperationContract(AsyncPattern = true)]
-		IAsyncResult BeginGetFileNames(int AProcessHandle, string AClassName, AsyncCallback ACallback, object AState);
+		IAsyncResult BeginGetFileNames(int AProcessHandle, string AClassName, string AEnvironment, AsyncCallback ACallback, object AState);
 		ServerFileInfo[] EndGetFileNames(IAsyncResult AResult);
 
 		/// <summary>

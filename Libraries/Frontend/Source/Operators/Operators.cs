@@ -406,7 +406,7 @@ namespace Alphora.Dataphor.Frontend.Server
 		}
 	}
 	
-	// operator GetLibraryFiles(const ALibraries : table { Library_Name : Name }) : table { Name : String, TimeStamp : DateTime, IsDotNetAssembly : Boolean };
+	// operator GetLibraryFiles(const AEnvironment : String, const ALibraries : table { Library_Name : Name }) : table { Name : String, TimeStamp : DateTime, IsDotNetAssembly : Boolean };
 	public class GetLibraryFilesNode : TableNode
 	{
 		public override void DetermineDataType(Plan APlan)
@@ -433,26 +433,30 @@ namespace Alphora.Dataphor.Frontend.Server
 				TableVar.Orders.Add(Order);
 		}
 		
-		private void PopulateRequiredFiles(Program AProgram, Schema.Library ALibrary, Table ATable, Row ARow)
+		private void PopulateRequiredFiles(Program AProgram, string AEnvironment, Schema.Library ALibrary, Table ATable, Row ARow)
 		{
 			foreach (Schema.FileReference LFile in ALibrary.Files)
 			{
-				string LFullFileName = ((DAE.Server.Server)AProgram.ServerProcess.ServerSession.Server).GetFullFileName(ALibrary, LFile.FileName);
-				ARow["Library_Name"] = ALibrary.Name;
-				ARow["Name"] = LFile.FileName;
-				ARow["TimeStamp"] = File.GetLastWriteTimeUtc(LFullFileName);
-				ARow["IsDotNetAssembly"] = FileUtility.IsAssembly(LFullFileName);
-				if (!ATable.FindKey(ARow))
-					ATable.Insert(ARow);
+				if (LFile.Environments.Contains(AEnvironment))
+				{
+					string LFullFileName = ((DAE.Server.Server)AProgram.ServerProcess.ServerSession.Server).GetFullFileName(ALibrary, LFile.FileName);
+					ARow["Library_Name"] = ALibrary.Name;
+					ARow["Name"] = LFile.FileName;
+					ARow["TimeStamp"] = File.GetLastWriteTimeUtc(LFullFileName);
+					ARow["IsDotNetAssembly"] = FileUtility.IsAssembly(LFullFileName);
+					if (!ATable.FindKey(ARow))
+						ATable.Insert(ARow);
+				}
 			}
 			
 			foreach (Schema.LibraryReference LLibrary in ALibrary.Libraries)
-				PopulateRequiredFiles(AProgram, AProgram.Catalog.Libraries[LLibrary.Name], ATable, ARow);
+				PopulateRequiredFiles(AProgram, AEnvironment, AProgram.Catalog.Libraries[LLibrary.Name], ATable, ARow);
 		}
 		
 		public override object InternalExecute(Program AProgram)
 		{
-			using (Table LLibraries = (Table)Nodes[0].Execute(AProgram))
+			string LEnvironment = (string)Nodes[0].Execute(AProgram);
+			using (Table LLibraries = (Table)Nodes[1].Execute(AProgram))
 			{
 				LocalTable LResult = new LocalTable(this, AProgram);
 				try
@@ -469,7 +473,7 @@ namespace Alphora.Dataphor.Frontend.Server
 							while (LLibraries.Next())
 							{
 								LLibraries.Select(LLibraryRow);
-								PopulateRequiredFiles(AProgram, AProgram.Catalog.Libraries[(string)LLibraryRow["Library_Name"]], LResult, LRow);
+								PopulateRequiredFiles(AProgram, LEnvironment, AProgram.Catalog.Libraries[(string)LLibraryRow["Library_Name"]], LResult, LRow);
 							}
 						}
 					}

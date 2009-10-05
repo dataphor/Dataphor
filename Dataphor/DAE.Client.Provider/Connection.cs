@@ -243,6 +243,7 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 				FServer = FConnection.Server;
 				try
 				{
+					FAlias.SessionInfo.ClientType = "ADO.NET";
 					FSession = FServer.Connect(FAlias.SessionInfo);
 					FServerProcess = FSession.StartProcess(new ProcessInfo(FAlias.SessionInfo));
 				}

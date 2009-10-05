@@ -1,4 +1,5 @@
-<library xmlns:bop="www.alphora.com/schemas/bop" version="2.1.0.0" defaultdevicename="Pubs" assembliesasstring="" librariesasstring="" settings="" name="Sample.Pubs" issystem="False" isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
-    <libraries.libraryreference name="MSSQLDevice" version="*" />
-    <libraries.libraryreference name="Frontend" version="*" />
+﻿<?xml version="1.0" encoding="utf-8"?>
+<library xmlns:bop="www.alphora.com/schemas/bop" version="*" defaultdevicename="Pubs" assembliesasstring="" librariesasstring="" settings="" name="Sample.Pubs" issystem="False" generatorid="-1" isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+	<libraries.libraryreference name="MSSQLDevice" version="*" />
+	<libraries.libraryreference name="Frontend" version="*" />
 </library>

@@ -869,7 +869,7 @@ namespace Alphora.Dataphor.DAE.Server
 			Catalog.DataTypes.SystemName = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemName, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
 		}
 
-		internal ServerFileInfos GetFileNames(Schema.Library ALibrary)
+		internal ServerFileInfos GetFileNames(Schema.Library ALibrary, string AEnvironment)
 		{
 			ServerFileInfos LFileInfos = new ServerFileInfos();
 			Schema.Libraries LLibraries = new Schema.Libraries();
@@ -882,7 +882,7 @@ namespace Alphora.Dataphor.DAE.Server
 				
 				foreach (Schema.FileReference LReference in ALibrary.Files)
 				{
-					if (!LFileInfos.Contains(LReference.FileName))
+					if (LReference.Environments.Contains(AEnvironment) && !LFileInfos.Contains(LReference.FileName))
 					{
 						string LFullFileName = GetFullFileName(ALibrary, LReference.FileName);
 						LFileInfos.Add

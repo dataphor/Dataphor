@@ -445,8 +445,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 				if (Schema.Object.NamesEqual(LLibrary.Name, Server.CGeneralLibraryName))
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotModifyGeneralLibrary);
-
-				LLibrary.Files.Add(AFile);
+					
+				bool LFileExists = LLibrary.Files.Contains(AFile.FileName);
+				bool LOldIsAssembly = LFileExists ? LLibrary.Files[AFile.FileName].IsAssembly : false;
+				if (LFileExists)
+					LLibrary.Files[AFile.FileName].IsAssembly = AFile.IsAssembly;
+				else
+					LLibrary.Files.Add(AFile);
 				try
 				{
 					// ensure that all assemblies are registered
@@ -458,12 +463,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 				catch
 				{
-					LLibrary.Files.Remove(AFile);
+					if (LFileExists)
+						LLibrary.Files[AFile.FileName].IsAssembly = LOldIsAssembly;
+					else
+						LLibrary.Files.Remove(AFile);
 					throw;
 				}
 			}
 		}
-
+		
 		public static void RemoveLibraryFile(Program AProgram, string ALibraryName, Schema.FileReference AFile)
 		{
 			lock (AProgram.Catalog.Libraries)
@@ -474,15 +482,84 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 				if (Schema.Object.NamesEqual(LLibrary.Name, Server.CGeneralLibraryName))
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotModifyGeneralLibrary);
-
-				LLibrary.Files.Remove(AFile);
+					
+				if (LLibrary.Files[AFile.FileName].Environments.Count > 0)
+					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, String.Format("File '{0}' in library '{1}' cannot be removed because it has environments defined.", AFile.FileName, ALibraryName));
+					
+				FileReference LRemovedFile = LLibrary.Files.RemoveAt(LLibrary.Files.IndexOf(AFile.FileName));
 				try
 				{
 					LLibrary.SaveToFile(Path.Combine(LLibrary.GetLibraryDirectory(((Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), Schema.LibraryUtility.GetFileName(LLibrary.Name)));
 				}
 				catch
 				{
-					LLibrary.Files.Add(AFile);
+					LLibrary.Files.Add(LRemovedFile);
+					throw;
+				}
+			}
+		}
+		
+		public static void AddLibraryFileEnvironment(Program AProgram, string ALibraryName, string AFileName, string AEnvironment)
+		{
+			lock (AProgram.Catalog.Libraries)
+			{
+				if (!AProgram.Catalog.Libraries.Contains(ALibraryName))
+					SystemCreateLibraryNode.CreateLibrary(AProgram, new Schema.Library(Schema.Object.EnsureUnrooted(ALibraryName)), true, false);
+
+				Schema.Library LLibrary = AProgram.Catalog.Libraries[ALibraryName];
+				if (Schema.Object.NamesEqual(LLibrary.Name, Server.CSystemLibraryName))
+					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotModifySystemLibrary);
+
+				if (Schema.Object.NamesEqual(LLibrary.Name, Server.CGeneralLibraryName))
+					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotModifyGeneralLibrary);
+					
+				int LFileIndex = LLibrary.Files.IndexOf(AFileName);
+				bool LFileAdded = false;
+				if (LFileIndex == 0)
+				{
+					LFileAdded = true;
+					LFileIndex = LLibrary.Files.Add(new FileReference(AFileName));
+				}
+					
+				LLibrary.Files[LFileIndex].Environments.Add(AEnvironment);
+				try
+				{
+					// ensure that all assemblies are registered
+					Schema.LoadedLibrary LLoadedLibrary = AProgram.CatalogDeviceSession.ResolveLoadedLibrary(LLibrary.Name, false);
+					if (LLoadedLibrary != null)
+						LibraryUtility.RegisterLibraryFiles(AProgram, LLibrary, LLoadedLibrary);
+
+					LLibrary.SaveToFile(Path.Combine(LLibrary.GetLibraryDirectory(((Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), Schema.LibraryUtility.GetFileName(LLibrary.Name)));
+				}
+				catch
+				{
+					LLibrary.Files[LFileIndex].Environments.Remove(AEnvironment);
+					if (LFileAdded)
+						LLibrary.Files.RemoveAt(LFileIndex);
+					throw;
+				}
+			}
+		}
+		
+		public static void RemoveLibraryFileEnvironment(Program AProgram, string ALibraryName, string AFileName, string AEnvironment)
+		{
+			lock (AProgram.Catalog.Libraries)
+			{
+				Schema.Library LLibrary = AProgram.Catalog.Libraries[ALibraryName];
+				if (Schema.Object.NamesEqual(LLibrary.Name, Server.CSystemLibraryName))
+					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotModifySystemLibrary);
+
+				if (Schema.Object.NamesEqual(LLibrary.Name, Server.CGeneralLibraryName))
+					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotModifyGeneralLibrary);
+					
+				LLibrary.Files[AFileName].Environments.Remove(AEnvironment);
+				try
+				{
+					LLibrary.SaveToFile(Path.Combine(LLibrary.GetLibraryDirectory(((Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), Schema.LibraryUtility.GetFileName(LLibrary.Name)));
+				}
+				catch
+				{
+					LLibrary.Files[AFileName].Environments.Add(AEnvironment);
 					throw;
 				}
 			}

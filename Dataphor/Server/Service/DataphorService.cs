@@ -494,9 +494,9 @@ namespace Alphora.Dataphor.DAE.Service
 			return FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).GetClassName(AClassName);
 		}
 
-		public ServerFileInfo[] GetFileNames(int AProcessHandle, string AClassName)
+		public ServerFileInfo[] GetFileNames(int AProcessHandle, string AClassName, string AEnvironment)
 		{
-			return FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).GetFileNames(AClassName);
+			return FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).GetFileNames(AClassName, AEnvironment);
 		}
 
 		public int GetFile(int AProcessHandle, string ALibraryName, string AFileName)

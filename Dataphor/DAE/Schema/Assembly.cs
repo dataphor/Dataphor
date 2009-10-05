@@ -39,7 +39,8 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public override bool Equals(object AObject)
 		{
-			return FName.Equals(AObject);
+			RegisteredAssembly LObject = AObject as RegisteredAssembly;
+			return LObject != null && FName.Equals(LObject.Name);
 		}
 	}
 	

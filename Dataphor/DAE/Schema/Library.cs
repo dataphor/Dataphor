@@ -7,6 +7,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Permissions;
 using System.Security.Cryptography;
@@ -124,6 +125,11 @@ namespace Alphora.Dataphor.DAE.Schema
 			return IndexOf(AName) >= 0;
 		}
 	}
+	
+	public static class Environments
+	{
+		public const string WindowsServer = "WindowsServer";
+	}
 		
 	public class FileReference : System.Object, ICloneable
 	{
@@ -139,6 +145,13 @@ namespace Alphora.Dataphor.DAE.Schema
 			FIsAssembly = AIsAssembly;
 		}
 		
+		public FileReference(string AFileName, bool AIsAssembly, IEnumerable<string> AEnvironments) : base()
+		{
+			FFileName = AFileName;
+			FIsAssembly = AIsAssembly;
+			FEnvironments.AddRange(AEnvironments);
+		}
+		
 		private string FFileName;
 		public string FileName
 		{
@@ -152,11 +165,17 @@ namespace Alphora.Dataphor.DAE.Schema
 			get { return FIsAssembly; }
 			set { FIsAssembly = value; }
 		}
+		
+		private List<String> FEnvironments = new List<String>();
+		public List<String> Environments { get { return FEnvironments; } }
 
 		public override bool Equals(object AObject)
 		{
 			FileReference LObject = AObject as FileReference;
-			return (LObject != null) && String.Equals(FFileName, LObject.FileName, StringComparison.OrdinalIgnoreCase) && (FIsAssembly == LObject.IsAssembly);
+			return 
+				(LObject != null) 
+					&& String.Equals(FFileName, LObject.FileName, StringComparison.OrdinalIgnoreCase) 
+					&& (FIsAssembly == LObject.IsAssembly);
 		}
 		
 		public override int GetHashCode()
@@ -166,7 +185,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public object Clone()
 		{
-			return new FileReference(FFileName, FIsAssembly);
+			return new FileReference(FFileName, FIsAssembly, FEnvironments.ToArray());
 		}
 	}
 	
@@ -209,6 +228,11 @@ namespace Alphora.Dataphor.DAE.Schema
 		public bool Contains(string AFileName)
 		{
 			return IndexOf(AFileName) >= 0;
+		}
+		
+		public FileReference this[string AFileName]
+		{
+			get { return this[IndexOf(AFileName)]; }
 		}
 	}
 	

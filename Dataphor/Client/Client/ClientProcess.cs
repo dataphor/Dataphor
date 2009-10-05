@@ -226,9 +226,9 @@ namespace Alphora.Dataphor.DAE.Client
 			return GetServiceInterface().EndGetClassName(LResult);
 		}
 
-		public Alphora.Dataphor.DAE.Server.ServerFileInfo[] GetFileNames(string AClassName)
+		public Alphora.Dataphor.DAE.Server.ServerFileInfo[] GetFileNames(string AClassName, string AEnvironment)
 		{
-			IAsyncResult LResult = GetServiceInterface().BeginGetFileNames(ProcessHandle, AClassName, null, null);
+			IAsyncResult LResult = GetServiceInterface().BeginGetFileNames(ProcessHandle, AClassName, AEnvironment, null, null);
 			LResult.AsyncWaitHandle.WaitOne();
 			return GetServiceInterface().EndGetFileNames(LResult);
 		}

@@ -23,7 +23,7 @@ namespace Alphora.Dataphor.Frontend.Client
 	public abstract class Session : Disposable
 	{
 		public const string CApplicationNodeTableExpression = @".Frontend.GetApplicationNodeTypes(AClientType, AApplicationID)";
-		public const string CGetLibraryFilesExpression = @".Frontend.GetLibraryFiles(ApplicationLibraries where Application_ID = AApplicationID over { Library_Name })";
+		public const string CGetLibraryFilesExpression = @".Frontend.GetLibraryFiles(.Frontend.ClientTypes[AClientType].Environment, ApplicationLibraries where Application_ID = AApplicationID over { Library_Name })";
 		public const string CPrepareApplicationExpression = @".Frontend.PrepareApplication(AApplicationID)";
 
 		public Session(DataSession ASession, bool AOwnsSession)
@@ -150,12 +150,6 @@ namespace Alphora.Dataphor.Frontend.Client
 
 			#if !SILVERLIGHT
 			// Load the files required to register any nodes, if necessary				
-			// TODO: This should be better when we actually have a story here.
-			// The problem is that there is no way to distinguish between files required for different client types.
-			// If a file is required for one client, it will be downloaded by all clients.
-			// The library definition would have to be extended by the Frontend to be able to specify a client affinity (possibly multiple clients) for each file.
-			// Then the CLI must somehow be able to expose the file caching mechanism maintained internally by the catalog repository services.
-			// Right now we are doing this by simply casting and accessing the GetFile() method of the LocalServer.
 			if (DataSession.Server is DAE.Server.LocalServer)
 			{
 				IServerCursor LCursor = DataSession.OpenCursor(CGetLibraryFilesExpression, LParams);

@@ -4,6 +4,8 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
+#define LOADFROMLIBRARIES
+
 using System;
 using System.IO;
 using System.Reflection;
@@ -379,24 +381,27 @@ namespace Alphora.Dataphor.DAE.Schema
 			#if !LOADFROMLIBRARIES
 			foreach (Schema.FileReference LFile in ALibrary.Files)
 			{
-				string LSourceFile = Path.IsPathRooted(LFile.FileName) ? LFile.FileName : Path.Combine(ALibrary.GetLibraryDirectory(((Server.Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), LFile.FileName);
-				string LTargetFile = Path.Combine(PathUtility.GetBinDirectory(), Path.GetFileName(LFile.FileName));
-				
-				if (!File.Exists(LSourceFile))
-					throw new System.IO.IOException(String.Format("File \"{0}\" not found.", LSourceFile));
-				try
+				if ((LFile.Environments.Count == 0) || LFile.Environments.Contains(Environments.WindowsServer))
 				{
-					#if !RESPECTREADONLY
-					FileUtility.EnsureWriteable(LTargetFile);
-					#endif
-                    if ((File.GetLastWriteTimeUtc(LSourceFile) > File.GetLastWriteTimeUtc(LTargetFile))) // source newer than target
-                    {
-                        File.Copy(LSourceFile, LTargetFile, true);
-                    }
-				}
-				catch (IOException)
-				{
-					// Ignore this exception so that assembly copying does not fail if the assembly is already loaded
+					string LSourceFile = Path.IsPathRooted(LFile.FileName) ? LFile.FileName : Path.Combine(ALibrary.GetLibraryDirectory(((Server.Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), LFile.FileName);
+					string LTargetFile = Path.Combine(PathUtility.GetBinDirectory(), Path.GetFileName(LFile.FileName));
+					
+					if (!File.Exists(LSourceFile))
+						throw new System.IO.IOException(String.Format("File \"{0}\" not found.", LSourceFile));
+					try
+					{
+						#if !RESPECTREADONLY
+						FileUtility.EnsureWriteable(LTargetFile);
+						#endif
+						if ((File.GetLastWriteTimeUtc(LSourceFile) > File.GetLastWriteTimeUtc(LTargetFile))) // source newer than target
+						{
+							File.Copy(LSourceFile, LTargetFile, true);
+						}
+					}
+					catch (IOException)
+					{
+						// Ignore this exception so that assembly copying does not fail if the assembly is already loaded
+					}
 				}
 			}
 			#endif
@@ -404,10 +409,10 @@ namespace Alphora.Dataphor.DAE.Schema
 			// Load assemblies after all files are copied in so that multi-file assemblies and other dependencies are certain to be present
 			foreach (Schema.FileReference LFile in ALibrary.Files)
 			{
-				if (LFile.IsAssembly)
+				if (LFile.IsAssembly && ((LFile.Environments.Count == 0) || LFile.Environments.Contains(Environments.WindowsServer)))
 				{
 					#if LOADFROMLIBRARIES
-					string LSourceFile = Path.IsPathRooted(LFile.FileName) ? LFile.FileName : Path.Combine(ALibrary.GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory), LFile.FileName);
+					string LSourceFile = Path.IsPathRooted(LFile.FileName) ? LFile.FileName : Path.Combine(ALibrary.GetLibraryDirectory(((Server.Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), LFile.FileName);
                     Assembly LAssembly = Assembly.LoadFrom(LSourceFile);
 					#else
                     string LTargetFile = Path.Combine(PathUtility.GetBinDirectory(), Path.GetFileName(LFile.FileName));
