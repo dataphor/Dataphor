@@ -29,6 +29,11 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			{
 				case ConnectStatus.SelectHost : ConnectContent.Content = new ConnectHost(FWorkItem); break;
 				case ConnectStatus.LoadingInstances : ConnectContent.Content = "Loading instances..."; break;
+				case ConnectStatus.SelectInstance : ConnectContent.Content = new ConnectInstances(FWorkItem); break;
+				case ConnectStatus.Login : ConnectContent.Content = new ConnectLogin(FWorkItem); break;
+				case ConnectStatus.Connecting : ConnectContent.Content = "Connecting..."; break;
+				case ConnectStatus.SelectApplication : ConnectContent.Content = new ConnectApplication(FWorkItem); break;
+				case ConnectStatus.StartingSession : ConnectContent.Content = "Starting session..."; break;
 				case ConnectStatus.Complete : OnComplete(); break;
 			}
 		}

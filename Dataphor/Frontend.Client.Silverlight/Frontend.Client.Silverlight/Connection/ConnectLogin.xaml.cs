@@ -28,7 +28,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
         private void Button_Click(object ASender, System.Windows.RoutedEventArgs AArgs)
         {
-			// TODO: update binding
+			BindingUtility.UpdateTextBoxBindingSources(this);
 			FWorkItem.BeginLogin();
         }
         

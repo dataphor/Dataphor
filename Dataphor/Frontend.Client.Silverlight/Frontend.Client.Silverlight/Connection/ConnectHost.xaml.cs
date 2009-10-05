@@ -20,7 +20,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
         private void Button_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-			// TODO: update binding
+			BindingUtility.UpdateTextBoxBindingSources(this);
 			FWorkItem.BeginLoadInstances();
         }
     }

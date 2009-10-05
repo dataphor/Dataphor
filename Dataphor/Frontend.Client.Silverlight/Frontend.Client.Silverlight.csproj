@@ -142,6 +142,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Frontend.Client.Silverlight\BindingUtility.cs" />
     <Compile Include="Frontend.Client.Silverlight\Connection\ConnectApplication.xaml.cs">
       <DependentUpon>ConnectApplication.xaml</DependentUpon>
     </Compile>
