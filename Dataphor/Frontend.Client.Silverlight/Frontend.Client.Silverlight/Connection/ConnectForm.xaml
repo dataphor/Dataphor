@@ -22,7 +22,7 @@
   			<Border Background="#7F182A9F" CornerRadius="5,5,0,0">
   				<TextBlock Text="Connect..." Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="4"/>
   			</Border>
-  			<ContentPresenter x:Name="ConnectContent" Grid.Row="1" Margin="8" />
+  			<ContentPresenter x:Name="ConnectContent" Grid.Row="1" Margin="8" MinWidth="250" MinHeight="150" />
   		</Grid>
   	</Border>
 

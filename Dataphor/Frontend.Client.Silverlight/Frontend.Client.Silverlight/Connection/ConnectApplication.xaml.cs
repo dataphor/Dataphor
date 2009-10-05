@@ -23,5 +23,11 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		}
 		
 		private ConnectWorkItem FWorkItem;
+
+		private void StartButton_Click(object sender, System.Windows.RoutedEventArgs e)
+		{
+			// TODO: Set FWorkItem.ApplicationID
+			FWorkItem.BeginStartApplication();
+		}
 	}
 }

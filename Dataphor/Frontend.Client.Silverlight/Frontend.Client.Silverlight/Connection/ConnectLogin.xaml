@@ -9,7 +9,7 @@
 	
 	<StackPanel x:Name="LayoutRoot">
 		<TextBlock Text="User Name"/>
-		<TextBox Text="{Binding UserName, Mode=TwoWay}" MinWidth="200" HorizontalAlignment="Left" />
+		<TextBox x:Name="UserNameBox" Text="{Binding UserName, Mode=TwoWay, UpdateSourceTrigger=Explicit}" MinWidth="200" HorizontalAlignment="Left" TextChanged="TextBox_TextChanged" />
 		<TextBlock Text="Password"/>
 		<PasswordBox Password="{Binding Password, Mode=TwoWay}" MinWidth="150" HorizontalAlignment="Left" />
 		<Grid Margin="0,4,0,0">

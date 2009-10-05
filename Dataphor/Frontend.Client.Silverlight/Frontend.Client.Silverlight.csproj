@@ -159,6 +159,7 @@
       <DependentUpon>ConnectLogin.xaml</DependentUpon>
     </Compile>
     <Compile Include="Frontend.Client.Silverlight\Connection\ConnectWorkItem.cs" />
+    <None Include="Frontend.Client.Silverlight\Nodes\Form.cs" />
     <Compile Include="Frontend.Client.Silverlight\Nodes\Timer.cs" />
     <Compile Include="Frontend.Client.Silverlight\SilverlightClientException.cs" />
     <Compile Include="Frontend.Client.Silverlight\DocumentExpression.cs" />

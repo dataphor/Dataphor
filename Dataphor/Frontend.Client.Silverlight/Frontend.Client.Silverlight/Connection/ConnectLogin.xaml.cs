@@ -20,7 +20,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		private void WorkItemPropertyChanged(object ASender, PropertyChangedEventArgs AArgs)
 		{
-			if (AArgs.PropertyName == "UserName" || AArgs.PropertyName == "Password")
+			if (AArgs.PropertyName == "UserName")
 				UpdateLoginEnabled();
 		}
         
@@ -35,7 +35,13 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		private void UpdateLoginEnabled()
 		{
 			LoginButton.IsEnabled = !String.IsNullOrEmpty(FWorkItem.HostName) && !String.IsNullOrEmpty(FWorkItem.InstanceName) 
-				&& !String.IsNullOrEmpty(FWorkItem.UserName) && !String.IsNullOrEmpty(FWorkItem.Password);
+				&& !String.IsNullOrEmpty(FWorkItem.UserName);
+		}
+
+		private void TextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+		{
+			// Update with every change (in WPF, this could be accomplished through the UpdateSourceTrigger enum)
+			UserNameBox.GetBindingExpression(TextBox.TextProperty).UpdateSource();
 		}
     }
 }

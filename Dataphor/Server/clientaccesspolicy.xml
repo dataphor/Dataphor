@@ -7,7 +7,8 @@
 				<domain uri="*"/>
 			</allow-from>
 			<grant-to>
-				<resource path="/api" include-subpaths="true"/>
+				<resource path="/listener" include-subpaths="true"/>
+				<resource path="/instance" include-subpaths="true"/>
 			</grant-to>
 		</policy>
 	</cross-domain-access>

@@ -9,7 +9,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		{
 			InitializeComponent();
 			
-			var LConnectItem = new ConnectWorkItem();
+			var LConnectItem = new ConnectWorkItem(RootContent);
 			var LConnectForm = new ConnectForm(LConnectItem);
 			RootContent.Content = LConnectForm;
 			LConnectForm.Complete += ConnectionComplete;

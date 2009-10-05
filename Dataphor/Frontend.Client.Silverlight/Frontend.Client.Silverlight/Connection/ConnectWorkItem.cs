@@ -10,6 +10,13 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 	/// <summary> Manages the connection work-flow. </summary>
 	public class ConnectWorkItem  : INotifyPropertyChanged
 	{
+		public ConnectWorkItem(ContentControl AContainer)
+		{
+			FContainer = AContainer;
+		}
+		
+		private ContentControl FContainer;
+		
 		private ConnectStatus FStatus;
 
 		public ConnectStatus Status
@@ -105,7 +112,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			}
 		}
 
-		private string FUserName;
+		private string FUserName = "Admin";
 		
 		public string UserName
 		{
@@ -154,7 +161,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
     							}
     					};
     				LDataSession.Alias.SessionInfo.UserID = FUserName;
-    				LDataSession.Alias.SessionInfo.Password = FPassword;
+    				LDataSession.Alias.SessionInfo.Password = FPassword == null ? "" : FPassword;
     				LDataSession.Open();
     				try
     				{
@@ -210,7 +217,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			}
 		}
 		
-		private void BeginStartApplication(EventHandler AOnComplete, ContentControl AContainer)
+		public void BeginStartApplication()
 		{
 			Silverlight.Session.BeginInvoke<Silverlight.Session>
 			(
@@ -218,7 +225,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				{
 					var LSession = new Silverlight.Session(DataSession, true);
 					var LStartingDocument = LSession.SetApplication(FApplicationID);
-					LSession.Start(LStartingDocument, AOnComplete, AContainer);
+					LSession.Start(LStartingDocument, FContainer);
 					return LSession;
 				},
 				(Exception LException) =>

@@ -94,12 +94,13 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		#region Execution
 
+		public event EventHandler OnComplete;
+
 		private IHost FRootFormHost;
-		private EventHandler FOnComplete;
 		private ContentControl FContainer;
 
 		/// <remarks> Must call SetApplication or SetLibrary before calling Start().  Upon completion, the given callback will be invoked and the session will be disposed. </remarks>
-		public Control Start(string ADocument, EventHandler AOnComplete, ContentControl AContainer)
+		public Control Start(string ADocument, ContentControl AContainer)
 		{
 			TimingUtility.PushTimer(String.Format("Silverlight.Session.Start('{0}')", ADocument));
 			try
@@ -109,7 +110,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				try
 				{
 					FRootFormHost.NextRequest = new Request(ADocument);
-					FOnComplete = AOnComplete;
 					FContainer = AContainer;
 					RootFormAdvance(null);
 					return ((ISilverlightFormInterface)FRootFormHost.Children[0]).Control;
@@ -154,11 +154,8 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				LoadNextForm(FRootFormHost).Show(new FormInterfaceHandler(RootFormAdvance), FContainer);
 			else
 			{
-				if (FOnComplete != null)
-				{
-					FOnComplete(this, EventArgs.Empty);
-					FOnComplete = null;
-				}
+				if (OnComplete != null)
+					OnComplete(this, EventArgs.Empty);
 				Dispose();
 			}
 		}

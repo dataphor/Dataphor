@@ -8,11 +8,13 @@
     xmlns:layout="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Layout.Toolkit"
     d:DesignWidth="640" d:DesignHeight="480"
     >
-	<UserControl.Background>
-		<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-			<GradientStop Color="#FFE7EBFF" Offset="0"/>
-			<GradientStop Color="White" Offset="1"/>
-		</LinearGradientBrush>
-	</UserControl.Background>
-	<layout:TransitioningContentControl x:Name="RootContent"/>
+	<Border>
+		<Border.Background>
+			<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+				<GradientStop Color="#FFEDEFFD" Offset="0"/>
+				<GradientStop Color="White" Offset="1"/>
+			</LinearGradientBrush>
+		</Border.Background>
+		<layout:TransitioningContentControl x:Name="RootContent"/>
+	</Border>
 </UserControl>

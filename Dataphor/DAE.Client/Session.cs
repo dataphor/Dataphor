@@ -1015,8 +1015,7 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			get
 			{
-				CheckActive();
-				return FServerConnection.Alias;
+				return FAlias;
 			}
 			set
 			{
