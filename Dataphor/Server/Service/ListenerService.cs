@@ -28,7 +28,7 @@ namespace Alphora.Dataphor.DAE.Server
 		/// Establishes a listener in the current process, using the listener configuration settings if available.
 		/// </summary>
 		/// <returns>True if a listener is established in this app domain.</returns>
-		public static bool EstablishListener()
+		public static bool StartListener()
 		{
 			if (FListenerHost != null)
 				return true;
@@ -59,6 +59,15 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 			
 			return true;
+		}
+		
+		public static void StopListener()
+		{
+			if (FListenerHost != null)
+			{
+				FListenerHost.Close();
+				FListenerHost = null;
+			}
 		}
 		
 		public string[] EnumerateInstances()

@@ -28,6 +28,11 @@ namespace Alphora.Dataphor.DAE.Contracts
 		{
 			return String.Format("http://{0}:{1}/listener/service", AHostName, CDefaultListenerPortNumber);
 		}
+		
+		public static string BuildCrossDomainServiceURI(string AHostName, int APortNumber)
+		{
+			return String.Format("http://{0}:{1}", AHostName, APortNumber);
+		}
 
 		public static Binding GetBinding()
 		{

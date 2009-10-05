@@ -45,12 +45,16 @@
     <Reference Include="System.ServiceModel">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.ServiceModel.Web">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Contracts\ICrossDomainService.cs" />
     <Compile Include="Contracts\IDataphorService.cs" />
     <Compile Include="Connection\DotNetCommand.cs" />
     <Compile Include="Connection\DotNetConnection.cs" />
@@ -77,6 +81,7 @@
     <Compile Include="Schema\LibraryUtility.cs" />
     <Compile Include="Server\CatalogCache.cs" />
     <Compile Include="Server\InstanceManager.cs" />
+    <Compile Include="Service\CrossDomainService.cs" />
     <Compile Include="Service\ListenerService.cs" />
     <Compile Include="NativeCLI\NativeCLIUtility.cs" />
     <Compile Include="NativeCLI\NativeMarshal.cs" />
@@ -103,6 +108,9 @@
     <Compile Include="Streams\FileStreamProvider.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="clientaccesspolicy.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Language.SQL\BNF.txt" />
     <Content Include="Language.SQL\BNFDifferences.txt" />
   </ItemGroup>

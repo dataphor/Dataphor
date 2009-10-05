@@ -109,7 +109,12 @@ namespace Alphora.Dataphor.DAE.Service
 					FNativeServiceHost.Open();
 					
 					// Start the listener
-					ListenerService.EstablishListener();
+					ListenerService.StartListener();
+					
+					// Start the CrossDomainServer
+					// This is required in order to serve a ClientAccessPolicy to enable cross-domain access in a sliverlight application.
+					// Without this, the Silverlight client will not work correctly.
+					CrossDomainService.StartCrossDomainService("localhost", LInstance.PortNumber);
 				}
 				catch
 				{
