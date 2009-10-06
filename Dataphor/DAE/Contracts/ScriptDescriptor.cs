@@ -22,15 +22,15 @@ namespace Alphora.Dataphor.DAE.Contracts
 		}
 		
 		[DataMember]
-		private int FHandle;
+		internal int FHandle;
 		public int Handle { get { return FHandle; } }
 		
 		[DataMember]
-		private List<BatchDescriptor> FBatches;
+		internal List<BatchDescriptor> FBatches;
 		public List<BatchDescriptor> Batches { get { return FBatches; } }
 		
 		[DataMember]
-		private ParserMessages FMessages;
+		internal ParserMessages FMessages;
 		public ParserMessages Messages { get { return FMessages; } }
 	}
 }

@@ -20,11 +20,11 @@ namespace Alphora.Dataphor.DAE.Contracts
 		}
 		
 		[DataMember]
-		private int FHandle;
+		internal int FHandle;
 		public int Handle { get { return FHandle; } }
 
 		[DataMember]
-		private int FID;
+		internal int FID;
 		public int ID { get { return FID; } }
 	}
 }

@@ -21,15 +21,15 @@ namespace Alphora.Dataphor.DAE.Contracts
 		}
 		
 		[DataMember]
-		private int FHandle;
+		internal int FHandle;
 		public int Handle { get { return FHandle; } }
 		
 		[DataMember]
-		private bool FIsExpression;
+		internal bool FIsExpression;
 		public bool IsExpression { get { return FIsExpression; } }
 		
 		[DataMember]
-		private int FLine;
+		internal int FLine;
 		public int Line { get { return FLine; } }
 	}
 }

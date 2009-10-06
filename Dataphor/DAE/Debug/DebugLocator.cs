@@ -44,21 +44,21 @@ namespace Alphora.Dataphor.DAE.Debug
 		}
 		
 		[DataMember]
-		private string FLocator;
+		internal string FLocator;
 		/// <summary>
 		/// Gets the locator reference for this instance.
 		/// </summary>
 		public string Locator { get { return FLocator; } }
 		
 		[DataMember]
-		private int FLine;
+		internal int FLine;
 		/// <summary>
 		/// Gets the line number (1-based) at which the locator begins.
 		/// </summary>
 		public int Line { get { return FLine; } }
 		
 		[DataMember]
-		private int FLinePos;
+		internal int FLinePos;
 		/// <summary>
 		/// Gets the character position (1-based) at which the locator begins.
 		/// </summary>

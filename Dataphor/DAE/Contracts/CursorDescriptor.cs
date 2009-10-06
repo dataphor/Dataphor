@@ -28,19 +28,19 @@ namespace Alphora.Dataphor.DAE.Contracts
 		}
 		
 		[DataMember]
-		private int FHandle;
+		internal int FHandle;
 		public int Handle { get { return FHandle; } }
 
 		[DataMember]
-		private CursorCapability FCapabilities;
+		internal CursorCapability FCapabilities;
 		public CursorCapability Capabilities { get { return FCapabilities; } }
 		
 		[DataMember]
-		private CursorType FCursorType;
+		internal CursorType FCursorType;
 		public CursorType CursorType { get { return FCursorType; } }
 
 		[DataMember]
-		private CursorIsolation FCursorIsolation;
+		internal CursorIsolation FCursorIsolation;
 		public CursorIsolation CursorIsolation { get { return FCursorIsolation; } }
 	}
 }
