@@ -35,6 +35,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Data" />
     <Reference Include="System.Runtime.Serialization">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
@@ -46,6 +47,8 @@
   <ItemGroup>
     <Compile Include="IClientNativeCLIService.cs" />
     <Compile Include="NativeCLI.cs" />
+    <Compile Include="NativeCLIFault.cs" />
+    <Compile Include="NativeCLIFaultUtility.cs" />
     <Compile Include="NativeCLISession.cs" />
     <Compile Include="NativeCLIException.cs" />
     <Compile Include="NativeSessionInfo.cs" />

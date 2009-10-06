@@ -59,5 +59,10 @@ namespace Alphora.Dataphor.DAE.Device
 		public DeviceException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, AParams) {}
 		
 		protected DeviceException(ResourceManager AResourceManager, int AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, params object[] AParams) : base(AResourceManager, AErrorCode, ASeverity, AInnerException, AParams) {}
+		
+		public DeviceException(ErrorSeverity ASeverity, int ACode, string AMessage, string ADetails, string AServerContext, DataphorException AInnerException) 
+			: base(ASeverity, ACode, AMessage, ADetails, AServerContext, AInnerException)
+		{
+		}
 	}
 }

@@ -3,6 +3,7 @@
 	© Copyright 2000-2009 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
 using System;
 using System.Text;
 using System.Collections.Generic;
@@ -46,6 +47,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </remarks>
 		/// <returns>A session handle that can be used in subsequent calls.</returns>
 		[OperationContract]
+		[FaultContract(typeof(NativeCLIFault))]
 		NativeSessionHandle StartSession(NativeSessionInfo ASessionInfo);
 		
 		/// <summary>
@@ -55,6 +57,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Once a session has been stopped, the session handle is no longer valid.
 		/// </remarks>
 		[OperationContract]
+		[FaultContract(typeof(NativeCLIFault))]
 		void StopSession(NativeSessionHandle ASessionHandle);
 
 		#endregion
@@ -65,6 +68,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Begins a new transaction.
 		/// </summary>
 		[OperationContract]
+		[FaultContract(typeof(NativeCLIFault))]
         void BeginTransaction(NativeSessionHandle ASessionHandle, NativeIsolationLevel AIsolationLevel);
         
         /// <summary>
@@ -76,6 +80,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// 2PC distributed transactions.
         /// </remarks>
 		[OperationContract]
+		[FaultContract(typeof(NativeCLIFault))]
         void PrepareTransaction(NativeSessionHandle ASessionHandle);
         
         /// <summary>
@@ -87,6 +92,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// Will raise if no transaction is currently active.
         /// </remarks>
 		[OperationContract]
+		[FaultContract(typeof(NativeCLIFault))]
         void CommitTransaction(NativeSessionHandle ASessionHandle);
         
         /// <summary>
@@ -97,12 +103,14 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// Will raise if no transaction is currently active.
         /// </remarks>
 		[OperationContract]
+		[FaultContract(typeof(NativeCLIFault))]
         void RollbackTransaction(NativeSessionHandle ASessionHandle);
         
         /// <summary>
 		/// Returns the number of active transactions.
 		/// </summary>
 		[OperationContract]
+		[FaultContract(typeof(NativeCLIFault))]
         int GetTransactionCount(NativeSessionHandle ASessionHandle);
 
 		#endregion
@@ -126,6 +134,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </remarks>
 		/// <returns>The result of the execution, if the statement is an expression, null otherwise.</returns>
 		[OperationContract]
+		[FaultContract(typeof(NativeCLIFault))]
 		NativeResult ExecuteStatement(NativeSessionInfo ASessionInfo, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions);
 
 		/// <summary>
@@ -138,6 +147,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AOperations">The operations to be executed.</param>
 		/// <returns>An array of NativeResult objects containing the results of the executions, if any.</returns>
 		[OperationContract]
+		[FaultContract(typeof(NativeCLIFault))]
 		NativeResult[] ExecuteStatements(NativeSessionInfo ASessionInfo, NativeExecuteOperation[] AOperations);
 		
 		/// <summary>
@@ -153,6 +163,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </remarks>
 		/// <returns>The result of the execution, if the statement is an expression, null otherwise.</returns>
 		[OperationContract]
+		[FaultContract(typeof(NativeCLIFault))]
 		NativeResult SessionExecuteStatement(NativeSessionHandle ASessionHandle, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions);
 
 		/// <summary>
@@ -161,6 +172,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AOperations">The operations to be executed.</param>
 		/// <returns>An array of NativeResult objects containing the results of the executions, if any.</returns>
 		[OperationContract]
+		[FaultContract(typeof(NativeCLIFault))]
 		NativeResult[] SessionExecuteStatements(NativeSessionHandle ASessionHandle, NativeExecuteOperation[] AOperations);
 		
 		#endregion

@@ -21,7 +21,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 	/// this class provides a remotable wrapper that routes Native CLI calls
 	/// to the NativeServer established by the ServerHost.
 	/// </remarks>
-	[ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, IncludeExceptionDetailInFaults = true)]
+	[ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
 	public class NativeCLIService : INativeCLIService
 	{
 		public NativeCLIService(NativeServer ANativeServer)
@@ -35,57 +35,134 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 
 		public NativeSessionHandle StartSession(NativeSessionInfo ASessionInfo)
 		{
-			return FNativeServer.StartSession(ASessionInfo);
+			try
+			{
+				return FNativeServer.StartSession(ASessionInfo);
+			}
+			catch (NativeCLIException LException)
+			{
+				throw new FaultException<NativeCLIFault>(NativeCLIFaultUtility.ExceptionToFault(LException), LException.Message);
+			}
 		}
 
 		public void StopSession(NativeSessionHandle ASessionHandle)
 		{
-			FNativeServer.StopSession(ASessionHandle);
+			try
+			{
+				FNativeServer.StopSession(ASessionHandle);
+			}
+			catch (NativeCLIException LException)
+			{
+				throw new FaultException<NativeCLIFault>(NativeCLIFaultUtility.ExceptionToFault(LException), LException.Message);
+			}
 		}
 
 		public void BeginTransaction(NativeSessionHandle ASessionHandle, NativeIsolationLevel AIsolationLevel)
 		{
-			FNativeServer.BeginTransaction(ASessionHandle, AIsolationLevel);
+			try
+			{
+				FNativeServer.BeginTransaction(ASessionHandle, AIsolationLevel);
+			}
+			catch (NativeCLIException LException)
+			{
+				throw new FaultException<NativeCLIFault>(NativeCLIFaultUtility.ExceptionToFault(LException), LException.Message);
+			}
 		}
 
 		public void PrepareTransaction(NativeSessionHandle ASessionHandle)
 		{
-			FNativeServer.PrepareTransaction(ASessionHandle);
+			try
+			{
+				FNativeServer.PrepareTransaction(ASessionHandle);
+			}
+			catch (NativeCLIException LException)
+			{
+				throw new FaultException<NativeCLIFault>(NativeCLIFaultUtility.ExceptionToFault(LException), LException.Message);
+			}
 		}
 
 		public void CommitTransaction(NativeSessionHandle ASessionHandle)
 		{
-			FNativeServer.CommitTransaction(ASessionHandle);
+			try
+			{
+				FNativeServer.CommitTransaction(ASessionHandle);
+			}
+			catch (NativeCLIException LException)
+			{
+				throw new FaultException<NativeCLIFault>(NativeCLIFaultUtility.ExceptionToFault(LException), LException.Message);
+			}
 		}
 
 		public void RollbackTransaction(NativeSessionHandle ASessionHandle)
 		{
-			FNativeServer.RollbackTransaction(ASessionHandle);
+			try
+			{
+				FNativeServer.RollbackTransaction(ASessionHandle);
+			}
+			catch (NativeCLIException LException)
+			{
+				throw new FaultException<NativeCLIFault>(NativeCLIFaultUtility.ExceptionToFault(LException), LException.Message);
+			}
 		}
 
 		public int GetTransactionCount(NativeSessionHandle ASessionHandle)
 		{
-			return FNativeServer.GetTransactionCount(ASessionHandle);
+			try
+			{
+				return FNativeServer.GetTransactionCount(ASessionHandle);
+			}
+			catch (NativeCLIException LException)
+			{
+				throw new FaultException<NativeCLIFault>(NativeCLIFaultUtility.ExceptionToFault(LException), LException.Message);
+			}
 		}
 
 		public NativeResult ExecuteStatement(NativeSessionInfo ASessionInfo, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions)
 		{
-			return FNativeServer.Execute(ASessionInfo, AStatement, AParams, AOptions);
+			try
+			{
+				return FNativeServer.Execute(ASessionInfo, AStatement, AParams, AOptions);
+			}
+			catch (NativeCLIException LException)
+			{
+				throw new FaultException<NativeCLIFault>(NativeCLIFaultUtility.ExceptionToFault(LException), LException.Message);
+			}
 		}
 
 		public NativeResult[] ExecuteStatements(NativeSessionInfo ASessionInfo, NativeExecuteOperation[] AOperations)
 		{
-			return FNativeServer.Execute(ASessionInfo, AOperations);
+			try
+			{
+				return FNativeServer.Execute(ASessionInfo, AOperations);
+			}
+			catch (NativeCLIException LException)
+			{
+				throw new FaultException<NativeCLIFault>(NativeCLIFaultUtility.ExceptionToFault(LException), LException.Message);
+			}
 		}
 
 		public NativeResult SessionExecuteStatement(NativeSessionHandle ASessionHandle, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions)
 		{
-			return FNativeServer.Execute(ASessionHandle, AStatement, AParams, AOptions);
+			try
+			{
+				return FNativeServer.Execute(ASessionHandle, AStatement, AParams, AOptions);
+			}
+			catch (NativeCLIException LException)
+			{
+				throw new FaultException<NativeCLIFault>(NativeCLIFaultUtility.ExceptionToFault(LException), LException.Message);
+			}
 		}
 
 		public NativeResult[] SessionExecuteStatements(NativeSessionHandle ASessionHandle, NativeExecuteOperation[] AOperations)
 		{
-			return FNativeServer.Execute(ASessionHandle, AOperations);
+			try
+			{
+				return FNativeServer.Execute(ASessionHandle, AOperations);
+			}
+			catch (NativeCLIException LException)
+			{
+				throw new FaultException<NativeCLIFault>(NativeCLIFaultUtility.ExceptionToFault(LException), LException.Message);
+			}
 		}
 
 		#endregion

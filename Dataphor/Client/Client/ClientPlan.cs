@@ -5,6 +5,7 @@
 */
 
 using System;
+using System.ServiceModel;
 using System.Collections.Generic;
 
 using Alphora.Dataphor.DAE;
@@ -78,11 +79,18 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public void Execute(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, ProcessCallInfo ACallInfo)
 		{
-			IAsyncResult LResult = GetServiceInterface().BeginExecutePlan(PlanHandle, ACallInfo, AParams, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			ExecuteResult LExecuteResult = GetServiceInterface().EndExecutePlan(LResult);
-			AExecuteTime = LExecuteResult.ExecuteTime;
-			AParams.Data = LExecuteResult.ParamData;
+			try
+			{
+				IAsyncResult LResult = GetServiceInterface().BeginExecutePlan(PlanHandle, ACallInfo, AParams, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				ExecuteResult LExecuteResult = GetServiceInterface().EndExecutePlan(LResult);
+				AExecuteTime = LExecuteResult.ExecuteTime;
+				AParams.Data = LExecuteResult.ParamData;
+			}
+			catch (FaultException<DataphorFault> LFault)
+			{
+				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+			}
 		}
 
 		#endregion
@@ -96,44 +104,72 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public byte[] Evaluate(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, ProcessCallInfo ACallInfo)
 		{
-			IAsyncResult LResult = GetServiceInterface().BeginEvaluatePlan(PlanHandle, ACallInfo, AParams, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			EvaluateResult LEvaluateResult = GetServiceInterface().EndEvaluatePlan(LResult);
-			AExecuteTime = LEvaluateResult.ExecuteTime;
-			FProgramStatistics = AExecuteTime;
-			AParams.Data = LEvaluateResult.ParamData;
-			return LEvaluateResult.Result;
+			try
+			{
+				IAsyncResult LResult = GetServiceInterface().BeginEvaluatePlan(PlanHandle, ACallInfo, AParams, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				EvaluateResult LEvaluateResult = GetServiceInterface().EndEvaluatePlan(LResult);
+				AExecuteTime = LEvaluateResult.ExecuteTime;
+				FProgramStatistics = AExecuteTime;
+				AParams.Data = LEvaluateResult.ParamData;
+				return LEvaluateResult.Result;
+			}
+			catch (FaultException<DataphorFault> LFault)
+			{
+				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+			}
 		}
 
 		public IRemoteServerCursor Open(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, ProcessCallInfo ACallInfo)
 		{
-			IAsyncResult LResult = GetServiceInterface().BeginOpenPlanCursor(PlanHandle, ACallInfo, AParams, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			CursorResult LCursorResult = GetServiceInterface().EndOpenPlanCursor(LResult);
-			AExecuteTime = LCursorResult.ExecuteTime;
-			FProgramStatistics = AExecuteTime;
-			AParams.Data = LCursorResult.ParamData;
-			return new ClientCursor(this, LCursorResult.CursorDescriptor);
+			try
+			{
+				IAsyncResult LResult = GetServiceInterface().BeginOpenPlanCursor(PlanHandle, ACallInfo, AParams, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				CursorResult LCursorResult = GetServiceInterface().EndOpenPlanCursor(LResult);
+				AExecuteTime = LCursorResult.ExecuteTime;
+				FProgramStatistics = AExecuteTime;
+				AParams.Data = LCursorResult.ParamData;
+				return new ClientCursor(this, LCursorResult.CursorDescriptor);
+			}
+			catch (FaultException<DataphorFault> LFault)
+			{
+				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+			}
 		}
 
 		public IRemoteServerCursor Open(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, out Guid[] ABookmarks, int ACount, out RemoteFetchData AFetchData, ProcessCallInfo ACallInfo)
 		{
-			IAsyncResult LResult = GetServiceInterface().BeginOpenPlanCursorWithFetch(PlanHandle, ACallInfo, AParams, ACount, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			CursorWithFetchResult LCursorResult = GetServiceInterface().EndOpenPlanCursorWithFetch(LResult);
-			AExecuteTime = LCursorResult.ExecuteTime;
-			FProgramStatistics = AExecuteTime;
-			AParams.Data = LCursorResult.ParamData;
-			ABookmarks = LCursorResult.Bookmarks;
-			AFetchData = LCursorResult.FetchData;
-			return new ClientCursor(this, LCursorResult.CursorDescriptor);
+			try
+			{
+				IAsyncResult LResult = GetServiceInterface().BeginOpenPlanCursorWithFetch(PlanHandle, ACallInfo, AParams, ACount, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				CursorWithFetchResult LCursorResult = GetServiceInterface().EndOpenPlanCursorWithFetch(LResult);
+				AExecuteTime = LCursorResult.ExecuteTime;
+				FProgramStatistics = AExecuteTime;
+				AParams.Data = LCursorResult.ParamData;
+				ABookmarks = LCursorResult.Bookmarks;
+				AFetchData = LCursorResult.FetchData;
+				return new ClientCursor(this, LCursorResult.CursorDescriptor);
+			}
+			catch (FaultException<DataphorFault> LFault)
+			{
+				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+			}
 		}
 
 		public void Close(IRemoteServerCursor ACursor, ProcessCallInfo ACallInfo)
 		{
-			IAsyncResult LResult = GetServiceInterface().BeginCloseCursor(((ClientCursor)ACursor).CursorHandle, ACallInfo, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			GetServiceInterface().EndCloseCursor(LResult);
+			try
+			{
+				IAsyncResult LResult = GetServiceInterface().BeginCloseCursor(((ClientCursor)ACursor).CursorHandle, ACallInfo, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				GetServiceInterface().EndCloseCursor(LResult);
+			}
+			catch (FaultException<DataphorFault> LFault)
+			{
+				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+			}
 		}
 
 		#endregion

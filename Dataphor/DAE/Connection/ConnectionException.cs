@@ -136,5 +136,11 @@ namespace Alphora.Dataphor.DAE.Connection
 				
 			return base.GetDetails();
 		}
+		
+		public ConnectionException(ErrorSeverity ASeverity, int ACode, string AMessage, string ADetails, string AServerContext, string AStatement, DataphorException AInnerException) 
+			: base(ASeverity, ACode, AMessage, ADetails, AServerContext, AInnerException)
+		{
+			FStatement = AStatement;
+		}
 	}
 }

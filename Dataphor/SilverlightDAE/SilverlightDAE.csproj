@@ -213,6 +213,12 @@
     <Compile Include="..\Common\Contracts\IClientListenerService.cs">
       <Link>Common\Contracts\IClientListenerService.cs</Link>
     </Compile>
+    <Compile Include="..\Common\Contracts\ListenerFault.cs">
+      <Link>Common\Contracts\ListenerFault.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Contracts\ListenerFaultUtility.cs">
+      <Link>Common\Contracts\ListenerFaultUtility.cs</Link>
+    </Compile>
     <Compile Include="..\Common\Contracts\ServiceClient.cs">
       <Link>Common\Contracts\ServiceClient.cs</Link>
     </Compile>
@@ -299,6 +305,12 @@
     </Compile>
     <Compile Include="..\DAE\Contracts\CursorDescriptor.cs">
       <Link>DAE\Contracts\CursorDescriptor.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Contracts\DataphorFault.cs">
+      <Link>DAE\Contracts\DataphorFault.cs</Link>
+    </Compile>
+    <Compile Include="..\DAE\Contracts\DataphorFaultUtility.cs">
+      <Link>DAE\Contracts\DataphorFaultUtility.cs</Link>
     </Compile>
     <Compile Include="..\DAE\Contracts\PlanDescriptor.cs">
       <Link>DAE\Contracts\PlanDescriptor.cs</Link>

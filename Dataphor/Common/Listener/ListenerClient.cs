@@ -19,23 +19,44 @@ namespace Alphora.Dataphor.DAE.Listener
 		
 		public string[] EnumerateInstances()
 		{
-			IAsyncResult LResult = GetInterface().BeginEnumerateInstances(null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			return GetInterface().EndEnumerateInstances(LResult);
+			try
+			{
+				IAsyncResult LResult = GetInterface().BeginEnumerateInstances(null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				return GetInterface().EndEnumerateInstances(LResult);
+			}
+			catch (FaultException<ListenerFault> LException)
+			{
+				throw ListenerFaultUtility.FaultToException(LException.Detail);
+			}
 		}
 		
 		public string GetInstanceURI(string AInstanceName)
 		{
-			IAsyncResult LResult = GetInterface().BeginGetInstanceURI(AInstanceName, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			return GetInterface().EndGetInstanceURI(LResult);
+			try
+			{
+				IAsyncResult LResult = GetInterface().BeginGetInstanceURI(AInstanceName, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				return GetInterface().EndGetInstanceURI(LResult);
+			}
+			catch (FaultException<ListenerFault> LException)
+			{
+				throw ListenerFaultUtility.FaultToException(LException.Detail);
+			}
 		}
 		
 		public string GetNativeInstanceURI(string AInstanceName)
 		{
-			IAsyncResult LResult = GetInterface().BeginGetNativeInstanceURI(AInstanceName, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			return GetInterface().EndGetNativeInstanceURI(LResult);
+			try
+			{
+				IAsyncResult LResult = GetInterface().BeginGetNativeInstanceURI(AInstanceName, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				return GetInterface().EndGetNativeInstanceURI(LResult);
+			}
+			catch (FaultException<ListenerFault> LException)
+			{
+				throw ListenerFaultUtility.FaultToException(LException.Detail);
+			}
 		}
 	}
 }

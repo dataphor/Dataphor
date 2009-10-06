@@ -92,6 +92,11 @@ namespace Alphora.Dataphor
 	    #if !SILVERLIGHT // SerializationInfo
 		public BaseException(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext) : base(AInfo, AContext) {}
 		#endif
+		
+		public BaseException(ErrorSeverity ASeverity, int ACode, string AMessage, string ADetails, string AServerContext, DataphorException AInnerException) 
+			: base(ASeverity, ACode, AMessage, ADetails, AServerContext, AInnerException)
+		{
+		}
 	}
 
 	public class AbortException : Exception

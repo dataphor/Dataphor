@@ -180,6 +180,15 @@ namespace Alphora.Dataphor
 				LResult = String.Format(CMessageNotFound, AErrorCode, AResourceManager.BaseName);
 			return LResult;
 		}
+		
+		public DataphorException(ErrorSeverity ASeverity, int ACode, string AMessage, string ADetails, string AServerContext, DataphorException AInnerException) : base(AMessage, AInnerException)
+		{
+			FSeverity = ASeverity;
+			FCode = ACode;
+			FDetails = ADetails;
+			FServerContext = AServerContext;
+			HResult = COR_E_EXCEPTION;
+		}
 	}
 }
 

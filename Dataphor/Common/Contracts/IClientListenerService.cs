@@ -19,6 +19,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Enumerates the available Dataphor instances.
 		/// </summary>
 		[OperationContract(AsyncPattern = true)]
+		[FaultContract(typeof(ListenerFault))]
 		IAsyncResult BeginEnumerateInstances(AsyncCallback ACallback, object AState);
 		string[] EndEnumerateInstances(IAsyncResult AResult);
 		
@@ -26,6 +27,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Returns the URI for an instance.
 		/// </summary>
 		[OperationContract(AsyncPattern = true)]
+		[FaultContract(typeof(ListenerFault))]
 		IAsyncResult BeginGetInstanceURI(string AInstanceName, AsyncCallback ACallback, object AState);
 		string EndGetInstanceURI(IAsyncResult AResult);
 		
@@ -33,6 +35,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Returns the URI for the standard or native CLI of an instance.
 		/// </summary>
 		[OperationContract(AsyncPattern = true)]
+		[FaultContract(typeof(ListenerFault))]
 		IAsyncResult BeginGetNativeInstanceURI(string AInstanceName, AsyncCallback ACallback, object AState);
 		string EndGetNativeInstanceURI(IAsyncResult AResult);
 	}

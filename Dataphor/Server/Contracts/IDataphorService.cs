@@ -27,6 +27,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Returns the name of the server.
 		/// </summary>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		string GetServerName();
 		
 		/// <summary>
@@ -34,12 +35,14 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <returns></returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		long GetCacheTimeStamp();
 		
 		/// <summary>
 		/// Returns the current derivation timestamp of the catalog.
 		/// </summary>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		long GetDerivationTimeStamp();
 		
 		#endregion
@@ -53,6 +56,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ASessionInfo">The session information used to authenticate and describe the session.</param>
 		/// <returns>A session descriptor that describes the new session.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		SessionDescriptor Connect(SessionInfo ASessionInfo);
 
 		/// <summary>
@@ -60,6 +64,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="ASessionHandle">The handle to the session to be disconnected.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		void Disconnect(int ASessionHandle);
 		
 		#endregion
@@ -74,6 +79,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AProcessInfo">The process information used to describe the new process.</param>
 		/// <returns>A process descriptor that describes the new process.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		ProcessDescriptor StartProcess(int ASessionHandle, ProcessInfo AProcessInfo);
 		
 		/// <summary>
@@ -81,6 +87,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="AProcessHandle">The handle to the process to be stopped.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		void StopProcess(int AProcessHandle);
 		
 		/// <summary>
@@ -89,6 +96,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AProcessHandle">The handle to the process on which the transaction will be started.</param>
 		/// <param name="AIsolationLevel">The isolation level of the new transaction.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		void BeginTransaction(int AProcessHandle, IsolationLevel AIsolationLevel);
 		
 		/// <summary>
@@ -96,6 +104,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="AProcessHandle">The handle to the process on which the current transaction will be prepared.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		void PrepareTransaction(int AProcessHandle);
 		
 		/// <summary>
@@ -103,6 +112,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="AProcessHandle">The handle to the process on which the current transaction will be committed.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		void CommitTransaction(int AProcessHandle);
 		
 		/// <summary>
@@ -110,6 +120,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="AProcessHandle">The handle to the process on which the current transaction will be rolled back.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		void RollbackTransaction(int AProcessHandle);
 		
 		/// <summary>
@@ -118,6 +129,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AProcessHandle">The handle to the process for which the number of active transactions will be returned.</param>
 		/// <returns>The number of active transactions.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		int GetTransactionCount(int AProcessHandle);
 
 		/// <summary>
@@ -129,6 +141,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AIsInsert">Whether or not the process should join in insert mode.</param>
 		/// <returns>The ID of the new application transaction.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         Guid BeginApplicationTransaction(int AProcessHandle, ProcessCallInfo ACallInfo, bool AShouldJoin, bool AIsInsert);
         
         /// <summary>
@@ -138,6 +151,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
         /// <param name="AID">The ID of the application transaction to be prepared.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         void PrepareApplicationTransaction(int AProcessHandle, ProcessCallInfo ACallInfo, Guid AID);
 
 		/// <summary>
@@ -147,6 +161,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="AID">The ID of the application transaction to be committed.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         void CommitApplicationTransaction(int AProcessHandle, ProcessCallInfo ACallInfo, Guid AID);
         
         /// <summary>
@@ -156,6 +171,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
         /// <param name="AID">The ID of the application transaction to be rolled back.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         void RollbackApplicationTransaction(int AProcessHandle, ProcessCallInfo ACallInfo, Guid AID);
         
         /// <summary>
@@ -164,6 +180,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="AProcessHandle">The handle to the process.</param>
         /// <returns>The ID of the application transaction.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         Guid GetApplicationTransactionID(int AProcessHandle);
 
 		/// <summary>
@@ -174,6 +191,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AID">The ID of the application transaction to join.</param>
 		/// <param name="AIsInsert">Whether or not to join in insert mode.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         void JoinApplicationTransaction(int AProcessHandle, ProcessCallInfo ACallInfo, Guid AID, bool AIsInsert);
         
         /// <summary>
@@ -182,6 +200,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="AProcessHandle">The handle to the process.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		void LeaveApplicationTransaction(int AProcessHandle, ProcessCallInfo ACallInfo);
 		
 		#endregion
@@ -199,6 +218,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ALocator">A locator describing the source of the statement.</param>
 		/// <returns>A PlanDescriptor describing the prepared plan.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		PlanDescriptor PrepareStatement(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, string AStatement, RemoteParam[] AParams, DebugLocator ALocator);
 		
 		/// <summary>
@@ -209,6 +229,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AParams">The parameters to the plan.</param>
 		/// <returns>An execute result describing the result of the execution.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		ExecuteResult ExecutePlan(int APlanHandle, ProcessCallInfo ACallInfo, RemoteParamData AParams);
 
 		/// <summary>
@@ -216,6 +237,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="APlanHandle">The handle of the plan to be unprepared.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		void UnprepareStatement(int APlanHandle);
 		
 		/// <summary>
@@ -227,6 +249,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AStatement">The statement to be executed.</param>
 		/// <param name="AParams">Any parameters to the statement.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		ExecuteResult ExecuteStatement(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, ProcessCallInfo ACallInfo, string AStatement, RemoteParamData AParams);
 		
 		/// <summary>
@@ -239,6 +262,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ALocator">A debug locator describing the source of the expression.</param>
 		/// <returns>A PlanDescriptor describing the prepared plan.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		PlanDescriptor PrepareExpression(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, string AExpression, RemoteParam[] AParams, DebugLocator ALocator);
 		
 		/// <summary>
@@ -249,6 +273,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AParams">The parameters to the expression.</param>
 		/// <returns>An EvaluateResult describing the results of the evaluation.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		EvaluateResult EvaluatePlan(int APlanHandle, ProcessCallInfo ACallInfo, RemoteParamData AParams);
 
 		/// <summary>
@@ -259,6 +284,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AParams">The parameters to the expression.</param>
 		/// <returns>A CursorDescriptor describing the new cursor.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		CursorResult OpenPlanCursor(int APlanHandle, ProcessCallInfo ACallInfo, RemoteParamData AParams);
 		
 		/// <summary>
@@ -270,6 +296,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ACount">The number of rows to be fetched as part of the open.</param>
 		/// <returns>A CursorWithFetchResult describing the results of the open.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		CursorWithFetchResult OpenPlanCursorWithFetch(int APlanHandle, ProcessCallInfo ACallInfo, RemoteParamData AParams, int ACount);
 		
 		/// <summary>
@@ -277,6 +304,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="APlanHandle">The handle of the plan to be unprepared.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		void UnprepareExpression(int APlanHandle);
 		
 		/// <summary>
@@ -289,6 +317,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AParams">Any parameters to the expression.</param>
 		/// <returns>A DirectEvaluateResult describing the result of the evaluation.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		DirectEvaluateResult EvaluateExpression(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, ProcessCallInfo ACallInfo, string AExpression, RemoteParamData AParams);
 		
 		/// <summary>
@@ -301,6 +330,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AParams">Any parameters to the expression.</param>
 		/// <returns>A cursor descriptor describing the cursor that was opened.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		DirectCursorResult OpenCursor(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, ProcessCallInfo ACallInfo, string AExpression, RemoteParamData AParams);
 		
 		/// <summary>
@@ -314,6 +344,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ACount">The number of rows to be fetched as part of the open.</param>
 		/// <returns>A DirectCursorWithFetchResult describing the result of the open.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		DirectCursorWithFetchResult OpenCursorWithFetch(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, ProcessCallInfo ACallInfo, string AExpression, RemoteParamData AParams, int ACount);
 		
 		#endregion
@@ -327,6 +358,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ACursorHandle">The handle of the cursor to be closed.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		void CloseCursor(int ACursorHandle, ProcessCallInfo ACallInfo);
 		
 		/// <summary>
@@ -336,6 +368,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <returns>A RemoteRowBody describing the row in it's physical representation.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		RemoteRowBody Select(int ACursorHandle, ProcessCallInfo ACallInfo);
 		
 		/// <summary>
@@ -346,6 +379,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AHeader">A RemoteRowHeader describing the set of columns to be included in the resulting row.</param>
 		/// <returns>A RemoteRowBody describing the row in it's physical representation.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		RemoteRowBody SelectSpecific(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRowHeader AHeader);
 		
 		/// <summary>
@@ -356,6 +390,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ACount">The number of rows to be fetched.</param>
 		/// <returns>A FetchResult describing the results of the fetch.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		FetchResult Fetch(int ACursorHandle, ProcessCallInfo ACallInfo, int ACount);
 		
 		/// <summary>
@@ -367,6 +402,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ACount">The number of rows to be fetched.</param>
 		/// <returns>A FetchResult describing the results of the fetch.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		FetchResult FetchSpecific(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRowHeader AHeader, int ACount);
 		
 		/// <summary>
@@ -376,6 +412,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <returns>A CursorGetFlags describing the navigation state of the cursor.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		CursorGetFlags GetFlags(int ACursorHandle, ProcessCallInfo ACallInfo);
 		
 		/// <summary>
@@ -386,6 +423,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ADelta">The number of rows to navigate, forward or backward (negative number)</param>
 		/// <returns>A RemoteMoveData describing the results of the move.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		RemoteMoveData MoveBy(int ACursorHandle, ProcessCallInfo ACallInfo, int ADelta);
 
 		/// <summary>
@@ -395,6 +433,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <returns>A CursorGetFlags describing the navigation state of the cursor.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         CursorGetFlags First(int ACursorHandle, ProcessCallInfo ACallInfo);
 
 		/// <summary>
@@ -404,6 +443,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <returns>A CursorGetFlags describing the navigation state of the cursor.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         CursorGetFlags Last(int ACursorHandle, ProcessCallInfo ACallInfo);
 
 		/// <summary>
@@ -413,6 +453,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <returns>A CursorGetFlags describing the navigation state of the cursor.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         CursorGetFlags Reset(int ACursorHandle, ProcessCallInfo ACallInfo);
 
 		/// <summary>
@@ -423,6 +464,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ARow">The row to be inserted.</param>
 		/// <param name="AValueFlags">A value flags array indicating which columns are explicitly specified in the row.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         void Insert(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRow ARow, BitArray AValueFlags);
 
 		/// <summary>
@@ -433,6 +475,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ARow">The new values for the row.</param>
 		/// <param name="AValueFlags">A value flags array indicating which columns are to be updated in the row.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         void Update(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRow ARow, BitArray AValueFlags);
         
         /// <summary>
@@ -441,6 +484,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACursorHandle">The handle of the cursor from which the row will be deleted.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         void Delete(int ACursorHandle, ProcessCallInfo ACallInfo);
 
 		/// <summary>
@@ -450,6 +494,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <returns>The bookmark for the current row of the cursor.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         Guid GetBookmark(int ACursorHandle, ProcessCallInfo ACallInfo);
 
 		/// <summary>
@@ -461,6 +506,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AForward">A hint indicating the intended direction of navigation after the positioning call.</param>
 		/// <returns>A RemoteGotoData describing the results of the navigation.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		RemoteGotoData GotoBookmark(int ACursorHandle, ProcessCallInfo ACallInfo, Guid ABookmark, bool AForward);
 
 		/// <summary>
@@ -472,6 +518,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ABookmark2">The second bookmark to be compared.</param>
 		/// <returns>0 if the bookmarks are equal, -1 if the first bookmark is less than the second bookmark, and 1 if the first bookmark is greater than the second bookmark.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         int CompareBookmarks(int ACursorHandle, ProcessCallInfo ACallInfo, Guid ABookmark1, Guid ABookmark2);
 
 		/// <summary>
@@ -481,6 +528,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="ABookmark">The bookmark to be disposed.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		void DisposeBookmark(int ACursorHandle, ProcessCallInfo ACallInfo, Guid ABookmark);
 
 		/// <summary>
@@ -490,6 +538,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="ABookmarks">The list of bookmarks to be disposed.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		void DisposeBookmarks(int ACursorHandle, ProcessCallInfo ACallInfo, Guid[] ABookmarks);
 
 		/// <summary>
@@ -498,6 +547,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ACursorHandle">The handle of the cursor for which the order is to be returned.</param>
 		/// <returns>The order of the cursor as a string.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         string GetOrder(int ACursorHandle);
         
         /// <summary>
@@ -507,6 +557,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
         /// <returns>A RemoteRow representing the key in it's physical representation.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         RemoteRow GetKey(int ACursorHandle, ProcessCallInfo ACallInfo);
         
         /// <summary>
@@ -517,6 +568,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="AKey">The key on which the cursor should be positioned.</param>
         /// <returns>A RemoteGotoData describing the results of the navigation.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         RemoteGotoData FindKey(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRow AKey);
         
         /// <summary>
@@ -527,6 +579,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="AKey">The key on which the should be positioned.</param>
         /// <returns>A CursorGetFlags describing the resulting navigation state of the cursor.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         CursorGetFlags FindNearest(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRow AKey);
         
         /// <summary>
@@ -537,6 +590,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ARow">The row on which the cursor should be positioned after the refresh.</param>
         /// <returns>A RemoteGotoData describing the results of the refresh.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         RemoteGotoData Refresh(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRow ARow);
 
 		/// <summary>
@@ -546,6 +600,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <returns>The number of rows in the cursor.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         int GetRowCount(int ACursorHandle, ProcessCallInfo ACallInfo);
 
 		/// <summary>
@@ -557,6 +612,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AColumn">The name of a column that is being defaulted. Use the empty string to indicate that the entire row is being defaulted.</param>
 		/// <returns>A RemoteProposeData containing the results of the call.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         RemoteProposeData Default(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRowBody ARow, string AColumn);
         
         /// <summary>
@@ -569,6 +625,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="AColumn">The name of the column that triggered the change. Use the empty string to indicate that the entire row is being changed.</param>
         /// <returns>A RemoteProposeData containing the results of the call.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         RemoteProposeData Change(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRowBody AOldRow, RemoteRowBody ANewRow, string AColumn);
 
 		/// <summary>
@@ -581,6 +638,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AColumn">The name of the column that triggered the validation. Use the empty string to indiate that the entire row is being validated.</param>
 		/// <returns>A RemoteProposeData containing the results of the call.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         RemoteProposeData Validate(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRowBody AOldRow, RemoteRowBody ANewRow, string AColumn);
 
 		#endregion
@@ -596,6 +654,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ALocator">A debug locator describing the source of the script.</param>
 		/// <returns>A ScriptDescriptor describing the new script.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		ScriptDescriptor PrepareScript(int AProcessHandle, string AScript, DebugLocator ALocator);
 
 		/// <summary>
@@ -603,6 +662,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="AScriptHandle">The handle of the script to be unprepared.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		void UnprepareScript(int AScriptHandle);
 
 		/// <summary>
@@ -612,6 +672,7 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="AScript">The script to be executed.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		void ExecuteScript(int AProcessHandle, ProcessCallInfo ACallInfo, string AScript);
 		
 		/// <summary>
@@ -620,6 +681,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ABatchHandle">The handle of the batch for which the text is to be returned.</param>
 		/// <returns>The text of the batch as a string.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		string GetBatchText(int ABatchHandle);
 		
 		/// <summary>
@@ -629,6 +691,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AParams">The parameters to the batch.</param>
 		/// <returns>A PlanDescriptor describing the prepared plan.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		PlanDescriptor PrepareBatch(int ABatchHandle, RemoteParam[] AParams);
 		
 		/// <summary>
@@ -636,6 +699,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="APlanHandle">The handle of the plan to be unprepared.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		void UnprepareBatch(int APlanHandle);
 		
 		/// <summary>
@@ -646,6 +710,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AParams">The parameters to the batch.</param>
 		/// <returns>An ExecuteResult describing the result of the execution.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		ExecuteResult ExecuteBatch(int ABatchHandle, ProcessCallInfo ACallInfo, RemoteParamData AParams);
 		
 		#endregion
@@ -660,6 +725,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AName">The name of the object to be created.</param>
 		/// <returns>A D4 script to create the necessary objects.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
         CatalogResult GetCatalog(int AProcessHandle, string AName);
         
 		/// <summary>
@@ -669,6 +735,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AClassName">The registered class name.</param>
 		/// <returns>The fully qualified class name as a string.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		string GetClassName(int AProcessHandle, string AClassName);
 
 		/// <summary>
@@ -679,6 +746,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AEnvironment">The client environment in which the class is to be instantiated.</param>
 		/// <returns>A list of ServerFileInfo describing the necessary files.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		ServerFileInfo[] GetFileNames(int AProcessHandle, string AClassName, string AEnvironment);
 
 		/// <summary>
@@ -689,6 +757,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AFileName">The name of the file to be retrieved.</param>
 		/// <returns>The handle of the stream containing the contents of the file.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		int GetFile(int AProcessHandle, string ALibraryName, string AFileName);
 		
 		#endregion
@@ -702,6 +771,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AProcessHandle">The handle of the process on which the stream will be allocated.</param>
 		/// <returns>The ID of the new stream.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		StreamID AllocateStream(int AProcessHandle);
 		
 		/// <summary>
@@ -711,6 +781,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AStreamID">The ID of the stream to be referenced.</param>
 		/// <returns>The ID of the new stream.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		StreamID ReferenceStream(int AProcessHandle, StreamID AStreamID);
 		
 		/// <summary>
@@ -719,6 +790,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AProcessHandle">The handle of the process on which the stream will be deallocated.</param>
 		/// <param name="AStreamID">The ID of the stream to be deallocated.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		void DeallocateStream(int AProcessHandle, StreamID AStreamID);
 		
 		/// <summary>
@@ -729,6 +801,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ALockMode">The locking to be used to open the stream.</param>
 		/// <returns>The handle of the new stream.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		int OpenStream(int AProcessHandle, StreamID AStreamID, LockMode ALockMode);
 		
 		/// <summary>
@@ -736,6 +809,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="AStreamHandle">The handle of the stream to be closed.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		void CloseStream(int AStreamHandle);
 		
 		/// <summary>
@@ -744,6 +818,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AStreamHandle">The handle of the stream for which the length will be returned.</param>
 		/// <returns>The number of bytes in the stream as a long.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		long GetStreamLength(int AStreamHandle);
 		
 		/// <summary>
@@ -752,6 +827,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AStreamHandle">The handle of the stream for which the length will be set.</param>
 		/// <param name="AValue">The new length of the stream.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		void SetStreamLength(int AStreamHandle, long AValue);
 		
 		/// <summary>
@@ -760,6 +836,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AStreamHandle">The handle of the stream for which the current position is to be returned.</param>
 		/// <returns>The current position of the stream as a long.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		long GetStreamPosition(int AStreamHandle);
 		
 		/// <summary>
@@ -768,6 +845,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AStreamHandle">The handle of the stream for which the current position is to be set.</param>
 		/// <param name="APosition">The new position of the stream.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		void SetStreamPosition(int AStreamHandle, long APosition);
 		
 		/// <summary>
@@ -775,6 +853,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		/// <param name="AStreamHandle">The handle of the stream to be flushed.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		void FlushStream(int AStreamHandle);
 
 		/// <summary>
@@ -788,6 +867,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// was less than the requested number.
 		/// </remarks>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		byte[] ReadStream(int AStreamHandle, int ACount);
 		
 		/// <summary>
@@ -798,6 +878,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AOrigin">The origin of the seek.</param>
 		/// <returns>The new position of the stream.</returns>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		long SeekStream(int AStreamHandle, long AOffset, SeekOrigin AOrigin);
 
 		/// <summary>
@@ -806,6 +887,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="AStreamHandle">The handle of the stream to be written.</param>
 		/// <param name="AData">A byte[] containing the data to be written.</param>
 		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
 		void WriteStream(int AStreamHandle, byte[] AData);
 		
 		#endregion

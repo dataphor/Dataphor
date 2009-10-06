@@ -20,18 +20,21 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Enumerates the available Dataphor instances.
 		/// </summary>
 		[OperationContract]
+		[FaultContract(typeof(ListenerFault))]
 		string[] EnumerateInstances();
 		
 		/// <summary>
 		/// Returns the URI for an instance.
 		/// </summary>
 		[OperationContract]
+		[FaultContract(typeof(ListenerFault))]
 		string GetInstanceURI(string AInstanceName);
 		
 		/// <summary>
 		/// Returns the URI for the native CLI of an instance.
 		/// </summary>
 		[OperationContract]
+		[FaultContract(typeof(ListenerFault))]
 		string GetNativeInstanceURI(string AInstanceName);
 	}
 }

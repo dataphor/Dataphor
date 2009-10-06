@@ -77,5 +77,10 @@ namespace Alphora.Dataphor.BOP
 		#if !SILVERLIGHT
 		public BOPException(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext) : base(AInfo, AContext) {}
 		#endif
+		
+		public BOPException(ErrorSeverity ASeverity, int ACode, string AMessage, string ADetails, string AServerContext, DataphorException AInnerException) 
+			: base(ASeverity, ACode, AMessage, ADetails, AServerContext, AInnerException)
+		{
+		}
 	}
 }

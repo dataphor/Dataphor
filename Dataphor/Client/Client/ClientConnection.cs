@@ -41,16 +41,30 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public IRemoteServerSession Connect(SessionInfo ASessionInfo)
 		{
-			IAsyncResult LResult = GetServiceInterface().BeginConnect(ASessionInfo, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			return new ClientSession(this, ASessionInfo, GetServiceInterface().EndConnect(LResult));
+			try
+			{
+				IAsyncResult LResult = GetServiceInterface().BeginConnect(ASessionInfo, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				return new ClientSession(this, ASessionInfo, GetServiceInterface().EndConnect(LResult));
+			}
+			catch (FaultException<DataphorFault> LFault)
+			{
+				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+			}
 		}
 
 		public void Disconnect(IRemoteServerSession ASession)
 		{
-			IAsyncResult LResult = GetServiceInterface().BeginDisconnect(((ClientSession)ASession).SessionHandle, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			GetServiceInterface().EndDisconnect(LResult);
+			try
+			{
+				IAsyncResult LResult = GetServiceInterface().BeginDisconnect(((ClientSession)ASession).SessionHandle, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				GetServiceInterface().EndDisconnect(LResult);
+			}
+			catch (FaultException<DataphorFault> LFault)
+			{
+				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+			}
 		}
 
 		#endregion
@@ -59,7 +73,14 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public void Ping()
 		{
-			// TODO: Lifetime management for the WCF objects
+			try
+			{
+				// TODO: Lifetime management for the WCF objects
+			}
+			catch (FaultException<DataphorFault> LFault)
+			{
+				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+			}
 		}
 
 		#endregion

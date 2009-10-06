@@ -53,65 +53,128 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		
 		public NativeSessionHandle StartSession(NativeSessionInfo ASessionInfo)
 		{
-			IAsyncResult LResult = GetInterface().BeginStartSession(ASessionInfo, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			return GetInterface().EndStartSession(LResult);
+			try
+			{
+				IAsyncResult LResult = GetInterface().BeginStartSession(ASessionInfo, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				return GetInterface().EndStartSession(LResult);
+			}
+			catch (FaultException<NativeCLIFault> LException)
+			{
+				throw NativeCLIFaultUtility.FaultToException(LException.Detail);
+			}
 		}
 		
 		public void StopSession(NativeSessionHandle ASessionHandle)
 		{
-			IAsyncResult LResult = GetInterface().BeginStopSession(ASessionHandle, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			GetInterface().EndStopSession(LResult);
+			try
+			{
+				IAsyncResult LResult = GetInterface().BeginStopSession(ASessionHandle, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				GetInterface().EndStopSession(LResult);
+			}
+			catch (FaultException<NativeCLIFault> LException)
+			{
+				throw NativeCLIFaultUtility.FaultToException(LException.Detail);
+			}
 		}
 		
 		public void BeginTransaction(NativeSessionHandle ASessionHandle, NativeIsolationLevel AIsolationLevel)
 		{
-			IAsyncResult LResult = GetInterface().BeginBeginTransaction(ASessionHandle, AIsolationLevel, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			GetInterface().EndBeginTransaction(LResult);
+			try
+			{
+				IAsyncResult LResult = GetInterface().BeginBeginTransaction(ASessionHandle, AIsolationLevel, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				GetInterface().EndBeginTransaction(LResult);
+			}
+			catch (FaultException<NativeCLIFault> LException)
+			{
+				throw NativeCLIFaultUtility.FaultToException(LException.Detail);
+			}
 		}
 		
 		public void PrepareTransaction(NativeSessionHandle ASessionHandle)
 		{
-			IAsyncResult LResult = GetInterface().BeginPrepareTransaction(ASessionHandle, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			GetInterface().EndPrepareTransaction(LResult);
+			try
+			{
+				IAsyncResult LResult = GetInterface().BeginPrepareTransaction(ASessionHandle, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				GetInterface().EndPrepareTransaction(LResult);
+			}
+			catch (FaultException<NativeCLIFault> LException)
+			{
+				throw NativeCLIFaultUtility.FaultToException(LException.Detail);
+			}
 		}
 		
 		public void CommitTransaction(NativeSessionHandle ASessionHandle)
 		{
-			IAsyncResult LResult = GetInterface().BeginCommitTransaction(ASessionHandle, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			GetInterface().EndCommitTransaction(LResult);
+			try
+			{
+				IAsyncResult LResult = GetInterface().BeginCommitTransaction(ASessionHandle, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				GetInterface().EndCommitTransaction(LResult);
+			}
+			catch (FaultException<NativeCLIFault> LException)
+			{
+				throw NativeCLIFaultUtility.FaultToException(LException.Detail);
+			}
 		}
 		
 		public void RollbackTransaction(NativeSessionHandle ASessionHandle)
 		{
-			IAsyncResult LResult = GetInterface().BeginRollbackTransaction(ASessionHandle, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			GetInterface().EndRollbackTransaction(LResult);
+			try
+			{
+				IAsyncResult LResult = GetInterface().BeginRollbackTransaction(ASessionHandle, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				GetInterface().EndRollbackTransaction(LResult);
+			}
+			catch (FaultException<NativeCLIFault> LException)
+			{
+				throw NativeCLIFaultUtility.FaultToException(LException.Detail);
+			}
 		}
 		
 		public int GetTransactionCount(NativeSessionHandle ASessionHandle)
 		{
-			IAsyncResult LResult = GetInterface().BeginGetTransactionCount(ASessionHandle, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			return GetInterface().EndGetTransactionCount(LResult);
+			try
+			{
+				IAsyncResult LResult = GetInterface().BeginGetTransactionCount(ASessionHandle, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				return GetInterface().EndGetTransactionCount(LResult);
+			}
+			catch (FaultException<NativeCLIFault> LException)
+			{
+				throw NativeCLIFaultUtility.FaultToException(LException.Detail);
+			}
 		}
 		
 		public NativeResult Execute(NativeSessionHandle ASessionHandle, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions)
 		{
-			IAsyncResult LResult = GetInterface().BeginSessionExecuteStatement(ASessionHandle, AStatement, AParams, AOptions, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			return GetInterface().EndSessionExecuteStatement(LResult);
+			try
+			{
+				IAsyncResult LResult = GetInterface().BeginSessionExecuteStatement(ASessionHandle, AStatement, AParams, AOptions, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				return GetInterface().EndSessionExecuteStatement(LResult);
+			}
+			catch (FaultException<NativeCLIFault> LException)
+			{
+				throw NativeCLIFaultUtility.FaultToException(LException.Detail);
+			}
 		}
 
 		public NativeResult[] Execute(NativeSessionHandle ASessionHandle, NativeExecuteOperation[] AOperations)
 		{
-			IAsyncResult LResult = GetInterface().BeginSessionExecuteStatements(ASessionHandle, AOperations, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			return GetInterface().EndSessionExecuteStatements(LResult);
+			try
+			{
+				IAsyncResult LResult = GetInterface().BeginSessionExecuteStatements(ASessionHandle, AOperations, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				return GetInterface().EndSessionExecuteStatements(LResult);
+			}
+			catch (FaultException<NativeCLIFault> LException)
+			{
+				throw NativeCLIFaultUtility.FaultToException(LException.Detail);
+			}
 		}
 	}
 	
@@ -123,16 +186,30 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 
 		public NativeResult Execute(NativeSessionInfo ASessionInfo, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions)
 		{
-			IAsyncResult LResult = GetInterface().BeginExecuteStatement(ASessionInfo, AStatement, AParams, AOptions, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			return GetInterface().EndExecuteStatement(LResult);
+			try
+			{
+				IAsyncResult LResult = GetInterface().BeginExecuteStatement(ASessionInfo, AStatement, AParams, AOptions, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				return GetInterface().EndExecuteStatement(LResult);
+			}
+			catch (FaultException<NativeCLIFault> LException)
+			{
+				throw NativeCLIFaultUtility.FaultToException(LException.Detail);
+			}
 		}
 		
 		public NativeResult[] Execute(NativeSessionInfo ASessionInfo, NativeExecuteOperation[] AOperations)
 		{
-			IAsyncResult LResult = GetInterface().BeginExecuteStatements(ASessionInfo, AOperations, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			return GetInterface().EndExecuteStatements(LResult);
+			try
+			{
+				IAsyncResult LResult = GetInterface().BeginExecuteStatements(ASessionInfo, AOperations, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				return GetInterface().EndExecuteStatements(LResult);
+			}
+			catch (FaultException<NativeCLIFault> LException)
+			{
+				throw NativeCLIFaultUtility.FaultToException(LException.Detail);
+			}
 		}
 	}
 }

@@ -4,6 +4,8 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
+#define LOADFROMLIBRARIES
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -916,7 +918,7 @@ namespace Alphora.Dataphor.DAE.Server
 					: 
 						ALibrary.Name == Engine.CSystemLibraryName
 							? PathUtility.GetFullFileName(AFileName)
-							: Path.Combine(ALibrary.GetLibraryDirectory(LibraryDirectory), AFileName);
+							: Path.Combine(Schema.LibraryUtility.GetLibraryDirectory(ALibrary, LibraryDirectory), AFileName);
 			#else
 			return PathUtility.GetFullFileName(AFileName);
 			#endif

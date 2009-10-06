@@ -5,6 +5,7 @@
 */
 
 using System;
+using System.ServiceModel;
 using System.Collections.Generic;
 
 using Alphora.Dataphor.DAE;
@@ -44,18 +45,32 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public IRemoteServerProcess StartProcess(ProcessInfo AProcessInfo, out int AProcessID)
 		{
-			IAsyncResult LResult = GetServiceInterface().BeginStartProcess(FSessionDescriptor.Handle, AProcessInfo, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			ProcessDescriptor LProcessDescriptor = GetServiceInterface().EndStartProcess(LResult);
-			AProcessID = LProcessDescriptor.ID;
-			return new ClientProcess(this, AProcessInfo, LProcessDescriptor);
+			try
+			{
+				IAsyncResult LResult = GetServiceInterface().BeginStartProcess(FSessionDescriptor.Handle, AProcessInfo, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				ProcessDescriptor LProcessDescriptor = GetServiceInterface().EndStartProcess(LResult);
+				AProcessID = LProcessDescriptor.ID;
+				return new ClientProcess(this, AProcessInfo, LProcessDescriptor);
+			}
+			catch (FaultException<DataphorFault> LFault)
+			{
+				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+			}
 		}
 
 		public void StopProcess(IRemoteServerProcess AProcess)
 		{
-			IAsyncResult LResult = GetServiceInterface().BeginStopProcess(((ClientProcess)AProcess).ProcessHandle, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			GetServiceInterface().EndStopProcess(LResult);
+			try
+			{
+				IAsyncResult LResult = GetServiceInterface().BeginStopProcess(((ClientProcess)AProcess).ProcessHandle, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				GetServiceInterface().EndStopProcess(LResult);
+			}
+			catch (FaultException<DataphorFault> LFault)
+			{
+				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+			}
 		}
 
 		#endregion

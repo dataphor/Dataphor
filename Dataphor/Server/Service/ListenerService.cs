@@ -13,12 +13,10 @@ using System.ServiceModel;
 using System.ServiceModel.Channels;
 
 using Alphora.Dataphor.DAE.Contracts;
-using Alphora.Dataphor.DAE.NativeCLI;
 using Alphora.Dataphor.DAE.Server;
 
 namespace Alphora.Dataphor.DAE.Service
 {
-	[ServiceBehavior(IncludeExceptionDetailInFaults = true)]
 	public class ListenerService : IListenerService
 	{
 		public string[] EnumerateInstances()
@@ -33,7 +31,7 @@ namespace Alphora.Dataphor.DAE.Service
 			}
 			catch (Exception LException)
 			{
-				throw NativeCLIUtility.WrapException(LException);
+				throw new FaultException<ListenerFault>(ListenerFaultUtility.ExceptionToFault(LException), LException.Message);
 			}
 		}
 		
@@ -54,7 +52,7 @@ namespace Alphora.Dataphor.DAE.Service
 			}
 			catch (Exception LException)
 			{
-				throw NativeCLIUtility.WrapException(LException);
+				throw new FaultException<ListenerFault>(ListenerFaultUtility.ExceptionToFault(LException), LException.Message);
 			}
 		}
 		

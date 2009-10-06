@@ -198,9 +198,16 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			get 
 			{ 
-				IAsyncResult LResult = GetServiceInterface().BeginGetServerName(null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndGetServerName(LResult);
+				try
+				{
+					IAsyncResult LResult = GetServiceInterface().BeginGetServerName(null, null);
+					LResult.AsyncWaitHandle.WaitOne();
+					return GetServiceInterface().EndGetServerName(LResult);
+				}
+				catch (FaultException<DataphorFault> LFault)
+				{
+					throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				}
 			}
 		}
 
@@ -226,9 +233,16 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			get 
 			{ 
-				IAsyncResult LResult = GetServiceInterface().BeginGetCacheTimeStamp(null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndGetCacheTimeStamp(LResult);
+				try
+				{
+					IAsyncResult LResult = GetServiceInterface().BeginGetCacheTimeStamp(null, null);
+					LResult.AsyncWaitHandle.WaitOne();
+					return GetServiceInterface().EndGetCacheTimeStamp(LResult);
+				}
+				catch (FaultException<DataphorFault> LFault)
+				{
+					throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				}
 			}
 		}
 
@@ -236,9 +250,16 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			get 
 			{ 
-				IAsyncResult LResult = GetServiceInterface().BeginGetDerivationTimeStamp(null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetServiceInterface().EndGetDerivationTimeStamp(LResult);
+				try
+				{
+					IAsyncResult LResult = GetServiceInterface().BeginGetDerivationTimeStamp(null, null);
+					LResult.AsyncWaitHandle.WaitOne();
+					return GetServiceInterface().EndGetDerivationTimeStamp(LResult);
+				}
+				catch (FaultException<DataphorFault> LFault)
+				{
+					throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				}
 			}
 		}
 

@@ -5,6 +5,7 @@
 */
 
 using System;
+using System.ServiceModel;
 using System.Collections.Generic;
 
 using Alphora.Dataphor.DAE;
@@ -41,20 +42,34 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public IRemoteServerPlan Prepare(RemoteParam[] AParams)
 		{
-			IAsyncResult LResult = GetServiceInterface().BeginPrepareBatch(BatchHandle, AParams, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			PlanDescriptor LPlanDescriptor = GetServiceInterface().EndPrepareBatch(LResult);
-			if (IsExpression())
-				return new ClientExpressionPlan(FClientScript.ClientProcess, LPlanDescriptor);
-			else
-				return new ClientStatementPlan(FClientScript.ClientProcess, LPlanDescriptor);
+			try
+			{
+				IAsyncResult LResult = GetServiceInterface().BeginPrepareBatch(BatchHandle, AParams, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				PlanDescriptor LPlanDescriptor = GetServiceInterface().EndPrepareBatch(LResult);
+				if (IsExpression())
+					return new ClientExpressionPlan(FClientScript.ClientProcess, LPlanDescriptor);
+				else
+					return new ClientStatementPlan(FClientScript.ClientProcess, LPlanDescriptor);
+			}
+			catch (FaultException<DataphorFault> LFault)
+			{
+				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+			}
 		}
 
 		public void Unprepare(IRemoteServerPlan APlan)
 		{
-			IAsyncResult LResult = GetServiceInterface().BeginUnprepareBatch(((ClientPlan)APlan).PlanHandle, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			GetServiceInterface().EndUnprepareBatch(LResult);
+			try
+			{
+				IAsyncResult LResult = GetServiceInterface().BeginUnprepareBatch(((ClientPlan)APlan).PlanHandle, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				GetServiceInterface().EndUnprepareBatch(LResult);
+			}
+			catch (FaultException<DataphorFault> LFault)
+			{
+				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+			}
 		}
 
 		public IRemoteServerExpressionPlan PrepareExpression(RemoteParam[] AParams, out PlanDescriptor APlanDescriptor)
@@ -101,9 +116,16 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public string GetText()
 		{
-			IAsyncResult LResult = GetServiceInterface().BeginGetBatchText(BatchHandle, null, null);
-			LResult.AsyncWaitHandle.WaitOne();
-			return GetServiceInterface().EndGetBatchText(LResult);
+			try
+			{
+				IAsyncResult LResult = GetServiceInterface().BeginGetBatchText(BatchHandle, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				return GetServiceInterface().EndGetBatchText(LResult);
+			}
+			catch (FaultException<DataphorFault> LFault)
+			{
+				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+			}
 		}
 
 		public int Line

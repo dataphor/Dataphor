@@ -816,6 +816,14 @@ namespace Alphora.Dataphor.DAE.Compiling
 			get { return FLinePos; } 
 			set { FLinePos = value; }
 		}
+		
+		public CompilerException(ErrorSeverity ASeverity, int ACode, string AMessage, string ADetails, string AServerContext, CompilerErrorLevel AErrorLevel, int ALine, int ALinePos, DataphorException AInnerException) 
+			: base(ASeverity, ACode, AMessage, ADetails, AServerContext, AInnerException)
+		{
+			FErrorLevel = AErrorLevel;
+			FLine = ALine;
+			FLinePos = ALinePos;
+		}
 	}
 	
 	#if USETYPEDLIST

@@ -18,7 +18,6 @@ namespace Alphora.Dataphor.DAE.Language
 	/// during lexical analysis or parsing.  Any exception encountered during these phases will be wrapped with an exception
 	/// of this type.  Only the parser should throw exceptions of this type.
 	/// </remarks>
-	[DataContract]
 	public class SyntaxException : DAEException, ILocatedException
 	{
 		public enum Codes : int
@@ -37,9 +36,17 @@ namespace Alphora.Dataphor.DAE.Language
 			FTokenType = ALexer[0, false].Type;
 			FToken = ALexer[0, false].Token;
 		}
+		
+		public SyntaxException(ErrorSeverity ASeverity, int ACode, string AMessage, string ADetails, string AServerContext, int ALine, int ALinePos, TokenType ATokenType, string AToken, DataphorException AInnerException) 
+			: base(ASeverity, ACode, AMessage, ADetails, AServerContext, AInnerException)
+		{
+			FLine = ALine;
+			FLinePos = ALinePos;
+			FTokenType = ATokenType;
+			FToken = AToken;
+		}
 			
 		private int FLine;
-		[DataMember]
 		public int Line 
 		{ 
 			get { return FLine; } 
@@ -47,7 +54,6 @@ namespace Alphora.Dataphor.DAE.Language
 		}
 			
 		private int FLinePos;
-		[DataMember]
 		public int LinePos 
 		{ 
 			get { return FLinePos; } 
@@ -55,11 +61,9 @@ namespace Alphora.Dataphor.DAE.Language
 		}
 			
 		private TokenType FTokenType;
-		[DataMember]
 		public TokenType TokenType { get { return FTokenType; } }
 			
 		private string FToken;
-		[DataMember]
 		public string Token { get { return FToken; } }
 	}
 }

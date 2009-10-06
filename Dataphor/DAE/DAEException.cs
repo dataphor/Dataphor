@@ -15,6 +15,10 @@ namespace Alphora.Dataphor.DAE
 	{
 		// Constructors
 		protected DAEException(ResourceManager AResourceManager, int AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, params object[] AParams) : base(AResourceManager, AErrorCode, ASeverity, AInnerException, AParams) {}
+		protected DAEException(ErrorSeverity ASeverity, int ACode, string AMessage, string ADetails, string AServerContext, DataphorException AInnerException) 
+			: base(ASeverity, ACode, AMessage, ADetails, AServerContext, AInnerException)
+		{
+		}
 	}
 
 	public interface ILocatedException

@@ -35,17 +35,18 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Runtime.Serialization">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.ServiceModel">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Xml.Linq">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Contracts\DataphorServiceUtility.cs" />
     <Compile Include="Contracts\IClientListenerService.cs" />
+    <Compile Include="Contracts\ListenerFault.cs" />
+    <Compile Include="Contracts\ListenerFaultUtility.cs" />
     <Compile Include="Contracts\ServiceClient.cs" />
     <Compile Include="Listener\ListenerClient.cs" />
     <Compile Include="Listener\ListenerFactory.cs" />
