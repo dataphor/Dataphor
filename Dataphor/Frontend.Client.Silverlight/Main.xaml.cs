@@ -8,15 +8,25 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		public Main()
 		{
 			InitializeComponent();
-			
+
+			StartConnection();
+		}
+
+		private void StartConnection()
+		{
 			var LConnectItem = new ConnectWorkItem(RootContent);
 			var LConnectForm = new ConnectForm(LConnectItem);
 			RootContent.Content = LConnectForm;
-			LConnectForm.Complete += ConnectionComplete;
+			LConnectForm.Complete +=
+				delegate
+				{
+					LConnectItem.Session.OnComplete += SessionComplete;
+				};
 		}
 		
-		private void ConnectionComplete(object ASender, EventArgs AArgs)
+		private void SessionComplete(object sender, EventArgs e)
 		{
+ 			StartConnection();
 		}
 	}
 }

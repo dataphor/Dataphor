@@ -182,6 +182,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
     			{
     				Exception = null;
     				DataSession = AApplications.Session;
+    				Applications = AApplications;
    					Status = ConnectStatus.SelectApplication;
     			}
     		);
@@ -198,6 +199,21 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				{
 					FDataSession = value;
 					NotifyPropertyChanged("DataSession");
+				}
+			}
+		}
+		
+		private DataView FApplications;
+		
+		public DataView Applications
+		{
+			get { return FApplications; }
+			set
+			{
+				if (FApplications != value)
+				{
+					FApplications = value;
+					NotifyPropertyChanged("Applications");
 				}
 			}
 		}
