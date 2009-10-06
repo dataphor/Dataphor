@@ -513,7 +513,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			#endif
 			
-			return new Scalar(AProgram.ValueManager, (Schema.IScalarType)Operator.Operands[0].DataType, (StreamID)AArgument1).AsBase64String;
+			// TODO: Streams and binary data types
+			using 
+			(
+				Scalar LScalar = 
+					(AArgument1 is StreamID) 
+						? new Scalar(AProgram.ValueManager, AProgram.DataTypes.SystemBinary, (StreamID)AArgument1) 
+						: new Scalar(AProgram.ValueManager, AProgram.DataTypes.SystemBinary, AArgument1)
+			)
+			{
+				LScalar.ValuesOwned = false;
+				return LScalar.AsBase64String;
+			}
 		}
 
 		public override void DetermineCharacteristics(Plan APlan)
