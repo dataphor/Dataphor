@@ -858,6 +858,7 @@
     <Compile Include="..\DAE\Utility.cs">
       <Link>DAE\Utility.cs</Link>
     </Compile>
+    <Compile Include="DAE\Server\Register.cs" />
     <Compile Include="System\ComponentModel.cs" />
     <Compile Include="System\ComponentModel.Design.Serialization.cs" />
     <Compile Include="System\ICloneable.cs" />

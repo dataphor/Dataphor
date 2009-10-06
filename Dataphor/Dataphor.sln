@@ -110,7 +110,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.PGSQL", "DAE.PGSQL\DAE.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Silverlight", "Silverlight", "{FC515183-B412-4C67-BF18-1035E42E9C5B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SilverlightDAE", "Base.Silverlight\SilverlightDAE.csproj", "{B190A64D-B46B-4C63-A217-1ABD2C97021A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SilverlightDAE", "SilverlightDAE\SilverlightDAE.csproj", "{B190A64D-B46B-4C63-A217-1ABD2C97021A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Base.Windows", "Base.Windows\Base.Windows.csproj", "{24D70A7F-F43A-45A3-8C54-EA31764841C7}"
 EndProject
@@ -123,6 +123,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend.Client.Silverlight", "Frontend.Client.Silverlight\Frontend.Client.Silverlight.csproj", "{A30486D2-B128-4459-A26A-FBD3601599F0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend.Client.Silverlight.Web", "Frontend.Client.Silverlight.Web\Frontend.Client.Silverlight.Web.csproj", "{514F81A0-F061-4DE7-A84A-91379BDA11E2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A30486D2-B128-4459-A26A-FBD3601599F0} = {A30486D2-B128-4459-A26A-FBD3601599F0}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

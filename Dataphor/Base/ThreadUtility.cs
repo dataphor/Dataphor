@@ -23,9 +23,11 @@ namespace Alphora.Dataphor
 		/// <summary> HACK: This sets a thread's name working around the perf and write-once issues. </summary>
 		/// <remarks> This method is only called if the DEBUG conditional is set.  The name argument is of type object so that it can be reset back to the initial null state. </remarks>
 		[System.Diagnostics.Conditional("DEBUG")]
-		public static void SetThreadName(Thread AThread, object AName)
+		public static void SetThreadName(Thread AThread, string AName)
 		{
+			#if !SILVERLIGHT
 			GetThreadNameFieldInfo().SetValue(AThread, AName);
+			#endif
 		}
 	}
 }

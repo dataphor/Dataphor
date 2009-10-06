@@ -8,7 +8,9 @@
 			</allow-from>
 			<grant-to>
 				<resource path="/listener" include-subpaths="true"/>
-				<resource path="/instance" include-subpaths="true"/>
+				<dynamicresources>
+					<!-- This portion is dynamically generated based on the instances. -->
+				</dynamicresources>
 			</grant-to>
 		</policy>
 	</cross-domain-access>

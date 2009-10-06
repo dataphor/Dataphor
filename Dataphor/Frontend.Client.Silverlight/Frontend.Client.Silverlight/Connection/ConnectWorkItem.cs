@@ -183,7 +183,12 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
     				Exception = null;
     				DataSession = AApplications.Session;
     				Applications = AApplications;
-   					Status = ConnectStatus.SelectApplication;
+    				
+    				// If there is only 1 application, skip to login
+    				if (!AApplications.IsEmpty() && AApplications.IsLastRow)
+    					Status = ConnectStatus.Login;
+    				else
+   						Status = ConnectStatus.SelectApplication;
     			}
     		);
 		}
