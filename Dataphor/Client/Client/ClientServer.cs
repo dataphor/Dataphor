@@ -24,6 +24,12 @@ namespace Alphora.Dataphor.DAE.Client
 			FHostName = AHostName;
 			FOverridePortNumber = AOverridePortNumber;
 			FInstanceName = AInstanceName;
+			
+			#if SILVERLIGHT
+			System.Net.WebRequest.RegisterPrefix("http://", System.Net.Browser.WebRequestCreator.ClientHttp);
+			System.Net.WebRequest.RegisterPrefix("https://", System.Net.Browser.WebRequestCreator.ClientHttp);
+			#endif
+			
 			Open();
 		}
 		
