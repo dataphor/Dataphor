@@ -410,7 +410,7 @@ namespace Alphora.Dataphor.DAE.Server
 			try
 			{
 				Assembly LAssembly = LoadAssembyFromRemote(AProcess, ALibraryName, AFileName);
-				if (AShouldRegister && !AClassLoader.Assemblies.Contains(LAssembly.GetName()))
+				if (AShouldRegister && !AClassLoader.Assemblies.Contains(LAssembly.FullName))
 					AClassLoader.RegisterAssembly(Catalog.LoadedLibraries[Engine.CSystemLibraryName], LAssembly);
 				FAssembliesCached.Add(AFileName);
 				FFilesCached.Add(AFileName);
@@ -513,7 +513,7 @@ namespace Alphora.Dataphor.DAE.Server
 						if ((LFileInfos[LIndex].ShouldRegister || LShouldLoad) && !FAssembliesCached.Contains(LFileInfos[LIndex].FileName))
 						{
 							Assembly LAssembly = Assembly.LoadFrom(LFullFileName);
-							if (LFileInfos[LIndex].ShouldRegister && !AClassLoader.Assemblies.Contains(LAssembly.GetName()))
+							if (LFileInfos[LIndex].ShouldRegister && !AClassLoader.Assemblies.Contains(LAssembly.FullName))
 								AClassLoader.RegisterAssembly(Catalog.LoadedLibraries[Engine.CSystemLibraryName], LAssembly);
 							FAssembliesCached.Add(LFileInfos[LIndex].FileName);
 						}

@@ -106,7 +106,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				try
 				{
 					RegisteredAssembly LAssembly = new RegisteredAssembly(AAssembly, ALibrary);
-					if (!FAssemblies.Contains(AAssembly.GetName()))
+					if (!FAssemblies.Contains(AAssembly.FullName))
 					{
 						SettingsList LClasses = GetClassList(AAssembly);
 						foreach (SettingsItem LSetting in LClasses.Values)
@@ -140,7 +140,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 						FClasses.RemoveAt(FClasses.IndexOf(LSetting.Name));
 					}
 					
-				int LIndex = FAssemblies.IndexOf(AAssembly.GetName());
+				int LIndex = FAssemblies.IndexOf(AAssembly.FullName);
 				if (LIndex >= 0)
 					FAssemblies.RemoveAt(LIndex);
 					

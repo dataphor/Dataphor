@@ -186,7 +186,7 @@ namespace Alphora.Dataphor.DAE.Service
 
 		public ExecuteResult ExecutePlan(int APlanHandle, ProcessCallInfo ACallInfo, RemoteParamData AParams)
 		{
-			TimeSpan LExecuteTime;
+			ProgramStatistics LExecuteTime;
 			FHandleManager.GetObject<RemoteServerStatementPlan>(APlanHandle).Execute(ref AParams, out LExecuteTime, ACallInfo);
 			return new ExecuteResult() { ExecuteTime = LExecuteTime, ParamData = AParams.Data };
 		}
@@ -199,7 +199,7 @@ namespace Alphora.Dataphor.DAE.Service
 		public ExecuteResult ExecuteStatement(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, ProcessCallInfo ACallInfo, string AStatement, RemoteParamData AParams)
 		{
 			FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).Execute(AStatement, ref AParams, ACallInfo, GetRemoteProcessCleanupInfo(ACleanupInfo));
-			return new ExecuteResult() { ExecuteTime = TimeSpan.Zero, ParamData = AParams.Data };
+			return new ExecuteResult() { ExecuteTime = new ProgramStatistics(), ParamData = AParams.Data };
 		}
 
 		public PlanDescriptor PrepareExpression(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, string AExpression, RemoteParam[] AParams, DebugLocator ALocator)
@@ -212,14 +212,14 @@ namespace Alphora.Dataphor.DAE.Service
 
 		public EvaluateResult EvaluatePlan(int APlanHandle, ProcessCallInfo ACallInfo, RemoteParamData AParams)
 		{
-			TimeSpan LExecuteTime;
+			ProgramStatistics LExecuteTime;
 			byte[] LResult = FHandleManager.GetObject<RemoteServerExpressionPlan>(APlanHandle).Evaluate(ref AParams, out LExecuteTime, ACallInfo);
 			return new EvaluateResult() { ExecuteTime = LExecuteTime, ParamData = AParams.Data, Result = LResult };
 		}
 		
 		public CursorResult OpenPlanCursor(int APlanHandle, ProcessCallInfo ACallInfo, RemoteParamData AParams)
 		{
-			TimeSpan LExecuteTime;
+			ProgramStatistics LExecuteTime;
 			RemoteServerCursor LCursor = (RemoteServerCursor)FHandleManager.GetObject<RemoteServerExpressionPlan>(APlanHandle).Open(ref AParams, out LExecuteTime, ACallInfo);
 			CursorDescriptor LDescriptor = new CursorDescriptor(FHandleManager.GetHandle(LCursor), LCursor.Capabilities, LCursor.CursorType, LCursor.Isolation);
 			return new CursorResult() { ExecuteTime = LExecuteTime, ParamData = AParams.Data, CursorDescriptor = LDescriptor };
@@ -227,7 +227,7 @@ namespace Alphora.Dataphor.DAE.Service
 
 		public CursorWithFetchResult OpenPlanCursorWithFetch(int APlanHandle, ProcessCallInfo ACallInfo, RemoteParamData AParams, int ACount)
 		{
-			TimeSpan LExecuteTime;
+			ProgramStatistics LExecuteTime;
 			Guid[] LBookmarks;
 			RemoteFetchData LFetchData;
 			RemoteServerCursor LCursor = (RemoteServerCursor)FHandleManager.GetObject<RemoteServerExpressionPlan>(APlanHandle).Open(ref AParams, out LExecuteTime, out LBookmarks, ACount, out LFetchData, ACallInfo);
@@ -244,21 +244,23 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 			IRemoteServerExpressionPlan LPlan;
 			PlanDescriptor LPlanDescriptor;
-			byte[] LResult = FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).Evaluate(AExpression, ref AParams, out LPlan, out LPlanDescriptor, ACallInfo, GetRemoteProcessCleanupInfo(ACleanupInfo));
+			ProgramStatistics LExecuteTime;
+			byte[] LResult = FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).Evaluate(AExpression, ref AParams, out LPlan, out LPlanDescriptor, out LExecuteTime, ACallInfo, GetRemoteProcessCleanupInfo(ACleanupInfo));
 			LPlanDescriptor.Handle = FHandleManager.GetHandle(LPlan);
-			return new DirectEvaluateResult { ExecuteTime = TimeSpan.Zero, ParamData = AParams.Data, Result = LResult, PlanDescriptor = LPlanDescriptor };
+			return new DirectEvaluateResult { ExecuteTime = LExecuteTime, ParamData = AParams.Data, Result = LResult, PlanDescriptor = LPlanDescriptor };
 		}
 		
 		public DirectCursorResult OpenCursor(int AProcessHandle, ProcessCleanupInfo ACleanupInfo, ProcessCallInfo ACallInfo, string AExpression, RemoteParamData AParams)
 		{
 			IRemoteServerExpressionPlan LPlan;
 			PlanDescriptor LPlanDescriptor;
-			IRemoteServerCursor LCursor = FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).OpenCursor(AExpression, ref AParams, out LPlan, out LPlanDescriptor, ACallInfo, GetRemoteProcessCleanupInfo(ACleanupInfo));
+			ProgramStatistics LExecuteTime;
+			IRemoteServerCursor LCursor = FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).OpenCursor(AExpression, ref AParams, out LPlan, out LPlanDescriptor, out LExecuteTime, ACallInfo, GetRemoteProcessCleanupInfo(ACleanupInfo));
 			LPlanDescriptor.Handle = FHandleManager.GetHandle(LPlan);
 			return 
 				new DirectCursorResult 
 				{
-					ExecuteTime = TimeSpan.Zero, 
+					ExecuteTime = LExecuteTime, 
 					ParamData = AParams.Data, 
 					PlanDescriptor = LPlanDescriptor, 
 					CursorDescriptor = new CursorDescriptor(FHandleManager.GetHandle(LCursor), LCursor.Capabilities, LCursor.CursorType, LCursor.Isolation) 
@@ -269,14 +271,15 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 			IRemoteServerExpressionPlan LPlan;
 			PlanDescriptor LPlanDescriptor;
+			ProgramStatistics LExecuteTime;
 			Guid[] LBookmarks;
 			RemoteFetchData LFetchData;
-			IRemoteServerCursor LCursor = FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).OpenCursor(AExpression, ref AParams, out LPlan, out LPlanDescriptor, ACallInfo, GetRemoteProcessCleanupInfo(ACleanupInfo), out LBookmarks, ACount, out LFetchData);
+			IRemoteServerCursor LCursor = FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).OpenCursor(AExpression, ref AParams, out LPlan, out LPlanDescriptor, out LExecuteTime, ACallInfo, GetRemoteProcessCleanupInfo(ACleanupInfo), out LBookmarks, ACount, out LFetchData);
 			LPlanDescriptor.Handle = FHandleManager.GetHandle(LPlan);
 			return 
 				new DirectCursorWithFetchResult
 				{
-					ExecuteTime = TimeSpan.Zero,
+					ExecuteTime = LExecuteTime,
 					ParamData = AParams.Data,
 					PlanDescriptor = LPlanDescriptor,
 					CursorDescriptor = new CursorDescriptor(FHandleManager.GetHandle(LCursor), LCursor.Capabilities, LCursor.CursorType, LCursor.Isolation),
@@ -477,7 +480,7 @@ namespace Alphora.Dataphor.DAE.Service
 		public ExecuteResult ExecuteBatch(int ABatchHandle, ProcessCallInfo ACallInfo, RemoteParamData AParams)
 		{
 			FHandleManager.GetObject<RemoteServerBatch>(ABatchHandle).Execute(ref AParams, ACallInfo);
-			return new ExecuteResult { ExecuteTime = TimeSpan.Zero, ParamData = AParams.Data };
+			return new ExecuteResult { ExecuteTime = new ProgramStatistics(), ParamData = AParams.Data };
 		}
 
 		public CatalogResult GetCatalog(int AProcessHandle, string AName)

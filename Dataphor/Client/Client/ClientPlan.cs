@@ -64,10 +64,8 @@ namespace Alphora.Dataphor.DAE.Client
 			get { return FPlanDescriptor.Statistics; }
 		}
 
-		public ProgramStatistics ProgramStatistics
-		{
-			get { throw new NotImplementedException(); }
-		}
+		protected ProgramStatistics FProgramStatistics = new ProgramStatistics();
+		public ProgramStatistics ProgramStatistics { get { return FProgramStatistics; } }
 
 		#endregion
 	}
@@ -78,7 +76,7 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		#region IRemoteServerStatementPlan Members
 
-		public void Execute(ref RemoteParamData AParams, out TimeSpan AExecuteTime, ProcessCallInfo ACallInfo)
+		public void Execute(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, ProcessCallInfo ACallInfo)
 		{
 			IAsyncResult LResult = GetServiceInterface().BeginExecutePlan(PlanHandle, ACallInfo, AParams, null, null);
 			LResult.AsyncWaitHandle.WaitOne();
@@ -96,32 +94,35 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		#region IRemoteServerExpressionPlan Members
 
-		public byte[] Evaluate(ref RemoteParamData AParams, out TimeSpan AExecuteTime, ProcessCallInfo ACallInfo)
+		public byte[] Evaluate(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, ProcessCallInfo ACallInfo)
 		{
 			IAsyncResult LResult = GetServiceInterface().BeginEvaluatePlan(PlanHandle, ACallInfo, AParams, null, null);
 			LResult.AsyncWaitHandle.WaitOne();
 			EvaluateResult LEvaluateResult = GetServiceInterface().EndEvaluatePlan(LResult);
 			AExecuteTime = LEvaluateResult.ExecuteTime;
+			FProgramStatistics = AExecuteTime;
 			AParams.Data = LEvaluateResult.ParamData;
 			return LEvaluateResult.Result;
 		}
 
-		public IRemoteServerCursor Open(ref RemoteParamData AParams, out TimeSpan AExecuteTime, ProcessCallInfo ACallInfo)
+		public IRemoteServerCursor Open(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, ProcessCallInfo ACallInfo)
 		{
 			IAsyncResult LResult = GetServiceInterface().BeginOpenPlanCursor(PlanHandle, ACallInfo, AParams, null, null);
 			LResult.AsyncWaitHandle.WaitOne();
 			CursorResult LCursorResult = GetServiceInterface().EndOpenPlanCursor(LResult);
 			AExecuteTime = LCursorResult.ExecuteTime;
+			FProgramStatistics = AExecuteTime;
 			AParams.Data = LCursorResult.ParamData;
 			return new ClientCursor(this, LCursorResult.CursorDescriptor);
 		}
 
-		public IRemoteServerCursor Open(ref RemoteParamData AParams, out TimeSpan AExecuteTime, out Guid[] ABookmarks, int ACount, out RemoteFetchData AFetchData, ProcessCallInfo ACallInfo)
+		public IRemoteServerCursor Open(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, out Guid[] ABookmarks, int ACount, out RemoteFetchData AFetchData, ProcessCallInfo ACallInfo)
 		{
 			IAsyncResult LResult = GetServiceInterface().BeginOpenPlanCursorWithFetch(PlanHandle, ACallInfo, AParams, ACount, null, null);
 			LResult.AsyncWaitHandle.WaitOne();
 			CursorWithFetchResult LCursorResult = GetServiceInterface().EndOpenPlanCursorWithFetch(LResult);
 			AExecuteTime = LCursorResult.ExecuteTime;
+			FProgramStatistics = AExecuteTime;
 			AParams.Data = LCursorResult.ParamData;
 			ABookmarks = LCursorResult.Bookmarks;
 			AFetchData = LCursorResult.FetchData;

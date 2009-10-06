@@ -103,16 +103,17 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				ARow[1] = LSession.User.ID;
 				ARow[2] = LSession.SessionInfo.HostName;
 				ARow[3] = LSession.SessionInfo.CatalogCacheName;
-				ARow[4] = LSession.CurrentLibrary.Name;
-				ARow[5] = LSession.SessionInfo.DefaultIsolationLevel.ToString();
-				ARow[6] = LSession.SessionInfo.DefaultUseDTC;
-				ARow[7] = LSession.SessionInfo.DefaultUseImplicitTransactions;
-				ARow[8] = LSession.SessionInfo.Language.ToString();
-				ARow[9] = LSession.SessionInfo.FetchCount;
-				ARow[10] = LSession.SessionInfo.DefaultMaxStackDepth;
-				ARow[11] = LSession.SessionInfo.DefaultMaxCallDepth;
-				ARow[12] = LSession.SessionInfo.UsePlanCache;
-				ARow[13] = LSession.SessionInfo.ShouldEmitIL;
+				ARow[4] = LSession.SessionInfo.ClientType;
+				ARow[5] = LSession.CurrentLibrary.Name;
+				ARow[6] = LSession.SessionInfo.DefaultIsolationLevel.ToString();
+				ARow[7] = LSession.SessionInfo.DefaultUseDTC;
+				ARow[8] = LSession.SessionInfo.DefaultUseImplicitTransactions;
+				ARow[9] = LSession.SessionInfo.Language.ToString();
+				ARow[10] = LSession.SessionInfo.FetchCount;
+				ARow[11] = LSession.SessionInfo.DefaultMaxStackDepth;
+				ARow[12] = LSession.SessionInfo.DefaultMaxCallDepth;
+				ARow[13] = LSession.SessionInfo.UsePlanCache;
+				ARow[14] = LSession.SessionInfo.ShouldEmitIL;
 				ANativeTable.Insert(AProgram.ValueManager, ARow);
 			}
 		}

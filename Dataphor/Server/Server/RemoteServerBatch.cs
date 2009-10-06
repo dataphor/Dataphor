@@ -74,7 +74,8 @@ namespace Alphora.Dataphor.DAE.Server
 					IRemoteServerExpressionPlan LPlan = PrepareExpression(LParams, out LPlanDescriptor);
 					try
 					{
-						LPlan.Close(LPlan.Open(ref AParams, out LPlanDescriptor.Statistics.ExecuteTime, FScript.Process.EmptyCallInfo()), FScript.Process.EmptyCallInfo());
+						ProgramStatistics LProgramStatistics;
+						LPlan.Close(LPlan.Open(ref AParams, out LProgramStatistics, FScript.Process.EmptyCallInfo()), FScript.Process.EmptyCallInfo());
 						// TODO: Provide a mechanism for determining whether or not an expression should be evaluated or opened through the remoting CLI.
 					}
 					finally
@@ -88,7 +89,8 @@ namespace Alphora.Dataphor.DAE.Server
 					IRemoteServerStatementPlan LPlan = PrepareStatement(LParams, out LPlanDescriptor);
 					try
 					{
-						LPlan.Execute(ref AParams, out LPlanDescriptor.Statistics.ExecuteTime, ACallInfo);
+						ProgramStatistics LProgramStatistics;
+						LPlan.Execute(ref AParams, out LProgramStatistics, ACallInfo);
 					}
 					finally
 					{

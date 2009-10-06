@@ -102,6 +102,12 @@ namespace Alphora.Dataphor.DAE.Server
     
     public class LocalExpressionPlan : LocalPlan, IServerExpressionPlan
     {
+		public LocalExpressionPlan(LocalProcess AProcess, IRemoteServerExpressionPlan APlan, PlanDescriptor APlanDescriptor, DataParams AParams, ProgramStatistics AExecuteTime) : this(AProcess, APlan, APlanDescriptor, AParams)
+		{
+			FProgramStatistics = AExecuteTime;
+			FProgramStatisticsCached = true;
+		}
+		
 		public LocalExpressionPlan(LocalProcess AProcess, IRemoteServerExpressionPlan APlan, PlanDescriptor APlanDescriptor, DataParams AParams) : base(AProcess, APlan, APlanDescriptor)
 		{
 			FPlan = APlan;
@@ -155,7 +161,7 @@ namespace Alphora.Dataphor.DAE.Server
 		public DataValue Evaluate(DataParams AParams)
 		{
 			RemoteParamData LParams = FProcess.DataParamsToRemoteParamData(AParams);
-			byte[] LResult = FPlan.Evaluate(ref LParams, out FProgramStatistics.ExecuteTime, FProcess.GetProcessCallInfo());
+			byte[] LResult = FPlan.Evaluate(ref LParams, out FProgramStatistics, FProcess.GetProcessCallInfo());
 			FProgramStatisticsCached = false;
 			FProcess.RemoteParamDataToDataParams(AParams, LParams);
 			return LResult == null ? null : DataValue.FromPhysical(FProcess.ValueManager, DataType, LResult, 0);
@@ -172,14 +178,14 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				Guid[] LBookmarks;
 				RemoteFetchData LFetchData;
-				LServerCursor = FPlan.Open(ref LParams, out FProgramStatistics.ExecuteTime, out LBookmarks, FProcess.ProcessInfo.FetchCount, out LFetchData, FProcess.GetProcessCallInfo());
+				LServerCursor = FPlan.Open(ref LParams, out FProgramStatistics, out LBookmarks, FProcess.ProcessInfo.FetchCount, out LFetchData, FProcess.GetProcessCallInfo());
 				FProgramStatisticsCached = false;
 				LCursor = new LocalCursor(this, LServerCursor);
 				LCursor.ProcessFetchData(LFetchData, LBookmarks, true);
 			}
 			else
 			{
-				LServerCursor = FPlan.Open(ref LParams, out FProgramStatistics.ExecuteTime, FProcess.GetProcessCallInfo());
+				LServerCursor = FPlan.Open(ref LParams, out FProgramStatistics, FProcess.GetProcessCallInfo());
 				FProgramStatisticsCached = false;
 				LCursor = new LocalCursor(this, LServerCursor);
 			}
@@ -415,7 +421,7 @@ namespace Alphora.Dataphor.DAE.Server
         public void Execute(DataParams AParams)
         {
 			RemoteParamData LParams = FProcess.DataParamsToRemoteParamData(AParams);
-			FPlan.Execute(ref LParams, out FProgramStatistics.ExecuteTime, FProcess.GetProcessCallInfo());
+			FPlan.Execute(ref LParams, out FProgramStatistics, FProcess.GetProcessCallInfo());
 			FProgramStatisticsCached = false;
 			FProcess.RemoteParamDataToDataParams(AParams, LParams);
 		}

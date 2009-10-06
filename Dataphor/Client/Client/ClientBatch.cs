@@ -83,7 +83,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public void Execute(ref RemoteParamData AParams, ProcessCallInfo ACallInfo)
 		{
-			TimeSpan LExecuteTime;
+			ProgramStatistics LExecuteTime;
 			if (IsExpression())
 				((IRemoteServerExpressionPlan)Prepare(AParams.Params)).Evaluate(ref AParams, out LExecuteTime, ACallInfo);
 			else

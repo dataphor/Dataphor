@@ -284,6 +284,7 @@ namespace Alphora.Dataphor.DAE.Server
 			ref RemoteParamData AParams, 
 			out IRemoteServerExpressionPlan APlan, 
 			out PlanDescriptor APlanDescriptor, 
+			out ProgramStatistics AExecuteTime,
 			ProcessCallInfo ACallInfo,
 			RemoteProcessCleanupInfo ACleanupInfo
 		)
@@ -292,10 +293,7 @@ namespace Alphora.Dataphor.DAE.Server
 			APlan = PrepareExpression(AExpression, AParams.Params, null, out APlanDescriptor, ACleanupInfo);
 			try
 			{
-				TimeSpan LExecuteTime;
-				byte[] LResult = APlan.Evaluate(ref AParams, out LExecuteTime, EmptyCallInfo());
-				APlanDescriptor.Statistics.ExecuteTime = LExecuteTime;
-				return LResult;
+				return APlan.Evaluate(ref AParams, out AExecuteTime, EmptyCallInfo());
 			}
 			catch
 			{
@@ -312,6 +310,7 @@ namespace Alphora.Dataphor.DAE.Server
 			ref RemoteParamData AParams, 
 			out IRemoteServerExpressionPlan APlan, 
 			out PlanDescriptor APlanDescriptor, 
+			out ProgramStatistics AExecuteTime,
 			ProcessCallInfo ACallInfo,
 			RemoteProcessCleanupInfo ACleanupInfo
 		)
@@ -320,10 +319,7 @@ namespace Alphora.Dataphor.DAE.Server
 			APlan = PrepareExpression(AExpression, AParams.Params, null, out APlanDescriptor, ACleanupInfo);
 			try
 			{
-				TimeSpan LExecuteTime;
-				IRemoteServerCursor LCursor = APlan.Open(ref AParams, out LExecuteTime, EmptyCallInfo());
-				APlanDescriptor.Statistics.ExecuteTime = LExecuteTime;
-				return LCursor;
+				return APlan.Open(ref AParams, out AExecuteTime, EmptyCallInfo());
 			}
 			catch
 			{
@@ -340,6 +336,7 @@ namespace Alphora.Dataphor.DAE.Server
 			ref RemoteParamData AParams,
 			out IRemoteServerExpressionPlan APlan,
 			out PlanDescriptor APlanDescriptor,
+			out ProgramStatistics AExecuteTime,
 			ProcessCallInfo ACallInfo,
 			RemoteProcessCleanupInfo ACleanupInfo,
 			out Guid[] ABookmarks,
@@ -351,10 +348,8 @@ namespace Alphora.Dataphor.DAE.Server
 			APlan = PrepareExpression(AExpression, AParams.Params, null, out APlanDescriptor, ACleanupInfo);
 			try
 			{
-				TimeSpan LExecuteTime;
-				IRemoteServerCursor LCursor = APlan.Open(ref AParams, out LExecuteTime, EmptyCallInfo());
+				IRemoteServerCursor LCursor = APlan.Open(ref AParams, out AExecuteTime, EmptyCallInfo());
 				AFetchData = LCursor.Fetch(out ABookmarks, ACount, EmptyCallInfo());
-				APlanDescriptor.Statistics.ExecuteTime = LExecuteTime;
 				return LCursor;
 			}
 			catch

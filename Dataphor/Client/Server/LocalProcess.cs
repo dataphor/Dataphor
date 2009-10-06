@@ -454,7 +454,8 @@ namespace Alphora.Dataphor.DAE.Server
 			RemoteParamData LParams = DataParamsToRemoteParamData(AParams);
 			IRemoteServerExpressionPlan LPlan;
 			PlanDescriptor LPlanDescriptor;
-			byte[] LResult = FProcess.Evaluate(AExpression, ref LParams, out LPlan, out LPlanDescriptor, GetProcessCallInfo(), GetProcessCleanupInfo());
+			ProgramStatistics LExecuteTime;
+			byte[] LResult = FProcess.Evaluate(AExpression, ref LParams, out LPlan, out LPlanDescriptor, out LExecuteTime, GetProcessCallInfo(), GetProcessCleanupInfo());
 			RemoteParamDataToDataParams(AParams, LParams);
 			
 			#if LOGCACHEEVENTS
@@ -482,6 +483,7 @@ namespace Alphora.Dataphor.DAE.Server
 			IRemoteServerExpressionPlan LPlan;
 			IRemoteServerCursor LCursor;
 			PlanDescriptor LDescriptor;
+			ProgramStatistics LExecuteTime;
 			LocalExpressionPlan LLocalPlan;
 			LocalCursor LLocalCursor;
 			
@@ -489,17 +491,17 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				Guid[] LBookmarks;
 				RemoteFetchData LFetchData;
-				LCursor = FProcess.OpenCursor(AExpression, ref LParams, out LPlan, out LDescriptor, GetProcessCallInfo(), GetProcessCleanupInfo(), out LBookmarks, ProcessInfo.FetchCount, out LFetchData);
+				LCursor = FProcess.OpenCursor(AExpression, ref LParams, out LPlan, out LDescriptor, out LExecuteTime, GetProcessCallInfo(), GetProcessCleanupInfo(), out LBookmarks, ProcessInfo.FetchCount, out LFetchData);
 				RemoteParamDataToDataParams(AParams, LParams);
-				LLocalPlan = new LocalExpressionPlan(this, LPlan, LDescriptor, AParams);
+				LLocalPlan = new LocalExpressionPlan(this, LPlan, LDescriptor, AParams, LExecuteTime);
 				LLocalCursor = new LocalCursor(LLocalPlan, LCursor);
 				LLocalCursor.ProcessFetchData(LFetchData, LBookmarks, true);
 			}
 			else
 			{
-				LCursor = FProcess.OpenCursor(AExpression, ref LParams, out LPlan, out LDescriptor, GetProcessCallInfo(), GetProcessCleanupInfo());
+				LCursor = FProcess.OpenCursor(AExpression, ref LParams, out LPlan, out LDescriptor, out LExecuteTime, GetProcessCallInfo(), GetProcessCleanupInfo());
 				RemoteParamDataToDataParams(AParams, LParams);
-				LLocalPlan = new LocalExpressionPlan(this, LPlan, LDescriptor, AParams);
+				LLocalPlan = new LocalExpressionPlan(this, LPlan, LDescriptor, AParams, LExecuteTime);
 				LLocalCursor = new LocalCursor(LLocalPlan, LCursor);
 			}
 			return LLocalCursor;

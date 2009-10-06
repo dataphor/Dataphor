@@ -25,23 +25,23 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 			{
 				// Nodes
 				if (LType.IsSubclassOf(typeof(PlanNode)))
-					LClasses.Add(new SettingsItem(String.Format("{0},{1}", LType.FullName, LType.Assembly.GetName().Name), LType.AssemblyQualifiedName));
+					LClasses.Add(new SettingsItem(String.Format("{0},{1}", LType.FullName, AssemblyNameUtility.GetName(LType.Assembly.FullName)), LType.AssemblyQualifiedName));
 				
 				// Devices
 				if (LType.IsSubclassOf(typeof(Schema.Device)))
-					LClasses.Add(new SettingsItem(String.Format("{0},{1}", LType.FullName, LType.Assembly.GetName().Name), LType.AssemblyQualifiedName));
+					LClasses.Add(new SettingsItem(String.Format("{0},{1}", LType.FullName, AssemblyNameUtility.GetName(LType.Assembly.FullName)), LType.AssemblyQualifiedName));
 				
 				// Conveyors
 				if (LType.IsSubclassOf(typeof(Conveyor)))
-					LClasses.Add(new SettingsItem(String.Format("{0},{1}", LType.FullName, LType.Assembly.GetName().Name), LType.AssemblyQualifiedName));
+					LClasses.Add(new SettingsItem(String.Format("{0},{1}", LType.FullName, AssemblyNameUtility.GetName(LType.Assembly.FullName)), LType.AssemblyQualifiedName));
 				
 				// DeviceOperator
 				if (LType.IsSubclassOf(typeof(Schema.DeviceOperator)))
-					LClasses.Add(new SettingsItem(String.Format("{0},{1}", LType.FullName, LType.Assembly.GetName().Name), LType.AssemblyQualifiedName));
+					LClasses.Add(new SettingsItem(String.Format("{0},{1}", LType.FullName, AssemblyNameUtility.GetName(LType.Assembly.FullName)), LType.AssemblyQualifiedName));
 					
 				// DeviceScalarType
 				if (LType.IsSubclassOf(typeof(Schema.DeviceScalarType)))
-					LClasses.Add(new SettingsItem(String.Format("{0},{1}", LType.FullName, LType.Assembly.GetName().Name), LType.AssemblyQualifiedName));
+					LClasses.Add(new SettingsItem(String.Format("{0},{1}", LType.FullName, AssemblyNameUtility.GetName(LType.Assembly.FullName)), LType.AssemblyQualifiedName));
 			}
 			
 			return LClasses;

@@ -109,7 +109,7 @@ namespace Alphora.Dataphor.DAE.Contracts
     public struct ExecuteResult
     {
 		[DataMember]
-		public TimeSpan ExecuteTime;
+		public ProgramStatistics ExecuteTime;
 		
 		[DataMember]
 		public RemoteRowBody ParamData;
@@ -120,7 +120,7 @@ namespace Alphora.Dataphor.DAE.Contracts
     public struct EvaluateResult
     {
 		[DataMember]
-		public TimeSpan ExecuteTime;
+		public ProgramStatistics ExecuteTime;
 		
 		[DataMember]
 		public RemoteRowBody ParamData;
@@ -134,7 +134,7 @@ namespace Alphora.Dataphor.DAE.Contracts
     public struct DirectEvaluateResult
     {
 		[DataMember]
-		public TimeSpan ExecuteTime;
+		public ProgramStatistics ExecuteTime;
 		
 		[DataMember]
 		public RemoteRowBody ParamData;
@@ -151,7 +151,7 @@ namespace Alphora.Dataphor.DAE.Contracts
     public struct CursorResult
     {
 		[DataMember]
-		public TimeSpan ExecuteTime;
+		public ProgramStatistics ExecuteTime;
 		
 		[DataMember]
 		public RemoteRowBody ParamData;
@@ -165,7 +165,7 @@ namespace Alphora.Dataphor.DAE.Contracts
     public struct DirectCursorResult
     {
 		[DataMember]
-		public TimeSpan ExecuteTime;
+		public ProgramStatistics ExecuteTime;
 		
 		[DataMember]
 		public RemoteRowBody ParamData;
@@ -182,7 +182,7 @@ namespace Alphora.Dataphor.DAE.Contracts
     public struct CursorWithFetchResult
     {
 		[DataMember]
-		public TimeSpan ExecuteTime;
+		public ProgramStatistics ExecuteTime;
 		
 		[DataMember]
 		public RemoteRowBody ParamData;
@@ -202,7 +202,7 @@ namespace Alphora.Dataphor.DAE.Contracts
     public struct DirectCursorWithFetchResult
     {
 		[DataMember]
-		public TimeSpan ExecuteTime;
+		public ProgramStatistics ExecuteTime;
 		
 		[DataMember]
 		public RemoteRowBody ParamData;

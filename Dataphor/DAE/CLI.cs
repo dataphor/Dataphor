@@ -606,6 +606,7 @@ namespace Alphora.Dataphor.DAE
 		[DataMember]
 		public TimeSpan BindingTime;
 
+/*
 		/// <summary>Returns the total execution time for the plan.</summary>
 		/// <remarks>
 		///	Execution time is the total time spent executing on this plan. 
@@ -621,6 +622,7 @@ namespace Alphora.Dataphor.DAE
 		/// </remarks>
 		[DataMember]
 		public TimeSpan DeviceExecuteTime;
+*/
 	}
 	
 	[DataContract]

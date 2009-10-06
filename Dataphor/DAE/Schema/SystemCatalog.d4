@@ -1410,6 +1410,7 @@ begin
 		User_ID : UserID,
 		HostName : String,
 		Connection_Name : String nil,
+		ClientType : String nil,
 		Current_Library_Name : Name, 
 		DefaultIsolationLevel : String,
 		DefaultUseDTC : Boolean,

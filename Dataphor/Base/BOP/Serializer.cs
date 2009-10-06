@@ -102,7 +102,7 @@ namespace Alphora.Dataphor.BOP
 		/// <summary> Determines the element namespace to use when writing the specified type. </summary>
 		protected virtual string GetElementNamespace(Type AType)
 		{
-			return String.Format("{0},{1}", AType.Namespace, AType.Assembly.GetName().Name);
+			return String.Format("{0},{1}", AType.Namespace, AssemblyNameUtility.GetName(AType.Assembly.FullName));
 		}
 
 		/// <summary> Determines if the specified property should be serialized. </summary>

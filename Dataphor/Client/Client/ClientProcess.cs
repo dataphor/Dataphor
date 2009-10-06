@@ -145,35 +145,38 @@ namespace Alphora.Dataphor.DAE.Client
 			GetServiceInterface().EndUnprepareExpression(LResult);
 		}
 
-		public byte[] Evaluate(string AExpression, ref RemoteParamData AParams, out IRemoteServerExpressionPlan APlan, out PlanDescriptor APlanDescriptor, ProcessCallInfo ACallInfo, RemoteProcessCleanupInfo ACleanupInfo)
+		public byte[] Evaluate(string AExpression, ref RemoteParamData AParams, out IRemoteServerExpressionPlan APlan, out PlanDescriptor APlanDescriptor, out ProgramStatistics AExecuteTime, ProcessCallInfo ACallInfo, RemoteProcessCleanupInfo ACleanupInfo)
 		{
 			IAsyncResult LResult = GetServiceInterface().BeginEvaluateExpression(ProcessHandle, GetCleanupInfo(ACleanupInfo), ACallInfo, AExpression, AParams, null, null);
 			LResult.AsyncWaitHandle.WaitOne();
 			DirectEvaluateResult LEvaluateResult = GetServiceInterface().EndEvaluateExpression(LResult);
 			AParams.Data = LEvaluateResult.ParamData;
 			APlanDescriptor = LEvaluateResult.PlanDescriptor;
+			AExecuteTime = LEvaluateResult.ExecuteTime;
 			APlan = new ClientExpressionPlan(this, APlanDescriptor);
 			return LEvaluateResult.Result;
 		}
 
-		public IRemoteServerCursor OpenCursor(string AExpression, ref RemoteParamData AParams, out IRemoteServerExpressionPlan APlan, out PlanDescriptor APlanDescriptor, ProcessCallInfo ACallInfo, RemoteProcessCleanupInfo ACleanupInfo)
+		public IRemoteServerCursor OpenCursor(string AExpression, ref RemoteParamData AParams, out IRemoteServerExpressionPlan APlan, out PlanDescriptor APlanDescriptor, out ProgramStatistics AExecuteTime, ProcessCallInfo ACallInfo, RemoteProcessCleanupInfo ACleanupInfo)
 		{
 			IAsyncResult LResult = GetServiceInterface().BeginOpenCursor(ProcessHandle, GetCleanupInfo(ACleanupInfo), ACallInfo, AExpression, AParams, null, null);
 			LResult.AsyncWaitHandle.WaitOne();
 			DirectCursorResult LCursorResult = GetServiceInterface().EndOpenCursor(LResult);
 			AParams.Data = LCursorResult.ParamData;
 			APlanDescriptor = LCursorResult.PlanDescriptor;
+			AExecuteTime = LCursorResult.ExecuteTime;
 			APlan = new ClientExpressionPlan(this, APlanDescriptor);
 			return new ClientCursor((ClientExpressionPlan)APlan, LCursorResult.CursorDescriptor);
 		}
 
-		public IRemoteServerCursor OpenCursor(string AExpression, ref RemoteParamData AParams, out IRemoteServerExpressionPlan APlan, out PlanDescriptor APlanDescriptor, ProcessCallInfo ACallInfo, RemoteProcessCleanupInfo ACleanupInfo, out Guid[] ABookmarks, int ACount, out RemoteFetchData AFetchData)
+		public IRemoteServerCursor OpenCursor(string AExpression, ref RemoteParamData AParams, out IRemoteServerExpressionPlan APlan, out PlanDescriptor APlanDescriptor, out ProgramStatistics AExecuteTime, ProcessCallInfo ACallInfo, RemoteProcessCleanupInfo ACleanupInfo, out Guid[] ABookmarks, int ACount, out RemoteFetchData AFetchData)
 		{
 			IAsyncResult LResult = GetServiceInterface().BeginOpenCursorWithFetch(ProcessHandle, GetCleanupInfo(ACleanupInfo), ACallInfo, AExpression, AParams, ACount, null, null);
 			LResult.AsyncWaitHandle.WaitOne();
 			DirectCursorWithFetchResult LCursorResult = GetServiceInterface().EndOpenCursorWithFetch(LResult);
 			AParams.Data = LCursorResult.ParamData;
 			APlanDescriptor = LCursorResult.PlanDescriptor;
+			AExecuteTime = LCursorResult.ExecuteTime;
 			ABookmarks = LCursorResult.Bookmarks;
 			AFetchData = LCursorResult.FetchData;
 			APlan = new ClientExpressionPlan(this, APlanDescriptor);

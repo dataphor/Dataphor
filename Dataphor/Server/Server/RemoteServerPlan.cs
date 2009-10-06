@@ -107,7 +107,7 @@ namespace Alphora.Dataphor.DAE.Server
 			FProcess.UnprepareStatement(this);
 		}
 		
-		public void Execute(ref RemoteParamData AParams, out TimeSpan AExecuteTime, ProcessCallInfo ACallInfo)
+		public void Execute(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, ProcessCallInfo ACallInfo)
 		{
 			FProcess.ProcessCallInfo(ACallInfo);
 			try
@@ -115,7 +115,7 @@ namespace Alphora.Dataphor.DAE.Server
 				DataParams LParams = FProcess.RemoteParamDataToDataParams(AParams);
 				ServerStatementPlan.Execute(LParams);
 				FProcess.DataParamsToRemoteParamData(LParams, ref AParams);
-				AExecuteTime = ServerStatementPlan.ProgramStatistics.ExecuteTime;
+				AExecuteTime = ServerStatementPlan.ProgramStatistics;
 			}
 			catch (Exception E)
 			{
@@ -148,7 +148,7 @@ namespace Alphora.Dataphor.DAE.Server
 			FProcess.UnprepareExpression(this);
 		}
 		
-		public byte[] Evaluate(ref RemoteParamData AParams, out TimeSpan AExecuteTime, ProcessCallInfo ACallInfo)
+		public byte[] Evaluate(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, ProcessCallInfo ACallInfo)
 		{
 			FProcess.ProcessCallInfo(ACallInfo);
 			try
@@ -156,7 +156,7 @@ namespace Alphora.Dataphor.DAE.Server
 				DataParams LParams = FProcess.RemoteParamDataToDataParams(AParams);
 				DataValue LValue = ServerExpressionPlan.Evaluate(LParams);
 				FProcess.DataParamsToRemoteParamData(LParams, ref AParams);
-				AExecuteTime = ServerExpressionPlan.ProgramStatistics.ExecuteTime;
+				AExecuteTime = ServerExpressionPlan.ProgramStatistics;
 				if (LValue == null)
 					return null;
 				if (ServerExpressionPlan.DataType.Equivalent(LValue.DataType))
@@ -171,7 +171,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		/// <summary> Opens a remote, server-side cursor based on the prepared statement this plan represents. </summary>        
 		/// <returns> An <see cref="IRemoteServerCursor"/> instance for the prepared statement. </returns>
-		public IRemoteServerCursor Open(ref RemoteParamData AParams, out TimeSpan AExecuteTime, ProcessCallInfo ACallInfo)
+		public IRemoteServerCursor Open(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, ProcessCallInfo ACallInfo)
 		{
 			FProcess.ProcessCallInfo(ACallInfo);
 			
@@ -184,7 +184,7 @@ namespace Alphora.Dataphor.DAE.Server
 				{
 					LCursor.Open();
 					FProcess.DataParamsToRemoteParamData(LParams, ref AParams);
-					AExecuteTime = ServerExpressionPlan.ProgramStatistics.ExecuteTime;
+					AExecuteTime = ServerExpressionPlan.ProgramStatistics;
 					return LCursor;
 				}
 				catch
@@ -199,7 +199,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public IRemoteServerCursor Open(ref RemoteParamData AParams, out TimeSpan AExecuteTime, out Guid[] ABookmarks, int ACount, out RemoteFetchData AFetchData, ProcessCallInfo ACallInfo)
+		public IRemoteServerCursor Open(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, out Guid[] ABookmarks, int ACount, out RemoteFetchData AFetchData, ProcessCallInfo ACallInfo)
 		{
 			IRemoteServerCursor LServerCursor = Open(ref AParams, out AExecuteTime, ACallInfo);
 			AFetchData = LServerCursor.Fetch(out ABookmarks, ACount, FProcess.EmptyCallInfo());

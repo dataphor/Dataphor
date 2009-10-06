@@ -122,6 +122,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 			ref RemoteParamData AParams, 
 			out IRemoteServerExpressionPlan APlan, 
 			out PlanDescriptor APlanDescriptor, 
+			out ProgramStatistics AExecuteTime,
 			ProcessCallInfo ACallInfo, 
 			RemoteProcessCleanupInfo ACleanupInfo
 		);
@@ -134,6 +135,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 			ref RemoteParamData AParams, 
 			out IRemoteServerExpressionPlan APlan, 
 			out PlanDescriptor APlanDescriptor, 
+			out ProgramStatistics AExecuteTime,
 			ProcessCallInfo ACallInfo,
 			RemoteProcessCleanupInfo ACleanupInfo
 		);
@@ -148,6 +150,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 			ref RemoteParamData AParams, 
 			out IRemoteServerExpressionPlan APlan,
 			out PlanDescriptor APlanDescriptor,
+			out ProgramStatistics AExecuteTime,
 			ProcessCallInfo ACallInfo,
 			RemoteProcessCleanupInfo ACleanupInfo,
 			out Guid[] ABookmarks, 
@@ -247,7 +250,7 @@ namespace Alphora.Dataphor.DAE.Contracts
     public interface IRemoteServerStatementPlan : IRemoteServerPlan
     {
         /// <summary> Executes the prepared statement this plan represents. </summary>
-        void Execute(ref RemoteParamData AParams, out TimeSpan AExecuteTime, ProcessCallInfo ACallInfo);
+        void Execute(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, ProcessCallInfo ACallInfo);
 	}
 
 	/// <nodoc/>
@@ -268,17 +271,17 @@ namespace Alphora.Dataphor.DAE.Contracts
     public interface IRemoteServerExpressionPlan : IRemoteServerPlan, IServerCursorBehavior
     {
 		/// <summary> Evaluates the expression and returns the result. </summary>
-		byte[] Evaluate(ref RemoteParamData AParams, out TimeSpan AExecuteTime, ProcessCallInfo ACallInfo);
+		byte[] Evaluate(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, ProcessCallInfo ACallInfo);
 		
         /// <summary> Opens a remote, server-side cursor based on the prepared statement this plan represents. </summary>        
         /// <returns> An <see cref="IRemoteServerCursor"/> instance for the prepared statement. </returns>
-		IRemoteServerCursor Open(ref RemoteParamData AParams, out TimeSpan AExecuteTime, ProcessCallInfo ACallInfo);
+		IRemoteServerCursor Open(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, ProcessCallInfo ACallInfo);
 		
 		/// <summary>Opens a remote, server-side cursor based on the prepared statement this plan represents, and fetches count rows.</summary>
         /// <param name="ABookmarks"> A Guid array that will receive the bookmarks for the selected rows. </param>
         /// <param name="ACount"> The number of rows to fetch, with a negative number indicating backwards movement. </param>
         /// <param name="AFetchData"> A <see cref="RemoteFetchData"/> structure containing the result of the fetch. </param>
-        IRemoteServerCursor Open(ref RemoteParamData AParams, out TimeSpan AExecuteTime, out Guid[] ABookmarks, int ACount, out RemoteFetchData AFetchData, ProcessCallInfo ACallInfo);
+        IRemoteServerCursor Open(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, out Guid[] ABookmarks, int ACount, out RemoteFetchData AFetchData, ProcessCallInfo ACallInfo);
 		
         /// <summary> Closes a remote, server-side cursor previously created using Open. </summary>
         /// <param name="ACursor"> The cursor to close. </param>

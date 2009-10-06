@@ -105,8 +105,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 				FInternalProgram.BindToProcess(AProcess, this);
 			
 			// Reset execution statistics
-			FStatistics.ExecuteTime = TimeSpan.Zero;
-			FStatistics.DeviceExecuteTime = TimeSpan.Zero;
+			//FStatistics.ExecuteTime = TimeSpan.Zero;
+			//FStatistics.DeviceExecuteTime = TimeSpan.Zero;
 		}
 		
 		public void CheckCompiled()

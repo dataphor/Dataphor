@@ -16,13 +16,13 @@ namespace Alphora.Dataphor.DAE.Schema
 	{
 		public RegisteredAssembly(Assembly AAssembly, LoadedLibrary ALibrary) : base()
 		{
-			FName = AAssembly.GetName();
+			FName = AAssembly.FullName;
 			FAssembly = AAssembly;
 			FLibrary = ALibrary;
 		}
 		
-		private AssemblyName FName;
-		public AssemblyName Name { get { return FName; } }
+		private string FName;
+		public string Name { get { return FName; } }
 		
 		[Reference]
 		private Assembly FAssembly;
@@ -46,17 +46,17 @@ namespace Alphora.Dataphor.DAE.Schema
 	
 	public class RegisteredAssemblies : List<RegisteredAssembly>
 	{
-		public RegisteredAssembly this[AssemblyName AName] { get { return this[IndexOf(AName)]; } }
+		public RegisteredAssembly this[string AName] { get { return this[IndexOf(AName)]; } }
 		
-		public int IndexOf(AssemblyName AName)
+		public int IndexOf(string AName)
 		{
 			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (String.Equals(AName.FullName, this[LIndex].Name.FullName, StringComparison.OrdinalIgnoreCase))
+				if (String.Equals(AName, this[LIndex].Name, StringComparison.OrdinalIgnoreCase))
 					return LIndex;
 			return -1;
 		}
 		
-		public bool Contains(AssemblyName AName)
+		public bool Contains(string AName)
 		{
 			return IndexOf(AName) >= 0;
 		}
