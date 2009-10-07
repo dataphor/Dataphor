@@ -596,7 +596,7 @@ Manager_ID Employee_ID sum
 					 <ulink type="xref" url="O-System.iDivision.html"><phrase
 						  role="code">/</phrase></ulink>.</para> 
 				<para>Integer divison is defined as iterated subtraction. The
-					 dividend is subtracted from the divisor until the divisor cannot be subtracted
+					 divisor is subtracted from the dividend until the divisor cannot be subtracted
 					 from what remains of the dividend without changing the sign of the remainder of
 					 the dividend. The result of this operator is the number of times this can be
 					 done. This same definition applies to decimal numbers. What remains of the
@@ -9488,19 +9488,16 @@ Cache
 						  role="bold">mod</emphasis></phrase> is the parser recognized symbol for 
 					 <phrase role="code">iMod</phrase>. This operator can be used on
 					 both integer types and decimal types.</para> 
-				<para>The dividend is subtracted from the divisor until the divisor
-					 cannot be subtracted from what remains of the dividend without changing the
-					 sign of the remainder of the dividend. this operator returns what remains of
-					 the dividend. The number of times the divisor can be subtracted from the
-					 dividend can be accessed via the integer division (<ulink type="xref"
-					 url="O-System.iDiv.html"><phrase role="code"><emphasis
-								role="bold">div</emphasis></phrase></ulink>) operator.</para> 
+				<para>
+					This operator behaves as follows:
+					<programlisting>(a mod b = r) given (a div b = q) and (a = b*q + r where 0 &lt;= r &lt; b).</programlisting>
+				</para> 
 				<example> 
 					 <title>Using System.iMod</title> 
-					 <programlisting>select TableDee add {17 mod 5 IntDiv, 1.2 mod 0.35 DecIntDiv };</programlisting> 
-					 <programlisting>IntDiv DecIntDiv
------- ---------
-2      0.15</programlisting> 
+					 <programlisting>select TableDee add {17 mod 5 IntMod, 1.2 mod 0.35 DecIntMod, -340 mod 60 NegIntMod };</programlisting> 
+					 <programlisting>IntMod DecIntMod NegIntMod
+------ --------- ---------
+2      0.15      -40</programlisting> 
 				</example> 
 				<bridgehead renderas="sect3">See Also</bridgehead> 
 				<para><ulink type="olinkb"
