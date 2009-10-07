@@ -38,26 +38,27 @@ create operator SendEmail
 	class "System.Internet.SendEmailNode" static tags {DAE.IsRemotable = "False"};
 grant usage on SendEmail(String, String, String, String, String, String) to role User;
 
-
+// TODO: These are in-theory remotable, but a separate Silverlight assembly needs to be provided to enable that
 create operator HTMLAttributeEncode(const AValue : String) : String
-	class "System.Internet.HTMLAttributeEncodeNode" static tags {DAE.IsRemotable = "True"};
+	class "System.Internet.HTMLAttributeEncodeNode" static tags {DAE.IsRemotable = "False"};
 grant usage on HTMLAttributeEncode(String) to role User;
 
 create operator HTMLEncode(const AValue : String) : String
-	class "System.Internet.HTMLEncodeNode" static tags {DAE.IsRemotable = "True"};
+	class "System.Internet.HTMLEncodeNode" static tags {DAE.IsRemotable = "False"};
 grant usage on HTMLEncode(String) to role User;
 
 create operator HTMLDecode(const AValue : String) : String
-	class "System.Internet.HTMLDecodeNode" static tags {DAE.IsRemotable = "True"};
+	class "System.Internet.HTMLDecodeNode" static tags {DAE.IsRemotable = "False"};
 grant usage on HTMLDecode(String) to role User;
 
 create operator URLEncode(const AValue : String) : String
-	class "System.Internet.URLEncodeNode" static tags {DAE.IsRemotable = "True"};
+	class "System.Internet.URLEncodeNode" static tags {DAE.IsRemotable = "False"};
 grant usage on URLEncode(String) to role User;
 
 create operator URLDecode(const AValue : String) : String
-	class "System.Internet.URLDecodeNode" static tags {DAE.IsRemotable = "True"};
+	class "System.Internet.URLDecodeNode" static tags {DAE.IsRemotable = "False"};
 grant usage on URLDecode(String) to role User;
+// TODO: End in-theory remotable operators
 
 /* HTTP Post Support */
 
@@ -182,12 +183,14 @@ grant usage on XMLDefaultNamespace to role User;
 
 //* Loads an XML document from a string into the XML tables and returns the document ID
 create operator LoadXML(ADocument : String) : XMLDocumentID
-	class "LoadXMLNode";
+	class "LoadXMLNode"
+	static tags { DAE.IsRemotable = "false" };
 grant usage on LoadXML(String) to role User;
 
 //* Saves an XML document from the XML tables to a returned string
 create operator SaveXML(ADocumentID : XMLDocumentID) : String
-	class "SaveXMLNode";
+	class "SaveXMLNode"
+	static tags { DAE.IsRemotable = "false" };
 grant usage on SaveXML(XMLDocumentID) to role User;
 
 //* Operator: FTPDownloadBinary

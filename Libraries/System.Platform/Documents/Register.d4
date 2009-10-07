@@ -100,35 +100,37 @@ grant usage on MoveFile(FileName, FileName) to role PlatformUser;
 create operator DirectoryExists(const ADirectoryName : FileName) : Boolean class "System.Platform.DirectoryExistsNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
 grant usage on DirectoryExists(FileName) to role PlatformUser;
 
+// TODO: These are in theory remotable, but a separate Silverlight assembly would need to provided to enable that
 //* Operator: GetFileName
 // Returns the file name of the path given by AFileName.
-create operator GetFileName(const AFileName : FileName) : FileName class "System.Platform.GetFileNameNode";
+create operator GetFileName(const AFileName : FileName) : FileName class "System.Platform.GetFileNameNode" tags { DAE.IsRemotable = "false" };
 grant usage on GetFileName(FileName) to role PlatformUser;
 
 //* Operator: GetDirectoryName
 // Returns the directory information for the path given by AFileName.
-create operator GetDirectoryName(const AFileName : FileName) : FileName class "System.Platform.GetDirectoryNameNode";
+create operator GetDirectoryName(const AFileName : FileName) : FileName class "System.Platform.GetDirectoryNameNode" tags { DAE.IsRemotable = "false" };
 grant usage on GetDirectoryName(FileName) to role PlatformUser;
 
 //* Operator: GetFileExtension
 // Returns the extension, if any, of the file given by AFileName.
-create operator GetFileExtension(const AFileName : FileName) : FileName class "System.Platform.GetFileExtensionNode";
+create operator GetFileExtension(const AFileName : FileName) : FileName class "System.Platform.GetFileExtensionNode" tags { DAE.IsRemotable = "false" };
 grant usage on GetFileExtension(FileName) to role PlatformUser;
 
 //* Operator: ChangeFileExtension
 // Returns the file name given by AFileName with the extension changed to AExtension.
-create operator ChangeFileExtension(const AFileName : FileName, const AExtension : FileName) : FileName class "System.Platform.ChangeFileExtensionNode";
+create operator ChangeFileExtension(const AFileName : FileName, const AExtension : FileName) : FileName class "System.Platform.ChangeFileExtensionNode" tags { DAE.IsRemotable = "false" };
 grant usage on ChangeFileExtension(FileName, FileName) to role PlatformUser;
 
 //* Operator: FileNameHasExtension
 // Returns true if the file name given by AFileName has an extension.
-create operator FileNameHasExtension(const AFileName : FileName) : Boolean class "System.Platform.FileNameHasExtensionNode";
+create operator FileNameHasExtension(const AFileName : FileName) : Boolean class "System.Platform.FileNameHasExtensionNode" tags { DAE.IsRemotable = "false" };
 grant usage on FileNameHasExtension(FileName) to role PlatformUser;
 
 //* Operator: CombinePath
 // Returns the combined path given by APath and ASubPath, with a directory separator if necessary.
-create operator CombinePath(const APath : FileName, const ASubPath : FileName) : FileName class "System.Platform.CombinePathNode";
+create operator CombinePath(const APath : FileName, const ASubPath : FileName) : FileName class "System.Platform.CombinePathNode" tags { DAE.IsRemotable = "false" };
 grant usage on CombinePath(FileName, FileName) to role PlatformUser;
+// TODO: End in-theory remotable operators
 
 //* Operator: CreateDirectory
 // Creates a directory at the path given by ADirectoryName.
@@ -234,10 +236,10 @@ grant usage on ReplaceFile(FileName, String) to role PlatformUser;
 
 //* Operator: SetCurrentDirectory
 // Sets the process specific current directory
-create operator SetCurrentDirectory(const APath : String) class "System.Platform.SetCurrentDirectoryNode";
+create operator SetCurrentDirectory(const APath : String) class "System.Platform.SetCurrentDirectoryNode" tags { DAE.IsRemotable = "false" };
 grant usage on SetCurrentDirectory(String) to role PlatformUser;
 
 //* Operator: GetCurrentDirectory
 // Gets the process specific current directory
-create operator GetCurrentDirectory() : String class "System.Platform.GetCurrentDirectoryNode";
+create operator GetCurrentDirectory() : String class "System.Platform.GetCurrentDirectoryNode" tags { DAE.IsRemotable = "false" };
 grant usage on GetCurrentDirectory() to role PlatformUser;

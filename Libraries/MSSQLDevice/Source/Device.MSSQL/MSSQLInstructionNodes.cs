@@ -139,6 +139,4 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
                 return MSSQLMSSQLBinaryCompareNode.Compare(AProgram, AArgument1, AArgument2) >= 0;
         }
     }
-
- 
 }
