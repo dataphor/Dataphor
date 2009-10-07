@@ -819,13 +819,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				{
 					if ((LHeader & 4) != 0) // if expanded form
 					{
-						StreamID = Manager.StreamManager.Allocate();
+						Value = Manager.StreamManager.Allocate();
 						Stream LStream = Manager.StreamManager.Open(StreamID, LockMode.Exclusive);
 						LStream.Write(ABuffer, AOffset, ABuffer.Length - AOffset);
 						LStream.Close();
 					}
 					else
-						StreamID = StreamID.Read(ABuffer, AOffset);
+						Value = StreamID.Read(ABuffer, AOffset);
 				}
 			}
 			else
@@ -833,7 +833,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				if ((LHeader & 2) != 0)
 					Value = null;
 				else
-					StreamID = StreamID.Null;
+					Value = StreamID.Null;
 			}
 		}
 						
