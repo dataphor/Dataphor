@@ -217,6 +217,22 @@ namespace Alphora.Dataphor.DAE.Server
 		// Connections
 		private RemoteServerConnections FConnections;
 		internal RemoteServerConnections Connections { get { return FConnections; } }
+		
+		internal RemoteServerConnection[] GetCurrentConnections()
+		{
+			BeginCall();
+			try
+			{
+				RemoteServerConnection[] LResult = new RemoteServerConnection[FConnections == null ? 0 : FConnections.Count];
+				if (FConnections != null)
+					FConnections.CopyTo(LResult, 0);
+				return LResult;
+			}
+			finally
+			{
+				EndCall();
+			}
+		}
 
 		public void DisconnectedObject(object AObject)
 		{

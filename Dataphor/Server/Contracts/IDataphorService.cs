@@ -47,17 +47,61 @@ namespace Alphora.Dataphor.DAE.Contracts
 		
 		#endregion
 		
+		// Connection
+		#region Connection
+		
+		/// <summary>
+		/// Opens a connection to the Dataphor server.
+		/// </summary>
+		/// <param name="AConnectionName">The name of the connection.</param>
+		/// <param name="AHostName">The name of the machine hosting the connection.</param>
+		/// <returns>A handle to the newly created connection.</returns>
+		/// <remarks>
+		/// <para>
+		/// Establishing a connection allows multiple sessions from the same host
+		/// to utilize the same catalog cache, rather than having to maintain
+		/// separate catalog caches for each session.
+		/// </para>
+		/// <para>
+		/// Sessions also perform lifetime management for the connection. If
+		/// a connection has not received a ping within a timeout period, the
+		/// connection is assumed to be inactive and cleaned up by the server.
+		/// </para>
+		/// </remarks>
+		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
+		int OpenConnection(string AConnectionName, string AHostName);
+		
+		/// <summary>
+		/// Performs a ping to notify the server that the connection is still alive.
+		/// </summary>
+		/// <param name="AConnectionHandle">The handle of the connection to be pinged.</param>
+		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
+		void PingConnection(int AConnectionHandle);
+		
+		/// <summary>
+		/// Closes a connection.
+		/// </summary>
+		/// <param name="AConnectionHandle">The handle to the connection to be closed.</param>
+		[OperationContract]
+		[FaultContract(typeof(DataphorFault))]
+		void CloseConnection(int AConnectionHandle);
+		
+		#endregion
+		
 		// Session
 		#region Session
 
 		/// <summary>
 		/// Initiates a connection to the Dataphor server.
 		/// </summary>
+		/// <param name="AConnectionHandle">The handle to the connection on which the session will be created.</param>
 		/// <param name="ASessionInfo">The session information used to authenticate and describe the session.</param>
 		/// <returns>A session descriptor that describes the new session.</returns>
 		[OperationContract]
 		[FaultContract(typeof(DataphorFault))]
-		SessionDescriptor Connect(SessionInfo ASessionInfo);
+		SessionDescriptor Connect(int AConnectionHandle, SessionInfo ASessionInfo);
 
 		/// <summary>
 		/// Disconnects an active Dataphor session.

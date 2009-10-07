@@ -21,7 +21,7 @@ namespace Alphora.Dataphor.DAE.Service
 	using Alphora.Dataphor.DAE.Debug;
 
 	[ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
-	public class DataphorService : IDataphorService
+	public class DataphorService : IDataphorService, IDisposable
 	{
 		public DataphorService()
 		{
@@ -55,6 +55,19 @@ namespace Alphora.Dataphor.DAE.Service
 		private HandleManager FHandleManager = new HandleManager();
 		private ConnectionManager FConnectionManager;
 		
+		#region IDisposable Members
+
+		public void Dispose()
+		{
+			if (FConnectionManager != null)
+			{
+				FConnectionManager.Dispose();
+				FConnectionManager = null;
+			}
+		}
+
+		#endregion
+
 		#region IDataphorService Members
 		
 		public string GetServerName()
@@ -92,13 +105,48 @@ namespace Alphora.Dataphor.DAE.Service
 				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
 			}
 		}
-
-		public SessionDescriptor Connect(SessionInfo ASessionInfo)
+		
+		public int OpenConnection(string AConnectionName, string AHostName)
 		{
 			try
 			{
-				RemoteServerConnection LConnection = FConnectionManager.GetConnection(ASessionInfo.CatalogCacheName, ASessionInfo.HostName);
-				RemoteServerSession LSession = (RemoteServerSession)LConnection.Connect(ASessionInfo);
+				return FHandleManager.GetHandle(FRemoteServer.Establish(AConnectionName, AHostName));
+			}
+			catch (DataphorException LException)
+			{
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+			}
+		}
+		
+		public void PingConnection(int AConnectionHandle)
+		{
+			try
+			{
+				FHandleManager.GetObject<RemoteServerConnection>(AConnectionHandle).Ping();
+			}
+			catch (DataphorException LException)
+			{
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+			}
+		}
+		
+		public void CloseConnection(int AConnectionHandle)
+		{
+			try
+			{
+				FRemoteServer.Relinquish(FHandleManager.GetObject<RemoteServerConnection>(AConnectionHandle));
+			}
+			catch (DataphorException LException)
+			{
+				throw new FaultException<DataphorFault>(DataphorFaultUtility.ExceptionToFault(LException), LException.Message);
+			}
+		}
+
+		public SessionDescriptor Connect(int AConnectionHandle, SessionInfo ASessionInfo)
+		{
+			try
+			{
+				RemoteServerSession LSession = (RemoteServerSession)FHandleManager.GetObject<RemoteServerConnection>(AConnectionHandle).Connect(ASessionInfo);
 				return new SessionDescriptor(FHandleManager.GetHandle(LSession), LSession.SessionID);
 			}
 			catch (DataphorException LException)
@@ -111,7 +159,6 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 			try
 			{
-				// TODO: Relinquish connection on last session disconnect... (may be done by lifetime management...)
 				FHandleManager.GetObject<RemoteServerSession>(ASessionHandle).Dispose();
 			}
 			catch (DataphorException LException)

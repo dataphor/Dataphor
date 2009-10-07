@@ -182,12 +182,30 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public IRemoteServerConnection Establish(string AConnectionName, string AHostName)
 		{
-			return new ClientConnection(this, AConnectionName, AHostName);
+			try
+			{
+				IAsyncResult LResult = GetServiceInterface().BeginOpenConnection(AConnectionName, AHostName, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				return new ClientConnection(this, AConnectionName, AHostName, GetServiceInterface().EndOpenConnection(LResult));
+			}
+			catch (FaultException<DataphorFault> LFault)
+			{
+				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+			}
 		}
 
 		public void Relinquish(IRemoteServerConnection AConnection)
 		{
-			// Nothing to do here
+			try
+			{
+				IAsyncResult LResult = GetServiceInterface().BeginCloseConnection(((ClientConnection)AConnection).ConnectionHandle, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				GetServiceInterface().EndCloseConnection(LResult);
+			}
+			catch (FaultException<DataphorFault> LFault)
+			{
+				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+			}
 		}
 
 		#endregion

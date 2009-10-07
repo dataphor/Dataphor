@@ -156,7 +156,7 @@ namespace Alphora.Dataphor.DAE.Service
 			
 			if (FService != null)
 			{
-				//FService.Dispose(); // TODO: Service lifetime management
+				FService.Dispose();
 				FService = null;
 			}
 			

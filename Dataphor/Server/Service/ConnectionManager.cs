@@ -9,50 +9,96 @@ using System.Text;
 using System.Collections.Generic;
 
 using Alphora.Dataphor.DAE.Server;
+using System.Threading;
 
 namespace Alphora.Dataphor.DAE.Service
 {
-	public class ConnectionManager
+	public class ConnectionManager : IDisposable
 	{
+		public const int CIdleTimeInSeconds = 300; // 5 minutes
+		
 		public ConnectionManager(RemoteServer ARemoteServer)
 		{
 			FRemoteServer = ARemoteServer;
+			StartLifetimeWatcher();
 		}
 		
+
+		#region IDisposable Members
+
+		public void Dispose()
+		{
+			StopLifetimeWatcher();
+		}
+
+		#endregion
+
 		private RemoteServer FRemoteServer;
 		
-		private Dictionary<string, RemoteServerConnection> FConnections = new Dictionary<string, RemoteServerConnection>();
-		private Dictionary<RemoteServerConnection, string> FConnectionIndex = new Dictionary<RemoteServerConnection, string>();
+		private ManualResetEvent FLifetimeSignal;
+		private object FLifetimeSyncHandle = new object();
 		
-		public RemoteServerConnection GetConnection(string AConnectionName, string AHostName)
+		private void StartLifetimeWatcher()
 		{
-			lock (FConnections)
+			lock (FLifetimeSyncHandle)
 			{
-				RemoteServerConnection LConnection;
-				if (!FConnections.TryGetValue(AConnectionName, out LConnection))
+				if (FLifetimeSignal != null)
+					Error.Fail("Lifetime manager started more than once.");
+				FLifetimeSignal = new ManualResetEvent(false);
+			}
+			new Thread(new ThreadStart(LifetimeWatcher)).Start();
+		}
+		
+		private void LifetimeWatcher()
+		{
+			try
+			{
+				bool LSignaled = false;
+				while (!LSignaled)
 				{
-					LConnection = (RemoteServerConnection)FRemoteServer.Establish(AConnectionName, AHostName);
-					LConnection.Disposed += new EventHandler(ConnectionDisposed);
-					FConnections.Add(AConnectionName, LConnection);
-					FConnectionIndex.Add(LConnection, AConnectionName);
+					// Wait for either a signal or a time-out
+					LSignaled = FLifetimeSignal.WaitOne(CIdleTimeInSeconds * 1000);
+					
+					if (!LSignaled)
+					{
+						DateTime LOldestActivityTime = DateTime.Now.AddSeconds(-CIdleTimeInSeconds);
+						
+						RemoteServerConnection[] LConnections = FRemoteServer.GetCurrentConnections();
+						for (int LIndex = 0; LIndex < LConnections.Length; LIndex++)
+							if (LConnections[LIndex].LastActivityTime < LOldestActivityTime)
+							{
+								try
+								{
+									// Connection has been idle for longer than the activity time, kill it
+									FRemoteServer.Relinquish(LConnections[LIndex]);
+								}
+								catch (Exception LException)
+								{
+									FRemoteServer.Server.LogError(LException);
+								}
+							}
+						}
 				}
-				
-				return LConnection;
+
+				// The keep alive processing is complete.  Clean up...
+				lock (FLifetimeSyncHandle)
+				{
+					FLifetimeSignal.Close();
+					FLifetimeSignal = null;
+				}
+			}
+			catch
+			{
+				// Don't allow exceptions to go unhandled, the framework will terminate the server.
 			}
 		}
-
-		private void ConnectionDisposed(object ASender, EventArgs AArgs)
+		
+		private void StopLifetimeWatcher()
 		{
-			((RemoteServerConnection)ASender).Disposed -= new EventHandler(ConnectionDisposed);
-
-			lock (FConnections)
+			lock (FLifetimeSyncHandle)
 			{
-				string LConnectionName;
-				if (FConnectionIndex.TryGetValue((RemoteServerConnection)ASender, out LConnectionName))
-				{
-					FConnectionIndex.Remove((RemoteServerConnection)ASender);
-					FConnections.Remove(LConnectionName);
-				}
+				if (FLifetimeSignal != null)
+					FLifetimeSignal.Set();
 			}
 		}
 	}

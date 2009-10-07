@@ -23,6 +23,7 @@ namespace Alphora.Dataphor.DAE.Server
 			FHostName = AHostName;
 			FConnectionName = AConnectionName;
 			FSessions = new RemoteServerSessions(false);
+			FLastActivityTime = DateTime.Now;
 		}
 		
 		protected bool FDisposed;
@@ -151,11 +152,14 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 			return LLease;
 		}
+		
+		private DateTime FLastActivityTime;
+		public DateTime LastActivityTime { get { return FLastActivityTime; } }
 
 		/// <remarks> Provides a way to check that the session is still available (the message will reset the server's keep alive timeout). </remarks>
 		public void Ping()
 		{
-			// intentionally left blank
+			FLastActivityTime = DateTime.Now;
 		}
 
 		#endregion

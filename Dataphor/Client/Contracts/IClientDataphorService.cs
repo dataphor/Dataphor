@@ -49,17 +49,64 @@ namespace Alphora.Dataphor.DAE.Contracts
 		
 		#endregion
 		
+		// Connection
+		#region Connection
+		
+		/// <summary>
+		/// Opens a connection to the Dataphor server.
+		/// </summary>
+		/// <param name="AConnectionName">The name of the connection.</param>
+		/// <param name="AHostName">The name of the machine hosting the connection.</param>
+		/// <returns>A handle to the newly created connection.</returns>
+		/// <remarks>
+		/// <para>
+		/// Establishing a connection allows multiple sessions from the same host
+		/// to utilize the same catalog cache, rather than having to maintain
+		/// separate catalog caches for each session.
+		/// </para>
+		/// <para>
+		/// Sessions also perform lifetime management for the connection. If
+		/// a connection has not received a ping within a timeout period, the
+		/// connection is assumed to be inactive and cleaned up by the server.
+		/// </para>
+		/// </remarks>
+		[OperationContract(AsyncPattern = true)]
+		[FaultContract(typeof(DataphorFault))]
+		IAsyncResult BeginOpenConnection(string AConnectionName, string AHostName, AsyncCallback ACallback, object AState);
+		int EndOpenConnection(IAsyncResult AResult);
+		
+		/// <summary>
+		/// Performs a ping to notify the server that the connection is still alive.
+		/// </summary>
+		/// <param name="AConnectionHandle">The handle of the connection to be pinged.</param>
+		[OperationContract(AsyncPattern = true)]
+		[FaultContract(typeof(DataphorFault))]
+		IAsyncResult BeginPingConnection(int AConnectionHandle, AsyncCallback ACallback, object AState);
+		void EndPingConnection(IAsyncResult AResult);
+		
+		/// <summary>
+		/// Closes a connection.
+		/// </summary>
+		/// <param name="AConnectionHandle">The handle to the connection to be closed.</param>
+		[OperationContract(AsyncPattern = true)]
+		[FaultContract(typeof(DataphorFault))]
+		IAsyncResult BeginCloseConnection(int AConnectionHandle, AsyncCallback ACallback, object AState);
+		void EndCloseConnection(IAsyncResult AResult);
+		
+		#endregion
+		
 		// Session
 		#region Session
 
 		/// <summary>
 		/// Initiates a connection to the Dataphor server.
 		/// </summary>
+		/// <param name="AConnectionHandle">A handle to the connection on which the session will be created.</param>
 		/// <param name="ASessionInfo">The session information used to authenticate and describe the session.</param>
 		/// <returns>A session descriptor that describes the new session.</returns>
 		[OperationContract(AsyncPattern = true)]
 		[FaultContract(typeof(DataphorFault))]
-		IAsyncResult BeginConnect(SessionInfo ASessionInfo, AsyncCallback ACallback, object AState);
+		IAsyncResult BeginConnect(int AConnectionHandle, SessionInfo ASessionInfo, AsyncCallback ACallback, object AState);
 		SessionDescriptor EndConnect(IAsyncResult AResult);
 
 		/// <summary>

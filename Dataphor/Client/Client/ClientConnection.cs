@@ -16,11 +16,12 @@ namespace Alphora.Dataphor.DAE.Client
 {
 	public class ClientConnection : ClientObject, IRemoteServerConnection
 	{
-		public ClientConnection(ClientServer AClientServer, string AConnectionName, string AClientHostName)
+		public ClientConnection(ClientServer AClientServer, string AConnectionName, string AClientHostName, int AConnectionHandle)
 		{
 			FClientServer = AClientServer;
 			FConnectionName = AConnectionName;
 			FClientHostName = AClientHostName;
+			FConnectionHandle = AConnectionHandle;
 		}
 		
 		private ClientServer FClientServer;
@@ -34,6 +35,9 @@ namespace Alphora.Dataphor.DAE.Client
 		private string FClientHostName;
 		public string ClientHostName { get { return FClientHostName; } }
 		
+		private int FConnectionHandle;
+		public int ConnectionHandle { get { return FConnectionHandle; } }
+		
 		#region IRemoteServerConnection Members
 
 		private string FConnectionName;
@@ -43,7 +47,7 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginConnect(ASessionInfo, null, null);
+				IAsyncResult LResult = GetServiceInterface().BeginConnect(FConnectionHandle, ASessionInfo, null, null);
 				LResult.AsyncWaitHandle.WaitOne();
 				return new ClientSession(this, ASessionInfo, GetServiceInterface().EndConnect(LResult));
 			}
@@ -75,7 +79,9 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				// TODO: Lifetime management for the WCF objects
+				IAsyncResult LResult = GetServiceInterface().BeginPingConnection(FConnectionHandle, null, null);
+				LResult.AsyncWaitHandle.WaitOne();
+				GetServiceInterface().EndPingConnection(LResult);
 			}
 			catch (FaultException<DataphorFault> LFault)
 			{
