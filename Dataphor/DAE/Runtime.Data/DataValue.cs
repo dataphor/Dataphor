@@ -644,6 +644,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (LCloneable != null)
 				return LCloneable.Clone();
 				
+			#if SILVERLIGHT
+			
+			System.Array LArray = AValue as System.Array;
+			if (LArray != null)
+				return LArray.Clone();
+			
+			#endif
+				
 			if (AValue is StreamID)
 				return AManager.StreamManager.Reference((StreamID)AValue);
 				
