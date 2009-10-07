@@ -15,6 +15,7 @@ using WinForms = System.Windows.Forms;
 using System.Reflection;
 using System.Diagnostics;
 using System.Drawing;
+using Alphora.Dataphor.DAE;
 
 namespace Alphora.Dataphor.Frontend.Client.Windows
 {
@@ -28,6 +29,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public const string CFormDesignerNodeTypesExpression = @".Frontend.GetNodeTypes('Windows', Frontend.FormDesignerLibraries)";
 		public const string CLibraryNodeTypesExpression = @".Frontend.GetLibraryNodeTypes('Windows', ALibraryName)";
+		public const string CGetFormDesignerLibraryFilesExpression = @".Frontend.GetLibraryFiles(FormDesignerLibraries)";
 		public const string CSettingsExpression = @".Frontend.GetWindowsSettings(AApplicationID)";
 
         static readonly ILogger SRFLogger = LoggerFactory.Instance.CreateLogger(typeof(Session));
@@ -455,6 +457,52 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			{
 				NodeTypeTable.Clear();
 				NodeTypeTable.LoadFromString(LNodeTable.AsString);
+			}
+			
+			// Ensure that the FormDesignerLibraries are loaded
+			// Load the files required to register any nodes, if necessary				
+			// TODO: This should be better when we actually have a story here.
+			// The problem is that there is no way to distinguish between files required for different client types.
+			// If a file is required for one client, it will be downloaded by all clients.
+			// The library definition would have to be extended by the Frontend to be able to specify a client affinity (possibly multiple clients) for each file.
+			// Then the CLI must somehow be able to expose the file caching mechanism maintained internally by the catalog repository services.
+			// Right now we are doing this by simply casting and accessing the GetFile() method of the LocalServer.
+			if (DataSession.Server is DAE.Server.LocalServer)
+			{
+				IServerCursor LCursor = DataSession.OpenCursor(CGetFormDesignerLibraryFilesExpression);
+				try
+				{
+					using (DAE.Runtime.Data.Row LRow = LCursor.Plan.RequestRow())
+					{
+						bool LShouldLoad;
+						List<string> LFilesToLoad = new List<string>();
+
+						while (LCursor.Next())
+						{
+							LCursor.Select(LRow);
+							string LFullFileName = 
+								((DAE.Server.LocalServer)DataSession.Server).GetFile
+								(
+									(DAE.Server.LocalProcess)LCursor.Plan.Process, 
+									(string)LRow["Library_Name"], 
+									(string)LRow["Name"], 
+									(DateTime)LRow["TimeStamp"], 
+									(bool)LRow["IsDotNetAssembly"], 
+									out LShouldLoad
+								);
+							if (LShouldLoad)
+								LFilesToLoad.Add(LFullFileName);
+						}
+						
+						// Load each file to ensure they can be reached by the assembly resolver hack (see AssemblyUtility)
+						foreach (string LFullFileName in LFilesToLoad)
+							Assembly.LoadFrom(LFullFileName);
+					}
+				}
+				finally
+				{
+					DataSession.CloseCursor(LCursor);
+				}
 			}
 		}
 
