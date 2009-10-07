@@ -24,5 +24,14 @@ namespace Alphora.Dataphor.DAE.Runtime
 		
 		public PlanNode Originator;
 		public DebugLocator Locator;
+
+		public Schema.Operator GetOriginatingOperator()
+		{
+			InstructionNodeBase LInstructionNodeBase = Originator as InstructionNodeBase;
+			if (LInstructionNodeBase != null)
+				return LInstructionNodeBase.Operator;
+			
+			return ((AggregateCallNode)Originator).Operator;	
+		}
 	}
 }

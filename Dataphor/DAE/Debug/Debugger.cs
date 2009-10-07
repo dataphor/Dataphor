@@ -459,7 +459,7 @@ namespace Alphora.Dataphor.DAE.Debug
 											) 
 										: new DebugLocator(LWindow.Locator, -1, -1),
 									LWindow.Originator != null
-										? DebugLocator.OperatorLocator(((InstructionNodeBase)LWindow.Originator).Operator.DisplayName)
+										? DebugLocator.OperatorLocator(LWindow.GetOriginatingOperator().DisplayName)
 										: DebugLocator.ProgramLocator(LProgram.ID),
 									LCurrentNode != null
 										? LCurrentNode.SafeEmitStatementAsString()
