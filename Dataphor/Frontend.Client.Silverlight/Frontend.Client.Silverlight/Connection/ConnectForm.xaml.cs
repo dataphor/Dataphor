@@ -33,7 +33,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				case ConnectStatus.Login : ConnectContent.Content = new ConnectLogin(FWorkItem); break;
 				case ConnectStatus.Connecting : ConnectContent.Content = "Connecting..."; break;
 				case ConnectStatus.SelectApplication : ConnectContent.Content = new ConnectApplication(FWorkItem); break;
-				case ConnectStatus.StartingSession : ConnectContent.Content = "Starting session..."; break;
+				case ConnectStatus.StartingApplication : ConnectContent.Content = "Starting session..."; break;
 				case ConnectStatus.Complete : OnComplete(); break;
 			}
 		}

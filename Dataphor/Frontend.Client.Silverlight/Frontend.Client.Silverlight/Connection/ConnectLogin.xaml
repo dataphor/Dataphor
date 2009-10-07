@@ -12,11 +12,9 @@
 		<TextBox x:Name="UserNameBox" Text="{Binding UserName, Mode=TwoWay, UpdateSourceTrigger=Explicit}" MinWidth="200" HorizontalAlignment="Left" TextChanged="TextBox_TextChanged" />
 		<TextBlock Text="Password"/>
 		<PasswordBox Password="{Binding Password, Mode=TwoWay}" MinWidth="150" HorizontalAlignment="Left" />
-		<Grid Margin="0,4,0,0">
-			<Button x:Name="LoginButton" Content="Login" HorizontalAlignment="Right" Click="Button_Click" />
-		</Grid>
-		<Border x:Name="ErrorBorder" BorderBrush="#FFF44747" BorderThickness="1" CornerRadius="4" Margin="0,4,0,0" Visibility="Collapsed">
-			<TextBox x:Name="ErrorText" TextWrapping="Wrap" IsReadOnly="True" Background="{x:Null}" BorderBrush="{x:Null}" BorderThickness="0" Foreground="#FFC10000" ScrollViewer.VerticalScrollBarVisibility="Auto" IsTabStop="False"/>
-		</Border>
+		<StackPanel Margin="0,4,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
+			<Button Content="Back" Click="BackClicked" Style="{StaticResource ButtonStyle}" />
+			<Button x:Name="LoginButton" Content="Login" Click="Button_Click" Style="{StaticResource ButtonStyle}" />
+		</StackPanel>
 	</StackPanel>
 </UserControl>

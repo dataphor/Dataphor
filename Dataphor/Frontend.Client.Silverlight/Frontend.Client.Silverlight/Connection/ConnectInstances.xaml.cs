@@ -28,6 +28,11 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				FWorkItem.InstanceName = FWorkItem.Instances[InstanceListBox.SelectedIndex];
 				FWorkItem.Status = ConnectStatus.Login;
 			}
+		}
+
+		private void BackClicked(object sender, System.Windows.RoutedEventArgs e)
+		{
+        	FWorkItem.Back();
 		}  
 	}
 }

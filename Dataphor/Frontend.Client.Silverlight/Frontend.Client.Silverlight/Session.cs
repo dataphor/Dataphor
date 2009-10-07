@@ -251,7 +251,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 					catch (Exception LException)
 					{
 						if (AOnError != null)
-							LDispatcher.BeginInvoke(AOnError, LException);
+							LDispatcher.BeginInvoke(AOnError, LException is TargetInvocationException ? ((TargetInvocationException)LException).InnerException : LException);
 						else
 							System.Diagnostics.Debug.WriteLine("Unhandled exception: ", LException);
 					}
@@ -270,12 +270,12 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		            {
 		                var LResult = (T)ADelegate.DynamicInvoke(AArguments);
 		                if (AOnCompletion != null)
-		                    LDispatcher.BeginInvoke(AOnCompletion, LResult);
+							LDispatcher.BeginInvoke(AOnCompletion, LResult);
 		            }
 		            catch (Exception LException)
 		            {
 		                if (AOnError != null)
-		                    LDispatcher.BeginInvoke(AOnError, LException);
+		                    LDispatcher.BeginInvoke(AOnError, LException is TargetInvocationException ? ((TargetInvocationException)LException).InnerException : LException);
 		                else
 		                    System.Diagnostics.Debug.WriteLine("Unhandled exception: ", LException);
 		            }

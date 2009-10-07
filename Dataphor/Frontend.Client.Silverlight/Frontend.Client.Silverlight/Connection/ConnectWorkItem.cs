@@ -27,8 +27,24 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				if (FStatus != value)
 				{
 					FStatus = value;
+					Exception = null;
 					NotifyPropertyChanged("Status");
 				}
+			}
+		}
+		
+		public void Back()
+		{
+			switch (Status)
+			{
+				case ConnectStatus.SelectHost:
+				case ConnectStatus.LoadingInstances: break;
+				case ConnectStatus.SelectInstance : Status = ConnectStatus.SelectHost; break;
+				case ConnectStatus.Login : Status = ConnectStatus.SelectInstance; break;
+				case ConnectStatus.Connecting: break;
+				case ConnectStatus.SelectApplication : Status = ConnectStatus.SelectInstance; break;
+				case ConnectStatus.StartingApplication: break;
+				case ConnectStatus.Complete : Status = ConnectStatus.SelectApplication; break;
 			}
 		}
 		
@@ -85,12 +101,11 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				() => { return ListenerFactory.EnumerateInstances(FHostName); },
 				(Exception AException) => 
 				{ 
-					Exception = AException; 
 					Status = ConnectStatus.SelectHost;
+					Exception = AException; 
 				},
 				(string[] AInstances) => 
 				{
-					Exception = null;
 					Instances = AInstances; 
 					Status = ConnectStatus.SelectInstance;
 				}
@@ -175,12 +190,11 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
     			}, 
     			(Exception AException) => 
     			{
-    				Exception = AException;
     				Status = ConnectStatus.Login;
+    				Exception = AException;
     			},
     			(DataView AApplications) =>
     			{
-    				Exception = null;
     				DataSession = AApplications.Session;
     				Applications = AApplications;
     				
@@ -249,10 +263,10 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 					LSession.Start(LStartingDocument, FContainer);
 					return LSession;
 				},
-				(Exception LException) =>
+				(Exception AException) =>
 				{
-					Exception = LException;
 					Status = ConnectStatus.SelectApplication;
+					Exception = AException;
 				},
 				(Silverlight.Session ASession) =>
 				{
@@ -294,7 +308,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		Login, 
 		Connecting, 
 		SelectApplication, 
-		StartingSession, 
+		StartingApplication, 
 		Complete 
 	};
 }

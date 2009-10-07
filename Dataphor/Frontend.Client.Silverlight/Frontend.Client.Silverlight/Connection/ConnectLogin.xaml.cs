@@ -43,5 +43,10 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			// Update with every change (in WPF, this could be accomplished through the UpdateSourceTrigger enum)
 			UserNameBox.GetBindingExpression(TextBox.TextProperty).UpdateSource();
 		}
+
+		private void BackClicked(object sender, System.Windows.RoutedEventArgs e)
+		{
+        	FWorkItem.Back();
+		}
     }
 }

@@ -29,5 +29,10 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			// TODO: Set FWorkItem.ApplicationID
 			FWorkItem.BeginStartApplication();
 		}
+
+		private void BackClicked(object sender, System.Windows.RoutedEventArgs e)
+		{
+			FWorkItem.Back();
+		}
 	}
 }

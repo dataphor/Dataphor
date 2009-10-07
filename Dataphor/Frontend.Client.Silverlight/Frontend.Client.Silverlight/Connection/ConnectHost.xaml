@@ -10,9 +10,9 @@
 	<StackPanel >
 		<TextBlock Text="Host Name" TextWrapping="Wrap"/>
 		<TextBox x:Name="HostNameTextBox" Text="{Binding HostName, Mode=TwoWay}" TextWrapping="Wrap" MinWidth="200" TabIndex="0"/>
-		<Grid Margin="0,4,0,0">
-			<Button Content="Connect" HorizontalAlignment="Right" Click="Button_Click" />
-  		</Grid>
+		<StackPanel Orientation="Horizontal" Margin="0,4,0,0" HorizontalAlignment="Right">
+			<Button Content="Connect" Click="ConnectClicked" Style="{StaticResource ButtonStyle}" />
+		</StackPanel>
 	</StackPanel>
 
 </UserControl>

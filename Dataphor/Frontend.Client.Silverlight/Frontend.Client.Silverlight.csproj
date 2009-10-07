@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Alphora.Dataphor</RootNamespace>
-    <AssemblyName>Frontend.Client.Silverlight</AssemblyName>
+    <AssemblyName>Alphora.Dataphor.Frontend.Client.Silverlight</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <SilverlightApplication>true</SilverlightApplication>
     <SupportedCultures>
@@ -160,6 +160,7 @@
     </Compile>
     <Compile Include="Frontend.Client.Silverlight\Connection\ConnectWorkItem.cs" />
     <None Include="Frontend.Client.Silverlight\Nodes\Form.cs" />
+    <Compile Include="Frontend.Client.Silverlight\Helpers\NullToVisibilityConverter.cs" />
     <Compile Include="Frontend.Client.Silverlight\Nodes\Timer.cs" />
     <Compile Include="Frontend.Client.Silverlight\SilverlightClientException.cs" />
     <Compile Include="Frontend.Client.Silverlight\DocumentExpression.cs" />

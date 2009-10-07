@@ -18,7 +18,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
         
         private ConnectWorkItem FWorkItem;
 
-        private void Button_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void ConnectClicked(object sender, System.Windows.RoutedEventArgs e)
         {
 			BindingUtility.UpdateTextBoxBindingSources(this);
 			FWorkItem.BeginLoadInstances();

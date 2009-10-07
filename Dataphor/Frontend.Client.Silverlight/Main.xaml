@@ -8,6 +8,7 @@
     xmlns:layout="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Layout.Toolkit"
     d:DesignWidth="640" d:DesignHeight="480"
     >
+
 	<Border>
 		<Border.Background>
 			<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
@@ -15,6 +16,6 @@
 				<GradientStop Color="White" Offset="1"/>
 			</LinearGradientBrush>
 		</Border.Background>
-		<layout:TransitioningContentControl x:Name="RootContent"/>
+		<layout:TransitioningContentControl x:Name="RootContent" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" IsTabStop="False" />
 	</Border>
 </UserControl>
