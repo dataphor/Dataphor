@@ -49,7 +49,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				X - Not Applicable			
 			
 	*/
-
+	
+	/// <remarks> operator ToString(System.Generic) : System.String </remarks>
+	public class ObjectToStringNode : UnaryInstructionNode
+	{
+		public override object InternalExecute(Program AProgram, object AArgument1)
+		{
+			#if NILPROPOGATION
+			if (AArgument1 == null)
+				return null;
+			else
+			#endif
+				return AArgument1.ToString();
+		}
+	}
+	
 	/// <remarks> operator BooleanToString(System.Boolean) : System.String </remarks>
 	public class BooleanToStringNode : UnaryInstructionNode
 	{
