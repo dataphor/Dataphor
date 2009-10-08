@@ -391,7 +391,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			FSourceType = ASourceType;
 			FTargetType = ATargetType;
-			FCanConvert = (FSourceType is Schema.IGenericType) || (FTargetType is Schema.IGenericType) || FSourceType.Is(FTargetType);
+			FCanConvert = FSourceType.Is(FTargetType);
 		}
 		
 		[Reference]
@@ -523,7 +523,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		/// <summary>Returns true if ASourceType is ATargetType or there is only one conversion path with the best narrowing score, false otherwise.</summary>
 		public override bool CanConvert 
 		{ 
-			get { return FSourceType.IsGeneric || FTargetType.IsGeneric || FPaths.CanConvert; } 
+			get { return FTargetType.IsGeneric || FPaths.CanConvert; } 
 			set { }
 		}
 		
@@ -7660,7 +7660,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 											new RestrictExpression
 											(
 												new IdentifierExpression(ATableVar.Name),
-												BuildKeyIsNotNilExpression(AKey.Columns)
+												BuildKeyIsNotNilExpression(APlan, AKey.Columns)
 											),
 											AKey.Columns.ColumnNames
 										)
@@ -7675,7 +7675,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 										new RestrictExpression
 										(
 											new IdentifierExpression(ATableVar.Name),
-											BuildKeyIsNotNilExpression(AKey.Columns)
+											BuildKeyIsNotNilExpression(APlan, AKey.Columns)
 										)
 									}
 								)
@@ -12737,6 +12737,17 @@ indicative of other problems, a reference will never be attached as an explicit 
 			}
 		}
 		
+		public static T TagLine<T>(T AStatement, LineInfo ALineInfo) where T : Statement
+		{
+			AStatement.SetLineInfo(ALineInfo);
+			return AStatement;
+		}
+		
+		public static T TagLine<T>(Plan APlan, T AStatement) where T : Statement
+		{
+			return TagLine<T>(AStatement, APlan.GetCurrentLineInfo());
+		}
+		
 		public static Expression BuildRowEqualExpression(Plan APlan, Schema.Columns ALeftRow, Schema.Columns ARightRow)
 		{
 			return BuildRowEqualExpression(APlan, ALeftRow, ARightRow, null, null);
@@ -12752,58 +12763,75 @@ indicative of other problems, a reference will never be attached as an explicit 
 		{
 			Expression LExpression = null;
 			Expression LEqualExpression;
+			LineInfo LLineInfo = APlan.GetCurrentLineInfo();
 
 			for (int LIndex = 0; LIndex < ALeftRow.Count; LIndex++)
 			{
 				int LRightIndex = ARightRow.IndexOf(Schema.Object.Dequalify(ALeftRow[LIndex].Name));
 				if (((ALeftIsNilable == null) || ALeftIsNilable[LIndex]) || ((ARightIsNilable == null) || ARightIsNilable[LRightIndex]))
 					LEqualExpression =
-						new BinaryExpression
+						TagLine<Expression>
+						(
+							new BinaryExpression
+							(
+								TagLine<Expression>
+								(
+									new BinaryExpression
+									(
+										#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
+										TagLine<Expression>(new CallExpression(CIsNilOperatorName, new Expression[]{ TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ALeftRow[LIndex].Name)), LLineInfo) }), LLineInfo), 
+										Instructions.And, 
+										TagLine<Expression>(new CallExpression(CIsNilOperatorName, new Expression[]{ TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ARightRow[LRightIndex].Name)), LLineInfo) }), LLineInfo)
+										#else
+										TagLine<Expression>(new CallExpression(CIsNilOperatorName, new Expression[]{ TagLine<Expression>(new IdentifierExpression(ALeftRow[LIndex].Name), LLineInfo) }), LLineInfo)
+										Instructions.And, 
+										TagLine<Expression>(new CallExpression(CIsNilOperatorName, new Expression[]{ TagLine<Expression>(new IdentifierExpression(ARightRow[LRightIndex].Name), LLineInfo) }), LLineInfo)
+										#endif
+									),
+									LLineInfo
+								),
+								Instructions.Or,
+								TagLine<Expression>
+								(
+									new BinaryExpression
+									(
+										TagLine<Expression>(new IdentifierExpression(ALeftRow[LIndex].Name), LLineInfo),
+										Instructions.Equal, 
+										TagLine<Expression>(new IdentifierExpression(ARightRow[LRightIndex].Name), LLineInfo)
+									),
+									LLineInfo
+								)
+							),
+							LLineInfo
+						);
+				else
+					LEqualExpression =
+						TagLine<Expression>
 						(
 							new BinaryExpression
 							(
 								#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
-								new CallExpression(CIsNilOperatorName, new Expression[]{new IdentifierExpression(Schema.Object.EnsureRooted(ALeftRow[LIndex].Name))}), 
-								Instructions.And, 
-								new CallExpression(CIsNilOperatorName, new Expression[]{new IdentifierExpression(Schema.Object.EnsureRooted(ARightRow[LRightIndex].Name))})
+								TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ALeftRow[LIndex].Name)), LLineInfo),
+								Instructions.Equal,
+								TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ARightRow[LRightIndex].Name)), LLineInfo)
 								#else
-								new CallExpression(CIsNilOperatorName, new Expression[]{new IdentifierExpression(ALeftRow[LIndex].Name)}), 
-								Instructions.And, 
-								new CallExpression(CIsNilOperatorName, new Expression[]{new IdentifierExpression(ARightRow[LRightIndex].Name)})
+								TagLine<Expression>(new IdentifierExpression(ALeftRow[LIndex].Name), LLineInfo),
+								Instructions.Equal,
+								TagLine<Expression>(new IdentifierExpression(ARightRow[LRightIndex].Name), LLineInfo)
 								#endif
 							),
-							Instructions.Or,
-							new BinaryExpression
-							(
-								new IdentifierExpression(ALeftRow[LIndex].Name), 
-								Instructions.Equal, 
-								new IdentifierExpression(ARightRow[LRightIndex].Name)
-							)
-						);
-				else
-					LEqualExpression =
-						new BinaryExpression
-						(
-							#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
-							new IdentifierExpression(Schema.Object.EnsureRooted(ALeftRow[LIndex].Name)),
-							Instructions.Equal,
-							new IdentifierExpression(Schema.Object.EnsureRooted(ARightRow[LRightIndex].Name))
-							#else
-							new IdentifierExpression(ALeftRow[LIndex].Name),
-							Instructions.Equal,
-							new IdentifierExpression(ARightRow[LRightIndex].Name)
-							#endif
+							LLineInfo
 						);
 					
 				if (LExpression == null)
 					LExpression = LEqualExpression;
 				else
-					LExpression = new BinaryExpression(LExpression, Instructions.And, LEqualExpression);
+					LExpression = TagLine<Expression>(new BinaryExpression(LExpression, Instructions.And, LEqualExpression), LLineInfo);
 			}
 
 			if (LExpression == null)
-				LExpression = new ValueExpression(true);
-
+				LExpression = TagLine<Expression>(new ValueExpression(true), LLineInfo);
+				
 			return LExpression;
 		}
 		
@@ -12820,7 +12848,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			Schema.Columns LColumns = new Schema.Columns();
 			foreach (Schema.Column LColumn in AColumns)
 			{
-				Schema.Signature LSignature = new Schema.Signature(new Schema.SignatureElement[]{new Schema.SignatureElement(LColumn.DataType), new Schema.SignatureElement(LColumn.DataType)});
+				Schema.Signature LSignature = new Schema.Signature(new Schema.SignatureElement[] { new Schema.SignatureElement(LColumn.DataType), new Schema.SignatureElement(LColumn.DataType) });
 				OperatorBindingContext LContext = new OperatorBindingContext(null, "iEqual", APlan.NameResolutionPath, LSignature, true);
 				Compiler.ResolveOperator(APlan, LContext);
 				if (LContext.Operator != null)
@@ -12834,74 +12862,95 @@ indicative of other problems, a reference will never be attached as an explicit 
 		{
 			if ((ALeftRowVarName == null) || (ARightRowVarName == null) || ((ALeftRowVarName == String.Empty) && (ARightRowVarName == String.Empty)))
 				throw new ArgumentException("Row variable name is required for at least one side of the row comparison expression to be built.");
-				
+
 			Expression LExpression = null;
+			var LLineInfo = APlan.GetCurrentLineInfo();
 			for (int LIndex = 0; LIndex < AColumns.Count; LIndex++)
 			{
 				Expression LEqualExpression =
-					new BinaryExpression
+					TagLine<Expression>
 					(
 						new BinaryExpression
 						(
-							new CallExpression
+							TagLine<Expression>
 							(
-								CIsNilOperatorName,
-								new Expression[]
-								{
-									ALeftRowVarName == String.Empty ?
-										#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
-										(Expression)new IdentifierExpression(Schema.Object.EnsureRooted(AColumns[LIndex].Name)) :
-										#else
-										(Expression)new IdentifierExpression(AColumns[LIndex].Name) :
-										#endif
-										new QualifierExpression(new IdentifierExpression(ALeftRowVarName), new IdentifierExpression(AColumns[LIndex].Name))
-								}
+								new BinaryExpression
+								(
+									TagLine<Expression>
+									(
+										new CallExpression
+										(
+											CIsNilOperatorName,
+											new Expression[]
+											{
+												ALeftRowVarName == String.Empty
+													#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
+													? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(AColumns[LIndex].Name)), LLineInfo)
+													#else
+													? TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)
+													#endif
+													: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ALeftRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)), LLineInfo)
+											}
+										),
+										LLineInfo
+									),
+									Instructions.And,
+									TagLine<Expression>
+									(
+										new CallExpression
+										(
+											CIsNilOperatorName,
+											new Expression[]
+											{
+												ARightRowVarName == String.Empty
+													#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
+													? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(AColumns[LIndex].Name)), LLineInfo)
+													#else
+													? TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)
+													#endif
+													: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ARightRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)), LLineInfo)
+											}
+										),
+										LLineInfo
+									)
+								),
+								LLineInfo
 							),
-							Instructions.And,
-							new CallExpression
+							Instructions.Or,
+							TagLine<Expression>
 							(
-								CIsNilOperatorName,
-								new Expression[]
-								{
-									ARightRowVarName == String.Empty ?
+								new BinaryExpression
+								(
+									ALeftRowVarName == String.Empty
 										#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
-										(Expression)new IdentifierExpression(Schema.Object.EnsureRooted(AColumns[LIndex].Name)) :
+										? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(AColumns[LIndex].Name)), LLineInfo)
 										#else
-										(Expression)new IdentifierExpression(AColumns[LIndex].Name) :
+										? TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)
 										#endif
-										new QualifierExpression(new IdentifierExpression(ARightRowVarName), new IdentifierExpression(AColumns[LIndex].Name))
-								}
+										: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ALeftRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)), LLineInfo),
+									Instructions.Equal,
+									ARightRowVarName == String.Empty
+										#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
+										? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(AColumns[LIndex].Name)), LLineInfo)
+										#else
+										? TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo) :
+										#endif
+										: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ARightRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)), LLineInfo)
+								),
+								LLineInfo
 							)
 						),
-						Instructions.Or,
-						new BinaryExpression
-						(
-							ALeftRowVarName == String.Empty ?
-								#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
-								(Expression)new IdentifierExpression(Schema.Object.EnsureRooted(AColumns[LIndex].Name)) :
-								#else
-								(Expression)new IdentifierExpression(AColumns[LIndex].Name) :
-								#endif
-								new QualifierExpression(new IdentifierExpression(ALeftRowVarName), new IdentifierExpression(AColumns[LIndex].Name)),
-							Instructions.Equal,
-							ARightRowVarName == String.Empty ?
-								#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
-								(Expression)new IdentifierExpression(Schema.Object.EnsureRooted(AColumns[LIndex].Name)) :
-								#else
-								(Expression)new IdentifierExpression(AColumns[LIndex].Name) :
-								#endif
-								new QualifierExpression(new IdentifierExpression(ARightRowVarName), new IdentifierExpression(AColumns[LIndex].Name))
-						)
+						LLineInfo
 					);
 					
 				if (LExpression != null)
-					LExpression = new BinaryExpression(LExpression, Instructions.And, LEqualExpression);
+					LExpression = TagLine<Expression>(new BinaryExpression(LExpression, Instructions.And, LEqualExpression), LLineInfo);
 				else
 					LExpression = LEqualExpression;
 			}
 			
 			if (LExpression == null)
-				LExpression = new ValueExpression(true);
+				LExpression = TagLine<Expression>(new ValueExpression(true), LLineInfo);
 			
 			return LExpression;
 		}
@@ -12909,36 +12958,41 @@ indicative of other problems, a reference will never be attached as an explicit 
 		public static Expression BuildKeyEqualExpression(Plan APlan, string ALeftRowVarName, string ARightRowVarName, Schema.TableVarColumnsBase ALeftColumns, Schema.TableVarColumnsBase ARightColumns)
 		{
 			Expression LExpression = null;
+			var LLineInfo = APlan.GetCurrentLineInfo();
 			for (int LIndex = 0; LIndex < ALeftColumns.Count; LIndex++)
 			{
 				Expression LEqualExpression = 
-					new BinaryExpression
+					TagLine<Expression>
 					(
-						ALeftRowVarName == String.Empty ? 
-							#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
-							(Expression)new IdentifierExpression(Schema.Object.EnsureRooted(ALeftColumns[LIndex].Name)) :
-							#else
-							(Expression)new IdentifierExpression(ALeftColumns[LIndex].Name) :
-							#endif
-							new QualifierExpression(new IdentifierExpression(ALeftRowVarName), new IdentifierExpression(ALeftColumns[LIndex].Name)),
-						Instructions.Equal, 
-						ARightRowVarName == String.Empty ?
-							#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
-							(Expression)new IdentifierExpression(Schema.Object.EnsureRooted(ARightColumns[LIndex].Name)) :
-							#else
-							(Expression)new IdentifierExpression(ARightColumns[LIndex].Name) :
-							#endif
-							new QualifierExpression(new IdentifierExpression(ARightRowVarName), new IdentifierExpression(ARightColumns[LIndex].Name))
+						new BinaryExpression
+						(
+							ALeftRowVarName == String.Empty
+								#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
+								? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ALeftColumns[LIndex].Name)), LLineInfo)
+								#else
+								? TagLine<Expression>(new IdentifierExpression(ALeftColumns[LIndex].Name), LLineInfo)
+								#endif
+								: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ALeftRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(ALeftColumns[LIndex].Name), LLineInfo)), LLineInfo),
+							Instructions.Equal, 
+							ARightRowVarName == String.Empty
+								#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
+								? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ARightColumns[LIndex].Name)), LLineInfo)
+								#else
+								? TagLine<Expression>(new IdentifierExpression(ARightColumns[LIndex].Name), LLineInfo)
+								#endif
+								: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ARightRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(ARightColumns[LIndex].Name), LLineInfo)), LLineInfo)
+						),
+						LLineInfo
 					);
 					
 				if (LExpression != null)
-					LExpression = new BinaryExpression(LExpression, Instructions.And, LEqualExpression);
+					LExpression = TagLine<Expression>(new BinaryExpression(LExpression, Instructions.And, LEqualExpression), LLineInfo);
 				else
 					LExpression = LEqualExpression;
 			}
 			
 			if (LExpression == null)
-				LExpression = new ValueExpression(true);
+				LExpression = TagLine<Expression>(new ValueExpression(true), LLineInfo);
 				
 			return LExpression;
 		}
@@ -12946,36 +13000,41 @@ indicative of other problems, a reference will never be attached as an explicit 
 		public static Expression BuildKeyEqualExpression(Plan APlan, string ALeftRowVarName, string ARightRowVarName, Schema.Columns ALeftColumns, Schema.Columns ARightColumns)
 		{
 			Expression LExpression = null;
+			var LLineInfo = APlan.GetCurrentLineInfo();
 			for (int LIndex = 0; LIndex < ALeftColumns.Count; LIndex++)
 			{
 				Expression LEqualExpression = 
-					new BinaryExpression
+					TagLine<Expression>
 					(
-						ALeftRowVarName == String.Empty ? 
-							#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
-							(Expression)new IdentifierExpression(Schema.Object.EnsureRooted(ALeftColumns[LIndex].Name)) :
-							#else
-							(Expression)new IdentifierExpression(ALeftColumns[LIndex].Name) :
-							#endif
-							new QualifierExpression(new IdentifierExpression(ALeftRowVarName), new IdentifierExpression(ALeftColumns[LIndex].Name)),
-						Instructions.Equal, 
-						ARightRowVarName == String.Empty ?
-							#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
-							(Expression)new IdentifierExpression(Schema.Object.EnsureRooted(ARightColumns[LIndex].Name)) :
-							#else
-							(Expression)new IdentifierExpression(ARightColumns[LIndex].Name) :
-							#endif
-							new QualifierExpression(new IdentifierExpression(ARightRowVarName), new IdentifierExpression(ARightColumns[LIndex].Name))
+						new BinaryExpression
+						(
+							ALeftRowVarName == String.Empty ? 
+								#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
+								TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ALeftColumns[LIndex].Name)), LLineInfo) :
+								#else
+								TagLine<Expression>(new IdentifierExpression(ALeftColumns[LIndex].Name), LLineInfo) :
+								#endif
+								TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ALeftRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(ALeftColumns[LIndex].Name), LLineInfo)), LLineInfo),
+							Instructions.Equal, 
+							ARightRowVarName == String.Empty ?
+								#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
+								TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ARightColumns[LIndex].Name)), LLineInfo) :
+								#else
+								TagLine<Expression>(new IdentifierExpression(ARightColumns[LIndex].Name), LLineInfo) :
+								#endif
+								TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ARightRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(ARightColumns[LIndex].Name), LLineInfo)), LLineInfo)
+						),
+						LLineInfo
 					);
 					
 				if (LExpression != null)
-					LExpression = new BinaryExpression(LExpression, Instructions.And, LEqualExpression);
+					LExpression = TagLine<Expression>(new BinaryExpression(LExpression, Instructions.And, LEqualExpression), LLineInfo);
 				else
 					LExpression = LEqualExpression;
 			}
 			
 			if (LExpression == null)
-				LExpression = new ValueExpression(true);
+				LExpression = TagLine<Expression>(new ValueExpression(true), LLineInfo);
 				
 			return LExpression;
 		}
@@ -12984,60 +13043,70 @@ indicative of other problems, a reference will never be attached as an explicit 
 		{
 			Expression LExpression = null;
 			Expression LEqualExpression;
+			var LLineInfo = APlan.GetCurrentLineInfo();
 			for (int LIndex = 0; LIndex < ALeftKey.Count; LIndex++)
 			{
 				Error.AssertWarn(String.Compare(ALeftKey[LIndex].Name, ARightKey[LIndex].Name) != 0, "Key column names equal. Invalid key comparison expression.");
 				
 				#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
-				LEqualExpression = new BinaryExpression(new IdentifierExpression(Schema.Object.EnsureRooted(ALeftKey[LIndex].Name)), Instructions.Equal, new IdentifierExpression(Schema.Object.EnsureRooted(ARightKey[LIndex].Name)));
+				LEqualExpression = TagLine<Expression>(new BinaryExpression(TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ALeftKey[LIndex].Name)), LLineInfo), Instructions.Equal, TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ARightKey[LIndex].Name)), LLineInfo)), LLineInfo);
 				#else
-				LEqualExpression = new BinaryExpression(new IdentifierExpression(ALeftKey[LIndex].Name), Instructions.Equal, new IdentifierExpression(ARightKey[LIndex].Name));
+				LEqualExpression = TagLine<Expression>(new BinaryExpression(TagLine<Expression>(new IdentifierExpression(ALeftKey[LIndex].Name), LLineInfo), Instructions.Equal, TagLine<Expression>(new IdentifierExpression(ARightKey[LIndex].Name), LLineInfo), LLineInfo);
 				#endif
 				
 				if (LExpression == null)
 					LExpression = LEqualExpression;
 				else
-					LExpression = new BinaryExpression(LExpression, Instructions.And, LEqualExpression);
+					LExpression = TagLine<Expression>(new BinaryExpression(LExpression, Instructions.And, LEqualExpression), LLineInfo);
 			}
 			
 			if (LExpression == null)
-				LExpression = new ValueExpression(true);
+				LExpression = TagLine<Expression>(new ValueExpression(true), LLineInfo);
 
 			return LExpression;
 		}
 		
-		public static Expression BuildKeyIsNotNilExpression(Schema.KeyColumns AKey)
+		public static Expression BuildKeyIsNotNilExpression(Plan APlan, Schema.KeyColumns AKey)
 		{
 			Expression LExpression = null;
 			Expression LIsNotNilExpression;
+			var LLineInfo = APlan.GetCurrentLineInfo();
 			for (int LIndex = 0; LIndex < AKey.Count; LIndex++)
 			{
 				LIsNotNilExpression = 
-					new UnaryExpression
+					TagLine<Expression>
 					(
-						Instructions.Not,
-						new CallExpression
+						new UnaryExpression
 						(
-							CIsNilOperatorName,
-							new Expression[] 
-							{ 
-								#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
-								new IdentifierExpression(Schema.Object.EnsureRooted(AKey[LIndex].Name))
-								#else
-								new IdentifierExpression(AKey[LIndex].Name)
-								#endif
-							}
-						)
+							Instructions.Not,
+							TagLine<Expression>
+							(
+								new CallExpression
+								(
+									CIsNilOperatorName,
+									new Expression[] 
+									{ 
+										#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
+										TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(AKey[LIndex].Name)), LLineInfo)
+										#else
+										TagLine<Expression>(new IdentifierExpression(AKey[LIndex].Name), LLineInfo)
+										#endif
+									}
+								),
+								LLineInfo
+							)
+						),
+						LLineInfo
 					);
 					
 				if (LExpression == null)
 					LExpression = LIsNotNilExpression;
 				else
-					LExpression = new BinaryExpression(LExpression, Instructions.And, LIsNotNilExpression);
+					LExpression = TagLine<Expression>(new BinaryExpression(LExpression, Instructions.And, LIsNotNilExpression), LLineInfo);
 			}
 			
 			if (LExpression == null)
-				LExpression = new ValueExpression(true);
+				LExpression = TagLine<Expression>(new ValueExpression(true), LLineInfo);
 				
 			return LExpression;
 		}

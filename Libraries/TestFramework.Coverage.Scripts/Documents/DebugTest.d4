@@ -1,0 +1,25 @@
+create operator TestCall(const AValue : Integer) : Integer
+begin
+	result := AValue;
+end;
+
+create operator TestAnotherCall(const AValue : Integer) : Integer
+begin
+	result := AValue;
+end;
+
+var LCounter := 1;
+while LCounter < 100 do
+begin
+	LCounter := LCounter + 1;
+	LCounter := TestCall(LCounter);
+	LCounter := TestAnotherCall(LCounter);
+	LCounter := LCounter - 1;
+end;
+
+select Debug.GetProcesses();
+select Debug.GetCallStack(45596481);
+select Debug.GetStack(14000148, 0);
+
+select Operators where Name like '%Test%'
+

@@ -171,6 +171,7 @@ namespace Alphora.Dataphor.DAE.ServerTests
 		[Test, Ignore("Ambiguous column names with common columns???")] public void ExecuteSemiTables() { ExecuteScript("Coverage.Scripts", "SemiTables"); }
 		[Test, Ignore("Needs to be rewritten (still uses old style type specifier in table selector expressions)")] public void ExecuteScanTable() { ExecuteScript("Coverage.Scripts", "ScanTable"); }
 		[Test] public void ExecuteSpecifyClause() { ExecuteScript("Coverage.Scripts", "SpecifyClause"); }
+		[Test] public void ExecuteSpecificAssignment() { ExecuteScript("Coverage.Scripts", "SpecificAssignment"); }
 		[Test, Ignore("Build this coverage")] public void ExecuteTableIndexer() { ExecuteScript("Coverage.Scripts", "TableIndexer"); }
 		[Test] public void ExecuteServerLinks() { ExecuteScript("Coverage.Scripts", "ServerLink"); }
 		[Test] public void ExecuteDebugLibrary() { ExecuteScript("Coverage.Scripts", "DebugLibrary"); }

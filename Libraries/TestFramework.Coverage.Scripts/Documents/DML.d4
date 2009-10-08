@@ -866,7 +866,7 @@ select ScriptData("
 		);
 		
 		// Sum, Min, Max, Avg, integers, empty set
-		if (row from (Item where false group add { Sum(Quantity) SumQuantity, Min(Quantity) MinQuantity, Max(Quantity) MaxQuantity, Avg(Quantity) AvgQuantity })) <> row { nil SumQuantity, nil MinQuantity, nil MaxQuantity, nil AvgQuantity } then
+		if (row from (Item where false group add { Sum(Quantity) SumQuantity, Min(Quantity) MinQuantity, Max(Quantity) MaxQuantity, Avg(Quantity) AvgQuantity })) <> row { nil as Integer SumQuantity, nil as Integer MinQuantity, nil as Integer MaxQuantity, nil as Decimal AvgQuantity } then
 			raise Error("Integer Sum, Min, Max or Avg of empty set failed");
 		
 		// Sum, Min, Max, Avg float, {no columns}
@@ -1195,7 +1195,7 @@ select ScriptData("
 					Avg(PercentStocked) AvgPercentStocked
 				}
 		) <>
-			table { row { nil SumPercentStocked, nil MinPercentStocked, nil MaxPercentStocked, nil AvgPercentStocked }, key { } } then
+			table { row { nil as Decimal SumPercentStocked, nil as Decimal MinPercentStocked, nil as Decimal MaxPercentStocked, nil as Decimal AvgPercentStocked }, key { } } then
 			raise Error("Sum, Min, Max, or Avg decimal on empty set failed");
 			
 		// Min, Max String {no columns}
@@ -1248,7 +1248,7 @@ select ScriptData("
 			"
 		);
 
-		if (Client where false group add { Min(LastName) MinName, Max(LastName) MaxName }) <> table { row { nil MinName, nil MaxName }, key { } } then
+		if (Client where false group add { Min(LastName) MinName, Max(LastName) MaxName }) <> table { row { nil as String MinName, nil as String MaxName }, key { } } then
 			raise Error('Min or Max string of empty set failed');
 
 		// Min, Max IString {no columns}

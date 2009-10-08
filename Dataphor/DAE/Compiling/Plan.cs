@@ -437,6 +437,18 @@ namespace Alphora.Dataphor.DAE.Compiling
 				return (Statement)FStatementStack[FStatementStack.Count - 1];
 			return null;
 		}
+		
+		/// <summary>
+		/// Returns the first non-empty LineInfo in the current statement stack, null if no LineInfo is found.
+		/// </summary>
+		public LineInfo GetCurrentLineInfo()
+		{
+			foreach (Statement LStatement in FStatementStack)
+				if (LStatement.Line != -1)
+					return LStatement.LineInfo;
+					
+			return null;
+		}
 
 		// CursorContext
 		protected CursorContexts FCursorContexts = new CursorContexts();

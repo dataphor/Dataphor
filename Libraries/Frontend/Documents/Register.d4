@@ -532,7 +532,7 @@ create operator GetWindowsSettings(const AApplicationID : Name)
 		HelpDocument : String 
 	}
 begin
-	result := row { nil IconImage, nil Theme, nil DocumentCacheSize, nil ImageCacheSize, nil HelpDocument };
+	result := row { nil as Graphic IconImage, nil as String Theme, nil as Integer DocumentCacheSize, nil as Integer ImageCacheSize, nil as String HelpDocument };
 	if exists (WindowsClientApplications where Application_ID = AApplicationID) then
 	begin
 		var LRow := WindowsClientApplications[AApplicationID];
@@ -638,7 +638,7 @@ begin
 	begin
 		var LCRC32 := GetCRC32(LData);
 		if LCRC32 = ACRC32 then
-			result := row { true CRCMatches, nil Value, LCRC32 ActualCRC32 }
+			result := row { true CRCMatches, nil as Scalar Value, LCRC32 ActualCRC32 }
 		else
 			result := row { false CRCMatches, LData Value, LCRC32 ActualCRC32 };
 	end
