@@ -12,7 +12,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 	using Alphora.Dataphor.DAE.Debug;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 
-	public class RuntimeException : DAEException, ILocatedException
+	public class RuntimeException : DAEException, ILocatorException
 	{
 		public enum Codes 
 		{
