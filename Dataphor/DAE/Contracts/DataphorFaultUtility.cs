@@ -10,14 +10,15 @@ using Alphora.Dataphor.BOP;
 using Alphora.Dataphor.DAE.Compiling;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Device;
+using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Streams;
 
 #if !SILVERLIGHT
-using Alphora.Dataphor.DAE.Connection;
 using Alphora.Dataphor.DAE.Store;
+using Alphora.Dataphor.DAE.Connection;
 #endif
 
 namespace Alphora.Dataphor.DAE.Contracts
@@ -64,6 +65,15 @@ namespace Alphora.Dataphor.DAE.Contracts
 				LFault.ErrorLevel = LCompilerException.ErrorLevel;
 			}
 			
+			RuntimeException LRuntimeException = AException as RuntimeException;
+			if (LRuntimeException != null)
+			{
+				LFault.Locator = LRuntimeException.Locator;
+				LFault.Line = LRuntimeException.Line;
+				LFault.LinePos = LRuntimeException.LinePos;
+				LFault.Context = LRuntimeException.Context;
+			}
+			
 			return LFault;
 		}
 		
@@ -74,6 +84,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 				case "BaseException" : return new BaseException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
 				case "BOPException" : return new BOPException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
 				case "CompilerException" : return new CompilerException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.ErrorLevel, AFault.Line, AFault.LinePos, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
+				case "RuntimeException" : return new RuntimeException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.Locator, AFault.Line, AFault.LinePos, AFault.Context, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
 				#if !SILVERLIGHT
 				case "ConnectionException" : return new ConnectionException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.Statement, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
 				case "StoreException" : return new StoreException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));

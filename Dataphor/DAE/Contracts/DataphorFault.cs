@@ -54,6 +54,13 @@ namespace Alphora.Dataphor.DAE.Contracts
 		[DataMember]
 		public CompilerErrorLevel ErrorLevel;
 		
+		// RuntimeException
+		[DataMember]
+		public string Locator;
+		
+		[DataMember]
+		public string Context;
+		
 		// ConnectionException
 		[DataMember]
 		public string Statement;

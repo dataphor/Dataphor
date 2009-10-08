@@ -9,8 +9,8 @@ using System.Resources;
 
 namespace Alphora.Dataphor.DAE.Runtime
 {
+	using Alphora.Dataphor.DAE.Debug;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
-using Alphora.Dataphor.DAE.Debug;
 
 	public class RuntimeException : DAEException, ILocatedException
 	{
@@ -578,6 +578,15 @@ using Alphora.Dataphor.DAE.Debug;
 				FLine = ALocator.Line;
 				FLinePos = ALocator.LinePos;
 			}
+		}
+
+		public RuntimeException(ErrorSeverity ASeverity, int ACode, string AMessage, string ADetails, string AServerContext, string ALocator, int ALine, int ALinePos, string AContext, DataphorException AInnerException) 
+			: base(ASeverity, ACode, AMessage, ADetails, AServerContext, AInnerException)
+		{
+			FLocator = ALocator;
+			FLine = ALine;
+			FLinePos = ALinePos;
+			FContext = AContext;
 		}
 	}
 }
