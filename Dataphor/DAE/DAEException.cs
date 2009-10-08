@@ -25,4 +25,9 @@ namespace Alphora.Dataphor.DAE
 		int Line { get; set; }
 		int LinePos { get; set; }
 	}
+	
+	public interface ILocatorException : ILocatedException
+	{
+		string Locator { get; set; }
+	}
 }
