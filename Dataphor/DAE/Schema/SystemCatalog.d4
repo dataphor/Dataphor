@@ -881,6 +881,7 @@ begin
 	create operator RenameLibrary(const AOldName : Name, const ANewName : Name) class "System.SystemRenameLibraryNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator GetLibraryDescriptor(const AName : Name) : LibraryDescriptor class "System.SystemGetLibraryDescriptorNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator SetLibraryDescriptor(const AName : Name, const ADescriptor : LibraryDescriptor) class "System.SystemSetLibraryDescriptorNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+	create operator FileReference(const AName : Name, const AIsAssembly : Boolean) : FileReference class "System.FileReferenceNode";
 	create operator LibraryDescriptor(const AName : Name) : LibraryDescriptor class "System.SystemLibraryDescriptorNode";
 	create operator LibraryDescriptor(const AName : Name, const AVersion : VersionNumber) : LibraryDescriptor class "System.SystemLibraryDescriptorNode";
 	create operator LibraryDescriptor(const AName : Name, const AVersion : VersionNumber, const ADefaultDeviceName : Name) : LibraryDescriptor class "System.SystemLibraryDescriptorNode";
@@ -2062,6 +2063,7 @@ begin
 	grant usage on ExecuteWithTimeout(String, Integer) to role User;                                                              
 	grant usage on ExecuteWithTimeout(String, Integer, row) to role User;                                                         
 	grant usage on ExecuteWithTimeout(String, Integer, row, var row) to role User;                                                
+	grant usage on FileReference(Name, Boolean) to role User;
 	grant usage on FindKey(cursor, row) to role User;                                                                                           
 	grant usage on FindNearest(cursor, row) to role User;                                                                                       
 	grant usage on First(cursor) to role User;                                                                                                  
