@@ -215,7 +215,7 @@ create operator PlatformExecute(const AFileName : String, const AArguments : Str
 grant usage on PlatformExecute(String, String, row { WorkingDirectory : String, NoWindow : Boolean, WindowStyle : Integer, RedirectOutput : Boolean, RedirectErrors : Boolean }) to role PlatformUser;
 create operator PlatformExecute(const AFileName : String, const AArguments : String, const AWorkingDirectory : String) : row { ExitCode : Integer, Output : String }
 begin
-	var LResult := PlatformExecute(AFileName, AArguments, row { AWorkingDirectory WorkingDirectory, nil NoWindow, nil WindowStyle, nil RedirectOutput, nil RedirectErrors });
+	var LResult := PlatformExecute(AFileName, AArguments, row { AWorkingDirectory WorkingDirectory, nil as Boolean NoWindow, nil as Integer WindowStyle, nil as Boolean RedirectOutput, nil as Boolean RedirectErrors });
 	result := row { LResult.ExitCode ExitCode, LResult.Output Output };
 end;
 grant usage on PlatformExecute(String, String, String) to role PlatformUser;
