@@ -1,0 +1,46 @@
+// Alphora Dataphor
+// © Copyright 2000-2009 Alphora
+// This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+/*
+	Specific Assignment
+	
+	This test verifies that the assignment of a generic to a variable of a more specific 
+	declared type fails at compile-time.
+*/
+
+begin
+	var LExceptionOccurred := false;
+	try
+		Execute
+		(
+			"
+				var LValue := Evaluate('4');
+				var LString : String := LValue;
+			"
+		);
+	except
+		LExceptionOccurred := true;
+	end;
+
+	if not(LExceptionOccurred) then
+		raise Error('Generic assignment allowed');
+end;
+
+begin
+	var LExceptionOccurred := false;
+	try
+		Execute
+		(
+			"
+				var LTable := table of { ID : Integer, Name : String } { };
+				insert row { 1 ID, Evaluate('''this''') Name } into LTable;
+			"
+		);
+	except
+		LExceptionOccurred := true;
+	end;
+
+	if not(LExceptionOccurred) then
+		raise Error('Generic assignment allowed in insert statement');
+end;
