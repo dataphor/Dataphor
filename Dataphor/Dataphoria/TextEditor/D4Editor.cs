@@ -116,6 +116,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		private void ShowResults()
 		{
 			FDockContentResultPanel.Show();
+			FTextEdit.Focus();
 		}
 
 		#region Execution
@@ -129,10 +130,27 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		void IErrorSource.ErrorSelected(Exception AException)
 		{
-			var LException = AException as ILocatedException;
-			if (LException != null)
-				GotoPosition(LException.Line, LException.LinePos);
-			SelectNextControl(this, true, true, true, false);
+			var LLocator = AException as ILocatorException;
+			if (LLocator != null)
+			{
+				try
+				{
+					Dataphoria.OpenLocator(new DebugLocator(LLocator.Locator, LLocator.Line, LLocator.LinePos));
+				}
+				catch
+				{
+					// ignore exceptions trying to locate, the locator may no longer even be valid
+				}
+			}
+			else
+			{
+				var LLocated = AException as ILocatedException;
+				if (LLocated != null)
+					GotoPosition(LLocated.Line, LLocated.LinePos);
+
+				Activate();	
+				FTextEdit.Focus();			
+			}
 		}
 
 		private void AppendResultPanel(string AResults)
