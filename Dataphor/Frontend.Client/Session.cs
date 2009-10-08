@@ -148,7 +148,6 @@ namespace Alphora.Dataphor.Frontend.Client
 				LDocumentString = LStartingDocument.AsString;
 			}
 
-			#if !SILVERLIGHT
 			// Load the files required to register any nodes, if necessary				
 			if (DataSession.Server is DAE.Server.LocalServer)
 			{
@@ -157,6 +156,7 @@ namespace Alphora.Dataphor.Frontend.Client
 				{
 					using (DAE.Runtime.Data.Row LRow = LCursor.Plan.RequestRow())
 					{
+						#if !SILVERLIGHT
 						bool LShouldLoad;
 						List<string> LFilesToLoad = new List<string>();
 
@@ -180,6 +180,20 @@ namespace Alphora.Dataphor.Frontend.Client
 						// Load each file to ensure they can be reached by the assembly resolver hack (see AssemblyUtility)
 						foreach (string LFullFileName in LFilesToLoad)
 							Assembly.LoadFrom(LFullFileName);
+						#else
+						while (LCursor.Next())
+						{
+							LCursor.Select(LRow);
+							((DAE.Server.LocalServer)DataSession.Server).LoadAndRegister
+							(
+								(DAE.Server.LocalProcess)LCursor.Plan.Process,
+								LCursor.Plan.Catalog.ClassLoader,
+								(string)LRow["Library_Name"],
+								(string)LRow["Name"],
+								(bool)LRow["ShouldRegister"]
+							);
+						}
+						#endif
 					}
 				}
 				finally
@@ -187,7 +201,6 @@ namespace Alphora.Dataphor.Frontend.Client
 					DataSession.CloseCursor(LCursor);
 				}
 			}
-			#endif
 			
 			return LDocumentString;
 		}

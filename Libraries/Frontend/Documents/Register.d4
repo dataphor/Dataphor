@@ -562,7 +562,7 @@ end;
 grant usage on GetWindowsSettings(Name) to role User;
 
 //* Operator: GetLibraryFiles
-create operator GetLibraryFiles(const AEnvironment : String, const ALibraries : table { Library_Name : Name }) : table { Library_Name : String, Name : String, TimeStamp : DateTime, IsDotNetAssembly : Boolean }
+create operator GetLibraryFiles(const AEnvironment : String, const ALibraries : table { Library_Name : Name }) : table { Library_Name : String, Name : String, TimeStamp : DateTime, IsDotNetAssembly : Boolean, ShouldRegister : Boolean }
 	class "Frontend.GetLibraryFilesNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 grant usage on GetLibraryFiles(String, table { Library_Name : Name }) to role User;
 

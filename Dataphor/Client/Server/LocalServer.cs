@@ -393,10 +393,8 @@ namespace Alphora.Dataphor.DAE.Server
 					ServerFileInfo[] LFileInfos = AProcess.RemoteProcess.GetFileNames(AClassDefinition.ClassName, AProcess.Session.SessionInfo.ClientType);
 
 					for (int LIndex = 0; LIndex < LFileInfos.Length; LIndex++)
-					{
-						if (LFileInfos[LIndex].IsDotNetAssembly && !FFilesCached.Contains(LFileInfos[LIndex].FileName))
+						if (LFileInfos[LIndex].IsDotNetAssembly)
 							LoadAndRegister(AProcess, AClassLoader, LFileInfos[LIndex].LibraryName, LFileInfos[LIndex].FileName, LFileInfos[LIndex].ShouldRegister);
-					}
 				}
 			}
 			finally
@@ -405,15 +403,18 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		private void LoadAndRegister(LocalProcess AProcess, ClassLoader AClassLoader, string ALibraryName, string AFileName, bool AShouldRegister)
+		public void LoadAndRegister(LocalProcess AProcess, ClassLoader AClassLoader, string ALibraryName, string AFileName, bool AShouldRegister)
 		{
 			try
 			{
-				Assembly LAssembly = LoadAssembyFromRemote(AProcess, ALibraryName, AFileName);
-				if (AShouldRegister && !AClassLoader.Assemblies.Contains(LAssembly.FullName))
-					AClassLoader.RegisterAssembly(Catalog.LoadedLibraries[Engine.CSystemLibraryName], LAssembly);
-				FAssembliesCached.Add(AFileName);
-				FFilesCached.Add(AFileName);
+				if (!FFilesCached.Contains(AFileName))
+				{
+					Assembly LAssembly = LoadAssembyFromRemote(AProcess, ALibraryName, AFileName);
+					if (AShouldRegister && !AClassLoader.Assemblies.Contains(LAssembly.FullName))
+						AClassLoader.RegisterAssembly(Catalog.LoadedLibraries[Engine.CSystemLibraryName], LAssembly);
+					FAssembliesCached.Add(AFileName);
+					FFilesCached.Add(AFileName);
+				}
 			}
 			catch (IOException E)
 			{

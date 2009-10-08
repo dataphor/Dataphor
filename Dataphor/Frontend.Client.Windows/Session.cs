@@ -14,6 +14,7 @@ using WinForms = System.Windows.Forms;
 using System.Reflection;
 using System.Diagnostics;
 using System.Drawing;
+using Alphora.Dataphor.DAE;
 
 namespace Alphora.Dataphor.Frontend.Client.Windows
 {
@@ -28,6 +29,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		public const string CClientName = "Windows";
 		public const string CFormDesignerNodeTypesExpression = ".Frontend.GetNodeTypes('" + CClientName + "', Frontend.FormDesignerLibraries)";
 		public const string CLibraryNodeTypesExpression = ".Frontend.GetLibraryNodeTypes('" + CClientName + "', ALibraryName)";
+		public const string CGetFormDesignerLibraryFilesExpression = @".Frontend.GetLibraryFiles(.Frontend.ClientTypes['" + CClientName + "'].Environment, FormDesignerLibraries)";
 		public const string CSettingsExpression = ".Frontend.GetWindowsSettings(AApplicationID)";
 
 		public Session(Alphora.Dataphor.DAE.Client.DataSession ADataSession, bool AOwnsDataSession) : base(ADataSession, AOwnsDataSession) 
@@ -453,6 +455,45 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			{
 				NodeTypeTable.Clear();
 				NodeTypeTable.LoadFromString(LNodeTable.AsString);
+			}
+
+			// Load the files required to register any nodes, if necessary				
+			if (DataSession.Server is DAE.Server.LocalServer)
+			{
+				IServerCursor LCursor = DataSession.OpenCursor(CGetLibraryFilesExpression);
+				try
+				{
+					using (DAE.Runtime.Data.Row LRow = LCursor.Plan.RequestRow())
+					{
+						bool LShouldLoad;
+						List<string> LFilesToLoad = new List<string>();
+
+						while (LCursor.Next())
+						{
+							LCursor.Select(LRow);
+							string LFullFileName = 
+								((DAE.Server.LocalServer)DataSession.Server).GetFile
+								(
+									(DAE.Server.LocalProcess)LCursor.Plan.Process, 
+									(string)LRow["Library_Name"], 
+									(string)LRow["Name"], 
+									(DateTime)LRow["TimeStamp"], 
+									(bool)LRow["IsDotNetAssembly"], 
+									out LShouldLoad
+								);
+							if (LShouldLoad)
+								LFilesToLoad.Add(LFullFileName);
+						}
+						
+						// Load each file to ensure they can be reached by the assembly resolver hack (see AssemblyUtility)
+						foreach (string LFullFileName in LFilesToLoad)
+							Assembly.LoadFrom(LFullFileName);
+					}
+				}
+				finally
+				{
+					DataSession.CloseCursor(LCursor);
+				}
 			}
 		}
 

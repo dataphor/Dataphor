@@ -128,6 +128,10 @@
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
       <Private>False</Private>
     </ProjectReference>
+    <ProjectReference Include="..\Client\Client.csproj">
+      <Project>{F342F781-894F-4A6F-A59A-86080E1AC737}</Project>
+      <Name>Client %28Client\Client%29</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Common\Common.csproj">
       <Project>{B488ECA3-95AD-4814-BC9B-69D062B7B333}</Project>
       <Name>Common %28Common\Common%29</Name>
