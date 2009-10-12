@@ -2315,7 +2315,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (AValue == null)
 				return true;
 				
-			if ((ADataType == AProgram.DataTypes.SystemScalar) || (ADataType == AProgram.DataTypes.SystemGeneric))
+			if ((ADataType.Equals(AProgram.DataTypes.SystemScalar)) || (ADataType.Equals(AProgram.DataTypes.SystemGeneric)))
 				return true;
 				
 			Schema.ScalarType LScalarType = ADataType as Schema.ScalarType;

@@ -32,6 +32,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	public interface IDataType
 	{
 		string Name { get; set; }
+		bool IsNil { get; } // True if the type is known to be the constant nil at compile-time
 		bool IsGeneric { get; set; }
 		bool IsDisposable { get; set; }
 		bool Equivalent(IDataType ADataType);

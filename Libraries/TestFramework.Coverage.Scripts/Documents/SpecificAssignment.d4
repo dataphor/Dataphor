@@ -44,3 +44,8 @@ begin
 	if not(LExceptionOccurred) then
 		raise Error('Generic assignment allowed in insert statement');
 end;
+
+// A compile-time nil can be converted to any type.
+var LString : String := nil;
+var LTable := table of { ID : Integer, Name : String } { };
+insert row { 1 ID, nil Name } into LTable;

@@ -678,7 +678,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				else if (value != null)
 				{
 					#if USEDATATYPESINNATIVEROW
-					if ((DataType.Columns[AIndex].DataType == Manager.DataTypes.SystemGeneric) || (DataType.Columns[AIndex].DataType == Manager.DataTypes.SystemScalar))
+					if ((DataType.Columns[AIndex].DataType.Equals(Manager.DataTypes.SystemGeneric)) || (DataType.Columns[AIndex].DataType.Equals(Manager.DataTypes.SystemScalar)))
 						FRow.DataTypes[AIndex] = DataValue.NativeTypeToScalarType(Manager, value.GetType());
 					else
 						FRow.DataTypes[AIndex] = DataType.Columns[AIndex].DataType;

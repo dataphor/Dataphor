@@ -391,7 +391,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			FSourceType = ASourceType;
 			FTargetType = ATargetType;
-			FCanConvert = FSourceType.Is(FTargetType);
+			FCanConvert = FSourceType.IsNil || FSourceType.Is(FTargetType);
 		}
 		
 		[Reference]
@@ -523,7 +523,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		/// <summary>Returns true if ASourceType is ATargetType or there is only one conversion path with the best narrowing score, false otherwise.</summary>
 		public override bool CanConvert 
 		{ 
-			get { return FTargetType.IsGeneric || FPaths.CanConvert; } 
+			get { return FSourceType.IsNil || FTargetType.IsGeneric || FPaths.CanConvert; } 
 			set { }
 		}
 		
@@ -12086,7 +12086,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				#if NILISSCALAR
 				case LexerToken.Nil: LNode.DataType = APlan.DataTypes.SystemScalar; LNode.IsNilable = true; break;
 				#else
-				case TokenType.Nil: LNode.DataType = APlan.DataTypes.SystemGeneric; LNode.IsNilable = true; break;
+				case TokenType.Nil: LNode.DataType = APlan.DataTypes.SystemNilGeneric; LNode.IsNilable = true; break;
 				#endif
 				case TokenType.Boolean: LNode.DataType = APlan.DataTypes.SystemBoolean; LNode.Value = (bool)AExpression.Value; break;
 				case TokenType.Integer: 

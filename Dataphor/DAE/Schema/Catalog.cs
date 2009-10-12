@@ -1290,6 +1290,17 @@ namespace Alphora.Dataphor.DAE.Schema
 				return FSystemGeneric;
 			}
 		}
+		
+		private IGenericType FSystemNilGeneric;
+		public IGenericType SystemNilGeneric
+		{
+			get
+			{
+				if (FSystemNilGeneric == null)
+					FSystemNilGeneric = new GenericType(true);
+				return FSystemNilGeneric;
+			}
+		}
 
 		private IRowType FSystemRow;
 		public IRowType SystemRow
