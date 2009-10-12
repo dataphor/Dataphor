@@ -25,7 +25,13 @@ namespace Alphora.Dataphor.DAE.Schema
     {
 		public GenericType() : base()
 		{
-			IsGeneric = true;
+			FIsGeneric = true;
+		}
+		
+		public GenericType(bool AIsNil) : base()
+		{
+			FIsGeneric = true;
+			FIsNil = AIsNil;
 		}
 		
 		public override bool Equals(object AObject)
@@ -88,6 +94,11 @@ namespace Alphora.Dataphor.DAE.Schema
 			get { return FIsGeneric; }
 			set { FIsGeneric = value; }
 		}
+		
+		// IsNil
+		// True if the type is known to be the constant nil at compile-time
+		private bool FIsNil;
+		public bool IsNil { get { return FIsNil; } }
 		
 		// IsDisposable
 		// Indicates whether the host representation for this data type must be disposed

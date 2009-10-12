@@ -63,6 +63,8 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FIsGeneric = value; }
 		}
 		
+		public bool IsNil { get { return false; } }
+		
 		// IsDisposable
 		// Indicates whether the host representation for this data type must be disposed
 		private bool FIsDisposable = false;
