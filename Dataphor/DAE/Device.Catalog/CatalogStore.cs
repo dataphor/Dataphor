@@ -1904,21 +1904,24 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				{
 					CloseCursor(LCursor);
 				}
-
-				SQLStoreCursor LObjects = OpenCursor("PK_DAECatalogObjects", false);
-				try
+				
+				if (LNames.Count > 0)
 				{
-					for (int LNameIndex = 0; LNameIndex < LNames.Count; LNameIndex++)
-						#if REQUIRECASEMATCHONRESOLVE
-						if ((AName == (string)LNames[LNameIndex][0]) && LObjects.FindKey(new object[] { LNames[LNameIndex][1] }))
-						#else
-						if (LObjects.FindKey(LNames[LNameIndex]))
-						#endif
-							LHeaders.Add(new Schema.CatalogObjectHeader((int)LObjects[0], (string)LObjects[1], (string)LObjects[2], (string)LObjects[3]));
-				}
-				finally
-				{
-					CloseCursor(LObjects);
+					SQLStoreCursor LObjects = OpenCursor("PK_DAECatalogObjects", false);
+					try
+					{
+						for (int LNameIndex = 0; LNameIndex < LNames.Count; LNameIndex++)
+							#if REQUIRECASEMATCHONRESOLVE
+							if ((AName == (string)LNames[LNameIndex][0]) && LObjects.FindKey(new object[] { LNames[LNameIndex][1] }))
+							#else
+							if (LObjects.FindKey(LNames[LNameIndex]))
+							#endif
+								LHeaders.Add(new Schema.CatalogObjectHeader((int)LObjects[0], (string)LObjects[1], (string)LObjects[2], (string)LObjects[3]));
+					}
+					finally
+					{
+						CloseCursor(LObjects);
+					}
 				}
 			}
 			
@@ -1965,21 +1968,24 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				{
 					CloseCursor(LCursor);
 				}
-
-				SQLStoreCursor LObjects = OpenCursor("PK_DAECatalogObjects", false);
-				try
+				
+				if (LNameList.Count > 0)
 				{
-					for (int LNameIndex = 0; LNameIndex < LNameList.Count; LNameIndex++)
-						#if REQUIRECASEMATCHONRESOLVE
-						if ((AName == (string)LNameList[LNameIndex][0]) && LObjects.FindKey(new object[] { LNameList[LNameIndex][1] }))
-						#else
-						if (LObjects.FindKey(LNameList[LNameIndex]))
-						#endif
-							LHeaders.Add(new Schema.CatalogObjectHeader((int)LObjects[0], (string)LObjects[1], (string)LObjects[2], (string)LObjects[3]));
-				}
-				finally
-				{
-					CloseCursor(LObjects);
+					SQLStoreCursor LObjects = OpenCursor("PK_DAECatalogObjects", false);
+					try
+					{
+						for (int LNameIndex = 0; LNameIndex < LNameList.Count; LNameIndex++)
+							#if REQUIRECASEMATCHONRESOLVE
+							if ((AName == (string)LNameList[LNameIndex][0]) && LObjects.FindKey(new object[] { LNameList[LNameIndex][1] }))
+							#else
+							if (LObjects.FindKey(LNameList[LNameIndex]))
+							#endif
+								LHeaders.Add(new Schema.CatalogObjectHeader((int)LObjects[0], (string)LObjects[1], (string)LObjects[2], (string)LObjects[3]));
+					}
+					finally
+					{
+						CloseCursor(LObjects);
+					}
 				}
 					
 				return LHeaders;
@@ -2020,17 +2026,20 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					}
 					#endif
 				}
-
-				SQLStoreCursor LObjects = OpenCursor("PK_DAECatalogObjects", false);
-				try
+				
+				if (LOperatorList.Count > 0)
 				{
-					for (int LOperatorIndex = 0; LOperatorIndex < LOperatorList.Count; LOperatorIndex++)
-						if (LObjects.FindKey(new object[] { LOperatorList[LOperatorIndex] }))
-							LHeaders.Add(new Schema.CatalogObjectHeader((int)LObjects[0], (string)LObjects[1], (string)LObjects[2], (string)LObjects[3]));
-				}
-				finally
-				{
-					CloseCursor(LObjects);
+					SQLStoreCursor LObjects = OpenCursor("PK_DAECatalogObjects", false);
+					try
+					{
+						for (int LOperatorIndex = 0; LOperatorIndex < LOperatorList.Count; LOperatorIndex++)
+							if (LObjects.FindKey(new object[] { LOperatorList[LOperatorIndex] }))
+								LHeaders.Add(new Schema.CatalogObjectHeader((int)LObjects[0], (string)LObjects[1], (string)LObjects[2], (string)LObjects[3]));
+					}
+					finally
+					{
+						CloseCursor(LObjects);
+					}
 				}
 			}
 			
