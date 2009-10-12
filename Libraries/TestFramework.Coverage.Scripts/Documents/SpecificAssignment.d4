@@ -49,3 +49,43 @@ end;
 var LString : String := nil;
 var LTable := table of { ID : Integer, Name : String } { };
 insert row { 1 ID, nil Name } into LTable;
+
+// A nil initializer should not allow generic-source assignment
+begin
+	var LExceptionOccurred := false;
+	try
+		Execute
+		(
+			"
+				var LVar := nil;
+				var LString : String;
+				LString := LVar;
+			"
+		);
+	except
+		LExceptionOccurred := true;
+	end;
+
+	if not(LExceptionOccurred) then
+		raise Error('Generic assignment allowed with nil initializer');
+end;
+
+// A typeof(nil) should not allow generic-source assignment
+begin
+	var LExceptionOccurred := false;
+	try
+		Execute
+		(
+			"
+				var LVar : typeof(nil);
+				var LString : String;
+				LString := LVar;
+			"
+		);
+	except
+		LExceptionOccurred := true;
+	end;
+
+	if not(LExceptionOccurred) then
+		raise Error('Generic assignment allowed with nil initializer');
+end;

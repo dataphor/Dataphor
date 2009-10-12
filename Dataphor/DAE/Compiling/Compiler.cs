@@ -1432,11 +1432,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 				}
 				if (LValueNode.DataType == null)
 					throw new CompilerException(CompilerException.Codes.ExpressionExpected, LStatement.Expression);
-
+					
 				VariableNode LNode = new VariableNode();
 				LNode.SetLineInfo(APlan, LStatement.LineInfo);
 				LNode.VariableName = LStatement.VariableName.Identifier;
-				LNode.VariableType = LValueNode.DataType;
+				LNode.VariableType = LValueNode.DataType.IsNil ? APlan.DataTypes.SystemGeneric : LValueNode.DataType;
 				LNode.Nodes.Add(LValueNode);
 				LNode.DetermineCharacteristics(APlan);
 				APlan.Symbols.Push(new Symbol(LNode.VariableName, LNode.VariableType));
@@ -5716,6 +5716,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 					if (!ATrackDependencies)
 						APlan.PopCreationObject();
 				}
+				
+				// Do not allow a NilGeneric to be the inferred type of a typeof specifier
+				if (LDataType.IsNil)
+					LDataType = APlan.DataTypes.SystemGeneric;
 
 				// Attach dependencies for the resolved data type
 				if (!ATrackDependencies)
@@ -5750,8 +5754,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 			{
 				AttachDataTypeDependencies(APlan, ((Schema.ICursorType)ADataType).TableType);
 			}
-			else
+			else if (!(ADataType is Schema.IGenericType))
+			{
 				Error.Fail(@"Could not attach dependencies for data type ""{0}"".", ADataType.Name);
+			}
 		}
 		
 		public static PlanNode CompileOperatorBlock(Plan APlan, Schema.Operator AOperator, Statement AStatement)
