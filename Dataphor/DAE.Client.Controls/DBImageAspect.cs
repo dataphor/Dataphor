@@ -353,15 +353,27 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			return base.IsInputKey(AKeyData);
 		}
 
-		public event RequestImageHandler OnImageRequested;
+		public event RequestImageHandler OnCaptureRequested;
+		
 		private void CaptureClicked(object ASender, EventArgs AArgs)
 		{
-			if (OnImageRequested != null)
+			if (OnCaptureRequested != null)
 			{
 				FLink.Edit();
-				OnImageRequested();
+				OnCaptureRequested();
 			}
-		}   
+		}
+
+        public event RequestImageHandler OnScanRequested;
+        
+        private void ScanClicked(object ASender, EventArgs AArgs)
+        {
+            if (OnScanRequested != null)
+            {
+                FLink.Edit();
+                OnScanRequested();
+            }
+        }   
 		
 		protected override void OnKeyDown(KeyEventArgs AArgs)
 		{
@@ -483,11 +495,18 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		{
 			DBImageAspectMenuItem LItem;
 
-			// Capture...
+            // Scan...
+            LItem = new DBImageAspectMenuItem(this, false, true);
+            LItem.Text = Strings.Get("DBImageAspect.Menu.ScanText");
+            LItem.Click += new EventHandler(ScanClicked);
+            LItem.DefaultItem = true;
+            ContextMenu.MenuItems.Add(LItem);
+            
+            // Capture...
 			LItem = new DBImageAspectMenuItem(this, false, true);
 			LItem.Text = Strings.Get("DBImageAspect.Menu.CaptureText");
 			LItem.Click += new EventHandler(CaptureClicked);
-			LItem.DefaultItem = true;
+            LItem.DefaultItem = false;
 			ContextMenu.MenuItems.Add(LItem);
 
 			// -

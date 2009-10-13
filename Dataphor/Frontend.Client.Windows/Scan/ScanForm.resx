@@ -117,112 +117,63 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DBFile.Menu.CopyText" xml:space="preserve">
-    <value>&amp;Copy</value>
+  <metadata name="toolStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>325, 17</value>
+  </metadata>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="previewToolStripButton.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAArpJREFUOE+FkmtI
+        02EUxv2Qsw39IHNBJIWZRYEfytTCSqwIgsC+FAXRje6R0RC7aAwRrS+xSRIilmw2b23/zW1ubu7mMi/T
+        LQ2nc7p0Yy51ak7BC7o9vUqJkbEDD+/h5Ty/83LeExa2IYxG4/5gMMheXl7OJOdxokQAO4miicI31m6a
+        p6amJugMhvH+oRG30+m2ukbH9GO+qU/Tfn9pIBB4xePxzoWExO7ac6O4VAB+jRQVVRQENfWorJOhVqJC
+        SYloKTY2LjEkJC39VKFYrgWl0EIk06xLLG/Ck6d5ypCA1YKbd7JMCs1nrJr+aBVYTamQlJJyISQkIiIi
+        Pvt5wbhIoUMV1QihWImPIiWEBMApeuMgAHpIyO27Dx8rWixoIJIa2kFpWlCnNEIo1SIt/fSz/wLm5oLb
+        bKO+Cs6X3hV1vweGAS/qzU7ILEOQmAegsjggkNRP0Wi0hH8gDrf3QZmmx58v9YLfuYhWxyKkxgm02eZg
+        6ZuFZXgBXv8iOrptiI6OObsOcE9MnxBr7Z25753IE/pRIJpHedM8BEof7L4AZpbIKpEYHJqAZ9IPLpe7
+        QMyHw8pFigyr3Sm2j3hhsHqgaPOBr/SAW/0dL4r7IFCNoW8SCASBxQDgGP4JSYMOTBYre617Tv7rHKmm
+        GUp9C/StZrR//YaegUH0Ol3osg2jq/sHXLOA1Qv0zwAfalsQtztOsP50FosV/yg7t7Gh2QwFmbS0yQSq
+        0QCxSg+5zoQGXRsoXQeE2hEIZDbcv/YOUbSYv1c6isncdzT9ZO31e1kDRW/Ll/kSNShtKyRElNqEQnkO
+        quv1YOdxJo8kXlFfPMBZYUVvP7bZN24hl3vJdC8nHkouzbx01cJ+yZnnldWBWyYAg8G4tWrKSLpZeSaZ
+        7SIpM+QykYIddDr9PCMycs38O7YywhkHSR7+Cx2mwkxlUCULAAAAAElFTkSuQmCC
+</value>
   </data>
-  <data name="DBFile.Menu.PasteText" xml:space="preserve">
-    <value>&amp;Paste</value>
+  <data name="StartToolStripButton.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAuBJREFUOE+NkX0s
+        1HEcx6+sP1TMMUUtTP7QasvqSv5QJrP5o6k/1LRrWIqRZh4Wat2QhzKhSJs8O3LuAXfn7jjuOtx1nMvD
+        5c48xKG7wlDJyu7e/Wg1tUqf7bXPd9/v5/364/shkTaVRCJxN5vNcWtra4FE9yY4AsCJgEywY/PsH88U
+        CsVVJOoy6HRTU+OTerV+1thunFtoWFxefmIymTJzcnICtpQccHENKSyho+J5I8prOaiqb0I1oxmMRiHy
+        6MxVB2fnQ1tKfP0CCpjNbWDzxGA2txKIvnduG2ITkpu2FKwPUEMjRFyRDCwi9IN1YR27BSe9vIL/R7I/
+        IYVmZPI6UMsSoIbZsgGdJQQt6+EEIdi1peRqZFQSX64Gr1OFxg4FWK2dYPAlqOG0wfO0T/xfBUtms+2Y
+        ceFRoUT7RaDRQ6KbQftrgkEjBH3TaFVPoIrZ+J4Q7PlFQux6u27SEF0p0C6mcWZQ1bOKVzMmDM4C7IFh
+        ZIhLCErRPaGFenAUlpaWnj8FU+/m/euEmsGU0nHcpn9AOnMFZeLP4CiAuIZ8UOm+uC+6iSxRFEIb/HEx
+        7dIKEXYhVbBb/NXaUe6I3ghZ/1sIlHOoFk4jr3YcqU/fICSXjssMCur7M6Hob0eLqgaMoWycKT9hsgnb
+        eZSUnP4giSOSQiDthvSlCj0DGgyNjmN4Qo8h3TzCK68jtTsQBYpIzC0ZoJnqwTNlErLlV+CaYX+PZG9v
+        f/BGfDKfK1WCJ1GgSdwFtlBKIIFQ2osrZUHIVYYhvfsC5j7OwmAw4LEsFnnKcLhnOBZv/IG1tbWbp7dP
+        LTUiRkuj0b5WsIVgieXgd6gRU5kI2osgpCoDwFYV41bHWWT1ncfdNioc7thQf1+lBXHhZk0mBx/2OF4Y
+        GBzWdy0x6ZNfPgUJvacQJicjWuWEZJk/PHJcZaQg0vr8P2sb8brPwsrinGPw7ipKke3YsaK9Iy5pdrl2
+        iXZW68lv6P3RR+GHTJoAAAAASUVORK5CYII=
+</value>
   </data>
-  <data name="DBFile.Menu.SaveAsText" xml:space="preserve">
-    <value>&amp;Save As...</value>
+  <data name="AdvancedtoolStripButton.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAgxJREFUOE+lkvtL
+        U2EYx+0PEbtpFwnBKPGKiJImGP0gYhIYs1E5GF5gIxkpA00JRSmMEF0ohMh+GaRWYlqabMVcNdS2QpaI
+        VqiDIYhk397vA6fXhCjyhYdzeM/5fp7vczkAdeL2cwho7v/wWzT1zcN+Pwhr51uY2/y41PQaF+wzKKiZ
+        QvaN58g0jyLd5KEUcQbg+84P/Cm2tncQjW3j68YWIqubCC3FcOJc478BAuGoZM6zvoRnakXEruEIjhc4
+        /g5gZop9c+voGAyLbQIfeBZxLL9BA1jzXvuGbWamuKh+GmmVbswE19A59FEBbmoAG7YbsLtm2mZmiml9
+        cvabNDwpz6YB7LYBoMXCumkJr7LOmnnHzBQ/9X2Bo2cOibm1GsBREbAQiYmw/8lnuCeWkVzcgnZlnw1j
+        3HV/wuNXK6i/9x5Hc6wawDlTXHbLJ+LZUBQPRyKwdQdxutwl1h+NLXHh5Ht1ewBHsiwawCW57HyDAfWR
+        dvl0uhZQ1eqX8aVc7EKLqrum651ATLf9OJx5XQM4KmY0xPzZ0hFAiQJnXB0WwME0E3IsL5B17ZlADqWb
+        NYDrOepdlcysmTWWOrxqbceRWtaLk0VO1XW72D5Vckd2gMBfq8zdpmUG62NJvKM4+XyziDk24xmfWoGE
+        s1c0gHPmbrPTpHNJKOCo2G1mZs20zcwUJ5yp1AB5+8/zEwgF5GMVDxh4AAAAAElFTkSuQmCC
+</value>
   </data>
-  <data name="DBFile.Menu.LoadText" xml:space="preserve">
-    <value>&amp;Load...</value>
-  </data>
-  <data name="DBFile.Menu.ClearText" xml:space="preserve">
-    <value>Cl&amp;ear</value>
-  </data>
-  <data name="DBFile.Menu.OpenText" xml:space="preserve">
-    <value>&amp;Open</value>
-  </data>
-  <data name="DBFileForm.SaveFileCaption" xml:space="preserve">
-    <value>Save File</value>
-  </data>
-  <data name="DBFileForm.LoadFileCaption" xml:space="preserve">
-    <value>Load File</value>
-  </data>
-  <data name="DBFileForm.FileLockedText" xml:space="preserve">
-    <value>The temporary file is being accessed by another application.  Close the application then click "OK" to capture changes. [ {0} ]</value>
-  </data>
-  <data name="DBFileForm.FileLockedCaption" xml:space="preserve">
-    <value>File In Use</value>
-  </data>
-  <data name="DBFileForm.ClosingText" xml:space="preserve">
-    <value>The contol that opened the file is closing; changes cannot be captured. Click "OK" to backup changes to a temporary file.</value>
-  </data>
-  <data name="DBFileForm.ClosingCaption" xml:space="preserve">
-    <value>Control Closing</value>
-  </data>
-  <data name="DBFileForm.UserInputRequiredInstructionsText" xml:space="preserve">
-    <value>Click "OK" when you are ready to capture changes (you may need to close the application that opened the file first).</value>
-  </data>
-  <data name="DBFileForm.UserInputRequiredInstructionsCaption" xml:space="preserve">
-    <value>Instructions - Undetermined Application</value>
-  </data>
-  <data name="DBFileForm.FileAttachedInstructionsText" xml:space="preserve">
-    <value>Close the application that opened the file before clicking "Accept" or "Reject".</value>
-  </data>
-  <data name="DBFileForm.FileAttachedInstructionsCaption" xml:space="preserve">
-    <value>Instructions - [{0}]</value>
-  </data>
-  <data name="DBFileForm.FileLockedInstructionsText" xml:space="preserve">
-    <value>Close the application that opened the file before clicking "Accept" or "Reject".</value>
-  </data>
-  <data name="DBFileForm.FileLockedInstructionsCaption" xml:space="preserve">
-    <value>Instructions - File In Use</value>
-  </data>
-  <data name="DBFileForm.CannotWriteText" xml:space="preserve">
-    <value>The temporary file is being accessed by another application.  Close the application then click "Retry". [ {0} ]</value>
-  </data>
-  <data name="DBFileForm.CannotWriteCaption" xml:space="preserve">
-    <value>Unable To Open File</value>
-  </data>
-  <data name="DBFileForm.FileNameLockedText" xml:space="preserve">
-    <value>The file is being accessed by another application. Press "Ignore" to open as a different file. [ {0} ]</value>
-  </data>
-  <data name="DBFileForm.FileNameLockedCaption" xml:space="preserve">
-    <value>File In Use</value>
-  </data>
-  <data name="DBFileForm.ProcessStartFailedText" xml:space="preserve">
-    <value>Unable to open "{0}".  {1}</value>
-  </data>
-  <data name="DBFileForm.ProcessStartFailedCaption" xml:space="preserve">
-    <value>Start Process Failed</value>
-  </data>
-  <data name="DBFileForm.OverwriteBoxText" xml:space="preserve">
-    <value>File "{0}" already exists.  Overwrite?</value>
-  </data>
-  <data name="DBFileForm.OverwriteBoxCaption" xml:space="preserve">
-    <value>Overwrite</value>
-  </data>
-  <data name="DBFileForm.UnknownFileDescription" xml:space="preserve">
-    <value>{0} File</value>
-  </data>
-  <data name="DBFileForm.AllFileFilter" xml:space="preserve">
-    <value>All files (*.*)|*.*</value>
-  </data>
-  <data name="DBImageAspect.Menu.CaptureText" xml:space="preserve">
-    <value>Ca&amp;pture...</value>
-  </data>
-  <data name="DBImageAspect.Menu.ClearText" xml:space="preserve">
-    <value>Cl&amp;ear</value>
-  </data>
-  <data name="DBImageAspect.Menu.CopyText" xml:space="preserve">
-    <value>&amp;Copy</value>
-  </data>
-  <data name="DBImageAspect.Menu.LoadText" xml:space="preserve">
-    <value>&amp;Load...</value>
-  </data>
-  <data name="DBImageAspect.Menu.PasteText" xml:space="preserve">
-    <value>&amp;Paste</value>
-  </data>
-  <data name="DBImageAspect.Menu.SaveAsText" xml:space="preserve">
-    <value>&amp;Save As...</value>
-  </data>
-  <data name="DBImageAspect.SaveFileDialog.Filter" xml:space="preserve">
-    <value>Image Files(*.jpeg)|*.jpeg</value>
-  </data>
-  <data name="DBImageAspect.Menu.ScanText" xml:space="preserve">
-    <value>Sca&amp;n...</value>
-  </data>
+  <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>51</value>
+  </metadata>
 </root>

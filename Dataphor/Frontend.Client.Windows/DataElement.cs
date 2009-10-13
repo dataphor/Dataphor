@@ -514,35 +514,47 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return new DAE.Client.Controls.DBImageAspect();
 		}
 
+        private IImageSource FScanSource;
+        public IImageSource ScanSource
+        {
+            get
+            {
+                if (FScanSource == null)
+                    FScanSource = new ScanForm();
+                return FScanSource;
+            }
+            set { FScanSource = value; }
+        }
+
 		private IImageSource FImageSource;
 		public IImageSource ImageSource
 		{
 			get 
-			{ 
-				if (FImageSource == null)
-					FImageSource = new ImageCaptureForm();
-				return FImageSource; 
+			{
+                if (FImageSource == null)
+                    FImageSource = new ImageCaptureForm(); 
+                return FImageSource; 
 			}
 			set { FImageSource = value; }
 		}
 
-		protected void LoadImage()
+        protected void LoadImage(IImageSource AImageSource)
 		{          
-			 if (!ImageSource.Loading)
+            if (!AImageSource.Loading)
 			 {
 				 try
 				 {						 
-					 ImageSource.LoadImage();
-					 if (ImageSource.Stream != null)
+					 AImageSource.LoadImage();
+					 if (AImageSource.Stream != null)
 					 {
 						 using (DAE.Runtime.Data.Scalar LNewValue = new DAE.Runtime.Data.Scalar(ImageControl.Source.DataSet.Process.ValueManager, ImageControl.Source.DataSet.Process.DataTypes.SystemGraphic))
 						 {
 							 using (Stream LStream = LNewValue.OpenStream())
 							 {
-								 using (ImageSource.Stream)
+								 using (AImageSource.Stream)
 								 {
-									 ImageSource.Stream.Position = 0;
-									 StreamUtility.CopyStream(ImageSource.Stream, LStream);
+									 AImageSource.Stream.Position = 0;
+									 StreamUtility.CopyStream(AImageSource.Stream, LStream);
 									 ImageControl.DataField.Value = LNewValue;
 									 ImageControl.LoadImage();
 								 }
@@ -552,11 +564,21 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				 }
 				 finally
 				 {
-					 if (ImageSource.GetType() == typeof(ImageCaptureForm))
-						 ImageSource = null;
+                     if (AImageSource.GetType() == typeof(ScanForm) || AImageSource.GetType() == typeof(ImageCaptureForm))
+						 AImageSource = null;
 				 }
 			}             
 		}
+
+        private void CaptureImage()
+        {
+            LoadImage(ImageSource);
+        }
+
+        private void ScanImage()
+        {
+            LoadImage(ScanSource);
+        }
 
 		protected override void InitializeControl()
 		{
@@ -566,7 +588,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			ImageControl.Width = CDefaultImageWidth;
 			InternalUpdateStretchStyle();
 			InternalUpdateCenter();
-			ImageControl.OnImageRequested += LoadImage;
+			ImageControl.OnCaptureRequested += CaptureImage;
+            ImageControl.OnScanRequested += ScanImage;
 			base.InitializeControl();             
 		}
 		
@@ -594,9 +617,24 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected override void Dispose(bool ADisposing)
 		{
-			if (ImageControl != null)
-				ImageControl.OnImageRequested -= new Alphora.Dataphor.DAE.Client.Controls.RequestImageHandler(LoadImage);
-			base.Dispose(ADisposing);
+            if (ImageControl != null)
+            {
+                ImageControl.OnCaptureRequested -= new Alphora.Dataphor.DAE.Client.Controls.RequestImageHandler(CaptureImage);
+                ImageControl.OnCaptureRequested -= new Alphora.Dataphor.DAE.Client.Controls.RequestImageHandler(ScanImage);
+            }
+            if (ScanSource != null)
+            {
+                ScanSource.Dispose();
+                ScanSource = null;
+            }
+
+            if (ImageSource != null)
+            {
+                ImageSource.Dispose();
+                ImageSource = null;
+            }
+
+            base.Dispose(ADisposing);
 		}
 	}
 }

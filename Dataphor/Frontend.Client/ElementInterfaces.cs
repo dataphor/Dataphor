@@ -258,10 +258,10 @@ namespace Alphora.Dataphor.Frontend.Client
 		bool Center { get; set; }
 
 		/// <summary> An object capable of loading an Image. </summary> <doc/>	 	
-		IImageSource ImageSource { get; } 		
+		IImageSource ImageSource { get; }
 	}
 
-	public interface IImageSource 
+	public interface IImageSource : IDisposable 
 	{
 		System.IO.Stream Stream { get; }
 		void LoadImage();

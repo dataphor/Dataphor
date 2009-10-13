@@ -94,9 +94,14 @@
       <HintPath>.\ICSharpCode.TextEditor.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="ImageAcquisitionTAL, Version=1.0.3573.27170, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\ImageAcquisitionTAL.dll</HintPath>
+    </Reference>
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
+    <Reference Include="System.configuration" />
     <Reference Include="System.Data">
       <Name>System.Data</Name>
     </Reference>
@@ -169,6 +174,12 @@
     <Compile Include="BaseElement.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Scan\ColorsComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Scan\ColorsComboBox.designer.cs">
+      <DependentUpon>ColorsComboBox.cs</DependentUpon>
+    </Compile>
     <Compile Include="Container.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -225,8 +236,14 @@
     <Compile Include="Forms\ImageCaptureForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\ImageCaptureForm.Designer.cs">
+    <Compile Include="Forms\ImageCaptureForm.designer.cs">
       <DependentUpon>ImageCaptureForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Scan\ScanForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Scan\ScanForm.designer.cs">
+      <DependentUpon>ScanForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\ServerConnectForm.cs">
       <SubType>Form</SubType>
@@ -260,12 +277,41 @@
     <Compile Include="Notebook.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Scan\QualityPictureBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Scan\QualityPictureBox.designer.cs">
+      <DependentUpon>QualityPictureBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Scan\ResolutionsComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Scan\ResolutionsComboBox.designer.cs">
+      <DependentUpon>ResolutionsComboBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Scan\ScannersCombobox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Scan\ScannersCombobox.designer.cs">
+      <DependentUpon>ScannersCombobox.cs</DependentUpon>
+    </Compile>
     <Compile Include="Search.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Session.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Scan\Settings.cs" />
     <Compile Include="StaticButton.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -366,12 +412,25 @@
       <DependentUpon>ImageCaptureForm.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Scan\ScanForm.resx">
+      <DependentUpon>ScanForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="General.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>General.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Images\Collapse.png" />
     <EmbeddedResource Include="Images\Expand.png" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Scan\QualityPictureBox.resx">
+      <DependentUpon>QualityPictureBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Scan\ScannersCombobox.resx">
+      <DependentUpon>ScannersCombobox.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="TextEditor\FindReplaceForm.resx">
       <DependentUpon>FindReplaceForm.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -398,8 +457,14 @@
     <None Include="Images\NoPhoto.png" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Properties\" />
-    <Folder Include="Resources\" />
+    <EmbeddedResource Include="Images\Scanner.png" />
+    <Content Include="Scan\ImageAcquisitionTAL.dll" />
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="Image\Scanner.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
