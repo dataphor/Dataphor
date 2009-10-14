@@ -301,18 +301,25 @@ namespace Alphora.Dataphor.BOP
 			else	// construct instance
 			{
 				LType = GetClassType(LElementName, ANode.Name.NamespaceName);
-
-				PublishDefaultConstructorAttribute LConstructorAttribute = (PublishDefaultConstructorAttribute)ReflectionUtility.GetAttribute(LType, typeof(PublishDefaultConstructorAttribute));
+				
 				try
 				{
-					if ((LConstructorAttribute == null) || (LConstructorAttribute.ConstructorSignature == String.Empty))
-						AInstance = Activator.CreateInstance(LType, new object[] { });
+					if (!IsValueType(LType))
+					{
+						PublishDefaultConstructorAttribute LConstructorAttribute = (PublishDefaultConstructorAttribute)ReflectionUtility.GetAttribute(LType, typeof(PublishDefaultConstructorAttribute));
+						if ((LConstructorAttribute == null) || (LConstructorAttribute.ConstructorSignature == String.Empty))
+							AInstance = Activator.CreateInstance(LType, new object[] { });
+						else
+						{
+							// create a copy of the node to work with
+							// so that the original is not corrupted by disappearing attributes
+							ANode = new XElement(ANode);
+							AInstance = ConstructInstance(LConstructorAttribute.ConstructorSignature, LType, ANode);
+						}
+					}
 					else
 					{
-						// create a copy of the node to work with
-						// so that the original is not corrupted by disappearing attributes
-						ANode = new XElement(ANode);
-						AInstance = ConstructInstance(LConstructorAttribute.ConstructorSignature, LType, ANode);
+						return ReflectionUtility.StringToValue(ANode.Attribute("value").Value, LType);
 					}
 				}
 				catch (Exception E)

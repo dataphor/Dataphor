@@ -315,13 +315,17 @@ namespace Alphora.Dataphor.BOP
 										try
 										{
 											LItemType = LItem.GetType();
-											WriteMembers
-											(
-												String.Empty,
-												CreateElement(ANode, LNameQualifier, LItemType),
-												LItem,
-												LItemType
-											);
+											var LElement = CreateElement(ANode, LNameQualifier, LItemType);
+											if (!IsValueType(LItemType))
+												WriteMembers
+												(
+													String.Empty,
+													LElement,
+													LItem,
+													LItemType
+												);
+											else
+												LElement.SetAttributeValue("value", LItem.ToString());
 										}
 										catch (Exception LException)
 										{
