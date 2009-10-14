@@ -33,11 +33,23 @@ namespace Alphora.Dataphor.DAE.Contracts
 		{
 			return String.Format("http://{0}:{1}", AHostName, APortNumber);
 		}
+		
+		public const int CMaxMessageLength = 10485760;
 
 		public static Binding GetBinding()
 		{
 			//return new BasicHttpBinding();
-			return new CustomBinding(new BinaryMessageEncodingBindingElement(), new HttpTransportBindingElement());
+			var LMessageEncodingElement = new BinaryMessageEncodingBindingElement();
+			#if !SILVERLIGHT
+			LMessageEncodingElement.ReaderQuotas.MaxArrayLength = CMaxMessageLength;
+			LMessageEncodingElement.ReaderQuotas.MaxStringContentLength = CMaxMessageLength;
+			#endif
+			
+			var LTransportElement = new HttpTransportBindingElement();
+			LTransportElement.MaxBufferSize = CMaxMessageLength;
+			LTransportElement.MaxReceivedMessageSize = CMaxMessageLength;
+			
+			return new CustomBinding(LMessageEncodingElement, LTransportElement);
 		}
 	}
 }
