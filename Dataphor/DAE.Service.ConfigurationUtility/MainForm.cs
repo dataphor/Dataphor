@@ -381,7 +381,7 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 			try
 			{
 				ServerConfiguration LInstance = EditInstanceForm.ExecuteAdd();
-				LConfiguration.Instances.Add(LConfiguration);
+				LConfiguration.Instances.Add(LInstance);
 				InstanceManager.SaveConfiguration(LConfiguration);
 				LoadInstances(LConfiguration);
 				cbInstance.SelectedItem = LInstance.Name;
