@@ -304,6 +304,7 @@ namespace Alphora.Dataphor.Dataphoria
 					try
 					{
 						FDataSession.AliasName = LConfiguration.DefaultAliasName;
+						FDataSession.SessionInfo.Environment = "WindowsClient";
 						FDataSession.Open();
 
 						FUtilityProcess = FDataSession.ServerSession.StartProcess(new ProcessInfo(FDataSession.ServerSession.SessionInfo));

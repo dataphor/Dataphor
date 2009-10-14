@@ -73,6 +73,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows.Executable
 				using (DataSession LDataSession = new DataSession())
 				{
 					LDataSession.Alias = LConfiguration.Aliases[LConfiguration.DefaultAliasName];
+					LDataSession.SessionInfo.Environment = "WindowsClient";
 					LDataSession.Active = true;
 					
 					if (LApplicationID == String.Empty)

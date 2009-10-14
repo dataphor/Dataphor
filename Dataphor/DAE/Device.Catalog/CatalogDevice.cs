@@ -103,7 +103,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				ARow[1] = LSession.User.ID;
 				ARow[2] = LSession.SessionInfo.HostName;
 				ARow[3] = LSession.SessionInfo.CatalogCacheName;
-				ARow[4] = LSession.SessionInfo.ClientType;
+				ARow[4] = LSession.SessionInfo.Environment;
 				ARow[5] = LSession.CurrentLibrary.Name;
 				ARow[6] = LSession.SessionInfo.DefaultIsolationLevel.ToString();
 				ARow[7] = LSession.SessionInfo.DefaultUseDTC;

@@ -55,6 +55,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					FInvokeControl.CreateControl();
 				}
 			}
+			
+			// Ensure the assembly resolver is loaded
+			Alphora.Dataphor.Windows.AssemblyUtility.Initialize();
 		}
 
 		protected override void Dispose(bool ADisposing)

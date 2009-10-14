@@ -515,7 +515,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					
 				int LFileIndex = LLibrary.Files.IndexOf(AFileName);
 				bool LFileAdded = false;
-				if (LFileIndex == 0)
+				if (LFileIndex < 0)
 				{
 					LFileAdded = true;
 					LFileIndex = LLibrary.Files.Add(new FileReference(AFileName));

@@ -177,6 +177,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
     					};
     				LDataSession.Alias.SessionInfo.UserID = FUserName;
     				LDataSession.Alias.SessionInfo.Password = FPassword == null ? "" : FPassword;
+    				LDataSession.Alias.SessionInfo.Environment = "SilverlightClient";
     				LDataSession.Open();
     				try
     				{

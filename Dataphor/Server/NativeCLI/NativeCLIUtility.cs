@@ -43,7 +43,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			LSessionInfo.Password = ANativeSessionInfo.Password;
 			LSessionInfo.DefaultLibraryName = ANativeSessionInfo.DefaultLibraryName;
 			LSessionInfo.HostName = ANativeSessionInfo.HostName;
-			LSessionInfo.ClientType = "NativeCLI";
+			LSessionInfo.Environment = "NativeCLI";
 			LSessionInfo.DefaultUseDTC = ANativeSessionInfo.DefaultUseDTC;
 			LSessionInfo.DefaultIsolationLevel = NativeIsolationLevelToIsolationLevel(ANativeSessionInfo.DefaultIsolationLevel);
 			LSessionInfo.DefaultUseImplicitTransactions = ANativeSessionInfo.DefaultUseImplicitTransactions;

@@ -1311,7 +1311,7 @@ begin
 
 	grant usage on LibraryFiles to role CatalogUser;
 	
-	create table LibraryFileEnvironments
+	create table LibraryFileEnvironments in Catalog
 	{
 		Library_Name : Name tags { Frontend.Title = "Library Name" },
 		LibraryFile_FileName : String tags { Frontend.Title = "File Name", Frontend.Width = "50" },
@@ -1412,7 +1412,7 @@ begin
 		User_ID : UserID,
 		HostName : String,
 		Connection_Name : String nil,
-		ClientType : String nil,
+		Environment : String nil,
 		Current_Library_Name : Name, 
 		DefaultIsolationLevel : String,
 		DefaultUseDTC : Boolean,

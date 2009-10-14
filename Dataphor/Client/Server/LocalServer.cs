@@ -208,8 +208,7 @@ namespace Alphora.Dataphor.DAE.Server
 						throw new ServerException(ServerException.Codes.CacheSerializationError, AClientCacheTimeStamp, FClientCacheTimeStamp);
 					}
 					
-					LSignal = (ManualResetEvent)FCacheSignals[AClientCacheTimeStamp];
-					LSignalAdded = (LSignal == null);
+					LSignalAdded = !FCacheSignals.TryGetValue(AClientCacheTimeStamp, out LSignal);
 					if (LSignalAdded)
 					{
 						LSignal = FCacheSignalPool.Acquire();
@@ -390,7 +389,7 @@ namespace Alphora.Dataphor.DAE.Server
 					// Use the remote server to attempt to download and install the necessary assemblies.
 
 					// Retrieve the list of all files required to load the assemblies required to load the class.
-					ServerFileInfo[] LFileInfos = AProcess.RemoteProcess.GetFileNames(AClassDefinition.ClassName, AProcess.Session.SessionInfo.ClientType);
+					ServerFileInfo[] LFileInfos = AProcess.RemoteProcess.GetFileNames(AClassDefinition.ClassName, AProcess.Session.SessionInfo.Environment);
 
 					for (int LIndex = 0; LIndex < LFileInfos.Length; LIndex++)
 						if (LFileInfos[LIndex].IsDotNetAssembly)
@@ -502,7 +501,7 @@ namespace Alphora.Dataphor.DAE.Server
 					//string AFullClassName = AProcess.RemoteProcess.GetClassName(AClassDefinition.ClassName); // BTR 5/17/2004 -> As far as I can tell, this doesn't do anything
 
 					// Retrieve the list of all files required to load the assemblies required to load the class.
-					ServerFileInfo[] LFileInfos = AProcess.RemoteProcess.GetFileNames(AClassDefinition.ClassName, AProcess.Session.SessionInfo.ClientType);
+					ServerFileInfo[] LFileInfos = AProcess.RemoteProcess.GetFileNames(AClassDefinition.ClassName, AProcess.Session.SessionInfo.Environment);
 
 					string[] LFullFileNames = new string[LFileInfos.Length];
 					for (int LIndex = 0; LIndex < LFileInfos.Length; LIndex++)

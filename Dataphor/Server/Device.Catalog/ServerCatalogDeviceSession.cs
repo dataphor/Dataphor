@@ -696,8 +696,16 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		protected void UpdateLibraryFile(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
 		{
-			SystemSetLibraryDescriptorNode.RemoveLibraryFile(AProgram, Schema.Object.EnsureRooted((string)AOldRow[0]), new FileReference((string)AOldRow[1], (bool)AOldRow[2]));
-			SystemSetLibraryDescriptorNode.AddLibraryFile(AProgram, Schema.Object.EnsureRooted((string)ANewRow[0]), new FileReference((string)ANewRow[1], (bool)ANewRow[2]));
+			if 
+			(
+				((string)AOldRow[0] != (string)ANewRow[0])
+					|| ((string)AOldRow[1] != (string)ANewRow[1])
+					|| ((bool)AOldRow[2] != (bool)ANewRow[2])
+			)
+			{
+				SystemSetLibraryDescriptorNode.RemoveLibraryFile(AProgram, Schema.Object.EnsureRooted((string)AOldRow[0]), new FileReference((string)AOldRow[1], (bool)AOldRow[2]));
+				SystemSetLibraryDescriptorNode.AddLibraryFile(AProgram, Schema.Object.EnsureRooted((string)ANewRow[0]), new FileReference((string)ANewRow[1], (bool)ANewRow[2]));
+			}
 		}
 
 		protected void DeleteLibraryFile(Program AProgram, Schema.TableVar ATableVar, Row ARow)

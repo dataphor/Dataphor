@@ -14,7 +14,7 @@ namespace Alphora.Dataphor.Windows
 	///		AssemblyUtility.GetType() to  ensure that this constructor has
 	///		executed.
 	///	</remarks>
-	public class AssemblyUtility
+	public static class AssemblyUtility
 	{
 		// Error code = A01XXX
 		static AssemblyUtility()

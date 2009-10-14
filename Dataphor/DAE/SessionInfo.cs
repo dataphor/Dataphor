@@ -110,13 +110,14 @@ namespace Alphora.Dataphor.DAE
 			set { FHostName = value == null ? String.Empty : value; }
 		}
 		
-		// ClientType
-		private string FClientType = String.Empty;
+		// Environment
+		private string FEnvironment = String.Empty;
+		[System.ComponentModel.Browsable(false)]
 		[DataMember]
-		public string ClientType
+		public string Environment
 		{
-			get { return FClientType; }
-			set { FClientType = value == null ? String.Empty : value; }
+			get { return FEnvironment; }
+			set { FEnvironment = value == null ? String.Empty : value; }
 		}
 		
 		// CatalogCacheName
@@ -262,7 +263,7 @@ namespace Alphora.Dataphor.DAE
 		{	
 			SessionInfo LSessionInfo = new SessionInfo(FUserID, FPassword);
 			LSessionInfo.HostName = FHostName;
-			LSessionInfo.ClientType = FClientType;
+			LSessionInfo.Environment = FEnvironment;
 			LSessionInfo.CatalogCacheName = FCatalogCacheName;
 			LSessionInfo.DefaultLibraryName = FDefaultLibraryName;
 			LSessionInfo.DefaultUseDTC = FDefaultUseDTC;
