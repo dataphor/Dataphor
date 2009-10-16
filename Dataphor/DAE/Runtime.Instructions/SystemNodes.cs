@@ -2487,8 +2487,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			try
 			{
 				PlanNode LNode = Compiler.Compile(LPlan, new Parser().ParseScript((string)AArguments[0], null));
-				LNode = Compiler.OptimizeNode(LPlan, LNode);
-				LNode = Compiler.BindNode(LPlan, LNode);
+				LNode = Compiler.OptimizeAndBindNode(LPlan, LNode); 		
 				#if ACCUMULATOR
 				LAccumulator = LPlan.Accumulator;
 				#endif

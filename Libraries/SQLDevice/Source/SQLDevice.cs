@@ -1621,7 +1621,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 								try
 								{
 									PlanNode LNode = Compiler.CompileExpression(LPlan.Plan, new D4.Parser(true).ParseExpression(LInstructionNode.EmitStatementAsString()));
-									LNode = Compiler.OptimizeNode(LPlan.Plan, LNode);
+									LNode = Compiler.PostBindOptimizeNode(LPlan.Plan, LNode);
 									LNode.InternalDetermineBinding(LPlan.Plan); // Don't use the compiler bind here because we already know a determine device call on the top level node will fail
 									APlanNode.CouldSupport = true; // Set this to indicate that support could be provided if it would be beneficial to do so
 									return FromScalar(LDevicePlan, LNode);

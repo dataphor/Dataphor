@@ -1991,11 +1991,11 @@ drop table Testing;
 		{
 			string AExpression = (string)AArguments[0];
 			string AExpectedExpression = (string)AArguments[1];
-			CursorNode LNode = (CursorNode)Compiler.BindNode(AProgram.Plan, Compiler.OptimizeNode(AProgram.Plan, Compiler.CompileCursor(AProgram.Plan, new Parser().ParseCursorDefinition(AExpression))));
+			CursorNode LNode = (CursorNode)Compiler.OptimizeAndBindNode(AProgram.Plan, Compiler.CompileCursor(AProgram.Plan, new Parser().ParseCursorDefinition(AExpression)));
 			Table LTable = (Table)LNode.SourceNode.Execute(AProgram);
 			try
 			{
-				CursorNode LExpectedNode = (CursorNode)Compiler.BindNode(AProgram.Plan, Compiler.OptimizeNode(AProgram.Plan, Compiler.CompileCursor(AProgram.Plan, new Parser().ParseCursorDefinition(AExpectedExpression))));
+				CursorNode LExpectedNode = (CursorNode)Compiler.OptimizeAndBindNode(AProgram.Plan, Compiler.CompileCursor(AProgram.Plan, new Parser().ParseCursorDefinition(AExpectedExpression)));
 				Table LExpectedTable = (Table)LExpectedNode.SourceNode.Execute(AProgram);
 				try
 				{

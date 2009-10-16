@@ -226,7 +226,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					QuotaExpression LQuotaExpression = (QuotaExpression)EmitStatement(EmitMode.ForCopy);
 					LQuotaExpression.Expression = new UnionExpression(new TableSelectorExpression(new Expression[]{new IdentifierExpression("ARow")}), LQuotaExpression.Expression);
 					Expression LValidateExpression = new BinaryExpression(new IdentifierExpression("ARow"), Instructions.In, LQuotaExpression);
-					FValidateNode = Compiler.BindNode(APlan, Compiler.OptimizeNode(APlan, Compiler.CompileExpression(APlan, LValidateExpression)));
+					FValidateNode = Compiler.OptimizeAndBindNode(APlan, Compiler.CompileExpression(APlan, LValidateExpression));
 				}
 				finally
 				{

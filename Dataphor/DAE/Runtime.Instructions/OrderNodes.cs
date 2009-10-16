@@ -709,8 +709,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							APlan.Symbols.Pop();
 						}
 
-						LResultNode = Compiler.OptimizeNode(APlan, LResultNode);
-						LResultNode = Compiler.BindNode(APlan, LResultNode);
+						LResultNode = Compiler.OptimizeAndBindNode(APlan, LResultNode);
 						return LResultNode;
 					}
 					finally

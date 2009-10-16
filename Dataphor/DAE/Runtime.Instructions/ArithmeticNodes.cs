@@ -1230,6 +1230,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iAddition(string, string) : string </remarks>    
 	public class StringAdditionNode : BinaryInstructionNode
 	{
+		public StringAdditionNode() : base() {}
+		
+		public StringAdditionNode(PlanNode ALeftNode, PlanNode ARightNode)
+		{
+			Nodes.Add(ALeftNode);
+			Nodes.Add(ARightNode);
+			Operator = new Schema.Operator("iAddition") { IsBuiltin = true };	
+		}
+		
 		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION

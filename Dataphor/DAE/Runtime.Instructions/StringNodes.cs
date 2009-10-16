@@ -307,6 +307,46 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	}
 	
+	public class StringInternalConcatNode : PlanNode
+	{
+		public override object InternalExecute(Program AProgram)
+		{
+			StringBuilder LResult = new StringBuilder();	
+			bool LNilEncountered = false;	   					   			
+ 			foreach (PlanNode LNode in Nodes)
+ 			{
+ 				string LValue = (String)LNode.Execute(AProgram);
+ 				if (LValue == null)
+ 					LNilEncountered = true;
+ 				LResult.Append(LValue);
+			}
+			#if NILPROPOGATION
+			return LNilEncountered ? null : LResult.ToString();
+			#else
+			return LResult.ToString();
+			#endif
+		}
+
+		public override Statement EmitStatement(EmitMode AMode)
+		{						
+			StringAdditionNode LNode = new StringAdditionNode(Nodes[0], Nodes[1]);
+			LNode.Operator.Operands.Add(new Schema.Operand(LNode.Operator, "ALeftValue", null));
+			LNode.Operator.Operands.Add(new Schema.Operand(LNode.Operator, "ARightValue", null));						
+			for (int LIndex = 2; LIndex < Nodes.Count; LIndex++)
+			{   		
+				LNode = new StringAdditionNode(LNode, Nodes[LIndex]);	
+				LNode.Operator.Operands.Add(new Schema.Operand(LNode.Operator, "ALeftValue", null));
+				LNode.Operator.Operands.Add(new Schema.Operand(LNode.Operator, "ARightValue", null));	
+			}		
+			return LNode.EmitStatement(AMode);
+		}
+
+		public override void DetermineDataType(Alphora.Dataphor.DAE.Compiling.Plan APlan)
+		{
+			DataType = APlan.DataTypes.SystemString;
+		}			
+	}
+	
 	// operator Replace(AString : System.String, AOldString : System.String, ANewString : System.String) : System.String
     // operator Replace(AString : System.String, AOldString : System.String, ANewString : System.String, ACaseSensitive : System.Boolean) : System.String
     public class StringReplaceNode : InstructionNode

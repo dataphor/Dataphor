@@ -1085,7 +1085,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				PlanNode LPlanNode = Compiler.EmitTableVarNode(AProgram.Plan, ATableVar);
 				LPlanNode = Compiler.EmitRestrictNode(AProgram.Plan, LPlanNode, new UnaryExpression(Instructions.Not, (Expression)LRowConstraint.Node.EmitStatement(EmitMode.ForCopy)));
 				LPlanNode = Compiler.EmitUnaryNode(AProgram.Plan, Instructions.Exists, LPlanNode);
-				LPlanNode = Compiler.BindNode(AProgram.Plan, Compiler.OptimizeNode(AProgram.Plan, LPlanNode));
+				LPlanNode = Compiler.OptimizeAndBindNode(AProgram.Plan, LPlanNode);
 				object LObject;
 
 				try
@@ -2427,7 +2427,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				AProgram.Plan.PushCreationObject(LTempConstraint);
 				try
 				{
-					LTempConstraint.Node = Compiler.OptimizeNode(AProgram.Plan, Compiler.BindNode(AProgram.Plan, Compiler.CompileBooleanExpression(AProgram.Plan, FAlterConstraintStatement.Expression)));
+					LTempConstraint.Node = Compiler.OptimizeAndBindNode(AProgram.Plan, Compiler.CompileBooleanExpression(AProgram.Plan, FAlterConstraintStatement.Expression));
 					
 					// Validate the new constraint
 					if (LTempConstraint.Enforced && !AProgram.ServerProcess.IsLoading() && AProgram.ServerProcess.IsReconciliationEnabled())
