@@ -9,13 +9,38 @@
 	
 	Verifies that operators can be emitted and re-parsed correctly.
 */
+var LProcess := StartProcess();
+try	
+	Execute
+	(
+		LProcess,
+		"create operator TestStringInternalConcat()
+		begin
+			var LString := 'How' + ' much' + ' wood' + ' would' + ' a' + ' woodchuck' + ' chuck?';
+		end;"
+	);
+finally
+	StopProcess(LProcess);
+end;
 
 foreach var LRow in Operators { Name } do
+begin
 	try	
 		TestOperatorText(LRow.Name);
 	except
 		on E : Error do
 			raise Error("Could not re-parse emitted text for operator " + LRow.Name, E);
+	end;	
+end;
+	
+foreach var LRow in Operators { Name } do
+	try	
+		TestRemoteOperatorText(LRow.Name);
+	except
+		on E : Error do
+			raise Error("Could not re-parse remote emitted text for operator " + LRow.Name, E);
 	end;
+
+drop operator TestStringInternalConcat();
 
 //select Script('System.Concat0000003407')

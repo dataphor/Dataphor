@@ -8,6 +8,7 @@ begin
 	var
 		LString1: String,
 		LString2: String,
+		LString3: String,
 		LIndex: Integer;
 	
 	LString1 := "Blah";
@@ -376,6 +377,16 @@ begin
 	
 	if ("A" ?= "B") > 0 then
 		raise Error("String compare failed (arguments equal)");
+		
+	LString1 := "A" + "B" + "C";
+	if LString1 <> "ABC" then
+		raise Error("String Internal Concatenation with constants failed");
+	
+	LString1 := "A";
+	LString2 := "B";
+	LString3 := "C";
+	if LString1 + LString2 + LString3 <> "ABC" then
+		raise Error("String Internal Concatenation with variables failed");
 end;
 
 // ASCII

@@ -2269,6 +2269,22 @@ drop table Testing;
 			return null;
 		}
 	}
+	
+	public class TestRemoteOperatorTextNode : UnaryInstructionNode
+	{
+		public override object InternalExecute(Program AProgram, object AArgument1)
+		{
+			// Emit the text of the operator, then attempt to re-parse it
+			Schema.Object LOperator = 
+				(Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemString))
+					? Compiler.ResolveCatalogObjectSpecifier(AProgram.Plan, (string)AArgument1)
+					: Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArgument1);
+					
+			new Parser().ParseStatement(new D4TextEmitter().Emit(LOperator.EmitStatement(EmitMode.ForRemote)), null);
+			
+			return null;
+		}
+	}
 
 	public class TestIsPlanCachedNode : NilaryInstructionNode
 	{
