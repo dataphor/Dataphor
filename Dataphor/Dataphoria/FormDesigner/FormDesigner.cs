@@ -422,9 +422,9 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			Dataphoria.Warnings.AppendErrors(this, LSerializer.Errors, true);
 
 			var LStream = new MemoryStream();
-			var LXmlTextWriter = new XmlTextWriter(LStream, Encoding.UTF8);
-			LXmlTextWriter.Formatting = Formatting.Indented;
+			var LXmlTextWriter = XmlWriter.Create(LStream, new XmlWriterSettings() { Encoding = Encoding.UTF8, Indent = true });
 			LDocument.Save(LXmlTextWriter);
+			LXmlTextWriter.Flush();
 			byte[] LWriterString = LStream.ToArray();
 			ABuffer.SaveData(Encoding.UTF8.GetString(LWriterString, 0, LWriterString.Length));
 

@@ -285,7 +285,7 @@ namespace Alphora.Dataphor.BOP
 										(ANameQualifier == String.Empty) && 
 										String.Equals(LNameMemberName, LMember.Name, StringComparison.OrdinalIgnoreCase)
 									)
-										? XName.Get(CXmlBOPName, CBOPNamespaceURI)
+										? XName.Get(CBOPName, CBOPNamespaceURI)
 										: XName.Get(AppendQualifier(LMember.Name.ToLower(), ANameQualifier));
 								WriteValue(LName, ANode, LMember, LValue, AInstance);
 								break;

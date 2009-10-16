@@ -184,7 +184,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		private void EmitCreateScriptClicked(object ASender, EventArgs AArgs)
 		{
-			 Dataphoria.EvaluateAndEdit(String.Format(".Frontend.ScriptApplication('{0}')", FID), "d4");
+			Dataphoria.EvaluateAndEdit(String.Format(".Frontend.ScriptApplication('{0}')", FID), "d4");
 		}
 	}
 }
