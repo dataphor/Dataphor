@@ -163,21 +163,11 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <para>Default: empty string</para></value>
 		string Text { get; set; }
 
-		/// <summary> The image be used as an icon for this form. </summary> <doc/>
-		/// <value> <para>String</para>
-		/// <para>Default: empty string</para></value>
-		string IconImage { get; set; }
-
 		/// <summary> The primary data source for this interface. </summary> <doc/>
 		/// <value> <para>ISource</para>
 		/// <para>Default: (None)</para></value>
 		/// <remarks> A source available in the same node tree.</remarks>
 		ISource MainSource { get; set; }
-
-		/// <summary> The image to display on the background of the user interface. </summary> <doc/>
-		/// <value> <para>String</para>
-		/// <para>Default: empty string</para></value>
-		string BackgroundImage { get; set; }
 
 		/// <summary> An action to invoke as the default for the form. </summary> <doc/>
 		/// <value> <para>IAction</para>
@@ -1012,8 +1002,6 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		FormMode Mode { get; }
 
-		ErrorList ErrorList { get; }
-		
 		/// <summary> Notifies the user (in a passive manner) that errors occurred while loading this interface. </summary>
 		void EmbedErrors(ErrorList AErrorList);
 		

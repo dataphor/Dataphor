@@ -1,0 +1,128 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:Alphora.Dataphor.Frontend.Client.Silverlight"
+	xmlns:vsm="clr-namespace:System.Windows;assembly=System.Windows"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    mc:Ignorable="d"
+    >
+
+	<Style TargetType="local:FormControl">
+		<Setter Property="IsTabStop" Value="False" />
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="local:FormControl">
+					<Grid x:Name="RootElement" Background="Transparent">
+						<ContentPresenter Content="{TemplateBinding Content}" />
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+    <Style TargetType="local:SessionControl">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:SessionControl">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+							d:DesignWidth="300"
+							d:DesignHeight="250"
+					>
+                    	<Grid >
+                    		<Grid.RowDefinitions>
+                    			<RowDefinition/>
+                    			<RowDefinition Height="Auto" MinHeight="16"/>
+                    		</Grid.RowDefinitions>
+                    		<Grid x:Name="TaskBar" Grid.Row="1">
+                    			<Grid.ColumnDefinitions>
+                    				<ColumnDefinition Width="Auto" MinWidth="52"/>
+                    				<ColumnDefinition/>
+                    			</Grid.ColumnDefinitions>
+                    			<Grid.Background>
+                    				<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    					<GradientStop Color="#FF4E5165" Offset="0"/>
+                    					<GradientStop Color="#FF9A9EB7" Offset="1"/>
+                    				</LinearGradientBrush>
+                    			</Grid.Background>
+                    			<ToggleButton Content="{TemplateBinding MainFormTitle}" IsChecked="{TemplateBinding MainFormSelected}" Style="{StaticResource TaskBarButton}"/>
+                    			<ListBox Grid.Column="1" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" ItemsPanel="{StaticResource TaskBarItemsPanel}" Style="{StaticResource TaskBar}" ItemsSource="{TemplateBinding FormStacks}" ItemContainerStyle="{StaticResource TaskBarItemStyle}" />
+                    		</Grid>
+                    		<ContentPresenter Content="{TemplateBinding Content}" Margin="{TemplateBinding Padding}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    	</Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+    </Style>
+
+    <Style TargetType="local:FormStackControl">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:FormStackControl">
+                    <Grid d:DesignHeight="250" d:DesignWidth="300">
+                    	<Grid.RowDefinitions>
+                    		<RowDefinition Height="Auto" MinHeight="23"/>
+                    		<RowDefinition/>
+                    	</Grid.RowDefinitions>
+                    	<ScrollViewer VerticalScrollBarVisibility="Disabled" HorizontalContentAlignment="Center">
+                    		<ListBox Background="{x:Null}" BorderBrush="{x:Null}" ItemsPanel="{StaticResource BreadCrumbItemsPanel}" ItemTemplate="{StaticResource BreadCrumbItemTemplate}"/>
+                    	</ScrollViewer>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="local:BreadCrumbFormItem">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:BreadCrumbFormItem">
+                    <Grid>
+                		<Grid.ColumnDefinitions>
+                			<ColumnDefinition/>
+                			<ColumnDefinition Width="Auto"/>
+                		</Grid.ColumnDefinitions>
+                		<StackPanel Orientation="Horizontal" Grid.Column="1" >
+                			<Button x:Name="Accept" Style="{StaticResource ButtonStyle}">
+                				<Path Stretch="Fill" Height="12.091" Width="15.114" Data="F1M40.848,8.59C40.848,8.59,16.367,25.367,15.988,25.625C15.672,25.309,8.156,17.824,8.156,17.824C7.598,17.27,6.863,17.062,6.191,17.273C5.461,17.504,4.992,18.023,4.863,18.738L4.785,19.18C4.762,19.324,4.762,19.469,4.793,19.609L4.902,20.137L4.98,20.367L13.652,39.437C13.926,40.035,14.473,40.453,15.121,40.562C15.766,40.672,16.422,40.449,16.875,39.973L43.355,11.98C43.742,11.574,43.965,10.992,43.965,10.391L43.941,10.156L43.832,9.648C43.703,9.023,43.297,8.559,42.664,8.305C42.262,8.145,41.617,8.062,40.848,8.59z M40.848,8.59" Stroke="White" UseLayoutRounding="False">
+                					<Path.Fill>
+                						<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                							<GradientStop Color="#FF8F9F8E" Offset="0"/>
+                							<GradientStop Color="#FF1C5917" Offset="1"/>
+                						</LinearGradientBrush>
+                					</Path.Fill>
+                				</Path>
+                			</Button>
+                			<Button x:Name="Reject" Style="{StaticResource ButtonStyle}">
+                				<Path Stretch="Fill" Height="14" Width="14" Data="M5.75,0.611000000000001L5.477,0.911999999999999L1.426,4.959L1.125,5.236L1.426,5.509L8.801,12.912L1.426,20.287L1.125,20.56L1.426,20.834L5.477,24.884L5.75,25.185L6.023,24.884L13.398,17.509L20.773,24.884L21.051,25.185L21.324,24.884L25.375,20.834L25.648,20.56L25.375,20.287L18,12.912L25.375,5.509L25.648,5.236L25.375,4.959L21.324,0.911999999999999L21.051,0.611000000000001L20.773,0.911999999999999L13.398,8.287L6.023,0.911999999999999L5.75,0.611000000000001z" Stroke="White" UseLayoutRounding="False">
+                					<Path.Fill>
+                						<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                							<GradientStop Color="#FFBF9090" Offset="0.013"/>
+                							<GradientStop Color="#FF5B1111" Offset="1"/>
+                						</LinearGradientBrush>
+                					</Path.Fill>
+                				</Path>
+                			</Button>
+                			<Button x:Name="Close" Style="{StaticResource ButtonStyle}">
+                				<Path Stretch="Fill" Height="14" Width="14" Data="M5.75,0.611000000000001L5.477,0.911999999999999L1.426,4.959L1.125,5.236L1.426,5.509L8.801,12.912L1.426,20.287L1.125,20.56L1.426,20.834L5.477,24.884L5.75,25.185L6.023,24.884L13.398,17.509L20.773,24.884L21.051,25.185L21.324,24.884L25.375,20.834L25.648,20.56L25.375,20.287L18,12.912L25.375,5.509L25.648,5.236L25.375,4.959L21.324,0.911999999999999L21.051,0.611000000000001L20.773,0.911999999999999L13.398,8.287L6.023,0.911999999999999L5.75,0.611000000000001z" Stroke="White" UseLayoutRounding="False">
+                					<Path.Fill>
+                						<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                							<GradientStop Color="#FF909DBF" Offset="0.026"/>
+                							<GradientStop Color="#FF111E5B" Offset="0.996"/>
+                						</LinearGradientBrush>
+                					</Path.Fill>
+                				</Path>
+                			</Button>
+                		</StackPanel>
+                		<ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Margin="{TemplateBinding Padding}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                	</Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

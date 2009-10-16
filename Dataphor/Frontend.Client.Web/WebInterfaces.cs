@@ -40,6 +40,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		string IconImageID { get; }
 		event CancelEventHandler OnClosing;
 		void PreprocessRequest(HttpContext AContext);
+		ErrorList ErrorList { get; }
 	}
 
 	public interface IWebToolbar

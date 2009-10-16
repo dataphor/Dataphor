@@ -250,7 +250,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		}
 
 		private bool FForceAcceptReject;
-		
+		[DefaultValue(false)]
 		public bool ForceAcceptReject
 		{
 			get { return FForceAcceptReject; }

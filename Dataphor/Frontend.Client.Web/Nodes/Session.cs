@@ -211,7 +211,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			string LFormIDString = AContext.Request.QueryString["WarningForFormID"];
 			if ((LFormIDString != null) && (LFormIDString != String.Empty))
 			{
-				IFormInterface LForm = GetForm(LFormIDString);
+				IWebFormInterface LForm = GetForm(LFormIDString) as IWebFormInterface;
 				if ((LForm != null) && (LForm.ErrorList != null))
 					ShowFormWarnings(LForm.ErrorList);
 			}
@@ -473,7 +473,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		protected virtual void RenderWarningsButton(HtmlTextWriter AWriter)
 		{
-			IFormInterface LForm = Forms.GetTopmostForm();
+			IWebFormInterface LForm = Forms.GetTopmostForm() as IWebFormInterface;
 			if ((LForm != null) && (LForm.ErrorList != null) && HasNonAborts(LForm.ErrorList))
 				RenderStatusButton(AWriter, Strings.Get("FormLoadWarningsButtonAlt"), @"images/formwarning.png", String.Format(@"Submit('{0}?WarningForFormID={1}',event)", (string)Context.Session["DefaultPage"], ((IWebElement)LForm).ID));
 		}

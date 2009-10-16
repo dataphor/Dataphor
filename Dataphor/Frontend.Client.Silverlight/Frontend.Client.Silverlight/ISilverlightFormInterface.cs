@@ -5,12 +5,14 @@ using System.Windows.Controls;
 
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
-	public interface ISilverlightFormInterface : IFormInterface
+	public interface ISilverlightFormInterface : IFormInterface, ISilverlightElement
 	{
-		/// <summary> Shows the form non-modally. </summary>
+		/// <summary> Shows the form. </summary>
 		/// <param name="AOnCloseForm"> Callback when the form closes. </param>
 		void Show(FormInterfaceHandler AOnCloseForm, ContentControl AContainer);
-		Control Control { get; set; }
-		bool SupressCloseButton { get; set; }
+		
+		DispatchedReadOnlyCollection<Exception> BindErrors { get; }
+		
+		FormControl Form { get; }
 	}
 }

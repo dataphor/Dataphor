@@ -96,7 +96,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		public void BeginLoadInstances()
 		{
 			Status = ConnectStatus.LoadingInstances;
-			Session.BeginInvoke<string[]>
+			Session.Invoke<string[]>
 			(
 				() => { return ListenerFactory.EnumerateInstances(FHostName); },
 				(Exception AException) => 
@@ -161,7 +161,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		{
     		Status = ConnectStatus.Connecting;
 
-    		Session.BeginInvoke<DataView>
+    		Session.Invoke<DataView>
     		(
     			() =>
     			{
@@ -255,7 +255,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		public void BeginStartApplication()
 		{
-			Silverlight.Session.BeginInvoke<Silverlight.Session>
+			Silverlight.Session.Invoke<Silverlight.Session>
 			(
 				() =>
 				{

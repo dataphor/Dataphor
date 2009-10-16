@@ -1,0 +1,68 @@
+	<namespace name="Alphora.Dataphor.Frontend.Client" assembly="SilverlightDAE">
+		<nodetype name="module"/>
+		<nodetype name="source"/>
+		<nodetype name="sourceaction"/>
+		<nodetype name="datascriptaction"/>
+		<nodetype name="dataargument"/>
+		<nodetype name="setpropertyaction"/>
+		<nodetype name="blockaction"/>
+		<nodetype name="formaction"/>
+		<nodetype name="findaction"/>
+		<nodetype name="setnextrequestaction"/>
+		<nodetype name="clearnextrequestaction"/>
+		<nodetype name="callaction"/>
+		<notetype name="helpaction"/>
+		<nodetype name="executemoduleaction"/>
+		<nodetype name="showformaction"/>
+		<nodetype name="lookupaction"/>
+		<nodetype name="scriptaction"/>
+	</namespace>
+	<namespace name="Alphora.Dataphor.Frontend.Client.Silverlight" assembly="Alphora.Dataphor.Frontend.Client.Silverlight">
+		<nodetype name="forminterface"/>
+		<nodetype name="session"/>
+		<nodetype name="showlinkaction"/>
+		<nodetype name="timer"/>
+
+		<nodetype name="exposed"/>
+		<nodetype name="menu"/>
+		<nodetype name="trigger"/>
+
+		<nodetype name="group"/>
+		<nodetype name="column"/>
+		<nodetype name="row"/>
+		<nodetype name="statictext"/>
+		<nodetype name="staticimage"/>
+		<nodetype name="htmlbox"/>
+
+		<nodetype name="text"/>
+		<nodetype name="image"/>
+		<nodetype name="textbox"/>
+		<nodetype name="checkbox"/>
+		<nodetype name="choice"/>
+		<nodetype name="datetimebox"/>
+		<nodetype name="numerictextbox"/>
+		<nodetype name="texteditor"/>
+
+		<nodetype name="grid"/>
+		<nodetype name="textcolumn"/>
+		<nodetype name="triggercolumn"/>
+		<nodetype name="imagecolumn"/>
+		<nodetype name="checkboxcolumn"/>
+		<nodetype name="sequencecolumn"/>
+		
+		<nodetype name="search"/>
+		<nodetype name="searchcolumn"/>
+		<nodetype name="editfilteraction"/>
+		<nodetype name="tree"/>
+		<nodetype name="file"/>
+
+		<nodetype name="quicklookup"/>
+		<nodetype name="fulllookup"/>
+
+		<nodetype name="frame"/>
+
+		<nodetype name="notebook"/>
+		<nodetype name="notebookpage"/>
+		<nodetype name="notebookframepage"/>
+		
+	</namespace>
