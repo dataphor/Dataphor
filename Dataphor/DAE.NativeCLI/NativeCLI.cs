@@ -18,13 +18,17 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 	{
 		public const string CDefaultInstanceName = "Dataphor";
 		
-		public NativeCLIClient(string AHostName) : this(AHostName, CDefaultInstanceName, 0) { }
-		public NativeCLIClient(string AHostName, string AInstanceName) : this(AHostName, AInstanceName, 0) { }
-		public NativeCLIClient(string AHostName, string AInstanceName, int AOverridePortNumber) : base(GetNativeServerURI(AHostName, AInstanceName, AOverridePortNumber))
+		public NativeCLIClient(string AHostName) : this(AHostName, CDefaultInstanceName, 0, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default) { }
+		public NativeCLIClient(string AHostName, string AInstanceName) : this(AHostName, AInstanceName, 0, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default) { }
+		public NativeCLIClient(string AHostName, string AInstanceName, int AOverridePortNumber, ConnectionSecurityMode ASecurityMode) : this(AHostName, AInstanceName, 0, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default) { }
+		public NativeCLIClient(string AHostName, string AInstanceName, int AOverridePortNumber, ConnectionSecurityMode ASecurityMode, int AOverrideListenerPortNumber, ConnectionSecurityMode AListenerSecurityMode) : base(GetNativeServerURI(AHostName, AInstanceName, AOverridePortNumber, ASecurityMode, AOverrideListenerPortNumber, AListenerSecurityMode))
 		{
 			FHostName = AHostName;
 			FInstanceName = AInstanceName;
 			FOverridePortNumber = AOverridePortNumber;
+			FSecurityMode = ASecurityMode;
+			FOverrideListenerPortNumber = AOverrideListenerPortNumber;
+			FListenerSecurityMode = AListenerSecurityMode;
 		}
 		
 		private string FHostName;
@@ -36,12 +40,21 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		private int FOverridePortNumber;
 		public int OverridePortNumber { get { return FOverridePortNumber; } }
 		
-		public static string GetNativeServerURI(string AHostName, string AInstanceName, int AOverridePortNumber)
+		private ConnectionSecurityMode FSecurityMode;
+		public ConnectionSecurityMode SecurityMode { get { return FSecurityMode; } }
+		
+		private int FOverrideListenerPortNumber;
+		public int OverrideListenerPortNumber { get { return FOverrideListenerPortNumber; } }
+		
+		private ConnectionSecurityMode FListenerSecurityMode;
+		public ConnectionSecurityMode ListenerSecurityMode { get { return FListenerSecurityMode; } }
+		
+		public static string GetNativeServerURI(string AHostName, string AInstanceName, int AOverridePortNumber, ConnectionSecurityMode ASecurityMode, int AOverrideListenerPortNumber, ConnectionSecurityMode AListenerSecurityMode)
 		{
 			if (AOverridePortNumber > 0)
-				return DataphorServiceUtility.BuildNativeInstanceURI(AHostName, AOverridePortNumber, AInstanceName);
+				return DataphorServiceUtility.BuildNativeInstanceURI(AHostName, AOverridePortNumber, ASecurityMode == ConnectionSecurityMode.Transport, AInstanceName);
 			else
-				return ListenerFactory.GetInstanceURI(AHostName, AInstanceName, true);
+				return ListenerFactory.GetInstanceURI(AHostName, AOverrideListenerPortNumber, AListenerSecurityMode, AInstanceName, ASecurityMode, true);
 		}
 	}
 	
@@ -49,7 +62,8 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 	{
 		public NativeSessionCLIClient(string AHostName) : base(AHostName) { }
 		public NativeSessionCLIClient(string AHostName, string AInstanceName) : base(AHostName, AInstanceName) { }
-		public NativeSessionCLIClient(string AHostName, string AInstanceName, int AOverridePortNumber) : base(AHostName, AInstanceName, AOverridePortNumber) { }
+		public NativeSessionCLIClient(string AHostName, string AInstanceName, int AOverridePortNumber, ConnectionSecurityMode ASecurityMode) : base(AHostName, AInstanceName, AOverridePortNumber, ASecurityMode) { }
+		public NativeSessionCLIClient(string AHostName, string AInstanceName, int AOverridePortNumber, ConnectionSecurityMode ASecurityMode, int AOverrideListenerPortNumber, ConnectionSecurityMode AListenerSecurityMode) : base(AHostName, AInstanceName, AOverridePortNumber, ASecurityMode, AOverrideListenerPortNumber, AListenerSecurityMode) { }
 		
 		public NativeSessionHandle StartSession(NativeSessionInfo ASessionInfo)
 		{
@@ -182,7 +196,8 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 	{
 		public NativeStatelessCLIClient(string AHostName) : base(AHostName) { }
 		public NativeStatelessCLIClient(string AHostName, string AInstanceName) : base(AHostName, AInstanceName) { }
-		public NativeStatelessCLIClient(string AHostName, string AInstanceName, int AOverridePortNumber) : base(AHostName, AInstanceName, AOverridePortNumber) { }
+		public NativeStatelessCLIClient(string AHostName, string AInstanceName, int AOverridePortNumber, ConnectionSecurityMode ASecurityMode) : base(AHostName, AInstanceName, AOverridePortNumber, ASecurityMode) { }
+		public NativeStatelessCLIClient(string AHostName, string AInstanceName, int AOverridePortNumber, ConnectionSecurityMode ASecurityMode, int AOverrideListenerPortNumber, ConnectionSecurityMode AListenerSecurityMode) : base(AHostName, AInstanceName, AOverridePortNumber, ASecurityMode, AOverrideListenerPortNumber, AListenerSecurityMode) { }
 
 		public NativeResult Execute(NativeSessionInfo ASessionInfo, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions)
 		{

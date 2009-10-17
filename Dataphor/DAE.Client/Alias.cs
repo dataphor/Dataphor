@@ -9,6 +9,7 @@ using System.ComponentModel;
 using System.Collections.Generic;
 
 using Alphora.Dataphor.BOP;
+using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Dataphor.DAE.Client
 {
@@ -123,7 +124,7 @@ namespace Alphora.Dataphor.DAE.Client
 			set { FIsUserAlias = value; } 
 		}
 	}
-
+	
 	/// <summary> A ServerAlias descendent that models an out-of-process connection to a Dataphor Server. </summary>
 	public class ConnectionAlias : ServerAlias
 	{
@@ -158,6 +159,51 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			get { return FOverridePortNumber; }
 			set { FOverridePortNumber = value; }
+		}
+		
+		private ConnectionSecurityMode FSecurityMode;
+		/// <summary>
+		/// Determines the security mode of the connection.
+		/// </summary>
+		/// <remarks>
+		/// Default indicates that the connection will be made using the default security mode of the server.
+		/// None indicates that the connection will be made with no security.
+		/// Transport indicates that the connection will be established with transport security.
+		/// </remarks>
+		[DefaultValue(ConnectionSecurityMode.Default)]
+		[Description("Determines the security mode of the connection.")]
+		public ConnectionSecurityMode SecurityMode
+		{
+			get { return FSecurityMode; }
+			set { FSecurityMode = value; }
+		}
+		
+		private int FOverrideListenerPortNumber;
+		/// <summary>
+		/// Allows the port number for the listener to be explicitly specified.
+		/// </summary>
+		[DefaultValue(0)]
+		[Description("If specified, a uri for the listener is constructed with this port number, rather than using the default listener port to connect.")]
+		public int OverrideListenerPortNumber
+		{
+			get { return FOverrideListenerPortNumber; }
+			set { FOverrideListenerPortNumber = value; }
+		}
+		
+		private ConnectionSecurityMode FListenerSecurityMode;
+		/// <summary>
+		/// Determines the security mode of the listener connection.
+		/// </summary>
+		/// <remarks>
+		/// Default or None indicates that the listener connection will be made with no security.
+		/// Transport indicates that the listener connection will be made with transport security.
+		/// </remarks>
+		[DefaultValue(ConnectionSecurityMode.Default)]
+		[Description("Determines the security mode of the listener connection.")]
+		public ConnectionSecurityMode ListenerSecurityMode
+		{
+			get { return FListenerSecurityMode; }
+			set { FListenerSecurityMode = value; }
 		}
 		
 		private bool FClientSideLoggingEnabled;

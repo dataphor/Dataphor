@@ -28,15 +28,15 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		[OperationContract(AsyncPattern = true)]
 		[FaultContract(typeof(ListenerFault))]
-		IAsyncResult BeginGetInstanceURI(string AInstanceName, AsyncCallback ACallback, object AState);
+		IAsyncResult BeginGetInstanceURI(string AHostName, string AInstanceName, ConnectionSecurityMode ASecurityMode, AsyncCallback ACallback, object AState);
 		string EndGetInstanceURI(IAsyncResult AResult);
 		
 		/// <summary>
-		/// Returns the URI for the standard or native CLI of an instance.
+		/// Returns the URI for the native CLI of an instance.
 		/// </summary>
 		[OperationContract(AsyncPattern = true)]
 		[FaultContract(typeof(ListenerFault))]
-		IAsyncResult BeginGetNativeInstanceURI(string AInstanceName, AsyncCallback ACallback, object AState);
+		IAsyncResult BeginGetNativeInstanceURI(string AHostName, string AInstanceName, ConnectionSecurityMode ASecurityMode, AsyncCallback ACallback, object AState);
 		string EndGetNativeInstanceURI(IAsyncResult AResult);
 	}
 }

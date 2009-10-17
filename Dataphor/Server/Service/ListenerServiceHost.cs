@@ -19,23 +19,28 @@ namespace Alphora.Dataphor.DAE.Service
 {
 	public class ListenerServiceHost : IDisposable
 	{
-		public ListenerServiceHost()
+		public ListenerServiceHost(int AOverridePortNumber, int AOverrideSecurePortNumber, bool ARequireSecureConnection, bool AUseCrossDomainService)
 		{
-			IDictionary LSettings = (IDictionary)ConfigurationManager.GetSection("listener");
-			
-			// Set shouldListen=false to turn off the listener for a process
-			if ((LSettings != null) && LSettings.Contains("shouldListen") && !Convert.ToBoolean(LSettings["shouldListen"]))
-				return;
+			int LListenerPort = AOverridePortNumber == 0 ? DataphorServiceUtility.CDefaultListenerPortNumber : AOverridePortNumber;
+			int LSecureListenerPort = AOverrideSecurePortNumber == 0 ? DataphorServiceUtility.CDefaultSecureListenerPortNumber : AOverrideSecurePortNumber;
 				
 			FListenerHost = new ServiceHost(typeof(ListenerService));
 			
+			if (!ARequireSecureConnection)
+				FListenerHost.AddServiceEndpoint
+				(
+					typeof(IListenerService), 
+					DataphorServiceUtility.GetBinding(false), 
+					DataphorServiceUtility.BuildListenerURI(Environment.MachineName, LListenerPort, false)
+				);
+				
 			FListenerHost.AddServiceEndpoint
 			(
 				typeof(IListenerService), 
-				DataphorServiceUtility.GetBinding(), 
-				DataphorServiceUtility.BuildListenerURI(Environment.MachineName)
+				DataphorServiceUtility.GetBinding(true), 
+				DataphorServiceUtility.BuildListenerURI(Environment.MachineName, LSecureListenerPort, true)
 			);
-			
+
 			try
 			{
 				FListenerHost.Open();
@@ -45,7 +50,8 @@ namespace Alphora.Dataphor.DAE.Service
 				// An error indicates the service could not be started because there is already a listener running in another process.
 			}
 			
-			FCrossDomainServiceHost = new CrossDomainServiceHost(Environment.MachineName, DataphorServiceUtility.CDefaultListenerPortNumber);
+			if (AUseCrossDomainService)
+				FCrossDomainServiceHost = new CrossDomainServiceHost(Environment.MachineName, LListenerPort, LSecureListenerPort, ARequireSecureConnection);
 		}
 
 		#region IDisposable Members

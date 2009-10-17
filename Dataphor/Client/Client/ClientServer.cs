@@ -19,11 +19,14 @@ namespace Alphora.Dataphor.DAE.Client
 	public class ClientServer : ClientObject, IRemoteServer
 	{
 		public ClientServer() { }
-		public ClientServer(string AHostName, int AOverridePortNumber, string AInstanceName)
+		public ClientServer(string AHostName, string AInstanceName, int AOverridePortNumber, ConnectionSecurityMode ASecurityMode, int AOverrideListenerPortNumber, ConnectionSecurityMode AListenerSecurityMode)
 		{
 			FHostName = AHostName;
-			FOverridePortNumber = AOverridePortNumber;
 			FInstanceName = AInstanceName;
+			FOverridePortNumber = AOverridePortNumber;
+			FSecurityMode = ASecurityMode;
+			FOverrideListenerPortNumber = AOverrideListenerPortNumber;
+			FListenerSecurityMode = AListenerSecurityMode;
 			
 			#if SILVERLIGHT
 			System.Net.WebRequest.RegisterPrefix("http://", System.Net.Browser.WebRequestCreator.ClientHttp);
@@ -44,6 +47,17 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 		
+		private string FInstanceName;
+		public string InstanceName
+		{
+			get { return FInstanceName; }
+			set
+			{
+				CheckInactive();
+				FInstanceName = value;
+			}
+		}
+		
 		private int FOverridePortNumber;
 		public int OverridePortNumber
 		{
@@ -55,14 +69,36 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 		
-		private string FInstanceName;
-		public string InstanceName
+		private ConnectionSecurityMode FSecurityMode;
+		public ConnectionSecurityMode SecurityMode
 		{
-			get { return FInstanceName; }
+			get { return FSecurityMode; }
 			set
 			{
 				CheckInactive();
-				FInstanceName = value;
+				FSecurityMode = value;
+			}
+		}
+		
+		private int FOverrideListenerPortNumber;
+		public int OverrideListenerPortNumber
+		{
+			get { return FOverrideListenerPortNumber; }
+			set
+			{
+				CheckInactive();
+				FOverrideListenerPortNumber = value; 
+			}
+		}
+		
+		private ConnectionSecurityMode FListenerSecurityMode;
+		public ConnectionSecurityMode ListenerSecurityMode
+		{
+			get { return FListenerSecurityMode; }
+			set
+			{
+				CheckInactive();
+				FListenerSecurityMode = value;
 			}
 		}
 		
@@ -87,11 +123,12 @@ namespace Alphora.Dataphor.DAE.Client
 			if (!IsActive)
 				if (FOverridePortNumber == 0)
 				{
+					Uri LUri = new Uri(ListenerFactory.GetInstanceURI(FHostName, FOverrideListenerPortNumber, FListenerSecurityMode, FInstanceName, FSecurityMode));
 					FChannelFactory =
 						new ChannelFactory<IClientDataphorService>
 						(
-							DataphorServiceUtility.GetBinding(), 
-							new EndpointAddress(ListenerFactory.GetInstanceURI(FHostName, FInstanceName))
+							DataphorServiceUtility.GetBinding(LUri.Scheme == Uri.UriSchemeHttps), 
+							new EndpointAddress(LUri)
 						);
 				}
 				else
@@ -99,8 +136,8 @@ namespace Alphora.Dataphor.DAE.Client
 					FChannelFactory = 
 						new ChannelFactory<IClientDataphorService>
 						(
-							DataphorServiceUtility.GetBinding(), 
-							new EndpointAddress(DataphorServiceUtility.BuildInstanceURI(FHostName, FOverridePortNumber, FInstanceName))
+							DataphorServiceUtility.GetBinding(FSecurityMode == ConnectionSecurityMode.Transport), 
+							new EndpointAddress(DataphorServiceUtility.BuildInstanceURI(FHostName, FOverridePortNumber, FSecurityMode == ConnectionSecurityMode.Transport, FInstanceName))
 						);
 				}
 		}

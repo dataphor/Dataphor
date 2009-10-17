@@ -8,31 +8,38 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 
+using Alphora.Dataphor.DAE.Contracts;
+
 namespace Alphora.Dataphor.DAE.Listener
 {
 	public static class ListenerFactory
 	{
 		public static string[] EnumerateInstances(string AHostName)
 		{
-			using (ListenerClient LClient = new ListenerClient(AHostName))
+			return EnumerateInstances(AHostName, 0, ConnectionSecurityMode.None);
+		}
+		
+		public static string[] EnumerateInstances(string AHostName, int AOverrideListenerPortNumber, ConnectionSecurityMode AListenerSecurityMode)
+		{
+			using (ListenerClient LClient = new ListenerClient(AHostName, AOverrideListenerPortNumber, AListenerSecurityMode))
 			{
 				return LClient.EnumerateInstances();
 			}
 		}
 		
-		public static string GetInstanceURI(string AHostName, string AInstanceName)
+		public static string GetInstanceURI(string AHostName, int AOverrideListenerPortNumber, ConnectionSecurityMode AListenerSecurityMode, string AInstanceName, ConnectionSecurityMode ASecurityMode)
 		{
-			return GetInstanceURI(AHostName, AInstanceName, false);
+			return GetInstanceURI(AHostName, AOverrideListenerPortNumber, AListenerSecurityMode, AInstanceName, ASecurityMode, false);
 		}
 		
-		public static string GetInstanceURI(string AHostName, string AInstanceName, bool AUseNative)
+		public static string GetInstanceURI(string AHostName, int AOverrideListenerPortNumber, ConnectionSecurityMode AListenerSecurityMode, string AInstanceName, ConnectionSecurityMode ASecurityMode, bool AUseNative)
 		{
-			using (ListenerClient LClient = new ListenerClient(AHostName))
+			using (ListenerClient LClient = new ListenerClient(AHostName, AOverrideListenerPortNumber, AListenerSecurityMode))
 			{
 				if (AUseNative)
-					return LClient.GetNativeInstanceURI(AInstanceName);
+					return LClient.GetNativeInstanceURI(AInstanceName, ASecurityMode);
 				else
-					return LClient.GetInstanceURI(AInstanceName);
+					return LClient.GetInstanceURI(AInstanceName, ASecurityMode);
 			}
 		}
 	}

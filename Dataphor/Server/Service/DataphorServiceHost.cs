@@ -84,39 +84,78 @@ namespace Alphora.Dataphor.DAE.Service
 					FRemoteServer = new RemoteServer(FServer);
 					FNativeServer = new NativeServer(FServer);
 					FServer.Start();
-					FService = new DataphorService(FRemoteServer);
-					FNativeService = new NativeCLIService(FNativeServer);
+					try
+					{
+						FServer.LogMessage("Creating WCF Service...");
+						FService = new DataphorService(FRemoteServer);
+						
+						FServer.LogMessage("Creating Native CLI Service...");
+						FNativeService = new NativeCLIService(FNativeServer);
 
-					// TODO: Enable configuration of endpoints through instances or app.config files
-					FServiceHost = new ServiceHost(FService);
-					
-					FServiceHost.AddServiceEndpoint
-					(
-						typeof(IDataphorService), 
-						DataphorServiceUtility.GetBinding(), 
-						DataphorServiceUtility.BuildInstanceURI(Environment.MachineName, LInstance.PortNumber, LInstance.Name)
-					);
+						// TODO: Enable configuration of endpoints through instances or app.config files
+						FServer.LogMessage("Configuring Service Host...");
+						FServiceHost = new ServiceHost(FService);
+						
+						if (!LInstance.RequireSecureConnection)
+							FServiceHost.AddServiceEndpoint
+							(
+								typeof(IDataphorService), 
+								DataphorServiceUtility.GetBinding(false), 
+								DataphorServiceUtility.BuildInstanceURI(Environment.MachineName, LInstance.PortNumber, false, LInstance.Name)
+							);
 
-					FServiceHost.Open();
+						FServiceHost.AddServiceEndpoint
+						(
+							typeof(IDataphorService), 
+							DataphorServiceUtility.GetBinding(true), 
+							DataphorServiceUtility.BuildInstanceURI(Environment.MachineName, LInstance.SecurePortNumber, true, LInstance.Name)
+						);
+
+						FServer.LogMessage("Opening Service Host...");
+						FServiceHost.Open();
+						
+						FServer.LogMessage("Configuring Native CLI Service Host...");
+						FNativeServiceHost = new ServiceHost(FNativeService);
+						
+						if (!LInstance.RequireSecureConnection)
+							FNativeServiceHost.AddServiceEndpoint
+							(
+								typeof(INativeCLIService),
+								DataphorServiceUtility.GetBinding(false), 
+								DataphorServiceUtility.BuildNativeInstanceURI(Environment.MachineName, LInstance.PortNumber, false, LInstance.Name)
+							);
+						
+						FNativeServiceHost.AddServiceEndpoint
+						(
+							typeof(INativeCLIService),
+							DataphorServiceUtility.GetBinding(true), 
+							DataphorServiceUtility.BuildNativeInstanceURI(Environment.MachineName, LInstance.SecurePortNumber, true, LInstance.Name)
+						);
 					
-					FNativeServiceHost = new ServiceHost(FNativeService);
-					
-					FNativeServiceHost.AddServiceEndpoint
-					(
-						typeof(INativeCLIService),
-						DataphorServiceUtility.GetBinding(), 
-						DataphorServiceUtility.BuildNativeInstanceURI(Environment.MachineName, LInstance.PortNumber, LInstance.Name)
-					);
-					
-					FNativeServiceHost.Open();
-					
-					// Start the listener
-					FListenerServiceHost = new ListenerServiceHost();
-					
-					// Start the CrossDomainServer
-					// This is required in order to serve a ClientAccessPolicy to enable cross-domain access in a sliverlight application.
-					// Without this, the Silverlight client will not work correctly.
-					FCrossDomainServiceHost = new CrossDomainServiceHost(Environment.MachineName, LInstance.PortNumber);
+						FServer.LogMessage("Opening Native CLI Service Host...");
+						FNativeServiceHost.Open();
+						
+						// Start the listener
+						if (LInstance.ShouldListen)
+						{
+							FServer.LogMessage("Starting Listener Service...");
+							FListenerServiceHost = new ListenerServiceHost(LInstance.OverrideListenerPortNumber, LInstance.OverrideSecureListenerPortNumber, LInstance.RequireSecureListenerConnection, LInstance.AllowSilverlightClients);
+						}
+						
+						// Start the CrossDomainServer
+						// This is required in order to serve a ClientAccessPolicy to enable cross-domain access in a sliverlight application.
+						// Without this, the Silverlight client will not work correctly.
+						if (LInstance.AllowSilverlightClients)
+						{
+							FServer.LogMessage("Starting Cross Domain Service...");
+							FCrossDomainServiceHost = new CrossDomainServiceHost(Environment.MachineName, LInstance.PortNumber, LInstance.SecurePortNumber, LInstance.RequireSecureConnection);
+						}
+					}
+					catch (Exception LException)
+					{
+						FServer.LogError(LException);
+						throw;
+					}
 				}
 				catch
 				{

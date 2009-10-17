@@ -98,7 +98,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			Status = ConnectStatus.LoadingInstances;
 			Session.Invoke<string[]>
 			(
-				() => { return ListenerFactory.EnumerateInstances(FHostName); },
+				() => { return ListenerFactory.EnumerateInstances(FHostName); }, // TODO: This will need to be changed to use the listener connectivity override overload
 				(Exception AException) => 
 				{ 
 					Status = ConnectStatus.SelectHost;

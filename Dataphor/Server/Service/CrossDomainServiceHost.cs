@@ -19,30 +19,38 @@ namespace Alphora.Dataphor.DAE.Service
 {
 	public class CrossDomainServiceHost : IDisposable
 	{
-		public CrossDomainServiceHost(string AHostName, int APortNumber)
+		public CrossDomainServiceHost(string AHostName, int APortNumber, int ASecurePortNumber, bool ARequireSecureConnection)
 		{
-			IDictionary LSettings = (IDictionary)ConfigurationManager.GetSection("crossDomainService");
+			List<Uri> LBaseAddresses = new List<Uri>();
+			LBaseAddresses.Add(new Uri(DataphorServiceUtility.BuildCrossDomainServiceURI(AHostName, ASecurePortNumber, true)));
 			
-			// Set enableCrossDomainService=false to turn off the cross domain service for a process
-			if ((LSettings != null) && LSettings.Contains("enableCrossDomainService") && !Convert.ToBoolean(LSettings["enableCrossDomainService"]))
-				return;
+			if (!ARequireSecureConnection)
+				LBaseAddresses.Add(new Uri(DataphorServiceUtility.BuildCrossDomainServiceURI(AHostName, APortNumber, false)));
 				
-			FServiceHost = new WebServiceHost(typeof(CrossDomainService), new Uri(DataphorServiceUtility.BuildCrossDomainServiceURI(AHostName, APortNumber)));
+			FServiceHost = new WebServiceHost(typeof(CrossDomainService), LBaseAddresses.ToArray());
 			
 			FServiceHost.AddServiceEndpoint
 			(
-				typeof(ICrossDomainService), 
-				new WebHttpBinding(),
+				typeof(ICrossDomainService),
+				new WebHttpBinding(WebHttpSecurityMode.Transport),
 				""
 			);
-			
+		
+			if (!ARequireSecureConnection)
+				FServiceHost.AddServiceEndpoint
+				(
+					typeof(ICrossDomainService), 
+					new WebHttpBinding(),
+					""
+				);
+				
 			try
 			{
 				FServiceHost.Open();
 			}
 			catch
 			{
-				// An error indicates the service could not be started because there is already a listener running in another process.
+				// An error indicates the service could not be started because there is already a cross domain service running in another process
 			}
 		}
 		

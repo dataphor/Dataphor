@@ -57,7 +57,16 @@ namespace Alphora.Dataphor.DAE.Client
 				}
 				else
 				{
-					FClientServer = new ClientServer(LConnectionAlias.HostName, LConnectionAlias.OverridePortNumber, LConnectionAlias.InstanceName);
+					FClientServer = 
+						new ClientServer
+						(
+							LConnectionAlias.HostName, 
+							LConnectionAlias.InstanceName, 
+							LConnectionAlias.OverridePortNumber, 
+							LConnectionAlias.SecurityMode, 
+							LConnectionAlias.OverrideListenerPortNumber, 
+							LConnectionAlias.ListenerSecurityMode
+						);
 					FLocalServer = new LocalServer(FClientServer, LConnectionAlias.ClientSideLoggingEnabled, TerminalServiceUtility.ClientName);
 				}
 			}

@@ -10,33 +10,59 @@ using System.ServiceModel;
 
 namespace Alphora.Dataphor.DAE.Contracts
 {
+	public enum ConnectionSecurityMode { Default, None, Transport };
+
 	public static class DataphorServiceUtility
 	{
 		public const int CDefaultListenerPortNumber = 8060;
+		public const int CDefaultSecureListenerPortNumber = 8600;
 		
-		public static string BuildInstanceURI(string AHostName, int APortNumber, string AInstanceName)
+		private static string GetScheme(bool ASecure)
 		{
-			return String.Format("http://{0}:{1}/{2}/service", AHostName, APortNumber, AInstanceName);
+			return ASecure ? Uri.UriSchemeHttps : Uri.UriSchemeHttp;
 		}
 		
-		public static string BuildNativeInstanceURI(string AHostName, int APortNumber, string AInstanceName)
+		public static string BuildInstanceURI(string AHostName, int APortNumber, bool ASecure, string AInstanceName)
 		{
-			return String.Format("http://{0}:{1}/{2}/service/native", AHostName, APortNumber, AInstanceName);
+			return String.Format("{0}://{1}:{2}/{3}/service", GetScheme(ASecure), AHostName, APortNumber, AInstanceName);
 		}
 		
-		public static string BuildListenerURI(string AHostName)
+		public static string BuildNativeInstanceURI(string AHostName, int APortNumber, bool ASecure, string AInstanceName)
 		{
-			return String.Format("http://{0}:{1}/listener/service", AHostName, CDefaultListenerPortNumber);
+			return String.Format("{0}://{1}:{2}/{3}/service/native", GetScheme(ASecure), AHostName, APortNumber, AInstanceName);
 		}
 		
-		public static string BuildCrossDomainServiceURI(string AHostName, int APortNumber)
+		public static string BuildListenerURI(string AHostName, int AOverridePortNumber, ConnectionSecurityMode ASecurityMode)
 		{
-			return String.Format("http://{0}:{1}", AHostName, APortNumber);
+			return 
+				BuildListenerURI
+				(
+					AHostName, 
+					AOverridePortNumber == 0 
+						? 
+						(
+							ASecurityMode == ConnectionSecurityMode.Transport 
+								? CDefaultSecureListenerPortNumber 
+								: CDefaultListenerPortNumber 
+						)
+						: AOverridePortNumber, 
+					ASecurityMode == ConnectionSecurityMode.Transport
+				);
+		}
+		
+		public static string BuildListenerURI(string AHostName, int APortNumber, bool ASecure)
+		{
+			return String.Format("{0}://{1}:{2}/listener/service", GetScheme(ASecure), AHostName, APortNumber);
+		}
+		
+		public static string BuildCrossDomainServiceURI(string AHostName, int APortNumber, bool ASecure)
+		{
+			return String.Format("{0}://{1}:{2}", GetScheme(ASecure), AHostName, APortNumber);
 		}
 		
 		public const int CMaxMessageLength = 10485760;
 
-		public static Binding GetBinding()
+		public static Binding GetBinding(bool ASecure)
 		{
 			//return new BasicHttpBinding();
 			var LMessageEncodingElement = new BinaryMessageEncodingBindingElement();
@@ -45,7 +71,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 			LMessageEncodingElement.ReaderQuotas.MaxStringContentLength = CMaxMessageLength;
 			#endif
 			
-			var LTransportElement = new HttpTransportBindingElement();
+			var LTransportElement = ASecure ? new HttpsTransportBindingElement() : new HttpTransportBindingElement();
 			LTransportElement.MaxBufferSize = CMaxMessageLength;
 			LTransportElement.MaxReceivedMessageSize = CMaxMessageLength;
 			

@@ -7,14 +7,15 @@
 using System;
 using System.Text;
 using System.Collections.Generic;
+using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Dataphor.DAE.NativeCLI
 {
 	public class NativeCLISession : IDisposable
 	{
-		public NativeCLISession(string AHostName, string AInstanceName, int AOverridePortNumber, NativeSessionInfo ANativeSessionInfo)
+		public NativeCLISession(string AHostName, string AInstanceName, int AOverridePortNumber, ConnectionSecurityMode ASecurityMode, int AOverrideListenerPortNumber, ConnectionSecurityMode AListenerSecurityMode, NativeSessionInfo ANativeSessionInfo)
 		{
-			FNativeCLI = new NativeSessionCLIClient(AHostName, AInstanceName, AOverridePortNumber);
+			FNativeCLI = new NativeSessionCLIClient(AHostName, AInstanceName, AOverridePortNumber, ASecurityMode, AOverrideListenerPortNumber, AListenerSecurityMode);
 			FNativeSessionInfo = ANativeSessionInfo;
 			FSessionHandle = FNativeCLI.StartSession(ANativeSessionInfo);
 		}
@@ -26,6 +27,12 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		public string InstanceName { get { return FNativeCLI.InstanceName; } }
 
 		public int OverridePortNumber { get { return FNativeCLI.OverridePortNumber; } }
+		
+		public ConnectionSecurityMode SecurityMode { get { return FNativeCLI.SecurityMode; } }
+		
+		public int OverrideListenerPortNumber { get { return FNativeCLI.OverrideListenerPortNumber; } }
+		
+		public ConnectionSecurityMode ListenerSecurityMode { get { return FNativeCLI.ListenerSecurityMode; } }
 		
 		private NativeSessionInfo FNativeSessionInfo;
 		public NativeSessionInfo NativeSessionInfo { get { return FNativeSessionInfo; } }

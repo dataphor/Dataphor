@@ -57,6 +57,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private ListBox LibraryDirectoriesListBox;
 		private Button button1;
 		private System.Windows.Forms.TextBox tbLibraryDirectories;
+		private System.Windows.Forms.CheckBox cbRequireSecureConnection;
+		private GroupBox groupBox5;
+		private Label label7;
+		private System.Windows.Forms.TextBox tbSecurePortNumber;
+		private System.Windows.Forms.CheckBox cbShouldListen;
+		private Label label10;
+		private Label label8;
+		private System.Windows.Forms.TextBox tbOverrideSecureListenerPortNumber;
+		private System.Windows.Forms.CheckBox cbRequireSecureListenerConnection;
+		private Label label9;
+		private System.Windows.Forms.TextBox tbOverrideListenerPortNumber;
+		private System.Windows.Forms.CheckBox cbAllowSilverlightClients;
 		private Label label13;
 
 		public EditInstanceForm()
@@ -122,21 +134,35 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.button1 = new System.Windows.Forms.Button();
 			this.tbLibraryDirectories = new System.Windows.Forms.TextBox();
 			this.groupBox4 = new System.Windows.Forms.GroupBox();
+			this.cbRequireSecureConnection = new System.Windows.Forms.CheckBox();
+			this.label7 = new System.Windows.Forms.Label();
+			this.tbSecurePortNumber = new System.Windows.Forms.TextBox();
+			this.groupBox5 = new System.Windows.Forms.GroupBox();
+			this.label8 = new System.Windows.Forms.Label();
+			this.tbOverrideSecureListenerPortNumber = new System.Windows.Forms.TextBox();
+			this.cbRequireSecureListenerConnection = new System.Windows.Forms.CheckBox();
+			this.label9 = new System.Windows.Forms.Label();
+			this.tbOverrideListenerPortNumber = new System.Windows.Forms.TextBox();
+			this.label10 = new System.Windows.Forms.Label();
+			this.cbShouldListen = new System.Windows.Forms.CheckBox();
+			this.cbAllowSilverlightClients = new System.Windows.Forms.CheckBox();
 			this.FContentPanel.SuspendLayout();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.groupBox3.SuspendLayout();
 			this.groupBox4.SuspendLayout();
+			this.groupBox5.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// FContentPanel
 			// 
 			this.FContentPanel.AutoScroll = true;
+			this.FContentPanel.Controls.Add(this.groupBox5);
 			this.FContentPanel.Controls.Add(this.groupBox4);
 			this.FContentPanel.Controls.Add(this.groupBox3);
 			this.FContentPanel.Controls.Add(this.groupBox2);
 			this.FContentPanel.Controls.Add(this.groupBox1);
-			this.FContentPanel.Size = new System.Drawing.Size(683, 334);
+			this.FContentPanel.Size = new System.Drawing.Size(687, 447);
 			// 
 			// tbInstanceName
 			// 
@@ -203,7 +229,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.groupBox1.Controls.Add(this.tbCatalogStoreConnectionString);
 			this.groupBox1.Controls.Add(this.label2);
 			this.groupBox1.Controls.Add(this.tbCatalogStoreClassName);
-			this.groupBox1.Location = new System.Drawing.Point(324, 4);
+			this.groupBox1.Location = new System.Drawing.Point(326, 148);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(354, 98);
 			this.groupBox1.TabIndex = 2;
@@ -256,9 +282,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.groupBox2.Controls.Add(this.SettingNameTextBox);
 			this.groupBox2.Controls.Add(this.DeviceNameTextBox);
 			this.groupBox2.Controls.Add(this.DeviceSettingsListBox);
-			this.groupBox2.Location = new System.Drawing.Point(324, 108);
+			this.groupBox2.Location = new System.Drawing.Point(324, 252);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(354, 219);
+			this.groupBox2.Size = new System.Drawing.Size(354, 184);
 			this.groupBox2.TabIndex = 3;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Device Settings";
@@ -346,7 +372,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.DeviceSettingsListBox.FormattingEnabled = true;
 			this.DeviceSettingsListBox.Location = new System.Drawing.Point(9, 93);
 			this.DeviceSettingsListBox.Name = "DeviceSettingsListBox";
-			this.DeviceSettingsListBox.Size = new System.Drawing.Size(336, 121);
+			this.DeviceSettingsListBox.Size = new System.Drawing.Size(336, 82);
 			this.DeviceSettingsListBox.TabIndex = 3;
 			this.DeviceSettingsListBox.SelectedIndexChanged += new System.EventHandler(this.DeviceSettingsListBox_SelectedIndexChanged);
 			// 
@@ -362,7 +388,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.groupBox3.Controls.Add(this.tbLibraryDirectories);
 			this.groupBox3.Location = new System.Drawing.Point(12, 148);
 			this.groupBox3.Name = "groupBox3";
-			this.groupBox3.Size = new System.Drawing.Size(306, 179);
+			this.groupBox3.Size = new System.Drawing.Size(306, 288);
 			this.groupBox3.TabIndex = 1;
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Library Directories";
@@ -422,7 +448,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.LibraryDirectoriesListBox.FormattingEnabled = true;
 			this.LibraryDirectoriesListBox.Location = new System.Drawing.Point(6, 78);
 			this.LibraryDirectoriesListBox.Name = "LibraryDirectoriesListBox";
-			this.LibraryDirectoriesListBox.Size = new System.Drawing.Size(291, 95);
+			this.LibraryDirectoriesListBox.Size = new System.Drawing.Size(291, 199);
 			this.LibraryDirectoriesListBox.TabIndex = 1;
 			this.LibraryDirectoriesListBox.SelectedIndexChanged += new System.EventHandler(this.LibraryDirectoriesListBox_SelectedIndexChanged);
 			// 
@@ -444,6 +470,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			// 
 			// groupBox4
 			// 
+			this.groupBox4.Controls.Add(this.label7);
+			this.groupBox4.Controls.Add(this.tbSecurePortNumber);
+			this.groupBox4.Controls.Add(this.cbRequireSecureConnection);
 			this.groupBox4.Controls.Add(this.tbInstanceName);
 			this.groupBox4.Controls.Add(this.label1);
 			this.groupBox4.Controls.Add(this.label13);
@@ -457,9 +486,124 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.groupBox4.TabIndex = 0;
 			this.groupBox4.TabStop = false;
 			// 
+			// cbRequireSecureConnection
+			// 
+			this.cbRequireSecureConnection.AutoSize = true;
+			this.cbRequireSecureConnection.Location = new System.Drawing.Point(149, 72);
+			this.cbRequireSecureConnection.Name = "cbRequireSecureConnection";
+			this.cbRequireSecureConnection.Size = new System.Drawing.Size(157, 17);
+			this.cbRequireSecureConnection.TabIndex = 60;
+			this.cbRequireSecureConnection.Text = "Require Secure Connection";
+			this.cbRequireSecureConnection.UseVisualStyleBackColor = true;
+			// 
+			// label7
+			// 
+			this.label7.AutoSize = true;
+			this.label7.Location = new System.Drawing.Point(76, 53);
+			this.label7.Name = "label7";
+			this.label7.Size = new System.Drawing.Size(103, 13);
+			this.label7.TabIndex = 62;
+			this.label7.Text = "Secure Port Number";
+			// 
+			// tbSecurePortNumber
+			// 
+			this.tbSecurePortNumber.Location = new System.Drawing.Point(79, 70);
+			this.tbSecurePortNumber.Name = "tbSecurePortNumber";
+			this.tbSecurePortNumber.Size = new System.Drawing.Size(64, 20);
+			this.tbSecurePortNumber.TabIndex = 61;
+			this.tbSecurePortNumber.TextChanged += new System.EventHandler(this.tbPortNumber_TextChanged);
+			// 
+			// groupBox5
+			// 
+			this.groupBox5.Controls.Add(this.cbAllowSilverlightClients);
+			this.groupBox5.Controls.Add(this.cbShouldListen);
+			this.groupBox5.Controls.Add(this.label10);
+			this.groupBox5.Controls.Add(this.label8);
+			this.groupBox5.Controls.Add(this.tbOverrideSecureListenerPortNumber);
+			this.groupBox5.Controls.Add(this.cbRequireSecureListenerConnection);
+			this.groupBox5.Controls.Add(this.label9);
+			this.groupBox5.Controls.Add(this.tbOverrideListenerPortNumber);
+			this.groupBox5.Location = new System.Drawing.Point(326, 4);
+			this.groupBox5.Name = "groupBox5";
+			this.groupBox5.Size = new System.Drawing.Size(354, 138);
+			this.groupBox5.TabIndex = 4;
+			this.groupBox5.TabStop = false;
+			this.groupBox5.Text = "Advanced Network Configuration";
+			// 
+			// label8
+			// 
+			this.label8.AutoSize = true;
+			this.label8.Location = new System.Drawing.Point(81, 55);
+			this.label8.Name = "label8";
+			this.label8.Size = new System.Drawing.Size(103, 13);
+			this.label8.TabIndex = 67;
+			this.label8.Text = "Secure Port Number";
+			// 
+			// tbOverrideSecureListenerPortNumber
+			// 
+			this.tbOverrideSecureListenerPortNumber.Location = new System.Drawing.Point(84, 72);
+			this.tbOverrideSecureListenerPortNumber.Name = "tbOverrideSecureListenerPortNumber";
+			this.tbOverrideSecureListenerPortNumber.Size = new System.Drawing.Size(64, 20);
+			this.tbOverrideSecureListenerPortNumber.TabIndex = 66;
+			// 
+			// cbRequireSecureListenerConnection
+			// 
+			this.cbRequireSecureListenerConnection.AutoSize = true;
+			this.cbRequireSecureListenerConnection.Location = new System.Drawing.Point(154, 74);
+			this.cbRequireSecureListenerConnection.Name = "cbRequireSecureListenerConnection";
+			this.cbRequireSecureListenerConnection.Size = new System.Drawing.Size(157, 17);
+			this.cbRequireSecureListenerConnection.TabIndex = 65;
+			this.cbRequireSecureListenerConnection.Text = "Require Secure Connection";
+			this.cbRequireSecureListenerConnection.UseVisualStyleBackColor = true;
+			// 
+			// label9
+			// 
+			this.label9.AutoSize = true;
+			this.label9.Location = new System.Drawing.Point(11, 55);
+			this.label9.Name = "label9";
+			this.label9.Size = new System.Drawing.Size(66, 13);
+			this.label9.TabIndex = 64;
+			this.label9.Text = "Port Number";
+			// 
+			// tbOverrideListenerPortNumber
+			// 
+			this.tbOverrideListenerPortNumber.Location = new System.Drawing.Point(14, 72);
+			this.tbOverrideListenerPortNumber.Name = "tbOverrideListenerPortNumber";
+			this.tbOverrideListenerPortNumber.Size = new System.Drawing.Size(64, 20);
+			this.tbOverrideListenerPortNumber.TabIndex = 63;
+			// 
+			// label10
+			// 
+			this.label10.AutoSize = true;
+			this.label10.Location = new System.Drawing.Point(11, 38);
+			this.label10.Name = "label10";
+			this.label10.Size = new System.Drawing.Size(117, 13);
+			this.label10.TabIndex = 68;
+			this.label10.Text = "Listener Port Overrides:";
+			// 
+			// cbShouldListen
+			// 
+			this.cbShouldListen.AutoSize = true;
+			this.cbShouldListen.Location = new System.Drawing.Point(14, 19);
+			this.cbShouldListen.Name = "cbShouldListen";
+			this.cbShouldListen.Size = new System.Drawing.Size(150, 17);
+			this.cbShouldListen.TabIndex = 69;
+			this.cbShouldListen.Text = "Should Establish Listener?";
+			this.cbShouldListen.UseVisualStyleBackColor = true;
+			// 
+			// cbAllowSilverlightClients
+			// 
+			this.cbAllowSilverlightClients.AutoSize = true;
+			this.cbAllowSilverlightClients.Location = new System.Drawing.Point(14, 112);
+			this.cbAllowSilverlightClients.Name = "cbAllowSilverlightClients";
+			this.cbAllowSilverlightClients.Size = new System.Drawing.Size(139, 17);
+			this.cbAllowSilverlightClients.TabIndex = 70;
+			this.cbAllowSilverlightClients.Text = "Allow Silverlight Clients?";
+			this.cbAllowSilverlightClients.UseVisualStyleBackColor = true;
+			// 
 			// EditInstanceForm
 			// 
-			this.ClientSize = new System.Drawing.Size(683, 405);
+			this.ClientSize = new System.Drawing.Size(687, 518);
 			this.ControlBox = false;
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Location = new System.Drawing.Point(0, 0);
@@ -475,6 +619,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.groupBox3.PerformLayout();
 			this.groupBox4.ResumeLayout(false);
 			this.groupBox4.PerformLayout();
+			this.groupBox5.ResumeLayout(false);
+			this.groupBox5.PerformLayout();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -501,6 +647,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			tbInstanceName.Text = AConfiguration.Name;
 			tbPortNumber.Text = AConfiguration.PortNumber.ToString();
+			tbSecurePortNumber.Text = AConfiguration.SecurePortNumber.ToString();
+			cbRequireSecureConnection.Checked = AConfiguration.RequireSecureConnection;
+			cbShouldListen.Checked = AConfiguration.ShouldListen;
+			tbOverrideListenerPortNumber.Text = AConfiguration.OverrideListenerPortNumber.ToString();
+			tbOverrideSecureListenerPortNumber.Text = AConfiguration.OverrideSecureListenerPortNumber.ToString();
+			cbRequireSecureListenerConnection.Checked = AConfiguration.RequireSecureListenerConnection;
+			cbAllowSilverlightClients.Checked = AConfiguration.AllowSilverlightClients;
 			tbInstanceDirectory.Text = AConfiguration.InstanceDirectory;
 			LibraryDirectoriesListBox.Items.Clear();
             if (AConfiguration.LibraryDirectories != null)
@@ -521,6 +674,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			ServerConfiguration LResult = new ServerConfiguration();
 			LResult.Name = tbInstanceName.Text;
 			LResult.PortNumber = Int32.Parse(tbPortNumber.Text);
+			LResult.SecurePortNumber = Int32.Parse(tbSecurePortNumber.Text);
+			LResult.RequireSecureConnection = cbRequireSecureConnection.Checked;
+			LResult.ShouldListen = cbShouldListen.Checked;
+			LResult.OverrideListenerPortNumber = Int32.Parse(tbOverrideListenerPortNumber.Text);
+			LResult.OverrideSecureListenerPortNumber = Int32.Parse(tbOverrideSecureListenerPortNumber.Text);
+			LResult.RequireSecureListenerConnection = cbRequireSecureListenerConnection.Checked;
+			LResult.AllowSilverlightClients = cbAllowSilverlightClients.Checked;
 			LResult.InstanceDirectory = tbInstanceDirectory.Text;
 			StringBuilder LLibraryDirectories = new StringBuilder();
 			for (int LIndex = 0; LIndex < LibraryDirectoriesListBox.Items.Count; LIndex++)
@@ -539,7 +699,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void tbPortNumber_TextChanged(object sender, EventArgs e)
 		{
-			Int32.Parse(tbPortNumber.Text);
+			Int32.Parse(((System.Windows.Forms.TextBox)sender).Text);
 		}
 
 		private void LibraryDirectoriesListBox_SelectedIndexChanged(object sender, EventArgs e)

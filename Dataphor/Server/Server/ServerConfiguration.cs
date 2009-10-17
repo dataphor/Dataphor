@@ -6,6 +6,8 @@
 
 using System;
 using System.IO;
+using System.ComponentModel;
+
 using Alphora.Dataphor.Windows;
 
 namespace Alphora.Dataphor.DAE.Server
@@ -16,8 +18,10 @@ namespace Alphora.Dataphor.DAE.Server
 	public class ServerConfiguration
 	{
 		public const int CDefaultPortNumber = 8061;
+		public const int CDefaultSecurePortNumber = 8601;
 		public const string CDefaultLocalInstanceName = "LocalInstance";
 		public const int CDefaultLocalPortNumber = 8062;
+		public const int CDefaultLocalSecurePortNumber = 8602;
 		
 		private string FName;
 		public string Name
@@ -31,6 +35,64 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			get { return FPortNumber; }
 			set { FPortNumber = value; }
+		}
+		
+		private int FSecurePortNumber;
+		public int SecurePortNumber
+		{
+			get { return FSecurePortNumber; }
+			set { FSecurePortNumber = value; }
+		}
+		
+		private bool FRequireSecureConnection;
+		/// <summary>
+		/// Indicates whether or not the server will require all remote connections to use a secure channel.
+		/// </summary>
+		[DefaultValue(false)]
+		public bool RequireSecureConnection
+		{
+			get { return FRequireSecureConnection; }
+			set { FRequireSecureConnection = value; }
+		}
+		
+		private bool FShouldListen = true;
+		[DefaultValue(true)]
+		public bool ShouldListen
+		{
+			get { return FShouldListen; }
+			set { FShouldListen = value; }
+		}
+		
+		private int FOverrideListenerPortNumber;
+		[DefaultValue(0)]
+		public int OverrideListenerPortNumber
+		{
+			get { return FOverrideListenerPortNumber; }
+			set { FOverrideListenerPortNumber = value; }
+		}
+		
+		private int FOverrideSecureListenerPortNumber;
+		[DefaultValue(0)]
+		public int OverrideSecureListenerPortNumber
+		{
+			get { return FOverrideSecureListenerPortNumber; }
+			set { FOverrideSecureListenerPortNumber = value; }
+		}
+		
+		private bool FRequireSecureListenerConnection;
+		[DefaultValue(false)]
+		public bool RequireSecureListenerConnection
+		{
+			get { return FRequireSecureListenerConnection; }
+			set { FRequireSecureListenerConnection = value; }
+		}
+		
+		private bool FAllowSilverlightClients = true;
+		[DefaultValue(true)]
+		public bool AllowSilverlightClients
+		{
+			get { return FAllowSilverlightClients; }
+			set { FAllowSilverlightClients = value; }
 		}
 		
 		private string FLibraryDirectories;
@@ -82,6 +144,7 @@ namespace Alphora.Dataphor.DAE.Server
 			ServerConfiguration LInstance = new ServerConfiguration();
 			LInstance.Name = String.IsNullOrEmpty(AInstanceName) ? Engine.CDefaultServerName : AInstanceName;
 			LInstance.PortNumber = CDefaultPortNumber;
+			LInstance.SecurePortNumber = CDefaultSecurePortNumber;
 			LInstance.LibraryDirectories = Path.Combine(PathUtility.GetInstallationDirectory(), Server.CDefaultLibraryDirectory);
 			return LInstance;
 		}
@@ -91,6 +154,7 @@ namespace Alphora.Dataphor.DAE.Server
 			ServerConfiguration LInstance = new ServerConfiguration();
 			LInstance.Name = CDefaultLocalInstanceName;
 			LInstance.PortNumber = CDefaultLocalPortNumber; // don't use the same default port as the service
+			LInstance.SecurePortNumber = CDefaultLocalSecurePortNumber;
 			LInstance.LibraryDirectories = Path.Combine(PathUtility.GetInstallationDirectory(), Server.CDefaultLibraryDirectory);
 			return LInstance;
 		}

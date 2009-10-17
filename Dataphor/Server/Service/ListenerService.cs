@@ -35,20 +35,33 @@ namespace Alphora.Dataphor.DAE.Service
 			}
 		}
 		
-		public string GetInstanceURI(string AInstanceName)
-		{
-			return GetInstanceURI(AInstanceName, false);
-		}
-		
-		private string GetInstanceURI(string AInstanceName, bool AUseNative)
+		private string GetInstanceURI(string AHostName, string AInstanceName, ConnectionSecurityMode ASecurityMode, bool AUseNative)
 		{
 			try
 			{
-				if (AUseNative)
-					throw new NotSupportedException();
-					
 				ServerConfiguration LServer = InstanceManager.LoadConfiguration().Instances[AInstanceName];
-				return DataphorServiceUtility.BuildInstanceURI(Environment.MachineName, LServer.PortNumber, LServer.Name);
+					
+				bool LSecure = false;
+				switch (ASecurityMode)
+				{
+					case ConnectionSecurityMode.Default : 
+						LSecure = LServer.RequireSecureConnection;
+					break;
+					
+					case ConnectionSecurityMode.None :
+						if (LServer.RequireSecureConnection)
+							throw new NotSupportedException("The URI cannot be determined because the instance does not support unsecured connections.");
+					break;
+
+					case ConnectionSecurityMode.Transport :
+						LSecure = true;
+					break;
+				}
+					
+				if (AUseNative)
+					return DataphorServiceUtility.BuildNativeInstanceURI(AHostName, LServer.PortNumber, LSecure, LServer.Name);
+				
+				return DataphorServiceUtility.BuildInstanceURI(AHostName, LServer.PortNumber, LSecure, LServer.Name);
 			}
 			catch (Exception LException)
 			{
@@ -56,9 +69,14 @@ namespace Alphora.Dataphor.DAE.Service
 			}
 		}
 		
-		public string GetNativeInstanceURI(string AInstanceName)
+		public string GetInstanceURI(string AHostName, string AInstanceName, ConnectionSecurityMode ASecurityMode)
 		{
-			return GetInstanceURI(AInstanceName, true);
+			return GetInstanceURI(AHostName, AInstanceName, ASecurityMode, false);
+		}
+		
+		public string GetNativeInstanceURI(string AHostName, string AInstanceName, ConnectionSecurityMode ASecurityMode)
+		{
+			return GetInstanceURI(AHostName, AInstanceName, ASecurityMode, true);
 		}
 	}
 }

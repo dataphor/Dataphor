@@ -312,7 +312,6 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 				return;
 
 			System.ServiceProcess.ServiceController LServiceController = new System.ServiceProcess.ServiceController(ServiceUtility.GetServiceName(FAppForm.SelectedInstanceName));
-
 			try
 			{				
 				using(StatusForm LStatusForm = new StatusForm("Starting...", this))
@@ -320,7 +319,7 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 					// Start the service
 					Cursor.Current = Cursors.WaitCursor;
 					FAppForm.FTimer.Stop();
-					LServiceController.Start();
+					LServiceController.Start(new string[] { "-n", FAppForm.SelectedInstanceName });
 					// Wait for the service to start...give it 30 seconds
 					LServiceController.WaitForStatus(System.ServiceProcess.ServiceControllerStatus.Running, new TimeSpan(0, 0, 30));
 					FAppForm.CheckServiceStatus();

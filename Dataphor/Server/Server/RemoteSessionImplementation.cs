@@ -14,6 +14,7 @@ using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
+using Alphora.Dataphor.DAE.Contracts;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -22,7 +23,21 @@ namespace Alphora.Dataphor.DAE.Server
     {
 		public RemoteSessionImplementation(ServerProcess AProcess, Schema.ServerLink AServerLink) : base(AProcess, AServerLink)
 		{
-			FNativeCLISession = new NativeCLISession(AServerLink.HostName, AServerLink.InstanceName, AServerLink.OverridePortNumber, GetNativeSessionInfo());
+			FNativeCLISession = 
+				new NativeCLISession
+				(
+					AServerLink.HostName, 
+					AServerLink.InstanceName, 
+					AServerLink.OverridePortNumber, 
+					AServerLink.UseSecureConnection
+						? ConnectionSecurityMode.Transport 
+						: ConnectionSecurityMode.None, 
+					AServerLink.OverrideListenerPortNumber, 
+					AServerLink.UseSecureListenerConnection
+						? ConnectionSecurityMode.Transport 
+						: ConnectionSecurityMode.None, 
+					GetNativeSessionInfo()
+				);
 		}
 		
 		protected override void Dispose(bool ADisposing)
