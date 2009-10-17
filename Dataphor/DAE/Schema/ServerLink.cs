@@ -56,6 +56,27 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FOverridePortNumber = value; }
 		}
 		
+		private bool FUseSecureConnection = false;
+		public bool UseSecureConnection
+		{
+			get { return FUseSecureConnection; }
+			set { FUseSecureConnection = value; }
+		}
+		
+		private int FOverrideListenerPortNumber = 0;
+		public int OverrideListenerPortNumber
+		{
+			get { return FOverrideListenerPortNumber; }
+			set { FOverrideListenerPortNumber = value; }
+		}
+		
+		private bool FUseSecureListenerConnection = false;
+		public bool UseSecureListenerConnection
+		{
+			get { return FUseSecureListenerConnection; }
+			set { FUseSecureListenerConnection = value; }
+		}
+		
 		private bool FUseSessionInfo = true;
 		public bool UseSessionInfo
 		{
@@ -78,6 +99,9 @@ namespace Alphora.Dataphor.DAE.Schema
 				FHostName = MetaData.Tags.GetTagValue("HostName", "localhost");
 				FInstanceName = MetaData.Tags.GetTagValue("InstanceName", Engine.CDefaultServerName);
 				FOverridePortNumber = Convert.ToInt32(MetaData.Tags.GetTagValue("OverridePortNumber", "0"));
+				FUseSecureConnection = Convert.ToBoolean(MetaData.Tags.GetTagValue("UseSecureConnection", "false"));
+				FOverrideListenerPortNumber = Convert.ToInt32(MetaData.Tags.GetTagValue("OverrideListenerPortNumber", "0"));
+				FUseSecureListenerConnection = Convert.ToBoolean(MetaData.Tags.GetTagValue("UseSecureListenerConnection", "false"));
 				FUseSessionInfo = Convert.ToBoolean(MetaData.Tags.GetTagValue("UseSessionInfo", "true"));
 			}
 		}
