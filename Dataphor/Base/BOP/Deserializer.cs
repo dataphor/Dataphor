@@ -103,33 +103,21 @@ namespace Alphora.Dataphor.BOP
 
 		/// <summary> Constructs a class type from a name and optionally a namespace/assembly. </summary>
 		/// <remarks> The namespace may also include an assembly name (after a comma). </remarks>
-		protected virtual Type GetClassType(string AName, string ANamespace)
+		protected virtual Type GetClassType(string AClassName, string ANamespace)
 		{
-			string LName;
-			if (ANamespace == String.Empty)
-				LName = AName;
-			else
+			string LAssemblyName = "";
+			if (ANamespace != String.Empty)
 			{
 				int LDelimiter = ANamespace.IndexOf(',');	// assembly qualified name if there is a comma
 				if (LDelimiter < 0)
-					LName = String.Format("{0}.{1}", ANamespace, AName);
+					LAssemblyName = "";
 				else
 				{
-					// Rearrange: <namespace>,<assembly>  -> <namespace>.<classname>,<assembly>
-					StringBuilder LTemp = new StringBuilder(ANamespace.Substring(0, LDelimiter).Trim());
-					if (LTemp.Length > 0)
-						LTemp.Append('.');
-					LTemp.Append(AName);
-					LName = ANamespace.Substring(LDelimiter + 1).Trim();
-					if (LName != String.Empty)
-					{
-						LTemp.Append(',');
-						LTemp.Append(LName);
-					}
-					LName = LTemp.ToString();
+					LAssemblyName = ANamespace.Substring(LDelimiter + 1).Trim();
+					ANamespace = ANamespace.Substring(0, LDelimiter).Trim();
 				}
 			}
-			return Type.GetType(LName, true, true);
+			return ReflectionUtility.GetType(ANamespace, AClassName, LAssemblyName);
 		}
 
 		private static bool IsBOPNode(XName AName)

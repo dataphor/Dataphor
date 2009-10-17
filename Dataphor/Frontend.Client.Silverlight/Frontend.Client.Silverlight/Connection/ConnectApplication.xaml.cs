@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
+using Alphora.Dataphor.DAE.Runtime.Data;
 
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
@@ -26,13 +27,22 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		private void StartButton_Click(object sender, System.Windows.RoutedEventArgs e)
 		{
-			// TODO: Set FWorkItem.ApplicationID
+			if (ApplicationsGrid.SelectedItem != null)
+				FWorkItem.ApplicationID = (string)((object[])ApplicationsGrid.SelectedItem)[0];
 			FWorkItem.BeginStartApplication();
 		}
 
 		private void BackClicked(object sender, System.Windows.RoutedEventArgs e)
 		{
 			FWorkItem.Back();
+		}
+
+		private void ApplicationsGridLoadingRow(object ASender, System.Windows.Controls.DataGridRowEventArgs AArgs)
+		{
+			var LColumn = ApplicationsGrid.Columns[0];
+			var LCell = LColumn.GetCellContent(AArgs.Row).Parent as DataGridCell;
+			if (LCell != null)
+			    LCell.DataContext = ((object[])AArgs.Row.DataContext)[1];
 		}
 	}
 }

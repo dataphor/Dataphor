@@ -30,12 +30,14 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			
 			// Ensure that the silverlight frontend session has a static dispatcher
 			Silverlight.Session.Dispatcher = RootVisual.Dispatcher;
+			ReflectionUtility.EnsureAssemblyByName();
 		}
 
 		private void Application_Exit(object sender, EventArgs e)
 		{
 
 		}
+		
 		private void Application_UnhandledException(object sender, ApplicationUnhandledExceptionEventArgs e)
 		{
 			// If the app is running outside of the debugger then report the exception using

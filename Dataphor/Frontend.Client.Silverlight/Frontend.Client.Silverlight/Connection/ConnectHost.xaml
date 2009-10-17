@@ -11,7 +11,7 @@
 		<TextBlock Text="Host Name" TextWrapping="Wrap"/>
 		<TextBox x:Name="HostNameTextBox" Text="{Binding HostName, Mode=TwoWay}" TextWrapping="Wrap" MinWidth="200" TabIndex="0"/>
 		<StackPanel Orientation="Horizontal" Margin="0,4,0,0" HorizontalAlignment="Right">
-			<Button Content="Connect" Click="ConnectClicked" Style="{StaticResource ButtonStyle}" />
+			<Button Content="Connect" Click="ConnectClicked" Style="{StaticResource ButtonStyle}" TabIndex="100" />
 		</StackPanel>
 	</StackPanel>
 

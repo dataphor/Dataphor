@@ -62,7 +62,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			string LClassName = LClass.ClassName;
 			try
 			{
-				return Type.GetType(LClassName, true, true);
+				return Type.GetType(LClassName, true);
 			}
 			catch (Exception E)
 			{

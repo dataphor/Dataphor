@@ -6,6 +6,7 @@
 using System;
 using System.Reflection;
 using System.ComponentModel;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor
 {
@@ -330,6 +331,92 @@ namespace Alphora.Dataphor
 			}
 		
 			return LObject;
+		}
+		
+		/// <summary> Internal dictionary of assembly references by weak (short) name. </summary>
+		private static Dictionary<string, Assembly> FAssemblyByName;
+
+		/// <summary> Ensures that the internal dictionary is populated with the set of initially loaded assemblies. </summary>
+		public static void EnsureAssemblyByName()
+		{
+			if (FAssemblyByName == null)
+			{
+				if 
+				(
+					System.Threading.Interlocked.CompareExchange<Dictionary<string, Assembly>>
+					(
+						ref FAssemblyByName, 
+						new Dictionary<string, Assembly>(),
+						null
+					) == null
+				)
+					lock (FAssemblyByName)
+					{
+						#if SILVERLIGHT
+						foreach (var LPart in System.Windows.Deployment.Current.Parts)
+						{
+							RegisterAssembly
+							(
+								new System.Windows.AssemblyPart().Load
+								(
+									System.Windows.Application.GetResourceStream
+									(
+										new Uri(LPart.Source, UriKind.Relative)
+									).Stream
+								)
+							);
+						}
+						#else
+						foreach (var LAssembly in AppDomain.CurrentDomain.GetAssemblies())
+							RegisterAssembly(LAssembly);
+						#endif
+					}
+			}
+		}
+		
+		/// <summary> Attempts to locate an assembly by weak (short) name. </summary>
+		public static bool TryGetAssemblyByName(string AName, out Assembly AAssembly)
+		{
+			EnsureAssemblyByName();
+			lock (FAssemblyByName)
+				return FAssemblyByName.TryGetValue(AName, out AAssembly);
+		}
+		
+		/// <summary> Registers an assembly for resolution by weak (short) name. </summary>
+		public static void RegisterAssembly(Assembly AAssembly)
+		{
+			EnsureAssemblyByName();
+			lock (FAssemblyByName)
+				FAssemblyByName.Add(AssemblyNameUtility.GetName(AAssembly.FullName), AAssembly); 
+		}
+
+		/// <summary> Creates a new instance using the given name components. </summary>
+		/// <remarks> If the given assembly name is weak (short), an attempt will be made 
+		/// to find a strong name in the registered assemblies for it. </remarks>
+		public static object CreateInstance(string ANamespace, string AClassName, string AAssemblyName)
+		{
+			return Activator.CreateInstance(GetType(ANamespace, AClassName, AAssemblyName));
+		}
+		
+		/// <summary> Locates a type using the given name components. </summary>
+		/// <remarks> If the given assembly name is weak (short), an attempt will be made 
+		/// to find a strong name in the registered assemblies for it. </remarks>
+		public static Type GetType(string ANamespace, string AClassName, string AAssemblyName)
+		{
+			// Lookup a full assembly name for the given assembly name if there is one
+			Assembly LAssembly;
+			if (TryGetAssemblyByName(AAssemblyName, out LAssembly))
+				AAssemblyName = LAssembly.FullName;
+
+			return 
+				Type.GetType
+				(
+					(String.IsNullOrEmpty(ANamespace) ? "" : (ANamespace + "."))
+						+ AClassName
+						+ (String.IsNullOrEmpty(AAssemblyName) ? "" : ("," + AAssemblyName)), 
+					true, 
+					true
+				);
 		}
 	}
 }

@@ -8,10 +8,10 @@
 	d:DesignWidth="240" d:DesignHeight="180">
 	
 	<StackPanel x:Name="LayoutRoot">
-		<ListBox x:Name="InstanceListBox" ItemsSource="{Binding Instances}"/>
+		<ListBox x:Name="InstanceListBox" ItemsSource="{Binding Instances}" TabIndex="0"/>
 		<StackPanel Margin="0,4,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
-			<Button Content="Back" Click="BackClicked" Style="{StaticResource ButtonStyle}" />
-			<Button Content="Connect" Click="Button_Click" Style="{StaticResource ButtonStyle}" />
+			<Button Content="Back" Click="BackClicked" Style="{StaticResource ButtonStyle}" TabIndex="200" />
+			<Button Content="Connect" Click="Button_Click" Style="{StaticResource ButtonStyle}" TabIndex="100" />
 		</StackPanel>
 	</StackPanel>
 </UserControl>

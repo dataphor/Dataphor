@@ -4,6 +4,8 @@ using System.ComponentModel;
 using Alphora.Dataphor.DAE.Listener;
 using System.Windows.Controls;
 using Alphora.Dataphor.DAE.Client;
+using System.Collections.Generic;
+using Alphora.Dataphor.DAE.Runtime.Data;
 
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
@@ -42,7 +44,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				case ConnectStatus.SelectInstance : Status = ConnectStatus.SelectHost; break;
 				case ConnectStatus.Login : Status = ConnectStatus.SelectInstance; break;
 				case ConnectStatus.Connecting: break;
-				case ConnectStatus.SelectApplication : Status = ConnectStatus.SelectInstance; break;
+				case ConnectStatus.SelectApplication : Status = ConnectStatus.Login; break;
 				case ConnectStatus.StartingApplication: break;
 				case ConnectStatus.Complete : Status = ConnectStatus.SelectApplication; break;
 			}
@@ -157,11 +159,17 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			}
 		}
 		
+		private struct LoginResult
+		{
+			public List<object[]> Applications;
+			public DataSession DataSession;
+		}
+		
 		public void BeginLogin()
 		{
     		Status = ConnectStatus.Connecting;
 
-    		Session.Invoke<DataView>
+    		Session.Invoke<LoginResult>
     		(
     			() =>
     			{
@@ -181,7 +189,13 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
     				LDataSession.Open();
     				try
     				{
-    					return LDataSession.OpenReadOnlyDataView(".Frontend.Applications");
+    					var LApplicationRows = new List<object[]>();
+    					using (var LApplications = LDataSession.OpenReadOnlyDataView(".Frontend.Applications"))
+    					{
+    						foreach (Row LRow in LApplications)
+    							LApplicationRows.Add((object[])((NativeRow)LRow.AsNative).Values.Clone());
+    					}
+    					return new LoginResult() { Applications = LApplicationRows, DataSession = LDataSession };
     				}
     				catch
     				{
@@ -194,15 +208,15 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
     				Status = ConnectStatus.Login;
     				Exception = AException;
     			},
-    			(DataView AApplications) =>
+    			(LoginResult AResult) =>
     			{
-    				DataSession = AApplications.Session;
-    				Applications = AApplications;
+    				DataSession = AResult.DataSession;
+    				Applications = AResult.Applications;
     				
     				// If there is only 1 application, skip to login
-    				if (!AApplications.IsEmpty() && AApplications.IsLastRow)
-    					Status = ConnectStatus.Login;
-    				else
+					//if (Applications.Count == 1)
+					//    Status = ConnectStatus.Login;
+					//else
    						Status = ConnectStatus.SelectApplication;
     			}
     		);
@@ -223,9 +237,9 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			}
 		}
 		
-		private DataView FApplications;
+		private List<object[]> FApplications;
 		
-		public DataView Applications
+		public List<object[]> Applications
 		{
 			get { return FApplications; }
 			set
@@ -240,7 +254,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		private string FApplicationID;
 		
-		public string Application
+		public string ApplicationID
 		{
 			get { return FApplicationID; }
 			set

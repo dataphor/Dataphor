@@ -126,7 +126,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			if (!FNodeTypes.TryGetValue(AClassName, out LEntry))
 				return null;
 			else
-				return Type.GetType(String.Format("{0}.{1},{2}", LEntry.Namespace, AClassName, LEntry.Assembly), true, true);
+				return ReflectionUtility.GetType(LEntry.Namespace, AClassName, LEntry.Assembly);
 		}
 
 		/// <summary> Creates an instance of the specified class using the NodeTypeTable. </summary>
@@ -135,7 +135,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			NodeTypeEntry LEntry;
 			if (!FNodeTypes.TryGetValue(AClassName, out LEntry))
 				throw new Exception(String.Format("CreateInstance: Class ({0}) not found in node type list.", AClassName));
-			return Activator.CreateInstance(Type.GetType(String.Format("{0}.{1},{2}", LEntry.Namespace, AClassName, LEntry.Assembly), true, true));
+			return ReflectionUtility.CreateInstance(LEntry.Namespace, AClassName, LEntry.Assembly);
 		}
 	}
 
@@ -168,17 +168,11 @@ namespace Alphora.Dataphor.Frontend.Client
 				NodeTypeEntry LEntry;
 				if (FTable.TryGetValue(AName, out LEntry))
 					return 
-						Type.GetType
+						ReflectionUtility.GetType
 						(
-							String.Format
-							(
-								"{0}.{1},{2}",
-								LEntry.Namespace, 
-								AName,
-								LEntry.Assembly
-							), 
-							true, 
-							true
+							LEntry.Namespace, 
+							AName,
+							LEntry.Assembly
 						);
 			}
 			return base.GetClassType(AName, ANamespace);

@@ -374,7 +374,9 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			using (Stream LSourceStream = new RemoteStreamWrapper(AProcess.RemoteProcess.GetFile(ALibraryName, AFileName)))
 			{
-				return new System.Windows.AssemblyPart().Load(LSourceStream);
+				var LAssembly = new System.Windows.AssemblyPart().Load(LSourceStream);
+				ReflectionUtility.RegisterAssembly(LAssembly);
+				return LAssembly;
 			}
 		}
 		
@@ -513,6 +515,7 @@ namespace Alphora.Dataphor.DAE.Server
 						if ((LFileInfos[LIndex].ShouldRegister || LShouldLoad) && !FAssembliesCached.Contains(LFileInfos[LIndex].FileName))
 						{
 							Assembly LAssembly = Assembly.LoadFrom(LFullFileName);
+							ReflectionUtility.RegisterAssembly(LAssembly);
 							if (LFileInfos[LIndex].ShouldRegister && !AClassLoader.Assemblies.Contains(LAssembly.FullName))
 								AClassLoader.RegisterAssembly(Catalog.LoadedLibraries[Engine.CSystemLibraryName], LAssembly);
 							FAssembliesCached.Add(LFileInfos[LIndex].FileName);

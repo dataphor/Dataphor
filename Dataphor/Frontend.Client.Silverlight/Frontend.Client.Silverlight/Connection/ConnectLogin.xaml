@@ -9,12 +9,12 @@
 	
 	<StackPanel x:Name="LayoutRoot">
 		<TextBlock Text="User Name"/>
-		<TextBox x:Name="UserNameBox" Text="{Binding UserName, Mode=TwoWay, UpdateSourceTrigger=Explicit}" MinWidth="200" HorizontalAlignment="Left" TextChanged="TextBox_TextChanged" />
+		<TextBox x:Name="UserNameBox" Text="{Binding UserName, Mode=TwoWay, UpdateSourceTrigger=Explicit}" MinWidth="200" HorizontalAlignment="Left" TextChanged="TextBox_TextChanged" TabIndex="0" />
 		<TextBlock Text="Password"/>
-		<PasswordBox Password="{Binding Password, Mode=TwoWay}" MinWidth="150" HorizontalAlignment="Left" />
+		<PasswordBox Password="{Binding Password, Mode=TwoWay}" MinWidth="150" HorizontalAlignment="Left" TabIndex="100" />
 		<StackPanel Margin="0,4,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
-			<Button Content="Back" Click="BackClicked" Style="{StaticResource ButtonStyle}" />
-			<Button x:Name="LoginButton" Content="Login" Click="Button_Click" Style="{StaticResource ButtonStyle}" />
+			<Button Content="Back" Click="BackClicked" Style="{StaticResource ButtonStyle}" TabIndex="300" />
+			<Button x:Name="LoginButton" Content="Login" Click="Button_Click" Style="{StaticResource ButtonStyle}" TabIndex="200" />
 		</StackPanel>
 	</StackPanel>
 </UserControl>
