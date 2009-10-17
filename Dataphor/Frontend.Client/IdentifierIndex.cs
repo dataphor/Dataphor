@@ -35,7 +35,13 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <remarks> Returns null if the key was not found. </remarks>
 		public string this[string AKey]
 		{
-			get { return (string)FTable[AKey]; }
+			get
+			{ 
+				string AValue;
+				if (FTable.TryGetValue(AKey, out AValue))
+					return AValue;
+				return null;
+			}
 		}
 
 		/// <summary> Adds an entry to the index, generating a unique Identifier. </summary>
