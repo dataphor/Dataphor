@@ -20,6 +20,7 @@ namespace Alphora.Dataphor.DAE.Service
 	{
 		private ServiceProcessInstaller FServiceProcessInstaller;
 		private ServiceInstaller FServiceInstaller;
+		private string FInstanceName;
 		
 		public ProjectInstaller()
 		{
@@ -35,9 +36,11 @@ namespace Alphora.Dataphor.DAE.Service
 
 		private void Prepare()
 		{
-			string LServiceName = Context.Parameters["ServiceName"];
-			if (LServiceName == null)
-				LServiceName = Alphora.Dataphor.DAE.Service.ServiceUtility.GetServiceName(Server.Engine.CDefaultServerName);
+			FInstanceName = Context.Parameters["InstanceName"];
+			if (FInstanceName == null)
+				FInstanceName = Server.Engine.CDefaultServerName;
+				
+			string LServiceName = ServiceUtility.GetServiceName(FInstanceName);
 
 			FServiceInstaller.DisplayName = LServiceName;
 			FServiceInstaller.ServiceName = LServiceName;
@@ -52,7 +55,7 @@ namespace Alphora.Dataphor.DAE.Service
 			string LServiceKey = String.Format("HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\{0}", FServiceInstaller.ServiceName);
 			string LImagePath = Registry.GetValue(LServiceKey, "ImagePath", null) as String;
 			if (LImagePath != null)
-				Registry.SetValue(LServiceKey, "ImagePath", String.Format("{0} -name \"{1}\"", LImagePath, FServiceInstaller.ServiceName));
+				Registry.SetValue(LServiceKey, "ImagePath", String.Format("{0} -name \"{1}\"", LImagePath, FInstanceName));
 			else
 				throw new InvalidOperationException("Could not retrieve service ImagePath from registry.");
 		}

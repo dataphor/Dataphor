@@ -27,7 +27,7 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 			TransactedInstaller LInstaller = new TransactedInstaller();
 			LInstaller.Context = new InstallContext("DAEService.InstallLog", new string[] {});
-			LInstaller.Context.Parameters.Add("ServiceName", GetServiceName(AInstanceName));
+			LInstaller.Context.Parameters.Add("InstanceName", AInstanceName);
 			LInstaller.Installers.Add(new ProjectInstaller());
 			return LInstaller;
 		}

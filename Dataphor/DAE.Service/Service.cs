@@ -23,20 +23,32 @@ namespace Alphora.Dataphor.DAE.Service
 {
 	public class Service : System.ServiceProcess.ServiceBase
 	{
-		public Service(string AServiceName)
+		public Service() : base()
+		{
+		}
+		
+		public Service(string AServiceName) : base()
 		{
 			ServiceName = AServiceName;
 		}
 		
+		public Service(string AServiceName, string AInstanceName) : base()
+		{
+			ServiceName = AServiceName;
+			FInstanceName = AInstanceName;
+		}
+		
+		private string FInstanceName;
+		
 		private static string GetInstanceName(string[] AArgs)
 		{
-			for (int i = 1; i < AArgs.Length - 1; i++)
+			for (int i = 0; i < AArgs.Length - 1; i++)
 				if ((AArgs[i].ToLower() == "-name") || (AArgs[i].ToLower() == "-n"))
 					return AArgs[i + 1];
 					
-			return Server.Engine.CDefaultServerName;
+			return null;
 		}
-
+		
 		// The main entry point for the process
 		static void Main(string[] AArgs)
 		{
@@ -55,7 +67,10 @@ namespace Alphora.Dataphor.DAE.Service
 						return;
 					case "-r" :
 					case "-run" :
-						Service LService = new Service(ServiceUtility.GetServiceName(LInstanceName));
+						if (LInstanceName == null)
+							LInstanceName = Server.Engine.CDefaultServerName;
+							
+						Service LService = new Service(ServiceUtility.GetServiceName(LInstanceName), LInstanceName);
 						Console.WriteLine(Strings.Get("ServiceStarting"));
 						LService.OnStart(AArgs);
 						try
@@ -76,9 +91,10 @@ namespace Alphora.Dataphor.DAE.Service
 						throw new ArgumentException(Strings.Get("InvalidCommandLine"));
 				}
 			}
+			
 			System.ServiceProcess.ServiceBase.Run
 			(
-				new System.ServiceProcess.ServiceBase[] { new Service(ServiceUtility.GetServiceName(LInstanceName)) }
+				new System.ServiceProcess.ServiceBase[] { LInstanceName == null ? new Service() : new Service(ServiceUtility.GetServiceName(LInstanceName), LInstanceName) }
 			);
 		}
 
@@ -90,10 +106,21 @@ namespace Alphora.Dataphor.DAE.Service
 		/// </summary>
 		protected override void OnStart(string[] args)
 		{
+			// The args passed here are only coming in from the arguments to the service 
+			// as a result of a manual start from the service control panel, not the
+			// arguments to the actual service. The InstanceName is pulled from
+			// those arguments in the Main static and passed to the constructor of
+			// the service.
 			try
 			{
+				if (FInstanceName == null)
+					FInstanceName = GetInstanceName(args);
+
+				if (FInstanceName == null)
+					FInstanceName = Server.Engine.CDefaultServerName;
+					
 				FDataphorServiceHost = new DataphorServiceHost();
-				FDataphorServiceHost.InstanceName = GetInstanceName(args);
+				FDataphorServiceHost.InstanceName = FInstanceName;
 				FDataphorServiceHost.Start();
 			}
 			catch (Exception LException)
