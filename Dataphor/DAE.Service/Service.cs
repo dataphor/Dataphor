@@ -22,18 +22,30 @@ namespace Alphora.Dataphor.DAE.Service
 {
 	public class Service : System.ServiceProcess.ServiceBase
 	{
+		public Service()
+		{
+		}
+		
 		public Service(string AServiceName)
 		{
 			ServiceName = AServiceName;
 		}
 		
+		public Service(string AServiceName, string AInstanceName)
+		{
+			ServiceName = AServiceName;
+			FInstanceName = AInstanceName;
+		}
+		
+		private string FInstanceName;
+		
 		private static string GetInstanceName(string[] AArgs)
 		{
-			for (int i = 1; i < AArgs.Length - 1; i++)
+			for (int i = 0; i < AArgs.Length - 1; i++)
 				if ((AArgs[i].ToLower() == "-name") || (AArgs[i].ToLower() == "-n"))
 					return AArgs[i + 1];
 					
-			return Server.Server.CDefaultServerName;
+			return null;
 		}
 
 		// The main entry point for the process
@@ -54,7 +66,10 @@ namespace Alphora.Dataphor.DAE.Service
 						return;
 					case "-r" :
 					case "-run" :
-						Service LService = new Service(ServiceUtility.GetServiceName(LInstanceName));
+						if (LInstanceName == null)
+							LInstanceName = Server.Server.CDefaultServerName;
+
+						Service LService = new Service(ServiceUtility.GetServiceName(LInstanceName), LInstanceName);
 						Console.WriteLine(Strings.Get("ServiceStarting"));
 						LService.OnStart(AArgs);
 						try
@@ -77,7 +92,7 @@ namespace Alphora.Dataphor.DAE.Service
 			}
 			System.ServiceProcess.ServiceBase.Run
 			(
-				new System.ServiceProcess.ServiceBase[] { new Service(ServiceUtility.GetServiceName(LInstanceName)) }
+				new System.ServiceProcess.ServiceBase[] { LInstanceName == null ? new Service() : new Service(ServiceUtility.GetServiceName(LInstanceName), LInstanceName) }
 			);
 		}
 
@@ -94,12 +109,17 @@ namespace Alphora.Dataphor.DAE.Service
 			{
 				InstanceManager.Load();
 				
-				string LInstanceName = GetInstanceName(args);
-				ServerConfiguration LInstance = InstanceManager.Instances[LInstanceName];
+				if (FInstanceName == null)
+					FInstanceName = GetInstanceName(args);
+					
+				if (FInstanceName == null)
+					FInstanceName = Server.Server.CDefaultServerName;
+				
+				ServerConfiguration LInstance = InstanceManager.Instances[FInstanceName];
 				if (LInstance == null)
 				{
 					// Establish a default configuration
-					LInstance = ServerConfiguration.DefaultInstance(LInstanceName);
+					LInstance = ServerConfiguration.DefaultInstance(FInstanceName);
 					InstanceManager.Instances.Add(LInstance);
 					InstanceManager.Save();
 				}
