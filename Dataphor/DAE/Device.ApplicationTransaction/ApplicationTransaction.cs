@@ -1654,28 +1654,38 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				AProcess.IsInsert = false;
 				try
 				{
-					LPlan.PushSecurityContext(new SecurityContext(AOperator.Owner));
+					// A loading context is required because the operator text is using the original text
+					// so it must be bound with the original resolution path (the owning library).
+					LPlan.PushLoadingContext(new LoadingContext(AOperator.Owner, AOperator.Library.Name, false));
 					try
 					{
-						LPlan.PushATCreationContext();
+						LPlan.PushSecurityContext(new SecurityContext(AOperator.Owner));
 						try
 						{
-							Program LProgram = new Program(AProcess);
-							LProgram.Code = Compiler.Bind(LPlan, Compiler.CompileStatement(LPlan, LStatement));
-							LPlan.CheckCompiled();
-							LProgram.Execute(null);
-							Schema.Operator LOperator = ((CreateOperatorNode)LProgram.Code).CreateOperator;
-							AProcess.CatalogDeviceSession.AddOperatorMap(LOperatorMap, LOperator);
-							return LOperator;
+							LPlan.PushATCreationContext();
+							try
+							{
+								Program LProgram = new Program(AProcess);
+								LProgram.Code = Compiler.Bind(LPlan, Compiler.CompileStatement(LPlan, LStatement));
+								LPlan.CheckCompiled();
+								LProgram.Execute(null);
+								Schema.Operator LOperator = ((CreateOperatorNode)LProgram.Code).CreateOperator;
+								AProcess.CatalogDeviceSession.AddOperatorMap(LOperatorMap, LOperator);
+								return LOperator;
+							}
+							finally
+							{
+								LPlan.PopATCreationContext();
+							}
 						}
 						finally
 						{
-							LPlan.PopATCreationContext();
+							LPlan.PopSecurityContext();
 						}
 					}
 					finally
 					{
-						LPlan.PopSecurityContext();
+						LPlan.PopLoadingContext();
 					}
 				}
 				finally
