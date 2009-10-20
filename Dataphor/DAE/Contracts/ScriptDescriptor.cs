@@ -18,7 +18,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		{
 			FHandle = AHandle;
 			FBatches = new List<BatchDescriptor>();
-			FMessages = new ParserMessages();
+			FMessages = new List<DataphorFault>();
 		}
 		
 		[DataMember]
@@ -30,7 +30,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		public List<BatchDescriptor> Batches { get { return FBatches; } }
 		
 		[DataMember]
-		internal ParserMessages FMessages;
-		public ParserMessages Messages { get { return FMessages; } }
+		internal List<DataphorFault> FMessages;
+		public List<DataphorFault> Messages { get { return FMessages; } }
 	}
 }

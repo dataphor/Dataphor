@@ -41,9 +41,15 @@ namespace Alphora.Dataphor.DAE.Client
 			get { return FClientProcess; }
 		}
 
+		private Exception[] FMessages;
 		public Exception[] Messages
 		{
-			get { return FPlanDescriptor.Messages; }
+			get 
+			{ 
+				if (FMessages == null)
+					FMessages = DataphorFaultUtility.FaultsToExceptions(FPlanDescriptor.Messages).ToArray();
+				return FMessages;
+			}
 		}
 
 		#endregion

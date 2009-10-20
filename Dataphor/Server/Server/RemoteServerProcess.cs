@@ -173,7 +173,7 @@ namespace Alphora.Dataphor.DAE.Server
 			LDescriptor.ID = APlan.ID;
 			LDescriptor.CacheTimeStamp = APlan.Process.Session.Server.CacheTimeStamp;
 			LDescriptor.Statistics = APlan.PlanStatistics;
-			LDescriptor.Messages = APlan.Messages;
+			LDescriptor.Messages = DataphorFaultUtility.ExceptionsToFaults(APlan.Messages);
 			return LDescriptor;
 		}
 		
@@ -235,7 +235,7 @@ namespace Alphora.Dataphor.DAE.Server
 			PlanDescriptor LDescriptor = new PlanDescriptor();
 			LDescriptor.ID = APlan.ID;
 			LDescriptor.Statistics = APlan.PlanStatistics;
-			LDescriptor.Messages = APlan.Messages;
+			LDescriptor.Messages = DataphorFaultUtility.ExceptionsToFaults(APlan.Messages);
 			if (APlan.ServerExpressionPlan.ActualDataType is Schema.ICursorType)
 			{
 				LDescriptor.Capabilities = APlan.Capabilities;

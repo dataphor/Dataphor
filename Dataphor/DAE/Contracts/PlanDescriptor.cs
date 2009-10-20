@@ -23,7 +23,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 		public PlanStatistics Statistics;
 
 		[DataMember]
-		public Exception[] Messages;
+		public List<DataphorFault> Messages;
 		
 		[DataMember]
 		public CursorCapability Capabilities;

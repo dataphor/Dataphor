@@ -891,7 +891,7 @@ namespace Alphora.Dataphor.DAE.Service
 				RemoteServerScript LScript = (RemoteServerScript)FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).PrepareScript(AScript, ALocator);
 				ScriptDescriptor LDescriptor = new ScriptDescriptor(FHandleManager.GetHandle(LScript));
 				foreach (Exception LException in LScript.Messages)
-					LDescriptor.Messages.Add(LException);
+					LDescriptor.Messages.Add(DataphorFaultUtility.ExceptionToFault(LException is DataphorException ? (DataphorException)LException : new DataphorException(LException)));
 				foreach (RemoteServerBatch LBatch in LScript.Batches)
 					LDescriptor.Batches.Add(new BatchDescriptor(FHandleManager.GetHandle(LBatch), LBatch.IsExpression(), LBatch.Line));
 				return LDescriptor;

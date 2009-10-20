@@ -5,6 +5,7 @@
 */
 
 using System;
+using System.Collections.Generic;
 
 using Alphora.Dataphor.BOP;
 using Alphora.Dataphor.DAE.Compiling;
@@ -77,6 +78,21 @@ namespace Alphora.Dataphor.DAE.Contracts
 			return LFault;
 		}
 		
+		public static List<DataphorFault> ExceptionsToFaults(IEnumerable<Exception> AExceptions)
+		{
+			var LResult = new List<DataphorFault>();
+
+			foreach (Exception LException in AExceptions)
+			{
+				DataphorException LDataphorException = LException as DataphorException;
+				if (LDataphorException == null)
+					LDataphorException = new DataphorException(LException);
+				LResult.Add(ExceptionToFault(LDataphorException));
+			}
+			
+			return LResult;
+		}
+		
 		public static DataphorException FaultToException(DataphorFault AFault)
 		{
 			switch (AFault.ExceptionClassName)
@@ -108,6 +124,16 @@ namespace Alphora.Dataphor.DAE.Contracts
 				case "StreamsException" : return new StreamsException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
 				default : return new DataphorException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
 			}
+		}
+		
+		public static List<Exception> FaultsToExceptions(IEnumerable<DataphorFault> LFaults)
+		{
+			var LResult = new List<Exception>();
+
+			foreach (DataphorFault LFault in LFaults)
+				LResult.Add(FaultToException(LFault));
+
+			return LResult;
 		}
 	}
 }

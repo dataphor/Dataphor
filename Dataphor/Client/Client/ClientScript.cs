@@ -21,7 +21,7 @@ namespace Alphora.Dataphor.DAE.Client
 			
 			FMessages = new Exception[FScriptDescriptor.Messages.Count];
 			for (int LIndex = 0; LIndex < FScriptDescriptor.Messages.Count; LIndex++)
-				FMessages[LIndex] = FScriptDescriptor.Messages[LIndex];
+				FMessages[LIndex] = DataphorFaultUtility.FaultToException(FScriptDescriptor.Messages[LIndex]);
 			
 			foreach (BatchDescriptor LBatchDescriptor in FScriptDescriptor.Batches)
 				FClientBatches.Add(new ClientBatch(this, LBatchDescriptor));

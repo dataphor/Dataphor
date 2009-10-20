@@ -58,7 +58,8 @@ namespace Alphora.Dataphor.DAE.Server
 				if (FMessages == null)
 				{
 					FMessages = new CompilerMessages();
-					FMessages.AddRange(FDescriptor.Messages);
+					foreach (DataphorFault LFault in FDescriptor.Messages)
+						FMessages.Add(DataphorFaultUtility.FaultToException(LFault));
 				}
 				return FMessages;
 			}
