@@ -73,7 +73,10 @@ namespace Alphora.Dataphor.DAE.Contracts
 	[DataContract]
 	public struct RemoteProposeData
     {
+		[DataMember]
 		public bool Success;
+		
+		[DataMember]
 		public RemoteRowBody Body;
     }
 
