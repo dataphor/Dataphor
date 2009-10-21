@@ -390,9 +390,17 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			UpdateToolTip();
 			UpdateTabStop();
 			UpdateMargins();
-			FFrameworkElement = CreateFrameworkElement();
-			if (FFrameworkElement != null)
-				FFrameworkElement.Dispatcher.BeginInvoke(new System.Action(InitializeFrameworkElement));
+			Session.DispatchAndWait
+			(
+				(System.Action)
+				(
+					() =>
+					{
+						FFrameworkElement = CreateFrameworkElement();
+						InitializeFrameworkElement();
+					}
+				)
+			);
 			base.Activate();
 		}
 

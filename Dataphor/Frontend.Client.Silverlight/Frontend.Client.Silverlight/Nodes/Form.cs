@@ -234,20 +234,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		#endregion
 		
-		public FormControl Form { get { return FrameworkElement as FormControl; } }
-
-		protected override void InitializeFrameworkElement()
-		{
-			base.InitializeFrameworkElement();
-			
-			var LForm = Form;
-			LForm.CloseRequested += FormCloseRequested;
-			
-			var LBinding = new Binding("BindIsEnabled");
-			LBinding.Source = this;
-			Form.SetBinding(Control.IsEnabledProperty, LBinding);
-		}
-
 		#region Close
 		
 		/// <summary> Callback event from the main thread that the user is attempting to close the form. </summary>
@@ -409,14 +395,16 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			Show(null, null, null, AFormMode);
 		}
 
-		public void Show(FormInterfaceHandler AOnCloseForm, ContentControl AContainer)
+		public void Show(FormInterfaceHandler AOnCloseForm)
 		{
 			FOnCloseForm = AOnCloseForm;
 			try
 			{
 				SetMode(FormMode.None);
-				HostNode.Session.Forms.Add(this);
-				Session.DispatcherInvoke((System.Action)(() => { if (Form != null) Form.Show(); }));
+				var LSession = (Silverlight.Session)HostNode.Session;
+				LSession.Forms.Add(this);
+				if (Form != null)
+					LSession.Show(Form, null);
 			}
 			catch
 			{
@@ -434,22 +422,14 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				SetMode(AMode);
 				try
 				{
-					if (AParentForm != null)
-						HostNode.Session.Forms.AddModal(this, AParentForm);
-					else
-						HostNode.Session.Forms.Add(this);
+					var LSession = (Silverlight.Session)HostNode.Session;
 					InternalUpdateAcceptReject();
-					Session.DispatcherInvoke
-					(
-						(System.Action)
-						(
-							() => 
-							{ 
-								if (Form != null) 
-									Form.Show(((ISilverlightFormInterface)AParentForm).Form);
-							}
-						)
-					);
+					if (AParentForm != null)
+						LSession.Forms.AddModal(this, AParentForm);
+					else
+						LSession.Forms.Add(this);
+					if (Form != null)
+						LSession.Show(Form, AParentForm);
 				}
 				catch
 				{
@@ -539,6 +519,24 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			return new FormControl();
 		}
 
+		public FormControl Form { get { return FrameworkElement as FormControl; } }
+
+		protected override void InitializeFrameworkElement()
+		{
+			base.InitializeFrameworkElement();
+			
+			var LForm = Form;
+			LForm.CloseRequested += FormCloseRequested;
+			
+			var LBinding = new Binding("BindIsEnabled");
+			LBinding.Source = this;
+			LForm.SetBinding(Control.IsEnabledProperty, LBinding);
+
+			LBinding = new Binding("BindText");
+			LBinding.Source = this;
+			LForm.SetBinding(FormControl.TitleProperty, LBinding);
+		}
+		
 		#endregion
 	}
 

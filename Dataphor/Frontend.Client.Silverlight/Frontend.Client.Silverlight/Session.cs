@@ -92,6 +92,62 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		#endregion
 
+		#region Controls
+		
+		private SessionControl FSessionControl;
+		
+		protected virtual void CreateSessionControl()
+		{
+			FSessionControl = 
+				(SessionControl)DispatchAndWait
+				(
+					(System.Func<SessionControl>)
+					(
+						() => 
+						{ 
+							var LControl = new SessionControl();
+							InitializeSessionControl(LControl);
+							return LControl;
+						}
+					)
+				);
+		}
+
+		/// <summary> Prepares the session control. </summary>
+		/// <remarks> This method is invoked on the main thread while the session thread is waiting. </remarks>
+		protected virtual void InitializeSessionControl(SessionControl AControl)
+		{
+			// pure virtual
+		}
+		
+		public void Show(FormControl AForm, IFormInterface AParentForm)
+		{
+			if (AForm == null)
+				throw new ArgumentNullException("AForm");
+			
+			Session.DispatcherInvoke
+			(
+				(System.Action)
+				(
+					() => 
+					{
+						FormStackControl LStack;
+						if (AParentForm != null)
+						{
+							LStack = FSessionControl.FormStacks.Find(AParentForm);
+							if (LStack == null)
+								Error.Fail("The parent form for the form being shown is not a visible, top-level form.");
+						}
+						else
+							LStack = FSessionControl.FormStacks.Create();
+						LStack.FormStack.Push(AForm);
+					}
+				)
+			);
+		}
+
+		#endregion
+		
 		#region Execution
 
 		public event EventHandler OnComplete;
@@ -99,13 +155,18 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		private IHost FRootFormHost;
 		private ContentControl FContainer;
 
-		/// <remarks> Must call SetApplication or SetLibrary before calling Start().  Upon completion, the given callback will be invoked and the session will be disposed. </remarks>
+		/// <remarks> Must call SetApplication or SetLibrary before calling Start().  Upon completion, the given 
+		/// callback will be invoked and the session will be disposed.  Note that the session may leave its
+		/// control in place and it is up to the caller to replace the content of the given container. </remarks>
 		public void Start(string ADocument, ContentControl AContainer)
 		{
 			TimingUtility.PushTimer(String.Format("Silverlight.Session.Start('{0}')", ADocument));
 			try
 			{
-				// Prepare the root forms host
+				// Create the session control
+				CreateSessionControl();
+
+				// Prepare the root form's host
 				FRootFormHost = CreateHost();
 				try
 				{
@@ -122,6 +183,9 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 					}
 					throw;
 				}
+				
+				// Show the session control as the content of the given container
+				DispatchAndWait((System.Action)(() => { if (FSessionControl != null) AContainer.Content = FSessionControl; }));
 			}
 			finally
 			{
@@ -149,13 +213,18 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		private void RootFormAdvance(IFormInterface AForm)
 		{
 			if (FRootFormHost.NextRequest != null)
-				LoadNextForm(FRootFormHost).Show(new FormInterfaceHandler(RootFormAdvance), FContainer);
+				LoadNextForm(FRootFormHost).Show(new FormInterfaceHandler(RootFormAdvance));
 			else
 			{
-				if (OnComplete != null)
-					OnComplete(this, EventArgs.Empty);
+				SessionComplete();
 				Dispose();
 			}
+		}
+
+		protected virtual void SessionComplete()
+		{
+			if (OnComplete != null)
+				OnComplete(this, EventArgs.Empty);
 		}
 
 		#endregion
@@ -211,7 +280,31 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		#endregion
 
 		#region Threading
-
+		
+		/*
+			Threading strategy:
+				All threads in the SL client funnel into one of two threads: 
+					1. The session thread - all node and communication logic happens here.
+					2. The main (UI) thread - user interface related activity.
+				The main thread must never wait for (be blocked by) the session thread, or
+				the entire application may freeze.  This is because in general this is a 
+				dead-lock state.  In order for communications activity to complete, the 
+				message pump facilitated by the main thread must progress.  The reciprical
+				wait is acceptable however; the session thread may wait on the main thread.
+				
+				The implementation if this strategy is provided through static dispatch 
+				(main thread) and session invocation methods.  The session thread is a 
+				virtual thread, not a dedicated thread.  A new thread is started to service 
+				the session action queue as items are queued.  Once no items remain to be 
+				queued, the temporary session thread terminates.  In keeping with the 
+				strategy, the main thread will error if it ever calls InvokeAndWait on the 
+				session thread.  There is, however, a DispatchAndWait method so that the
+				session thread may wait on the main thread.  This is useful and important 
+				when performing construction of new UI elements, which must be performed in 
+				the main thread, but where the instance pointers are needed right away in
+				the session thread in order to properly synchronize.
+		*/
+		
 		/// <summary> Gets or sets the dispatcher used to synchronize onto the main UI thread. </summary>
 		public static Dispatcher Dispatcher { get; set; }
 
@@ -233,6 +326,37 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			CheckedDispatcher.BeginInvoke(ADelegate, AArguments);
 		}
 		
+		/// <summary> Synchronously executes the given delegate on the main thread and returns the result. </summary>
+		public static object DispatchAndWait(Delegate ADelegate, params object[] AArguments)
+		{
+			object LResult = null;
+			Exception LException = null;
+			var LEvent = new ManualResetEvent(false);
+			CheckedDispatcher.BeginInvoke
+			(
+				() => 
+				{ 
+					try
+					{
+						LResult = ADelegate.DynamicInvoke(AArguments);
+					}
+					catch (Exception LError)
+					{
+						LException = LError;
+					}
+					finally
+					{
+						LEvent.Set();
+					}
+				}
+			);
+			LEvent.WaitOne();
+			LEvent.Close();
+			if (LException != null)
+				throw LException;
+			return LResult;
+		}
+
 		public static Queue<System.Action> FSessionQueue = new Queue<System.Action>();
 		public static Thread FSessionThread;
 		
@@ -289,8 +413,13 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		}
 		
 		/// <summary> Synchronously executes the given delegate on the session thread and returns the result. </summary>
-		public static object InvokeAndWait(Delegate ADelegate, object[] AArguments)
+		/// <remarks> This method will throw an exception if invoked from the main thread. </remarks>
+		public static object InvokeAndWait(Delegate ADelegate, params object[] AArguments)
 		{
+			// Ensure that this method isn't called from the main thread
+			var LDispatcher = Silverlight.Session.Dispatcher;
+			Error.DebugAssertFail(LDispatcher == null || LDispatcher.CheckAccess(), "InvokeAndWait may not be called from the main thread.");
+				
 			object LResult = null;
 			Exception LException = null;
 			var LEvent = new ManualResetEvent(false);

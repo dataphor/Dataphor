@@ -10,6 +10,7 @@ using System.Drawing;
 
 using Alphora.Dataphor.BOP;
 using System.Windows;
+using System.Windows.Data;
 
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {

@@ -9,7 +9,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 	{
 		/// <summary> Shows the form. </summary>
 		/// <param name="AOnCloseForm"> Callback when the form closes. </param>
-		void Show(FormInterfaceHandler AOnCloseForm, ContentControl AContainer);
+		void Show(FormInterfaceHandler AOnCloseForm);
 		
 		DispatchedReadOnlyCollection<Exception> BindErrors { get; }
 		

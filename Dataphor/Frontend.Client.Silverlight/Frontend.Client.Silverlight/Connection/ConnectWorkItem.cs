@@ -214,9 +214,12 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
     				Applications = AResult.Applications;
     				
     				// If there is only 1 application, skip to login
-					//if (Applications.Count == 1)
-					//    Status = ConnectStatus.Login;
-					//else
+					if (Applications.Count == 1)
+					{
+						ApplicationID = (string)Applications[0][0];
+					    BeginStartApplication();
+					}
+					else
    						Status = ConnectStatus.SelectApplication;
     			}
     		);
@@ -269,6 +272,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		public void BeginStartApplication()
 		{
+			Status = ConnectStatus.StartingApplication;
 			Silverlight.Session.Invoke<Silverlight.Session>
 			(
 				() =>

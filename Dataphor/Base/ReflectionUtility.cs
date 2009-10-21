@@ -337,6 +337,7 @@ namespace Alphora.Dataphor
 		private static Dictionary<string, Assembly> FAssemblyByName;
 
 		/// <summary> Ensures that the internal dictionary is populated with the set of initially loaded assemblies. </summary>
+		/// <remarks> Under Silverlight, this call must be made on the main thread. </remarks>
 		public static void EnsureAssemblyByName()
 		{
 			if (FAssemblyByName == null)
