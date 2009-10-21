@@ -952,7 +952,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		int MarginBottom { get; set; }
 
 		/// <summary> The help keyword to navigate to when 
-		/// the user activates help. </summary>
+		/// the user activates help. </summary> <doc/>
 		/// <value> <para>String</para>
 		/// <para> Default: empty string</para></value>
 		/// <remarks> The keyword will locate help based on an index term, 
@@ -974,10 +974,14 @@ namespace Alphora.Dataphor.Frontend.Client
 		HelpKeywordBehavior HelpKeywordBehavior { get; set; }
 
 		/// <summary> Specifies the help text to display to the user when 
-		/// keyword navigation is not used. </summary>
+		/// keyword navigation is not used. </summary> <doc/>
 		/// <value><para>String</para>
 		/// <para>Default: empty string</para></value>
 		string HelpString { get; set; }
+		
+		/// <summary> The style name to use for this element. </summary> <doc/>
+		/// <value><para>String</para><para>Default: empty string</para></value>
+		string Style { get; set; }
 	}
 
 	/// <summary> FormInterface element node. </summary>

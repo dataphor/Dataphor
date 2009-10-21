@@ -333,6 +333,9 @@
     		</Setter>
     		<Setter Property="BorderBrush" Value="#FF5769DC"/>
     	</Style>
-        
+
+		<Style x:Key="StaticTextStyle" TargetType="TextBlock">
+			<Setter Property="TextWrapping" Value="Wrap" />
+		</Style>        
     </Application.Resources>
 </Application>

@@ -32,6 +32,8 @@ namespace Alphora.Dataphor.Frontend.Client
 			FOwnsDataSession = AOwnsSession;
 			InitializePipe();
 			FForms = new Forms();
+			FForms.Added += new FormsHandler(FormAdded);
+			FForms.Removed += new FormsHandler(FormRemoved);
 		}
 
 		protected override void Dispose(bool ADisposing)
@@ -537,6 +539,16 @@ namespace Alphora.Dataphor.Frontend.Client
 			get { return FForms; }
 		}
 
+		protected virtual void FormAdded(IFormInterface AForm, bool AStack)
+		{
+			// pure virtual
+		}
+
+		protected virtual void FormRemoved(IFormInterface AForm, bool AStack)
+		{
+			// pure virtual
+		}
+
 		public virtual IFormInterface CreateForm()
 		{
 			return (IFormInterface)NodeTypeTable.CreateInstance("FormInterface");
@@ -640,7 +652,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		}
 	}
 
-	public delegate void FormsHandler(IFormInterface AForm);
+	public delegate void FormsHandler(IFormInterface AForm, bool AStack);
 
 	/// <summary> A linked list of form stacks. </summary>
 	public class Forms : IEnumerable
@@ -651,16 +663,16 @@ namespace Alphora.Dataphor.Frontend.Client
 		private FormStack FLast;
 		public FormStack Last { get { return FLast; } }
 
-		public event FormsHandler OnAdded;
-		public event FormsHandler OnRemoved;
+		public event FormsHandler Added;
+		public event FormsHandler Removed;
 
 		public void Add(IFormInterface AForm)
 		{
 			FormStack LNewStack = new FormStack();
 			LNewStack.Push(AForm);
 			AddStackToTop(LNewStack);
-			if (OnAdded != null)
-				OnAdded(AForm);
+			if (Added != null)
+				Added(AForm, true);
 		}
 
 		/// <summary> Adds the form as modal (top of the stack) over some existing form. </summary>
@@ -676,8 +688,8 @@ namespace Alphora.Dataphor.Frontend.Client
 				{
 					LTopmost.Disable(AForm);
 					LSearchStack.Push(AForm);
-					if (OnAdded != null)
-						OnAdded(AForm);
+					if (Added != null)
+						Added(AForm, false);
 					return;
 				}
 				LSearchStack = LSearchStack.FNext;
@@ -687,7 +699,8 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		/// <summary> Removes a top-most form. </summary>
 		/// <remarks> If the specified form is not a top-most form, nothing happens. </remarks>
-		public void Remove(IFormInterface AForm)
+		/// <returns> True if this form was the last of a stack. </returns>
+		public bool Remove(IFormInterface AForm)
 		{
 			FormStack LSearchStack = FFirst;
 			while (LSearchStack != null)
@@ -695,17 +708,19 @@ namespace Alphora.Dataphor.Frontend.Client
 				if (AForm == LSearchStack.GetTopmostForm())
 				{
 					LSearchStack.Pop();
-					if (LSearchStack.IsEmpty())
+					bool LLast = LSearchStack.IsEmpty();
+					if (LLast)
 						RemoveStack(LSearchStack);
 					else
 						LSearchStack.GetTopmostForm().Enable();
-					if (OnRemoved != null)
-						OnRemoved(AForm);
-					return;
+					if (Removed != null)
+						Removed(AForm, LLast);
+					return LLast;
 				}
 				LSearchStack = LSearchStack.FNext;
 			}														
 			Error.Warn(String.Format("Unable to find form '{0}' as a top-most form.", AForm.Text));
+			return false;
 		}
 
 		public void BringToFront(IFormInterface AForm)

@@ -37,14 +37,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			if (CloseRequested != null)
 				CloseRequested(this, ABehavior);
 		}
-
-		public event CloseHandler Closed;
-		
-		public void Close(CloseBehavior ABehavior)
-		{
-			if (Closed != null)
-				Closed(this, ABehavior);
-		}
 	}
 	
 	public delegate void CloseHandler(object ASender, CloseBehavior ABehavior);

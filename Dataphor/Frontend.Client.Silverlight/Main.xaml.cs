@@ -33,7 +33,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		private void SessionComplete(object sender, EventArgs e)
 		{
- 			StartConnection();
+ 			Session.DispatcherInvoke((System.Action)(() => { StartConnection(); }));
 		}
 	}
 }

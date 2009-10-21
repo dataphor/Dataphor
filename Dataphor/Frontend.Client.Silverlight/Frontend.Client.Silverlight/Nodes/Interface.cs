@@ -11,6 +11,7 @@ using System.Drawing;
 using Alphora.Dataphor.BOP;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Controls;
 
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
@@ -18,7 +19,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 	[DesignRoot()]
 	[ListInDesigner(false)]
 	[DesignerImage("Image('Frontend', 'Nodes.Interface')")]
-	public abstract class Interface : Element, IInterface
+	public abstract class Interface : Element, IInterface, ISilverlightContainerElement
 	{
 		protected override void Dispose(bool ADisposed)
 		{
@@ -471,6 +472,11 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		public override bool GetDefaultTabStop()
 		{
 			return false;
+		}
+
+		public void AddChild(FrameworkElement AChild)
+		{
+			((ContentControl)FrameworkElement).Content = AChild;
 		}
 	}
 }

@@ -70,11 +70,10 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			return LStack;
 		}
 
-		public FormStackControl Find(IFormInterface AParentForm)
+		public FormStackControl Find(FormControl AForm)
 		{
-			var LSilverlightForm = (ISilverlightFormInterface)AParentForm;
 			foreach (var LItem in this)
-				if (LItem.FormStack.TopMatches(LSilverlightForm.Form))
+				if (LItem.FormStack.TopMatches(AForm))
 					return LItem;
 			return null;
 		}

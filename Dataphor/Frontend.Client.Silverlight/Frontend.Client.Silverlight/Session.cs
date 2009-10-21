@@ -15,6 +15,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using System.Windows;
 
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
@@ -120,7 +121,11 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			// pure virtual
 		}
 		
-		public void Show(FormControl AForm, IFormInterface AParentForm)
+		#endregion
+		
+		#region Forms
+		
+		public void Show(FormControl AForm, FormControl AParentForm)
 		{
 			if (AForm == null)
 				throw new ArgumentNullException("AForm");
@@ -146,6 +151,82 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			);
 		}
 
+		public void DisposeFormHost(IHost AHost, bool AStack)
+		{
+			if (AStack)
+			{
+				if (AHost != null)
+				{
+					if (AHost.NextRequest != null)
+						LoadNextForm(AHost).Show();
+					else
+						if (AHost == FRootFormHost)
+						{
+							SessionComplete();
+							Dispose();
+						}
+						else
+							AHost.Dispose();
+				}
+			}
+			else
+				if (AHost != null)
+					AHost.Dispose();
+		}	
+			
+		public void Close(FormControl AForm)
+		{
+			if (AForm == null)
+				throw new ArgumentNullException("AForm");
+			
+			Session.DispatcherInvoke
+			(
+				(System.Action)
+				(
+					() => 
+					{
+						var LStack = FSessionControl.FormStacks.Find(AForm);
+						if (LStack == null)
+							Error.Fail("The form being closed is not a visible, top-level form.");
+						LStack.FormStack.Pop();
+						if (LStack.FormStack.IsEmpty)
+							FSessionControl.FormStacks.Remove(LStack);
+					}
+				)
+			);
+		}
+		
+		#endregion
+		
+		#region Layout
+
+		private static double FAverageCharacterWidth = 0d;
+		
+		public static double AverageCharacterWidth
+		{
+			get 
+			{ 
+				if (FAverageCharacterWidth == 0d)
+				{
+					FAverageCharacterWidth = (double)
+						DispatchAndWait
+						(
+							(Func<double>)
+							(
+								() =>
+								{
+									var LTextBlock = new TextBlock();
+									LTextBlock.Text = "abcdefghijklmnopqrstuvwzyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+									LTextBlock.Measure(new Size());
+									return (double)(int)(LTextBlock.ActualWidth / 52);
+								}
+							)
+						);
+				}
+				return FAverageCharacterWidth;
+			}
+		}
+		
 		#endregion
 		
 		#region Execution
@@ -172,7 +253,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				{
 					FRootFormHost.NextRequest = new Request(ADocument);
 					FContainer = AContainer;
-					RootFormAdvance(null);
+					LoadNextForm(FRootFormHost).Show();
 				}
 				catch
 				{
@@ -207,17 +288,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				LForm.Dispose();
 				LForm = null;
 				throw;
-			}
-		}
-
-		private void RootFormAdvance(IFormInterface AForm)
-		{
-			if (FRootFormHost.NextRequest != null)
-				LoadNextForm(FRootFormHost).Show(new FormInterfaceHandler(RootFormAdvance));
-			else
-			{
-				SessionComplete();
-				Dispose();
 			}
 		}
 

@@ -97,14 +97,14 @@
                 			<VisualStateGroup x:Name="AcceptRejectStates">
                 				<VisualState x:Name="Close">
                 					<Storyboard>
-                						<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="Accept" Storyboard.TargetProperty="(UIElement.Visibility)">
+                						<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="AcceptButton" Storyboard.TargetProperty="(UIElement.Visibility)">
                 							<DiscreteObjectKeyFrame KeyTime="00:00:00">
                 								<DiscreteObjectKeyFrame.Value>
                 									<Visibility>Collapsed</Visibility>
                 								</DiscreteObjectKeyFrame.Value>
                 							</DiscreteObjectKeyFrame>
                 						</ObjectAnimationUsingKeyFrames>
-                						<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="Reject" Storyboard.TargetProperty="(UIElement.Visibility)">
+                						<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="RejectButton" Storyboard.TargetProperty="(UIElement.Visibility)">
                 							<DiscreteObjectKeyFrame KeyTime="00:00:00">
                 								<DiscreteObjectKeyFrame.Value>
                 									<Visibility>Collapsed</Visibility>
@@ -115,7 +115,7 @@
                 				</VisualState>
                 				<VisualState x:Name="AcceptReject">
                 					<Storyboard>
-                						<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="Close1" Storyboard.TargetProperty="(UIElement.Visibility)">
+                						<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="CloseButton" Storyboard.TargetProperty="(UIElement.Visibility)">
                 							<DiscreteObjectKeyFrame KeyTime="00:00:00">
                 								<DiscreteObjectKeyFrame.Value>
                 									<Visibility>Collapsed</Visibility>
@@ -144,7 +144,7 @@
                 		</VisualStateManager.VisualStateGroups>
                 		<TextBlock x:Name="textBlock" Text="{TemplateBinding Title}" Margin="{TemplateBinding Padding}" Foreground="Black" />
                 		<StackPanel x:Name="stackPanel" Orientation="Horizontal" Grid.Column="1" >
-                			<Button x:Name="Accept" Style="{StaticResource ButtonStyle}">
+                			<Button x:Name="AcceptButton" Style="{StaticResource ButtonStyle}">
                 				<Path Stretch="Fill" Height="12.091" Width="15.114" Data="F1M40.848,8.59C40.848,8.59,16.367,25.367,15.988,25.625C15.672,25.309,8.156,17.824,8.156,17.824C7.598,17.27,6.863,17.062,6.191,17.273C5.461,17.504,4.992,18.023,4.863,18.738L4.785,19.18C4.762,19.324,4.762,19.469,4.793,19.609L4.902,20.137L4.98,20.367L13.652,39.437C13.926,40.035,14.473,40.453,15.121,40.562C15.766,40.672,16.422,40.449,16.875,39.973L43.355,11.98C43.742,11.574,43.965,10.992,43.965,10.391L43.941,10.156L43.832,9.648C43.703,9.023,43.297,8.559,42.664,8.305C42.262,8.145,41.617,8.062,40.848,8.59z M40.848,8.59" Stroke="White" UseLayoutRounding="False">
                 					<Path.Fill>
                 						<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
@@ -154,7 +154,7 @@
                 					</Path.Fill>
                 				</Path>
                 			</Button>
-                			<Button x:Name="Reject" Style="{StaticResource ButtonStyle}">
+                			<Button x:Name="RejectButton" Style="{StaticResource ButtonStyle}">
                 				<Path Stretch="Fill" Height="14" Width="14" Data="M5.75,0.611000000000001L5.477,0.911999999999999L1.426,4.959L1.125,5.236L1.426,5.509L8.801,12.912L1.426,20.287L1.125,20.56L1.426,20.834L5.477,24.884L5.75,25.185L6.023,24.884L13.398,17.509L20.773,24.884L21.051,25.185L21.324,24.884L25.375,20.834L25.648,20.56L25.375,20.287L18,12.912L25.375,5.509L25.648,5.236L25.375,4.959L21.324,0.911999999999999L21.051,0.611000000000001L20.773,0.911999999999999L13.398,8.287L6.023,0.911999999999999L5.75,0.611000000000001z" Stroke="White" UseLayoutRounding="False">
                 					<Path.Fill>
                 						<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
@@ -164,7 +164,7 @@
                 					</Path.Fill>
                 				</Path>
                 			</Button>
-                			<Button x:Name="Close1" Style="{StaticResource ButtonStyle}">
+                			<Button x:Name="CloseButton" Style="{StaticResource ButtonStyle}">
                 				<Path Stretch="Fill" Height="14" Width="14" Data="M5.75,0.611000000000001L5.477,0.911999999999999L1.426,4.959L1.125,5.236L1.426,5.509L8.801,12.912L1.426,20.287L1.125,20.56L1.426,20.834L5.477,24.884L5.75,25.185L6.023,24.884L13.398,17.509L20.773,24.884L21.051,25.185L21.324,24.884L25.375,20.834L25.648,20.56L25.375,20.287L18,12.912L25.375,5.509L25.648,5.236L25.375,4.959L21.324,0.911999999999999L21.051,0.611000000000001L20.773,0.911999999999999L13.398,8.287L6.023,0.911999999999999L5.75,0.611000000000001z" Stroke="White" UseLayoutRounding="False">
                 					<Path.Fill>
                 						<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">

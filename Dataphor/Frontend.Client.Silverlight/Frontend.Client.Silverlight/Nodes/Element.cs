@@ -17,7 +17,7 @@ using Alphora.Dataphor.BOP;
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
 	/// <summary> Base node for all visible nodes. </summary>
-	public abstract class Element : Node, INotifyPropertyChanged
+	public abstract class Element : Node, IElement, INotifyPropertyChanged
 	{
 		public const int CDefaultMarginLeft = 2;
 		public const int CDefaultMarginRight = 2;
@@ -63,11 +63,78 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				LBinding = new Binding("BindIsTabStop");
 				LBinding.Source = this;
 				LControl.SetBinding(Control.IsTabStopProperty, LBinding);
+				
+				LBinding = new Binding("BindStyle");
+				LBinding.Source = this;
+				LControl.SetBinding(Control.StyleProperty, LBinding);
+			}
+			
+			if (Parent != null)
+			{
+				var LParentContainer = Parent as ISilverlightContainerElement;
+				if (LParentContainer != null)
+					LParentContainer.AddChild(FFrameworkElement);
 			}
 		}
 		
 		protected abstract FrameworkElement CreateFrameworkElement();
 
+		#endregion
+		
+		#region Styles
+		
+		private string FStyle = "";
+		
+		[DefaultValue("")]
+		public string Style
+		{
+			get { return FStyle; }
+			set
+			{
+				if (FStyle != value)
+				{
+					FStyle = value;
+					UpdateStyle();
+				}
+			}
+		}
+		
+		protected virtual string GetStyle()
+		{
+			if (!String.IsNullOrEmpty(FStyle))
+				return FStyle;
+			return GetDefaultStyle();
+		}
+
+		protected virtual string GetDefaultStyle()
+		{
+			return null;
+		}
+		
+		protected void UpdateStyle()
+		{
+			var LStyleName = GetStyle();
+			if (String.IsNullOrEmpty(LStyleName))
+				BindStyle = null;
+			else
+				Session.DispatcherInvoke((System.Action)(() => { BindStyle = Application.Current.Resources[LStyleName] as Style; }));
+		}
+		
+		private Style FBindStyle;
+		
+		public Style BindStyle
+		{
+			get { return FBindStyle; }
+			private set
+			{
+				if (FBindStyle != value)
+				{
+					FBindStyle = value;
+					NotifyPropertyChanged("BindStyle");
+				}
+			}
+		}
+		
 		#endregion
 		
 		#region Binding
@@ -78,7 +145,13 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		protected void NotifyPropertyChanged(string AName)
 		{
 			if (PropertyChanged != null)
-				Session.CheckedDispatcher.BeginInvoke(PropertyChanged, this, new PropertyChangedEventArgs(AName));
+			{
+				var LDispatcher = Session.CheckedDispatcher;
+				if (LDispatcher.CheckAccess())
+					PropertyChanged(this, new PropertyChangedEventArgs(AName));
+				else
+					Session.DispatcherInvoke(PropertyChanged, this, new PropertyChangedEventArgs(AName));
+			}
 		}
 
 		#endregion
@@ -390,6 +463,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			UpdateToolTip();
 			UpdateTabStop();
 			UpdateMargins();
+			UpdateStyle();
 			Session.DispatchAndWait
 			(
 				(System.Action)

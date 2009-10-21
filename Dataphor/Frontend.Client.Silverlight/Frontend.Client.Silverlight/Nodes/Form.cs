@@ -291,11 +291,13 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		public virtual bool Closed(CloseBehavior ABehavior)
 		{
+			var LSession = (Silverlight.Session)HostNode.Session;
 			try
 			{
+				bool LEndOfStack = true;
 				try
 				{
-					HostNode.Session.Forms.Remove(this);
+					LEndOfStack = LSession.Forms.Remove(this);
 				}
 				finally
 				{
@@ -310,7 +312,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 					{
 						try
 						{
-							Session.DispatcherInvoke((System.Action)(() => { if (Form != null) Form.Close(ABehavior); }));
+							Session.DispatcherInvoke((System.Action)(() => { if (Form != null) LSession.Close(Form); }));
 
 							if (OnClosed != null)
 								OnClosed(this, EventArgs.Empty);
@@ -318,8 +320,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 						finally
 						{
 							EndChildModal();
-							if ((HostNode != null) && (HostNode.NextRequest == null))
-								HostNode.Dispose();
+							LSession.DisposeFormHost(HostNode, LEndOfStack);
 						}
 					}
 				}
@@ -429,7 +430,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 					else
 						LSession.Forms.Add(this);
 					if (Form != null)
-						LSession.Show(Form, AParentForm);
+						LSession.Show(Form, AParentForm == null ? null : ((ISilverlightFormInterface)AParentForm).Form);
 				}
 				catch
 				{
