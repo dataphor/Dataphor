@@ -451,6 +451,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			get { return FBackgroundImage; }
 			set { FBackgroundImage = value; }
 		}
+		
+		/// <remarks> Frame does nothing with the ForceAcceptReject. Vestigial of IInterface ancestry. </remarks>
+		public bool ForceAcceptReject { get; set; }	 				
 
 		// IconImage
 
