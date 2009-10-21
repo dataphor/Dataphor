@@ -218,7 +218,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 									var LTextBlock = new TextBlock();
 									LTextBlock.Text = "abcdefghijklmnopqrstuvwzyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 									LTextBlock.Measure(new Size());
-									return (double)(int)(LTextBlock.ActualWidth / 52);
+									return (double)(int)(LTextBlock.ActualWidth / LTextBlock.Text.Length);
 								}
 							)
 						);

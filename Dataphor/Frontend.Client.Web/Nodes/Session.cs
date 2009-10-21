@@ -26,8 +26,6 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		public Session(DataSession ASession, bool AOwnsConnection) : base(ASession, AOwnsConnection)
 		{
 			FImageCache = new ImageCache(Path.GetTempPath() + CImageCachePath, this);
-			Forms.OnAdded += new FormsHandler(FormAdded);
-			Forms.OnRemoved += new FormsHandler(FormRemoved);
 		}
 
 		protected override void Dispose(bool ADisposed)
@@ -90,16 +88,18 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// Forms
 
-		private void FormAdded(IFormInterface AForm)
+		protected override void FormAdded(IFormInterface AForm, bool AStack)
 		{
+			base.FormAdded(AForm, AStack);
 			FFormsByID.Add(((IWebElement)AForm).ID, AForm);
 		}
 
-		private void FormRemoved(IFormInterface AForm)
+		protected override void FormRemoved(IFormInterface AForm, bool AStack)
 		{
+			base.FormRemoved(AForm, AStack);
 			FFormsByID.Remove(((IWebElement)AForm).ID);
 		}
-
+		
 		private Hashtable FFormsByID = new Hashtable();
 
 		public IFormInterface GetForm(string AFormID)

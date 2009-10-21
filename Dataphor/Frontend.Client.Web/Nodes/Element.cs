@@ -32,6 +32,10 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			FHelpID = Session.GenerateID();
 		}
 
+		// TODO: Implement styles in web client
+		[DefaultValue("")]
+		public string Style { get; set; }
+		
 		// MarginLeft
 		
 		private int FMarginLeft;

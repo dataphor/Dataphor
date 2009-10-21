@@ -228,6 +228,26 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		}
 
 		#endregion
+		
+		#region Styles
+		
+		private string FStyle = "";
+		
+		// TODO: Implement styles in the Windows Client
+		[DefaultValue("")]
+		public string Style
+		{
+			get { return FStyle; }
+			set
+			{
+				if (FStyle != value)
+				{
+					FStyle = value;
+				}
+			}
+		}
+		
+		#endregion
 
 		#region Margins
 
