@@ -182,7 +182,7 @@
     <Compile Include="Frontend.Client.Silverlight\Nodes\Form.cs" />
     <Compile Include="Frontend.Client.Silverlight\Helpers\NullToVisibilityConverter.cs" />
     <Compile Include="Frontend.Client.Silverlight\Nodes\Interface.cs" />
-    <Compile Include="Frontend.Client.Silverlight\Nodes\ISilverlightElement.cs" />
+    <Compile Include="Frontend.Client.Silverlight\Interfaces\ISilverlightElement.cs" />
     <Compile Include="Frontend.Client.Silverlight\Nodes\StaticText.cs" />
     <Compile Include="Frontend.Client.Silverlight\Nodes\Timer.cs" />
     <Compile Include="Frontend.Client.Silverlight\SilverlightClientException.cs" />
