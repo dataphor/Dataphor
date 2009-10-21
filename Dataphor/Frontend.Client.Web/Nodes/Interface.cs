@@ -50,8 +50,8 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// UserState
 
-		private Dictionary<string, object> FUserState = new Dictionary<string, object>();
-		public Dictionary<string, object> UserState
+		private IndexedDictionary<string, object> FUserState = new IndexedDictionary<string, object>();
+		public IndexedDictionary<string, object> UserState
 		{
 			get { return FUserState; }
 		}

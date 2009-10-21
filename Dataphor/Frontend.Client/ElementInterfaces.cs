@@ -7,7 +7,6 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
-using System.Collections.Generic;
 
 namespace Alphora.Dataphor.Frontend.Client
 {
@@ -209,7 +208,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		IAction OnBeforeDeactivate { get; set; }
 
 		/// <summary> Dictionary of non-persisted miscellenious data. </summary> <doc/>
-		Dictionary<string, object> UserState { get; }
+		IndexedDictionary<string, object> UserState { get; }
 	}
 
 	/// <summary> Data aware image element. </summary> <doc/>

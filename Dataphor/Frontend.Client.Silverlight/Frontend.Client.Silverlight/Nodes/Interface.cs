@@ -9,7 +9,6 @@ using System.ComponentModel;
 using System.Drawing;
 
 using Alphora.Dataphor.BOP;
-using System.Collections.Generic;
 using System.Windows;
 
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
@@ -93,9 +92,9 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		// UserState
 
-		private Dictionary<string, object> FUserState = new Dictionary<string, object>();
+		private IndexedDictionary<string, object> FUserState = new IndexedDictionary<string, object>();
 		[Browsable(false)]
-		public Dictionary<string, object> UserState
+		public IndexedDictionary<string, object> UserState
 		{
 			get { return FUserState; }
 		}

@@ -97,6 +97,7 @@
     <Compile Include="BOP\Deserializer.cs" />
     <Compile Include="BOP\Persistence.cs" />
     <Compile Include="BOP\Structures.cs" />
+    <Compile Include="IndexedDictionary.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
