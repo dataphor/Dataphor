@@ -175,8 +175,10 @@
     <Compile Include="Frontend.Client.Silverlight\Controls\FormControl.cs" />
     <Compile Include="Frontend.Client.Silverlight\Controls\FormStackControl.cs" />
     <Compile Include="Frontend.Client.Silverlight\Controls\SessionControl.cs" />
+    <Compile Include="Frontend.Client.Silverlight\Controls\TriggerControl.cs" />
     <Compile Include="Frontend.Client.Silverlight\Helpers\BooleanToVisibilityConverter.cs" />
     <Compile Include="Frontend.Client.Silverlight\Helpers\DispatchedReadOnlyCollection.cs" />
+    <Compile Include="Frontend.Client.Silverlight\Helpers\ObservableCollectionView.cs" />
     <Compile Include="Frontend.Client.Silverlight\Interfaces\ISilverlightContainerElement.cs" />
     <Compile Include="Frontend.Client.Silverlight\Nodes\Element.cs" />
     <Compile Include="Frontend.Client.Silverlight\Nodes\Form.cs" />
@@ -185,6 +187,7 @@
     <Compile Include="Frontend.Client.Silverlight\Interfaces\ISilverlightElement.cs" />
     <Compile Include="Frontend.Client.Silverlight\Nodes\StaticText.cs" />
     <Compile Include="Frontend.Client.Silverlight\Nodes\Timer.cs" />
+    <Compile Include="Frontend.Client.Silverlight\Nodes\Trigger.cs" />
     <Compile Include="Frontend.Client.Silverlight\SilverlightClientException.cs" />
     <Compile Include="Frontend.Client.Silverlight\DocumentExpression.cs" />
     <Compile Include="Frontend.Client.Silverlight\ISilverlightFormInterface.cs" />

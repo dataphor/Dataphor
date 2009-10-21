@@ -399,10 +399,54 @@ namespace Alphora.Dataphor
 			return Activator.CreateInstance(GetType(ANamespace, AClassName, AAssemblyName));
 		}
 		
+		/// <summary> Locates a type, using the given assembly if no assembly name is provided. </summary>
+		/// <remarks> If an assembly name is given and it is short, an attempt will be made 
+		/// to find a full name in the registered assemblies for it. </remarks>
+		public static Type GetType(string AAssemblyQualifiedClassName, Assembly ADefaultAssembly)
+		{
+			string LAssemblyName;
+			string LQualifiedClassName;
+			var LIndex = AAssemblyQualifiedClassName.IndexOf(",");
+			if (LIndex >= 0)
+			{
+				LAssemblyName = AAssemblyQualifiedClassName.Substring(LIndex + 1).Trim();
+				LQualifiedClassName = AAssemblyQualifiedClassName.Substring(0, LIndex).Trim();
+			}
+			else
+			{
+				LAssemblyName = ADefaultAssembly.FullName;
+				LQualifiedClassName = AAssemblyQualifiedClassName.Trim();
+			}
+			
+			return GetType(LQualifiedClassName, LAssemblyName);	
+		}
+
+		/// <summary> Locates a type, using the calling assembly if no assembly name is provided. </summary>
+		/// <remarks> If an assembly name is given and it is short, an attempt will be made 
+		/// to find a full name in the registered assemblies for it. </remarks>
+		public static Type GetType(string AAssemblyQualifiedClassName)
+		{
+			return GetType(AAssemblyQualifiedClassName, Assembly.GetCallingAssembly());	
+		}
+
 		/// <summary> Locates a type using the given name components. </summary>
-		/// <remarks> If the given assembly name is weak (short), an attempt will be made 
-		/// to find a strong name in the registered assemblies for it. </remarks>
+		/// <remarks> If the given assembly name is short, an attempt will be made 
+		/// to find a full name in the registered assemblies for it. </remarks>
 		public static Type GetType(string ANamespace, string AClassName, string AAssemblyName)
+		{
+			return 
+				GetType
+				(
+					(String.IsNullOrEmpty(ANamespace) ? "" : (ANamespace + "."))
+						+ AClassName,
+					AAssemblyName
+				);
+		}
+
+		/// <summary> Locates a type using the given name components. </summary>
+		/// <remarks> If the given assembly name is short, an attempt will be made 
+		/// to find a full name in the registered assemblies for it. </remarks>
+		public static Type GetType(string AQualifiedClassName, string AAssemblyName)
 		{
 			// Lookup a full assembly name for the given assembly name if there is one
 			Assembly LAssembly;
@@ -412,9 +456,7 @@ namespace Alphora.Dataphor
 			return 
 				Type.GetType
 				(
-					(String.IsNullOrEmpty(ANamespace) ? "" : (ANamespace + "."))
-						+ AClassName
-						+ (String.IsNullOrEmpty(AAssemblyName) ? "" : ("," + AAssemblyName)), 
+					AQualifiedClassName + (String.IsNullOrEmpty(AAssemblyName) ? "" : ("," + AAssemblyName)), 
 					true, 
 					true
 				);

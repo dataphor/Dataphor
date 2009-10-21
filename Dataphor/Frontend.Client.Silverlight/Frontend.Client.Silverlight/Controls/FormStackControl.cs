@@ -18,7 +18,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			FormStack = new FormStack();
 		}
 		
-		public static readonly DependencyProperty FormStackProperty = DependencyProperty.Register("FormStack", typeof(FormStack), typeof(FormStackControl), new PropertyMetadata(null, new PropertyChangedCallback(FormStackChanged)));
+		public static readonly DependencyProperty FormStackProperty = DependencyProperty.Register("FormStack", typeof(FormStack), typeof(FormStackControl), new PropertyMetadata(null));
 		
 		/// <summary> Gets or sets the forms of this stack. </summary>
 		public FormStack FormStack
@@ -26,69 +26,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			get { return (FormStack)GetValue(FormStackProperty); }
 			set { SetValue(FormStackProperty, value); }
 		}
-		
-		private static void FormStackChanged(DependencyObject ASender, DependencyPropertyChangedEventArgs AArgs)
-		{
-			var LSender = (FormStackControl)ASender;
-			//LSender.UpdateSelectedForm();
-			LSender.UpdateFormStack();
-		}
-
-		private void UpdateFormStack()
-		{
-			//if (FormStackView == null)
-			//    FormStackView = new CollectionViewSource();
-			// TODO: is this detach/reattach necessary?
-			//FormStackView.View.CurrentChanged -= new EventHandler(CurrentFormStackChanged);
-			//FormStackView.Source = FormStack;
-			//FormStackView.View.MoveCurrentToFirst();
-			//FormStackView.View.CurrentChanged += new EventHandler(CurrentFormStackChanged);
-		}
-
-		//private void CurrentFormStackChanged(object ASender, EventArgs AArgs)
-		//{
-			
-		//}
-		
-		//public static readonly DependencyProperty FormStackViewProperty = DependencyProperty.Register("FormStackView", typeof(CollectionViewSource), typeof(FormStackControl), new PropertyMetadata(null));
-		
-		///// <summary> Gets or sets the collection view source that wraps the form stack. </summary>
-		//public CollectionViewSource FormStackView
-		//{
-		//    get { return (CollectionViewSource)GetValue(FormStackViewProperty); }
-		//    set { SetValue(FormStackViewProperty, value); }
-		//}
-		
-		//public static readonly DependencyProperty SelectedIndexProperty = DependencyProperty.Register("SelectedIndex", typeof(int), typeof(FormStackControl), new PropertyMetadata(-1, new PropertyChangedCallback(SelectedIndexChanged)));
-		
-		///// <summary> Gets or sets the index of the selected form in this stack. </summary>
-		//public int SelectedIndex
-		//{
-		//    get { return (int)GetValue(SelectedIndexProperty); }
-		//    set { SetValue(SelectedIndexProperty, value); }
-		//}
-		
-		//private static void SelectedIndexChanged(DependencyObject ASender, DependencyPropertyChangedEventArgs AArgs)
-		//{
-		//    ((FormStackControl)ASender).UpdateSelectedForm();
-		//}
-		
-		//public static readonly DependencyProperty SelectedFormProperty = DependencyProperty.Register("SelectedForm", typeof(FormControl), typeof(FormStackControl), new PropertyMetadata(null));
-		
-		///// <summary> Gets or sets the index of the selected form in this stack. </summary>
-		//public FormControl SelectedForm
-		//{
-		//    get { return (FormControl)GetValue(SelectedFormProperty); }
-		//    set { SetValue(SelectedFormProperty, value); }
-		//}
-
-		//public void UpdateSelectedForm()
-		//{
-		//    SelectedForm = 
-		//        (FormStack == null || SelectedIndex < 0 || SelectedIndex >= FormStack.Count) 
-		//            ? null 
-		//            : FormStack[SelectedIndex]; 
-		//}
 	}
 
 	public class FormStack : ObservableCollectionView<FormControl>

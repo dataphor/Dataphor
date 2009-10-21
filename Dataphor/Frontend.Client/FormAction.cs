@@ -95,7 +95,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		}
 	}
 
-	[PublishDefaultConstructor("Alphora.Dataphor.Frontend.Client.SourceLinkType,Alphora.Dataphor.Frontend.Client")]
+	[PublishDefaultConstructor("Alphora.Dataphor.Frontend.Client.SourceLinkType")]
 	public class ShowFormAction : Action, IShowFormAction
 	{
 		public ShowFormAction() {}

@@ -458,7 +458,8 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		#region Enabled / Disabled
 
 		private int FDisableCount;
-		private bool FBindIsEnabled;
+		
+		private bool FBindIsEnabled = true;
 		
 		public bool BindIsEnabled
 		{

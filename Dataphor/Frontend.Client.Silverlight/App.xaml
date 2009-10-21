@@ -56,16 +56,16 @@
     							</VisualStateGroup>
     						</VisualStateManager.VisualStateGroups>
     						<Border x:Name="Background" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" BorderBrush="Black" Background="{TemplateBinding Background}"/>
-    						<Rectangle Margin="3" RadiusY="5" RadiusX="5" >
-    							<Rectangle.Fill>
-    								<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-    									<GradientStop Color="#BFFFFFFF" Offset="0"/>
-    									<GradientStop Color="Transparent" Offset="0.289"/>
-    								</LinearGradientBrush>
-    							</Rectangle.Fill>
-    						</Rectangle>
     						<ContentPresenter x:Name="contentPresenter" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"/>
-    						<Rectangle x:Name="DisabledVisualElement" Fill="#FFFFFFFF" RadiusX="5" RadiusY="5" IsHitTestVisible="false" Opacity="0"/>
+							<Rectangle Margin="3" RadiusY="5" RadiusX="5" >
+								<Rectangle.Fill>
+									<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+										<GradientStop Color="#BFFFFFFF" Offset="0"/>
+										<GradientStop Color="Transparent" Offset="0.289"/>
+									</LinearGradientBrush>
+								</Rectangle.Fill>
+							</Rectangle>
+							<Rectangle x:Name="DisabledVisualElement" Fill="#FFFFFFFF" RadiusX="5" RadiusY="5" IsHitTestVisible="false" Opacity="0"/>
     						<Rectangle x:Name="FocusVisualElement" Stroke="#FF6DBDD1" StrokeThickness="1" RadiusX="5" RadiusY="5" Margin="1" IsHitTestVisible="false" Opacity="0"/>
     					</Grid>
     				</ControlTemplate>
@@ -192,7 +192,7 @@
     						Content="{Binding DataContext.Title, RelativeSource={RelativeSource TemplatedParent}}" 
     						HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" 
     						Padding="{TemplateBinding Padding}" 
-							IsTabStop="False"
+							IsChecked="{Binding IsSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
 							Style="{StaticResource TaskBarButton}" 
 							/>
     				</ControlTemplate>

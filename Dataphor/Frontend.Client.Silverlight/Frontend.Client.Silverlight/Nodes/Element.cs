@@ -57,6 +57,14 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			LBinding.Source = this;
 			FFrameworkElement.SetBinding(ToolTipService.ToolTipProperty, LBinding);
 			
+			LBinding = new Binding("BindVerticalAlignment");
+			LBinding.Source = this;
+			FFrameworkElement.SetBinding(FrameworkElement.VerticalAlignmentProperty, LBinding);
+			
+			LBinding = new Binding("BindHorizontalAlignment");
+			LBinding.Source = this;
+			FFrameworkElement.SetBinding(FrameworkElement.HorizontalAlignmentProperty, LBinding);
+
 			var LControl = FFrameworkElement as Control;
 			if (LControl != null)
 			{
@@ -137,6 +145,70 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		#endregion
 		
+		#region Alignment
+
+		protected System.Windows.VerticalAlignment ConvertVerticalAlignment(VerticalAlignment AValue)
+		{
+			switch (AValue)
+			{
+				case VerticalAlignment.Bottom : return System.Windows.VerticalAlignment.Bottom;
+				case VerticalAlignment.Top : return System.Windows.VerticalAlignment.Top;
+				default : /* case VerticalAlignment.Middle : */ return System.Windows.VerticalAlignment.Center;
+			}
+		}
+		
+		protected virtual void UpdateVerticalAlignment()
+		{
+			// pure virtual
+		}
+		
+		private System.Windows.VerticalAlignment FBindVerticalAlignment = System.Windows.VerticalAlignment.Stretch;
+		
+		public System.Windows.VerticalAlignment BindVerticalAlignment
+		{
+			get { return FBindVerticalAlignment; }
+			protected set
+			{
+				if (FBindVerticalAlignment != value)
+				{
+					FBindVerticalAlignment = value;
+					NotifyPropertyChanged("BindVerticalAlignment");
+				}
+			}
+		}
+
+		protected System.Windows.HorizontalAlignment ConvertHorizontalAlignment(HorizontalAlignment AValue)
+		{
+			switch (AValue)
+			{
+				case HorizontalAlignment.Left : return System.Windows.HorizontalAlignment.Left;
+				case HorizontalAlignment.Right : return System.Windows.HorizontalAlignment.Right;
+				default : /* case HorizontalAlignment.Middle : */ return System.Windows.HorizontalAlignment.Center;
+			}
+		}
+		
+		protected virtual void UpdateHorizontalAlignment()
+		{
+			// pure virtual
+		}
+		
+		private System.Windows.HorizontalAlignment FBindHorizontalAlignment = System.Windows.HorizontalAlignment.Stretch;
+		
+		public System.Windows.HorizontalAlignment BindHorizontalAlignment
+		{
+			get { return FBindHorizontalAlignment; }
+			protected set
+			{
+				if (FBindHorizontalAlignment != value)
+				{
+					FBindHorizontalAlignment = value;
+					NotifyPropertyChanged("BindHorizontalAlignment");
+				}
+			}
+		}
+
+		#endregion
+		
 		#region Binding
 		
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -169,19 +241,34 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				if (FVisible != value)
 				{
 					FVisible = value;
+					UpdateVisible();
+				}
+			}
+		}
+		
+		public virtual bool GetVisible()
+		{
+			return FVisible;
+		}
+		
+		private Visibility FBindVisibility;
+		
+		public Visibility BindVisibility
+		{
+			get { return FBindVisibility;  }
+			private set
+			{
+				if (FBindVisibility != value)
+				{
+					FBindVisibility = value;
 					NotifyPropertyChanged("BindVisibility");
 				}
 			}
 		}
 		
-		public bool GetVisible()
+		protected void UpdateVisible()
 		{
-			return false;	// unused, part of IVisible interface for other clients
-		}
-		
-		public Visibility BindVisibility
-		{
-			get { return FVisible ? Visibility.Visible : Visibility.Collapsed; }
+			BindVisibility = GetVisible() ? Visibility.Visible : Visibility.Collapsed;
 		}
 
 		#endregion
@@ -262,7 +349,8 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		protected void UpdateToolTip()
 		{
-			BindToolTip = GetHint();
+			var LHint = GetHint();
+			BindToolTip = String.IsNullOrEmpty(LHint) ? null : LHint;
 		}
 
 		private string FBindToolTip;
@@ -464,6 +552,9 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			UpdateTabStop();
 			UpdateMargins();
 			UpdateStyle();
+			UpdateVerticalAlignment();
+			UpdateHorizontalAlignment();
+			UpdateVisible();
 			Session.DispatchAndWait
 			(
 				(System.Action)

@@ -31,7 +31,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// Published
 
 		/// <summary>
-		/// VerticalAlignment specified the vertical placement of the control.
+		/// VerticalAlignment specified the vertical placement of the control given extra space.
 		/// </summary> <doc/>
 		/// <value> <para>VerticalAligmnent: Top|Middle|Bottom</para>
 		/// <para>Default: Top</para></value>

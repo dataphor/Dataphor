@@ -1,4 +1,4 @@
-	<namespace name="Alphora.Dataphor.Frontend.Client" assembly="SilverlightDAE">
+	<namespace name="Alphora.Dataphor.Frontend.Client" assembly="Alphora.Dataphor.Frontend.Client.Silverlight">
 		<nodetype name="module"/>
 		<nodetype name="source"/>
 		<nodetype name="sourceaction"/>
