@@ -9,13 +9,14 @@ using System.IO;
 using System.ComponentModel;
 using System.Collections.Specialized;
 
+using Alphora.Dataphor;
 using Alphora.Dataphor.BOP;
 using DAE = Alphora.Dataphor.DAE.Server;
 using System.Collections.Generic;
 
 namespace Alphora.Dataphor.Frontend.Client
 {
-	public class EventParams : Dictionary<string, object>
+	public class EventParams : IndexedDictionary<string, object>
 	{
 		public EventParams() : base() {}
 		

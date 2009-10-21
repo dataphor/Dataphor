@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace Alphora.Dataphor
 {
-	public sealed class IndexedDictionary<TKey, TValue> : Dictionary<TKey, TValue>
+	public class IndexedDictionary<TKey, TValue> : Dictionary<TKey, TValue>
 	{
 		public new TValue this [TKey AIndex]
 		{
