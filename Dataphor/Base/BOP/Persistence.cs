@@ -61,6 +61,13 @@ namespace Alphora.Dataphor.BOP
 			else
 				return ReflectionUtility.GetMemberType(AMember);
 		}
+		
+		/// <summary> Performs a case sensitive comparison on the namespace name, and a case insensitive comparison on the local name. </summary>
+		public static bool XNamesEqual(XName ALeft, XName ARight)
+		{
+			return String.Equals(ALeft.LocalName, ARight.LocalName, StringComparison.OrdinalIgnoreCase)
+				&& String.Equals(ALeft.NamespaceName, ARight.NamespaceName);
+		}
 
 		protected bool IsValueType(Type AType)
 		{

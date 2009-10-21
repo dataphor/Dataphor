@@ -344,7 +344,7 @@ namespace Alphora.Dataphor.BOP
 							if (IsBOPNode(LAttribute.Name))
 							{
 								LMemberInstance = AInstance;
-								if (LAttribute.Name == CXmlBOPName)
+								if (Persistence.XNamesEqual(LAttribute.Name, CXmlBOPName))
 								{
 									LMember = GetNameMemberInfo(LType);
 									if (LMember == null)

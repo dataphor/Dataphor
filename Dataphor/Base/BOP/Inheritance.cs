@@ -53,13 +53,6 @@ namespace Alphora.Dataphor.BOP
 			AElement.SetAttributeValue(AAttrName, AAttrValue);
 		}
 
-		/// <summary> Performs a case sensitive comparison on the namespace name, and a case insensitive comparison on the local name. </summary>
-		private static bool XNamesEqual(XName ALeft, XName ARight)
-		{
-			return String.Equals(ALeft.LocalName, ARight.LocalName, StringComparison.OrdinalIgnoreCase)
-				&& String.Equals(ALeft.NamespaceName, ARight.NamespaceName);
-		}
-		
 		/// <summary> Copies an element using ADoc to provide the context of the copy. </summary>
 		/// <param name="ADoc"> XDocument used to create/host the new node </param>
 		/// <param name="ANode"> XElement to copy </param>
@@ -70,7 +63,7 @@ namespace Alphora.Dataphor.BOP
 			XElement LTempElement = null;
 			foreach (XAttribute LCopyAttr in AElement.Attributes())
 			{
-				if (!XNamesEqual(LCopyAttr.Name, CXmlIBOPOrder)) // don't copy the ibop:order attribute in the merged doc
+				if (!Persistence.XNamesEqual(LCopyAttr.Name, CXmlIBOPOrder)) // don't copy the ibop:order attribute in the merged doc
 				{
 					AddAttr
 					(
@@ -121,7 +114,7 @@ namespace Alphora.Dataphor.BOP
 				if (LOriginalAttr == null) // add attr
 				{
 					LDiffFound = true;
-					if (!XNamesEqual(LModifiedAttr.Name, CXmlIBOPDiffFound))
+					if (!Persistence.XNamesEqual(LModifiedAttr.Name, CXmlIBOPDiffFound))
 						AddAttr(ADiffDoc, ref ADiffElement, AOriginalElement.Name, LModifiedAttr.Name, LModifiedAttr.Value);
 				}
 				else // compare attr value
@@ -402,7 +395,7 @@ namespace Alphora.Dataphor.BOP
 		{
 			// assumes the nodes are "matched" in in the document by FindNode()
 
-			if (!AIgnoreName && !XNamesEqual(AModifiedNode.Name, AOriginalNode.Name))
+			if (!AIgnoreName && !Persistence.XNamesEqual(AModifiedNode.Name, AOriginalNode.Name))
 			{
 				XElement LNewNode = new XElement(AModifiedNode.Name);
 				MergeAttrs(ADoc, AOriginalNode, ref LNewNode, true);
@@ -416,7 +409,7 @@ namespace Alphora.Dataphor.BOP
 			// merge the attributes
 			foreach (XAttribute LModifiedAttr in AModifiedNode.Attributes())
 			{
-				if (!XNamesEqual(LModifiedAttr.Name, CXmlIBOPOrder)) // don't put the ibop:order in the merged doc
+				if (!Persistence.XNamesEqual(LModifiedAttr.Name, CXmlIBOPOrder)) // don't put the ibop:order in the merged doc
 				{
 					// if the attribute name is default-<attribute name> and it's value is true then remove the appropriate attribute from the original node.
 					if (LModifiedAttr.Name.NamespaceName == Persistence.CBOPNamespaceURI && LModifiedAttr.Name.LocalName.StartsWith(Persistence.CBOPDefault))
