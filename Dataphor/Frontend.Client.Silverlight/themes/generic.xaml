@@ -10,11 +10,16 @@
 
 	<Style TargetType="local:FormControl">
 		<Setter Property="IsTabStop" Value="False" />
+		<Setter Property="Background" Value="{x:Null}" />
+		<Setter Property="HorizontalContentAlignment" Value="Center" />
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="local:FormControl">
-					<Grid x:Name="RootElement" Background="Transparent">
-						<ContentPresenter Content="{TemplateBinding Content}" />
+					<Grid x:Name="RootElement" Background="{TemplateBinding Background}">
+						<ContentPresenter Content="{TemplateBinding Content}" 
+							ContentTemplate="{TemplateBinding ContentTemplate}"
+							HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+							VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
 					</Grid>
 				</ControlTemplate>
 			</Setter.Value>
@@ -36,22 +41,23 @@
                     			<RowDefinition/>
                     			<RowDefinition Height="Auto" MinHeight="16"/>
                     		</Grid.RowDefinitions>
-							<ContentControl Margin="{TemplateBinding Padding}" 
+							<ContentPresenter Margin="{TemplateBinding Padding}"
 								HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
 								VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
 								Content="{Binding FormStacks.CurrentItem, RelativeSource={RelativeSource TemplatedParent}}"
 								/>
-                   			<local:ButtonScrollViewer x:Name="TaskBar" Grid.Row="1">
-                    			<local:ButtonScrollViewer.Background>
-                    				<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                    					<GradientStop Color="#FF4E5165" Offset="0"/>
-                    					<GradientStop Color="#FF9A9EB7" Offset="1"/>
-                    				</LinearGradientBrush>
-                    			</local:ButtonScrollViewer.Background>
-                   				<ListBox Background="{x:Null}" BorderBrush="{x:Null}" MinHeight="16" Foreground="White" 
-                   					ItemsPanel="{StaticResource HorizontalItemsPanel}" ItemsSource="{TemplateBinding FormStacks}" 
-                   					ItemContainerStyle="{StaticResource TaskBarItemStyle}" Style="{StaticResource TaskBar}"/>   
-							</local:ButtonScrollViewer>
+							<ListBox BorderBrush="{x:Null}" MinHeight="16" Foreground="White" Grid.Row="1"
+               					ItemsPanel="{StaticResource HorizontalItemsPanel}" 
+               					ItemsSource="{TemplateBinding FormStacks}"
+               					ItemContainerStyle="{StaticResource TaskBarItemStyle}" 
+               					Style="{StaticResource TaskBar}">
+								<ListBox.Background>
+									<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+										<GradientStop Color="#FF4E5165" Offset="0"/>
+										<GradientStop Color="#FF9A9EB7" Offset="1"/>
+									</LinearGradientBrush>
+								</ListBox.Background>
+							</ListBox>
                     	</Grid>
                     </Border>
                 </ControlTemplate>
@@ -72,7 +78,8 @@
                     	</Grid.RowDefinitions>
                     	<local:ButtonScrollViewer HorizontalAlignment="Left">
                     		<ListBox Background="{x:Null}" BorderBrush="{x:Null}" 
-                    			ItemsPanel="{StaticResource HorizontalItemsPanel}" ItemsSource="{TemplateBinding FormStack}"
+                    			ItemsPanel="{StaticResource HorizontalItemsPanel}" 
+                    			ItemsSource="{TemplateBinding FormStack}"
                     			Style="{StaticResource BreadCrumbListBoxStyle}" 
                     			ItemContainerStyle="{StaticResource BreadCrumbItemContainerStyle}" />
                     	</local:ButtonScrollViewer>
@@ -187,44 +194,63 @@
             <Setter.Value>
                 <ControlTemplate TargetType="local:ButtonScrollViewer">
                     <Grid Background="{TemplateBinding Background}">
-                		<Grid.ColumnDefinitions>
-                			<ColumnDefinition Width="Auto"/>
-                			<ColumnDefinition/>
-                			<ColumnDefinition Width="Auto"/>
-                		</Grid.ColumnDefinitions>
                 		<VisualStateManager.VisualStateGroups>
                 			<VisualStateGroup x:Name="Right">
-                				<VisualState x:Name="RightDisabled">
+                				<VisualState x:Name="RightEnabled">
                 					<Storyboard>
                 						<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="RightButton" Storyboard.TargetProperty="(UIElement.Visibility)">
                 							<DiscreteObjectKeyFrame KeyTime="00:00:00">
                 								<DiscreteObjectKeyFrame.Value>
-                									<Visibility>Collapsed</Visibility>
+                									<Visibility>Visible</Visibility>
                 								</DiscreteObjectKeyFrame.Value>
                 							</DiscreteObjectKeyFrame>
                 						</ObjectAnimationUsingKeyFrames>
                 					</Storyboard>
                 				</VisualState>
-                			</VisualStateGroup>
+								<VisualState x:Name="RightDisabled">
+									<Storyboard>
+										<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="RightButton" Storyboard.TargetProperty="(UIElement.Visibility)">
+											<DiscreteObjectKeyFrame KeyTime="00:00:00">
+												<DiscreteObjectKeyFrame.Value>
+													<Visibility>Collapsed</Visibility>
+												</DiscreteObjectKeyFrame.Value>
+											</DiscreteObjectKeyFrame>
+										</ObjectAnimationUsingKeyFrames>
+									</Storyboard>
+								</VisualState>
+							</VisualStateGroup>
                 			<VisualStateGroup x:Name="Left">
-                				<VisualState x:Name="LeftDisabled">
+                				<VisualState x:Name="LeftEnabled">
                 					<Storyboard>
                 						<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="LeftButton" Storyboard.TargetProperty="(UIElement.Visibility)">
                 							<DiscreteObjectKeyFrame KeyTime="00:00:00">
                 								<DiscreteObjectKeyFrame.Value>
-                									<Visibility>Collapsed</Visibility>
+                									<Visibility>Visible</Visibility>
                 								</DiscreteObjectKeyFrame.Value>
                 							</DiscreteObjectKeyFrame>
                 						</ObjectAnimationUsingKeyFrames>
                 					</Storyboard>
                 				</VisualState>
-                			</VisualStateGroup>
+								<VisualState x:Name="LeftDisabled">
+									<Storyboard>
+										<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="LeftButton" Storyboard.TargetProperty="(UIElement.Visibility)">
+											<DiscreteObjectKeyFrame KeyTime="00:00:00">
+												<DiscreteObjectKeyFrame.Value>
+													<Visibility>Collapsed</Visibility>
+												</DiscreteObjectKeyFrame.Value>
+											</DiscreteObjectKeyFrame>
+										</ObjectAnimationUsingKeyFrames>
+									</Storyboard>
+								</VisualState>
+							</VisualStateGroup>
                 		</VisualStateManager.VisualStateGroups>
-                		<RepeatButton x:Name="LeftButton" Padding="3" Background="{x:Null}" BorderBrush="#FF3A3A4F" Style="{StaticResource ButtonScrollViewerButtonStyle}">
-                			<Path Fill="#FF848485" Height="16" Width="5" Data="M5,0 L0,8 L5,16 Z"/>
-                		</RepeatButton>
-                		<ScrollContentPresenter x:Name="ScrollPresenter" Grid.Column="1" Margin="{TemplateBinding Padding}" CanHorizontallyScroll="True" CanVerticallyScroll="False"/>
-                		<RepeatButton x:Name="RightButton" Grid.Column="2" Padding="3" Style="{StaticResource ButtonScrollViewerButtonStyle}">
+                		<local:ScrollPresenter x:Name="ScrollPresenter" Content="{TemplateBinding Content}" 
+                			Margin="{TemplateBinding Padding}" 
+                			CanVerticallyScroll="False"/>
+						<RepeatButton x:Name="LeftButton" HorizontalAlignment="Left" Padding="3" Style="{StaticResource ButtonScrollViewerButtonStyle}">
+							<Path Fill="#FF848485" Height="16" Width="5" Data="M5,0 L0,8 L5,16 Z"/>
+						</RepeatButton>
+						<RepeatButton x:Name="RightButton" HorizontalAlignment="Right" Padding="3" Style="{StaticResource ButtonScrollViewerButtonStyle}">
                 			<Path Fill="#FF848485" Height="16" Width="5" Data="M0,0 L5,8 L0,16 Z"/>
                 		</RepeatButton>
                 	</Grid>

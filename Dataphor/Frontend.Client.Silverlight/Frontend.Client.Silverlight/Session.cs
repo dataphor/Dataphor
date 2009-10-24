@@ -375,8 +375,19 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				the session thread in order to properly synchronize.
 		*/
 		
+		private static Dispatcher FDispatcher;
+		
 		/// <summary> Gets or sets the dispatcher used to synchronize onto the main UI thread. </summary>
-		public static Dispatcher Dispatcher { get; set; }
+		public static Dispatcher Dispatcher 
+		{ 
+			get
+			{
+				if (FDispatcher == null)
+					FDispatcher = Deployment.Current.Dispatcher;
+				return FDispatcher;
+			}
+			set { FDispatcher = value; }
+		}
 
 		/// <summary> Returns the verified non-null main UI thread dispatcher. </summary>
 		public static Dispatcher CheckedDispatcher

@@ -165,14 +165,12 @@
     		<Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
     		<Setter Property="Template">
     			<Setter.Value>
-    				<ControlTemplate TargetType="ListBox">
-    					<Grid Background="{TemplateBinding Background}">
-    						<Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="2">
-    							<local:ButtonScrollViewer x:Name="ScrollViewer" Padding="{TemplateBinding Padding}" TabNavigation="{TemplateBinding TabNavigation}">
-    								<ItemsPresenter/>
-    							</local:ButtonScrollViewer>
-    						</Border>
-    					</Grid>
+					<ControlTemplate TargetType="ListBox">
+						<Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="2" Background="{TemplateBinding Background}">
+							<local:ButtonScrollViewer x:Name="ScrollViewer" Padding="{TemplateBinding Padding}" TabNavigation="{TemplateBinding TabNavigation}" HorizontalContentAlignment="Left">
+								<ItemsPresenter/>
+							</local:ButtonScrollViewer>
+						</Border>
     				</ControlTemplate>
     			</Setter.Value>
     		</Setter>
@@ -180,6 +178,7 @@
 		
     	<Style x:Key="TaskBarItemStyle" TargetType="ListBoxItem">
     		<Setter Property="Padding" Value="3"/>
+			<Setter Property="Margin" Value="2,0,0,0" />
     		<Setter Property="HorizontalContentAlignment" Value="Center"/>
     		<Setter Property="Background" Value="Transparent"/>
     		<Setter Property="BorderThickness" Value="1"/>
@@ -189,7 +188,7 @@
     				<ControlTemplate TargetType="ListBoxItem">
     					<ToggleButton 
 							x:Name="ItemButton" 
-    						Content="{Binding DataContext.Title, RelativeSource={RelativeSource TemplatedParent}}" 
+    						Content="{Binding DataContext.FormStack.CurrentItem.Title, RelativeSource={RelativeSource TemplatedParent}}" 
     						HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" 
     						Padding="{TemplateBinding Padding}" 
 							IsChecked="{Binding IsSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
@@ -201,53 +200,58 @@
     	</Style>
 
     	<Style x:Key="ButtonScrollViewerButtonStyle" TargetType="RepeatButton">
-    		<Setter Property="Background" Value="{x:Null}"/>
+    		<Setter Property="Background" Value="#FFB6BCE2"/>
     		<Setter Property="Padding" Value="3"/>
-    		<Setter Property="BorderBrush" Value="#FF101032"/>
+    		<Setter Property="BorderBrush" Value="Transparent" />
+			<Setter Property="ClickMode" Value="Hover" />
     		<Setter Property="Template">
     			<Setter.Value>
     				<ControlTemplate TargetType="RepeatButton">
-    					<Grid>
+    					<Grid Background="{TemplateBinding Background}">
     						<VisualStateManager.VisualStateGroups>
     							<VisualStateGroup x:Name="CommonStates">
     								<VisualState x:Name="Normal"/>
     								<VisualState x:Name="MouseOver">
     									<Storyboard>
     										<DoubleAnimationUsingKeyFrames Storyboard.TargetName="BackgroundAnimation" Storyboard.TargetProperty="Opacity">
-    											<SplineDoubleKeyFrame KeyTime="0" Value="1"/>
+    											<SplineDoubleKeyFrame KeyTime="0" Value="0.25"/>
     										</DoubleAnimationUsingKeyFrames>
     									</Storyboard>
     								</VisualState>
     								<VisualState x:Name="Pressed">
     									<Storyboard>
     										<DoubleAnimationUsingKeyFrames Storyboard.TargetName="BackgroundAnimation" Storyboard.TargetProperty="Opacity">
-    											<SplineDoubleKeyFrame KeyTime="0" Value="1"/>
+    											<SplineDoubleKeyFrame KeyTime="0" Value="0.5"/>
     										</DoubleAnimationUsingKeyFrames>
     									</Storyboard>
     								</VisualState>
-    								<VisualState x:Name="Disabled"/>
+    								<VisualState x:Name="Disabled">
+    									<Storyboard>
+    										<DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="BackgroundAnimation" Storyboard.TargetProperty="(UIElement.Opacity)">
+    											<EasingDoubleKeyFrame KeyTime="00:00:00" Value="0.3"/>
+    										</DoubleAnimationUsingKeyFrames>
+    										<ColorAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="BackgroundAnimation" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)">
+    											<EasingColorKeyFrame KeyTime="00:00:00" Value="#FF9D9D9D"/>
+    										</ColorAnimationUsingKeyFrames>
+    									</Storyboard>
+    								</VisualState>
     							</VisualStateGroup>
     							<VisualStateGroup x:Name="FocusStates">
     								<VisualState x:Name="Focused"/>
     								<VisualState x:Name="Unfocused"/>
     							</VisualStateGroup>
     						</VisualStateManager.VisualStateGroups>
-    						<Border x:Name="Background" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3">
-    							<Grid Margin="1" Background="{TemplateBinding Background}">
-    								<Border x:Name="BackgroundAnimation" Opacity="0" Background="#FF448DCA"/>
-    							</Grid>
-    						</Border>
+    						<Border x:Name="BackgroundAnimation" Opacity="0" Background="White" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}"/>
     						<ContentPresenter x:Name="contentPresenter" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"/>
     					</Grid>
     				</ControlTemplate>
     			</Setter.Value>
     		</Setter>
+    		<Setter Property="BorderThickness" Value="1"/>
     	</Style>
 
 		<Style x:Key="BreadCrumbListBoxStyle" TargetType="ListBox">
     		<Setter Property="IsTabStop" Value="False"/>
-    		<Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
-    		<Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
     		<Setter Property="Template">
     			<Setter.Value>
     				<ControlTemplate TargetType="ListBox">

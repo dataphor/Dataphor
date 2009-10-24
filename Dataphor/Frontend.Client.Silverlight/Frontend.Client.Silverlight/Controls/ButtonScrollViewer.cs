@@ -6,7 +6,7 @@ using System.Windows.Controls.Primitives;
 
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
-	[TemplatePart(Name = "ScrollPresenter", Type = typeof(ScrollContentPresenter))]
+	[TemplatePart(Name = "ScrollPresenter", Type = typeof(ScrollPresenter))]
 	[TemplatePart(Name = "LeftButton", Type = typeof(ButtonBase))]
 	[TemplatePart(Name = "RightButton", Type = typeof(ButtonBase))]
 	[TemplateVisualState(GroupName = "Left", Name = "LeftDisabled")]
@@ -22,7 +22,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		public override void OnApplyTemplate()
 		{
-			ScrollPresenter = GetTemplateChild("ScrollPresenter") as ScrollContentPresenter;
+			ScrollPresenter = GetTemplateChild("ScrollPresenter") as ScrollPresenter;
 			LeftButton = GetTemplateChild("LeftButton") as ButtonBase;
 			RightButton = GetTemplateChild("RightButton") as ButtonBase;
 			
@@ -31,9 +31,9 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			UpdateStates(false);
 		}
 		
-		private ScrollContentPresenter FScrollPresenter;
+		private ScrollPresenter FScrollPresenter;
 		
-		public ScrollContentPresenter ScrollPresenter
+		public ScrollPresenter ScrollPresenter
 		{
 			get { return FScrollPresenter; }
 			set
@@ -41,19 +41,37 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				if (FScrollPresenter != value)
 				{
 					if (FScrollPresenter != null)
-						FScrollPresenter.LayoutUpdated -= ScrollPresenterLayoutUpdated;
+					{
+						FScrollPresenter.MeasurementsChanged -= ScrollPresenterMeasurementsOrOffsetsChanged;
+						FScrollPresenter.OffsetsChanged -= ScrollPresenterMeasurementsOrOffsetsChanged;
+					}
 					FScrollPresenter = value;
 					if (FScrollPresenter != null)
-						FScrollPresenter.LayoutUpdated += ScrollPresenterLayoutUpdated;
+					{
+						FScrollPresenter.MeasurementsChanged += ScrollPresenterMeasurementsOrOffsetsChanged;
+						FScrollPresenter.OffsetsChanged += ScrollPresenterMeasurementsOrOffsetsChanged;
+					}
 				}
 			}
 		}
-		
-		private void ScrollPresenterLayoutUpdated(object ASender, EventArgs AArgs)
+
+		private void ScrollPresenterSizeChanged(object sender, SizeChangedEventArgs e)
 		{
-			UpdateStates(true);
+			InvalidateMeasure();
+		}
+		
+		private void ScrollPresenterMeasurementsOrOffsetsChanged(object ASender, EventArgs AArgs)
+		{
+			InvalidateMeasure();
 		}
 
+		protected override Size MeasureOverride(Size availableSize)
+		{
+			var LResult = base.MeasureOverride(availableSize);
+			UpdateStates(false);
+			return LResult;			
+		}
+		
 		protected void UpdateStates(bool AUseTransitions)
 		{
 			if (FScrollPresenter != null)
@@ -91,7 +109,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		private void LeftButtonClick(object ASender, RoutedEventArgs AArgs)
 		{
 			if (FScrollPresenter != null)
-				FScrollPresenter.LineLeft();
+				FScrollPresenter.ScrollToHorizontalOffset(FScrollPresenter.HorizontalOffset - 16);
 		}
 
 		private ButtonBase FRightButton;
@@ -115,7 +133,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		private void RightButtonClick(object ASender, RoutedEventArgs AArgs)
 		{
 			if (FScrollPresenter != null)
-				FScrollPresenter.LineRight();
+				FScrollPresenter.ScrollToHorizontalOffset(FScrollPresenter.HorizontalOffset + 10);
 		}
 	}
 }

@@ -28,8 +28,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		{
 			RootVisual = new Main();
 			
-			// Ensure that the silverlight frontend session has a static dispatcher
-			Silverlight.Session.Dispatcher = RootVisual.Dispatcher;
+			// Ensure that the long assembly names are registered
 			ReflectionUtility.EnsureAssemblyByName();
 		}
 

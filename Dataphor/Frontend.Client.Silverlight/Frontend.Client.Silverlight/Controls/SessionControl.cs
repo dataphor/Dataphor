@@ -25,6 +25,16 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			get { return (FormStacks)GetValue(FormStacksProperty); }
 			set { SetValue(FormStacksProperty, value); }
 		}
+
+
+		public static readonly DependencyProperty IsBusyProperty = DependencyProperty.Register("IsBusy", typeof(bool), typeof(SessionControl), new PropertyMetadata(false));
+
+		/// <summary> Gets or sets whether or not the session is busy processing. </summary>
+		public bool IsBusy
+		{
+			get { return (bool)GetValue(IsBusyProperty); }
+			set { SetValue(IsBusyProperty, value); }
+		}
 	}
 	
 	public class FormStacks : ObservableCollectionView<FormStackControl>

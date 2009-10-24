@@ -20,6 +20,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			LConnectItem.HostName = "localhost";
 			LConnectItem.InstanceName = "Draft";
 			LConnectItem.Status = ConnectStatus.Login;
+			LConnectItem.BeginLogin();
 			#endif
 			
 			var LConnectForm = new ConnectForm(LConnectItem);
