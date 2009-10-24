@@ -77,61 +77,43 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				if (FForceAcceptReject != value)
 				{
 					FForceAcceptReject = value;
-					InternalUpdateAcceptReject();
+					UpdateAcceptReject();
 				}
 			}
 		}
-		
-		
-		private bool FBindIsAcceptReject;
-		public bool BindIsAcceptReject
+
+		private void UpdateAcceptReject()
 		{
-			get { return FBindIsAcceptReject; }
-			private set
-			{
-				if (FBindIsAcceptReject != value)
-				{
-					FBindIsAcceptReject = value;
-					NotifyPropertyChanged("BindIsAcceptReject");
-				}
-			}
+			UpdateBinding(FormControl.IsAcceptRejectProperty);
+		}
+		
+		private object UIGetIsAcceptReject()
+		{
+			return IsAcceptReject;
 		}
 		
 		public bool IsAcceptReject
 		{
-			get { return FBindIsAcceptReject; }
-		}
-
-		protected void InternalUpdateAcceptReject()
-		{
-			BindIsAcceptReject = 
-				ForceAcceptReject 
-					|| (FMode != FormMode.None) 
-					|| 
-					(
-						(MainSource != null) &&
-						(MainSource.DataView != null) &&
+			get 
+			{ 
+				return 
+					ForceAcceptReject 
+						|| (FMode != FormMode.None) 
+						|| 
 						(
-							(MainSource.DataView.State == DAE.Client.DataSetState.Edit) || 
-							(MainSource.DataView.State == DAE.Client.DataSetState.Insert)
-						)
-					);
+							(MainSource != null) &&
+							(MainSource.DataView != null) &&
+							(
+								(MainSource.DataView.State == DAE.Client.DataSetState.Edit) || 
+								(MainSource.DataView.State == DAE.Client.DataSetState.Insert)
+							)
+						);
+			}
 		}
 
 		protected override void MainSourceStateChanged(DAE.Client.DataLink ALink, DAE.Client.DataSet ADataSet)
 		{
-			if (Active)
-				InternalUpdateAcceptReject();
-		}
-
-		#endregion
-
-		#region Node
-
-		protected override void Activate()
-		{
-			base.Activate();
-			InternalUpdateAcceptReject();
+			UpdateAcceptReject();
 		}
 
 		#endregion
@@ -383,7 +365,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 						MainSource.DataView.Edit();
 					break;
 			}
-			InternalUpdateAcceptReject();
+			UpdateAcceptReject();
 		}
 
 		public void Show()
@@ -424,7 +406,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				try
 				{
 					var LSession = (Silverlight.Session)HostNode.Session;
-					InternalUpdateAcceptReject();
 					if (AParentForm != null)
 						LSession.Forms.AddModal(this, AParentForm);
 					else
@@ -469,12 +450,12 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				if (FBindIsEnabled != value)
 				{
 					FBindIsEnabled = value;
-					NotifyPropertyChanged("BindIsEnabled");
+					UpdateBinding(Control.IsEnabledProperty);
 				}
 			}
 		}
 		
-		public bool GetEnabled()
+		public virtual bool GetEnabled()
 		{
 			return FDisableCount == 0;
 		}
@@ -490,6 +471,11 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		{
 			FDisableCount++;
 			BindIsEnabled = false;
+		}
+		
+		private object UIGetIsEnabled()
+		{
+			return GetEnabled();
 		}
 
 		#endregion
@@ -526,19 +512,26 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		protected override void InitializeFrameworkElement()
 		{
 			base.InitializeFrameworkElement();
-			
-			var LForm = Form;
-			LForm.CloseRequested += FormCloseRequested;
-			
-			var LBinding = new Binding("BindIsEnabled");
-			LBinding.Source = this;
-			LForm.SetBinding(Control.IsEnabledProperty, LBinding);
-
-			LBinding = new Binding("BindText");
-			LBinding.Source = this;
-			LForm.SetBinding(FormControl.TitleProperty, LBinding);
+			Form.CloseRequested += FormCloseRequested;
 		}
 		
+		protected override void RegisterBindings()
+		{
+			AddBinding(Control.IsEnabledProperty, new Func<object>(UIGetIsEnabled));
+			AddBinding(FormControl.TitleProperty, new Func<object>(UIGetText));
+			AddBinding(FormControl.IsAcceptRejectProperty, new Func<object>(UIGetIsAcceptReject));
+		}
+		
+		private object UIGetText()
+		{
+			return GetText();
+		}
+
+		protected override void UpdateText()
+		{
+			UpdateBinding(FormControl.TitleProperty);
+		}
+
 		#endregion
 	}
 

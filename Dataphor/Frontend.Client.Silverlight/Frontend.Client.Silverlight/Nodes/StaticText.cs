@@ -15,13 +15,11 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			return new TextBlock();
 		}
 
-		protected override void InitializeFrameworkElement()
+		protected override void RegisterBindings()
 		{
-			base.InitializeFrameworkElement();
-			
-			var LBinding = new Binding("BindText");
-			LBinding.Source = this;
-			FrameworkElement.SetBinding(TextBlock.TextProperty, LBinding);
+			base.RegisterBindings();
+			AddBinding(TextBlock.TextProperty, new Func<object>(UIGetText));
+			AddBinding(FrameworkElement.WidthProperty, new Func<object>(UIGetWidth));
 		}
 
 		protected override string GetDefaultStyle()
@@ -40,14 +38,14 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				if (FText != value)
 				{
 					FText = value;
-					NotifyPropertyChanged("BindText");
+					UpdateBinding(TextBlock.TextProperty);
 				}
 			}
 		}
 
-		public string BindText
+		private object UIGetText()
 		{
-			get { return FText; }
+			return Text;
 		}
 
 		private int FWidth = CDefaultWidth;
@@ -62,35 +60,14 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 					if (FWidth < 1)
 						throw new ClientException(ClientException.Codes.CharsPerLineInvalid);
 					FWidth = value;
-					UpdateWidth();
+					UpdateBinding(FrameworkElement.WidthProperty);
 				}
 			}
 		}
 
-		protected void UpdateWidth()
+		private object UIGetWidth()
 		{
-			BindWidth = FWidth * Silverlight.Session.AverageCharacterWidth;
-		}
-		
-		private double FBindWidth;
-		
-		public double BindWidth
-		{
-			get { return FBindWidth; }
-			set
-			{
-				if (FBindWidth != value)
-				{
-					FBindWidth = value;
-					NotifyPropertyChanged("BindWidth");
-				}
-			}
-		}
-
-		protected override void Activate()
-		{
-			UpdateWidth();
-			base.Activate();
+			return FWidth * Silverlight.Session.AverageCharacterWidth;
 		}
 	}
 }

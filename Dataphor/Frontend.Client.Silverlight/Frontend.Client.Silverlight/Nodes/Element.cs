@@ -13,11 +13,12 @@ using System.Windows.Threading;
 using System.Windows.Controls;
 
 using Alphora.Dataphor.BOP;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
 	/// <summary> Base node for all visible nodes. </summary>
-	public abstract class Element : Node, IElement, INotifyPropertyChanged
+	public abstract class Element : Node, IElement
 	{
 		public const int CDefaultMarginLeft = 2;
 		public const int CDefaultMarginRight = 2;
@@ -43,40 +44,11 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		}
 		
 		/// <remarks> This method is invoked on the main thread. </remarks>
+		protected abstract FrameworkElement CreateFrameworkElement();
+
+		/// <remarks> This method is invoked on the main thread. </remarks>
 		protected virtual void InitializeFrameworkElement()
 		{
-			var LBinding = new Binding("BindMargin");
-			LBinding.Source = this;
-			FFrameworkElement.SetBinding(FrameworkElement.MarginProperty, LBinding);
-			
-			LBinding = new Binding("BindVisibility");
-			LBinding.Source = this;
-			FFrameworkElement.SetBinding(FrameworkElement.VisibilityProperty, LBinding);
-			
-			LBinding = new Binding("BindToolTip");
-			LBinding.Source = this;
-			FFrameworkElement.SetBinding(ToolTipService.ToolTipProperty, LBinding);
-			
-			LBinding = new Binding("BindVerticalAlignment");
-			LBinding.Source = this;
-			FFrameworkElement.SetBinding(FrameworkElement.VerticalAlignmentProperty, LBinding);
-			
-			LBinding = new Binding("BindHorizontalAlignment");
-			LBinding.Source = this;
-			FFrameworkElement.SetBinding(FrameworkElement.HorizontalAlignmentProperty, LBinding);
-
-			var LControl = FFrameworkElement as Control;
-			if (LControl != null)
-			{
-				LBinding = new Binding("BindIsTabStop");
-				LBinding.Source = this;
-				LControl.SetBinding(Control.IsTabStopProperty, LBinding);
-				
-				LBinding = new Binding("BindStyle");
-				LBinding.Source = this;
-				LControl.SetBinding(Control.StyleProperty, LBinding);
-			}
-			
 			if (Parent != null)
 			{
 				var LParentContainer = Parent as ISilverlightContainerElement;
@@ -85,8 +57,107 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			}
 		}
 		
-		protected abstract FrameworkElement CreateFrameworkElement();
+		#endregion
+		
+		#region Binding
+		
+		private Dictionary<DependencyProperty, Func<object>> FBindings = new Dictionary<DependencyProperty, Func<object>>();
+		
+		protected void AddBinding(DependencyProperty AProperty, Func<object> AGetter)
+		{
+			FBindings.Add(AProperty, AGetter);
+			UpdateBinding(AProperty);
+		}
+		
+		/// <remarks> This method is invoked on the main thread. </remarks>
+		private void InternalRemoveBinding(FrameworkElement AElement, DependencyProperty AProperty)
+		{
+			AElement.ClearValue(AProperty);
+		}
+		
+		protected void RemoveBinding(DependencyProperty AProperty)
+		{
+			FBindings.Remove(AProperty);
+			if (Active)
+				Session.DispatcherInvoke(new Action<FrameworkElement, DependencyProperty>(InternalRemoveBinding), FrameworkElement, AProperty);
+		}
+		
+		/// <remarks> This method is invoked on the main thread. </remarks>
+		private void InternalUpdateBinding(FrameworkElement AElement, DependencyProperty AProperty, object AValue)
+		{
+			AElement.SetValue(AProperty, AValue);
+		}
+		
+		protected void UpdateBinding(DependencyProperty AProperty)
+		{
+			Func<object> LGetter;
+			if (Active && FBindings.TryGetValue(AProperty, out LGetter))
+				Session.DispatcherInvoke(new Action<FrameworkElement, DependencyProperty, object>(InternalUpdateBinding), FrameworkElement, AProperty, LGetter());
+		}
+		
+		protected void UpdateBindings(DependencyProperty[] AProperties)
+		{
+			var LElement = FrameworkElement;
+			if (LElement != null)
+			{
+				object[] LValues = new object[AProperties.Length];
+				for (int i = 0; i < AProperties.Length; i++)
+					LValues[i] = FBindings[AProperties[i]]();
+					
+				InternalUpdateBindings(LElement, AProperties, LValues);
+			}
+		}
+		
+		protected void UpdateAllBindings()
+		{
+			var LElement = FrameworkElement;
+			if (LElement != null)
+			{
+				// Snapshot the properties and values on the main thread to carry across threads
+				DependencyProperty[] LProperties = new DependencyProperty[FBindings.Count];
+				object[] LValues = new object[FBindings.Count];
+				int LIndex = 0;
+				foreach (KeyValuePair<DependencyProperty, Func<object>> LEntry in FBindings)
+				{
+					LProperties[LIndex] = LEntry.Key;
+					LValues[LIndex] = LEntry.Value();
+					LIndex++;
+				}
 
+				InternalUpdateBindings(LElement, LProperties, LValues);
+			}
+		}
+
+		private void InternalUpdateBindings(FrameworkElement LElement, DependencyProperty[] LProperties, object[] LValues)
+		{
+			Session.DispatcherInvoke
+			(
+				(System.Action)
+				(
+					() =>
+					{
+						for (int i = 0; i < LProperties.Length; i++)
+							InternalUpdateBinding(LElement, LProperties[i], LValues[i]);
+					}
+				)
+			);
+		}
+		
+		/// <remarks> This method is invoked on the session thread. </remarks>
+		protected virtual void RegisterBindings()
+		{
+			AddBinding(FrameworkElement.MarginProperty, new Func<object>(UIGetMargin));
+			AddBinding(FrameworkElement.VisibilityProperty, new Func<object>(UIGetVisibility));
+			AddBinding(ToolTipService.ToolTipProperty, new Func<object>(UIGetToolTip));
+			AddBinding(FrameworkElement.VerticalAlignmentProperty, new Func<object>(UIGetVerticalAlignment));
+			AddBinding(FrameworkElement.HorizontalAlignmentProperty, new Func<object>(UIGetHorizontalAlignment));
+			if (FFrameworkElement is Control)
+			{
+				AddBinding(Control.IsTabStopProperty, new Func<object>(UIGetIsTabStop));
+				AddBinding(Control.StyleProperty, new Func<object>(UIGetStyle));
+			}
+		}
+		
 		#endregion
 		
 		#region Styles
@@ -102,7 +173,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				if (FStyle != value)
 				{
 					FStyle = value;
-					UpdateStyle();
+					UpdateBinding(Control.StyleProperty);
 				}
 			}
 		}
@@ -119,28 +190,13 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			return null;
 		}
 		
-		protected void UpdateStyle()
+		private object UIGetStyle()
 		{
 			var LStyleName = GetStyle();
 			if (String.IsNullOrEmpty(LStyleName))
-				BindStyle = null;
+				return null;
 			else
-				Session.DispatcherInvoke((System.Action)(() => { BindStyle = Application.Current.Resources[LStyleName] as Style; }));
-		}
-		
-		private Style FBindStyle;
-		
-		public Style BindStyle
-		{
-			get { return FBindStyle; }
-			private set
-			{
-				if (FBindStyle != value)
-				{
-					FBindStyle = value;
-					NotifyPropertyChanged("BindStyle");
-				}
-			}
+				return Session.DispatchAndWait((System.Func<object>)(() => { return Application.Current.Resources[LStyleName]; }));
 		}
 		
 		#endregion
@@ -157,26 +213,11 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			}
 		}
 		
-		protected virtual void UpdateVerticalAlignment()
+		protected virtual object UIGetVerticalAlignment()
 		{
-			// pure virtual
+			return System.Windows.VerticalAlignment.Stretch;
 		}
 		
-		private System.Windows.VerticalAlignment FBindVerticalAlignment = System.Windows.VerticalAlignment.Stretch;
-		
-		public System.Windows.VerticalAlignment BindVerticalAlignment
-		{
-			get { return FBindVerticalAlignment; }
-			protected set
-			{
-				if (FBindVerticalAlignment != value)
-				{
-					FBindVerticalAlignment = value;
-					NotifyPropertyChanged("BindVerticalAlignment");
-				}
-			}
-		}
-
 		protected System.Windows.HorizontalAlignment ConvertHorizontalAlignment(HorizontalAlignment AValue)
 		{
 			switch (AValue)
@@ -187,44 +228,11 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			}
 		}
 		
-		protected virtual void UpdateHorizontalAlignment()
+		protected virtual object UIGetHorizontalAlignment()
 		{
-			// pure virtual
+			return System.Windows.HorizontalAlignment.Stretch;
 		}
 		
-		private System.Windows.HorizontalAlignment FBindHorizontalAlignment = System.Windows.HorizontalAlignment.Stretch;
-		
-		public System.Windows.HorizontalAlignment BindHorizontalAlignment
-		{
-			get { return FBindHorizontalAlignment; }
-			protected set
-			{
-				if (FBindHorizontalAlignment != value)
-				{
-					FBindHorizontalAlignment = value;
-					NotifyPropertyChanged("BindHorizontalAlignment");
-				}
-			}
-		}
-
-		#endregion
-		
-		#region Binding
-		
-		public event PropertyChangedEventHandler PropertyChanged;
-	
-		/// <summary> Invokes a property changes notification on the main (UI) thread. </summary>
-		protected void NotifyPropertyChanged(string AName)
-		{
-			if (PropertyChanged != null)
-			{
-				var LDispatcher = Session.CheckedDispatcher;
-				if (LDispatcher.CheckAccess())
-					PropertyChanged(this, new PropertyChangedEventArgs(AName));
-				else
-					Session.DispatcherInvoke(PropertyChanged, this, new PropertyChangedEventArgs(AName));
-			}
-		}
 
 		#endregion
 		
@@ -241,7 +249,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				if (FVisible != value)
 				{
 					FVisible = value;
-					UpdateVisible();
+					UpdateBinding(FrameworkElement.VisibilityProperty);
 				}
 			}
 		}
@@ -251,26 +259,11 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			return FVisible;
 		}
 		
-		private Visibility FBindVisibility;
-		
-		public Visibility BindVisibility
+		private object UIGetVisibility()
 		{
-			get { return FBindVisibility;  }
-			private set
-			{
-				if (FBindVisibility != value)
-				{
-					FBindVisibility = value;
-					NotifyPropertyChanged("BindVisibility");
-				}
-			}
+			return GetVisible() ? Visibility.Visible : Visibility.Collapsed;
 		}
 		
-		protected void UpdateVisible()
-		{
-			BindVisibility = GetVisible() ? Visibility.Visible : Visibility.Collapsed;
-		}
-
 		#endregion
 
 		#region TabStop
@@ -286,7 +279,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				if (FTabStop != value)
 				{
 					FTabStop = value;
-					UpdateTabStop();
+					UpdateBinding(Control.IsTabStopProperty);
 				}
 			}
 		}
@@ -300,25 +293,10 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		{
 			return FTabStop;
 		}
-
-		protected void UpdateTabStop() 
-		{
-			BindIsTabStop = GetTabStop();
-		}
 		
-		private bool FBindIsTabStop;
-		
-		public bool BindIsTabStop
+		private object UIGetIsTabStop()
 		{
-			get { return FBindIsTabStop; }
-			private set
-			{
-				if (FBindIsTabStop != value)
-				{
-					FBindIsTabStop = value;
-					NotifyPropertyChanged("BindIsTabStop");
-				}
-			}
+			return GetTabStop();
 		}
 
 		#endregion
@@ -337,7 +315,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				if (FHint != value)
 				{
 					FHint = value;
-					UpdateToolTip();
+					UpdateBinding(ToolTipService.ToolTipProperty);
 				}
 			}
 		}
@@ -346,26 +324,11 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		{
 			return FHint;
 		}
-
-		protected void UpdateToolTip()
+		
+		private object UIGetToolTip()
 		{
 			var LHint = GetHint();
-			BindToolTip = String.IsNullOrEmpty(LHint) ? null : LHint;
-		}
-
-		private string FBindToolTip;
-		
-		public string BindToolTip
-		{
-			get { return FBindToolTip; }
-			private set
-			{
-				if (FBindToolTip != value)
-				{
-					FBindToolTip = value;
-					NotifyPropertyChanged("BindToolTip");
-				}
-			}
+			return String.IsNullOrEmpty(LHint) ? null : LHint;
 		}
 
 		#endregion
@@ -420,7 +383,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				if (FSuppressMargins != value)
 				{
 					FSuppressMargins = value;
-					UpdateMargins();
+					UpdateBinding(FrameworkElement.MarginProperty);
 				}
 			}
 		}
@@ -438,7 +401,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				if (FMarginLeft != value)
 				{
 					FMarginLeft = value;
-					UpdateMargins();
+					UpdateBinding(FrameworkElement.MarginProperty);
 				}
 			}
 		}
@@ -461,7 +424,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				if (FMarginRight != value)
 				{
 					FMarginRight = value;
-					UpdateMargins();
+					UpdateBinding(FrameworkElement.MarginProperty);
 				}
 			}
 		}
@@ -484,7 +447,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				if (FMarginTop != value)
 				{
 					FMarginTop = value;
-					UpdateMargins();
+					UpdateBinding(FrameworkElement.MarginProperty);
 				}
 			}
 		}
@@ -507,7 +470,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				if (FMarginBottom != value)
 				{
 					FMarginBottom = value;
-					UpdateMargins();
+					UpdateBinding(FrameworkElement.MarginProperty);
 				}
 			}
 		}
@@ -517,26 +480,9 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			return CDefaultMarginBottom;
 		}
 
-		// BindMargin
-				
-		private Thickness FBindMargin;
-		
-		public Thickness BindMargin
+		private object UIGetMargin()
 		{
-			get { return FBindMargin; }
-			private set
-			{
-				if (FBindMargin != value)
-				{
-					FBindMargin = value;
-					NotifyPropertyChanged("BindMargin");
-				}
-			}
-		}
-
-		private void UpdateMargins()
-		{
-			BindMargin =
+			return
 				FSuppressMargins
 					? new Thickness(0)
 					: new Thickness(FMarginLeft, FMarginTop, FMarginRight, FMarginBottom); 
@@ -548,13 +494,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		protected override void Activate()
 		{
-			UpdateToolTip();
-			UpdateTabStop();
-			UpdateMargins();
-			UpdateStyle();
-			UpdateVerticalAlignment();
-			UpdateHorizontalAlignment();
-			UpdateVisible();
+			RegisterBindings();
 			Session.DispatchAndWait
 			(
 				(System.Action)
@@ -566,6 +506,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 					}
 				)
 			);
+			UpdateAllBindings();
 			base.Activate();
 		}
 

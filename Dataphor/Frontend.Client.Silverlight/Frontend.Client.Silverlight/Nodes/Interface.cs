@@ -72,24 +72,8 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			return FText;
 		}
 
-		protected void UpdateText() 
+		protected virtual void UpdateText() 
 		{
-			BindText = GetText();
-		}
-		
-		private string FBindText;
-		
-		public string BindText
-		{
-			get { return FBindText; }
-			private set
-			{
-				if (FBindText != value)
-				{
-					FBindText = value;
-					NotifyPropertyChanged("BindText");
-				}
-			}
 		}
 
 		// UserState
