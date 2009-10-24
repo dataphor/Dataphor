@@ -219,6 +219,16 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			MoveCurrentToPosition(-1);
 			base.ClearItems();
 		}
+
+		protected override void RemoveItem(int AIndex)
+		{
+			base.RemoveItem(AIndex);
+			if (AIndex == FCurrentPosition)
+				if (AIndex > 0)
+					MoveCurrentToPosition(AIndex - 1);
+				else
+					MoveCurrentToPosition(AIndex);
+		}
 		
 		private class DeferTarget : IDisposable
 		{
