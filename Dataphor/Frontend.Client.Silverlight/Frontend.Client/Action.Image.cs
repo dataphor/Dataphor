@@ -93,22 +93,11 @@ namespace Alphora.Dataphor.Frontend.Client
 				try
 				{
 					if (ARequest.Result.IsNative)
-					{
-						byte[] LResultBytes = ARequest.Result.AsByteArray;
-						var LSource = new BitmapImage();
-						LSource.SetSource(new MemoryStream(LResultBytes, 0, LResultBytes.Length, false, true));
-						SetImage(LSource);
-					}
+						SetImage(ImageUtility.BitmapImageFromBytes(ARequest.Result.AsByteArray));
 					else
 					{
 						using (Stream LStream = ARequest.Result.OpenStream())
-						{
-							MemoryStream LCopyStream = new MemoryStream();
-							StreamUtility.CopyStream(LStream, LCopyStream);
-							BitmapImage LImage = new BitmapImage();
-							LImage.SetSource(LCopyStream);
-							SetImage(LImage);
-						}
+							SetImage(ImageUtility.BitmapImageFromStream(LStream));
 					}
 				}
 				catch
@@ -123,6 +112,5 @@ namespace Alphora.Dataphor.Frontend.Client
 			FImageRequest = null;
 			SetImage(ImageUtility.GetErrorImage());
 		}
-
 	}
 }

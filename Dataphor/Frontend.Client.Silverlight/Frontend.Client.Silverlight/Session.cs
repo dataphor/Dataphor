@@ -499,7 +499,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		{
 			// Ensure that this method isn't called from the main thread
 			var LDispatcher = Silverlight.Session.Dispatcher;
-			Error.DebugAssertFail(LDispatcher == null || LDispatcher.CheckAccess(), "InvokeAndWait may not be called from the main thread.");
+			Error.DebugAssertFail(LDispatcher == null || !LDispatcher.CheckAccess(), "InvokeAndWait may not be called from the main thread.");
 				
 			object LResult = null;
 			Exception LException = null;

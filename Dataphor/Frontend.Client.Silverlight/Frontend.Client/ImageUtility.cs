@@ -26,11 +26,36 @@ namespace Alphora.Dataphor.Frontend.Client
 		{
             var LInfo = Application.GetResourceStream(new Uri(AResourceName, UriKind.Relative));
             using (LInfo.Stream)
-            {
-                var LResult = new BitmapImage();
-                LResult.SetSource(LInfo.Stream);
-                return LResult;
-            }
+				return BitmapImageFromStream(LInfo.Stream);
+		}
+
+		public static BitmapImage BitmapImageFromBytes(byte[] AImageBytes)
+		{
+			return 
+				BitmapImageFromStream
+				(
+					new MemoryStream(AImageBytes, 0, AImageBytes.Length, false, true)
+				);
+		}
+
+		public static BitmapImage BitmapImageFromStream(Stream AStream)
+		{
+			return 
+				(BitmapImage)
+				(
+					Silverlight.Session.DispatchAndWait
+					(
+						(Func<BitmapImage>)
+						(
+							() =>
+							{
+								var LSource = new BitmapImage();
+								LSource.SetSource(AStream);
+								return LSource;
+							}
+						)
+					)
+				);
 		}
 	}
 
@@ -88,22 +113,11 @@ namespace Alphora.Dataphor.Frontend.Client
 			try
 			{
 				if (ARequest.Result.IsNative)
-				{
-					byte[] LResultBytes = ARequest.Result.AsByteArray;
-					var LSource = new BitmapImage();
-					LSource.SetSource(new MemoryStream(LResultBytes, 0, LResultBytes.Length, false, true));
-					FImage = LSource;
-				}
+					FImage = ImageUtility.BitmapImageFromBytes(ARequest.Result.AsByteArray);
 				else
 				{
 					using (Stream LStream = ARequest.Result.OpenStream())
-					{
-						MemoryStream LCopyStream = new MemoryStream();
-						StreamUtility.CopyStream(LStream, LCopyStream);
-						var LSource = new BitmapImage();
-						LSource.SetSource(LCopyStream);
-						FImage = LSource;
-					}
+						FImage = ImageUtility.BitmapImageFromStream(LStream);
 				}
 			}
 			catch
