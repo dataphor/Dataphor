@@ -126,7 +126,7 @@ namespace Alphora.Dataphor
 			string[] LSignatureNames = ASignature.Split(new char[] {';'});
 			Type[] LSignature = new Type[LSignatureNames.Length];
 			for (int i = LSignature.Length - 1; i >= 0; i--)
-				LSignature[i] = Type.GetType(LSignatureNames[i], true, true);
+				LSignature[i] = GetType(LSignatureNames[i], AType.Assembly);
 
 			// Find the matching constructor
 			ConstructorInfo LConstructor = AType.GetConstructor(LSignature);
