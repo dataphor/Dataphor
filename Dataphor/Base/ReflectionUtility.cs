@@ -142,6 +142,8 @@ namespace Alphora.Dataphor
 			#if SILVERLIGHT
 			if (AValue == null)
 				throw new BaseException(BaseException.Codes.CannotConvertNull, ErrorSeverity.System);
+			if (typeof(Enum).IsAssignableFrom(AType))
+				return Enum.Parse(AType, AValue, true);
 			switch (Type.GetTypeCode(AType))
 			{
 				case TypeCode.Boolean:
@@ -188,8 +190,6 @@ namespace Alphora.Dataphor
 						else
 							break;
 					}
-					else if (typeof(Enum).IsAssignableFrom(AType))
-						return Enum.Parse(AType, AValue, true);
 					break;
 			}
 			throw new BaseException(BaseException.Codes.CannotConvertFromString, AType.Name);

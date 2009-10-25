@@ -261,7 +261,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				else
 				{
 					CancelChanges();
-					return false;
+					return true;
 				}
 			}
 			catch (Exception AException)
