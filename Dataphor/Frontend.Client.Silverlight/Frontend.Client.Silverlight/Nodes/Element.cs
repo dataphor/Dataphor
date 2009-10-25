@@ -52,8 +52,9 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			if (Parent != null)
 			{
 				var LParentContainer = Parent as ISilverlightContainerElement;
-				if (LParentContainer != null)
-					LParentContainer.AddChild(FFrameworkElement);
+				var LIndex = Parent.Children.IndexOf(this);
+				if (LParentContainer != null && LIndex >= 0)
+					LParentContainer.InsertChild(LIndex, FFrameworkElement);
 			}
 		}
 		
@@ -151,11 +152,9 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			AddBinding(ToolTipService.ToolTipProperty, new Func<object>(UIGetToolTip));
 			AddBinding(FrameworkElement.VerticalAlignmentProperty, new Func<object>(UIGetVerticalAlignment));
 			AddBinding(FrameworkElement.HorizontalAlignmentProperty, new Func<object>(UIGetHorizontalAlignment));
+			AddBinding(FrameworkElement.StyleProperty, new Func<object>(UIGetStyle));
 			if (FFrameworkElement is Control)
-			{
 				AddBinding(Control.IsTabStopProperty, new Func<object>(UIGetIsTabStop));
-				AddBinding(Control.StyleProperty, new Func<object>(UIGetStyle));
-			}
 		}
 		
 		#endregion
@@ -173,7 +172,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				if (FStyle != value)
 				{
 					FStyle = value;
-					UpdateBinding(Control.StyleProperty);
+					UpdateBinding(FrameworkElement.StyleProperty);
 				}
 			}
 		}
@@ -494,7 +493,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		protected override void Activate()
 		{
-			RegisterBindings();
 			Session.DispatchAndWait
 			(
 				(System.Action)
@@ -506,6 +504,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 					}
 				)
 			);
+			RegisterBindings();
 			UpdateAllBindings();
 			base.Activate();
 		}

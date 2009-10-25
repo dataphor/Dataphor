@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Windows;
 using System.ComponentModel;
-using Alphora.Dataphor.DAE.Listener;
 using System.Windows.Controls;
-using Alphora.Dataphor.DAE.Client;
 using System.Collections.Generic;
-using Alphora.Dataphor.DAE.Runtime.Data;
 
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
+	using Alphora.Dataphor.DAE.Listener;
+	using Alphora.Dataphor.DAE.Client;
+	using Alphora.Dataphor.DAE.Runtime.Data;
+
 	/// <summary> Manages the connection work-flow. </summary>
 	public class ConnectWorkItem  : INotifyPropertyChanged
 	{
@@ -192,7 +193,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
     					var LApplicationRows = new List<object[]>();
     					using (var LApplications = LDataSession.OpenReadOnlyDataView(".Frontend.Applications"))
     					{
-    						foreach (Row LRow in LApplications)
+    						foreach (DAE.Runtime.Data.Row LRow in LApplications)
     							LApplicationRows.Add((object[])((NativeRow)LRow.AsNative).Values.Clone());
     					}
     					return new LoginResult() { Applications = LApplicationRows, DataSession = LDataSession };

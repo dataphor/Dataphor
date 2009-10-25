@@ -458,7 +458,8 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			return false;
 		}
 
-		public void AddChild(FrameworkElement AChild)
+		/// <remarks> This method is invoked on the main thread. </remarks>
+		public void InsertChild(int AIndex, FrameworkElement AChild)
 		{
 			((ContentControl)FrameworkElement).Content = AChild;
 		}
