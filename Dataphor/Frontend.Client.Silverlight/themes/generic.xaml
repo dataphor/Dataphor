@@ -27,7 +27,10 @@
 	</Style>
 
     <Style TargetType="local:SessionControl">
-        <Setter Property="Template">
+		<Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+		<Setter Property="VerticalContentAlignment" Value="Stretch"/>
+		<Setter Property="Padding" Value="1" />
+		<Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="local:SessionControl">
                     <Border Background="{TemplateBinding Background}"
@@ -63,8 +66,6 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-        <Setter Property="VerticalContentAlignment" Value="Stretch"/>
     </Style>
 
     <Style TargetType="local:FormStackControl">
@@ -76,19 +77,22 @@
                     		<RowDefinition Height="Auto" MinHeight="16"/>
                     		<RowDefinition/>
                     	</Grid.RowDefinitions>
-                    	<local:ButtonScrollViewer HorizontalAlignment="Left">
+                    	<Border BorderThickness="1,1,1,0" CornerRadius="4,4,0,0" BorderBrush="{TemplateBinding BorderBrush}" Background="#FFB3B6DE">
                     		<ListBox Background="{x:Null}" BorderBrush="{x:Null}" 
                     			ItemsPanel="{StaticResource HorizontalItemsPanel}" 
                     			ItemsSource="{TemplateBinding FormStack}"
                     			Style="{StaticResource BreadCrumbListBoxStyle}" 
                     			ItemContainerStyle="{StaticResource BreadCrumbItemContainerStyle}" />
-                    	</local:ButtonScrollViewer>
-                    	<ContentPresenter x:Name="SelectedFormContent" Grid.Row="1" 
-                    		Content="{Binding FormStack.CurrentItem, RelativeSource={RelativeSource TemplatedParent}}"/>
+                    	</Border>
+                    	<Border Grid.Row="1" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1,0,1,1" CornerRadius="0,0,4,4" Background="{TemplateBinding Background}">
+                    		<ContentPresenter x:Name="SelectedFormContent" 
+                    			Content="{Binding FormStack.CurrentItem, RelativeSource={RelativeSource TemplatedParent}}"/>
+                    	</Border>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+        <Setter Property="BorderBrush" Value="Black"/>
     </Style>
 
     <Style TargetType="local:BreadCrumbFormItem">
@@ -96,7 +100,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="local:BreadCrumbFormItem">
-                    <Grid d:DesignWidth="150">
+                    <Grid d:DesignWidth="150" Background="{TemplateBinding Background}">
                 		<Grid.ColumnDefinitions>
                 			<ColumnDefinition/>
                 			<ColumnDefinition Width="Auto"/>
@@ -305,10 +309,14 @@
 								</LinearGradientBrush>
 							</Rectangle.Fill>
 						</Rectangle>
-						<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="{TemplateBinding Padding}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+						<Grid Margin="{TemplateBinding Padding}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition/>
+								<ColumnDefinition Width="*"/>
+							</Grid.ColumnDefinitions>
 							<Image x:Name="image" Source="{TemplateBinding Image}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="{TemplateBinding ImageWidth}" Height="{TemplateBinding ImageHeight}" Margin="0,0,4,0"/>
-							<ContentPresenter x:Name="contentPresenter" HorizontalAlignment="Right" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"/>
-						</StackPanel>
+							<ContentPresenter x:Name="contentPresenter" HorizontalAlignment="Right" VerticalAlignment="Center" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Grid.Column="1"/>
+						</Grid>
 						<Rectangle x:Name="DisabledVisualElement" Fill="#FFFFFFFF" RadiusX="5" RadiusY="5" IsHitTestVisible="false" Opacity="0"/>
 						<Rectangle x:Name="FocusVisualElement" Stroke="#FF6DBDD1" StrokeThickness="1" RadiusX="5" RadiusY="5" Margin="1" IsHitTestVisible="false" Opacity="0"/>
 					</Grid>

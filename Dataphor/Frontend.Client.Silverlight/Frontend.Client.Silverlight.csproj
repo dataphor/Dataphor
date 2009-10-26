@@ -178,8 +178,10 @@
     <Compile Include="Frontend.Client.Silverlight\Controls\SessionControl.cs" />
     <Compile Include="Frontend.Client.Silverlight\Controls\TriggerControl.cs" />
     <Compile Include="Frontend.Client.Silverlight\Helpers\BooleanToVisibilityConverter.cs" />
+    <Compile Include="Frontend.Client.Silverlight\Helpers\FirstItemInvisibleConverter.cs" />
     <Compile Include="Frontend.Client.Silverlight\Helpers\DispatchedReadOnlyCollection.cs" />
     <Compile Include="Frontend.Client.Silverlight\Helpers\ObservableCollectionView.cs" />
+    <Compile Include="Frontend.Client.Silverlight\Helpers\SilverlightUtility.cs" />
     <Compile Include="Frontend.Client.Silverlight\Interfaces\ISilverlightContainerElement.cs" />
     <Compile Include="Frontend.Client.Silverlight\Nodes\Column.cs" />
     <Compile Include="Frontend.Client.Silverlight\Nodes\Element.cs" />

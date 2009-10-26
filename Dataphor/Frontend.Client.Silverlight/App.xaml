@@ -156,17 +156,17 @@
     	</ItemsPanelTemplate>
     	
 		<Style x:Key="TaskBar" TargetType="ListBox">
-    		<Setter Property="Padding" Value="1"/>
+    		<Setter Property="Padding" Value="0"/>
     		<Setter Property="HorizontalContentAlignment" Value="Left"/>
     		<Setter Property="VerticalContentAlignment" Value="Stretch"/>
     		<Setter Property="IsTabStop" Value="False"/>
-    		<Setter Property="BorderThickness" Value="1"/>
+    		<Setter Property="BorderThickness" Value="0"/>
     		<Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
     		<Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
     		<Setter Property="Template">
     			<Setter.Value>
 					<ControlTemplate TargetType="ListBox">
-						<Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="2" Background="{TemplateBinding Background}">
+						<Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}">
 							<local:ButtonScrollViewer x:Name="ScrollViewer" Padding="{TemplateBinding Padding}" TabNavigation="{TemplateBinding TabNavigation}" HorizontalContentAlignment="Left">
 								<ItemsPresenter/>
 							</local:ButtonScrollViewer>
@@ -255,47 +255,55 @@
     		<Setter Property="Template">
     			<Setter.Value>
     				<ControlTemplate TargetType="ListBox">
-   						<Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="2">
-   							<ItemsPresenter />
-   						</Border>
+						<Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="2" Background="{TemplateBinding Background}">
+							<local:ButtonScrollViewer x:Name="ScrollViewer" Padding="{TemplateBinding Padding}" TabNavigation="{TemplateBinding TabNavigation}" HorizontalContentAlignment="Left">
+								<ItemsPresenter/>
+							</local:ButtonScrollViewer>
+						</Border>
     				</ControlTemplate>
     			</Setter.Value>
     		</Setter>
     		<Setter Property="Background" Value="{x:Null}"/>
     		<Setter Property="BorderBrush" Value="#FF40449F"/>
     	</Style>
+
+		<local:FirstItemInvisibleConverter x:Key="FirstItemInvisibleConverter" />
     	
     	<Style x:Key="BreadCrumbItemContainerStyle" TargetType="ListBoxItem">
     		<Setter Property="Padding" Value="3"/>
-    		<Setter Property="HorizontalContentAlignment" Value="Left"/>
-    		<Setter Property="VerticalContentAlignment" Value="Top"/>
     		<Setter Property="Background" Value="{x:Null}"/>
     		<Setter Property="BorderThickness" Value="1"/>
     		<Setter Property="TabNavigation" Value="Local"/>
-    		<Setter Property="Template">
+			<Setter Property="VerticalContentAlignment" Value="Center" />
+			<Setter Property="HorizontalContentAlignment" Value="Center" />
+			<Setter Property="Template">
     			<Setter.Value>
     				<ControlTemplate TargetType="ListBoxItem">
-    					<Border Background="{TemplateBinding Background}" >
+    					<Grid d:DesignHeight="35" d:DesignWidth="125" Background="{TemplateBinding Background}">
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition/>
+							</Grid.ColumnDefinitions>
     						<VisualStateManager.VisualStateGroups>
     							<VisualStateGroup x:Name="CommonStates">
-									<VisualState x:Name="Normal"/>
+    								<VisualState x:Name="Normal"/>
     								<VisualState x:Name="MouseOver">
     									<Storyboard>
     										<ColorAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)">
-    											<EasingColorKeyFrame KeyTime="00:00:00" Value="#66556BA5"/>
+    											<EasingColorKeyFrame KeyTime="00:00:00" Value="#B0C5DBFF"/>
     										</ColorAnimationUsingKeyFrames>
     									</Storyboard>
     								</VisualState>
     								<VisualState x:Name="Disabled">
     									<Storyboard>
     										<ColorAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)">
-    											<EasingColorKeyFrame KeyTime="00:00:00" Value="#4C7B7F88"/>
+    											<EasingColorKeyFrame KeyTime="00:00:00" Value="#80C5DBFF"/>
     										</ColorAnimationUsingKeyFrames>
     									</Storyboard>
     								</VisualState>
     							</VisualStateGroup>
     							<VisualStateGroup x:Name="SelectionStates">
-									<VisualState x:Name="Unselected"/>
+    								<VisualState x:Name="Unselected"/>
     								<VisualState x:Name="Selected">
     									<Storyboard>
     										<ColorAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)">
@@ -326,14 +334,18 @@
     								</VisualState>
     							</VisualStateGroup>
     						</VisualStateManager.VisualStateGroups>
-    						<Border x:Name="border" Background="#00556BA5" BorderThickness="1" CornerRadius="2" BorderBrush="#FF5869B7" >
-								<local:BreadCrumbFormItem Title="{Binding Title}" Form="{Binding .}" 
-									IsAcceptReject="{Binding IsAcceptReject}" IsFormEnabled="{Binding IsEnabled}" 
-									HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
-									VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+							<StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Margin="4,0" Orientation="Horizontal" Visibility="{Binding ., RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource FirstItemInvisibleConverter}}">
+								<Path Data="M0,0 L3,5 L0,10 Z" Fill="Black" />
+								<Path Data="M0,0 L3,5 L0,10 Z" Fill="Black" />
+							</StackPanel>
+							<Border x:Name="border" Background="#70C5DBFF" BorderThickness="1" CornerRadius="2" BorderBrush="#FF5869B7" Grid.Column="1" >
+    							<local:BreadCrumbFormItem Title="{Binding Title}" Form="{Binding .}" 
+    								IsAcceptReject="{Binding IsAcceptReject}" IsFormEnabled="{Binding IsEnabled}" 
+    								HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+    								VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
 									/>
     						</Border>
-    					</Border>
+    					</Grid>
     				</ControlTemplate>
     			</Setter.Value>
     		</Setter>
