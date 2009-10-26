@@ -154,7 +154,10 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			AddBinding(FrameworkElement.HorizontalAlignmentProperty, new Func<object>(UIGetHorizontalAlignment));
 			AddBinding(FrameworkElement.StyleProperty, new Func<object>(UIGetStyle));
 			if (FFrameworkElement is Control)
+			{
 				AddBinding(Control.IsTabStopProperty, new Func<object>(UIGetIsTabStop));
+				AddBinding(Control.IsEnabledProperty, new Func<object>(UIGetIsEnabled));
+			}
 		}
 		
 		#endregion
@@ -296,6 +299,25 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		private object UIGetIsTabStop()
 		{
 			return GetTabStop();
+		}
+
+		#endregion
+		
+		#region Enabled
+		
+		/// <summary> Gets whether the node is actually enabled. </summary>
+		public virtual bool GetEnabled()
+		{
+			Element LParent = Parent as Element;
+			if (LParent != null)
+				return LParent.GetEnabled();
+			else
+				return true;
+		}
+
+		private object UIGetIsEnabled()
+		{
+			return GetEnabled();
 		}
 
 		#endregion

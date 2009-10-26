@@ -56,7 +56,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			base.RegisterBindings();
 
 			AddBinding(ContentControl.ContentProperty, new Func<object>(UIGetContent));
-			AddBinding(Control.IsEnabledProperty, new Func<object>(UIGetIsEnabled));
 			AddBinding(TriggerControl.ImageProperty, new Func<object>(UIGetImage));
 			AddBinding(TriggerControl.ImageWidthProperty, new Func<object>(UIGetImageWidth));			
 			AddBinding(TriggerControl.ImageHeightProperty, new Func<object>(UIGetImageHeight));			
@@ -79,7 +78,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 					{
 						try
 						{
-							if (Action != null)
+							if (Action != null && GetEnabled())
 								Action.Execute(this, new EventParams());
 						}
 						catch (Exception AException)
@@ -256,19 +255,14 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		///		The enabled state of the node is the most restrictive between 
 		///		the action and the Enabled property.
 		///	</remarks>
-		public virtual bool GetEnabled()
+		public override bool GetEnabled()
 		{
-			return ( Action == null ? false : Action.GetEnabled() ) && FEnabled;
+			return ( Action == null ? false : Action.GetEnabled() ) && FEnabled && base.GetEnabled();
 		}
 
 		private void ActionEnabledChanged(object ASender, EventArgs AArgs)
 		{
 			UpdateBinding(Control.IsEnabledProperty);
-		}
-
-		private object UIGetIsEnabled()
-		{
-			return GetEnabled();
 		}
 
 		// Hint/Tooltip

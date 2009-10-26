@@ -440,22 +440,9 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		private int FDisableCount;
 		
-		private bool FBindIsEnabled = true;
-		
-		public bool BindIsEnabled
-		{
-			get { return FBindIsEnabled; }
-			set
-			{
-				if (FBindIsEnabled != value)
-				{
-					FBindIsEnabled = value;
-					UpdateBinding(Control.IsEnabledProperty);
-				}
-			}
-		}
-		
-		public virtual bool GetEnabled()
+		// Enabled
+
+		public override bool GetEnabled()
 		{
 			return FDisableCount == 0;
 		}
@@ -464,18 +451,14 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		{
 			FDisableCount = Math.Max(0, FDisableCount - 1);
 			if (FDisableCount == 0)
-				BindIsEnabled = true;
+				UpdateBinding(Control.IsEnabledProperty);
 		}
 
 		public virtual void Disable(IFormInterface AForm)
 		{
 			FDisableCount++;
-			BindIsEnabled = false;
-		}
-		
-		private object UIGetIsEnabled()
-		{
-			return GetEnabled();
+			if (FDisableCount == 1)
+				UpdateBinding(Control.IsEnabledProperty);
 		}
 
 		#endregion
@@ -517,7 +500,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		protected override void RegisterBindings()
 		{
-			AddBinding(Control.IsEnabledProperty, new Func<object>(UIGetIsEnabled));
+			base.RegisterBindings();
 			AddBinding(FormControl.TitleProperty, new Func<object>(UIGetText));
 			AddBinding(FormControl.IsAcceptRejectProperty, new Func<object>(UIGetIsAcceptReject));
 		}
