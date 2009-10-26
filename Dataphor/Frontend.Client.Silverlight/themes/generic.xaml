@@ -134,6 +134,7 @@
                 				</VisualState>
                 			</VisualStateGroup>
                 			<VisualStateGroup x:Name="EnabledStates">
+								<VisualState x:Name="Enabled"/>
                 				<VisualState x:Name="Disabled">
                 					<Storyboard>
                 						<ColorAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="textBlock" Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)">
@@ -196,17 +197,7 @@
                     <Grid Background="{TemplateBinding Background}">
                 		<VisualStateManager.VisualStateGroups>
                 			<VisualStateGroup x:Name="Right">
-                				<VisualState x:Name="RightEnabled">
-                					<Storyboard>
-                						<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="RightButton" Storyboard.TargetProperty="(UIElement.Visibility)">
-                							<DiscreteObjectKeyFrame KeyTime="00:00:00">
-                								<DiscreteObjectKeyFrame.Value>
-                									<Visibility>Visible</Visibility>
-                								</DiscreteObjectKeyFrame.Value>
-                							</DiscreteObjectKeyFrame>
-                						</ObjectAnimationUsingKeyFrames>
-                					</Storyboard>
-                				</VisualState>
+                				<VisualState x:Name="RightEnabled"/>
 								<VisualState x:Name="RightDisabled">
 									<Storyboard>
 										<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="RightButton" Storyboard.TargetProperty="(UIElement.Visibility)">
@@ -220,17 +211,7 @@
 								</VisualState>
 							</VisualStateGroup>
                 			<VisualStateGroup x:Name="Left">
-                				<VisualState x:Name="LeftEnabled">
-                					<Storyboard>
-                						<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="LeftButton" Storyboard.TargetProperty="(UIElement.Visibility)">
-                							<DiscreteObjectKeyFrame KeyTime="00:00:00">
-                								<DiscreteObjectKeyFrame.Value>
-                									<Visibility>Visible</Visibility>
-                								</DiscreteObjectKeyFrame.Value>
-                							</DiscreteObjectKeyFrame>
-                						</ObjectAnimationUsingKeyFrames>
-                					</Storyboard>
-                				</VisualState>
+                				<VisualState x:Name="LeftEnabled"/>
 								<VisualState x:Name="LeftDisabled">
 									<Storyboard>
 										<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="LeftButton" Storyboard.TargetProperty="(UIElement.Visibility)">
@@ -294,24 +275,7 @@
 								<VisualState x:Name="Unfocused"/>
 							</VisualStateGroup>
 							<VisualStateGroup x:Name="Image">
-								<VisualState x:Name="HasImage">
-									<Storyboard>
-										<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="image" Storyboard.TargetProperty="(UIElement.Visibility)">
-											<DiscreteObjectKeyFrame KeyTime="00:00:00">
-												<DiscreteObjectKeyFrame.Value>
-													<Visibility>Visible</Visibility>
-												</DiscreteObjectKeyFrame.Value>
-											</DiscreteObjectKeyFrame>
-										</ObjectAnimationUsingKeyFrames>
-										<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="contentPresenter" Storyboard.TargetProperty="(FrameworkElement.HorizontalAlignment)">
-											<DiscreteObjectKeyFrame KeyTime="00:00:00">
-												<DiscreteObjectKeyFrame.Value>
-													<HorizontalAlignment>Right</HorizontalAlignment>
-												</DiscreteObjectKeyFrame.Value>
-											</DiscreteObjectKeyFrame>
-										</ObjectAnimationUsingKeyFrames>
-									</Storyboard>
-								</VisualState>
+								<VisualState x:Name="HasImage"/>
 								<VisualState x:Name="NoImage">
 									<Storyboard>
 										<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="image" Storyboard.TargetProperty="(UIElement.Visibility)">

@@ -161,7 +161,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			else
 				VisualStateManager.GoToState(this, "Close", AUseAnimations);
 
-			if (IsEnabled)
+			if (IsFormEnabled)
 				VisualStateManager.GoToState(this, "Enabled", AUseAnimations);
 			else
 				VisualStateManager.GoToState(this, "Disabled", AUseAnimations);
