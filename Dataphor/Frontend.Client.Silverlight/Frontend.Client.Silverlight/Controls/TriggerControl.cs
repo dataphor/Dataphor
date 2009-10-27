@@ -8,6 +8,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
 	[TemplateVisualState(Name = "HasImage", GroupName = "Image")]
 	[TemplateVisualState(Name = "NoImage", GroupName = "Image")]
+	[TemplateVisualState(Name = "OnlyImage", GroupName = "Image")]
 	public class TriggerControl : Button
 	{
 		public TriggerControl()
@@ -61,7 +62,12 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		private void UpdateState(bool AUseTransitions)
 		{
 			if (Image != null || (ImageWidth > 0 && ImageHeight > 0))
-				VisualStateManager.GoToState(this, "HasImage", AUseTransitions);
+			{
+				if (Content == null)
+					VisualStateManager.GoToState(this, "OnlyImage", AUseTransitions);
+				else
+					VisualStateManager.GoToState(this, "HasImage", AUseTransitions);
+			}
 			else
 				VisualStateManager.GoToState(this, "NoImage", AUseTransitions);
 		}

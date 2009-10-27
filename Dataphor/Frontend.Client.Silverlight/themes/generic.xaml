@@ -15,12 +15,13 @@
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="local:FormControl">
-					<Grid x:Name="RootElement" Background="{TemplateBinding Background}">
+					<ScrollViewer Background="{TemplateBinding Background}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Margin="0" BorderThickness="0" Padding="0">
 						<ContentPresenter Content="{TemplateBinding Content}" 
 							ContentTemplate="{TemplateBinding ContentTemplate}"
 							HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-							VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-					</Grid>
+							VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+							Margin="{TemplateBinding Padding}"/>
+					</ScrollViewer>
 				</ControlTemplate>
 			</Setter.Value>
 		</Setter>
@@ -298,6 +299,24 @@
 										</ObjectAnimationUsingKeyFrames>
 									</Storyboard>
 								</VisualState>
+								<VisualState x:Name="OnlyImage">
+									<Storyboard>
+										<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="contentPresenter" Storyboard.TargetProperty="(UIElement.Visibility)">
+											<DiscreteObjectKeyFrame KeyTime="00:00:00">
+												<DiscreteObjectKeyFrame.Value>
+													<Visibility>Collapsed</Visibility>
+												</DiscreteObjectKeyFrame.Value>
+											</DiscreteObjectKeyFrame>
+										</ObjectAnimationUsingKeyFrames>
+										<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="image" Storyboard.TargetProperty="(FrameworkElement.HorizontalAlignment)">
+											<DiscreteObjectKeyFrame KeyTime="00:00:00">
+												<DiscreteObjectKeyFrame.Value>
+													<HorizontalAlignment>Center</HorizontalAlignment>
+												</DiscreteObjectKeyFrame.Value>
+											</DiscreteObjectKeyFrame>
+										</ObjectAnimationUsingKeyFrames>
+									</Storyboard>
+								</VisualState>
 							</VisualStateGroup>
 						</VisualStateManager.VisualStateGroups>
 						<Border x:Name="Background" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" BorderBrush="Black" Background="{TemplateBinding Background}"/>
@@ -324,4 +343,42 @@
 			</Setter.Value>
 		</Setter>
 	</Style>
+
+    <Style TargetType="local:GroupBox">
+		<Setter Property="BorderBrush" Value="Navy" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:GroupBox">
+					<Grid x:Name="root" Width="{TemplateBinding Width}">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="6" />
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="6" />
+						</Grid.ColumnDefinitions>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto" />
+							<RowDefinition Height="Auto" />
+							<RowDefinition Height="*" />
+							<RowDefinition Height="6" />
+						</Grid.RowDefinitions>
+						<Border BorderThickness="0,1,1,0" CornerRadius="0,4,4,4" 
+							BorderBrush="{TemplateBinding BorderBrush}" Grid.Column="2"
+                            Grid.Row="1" Grid.ColumnSpan="2" Grid.RowSpan="3" />
+						<Border Padding="3,0,3,0" BorderThickness="0" Grid.Column="1"
+							Grid.Row="0" Grid.RowSpan="2">
+							<ContentPresenter Content="{TemplateBinding Header}"
+								ContentTemplate="{TemplateBinding HeaderTemplate}" />
+						</Border>
+						<ContentPresenter Content="{TemplateBinding Content}" 
+							ContentTemplate="{TemplateBinding ContentTemplate}"
+							Margin="4" Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2" />
+						<Border BorderThickness="1,0,1,1" CornerRadius="4,4,4,4" 
+							BorderBrush="{TemplateBinding BorderBrush}" Grid.Row="1" Grid.ColumnSpan="4"
+                            Grid.RowSpan="3" />
+					</Grid>
+				</ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

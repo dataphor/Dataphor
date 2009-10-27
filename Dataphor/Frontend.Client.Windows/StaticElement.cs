@@ -659,10 +659,6 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	{
 		// TODO: True support for border (with property)
 
-		public const int CDefaultWidth = 100;
-		public const int CDefaultHeight = 100;
-
-
 		// IVerticalAlignedElement
 
 		protected VerticalAlignment FVerticalAlignment = VerticalAlignment.Top;

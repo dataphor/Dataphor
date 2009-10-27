@@ -95,10 +95,8 @@ namespace Alphora.Dataphor.Frontend.Client
 					if (ARequest.Result.IsNative)
 						SetImage(ImageUtility.BitmapImageFromBytes(ARequest.Result.AsByteArray));
 					else
-					{
 						using (Stream LStream = ARequest.Result.OpenStream())
 							SetImage(ImageUtility.BitmapImageFromStream(LStream));
-					}
 				}
 				catch
 				{

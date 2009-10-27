@@ -1,26 +1,54 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
-	/// <summary> Abstract class the implements functionality common panel based container elements. </summary>
-	public abstract class ContainerElement : Element, ISilverlightContainerElement
+	public class Group : Element, ISilverlightContainerElement
 	{
 		protected override FrameworkElement CreateFrameworkElement()
 		{
-			return new StackPanel();
+			return new GroupBox();
 		}
 
-		protected Panel Panel
+		protected ContentControl ContentControl
 		{
-			get { return (Panel)FrameworkElement; }
+			get { return (ContentControl)FrameworkElement; }
+		}
+
+		protected override void RegisterBindings()
+		{
+			base.RegisterBindings();
+			AddBinding(GroupBox.HeaderProperty, new Func<object>(UIGetHeader));
 		}
 		
+		private string FTitle = String.Empty;
+		public string Title
+		{
+			get { return FTitle; }
+			set
+			{
+				if (FTitle != value)
+				{
+					FTitle = value;
+					UpdateBinding(GroupBox.HeaderProperty);
+				}
+			}
+		}
+		
+		private object UIGetHeader()
+		{
+			if (String.IsNullOrEmpty(FTitle))
+				return null;
+			else
+				return FTitle;
+		}
+
 		/// <remarks> This method is invoked on the main thread. </remarks>
 		public void InsertChild(int AIndex, FrameworkElement AChild)
 		{
-			Panel.Children.Insert(Math.Min(AIndex, Panel.Children.Count), AChild);
+			ContentControl.Content = AChild;
 		}
 
 		// Element
