@@ -53,7 +53,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			{
 				var LParentContainer = Parent as ISilverlightContainerElement;
 				var LIndex = Parent.Children.IndexOf(this);
-				if (LParentContainer != null && LIndex >= 0)
+				if (LParentContainer != null)
 					LParentContainer.InsertChild(LIndex, FFrameworkElement);
 			}
 		}
@@ -165,7 +165,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		#region Styles
 		
 		private string FStyle = "";
-		
 		[DefaultValue("")]
 		public string Style
 		{
@@ -242,7 +241,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		private bool FVisible = true;
 		[DefaultValue(true)]
-		[Description("When set to false the control will not be shown.")]
 		public bool Visible
 		{
 			get { return FVisible; }
@@ -271,7 +269,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		#region TabStop
 
 		private bool FTabStop;
-		[Description("Determines if the control can be focused through tab key navigation.")]
 		[DefaultValueMember("GetDefaultTabStop")]
 		public bool TabStop
 		{
@@ -325,9 +322,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		#region Hint
 
 		private string FHint = String.Empty;
-		[Browsable(true)]
 		[DefaultValue("")]
-		[Description("Text which describes the element to the end-user.")]
 		public string Hint
 		{
 			get { return FHint; }
@@ -359,7 +354,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		// TODO: Support for help
 		
 		private string FHelpKeyword = String.Empty;
-		[Description("The help keyword to navigate to when the user activates help.")]
 		[DefaultValue("")]
 		public string HelpKeyword 
 		{ 
@@ -369,7 +363,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		private HelpKeywordBehavior FHelpKeywordBehavior = HelpKeywordBehavior.KeywordIndex;
 		[DefaultValue(HelpKeywordBehavior.KeywordIndex)]
-		[Description("Determines the method used to navigate the the help identified by the HelpKeyword property.")]
 		public HelpKeywordBehavior HelpKeywordBehavior
 		{
 			get { return FHelpKeywordBehavior; }
@@ -377,10 +370,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		}
 
 		private string FHelpString = String.Empty;
-		[Description("Specifies the help text to display to the user when keyword navigation is not used.")]
 		[DefaultValue("")]
-		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client", "System.Drawing.Design.UITypeEditor,System.Drawing")]
-		[DAE.Client.Design.EditorDocumentType("txt")]
 		public string HelpString
 		{ 
 			get { return FHelpString; }
@@ -394,7 +384,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		// SuppressMargins
 
 		private bool FSuppressMargins;
-		[Browsable(false)]
 		[Publish(PublishMethod.None)]
 		public bool SuppressMargins
 		{
@@ -412,7 +401,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		// MarginLeft
 		
 		private int FMarginLeft;
-		[Description("The left margin for the control")]
 		[DefaultValueMember("GetDefaultMarginLeft")]
 		public int MarginLeft
 		{
@@ -435,7 +423,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		// MarginRight
 		
 		private int FMarginRight;
-		[Description("The right margin for the control")]
 		[DefaultValueMember("GetDefaultMarginRight")]
 		public int MarginRight
 		{
@@ -458,7 +445,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		// MarginTop
 		
 		private int FMarginTop;
-		[Description("The top margin for the control")]
 		[DefaultValueMember("GetDefaultMarginTop")]
 		public int MarginTop
 		{
@@ -481,7 +467,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		// MarginBottom
 		
 		private int FMarginBottom;
-		[Description("The bottom margin for the control")]
 		[DefaultValueMember("GetDefaultMarginBottom")]
 		public int MarginBottom
 		{

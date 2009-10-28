@@ -188,7 +188,10 @@
     <Compile Include="Frontend.Client.Silverlight\Nodes\Element.cs" />
     <Compile Include="Frontend.Client.Silverlight\Nodes\Form.cs" />
     <Compile Include="Frontend.Client.Silverlight\Helpers\NullToVisibilityConverter.cs" />
+    <Compile Include="Frontend.Client.Silverlight\Nodes\Frame.cs" />
+    <Compile Include="Frontend.Client.Silverlight\Nodes\FrameInterface.cs" />
     <Compile Include="Frontend.Client.Silverlight\Nodes\Group.cs" />
+    <Compile Include="Frontend.Client.Silverlight\Nodes\HtmlBox.cs" />
     <Compile Include="Frontend.Client.Silverlight\Nodes\Interface.cs" />
     <Compile Include="Frontend.Client.Silverlight\Interfaces\ISilverlightElement.cs" />
     <Compile Include="Frontend.Client.Silverlight\Nodes\ContainerElement.cs" />

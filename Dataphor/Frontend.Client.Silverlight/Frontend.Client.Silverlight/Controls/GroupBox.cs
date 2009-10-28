@@ -18,6 +18,8 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 	/// </remarks>
 	[TemplateVisualState(Name = "Enabled", GroupName = "EnabledGroup")]
 	[TemplateVisualState(Name = "Disabled", GroupName = "EnabledGroup")]
+	[TemplateVisualState(Name = "HeaderNull", GroupName = "HeaderGroup")]
+	[TemplateVisualState(Name = "HeaderNotNull", GroupName = "HeaderGroup")]
 	public class GroupBox : ContentControl
 	{
 		public GroupBox()
@@ -60,6 +62,11 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				VisualStateManager.GoToState(this, "Enabled", AUseTransitions);
 			else
 				VisualStateManager.GoToState(this, "Disabled", AUseTransitions);
+			
+			if (Header == null)
+				VisualStateManager.GoToState(this, "HeaderNull", AUseTransitions);
+			else
+				VisualStateManager.GoToState(this, "HeaderNotNull", AUseTransitions);
 		}
 		
 	}

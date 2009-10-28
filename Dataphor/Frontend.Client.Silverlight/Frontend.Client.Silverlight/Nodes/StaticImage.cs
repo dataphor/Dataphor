@@ -13,6 +13,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		// IVerticalAlignedElement
 
 		protected VerticalAlignment FVerticalAlignment = VerticalAlignment.Top;
+		[DefaultValue(VerticalAlignment.Top)]
 		public VerticalAlignment VerticalAlignment
 		{
 			get { return FVerticalAlignment; }
@@ -34,6 +35,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		// IHorizontalAlignedElement
 
 		protected HorizontalAlignment FHorizontalAlignment = HorizontalAlignment.Left;
+		[DefaultValue(HorizontalAlignment.Left)]
 		public HorizontalAlignment HorizontalAlignment
 		{
 			get { return FHorizontalAlignment; }
@@ -53,6 +55,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		}
 
 		private int FImageWidth = -1;
+		[DefaultValue(-1)]
 		public int ImageWidth
 		{
 			get { return FImageWidth; }
@@ -75,6 +78,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		}
 
 		private int FImageHeight = -1;
+		[DefaultValue(-1)]
 		public int ImageHeight
 		{
 			get { return FImageHeight; }
@@ -100,7 +104,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		private StretchStyles FStretchStyle = StretchStyles.StretchRatio;
 		[DefaultValue(StretchStyles.StretchRatio)]
-		[Description("Specifies how to fit the image into the specified space.")]
 		public StretchStyles StretchStyle
 		{
 			get { return FStretchStyle; }
@@ -125,6 +128,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		}
 
 		private string FImage = String.Empty;
+		[DefaultValue("")]
 		public string Image
 		{
 			get { return FImage; }

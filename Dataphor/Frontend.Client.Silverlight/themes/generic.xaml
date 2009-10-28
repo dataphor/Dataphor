@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     mc:Ignorable="d"
+    xmlns:System="clr-namespace:System;assembly=mscorlib"
     >
 
 	<Style TargetType="local:FormControl">
@@ -345,8 +346,9 @@
 	</Style>
 
     <Style TargetType="local:GroupBox">
-		<Setter Property="BorderBrush" Value="Navy" />
-        <Setter Property="Template">
+		<Setter Property="HorizontalContentAlignment" Value="Stretch" />
+		<Setter Property="VerticalContentAlignment" Value="Stretch" />
+		<Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="local:GroupBox">
 					<Grid x:Name="root" Width="{TemplateBinding Width}">
@@ -379,13 +381,40 @@
                 					</Storyboard>
                 				</VisualState>
                 			</VisualStateGroup>
+							<VisualStateGroup x:Name="HeaderGroup">
+								<VisualState x:Name="HeaderNull" >
+									<Storyboard>
+										<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="contentPresenter" Storyboard.TargetProperty="(UIElement.Visibility)">
+											<DiscreteObjectKeyFrame KeyTime="00:00:00">
+												<DiscreteObjectKeyFrame.Value>
+													<Visibility>Collapsed</Visibility>
+												</DiscreteObjectKeyFrame.Value>
+											</DiscreteObjectKeyFrame>
+										</ObjectAnimationUsingKeyFrames>
+										<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="contentPresenter1" Storyboard.TargetProperty="(Grid.Row)">
+											<DiscreteObjectKeyFrame KeyTime="00:00:00">
+												<DiscreteObjectKeyFrame.Value>
+													<System:Int32>1</System:Int32>
+												</DiscreteObjectKeyFrame.Value>
+											</DiscreteObjectKeyFrame>
+										</ObjectAnimationUsingKeyFrames>
+										<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="contentPresenter1" Storyboard.TargetProperty="(Grid.RowSpan)">
+											<DiscreteObjectKeyFrame KeyTime="00:00:00">
+												<DiscreteObjectKeyFrame.Value>
+													<System:Int32>3</System:Int32>
+												</DiscreteObjectKeyFrame.Value>
+											</DiscreteObjectKeyFrame>
+										</ObjectAnimationUsingKeyFrames>
+									</Storyboard>
+								</VisualState>
+								<VisualState x:Name="HeaderNotNull"/>
+							</VisualStateGroup>
                 		</VisualStateManager.VisualStateGroups>
                 		<Border x:Name="border" BorderThickness="0,1,1,1" CornerRadius="0,4,4,0" 
                 			Grid.Column="2"
                 			Grid.Row="1" Grid.ColumnSpan="2" Grid.RowSpan="3" BorderBrush="Navy" />
-                		<ContentPresenter Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"
+                		<ContentPresenter x:Name="contentPresenter" Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"
                 			Margin="3,0,3,0"
-							Visibility="{Binding Header, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource NullToVisibilityConverter}}"
                 			Content="{TemplateBinding Header}"
                 			ContentTemplate="{TemplateBinding HeaderTemplate}" />
                 		<Border x:Name="border1" BorderThickness="1,1,0,1" CornerRadius="4,0,0,4" 
@@ -394,15 +423,15 @@
                 		<Border x:Name="border2" BorderThickness="0,0,0,1" CornerRadius="0" 
                 			BorderBrush="Navy" Grid.Row="1" Grid.Column="1" 
                 			Grid.RowSpan="3" />
-                		<ContentPresenter Content="{TemplateBinding Content}" 
+                		<ContentPresenter x:Name="contentPresenter1" Content="{TemplateBinding Content}" 
                 			ContentTemplate="{TemplateBinding ContentTemplate}"
                 			HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
                 			VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                			Margin="{TemplateBinding Padding}" Grid.Column="1" Grid.Row="1" Grid.RowSpan="3" Grid.ColumnSpan="2" />
+                			Margin="{TemplateBinding Padding}" Grid.Column="1" Grid.Row="2" Grid.RowSpan="2" Grid.ColumnSpan="2" />
                 	</Grid>
 				</ControlTemplate>
             </Setter.Value>
         </Setter>
-        <Setter Property="Padding" Value="4,2"/>
+        <Setter Property="Padding" Value="0,2"/>
     </Style>
 </ResourceDictionary>

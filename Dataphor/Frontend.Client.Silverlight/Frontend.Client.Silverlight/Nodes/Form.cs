@@ -345,7 +345,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		private FormInterfaceHandler FOnRejectForm;
 
 		private FormMode FMode;
-		[Browsable(false)]
 		public FormMode Mode { get { return FMode; } }
 
 		/// <remarks> The form interface must be active before calling this. </remarks>

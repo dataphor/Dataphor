@@ -369,7 +369,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 	[DesignerImage("Image('Frontend', 'Nodes.NotebookFramePage')")]
 	[DesignerCategory("Static Controls")]
-	[PublishDefaultConstructor("Alphora.Dataphor.Frontend.Client.SourceLinkType,Alphora.Dataphor.Frontend.Client")]
+	[PublishDefaultConstructor("Alphora.Dataphor.Frontend.Client.SourceLinkType")]
 	public class NotebookFramePage : BaseNotebookPage, IFrame, IWindowsMenuHost, INotebookFramePage
 	{
 		public NotebookFramePage() {}

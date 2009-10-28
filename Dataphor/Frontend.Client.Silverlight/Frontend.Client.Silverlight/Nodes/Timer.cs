@@ -10,8 +10,6 @@ using System.Windows.Threading;
 
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
-	[DesignerImage("Image('Frontend', 'Nodes.Timer')")]
-	[DesignerCategory("Non Visual")]
 	public class Timer : Node, ITimer
 	{
 		protected override void Dispose(bool ADisposing)
@@ -38,7 +36,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		// AutoReset
 		private bool FAutoReset = true;
-		[Description("Indicates whether the timer will run continously, or only once.")]
 		[DefaultValue(true)]
 		public bool AutoReset
 		{
@@ -48,7 +45,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		// Enabled
 		private bool FEnabled;
-		[Description("Indicates whether the timer is running.  Setting this property to true will start the timer, setting it to false will stop it.")]
 		[DefaultValue(false)]
 		public bool Enabled
 		{
@@ -88,7 +84,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		// Interval
 		private int FInterval = 100;
-		[Description("The interval, in milliseconds between each OnElapsed call.  Setting the interval when the timer is enabled has the effect of resetting the interval count.")]
 		[DefaultValue(100)]
 		public int Interval
 		{
@@ -106,7 +101,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		// OnElapsed		
 		private IAction FOnElapsed;
-		[Description("Action to be called when the timer elapses.")]
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		public IAction OnElapsed
 		{

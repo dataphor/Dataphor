@@ -16,7 +16,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	/// <summary> Embeds a FrameInterface. </summary>
 	[Description("Embeds a seperate form inside of the current form.")]
 	[DesignerImage("Image('Frontend', 'Nodes.Frame')")]
-	[PublishDefaultConstructor("Alphora.Dataphor.Frontend.Client.SourceLinkType,Alphora.Dataphor.Frontend.Client")]
+	[PublishDefaultConstructor("Alphora.Dataphor.Frontend.Client.SourceLinkType")]
 	[DesignerCategory("Static Controls")]
 	public class Frame : Element, IWindowsMenuHost, IFrame, IWindowsContainerElement
 	{
@@ -43,7 +43,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private SourceLinkType FSourceLinkType;
 		[DefaultValue(SourceLinkType.None)]
 		[RefreshProperties(RefreshProperties.All)]
-		[Description("Determines the data relationship between this document one that will be shown.")]
+		[Description("Determines the data relationship between this document and the one that will be shown.")]
 		public SourceLinkType SourceLinkType
 		{
 			get { return FSourceLinkType; }

@@ -16,9 +16,6 @@ using System.Windows.Controls;
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
 	/// <summary> Abstract class for interfaces. </summary>
-	[DesignRoot()]
-	[ListInDesigner(false)]
-	[DesignerImage("Image('Frontend', 'Nodes.Interface')")]
 	public abstract class Interface : Element, IInterface, ISilverlightContainerElement
 	{
 		protected override void Dispose(bool ADisposed)
@@ -53,7 +50,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		private string FText = String.Empty;
 		[DefaultValue("")]
-		[Description("The text to show as the title of the interface.")]
 		public string Text
 		{
 			get { return FText; }
@@ -89,8 +85,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		private ISource FMainSource;
 		/// <summary> The source for the primary DataView of this interface. </summary>
-		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
-		[Description("The source for the primary DataView of this interface.")]
 		public ISource MainSource
 		{
 			get { return FMainSource; }
@@ -150,8 +144,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		// OnDefault
 
 		private IAction FOnDefault;
-		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
-		[Description("An action to invoke as the default for the form.")]
 		public IAction OnDefault 
 		{ 
 			get { return FOnDefault; }
@@ -181,8 +173,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		// OnShown
 
 		private IAction FOnShown;
-		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
-		[Description("An action to invoke when the interface is shown.")]
 		public IAction OnShown
 		{
 			get { return FOnShown; }
@@ -207,8 +197,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		// OnPost
 
 		private IAction FOnPost;
-		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
-		[Description("An action that executes when the form is posted.")]
 		public IAction OnPost
 		{
 			get { return FOnPost; }
@@ -233,8 +221,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		// OnCancel
 
 		private IAction FOnCancel;
-		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
-		[Description("An action that will get executed when the form is canceled.")]
 		public IAction OnCancel
 		{
 			get { return FOnCancel; }
@@ -259,8 +245,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		// OnActivate
 
 		private IAction FOnActivate;
-		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
-		[Description("An action that will be executed while form is initially activating.")]
 		public IAction OnActivate
 		{
 			get { return FOnActivate; }
@@ -285,8 +269,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		// OnAfterActivate
 
 		private IAction FOnAfterActivate;
-		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
-		[Description("An action that will be executed after the form is initially activated.")]
 		public IAction OnAfterActivate
 		{
 			get { return FOnAfterActivate; }
@@ -311,8 +293,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		// OnBeforeDeactivate
 
 		private IAction FOnBeforeDeactivate;
-		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
-		[Description("An action that will be executed before the form is deactivated.")]
 		public IAction OnBeforeDeactivate
 		{
 			get { return FOnBeforeDeactivate; }
@@ -458,10 +438,15 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			return false;
 		}
 
-		/// <remarks> This method is invoked on the main thread. </remarks>
-		public void InsertChild(int AIndex, FrameworkElement AChild)
+		protected ContentControl ContentControl
 		{
-			((ContentControl)FrameworkElement).Content = AChild;
+			get { return FrameworkElement as ContentControl; }
+		}
+		
+		/// <remarks> This method is invoked on the main thread. </remarks>
+		public virtual void InsertChild(int AIndex, FrameworkElement AChild)
+		{
+			ContentControl.Content = AChild;
 		}
 	}
 }

@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.ComponentModel;
 
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
@@ -24,6 +25,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		}
 		
 		private string FTitle = String.Empty;
+		[DefaultValue("")]
 		public string Title
 		{
 			get { return FTitle; }

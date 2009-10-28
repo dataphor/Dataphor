@@ -11,7 +11,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		private HorizontalAlignment FHorizontalAlignment = HorizontalAlignment.Left;
 		[DefaultValue(HorizontalAlignment.Left)]
-		[Description("When this element is given more space than it can use, this property will control where the element will be placed within it's space.")]
 		public HorizontalAlignment HorizontalAlignment
 		{
 			get { return FHorizontalAlignment; }

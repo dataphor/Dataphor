@@ -28,7 +28,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		}
 
 		private string FText = "";
-		
 		[DefaultValue("")]
 		public string Text
 		{
