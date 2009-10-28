@@ -180,10 +180,6 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
             if (FAncestors != null)
                 LContent = Inheritance.Diff(MergeAncestors(LDocument.Ancestors), LContent);
-			//var LWriter = new StringWriter();
-			//var LXmlWriter = XmlWriter.Create(LWriter, new XmlWriterSettings() { Indented = true, OmitXmlDeclaration = true });
-			//LContent.WriteTo(LXmlWriter);
-			//LXmlWriter.Flush();
             LDocument.Content = LContent.Root.ToString(); // only the document node
 
             ABuffer.SaveData(LDocument.Write());
