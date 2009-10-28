@@ -463,7 +463,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			// Load the files required to register any nodes, if necessary				
 			if (DataSession.Server is DAE.Server.LocalServer)
 			{
-				IServerCursor LCursor = DataSession.OpenCursor(CGetLibraryFilesExpression);
+				IServerCursor LCursor = DataSession.OpenCursor(CGetFormDesignerLibraryFilesExpression);
 				try
 				{
 					using (DAE.Runtime.Data.Row LRow = LCursor.Plan.RequestRow())
