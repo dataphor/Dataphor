@@ -253,10 +253,7 @@ namespace Alphora.Dataphor.BOP
 			if (IsResolvable(AModifiedNode))
 			{
 				if (AResultNode == null)
-				{
 					AResultNode = new XElement(AModifiedNode.Name);
-					AParentNode.Add(AResultNode);
-				}
 
 				// Compare the attributes
 				DiffAttrs(AResultNode.Document, AModifiedNode, AOriginalNode, ref AResultNode);
