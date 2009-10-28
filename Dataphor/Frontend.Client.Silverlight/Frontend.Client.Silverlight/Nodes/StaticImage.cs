@@ -70,10 +70,8 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		{
 			if (FImageWidth >= 0)
 				return (double)FImageWidth;
-			else if (FSource != null && (FSource is BitmapImage))
-				return (double)((BitmapImage)FSource).PixelWidth;
-			else
-				return 0d;
+			else 
+				return (double)FLoadedImageWidth;
 		}
 
 		private int FImageHeight = -1;
@@ -94,10 +92,8 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		{
 			if (FImageHeight >= 0)
 				return (double)FImageHeight;
-			else if (FSource != null && (FSource is BitmapImage))
-				return (double)((BitmapImage)FSource).PixelHeight;
 			else
-				return 0d;
+				return (double)FLoadedImageHeight;
 		}
 
 		// StretchStyle
@@ -138,23 +134,25 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				{
 					FImage = value;
 					if (Active)
-						UpdateSource();
+						UpdateLoadedImage();
 				}
 			}
 		}
 
-		// Source
+		// LoadedImage
 		
-		private ImageSource FSource;
+		private ImageSource FLoadedImage;
 		
-		public ImageSource Source
+		public ImageSource LoadedImage
 		{
-			get { return FSource; }
+			get { return FLoadedImage; }
 			private set
 			{
-				if (FSource != value)
+				if (FLoadedImage != value)
 				{
-					FSource = value;
+					FLoadedImage = value;
+
+					StoreBitmapDimensions();
 					UpdateBinding(System.Windows.Controls.Image.SourceProperty);
 					UpdateBinding(FrameworkElement.WidthProperty);
 					UpdateBinding(FrameworkElement.HeightProperty);
@@ -162,9 +160,37 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			}
 		}
 
+		/// <summary> Snapshot the bitmap dimensions to avoid having to hit the pixel dimensions from the bitmap (across threads). </summary>
+		private void StoreBitmapDimensions()
+		{
+			Session.DispatchAndWait
+			(
+				(System.Action)
+				(
+					() =>
+					{
+						var LLoadedBitmap = FLoadedImage as BitmapImage;
+						if (LLoadedBitmap != null)
+						{
+							FLoadedImageWidth = LLoadedBitmap.PixelWidth;
+							FLoadedImageHeight = LLoadedBitmap.PixelHeight;
+						}
+						else
+						{
+							FLoadedImageWidth = 0;
+							FLoadedImageHeight = 0;
+						}
+					}
+				)
+			);
+		}
+		
+		private int FLoadedImageWidth;
+		private int FLoadedImageHeight;
+
 		private object UIGetSource()
 		{
-			return FSource;
+			return FLoadedImage;
 		}
 
 		protected PipeRequest FImageRequest;
@@ -178,11 +204,11 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			}
 		}
 
-		private void UpdateSource()
+		private void UpdateLoadedImage()
 		{
 			CancelImageRequest();
-			if (FImage == String.Empty)
-				Source = null;
+			if (FImage == String.Empty || !Active)
+				LoadedImage = null;
 			else
 			{
 				// Queue up an asynchronous request
@@ -199,21 +225,22 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				try
 				{
 					if (ARequest.Result.IsNative)
-						Source = ImageUtility.BitmapImageFromBytes(ARequest.Result.AsByteArray);
+						LoadedImage = ImageUtility.BitmapImageFromBytes(ARequest.Result.AsByteArray);
 					else
 						using (Stream LStream = ARequest.Result.OpenStream())
-							Source = ImageUtility.BitmapImageFromStream(LStream);
+							LoadedImage = ImageUtility.BitmapImageFromStream(LStream);
 				}
 				catch
 				{
-					Source = ImageUtility.GetErrorImage();
+					LoadedImage = ImageUtility.GetErrorImage();
 				}
 			}
 		}
 
 		protected void ImageError(PipeRequest ARequest, Pipe APipe, Exception AException)
 		{
-			Source = ImageUtility.GetErrorImage();
+			FImageRequest = null;
+			LoadedImage = ImageUtility.GetErrorImage();
 			this.HandleException(AException);
 		}
 
@@ -250,7 +277,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		internal protected override void AfterActivate()
 		{
-			UpdateSource();
+			UpdateLoadedImage();
 			base.AfterActivate();
 		}
 	}

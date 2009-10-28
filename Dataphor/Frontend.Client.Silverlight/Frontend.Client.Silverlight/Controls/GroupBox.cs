@@ -16,11 +16,15 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 	///	so that if MS introduces this control into SL less will have to change.	 
 	///	Props to: http://leeontech.wordpress.com/2008/04/10/groupbox/
 	/// </remarks>
+	[TemplateVisualState(Name = "Enabled", GroupName = "EnabledGroup")]
+	[TemplateVisualState(Name = "Disabled", GroupName = "EnabledGroup")]
 	public class GroupBox : ContentControl
 	{
 		public GroupBox()
 		{
-			this.DefaultStyleKey = typeof(GroupBox);
+			DefaultStyleKey = typeof(GroupBox);
+			
+			IsEnabledChanged += new DependencyPropertyChangedEventHandler(BaseIsEnabledChanged);
 		}
 
         public static readonly DependencyProperty HeaderProperty = DependencyProperty.Register("Header", typeof(object), typeof(GroupBox), null);
@@ -38,5 +42,25 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
             get { return (DataTemplate)GetValue(HeaderTemplateProperty); }
             set { SetValue(HeaderTemplateProperty, value); }
         }
+
+		private void BaseIsEnabledChanged(object ASender, DependencyPropertyChangedEventArgs AArgs)
+		{
+			UpdateVisualStates(true);
+		}
+
+		public override void OnApplyTemplate()
+		{
+			base.OnApplyTemplate();
+			UpdateVisualStates(false);
+		}
+
+		private void UpdateVisualStates(bool AUseTransitions)
+		{
+			if (IsEnabled)
+				VisualStateManager.GoToState(this, "Enabled", AUseTransitions);
+			else
+				VisualStateManager.GoToState(this, "Disabled", AUseTransitions);
+		}
+		
 	}
 }

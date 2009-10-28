@@ -8,7 +8,8 @@
     x:Class="Alphora.Dataphor.Frontend.Client.Silverlight.App"
     >
     <Application.Resources>
-        
+        <local:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+		
     	<Style x:Key="ButtonStyle" TargetType="Button">
     		<Setter Property="Background">
     			<Setter.Value>
@@ -359,5 +360,7 @@
 		<Style x:Key="RowStyle" TargetType="StackPanel">
 			<Setter Property="Orientation" Value="Horizontal" />
 		</Style>
+		<SolidColorBrush x:Key="DisabledBorder" Color="#FF6E6E6E"/>
+		<SolidColorBrush x:Key="EnabledBorder" Color="Navy"/>
     </Application.Resources>
 </Application>

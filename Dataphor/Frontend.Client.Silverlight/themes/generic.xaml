@@ -350,35 +350,59 @@
             <Setter.Value>
                 <ControlTemplate TargetType="local:GroupBox">
 					<Grid x:Name="root" Width="{TemplateBinding Width}">
-						<Grid.ColumnDefinitions>
-							<ColumnDefinition Width="6" />
-							<ColumnDefinition Width="Auto" />
-							<ColumnDefinition Width="*" />
-							<ColumnDefinition Width="6" />
-						</Grid.ColumnDefinitions>
-						<Grid.RowDefinitions>
-							<RowDefinition Height="Auto" />
-							<RowDefinition Height="Auto" />
-							<RowDefinition Height="*" />
-							<RowDefinition Height="6" />
-						</Grid.RowDefinitions>
-						<Border BorderThickness="0,1,1,0" CornerRadius="0,4,4,4" 
-							BorderBrush="{TemplateBinding BorderBrush}" Grid.Column="2"
-                            Grid.Row="1" Grid.ColumnSpan="2" Grid.RowSpan="3" />
-						<Border Padding="3,0,3,0" BorderThickness="0" Grid.Column="1"
-							Grid.Row="0" Grid.RowSpan="2">
-							<ContentPresenter Content="{TemplateBinding Header}"
-								ContentTemplate="{TemplateBinding HeaderTemplate}" />
-						</Border>
-						<ContentPresenter Content="{TemplateBinding Content}" 
-							ContentTemplate="{TemplateBinding ContentTemplate}"
-							Margin="4" Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2" />
-						<Border BorderThickness="1,0,1,1" CornerRadius="4,4,4,4" 
-							BorderBrush="{TemplateBinding BorderBrush}" Grid.Row="1" Grid.ColumnSpan="4"
-                            Grid.RowSpan="3" />
-					</Grid>
+                		<Grid.ColumnDefinitions>
+                			<ColumnDefinition Width="6" />
+                			<ColumnDefinition Width="Auto" />
+                			<ColumnDefinition Width="*" />
+                			<ColumnDefinition Width="6" />
+                		</Grid.ColumnDefinitions>
+                		<Grid.RowDefinitions>
+                			<RowDefinition Height="Auto" />
+                			<RowDefinition Height="Auto" />
+                			<RowDefinition Height="*" />
+                			<RowDefinition Height="6" />
+                		</Grid.RowDefinitions>
+                		<VisualStateManager.VisualStateGroups>
+                			<VisualStateGroup x:Name="EnabledGroup">
+								<VisualState x:Name="Enabled" />
+                				<VisualState x:Name="Disabled">
+                					<Storyboard>
+                						<ColorAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)">
+                							<EasingColorKeyFrame KeyTime="00:00:00" Value="#FF8E8E8E"/>
+                						</ColorAnimationUsingKeyFrames>
+                						<ColorAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border1" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)">
+                							<EasingColorKeyFrame KeyTime="00:00:00" Value="#FF8E8E8E"/>
+                						</ColorAnimationUsingKeyFrames>
+                						<ColorAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border2" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)">
+                							<EasingColorKeyFrame KeyTime="00:00:00" Value="#FF8E8E8E"/>
+                						</ColorAnimationUsingKeyFrames>
+                					</Storyboard>
+                				</VisualState>
+                			</VisualStateGroup>
+                		</VisualStateManager.VisualStateGroups>
+                		<Border x:Name="border" BorderThickness="0,1,1,1" CornerRadius="0,4,4,0" 
+                			Grid.Column="2"
+                			Grid.Row="1" Grid.ColumnSpan="2" Grid.RowSpan="3" BorderBrush="Navy" />
+                		<ContentPresenter Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"
+                			Margin="3,0,3,0"
+							Visibility="{Binding Header, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource NullToVisibilityConverter}}"
+                			Content="{TemplateBinding Header}"
+                			ContentTemplate="{TemplateBinding HeaderTemplate}" />
+                		<Border x:Name="border1" BorderThickness="1,1,0,1" CornerRadius="4,0,0,4" 
+                			BorderBrush="Navy" Grid.Row="1" 
+                			Grid.RowSpan="3" />
+                		<Border x:Name="border2" BorderThickness="0,0,0,1" CornerRadius="0" 
+                			BorderBrush="Navy" Grid.Row="1" Grid.Column="1" 
+                			Grid.RowSpan="3" />
+                		<ContentPresenter Content="{TemplateBinding Content}" 
+                			ContentTemplate="{TemplateBinding ContentTemplate}"
+                			HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                			VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                			Margin="{TemplateBinding Padding}" Grid.Column="1" Grid.Row="1" Grid.RowSpan="3" Grid.ColumnSpan="2" />
+                	</Grid>
 				</ControlTemplate>
             </Setter.Value>
         </Setter>
+        <Setter Property="Padding" Value="4,2"/>
     </Style>
 </ResourceDictionary>
