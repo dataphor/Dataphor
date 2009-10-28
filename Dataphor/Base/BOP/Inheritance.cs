@@ -147,7 +147,7 @@ namespace Alphora.Dataphor.BOP
 					ADiffDoc,
 					ref ADiffElement,
 					AOriginalElement.Name,
-					XName.Get(Persistence.CBOPNamespaceURI, Persistence.CBOPDefault + LDefaultAttr.Name),
+					XName.Get(Persistence.CBOPDefault + LDefaultAttr.Name, Persistence.CBOPNamespaceURI),
 					"True"
 				);
 			}
@@ -245,7 +245,8 @@ namespace Alphora.Dataphor.BOP
 			XElement AModifiedNode, 
 			XElement AOriginalNode,
 			XElement AParentNode, 
-			XElement AResultNode
+			XElement AResultNode,
+			XDocument AOriginalDocument
 		)
 		{
 			// if the current node is named
@@ -280,7 +281,7 @@ namespace Alphora.Dataphor.BOP
 								if (LNameAttribute != null)
 								{
 									// if named, search entire original document (moved node case)
-									LOriginalChild = FindNode(AOriginalNode.Document.Root, LNameAttribute.Value);
+									LOriginalChild = FindNode(AOriginalDocument.Root, LNameAttribute.Value);
 
 									// if found, explicitly mark the node as modified
 									if (LOriginalChild != null)
@@ -317,7 +318,7 @@ namespace Alphora.Dataphor.BOP
 							LAdjustment--;
 			
 						// recurse, comparing LOriginalChild to LModifiedChild with AResultNode as the Parent
-						DiffNode(LModifiedChild, LOriginalChild, AResultNode, null);
+						DiffNode(LModifiedChild, LOriginalChild, AResultNode, null, AOriginalDocument);
 					}
 
 					// Next!
@@ -359,7 +360,7 @@ namespace Alphora.Dataphor.BOP
 			LResultDoc.Root.SetAttributeValue(XNamespace.Xmlns + Persistence.CBOPNamespacePrefix, Persistence.CBOPNamespaceURI);
 			LResultDoc.Root.SetAttributeValue(XNamespace.Xmlns + CIBOPNamespacePrefix, CIBOPNamespaceURI);
 			
-			DiffNode(AModified.Root, AOriginal.Root, null, LResultDoc.Root);
+			DiffNode(AModified.Root, AOriginal.Root, null, LResultDoc.Root, AOriginal);
 			
 			// Still needed?
 			//LResultDoc.Normalize();
