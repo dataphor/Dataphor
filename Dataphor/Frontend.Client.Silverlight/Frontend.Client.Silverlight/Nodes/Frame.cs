@@ -85,7 +85,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				if (FDocument != value)
 				{
 					FDocument = value;
-					UpdateFrameInterface();
+					UpdateFrameInterface(true);
 				}
 			}
 		}
@@ -132,12 +132,12 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			get { return FFrameInterfaceNode; }
 		}
 
-		private void UpdateFrameInterface()
+		protected virtual void UpdateFrameInterface(bool AForce)
 		{
 			ResetFrameInterfaceNode(Active);
 		}
 
-		private void ResetFrameInterfaceNode(bool ABuild)
+		protected void ResetFrameInterfaceNode(bool ABuild)
 		{
 			// Clean up the old frame if there is one
 			if (FFrameInterfaceNode != null)

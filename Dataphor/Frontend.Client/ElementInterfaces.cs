@@ -65,9 +65,6 @@ namespace Alphora.Dataphor.Frontend.Client
 	/// in the Sample01 [dfd] document.</example>
 	public interface IGroup : IElement
 	{
-		/// <summary> Gets the actual title to use. </summary>
-		string GetTitle();
-
 		// Published
 
 		/// <summary> A text string that will be used to describe the group. </summary> <doc/>

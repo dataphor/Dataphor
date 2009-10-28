@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows.Controls;
-using System.Windows.Navigation;
 using System.Threading;
 using Alphora.Dataphor.DAE.Client;
 

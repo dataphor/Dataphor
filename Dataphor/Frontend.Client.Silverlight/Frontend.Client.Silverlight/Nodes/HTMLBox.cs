@@ -7,7 +7,7 @@ using System.Windows.Shapes;
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
 	// TODO: Support the HtmlBox
-	public class HtmlBox : Element
+	public class HtmlBox : Element, IHtmlBox
 	{
 		public const int CDefaultWidth = 100;
 		public const int CDefaultHeight = 100;

@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Threading;
 using System.Windows.Controls;
-using System.Windows.Navigation;
 
 using Alphora.Dataphor.DAE.Listener;
 

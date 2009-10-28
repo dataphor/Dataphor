@@ -6,7 +6,7 @@ using System.ComponentModel;
 
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
-	public class Group : Element, ISilverlightContainerElement
+	public class Group : Element, IGroup, ISilverlightContainerElement
 	{
 		protected override FrameworkElement CreateFrameworkElement()
 		{

@@ -5,7 +5,7 @@ using System.ComponentModel;
 
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
-	public class Column : ContainerElement
+	public class Column : ContainerElement, IColumn
 	{
 		// IVerticalAlignedElement
 
