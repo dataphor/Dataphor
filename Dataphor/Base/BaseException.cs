@@ -75,6 +75,9 @@ namespace Alphora.Dataphor
 
 			/// <summary>Error code 100132: "Cannot convert to string from type ({0})."</summary>
 			CannotConvertToString = 100132,
+			
+			/// <summary>Error code 100133: "Class ({0}) not found."</summary>
+			ClassNotFound = 100133,
 		};
 
 		// Resource manager for this exception class

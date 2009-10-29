@@ -390,6 +390,38 @@ namespace Alphora.Dataphor
 			lock (FAssemblyByName)
 				FAssemblyByName.Add(AssemblyNameUtility.GetName(AAssembly.FullName), AAssembly); 
 		}
+		
+		public static Assembly[] GetRegisteredAssemblies()
+		{
+			#if SILVERLIGHT
+			EnsureAssemblyByName();
+			lock (FAssemblyByName)
+			{
+				var LResult = new Assembly[FAssemblyByName.Count];
+				var i = 0;
+				foreach (Assembly LAssembly in FAssemblyByName.Values)
+				{
+					LResult[i] = LAssembly;
+					i++;
+				}
+				return LResult;
+			}
+			#else
+			return AppDomain.CurrentDomain.GetAssemblies();
+			#endif
+		}
+
+		public static Type SearchAllAssembliesForClass(string AQualifiedClassName)
+		{
+			var LAssemblies = GetRegisteredAssemblies();
+			foreach (Assembly LAssembly in LAssemblies)
+			{
+				var LResult = LAssembly.GetType(AQualifiedClassName, false);
+				if (LResult != null)
+					return LResult;
+			}
+			throw new BaseException(BaseException.Codes.ClassNotFound, AQualifiedClassName);
+		}
 
 		/// <summary> Creates a new instance using the given name components. </summary>
 		/// <remarks> If the given assembly name is weak (short), an attempt will be made 
@@ -416,6 +448,10 @@ namespace Alphora.Dataphor
 			{
 				LAssemblyName = ADefaultAssembly.FullName;
 				LQualifiedClassName = AAssemblyQualifiedClassName.Trim();
+				
+				Type LResult = ADefaultAssembly.GetType(LQualifiedClassName, false);
+				if (LResult != null)
+					return LResult;
 			}
 			
 			return GetType(LQualifiedClassName, LAssemblyName);	
@@ -453,13 +489,17 @@ namespace Alphora.Dataphor
 			if (TryGetAssemblyByName(AAssemblyName, out LAssembly))
 				AAssemblyName = LAssembly.FullName;
 
-			return 
+			var LResult =
 				Type.GetType
 				(
 					AQualifiedClassName + (String.IsNullOrEmpty(AAssemblyName) ? "" : ("," + AAssemblyName)), 
-					true, 
+					false, 
 					true
 				);
+			return 
+				LResult != null 
+					? LResult 
+					: SearchAllAssembliesForClass(AQualifiedClassName);
 		}
 	}
 }

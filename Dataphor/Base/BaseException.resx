@@ -180,4 +180,7 @@
 	<data name="100132" xml:space="preserve">
 		<value>Cannot convert to string from type ({0}).</value>
 	</data>
+	<data name="100133" xml:space="preserve">
+		<value>Class ({0}) not found.</value>
+	</data>
 </root>
