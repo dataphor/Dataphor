@@ -1948,7 +1948,7 @@ namespace Alphora.Dataphor.DAE.Server
 			if (!AContext.IsLoadingContext)
 			{
 				LoadingContext LCurrentLoadingContext = CurrentLoadingContext();
-				if ((LCurrentLoadingContext != null) && !LCurrentLoadingContext.IsInternalContext)
+				if ((LCurrentLoadingContext != null) && LCurrentLoadingContext.IsLoadingContext && !LCurrentLoadingContext.IsInternalContext)
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.InvalidLoadingContext, ErrorSeverity.System);
 			}
 
