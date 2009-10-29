@@ -6,16 +6,11 @@ using System.ComponentModel;
 
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
-	public class Group : Element, IGroup, ISilverlightContainerElement
+	public class Group : ContentElement, IGroup
 	{
 		protected override FrameworkElement CreateFrameworkElement()
 		{
 			return new GroupBox();
-		}
-
-		protected ContentControl ContentControl
-		{
-			get { return (ContentControl)FrameworkElement; }
 		}
 
 		protected override void RegisterBindings()
@@ -45,48 +40,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				return null;
 			else
 				return FTitle;
-		}
-
-		/// <remarks> This method is invoked on the main thread. </remarks>
-		public void InsertChild(int AIndex, FrameworkElement AChild)
-		{
-			ContentControl.Content = AChild;
-		}
-
-		// Element
-
-		public override int GetDefaultMarginLeft()
-		{
-			return 0;
-		}
-
-		public override int GetDefaultMarginRight()
-		{
-			return 0;
-		}
-
-		public override int GetDefaultMarginTop()
-		{
-			return 0;
-		}
-
-		public override int GetDefaultMarginBottom()
-		{
-			return 0;
-		}
-
-		public override bool GetDefaultTabStop()
-		{
-			return false;
-		}
-
-		// Node
-
-		public override bool IsValidChild(Type AChildType)
-		{
-			if (typeof(IElement).IsAssignableFrom(AChildType))
-				return true;
-			return base.IsValidChild(AChildType);
 		}
 	}
 }

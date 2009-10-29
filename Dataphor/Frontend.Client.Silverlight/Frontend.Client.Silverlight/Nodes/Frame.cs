@@ -7,7 +7,7 @@ using System.ComponentModel;
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
 	[PublishDefaultConstructor("Alphora.Dataphor.Frontend.Client.SourceLinkType")]
-	public class Frame : Element, IFrame, ISilverlightContainerElement
+	public class Frame : ContentElement, IFrame
 	{
 		public Frame() {}
 
@@ -20,21 +20,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		{
 			BeforeCloseEmbedded = null;
 			base.Dispose(ADisposing);
-		}
-
-		protected override FrameworkElement CreateFrameworkElement()
-		{
-			return new ContentControl();
-		}
-		
-		protected ContentControl ContentControl
-		{
-			get { return (ContentControl)FrameworkElement; }
-		}
-
-		public void InsertChild(int AIndex, FrameworkElement AChild)
-		{
-			ContentControl.Content = AChild;
 		}
 
 		// this link must be set first when deserializing.
@@ -248,28 +233,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		{
 			if (FrameInterfaceNode != null)
 				FrameInterfaceNode.BroadcastEvent(AEvent);
-		}
-
-		// Element
-
-		public override int GetDefaultMarginLeft()
-		{
-			return 0;
-		}
-
-		public override int GetDefaultMarginRight()
-		{
-			return 0;
-		}
-
-		public override int GetDefaultMarginTop()
-		{
-			return 0;
-		}
-
-		public override int GetDefaultMarginBottom()
-		{
-			return 0;
 		}
 	}
 }

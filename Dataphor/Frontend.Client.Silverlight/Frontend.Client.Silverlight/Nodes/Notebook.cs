@@ -4,7 +4,7 @@ using System.Windows.Controls;
 
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
-	public class Notebook : Element, INotebook
+	public class Notebook : Element, INotebook, ISilverlightContainerElement
 	{
 		protected override void Dispose(bool ADisposing)
 		{
@@ -163,12 +163,43 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				ActivePage = (IBaseNotebookPage)Children[0];
 		}
 
+		/// <remarks> This method is invoked on the main thread. </remarks>
+		public void InsertChild(int AIndex, FrameworkElement AChild)
+		{
+			TabControl.Items.Insert(Math.Min(AIndex, TabControl.Items.Count), AChild);
+		}
+
+		/// <remarks> This method is invoked on the main thread. </remarks>
+		public void RemoveChild(FrameworkElement AChild)
+		{
+			TabControl.Items.Remove(AChild);
+		}
 
 		// Element
 
 		public override bool GetDefaultTabStop()
 		{
 			return true;
+		}
+
+		public override int GetDefaultMarginLeft()
+		{
+			return 0;
+		}
+
+		public override int GetDefaultMarginRight()
+		{
+			return 0;
+		}
+
+		public override int GetDefaultMarginTop()
+		{
+			return 0;
+		}
+
+		public override int GetDefaultMarginBottom()
+		{
+			return 0;
 		}
 	}
 }

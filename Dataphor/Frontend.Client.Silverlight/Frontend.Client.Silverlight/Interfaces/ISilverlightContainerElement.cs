@@ -7,5 +7,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 	{
 		/// <remarks> This method is invoked on the main thread. </remarks>
 		void InsertChild(int AIndex, FrameworkElement AChild);
+		/// <remarks> This method is invoked on the main thread. </remarks>
+		void RemoveChild(FrameworkElement AChild);
 	}
 }

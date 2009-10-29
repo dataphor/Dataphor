@@ -185,6 +185,7 @@
     <Compile Include="Frontend.Client.Silverlight\Helpers\SilverlightUtility.cs" />
     <Compile Include="Frontend.Client.Silverlight\Interfaces\ISilverlightContainerElement.cs" />
     <Compile Include="Frontend.Client.Silverlight\Nodes\Column.cs" />
+    <Compile Include="Frontend.Client.Silverlight\Nodes\ContentElement.cs" />
     <Compile Include="Frontend.Client.Silverlight\Nodes\Element.cs" />
     <Compile Include="Frontend.Client.Silverlight\Nodes\Form.cs" />
     <Compile Include="Frontend.Client.Silverlight\Helpers\NullToVisibilityConverter.cs" />
@@ -204,6 +205,11 @@
     <Compile Include="Frontend.Client.Silverlight\Nodes\StaticText.cs" />
     <Compile Include="Frontend.Client.Silverlight\Nodes\Timer.cs" />
     <Compile Include="Frontend.Client.Silverlight\Nodes\Trigger.cs" />
+    <Compile Include="Frontend.Client.Silverlight\Strings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
     <Compile Include="Frontend.Client.Silverlight\SilverlightClientException.cs" />
     <Compile Include="Frontend.Client.Silverlight\DocumentExpression.cs" />
     <Compile Include="Frontend.Client.Silverlight\ISilverlightFormInterface.cs" />
@@ -265,6 +271,10 @@
     </EmbeddedResource>
     <EmbeddedResource Include="..\Frontend.Client\Strings.resx">
       <Link>Frontend.Client\Strings.resx</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Frontend.Client.Silverlight\Strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Frontend.Client.Silverlight\SilverlightClientException.resx">
       <DependentUpon>SilverlightClientException.cs</DependentUpon>

@@ -22,6 +22,12 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		{
 			Panel.Children.Insert(Math.Min(AIndex, Panel.Children.Count), AChild);
 		}
+		
+		/// <remarks> This method is invoked on the main thread. </remarks>
+		public void RemoveChild(FrameworkElement AChild)
+		{
+			Panel.Children.Remove(AChild);
+		}
 
 		// Element
 

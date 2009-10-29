@@ -34,7 +34,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		protected override void RegisterBindings()
 		{
 			base.RegisterBindings();
-			AddBinding(HeaderedItemsControl.HeaderProperty, new Func<object>(UIGetHeader));
+			AddBinding(TabItem.HeaderProperty, new Func<object>(UIGetHeader));
 		}
 		
 		protected string FTitle = String.Empty;
@@ -45,13 +45,18 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			set
 			{
 				FTitle = value;
-				UpdateBinding(HeaderedItemsControl.HeaderProperty);
+				UpdateBinding(TabItem.HeaderProperty);
 			}
+		}
+		
+		protected virtual string GetTitle()
+		{
+			return String.IsNullOrEmpty(FTitle) ? Strings.CDefaultNotebookPageTitle : FTitle;
 		}
 		
 		private object UIGetHeader()
 		{
-			return String.IsNullOrEmpty(FTitle) ? null : FTitle;
+			return GetTitle();
 		}
 
 		public override bool IsValidOwner(Type AOwnerType)

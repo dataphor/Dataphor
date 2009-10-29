@@ -18,7 +18,7 @@ using System.Collections.Generic;
 namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
 	/// <summary> Base node for all visible nodes. </summary>
-	public abstract class Element : Node, IElement
+	public abstract class Element : Node, ISilverlightElement
 	{
 		public const int CDefaultMarginLeft = 2;
 		public const int CDefaultMarginRight = 2;
@@ -46,7 +46,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		/// <remarks> This method is invoked on the main thread. </remarks>
 		protected abstract FrameworkElement CreateFrameworkElement();
 
-		/// <remarks> This method is invoked on the main thread. </remarks>
+		/// <remarks> This method is invoked on the main thread while the session thread is waiting. </remarks>
 		protected virtual void InitializeFrameworkElement()
 		{
 			if (Parent != null)
@@ -55,6 +55,18 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				var LIndex = Parent.Children.IndexOf(this);
 				if (LParentContainer != null)
 					LParentContainer.InsertChild(LIndex, FFrameworkElement);
+			}
+		}
+		
+		/// <remarks> This method is invoked on the main thread while the session thread is waiting. </remarks>
+		protected virtual void DeinitializeFrameworkElement()
+		{
+			// Remove this control from the parent if 
+			if (Parent != null)
+			{
+				var LParentContainer = Parent as ISilverlightContainerElement;
+				if (LParentContainer != null && Parent.Active)
+					LParentContainer.RemoveChild(FFrameworkElement);
 			}
 		}
 		
@@ -514,6 +526,12 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			RegisterBindings();
 			UpdateAllBindings();
 			base.Activate();
+		}
+
+		protected override void Deactivate()
+		{
+			base.Deactivate();
+			Session.DispatchAndWait(new System.Action(DeinitializeFrameworkElement));
 		}
 
 		#endregion
