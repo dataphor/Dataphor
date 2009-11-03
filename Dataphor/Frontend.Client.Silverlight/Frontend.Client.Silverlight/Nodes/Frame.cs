@@ -122,12 +122,17 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			ResetFrameInterfaceNode(Active);
 		}
 
+		protected virtual bool ShouldLoad()
+		{
+			return Document != String.Empty;
+		}
+
 		protected void ResetFrameInterfaceNode(bool ABuild)
 		{
 			// Clean up the old frame if there is one
 			if (FFrameInterfaceNode != null)
 				EnsureFrameInterfaceClosed();
-			if (ABuild && (FDocument != String.Empty))
+			if (ABuild && ShouldLoad())
 				LoadFrameInterface();
 		}
 

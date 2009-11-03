@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     mc:Ignorable="d"
     xmlns:System="clr-namespace:System;assembly=mscorlib"
+    xmlns:System_Windows_Controls="clr-namespace:System.Windows.Controls;assembly=Menu"
     >
 
 	<Style TargetType="local:FormControl">
@@ -16,13 +17,25 @@
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="local:FormControl">
-					<ScrollViewer Background="{TemplateBinding Background}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Margin="0" BorderThickness="0" Padding="0">
-						<ContentPresenter Content="{TemplateBinding Content}" 
-							ContentTemplate="{TemplateBinding ContentTemplate}"
-							HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-							VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-							Margin="{TemplateBinding Padding}"/>
-					</ScrollViewer>
+					<Grid >
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto"/>
+							<RowDefinition/>
+						</Grid.RowDefinitions>
+						<System_Windows_Controls:Menu VerticalAlignment="Top" HorizontalAlignment="Left">
+							<System_Windows_Controls:MenuItem Header="Hello"/>
+							<System_Windows_Controls:MenuItem Header="World">
+								<System_Windows_Controls:MenuItem Header="Hi!"/>
+							</System_Windows_Controls:MenuItem>
+						</System_Windows_Controls:Menu>
+						<ScrollViewer Background="{TemplateBinding Background}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Margin="0" BorderThickness="0" Padding="0" Grid.Row="1" >
+							<ContentPresenter Content="{TemplateBinding Content}" 
+								ContentTemplate="{TemplateBinding ContentTemplate}"
+								HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+								VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+								Margin="{TemplateBinding Padding}"/>
+						</ScrollViewer>
+					</Grid>
 				</ControlTemplate>
 			</Setter.Value>
 		</Setter>
@@ -434,4 +447,137 @@
         </Setter>
         <Setter Property="Padding" Value="0,2"/>
     </Style>
+
+	<Style TargetType="local:NotebookControl">
+		<Setter Property="IsTabStop" Value="False"/>
+		<Setter Value="#33FFFFFF" Property="Background"/>
+		<Setter Value="#FF7F8DCC" Property="BorderBrush"/>
+		<Setter Property="BorderThickness" Value="1"/>
+		<Setter Property="Padding" Value="0,2,0,2"/>
+		<Setter Property="HorizontalContentAlignment" Value="Left"/>
+		<Setter Property="VerticalContentAlignment" Value="Top"/>
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="local:NotebookControl">
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="6" />
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="6" />
+						</Grid.ColumnDefinitions>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto" />
+							<RowDefinition Height="*" />
+						</Grid.RowDefinitions>
+						<VisualStateManager.VisualStateGroups>
+							<VisualStateGroup x:Name="ValidationStates">
+								<VisualState x:Name="Valid"/>
+								<VisualState x:Name="InvalidUnfocused"/>
+								<VisualState x:Name="InvalidFocused"/>
+							</VisualStateGroup>
+						</VisualStateManager.VisualStateGroups>
+						<local:ButtonScrollViewer Grid.Column="1">
+							<ItemsPresenter Cursor="{TemplateBinding Cursor}"/>
+						</local:ButtonScrollViewer>
+						<Border Grid.Row="1" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1,1,0,1" Margin="0,-1,0,0" CornerRadius="3,0,0,3" Background="{TemplateBinding Background}"/>
+						<Border Grid.Row="1" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0,1,1,1" Grid.Column="2" Margin="0,-1,0,0" CornerRadius="0,3,3,0" Background="{TemplateBinding Background}"/>
+						<Border Background="{TemplateBinding Background}" Grid.Row="1" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0,0,0,1" Grid.Column="1"/>
+						<ContentPresenter Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1" Content="{TemplateBinding SelectedContent}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+						<Border x:Name="Disabled" IsHitTestVisible="False" Opacity="0" Canvas.ZIndex="1" Background="#8CFFFFFF" CornerRadius="3" Grid.ColumnSpan="4" Grid.RowSpan="2"/>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+		<Setter Property="ItemsPanel">
+			<Setter.Value>
+				<ItemsPanelTemplate>
+					<StackPanel Orientation="Horizontal"/>
+				</ItemsPanelTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+	
+	<Style TargetType="local:NotebookItem">
+		<Setter Property="Background" Value="#33FFFFFF"/>
+		<Setter Property="BorderBrush" Value="#FF7F8DCC"/>
+		<Setter Property="BorderThickness" Value="1"/>
+		<Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+		<Setter Property="VerticalContentAlignment" Value="Stretch"/>
+		<Setter Property="MinWidth" Value="5"/>
+		<Setter Property="MinHeight" Value="5"/>
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="local:NotebookItem">
+					<Grid>
+						<VisualStateManager.VisualStateGroups>
+							<VisualStateGroup x:Name="CommonStates">
+								<VisualState x:Name="Normal"/>
+								<VisualState x:Name="MouseOver">
+									<Storyboard>
+										<DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(Brush.Opacity)">
+											<EasingDoubleKeyFrame KeyTime="00:00:00" Value="0.4"/>
+										</DoubleAnimationUsingKeyFrames>
+									</Storyboard>
+								</VisualState>
+								<VisualState x:Name="Disabled">
+									<Storyboard>
+										<DoubleAnimationUsingKeyFrames Storyboard.TargetName="contentPresenter" Storyboard.TargetProperty="Opacity">
+											<SplineDoubleKeyFrame KeyTime="0" Value="0.7"/>
+										</DoubleAnimationUsingKeyFrames>
+										<DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border2" Storyboard.TargetProperty="(UIElement.Opacity)">
+											<EasingDoubleKeyFrame KeyTime="00:00:00" Value="0.4"/>
+										</DoubleAnimationUsingKeyFrames>
+									</Storyboard>
+								</VisualState>
+							</VisualStateGroup>
+							<VisualStateGroup x:Name="SelectionStates">
+								<VisualState x:Name="Unselected">
+									<Storyboard>
+										<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.BorderThickness)">
+											<DiscreteObjectKeyFrame KeyTime="00:00:00">
+												<DiscreteObjectKeyFrame.Value>
+													<Thickness>1</Thickness>
+												</DiscreteObjectKeyFrame.Value>
+											</DiscreteObjectKeyFrame>
+										</ObjectAnimationUsingKeyFrames>
+										<DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(Brush.Opacity)">
+											<EasingDoubleKeyFrame KeyTime="00:00:00" Value="0"/>
+										</DoubleAnimationUsingKeyFrames>
+									</Storyboard>
+								</VisualState>
+								<VisualState x:Name="Selected"/>
+							</VisualStateGroup>
+							<VisualStateGroup x:Name="FocusStates">
+								<VisualState x:Name="Focused">
+									<Storyboard>
+										<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border1" Storyboard.TargetProperty="(Border.BorderThickness)">
+											<DiscreteObjectKeyFrame KeyTime="00:00:00">
+												<DiscreteObjectKeyFrame.Value>
+													<Thickness>1,1,1,0</Thickness>
+												</DiscreteObjectKeyFrame.Value>
+											</DiscreteObjectKeyFrame>
+										</ObjectAnimationUsingKeyFrames>
+									</Storyboard>
+								</VisualState>
+								<VisualState x:Name="Unfocused"/>
+							</VisualStateGroup>
+						</VisualStateManager.VisualStateGroups>
+						<Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1,1,1,0" CornerRadius="3,3,0,0">
+							<Border.Background>
+								<SolidColorBrush Opacity="0.2" Color="White"/>
+							</Border.Background>
+							<Grid>
+								<Border x:Name="border1" CornerRadius="2,2,0,0" BorderBrush="White" />
+								<ContentPresenter x:Name="contentPresenter" Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}"
+									HorizontalAlignment="Center" Margin="{TemplateBinding HeaderPadding}" VerticalAlignment="Center"/>
+							</Grid>
+						</Border>
+						<Border x:Name="border2" Opacity="0" Background="#FF7E7E7E" CornerRadius="3,3,0,0"/>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
 </ResourceDictionary>

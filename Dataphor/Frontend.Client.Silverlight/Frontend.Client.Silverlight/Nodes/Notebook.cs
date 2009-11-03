@@ -18,32 +18,15 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			}
 		}
 
-		protected override FrameworkElement CreateFrameworkElement()
+		public NotebookControl NotebookControl
 		{
-			return new System.Windows.Controls.TabControl();
+			get { return (NotebookControl)FrameworkElement; }
 		}
 
-		protected override void InitializeFrameworkElement()
-		{
-			base.InitializeFrameworkElement();
-			TabControl.SelectionChanged += new SelectionChangedEventHandler(SelectionChanged);
-		}
-
-		public TabControl TabControl
-		{
-			get { return (TabControl)FrameworkElement; }
-		}
-
-		protected override void RegisterBindings()
-		{
-			base.RegisterBindings();
-			AddBinding(TabControl.SelectedItemProperty, new Func<object>(UIGetSelectedItem));
-		}
-		
 		/// <remarks> This callback method is invoked on the main thread. </remarks>
 		private void SelectionChanged(object ASender, SelectionChangedEventArgs AArgs)
 		{
-			var LNewItem = AArgs.AddedItems.Count == 0 ? null : (TabItem)AArgs.AddedItems[0];
+			var LNewItem = AArgs.AddedItems.Count == 0 ? null : AArgs.AddedItems[0];
 			Session.Invoke
 			(
 				(System.Action)
@@ -61,10 +44,10 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			);
 		}
 
-		private IBaseNotebookPage FindPage(TabItem AItem)
+		private IBaseNotebookPage FindPage(object AItem)
 		{
 			foreach (ISilverlightBaseNotebookPage LPage in Children)
-				if (LPage.TabItem == AItem)
+				if (LPage.ContentControl == AItem)
 					return LPage;
 			return null;
 		}
@@ -96,14 +79,14 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 					if ((value != null) && (!IsChildNode(value)))
 						throw new ClientException(ClientException.Codes.InvalidActivePage);
 					FActivePage = value;
-					UpdateBinding(TabControl.SelectedItemProperty);
+					UpdateBinding(NotebookControl.TargetSelectedIndexProperty);
 				}
 			}
 		}
 
-		private object UIGetSelectedItem()
+		private object UIGetTargetSelectedIndex()
 		{
-			return FActivePage == null ? null : ((ISilverlightBaseNotebookPage)FActivePage).TabItem;
+			return FActivePage == null ? -1 : Children.IndexOf(FActivePage);;
 		}
 
 		private bool IsChildNode(INode ANode)
@@ -166,17 +149,34 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		/// <remarks> This method is invoked on the main thread. </remarks>
 		public void InsertChild(int AIndex, FrameworkElement AChild)
 		{
-			TabControl.Items.Insert(Math.Min(AIndex, TabControl.Items.Count), AChild);
+			NotebookControl.Items.Insert(Math.Min(AIndex, NotebookControl.Items.Count), AChild);
 		}
 
 		/// <remarks> This method is invoked on the main thread. </remarks>
 		public void RemoveChild(FrameworkElement AChild)
 		{
-			TabControl.Items.Remove(AChild);
+			NotebookControl.Items.Remove(AChild);
 		}
 
 		// Element
 
+		protected override FrameworkElement CreateFrameworkElement()
+		{
+			return new NotebookControl();
+		}
+
+		protected override void InitializeFrameworkElement()
+		{
+			base.InitializeFrameworkElement();
+			NotebookControl.SelectionChanged += new SelectionChangedEventHandler(SelectionChanged);
+		}
+
+		protected override void RegisterBindings()
+		{
+			base.RegisterBindings();
+			AddBinding(NotebookControl.TargetSelectedIndexProperty, new Func<object>(UIGetTargetSelectedIndex));
+		}
+		
 		public override bool GetDefaultTabStop()
 		{
 			return true;

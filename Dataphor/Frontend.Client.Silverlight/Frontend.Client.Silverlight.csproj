@@ -175,6 +175,8 @@
     <Compile Include="Frontend.Client.Silverlight\Controls\FormControl.cs" />
     <Compile Include="Frontend.Client.Silverlight\Controls\FormStackControl.cs" />
     <Compile Include="Frontend.Client.Silverlight\Controls\GroupBox.cs" />
+    <Compile Include="Frontend.Client.Silverlight\Controls\NotebookControl.cs" />
+    <Compile Include="Frontend.Client.Silverlight\Controls\NotebookItem.cs" />
     <Compile Include="Frontend.Client.Silverlight\Controls\ScrollPresenter.cs" />
     <Compile Include="Frontend.Client.Silverlight\Controls\SessionControl.cs" />
     <Compile Include="Frontend.Client.Silverlight\Controls\TriggerControl.cs" />

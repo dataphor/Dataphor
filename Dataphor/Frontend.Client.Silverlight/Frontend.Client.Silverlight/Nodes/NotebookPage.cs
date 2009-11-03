@@ -9,12 +9,12 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 	{
 		protected override FrameworkElement CreateFrameworkElement()
 		{
-			return new TabItem();
+			return new NotebookItem();
 		}
 		
-		public TabItem TabItem
+		public NotebookItem NotebookItem
 		{
-			get { return (TabItem)FrameworkElement; }
+			get { return (NotebookItem)FrameworkElement; }
 		}
 
 		public virtual void Selected() {}
@@ -24,7 +24,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		protected override void RegisterBindings()
 		{
 			base.RegisterBindings();
-			AddBinding(TabItem.HeaderProperty, new Func<object>(UIGetHeader));
+			AddBinding(NotebookItem.HeaderProperty, new Func<object>(UIGetHeader));
 		}
 		
 		protected string FTitle = String.Empty;
@@ -35,13 +35,18 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			set
 			{
 				FTitle = value;
-				UpdateBinding(TabItem.HeaderProperty);
+				UpdateBinding(NotebookItem.HeaderProperty);
 			}
+		}
+		
+		protected virtual string GetTitle()
+		{
+			return String.IsNullOrEmpty(FTitle) ? Strings.CDefaultNotebookPageTitle : FTitle;
 		}
 		
 		private object UIGetHeader()
 		{
-			return String.IsNullOrEmpty(FTitle) ? null : FTitle;
+			return GetTitle();
 		}
 
 		public override bool IsValidOwner(Type AOwnerType)

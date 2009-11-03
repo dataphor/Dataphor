@@ -7,6 +7,6 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 	{
 		void Selected();
 		void Unselected();
-		TabItem TabItem { get; }
+		ContentControl ContentControl { get; }
 	}
 }

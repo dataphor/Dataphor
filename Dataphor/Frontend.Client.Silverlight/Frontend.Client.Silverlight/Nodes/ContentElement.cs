@@ -11,7 +11,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			return new ContentControl();
 		}
 
-		protected ContentControl ContentControl
+		public ContentControl ContentControl
 		{
 			get { return (ContentControl)FrameworkElement; }
 		}

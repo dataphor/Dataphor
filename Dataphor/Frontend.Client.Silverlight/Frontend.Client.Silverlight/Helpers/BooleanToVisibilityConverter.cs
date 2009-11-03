@@ -23,7 +23,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			throw new NotImplementedException("ConvertBack not implemented on NullToVisibilityConverter.");
+			throw new NotImplementedException("ConvertBack not implemented on BooleanToVisibilityConverter.");
 		}
 	}
 }
