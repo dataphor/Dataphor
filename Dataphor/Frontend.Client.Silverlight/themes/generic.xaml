@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     mc:Ignorable="d"
     xmlns:System="clr-namespace:System;assembly=mscorlib"
-    xmlns:System_Windows_Controls="clr-namespace:System.Windows.Controls;assembly=Menu"
+    xmlns:menu="clr-namespace:System.Windows.Controls;assembly=Menu"
     >
 
 	<Style TargetType="local:FormControl">
@@ -17,24 +17,17 @@
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="local:FormControl">
-					<Grid >
+					<Grid Background="{TemplateBinding Background}">
 						<Grid.RowDefinitions>
 							<RowDefinition Height="Auto"/>
 							<RowDefinition/>
 						</Grid.RowDefinitions>
-						<System_Windows_Controls:Menu VerticalAlignment="Top" HorizontalAlignment="Left">
-							<System_Windows_Controls:MenuItem Header="Hello"/>
-							<System_Windows_Controls:MenuItem Header="World">
-								<System_Windows_Controls:MenuItem Header="Hi!"/>
-							</System_Windows_Controls:MenuItem>
-						</System_Windows_Controls:Menu>
-						<ScrollViewer Background="{TemplateBinding Background}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Margin="0" BorderThickness="0" Padding="0" Grid.Row="1" >
-							<ContentPresenter Content="{TemplateBinding Content}" 
-								ContentTemplate="{TemplateBinding ContentTemplate}"
-								HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-								VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-								Margin="{TemplateBinding Padding}"/>
-						</ScrollViewer>
+						<ContentPresenter Content="{TemplateBinding Content}"
+							ContentTemplate="{TemplateBinding ContentTemplate}"
+							HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+							VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+							Margin="{TemplateBinding Padding}"
+							Grid.Row="1" />
 					</Grid>
 				</ControlTemplate>
 			</Setter.Value>
@@ -100,8 +93,9 @@
                     			ItemContainerStyle="{StaticResource BreadCrumbItemContainerStyle}" />
                     	</Border>
                     	<Border Grid.Row="1" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1,0,1,1" CornerRadius="0,0,4,4" Background="{TemplateBinding Background}">
-                    		<ContentPresenter x:Name="SelectedFormContent" 
-                    			Content="{Binding FormStack.CurrentItem, RelativeSource={RelativeSource TemplatedParent}}"/>
+							<ScrollViewer  HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Margin="0" BorderThickness="0" Padding="0">
+								<ContentPresenter Content="{Binding FormStack.CurrentItem, RelativeSource={RelativeSource TemplatedParent}}"/>
+							</ScrollViewer>
                     	</Border>
                     </Grid>
                 </ControlTemplate>
