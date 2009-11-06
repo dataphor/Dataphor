@@ -12,6 +12,7 @@ using Alphora.Dataphor.BOP;
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Client;
 using Alphora.Dataphor.DAE.Compiling;
+using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Schema = Alphora.Dataphor.DAE.Schema;
 
@@ -231,7 +232,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		private string FExpression = String.Empty;
 		[DefaultValue("")]
 		[Description("The expression to be used to select the data set.")]
-		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor", "System.Drawing.Design.UITypeEditor,System.Drawing")]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string Expression
 		{
@@ -252,7 +253,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		private string FInsertStatement = String.Empty;
 		[DefaultValue("")]
 		[Description("A single statement of D4 to be used to override the default insert behavior of the source. Columns of the row to be inserted can be accessed by name within the statement.")]
-		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client", "System.Drawing.Design.UITypeEditor,System.Drawing")]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string InsertStatement
 		{
@@ -273,7 +274,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		private string FUpdateStatement = String.Empty;
 		[DefaultValue("")]
 		[Description("A single statement of D4 to be used to override the default update behavior of the source. Columns of the row to be updated can be accessed by name within the statement.")]
-		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client", "System.Drawing.Design.UITypeEditor,System.Drawing")]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string UpdateStatement
 		{
@@ -294,7 +295,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		private string FDeleteStatement = String.Empty;
 		[DefaultValue("")]
 		[Description("A single statement of D4 to be used to override the default delete behavior of the source. Columns of the row to be deleted can be accessed by name within the statement.")]
-		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client", "System.Drawing.Design.UITypeEditor,System.Drawing")]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string DeleteStatement
 		{
@@ -315,7 +316,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		private string FFilter = String.Empty;
 		[DefaultValue("")]
 		[Description("The filter expression to apply to the data source.")]
-		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client", "System.Drawing.Design.UITypeEditor,System.Drawing")]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string Filter
 		{
@@ -1464,6 +1465,19 @@ namespace Alphora.Dataphor.Frontend.Client
 		
 		// Parameters
 		
+		private DataParams FParams;
+		public DataParams Params
+		{
+			get { return FParams; }
+			set 
+			{ 
+				FParams = value; 
+				UpdateParams();
+			}
+		}
+		
+		private DataSetParamGroup FParamsParamGroup;
+		
 		private DataSetParamGroup FArgumentParamGroup;
 
 		private void InternalUpdateParams()
@@ -1504,6 +1518,29 @@ namespace Alphora.Dataphor.Frontend.Client
 						FDataView.ParamGroups.Add(LParamGroup);
 						FArgumentParamGroup = LParamGroup;
 					}
+				}
+				
+				if (FParams != null)
+				{
+					if (FParamsParamGroup != null)
+					{
+						DataView.ParamGroups.SafeRemove(FParamsParamGroup);
+						FParamsParamGroup = null;
+					}
+					
+					DataSetParamGroup LParamGroup = new DataSetParamGroup();
+					foreach (DataParam LParam in FParams)
+					{
+						DataSetParam LDataSetParam = new DataSetParam();
+						LDataSetParam.Name = LParam.Name;
+						LDataSetParam.Modifier = LParam.Modifier;
+						LDataSetParam.DataType = LParam.DataType;
+						LDataSetParam.Value = LParam.Value;
+						LParamGroup.Params.Add(LDataSetParam);
+					}
+
+					FDataView.ParamGroups.Add(LParamGroup);
+					FParamsParamGroup = LParamGroup;
 				}
 			}
 		}

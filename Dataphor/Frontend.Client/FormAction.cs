@@ -352,7 +352,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			get { return FFilter; }
 			set { FFilter = value; }
 		}
-
+		
 		// Mode
 
 		private FormMode FMode;
@@ -456,6 +456,11 @@ namespace Alphora.Dataphor.Frontend.Client
 			set { FManageRefreshAfterPost = value; }
 		}
 
+		// These hooks are provided so that the ShowFormAction can be used in the eventing system
+		public event FormInterfaceHandler OnFormAcceptedEvent;
+		public event FormInterfaceHandler OnFormRejectedEvent;
+		private DataParams FParams;
+
 		protected override void InternalExecute(INode ASender, EventParams AParams)
 		{
 			if (FDocument != String.Empty)
@@ -466,31 +471,39 @@ namespace Alphora.Dataphor.Frontend.Client
 				}
 				else
 				{
-					IFormInterface LForm = HostNode.Session.LoadForm(this, FDocument, new FormInterfaceHandler(InternalBeforeActivateForm));
+					FParams = AParams["AParams"] as DataParams;
 					try
 					{
-						LForm.OnClosed += new EventHandler(OnClosedHandler);
-						InternalAfterActivateForm(LForm);
-						bool LForceAcceptReject = (FOnFormAccepted != null) || (FOnFormRejected != null);
-						if ((FMode != FormMode.None) || (SourceLinkType != SourceLinkType.None) || LForceAcceptReject)
+						IFormInterface LForm = HostNode.Session.LoadForm(this, FDocument, new FormInterfaceHandler(InternalBeforeActivateForm));
+						try
 						{
-							if (LForceAcceptReject)
-								LForm.ForceAcceptReject = true;
-							LForm.Show
-							(
-								(IFormInterface)FindParent(typeof(IFormInterface)),
-								new FormInterfaceHandler(FormAccepted),
-								new FormInterfaceHandler(FormRejected),
-								FMode
-							);
+							LForm.OnClosed += new EventHandler(OnClosedHandler);
+							InternalAfterActivateForm(LForm);
+							bool LForceAcceptReject = (FOnFormAccepted != null) || (FOnFormRejected != null) || (OnFormAcceptedEvent != null) || (OnFormRejectedEvent != null);
+							if ((FMode != FormMode.None) || (SourceLinkType != SourceLinkType.None) || LForceAcceptReject)
+							{
+								if (LForceAcceptReject)
+									LForm.ForceAcceptReject = true;
+								LForm.Show
+								(
+									(IFormInterface)FindParent(typeof(IFormInterface)),
+									new FormInterfaceHandler(FormAccepted),
+									new FormInterfaceHandler(FormRejected),
+									FMode
+								);
+							}
+							else
+								LForm.Show(FMode);
 						}
-						else
-							LForm.Show(FMode);
+						catch
+						{
+							LForm.Dispose();
+							throw;
+						}
 					}
-					catch
+					finally
 					{
-						LForm.Dispose();
-						throw;
+						FParams = null;
 					}
 				}
 			}
@@ -500,8 +513,11 @@ namespace Alphora.Dataphor.Frontend.Client
 		{
 			if (FOnFormRejected != null)
 				FOnFormRejected.Execute(this, new EventParams("AForm", AForm));
+				
+			if (OnFormRejectedEvent != null)
+				OnFormRejectedEvent(AForm);
 		}
-
+		
 		protected void FormAccepted(IFormInterface AForm)
 		{
 			if 
@@ -632,6 +648,9 @@ namespace Alphora.Dataphor.Frontend.Client
 			
 			if (FOnFormAccepted != null)
 				FOnFormAccepted.Execute(this, new EventParams("AForm", AForm));
+				
+			if (OnFormAcceptedEvent != null)
+				OnFormAcceptedEvent(AForm);
 		}
 
 		protected virtual void OnClosedHandler(object sender, EventArgs e)
@@ -653,7 +672,10 @@ namespace Alphora.Dataphor.Frontend.Client
 		protected void InternalBeforeActivateForm(IFormInterface AForm)
 		{
 			if ((AForm.MainSource != null) && !String.IsNullOrEmpty(FFilter))
+			{
 				AForm.MainSource.Filter = FFilter;
+				AForm.MainSource.Params = FParams;
+			}
 
 			if (FSourceLink != null) 
 				FSourceLink.TargetSource = AForm.MainSource;

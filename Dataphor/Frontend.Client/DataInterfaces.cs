@@ -11,6 +11,7 @@ using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Client;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Schema = Alphora.Dataphor.DAE.Schema;
+using Alphora.Dataphor.DAE.Runtime;
 
 namespace Alphora.Dataphor.Frontend.Client
 {
@@ -191,6 +192,11 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <value><para>String</para>
 		/// <para>Default: empty string</para></value>
 		string Filter { get; set; }
+		
+		/// <summary>
+		/// An optional set of parameters that can be passed directly to the DataView.
+		/// </summary>
+		DataParams Params { get; set; }
 
 		/// <summary> A D4 script that will be executed source is activated 
 		/// (before opening the expression cursor). </summary> <doc/>
