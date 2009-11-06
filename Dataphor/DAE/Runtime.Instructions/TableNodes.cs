@@ -1452,11 +1452,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FIsRepeatable = true;
 			FTableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 
+			/*
+			 * BTR 10/30/2009 -> This is totally wrong to do to a catalog table variable, 
+			 * it is changing the definition of a catalog object as a result of it being 
+			 * referenced in an expression. Ouch. The same code is properly present on the 
+			 * UnaryTableNode, so I believe this was copied here just for consistency, rather 
+			 * than to actually implement a feature, so I am okay with commenting it out. If a 
+			 * defect is discovered, we will have to come up with something then, but this is 
+			 * just plain wrong.
 			bool LIsNilable = (PropagateInsert == PropagateAction.False || !PropagateUpdate);
 			
 			if (LIsNilable)
 				foreach (Schema.TableVarColumn LColumn in TableVar.Columns)
 					LColumn.IsNilable = LIsNilable;
+			*/
 		}
 		
 		public virtual void DetermineVariableProperties(Plan APlan)
