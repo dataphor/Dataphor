@@ -5945,6 +5945,18 @@ namespace Alphora.Dataphor.DAE.Compiling
 					}
 				}
 			}
+			else
+			{
+				// If there is no source context, return a basic operator locator
+				// This will at least allow statement emission to be used to provide the operator text to the debugger
+				LNode.CreateOperator.Locator =
+					new DebugLocator
+					(
+						DebugLocator.OperatorLocator(LNode.CreateOperator.DisplayName),
+						0,
+						0
+					);
+			}
 		}
 		
 		public static PlanNode CompileCreateOperatorStatement(Plan APlan, Statement AStatement)
@@ -6293,6 +6305,18 @@ namespace Alphora.Dataphor.DAE.Compiling
 							);
 					}
 				}
+			}
+			else
+			{
+				// If there is no source context, return a basic operator locator
+				// This will at least allow statement emission to be used to provide the operator text to the debugger
+				LNode.CreateOperator.Locator =
+					new DebugLocator
+					(
+						DebugLocator.OperatorLocator(LNode.CreateOperator.DisplayName),
+						0,
+						0
+					);
 			}
 		}
 		
