@@ -20,7 +20,7 @@ using Alphora.Dataphor.DAE.Server;
 
 namespace Alphora.Dataphor.DAE.Service
 {
-	[ServiceBehavior(ConcurrencyMode = ConcurrencyMode.Multiple)]
+	[ServiceBehavior(ConcurrencyMode = ConcurrencyMode.Multiple, UseSynchronizationContext = false)]
 	public class CrossDomainService : ICrossDomainService
 	{
 		public Message GetPolicyFile()

@@ -20,7 +20,7 @@ namespace Alphora.Dataphor.DAE.Service
 	using Alphora.Dataphor.DAE.Contracts;
 	using Alphora.Dataphor.DAE.Debug;
 
-	[ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Multiple)]
+	[ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Multiple, UseSynchronizationContext = false)]
 	public class DataphorService : IDataphorService, IDisposable
 	{
 		public DataphorService()
