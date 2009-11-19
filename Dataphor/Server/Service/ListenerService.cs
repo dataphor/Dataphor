@@ -17,6 +17,7 @@ using Alphora.Dataphor.DAE.Server;
 
 namespace Alphora.Dataphor.DAE.Service
 {
+	[ServiceBehavior(ConcurrencyMode = ConcurrencyMode.Multiple)]
 	public class ListenerService : IListenerService
 	{
 		public string[] EnumerateInstances()

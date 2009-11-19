@@ -20,12 +20,13 @@ using Alphora.Dataphor.DAE.Server;
 
 namespace Alphora.Dataphor.DAE.Service
 {
+	[ServiceBehavior(ConcurrencyMode = ConcurrencyMode.Multiple)]
 	public class CrossDomainService : ICrossDomainService
 	{
 		public Message GetPolicyFile()
 		{
 			XDocument LDocument;
-			using (FileStream LStream = File.Open("clientaccesspolicy.xml", FileMode.Open))
+			using (FileStream LStream = File.Open("clientaccesspolicy.xml", FileMode.Open, FileAccess.Read))
 				LDocument = XDocument.Load(new StreamReader(LStream));
 				
 			// Replace a "dynamicresources" element with a set of resource elements for each instance
