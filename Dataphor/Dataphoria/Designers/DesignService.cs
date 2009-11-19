@@ -320,7 +320,7 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 		public DebugLocator GetLocator()
 		{
-			if (FBuffer == null)
+			if (FBuffer == null || FBuffer.Locator == null)
 				return null;
 			else
 				return new DebugLocator(FBuffer.Locator.Locator, 1, 1);
