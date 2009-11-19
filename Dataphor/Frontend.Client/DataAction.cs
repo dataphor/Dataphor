@@ -214,7 +214,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		private string FScript = String.Empty;
 		[DefaultValue("")]
 		[Description("The D4 script to run.  This script will be parameterized by any parameters specified using DataArgument child nodes.")]
-		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client", "System.Drawing.Design.UITypeEditor,System.Drawing")]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string Script
 		{

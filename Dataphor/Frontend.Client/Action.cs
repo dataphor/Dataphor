@@ -381,7 +381,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		private string FHelpString = String.Empty;
 		[DefaultValue("")]
 		[Description("The help text to display (if HelpKeyword is not specified).")]
-		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client", "System.Drawing.Design.UITypeEditor,System.Drawing")]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("txt")]
 		public string HelpString
 		{
