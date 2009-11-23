@@ -30,7 +30,7 @@ create operator Debug.GetSessions() : table { Session_ID : Integer }
 	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
 
 //* Operator: GetProcesses
-create operator Debug.GetProcesses() : table { Process_ID : Integer, Locator : String, Line : Integer, LinePos : Integer, DidBreak : Boolean, Error : Error }
+create operator Debug.GetProcesses() : table { Process_ID : Integer, IsPaused : Boolean, Locator : String, Line : Integer, LinePos : Integer, DidBreak : Boolean, Error : Error }
 	class "System.DebugGetProcessesNode"
 	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
 
