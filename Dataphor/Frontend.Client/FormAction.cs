@@ -543,97 +543,100 @@ namespace Alphora.Dataphor.Frontend.Client
 						DataView LSourceView = FSourceLink.Source.DataView;
 						DataView LTargetView = AForm.MainSource.DataView;
 						
-						// Determine RefreshSourceKey
-						// Determine RefreshKey
-						
-						// if SourceLinkRefreshKeyNames and RefreshKeyNames are specified, use them, otherwise
-						// if the current order of the source link data view is a subset of the columns in the detail view, use it, otherwise
-						// find the minimum key in the source link data view that is a subset of the columns in the detail view and use it
-						
-						Schema.Order LSourceKey = null;
-						Schema.Order LTargetKey = null;
-						
-						if ((SourceLinkRefreshKeyNames != "") && (RefreshKeyNames != ""))
+						if (LSourceView != LTargetView)
 						{
-							string[] LSourceKeyNames = SourceLinkRefreshKeyNames.Split(new char[]{';', ','});
-							string[] LTargetKeyNames = RefreshKeyNames.Split(new char[]{';', ','});
-							if (LSourceKeyNames.Length == LTargetKeyNames.Length)
+							// Determine RefreshSourceKey
+							// Determine RefreshKey
+							
+							// if SourceLinkRefreshKeyNames and RefreshKeyNames are specified, use them, otherwise
+							// if the current order of the source link data view is a subset of the columns in the detail view, use it, otherwise
+							// find the minimum key in the source link data view that is a subset of the columns in the detail view and use it
+							
+							Schema.Order LSourceKey = null;
+							Schema.Order LTargetKey = null;
+							
+							if ((SourceLinkRefreshKeyNames != "") && (RefreshKeyNames != ""))
 							{
-								LSourceKey = new Schema.Order();
-								LTargetKey = new Schema.Order();
-								for (int LIndex = 0; LIndex < LSourceKeyNames.Length; LIndex++)
+								string[] LSourceKeyNames = SourceLinkRefreshKeyNames.Split(new char[]{';', ','});
+								string[] LTargetKeyNames = RefreshKeyNames.Split(new char[]{';', ','});
+								if (LSourceKeyNames.Length == LTargetKeyNames.Length)
 								{
-									LSourceKey.Columns.Add(new Schema.OrderColumn(LSourceView.TableVar.Columns[LSourceKeyNames[LIndex]], true));
-									LTargetKey.Columns.Add(new Schema.OrderColumn(LTargetView.TableVar.Columns[LTargetKeyNames[LIndex]], true));
+									LSourceKey = new Schema.Order();
+									LTargetKey = new Schema.Order();
+									for (int LIndex = 0; LIndex < LSourceKeyNames.Length; LIndex++)
+									{
+										LSourceKey.Columns.Add(new Schema.OrderColumn(LSourceView.TableVar.Columns[LSourceKeyNames[LIndex]], true));
+										LTargetKey.Columns.Add(new Schema.OrderColumn(LTargetView.TableVar.Columns[LTargetKeyNames[LIndex]], true));
+									}
 								}
 							}
-						}
-						
-						if (LSourceKey == null)
-						{
-							if ((LSourceView.Order != null) && LSourceView.Order.Columns.IsSubsetOf(LTargetView.TableVar.Columns))
+							
+							if (LSourceKey == null)
 							{
-								LSourceKey = LSourceView.Order;
-								LTargetKey = LSourceView.Order;
+								if ((LSourceView.Order != null) && LSourceView.Order.Columns.IsSubsetOf(LTargetView.TableVar.Columns))
+								{
+									LSourceKey = LSourceView.Order;
+									LTargetKey = LSourceView.Order;
+								}
+								else
+								{
+									Schema.Key LMinimumKey = LSourceView.TableVar.Keys.MinimumSubsetKey(LTargetView.TableVar.Columns);
+									if (LMinimumKey != null)
+									{
+										LSourceKey = new Schema.Order(LMinimumKey);
+										LTargetKey = LSourceKey;
+									}
+								}
+							}
+
+							if (LSourceKey != null)
+							{						
+								using (Row LRow = new Row(LSourceView.Process.ValueManager, new Schema.RowType(LSourceKey.Columns)))
+								{
+									for (int LIndex = 0; LIndex < LSourceKey.Columns.Count; LIndex++)
+									{
+										DataField LTargetField = LTargetView[LTargetKey.Columns[LIndex].Column.Name];
+										if (LTargetField.HasValue())
+											LRow[LIndex] = LTargetField.Value;
+										else
+											LRow.ClearValue(LIndex);
+									}
+									
+									LTargetView.Close(); // to prevent unnecessary requery
+
+									string LSaveOrder = String.Empty;								
+									if (!LSourceView.Order.Equals(LSourceKey))
+									{
+										LSaveOrder = LSourceView.OrderString;
+										try
+										{
+											LSourceView.Order = LSourceKey;
+										}
+										catch (Exception LException)
+										{
+											if (LSourceView.OrderString != LSaveOrder)
+												LSourceView.OrderString = LSaveOrder;
+											else
+												LSourceView.Refresh();
+											throw new ClientException(ClientException.Codes.UnableToFindModifiedRow, LException);
+										}
+									}
+									try
+									{
+										LSourceView.Refresh(LRow);
+									}
+									finally
+									{
+										if ((LSaveOrder != String.Empty) && (LSourceView.OrderString != LSaveOrder))
+											LSourceView.OrderString = LSaveOrder;
+									}
+								}
 							}
 							else
 							{
-								Schema.Key LMinimumKey = LSourceView.TableVar.Keys.MinimumSubsetKey(LTargetView.TableVar.Columns);
-								if (LMinimumKey != null)
-								{
-									LSourceKey = new Schema.Order(LMinimumKey);
-									LTargetKey = LSourceKey;
-								}
+								LTargetView.Close();
+								LSourceView.Refresh();
 							}
-						}
-
-						if (LSourceKey != null)
-						{						
-							using (Row LRow = new Row(LSourceView.Process.ValueManager, new Schema.RowType(LSourceKey.Columns)))
-							{
-								for (int LIndex = 0; LIndex < LSourceKey.Columns.Count; LIndex++)
-								{
-									DataField LTargetField = LTargetView[LTargetKey.Columns[LIndex].Column.Name];
-									if (LTargetField.HasValue())
-										LRow[LIndex] = LTargetField.Value;
-									else
-										LRow.ClearValue(LIndex);
-								}
-								
-								LTargetView.Close(); // to prevent unnecessary requery
-
-								string LSaveOrder = String.Empty;								
-								if (!LSourceView.Order.Equals(LSourceKey))
-								{
-									LSaveOrder = LSourceView.OrderString;
-									try
-									{
-										LSourceView.Order = LSourceKey;
-									}
-									catch (Exception LException)
-									{
-										if (LSourceView.OrderString != LSaveOrder)
-											LSourceView.OrderString = LSaveOrder;
-										else
-											LSourceView.Refresh();
-										throw new ClientException(ClientException.Codes.UnableToFindModifiedRow, LException);
-									}
-								}
-								try
-								{
-									LSourceView.Refresh(LRow);
-								}
-								finally
-								{
-									if ((LSaveOrder != String.Empty) && (LSourceView.OrderString != LSaveOrder))
-										LSourceView.OrderString = LSaveOrder;
-								}
-							}
-						}
-						else
-						{
-							LTargetView.Close();
-							LSourceView.Refresh();
 						}
 					break;
 				}
@@ -671,10 +674,12 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		protected void InternalBeforeActivateForm(IFormInterface AForm)
 		{
-			if ((AForm.MainSource != null) && !String.IsNullOrEmpty(FFilter))
+			if (AForm.MainSource != null)
 			{
-				AForm.MainSource.Filter = FFilter;
-				AForm.MainSource.Params = FParams;
+                if (!String.IsNullOrEmpty(FFilter))
+				    AForm.MainSource.Filter = FFilter;
+                if (FParams != null)
+				    AForm.MainSource.Params = FParams;
 			}
 
 			if (FSourceLink != null) 

@@ -252,7 +252,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		
 		private string FInsertStatement = String.Empty;
 		[DefaultValue("")]
-		[Description("A single statement of D4 to be used to override the default insert behavior of the source. Columns of the row to be inserted can be accessed by name within the statement.")]
+		[Description("A single statement of D4 to be used to override the default insert behavior of the source.  The new columns are accessible as parameters by their names, qualified by 'New.'.")]
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string InsertStatement
@@ -273,7 +273,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		private string FUpdateStatement = String.Empty;
 		[DefaultValue("")]
-		[Description("A single statement of D4 to be used to override the default update behavior of the source. Columns of the row to be updated can be accessed by name within the statement.")]
+		[Description("A single statement of D4 to be used to override the default update behavior of the source.  The new and old columns are accessible as parameters by their names, qualified by 'New.' and 'Old.'.")]
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string UpdateStatement
@@ -294,7 +294,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		private string FDeleteStatement = String.Empty;
 		[DefaultValue("")]
-		[Description("A single statement of D4 to be used to override the default delete behavior of the source. Columns of the row to be deleted can be accessed by name within the statement.")]
+		[Description("A single statement of D4 to be used to override the default delete behavior of the source.  The old columns are accessible as parameters by their names, qualified by 'Old.'.")]
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string DeleteStatement

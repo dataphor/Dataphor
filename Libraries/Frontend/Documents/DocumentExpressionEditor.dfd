@@ -16,8 +16,8 @@
         <quicklookup columnname="PageType" document="Derive('PageTypes', 'List')" lookupcolumnname="Main.ID" source="DocumentExpression" title="Page Type" bop:name="qlPageType_Lookup">
           <textbox columnname="PageType" source="DocumentExpression" titlealignment="None" width="20" bop:name="qlPageType" />
         </quicklookup>
-        <textbox columnname="MKN" hint="Comma separated list of column names from the source form." source="DocumentExpression" title="Master Key Names" width="40" bop:name="txtMKN" />
-        <textbox columnname="DKN" hint="Comma separated list of column names in the target form." source="DocumentExpression" title="Detail Key Names" width="40" bop:name="txtDKN" />
+        <textbox columnname="MKN" nilifblank="False" hint="Comma separated list of column names from the source form." source="DocumentExpression" title="Master Key Names" width="40" bop:name="txtMKN" />
+        <textbox columnname="DKN" nilifblank="False" hint="Comma separated list of column names in the target form." source="DocumentExpression" title="Detail Key Names" width="40" bop:name="txtDKN" />
         <checkbox columnname="Elaborate" source="DocumentExpression" title="Elaborate" bop:name="chkElaborate" />
       </column>
     </notebookpage>

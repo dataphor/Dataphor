@@ -915,7 +915,7 @@ namespace Alphora.Dataphor.DAE.Client
 		// InsertStatement
 		private string FInsertStatement = String.Empty;
 		/// <summary> A D4 statement that will be used to insert any new rows. </summary>
-		/// <remarks> If no statement is specified, the insert will be performed through the cursor to the Dataphor server. </remarks>
+		/// <remarks> If no statement is specified, the insert will be performed through the cursor to the Dataphor server.  The new columns are accessible as parameters by their names, qualified by "New.". </remarks>
 		[DefaultValue("")]														   
 		[Category("Data")]
 		[Description("A D4 statement that will be used to insert any new rows.")]
@@ -930,7 +930,7 @@ namespace Alphora.Dataphor.DAE.Client
 		// UpdateStatement
 		private string FUpdateStatement = String.Empty;
 		/// <summary> A D4 statement that will be used to update any new rows. </summary>
-		/// <remarks> If no statement is specified, the update will be performed through the cursor to the Dataphor server. </remarks>
+		/// <remarks> If no statement is specified, the update will be performed through the cursor to the Dataphor server.  The new and old columns are accessible as parameters by their names, qualified by "New." and "Old." respectively. </remarks>
 		[DefaultValue("")]
 		[Category("Data")]
 		[Description("A D4 statement that will be used to update any new rows.")]
@@ -945,7 +945,7 @@ namespace Alphora.Dataphor.DAE.Client
 		// DeleteStatement
 		private string FDeleteStatement = String.Empty;
 		/// <summary> A D4 statement that will be used to delete any new rows. </summary>
-		/// <remarks> If no statement is specified, the delete will be performed through the cursor to the Dataphor server. </remarks>
+		/// <remarks> If no statement is specified, the delete will be performed through the cursor to the Dataphor server.  The old columns are accessible as parameters by their names, qualified by "Old.". </remarks>
 		[DefaultValue("")]
 		[Category("Data")]
 		[Description("A D4 statement that will be used to delete any new rows.")]
@@ -1038,12 +1038,17 @@ namespace Alphora.Dataphor.DAE.Client
 				InternalRefresh(ARow);
 		}
 
-		private DAE.Runtime.DataParams GetParamsFromRow(Row ARow)
+		private DAE.Runtime.DataParams GetParamsFromRow(Row ARow, string APrefix)
 		{
 			DAE.Runtime.DataParams LParams = new DAE.Runtime.DataParams();
-			for (int LIndex = 0; LIndex < ARow.DataType.Columns.Count; LIndex++)
-				LParams.Add(new DAE.Runtime.DataParam(ARow.DataType.Columns[LIndex].Name, ARow.DataType.Columns[LIndex].DataType, Modifier.In, ARow[LIndex]));
+			GetParamsFromRow(ARow, LParams, APrefix);
 			return LParams;
+		}
+
+		private static void GetParamsFromRow(Row ARow, DAE.Runtime.DataParams LParams, string APrefix)
+		{
+			for (int LIndex = 0; LIndex < ARow.DataType.Columns.Count; LIndex++)
+				LParams.Add(new DAE.Runtime.DataParam(APrefix + ARow.DataType.Columns[LIndex].Name, ARow.DataType.Columns[LIndex].DataType, Modifier.In, ARow[LIndex]));
 		}
 		
 		protected override void InternalInsert(Row ARow)
@@ -1052,7 +1057,7 @@ namespace Alphora.Dataphor.DAE.Client
 				base.InternalInsert(ARow);
 			else
 			{
-				DAE.Runtime.DataParams LParams = GetParamsFromRow(FBuffer[FActiveOffset].Row);
+				DAE.Runtime.DataParams LParams = GetParamsFromRow(FBuffer[FActiveOffset].Row, "New.");
 				IServerStatementPlan LPlan = FProcess.PrepareStatement(FInsertStatement, LParams);
 				try
 				{
@@ -1071,7 +1076,8 @@ namespace Alphora.Dataphor.DAE.Client
 				base.InternalUpdate(ARow);
 			else
 			{
-				DAE.Runtime.DataParams LParams = GetParamsFromRow(FBuffer[FActiveOffset].Row);
+				DAE.Runtime.DataParams LParams = GetParamsFromRow(FOriginalRow, "Old.");
+				GetParamsFromRow(ARow, LParams, "New.");
 				IServerStatementPlan LPlan = FProcess.PrepareStatement(FUpdateStatement, LParams);
 				try
 				{
@@ -1090,7 +1096,7 @@ namespace Alphora.Dataphor.DAE.Client
 				base.InternalDelete();
 			else
 			{
-				DAE.Runtime.DataParams LParams = GetParamsFromRow(FBuffer[FActiveOffset].Row);
+				DAE.Runtime.DataParams LParams = GetParamsFromRow(FBuffer[FActiveOffset].Row, "Old.");
 				IServerStatementPlan LPlan = FProcess.PrepareStatement(FDeleteStatement, LParams);
 				try
 				{

@@ -17,8 +17,8 @@
               <quicklookup columnname="PageType" lookupcolumnname="Main.ID" source="Main" document="Derive('Frontend.PageTypes', 'Browse', '', '', true)" title="Page Type" bop:name="MainColumnMain.PageType_Lookup">
                 <textbox width="20" titlealignment="None" columnname="PageType" source="Main" bop:name="MainColumnMain.PageType" />
               </quicklookup>
-              <textbox width="20" columnname="MasterKeyNames" title="Master Key Names" source="Main" hint="Master key names as a semi-colon delimited list of column names." bop:name="MainColumnMain.MasterKeyNames" />
-              <textbox width="20" columnname="DetailKeyNames" title="Detail Key Names" source="Main" hint="Detail key names as a semi-colon delimited list of column names." bop:name="MainColumnMain.DetailKeyNames" />
+              <textbox width="20" nilifblank="False" columnname="MasterKeyNames" title="Master Key Names" source="Main" hint="Master key names as a semi-colon delimited list of column names." bop:name="MainColumnMain.MasterKeyNames" />
+              <textbox width="20" nilifblank="False" columnname="DetailKeyNames" title="Detail Key Names" source="Main" hint="Detail key names as a semi-colon delimited list of column names." bop:name="MainColumnMain.DetailKeyNames" />
               <checkbox width="20" columnname="Elaborate" title="Elaborate" source="Main" bop:name="MainColumnMain.Elaborate" />
             </column>
           </group>
