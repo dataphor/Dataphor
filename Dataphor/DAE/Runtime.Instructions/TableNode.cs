@@ -3169,6 +3169,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected override void WritePlanAttributes(System.Xml.XmlWriter AWriter)
 		{
 			base.WritePlanAttributes(AWriter);
+			AWriter.WriteAttributeString("ShouldChange", TableVar.ShouldChange.ToString().ToLower());
+			AWriter.WriteAttributeString("ShouldValidate", TableVar.ShouldValidate.ToString().ToLower());
+			AWriter.WriteAttributeString("ShouldDefault", TableVar.ShouldDefault.ToString().ToLower());
+			AWriter.WriteAttributeString("IsChangeRemotable", TableVar.IsChangeRemotable.ToString().ToLower());
+			AWriter.WriteAttributeString("IsValidateRemotable", TableVar.IsValidateRemotable.ToString().ToLower());
+			AWriter.WriteAttributeString("IsDefaultRemotable", TableVar.IsDefaultRemotable.ToString().ToLower());
 			AWriter.WriteAttributeString("CursorCapabilities", CursorCapabilitiesToString(CursorCapabilities));
 			AWriter.WriteAttributeString("CursorType", CursorType.ToString().ToLower());
 			AWriter.WriteAttributeString("RequestedCursorType", RequestedCursorType.ToString().ToLower());
