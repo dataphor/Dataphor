@@ -413,7 +413,7 @@ namespace Alphora.Dataphor.BOP
 					if (LModifiedAttr.Name.NamespaceName == Persistence.CBOPNamespaceURI && LModifiedAttr.Name.LocalName.StartsWith(Persistence.CBOPDefault))
 					{
 						string LAttributeName = LModifiedAttr.Name.LocalName.Substring(Persistence.CBOPDefault.Length);
-						AOriginalNode.SetAttributeValue(XName.Get(LAttributeName, Persistence.CBOPNamespaceURI), null);
+						AOriginalNode.SetAttributeValue(LAttributeName, null);
 					}
 					else
 					{
