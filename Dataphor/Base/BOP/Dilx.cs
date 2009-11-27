@@ -49,14 +49,20 @@ namespace Alphora.Dataphor.BOP
 					String.Equals(AReader.NamespaceURI, CDilxNamespace, StringComparison.OrdinalIgnoreCase)
 				)
 				{
-					FContent = AReader.ReadInnerXml();
+					AReader.ReadStartElement();
+					// Support either CDATA (new method) or direct embedding of the interface (for backwards compatability)
+					if (AReader.MoveToContent() == XmlNodeType.CDATA)
+						FContent = AReader.ReadContentAsString();
+					else
+						FContent = AReader.ReadOuterXml();
 
+					// Strip out the dilx namespace due to embedding of document withing outer document
 					// TODO: Refactor this to actually parse the arguments
 					string LDefaultNamespace = String.Format("xmlns=\"{0}\"", CDilxNamespace);
 					int LContentIndex = FContent.IndexOf(LDefaultNamespace);
 					if (LContentIndex >= 0)
 						FContent = FContent.Remove(LContentIndex, LDefaultNamespace.Length);
-
+					
 					// Make sure there is nothing after the document node
 					AReader.Skip();
 					while (AReader.MoveToContent() == XmlNodeType.EndElement)
@@ -132,9 +138,7 @@ namespace Alphora.Dataphor.BOP
 
 			// Write document element
 			AWriter.WriteStartElement(CDocumentElementName);
-			AWriter.WriteRaw("\r\n");
-			AWriter.WriteRaw(FContent);
-			AWriter.WriteRaw("\r\n");
+			AWriter.WriteCData(FContent);
 			AWriter.WriteFullEndElement();
 
 			AWriter.WriteEndElement();
