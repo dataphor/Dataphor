@@ -407,7 +407,7 @@ namespace Alphora.Dataphor.BOP
 			// merge the attributes
 			foreach (XAttribute LModifiedAttr in AModifiedNode.Attributes())
 			{
-				if (!Persistence.XNamesEqual(LModifiedAttr.Name, CXmlIBOPOrder)) // don't put the ibop:order in the merged doc
+				if (!(LModifiedAttr.Name == (XNamespace.Xmlns + CIBOPNamespacePrefix)) && !Persistence.XNamesEqual(LModifiedAttr.Name, CXmlIBOPOrder)) // don't put the ibop:order in the merged doc
 				{
 					// if the attribute name is default-<attribute name> and it's value is true then remove the appropriate attribute from the original node.
 					if (LModifiedAttr.Name.NamespaceName == Persistence.CBOPNamespaceURI && LModifiedAttr.Name.LocalName.StartsWith(Persistence.CBOPDefault))
@@ -483,7 +483,7 @@ namespace Alphora.Dataphor.BOP
 						// search for node
 						LOriginalNode = FindNode(ADoc.Root, LNameAttr.Value);
 
-						// if found unhook it from it's previous parent
+						// if found unhook it from its previous parent
 						if (LOriginalNode != null) 
 							LOriginalNode.Remove();
 					}
