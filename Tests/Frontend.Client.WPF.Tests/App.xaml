@@ -1,0 +1,8 @@
+﻿<Application
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Alphora_Dataphor_Frontend_Client_WPF="clr-namespace:Alphora.Dataphor.Frontend.Client.WPF;assembly=Alphora.Dataphor.Frontend.Client.WPF" x:Class="Frontend.Client.WPF.Tests.App"
+    StartupUri="Window1.xaml">
+    <Application.Resources>
+    </Application.Resources>
+</Application>

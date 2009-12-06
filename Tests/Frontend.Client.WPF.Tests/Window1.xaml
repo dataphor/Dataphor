@@ -1,0 +1,49 @@
+﻿<Window
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:client="clr-namespace:Alphora.Dataphor.Frontend.Client.WPF;assembly=Alphora.Dataphor.Frontend.Client.WPF" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" x:Class="Frontend.Client.WPF.Tests.Window1"
+    Title="Window1" Height="400" Width="600" mc:Ignorable="d">
+	<Window.Resources>
+		<Style x:Key="DefaultWeekStyle" TargetType="{x:Type client:ScheduleWeek}" >
+			<Setter Property="GroupHeaderMemberPath" Value="Description" />
+			<Setter Property="AppointmentGroupIDMemberPath" Value="ProviderID" />
+			<Setter Property="AppointmentDateMemberPath" Value="Date" />
+			<Setter Property="AppointmentContainerStyle">
+				<Setter.Value>
+					<Style TargetType="{x:Type ContentControl}">
+						<Setter Property="client:ScheduleDayAppointments.Start" Value="{Binding StartTime}" />
+						<Setter Property="client:ScheduleDayAppointments.End" Value="{Binding EndTime}" />
+					</Style>
+				</Setter.Value>
+			</Setter>
+			<Setter Property="AppointmentItemTemplate">
+				<Setter.Value>
+					<DataTemplate>
+						<Border Background="#FFEEEEFF"
+							BorderBrush="#FF4F4F4F"
+							BorderThickness="1"
+							CornerRadius="3"
+							SnapsToDevicePixels="True"
+							Margin="2,0,4,0"
+							MaxWidth="150"
+							MinWidth="75">
+							<Border.ToolTip>
+								<Grid>
+								</Grid>
+							</Border.ToolTip>
+							<Border.Effect>
+								<DropShadowEffect ShadowDepth="2" Opacity="0.5"/>
+							</Border.Effect>
+							<TextBlock Text="{Binding Description}" Margin="4,2" HorizontalAlignment="Left" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+						</Border>
+					</DataTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+	</Window.Resources>
+    <Grid>
+        
+    	<client:ScheduleWeek x:Name="Week" StartDate="2009-11-29" Style="{StaticResource DefaultWeekStyle}"/>
+        
+    </Grid>
+</Window>
