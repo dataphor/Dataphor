@@ -1000,7 +1000,14 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
         public bool UseNaturalMaxWidth
         {
             get { return FUseNaturalMaxWidth; }
-            set { FUseNaturalMaxWidth = value; }
+            set 
+            { 
+				if (FUseNaturalMaxWidth)
+				{
+					FUseNaturalMaxWidth = value;
+					UpdateLayout();
+				}
+			}
         }
 
 		protected override Size InternalNaturalSize
