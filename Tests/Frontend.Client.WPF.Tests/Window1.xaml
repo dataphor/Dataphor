@@ -5,8 +5,9 @@
 	xmlns:local="clr-namespace:Frontend.Client.WPF.Tests"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+	mc:Ignorable="d" xmlns:Custom="http://schemas.microsoft.com/wpf/2008/toolkit" 
 	x:Class="Frontend.Client.WPF.Tests.Window1"
-    Title="Window1" Height="400" Width="600" mc:Ignorable="d">
+    Title="Window1" Height="400" Width="600">
 	<Window.Resources>
 		<local:FullDateToStringConverter x:Key="FullDateToStringConverter" />
 		<client:ScheduleTimeBlockTimeConverter x:Key="TimeConverter" />
@@ -25,6 +26,7 @@
 		
 		<Style x:Key="DefaultWeekStyle" TargetType="{x:Type client:ScheduleWeek}" >
 			<Setter Property="GroupHeaderMemberPath" Value="Description" />
+			<Setter Property="GroupIDMemberPath" Value="ProviderID" />
 			<Setter Property="AppointmentGroupIDMemberPath" Value="ProviderID" />
 			<Setter Property="AppointmentDateMemberPath" Value="Date" />
 			<Setter Property="AppointmentContainerStyle">
@@ -58,7 +60,7 @@
 					<DataTemplate>
 						<Border Background="#FFEEEEFF"
 							BorderBrush="#FF4F4F4F"
-							BorderThickness="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Converter={StaticResource IsSelectedToBorderThicknessConverter}}"
+							BorderThickness="{Binding IsSelected, Converter={StaticResource IsSelectedToBorderThicknessConverter}, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}}"
 							CornerRadius="3"
 							SnapsToDevicePixels="True"
 							Margin="2,0,4,0"
@@ -89,10 +91,16 @@
 									<TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding EndTime, Converter={StaticResource TimeConverter}}" Style="{StaticResource DataTextBlockStyle}"/>
 								</Grid>
 							</Border.ToolTip>
+							<ContextMenuService.ContextMenu>
+								<ContextMenu>
+									<MenuItem Header="Edit..." /> 
+									<MenuItem Header="Delete" /> 
+								</ContextMenu>
+							</ContextMenuService.ContextMenu>
 							<Border.Effect>
 								<DropShadowEffect ShadowDepth="2" Opacity="0.5"/>
 							</Border.Effect>
-							<TextBlock Text="{Binding Description}" Margin="4,2" HorizontalAlignment="Left" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+							<TextBlock Text="{Binding Description}" Margin="4,2" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"/>
 						</Border>
 					</DataTemplate>
 				</Setter.Value>
@@ -101,7 +109,13 @@
 	</Window.Resources>
     <Grid>
         
-    	<client:ScheduleWeek x:Name="Week" StartDate="2009-11-29" Style="{StaticResource DefaultWeekStyle}"/>
+    	<Grid.RowDefinitions>
+    		<RowDefinition Height="Auto" />
+    		<RowDefinition/>
+    	</Grid.RowDefinitions>
+        
+    	<client:ScheduleWeek x:Name="Week" StartDate="2009-11-29" Style="{StaticResource DefaultWeekStyle}" Grid.Row="1"/>
+    	<Custom:DatePicker HorizontalAlignment="Left" SelectedDate="{Binding StartDate, ElementName=Week, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
         
     </Grid>
 </Window>

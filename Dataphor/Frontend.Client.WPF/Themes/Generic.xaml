@@ -44,8 +44,10 @@
 									ItemsSource="{TemplateBinding GroupSource}" 
 									AppointmentSource="{TemplateBinding AppointmentSource}" 
 									AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}" 
-									DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}" 
+									DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}"
+									GroupIDMemberPath="{TemplateBinding GroupIDMemberPath}"
 									HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+									AppointmentGroupIDMemberPath="{TemplateBinding AppointmentGroupIDMemberPath}"
 									AppointmentContainerStyle="{TemplateBinding AppointmentContainerStyle}"
 									AppointmentDateMemberPath="{TemplateBinding AppointmentDateMemberPath}"
 									SelectedAppointment="{Binding SelectedAppointment, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
@@ -56,6 +58,8 @@
 									AppointmentSource="{TemplateBinding AppointmentSource}" 
 									AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}" 
 									DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}"
+									GroupIDMemberPath="{TemplateBinding GroupIDMemberPath}"
+									AppointmentGroupIDMemberPath="{TemplateBinding AppointmentGroupIDMemberPath}"
 									HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
 									AppointmentContainerStyle="{TemplateBinding AppointmentContainerStyle}"
 									AppointmentDateMemberPath="{TemplateBinding AppointmentDateMemberPath}"
@@ -67,6 +71,8 @@
 									AppointmentSource="{TemplateBinding AppointmentSource}" 
 									AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}" 
 									DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}" 
+									GroupIDMemberPath="{TemplateBinding GroupIDMemberPath}"
+									AppointmentGroupIDMemberPath="{TemplateBinding AppointmentGroupIDMemberPath}"
 									HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
 									AppointmentContainerStyle="{TemplateBinding AppointmentContainerStyle}"
 									AppointmentDateMemberPath="{TemplateBinding AppointmentDateMemberPath}"
@@ -78,6 +84,8 @@
 									AppointmentSource="{TemplateBinding AppointmentSource}" 
 									AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}" 
 									DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}"
+									GroupIDMemberPath="{TemplateBinding GroupIDMemberPath}"
+									AppointmentGroupIDMemberPath="{TemplateBinding AppointmentGroupIDMemberPath}"
 									HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
 									AppointmentContainerStyle="{TemplateBinding AppointmentContainerStyle}"
 									AppointmentDateMemberPath="{TemplateBinding AppointmentDateMemberPath}"
@@ -89,6 +97,8 @@
 									AppointmentSource="{TemplateBinding AppointmentSource}" 
 									AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}" 
 									DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}" 
+									GroupIDMemberPath="{TemplateBinding GroupIDMemberPath}"
+									AppointmentGroupIDMemberPath="{TemplateBinding AppointmentGroupIDMemberPath}"
 									HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
 									AppointmentContainerStyle="{TemplateBinding AppointmentContainerStyle}"
 									AppointmentDateMemberPath="{TemplateBinding AppointmentDateMemberPath}"
@@ -100,6 +110,8 @@
 									AppointmentSource="{TemplateBinding AppointmentSource}" 
 									AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}" 
 									DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}" 
+									GroupIDMemberPath="{TemplateBinding GroupIDMemberPath}"
+									AppointmentGroupIDMemberPath="{TemplateBinding AppointmentGroupIDMemberPath}"
 									HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
 									AppointmentContainerStyle="{TemplateBinding AppointmentContainerStyle}"
 									AppointmentDateMemberPath="{TemplateBinding AppointmentDateMemberPath}"
@@ -111,6 +123,8 @@
 									AppointmentSource="{TemplateBinding AppointmentSource}" 
 									AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}" 
 									DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}" 
+									GroupIDMemberPath="{TemplateBinding GroupIDMemberPath}"
+									AppointmentGroupIDMemberPath="{TemplateBinding AppointmentGroupIDMemberPath}"
 									HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
 									AppointmentContainerStyle="{TemplateBinding AppointmentContainerStyle}"
 									AppointmentDateMemberPath="{TemplateBinding AppointmentDateMemberPath}"
@@ -127,6 +141,7 @@
 	<local:DateToDayOfWeekConverter x:Key="DateToDayOfWeekConverter" />
 
 	<Style TargetType="{x:Type local:ScheduleDayGroup}">
+		<Setter Property="IsTabStop" Value="False" />
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type local:ScheduleDayGroup}">
@@ -157,6 +172,7 @@
 	<local:ScheduleTimeBlockHourConverter x:Key="ScheduleTimeBlockHourConverter" />
 
 	<Style TargetType="{x:Type local:ScheduleTimeBlock}">
+		<Setter Property="IsTabStop" Value="False" />
 		<Setter Property="Background" Value="#FFFFFFDD" />
 		<Setter Property="Template">
 			<Setter.Value>
@@ -194,6 +210,7 @@
 	</Style>
 
 	<Style x:Key="ScheduleDayTimeBlock" TargetType="{x:Type local:ScheduleTimeBlock}">
+		<Setter Property="IsTabStop" Value="False" />
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type local:ScheduleTimeBlock}">
@@ -223,6 +240,7 @@
 
 	<Style TargetType="{x:Type local:ScheduleDay}">
 		<Setter Property="IsSynchronizedWithCurrentItem" Value="False" />
+		<Setter Property="IsTabStop" Value="False" />
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type local:ScheduleDay}">

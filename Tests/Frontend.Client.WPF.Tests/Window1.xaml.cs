@@ -20,15 +20,18 @@ namespace Frontend.Client.WPF.Tests
 				{
 					new Appointment { Date = DateTime.Parse("12/1/2009"), Description = "Do thing1", ProviderID = "AdrianL", StartTime = TimeSpan.FromHours(8.3d), EndTime = TimeSpan.FromHours(9d) },
 					new Appointment { Date = DateTime.Parse("12/1/2009"), Description = "Go to town", ProviderID = "AdrianL", StartTime = TimeSpan.FromHours(11d), EndTime = TimeSpan.FromHours(12.5d) },
+					new Appointment { Date = DateTime.Parse("12/1/2009"), Description = "Ride high", ProviderID = "KarenB", StartTime = TimeSpan.FromHours(8.75d), EndTime = TimeSpan.FromHours(9d) },
+					new Appointment { Date = DateTime.Parse("12/1/2009"), Description = "Go to to the place with the stuff", ProviderID = "KarenB", StartTime = TimeSpan.FromHours(4d), EndTime = TimeSpan.FromHours(13.5d) },
 					new Appointment { Date = DateTime.Parse("12/2/2009"), Description = "Smile", ProviderID = "AdrianL", StartTime = TimeSpan.FromHours(9.25d), EndTime = TimeSpan.FromHours(9.25d) },
-					new Appointment { Date = DateTime.Parse("12/3/2009"), Description = "Give birth", ProviderID = "AdrianL", StartTime = TimeSpan.FromHours(13d), EndTime = TimeSpan.FromHours(13.75d) },
+					new Appointment { Date = DateTime.Parse("12/3/2009"), Description = "Jump up", ProviderID = "AdrianL", StartTime = TimeSpan.FromHours(13d), EndTime = TimeSpan.FromHours(13.75d) },
 					new Appointment { Date = DateTime.Parse("12/4/2009"), Description = "Dop the wallup", ProviderID = "AdrianL", StartTime = TimeSpan.FromHours(6d), EndTime = TimeSpan.FromHours(8.5d) }
 				};
 			
 			Week.GroupSource =
 				new Provider[]
 				{
-					new Provider { ProviderID = "AdrianL", Description = "Adrian Lewis" }
+					new Provider { ProviderID = "AdrianL", Description = "Adrian Lewis" },
+					new Provider { ProviderID = "KarenB", Description = "Karen Bolton" }
 				};
 		}
 	}

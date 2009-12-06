@@ -103,7 +103,7 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(AppointmentContainerStyleProperty, value); }
 		}
 
-		//HighlightedTimeProperty
+		// HighlightedTimeProperty
 		
 		public static readonly DependencyProperty HighlightedTimeProperty =
 			DependencyProperty.Register("HighlightedTime", typeof(TimeSpan?), typeof(ScheduleDayGroup), new PropertyMetadata(null));
@@ -113,6 +113,18 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		{
 			get { return (TimeSpan?)GetValue(HighlightedTimeProperty); }
 			set { SetValue(HighlightedTimeProperty, value); }
+		}
+
+		// GroupIDMemberPath
+
+		public static readonly DependencyProperty GroupIDMemberPathProperty =
+			DependencyProperty.Register("GroupIDMemberPath", typeof(string), typeof(ScheduleDayGroup), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits));
+
+		/// <summary> The data binding path to the ID member within the grouping items. </summary>
+		public string GroupIDMemberPath
+		{
+			get { return (string)GetValue(GroupIDMemberPathProperty); }
+			set { SetValue(GroupIDMemberPathProperty, value); }
 		}
 
 		// AppointmentDateMemberPath
@@ -127,6 +139,18 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(AppointmentDateMemberPathProperty, value); }
 		}
 
+		// AppointmentGroupIDMemberPath
+
+		public static readonly DependencyProperty AppointmentGroupIDMemberPathProperty =
+			DependencyProperty.Register("AppointmentGroupIDMemberPath", typeof(string), typeof(ScheduleDayGroup), new PropertyMetadata(null));
+
+		/// <summary> A description of the property. </summary>
+		public string AppointmentGroupIDMemberPath
+		{
+			get { return (string)GetValue(AppointmentGroupIDMemberPathProperty); }
+			set { SetValue(AppointmentGroupIDMemberPathProperty, value); }
+		}
+
 		protected override DependencyObject GetContainerForItemOverride()
 		{
 			return new ScheduleDay();
@@ -137,13 +161,17 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			var LDay = AElement as ScheduleDay;
 			if (LDay != null)
 			{
-				LDay.Date = Date;
+				var LBinding = new Binding("Date");
+				LBinding.Source = this;
+				LDay.SetBinding(ScheduleDay.DateProperty, LBinding);
+				
 				LDay.AppointmentSource = AppointmentSource;
 				LDay.ItemContainerStyle = AppointmentContainerStyle;
 				LDay.ItemTemplate = AppointmentItemTemplate;
 				LDay.AppointmentDateMemberPath = AppointmentDateMemberPath;
+				LDay.AppointmentGroupIDMemberPath = AppointmentGroupIDMemberPath;
 				
-				var LBinding = new Binding("HighlightedTime");
+				LBinding = new Binding("HighlightedTime");
 				LBinding.Source = this;
 				LBinding.Mode = BindingMode.TwoWay;
 				LDay.SetBinding(ScheduleDay.HighlightedTimeProperty, LBinding);
@@ -162,6 +190,13 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 					LBinding = new Binding(DisplayMemberPath);
 					LBinding.Source = AItem;
 					LDay.SetBinding(ScheduleDay.HeaderProperty, LBinding);
+				}
+				
+				if (!String.IsNullOrEmpty(GroupIDMemberPath))
+				{
+					LBinding = new Binding(GroupIDMemberPath);
+					LBinding.Source = AItem;
+					LDay.SetBinding(ScheduleDay.GroupIDProperty, LBinding);
 				}
 			}
 			base.PrepareContainerForItemOverride(AElement, AItem);
@@ -183,7 +218,7 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			if (value is DateTime)
 			{
 				var LDate = (DateTime)value;
-				return LDate.ToString("dddd d/M");
+				return LDate.ToString("dddd M/d");
 			}
 			else
 				return null;

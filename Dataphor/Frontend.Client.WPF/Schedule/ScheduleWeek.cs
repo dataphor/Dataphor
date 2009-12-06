@@ -170,13 +170,25 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		public static readonly DependencyProperty GroupHeaderMemberPathProperty =
 			DependencyProperty.Register("GroupHeaderMemberPath", typeof(string), typeof(ScheduleWeek), new PropertyMetadata(null));
 
-		/// <summary> The data binding path to the display member withing the grouping items. </summary>
+		/// <summary> The data binding path to the display member within the grouping items. </summary>
 		public string GroupHeaderMemberPath
 		{
 			get { return (string)GetValue(GroupHeaderMemberPathProperty); }
 			set { SetValue(GroupHeaderMemberPathProperty, value); }
 		}
 
+		// GroupIDMemberPath
+
+		public static readonly DependencyProperty GroupIDMemberPathProperty =
+			DependencyProperty.Register("GroupIDMemberPath", typeof(string), typeof(ScheduleWeek), new PropertyMetadata(null));
+
+		/// <summary> The data binding path to the ID member within the grouping items. </summary>
+		public string GroupIDMemberPath
+		{
+			get { return (string)GetValue(GroupIDMemberPathProperty); }
+			set { SetValue(GroupIDMemberPathProperty, value); }
+		}
+		
 		// AppointmentDateMemberPath
 		
 		public static readonly DependencyProperty AppointmentDateMemberPathProperty =

@@ -91,6 +91,30 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		{
 			((ScheduleDay)ASender).UpdateAppointmentView();
 		}
+		
+		// GroupID
+
+		public static readonly DependencyProperty GroupIDProperty =
+			DependencyProperty.Register("GroupID", typeof(object), typeof(ScheduleDay), new PropertyMetadata(null, new PropertyChangedCallback(AppointmentViewAffectingPropertyChanged)));
+
+		/// <summary> The value being grouped by. </summary>
+		public object GroupID
+		{
+			get { return (object)GetValue(GroupIDProperty); }
+			set { SetValue(GroupIDProperty, value); }
+		}
+		
+		// AppointmentGroupIDMemberPath
+
+		public static readonly DependencyProperty AppointmentGroupIDMemberPathProperty =
+			DependencyProperty.Register("AppointmentGroupIDMemberPath", typeof(string), typeof(ScheduleDay), new PropertyMetadata(null, new PropertyChangedCallback(AppointmentViewAffectingPropertyChanged)));
+
+		/// <summary> A description of the property. </summary>
+		public string AppointmentGroupIDMemberPath
+		{
+			get { return (string)GetValue(AppointmentGroupIDMemberPathProperty); }
+			set { SetValue(AppointmentGroupIDMemberPathProperty, value); }
+		}
 
 		// AppointmentSource
 		
@@ -115,21 +139,24 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 
 		private void UpdateAppointmentView()
 		{
-			FAppointmentViewSource.Source = null;
-			if (AppointmentSource != null && !String.IsNullOrEmpty(AppointmentDateMemberPath) && Date != DateTime.MinValue)
+			if (AppointmentSource != null && !String.IsNullOrEmpty(AppointmentDateMemberPath) && !String.IsNullOrEmpty(AppointmentGroupIDMemberPath) && Date != DateTime.MinValue && GroupID != null)
 			{
+				FAppointmentViewSource.Filter -= new FilterEventHandler(AppointmentViewFilter);
+				FAppointmentViewSource.Filter += new FilterEventHandler(AppointmentViewFilter);
 				FAppointmentViewSource.Source = AppointmentSource;
 				ItemsSource = FAppointmentViewSource.View;
+				// TODO: Doesn't seem to set selection correctly after refresh, even if UpdateSelection() is called here.
 			}
 		}
 
 		private void AppointmentViewFilter(object sender, FilterEventArgs AArgs)
 		{
-			if (AArgs.Item != null && !String.IsNullOrEmpty(AppointmentDateMemberPath))
+			if (AArgs.Item != null)
 			{
 				var LType = AArgs.Item.GetType();
 				var LDate = (DateTime)LType.GetProperty(AppointmentDateMemberPath).GetValue(AArgs.Item, new object[] {});
-				AArgs.Accepted = LDate == Date;
+				var LGroupID = LType.GetProperty(AppointmentGroupIDMemberPath).GetValue(AArgs.Item, new object[] { });
+				AArgs.Accepted = LDate == Date && LGroupID.Equals(GroupID);
 			}
 			else
 				AArgs.Accepted = true;
@@ -160,6 +187,11 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		protected override void OnSelectionChanged(SelectionChangedEventArgs e)
 		{
 			base.OnSelectionChanged(e);
+			UpdateSelection();
+		}
+
+		private void UpdateSelection()
+		{
 			if (SelectedItem != null)
 				SelectedAppointment = SelectedItem;
 		}
