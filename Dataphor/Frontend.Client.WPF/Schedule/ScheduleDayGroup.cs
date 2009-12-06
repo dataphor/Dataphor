@@ -14,6 +14,8 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			DefaultStyleKeyProperty.OverrideMetadata(typeof(ScheduleDayGroup), new FrameworkPropertyMetadata(typeof(ScheduleDayGroup)));
 		}
 
+		// Date
+		
 		public static readonly DependencyProperty DateProperty =
 			DependencyProperty.Register("Date", typeof(DateTime), typeof(ScheduleDayGroup), new PropertyMetadata(DateTime.MinValue));
 
@@ -24,6 +26,8 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(DateProperty, value); }
 		}
 
+		// StartTime
+		
 		public static readonly DependencyProperty StartTimeProperty =
 			DependencyProperty.Register("StartTime", typeof(TimeSpan), typeof(ScheduleDayGroup), new PropertyMetadata(TimeSpan.FromHours(8)));
 
@@ -34,6 +38,8 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(StartTimeProperty, value); }
 		}
 
+		// Granularity
+		
 		public static readonly DependencyProperty GranularityProperty =
 			DependencyProperty.Register("Granularity", typeof(int), typeof(ScheduleDayGroup), new PropertyMetadata(15, null, new CoerceValueCallback(CoerceGranularity)));
 
@@ -49,6 +55,8 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			return Math.Max(1, Math.Min(60, (int)AValue));
 		}
 
+		// AppointmentSource
+		
 		public static readonly DependencyProperty AppointmentSourceProperty =
 			DependencyProperty.Register("AppointmentSource", typeof(IEnumerable), typeof(ScheduleDayGroup), new PropertyMetadata(null));
 
@@ -59,6 +67,20 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(AppointmentSourceProperty, value); }
 		}
 
+		// SelectedAppointment
+
+		public static readonly DependencyProperty SelectedAppointmentProperty =
+			DependencyProperty.Register("SelectedAppointment", typeof(object), typeof(ScheduleDayGroup), new PropertyMetadata(null));
+
+		/// <summary> The currently selected appointment. </summary>
+		public object SelectedAppointment
+		{
+			get { return (object)GetValue(SelectedAppointmentProperty); }
+			set { SetValue(SelectedAppointmentProperty, value); }
+		}
+
+		// AppointmentItemTemplate
+		
 		public static readonly DependencyProperty AppointmentItemTemplateProperty =
 			DependencyProperty.Register("AppointmentItemTemplate", typeof(DataTemplate), typeof(ScheduleDayGroup), new PropertyMetadata(null));
 
@@ -69,6 +91,8 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(AppointmentItemTemplateProperty, value); }
 		}
 
+		// AppointmentContainerStyle
+		
 		public static readonly DependencyProperty AppointmentContainerStyleProperty =
 			DependencyProperty.Register("AppointmentContainerStyle", typeof(Style), typeof(ScheduleDayGroup), new PropertyMetadata(null));
 
@@ -79,6 +103,8 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(AppointmentContainerStyleProperty, value); }
 		}
 
+		//HighlightedTimeProperty
+		
 		public static readonly DependencyProperty HighlightedTimeProperty =
 			DependencyProperty.Register("HighlightedTime", typeof(TimeSpan?), typeof(ScheduleDayGroup), new PropertyMetadata(null));
 
@@ -89,6 +115,8 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(HighlightedTimeProperty, value); }
 		}
 
+		// AppointmentDateMemberPath
+		
 		public static readonly DependencyProperty AppointmentDateMemberPathProperty =
 			DependencyProperty.Register("AppointmentDateMemberPath", typeof(string), typeof(ScheduleDayGroup), new PropertyMetadata(null));
 
@@ -122,8 +150,12 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 				
 				LBinding = new Binding("StartTime");
 				LBinding.Source = this;
-				LBinding.Mode = BindingMode.TwoWay;
 				LDay.SetBinding(ScheduleDay.StartTimeProperty, LBinding);
+				
+				LBinding = new Binding("SelectedAppointment");
+				LBinding.Source = this;
+				LBinding.Mode = BindingMode.TwoWay;
+				LDay.SetBinding(ScheduleDay.SelectedAppointmentProperty, LBinding);
 				
 				if (!String.IsNullOrEmpty(DisplayMemberPath))
 				{

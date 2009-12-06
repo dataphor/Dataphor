@@ -15,6 +15,8 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			DefaultStyleKeyProperty.OverrideMetadata(typeof(ScheduleWeek), new FrameworkPropertyMetadata(typeof(ScheduleWeek)));
 		}
 
+		// StartTime
+		
 		public static readonly DependencyProperty StartTimeProperty =
 			DependencyProperty.Register("StartTime", typeof(TimeSpan), typeof(ScheduleWeek), new PropertyMetadata(TimeSpan.FromHours(8), null, new CoerceValueCallback(CoerceStartTime)));
 
@@ -40,6 +42,8 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 				);
 		}
 
+		// Granularity
+		
 		public static readonly DependencyProperty GranularityProperty =
 			DependencyProperty.Register("Granularity", typeof(int), typeof(ScheduleWeek), new PropertyMetadata(15, null, new CoerceValueCallback(CoerceGranularity)));
 
@@ -55,6 +59,8 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			return Math.Max(1, Math.Min(60, (int)AValue));
 		}
 
+		// StartDate
+		
 		public static readonly DependencyProperty StartDateProperty =
 			DependencyProperty.Register("StartDate", typeof(DateTime), typeof(ScheduleWeek), new PropertyMetadata(DateTime.MinValue, new PropertyChangedCallback(UpdateDays)));
 																					
@@ -70,13 +76,7 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			((ScheduleWeek)ASender).UpdateDays();
 		}
 
-		private void UpdateDays()
-		{
-			var LDays = new DateTime[7];
-			for (int i = 0; i < 7; i++)
-				LDays[i] = StartDate + TimeSpan.FromDays(i);
-			SetDays(LDays);
-		}
+		// Days
 		
 		private static readonly DependencyPropertyKey DaysPropertyKey =
 			DependencyProperty.RegisterReadOnly("Days", typeof(DateTime[]), typeof(ScheduleWeek), new FrameworkPropertyMetadata(null));
@@ -97,6 +97,16 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			SetValue(DaysPropertyKey, value);
 		}
 
+		private void UpdateDays()
+		{
+			var LDays = new DateTime[7];
+			for (int i = 0; i < 7; i++)
+				LDays[i] = StartDate + TimeSpan.FromDays(i);
+			SetDays(LDays);
+		}
+
+		// HighlightedTime
+		
 		public static readonly DependencyProperty HighlightedTimeProperty =
 			DependencyProperty.Register("HighlightedTime", typeof(TimeSpan?), typeof(ScheduleWeek), new PropertyMetadata(null));
 
@@ -107,6 +117,8 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(HighlightedTimeProperty, value); }
 		}
 
+		// GroupSource
+		
 		public static readonly DependencyProperty GroupSourceProperty =
 			DependencyProperty.Register("GroupSource", typeof(object), typeof(ScheduleWeek), new PropertyMetadata(null));
 
@@ -117,6 +129,8 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(GroupSourceProperty, value); }
 		}
 
+		// AppointmentSource
+		
 		public static readonly DependencyProperty AppointmentSourceProperty =
 			DependencyProperty.Register("AppointmentSource", typeof(IEnumerable), typeof(ScheduleWeek), new PropertyMetadata(null));
 
@@ -126,7 +140,21 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			get { return (IEnumerable)GetValue(AppointmentSourceProperty); }
 			set { SetValue(AppointmentSourceProperty, value); }
 		}
+		
+		// SelectedAppointment
 
+		public static readonly DependencyProperty SelectedAppointmentProperty =
+			DependencyProperty.Register("SelectedAppointment", typeof(object), typeof(ScheduleWeek), new PropertyMetadata(null));
+
+		/// <summary> The currently selected appointment. </summary>
+		public object SelectedAppointment
+		{
+			get { return (object)GetValue(SelectedAppointmentProperty); }
+			set { SetValue(SelectedAppointmentProperty, value); }
+		}
+
+		// AppointmentItemTemplate
+		
 		public static readonly DependencyProperty AppointmentItemTemplateProperty =
 			DependencyProperty.Register("AppointmentItemTemplate", typeof(DataTemplate), typeof(ScheduleWeek), new PropertyMetadata(null));
 
@@ -137,6 +165,8 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(AppointmentItemTemplateProperty, value); }
 		}
 
+		// GroupHeaderMemberPath
+		
 		public static readonly DependencyProperty GroupHeaderMemberPathProperty =
 			DependencyProperty.Register("GroupHeaderMemberPath", typeof(string), typeof(ScheduleWeek), new PropertyMetadata(null));
 
@@ -147,6 +177,8 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(GroupHeaderMemberPathProperty, value); }
 		}
 
+		// AppointmentDateMemberPath
+		
 		public static readonly DependencyProperty AppointmentDateMemberPathProperty =
 			DependencyProperty.Register("AppointmentDateMemberPath", typeof(string), typeof(ScheduleWeek), new PropertyMetadata(null));
 
@@ -157,6 +189,8 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(AppointmentDateMemberPathProperty, value); }
 		}
 
+		// AppointmentGroupIDMemberPath
+		
 		public static readonly DependencyProperty AppointmentGroupIDMemberPathProperty =
 			DependencyProperty.Register("AppointmentGroupIDMemberPath", typeof(string), typeof(ScheduleWeek), new PropertyMetadata(null));
 
@@ -167,6 +201,8 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(AppointmentGroupIDMemberPathProperty, value); }
 		}
 
+		// AppointmentContainerStyle
+		
 		public static readonly DependencyProperty AppointmentContainerStyleProperty =
 			DependencyProperty.Register("AppointmentContainerStyle", typeof(Style), typeof(ScheduleWeek), new PropertyMetadata(null));
 
@@ -177,6 +213,8 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(AppointmentContainerStyleProperty, value); }
 		}
 
+		// TimeBarElement
+		
 		private ScheduleTimeBar TimeBarElement { get; set; }
 		
 		public override void OnApplyTemplate()

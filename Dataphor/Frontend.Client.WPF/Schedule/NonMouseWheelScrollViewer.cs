@@ -1,0 +1,15 @@
+﻿using System;
+using System.Windows.Controls;
+
+namespace Alphora.Dataphor.Frontend.Client.WPF
+{
+	public class NonMouseWheelScrollViewer : ScrollViewer
+	{
+		protected override void OnMouseWheel(System.Windows.Input.MouseWheelEventArgs e)
+		{
+			var LHandled = e.Handled;
+			base.OnMouseWheel(e);
+			e.Handled = LHandled;	// Don't handle the mouse wheel
+		}
+	}
+}

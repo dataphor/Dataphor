@@ -2,6 +2,7 @@
 using System.Windows;
 using Alphora.Dataphor.Frontend.Client.WPF;
 using System;
+using System.Windows.Data;
 
 namespace Frontend.Client.WPF.Tests
 {
@@ -151,4 +152,31 @@ namespace Frontend.Client.WPF.Tests
 				PropertyChanged(this, new PropertyChangedEventArgs(APropertyName));
 		}
 	}
+
+	public class FullDateToStringConverter : IValueConverter
+	{
+		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+		{
+			return ((DateTime)value).ToString("dddd dd MMMM yyyy");
+		}
+
+		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+		{
+			throw new NotImplementedException();
+		}
+	}
+
+	public class IsSelectedToBorderThicknessConverter : IValueConverter
+	{
+		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+		{
+			return (bool)value ? new Thickness(2) : new Thickness(1);
+		}
+
+		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+		{
+			throw new NotImplementedException();
+		}
+	}
+
 }

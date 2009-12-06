@@ -9,7 +9,7 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 {
 	/// <summary> A day's schedule. </summary>
 	[TemplatePart(Name = "TimeBar", Type = typeof(ScheduleTimeBar))]
-	public class ScheduleDay : HeaderedItemsControl
+	public class ScheduleDay : ListBox
 	{
 		static ScheduleDay()
 		{
@@ -61,6 +61,18 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		private static object CoerceGranularity(DependencyObject ASender, object AValue)
 		{
 			return Math.Max(1, Math.Min(60, (int)AValue));
+		}
+		
+		// Header
+
+		public static readonly DependencyProperty HeaderProperty =
+			DependencyProperty.Register("Header", typeof(object), typeof(ScheduleDay), new PropertyMetadata(null));
+
+		/// <summary> Descriptive header to display for the day. </summary>
+		public object Header
+		{
+			get { return (object)GetValue(HeaderProperty); }
+			set { SetValue(HeaderProperty, value); }
 		}
 
 		// AppointmentDateMemberPath
@@ -122,7 +134,36 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			else
 				AArgs.Accepted = true;
 		}
-		
+
+		// SelectedAppointment
+
+		public static readonly DependencyProperty SelectedAppointmentProperty =
+			DependencyProperty.Register("SelectedAppointment", typeof(object), typeof(ScheduleDay), new PropertyMetadata(null, new PropertyChangedCallback(OnSelectedAppointmentChanged)));
+
+		/// <summary> The currently selected appointment. </summary>
+		public object SelectedAppointment
+		{
+			get { return (object)GetValue(SelectedAppointmentProperty); }
+			set { SetValue(SelectedAppointmentProperty, value); }
+		}
+
+		private static void OnSelectedAppointmentChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+		{
+			((ScheduleDay)d).OnSelectedAppointmentChanged(e);
+		}
+
+		protected virtual void OnSelectedAppointmentChanged(DependencyPropertyChangedEventArgs e)
+		{
+			SelectedIndex = Items.IndexOf(e.NewValue);
+		}
+
+		protected override void OnSelectionChanged(SelectionChangedEventArgs e)
+		{
+			base.OnSelectionChanged(e);
+			if (SelectedItem != null)
+				SelectedAppointment = SelectedItem;
+		}
+
 		// HighlightedTime
 		
 		public static readonly DependencyProperty HighlightedTimeProperty =
@@ -151,11 +192,6 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		{
 			TimeBar = GetTemplateChild("TimeBar") as ScheduleTimeBar;
 			base.OnApplyTemplate();
-		}
-		
-		protected override DependencyObject GetContainerForItemOverride()
-		{
-			return new ContentControl();
 		}
 	}
 }

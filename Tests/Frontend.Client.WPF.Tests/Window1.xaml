@@ -1,19 +1,56 @@
 ﻿<Window
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:client="clr-namespace:Alphora.Dataphor.Frontend.Client.WPF;assembly=Alphora.Dataphor.Frontend.Client.WPF" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" x:Class="Frontend.Client.WPF.Tests.Window1"
+    xmlns:client="clr-namespace:Alphora.Dataphor.Frontend.Client.WPF;assembly=Alphora.Dataphor.Frontend.Client.WPF" 
+	xmlns:local="clr-namespace:Frontend.Client.WPF.Tests"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+	x:Class="Frontend.Client.WPF.Tests.Window1"
     Title="Window1" Height="400" Width="600" mc:Ignorable="d">
 	<Window.Resources>
+		<local:FullDateToStringConverter x:Key="FullDateToStringConverter" />
+		<client:ScheduleTimeBlockTimeConverter x:Key="TimeConverter" />
+		<local:IsSelectedToBorderThicknessConverter x:Key="IsSelectedToBorderThicknessConverter" />
+
+		<Style x:Key="HeaderTextBlockStyle" TargetType="{x:Type TextBlock}">
+			<Setter Property="VerticalAlignment" Value="Bottom"/>
+			<Setter Property="Foreground" Value="#FF191D49"/>
+			<Setter Property="Margin" Value="2,2,4,2"/>
+		</Style>
+		
+		<Style x:Key="DataTextBlockStyle" TargetType="{x:Type TextBlock}">
+			<Setter Property="VerticalAlignment" Value="Bottom"/>
+			<Setter Property="Margin" Value="2,2,2,2"/>
+		</Style>
+		
 		<Style x:Key="DefaultWeekStyle" TargetType="{x:Type client:ScheduleWeek}" >
 			<Setter Property="GroupHeaderMemberPath" Value="Description" />
 			<Setter Property="AppointmentGroupIDMemberPath" Value="ProviderID" />
 			<Setter Property="AppointmentDateMemberPath" Value="Date" />
 			<Setter Property="AppointmentContainerStyle">
 				<Setter.Value>
-					<Style TargetType="{x:Type ContentControl}">
+			    	<Style TargetType="{x:Type ListBoxItem}">
 						<Setter Property="client:ScheduleDayAppointments.Start" Value="{Binding StartTime}" />
 						<Setter Property="client:ScheduleDayAppointments.End" Value="{Binding EndTime}" />
-					</Style>
+			    		<Setter Property="Background" Value="Transparent"/>
+						<Setter Property="BorderBrush" Value="{x:Null}" />
+						<Setter Property="BorderThickness" Value="0" />
+						<Setter Property="Padding" Value="0" />
+			    		<Setter Property="Template">
+			    			<Setter.Value>
+			    				<ControlTemplate TargetType="{x:Type ListBoxItem}">
+			    					<Border x:Name="Bd" SnapsToDevicePixels="true" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+			    						<ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+			    					</Border>
+			    					<ControlTemplate.Triggers>
+			    						<Trigger Property="IsEnabled" Value="false">
+			    							<Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+			    						</Trigger>
+			    					</ControlTemplate.Triggers>
+			    				</ControlTemplate>
+			    			</Setter.Value>
+			    		</Setter>
+			    	</Style>
 				</Setter.Value>
 			</Setter>
 			<Setter Property="AppointmentItemTemplate">
@@ -21,7 +58,7 @@
 					<DataTemplate>
 						<Border Background="#FFEEEEFF"
 							BorderBrush="#FF4F4F4F"
-							BorderThickness="1"
+							BorderThickness="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Converter={StaticResource IsSelectedToBorderThicknessConverter}}"
 							CornerRadius="3"
 							SnapsToDevicePixels="True"
 							Margin="2,0,4,0"
@@ -29,6 +66,27 @@
 							MinWidth="75">
 							<Border.ToolTip>
 								<Grid>
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="Auto" />
+										<ColumnDefinition/>
+									</Grid.ColumnDefinitions>
+									<Grid.RowDefinitions>
+										<RowDefinition Height="Auto" />
+										<RowDefinition Height="Auto" />
+										<RowDefinition Height="Auto" />
+										<RowDefinition Height="Auto" />
+										<RowDefinition Height="Auto" />
+									</Grid.RowDefinitions>
+									<TextBlock Text="Date" Style="{StaticResource HeaderTextBlockStyle}"/> 
+									<TextBlock Grid.Column="1" Text="{Binding Date, Converter={StaticResource FullDateToStringConverter}}" Style="{StaticResource DataTextBlockStyle}"/>
+									<TextBlock Grid.Row="1" Text="Description" Style="{StaticResource HeaderTextBlockStyle}"/> 
+									<TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Description}" Style="{StaticResource DataTextBlockStyle}"/>
+									<!--TextBlock Grid.Row="2" Text="Provider" Style="{StaticResource HeaderTextBlockStyle}"/> 
+									<TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Header, RelativeSource={RelativeSource AncestorType={x:Type client:ScheduleDay}}}" Style="{StaticResource DataTextBlockStyle}"/-->
+									<TextBlock Grid.Row="3" Text="Start Time" Style="{StaticResource HeaderTextBlockStyle}"/> 
+									<TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding StartTime, Converter={StaticResource TimeConverter}}" Style="{StaticResource DataTextBlockStyle}"/>
+									<TextBlock Grid.Row="4" Text="End Time" Style="{StaticResource HeaderTextBlockStyle}"/> 
+									<TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding EndTime, Converter={StaticResource TimeConverter}}" Style="{StaticResource DataTextBlockStyle}"/>
 								</Grid>
 							</Border.ToolTip>
 							<Border.Effect>
