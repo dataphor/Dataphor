@@ -408,16 +408,22 @@ namespace Alphora.Dataphor.DAE.Schema
 			// Load assemblies after all files are copied in so that multi-file assemblies and other dependencies are certain to be present
 			foreach (Schema.FileReference LFile in ALibrary.Files)
 			{
-				if (LFile.IsAssembly && ((LFile.Environments.Count == 0) || LFile.Environments.Contains(Environments.WindowsServer)))
+				if ((LFile.Environments.Count == 0) || LFile.Environments.Contains(Environments.WindowsServer))
 				{
 					#if LOADFROMLIBRARIES
 					string LSourceFile = Path.IsPathRooted(LFile.FileName) ? LFile.FileName : Path.Combine(ALibrary.GetLibraryDirectory(((Server.Server)AProgram.ServerProcess.ServerSession.Server).LibraryDirectory), LFile.FileName);
-                    Assembly LAssembly = Assembly.LoadFrom(LSourceFile);
+					if (FileUtility.IsAssembly(LSourceFile))
+					{
+	                    Assembly LAssembly = Assembly.LoadFrom(LSourceFile);
 					#else
                     string LTargetFile = Path.Combine(PathUtility.GetBinDirectory(), Path.GetFileName(LFile.FileName));
-                    Assembly LAssembly = Assembly.LoadFrom(LTargetFile);
+					if (FileUtility.IsAssembly(LTargetFile))
+					{
+	                    Assembly LAssembly = Assembly.LoadFrom(LTargetFile);
                     #endif
-                    AProgram.CatalogDeviceSession.RegisterAssembly(ALoadedLibrary, LAssembly);
+						if (LFile.IsAssembly)
+		                    AProgram.CatalogDeviceSession.RegisterAssembly(ALoadedLibrary, LAssembly);
+					}
 				}
 			}
 		}
