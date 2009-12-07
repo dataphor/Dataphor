@@ -2194,6 +2194,21 @@ namespace Alphora.Dataphor.DAE.Schema
 			ShouldDefault = ASourceNode.TableVar.ShouldDefault;
 			ShouldValidate = ASourceNode.TableVar.ShouldValidate;
 			
+			if (!ASourceNode.TableVar.IsChangeRemotable || !ASourceNode.TableVar.IsDefaultRemotable || !ASourceNode.TableVar.IsValidateRemotable)
+			{
+				if (MetaData == null)
+					MetaData = new MetaData();
+					
+				if (!ASourceNode.TableVar.IsChangeRemotable)
+					MetaData.Tags.AddOrUpdate("DAE.IsChangeRemotable", "false", true);
+					
+				if (!ASourceNode.TableVar.IsDefaultRemotable)
+					MetaData.Tags.AddOrUpdate("DAE.IsDefaultRemotable", "false", true);
+					
+				if (!ASourceNode.TableVar.IsValidateRemotable)
+					MetaData.Tags.AddOrUpdate("DAE.IsValidateRemotable", "false", true);
+			}
+			
 			// Copy keys
 			Schema.Key LNewKey;
 			foreach (Schema.Key LKey in ASourceNode.TableVar.Keys)
