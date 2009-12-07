@@ -178,31 +178,24 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			List<UIElement> LToDelete = new List<UIElement>(Children.Count);
 			foreach (UIElement LChild in Children)
 				LToDelete.Add(LChild);
-			
+
+			// Eliminate any blocks that are now before the start time
+			while (Children.Count > 0 && ((ScheduleTimeBlock)Children[0]).Time < StartTime)
+				RemoveChild(0);
+
 			Size LResult = new Size(0d, 0d);
 			var LSequence = 0;
 			var LVisibleMinutes = 0;
 			for (DateTime LTime = StartTime; LTime < new DateTime(TimeSpan.FromHours(24).Ticks) && LResult.Height < AAvailableSize.Height; LTime += TimeSpan.FromMinutes(Granularity))
 			{
-				var LBlockIndex = FindBlock(LTime);
-				ScheduleTimeBlock LBlock;
-				if (LBlockIndex < 0)
+				ScheduleTimeBlock LBlock = (Children.Count > LSequence && ((ScheduleTimeBlock)Children[LSequence]).Time == LTime) ? (ScheduleTimeBlock)Children[LSequence] : null;
+				if (LBlock == null)
 				{
 					LBlock = new ScheduleTimeBlock { Time = LTime };
 					if (TimeBlockStyle != null)
 						LBlock.Style = TimeBlockStyle;
 					DependencyPropertyDescriptor.FromProperty(ScheduleTimeBlock.IsHighlightedProperty, typeof(ScheduleTimeBlock)).AddValueChanged(LBlock, new EventHandler(ChildHighlightChanged));
 					Children.Insert(LSequence, LBlock);
-				}
-				else
-				{
-					LBlock = (ScheduleTimeBlock)Children[LBlockIndex];
-					LToDelete.Remove(LBlock);
-					if (LSequence != LBlockIndex)
-					{
-						Children.RemoveAt(LBlockIndex);
-						Children.Insert(LSequence, LBlock);
-					}
 				}
 				LBlock.Measure(AAvailableSize);
 				LResult.Height += LBlock.DesiredSize.Height;
@@ -211,11 +204,9 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 				LVisibleMinutes = (int)new TimeSpan(LTime.Ticks).TotalMinutes - (int)new TimeSpan(StartTime.Ticks).TotalMinutes;
 			}
 			
-			foreach (UIElement LChild in LToDelete)
-			{
-				DependencyPropertyDescriptor.FromProperty(ScheduleTimeBlock.IsHighlightedProperty, typeof(ScheduleTimeBlock)).RemoveValueChanged(LChild, new EventHandler(ChildHighlightChanged));
-				Children.Remove(LChild);
-			}
+			// Eliminate any blocks that are off the end
+			for (var i = LSequence; i < Children.Count; i++)
+				RemoveChild(Children.Count - 1);
 			
 			SetBlockHeight(Math.Max(LSequence > 0 ? (LResult.Height / LSequence) : CDefaultBlockHeight, 1d));
 			SetVisibleMinutes(LVisibleMinutes + (int)((AAvailableSize.Height - LResult.Height) / BlockHeight) * Granularity);
@@ -223,9 +214,16 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			return LResult;
 		}
 		
+		private void RemoveChild(int AIndex)
+		{
+			DependencyPropertyDescriptor.FromProperty(ScheduleTimeBlock.IsHighlightedProperty, typeof(ScheduleTimeBlock)).RemoveValueChanged(Children[AIndex], new EventHandler(ChildHighlightChanged));
+			Children.RemoveAt(AIndex);
+		}
+		
 		/// <remarks> Assumes the child blocks are in time order. </remarks>
 		private int FindBlock(DateTime ATime)
 		{
+			// TODO: Rewrite to use binary search
 			var LFoundTime = DateTime.MinValue;
 			for (int i = 0; i < Children.Count && ATime > LFoundTime; i++)
 			{
@@ -241,7 +239,7 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			double LYOffset = 0d;
 			foreach (FrameworkElement LChild in Children)
 			{
-				LChild.Arrange(new Rect(0d, LYOffset, AFinalSize.Width, Math.Min(LChild.DesiredSize.Height, AFinalSize.Height - LYOffset)));
+				LChild.Arrange(new Rect(0d, LYOffset, AFinalSize.Width, Math.Max(0, Math.Min(LChild.DesiredSize.Height, AFinalSize.Height - LYOffset))));
 				LYOffset += LChild.DesiredSize.Height;
 			}
 			return new Size(AFinalSize.Width, LYOffset);

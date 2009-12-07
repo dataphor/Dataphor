@@ -248,7 +248,7 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			if (AArgs.Delta < 0)
 				StartTime += TimeSpan.FromMinutes(Granularity);
 			else if (AArgs.Delta > 0)
-				StartTime -= TimeSpan.FromMinutes(Granularity);
+				StartTime = new DateTime(Math.Max(0, (new TimeSpan(StartTime.Ticks) - TimeSpan.FromMinutes(Granularity)).Ticks));
 			else
 				return;
 			AArgs.Handled = true;
