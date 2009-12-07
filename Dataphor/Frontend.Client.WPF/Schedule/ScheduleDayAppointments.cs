@@ -137,7 +137,7 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 					new Rect
 					(
 						0,
-						(LStart / Granularity * BlockHeight) - (int)new TimeSpan(StartTime.Ticks).TotalMinutes,
+						(LStart - (int)new TimeSpan(StartTime.Ticks).TotalMinutes) / Granularity * BlockHeight,
 						AFinalSize.Width,
 						Math.Max((LEnd - LStart) / Granularity, 1) * BlockHeight
 					)
