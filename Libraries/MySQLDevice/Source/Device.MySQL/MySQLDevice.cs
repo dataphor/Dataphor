@@ -311,7 +311,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 				return (int)AValue == 0 ? false : true;
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (bool)AValue;
 		}
@@ -342,7 +342,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 			return Convert.ToByte((short)AValue);
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (byte)AValue;
 		}
@@ -376,7 +376,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 			return (DateTime)AValue;
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			DateTime LValue = (DateTime)AValue;
 			if (LValue < MinValue)
@@ -409,7 +409,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 			return (DateTime)AValue;
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			DateTime LValue = (DateTime)AValue;
 			if (LValue < MySQLDateTime.MinValue)
@@ -442,7 +442,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 			return (DateTime)AValue;
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			DateTime LValue = (DateTime)AValue;
 			if (LValue < MySQLDateTime.MinValue)

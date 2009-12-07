@@ -16,17 +16,18 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using D4 = Alphora.Dataphor.DAE.Language.D4;
 	using Alphora.Dataphor.DAE.Runtime;
+	using Alphora.Dataphor.DAE.Streams;
 	
     public abstract class SQLScalarType : DeviceScalarType
     {
 		public SQLScalarType(int AID, string AName) : base(AID, AName) {}
 		
-		public virtual string ToLiteral(object AValue)
+		public virtual string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			object LValue = FromScalar(AValue);
+			object LValue = FromScalar(AManager, AValue);
 			
 			string LString = LValue as string;
 			if (LString != null)
@@ -40,9 +41,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return ToScalar(AManager, AValue);
 		}
 		
-		public virtual object ParameterFromScalar(object AValue)
+		public virtual object ParameterFromScalar(IValueManager AManager, object AValue)
 		{
-			return FromScalar(AValue);
+			return FromScalar(AManager, AValue);
 		}
 		
 		public virtual Stream GetParameterStreamAdapter(IValueManager AManager, Stream AStream)
@@ -183,7 +184,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLBoolean(int AID, string AName) : base(AID, AName) {}
 		
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -198,7 +199,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return Convert.ToBoolean(AValue);
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (bool)AValue ? 1 : 0;
 		}
@@ -227,12 +228,12 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return Convert.ToByte(AValue);
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return Convert.ToInt16((byte)AValue);
 		}
 		
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -265,7 +266,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return (sbyte)(short)AValue;
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (short)(sbyte)AValue;
 		}
@@ -296,12 +297,12 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return Convert.ToInt16(AValue);
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (short)AValue;
 		}
 
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -334,7 +335,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return (ushort)((int)AValue));
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (int)(uint)AValue;
 		}
@@ -364,12 +365,12 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return Convert.ToInt32(AValue);
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (int)AValue;
 		}
 
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -407,7 +408,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				return Convert.ToUInt32((decimal)AValue);
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (long)(uint)AValue;
 		}
@@ -438,12 +439,12 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return Convert.ToInt64(AValue);
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (long)AValue;
 		}
 
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -476,7 +477,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return Convert.ToUInt64((decimal)AValue);
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return Convert.ToDecimal((ulong)AValue);
 		}
@@ -507,12 +508,12 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return Convert.ToDecimal(AValue); 
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (decimal)AValue;
 		}
 
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -564,7 +565,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			get { return FDateTimeFormat;}
 		}
 		
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -577,7 +578,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return (DateTime)AValue;
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (DateTime)AValue;
 		}
@@ -607,12 +608,12 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return new TimeSpan(Convert.ToInt64(AValue));
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return ((TimeSpan)AValue).Ticks;
 		}
 
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -648,7 +649,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			get { return FDateFormat;}
 		}
 		
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -661,7 +662,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return (DateTime)AValue;
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (DateTime)AValue;
 		}
@@ -694,7 +695,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			get { return FTimeFormat; }
 		}
 		
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -708,7 +709,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return new DateTime(1, 1, 1, LDateTime.Hour, LDateTime.Minute, LDateTime.Second, LDateTime.Millisecond);
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (DateTime)AValue;
 		}
@@ -737,12 +738,12 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return Convert.ToDecimal(AValue);
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (decimal)AValue;
 		}
 
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -774,7 +775,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return new Guid((string)AValue);
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return ((Guid)AValue).ToString();
 		}
@@ -803,7 +804,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return (string)AValue;
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (String)AValue;
 		}
@@ -833,7 +834,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return (string)AValue;
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (string)AValue;
 		}
@@ -869,23 +870,38 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     public class SQLBinary : SQLScalarType
     {
 		public SQLBinary(int AID, string AName) : base(AID, AName) {}
+		
+		private byte[] GetNativeValue(IValueManager AManager, object AValue)
+		{
+			if (AValue is byte[])
+				return (byte[])AValue;
+				
+			using (Scalar LScalar = new Scalar(AManager, ScalarType, (StreamID)AValue))
+			{
+				return LScalar.AsByteArray;
+			}
+		}
 
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return String.Format("cast('{0}' as {1})", Convert.ToBase64String((byte[])AValue), DomainName());
+			return String.Format("cast('{0}' as {1})", Convert.ToBase64String(GetNativeValue(AManager, AValue)), DomainName());
 		}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
-			return (byte[])AValue;
+			using (Scalar LScalar = new Scalar(AManager, this.ScalarType, AManager.StreamManager.Allocate()))
+			{
+				LScalar.AsByteArray = (byte[])AValue;
+				return LScalar.StreamID;
+			}
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
-			return (byte[])AValue;
+			return GetNativeValue(AManager, AValue);
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -907,22 +923,37 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLGraphic(int AID, string AName) : base(AID, AName) {}
 
-		public override string ToLiteral(object AValue)
+		private byte[] GetNativeValue(IValueManager AManager, object AValue)
+		{
+			if (AValue is byte[])
+				return (byte[])AValue;
+				
+			using (Scalar LScalar = new Scalar(AManager, ScalarType, (StreamID)AValue))
+			{
+				return LScalar.AsByteArray;
+			}
+		}
+
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return String.Format("cast('{0}' as {1})", Convert.ToBase64String((byte[])AValue), DomainName());
+			return String.Format("cast('{0}' as {1})", Convert.ToBase64String(GetNativeValue(AManager, AValue)), DomainName());
 		}
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
-			return (byte[])AValue;
+			using (Scalar LScalar = new Scalar(AManager, this.ScalarType, AManager.StreamManager.Allocate()))
+			{
+				LScalar.AsByteArray = (byte[])AValue;
+				return LScalar.StreamID;
+			}
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
-			return (byte[])AValue;
+			return GetNativeValue(AManager, AValue);
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -949,7 +980,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return StringToVersionNumber((string)AValue);
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return VersionNumberToString((VersionNumber)AValue);
 		}

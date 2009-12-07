@@ -26,7 +26,7 @@ namespace Alphora.Dataphor.Device.PGSQL
 		//public PostgreSQLBoolean(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
 		//public PostgreSQLBoolean(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
 
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -42,7 +42,7 @@ namespace Alphora.Dataphor.Device.PGSQL
 				return (int)AValue == 0 ? false : true;
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (bool)AValue;
 		}
@@ -76,7 +76,7 @@ namespace Alphora.Dataphor.Device.PGSQL
 			return Convert.ToByte(AValue);
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (byte)AValue;
 		}
@@ -108,7 +108,7 @@ namespace Alphora.Dataphor.Device.PGSQL
 			return Convert.ToDecimal(AValue);
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (decimal)AValue;
 		}
@@ -147,7 +147,7 @@ namespace Alphora.Dataphor.Device.PGSQL
 			set { FDateTimeFormat = value; }
 		}
 
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -171,7 +171,7 @@ namespace Alphora.Dataphor.Device.PGSQL
 			return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond));
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			DateTime LValue = (DateTime)AValue;
 			// If the value is equal to Dataphor's zero date, set it to the Device's zero date
@@ -212,7 +212,7 @@ namespace Alphora.Dataphor.Device.PGSQL
 			set { FDateFormat = value; }
 		}
 
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -237,7 +237,7 @@ namespace Alphora.Dataphor.Device.PGSQL
 			return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerDay));
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			DateTime LValue = (DateTime)AValue;
 			// If the value is equal to Dataphor's zero date (Jan, 1, 0001), set it to the device's zero date
@@ -278,7 +278,7 @@ namespace Alphora.Dataphor.Device.PGSQL
 			set { FTimeFormat = value; }
 		}
 
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -299,7 +299,7 @@ namespace Alphora.Dataphor.Device.PGSQL
 			return new DateTime(((DateTime)AValue).Ticks % TimeSpan.TicksPerDay);
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			// Added 1899 years, so that a time can actually be stored. 
 			// Adding 1899 years puts it at the year 1900
@@ -331,7 +331,7 @@ namespace Alphora.Dataphor.Device.PGSQL
 	{
 		public PostgreSQLGuid(int AID, string AName) : base(AID, AName) { }
 
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -347,7 +347,7 @@ namespace Alphora.Dataphor.Device.PGSQL
 				return (Guid)AValue;
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (Guid)AValue;
 		}
@@ -422,7 +422,7 @@ namespace Alphora.Dataphor.Device.PGSQL
 	{
 		public PostgreSQLPostgreSQLBinary(int AID, string AName) : base(AID, AName) { }
 
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -435,7 +435,7 @@ namespace Alphora.Dataphor.Device.PGSQL
 			return (byte[])AValue;
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (byte[])AValue;
 		}

@@ -61,7 +61,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 			return new TimeSpan(Convert.ToInt64(AValue));
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return ((TimeSpan)AValue).Ticks;
 		}
@@ -86,7 +86,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 			return Convert.ToBoolean(AValue);
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return ((bool)AValue ? 1.0 : 0.0);
 		}
@@ -114,7 +114,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 			return Convert.ToInt32(AValue);
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (decimal)(int)AValue;
 		}
@@ -166,7 +166,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 			return Convert.ToInt16((decimal)AValue);
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (decimal)(short)AValue;
 		}
@@ -218,7 +218,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 			return Convert.ToByte((decimal)AValue);
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (decimal)(byte)AValue;
 		}
@@ -270,7 +270,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 			return Convert.ToInt64((decimal)AValue);
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (decimal)(long)AValue;
 		}
@@ -303,7 +303,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 				return AValue;
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			string LValue = (string)AValue;
 			if (LValue == String.Empty)
@@ -330,7 +330,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 				return AValue;
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			string LValue = (string)AValue;
 			if (LValue == String.Empty)

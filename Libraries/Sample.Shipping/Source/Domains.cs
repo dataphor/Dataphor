@@ -29,7 +29,7 @@ namespace Alphora.Shipping
 			return StringToCoordinate((string)AValue);
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return CoordinateToString((Coordinate)AValue);
 		}

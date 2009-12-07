@@ -521,7 +521,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							LScalar = null;
 						else
 							LScalar = FKeyTypes[LIndex].ToScalar(DeviceSession.ServerProcess.ValueManager, LValue);
-						FKeyParameters[LIndex].Literal = FKeyTypes[LIndex].ToLiteral(LScalar);
+						FKeyParameters[LIndex].Literal = FKeyTypes[LIndex].ToLiteral(DeviceSession.ServerProcess.ValueManager, LScalar);
 					}
 		}
 		

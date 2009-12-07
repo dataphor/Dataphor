@@ -258,7 +258,7 @@ order by libname, memname, indxname, indxpos
 	// It could be moved if we abstract ADO functionality to a common device.
 	public interface IADOFilterLiteralBuilder
 	{
-		string ToLiteral(object AValue);
+		string ToLiteral(IValueManager AManager, object AValue);
 	}
 	
 	public class SASDeviceSession : SQLDeviceSession
@@ -542,7 +542,7 @@ order by libname, memname, indxname, indxpos
 			return Convert.ToBoolean(AValue);
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return ((bool)AValue ? 1 : 0);
 		}
@@ -557,7 +557,7 @@ order by libname, memname, indxname, indxpos
 			return "smallint";
 		}
 
-		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(IValueManager AManager, object AValue)
 		{
 			return ((bool)AValue ? 1 : 0).ToString();
 		}
@@ -572,7 +572,7 @@ order by libname, memname, indxname, indxpos
 			return Convert.ToByte(AValue);
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (byte)AValue;
 		}
@@ -587,7 +587,7 @@ order by libname, memname, indxname, indxpos
 			return "smallint";
 		}
 
-		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(IValueManager AManager, object AValue)
 		{
 			return ((byte)AValue).ToString();
 		}
@@ -602,7 +602,7 @@ order by libname, memname, indxname, indxpos
 			return Convert.ToInt16(AValue);
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (short)AValue;
 		}
@@ -617,7 +617,7 @@ order by libname, memname, indxname, indxpos
 			return "smallint";
 		}
 		
-		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(IValueManager AManager, object AValue)
 		{
 			return ((short)AValue).ToString();
 		}
@@ -632,7 +632,7 @@ order by libname, memname, indxname, indxpos
 			 return Convert.ToInt32(AValue);
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (int)AValue;
 		}
@@ -647,7 +647,7 @@ order by libname, memname, indxname, indxpos
 			return "integer";
 		}
 		
-		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(IValueManager AManager, object AValue)
 		{
 			return ((int)AValue).ToString();
 		}
@@ -662,7 +662,7 @@ order by libname, memname, indxname, indxpos
 			return Convert.ToInt64(AValue);
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (long)AValue;
 		}
@@ -677,7 +677,7 @@ order by libname, memname, indxname, indxpos
 			return "decimal(20, 0)";
 		}
 		
-		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(IValueManager AManager, object AValue)
 		{
 			return ((long)AValue).ToString();
 		}
@@ -696,7 +696,7 @@ order by libname, memname, indxname, indxpos
 			return Convert.ToDecimal(AValue);
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (decimal)AValue;
 		}
@@ -727,7 +727,7 @@ order by libname, memname, indxname, indxpos
 				);
 		}
 		
-		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(IValueManager AManager, object AValue)
 		{
 			return ((decimal)AValue).ToString();
 		}
@@ -746,7 +746,7 @@ order by libname, memname, indxname, indxpos
 			return new TimeSpan(Convert.ToInt64(AValue));
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return ((TimeSpan)AValue).Ticks;
 		}
@@ -761,7 +761,7 @@ order by libname, memname, indxname, indxpos
 			return "numeric(20, 0)";
 		}
 
-		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(IValueManager AManager, object AValue)
 		{
 			return ((TimeSpan)AValue).Ticks.ToString();
 		}
@@ -786,7 +786,7 @@ order by libname, memname, indxname, indxpos
 		
 		// SAS stores datetime values as a numeric value representing the number of seconds since Jan 1, 1960.
 		
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			return String.Format("'{0}'", ((DateTime)AValue).ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo));
 		}
@@ -796,7 +796,7 @@ order by libname, memname, indxname, indxpos
 			return new DateTime(1960, 1, 1).AddSeconds(Convert.ToDouble(AValue));
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return ((DateTime)AValue).Subtract(new DateTime(1960, 1, 1)).TotalSeconds;
 		}
@@ -811,7 +811,7 @@ order by libname, memname, indxname, indxpos
 			return "date FORMAT=DATETIME18. INFORMAT=DATETIME18.";
 		}
 		
-		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(IValueManager AManager, object AValue)
 		{
 			return String.Format("#{0}#", ((DateTime)AValue).ToString(DateTimeFormat));
 		}
@@ -836,7 +836,7 @@ order by libname, memname, indxname, indxpos
 		
 		// SAS stores Date values as a numeric value representing the number of days since January 1, 1960.
 		
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			return String.Format("'{0}'", ((DateTime)AValue).ToString(DateFormat, DateTimeFormatInfo.InvariantInfo));
 		}
@@ -846,7 +846,7 @@ order by libname, memname, indxname, indxpos
 			return new DateTime(1960, 1, 1).AddDays(Convert.ToDouble(AValue));
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return ((DateTime)AValue).Subtract(new DateTime(1960, 1, 1)).TotalDays;
 		}
@@ -861,7 +861,7 @@ order by libname, memname, indxname, indxpos
 			return "date FORMAT=DATE9. INFORMAT=DATE9.";
 		}
 
-		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(IValueManager AManager, object AValue)
 		{
 			return String.Format("#{0}#", ((DateTime)AValue).ToString(DateFormat));
 		}
@@ -886,7 +886,7 @@ order by libname, memname, indxname, indxpos
 		
 		// SAS stores time values in the same way as a date time (as near as I can tell, the docs don't actually say).
 		
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			return String.Format("'{0}'", ((DateTime)AValue).ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo));
 		}
@@ -897,7 +897,7 @@ order by libname, memname, indxname, indxpos
 			return new DateTime(1, 1, 1, LDateTime.Hour, LDateTime.Minute, LDateTime.Second, LDateTime.Millisecond);
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return ((DateTime)AValue).Subtract(new DateTime(1960, 1, 1)).TotalSeconds;
 		}
@@ -912,7 +912,7 @@ order by libname, memname, indxname, indxpos
 			return "date FORMAT=TIME8. INFORMAT=TIME8.";
 		}
 		
-		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(IValueManager AManager, object AValue)
 		{
 			return String.Format("#{0}#", ((DateTime)AValue).ToString(TimeFormat));
 		}
@@ -931,7 +931,7 @@ order by libname, memname, indxname, indxpos
 			return Convert.ToDecimal(AValue);
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (decimal)AValue;
 		}
@@ -946,7 +946,7 @@ order by libname, memname, indxname, indxpos
 			return "decimal(28, 8)";
 		}
 		
-		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(IValueManager AManager, object AValue)
 		{
 			return ((decimal)AValue).ToString();
 		}
@@ -958,9 +958,9 @@ order by libname, memname, indxname, indxpos
 		//public SASGuid(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
 		//public SASGuid(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
 		
-		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(IValueManager AManager, object AValue)
 		{
-			return String.Format("'{0}'", FromScalar(AValue));
+			return String.Format("'{0}'", FromScalar(AManager, AValue));
 		}
     }
 
@@ -977,7 +977,7 @@ order by libname, memname, indxname, indxpos
 			return (string)AValue;
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (string)AValue;
 		}
@@ -1002,7 +1002,7 @@ order by libname, memname, indxname, indxpos
 			return String.Format("varchar({0})", GetLength(AMetaData).ToString());
 		}
 		
-		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(IValueManager AManager, object AValue)
 		{
 			return String.Format("'{0}'", ((string)AValue).Replace("'", "''"));
 		}

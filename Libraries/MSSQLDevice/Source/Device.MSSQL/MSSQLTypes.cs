@@ -62,7 +62,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 		//public MSSQLBoolean(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
 		//public MSSQLBoolean(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
 
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -78,7 +78,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 				return (int)AValue == 0 ? false : true;
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (bool)AValue;
 		}
@@ -112,7 +112,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 			return Convert.ToByte(AValue);
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (byte)AValue;
 		}
@@ -144,7 +144,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 			return Convert.ToDecimal(AValue);
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (decimal)AValue;
 		}
@@ -183,7 +183,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 			set { FDateTimeFormat = value; }
 		}
 
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -207,7 +207,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 			return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond));
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			DateTime LValue = (DateTime)AValue;
 			// If the value is equal to Dataphor's zero date, set it to the Device's zero date
@@ -248,7 +248,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 			set { FDateFormat = value; }
 		}
 
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -273,7 +273,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 			return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerDay));
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			DateTime LValue = (DateTime)AValue;
 			// If the value is equal to Dataphor's zero date (Jan, 1, 0001), set it to the device's zero date
@@ -314,7 +314,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 			set { FTimeFormat = value; }
 		}
 
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -335,7 +335,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 			return new DateTime(((DateTime)AValue).Ticks % TimeSpan.TicksPerDay);
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			// Added 1899 years, so that a time can actually be stored. 
 			// Adding 1899 years puts it at the year 1900
@@ -367,7 +367,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	{
 		public MSSQLGuid(int AID, string AName) : base(AID, AName) { }
 
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -383,7 +383,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 				return (Guid)AValue;
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (Guid)AValue;
 		}
@@ -458,7 +458,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	{
 		public MSSQLMSSQLBinary(int AID, string AName) : base(AID, AName) { }
 
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -471,7 +471,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 			return (byte[])AValue;
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (byte[])AValue;
 		}
