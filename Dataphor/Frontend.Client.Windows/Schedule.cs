@@ -1,15 +1,19 @@
 ﻿using System;
-using Alphora.Dataphor.DAE.Client;
-using System.ComponentModel;
-using System.Collections.ObjectModel;
-using System.Windows.Forms.Integration;
-using Alphora.Dataphor.Frontend.Client.WPF;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Windows;
+using System.Windows.Forms.Integration;
+using Alphora.Dataphor.DAE.Client;
 using Alphora.Dataphor.DAE.Runtime.Data;
+using Alphora.Dataphor.Frontend.Client.WPF;
+using System.Windows.Data;
 
 namespace Alphora.Dataphor.Frontend.Client.Windows
 {
-	public class Schedule : Element
+// TODO:	[DesignerImage("Image('Frontend', 'Nodes.SearchColumn')")]
+	[DesignerCategory("Data Controls")]
+	public class ScheduleWeekGrouped : Element
 	{
 		protected override void Dispose(bool ADisposing)
 		{
@@ -19,12 +23,41 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			GroupSource = null;
 		}
 
+		// StartDate
+
+		private DateTime FStartDate = DateTime.MinValue;
+		[Alphora.Dataphor.BOP.DefaultValueMember("StartDateDefault")]
+		[Description("The date of the first day shown in the schedule.")]
+		public DateTime StartDate
+		{
+			get { return FStartDate; }
+			set
+			{
+				if (FStartDate != value)
+				{
+					FStartDate = value;
+					if (Active)
+						InternalUpdateStartDate();
+				}
+			}
+		}
+		
+		public DateTime StartDateDefault
+		{
+			get { return DateTime.MinValue; }
+		}
+
+		private void InternalUpdateStartDate()
+		{
+			FWeekControl.StartDate = FStartDate;
+		}
+
 		// AppointmentSource
 
-		private IAppointmentSource FAppointmentSource;
+		private ISource FAppointmentSource;
 		[TypeConverter(typeof(NodeReferenceConverter))]
 		[Description("Specifies the AppointmentSource node the control will be attached to.")]
-		public IAppointmentSource AppointmentSource
+		public ISource AppointmentSource
 		{
 			get { return FAppointmentSource; }
 			set
@@ -34,7 +67,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
-		protected virtual void SetAppointmentSource(IAppointmentSource AAppointmentSource)
+		protected virtual void SetAppointmentSource(ISource AAppointmentSource)
 		{
 			if (FAppointmentSource != null)
 				FAppointmentSource.Disposed -= new EventHandler(AppointmentSourceDisposed);
@@ -54,14 +87,25 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected virtual void InternalUpdateAppointmentSource()
 		{
-			FAppointmentSourceLink.Source = AppointmentSource.DataAppointmentSource;
+			FAppointmentSourceLink.Source = AppointmentSource == null ? null : AppointmentSource.DataSource;
 		}
-		
+
+		private void AppointmentSourceLinkRowChanged(DataLink ALInk, DataSet ADataSet, DataField AField)
+		{
+			UpdateAppointmentData();
+		}
+
+		private void AppointmentSourceLinkChanged(DataLink ALink, DataSet ADataSet)
+		{
+			UpdateAppointmentData();
+		}
+
 		// AppointmentDateColumn
 
 		private string FAppointmentDateColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
+		[ColumnNameSourceProperty("AppointmentSource")]
 		[Description("The column in the appointment source that represents the date.")]
 		public string AppointmentDateColumn
 		{
@@ -81,6 +125,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private string FAppointmentStartTimeColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
+		[ColumnNameSourceProperty("AppointmentSource")]
 		[Description("The column in the appointment source that represents the StartTime.")]
 		public string AppointmentStartTimeColumn
 		{
@@ -100,6 +145,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private string FAppointmentEndTimeColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
+		[ColumnNameSourceProperty("AppointmentSource")]
 		[Description("The column in the appointment source that represents the EndTime.")]
 		public string AppointmentEndTimeColumn
 		{
@@ -119,6 +165,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private string FAppointmentGroupColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
+		[ColumnNameSourceProperty("AppointmentSource")]
 		[Description("The column in the appointment source that represents the Group.")]
 		public string AppointmentGroupColumn
 		{
@@ -138,6 +185,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private string FAppointmentDescriptionColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
+		[ColumnNameSourceProperty("AppointmentSource")]
 		[Description("The column in the appointment source that represents the Description.")]
 		public string AppointmentDescriptionColumn
 		{
@@ -154,16 +202,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// AppointmentData
 		
-		private ObservableCollection<ScheduleData> FAppointmentData = new ObservableCollection<ScheduleData>();
-		
 		protected void UpdateAppointmentData()
 		{
 			if 
 			(
 				Active && FAppointmentSourceLink.Active && !FAppointmentSourceLink.DataSet.IsEmpty()
 					&& !String.IsNullOrEmpty(FAppointmentDateColumn) && !String.IsNullOrEmpty(FAppointmentStartTimeColumn)
-					&& !String.IsNullOrEmpty(FAppointmentEndTimeColumn) && !String.IsNullOrEmpty(FAppointmentGroupColumn) 
-					&& !String.IsNullOrEmpty(FAppointmentDescriptionColumn)
+					&& !String.IsNullOrEmpty(FAppointmentEndTimeColumn) && !String.IsNullOrEmpty(FAppointmentDescriptionColumn)
 			)
 				ReconcileAppointmentData();
 			else
@@ -193,15 +238,20 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				// Replace the appointment source
 				var LItems = new List<ScheduleData>(FAppointmentSourceLink.LastOffset + 1);
 				for (int i = 0; i <= FAppointmentSourceLink.LastOffset; i++)
+				{
+					var LRow = FAppointmentSourceLink.Buffer(i);
 					LItems.Add
 					(
 						new ScheduleData
 						{
-							Date = ((Scalar)FAppointmentSourceLink.Buffer(i).GetValue(FAppointmentDateColumn)).AsDateTime,
-							StartTime = ((Scalar)FAppointmentSourceLink.Buffer(i).GetValue(FAppointmentStartTimeColumn)).AsDateTime,
-							EndTime = ((Scalar)FAppointmentSourceLink.Buffer(i).GetValue(FAppointmentEndTimeColumn)).AsDateTime,
+							Date = ((Scalar)LRow.GetValue(FAppointmentDateColumn)).AsDateTime,
+							StartTime = ((Scalar)LRow.GetValue(FAppointmentStartTimeColumn)).AsDateTime,
+							EndTime = ((Scalar)LRow.GetValue(FAppointmentEndTimeColumn)).AsDateTime,
+							Description = ((Scalar)LRow.GetValue(FAppointmentDescriptionColumn)).AsString,
+							Group = (String.IsNullOrEmpty(FAppointmentGroupColumn) ? null : ((Scalar)LRow.GetValue(FAppointmentGroupColumn)).AsNative)
 						}
 					);
+				}
 				FWeekControl.AppointmentSource = LItems;
 			}
 		}
@@ -241,7 +291,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected virtual void InternalUpdateShiftSource()
 		{
-			FShiftSourceLink.Source = ShiftSource.DataSource;
+			FShiftSourceLink.Source = ShiftSource == null ? null : ShiftSource.DataSource;
 		}
 
 		// ShiftDateColumn
@@ -249,6 +299,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private string FShiftDateColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
+		[ColumnNameSourceProperty("ShiftSource")]
 		[Description("The column in the Shift source that represents the date.")]
 		public string ShiftDateColumn
 		{
@@ -268,6 +319,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private string FShiftStartTimeColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
+		[ColumnNameSourceProperty("ShiftSource")]
 		[Description("The column in the Shift source that represents the Time.")]
 		public string ShiftStartTimeColumn
 		{
@@ -287,6 +339,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private string FShiftEndTimeColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
+		[ColumnNameSourceProperty("ShiftSource")]
 		[Description("The column in the Shift source that represents the Time.")]
 		public string ShiftEndTimeColumn
 		{
@@ -306,6 +359,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private string FShiftGroupColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
+		[ColumnNameSourceProperty("ShiftSource")]
 		[Description("The column in the Shift source that represents the Group.")]
 		public string ShiftGroupColumn
 		{
@@ -325,6 +379,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private string FShiftDescriptionColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
+		[ColumnNameSourceProperty("ShiftSource")]
 		[Description("The column in the Shift source that represents the Description.")]
 		public string ShiftDescriptionColumn
 		{
@@ -341,8 +396,6 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// ShiftData
 		
-		private ObservableCollection<Shift> FShiftData = new ObservableCollection<Shift>();
-		
 		protected void UpdateShiftData()
 		{
 			var LActive = Active
@@ -351,8 +404,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				&& !String.IsNullOrEmpty(FShiftEndTimeColumn) && !String.IsNullOrEmpty(FShiftGroupColumn);
 			if (LActive)
 				ReconcileShiftData();
-			else
-				FShiftData.Clear();
+			//else
+			//    if (FWeekControl != null)
+			//        FWeekControl.ShiftSource = null;
 		}
 
 		private void ReconcileShiftData()
@@ -395,23 +449,34 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected virtual void InternalUpdateGroupSource()
 		{
-			FGroupSourceLink.Source = GroupSource.DataSource;
+			FGroupSourceLink.Source = GroupSource == null ? null : GroupSource.DataSource;
 		}
 
-		// GroupIDColumn
+		private void GroupSourceLinkRowChanged(DataLink ALInk, DataSet ADataSet, DataField AField)
+		{
+			UpdateGroupData();
+		}
 
-		private string FGroupIDColumn = String.Empty;
+		private void GroupSourceLinkChanged(DataLink ALink, DataSet ADataSet)
+		{
+			UpdateGroupData();
+		}
+
+		// GroupColumn
+
+		private string FGroupColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
-		[Description("The column in the Shift source that represents the Description.")]
-		public string GroupIDColumn
+		[ColumnNameSourceProperty("GroupSource")]
+		[Description("The column in the Group source that represents the Group.")]
+		public string GroupColumn
 		{
-			get { return FGroupIDColumn; }
+			get { return FGroupColumn; }
 			set
 			{
-				if (FGroupIDColumn != value)
+				if (FGroupColumn != value)
 				{
-					FGroupIDColumn = value;
+					FGroupColumn = value;
 					UpdateGroupData();
 				}
 			}
@@ -422,7 +487,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private string FGroupDescriptionColumn = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
-		[Description("The column in the Shift source that represents the Description.")]
+		[ColumnNameSourceProperty("GroupSource")]
+		[Description("The column in the Group source that represents the Description.")]
 		public string GroupDescriptionColumn
 		{
 			get { return FGroupDescriptionColumn; }
@@ -439,8 +505,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private void UpdateGroupData()
 		{
 			var LActive = Active
-				&& (GroupSource != null) && (GroupSource.DataView != null) && !GroupSource.IsEmpty
-				&& !String.IsNullOrEmpty(FGroupIDColumn) && !String.IsNullOrEmpty(FGroupDescriptionColumn);
+				&& (FGroupSourceLink != null) && FGroupSourceLink.Active && !FGroupSourceLink.DataSet.IsEmpty()
+				&& !String.IsNullOrEmpty(FGroupColumn) && !String.IsNullOrEmpty(FGroupDescriptionColumn);
 			if (LActive)
 				ReconcileGroupData();
 			else
@@ -450,7 +516,27 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void ReconcileGroupData()
 		{
-			FWeekControl.GroupSource = FGroupData;
+			if (FWeekControl != null)
+			{
+				// Expand the buffer to capture all rows in the set
+				while (FGroupSourceLink.LastOffset == FGroupSourceLink.BufferCount - 1)
+					FGroupSourceLink.BufferCount++;
+
+				var LData = new List<ScheduleGroupData>(FGroupSourceLink.LastOffset + 1);
+				for (int i = 0; i <= FGroupSourceLink.LastOffset; i++)
+				{
+					var LRow = FGroupSourceLink.Buffer(i);
+					LData.Add
+					(
+						new ScheduleGroupData
+						{
+							Group = (String.IsNullOrEmpty(FGroupColumn) ? null : ((Scalar)LRow.GetValue(FGroupColumn)).AsNative),
+							Description = ((Scalar)LRow.GetValue(FGroupDescriptionColumn)).AsString,
+						}
+					);
+				}
+				FWeekControl.GroupSource = LData;
+			}
 		}
 
 		// WeekControl
@@ -469,11 +555,26 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		protected override void Activate()
 		{
+			// Ensure that the application and resources are initialized
+			if (Application.Current == null)
+			{
+				new Application();
+				Application.Current.Resources.MergedDictionaries.Add(Application.LoadComponent(new Uri("Alphora.Dataphor.Frontend.Client.Windows;component/Schedule.xaml", UriKind.Relative)) as ResourceDictionary);
+			}
+
 			FWeekControl = new ScheduleWeek();
+			FWeekControl.Style = Application.Current.Resources["DefaultWeekStyle"] as Style;
+			InternalUpdateStartDate();
 						
 			FAppointmentSourceLink = new DataLink();
+			FAppointmentSourceLink.OnDataChanged += new DataLinkHandler(AppointmentSourceLinkChanged);
+			FAppointmentSourceLink.OnRowChanged += new DataLinkFieldHandler(AppointmentSourceLinkRowChanged);
+			FAppointmentSourceLink.OnActiveChanged += new DataLinkHandler(AppointmentSourceLinkChanged);
 			FShiftSourceLink = new DataLink();
 			FGroupSourceLink = new DataLink();
+			FGroupSourceLink.OnDataChanged += new DataLinkHandler(GroupSourceLinkChanged);
+			FGroupSourceLink.OnRowChanged += new DataLinkFieldHandler(GroupSourceLinkRowChanged);
+			FGroupSourceLink.OnActiveChanged += new DataLinkHandler(GroupSourceLinkChanged);
 			
 			InternalUpdateGroupSource();
 			InternalUpdateAppointmentSource();
@@ -641,6 +742,32 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			if (PropertyChanged != null)
 				PropertyChanged(this, new PropertyChangedEventArgs(APropertyName));
+		}
+	}
+
+	public class FullDateToStringConverter : IValueConverter
+	{
+		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+		{
+			return ((DateTime)value).ToString("dddd dd MMMM yyyy");
+		}
+
+		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+		{
+			throw new NotImplementedException();
+		}
+	}
+
+	public class IsSelectedToBorderThicknessConverter : IValueConverter
+	{
+		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+		{
+			return (bool)value ? new Thickness(2) : new Thickness(1);
+		}
+
+		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

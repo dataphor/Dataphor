@@ -95,6 +95,12 @@
       <HintPath>.\ICSharpCode.TextEditor.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="PresentationCore">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="PresentationFramework">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
@@ -121,6 +127,12 @@
     </Reference>
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsFormsIntegration">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
     <ProjectReference Include="..\Base.Windows\Base.Windows.csproj">
       <Project>{24D70A7F-F43A-45A3-8C54-EA31764841C7}</Project>
@@ -163,6 +175,10 @@
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
       <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Frontend.Client.WPF\Frontend.Client.WPF.csproj">
+      <Project>{057EFD5F-E1A7-43BB-AD4A-0F4B02C00E1A}</Project>
+      <Name>Frontend.Client.WPF</Name>
     </ProjectReference>
     <ProjectReference Include="..\Frontend.Client\Frontend.Client.csproj">
       <Name>Frontend.Client</Name>
@@ -273,7 +289,7 @@
     <Compile Include="Notebook.cs">
       <SubType>Component</SubType>
     </Compile>
-    <None Include="Schedule.cs" />
+    <Compile Include="Schedule.cs" />
     <Compile Include="Search.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -410,6 +426,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Images\NoPhoto.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Schedule.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

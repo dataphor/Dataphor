@@ -170,6 +170,16 @@ namespace Alphora.Dataphor.Frontend.Client
 			return new TypeConverter.StandardValuesCollection(LCollection);
 		}
 	}
+	
+	public class ColumnNameSourcePropertyAttribute : Attribute
+	{
+		public ColumnNameSourcePropertyAttribute(string APropertyName)
+		{
+			PropertyName = APropertyName;
+		}
+		
+		public string PropertyName { get; set; }
+	}
 
 	/// <summary> For use on a property of an ISourceReference implementing node, which refers to a column within the data source. </summary>
 	public class ColumnNameConverter : TypeConverter
@@ -192,13 +202,17 @@ namespace Alphora.Dataphor.Frontend.Client
 				ISource LSource;
 				if (AContext.Instance is ISourceChild) 
 					LSource = ((ISource)((INode)AContext.Instance).Parent);
+				else if (AContext.Instance is ISourceReference) 
+					LSource = ((ISourceReference)AContext.Instance).Source;
+				else if (AContext.Instance is ISourceReferenceChild)
+					LSource = ((ISourceReference)((INode)((ISourceReferenceChild)AContext.Instance)).Parent).Source;
 				else
 				{
-					if (AContext.Instance is ISourceReference) 
-						LSource = ((ISourceReference)AContext.Instance).Source;
+					var LPropertyNameAttribute = AContext.PropertyDescriptor.Attributes[typeof(ColumnNameSourcePropertyAttribute)] as ColumnNameSourcePropertyAttribute;
+					if (LPropertyNameAttribute != null)
+						LSource = AContext.Instance.GetType().GetProperty(LPropertyNameAttribute.PropertyName).GetValue(AContext.Instance, new object[] {}) as ISource;
 					else
-						// ISourceReferenceChild
-						LSource = ((ISourceReference)((INode)((ISourceReferenceChild)AContext.Instance)).Parent).Source;
+						LSource = null;
 				}
 
 				if (LSource != null) 
