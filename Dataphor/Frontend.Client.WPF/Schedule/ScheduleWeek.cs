@@ -10,6 +10,8 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 	[TemplatePart(Name = "TimeBar", Type = typeof(ScheduleTimeBar))]
 	public class ScheduleWeek : Control
 	{
+		public const int CMinutesPerDay = 1440;
+		
 		static ScheduleWeek()
 		{
 			DefaultStyleKeyProperty.OverrideMetadata(typeof(ScheduleWeek), new FrameworkPropertyMetadata(typeof(ScheduleWeek)));
@@ -18,27 +20,31 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		// StartTime
 		
 		public static readonly DependencyProperty StartTimeProperty =
-			DependencyProperty.Register("StartTime", typeof(TimeSpan), typeof(ScheduleWeek), new PropertyMetadata(TimeSpan.FromHours(8), null, new CoerceValueCallback(CoerceStartTime)));
+			DependencyProperty.Register("StartTime", typeof(DateTime), typeof(ScheduleWeek), new PropertyMetadata(new DateTime(TimeSpan.FromHours(8).Ticks), null, new CoerceValueCallback(CoerceStartTime)));
 
 		/// <summary> The first visible time value. </summary>
-		public TimeSpan StartTime
+		public DateTime StartTime
 		{
-			get { return (TimeSpan)GetValue(StartTimeProperty); }
+			get { return (DateTime)GetValue(StartTimeProperty); }
 			set { SetValue(StartTimeProperty, value); }
 		}
 
 		private static object CoerceStartTime(DependencyObject ASender, object AValue)
 		{
 			var LWeek = (ScheduleWeek)ASender;
-			var LMinutes = (int)((TimeSpan)AValue).TotalMinutes;
+			var LDateTime = (DateTime)AValue;
+			var LMinutes = LDateTime.Minute + (LDateTime.Hour * 60);
 			return 
-				TimeSpan.FromMinutes
+				new DateTime
 				(
-					Math.Min
+					TimeSpan.FromMinutes
 					(
-						(LMinutes + (LWeek.Granularity / 2)) / LWeek.Granularity * LWeek.Granularity, 
-						1440 - (LWeek.TimeBarElement == null ? 0 : LWeek.TimeBarElement.VisibleMinutes)
-					)
+						Math.Min
+						(
+							(LMinutes + (LWeek.Granularity / 2)) / LWeek.Granularity * LWeek.Granularity, 
+							CMinutesPerDay - (LWeek.TimeBarElement == null ? 0 : LWeek.TimeBarElement.VisibleMinutes)
+						)
+					).Ticks
 				);
 		}
 
@@ -108,12 +114,12 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		// HighlightedTime
 		
 		public static readonly DependencyProperty HighlightedTimeProperty =
-			DependencyProperty.Register("HighlightedTime", typeof(TimeSpan?), typeof(ScheduleWeek), new PropertyMetadata(null));
+			DependencyProperty.Register("HighlightedTime", typeof(DateTime?), typeof(ScheduleWeek), new PropertyMetadata(null));
 
 		/// <summary> The currently highlighted time. </summary>
-		public TimeSpan? HighlightedTime
+		public DateTime? HighlightedTime
 		{
-			get { return (TimeSpan?)GetValue(HighlightedTimeProperty); }
+			get { return (DateTime?)GetValue(HighlightedTimeProperty); }
 			set { SetValue(HighlightedTimeProperty, value); }
 		}
 
@@ -249,13 +255,13 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		}
 	}
 
-	/// <summary> Converts to and from a number of minutes (int) from a TimeSpan. </summary>
-	public class TimeSpanToMinutesConverter : IValueConverter
+	/// <summary> Converts to and from a number of minutes (int) from a DateTime. </summary>
+	public class DateTimeToMinutesConverter : IValueConverter
 	{
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{
-			if (value is TimeSpan)
-				return ((TimeSpan)value).TotalMinutes;
+			if (value is DateTime)
+				return ((DateTime)value).Minute + ((DateTime)value).Hour * 60;
 			else
 				return null;
 		}
@@ -263,9 +269,9 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{
 			if (value is int)
-				return TimeSpan.FromMinutes((int)value);
+				return new DateTime(TimeSpan.FromMinutes((int)value).Ticks);
 			else if (value is double)
-				return TimeSpan.FromMinutes((int)(double)value);
+				return new DateTime(TimeSpan.FromMinutes((int)(double)value).Ticks);
 			else
 				return null;
 		}
@@ -276,7 +282,7 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 	{
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{
-			return 1440 - (value is int ? (int)value : 0);
+			return ScheduleWeek.CMinutesPerDay - (value is int ? (int)value : 0);
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

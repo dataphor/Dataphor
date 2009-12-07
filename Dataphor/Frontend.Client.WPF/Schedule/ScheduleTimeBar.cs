@@ -19,12 +19,12 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		// StartTime
 		
 		public static readonly DependencyProperty StartTimeProperty =
-			DependencyProperty.Register("StartTime", typeof(TimeSpan), typeof(ScheduleTimeBar), new PropertyMetadata(TimeSpan.FromHours(8), new PropertyChangedCallback(UpdateBlocks)));
+			DependencyProperty.Register("StartTime", typeof(DateTime), typeof(ScheduleTimeBar), new PropertyMetadata(new DateTime(TimeSpan.FromHours(8).Ticks), new PropertyChangedCallback(UpdateBlocks)));
 
 		/// <summary> The first visible time value </summary>
-		public TimeSpan StartTime
+		public DateTime StartTime
 		{
-			get { return (TimeSpan)GetValue(StartTimeProperty); }
+			get { return (DateTime)GetValue(StartTimeProperty); }
 			set { SetValue(StartTimeProperty, value); }
 		}
 
@@ -97,21 +97,21 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		// HighlightedTime
 		
 		public static readonly DependencyProperty HighlightedTimeProperty =
-			DependencyProperty.Register("HighlightedTime", typeof(TimeSpan?), typeof(ScheduleTimeBar), new PropertyMetadata(null, new PropertyChangedCallback(HighlightedTimeChanged)));
+			DependencyProperty.Register("HighlightedTime", typeof(DateTime?), typeof(ScheduleTimeBar), new PropertyMetadata(null, new PropertyChangedCallback(HighlightedTimeChanged)));
 
 		/// <summary> The time block that is currently highlighted. </summary>
-		public TimeSpan? HighlightedTime
+		public DateTime? HighlightedTime
 		{
-			get { return (TimeSpan?)GetValue(HighlightedTimeProperty); }
+			get { return (DateTime?)GetValue(HighlightedTimeProperty); }
 			set { SetValue(HighlightedTimeProperty, value); }
 		}
 
 		private static void HighlightedTimeChanged(DependencyObject ASender, DependencyPropertyChangedEventArgs AArgs)
 		{
-			((ScheduleTimeBar)ASender).HighlightedTimeChanged((TimeSpan?)AArgs.OldValue, (TimeSpan?)AArgs.NewValue);
+			((ScheduleTimeBar)ASender).HighlightedTimeChanged((DateTime?)AArgs.OldValue, (DateTime?)AArgs.NewValue);
 		}
 
-		private void HighlightedTimeChanged(TimeSpan? AOld, TimeSpan? ANew)
+		private void HighlightedTimeChanged(DateTime? AOld, DateTime? ANew)
 		{
 			int LBlockIndex;
 			if (AOld.HasValue)
@@ -140,24 +140,24 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		// SelectedTimeStart
 		
 		public static readonly DependencyProperty SelectedTimeStartProperty =
-			DependencyProperty.Register("SelectedTimeStart", typeof(TimeSpan?), typeof(ScheduleTimeBar), new PropertyMetadata(null));
+			DependencyProperty.Register("SelectedTimeStart", typeof(DateTime?), typeof(ScheduleTimeBar), new PropertyMetadata(null));
 
 		/// <summary> The start of the time selection. </summary>
-		public TimeSpan? SelectedTimeStart
+		public DateTime? SelectedTimeStart
 		{
-			get { return (TimeSpan?)GetValue(SelectedTimeStartProperty); }
+			get { return (DateTime?)GetValue(SelectedTimeStartProperty); }
 			set { SetValue(SelectedTimeStartProperty, value); }
 		}
 
 		// SelectedTimeEnd
 		
 		public static readonly DependencyProperty SelectedTimeEndProperty =
-			DependencyProperty.Register("SelectedTimeEnd", typeof(TimeSpan?), typeof(ScheduleTimeBar), new PropertyMetadata(null));
+			DependencyProperty.Register("SelectedTimeEnd", typeof(DateTime?), typeof(ScheduleTimeBar), new PropertyMetadata(null));
 
 		/// <summary> The end of the time selection. </summary>
-		public TimeSpan? SelectedTimeEnd
+		public DateTime? SelectedTimeEnd
 		{
-			get { return (TimeSpan?)GetValue(SelectedTimeEndProperty); }
+			get { return (DateTime?)GetValue(SelectedTimeEndProperty); }
 			set { SetValue(SelectedTimeEndProperty, value); }
 		}
 
@@ -182,7 +182,7 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			Size LResult = new Size(0d, 0d);
 			var LSequence = 0;
 			var LVisibleMinutes = 0;
-			for (TimeSpan LTime = StartTime; LTime < TimeSpan.FromHours(24) && LResult.Height < AAvailableSize.Height; LTime += TimeSpan.FromMinutes(Granularity))
+			for (DateTime LTime = StartTime; LTime < new DateTime(TimeSpan.FromHours(24).Ticks) && LResult.Height < AAvailableSize.Height; LTime += TimeSpan.FromMinutes(Granularity))
 			{
 				var LBlockIndex = FindBlock(LTime);
 				ScheduleTimeBlock LBlock;
@@ -208,7 +208,7 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 				LResult.Height += LBlock.DesiredSize.Height;
 				LResult.Width = Math.Max(LResult.Width, LBlock.DesiredSize.Width);
 				LSequence++;
-				LVisibleMinutes = (int)LTime.TotalMinutes - (int)StartTime.TotalMinutes;
+				LVisibleMinutes = (int)new TimeSpan(LTime.Ticks).TotalMinutes - (int)new TimeSpan(StartTime.Ticks).TotalMinutes;
 			}
 			
 			foreach (UIElement LChild in LToDelete)
@@ -224,9 +224,9 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		}
 		
 		/// <remarks> Assumes the child blocks are in time order. </remarks>
-		private int FindBlock(TimeSpan ATime)
+		private int FindBlock(DateTime ATime)
 		{
-			TimeSpan LFoundTime = TimeSpan.FromTicks(0);
+			var LFoundTime = DateTime.MinValue;
 			for (int i = 0; i < Children.Count && ATime > LFoundTime; i++)
 			{
 				LFoundTime = ((ScheduleTimeBlock)Children[i]).Time;

@@ -11,16 +11,16 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		
 		/// <summary> Start Attached Dependency Property. </summary>
 		public static readonly DependencyProperty StartProperty =
-			DependencyProperty.RegisterAttached("Start", typeof(TimeSpan), typeof(ScheduleDayAppointments), new FrameworkPropertyMetadata(TimeSpan.Zero, new PropertyChangedCallback(OnTimesChanged)));
+			DependencyProperty.RegisterAttached("Start", typeof(DateTime), typeof(ScheduleDayAppointments), new FrameworkPropertyMetadata(DateTime.MinValue, new PropertyChangedCallback(OnTimesChanged)));
 
 		/// <summary> Gets the Start property.  This dependency property specifies the time position of child elements of this panel. </summary>
-		public static TimeSpan GetStart(DependencyObject AObject)
+		public static DateTime GetStart(DependencyObject AObject)
 		{
-			return (TimeSpan)AObject.GetValue(StartProperty);
+			return (DateTime)AObject.GetValue(StartProperty);
 		}
 
 		/// <summary> Sets the Start property.  This dependency property specifies the time position of child elements of this panel. </summary>
-		public static void SetStart(DependencyObject AObject, TimeSpan value)
+		public static void SetStart(DependencyObject AObject, DateTime value)
 		{
 			AObject.SetValue(StartProperty, value);
 		}
@@ -29,16 +29,16 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		
 		/// <summary> End Attached Dependency Property. </summary>
 		public static readonly DependencyProperty EndProperty =
-			DependencyProperty.RegisterAttached("End", typeof(TimeSpan), typeof(ScheduleDayAppointments), new FrameworkPropertyMetadata(TimeSpan.Zero, new PropertyChangedCallback(OnTimesChanged)));
+			DependencyProperty.RegisterAttached("End", typeof(DateTime), typeof(ScheduleDayAppointments), new FrameworkPropertyMetadata(DateTime.MinValue, new PropertyChangedCallback(OnTimesChanged)));
 
 		/// <summary> Gets the End property.  This dependency property specifies the time position of child elements of this panel. </summary>
-		public static TimeSpan GetEnd(DependencyObject AObject)
+		public static DateTime GetEnd(DependencyObject AObject)
 		{
-			return (TimeSpan)AObject.GetValue(EndProperty);
+			return (DateTime)AObject.GetValue(EndProperty);
 		}
 
 		/// <summary> Sets the End property.  This dependency property specifies the time position of child elements of this panel. </summary>
-		public static void SetEnd(DependencyObject AObject, TimeSpan value)
+		public static void SetEnd(DependencyObject AObject, DateTime value)
 		{
 			AObject.SetValue(EndProperty, value);
 		}
@@ -58,12 +58,12 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		// StartTime
 		
 		public static readonly DependencyProperty StartTimeProperty =
-			DependencyProperty.Register("StartTime", typeof(TimeSpan), typeof(ScheduleDayAppointments), new PropertyMetadata(TimeSpan.FromHours(8), new PropertyChangedCallback(UpdateAppointments)));
+			DependencyProperty.Register("StartTime", typeof(DateTime), typeof(ScheduleDayAppointments), new PropertyMetadata(new DateTime(TimeSpan.FromHours(8).Ticks), new PropertyChangedCallback(UpdateAppointments)));
 
 		/// <summary> The first visible time value </summary>
-		public TimeSpan StartTime
+		public DateTime StartTime
 		{
-			get { return (TimeSpan)GetValue(StartTimeProperty); }
+			get { return (DateTime)GetValue(StartTimeProperty); }
 			set { SetValue(StartTimeProperty, value); }
 		}
 
@@ -106,7 +106,7 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			var LMaxWidth = 0d;
 			foreach (UIElement LChild in Children)
 			{
-				var LDuration = Math.Max((int)GetEnd(LChild).TotalMinutes - (int)GetStart(LChild).TotalMinutes, 0);
+				var LDuration = Math.Max((int)new TimeSpan(GetEnd(LChild).Ticks).TotalMinutes - (int)new TimeSpan(GetStart(LChild).Ticks).TotalMinutes, 0);
 				LChild.Measure
 				(
 					new Size
@@ -130,14 +130,14 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		{
 			foreach (UIElement LChild in Children)
 			{
-				var LStart = (int)GetStart(LChild).TotalMinutes;
-				var LEnd = (int)GetEnd(LChild).TotalMinutes;
+				var LStart = (int)new TimeSpan(GetStart(LChild).Ticks).TotalMinutes;
+				var LEnd = (int)new TimeSpan(GetEnd(LChild).Ticks).TotalMinutes;
 				LChild.Arrange
 				(
 					new Rect
 					(
 						0,
-						(LStart / Granularity * BlockHeight) - (int)StartTime.TotalMinutes,
+						(LStart / Granularity * BlockHeight) - (int)new TimeSpan(StartTime.Ticks).TotalMinutes,
 						AFinalSize.Width,
 						Math.Max((LEnd - LStart) / Granularity, 1) * BlockHeight
 					)

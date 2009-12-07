@@ -18,13 +18,13 @@ namespace Frontend.Client.WPF.Tests
 			Week.AppointmentSource = 
 				new Appointment[]
 				{
-					new Appointment { Date = DateTime.Parse("12/1/2009"), Description = "Do thing1", ProviderID = "AdrianL", StartTime = TimeSpan.FromHours(8.3d), EndTime = TimeSpan.FromHours(9d) },
-					new Appointment { Date = DateTime.Parse("12/1/2009"), Description = "Go to town", ProviderID = "AdrianL", StartTime = TimeSpan.FromHours(11d), EndTime = TimeSpan.FromHours(12.5d) },
-					new Appointment { Date = DateTime.Parse("12/1/2009"), Description = "Ride high", ProviderID = "KarenB", StartTime = TimeSpan.FromHours(8.75d), EndTime = TimeSpan.FromHours(9d) },
-					new Appointment { Date = DateTime.Parse("12/1/2009"), Description = "Go to to the place with the stuff", ProviderID = "KarenB", StartTime = TimeSpan.FromHours(4d), EndTime = TimeSpan.FromHours(13.5d) },
-					new Appointment { Date = DateTime.Parse("12/2/2009"), Description = "Smile", ProviderID = "AdrianL", StartTime = TimeSpan.FromHours(9.25d), EndTime = TimeSpan.FromHours(9.25d) },
-					new Appointment { Date = DateTime.Parse("12/3/2009"), Description = "Jump up", ProviderID = "AdrianL", StartTime = TimeSpan.FromHours(13d), EndTime = TimeSpan.FromHours(13.75d) },
-					new Appointment { Date = DateTime.Parse("12/4/2009"), Description = "Dop the wallup", ProviderID = "AdrianL", StartTime = TimeSpan.FromHours(6d), EndTime = TimeSpan.FromHours(8.5d) }
+					new Appointment { Date = DateTime.Parse("12/1/2009"), Description = "Do thing1", ProviderID = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(8.3d), EndTime = DateTime.MinValue + TimeSpan.FromHours(9d) },
+					new Appointment { Date = DateTime.Parse("12/1/2009"), Description = "Go to town", ProviderID = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(11d), EndTime = DateTime.MinValue + TimeSpan.FromHours(12.5d) },
+					new Appointment { Date = DateTime.Parse("12/1/2009"), Description = "Ride high", ProviderID = "KarenB", StartTime = DateTime.MinValue + TimeSpan.FromHours(8.75d), EndTime = DateTime.MinValue + TimeSpan.FromHours(9d) },
+					new Appointment { Date = DateTime.Parse("12/1/2009"), Description = "Go to to the place with the stuff", ProviderID = "KarenB", StartTime = DateTime.MinValue + TimeSpan.FromHours(4d), EndTime = DateTime.MinValue + TimeSpan.FromHours(13.5d) },
+					new Appointment { Date = DateTime.Parse("12/2/2009"), Description = "Smile", ProviderID = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(9.25d), EndTime = DateTime.MinValue + TimeSpan.FromHours(9.25d) },
+					new Appointment { Date = DateTime.Parse("12/3/2009"), Description = "Jump up", ProviderID = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(13d), EndTime = DateTime.MinValue + TimeSpan.FromHours(13.75d) },
+					new Appointment { Date = DateTime.Parse("12/4/2009"), Description = "Dop the wallup", ProviderID = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(6d), EndTime = DateTime.MinValue + TimeSpan.FromHours(8.5d) }
 				};
 			
 			Week.GroupSource =
@@ -75,7 +75,7 @@ namespace Frontend.Client.WPF.Tests
 		}
 	}
 	
-	public class Appointment : IDayGroupItem, INotifyPropertyChanged
+	public class Appointment : INotifyPropertyChanged
 	{
 		private DateTime FDate;
 		public DateTime Date
@@ -119,8 +119,8 @@ namespace Frontend.Client.WPF.Tests
 			}
 		}
 
-		private TimeSpan FStartTime;
-		public TimeSpan StartTime
+		private DateTime FStartTime;
+		public DateTime StartTime
 		{
 			get { return FStartTime; }
 			set
@@ -133,8 +133,8 @@ namespace Frontend.Client.WPF.Tests
 			}
 		}
 
-		private TimeSpan FEndTime;
-		public TimeSpan EndTime
+		private DateTime FEndTime;
+		public DateTime EndTime
 		{
 			get { return FEndTime; }
 			set

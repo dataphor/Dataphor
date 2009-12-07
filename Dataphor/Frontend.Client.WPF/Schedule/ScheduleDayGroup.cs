@@ -29,12 +29,12 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		// StartTime
 		
 		public static readonly DependencyProperty StartTimeProperty =
-			DependencyProperty.Register("StartTime", typeof(TimeSpan), typeof(ScheduleDayGroup), new PropertyMetadata(TimeSpan.FromHours(8)));
+			DependencyProperty.Register("StartTime", typeof(DateTime), typeof(ScheduleDayGroup), new PropertyMetadata(new DateTime(TimeSpan.FromHours(8).Ticks)));
 
 		/// <summary> The first visible time value. </summary>
-		public TimeSpan StartTime
+		public DateTime StartTime
 		{
-			get { return (TimeSpan)GetValue(StartTimeProperty); }
+			get { return (DateTime)GetValue(StartTimeProperty); }
 			set { SetValue(StartTimeProperty, value); }
 		}
 
@@ -106,12 +106,12 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		// HighlightedTimeProperty
 		
 		public static readonly DependencyProperty HighlightedTimeProperty =
-			DependencyProperty.Register("HighlightedTime", typeof(TimeSpan?), typeof(ScheduleDayGroup), new PropertyMetadata(null));
+			DependencyProperty.Register("HighlightedTime", typeof(DateTime?), typeof(ScheduleDayGroup), new PropertyMetadata(null));
 
 		/// <summary> The currently highlighted time. </summary>
-		public TimeSpan? HighlightedTime
+		public DateTime? HighlightedTime
 		{
-			get { return (TimeSpan?)GetValue(HighlightedTimeProperty); }
+			get { return (DateTime?)GetValue(HighlightedTimeProperty); }
 			set { SetValue(HighlightedTimeProperty, value); }
 		}
 

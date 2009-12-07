@@ -76,7 +76,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="Schedule\IDayGroupItem.cs" />
     <Compile Include="Schedule\NonMouseWheelScrollViewer.cs" />
     <Compile Include="Schedule\ScheduleDay.cs" />
     <Compile Include="Schedule\ScheduleDayAppointments.cs" />

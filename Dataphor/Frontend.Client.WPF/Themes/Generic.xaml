@@ -6,7 +6,7 @@
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	mc:Ignorable="d" >
 
-	<local:TimeSpanToMinutesConverter x:Key="TimeSpanToMinutesConverter" />
+	<local:DateTimeToMinutesConverter x:Key="DateTimeToMinutesConverter" />
 	<local:RemainingMinutesConverter x:Key="RemainingMinutesConverter" />
 
 	<Style TargetType="{x:Type local:ScheduleWeek}">
@@ -131,7 +131,7 @@
 									SelectedAppointment="{Binding SelectedAppointment, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
 							</Grid>
 						</local:NonMouseWheelScrollViewer>
-						<ScrollBar Grid.Row="2" Grid.Column="3" Value="{Binding StartTime, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource TimeSpanToMinutesConverter}, Mode=TwoWay}" SmallChange="{Binding Granularity, RelativeSource={RelativeSource TemplatedParent}}" LargeChange="60" ViewportSize="{Binding VisibleMinutes, ElementName=TimeBar}" Maximum="{Binding VisibleMinutes, Converter={StaticResource RemainingMinutesConverter}, ElementName=TimeBar}"/>
+						<ScrollBar Grid.Row="2" Grid.Column="3" Value="{Binding StartTime, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource DateTimeToMinutesConverter}, Mode=TwoWay}" SmallChange="{Binding Granularity, RelativeSource={RelativeSource TemplatedParent}}" LargeChange="60" ViewportSize="{Binding VisibleMinutes, ElementName=TimeBar}" Maximum="{Binding VisibleMinutes, Converter={StaticResource RemainingMinutesConverter}, ElementName=TimeBar}"/>
 					</Grid>
 				</ControlTemplate>
 			</Setter.Value>

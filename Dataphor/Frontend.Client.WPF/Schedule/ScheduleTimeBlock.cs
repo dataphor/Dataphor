@@ -14,12 +14,12 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		}
 
 		public static readonly DependencyProperty TimeProperty =
-			DependencyProperty.Register("Time", typeof(TimeSpan), typeof(ScheduleTimeBlock), new PropertyMetadata(TimeSpan.Zero, new PropertyChangedCallback(TimeChanged)));
+			DependencyProperty.Register("Time", typeof(DateTime), typeof(ScheduleTimeBlock), new PropertyMetadata(DateTime.MinValue, new PropertyChangedCallback(TimeChanged)));
 
 		/// <summary> The starting time of the time block represented by this time control. </summary>
-		public TimeSpan Time
+		public DateTime Time
 		{
-			get { return (TimeSpan)GetValue(TimeProperty); }
+			get { return (DateTime)GetValue(TimeProperty); }
 			set { SetValue(TimeProperty, value); }
 		}
 		
@@ -30,7 +30,7 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 
 		private void UpdateIsHourMarker()
 		{
-			SetIsHourMarker(Time.Minutes == 0);
+			SetIsHourMarker(Time.Minute == 0);
 		}
 
 		public override void OnApplyTemplate()
@@ -106,14 +106,14 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 	{
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{
-			if (value != null && value is TimeSpan)
+			if (value != null && value is DateTime)
 			{
-				var LValue = (TimeSpan)value;
-				switch (LValue.Hours)
+				var LValue = (DateTime)value;
+				switch (LValue.Hour)
 				{
 					case 0 : return "12mid";
 					case 12 : return "12noon";
-					default : return LValue.Hours < 12 ? (LValue.Hours.ToString() + "am") : ((LValue.Hours - 12).ToString() + "pm");
+					default : return LValue.Hour < 12 ? (LValue.Hour.ToString() + "am") : ((LValue.Hour - 12).ToString() + "pm");
 				}
 			}
 			else
@@ -130,16 +130,16 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 	{
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{
-			if (value != null && value is TimeSpan)
+			if (value != null && value is DateTime)
 			{
-				var LValue = (TimeSpan)value;
+				var LValue = (DateTime)value;
 				return 
 					String.Format
 					(
 						"{0}:{1:D2}{2}",
-						LValue.Hours == 0 ? 12 : (LValue.Hours <= 12 ? LValue.Hours : (LValue.Hours - 12)),
-						LValue.Minutes,
-						LValue.Hours < 12 ? "am" : "pm"
+						LValue.Hour == 0 ? 12 : (LValue.Hour <= 12 ? LValue.Hour : (LValue.Hour - 12)),
+						LValue.Minute,
+						LValue.Hour < 12 ? "am" : "pm"
 					);
 			}
 			else
