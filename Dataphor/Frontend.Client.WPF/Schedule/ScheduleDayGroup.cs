@@ -165,11 +165,14 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 				LBinding.Source = this;
 				LDay.SetBinding(ScheduleDay.DateProperty, LBinding);
 				
-				LDay.AppointmentSource = AppointmentSource;
 				LDay.ItemContainerStyle = AppointmentContainerStyle;
 				LDay.ItemTemplate = AppointmentItemTemplate;
 				LDay.AppointmentDateMemberPath = AppointmentDateMemberPath;
 				LDay.AppointmentGroupIDMemberPath = AppointmentGroupIDMemberPath;
+
+				LBinding = new Binding("AppointmentSource");
+				LBinding.Source = this;
+				LDay.SetBinding(ScheduleDay.AppointmentSourceProperty, LBinding);
 				
 				LBinding = new Binding("HighlightedTime");
 				LBinding.Source = this;

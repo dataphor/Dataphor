@@ -246,9 +246,9 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		{
 			base.OnMouseWheel(AArgs);
 			if (AArgs.Delta < 0)
-				StartTime += TimeSpan.FromMinutes(Granularity);
+				StartTime += TimeSpan.FromHours(1);
 			else if (AArgs.Delta > 0)
-				StartTime = new DateTime(Math.Max(0, (new TimeSpan(StartTime.Ticks) - TimeSpan.FromMinutes(Granularity)).Ticks));
+				StartTime = new DateTime(Math.Max(0, (new TimeSpan(StartTime.Ticks) - TimeSpan.FromHours(1)).Ticks));
 			else
 				return;
 			AArgs.Handled = true;

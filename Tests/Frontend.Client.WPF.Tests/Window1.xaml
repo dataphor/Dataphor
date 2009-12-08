@@ -113,9 +113,12 @@
     		<RowDefinition Height="Auto" />
     		<RowDefinition/>
     	</Grid.RowDefinitions>
-        
-    	<client:ScheduleWeek x:Name="Week" StartDate="2009-11-29" Style="{StaticResource DefaultWeekStyle}" Grid.Row="1"/>
-    	<Custom:DatePicker HorizontalAlignment="Left" SelectedDate="{Binding StartDate, ElementName=Week, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
-        
-    </Grid>
+
+		<client:ScheduleWeek x:Name="Week" StartDate="2009-11-29" Style="{StaticResource DefaultWeekStyle}" Grid.Row="1"/>
+		<StackPanel Orientation="Horizontal">
+			<Custom:DatePicker HorizontalAlignment="Left" SelectedDate="{Binding StartDate, ElementName=Week, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
+			<Button Content="Clear" Click="ClearClicked" />
+		</StackPanel>
+
+	</Grid>
 </Window>

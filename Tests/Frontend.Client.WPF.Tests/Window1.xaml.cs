@@ -3,6 +3,7 @@ using System.Windows;
 using Alphora.Dataphor.Frontend.Client.WPF;
 using System;
 using System.Windows.Data;
+using System.Collections.Generic;
 
 namespace Frontend.Client.WPF.Tests
 {
@@ -16,7 +17,7 @@ namespace Frontend.Client.WPF.Tests
 			InitializeComponent();
 			
 			Week.AppointmentSource = 
-				new Appointment[]
+				new List<Appointment>
 				{
 					new Appointment { Date = DateTime.Parse("12/1/2009"), Description = "Do thing1", ProviderID = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(8.3d), EndTime = DateTime.MinValue + TimeSpan.FromHours(9d) },
 					new Appointment { Date = DateTime.Parse("12/1/2009"), Description = "Go to town", ProviderID = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(11d), EndTime = DateTime.MinValue + TimeSpan.FromHours(12.5d) },
@@ -28,12 +29,18 @@ namespace Frontend.Client.WPF.Tests
 				};
 			
 			Week.GroupSource =
-				new Provider[]
+				new List<Provider>
 				{
 					new Provider { ProviderID = "AdrianL", Description = "Adrian Lewis" },
 					new Provider { ProviderID = "KarenB", Description = "Karen Bolton" }
 				};
 		}
+		
+		private void ClearClicked(Object ASender, RoutedEventArgs AArgs)
+		{
+			Week.AppointmentSource = null;
+		}
+
 	}
 	
 	public class Provider : INotifyPropertyChanged

@@ -66,4 +66,5 @@
 		<nodetype name="notebookframepage"/>
 		
 		<nodetype name="ScheduleWeekGrouped"/>
+		<nodetype name="ScheduleDayGrouped"/>
 	</namespace>

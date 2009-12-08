@@ -16,12 +16,6 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			DefaultStyleKeyProperty.OverrideMetadata(typeof(ScheduleDay), new FrameworkPropertyMetadata(typeof(ScheduleDay)));
 		}
 		
-		public ScheduleDay()
-		{
-			FAppointmentViewSource = new CollectionViewSource();
-			FAppointmentViewSource.Filter += new FilterEventHandler(AppointmentViewFilter);
-		}
-
 		// Date
 		
 		public static readonly DependencyProperty DateProperty =
@@ -135,18 +129,18 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 
 		// AppointmentViewSource
 		
-		private CollectionViewSource FAppointmentViewSource;
-
 		private void UpdateAppointmentView()
 		{
 			if (AppointmentSource != null && !String.IsNullOrEmpty(AppointmentDateMemberPath) && !String.IsNullOrEmpty(AppointmentGroupIDMemberPath) && Date != DateTime.MinValue && GroupID != null)
 			{
-				FAppointmentViewSource.Filter -= new FilterEventHandler(AppointmentViewFilter);
-				FAppointmentViewSource.Filter += new FilterEventHandler(AppointmentViewFilter);
-				FAppointmentViewSource.Source = AppointmentSource;
-				ItemsSource = FAppointmentViewSource.View;
-				// TODO: Doesn't seem to set selection correctly after refresh, even if UpdateSelection() is called here.
+				var LSource = new CollectionViewSource();
+				LSource.Filter += new FilterEventHandler(AppointmentViewFilter);
+				LSource.Source = AppointmentSource;
+				ItemsSource = LSource.View;
+				UpdateSelection();
 			}
+			else
+				ItemsSource = null;
 		}
 
 		private void AppointmentViewFilter(object sender, FilterEventArgs AArgs)
