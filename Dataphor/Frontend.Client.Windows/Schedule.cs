@@ -11,7 +11,7 @@ using System.Windows.Data;
 
 namespace Alphora.Dataphor.Frontend.Client.Windows
 {
-// TODO:	[DesignerImage("Image('Frontend', 'Nodes.SearchColumn')")]
+	[DesignerImage("Image('Frontend', 'Nodes.Schedule')")]
 	[DesignerCategory("Data Controls")]
 	public class ScheduleWeekGrouped : Element
 	{
@@ -97,9 +97,31 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void AppointmentSourceLinkChanged(DataLink ALink, DataSet ADataSet)
 		{
-			UpdateAppointmentData();
+			if (!FNavigatingSelection)
+				UpdateAppointmentData();
 		}
 
+		private bool FSettingSelection;
+		private bool FNavigatingSelection;
+		
+		private void SelectedAppointmentChanged(object ASender, EventArgs AArgs)
+		{
+			if (!FSettingSelection && FAppointmentSourceLink != null && FAppointmentSourceLink.Active)
+			{
+				FNavigatingSelection = true;
+				try
+				{
+					var LNewOffset = Array.IndexOf<ScheduleData>((ScheduleData[])FWeekControl.AppointmentSource, (ScheduleData)FWeekControl.SelectedAppointment);
+					if (LNewOffset >= 0)
+						FAppointmentSourceLink.DataSet.MoveBy(LNewOffset - FAppointmentSourceLink.ActiveOffset);
+				}
+				finally
+				{
+					FNavigatingSelection = false;
+				}
+			}
+		}
+		
 		// AppointmentDateColumn
 
 		private string FAppointmentDateColumn = String.Empty;
@@ -236,12 +258,12 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				//}
 				
 				// Replace the appointment source
-				var LItems = new List<ScheduleData>(FAppointmentSourceLink.LastOffset + 1);
+				ScheduleData LActiveItem = null;
+				var LItems = new ScheduleData[FAppointmentSourceLink.LastOffset + 1];
 				for (int i = 0; i <= FAppointmentSourceLink.LastOffset; i++)
 				{
 					var LRow = FAppointmentSourceLink.Buffer(i);
-					LItems.Add
-					(
+					var LItem =
 						new ScheduleData
 						{
 							Date = ((Scalar)LRow.GetValue(FAppointmentDateColumn)).AsDateTime,
@@ -249,10 +271,21 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 							EndTime = ((Scalar)LRow.GetValue(FAppointmentEndTimeColumn)).AsDateTime,
 							Description = ((Scalar)LRow.GetValue(FAppointmentDescriptionColumn)).AsString,
 							Group = (String.IsNullOrEmpty(FAppointmentGroupColumn) ? null : ((Scalar)LRow.GetValue(FAppointmentGroupColumn)).AsNative)
-						}
-					);
+						};
+					LItems[i] = LItem;
+					if (i == FAppointmentSourceLink.ActiveOffset)
+						LActiveItem = LItem;
 				}
 				FWeekControl.AppointmentSource = LItems;
+				FSettingSelection = true;
+				try
+				{
+					FWeekControl.SelectedAppointment = LActiveItem;
+				}
+				finally
+				{
+					FSettingSelection = false;
+				}
 			}
 		}
 
@@ -502,6 +535,26 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
+		// GroupConditionColumn
+
+		private string FGroupConditionColumn = String.Empty;
+		[DefaultValue("")]
+		[TypeConverter(typeof(ColumnNameConverter))]
+		[ColumnNameSourceProperty("GroupSource")]
+		[Description("The optional column in the Group source that represents the Condition.")]
+		public string GroupConditionColumn
+		{
+			get { return FGroupConditionColumn; }
+			set
+			{
+				if (FGroupConditionColumn != value)
+				{
+					FGroupConditionColumn = value;
+					UpdateGroupData();
+				}
+			}
+		}
+
 		private void UpdateGroupData()
 		{
 			var LActive = Active
@@ -526,14 +579,15 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				for (int i = 0; i <= FGroupSourceLink.LastOffset; i++)
 				{
 					var LRow = FGroupSourceLink.Buffer(i);
-					LData.Add
-					(
-						new ScheduleGroupData
-						{
-							Group = (String.IsNullOrEmpty(FGroupColumn) ? null : ((Scalar)LRow.GetValue(FGroupColumn)).AsNative),
-							Description = ((Scalar)LRow.GetValue(FGroupDescriptionColumn)).AsString,
-						}
-					);
+					if (String.IsNullOrEmpty(FGroupConditionColumn) || ((Scalar)LRow.GetValue(FGroupConditionColumn)).AsBoolean)
+						LData.Add
+						(
+							new ScheduleGroupData
+							{
+								Group = (String.IsNullOrEmpty(FGroupColumn) ? null : ((Scalar)LRow.GetValue(FGroupColumn)).AsNative),
+								Description = ((Scalar)LRow.GetValue(FGroupDescriptionColumn)).AsString,
+							}
+						);
 				}
 				FWeekControl.GroupSource = LData;
 			}
@@ -563,7 +617,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 
 			FWeekControl = new ScheduleWeek();
-			FWeekControl.Style = Application.Current.Resources["DefaultWeekStyle"] as Style;
+			FWeekControl.Style = Application.Current.Resources[GetStyle()] as Style;
+			DependencyPropertyDescriptor.FromProperty(ScheduleWeek.SelectedAppointmentProperty, typeof(ScheduleWeek)).AddValueChanged(FWeekControl, new EventHandler(SelectedAppointmentChanged));
 			InternalUpdateStartDate();
 						
 			FAppointmentSourceLink = new DataLink();
@@ -591,6 +646,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			base.Activate();
 		}
 
+		protected virtual string GetStyle()
+		{
+			return "DefaultWeekStyle";
+		}
+
 		protected override void Deactivate()
 		{
 			if (FAppointmentSourceLink != null)
@@ -610,11 +670,20 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 			if (FElementHost != null)
 			{
+				DependencyPropertyDescriptor.FromProperty(ScheduleWeek.SelectedAppointmentProperty, typeof(ScheduleWeek)).RemoveValueChanged(FWeekControl, new EventHandler(SelectedAppointmentChanged));
 				FElementHost.Dispose();
 				FElementHost = null;
 				FWeekControl = null;
 			}
 			base.Deactivate();
+		}
+	}
+	
+	public class ScheduleDayGrouped : ScheduleWeekGrouped
+	{
+		protected override string GetStyle()
+		{
+			return "SingleDayStyle";
 		}
 	}
 
@@ -662,7 +731,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	{
 		/// <summary> Gets and sets the key for the schedule item. </summary>
 		/// <remarks> This member does not raise property notification when modified. </remarks>
-		public Row Key { get; set; }
+		public Row Row { get; set; }
 
 		private DateTime FDate;
 		public DateTime Date
