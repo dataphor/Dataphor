@@ -3250,6 +3250,27 @@ namespace Alphora.Dataphor.DAE.Compiling
 			}
 		}
 		
+		public static PlanNode CompileTransitionConstraintViolationMessageNode(Plan APlan, Schema.TransitionConstraint AConstraint, Schema.Transition ATransition, Statement AStatement)
+		{
+			string LCustomMessage = AConstraint.GetCustomMessage(ATransition);
+			if (!String.IsNullOrEmpty(LCustomMessage))
+			{
+				try
+				{
+					PlanNode LViolationMessageNode = CompileTypedExpression(APlan, new D4.Parser().ParseExpression(LCustomMessage), APlan.DataTypes.SystemString);
+					LViolationMessageNode = OptimizeNode(APlan, LViolationMessageNode);
+					LViolationMessageNode = BindNode(APlan, LViolationMessageNode);
+					return LViolationMessageNode;
+				}
+				catch (Exception LException)
+				{
+					throw new CompilerException(CompilerException.Codes.InvalidCustomConstraintMessage, AStatement, LException, AConstraint.Name);
+				}
+			}
+			
+			return null;
+		}
+		
 		public static Schema.TransitionConstraint CompileTransitionConstraint(Plan APlan, Schema.TableVar ATableVar, TransitionConstraintDefinition AConstraint)
 		{
 			PlanNode LConstraintNode;
@@ -3278,22 +3299,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 							LConstraintNode = OptimizeNode(APlan, LConstraintNode);
 							LConstraintNode = BindNode(APlan, LConstraintNode);							
 							LNewConstraint.OnInsertNode = LConstraintNode;
-
-							string LCustomMessage = LNewConstraint.GetCustomMessage(Schema.Transition.Insert);
-							if (!String.IsNullOrEmpty(LCustomMessage))
-							{
-								try
-								{
-									PlanNode LViolationMessageNode = CompileTypedExpression(APlan, new D4.Parser().ParseExpression(LCustomMessage), APlan.DataTypes.SystemString);
-									LViolationMessageNode = OptimizeNode(APlan, LViolationMessageNode);
-									LViolationMessageNode = BindNode(APlan, LViolationMessageNode);
-									LNewConstraint.OnInsertViolationMessageNode = LViolationMessageNode;
-								}
-								catch (Exception LException)
-								{
-									throw new CompilerException(CompilerException.Codes.InvalidCustomConstraintMessage, AConstraint, LException, LNewConstraint.Name);
-								}
-							}
+							LNewConstraint.OnInsertViolationMessageNode = CompileTransitionConstraintViolationMessageNode(APlan, LNewConstraint, Schema.Transition.Insert, AConstraint);
 						}
 						finally
 						{
@@ -3316,22 +3322,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 								LConstraintNode = OptimizeNode(APlan, LConstraintNode);
 								LConstraintNode = BindNode(APlan, LConstraintNode);							
 								LNewConstraint.OnUpdateNode = LConstraintNode;
-
-								string LCustomMessage = LNewConstraint.GetCustomMessage(Schema.Transition.Update);
-								if (!String.IsNullOrEmpty(LCustomMessage))
-								{
-									try
-									{
-										PlanNode LViolationMessageNode = CompileTypedExpression(APlan, new D4.Parser().ParseExpression(LCustomMessage), APlan.DataTypes.SystemString);
-										LViolationMessageNode = OptimizeNode(APlan, LViolationMessageNode);
-										LViolationMessageNode = BindNode(APlan, LViolationMessageNode);
-										LNewConstraint.OnUpdateViolationMessageNode = LViolationMessageNode;
-									}
-									catch (Exception LException)
-									{
-										throw new CompilerException(CompilerException.Codes.InvalidCustomConstraintMessage, AConstraint, LException, LNewConstraint.Name);
-									}
-								}
+								LNewConstraint.OnUpdateViolationMessageNode = CompileTransitionConstraintViolationMessageNode(APlan, LNewConstraint, Schema.Transition.Update, AConstraint);
 							}
 							finally
 							{
@@ -3356,22 +3347,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 							LConstraintNode = OptimizeNode(APlan, LConstraintNode);
 							LConstraintNode = BindNode(APlan, LConstraintNode);							
 							LNewConstraint.OnDeleteNode = LConstraintNode;
-
-							string LCustomMessage = LNewConstraint.GetCustomMessage(Schema.Transition.Delete);
-							if (!String.IsNullOrEmpty(LCustomMessage))
-							{
-								try
-								{
-									PlanNode LViolationMessageNode = CompileTypedExpression(APlan, new D4.Parser().ParseExpression(LCustomMessage), APlan.DataTypes.SystemString);
-									LViolationMessageNode = OptimizeNode(APlan, LViolationMessageNode);
-									LViolationMessageNode = BindNode(APlan, LViolationMessageNode);
-									LNewConstraint.OnDeleteViolationMessageNode = LViolationMessageNode;
-								}
-								catch (Exception LException)
-								{
-									throw new CompilerException(CompilerException.Codes.InvalidCustomConstraintMessage, AConstraint, LException, LNewConstraint.Name);
-								}
-							}
+							LNewConstraint.OnDeleteViolationMessageNode = CompileTransitionConstraintViolationMessageNode(APlan, LNewConstraint, Schema.Transition.Delete, AConstraint);
 						}
 						finally
 						{
@@ -6998,11 +6974,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 				LConstraint.MetaData.Tags.Add(new Tag("DAE.Message", GetCustomMessageForSourceReference(APlan, AReference)));
 			LConstraint.IsGenerated = true;
 			LConstraint.ConstraintType = Schema.ConstraintType.Database;
-			LConstraint.OnInsertNode = CompileSourceInsertConstraintNodeForReference(APlan, AReference);
+			CompileSourceInsertConstraintNodeForReference(APlan, AReference, LConstraint);
 			LConstraint.InsertColumnFlags = new BitArray(AReference.SourceTable.DataType.Columns.Count);
 			for (int LIndex = 0; LIndex < LConstraint.InsertColumnFlags.Length; LIndex++)
 				LConstraint.InsertColumnFlags[LIndex] = AReference.SourceKey.Columns.ContainsName(AReference.SourceTable.DataType.Columns[LIndex].Name);
-			LConstraint.OnUpdateNode = CompileSourceUpdateConstraintNodeForReference(APlan, AReference);
+			CompileSourceUpdateConstraintNodeForReference(APlan, AReference, LConstraint);
 			LConstraint.UpdateColumnFlags = (BitArray)LConstraint.InsertColumnFlags.Clone();
 			return LConstraint;
 		}
@@ -7012,25 +6988,25 @@ namespace Alphora.Dataphor.DAE.Compiling
 		//
 		// on insert into A ->
 		//		[IsNil(AValues) or] [IsSpecial(AValues) or] exists(B where BKeys = AValues)
-		public static PlanNode CompileSourceInsertConstraintNodeForReference(Plan APlan, Schema.Reference AReference)
+		public static void CompileSourceInsertConstraintNodeForReference(Plan APlan, Schema.Reference AReference, Schema.TransitionConstraint AConstraint)
 		{
 			APlan.EnterRowContext();
 			try
 			{
 				Schema.IRowType LRowType = new Schema.RowType(AReference.SourceKey.Columns, Keywords.New);
-				BitArray LIsNilable = new BitArray(AReference.SourceKey.Columns.Count);
-				BitArray LHasSpecials = new BitArray(AReference.SourceKey.Columns.Count);
-				for (int LIndex = 0; LIndex < AReference.SourceKey.Columns.Count; LIndex++)
-				{
-					LIsNilable[LIndex] = AReference.SourceKey.Columns[LIndex].IsNilable;
-					LHasSpecials[LIndex] = 
-						(AReference.SourceKey.Columns[LIndex].DataType is Schema.ScalarType) 
-							&& (((Schema.ScalarType)AReference.SourceKey.Columns[LIndex].DataType).Specials.Count > 0);
-				}
-				
 				APlan.Symbols.Push(new Symbol(AReference.SourceTable.DataType.NewRowType));
 				try
 				{
+					BitArray LIsNilable = new BitArray(AReference.SourceKey.Columns.Count);
+					BitArray LHasSpecials = new BitArray(AReference.SourceKey.Columns.Count);
+					for (int LIndex = 0; LIndex < AReference.SourceKey.Columns.Count; LIndex++)
+					{
+						LIsNilable[LIndex] = AReference.SourceKey.Columns[LIndex].IsNilable;
+						LHasSpecials[LIndex] = 
+							(AReference.SourceKey.Columns[LIndex].DataType is Schema.ScalarType) 
+								&& (((Schema.ScalarType)AReference.SourceKey.Columns[LIndex].DataType).Specials.Count > 0);
+					}
+					
 					PlanNode LNode = 
 						AppendNode
 						(
@@ -7060,7 +7036,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 								)
 							)
 						);
-					return BindNode(APlan, LNode);
+						
+					AConstraint.OnInsertNode = BindNode(APlan, LNode);
+					AConstraint.OnInsertViolationMessageNode = CompileTransitionConstraintViolationMessageNode(APlan, AConstraint, Schema.Transition.Insert, null);
 				}
 				finally
 				{
@@ -7078,7 +7056,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		//
 		// on update of A ->
 		//		IsNil(NewAValues) or IsSpecial(NewAValues) or (OldAValues = NewAValues) or (exists(B where BKeys = NewAValues))
-		public static PlanNode CompileSourceUpdateConstraintNodeForReference(Plan APlan, Schema.Reference AReference)
+		public static void CompileSourceUpdateConstraintNodeForReference(Plan APlan, Schema.Reference AReference, Schema.TransitionConstraint AConstraint)
 		{
 			APlan.EnterRowContext();
 			try
@@ -7139,7 +7117,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 									)
 								)
 							);
-						return BindNode(APlan, LNode);
+
+						AConstraint.OnUpdateNode = BindNode(APlan, LNode);
+						AConstraint.OnUpdateViolationMessageNode = CompileTransitionConstraintViolationMessageNode(APlan, AConstraint, Schema.Transition.Update, null);
 					}
 					finally
 					{
@@ -7171,14 +7151,14 @@ namespace Alphora.Dataphor.DAE.Compiling
 			
 			if (AReference.UpdateReferenceAction == ReferenceAction.Require)
 			{
-				LConstraint.OnUpdateNode = CompileTargetUpdateConstraintNodeForReference(APlan, AReference);
+				CompileTargetUpdateConstraintNodeForReference(APlan, AReference, LConstraint);
 				LConstraint.UpdateColumnFlags = new BitArray(AReference.TargetTable.DataType.Columns.Count);
 				for (int LIndex = 0; LIndex < LConstraint.UpdateColumnFlags.Length; LIndex++)
 					LConstraint.UpdateColumnFlags[LIndex] = AReference.TargetKey.Columns.ContainsName(AReference.TargetTable.DataType.Columns[LIndex].Name);
 			}
 				
 			if (AReference.DeleteReferenceAction == ReferenceAction.Require)
-				LConstraint.OnDeleteNode = CompileTargetDeleteConstraintNodeForReference(APlan, AReference);
+				CompileTargetDeleteConstraintNodeForReference(APlan, AReference, LConstraint);
 				
 			return LConstraint;
 		}
@@ -7188,7 +7168,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		//		
 		// on update of B ->
 		//		(OldBValues = NewBValues) or (not(exists(A where AKeys = OldBValues)))
-		public static PlanNode CompileTargetUpdateConstraintNodeForReference(Plan APlan, Schema.Reference AReference)
+		public static void CompileTargetUpdateConstraintNodeForReference(Plan APlan, Schema.Reference AReference, Schema.TransitionConstraint AConstraint)
 		{
 			APlan.EnterRowContext();
 			try
@@ -7231,7 +7211,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 									)
 								)
 							);
-						return BindNode(APlan, LNode);
+
+						AConstraint.OnUpdateNode = BindNode(APlan, LNode);
+						AConstraint.OnUpdateViolationMessageNode = CompileTransitionConstraintViolationMessageNode(APlan, AConstraint, Schema.Transition.Update, null);
 					}
 					finally
 					{
@@ -7254,7 +7236,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		//
 		// on delete from B ->
 		//		not(exists(A where AKeys = BValues))
-		public static PlanNode CompileTargetDeleteConstraintNodeForReference(Plan APlan, Schema.Reference AReference)
+		public static void CompileTargetDeleteConstraintNodeForReference(Plan APlan, Schema.Reference AReference, Schema.TransitionConstraint AConstraint)
 		{
 			APlan.EnterRowContext();
 			try
@@ -7284,7 +7266,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 								)
 							)
 						);
-					return BindNode(APlan, LNode);
+
+					AConstraint.OnDeleteNode = BindNode(APlan, LNode);
+					AConstraint.OnDeleteViolationMessageNode = CompileTransitionConstraintViolationMessageNode(APlan, AConstraint, Schema.Transition.Delete, null);
 				}
 				finally
 				{
