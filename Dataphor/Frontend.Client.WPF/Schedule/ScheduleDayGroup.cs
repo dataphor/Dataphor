@@ -213,23 +213,4 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			base.ClearContainerForItemOverride(AElement, AItem);
 		}
 	}
-
-	public class DateToDayOfWeekConverter : IValueConverter
-	{
-		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-		{
-			if (value is DateTime)
-			{
-				var LDate = (DateTime)value;
-				return LDate.ToString("dddd M/d");
-			}
-			else
-				return null;
-		}
-
-		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-		{
-			throw new NotImplementedException();
-		}
-	}
 }

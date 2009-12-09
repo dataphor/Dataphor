@@ -22,7 +22,7 @@
 		<Setter Property="Margin" Value="2,2,2,2"/>
 	</Style>
 
-	<Style x:Key="DefaultWeekStyle" TargetType="{x:Type client:ScheduleWeek}" >
+	<Style x:Key="DefaultSchedulerStyle" TargetType="{x:Type client:Scheduler}" >
 		<Setter Property="GroupHeaderMemberPath" Value="Description" />
 		<Setter Property="GroupIDMemberPath" Value="Group" />
 		<Setter Property="AppointmentGroupIDMemberPath" Value="Group" />
@@ -102,51 +102,6 @@
 						<TextBlock Text="{Binding Description}" Margin="4,2" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"/>
 					</Border>
 				</DataTemplate>
-			</Setter.Value>
-		</Setter>
-	</Style>
-
-	<client:DateTimeToMinutesConverter x:Key="DateTimeToMinutesConverter" />
-	<client:RemainingMinutesConverter x:Key="RemainingMinutesConverter" />
-
-	<Style x:Key="SingleDayStyle" TargetType="{x:Type client:ScheduleWeek}" BasedOn="{StaticResource DefaultWeekStyle}">
-		<Setter Property="Template">
-			<Setter.Value>
-				<ControlTemplate TargetType="{x:Type client:ScheduleWeek}">
-					<Grid d:DesignWidth="600" d:DesignHeight="300" Grid.IsSharedSizeScope="True" SnapsToDevicePixels="True">
-						<Grid.RowDefinitions>
-							<RowDefinition Height="Auto" SharedSizeGroup="GroupHeaderHeight"/>
-							<RowDefinition Height="Auto" SharedSizeGroup="DayHeaderHeight"/>
-							<RowDefinition Height="*"/>
-						</Grid.RowDefinitions>
-						<Grid.ColumnDefinitions>
-							<ColumnDefinition Width="Auto"/>
-							<ColumnDefinition Width="Auto"/>
-							<ColumnDefinition Width="*"/>
-							<ColumnDefinition Width="Auto"/>
-						</Grid.ColumnDefinitions>
-						<client:ScheduleTimeBar x:Name="TimeBar" Grid.Row="2" Granularity="{TemplateBinding Granularity}" HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" StartTime="{TemplateBinding StartTime}" VerticalAlignment="Top" />
-						<Path Stretch="Fill" Stroke="Black" HorizontalAlignment="Left" Data="M0,0 L0,1" Grid.Column="1" Grid.RowSpan="3"/>
-						<client:NonMouseWheelScrollViewer Grid.Column="2" Grid.RowSpan="3" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-							<Grid >
-								<client:ScheduleDayGroup Grid.Column="0"
-									Date="{Binding Days[0], RelativeSource={RelativeSource TemplatedParent}}"
-									StartTime="{TemplateBinding StartTime}"
-									ItemsSource="{TemplateBinding GroupSource}"
-									AppointmentSource="{TemplateBinding AppointmentSource}"
-									AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}"
-									DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}"
-									GroupIDMemberPath="{TemplateBinding GroupIDMemberPath}"
-									HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
-									AppointmentGroupIDMemberPath="{TemplateBinding AppointmentGroupIDMemberPath}"
-									AppointmentContainerStyle="{TemplateBinding AppointmentContainerStyle}"
-									AppointmentDateMemberPath="{TemplateBinding AppointmentDateMemberPath}"
-									SelectedAppointment="{Binding SelectedAppointment, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
-							</Grid>
-						</client:NonMouseWheelScrollViewer>
-						<ScrollBar Grid.Row="2" Grid.Column="3" Value="{Binding StartTime, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource DateTimeToMinutesConverter}, Mode=TwoWay}" SmallChange="{Binding Granularity, RelativeSource={RelativeSource TemplatedParent}}" LargeChange="60" ViewportSize="{Binding VisibleMinutes, ElementName=TimeBar}" Maximum="{Binding VisibleMinutes, Converter={StaticResource RemainingMinutesConverter}, ElementName=TimeBar}"/>
-					</Grid>
-				</ControlTemplate>
 			</Setter.Value>
 		</Setter>
 	</Style>

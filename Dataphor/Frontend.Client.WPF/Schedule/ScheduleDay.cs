@@ -175,7 +175,18 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 
 		protected virtual void OnSelectedAppointmentChanged(DependencyPropertyChangedEventArgs e)
 		{
-			SelectedIndex = Items.IndexOf(e.NewValue);
+			UpdateSelectedIndex();
+		}
+
+		protected override void OnItemsChanged(System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+		{
+			base.OnItemsChanged(e);
+			UpdateSelectedIndex();
+		}
+		
+		private void UpdateSelectedIndex()
+		{
+			SelectedIndex = Items.IndexOf(SelectedAppointment);
 		}
 
 		protected override void OnSelectionChanged(SelectionChangedEventArgs e)

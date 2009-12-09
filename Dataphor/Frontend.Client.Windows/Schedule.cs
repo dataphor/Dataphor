@@ -13,7 +13,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 {
 	[DesignerImage("Image('Frontend', 'Nodes.Schedule')")]
 	[DesignerCategory("Data Controls")]
-	public class ScheduleWeekGrouped : Element
+	public class ScheduleDayGrouped : Element
 	{
 		protected override void Dispose(bool ADisposing)
 		{
@@ -49,7 +49,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void InternalUpdateStartDate()
 		{
-			FWeekControl.StartDate = FStartDate;
+			FControl.StartDate = FStartDate;
 		}
 
 		// AppointmentSource
@@ -111,7 +111,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				FNavigatingSelection = true;
 				try
 				{
-					var LNewOffset = Array.IndexOf<ScheduleData>((ScheduleData[])FWeekControl.AppointmentSource, (ScheduleData)FWeekControl.SelectedAppointment);
+					var LNewOffset = Array.IndexOf<ScheduleData>((ScheduleData[])FControl.AppointmentSource, (ScheduleData)FControl.SelectedAppointment);
 					if (LNewOffset >= 0)
 						FAppointmentSourceLink.DataSet.MoveBy(LNewOffset - FAppointmentSourceLink.ActiveOffset);
 				}
@@ -234,29 +234,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			)
 				ReconcileAppointmentData();
 			else
-				if (FWeekControl != null)
-					FWeekControl.AppointmentSource = null;
+				if (FControl != null)
+					FControl.AppointmentSource = null;
 		}
 
 		private void ReconcileAppointmentData()
 		{
-			if (FWeekControl != null)
+			if (FControl != null)
 			{
 				// Expand the buffer to capture all rows in the set
 				while (FAppointmentSourceLink.LastOffset == FAppointmentSourceLink.BufferCount - 1)
 					FAppointmentSourceLink.BufferCount++;
 
-				// TODO: Reconciliation
-				//var LToDelete = new List<ScheduleData>(FAppointmentData);
-				
-				//for (int i = 0; i <= FAppointmentSourceLink.LastOffset; i++)
-				//{
-				//}
-				
-				//foreach (ScheduleData LData in LToDelete)
-				//{
-				//}
-				
 				// Replace the appointment source
 				ScheduleData LActiveItem = null;
 				var LItems = new ScheduleData[FAppointmentSourceLink.LastOffset + 1];
@@ -276,11 +265,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					if (i == FAppointmentSourceLink.ActiveOffset)
 						LActiveItem = LItem;
 				}
-				FWeekControl.AppointmentSource = LItems;
+				FControl.AppointmentSource = LItems;
 				FSettingSelection = true;
 				try
 				{
-					FWeekControl.SelectedAppointment = LActiveItem;
+					FControl.SelectedAppointment = LActiveItem;
 				}
 				finally
 				{
@@ -438,8 +427,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			if (LActive)
 				ReconcileShiftData();
 			//else
-			//    if (FWeekControl != null)
-			//        FWeekControl.ShiftSource = null;
+			//    if (FControl != null)
+			//        FControl.ShiftSource = null;
 		}
 
 		private void ReconcileShiftData()
@@ -559,17 +548,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			var LActive = Active
 				&& (FGroupSourceLink != null) && FGroupSourceLink.Active && !FGroupSourceLink.DataSet.IsEmpty()
-				&& !String.IsNullOrEmpty(FGroupColumn) && !String.IsNullOrEmpty(FGroupDescriptionColumn);
+				&& !String.IsNullOrEmpty(FGroupColumn);
 			if (LActive)
 				ReconcileGroupData();
 			else
-				if (FWeekControl != null)
-					FWeekControl.GroupSource = null;
+				if (FControl != null)
+					FControl.GroupSource = null;
 		}
 
 		private void ReconcileGroupData()
 		{
-			if (FWeekControl != null)
+			if (FControl != null)
 			{
 				// Expand the buffer to capture all rows in the set
 				while (FGroupSourceLink.LastOffset == FGroupSourceLink.BufferCount - 1)
@@ -584,18 +573,23 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 						(
 							new ScheduleGroupData
 							{
-								Group = (String.IsNullOrEmpty(FGroupColumn) ? null : ((Scalar)LRow.GetValue(FGroupColumn)).AsNative),
-								Description = ((Scalar)LRow.GetValue(FGroupDescriptionColumn)).AsString,
+								Group = (LRow.HasValue(FGroupColumn) ? ((Scalar)LRow.GetValue(FGroupColumn)).AsNative : null),
+								Description = 
+								(
+									String.IsNullOrEmpty(FGroupDescriptionColumn) 
+										? null 
+										: (LRow.HasValue(FGroupDescriptionColumn) ? ((Scalar)LRow.GetValue(FGroupDescriptionColumn)).AsString : null)
+								),
 							}
 						);
 				}
-				FWeekControl.GroupSource = LData;
+				FControl.GroupSource = LData;
 			}
 		}
 
-		// WeekControl
+		// Control
 
-		private ScheduleWeek FWeekControl;
+		private Scheduler FControl;
 		private ElementHost FElementHost;
 
 		// Element
@@ -616,9 +610,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				Application.Current.Resources.MergedDictionaries.Add(Application.LoadComponent(new Uri("Alphora.Dataphor.Frontend.Client.Windows;component/Schedule.xaml", UriKind.Relative)) as ResourceDictionary);
 			}
 
-			FWeekControl = new ScheduleWeek();
-			FWeekControl.Style = Application.Current.Resources[GetStyle()] as Style;
-			DependencyPropertyDescriptor.FromProperty(ScheduleWeek.SelectedAppointmentProperty, typeof(ScheduleWeek)).AddValueChanged(FWeekControl, new EventHandler(SelectedAppointmentChanged));
+			FControl = CreateControl();
+			FControl.Style = Application.Current.Resources[GetStyle()] as Style;
+			DependencyPropertyDescriptor.FromProperty(Scheduler.SelectedAppointmentProperty, typeof(Scheduler)).AddValueChanged(FControl, new EventHandler(SelectedAppointmentChanged));
 			InternalUpdateStartDate();
 						
 			FAppointmentSourceLink = new DataLink();
@@ -641,14 +635,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			
 			FElementHost = new ElementHost();
 			FElementHost.Parent = ((IWindowsContainerElement)Parent).Control;
-			FElementHost.Child = FWeekControl;
+			FElementHost.Child = FControl;
 			
 			base.Activate();
 		}
 
+		protected virtual Scheduler CreateControl()
+		{
+			return new Scheduler();
+		}
+
 		protected virtual string GetStyle()
 		{
-			return "DefaultWeekStyle";
+			return "DefaultSchedulerStyle";
 		}
 
 		protected override void Deactivate()
@@ -670,21 +669,22 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 			if (FElementHost != null)
 			{
-				DependencyPropertyDescriptor.FromProperty(ScheduleWeek.SelectedAppointmentProperty, typeof(ScheduleWeek)).RemoveValueChanged(FWeekControl, new EventHandler(SelectedAppointmentChanged));
+				DependencyPropertyDescriptor.FromProperty(Scheduler.SelectedAppointmentProperty, typeof(Scheduler)).RemoveValueChanged(FControl, new EventHandler(SelectedAppointmentChanged));
 				FElementHost.Dispose();
 				FElementHost = null;
-				FWeekControl = null;
+				FControl = null;
 			}
 			base.Deactivate();
 		}
 	}
 	
-	public class ScheduleDayGrouped : ScheduleWeekGrouped
+	public class ScheduleWeekGrouped : ScheduleDayGrouped
 	{
-		protected override string GetStyle()
+		protected override Scheduler CreateControl()
 		{
-			return "SingleDayStyle";
+			return new ScheduleWeek();
 		}
+
 	}
 
 	public class ScheduleGroupData : INotifyPropertyChanged

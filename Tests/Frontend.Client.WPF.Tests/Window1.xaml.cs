@@ -16,10 +16,12 @@ namespace Frontend.Client.WPF.Tests
 		{
 			InitializeComponent();
 			
+			var LAppt = new Appointment { Date = DateTime.Parse("12/1/2009"), Description = "Do thing1", ProviderID = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(8.3d), EndTime = DateTime.MinValue + TimeSpan.FromHours(9d) };
+			
 			Week.AppointmentSource = 
 				new List<Appointment>
 				{
-					new Appointment { Date = DateTime.Parse("12/1/2009"), Description = "Do thing1", ProviderID = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(8.3d), EndTime = DateTime.MinValue + TimeSpan.FromHours(9d) },
+					LAppt,
 					new Appointment { Date = DateTime.Parse("12/1/2009"), Description = "Go to town", ProviderID = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(11d), EndTime = DateTime.MinValue + TimeSpan.FromHours(12.5d) },
 					new Appointment { Date = DateTime.Parse("12/1/2009"), Description = "Ride high", ProviderID = "KarenB", StartTime = DateTime.MinValue + TimeSpan.FromHours(8.75d), EndTime = DateTime.MinValue + TimeSpan.FromHours(9d) },
 					new Appointment { Date = DateTime.Parse("12/1/2009"), Description = "Go to to the place with the stuff", ProviderID = "KarenB", StartTime = DateTime.MinValue + TimeSpan.FromHours(4d), EndTime = DateTime.MinValue + TimeSpan.FromHours(13.5d) },
@@ -34,6 +36,8 @@ namespace Frontend.Client.WPF.Tests
 					new Provider { ProviderID = "AdrianL", Description = "Adrian Lewis" },
 					new Provider { ProviderID = "KarenB", Description = "Karen Bolton" }
 				};
+			
+			Week.SelectedAppointment = LAppt;
 		}
 		
 		private void ClearClicked(Object ASender, RoutedEventArgs AArgs)

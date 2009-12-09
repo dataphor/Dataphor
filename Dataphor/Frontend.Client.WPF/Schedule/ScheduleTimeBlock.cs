@@ -125,31 +125,4 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			throw new NotImplementedException();
 		}
 	}
-
-	public class ScheduleTimeBlockTimeConverter : IValueConverter
-	{
-		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-		{
-			if (value != null && value is DateTime)
-			{
-				var LValue = (DateTime)value;
-				return 
-					String.Format
-					(
-						"{0}:{1:D2}{2}",
-						LValue.Hour == 0 ? 12 : (LValue.Hour <= 12 ? LValue.Hour : (LValue.Hour - 12)),
-						LValue.Minute,
-						LValue.Hour < 12 ? "am" : "pm"
-					);
-			}
-			else
-				return null;
-		}
-
-		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-		{
-			throw new NotImplementedException();
-		}
-	}
-
 }
