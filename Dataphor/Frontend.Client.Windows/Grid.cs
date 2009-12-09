@@ -991,18 +991,23 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		protected override Size InternalMaxSize
 		{
-            get { return FUseNaturalMaxWidth ? new Size(InternalNaturalSize.Width, WinForms.Screen.FromControl(Control).WorkingArea.Size.Width) : WinForms.Screen.FromControl(Control).WorkingArea.Size; }
+            get 
+            { 
+				return FUseNaturalMaxWidth 
+					? new Size(InternalNaturalSize.Width, WinForms.Screen.FromControl(Control).WorkingArea.Size.Width) 
+					: WinForms.Screen.FromControl(Control).WorkingArea.Size; 
+			}
 		}
 
         [DefaultValue(false)]
-        [Description("Use Natural Width as the Max Width.")]
+        [Description("Use Natural Width as the Max Width, otherwise the grid will us all available space.")]
         private bool FUseNaturalMaxWidth;
         public bool UseNaturalMaxWidth
         {
             get { return FUseNaturalMaxWidth; }
             set 
             { 
-				if (FUseNaturalMaxWidth)
+				if (FUseNaturalMaxWidth != value)
 				{
 					FUseNaturalMaxWidth = value;
 					UpdateLayout();
