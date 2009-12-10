@@ -27,6 +27,8 @@
 		<Setter Property="GroupIDMemberPath" Value="Group" />
 		<Setter Property="AppointmentGroupIDMemberPath" Value="Group" />
 		<Setter Property="AppointmentDateMemberPath" Value="Date" />
+		<Setter Property="ShiftGroupIDMemberPath" Value="Group" />
+		<Setter Property="ShiftDateMemberPath" Value="Date" />
 		<Setter Property="Granularity" Value="10" />
 		<Setter Property="AppointmentContainerStyle">
 			<Setter.Value>
@@ -60,11 +62,10 @@
 					<Border Background="#FFEEEEFF"
 						BorderBrush="#FF4F4F4F"
 						BorderThickness="{Binding IsSelected, Converter={StaticResource IsSelectedToBorderThicknessConverter}, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}}"
-						CornerRadius="3"
+						CornerRadius="4"
 						SnapsToDevicePixels="True"
 						Margin="2,0,4,0"
-						MaxWidth="150"
-						MinWidth="75">
+						x:Name="Root">
 						<Border.ToolTip>
 							<Grid>
 								<Grid.ColumnDefinitions>
@@ -90,17 +91,26 @@
 								<TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding EndTime, Converter={StaticResource TimeConverter}}" Style="{StaticResource DataTextBlockStyle}"/>
 							</Grid>
 						</Border.ToolTip>
-						<ContextMenuService.ContextMenu>
-							<ContextMenu>
-								<MenuItem Header="Edit..." />
-								<MenuItem Header="Delete" />
-							</ContextMenu>
-						</ContextMenuService.ContextMenu>
-						<Border.Effect>
-							<DropShadowEffect ShadowDepth="2" Opacity="0.5"/>
-						</Border.Effect>
+						<Border.ContextMenu>
+							<ContextMenu x:Name="AppointmentMenu"/> <!-- Can be handled through a routed event onContextMenuSystem -->
+						</Border.ContextMenu>
 						<TextBlock Text="{Binding Description}" Margin="4,2" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"/>
 					</Border>
+				</DataTemplate>
+			</Setter.Value>
+		</Setter>
+		<Setter Property="ShiftContainerStyle">
+			<Setter.Value>
+				<Style TargetType="{x:Type ContentPresenter}">
+					<Setter Property="client:ScheduleDayAppointments.Start" Value="{Binding StartTime}" />
+					<Setter Property="client:ScheduleDayAppointments.End" Value="{Binding EndTime}" />
+				</Style>
+			</Setter.Value>
+		</Setter>
+		<Setter Property="ShiftItemTemplate">
+			<Setter.Value>
+				<DataTemplate>
+					<Border Background="#FFEEFFFF" SnapsToDevicePixels="True"/>
 				</DataTemplate>
 			</Setter.Value>
 		</Setter>

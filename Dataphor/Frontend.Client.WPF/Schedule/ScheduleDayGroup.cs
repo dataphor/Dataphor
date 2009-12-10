@@ -151,6 +151,66 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(AppointmentGroupIDMemberPathProperty, value); }
 		}
 
+		// ShiftSource
+
+		public static readonly DependencyProperty ShiftSourceProperty =
+			DependencyProperty.Register("ShiftSource", typeof(IEnumerable), typeof(ScheduleDayGroup), new PropertyMetadata(null));
+
+		/// <summary> The source containing the set of Shift items. </summary>
+		public IEnumerable ShiftSource
+		{
+			get { return (IEnumerable)GetValue(ShiftSourceProperty); }
+			set { SetValue(ShiftSourceProperty, value); }
+		}
+
+		// ShiftDateMemberPath
+
+		public static readonly DependencyProperty ShiftDateMemberPathProperty =
+			DependencyProperty.Register("ShiftDateMemberPath", typeof(string), typeof(ScheduleDayGroup), new PropertyMetadata(null));
+
+		/// <summary> The style to apply to an Shift item container. </summary>
+		public string ShiftDateMemberPath
+		{
+			get { return (string)GetValue(ShiftDateMemberPathProperty); }
+			set { SetValue(ShiftDateMemberPathProperty, value); }
+		}
+
+		// ShiftGroupIDMemberPath
+
+		public static readonly DependencyProperty ShiftGroupIDMemberPathProperty =
+			DependencyProperty.Register("ShiftGroupIDMemberPath", typeof(string), typeof(ScheduleDayGroup), new PropertyMetadata(null));
+
+		/// <summary> A description of the property. </summary>
+		public string ShiftGroupIDMemberPath
+		{
+			get { return (string)GetValue(ShiftGroupIDMemberPathProperty); }
+			set { SetValue(ShiftGroupIDMemberPathProperty, value); }
+		}
+
+		// ShiftItemTemplate
+
+		public static readonly DependencyProperty ShiftItemTemplateProperty =
+			DependencyProperty.Register("ShiftItemTemplate", typeof(DataTemplate), typeof(ScheduleDayGroup), new PropertyMetadata(null));
+
+		/// <summary> The data template used to display a shift item. </summary>
+		public DataTemplate ShiftItemTemplate
+		{
+			get { return (DataTemplate)GetValue(ShiftItemTemplateProperty); }
+			set { SetValue(ShiftItemTemplateProperty, value); }
+		}
+
+		// ShiftContainerStyle
+
+		public static readonly DependencyProperty ShiftContainerStyleProperty =
+			DependencyProperty.Register("ShiftContainerStyle", typeof(Style), typeof(ScheduleDayGroup), new PropertyMetadata(null));
+
+		/// <summary> The style to apply to an Shift item container. </summary>
+		public Style ShiftContainerStyle
+		{
+			get { return (Style)GetValue(ShiftContainerStyleProperty); }
+			set { SetValue(ShiftContainerStyleProperty, value); }
+		}
+
 		protected override DependencyObject GetContainerForItemOverride()
 		{
 			return new ScheduleDay();
@@ -167,13 +227,39 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 				
 				LDay.ItemContainerStyle = AppointmentContainerStyle;
 				LDay.ItemTemplate = AppointmentItemTemplate;
-				LDay.AppointmentDateMemberPath = AppointmentDateMemberPath;
-				LDay.AppointmentGroupIDMemberPath = AppointmentGroupIDMemberPath;
+
+				LBinding = new Binding("AppointmentDateMemberPath");
+				LBinding.Source = this;
+				LDay.SetBinding(ScheduleDay.AppointmentDateMemberPathProperty, LBinding);
+				
+				LBinding = new Binding("AppointmentGroupIDMemberPath");
+				LBinding.Source = this;
+				LDay.SetBinding(ScheduleDay.AppointmentGroupIDMemberPathProperty, LBinding);
 
 				LBinding = new Binding("AppointmentSource");
 				LBinding.Source = this;
 				LDay.SetBinding(ScheduleDay.AppointmentSourceProperty, LBinding);
-				
+
+				LBinding = new Binding("ShiftDateMemberPath");
+				LBinding.Source = this;
+				LDay.SetBinding(ScheduleDay.ShiftDateMemberPathProperty, LBinding);
+
+				LBinding = new Binding("ShiftGroupIDMemberPath");
+				LBinding.Source = this;
+				LDay.SetBinding(ScheduleDay.ShiftGroupIDMemberPathProperty, LBinding);
+
+				LBinding = new Binding("ShiftSource");
+				LBinding.Source = this;
+				LDay.SetBinding(ScheduleDay.ShiftSourceProperty, LBinding);
+
+				LBinding = new Binding("ShiftItemTemplate");
+				LBinding.Source = this;
+				LDay.SetBinding(ScheduleDay.ShiftItemTemplateProperty, LBinding);
+
+				LBinding = new Binding("ShiftContainerStyle");
+				LBinding.Source = this;
+				LDay.SetBinding(ScheduleDay.ShiftContainerStyleProperty, LBinding);
+
 				LBinding = new Binding("HighlightedTime");
 				LBinding.Source = this;
 				LBinding.Mode = BindingMode.TwoWay;
@@ -187,6 +273,10 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 				LBinding.Source = this;
 				LBinding.Mode = BindingMode.TwoWay;
 				LDay.SetBinding(ScheduleDay.SelectedAppointmentProperty, LBinding);
+				
+				LBinding = new Binding("Granularity");
+				LBinding.Source = this;
+				LDay.SetBinding(ScheduleDay.GranularityProperty, LBinding);
 				
 				if (!String.IsNullOrEmpty(DisplayMemberPath))
 				{

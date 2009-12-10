@@ -19,7 +19,7 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		// Date
 		
 		public static readonly DependencyProperty DateProperty =
-			DependencyProperty.Register("Date", typeof(DateTime), typeof(ScheduleDay), new PropertyMetadata(DateTime.MinValue, new PropertyChangedCallback(AppointmentViewAffectingPropertyChanged)));
+			DependencyProperty.Register("Date", typeof(DateTime), typeof(ScheduleDay), new PropertyMetadata(DateTime.MinValue, new PropertyChangedCallback(ViewAffectingPropertyChanged)));
 
 		/// <summary> The date represented by this date group. </summary>
 		public DateTime Date
@@ -69,6 +69,25 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(HeaderProperty, value); }
 		}
 
+		// GroupID
+
+		public static readonly DependencyProperty GroupIDProperty =
+			DependencyProperty.Register("GroupID", typeof(object), typeof(ScheduleDay), new PropertyMetadata(null, new PropertyChangedCallback(ViewAffectingPropertyChanged)));
+
+		/// <summary> The value being grouped by. </summary>
+		public object GroupID
+		{
+			get { return (object)GetValue(GroupIDProperty); }
+			set { SetValue(GroupIDProperty, value); }
+		}
+
+		private static void ViewAffectingPropertyChanged(DependencyObject ASender, DependencyPropertyChangedEventArgs AArgs)
+		{
+			var LDay = (ScheduleDay)ASender;
+			LDay.UpdateAppointmentView();
+			LDay.UpdateShiftView();
+		}
+
 		// AppointmentDateMemberPath
 
 		public static readonly DependencyProperty AppointmentDateMemberPathProperty =
@@ -80,24 +99,12 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			get { return (string)GetValue(AppointmentDateMemberPathProperty); }
 			set { SetValue(AppointmentDateMemberPathProperty, value); }
 		}
-		
+
 		private static void AppointmentViewAffectingPropertyChanged(DependencyObject ASender, DependencyPropertyChangedEventArgs AArgs)
 		{
 			((ScheduleDay)ASender).UpdateAppointmentView();
 		}
-		
-		// GroupID
 
-		public static readonly DependencyProperty GroupIDProperty =
-			DependencyProperty.Register("GroupID", typeof(object), typeof(ScheduleDay), new PropertyMetadata(null, new PropertyChangedCallback(AppointmentViewAffectingPropertyChanged)));
-
-		/// <summary> The value being grouped by. </summary>
-		public object GroupID
-		{
-			get { return (object)GetValue(GroupIDProperty); }
-			set { SetValue(GroupIDProperty, value); }
-		}
-		
 		// AppointmentGroupIDMemberPath
 
 		public static readonly DependencyProperty AppointmentGroupIDMemberPathProperty =
@@ -199,6 +206,117 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		{
 			if (SelectedItem != null)
 				SelectedAppointment = SelectedItem;
+		}
+
+		// ShiftDateMemberPath
+
+		public static readonly DependencyProperty ShiftDateMemberPathProperty =
+			DependencyProperty.Register("ShiftDateMemberPath", typeof(string), typeof(ScheduleDay), new PropertyMetadata(null, new PropertyChangedCallback(ShiftViewAffectingPropertyChanged)));
+
+		/// <summary> The style to apply to an Shift item container. </summary>
+		public string ShiftDateMemberPath
+		{
+			get { return (string)GetValue(ShiftDateMemberPathProperty); }
+			set { SetValue(ShiftDateMemberPathProperty, value); }
+		}
+
+		private static void ShiftViewAffectingPropertyChanged(DependencyObject ASender, DependencyPropertyChangedEventArgs AArgs)
+		{
+			((ScheduleDay)ASender).UpdateShiftView();
+		}
+
+		// ShiftGroupIDMemberPath
+
+		public static readonly DependencyProperty ShiftGroupIDMemberPathProperty =
+			DependencyProperty.Register("ShiftGroupIDMemberPath", typeof(string), typeof(ScheduleDay), new PropertyMetadata(null, new PropertyChangedCallback(ShiftViewAffectingPropertyChanged)));
+
+		/// <summary> A description of the property. </summary>
+		public string ShiftGroupIDMemberPath
+		{
+			get { return (string)GetValue(ShiftGroupIDMemberPathProperty); }
+			set { SetValue(ShiftGroupIDMemberPathProperty, value); }
+		}
+
+		// ShiftItemTemplate
+
+		public static readonly DependencyProperty ShiftItemTemplateProperty =
+			DependencyProperty.Register("ShiftItemTemplate", typeof(DataTemplate), typeof(ScheduleDay), new PropertyMetadata(null));
+
+		/// <summary> The data template used to display a shift item. </summary>
+		public DataTemplate ShiftItemTemplate
+		{
+			get { return (DataTemplate)GetValue(ShiftItemTemplateProperty); }
+			set { SetValue(ShiftItemTemplateProperty, value); }
+		}
+
+		// ShiftContainerStyle
+
+		public static readonly DependencyProperty ShiftContainerStyleProperty =
+			DependencyProperty.Register("ShiftContainerStyle", typeof(Style), typeof(ScheduleDay), new PropertyMetadata(null));
+
+		/// <summary> The style to apply to an Shift item container. </summary>
+		public Style ShiftContainerStyle
+		{
+			get { return (Style)GetValue(ShiftContainerStyleProperty); }
+			set { SetValue(ShiftContainerStyleProperty, value); }
+		}
+
+		// ShiftSource
+
+		public static readonly DependencyProperty ShiftSourceProperty =
+			DependencyProperty.Register("ShiftSource", typeof(IEnumerable), typeof(ScheduleDay), new PropertyMetadata(null, new PropertyChangedCallback(OnShiftSourceChanged)));
+
+		/// <summary> The source containing the set of Shift items. </summary>
+		public IEnumerable ShiftSource
+		{
+			get { return (IEnumerable)GetValue(ShiftSourceProperty); }
+			set { SetValue(ShiftSourceProperty, value); }
+		}
+
+		private static void OnShiftSourceChanged(DependencyObject ASender, DependencyPropertyChangedEventArgs AArgs)
+		{
+			((ScheduleDay)ASender).UpdateShiftView();
+		}
+
+		// ShiftView
+
+		public static readonly DependencyProperty ShiftViewProperty =
+			DependencyProperty.Register("ShiftView", typeof(IEnumerable), typeof(ScheduleDay), new PropertyMetadata(null));
+
+		/// <summary> The source containing the set of Shift items. </summary>
+		public IEnumerable ShiftView
+		{
+			get { return (IEnumerable)GetValue(ShiftViewProperty); }
+			set { SetValue(ShiftViewProperty, value); }
+		}
+
+		// ShiftViewSource
+
+		private void UpdateShiftView()
+		{
+			if (ShiftSource != null && !String.IsNullOrEmpty(ShiftDateMemberPath) && !String.IsNullOrEmpty(ShiftGroupIDMemberPath) && Date != DateTime.MinValue && GroupID != null)
+			{
+				var LSource = new CollectionViewSource();
+				LSource.Filter += new FilterEventHandler(ShiftViewFilter);
+				LSource.Source = ShiftSource;
+				ShiftView = LSource.View;
+				UpdateSelection();
+			}
+			else
+				ShiftView = null;
+		}
+
+		private void ShiftViewFilter(object sender, FilterEventArgs AArgs)
+		{
+			if (AArgs.Item != null)
+			{
+				var LType = AArgs.Item.GetType();
+				var LDate = (DateTime)LType.GetProperty(ShiftDateMemberPath).GetValue(AArgs.Item, new object[] { });
+				var LGroupID = LType.GetProperty(ShiftGroupIDMemberPath).GetValue(AArgs.Item, new object[] { });
+				AArgs.Accepted = LDate == Date && LGroupID.Equals(GroupID);
+			}
+			else
+				AArgs.Accepted = true;
 		}
 
 		// HighlightedTime

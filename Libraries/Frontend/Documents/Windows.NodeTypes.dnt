@@ -65,6 +65,8 @@
 		<nodetype name="notebookpage"/>
 		<nodetype name="notebookframepage"/>
 		
-		<nodetype name="ScheduleWeekGrouped"/>
-		<nodetype name="ScheduleDayGrouped"/>
+		<nodetype name="scheduleweekgrouped"/>
+		<nodetype name="scheduledaygrouped"/>
+		<nodetype name="scheduleappointmentverb"/>
+		<nodetype name="scheduletimeblockverb"/>
 	</namespace>

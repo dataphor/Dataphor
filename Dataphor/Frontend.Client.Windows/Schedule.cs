@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Forms.Integration;
 using Alphora.Dataphor.DAE.Client;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.Frontend.Client.WPF;
-using System.Windows.Data;
+using Alphora.Dataphor.BOP;
+using System.Windows.Media.Imaging;
 
 namespace Alphora.Dataphor.Frontend.Client.Windows
 {
@@ -316,6 +319,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			FShiftSourceLink.Source = ShiftSource == null ? null : ShiftSource.DataSource;
 		}
 
+		private void ShiftSourceLinkRowChanged(DataLink ALInk, DataSet ADataSet, DataField AField)
+		{
+			UpdateShiftData();
+		}
+
+		private void ShiftSourceLinkChanged(DataLink ALink, DataSet ADataSet)
+		{
+			UpdateShiftData();
+		}
+
 		// ShiftDateColumn
 
 		private string FShiftDateColumn = String.Empty;
@@ -420,20 +433,44 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		protected void UpdateShiftData()
 		{
-			var LActive = Active
-				&& (ShiftSource != null) && (ShiftSource.DataView != null) && !ShiftSource.IsEmpty
-				&& !String.IsNullOrEmpty(FShiftDateColumn) && !String.IsNullOrEmpty(FShiftStartTimeColumn)
-				&& !String.IsNullOrEmpty(FShiftEndTimeColumn) && !String.IsNullOrEmpty(FShiftGroupColumn);
-			if (LActive)
+			if 
+			(
+				Active && FShiftSourceLink.Active && !FShiftSourceLink.DataSet.IsEmpty()
+					&& !String.IsNullOrEmpty(FShiftDateColumn) && !String.IsNullOrEmpty(FShiftStartTimeColumn)
+					&& !String.IsNullOrEmpty(FShiftEndTimeColumn) && !String.IsNullOrEmpty(FShiftDescriptionColumn)
+			)
 				ReconcileShiftData();
-			//else
-			//    if (FControl != null)
-			//        FControl.ShiftSource = null;
+			else
+				if (FControl != null)
+					FControl.ShiftSource = null;
 		}
 
 		private void ReconcileShiftData()
 		{
-			
+			if (FControl != null)
+			{
+				// Expand the buffer to capture all rows in the set
+				while (FShiftSourceLink.LastOffset == FShiftSourceLink.BufferCount - 1)
+					FShiftSourceLink.BufferCount++;
+
+				var LData = new List<ScheduleData>(FShiftSourceLink.LastOffset + 1);
+				for (int i = 0; i <= FShiftSourceLink.LastOffset; i++)
+				{
+					var LRow = FShiftSourceLink.Buffer(i);
+					LData.Add
+					(
+						new ScheduleData
+						{
+							Date = ((Scalar)LRow.GetValue(FShiftDateColumn)).AsDateTime,
+							StartTime = ((Scalar)LRow.GetValue(FShiftStartTimeColumn)).AsDateTime,
+							EndTime = ((Scalar)LRow.GetValue(FShiftEndTimeColumn)).AsDateTime,
+							Description = ((Scalar)LRow.GetValue(FShiftDescriptionColumn)).AsString,
+							Group = (String.IsNullOrEmpty(FShiftGroupColumn) ? null : ((Scalar)LRow.GetValue(FShiftGroupColumn)).AsNative)
+						}
+					);
+				}
+				FControl.ShiftSource = LData;
+			}
 		}
 
 		// GroupSource
@@ -612,6 +649,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 			FControl = CreateControl();
 			FControl.Style = Application.Current.Resources[GetStyle()] as Style;
+			FControl.AddHandler(System.Windows.Controls.ContextMenuService.ContextMenuOpeningEvent, new RoutedEventHandler(ContextMenuOpened));
 			DependencyPropertyDescriptor.FromProperty(Scheduler.SelectedAppointmentProperty, typeof(Scheduler)).AddValueChanged(FControl, new EventHandler(SelectedAppointmentChanged));
 			InternalUpdateStartDate();
 						
@@ -620,6 +658,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			FAppointmentSourceLink.OnRowChanged += new DataLinkFieldHandler(AppointmentSourceLinkRowChanged);
 			FAppointmentSourceLink.OnActiveChanged += new DataLinkHandler(AppointmentSourceLinkChanged);
 			FShiftSourceLink = new DataLink();
+			FShiftSourceLink.OnDataChanged += new DataLinkHandler(ShiftSourceLinkChanged);
+			FShiftSourceLink.OnRowChanged += new DataLinkFieldHandler(ShiftSourceLinkRowChanged);
+			FShiftSourceLink.OnActiveChanged += new DataLinkHandler(ShiftSourceLinkChanged);
 			FGroupSourceLink = new DataLink();
 			FGroupSourceLink.OnDataChanged += new DataLinkHandler(GroupSourceLinkChanged);
 			FGroupSourceLink.OnRowChanged += new DataLinkFieldHandler(GroupSourceLinkRowChanged);
@@ -650,6 +691,38 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return "DefaultSchedulerStyle";
 		}
 
+		private void ContextMenuOpened(object ASender, RoutedEventArgs AArgs)
+		{
+			var LItem = AArgs.OriginalSource as FrameworkElement;
+			if (LItem != null && LItem.ContextMenu != null)
+			{
+				var LMenu = LItem.ContextMenu;
+				if (LMenu.Name == "DayTimeBlockMenu")
+				{
+					LMenu.Items.Clear();
+					BuildMenu(LMenu, typeof(ScheduleTimeBlockVerb));
+				}
+				else if (LMenu.Name == "AppointmentMenu")
+				{
+					LMenu.Items.Clear();
+					BuildMenu(LMenu, typeof(ScheduleAppointmentVerb));
+				}
+			}
+		}
+
+		protected virtual void BuildMenu(ContextMenu AMenu, Type AType)
+		{
+			foreach (INode LChild in Children)
+			{
+				if (AType.IsAssignableFrom(LChild.GetType()))
+				{
+					var LVerb = LChild as BaseVerb;
+					if (LVerb != null)
+						AMenu.Items.Add(LVerb.BuildMenuItem());
+				}
+			}
+		}
+		
 		protected override void Deactivate()
 		{
 			if (FAppointmentSourceLink != null)
@@ -676,8 +749,154 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 			base.Deactivate();
 		}
+
+		public override bool IsValidChild(Type AChildType)
+		{
+			return typeof(BaseVerb).IsAssignableFrom(AChildType)
+				|| base.IsValidChild(AChildType);
+		}
 	}
-	
+
+	public class BaseVerb : Node
+	{
+		protected override void Dispose(bool ADisposing)
+		{
+			base.Dispose(ADisposing);
+			Action = null;
+		}
+		
+		// Action
+
+		protected IAction FAction;
+		[TypeConverter(typeof(NodeReferenceConverter))]
+		[Description("An action that will be executed when this control is pressed.")]
+		public IAction Action
+		{
+			get { return FAction; }
+			set
+			{
+				if (FAction != value)
+				{
+					if (FAction != null)
+						FAction.Disposed -= new EventHandler(ActionDisposed);
+					FAction = value;
+					if (FAction != null)
+						FAction.Disposed += new EventHandler(ActionDisposed);
+				}
+			}
+		}
+
+		protected void ActionDisposed(object ASender, EventArgs AArgs)
+		{
+			Action = null;
+		}
+
+		// Text
+
+		private string FText = String.Empty;
+		[Publish(PublishMethod.Value)]
+		[DefaultValue("")]
+		[Description("A text string that will be used on the context menu.  If this is not set the text property of the action will be used.")]
+		public string Text
+		{
+			get { return FText; }
+			set { FText = value; }
+		}
+
+		public string GetText()
+		{
+			if ((Action != null) && (FText == String.Empty))
+				return Action.Text;
+			else
+				return FText;
+		}
+
+		// Enabled
+
+		private bool FEnabled = true;
+		[DefaultValue(true)]
+		[Description("When this is set to false this context menu item will be disabled.  This control will also be disabled if the action is disabled.")]
+		public bool Enabled
+		{
+			get { return FEnabled; }
+			set { FEnabled = value; }
+		}
+
+		/// <summary> Gets whether the node is actuall enabled (accounting for action). </summary>
+		/// <remarks>
+		///		The enabled state of the node is the most restrictive between 
+		///		the action and the Enabled property.
+		///	</remarks>
+		public bool GetEnabled()
+		{
+			return (Action == null ? false : Action.GetEnabled()) && FEnabled;
+		}
+		
+		protected internal virtual MenuItem BuildMenuItem()
+		{
+			var LItem = 
+				new MenuItem
+				{
+					Header = GetText(),
+					IsEnabled = GetEnabled(),
+					Icon = (Action == null ? null : LoadBitmap(((Action)Action).LoadedImage))
+				};
+			LItem.Click += new RoutedEventHandler(ItemClicked);
+			return LItem;
+		}
+		
+		private void ItemClicked(object ASender, RoutedEventArgs AArgs)
+		{
+			if (Action != null)
+			{
+				AArgs.Handled = true;
+				Action.Execute(this, new EventParams("AData", ((FrameworkElement)AArgs.OriginalSource).DataContext));
+			}
+		}
+
+		[System.Runtime.InteropServices.DllImport("gdi32")]
+		private static extern int DeleteObject(IntPtr o);
+		
+		/// <summary> Convert from a WinForms bitmap to a WPF ImageSource. </summary>
+		/// <remarks> Credits: http://stackoverflow.com/questions/1118496/using-image-control-in-wpf-to-display-system-drawing-bitmap/1118557#1118557 </remarks>
+		public static BitmapSource LoadBitmap(System.Drawing.Image ASource) 
+		{ 
+			var LSource = ASource as System.Drawing.Bitmap;
+			if (LSource != null)
+			{
+				IntPtr ip = LSource.GetHbitmap(); 
+				try 
+				{ 
+					return System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap
+					(
+						ip, 
+						IntPtr.Zero, 
+						Int32Rect.Empty, 
+						System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions()
+					); 
+				} 
+				finally 
+				{ 
+					DeleteObject(ip); 
+				} 
+			}
+			else
+				return null;
+		}
+	}
+
+	[DesignerImage("Image('Frontend', 'Nodes.Schedule')")]
+	[DesignerCategory("Data Controls")]
+	public class ScheduleAppointmentVerb : BaseVerb
+	{
+	}
+
+	[DesignerImage("Image('Frontend', 'Nodes.Schedule')")]
+	[DesignerCategory("Data Controls")]
+	public class ScheduleTimeBlockVerb : BaseVerb
+	{
+	}
+
 	public class ScheduleWeekGrouped : ScheduleDayGrouped
 	{
 		protected override Scheduler CreateControl()
@@ -729,10 +948,6 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 	public class ScheduleData : INotifyPropertyChanged
 	{
-		/// <summary> Gets and sets the key for the schedule item. </summary>
-		/// <remarks> This member does not raise property notification when modified. </remarks>
-		public Row Row { get; set; }
-
 		private DateTime FDate;
 		public DateTime Date
 		{

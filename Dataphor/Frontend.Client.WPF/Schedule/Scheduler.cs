@@ -206,6 +206,66 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(AppointmentContainerStyleProperty, value); }
 		}
 
+		// ShiftSource
+
+		public static readonly DependencyProperty ShiftSourceProperty =
+			DependencyProperty.Register("ShiftSource", typeof(IEnumerable), typeof(Scheduler), new PropertyMetadata(null));
+
+		/// <summary> The list of Shifts to display in this scheduler. </summary>
+		public IEnumerable ShiftSource
+		{
+			get { return (IEnumerable)GetValue(ShiftSourceProperty); }
+			set { SetValue(ShiftSourceProperty, value); }
+		}
+
+		// ShiftDateMemberPath
+
+		public static readonly DependencyProperty ShiftDateMemberPathProperty =
+			DependencyProperty.Register("ShiftDateMemberPath", typeof(string), typeof(Scheduler), new PropertyMetadata(null));
+
+		/// <summary> The path to the Date data member within the Shift items. </summary>
+		public string ShiftDateMemberPath
+		{
+			get { return (string)GetValue(ShiftDateMemberPathProperty); }
+			set { SetValue(ShiftDateMemberPathProperty, value); }
+		}
+
+		// ShiftGroupIDMemberPath
+
+		public static readonly DependencyProperty ShiftGroupIDMemberPathProperty =
+			DependencyProperty.Register("ShiftGroupIDMemberPath", typeof(string), typeof(Scheduler), new PropertyMetadata(null));
+
+		/// <summary> A description of the property. </summary>
+		public string ShiftGroupIDMemberPath
+		{
+			get { return (string)GetValue(ShiftGroupIDMemberPathProperty); }
+			set { SetValue(ShiftGroupIDMemberPathProperty, value); }
+		}
+
+		// ShiftItemTemplate
+
+		public static readonly DependencyProperty ShiftItemTemplateProperty =
+			DependencyProperty.Register("ShiftItemTemplate", typeof(DataTemplate), typeof(Scheduler), new PropertyMetadata(null));
+
+		/// <summary> The data template used to display a shift item. </summary>
+		public DataTemplate ShiftItemTemplate
+		{
+			get { return (DataTemplate)GetValue(ShiftItemTemplateProperty); }
+			set { SetValue(ShiftItemTemplateProperty, value); }
+		}
+
+		// ShiftContainerStyle
+
+		public static readonly DependencyProperty ShiftContainerStyleProperty =
+			DependencyProperty.Register("ShiftContainerStyle", typeof(Style), typeof(Scheduler), new PropertyMetadata(null));
+
+		/// <summary> The style to apply to an Shift item container. </summary>
+		public Style ShiftContainerStyle
+		{
+			get { return (Style)GetValue(ShiftContainerStyleProperty); }
+			set { SetValue(ShiftContainerStyleProperty, value); }
+		}
+
 		// TimeBarElement
 
 		private ScheduleTimeBar TimeBarElement { get; set; }

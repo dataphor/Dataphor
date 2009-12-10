@@ -27,7 +27,7 @@
 							</Grid.RowDefinitions>
 							<Path x:Name="path" Stretch="Fill" Stroke="Black" VerticalAlignment="Top" Height="1" Data="M0,0 L1,0" Grid.ColumnSpan="2" />
 							<TextBlock x:Name="textBlock" Text="{Binding Time, Converter={StaticResource ScheduleTimeBlockHourConverter}, RelativeSource={RelativeSource TemplatedParent}}" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="2" />
-							<Path x:Name="highlight" Stretch="Fill" VerticalAlignment="Center" Height="5" Width="3" Data="M0,0 L3,3 L0,6 z" Fill="Black" Grid.Column="1" HorizontalAlignment="Center" Visibility="Collapsed" />
+							<Path x:Name="highlight" Stretch="Fill" VerticalAlignment="Center" Height="7" Width="4" Data="M0,0 L3,3 L0,6 z" Fill="Black" Grid.Column="1" HorizontalAlignment="Center" Visibility="Collapsed" />
 						</Grid>
 					</Border>
 					<ControlTemplate.Triggers>
@@ -57,16 +57,16 @@
 					<Border x:Name="border" ToolTip="{Binding Time, Converter={StaticResource ScheduleTimeBlockTimeConverter}, RelativeSource={RelativeSource TemplatedParent}}" Background="#00000000">
 						<Grid Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
 							<Grid.ColumnDefinitions>
-								<ColumnDefinition/>
 								<ColumnDefinition Width="5"/>
+								<ColumnDefinition/>
 							</Grid.ColumnDefinitions>
 							<Grid.RowDefinitions>
 								<RowDefinition Height="20"/>
 								<!--SharedSizeGroup="BlockHeight" MinHeight="10"-->
 							</Grid.RowDefinitions>
+							<Path x:Name="highlight" Stretch="Fill" VerticalAlignment="Center" Height="7" Width="4" Data="M3,0 L0,3 L3,6 z" Fill="Black" HorizontalAlignment="Center" Visibility="Collapsed" />
 							<Path x:Name="path" Stretch="Fill" Stroke="Black" VerticalAlignment="Top" Height="1" Data="M0,0 L1,0" Grid.ColumnSpan="2" />
-							<TextBlock x:Name="textBlock" Text="{Binding Time, Converter={StaticResource ScheduleTimeBlockHourConverter}, RelativeSource={RelativeSource TemplatedParent}}" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="2" />
-							<Path x:Name="highlight" Stretch="Fill" VerticalAlignment="Center" Height="5" Width="3" Data="M0,0 L3,3 L0,6 z" Fill="Black" Grid.Column="1" HorizontalAlignment="Center" Visibility="Collapsed" />
+							<TextBlock x:Name="textBlock" Grid.Column="1" Text="{Binding Time, Converter={StaticResource ScheduleTimeBlockHourConverter}, RelativeSource={RelativeSource TemplatedParent}}" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="2" />
 						</Grid>
 					</Border>
 					<ControlTemplate.Triggers>
@@ -89,6 +89,55 @@
 
 	<local:DateTimeToMinutesConverter x:Key="DateTimeToMinutesConverter" />
 	<local:RemainingMinutesConverter x:Key="RemainingMinutesConverter" />
+
+	<Style TargetType="{x:Type local:Scheduler}">
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type local:Scheduler}">
+					<Grid d:DesignWidth="600" d:DesignHeight="300" Grid.IsSharedSizeScope="True" SnapsToDevicePixels="True">
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto" SharedSizeGroup="GroupHeaderHeight"/>
+							<RowDefinition Height="Auto" SharedSizeGroup="DayHeaderHeight"/>
+							<RowDefinition Height="*"/>
+						</Grid.RowDefinitions>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="*"/>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="Auto"/>
+						</Grid.ColumnDefinitions>
+						<local:ScheduleTimeBar x:Name="TimeBar" Grid.Row="2" Granularity="{TemplateBinding Granularity}" HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" StartTime="{TemplateBinding StartTime}" VerticalAlignment="Top" />
+						<Path Stretch="Fill" Stroke="Black" HorizontalAlignment="Left" Data="M0,0 L0,1" Grid.Column="1" Grid.RowSpan="3"/>
+						<local:NonMouseWheelScrollViewer Grid.Column="2" Grid.RowSpan="3" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+							<local:ScheduleDayGroup Grid.Column="0"
+								Date="{Binding StartDate, RelativeSource={RelativeSource TemplatedParent}}"
+								StartTime="{TemplateBinding StartTime}"
+								ItemsSource="{TemplateBinding GroupSource}"
+								AppointmentSource="{TemplateBinding AppointmentSource}"
+								AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}"
+								DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}"
+								GroupIDMemberPath="{TemplateBinding GroupIDMemberPath}"
+								HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+								AppointmentGroupIDMemberPath="{TemplateBinding AppointmentGroupIDMemberPath}"
+								AppointmentContainerStyle="{TemplateBinding AppointmentContainerStyle}"
+								AppointmentDateMemberPath="{TemplateBinding AppointmentDateMemberPath}"
+								ShiftGroupIDMemberPath="{TemplateBinding ShiftGroupIDMemberPath}"
+								ShiftSource="{TemplateBinding ShiftSource}"
+								ShiftDateMemberPath="{TemplateBinding ShiftDateMemberPath}"
+								ShiftItemTemplate="{TemplateBinding ShiftItemTemplate}"
+								ShiftContainerStyle="{TemplateBinding ShiftContainerStyle}"
+								SelectedAppointment="{Binding SelectedAppointment, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+								Granularity="{TemplateBinding Granularity}"/>
+						</local:NonMouseWheelScrollViewer>
+						<Path Stretch="Fill" Stroke="Black" HorizontalAlignment="Right" Data="M0,0 L0,1" Grid.Column="2" Grid.RowSpan="3"/>
+						<local:ScheduleTimeBar x:Name="RightTimeBar" Grid.Row="2" Grid.Column="3" Granularity="{TemplateBinding Granularity}" HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" StartTime="{TemplateBinding StartTime}" VerticalAlignment="Top" TimeBlockStyle="{StaticResource RightAlignedTimeBlockStyle}"/>
+						<ScrollBar Grid.Row="2" Grid.Column="4" Value="{Binding StartTime, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource DateTimeToMinutesConverter}, Mode=TwoWay}" SmallChange="{Binding Granularity, RelativeSource={RelativeSource TemplatedParent}}" LargeChange="60" ViewportSize="{Binding VisibleMinutes, ElementName=TimeBar}" Maximum="{Binding VisibleMinutes, Converter={StaticResource RemainingMinutesConverter}, ElementName=TimeBar}"/>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
 
 	<Style TargetType="{x:Type local:ScheduleWeek}">
 		<Setter Property="Template">
@@ -132,7 +181,13 @@
 									AppointmentGroupIDMemberPath="{TemplateBinding AppointmentGroupIDMemberPath}"
 									AppointmentContainerStyle="{TemplateBinding AppointmentContainerStyle}"
 									AppointmentDateMemberPath="{TemplateBinding AppointmentDateMemberPath}"
-									SelectedAppointment="{Binding SelectedAppointment, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
+									ShiftGroupIDMemberPath="{TemplateBinding ShiftGroupIDMemberPath}"
+									ShiftSource="{TemplateBinding ShiftSource}"
+									ShiftDateMemberPath="{TemplateBinding ShiftDateMemberPath}"
+									ShiftItemTemplate="{TemplateBinding ShiftItemTemplate}"
+									ShiftContainerStyle="{TemplateBinding ShiftContainerStyle}"
+									SelectedAppointment="{Binding SelectedAppointment, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+									Granularity="{TemplateBinding Granularity}"/>
 								<local:ScheduleDayGroup Grid.Column="1" 
 									Date="{Binding Days[1], RelativeSource={RelativeSource TemplatedParent}}" 
 									StartTime="{TemplateBinding StartTime}" 
@@ -141,11 +196,17 @@
 									AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}" 
 									DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}"
 									GroupIDMemberPath="{TemplateBinding GroupIDMemberPath}"
-									AppointmentGroupIDMemberPath="{TemplateBinding AppointmentGroupIDMemberPath}"
 									HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+									AppointmentGroupIDMemberPath="{TemplateBinding AppointmentGroupIDMemberPath}"
 									AppointmentContainerStyle="{TemplateBinding AppointmentContainerStyle}"
 									AppointmentDateMemberPath="{TemplateBinding AppointmentDateMemberPath}"
-									SelectedAppointment="{Binding SelectedAppointment, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
+									ShiftGroupIDMemberPath="{TemplateBinding ShiftGroupIDMemberPath}"
+									ShiftSource="{TemplateBinding ShiftSource}"
+									ShiftDateMemberPath="{TemplateBinding ShiftDateMemberPath}"
+									ShiftItemTemplate="{TemplateBinding ShiftItemTemplate}"
+									ShiftContainerStyle="{TemplateBinding ShiftContainerStyle}"
+									SelectedAppointment="{Binding SelectedAppointment, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+									Granularity="{TemplateBinding Granularity}"/>
 								<local:ScheduleDayGroup Grid.Column="2" 
 									Date="{Binding Days[2], RelativeSource={RelativeSource TemplatedParent}}" 
 									StartTime="{TemplateBinding StartTime}" 
@@ -154,11 +215,17 @@
 									AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}" 
 									DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}" 
 									GroupIDMemberPath="{TemplateBinding GroupIDMemberPath}"
-									AppointmentGroupIDMemberPath="{TemplateBinding AppointmentGroupIDMemberPath}"
 									HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+									AppointmentGroupIDMemberPath="{TemplateBinding AppointmentGroupIDMemberPath}"
 									AppointmentContainerStyle="{TemplateBinding AppointmentContainerStyle}"
 									AppointmentDateMemberPath="{TemplateBinding AppointmentDateMemberPath}"
-									SelectedAppointment="{Binding SelectedAppointment, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
+									ShiftGroupIDMemberPath="{TemplateBinding ShiftGroupIDMemberPath}"
+									ShiftSource="{TemplateBinding ShiftSource}"
+									ShiftDateMemberPath="{TemplateBinding ShiftDateMemberPath}"
+									ShiftItemTemplate="{TemplateBinding ShiftItemTemplate}"
+									ShiftContainerStyle="{TemplateBinding ShiftContainerStyle}"
+									SelectedAppointment="{Binding SelectedAppointment, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+									Granularity="{TemplateBinding Granularity}"/>
 								<local:ScheduleDayGroup Grid.Column="3" 
 									Date="{Binding Days[3], RelativeSource={RelativeSource TemplatedParent}}"
 									StartTime="{TemplateBinding StartTime}" 
@@ -167,11 +234,17 @@
 									AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}" 
 									DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}"
 									GroupIDMemberPath="{TemplateBinding GroupIDMemberPath}"
-									AppointmentGroupIDMemberPath="{TemplateBinding AppointmentGroupIDMemberPath}"
 									HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+									AppointmentGroupIDMemberPath="{TemplateBinding AppointmentGroupIDMemberPath}"
 									AppointmentContainerStyle="{TemplateBinding AppointmentContainerStyle}"
 									AppointmentDateMemberPath="{TemplateBinding AppointmentDateMemberPath}"
-									SelectedAppointment="{Binding SelectedAppointment, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
+									ShiftGroupIDMemberPath="{TemplateBinding ShiftGroupIDMemberPath}"
+									ShiftSource="{TemplateBinding ShiftSource}"
+									ShiftDateMemberPath="{TemplateBinding ShiftDateMemberPath}"
+									ShiftItemTemplate="{TemplateBinding ShiftItemTemplate}"
+									ShiftContainerStyle="{TemplateBinding ShiftContainerStyle}"
+									SelectedAppointment="{Binding SelectedAppointment, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+									Granularity="{TemplateBinding Granularity}"/>
 								<local:ScheduleDayGroup Grid.Column="4" 
 									Date="{Binding Days[4], RelativeSource={RelativeSource TemplatedParent}}" 
 									StartTime="{TemplateBinding StartTime}" 
@@ -180,11 +253,17 @@
 									AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}" 
 									DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}" 
 									GroupIDMemberPath="{TemplateBinding GroupIDMemberPath}"
-									AppointmentGroupIDMemberPath="{TemplateBinding AppointmentGroupIDMemberPath}"
 									HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+									AppointmentGroupIDMemberPath="{TemplateBinding AppointmentGroupIDMemberPath}"
 									AppointmentContainerStyle="{TemplateBinding AppointmentContainerStyle}"
 									AppointmentDateMemberPath="{TemplateBinding AppointmentDateMemberPath}"
-									SelectedAppointment="{Binding SelectedAppointment, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
+									ShiftGroupIDMemberPath="{TemplateBinding ShiftGroupIDMemberPath}"
+									ShiftSource="{TemplateBinding ShiftSource}"
+									ShiftDateMemberPath="{TemplateBinding ShiftDateMemberPath}"
+									ShiftItemTemplate="{TemplateBinding ShiftItemTemplate}"
+									ShiftContainerStyle="{TemplateBinding ShiftContainerStyle}"
+									SelectedAppointment="{Binding SelectedAppointment, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+									Granularity="{TemplateBinding Granularity}"/>
 								<local:ScheduleDayGroup Grid.Column="5" 
 									Date="{Binding Days[5], RelativeSource={RelativeSource TemplatedParent}}" 
 									StartTime="{TemplateBinding StartTime}" 
@@ -193,11 +272,17 @@
 									AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}" 
 									DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}" 
 									GroupIDMemberPath="{TemplateBinding GroupIDMemberPath}"
-									AppointmentGroupIDMemberPath="{TemplateBinding AppointmentGroupIDMemberPath}"
 									HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+									AppointmentGroupIDMemberPath="{TemplateBinding AppointmentGroupIDMemberPath}"
 									AppointmentContainerStyle="{TemplateBinding AppointmentContainerStyle}"
 									AppointmentDateMemberPath="{TemplateBinding AppointmentDateMemberPath}"
-									SelectedAppointment="{Binding SelectedAppointment, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
+									ShiftGroupIDMemberPath="{TemplateBinding ShiftGroupIDMemberPath}"
+									ShiftSource="{TemplateBinding ShiftSource}"
+									ShiftDateMemberPath="{TemplateBinding ShiftDateMemberPath}"
+									ShiftItemTemplate="{TemplateBinding ShiftItemTemplate}"
+									ShiftContainerStyle="{TemplateBinding ShiftContainerStyle}"
+									SelectedAppointment="{Binding SelectedAppointment, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+									Granularity="{TemplateBinding Granularity}"/>
 								<local:ScheduleDayGroup Grid.Column="6" 
 									Date="{Binding Days[6], RelativeSource={RelativeSource TemplatedParent}}" 
 									StartTime="{TemplateBinding StartTime}" 
@@ -206,55 +291,18 @@
 									AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}" 
 									DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}" 
 									GroupIDMemberPath="{TemplateBinding GroupIDMemberPath}"
-									AppointmentGroupIDMemberPath="{TemplateBinding AppointmentGroupIDMemberPath}"
 									HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+									AppointmentGroupIDMemberPath="{TemplateBinding AppointmentGroupIDMemberPath}"
 									AppointmentContainerStyle="{TemplateBinding AppointmentContainerStyle}"
 									AppointmentDateMemberPath="{TemplateBinding AppointmentDateMemberPath}"
-									SelectedAppointment="{Binding SelectedAppointment, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
+									ShiftGroupIDMemberPath="{TemplateBinding ShiftGroupIDMemberPath}"
+									ShiftSource="{TemplateBinding ShiftSource}"
+									ShiftDateMemberPath="{TemplateBinding ShiftDateMemberPath}"
+									ShiftItemTemplate="{TemplateBinding ShiftItemTemplate}"
+									ShiftContainerStyle="{TemplateBinding ShiftContainerStyle}"
+									SelectedAppointment="{Binding SelectedAppointment, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+									Granularity="{TemplateBinding Granularity}"/>
 							</Grid>
-						</local:NonMouseWheelScrollViewer>
-						<Path Stretch="Fill" Stroke="Black" HorizontalAlignment="Right" Data="M0,0 L0,1" Grid.Column="2" Grid.RowSpan="3"/>
-						<local:ScheduleTimeBar x:Name="RightTimeBar" Grid.Row="2" Grid.Column="3" Granularity="{TemplateBinding Granularity}" HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" StartTime="{TemplateBinding StartTime}" VerticalAlignment="Top" TimeBlockStyle="{StaticResource RightAlignedTimeBlockStyle}"/>
-						<ScrollBar Grid.Row="2" Grid.Column="4" Value="{Binding StartTime, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource DateTimeToMinutesConverter}, Mode=TwoWay}" SmallChange="{Binding Granularity, RelativeSource={RelativeSource TemplatedParent}}" LargeChange="60" ViewportSize="{Binding VisibleMinutes, ElementName=TimeBar}" Maximum="{Binding VisibleMinutes, Converter={StaticResource RemainingMinutesConverter}, ElementName=TimeBar}"/>
-					</Grid>
-				</ControlTemplate>
-			</Setter.Value>
-		</Setter>
-	</Style>
-
-	<Style TargetType="{x:Type local:Scheduler}">
-		<Setter Property="Template">
-			<Setter.Value>
-				<ControlTemplate TargetType="{x:Type local:Scheduler}">
-					<Grid d:DesignWidth="600" d:DesignHeight="300" Grid.IsSharedSizeScope="True" SnapsToDevicePixels="True">
-						<Grid.RowDefinitions>
-							<RowDefinition Height="Auto" SharedSizeGroup="GroupHeaderHeight"/>
-							<RowDefinition Height="Auto" SharedSizeGroup="DayHeaderHeight"/>
-							<RowDefinition Height="*"/>
-						</Grid.RowDefinitions>
-						<Grid.ColumnDefinitions>
-							<ColumnDefinition Width="Auto"/>
-							<ColumnDefinition Width="Auto"/>
-							<ColumnDefinition Width="*"/>
-							<ColumnDefinition Width="Auto"/>
-							<ColumnDefinition Width="Auto"/>
-						</Grid.ColumnDefinitions>
-						<local:ScheduleTimeBar x:Name="TimeBar" Grid.Row="2" Granularity="{TemplateBinding Granularity}" HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" StartTime="{TemplateBinding StartTime}" VerticalAlignment="Top" />
-						<Path Stretch="Fill" Stroke="Black" HorizontalAlignment="Left" Data="M0,0 L0,1" Grid.Column="1" Grid.RowSpan="3"/>
-						<local:NonMouseWheelScrollViewer Grid.Column="2" Grid.RowSpan="3" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-							<local:ScheduleDayGroup Grid.Column="0"
-								Date="{Binding StartDate, RelativeSource={RelativeSource TemplatedParent}}"
-								StartTime="{TemplateBinding StartTime}"
-								ItemsSource="{TemplateBinding GroupSource}"
-								AppointmentSource="{TemplateBinding AppointmentSource}"
-								AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}"
-								DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}"
-								GroupIDMemberPath="{TemplateBinding GroupIDMemberPath}"
-								HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
-								AppointmentGroupIDMemberPath="{TemplateBinding AppointmentGroupIDMemberPath}"
-								AppointmentContainerStyle="{TemplateBinding AppointmentContainerStyle}"
-								AppointmentDateMemberPath="{TemplateBinding AppointmentDateMemberPath}"
-								SelectedAppointment="{Binding SelectedAppointment, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
 						</local:NonMouseWheelScrollViewer>
 						<Path Stretch="Fill" Stroke="Black" HorizontalAlignment="Right" Data="M0,0 L0,1" Grid.Column="2" Grid.RowSpan="3"/>
 						<local:ScheduleTimeBar x:Name="RightTimeBar" Grid.Row="2" Grid.Column="3" Granularity="{TemplateBinding Granularity}" HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" StartTime="{TemplateBinding StartTime}" VerticalAlignment="Top" TimeBlockStyle="{StaticResource RightAlignedTimeBlockStyle}"/>
@@ -297,6 +345,7 @@
 
 	<Style x:Key="ScheduleDayTimeBlock" TargetType="{x:Type local:ScheduleTimeBlock}">
 		<Setter Property="IsTabStop" Value="False" />
+		<Setter Property="Background" Value="{x:Null}" />
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type local:ScheduleTimeBlock}">
@@ -304,7 +353,12 @@
 						<Grid.RowDefinitions>
 							<RowDefinition Height="20" />	<!--SharedSizeGroup="BlockHeight" MinHeight="10"-->
 						</Grid.RowDefinitions>
-						<Border x:Name="border" ToolTip="{Binding Time, Converter={StaticResource ScheduleTimeBlockTimeConverter}, RelativeSource={RelativeSource TemplatedParent}}" Background="#00000000" />
+						<Border x:Name="border" ToolTip="{Binding Time, Converter={StaticResource ScheduleTimeBlockTimeConverter}, RelativeSource={RelativeSource TemplatedParent}}" Background="Transparent" >
+							<Border.ContextMenu>
+								<ContextMenu x:Name="DayTimeBlockMenu"/>
+								<!-- Can be handled through a routed event onContextMenuSystem -->
+							</Border.ContextMenu>
+						</Border>
 						<Path x:Name="path" Stretch="Fill" Stroke="#FF8A8787" VerticalAlignment="Top" Height="1" Data="M0,0 L1,0" />
 					</Grid>
 					<ControlTemplate.Triggers>
@@ -336,7 +390,20 @@
 							<RowDefinition/>
 						</Grid.RowDefinitions>
 						<ContentPresenter Margin="4,2" Content="{TemplateBinding Header}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-						<local:ScheduleTimeBar x:Name="TimeBar" Grid.Row="1" VerticalAlignment="Top" TimeBlockStyle="{StaticResource ScheduleDayTimeBlock}" StartTime="{TemplateBinding StartTime}" HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWayToSource}"/>
+						<ItemsControl Grid.Row="1" VerticalAlignment="Top" ItemsSource="{TemplateBinding ShiftView}" ItemTemplate="{TemplateBinding ShiftItemTemplate}" ItemContainerStyle="{TemplateBinding ShiftContainerStyle}">
+							<ItemsControl.ItemsPanel>
+								<ItemsPanelTemplate>
+									<local:ScheduleDayAppointments
+										StartTime="{Binding StartTime, RelativeSource={RelativeSource AncestorType={x:Type local:ScheduleDay}}}"
+										Granularity="{Binding Granularity, RelativeSource={RelativeSource AncestorType={x:Type local:ScheduleDay}}}"
+										BlockHeight="{Binding TimeBar.BlockHeight, RelativeSource={RelativeSource AncestorType={x:Type local:ScheduleDay}}}"
+									/>
+								</ItemsPanelTemplate>
+							</ItemsControl.ItemsPanel>
+						</ItemsControl>
+						<local:ScheduleTimeBar x:Name="TimeBar" Grid.Row="1" VerticalAlignment="Top" TimeBlockStyle="{StaticResource ScheduleDayTimeBlock}" 
+							StartTime="{TemplateBinding StartTime}" Granularity="{TemplateBinding Granularity}"
+							HighlightedTime="{Binding HighlightedTime, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWayToSource}"/>
 						<!-- TODO: ItemsControl for shifts -->
 						<ItemsPresenter Grid.Row="1"/>
 						<Path x:Name="path" Stretch="Fill" Stroke="Black" HorizontalAlignment="Right" Width="1" Data="M0,0 L0,1" Grid.RowSpan="2" Margin="0,0,0,0"/>

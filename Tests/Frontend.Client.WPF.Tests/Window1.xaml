@@ -26,9 +26,12 @@
 		
 		<Style x:Key="DefaultWeekStyle" TargetType="{x:Type client:ScheduleWeek}" >
 			<Setter Property="GroupHeaderMemberPath" Value="Description" />
-			<Setter Property="GroupIDMemberPath" Value="ProviderID" />
-			<Setter Property="AppointmentGroupIDMemberPath" Value="ProviderID" />
+			<Setter Property="GroupIDMemberPath" Value="Group" />
+			<Setter Property="AppointmentGroupIDMemberPath" Value="Group" />
 			<Setter Property="AppointmentDateMemberPath" Value="Date" />
+			<Setter Property="ShiftGroupIDMemberPath" Value="Group" />
+			<Setter Property="ShiftDateMemberPath" Value="Date" />
+			<Setter Property="Granularity" Value="10" />
 			<Setter Property="AppointmentContainerStyle">
 				<Setter.Value>
 			    	<Style TargetType="{x:Type ListBoxItem}">
@@ -55,13 +58,28 @@
 			    	</Style>
 				</Setter.Value>
 			</Setter>
+			<Setter Property="ShiftContainerStyle">
+				<Setter.Value>
+					<Style TargetType="{x:Type ContentPresenter}">
+						<Setter Property="client:ScheduleDayAppointments.Start" Value="{Binding StartTime}" />
+						<Setter Property="client:ScheduleDayAppointments.End" Value="{Binding EndTime}" />
+					</Style>
+				</Setter.Value>
+			</Setter>
+			<Setter Property="ShiftItemTemplate">
+				<Setter.Value>
+					<DataTemplate>
+						<Border Background="#FFEEFFFF" SnapsToDevicePixels="True"/>
+					</DataTemplate>
+				</Setter.Value>
+			</Setter>
 			<Setter Property="AppointmentItemTemplate">
 				<Setter.Value>
 					<DataTemplate>
 						<Border Background="#FFEEEEFF"
 							BorderBrush="#FF4F4F4F"
 							BorderThickness="{Binding IsSelected, Converter={StaticResource IsSelectedToBorderThicknessConverter}, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}}"
-							CornerRadius="3"
+							CornerRadius="4"
 							SnapsToDevicePixels="True"
 							Margin="2,0,4,0"
 							MaxWidth="150"
@@ -97,9 +115,6 @@
 									<MenuItem Header="Delete" /> 
 								</ContextMenu>
 							</ContextMenuService.ContextMenu>
-							<Border.Effect>
-								<DropShadowEffect ShadowDepth="2" Opacity="0.5"/>
-							</Border.Effect>
 							<TextBlock Text="{Binding Description}" Margin="4,2" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"/>
 						</Border>
 					</DataTemplate>

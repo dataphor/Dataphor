@@ -16,27 +16,39 @@ namespace Frontend.Client.WPF.Tests
 		{
 			InitializeComponent();
 			
-			var LAppt = new Appointment { Date = DateTime.Parse("12/1/2009"), Description = "Do thing1", ProviderID = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(8.3d), EndTime = DateTime.MinValue + TimeSpan.FromHours(9d) };
+			var LAppt = new ScheduleData { Date = DateTime.Parse("12/1/2009"), Description = "Do thing1", Group = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(8.3d), EndTime = DateTime.MinValue + TimeSpan.FromHours(9d) };
 			
 			Week.AppointmentSource = 
-				new List<Appointment>
+				new List<ScheduleData>
 				{
 					LAppt,
-					new Appointment { Date = DateTime.Parse("12/1/2009"), Description = "Go to town", ProviderID = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(11d), EndTime = DateTime.MinValue + TimeSpan.FromHours(12.5d) },
-					new Appointment { Date = DateTime.Parse("12/1/2009"), Description = "Ride high", ProviderID = "KarenB", StartTime = DateTime.MinValue + TimeSpan.FromHours(8.75d), EndTime = DateTime.MinValue + TimeSpan.FromHours(9d) },
-					new Appointment { Date = DateTime.Parse("12/1/2009"), Description = "Go to to the place with the stuff", ProviderID = "KarenB", StartTime = DateTime.MinValue + TimeSpan.FromHours(4d), EndTime = DateTime.MinValue + TimeSpan.FromHours(13.5d) },
-					new Appointment { Date = DateTime.Parse("12/2/2009"), Description = "Smile", ProviderID = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(9.25d), EndTime = DateTime.MinValue + TimeSpan.FromHours(9.25d) },
-					new Appointment { Date = DateTime.Parse("12/3/2009"), Description = "Jump up", ProviderID = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(13d), EndTime = DateTime.MinValue + TimeSpan.FromHours(13.75d) },
-					new Appointment { Date = DateTime.Parse("12/4/2009"), Description = "Dop the wallup", ProviderID = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(6d), EndTime = DateTime.MinValue + TimeSpan.FromHours(8.5d) }
+					new ScheduleData { Date = DateTime.Parse("12/1/2009"), Description = "Go to town", Group = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(11d), EndTime = DateTime.MinValue + TimeSpan.FromHours(12.5d) },
+					new ScheduleData { Date = DateTime.Parse("12/1/2009"), Description = "Ride high", Group = "KarenB", StartTime = DateTime.MinValue + TimeSpan.FromHours(8.75d), EndTime = DateTime.MinValue + TimeSpan.FromHours(9d) },
+					new ScheduleData { Date = DateTime.Parse("12/1/2009"), Description = "Go to to the place with the stuff", Group = "KarenB", StartTime = DateTime.MinValue + TimeSpan.FromHours(4d), EndTime = DateTime.MinValue + TimeSpan.FromHours(13.5d) },
+					new ScheduleData { Date = DateTime.Parse("12/2/2009"), Description = "Smile", Group = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(9.25d), EndTime = DateTime.MinValue + TimeSpan.FromHours(9.25d) },
+					new ScheduleData { Date = DateTime.Parse("12/3/2009"), Description = "Jump up", Group = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(13d), EndTime = DateTime.MinValue + TimeSpan.FromHours(13.75d) },
+					new ScheduleData { Date = DateTime.Parse("12/4/2009"), Description = "Dop the wallup", Group = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(6d), EndTime = DateTime.MinValue + TimeSpan.FromHours(8.5d) }
 				};
 			
 			Week.GroupSource =
-				new List<Provider>
+				new List<ScheduleGroupData>
 				{
-					new Provider { ProviderID = "AdrianL", Description = "Adrian Lewis" },
-					new Provider { ProviderID = "KarenB", Description = "Karen Bolton" }
+					new ScheduleGroupData { Group = "AdrianL", Description = "Adrian Lewis" },
+					new ScheduleGroupData { Group = "KarenB", Description = "Karen Bolton" }
 				};
-			
+
+			Week.ShiftSource =
+				new List<ScheduleData>
+				{
+					LAppt,
+					new ScheduleData { Date = DateTime.Parse("12/1/2009"), Description = "Go to town", Group = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(11d), EndTime = DateTime.MinValue + TimeSpan.FromHours(5d) },
+					new ScheduleData { Date = DateTime.Parse("12/1/2009"), Description = "Ride high", Group = "KarenB", StartTime = DateTime.MinValue + TimeSpan.FromHours(6d), EndTime = DateTime.MinValue + TimeSpan.FromHours(10d) },
+					new ScheduleData { Date = DateTime.Parse("12/1/2009"), Description = "Go to to the place with the stuff", Group = "KarenB", StartTime = DateTime.MinValue + TimeSpan.FromHours(4d), EndTime = DateTime.MinValue + TimeSpan.FromHours(16d) },
+					new ScheduleData { Date = DateTime.Parse("12/2/2009"), Description = "Smile", Group = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(8d), EndTime = DateTime.MinValue + TimeSpan.FromHours(13d) },
+					new ScheduleData { Date = DateTime.Parse("12/3/2009"), Description = "Jump up", Group = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(13d), EndTime = DateTime.MinValue + TimeSpan.FromHours(17d) },
+					new ScheduleData { Date = DateTime.Parse("12/4/2009"), Description = "Dop the wallup", Group = "AdrianL", StartTime = DateTime.MinValue + TimeSpan.FromHours(6d), EndTime = DateTime.MinValue + TimeSpan.FromHours(17.5d) }
+				};
+
 			Week.SelectedAppointment = LAppt;
 		}
 		
@@ -46,19 +58,20 @@ namespace Frontend.Client.WPF.Tests
 		}
 
 	}
-	
-	public class Provider : INotifyPropertyChanged
+
+	public class ScheduleGroupData : INotifyPropertyChanged
 	{
-		private string FProviderID;
-		public string ProviderID
+		private object FGroup;
+		/// <summary> Gets and sets the object data used to group items under this grouping. </summary>
+		public object Group
 		{
-			get { return FProviderID; }
+			get { return FGroup; }
 			set
 			{
-				if (FProviderID != value)
+				if (FGroup != value)
 				{
-					FProviderID = value;
-					NotifyPropertyChanged("ProviderID");
+					FGroup = value;
+					NotifyPropertyChanged("Group");
 				}
 			}
 		}
@@ -85,8 +98,8 @@ namespace Frontend.Client.WPF.Tests
 				PropertyChanged(this, new PropertyChangedEventArgs(APropertyName));
 		}
 	}
-	
-	public class Appointment : INotifyPropertyChanged
+
+	public class ScheduleData : INotifyPropertyChanged
 	{
 		private DateTime FDate;
 		public DateTime Date
@@ -98,34 +111,6 @@ namespace Frontend.Client.WPF.Tests
 				{
 					FDate = value;
 					NotifyPropertyChanged("Date");
-				}
-			}
-		}
-
-		private string FProviderID;
-		public string ProviderID
-		{
-			get { return FProviderID; }
-			set
-			{
-				if (FProviderID != value)
-				{
-					FProviderID = value;
-					NotifyPropertyChanged("ProviderID");
-				}
-			}
-		}
-
-		private string FDescription;
-		public string Description
-		{
-			get { return FDescription; }
-			set
-			{
-				if (FDescription != value)
-				{
-					FDescription = value;
-					NotifyPropertyChanged("Description");
 				}
 			}
 		}
@@ -158,6 +143,36 @@ namespace Frontend.Client.WPF.Tests
 			}
 		}
 
+		private object FGroup;
+		/// <summary> Gets and sets the object data used to group this item. </summary>
+		public object Group
+		{
+			get { return FGroup; }
+			set
+			{
+				if (FGroup != value)
+				{
+					FGroup = value;
+					NotifyPropertyChanged("Group");
+				}
+			}
+		}
+
+		private string FDescription;
+		/// <summary> Gets and sets the textual description of the item. </summary>
+		public string Description
+		{
+			get { return FDescription; }
+			set
+			{
+				if (FDescription != value)
+				{
+					FDescription = value;
+					NotifyPropertyChanged("Description");
+				}
+			}
+		}
+
 		public event PropertyChangedEventHandler PropertyChanged;
 
 		protected void NotifyPropertyChanged(string APropertyName)
@@ -166,7 +181,7 @@ namespace Frontend.Client.WPF.Tests
 				PropertyChanged(this, new PropertyChangedEventArgs(APropertyName));
 		}
 	}
-
+	
 	public class FullDateToStringConverter : IValueConverter
 	{
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
