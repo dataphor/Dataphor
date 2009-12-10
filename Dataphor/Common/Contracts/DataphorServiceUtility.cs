@@ -59,8 +59,8 @@ namespace Alphora.Dataphor.DAE.Contracts
 		{
 			return String.Format("{0}://{1}:{2}", GetScheme(ASecure), AHostName, APortNumber);
 		}
-		
-		public const int CMaxMessageLength = 10485760;
+
+		public const int CMaxMessageLength = 2147483647;
 
 		public static Binding GetBinding(bool ASecure)
 		{
