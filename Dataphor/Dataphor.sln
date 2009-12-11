@@ -447,9 +447,7 @@ Global
 		{169E2E4D-8FEE-4425-981A-324128D572B4}.BaseDebug|Any CPU.ActiveCfg = Debug|Any CPU
 		{169E2E4D-8FEE-4425-981A-324128D572B4}.BaseDebug|Any CPU.Build.0 = Debug|Any CPU
 		{169E2E4D-8FEE-4425-981A-324128D572B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{169E2E4D-8FEE-4425-981A-324128D572B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{169E2E4D-8FEE-4425-981A-324128D572B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{169E2E4D-8FEE-4425-981A-324128D572B4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
