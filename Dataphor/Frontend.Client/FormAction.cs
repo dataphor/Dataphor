@@ -14,6 +14,9 @@ using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Client;
 using Schema = Alphora.Dataphor.DAE.Schema;
+using Alphora.Dataphor.DAE.Language;
+using System.Collections.Generic;
+using Alphora.Dataphor.DAE.Language.D4;
 
 namespace Alphora.Dataphor.Frontend.Client
 {
@@ -680,6 +683,7 @@ namespace Alphora.Dataphor.Frontend.Client
 				    AForm.MainSource.Filter = FFilter;
                 if (FParams != null)
 				    AForm.MainSource.Params = FParams;
+				AForm.MainSource.Default += new DataLinkHandler(DefaultData);
 			}
 
 			if (FSourceLink != null) 
@@ -716,10 +720,174 @@ namespace Alphora.Dataphor.Frontend.Client
 				FBeforeFormActivated.Execute(this, new EventParams("AForm", AForm));
 		}
 
+		protected virtual void DefaultData(DataLink ALink, DataSet ADataSet)
+		{
+			foreach (Node LChild in Children)
+			{
+				var LDefault = LChild as DataDefault;
+				if (LDefault != null)
+					LDefault.PerformDefault(ALink);
+			}
+		}
+
 		protected void InternalAfterActivateForm(IFormInterface AForm)
 		{
 			if (FAfterFormActivated != null)
 				FAfterFormActivated.Execute(this, new EventParams("AForm", AForm));
+		}
+
+		public override bool IsValidChild(Type AChildType)
+		{
+			return typeof(DataDefault).IsAssignableFrom(AChildType) || base.IsValidChild(AChildType);
+		}
+	}
+
+	[DesignerImage("Image('Frontend', 'Nodes.DataArgument')")]
+	[DesignerCategory("Non Visual")]
+	public abstract class DataDefault : Node, IDataDefault
+	{
+		// TargetColumn
+
+		private string FTargetColumns = String.Empty;
+		[DefaultValue("")]
+		[Description("The comma or semicolon separated list of columns in the Target source that are to be defaulted.")]
+		public string TargetColumns
+		{
+			get { return FTargetColumns; }
+			set { FTargetColumns = value; }
+		}
+		
+		// Enabled
+		
+		private bool FEnabled = true;
+		[DefaultValue(true)]
+		[Description("The default will only be performed if Enabled is true.")]
+		public bool Enabled
+		{
+			get { return FEnabled; }
+			set { FEnabled = value; }
+		}
+		
+		protected virtual bool GetEnabled()
+		{
+			return FEnabled && !String.IsNullOrEmpty(FTargetColumns);
+		}
+		
+		protected internal void PerformDefault(DataLink ALink)
+		{
+			if (FEnabled && ALink.Active)
+				InternalPerformDefault(ALink, FTargetColumns.Split(';', ','));
+		}
+		
+		protected abstract void InternalPerformDefault(DataLink ALink, string[] ATargetColumns);
+	}
+
+	public class DataSourceDefault : DataDefault, ISourceReference, IDataSourceDefault
+	{
+		protected override void Dispose(bool ADisposing)
+		{
+			base.Dispose(ADisposing);
+			Source = null;
+		}
+
+		// Source
+
+		private ISource FSource;
+		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
+		[Description("The source from which to pull the data.")]
+		public ISource Source
+		{
+			get { return FSource; }
+			set
+			{
+				if (FSource != value)
+				{
+					if (FSource != null)
+						FSource.Disposed -= new EventHandler(SourceDisposed);
+					FSource = value;
+					if (FSource != null)
+						FSource.Disposed += new EventHandler(SourceDisposed);
+				}
+			}
+		}
+
+		private void SourceDisposed(object ASender, EventArgs AArgs)
+		{
+			Source = null;
+		}
+
+		// SourceColumn
+
+		private string FSourceColumns = String.Empty;
+		[DefaultValue("")]
+		[Description("The columns in the Source source that are to be used to default from.")]
+		public string SourceColumns
+		{
+			get { return FSourceColumns; }
+			set { FSourceColumns = value; }
+		}
+
+		protected override bool GetEnabled()
+		{
+			return (FSource != null) && (FSource.DataView != null) && FSource.DataView.Active && !String.IsNullOrEmpty(FSourceColumns) && base.GetEnabled();
+		}
+		
+		protected override void InternalPerformDefault(DataLink ALink, string[] ATargetColumns)
+		{
+			var LSourceColumns = FSourceColumns.Split(',', ';');
+			for (int i = 0; i < Math.Min(LSourceColumns.Length, ATargetColumns.Length); i++)
+			{
+				var LSourceField = FSource[LSourceColumns[i].Trim()];
+				var LTargetField = ALink.DataSet[ATargetColumns[i].Trim()];
+				if (LSourceField.HasValue())
+					LTargetField.AsNative = LSourceField.AsNative;
+				else
+					LTargetField.ClearValue();
+			}
+		}
+	}
+	
+	public class DataValueDefault : DataDefault, IDataValueDefault
+	{
+		// SourceValue
+
+		private string FSourceValues = String.Empty;
+		[Description("Source values in D4 list literal format (e.g. 'String value', nil, 5 )")]
+		public string SourceValues
+		{
+			get { return FSourceValues; }
+			set 
+			{
+				value = value == null ? String.Empty : value;
+				var LExpressions = new Alphora.Dataphor.DAE.Language.D4.Parser().ParseExpressionList(value);
+				// validate that all expressions are literals
+				foreach (Expression LExpression in LExpressions)
+					if (!(LExpression is ValueExpression))
+						throw new ClientException(ClientException.Codes.ValueExpressionExpected);
+				FSourceValueExpressions = LExpressions;
+				FSourceValues = value; 
+			}
+		}
+
+		private List<Expression> FSourceValueExpressions;
+
+		protected override void InternalPerformDefault(DataLink ALink, string[] ATargetColumns)
+		{
+			if (FSourceValueExpressions != null)
+				for (int i = 0; i < Math.Min(FSourceValueExpressions.Count, ATargetColumns.Length); i++)
+				{
+					var LTargetField = ALink.DataSet[ATargetColumns[i].Trim()];
+					var LSource = (ValueExpression)FSourceValueExpressions[i];
+					switch (LSource.Token)
+					{
+						case TokenType.Boolean : LTargetField.AsBoolean = (bool)LSource.Value; break;
+						case TokenType.Decimal : LTargetField.AsDecimal = (decimal)LSource.Value; break;
+						case TokenType.Integer : LTargetField.AsInt32 = (int)LSource.Value; break;
+						case TokenType.Money : LTargetField.AsDecimal = (decimal)LSource.Value; break;
+						case TokenType.Nil : LTargetField.ClearValue(); break;
+						case TokenType.String : LTargetField.AsString = (string)LSource.Value; break;
+					}
+				}
 		}
 	}
 

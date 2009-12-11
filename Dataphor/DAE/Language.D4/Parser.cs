@@ -12,6 +12,7 @@ using System.IO;
 using Alphora.Dataphor;
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Language;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.DAE.Language.D4
 {
@@ -320,6 +321,37 @@ namespace Alphora.Dataphor.DAE.Language.D4
 						FLexer.NextToken();
 					FLexer[0].CheckSymbol(Keywords.Aggregate);
 					return CreateAggregateOperatorStatement(1, 1, LSession, true);
+				}
+				catch (Exception E)
+				{
+					throw new SyntaxException(FLexer, E);
+				}
+			}
+			finally
+			{
+				FLexer = null;
+			}
+		}
+
+		/*
+			BNF:
+			<expression list>
+		*/
+		public List<Expression> ParseExpressionList(string AInput)
+		{
+			FLexer = new Lexer(AInput);
+			try
+			{
+				try
+				{
+					var LResult = new List<Expression>();
+					while (FLexer.PeekToken(1).Type != TokenType.EOF)
+					{
+						LResult.Add(Expression());
+						if (FLexer.PeekToken(1).Type == TokenType.Symbol)
+							FLexer.NextToken().CheckSymbol(Keywords.ListSeparator);
+					}
+					return LResult;
 				}
 				catch (Exception E)
 				{

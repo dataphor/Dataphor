@@ -700,17 +700,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				if (LMenu.Name == "DayTimeBlockMenu")
 				{
 					LMenu.Items.Clear();
-					BuildMenu(LMenu, typeof(ScheduleTimeBlockVerb));
+					BuildMenu(LMenu, typeof(ScheduleTimeBlockVerb), LItem);
 				}
 				else if (LMenu.Name == "AppointmentMenu")
 				{
 					LMenu.Items.Clear();
-					BuildMenu(LMenu, typeof(ScheduleAppointmentVerb));
+					BuildMenu(LMenu, typeof(ScheduleAppointmentVerb), LItem);
 				}
 			}
 		}
 
-		protected virtual void BuildMenu(ContextMenu AMenu, Type AType)
+		protected virtual void BuildMenu(ContextMenu AMenu, Type AType, object AOwner)
 		{
 			foreach (INode LChild in Children)
 			{
@@ -718,7 +718,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				{
 					var LVerb = LChild as BaseVerb;
 					if (LVerb != null)
-						AMenu.Items.Add(LVerb.BuildMenuItem());
+						AMenu.Items.Add(LVerb.BuildMenuItem(AOwner));
 				}
 			}
 		}
@@ -757,7 +757,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		}
 	}
 
-	public class BaseVerb : Node
+	public abstract class BaseVerb : Node
 	{
 		protected override void Dispose(bool ADisposing)
 		{
@@ -832,44 +832,38 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return (Action == null ? false : Action.GetEnabled()) && FEnabled;
 		}
 		
-		protected internal virtual MenuItem BuildMenuItem()
+		protected internal virtual MenuItem BuildMenuItem(object AOwner)
 		{
 			var LItem = 
 				new MenuItem
 				{
 					Header = GetText(),
 					IsEnabled = GetEnabled(),
-					Icon = (Action == null ? null : LoadBitmap(((Action)Action).LoadedImage))
+					Icon = (Action == null ? null : new System.Windows.Controls.Image() { Source = ImageToBitmapSource(((Action)Action).LoadedImage) }),
+					Tag = AOwner
 				};
 			LItem.Click += new RoutedEventHandler(ItemClicked);
 			return LItem;
 		}
 		
-		private void ItemClicked(object ASender, RoutedEventArgs AArgs)
-		{
-			if (Action != null)
-			{
-				AArgs.Handled = true;
-				Action.Execute(this, new EventParams("AData", ((FrameworkElement)AArgs.OriginalSource).DataContext));
-			}
-		}
+		protected abstract void ItemClicked(object ASender, RoutedEventArgs AArgs);
 
 		[System.Runtime.InteropServices.DllImport("gdi32")]
 		private static extern int DeleteObject(IntPtr o);
 		
 		/// <summary> Convert from a WinForms bitmap to a WPF ImageSource. </summary>
 		/// <remarks> Credits: http://stackoverflow.com/questions/1118496/using-image-control-in-wpf-to-display-system-drawing-bitmap/1118557#1118557 </remarks>
-		public static BitmapSource LoadBitmap(System.Drawing.Image ASource) 
+		public static BitmapSource ImageToBitmapSource(System.Drawing.Image ASource) 
 		{ 
 			var LSource = ASource as System.Drawing.Bitmap;
 			if (LSource != null)
 			{
-				IntPtr ip = LSource.GetHbitmap(); 
+				IntPtr LHandle = LSource.GetHbitmap(); 
 				try 
 				{ 
 					return System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap
 					(
-						ip, 
+						LHandle, 
 						IntPtr.Zero, 
 						Int32Rect.Empty, 
 						System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions()
@@ -877,7 +871,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				} 
 				finally 
 				{ 
-					DeleteObject(ip); 
+					DeleteObject(LHandle); 
 				} 
 			}
 			else
@@ -889,12 +883,51 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	[DesignerCategory("Data Controls")]
 	public class ScheduleAppointmentVerb : BaseVerb
 	{
+		protected override void ItemClicked(object ASender, RoutedEventArgs AArgs)
+		{
+			if (Action != null)
+			{
+				AArgs.Handled = true;
+				var LAppointment = WPF.Utilities.GetAncestorOfTypeInVisualTree<ListBoxItem>((FrameworkElement)((MenuItem)ASender).Tag);
+				var LDay = WPF.Utilities.GetAncestorOfTypeInVisualTree<ScheduleDay>((FrameworkElement)((MenuItem)ASender).Tag);
+				var LParams = new EventParams();
+				if (LAppointment != null)
+				{
+					LParams.Add("AStartTime", ScheduleDayAppointments.GetStart(LAppointment));
+					LParams.Add("AEndTime", ScheduleDayAppointments.GetEnd(LAppointment));
+				}
+				if (LDay != null)
+				{
+					LParams.Add("ADate", LDay.Date);
+					LParams.Add("AGroup", LDay.GroupID);
+				}
+				Action.Execute(this, LParams);
+			}
+		}
 	}
 
 	[DesignerImage("Image('Frontend', 'Nodes.Schedule')")]
 	[DesignerCategory("Data Controls")]
 	public class ScheduleTimeBlockVerb : BaseVerb
 	{
+		protected override void ItemClicked(object ASender, RoutedEventArgs AArgs)
+		{
+			if (Action != null)
+			{
+				AArgs.Handled = true;
+				var LTimeBlock = WPF.Utilities.GetAncestorOfTypeInVisualTree<ScheduleTimeBlock>((FrameworkElement)((MenuItem)ASender).Tag);
+				var LDay = WPF.Utilities.GetAncestorOfTypeInVisualTree<ScheduleDay>((FrameworkElement)((MenuItem)ASender).Tag);
+				var LParams = new EventParams();
+				if (LTimeBlock != null)
+					LParams.Add("ATime", LTimeBlock.Time);
+				if (LDay != null)
+				{
+					LParams.Add("ADate", LDay.Date);
+					LParams.Add("AGroup", LDay.GroupID);
+				}
+				Action.Execute(this, LParams);
+			}
+		}
 	}
 
 	public class ScheduleWeekGrouped : ScheduleDayGrouped

@@ -142,6 +142,12 @@ namespace Alphora.Dataphor.Frontend.Client
 			remove { FDataLink.OnRowChanged -= value; }
 		}
 		
+		public event DataLinkHandler Default
+		{
+			add { FDataLink.OnDefault += value; }
+			remove { FDataLink.OnDefault -= value; }
+		}
+		
 		// CursorType
 		
 		private DAE.CursorType FCursorType = DAE.CursorType.Dynamic;

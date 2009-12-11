@@ -52,42 +52,45 @@ namespace Alphora.Dataphor.DAE.Client
 
 		protected override void Dispose(bool ADisposing)
 		{
-			FDisposing = true;
-			try
+			if (ADisposing)	// If not being properly disposed, don't bother, just causes errors
 			{
+				FDisposing = true;
 				try
 				{
-					InternalDispose(ADisposing);
+					try
+					{
+						InternalDispose(ADisposing);
+					}
+					finally
+					{
+						base.Dispose(ADisposing);
+
+						if (FFields != null)
+						{
+							FFields.Clear();
+							FFields = null;
+						}
+
+						if (FSources != null)
+						{
+							while(FSources.Count != 0)
+								FSources[FSources.Count - 1].DataSet = null;
+							FSources = null;
+						}
+
+						ClearOriginalRow();
+
+						if (FBuffer != null)
+						{
+							FBuffer.Dispose();
+							FBuffer = null; 
+						}
+					}
 				}
 				finally
 				{
-					base.Dispose(ADisposing);
-
-					if (FFields != null)
-					{
-						FFields.Clear();
-						FFields = null;
-					}
-
-					if (FSources != null)
-					{
-						while(FSources.Count != 0)
-							FSources[FSources.Count - 1].DataSet = null;
-						FSources = null;
-					}
-
-					ClearOriginalRow();
-
-					if (FBuffer != null)
-					{
-						FBuffer.Dispose();
-						FBuffer = null; 
-					}
+					FDisposing = false;
 				}
-			}
-			finally
-			{
-				FDisposing = false;
 			}
 		}
 		
@@ -1726,6 +1729,8 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			if (OnDefault != null)
 				OnDefault(this, EventArgs.Empty);
+			foreach (DataLink LLink in EnumerateLinks())
+				LLink.Default();
 		}
 		
 		/// <summary> Called before posting to validate the DataSet's data. </summary>
@@ -1795,7 +1800,7 @@ namespace Alphora.Dataphor.DAE.Client
 			foreach (DataLink LLink in EnumerateLinks())
 				LLink.PrepareToCancel();
 		}
-
+		
 		public event FieldChangeEventHandler RowChanging;
 
 		/// <summary> Occurs only when the fields in the active record are changing. </summary>
@@ -3176,6 +3181,17 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			if (OnRowChanged != null)
 				OnRowChanged(this, DataSet, AField);
+		}
+
+		/// <summary> Called when determining the default values for a newly inserted row. </summary>
+		/// <remarks> Setting column values in this handler will not set the IsModified of the DataSet. </remarks>
+		public event DataLinkHandler OnDefault;
+		/// <summary> Called when determining the default values for a newly inserted row. </summary>
+		/// <remarks> Setting column values in this handler will not set the IsModified of the DataSet. </remarks>
+		protected internal virtual void Default()
+		{
+			if (OnDefault != null)
+				OnDefault(this, DataSet);
 		}
 
 		/// <summary> Ensures that the link's buffer range encompasses the active row. </summary>

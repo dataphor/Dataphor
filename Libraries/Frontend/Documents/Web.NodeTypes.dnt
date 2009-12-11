@@ -17,6 +17,8 @@
 		<nodetype name="showformaction"/>
 		<nodetype name="scriptaction"/>
 		<nodetype name="timer"/>
+		<nodetype name="datasourcedefault"/>
+		<nodetype name="datavaluedefault"/>
 	</namespace>
 	<namespace name="Alphora.Dataphor.Frontend.Client.Web" assembly="Alphora.Dataphor.Frontend.Client.Web">
 		<nodetype name="forminterface"/>

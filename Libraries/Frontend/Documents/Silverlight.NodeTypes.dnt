@@ -16,6 +16,8 @@
 		<nodetype name="showformaction"/>
 		<nodetype name="lookupaction"/>
 		<nodetype name="scriptaction"/>
+		<nodetype name="datasourcedefault"/>
+		<nodetype name="datavaluedefault"/>
 	</namespace>
 	<namespace name="Alphora.Dataphor.Frontend.Client.Silverlight" assembly="Alphora.Dataphor.Frontend.Client.Silverlight">
 		<nodetype name="forminterface"/>

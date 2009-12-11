@@ -85,6 +85,7 @@
     <Compile Include="Schedule\Scheduler.cs" />
     <Compile Include="Schedule\ScheduleTimeBar.cs" />
     <Compile Include="Schedule\ScheduleTimeBlock.cs" />
+    <Compile Include="Utilities.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

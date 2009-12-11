@@ -41,6 +41,9 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <summary> Called after column-level edits are made to the active row. </summary>
 		event DataLinkFieldHandler RowChanged;
 
+		/// <summary> Called when determining the default values for a newly inserted row. </summary>
+		event DataLinkHandler Default;
+
 		/// <summary> Gets the dataphor <see cref="DataSource"/>. 
 		/// </summary> <doc/>
 		DataSource DataSource { get; }
@@ -492,6 +495,42 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// Cursor Isolation</ulink>.</para>
 		/// </remarks>
 		DAE.CursorIsolation RequestedIsolation { get; set; }
+	}
+
+	/// <summary> Base class for data value defaulting. </summary>
+	public interface IDataDefault
+	{
+		// Published
+
+		/// <summary> The default will only be performed if Enabled is true. </summary> <doc/>
+		bool Enabled { get; set; }
+		
+		/// <summary> The comma or semicolon separated list of columns in the Target source that are to be defaulted. </summary> <doc/>
+		string TargetColumns { get; set; }
+	}
+
+	/// <summary> Defaulting from literal values. </summary> <doc/>
+	public interface IDataValueDefault : IDataDefault
+	{
+		// Published
+
+		/// <summary> Source values in D4 list literal format (e.g. 'String value', nil, 5 ). </summary> <doc/>
+		string SourceValues { get; set; }
+	}
+
+	/// <summary> Defaulting from another data source's values. </summary> <doc/>
+	interface IDataSourceDefault : IDataDefault
+	{
+		// Published
+
+		/// <summary> The source that this node uses to obtain the default value. </summary> <doc/>
+		/// <value> <para>ISource: A source in the same node tree.</para>
+		/// <para>Default: (None)</para> </value>
+		/// <example> Main </example>
+		ISource Source { get; set; }
+
+		/// <summary> Comma or semicolon delimited list of source column names from which to default. </summary> <doc/>
+		string SourceColumns { get; set; }
 	}
 
 	/**************  Interfaces  **************/

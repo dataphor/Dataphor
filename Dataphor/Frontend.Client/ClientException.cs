@@ -112,7 +112,10 @@ namespace Alphora.Dataphor.Frontend.Client
 			SourceNotEnabled = 201146,
 
 			/// <summary>Error code 201147: "Action '{0}' cannot reference itself."</summary>
-			RecursiveActionReference = 201147
+			RecursiveActionReference = 201147,
+			
+			/// <summary>Error code 201148: "Expecting only value expressions in the expression list." </summary>
+			ValueExpressionExpected = 201148,
 		}
 
 		// Resource manager for this exception class

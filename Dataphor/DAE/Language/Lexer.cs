@@ -210,6 +210,16 @@ namespace Alphora.Dataphor.DAE.Language
 
 		/// <summary> Gets the symbol the specified number of tokens ahead without advancing the current token. </summary>
 		/// <remarks> If the token is not a symbol, returns an empty string. </remarks>
+		public LexerToken PeekToken(int ACount)
+		{
+			LexerToken LToken = this[ACount];
+			if (LToken.Type == TokenType.Error)
+				throw LToken.Error;
+			return LToken;
+		}
+
+		/// <summary> Gets the symbol the specified number of tokens ahead without advancing the current token. </summary>
+		/// <remarks> If the token is not a symbol, returns an empty string. </remarks>
 		public string PeekTokenSymbol(int ACount)
 		{
 			LexerToken LToken = this[ACount];

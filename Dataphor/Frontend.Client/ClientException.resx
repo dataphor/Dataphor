@@ -1,134 +1,219 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
-	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-		<xsd:element name="root" msdata:IsDataSet="true">
-			<xsd:complexType>
-				<xsd:choice maxOccurs="unbounded">
-					<xsd:element name="data">
-						<xsd:complexType>
-							<xsd:sequence>
-								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
-							</xsd:sequence>
-							<xsd:attribute name="name" type="xsd:string" />
-							<xsd:attribute name="type" type="xsd:string" />
-							<xsd:attribute name="mimetype" type="xsd:string" />
-						</xsd:complexType>
-					</xsd:element>
-					<xsd:element name="resheader">
-						<xsd:complexType>
-							<xsd:sequence>
-								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-							</xsd:sequence>
-							<xsd:attribute name="name" type="xsd:string" use="required" />
-						</xsd:complexType>
-					</xsd:element>
-				</xsd:choice>
-			</xsd:complexType>
-		</xsd:element>
-	</xsd:schema>
-	<resheader name="ResMimeType">
-		<value>text/microsoft-resx</value>
-	</resheader>
-	<resheader name="Version">
-		<value>1.0.0.0</value>
-	</resheader>
-	<resheader name="Reader">
-		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-	</resheader>
-	<resheader name="Writer">
-		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-	</resheader>
-	<data name="201100">
-		<value>Unable to find value ({0}).</value>
-	</data>
-	<data name="201101">
-		<value>Unable to find modified row.</value>
-	</data>
-	<data name="201102">
-		<value>Cannot perform this operation on a non root node.</value>
-	</data>
-	<data name="201104">
-		<value>Node ({0}) not found.</value>
-	</data>
-	<data name="201105">
-		<value>Node must not be active to perform this operation.</value>
-	</data>
-	<data name="201106">
-		<value>Node must be active to perform this operation.</value>
-	</data>
-	<data name="201107">
-		<value>Node ({0}) of type ({1}) is not a valid child of ({2}).</value>
-	</data>
-	<data name="201108">
-		<value>Cannot add an active node as a child.</value>
-	</data>
-	<data name="201109">
-		<value>Unable to load type table from file ({0}).</value>
-	</data>
-	<data name="201114">
-		<value>Interfaces can only contain a single element node.  Use a container as the base element.</value>
-	</data>
-	<data name="201115">
-		<value>Interface node can contain only one (1) interface element.</value>
-	</data>
-	<data name="201116">
-		<value>MainSource property is not set for interface ({0}).</value>
-	</data>
-	<data name="201117">
-		<value>StaticText width must be at least one (1).</value>
-	</data>
-	<data name="201118">
-		<value>TextBox Height cannot be less than one (1).</value>
-	</data>
-	<data name="201123">
-		<value>Unsupported Script Language ({0}).</value>
-	</data>
-	<data name="201124">
-		<value>Script compiler error: {0}.</value>
-	</data>
-	<data name="201125">
-		<value>The form is already displayed modally.</value>
-	</data>
-	<data name="201127">
-		<value>Invalid node name ({0}).</value>
-	</data>
-	<data name="201128">
-		<value>Choice node ({0}) items must be comma or semicolon separated list of available name-value pairs. (First=1, Second=2)</value>
-	</data>
-	<data name="201130">
-		<value>Invalid argument.  Syntax: &gt;application name&lt;.exe [-alias &gt;alias name&lt;] [-application &gt;application ID&lt;]</value>
-	</data>
-	<data name="201133">
-		<value>The specified notebook page is invalid because it is not a child of this node.</value>
-	</data>
-	<data name="201134">
-		<value>The document returned by the server could not be parsed. Document text: "{0}".</value>
-	</data>
-	<data name="201136">
-		<value>Cannot perform this operation while the server object is connected.</value>
-	</data>
-	<data name="201137">
-		<value>Cannot connect to server.  No server alias specified.</value>
-	</data>
-	<data name="201139">
-		<value>FormMode ({0}) not support when there is no MainSource for the form.</value>
-	</data>
-	<data name="201140">
-		<value>The node types table does not contain required entries.  This usually occurs when 'Frontend' is not included in the library or application requisites.</value>
-	</data>
-	<data name="201141">
-		<value>The specified parent form ({0}) is not found (for modal child).</value>
-	</data>
-	<data name="201142">
-		<value>Unable to locate form ({0}) because it is not visible or is disabled by another form.</value>
-	</data>
-	<data name="201143">
-		<value>Errors occurred while executing the script for ScriptAction "{0}".</value>
-	</data>
-	<data name="201145">
-		<value>Warning: Unable to load windows client settings.</value>
-	</data>
-	<data name="201146"><value>Source must be enabled to perform this operation.</value></data>
-	<data name="201147"><value>Action '{0}' cannot reference itself.</value></data>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="201100" xml:space="preserve">
+    <value>Unable to find value ({0}).</value>
+  </data>
+  <data name="201101" xml:space="preserve">
+    <value>Unable to find modified row.</value>
+  </data>
+  <data name="201102" xml:space="preserve">
+    <value>Cannot perform this operation on a non root node.</value>
+  </data>
+  <data name="201104" xml:space="preserve">
+    <value>Node ({0}) not found.</value>
+  </data>
+  <data name="201105" xml:space="preserve">
+    <value>Node must not be active to perform this operation.</value>
+  </data>
+  <data name="201106" xml:space="preserve">
+    <value>Node must be active to perform this operation.</value>
+  </data>
+  <data name="201107" xml:space="preserve">
+    <value>Node ({0}) of type ({1}) is not a valid child of ({2}).</value>
+  </data>
+  <data name="201108" xml:space="preserve">
+    <value>Cannot add an active node as a child.</value>
+  </data>
+  <data name="201109" xml:space="preserve">
+    <value>Unable to load type table from file ({0}).</value>
+  </data>
+  <data name="201114" xml:space="preserve">
+    <value>Interfaces can only contain a single element node.  Use a container as the base element.</value>
+  </data>
+  <data name="201115" xml:space="preserve">
+    <value>Interface node can contain only one (1) interface element.</value>
+  </data>
+  <data name="201116" xml:space="preserve">
+    <value>MainSource property is not set for interface ({0}).</value>
+  </data>
+  <data name="201117" xml:space="preserve">
+    <value>StaticText width must be at least one (1).</value>
+  </data>
+  <data name="201118" xml:space="preserve">
+    <value>TextBox Height cannot be less than one (1).</value>
+  </data>
+  <data name="201123" xml:space="preserve">
+    <value>Unsupported Script Language ({0}).</value>
+  </data>
+  <data name="201124" xml:space="preserve">
+    <value>Script compiler error: {0}.</value>
+  </data>
+  <data name="201125" xml:space="preserve">
+    <value>The form is already displayed modally.</value>
+  </data>
+  <data name="201127" xml:space="preserve">
+    <value>Invalid node name ({0}).</value>
+  </data>
+  <data name="201128" xml:space="preserve">
+    <value>Choice node ({0}) items must be comma or semicolon separated list of available name-value pairs. (First=1, Second=2)</value>
+  </data>
+  <data name="201130" xml:space="preserve">
+    <value>Invalid argument.  Syntax: &gt;application name&lt;.exe [-alias &gt;alias name&lt;] [-application &gt;application ID&lt;]</value>
+  </data>
+  <data name="201133" xml:space="preserve">
+    <value>The specified notebook page is invalid because it is not a child of this node.</value>
+  </data>
+  <data name="201134" xml:space="preserve">
+    <value>The document returned by the server could not be parsed. Document text: "{0}".</value>
+  </data>
+  <data name="201136" xml:space="preserve">
+    <value>Cannot perform this operation while the server object is connected.</value>
+  </data>
+  <data name="201137" xml:space="preserve">
+    <value>Cannot connect to server.  No server alias specified.</value>
+  </data>
+  <data name="201139" xml:space="preserve">
+    <value>FormMode ({0}) not support when there is no MainSource for the form.</value>
+  </data>
+  <data name="201140" xml:space="preserve">
+    <value>The node types table does not contain required entries.  This usually occurs when 'Frontend' is not included in the library or application requisites.</value>
+  </data>
+  <data name="201141" xml:space="preserve">
+    <value>The specified parent form ({0}) is not found (for modal child).</value>
+  </data>
+  <data name="201142" xml:space="preserve">
+    <value>Unable to locate form ({0}) because it is not visible or is disabled by another form.</value>
+  </data>
+  <data name="201143" xml:space="preserve">
+    <value>Errors occurred while executing the script for ScriptAction "{0}".</value>
+  </data>
+  <data name="201145" xml:space="preserve">
+    <value>Warning: Unable to load windows client settings.</value>
+  </data>
+  <data name="201146" xml:space="preserve">
+    <value>Source must be enabled to perform this operation.</value>
+  </data>
+  <data name="201147" xml:space="preserve">
+    <value>Action '{0}' cannot reference itself.</value>
+  </data>
+  <data name="201148" xml:space="preserve">
+    <value>Expecting only value expressions in the expression list.</value>
+  </data>
 </root>
