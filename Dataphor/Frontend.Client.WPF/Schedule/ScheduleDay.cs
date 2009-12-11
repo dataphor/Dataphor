@@ -348,5 +348,10 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			TimeBar = GetTemplateChild("TimeBar") as ScheduleTimeBar;
 			base.OnApplyTemplate();
 		}
+
+		protected override DependencyObject GetContainerForItemOverride()
+		{
+			return new ScheduleAppointment();
+		}
 	}
 }

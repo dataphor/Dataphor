@@ -11,6 +11,7 @@ using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.Frontend.Client.WPF;
 using Alphora.Dataphor.BOP;
 using System.Windows.Media.Imaging;
+using System.Windows.Media;
 
 namespace Alphora.Dataphor.Frontend.Client.Windows
 {
@@ -651,6 +652,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			FControl.Style = Application.Current.Resources[GetStyle()] as Style;
 			FControl.AddHandler(System.Windows.Controls.ContextMenuService.ContextMenuOpeningEvent, new RoutedEventHandler(ContextMenuOpened));
 			DependencyPropertyDescriptor.FromProperty(Scheduler.SelectedAppointmentProperty, typeof(Scheduler)).AddValueChanged(FControl, new EventHandler(SelectedAppointmentChanged));
+			FControl.MouseDoubleClick += new System.Windows.Input.MouseButtonEventHandler(ControlDoubleClicked);
 			InternalUpdateStartDate();
 						
 			FAppointmentSourceLink = new DataLink();
@@ -693,32 +695,57 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void ContextMenuOpened(object ASender, RoutedEventArgs AArgs)
 		{
-			var LItem = AArgs.OriginalSource as FrameworkElement;
-			if (LItem != null && LItem.ContextMenu != null)
+			var LItem = AArgs.OriginalSource as DependencyObject;
+			if (LItem != null)
 			{
-				var LMenu = LItem.ContextMenu;
-				if (LMenu.Name == "DayTimeBlockMenu")
+				FrameworkElement LElement = Utilities.GetAncestorOfTypeInVisualTree<ScheduleTimeBlock>(LItem);
+				if (LElement != null)
 				{
-					LMenu.Items.Clear();
-					BuildMenu(LMenu, typeof(ScheduleTimeBlockVerb), LItem);
+					AArgs.Handled = true;
+					var LMenu = new ContextMenu();
+					BuildMenu(LMenu, typeof(ScheduleTimeBlockVerb), LElement);
+					if (LMenu.Items.Count > 0)
+					{
+						LElement.ContextMenu = LMenu;
+						LMenu.IsOpen = true;
+					}
 				}
-				else if (LMenu.Name == "AppointmentMenu")
+				else
 				{
-					LMenu.Items.Clear();
-					BuildMenu(LMenu, typeof(ScheduleAppointmentVerb), LItem);
+					LElement = Utilities.GetAncestorOfTypeInVisualTree<ScheduleAppointment>(LItem);
+					if (LElement != null)
+					{
+						AArgs.Handled = true;
+						var LMenu = new ContextMenu();
+						BuildMenu(LMenu, typeof(ScheduleAppointmentVerb), LElement);
+						if (LMenu.Items.Count > 0)
+						{
+							LElement.ContextMenu = LMenu;
+							LMenu.IsOpen = true;
+						}
+					}
 				}
 			}
 		}
 
 		protected virtual void BuildMenu(ContextMenu AMenu, Type AType, object AOwner)
 		{
+			var LFirst = true;
 			foreach (INode LChild in Children)
 			{
 				if (AType.IsAssignableFrom(LChild.GetType()))
 				{
 					var LVerb = LChild as BaseVerb;
 					if (LVerb != null)
-						AMenu.Items.Add(LVerb.BuildMenuItem(AOwner));
+					{
+						var LMenuItem = LVerb.BuildMenuItem(AOwner);
+						if (LFirst)
+						{
+							LMenuItem.FontWeight = FontWeights.Bold;
+							LFirst = false;
+						}
+						AMenu.Items.Add(LMenuItem);
+					}
 				}
 			}
 		}
@@ -754,6 +781,48 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			return typeof(BaseVerb).IsAssignableFrom(AChildType)
 				|| base.IsValidChild(AChildType);
+		}
+
+		private void ControlDoubleClicked(object ASender, System.Windows.Input.MouseButtonEventArgs AArgs)
+		{
+			// Double click executes the enabled appointment verb if on an appointment, or block verb if on a block
+			var LItem = AArgs.OriginalSource as DependencyObject;
+			if (LItem != null)
+			{
+				FrameworkElement LElement = Utilities.GetAncestorOfTypeInVisualTree<ScheduleTimeBlock>(LItem);
+				if (LElement != null)
+				{
+					AArgs.Handled = true;
+					var LVerb = FindFirstVerb(typeof(ScheduleTimeBlockVerb));
+					if (LVerb != null && LVerb.Action != null)
+						LVerb.Execute(AArgs.OriginalSource);
+				}
+				else
+				{
+					LElement = Utilities.GetAncestorOfTypeInVisualTree<ScheduleAppointment>(LItem);
+					if (LElement != null)
+					{
+						AArgs.Handled = true;
+						var LVerb = FindFirstVerb(typeof(ScheduleAppointmentVerb));
+						if (LVerb != null && LVerb.Action != null)
+							LVerb.Execute(AArgs.OriginalSource);
+					}
+				}
+			}
+		}
+
+		private BaseVerb FindFirstVerb(Type AType)
+		{
+			foreach (INode LChild in Children)
+			{
+				if (AType.IsAssignableFrom(LChild.GetType()))
+				{
+					var LVerb = LChild as BaseVerb;
+					if (LVerb != null && LVerb.Enabled)
+						return LVerb;
+				}
+			}
+			return null;
 		}
 	}
 
@@ -846,8 +915,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return LItem;
 		}
 		
-		protected abstract void ItemClicked(object ASender, RoutedEventArgs AArgs);
+		protected virtual void ItemClicked(object ASender, RoutedEventArgs AArgs)
+		{
+			if (Action != null)
+			{
+				AArgs.Handled = true;
+				Execute((FrameworkElement)((MenuItem)ASender).Tag);
+			}
+		}
 
+		public abstract void Execute(object ASender);
+		
 		[System.Runtime.InteropServices.DllImport("gdi32")]
 		private static extern int DeleteObject(IntPtr o);
 		
@@ -883,26 +961,22 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	[DesignerCategory("Data Controls")]
 	public class ScheduleAppointmentVerb : BaseVerb
 	{
-		protected override void ItemClicked(object ASender, RoutedEventArgs AArgs)
+		public override void Execute(object ASender)
 		{
-			if (Action != null)
+			var LAppointment = WPF.Utilities.GetAncestorOfTypeInVisualTree<ListBoxItem>((DependencyObject)ASender);
+			var LDay = WPF.Utilities.GetAncestorOfTypeInVisualTree<ScheduleDay>((DependencyObject)ASender);
+			var LParams = new EventParams();
+			if (LAppointment != null)
 			{
-				AArgs.Handled = true;
-				var LAppointment = WPF.Utilities.GetAncestorOfTypeInVisualTree<ListBoxItem>((FrameworkElement)((MenuItem)ASender).Tag);
-				var LDay = WPF.Utilities.GetAncestorOfTypeInVisualTree<ScheduleDay>((FrameworkElement)((MenuItem)ASender).Tag);
-				var LParams = new EventParams();
-				if (LAppointment != null)
-				{
-					LParams.Add("AStartTime", ScheduleDayAppointments.GetStart(LAppointment));
-					LParams.Add("AEndTime", ScheduleDayAppointments.GetEnd(LAppointment));
-				}
-				if (LDay != null)
-				{
-					LParams.Add("ADate", LDay.Date);
-					LParams.Add("AGroup", LDay.GroupID);
-				}
-				Action.Execute(this, LParams);
+				LParams.Add("AStartTime", ScheduleDayAppointments.GetStart(LAppointment));
+				LParams.Add("AEndTime", ScheduleDayAppointments.GetEnd(LAppointment));
 			}
+			if (LDay != null)
+			{
+				LParams.Add("ADate", LDay.Date);
+				LParams.Add("AGroup", LDay.GroupID);
+			}
+			Action.Execute(this, LParams);
 		}
 	}
 
@@ -910,23 +984,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	[DesignerCategory("Data Controls")]
 	public class ScheduleTimeBlockVerb : BaseVerb
 	{
-		protected override void ItemClicked(object ASender, RoutedEventArgs AArgs)
+		public override void Execute(object ASender)
 		{
-			if (Action != null)
+			var LTimeBlock = WPF.Utilities.GetAncestorOfTypeInVisualTree<ScheduleTimeBlock>((DependencyObject)ASender);
+			var LDay = WPF.Utilities.GetAncestorOfTypeInVisualTree<ScheduleDay>((DependencyObject)ASender);
+			var LParams = new EventParams();
+			if (LTimeBlock != null)
+				LParams.Add("ATime", LTimeBlock.Time);
+			if (LDay != null)
 			{
-				AArgs.Handled = true;
-				var LTimeBlock = WPF.Utilities.GetAncestorOfTypeInVisualTree<ScheduleTimeBlock>((FrameworkElement)((MenuItem)ASender).Tag);
-				var LDay = WPF.Utilities.GetAncestorOfTypeInVisualTree<ScheduleDay>((FrameworkElement)((MenuItem)ASender).Tag);
-				var LParams = new EventParams();
-				if (LTimeBlock != null)
-					LParams.Add("ATime", LTimeBlock.Time);
-				if (LDay != null)
-				{
-					LParams.Add("ADate", LDay.Date);
-					LParams.Add("AGroup", LDay.GroupID);
-				}
-				Action.Execute(this, LParams);
+				LParams.Add("ADate", LDay.Date);
+				LParams.Add("AGroup", LDay.GroupID);
 			}
+			Action.Execute(this, LParams);
 		}
 	}
 
@@ -1075,11 +1145,14 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		}
 	}
 
-	public class IsSelectedToBorderThicknessConverter : IValueConverter
+	public class BooleanToBorderBrushConverter : IValueConverter
 	{
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{
-			return (bool)value ? new Thickness(2) : new Thickness(1);
+			var LBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0x55, 0x55, 0xFF));
+			if (!(bool)value)
+				LBrush.Opacity = 0d;
+			return LBrush;
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

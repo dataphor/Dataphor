@@ -79,6 +79,7 @@
     </Compile>
     <Compile Include="Schedule\Converters.cs" />
     <Compile Include="Schedule\NonMouseWheelScrollViewer.cs" />
+    <Compile Include="Schedule\ScheduleAppointment.cs" />
     <Compile Include="Schedule\ScheduleDay.cs" />
     <Compile Include="Schedule\ScheduleDayAppointments.cs" />
     <Compile Include="Schedule\ScheduleDayGroup.cs" />

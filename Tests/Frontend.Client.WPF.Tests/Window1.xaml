@@ -34,28 +34,14 @@
 			<Setter Property="Granularity" Value="10" />
 			<Setter Property="AppointmentContainerStyle">
 				<Setter.Value>
-			    	<Style TargetType="{x:Type ListBoxItem}">
+			    	<Style TargetType="{x:Type client:ScheduleAppointment}">
 						<Setter Property="client:ScheduleDayAppointments.Start" Value="{Binding StartTime}" />
 						<Setter Property="client:ScheduleDayAppointments.End" Value="{Binding EndTime}" />
 			    		<Setter Property="Background" Value="Transparent"/>
 						<Setter Property="BorderBrush" Value="{x:Null}" />
 						<Setter Property="BorderThickness" Value="0" />
 						<Setter Property="Padding" Value="0" />
-			    		<Setter Property="Template">
-			    			<Setter.Value>
-			    				<ControlTemplate TargetType="{x:Type ListBoxItem}">
-			    					<Border x:Name="Bd" SnapsToDevicePixels="true" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
-			    						<ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
-			    					</Border>
-			    					<ControlTemplate.Triggers>
-			    						<Trigger Property="IsEnabled" Value="false">
-			    							<Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
-			    						</Trigger>
-			    					</ControlTemplate.Triggers>
-			    				</ControlTemplate>
-			    			</Setter.Value>
-			    		</Setter>
-			    	</Style>
+					</Style>
 				</Setter.Value>
 			</Setter>
 			<Setter Property="ShiftContainerStyle">
