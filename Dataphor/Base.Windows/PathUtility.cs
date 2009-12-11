@@ -59,8 +59,8 @@ namespace Alphora.Dataphor.Windows
 			}
 		}
 	}
-	
-	public enum VersionModifier { None, VersionSpecific, BuildSpecific }
+
+	public enum VersionModifier { None, VersionSpecific, BuildSpecific, MajorSpecific }
 
 	/// <summary> Sundry static path related routines. </summary>
 	public sealed class PathUtility
@@ -83,17 +83,20 @@ namespace Alphora.Dataphor.Windows
 			StringBuilder LResult = new StringBuilder(ARoot);
 			LResult.AppendFormat(@"{0}Alphora{0}Dataphor{0}", Path.DirectorySeparatorChar);
 			
-			if ((AModifier == VersionModifier.VersionSpecific) || (AModifier == VersionModifier.BuildSpecific))
+			if (AModifier != VersionModifier.None)
 			{
 				//Append version
 				Version LVersion = typeof(PathUtility).Assembly.GetName().Version;
 				LResult.Append(LVersion.Major.ToString());
-				LResult.Append('.');
-				LResult.Append(LVersion.Minor.ToString());
-				if (AModifier == VersionModifier.BuildSpecific)
+				if (AModifier != VersionModifier.MajorSpecific)
 				{
 					LResult.Append('.');
-					LResult.Append(LVersion.Build.ToString());
+					LResult.Append(LVersion.Minor.ToString());
+					if (AModifier == VersionModifier.BuildSpecific)
+					{
+						LResult.Append('.');
+						LResult.Append(LVersion.Build.ToString());
+					}
 				}
 				LResult.Append(Path.DirectorySeparatorChar);
 			}

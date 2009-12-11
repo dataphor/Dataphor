@@ -59,7 +59,7 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		private static string GetMachineAliasConfigurationFileName()
 		{
-			return Path.Combine(PathUtility.CommonAppDataPath(String.Empty, VersionModifier.None), CAliasConfigurationFileName);
+			return Path.Combine(PathUtility.CommonAppDataPath(String.Empty, VersionModifier.MajorSpecific), CAliasConfigurationFileName);
 		}
 		
 		private static AliasConfiguration LoadMachineAliasConfiguration()
@@ -69,7 +69,7 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		private static string GetUserAliasConfigurationFileName()
 		{
-			return Path.Combine(PathUtility.UserAppDataPath(String.Empty, VersionModifier.None), CAliasConfigurationFileName);
+			return Path.Combine(PathUtility.UserAppDataPath(String.Empty, VersionModifier.MajorSpecific), CAliasConfigurationFileName);
 		}
 		
 		private static AliasConfiguration LoadUserAliasConfiguration()
