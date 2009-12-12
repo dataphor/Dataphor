@@ -234,7 +234,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public abstract object ToScalar(IValueManager AManager, object AValue);
 		
 		/// <summary>Override this method to provide transformation services to the device for a particular data type.</summary>
-		public abstract object FromScalar(object AValue);
+		public abstract object FromScalar(IValueManager AManager, object AValue);
 		
 		/// <summary>Override this method to provide transformation services to the device for stream access data types.</summary>
 		public virtual Stream GetStreamAdapter(IValueManager AManager, Stream AStream)

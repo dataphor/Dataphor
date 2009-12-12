@@ -820,7 +820,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				if (LValue == null)
 					LValueExpression = new CastExpression(new ValueExpression(null, TokenType.Nil), LScalarType.ParameterDomainName());
 				else
-					LValueExpression = new ValueExpression(LScalarType.ParameterFromScalar(LValue));
+					LValueExpression = new ValueExpression(LScalarType.ParameterFromScalar(ADevicePlan.Plan.ValueManager, LValue));
 				
 				if (APlanNode.DataType.Is(ADevicePlan.Plan.Catalog.DataTypes.SystemBoolean) && ADevicePlan.IsBooleanContext())
 					return new BinaryExpression(new ValueExpression(1), "iEqual", LValueExpression);
@@ -3809,7 +3809,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			{
 				LParamValue = LPlanParameter.PlanNode.Execute(AProgram);
 				LParamType = (SQLScalarType)Device.ResolveDeviceScalarType(ADevicePlan.Plan, (Schema.ScalarType)LPlanParameter.PlanNode.DataType);
-                LNativeParamValue = (LParamValue == null) ? null : LParamType.ParameterFromScalar(LParamValue);
+                LNativeParamValue = (LParamValue == null) ? null : LParamType.ParameterFromScalar(AProgram.ValueManager, LParamValue);
                 if (LNativeParamValue != null)
                     SetParameterValueLength(LNativeParamValue, LPlanParameter);
 
@@ -3822,7 +3822,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						LNativeParamValue,
 						LPlanParameter.SQLParameter.Direction,
 						LPlanParameter.SQLParameter.Marker,
-						Device.UseParametersForCursors && AIsCursor ? null : LParamType.ToLiteral(LParamValue)
+						Device.UseParametersForCursors && AIsCursor ? null : LParamType.ToLiteral(AProgram.ValueManager, LParamValue)
 					)
 				);
 			}
@@ -4005,7 +4005,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 								(
 									LParameterName,
 									LScalarType.GetSQLParameterType(LColumn),
-									ARow.HasValue(LIndex) ? LScalarType.ParameterFromScalar(ARow[LIndex]) : null,
+									ARow.HasValue(LIndex) ? LScalarType.ParameterFromScalar(AProgram.ValueManager, ARow[LIndex]) : null,
 									SQLDirection.In, 
 									Device.GetParameterMarker(LScalarType, LColumn)
 								)
@@ -4042,7 +4042,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 								(
 									LParameterName,
 									LScalarType.GetSQLParameterType(LColumn),
-									ARow.HasValue(LIndex) ? LScalarType.ParameterFromScalar(ARow[LIndex]) : null,
+									ARow.HasValue(LIndex) ? LScalarType.ParameterFromScalar(AProgram.ValueManager, ARow[LIndex]) : null,
 									SQLDirection.In,
 									Device.GetParameterMarker(LScalarType, LColumn)
 								)
@@ -4101,7 +4101,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 								(
 									LParameterName, 
 									LScalarType.GetSQLParameterType(LColumn), 
-									ANewRow.HasValue(LIndex) ? LScalarType.ParameterFromScalar(ANewRow[LIndex]) : null, 
+									ANewRow.HasValue(LIndex) ? LScalarType.ParameterFromScalar(AProgram.ValueManager, ANewRow[LIndex]) : null, 
 									SQLDirection.In, 
 									Device.GetParameterMarker(LScalarType, LColumn)
 								)
@@ -4130,7 +4130,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 									(
 										LParameterName, 
 										LScalarType.GetSQLParameterType(LColumn), 
-										AOldRow.HasValue(LRowIndex) ? LScalarType.ParameterFromScalar(AOldRow[LRowIndex]) : null, 
+										AOldRow.HasValue(LRowIndex) ? LScalarType.ParameterFromScalar(AProgram.ValueManager, AOldRow[LRowIndex]) : null, 
 										SQLDirection.In, 
 										Device.GetParameterMarker(LScalarType, LColumn)
 									)
@@ -4203,7 +4203,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 								(
 									LParameterName, 
 									LScalarType.GetSQLParameterType(LColumn), 
-									ARow.HasValue(LRowIndex) ? LScalarType.ParameterFromScalar(ARow[LRowIndex]) : null, 
+									ARow.HasValue(LRowIndex) ? LScalarType.ParameterFromScalar(AProgram.ValueManager, ARow[LRowIndex]) : null, 
 									SQLDirection.In, 
 									Device.GetParameterMarker(LScalarType, LColumn)
 								)
@@ -4749,11 +4749,11 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						LColumnMap.ColumnExpression.ColumnAlias, 
 						LScalarType.GetSQLParameterType(LTableVarColumn), 
 						AKey.HasValue(LIndex) ? 
-							LScalarType.ParameterFromScalar(AKey[LIndex]) : 
+							LScalarType.ParameterFromScalar(Manager, AKey[LIndex]) : 
 							null,
 						SQLDirection.In,
 						DeviceSession.Device.GetParameterMarker(LScalarType, LTableVarColumn),
-						DeviceSession.Device.UseParametersForCursors ? null : LScalarType.ToLiteral(AKey[LIndex])
+						DeviceSession.Device.UseParametersForCursors ? null : LScalarType.ToLiteral(Manager, AKey[LIndex])
 					);
 				AParameters.Add(LParameter);
 				Expression LCondition =	
@@ -5121,11 +5121,11 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 						if (AInValues.HasValue(LInIndex))
 							if (LConversionNode == null)
-								AParameters[LIndex].Value = LScalarType.ParameterFromScalar(AInValues[LInIndex]);
+								AParameters[LIndex].Value = LScalarType.ParameterFromScalar(AProgram.ValueManager, AInValues[LInIndex]);
 							else
 							{
 								SetValueNode(LConversionNode, AInValues.GetValue(LInIndex));
-								AParameters[LIndex].Value = LScalarType.ParameterFromScalar(LConversionNode.Execute(AProgram));
+								AParameters[LIndex].Value = LScalarType.ParameterFromScalar(AProgram.ValueManager, LConversionNode.Execute(AProgram));
 							}
 					break;
 				}

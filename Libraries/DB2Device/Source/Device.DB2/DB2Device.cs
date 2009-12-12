@@ -864,7 +864,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			return Convert.ToInt64(AValue);
 		}
 
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (decimal)(long)AValue;
 		}
@@ -1010,7 +1010,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			return new TimeSpan(Convert.ToInt64(AValue));
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (TimeSpan)AValue;
 		}
@@ -1090,7 +1090,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			get { return FDateFormat;}
 		}
 		
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -1103,7 +1103,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			return (DateTime)AValue;
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (DateTime)AValue;
 		}
@@ -1123,7 +1123,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			return DateTime.ParseExact((string)AValue, DateFormat, DateTimeFormatInfo.InvariantInfo);
 		}
 		
-		public override object ParameterFromScalar(object AValue)
+		public override object ParameterFromScalar(IValueManager AManager, object AValue)
 		{						
 			return ((DateTime)AValue).ToString(DateFormat);
 		}
@@ -1156,7 +1156,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			set { FDateTimeFormat = value; }
 		}
 
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -1169,7 +1169,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			return (DateTime)AValue;
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (DateTime)AValue;
 		}
@@ -1202,7 +1202,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			set { FDateTimeFormat = value; }
 		}
 
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -1215,7 +1215,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			return (DateTime)AValue;
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (DateTime)AValue;
 		}
@@ -1241,7 +1241,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 				);
 		}
 		
-		public override object ParameterFromScalar(object AValue)
+		public override object ParameterFromScalar(IValueManager AManager, object AValue)
 		{
 			return ((DateTime)AValue).ToString(DateTimeFormat);
 		}
@@ -1274,7 +1274,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			set { FTimeFormat = value; }
 		}
 
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -1288,7 +1288,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			return new DateTime(1, 1, 1, LDateTime.Hour, LDateTime.Minute, LDateTime.Second, LDateTime.Millisecond);
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return new TimeSpan(((DateTime)AValue).Ticks);
 		}
@@ -1321,7 +1321,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			set { FTimeFormat = value; }
 		}
 
-		public override string ToLiteral(object AValue)
+		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
@@ -1335,7 +1335,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			return new DateTime(1, 1, 1, LDateTime.Hour, LDateTime.Minute, LDateTime.Second, LDateTime.Millisecond);
 		}
 		
-		public override object FromScalar(object AValue)
+		public override object FromScalar(IValueManager AManager, object AValue)
 		{
 			return (DateTime)AValue;
 		}
@@ -1355,7 +1355,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			return DateTime.ParseExact((string)AValue, TimeFormat, DateTimeFormatInfo.InvariantInfo);
 		}
 		
-		public override object ParameterFromScalar(object AValue)
+		public override object ParameterFromScalar(IValueManager AManager, object AValue)
 		{
 			return ((DateTime)AValue).ToString(TimeFormat);
 		}

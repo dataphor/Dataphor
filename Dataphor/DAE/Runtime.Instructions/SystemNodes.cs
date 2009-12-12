@@ -488,12 +488,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			#endif
 
-			// TODO: Streams and binary data types
 			using (Scalar LScalar = new Scalar(AProgram.ValueManager, (Schema.ScalarType)FDataType, AProgram.StreamManager.Allocate()))
 			{
 				LScalar.AsBase64String = (string)AArgument1;
-				LScalar.ValuesOwned = false;
-				return LScalar.AsNative;
+				return LScalar.StreamID;
 			}
 		}
     }
@@ -513,7 +511,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			#endif
 			
-			// TODO: Streams and binary data types
 			using 
 			(
 				Scalar LScalar = 
@@ -547,7 +544,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			using (Scalar LScalar = new Scalar(AProgram.ValueManager, (Schema.ScalarType)FDataType, (StreamID)AArgument1))
 			{
 				LScalar.AsBase64String = (string)AArgument2;
-				return LScalar.AsNative;
+				return LScalar.StreamID;
 			}
 		}
     }
