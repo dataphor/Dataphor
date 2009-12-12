@@ -906,7 +906,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			var LItem = 
 				new MenuItem
 				{
-					Header = GetText(),
+					Header = TitleUtility.RemoveAccellerators(GetText()),
 					IsEnabled = GetEnabled(),
 					Icon = (Action == null ? null : new System.Windows.Controls.Image() { Source = ImageToBitmapSource(((Action)Action).LoadedImage) }),
 					Tag = AOwner
