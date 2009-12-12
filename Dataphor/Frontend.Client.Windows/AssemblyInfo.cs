@@ -12,7 +12,7 @@ using System.Runtime.CompilerServices;
 // associated with an assembly.
 //
 [assembly: AssemblyTitle("Alphora Dataphor - Frontend Windows Client")]
-[assembly: AssemblyDescription("Common Dataphor Frontend windows client library")]
+[assembly: AssemblyDescription("Common Dataphor Frontend Windows Client Library")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Alphora")]
 [assembly: AssemblyProduct("Dataphor")]

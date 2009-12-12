@@ -422,7 +422,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 							LDocumentCacheSize
 						);
 			}
+			#if DEBUG
 			catch (Exception LException)
+			#else
+			catch
+			#endif
 			{
 				#if DEBUG
 				HandleException(LException);	// Don't fail if we can't do this and only show something if under debug
