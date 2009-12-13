@@ -267,7 +267,11 @@ namespace Alphora.Dataphor.DAE
         /// If the given session is not a valid session for this Dataphor Server, a <see cref="ServerException"/> will be raised.
         /// </remarks>
         void Disconnect(IServerSession ASession);
-    }
+
+		/// <summary>Retrieves the local or remote catalog for this server.</summary>
+		/// <remarks>This may be a local or remote catalog and may thus contain a partial or complete representation of the schema.</remarks>
+		Schema.Catalog Catalog { get; }
+	}
     
     /// <summary> Contains the members common to both remote and local session interfaces </summary>
     public interface IServerSessionBase : IDisposableNotify

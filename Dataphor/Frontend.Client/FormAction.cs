@@ -462,19 +462,21 @@ namespace Alphora.Dataphor.Frontend.Client
 		// These hooks are provided so that the ShowFormAction can be used in the eventing system
 		public event FormInterfaceHandler OnFormAcceptedEvent;
 		public event FormInterfaceHandler OnFormRejectedEvent;
-		private DataParams FParams;
+		private DataParams FMainSourceParams;
+		private EventParams FParams;
 
 		protected override void InternalExecute(INode ASender, EventParams AParams)
 		{
 			if (FDocument != String.Empty)
 			{
+				FParams = AParams;
 				if ((FMode == FormMode.Delete) && !ConfirmDelete)
 				{
 					SourceLink.Source.DataView.Delete();
 				}
 				else
 				{
-					FParams = AParams["AParams"] as DataParams;
+					FMainSourceParams = AParams["AParams"] as DataParams;
 					try
 					{
 						IFormInterface LForm = HostNode.Session.LoadForm(this, FDocument, new FormInterfaceHandler(InternalBeforeActivateForm));
@@ -506,7 +508,7 @@ namespace Alphora.Dataphor.Frontend.Client
 					}
 					finally
 					{
-						FParams = null;
+						FMainSourceParams = null;
 					}
 				}
 			}
@@ -665,6 +667,7 @@ namespace Alphora.Dataphor.Frontend.Client
 				FSourceLink.TargetSource = null;
 			if (FOnFormClose != null)
 				FOnFormClose.Execute(this, new EventParams("AForm", sender));
+			FParams = null;
 		}
 
 		// Node
@@ -681,8 +684,8 @@ namespace Alphora.Dataphor.Frontend.Client
 			{
                 if (!String.IsNullOrEmpty(FFilter))
 				    AForm.MainSource.Filter = FFilter;
-                if (FParams != null)
-				    AForm.MainSource.Params = FParams;
+                if (FMainSourceParams != null)
+				    AForm.MainSource.Params = FMainSourceParams;
 				AForm.MainSource.Default += new DataLinkHandler(DefaultData);
 			}
 
@@ -726,7 +729,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			{
 				var LDefault = LChild as DataDefault;
 				if (LDefault != null)
-					LDefault.PerformDefault(ALink);
+					LDefault.PerformDefault(ALink, FParams);
 			}
 		}
 
@@ -773,15 +776,16 @@ namespace Alphora.Dataphor.Frontend.Client
 			return FEnabled && !String.IsNullOrEmpty(FTargetColumns);
 		}
 		
-		protected internal void PerformDefault(DataLink ALink)
+		protected internal void PerformDefault(DataLink ALink, EventParams AParams)
 		{
 			if (FEnabled && ALink.Active)
-				InternalPerformDefault(ALink, FTargetColumns.Split(';', ','));
+				InternalPerformDefault(ALink, FTargetColumns.Split(';', ','), AParams);
 		}
-		
-		protected abstract void InternalPerformDefault(DataLink ALink, string[] ATargetColumns);
+
+		protected abstract void InternalPerformDefault(DataLink ALink, string[] ATargetColumns, EventParams AParams);
 	}
 
+	/// <summary> Defaults data from a data source. </summary>
 	public class DataSourceDefault : DataDefault, ISourceReference, IDataSourceDefault
 	{
 		protected override void Dispose(bool ADisposing)
@@ -816,7 +820,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			Source = null;
 		}
 
-		// SourceColumn
+		// SourceColumns
 
 		private string FSourceColumns = String.Empty;
 		[DefaultValue("")]
@@ -831,8 +835,8 @@ namespace Alphora.Dataphor.Frontend.Client
 		{
 			return (FSource != null) && (FSource.DataView != null) && FSource.DataView.Active && !String.IsNullOrEmpty(FSourceColumns) && base.GetEnabled();
 		}
-		
-		protected override void InternalPerformDefault(DataLink ALink, string[] ATargetColumns)
+
+		protected override void InternalPerformDefault(DataLink ALink, string[] ATargetColumns, EventParams AParams)
 		{
 			var LSourceColumns = FSourceColumns.Split(',', ';');
 			for (int i = 0; i < Math.Min(LSourceColumns.Length, ATargetColumns.Length); i++)
@@ -847,9 +851,10 @@ namespace Alphora.Dataphor.Frontend.Client
 		}
 	}
 	
+	/// <summary> Defaults data from a set of specified values. </summary>
 	public class DataValueDefault : DataDefault, IDataValueDefault
 	{
-		// SourceValue
+		// SourceValues
 
 		private string FSourceValues = String.Empty;
 		[Description("Source values in D4 list literal format (e.g. 'String value', nil, 5 )")]
@@ -871,7 +876,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		private List<Expression> FSourceValueExpressions;
 
-		protected override void InternalPerformDefault(DataLink ALink, string[] ATargetColumns)
+		protected override void InternalPerformDefault(DataLink ALink, string[] ATargetColumns, EventParams AParams)
 		{
 			if (FSourceValueExpressions != null)
 				for (int i = 0; i < Math.Min(FSourceValueExpressions.Count, ATargetColumns.Length); i++)
@@ -890,6 +895,54 @@ namespace Alphora.Dataphor.Frontend.Client
 				}
 		}
 	}
+
+	/// <summary> Defaults data from given parameters. </summary>
+	public class DataParamDefault : DataDefault
+	{
+		// SourceParams
+
+		private string FSourceParams = String.Empty;
+		[DefaultValue("")]
+		[Description("Optional comma or semicolon delimited list of Params in the Source source that are to be used to default from.  If left empty, all given parameters are used.")]
+		public string SourceParams
+		{
+			get { return FSourceParams; }
+			set { FSourceParams = value; }
+		}
+
+		protected override void InternalPerformDefault(DataLink ALink, string[] ATargetColumns, EventParams AParams)
+		{
+			if (AParams != null)
+			{
+				// Determine the list of source parameters to use
+				string[] LSourceNames;
+				if (String.IsNullOrEmpty(FSourceParams))
+				{
+					LSourceNames = new string[AParams.Count];
+					var i = 0;
+					foreach (KeyValuePair<string, object> LEntry in AParams)
+					{
+						LSourceNames[i] = LEntry.Key;
+						i++;
+					}
+				}
+				else
+					LSourceNames = FSourceParams.Split(',', ';');
+				
+				// Copy the parameter values
+				for (int i = 0; i < Math.Min(LSourceNames.Length, ATargetColumns.Length); i++)
+				{
+					var LSourceValue = AParams[LSourceNames[i].Trim()];
+					var LTargetField = ALink.DataSet[ATargetColumns[i].Trim()];
+					if (LSourceValue != null)
+						LTargetField.AsNative = LSourceValue;
+					else
+						LTargetField.ClearValue();
+				}
+			}
+		}
+	}
+
 
 	public class FormAction : Action, IFormAction
 	{

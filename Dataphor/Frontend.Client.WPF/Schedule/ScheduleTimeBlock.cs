@@ -100,6 +100,12 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		{
 			SetValue(IsSelectedPropertyKey, value);
 		}
+
+		protected override void OnMouseDown(System.Windows.Input.MouseButtonEventArgs e)
+		{
+			base.OnMouseDown(e);
+			Focus();
+		}
 	}
 
 	public class ScheduleTimeBlockHourConverter : IValueConverter

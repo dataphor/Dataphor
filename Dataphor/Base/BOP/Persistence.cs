@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Xml.Linq;
 using System.Reflection;
+using System.ComponentModel;
 
 namespace Alphora.Dataphor.BOP
 {
@@ -72,6 +73,19 @@ namespace Alphora.Dataphor.BOP
 		protected bool IsValueType(Type AType)
 		{
 			return AType.IsValueType || (AType == typeof(String));
+		}
+		
+		public static TypeConverter GetTypeConverter(Type AType)
+		{
+			// Attempt to find and use a value converter
+			var LConverterAttribute = ((TypeConverterAttribute)ReflectionUtility.GetAttribute(AType, typeof(TypeConverterAttribute)));
+			if (LConverterAttribute != null)
+			{
+				var LConverterType = Type.GetType(LConverterAttribute.ConverterTypeName);
+				if (LConverterType != null)
+					return (TypeConverter)Activator.CreateInstance(LConverterType);
+			}
+			return null;
 		}
 	}
 }

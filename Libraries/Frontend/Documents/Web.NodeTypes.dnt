@@ -19,6 +19,9 @@
 		<nodetype name="timer"/>
 		<nodetype name="datasourcedefault"/>
 		<nodetype name="datavaluedefault"/>
+		<nodetype name="dataparamdefault"/>
+		<nodetype name="setargumentsfromparamsaction"/>
+		<nodetype name="setargumentsfromformmainsourceaction"/>
 	</namespace>
 	<namespace name="Alphora.Dataphor.Frontend.Client.Web" assembly="Alphora.Dataphor.Frontend.Client.Web">
 		<nodetype name="forminterface"/>
@@ -64,4 +67,7 @@
 		<nodetype name="notebook"/>
 		<nodetype name="notebookpage"/>
 		<nodetype name="notebookframepage"/>
+
+		<nodetype name="copyaction"/>
+		<nodetype name="pasteaction"/>
 	</namespace>

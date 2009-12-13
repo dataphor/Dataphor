@@ -19,6 +19,9 @@
 		<nodetype name="timer"/>
 		<nodetype name="datasourcedefault"/>
 		<nodetype name="datavaluedefault"/>
+		<nodetype name="dataparamdefault"/>
+		<nodetype name="setargumentsfromparamsaction"/>
+		<nodetype name="setargumentsfromformmainsourceaction"/>
 	</namespace>
 	<namespace name="Alphora.Dataphor.Frontend.Client.Windows" assembly="Alphora.Dataphor.Frontend.Client.Windows">
 		<nodetype name="forminterface"/>
@@ -71,4 +74,7 @@
 		<nodetype name="scheduledaygrouped"/>
 		<nodetype name="scheduleappointmentverb"/>
 		<nodetype name="scheduletimeblockverb"/>
+
+		<nodetype name="copyaction"/>
+		<nodetype name="pasteaction"/>
 	</namespace>

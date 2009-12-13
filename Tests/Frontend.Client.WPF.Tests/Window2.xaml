@@ -8,6 +8,11 @@
 
 	<Grid x:Name="LayoutRoot">
 		<Border SnapsToDevicePixels="True">
+			<Border.ContextMenu>
+				<ContextMenu>
+					<MenuItem InputGestureText="Ctrl+T" Header="Test" Click="TestClick"/>
+				</ContextMenu>
+			</Border.ContextMenu>
 			<Border.Background>
 				<LinearGradientBrush EndPoint="0.854,0.5" StartPoint="0.146,0.5">
 					<GradientStop Color="#FFE6C070"/>

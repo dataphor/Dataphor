@@ -23,5 +23,11 @@ namespace Frontend.Client.WPF.Tests
 			
 			// Insert code required on object creation below this point.
 		}
+		
+		private void TestClick(object sender, RoutedEventArgs e)
+		{
+			MessageBox.Show("TestClicked");
+		}
+		
 	}
 }

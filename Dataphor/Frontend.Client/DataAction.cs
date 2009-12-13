@@ -11,6 +11,7 @@ using Alphora.Dataphor.BOP;
 using Alphora.Dataphor.DAE.Language.D4;
 using DAE = Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Client;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.Frontend.Client
 {
@@ -252,9 +253,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		public override bool IsValidChild(Type AChildType)
 		{
-			if (typeof(IDataArgument).IsAssignableFrom(AChildType))
-				return true;
-			return base.IsValidChild(AChildType);
+			return typeof(IDataArgument).IsAssignableFrom(AChildType) || base.IsValidChild(AChildType);
 		}
 
 		// Action
@@ -384,7 +383,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// Columns
 
 		private string FColumns = String.Empty;
-		[Description("Comma separated list of column names or parameter=name pairs.")]
+		[Description("Comma or semicolon separated list of column names or parameter=name pairs.")]
 		public string Columns
 		{
 			get { return FColumns; }
@@ -439,7 +438,15 @@ namespace Alphora.Dataphor.Frontend.Client
 				foreach (Node LNode in ANode.Children)
 				{
 					DataArgument LArgument = LNode as DataArgument;
-					if ((LArgument != null) && (LArgument.Source != null) && (LArgument.Source.DataView != null) && LArgument.Source.DataView.Active && !LArgument.Source.DataView.IsReadOnly)
+					if 
+					(
+						(LArgument != null) 
+							&& (LArgument.Modifier == DAE.Language.Modifier.Out || LArgument.Modifier == DAE.Language.Modifier.Var) 
+							&& (LArgument.Source != null) 
+							&& (LArgument.Source.DataView != null) 
+							&& LArgument.Source.DataView.Active 
+							&& !LArgument.Source.DataView.IsReadOnly
+					)
 					{
 						string[] LParamNames;
 						DAE.Schema.Column[] LColumns;
@@ -495,6 +502,57 @@ namespace Alphora.Dataphor.Frontend.Client
 				for (int i = 0; i < LColumns.Length; i++)
 					LParamNames[i] = LColumns[i].Name;
 			}
+		}
+	}
+
+	public class SetArgumentsFromParamsAction : Action, ISetArgumentsFromParams
+	{
+		protected override void InternalExecute(INode ASender, EventParams AParams)
+		{
+			var LParams = new Alphora.Dataphor.DAE.Runtime.DataParams();
+			var LProcess = HostNode.Session.DataSession.UtilityProcess;
+			foreach (KeyValuePair<string, object> LEntry in AParams)
+			{
+				LParams.Add
+				(
+					new Alphora.Dataphor.DAE.Runtime.DataParam
+					(
+						LEntry.Key, 
+						// If null, arbitrarily use string
+						LEntry.Value == null 
+							? LProcess.DataTypes.SystemString 
+							: Alphora.Dataphor.DAE.Client.DataSession.ScalarTypeFromNativeType(LProcess, LEntry.Value.GetType()),
+						DAE.Language.Modifier.Out,
+						LEntry.Value
+					)
+				);
+			} 
+			DataArgument.ApplyArguments(this, LParams);
+		}
+
+		public override bool IsValidChild(Type AChildType)
+		{
+			return typeof(IDataArgument).IsAssignableFrom(AChildType) || base.IsValidChild(AChildType);
+		}
+	}
+
+	public class SetArgumentsFromFormMainSourceAction : Action, ISetArgumentsFromFormMainSource
+	{
+		protected override void InternalExecute(INode ASender, EventParams AParams)
+		{
+			var LForm = AParams["AForm"] as IFormInterface;
+			if (LForm != null && LForm.MainSource != null && LForm.MainSource.Active && LForm.MainSource.DataView != null && LForm.MainSource.DataView.Active)
+			{
+				var LParams = new Alphora.Dataphor.DAE.Runtime.DataParams();
+				foreach (DataField LField in LForm.MainSource.DataView.Fields)
+					LParams.Add(new DAE.Runtime.DataParam(LField.Name, LField.DataType, DAE.Language.Modifier.Out, LField.AsNative));
+				DataArgument.ApplyArguments(this, LParams);
+			}
+		}
+
+		public override bool IsValidChild(Type AChildType)
+		{
+			return typeof(IDataArgument).IsAssignableFrom(AChildType) || base.IsValidChild(AChildType);
 		}
 	}
 }

@@ -198,6 +198,7 @@
     <Compile Include="BaseElement.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ClipboardAction.cs" />
     <Compile Include="Container.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -332,6 +333,7 @@
     <Compile Include="Utilities.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Utility\ClipboardChangeNotifier.cs" />
     <Compile Include="WindowsInterfaces.cs">
       <SubType>Code</SubType>
     </Compile>

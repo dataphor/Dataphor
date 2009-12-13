@@ -231,6 +231,8 @@ namespace Alphora.Dataphor
 						if (AType == typeof(TimeSpan) || AType == typeof(Guid) || AType == typeof(Uri) || typeof(Enum).IsAssignableFrom(AType))
 							return AValue.ToString();
 					}
+					else if (typeof(IConvertible).IsAssignableFrom(AType))
+						return ((IConvertible)AValue).ToString(System.Globalization.CultureInfo.InvariantCulture);
 					break;
 			}
 			throw new BaseException(BaseException.Codes.CannotConvertToString, AType.Name);

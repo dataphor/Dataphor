@@ -142,10 +142,7 @@ namespace Alphora.Dataphor.BOP
 				else if (typeof(Delegate).IsAssignableFrom(LType))
 					throw new BOPException(BOPException.Codes.DelegatesNotSupported);		// TODO: Write delegates
 				else if (AValue != null)
-				{
-					LValue = ReferenceToString(AValue);
-					LIsReference = true;
-				}
+					LValue = ReferenceToString(AValue, out LIsReference);
 				else
 					return;
 				
@@ -240,8 +237,9 @@ namespace Alphora.Dataphor.BOP
 		}
 
 		/// <summary> Determines an attribute string for the given instance reference. </summary>
-		private string ReferenceToString(object AValue)
+		private string ReferenceToString(object AValue, out bool AReference)
 		{
+			AReference = true;
 			if (AValue == null)
 				return String.Empty;
 			else
@@ -251,7 +249,15 @@ namespace Alphora.Dataphor.BOP
 				if (LAttribute != null)
 					return (string)ReflectionUtility.GetMemberValue(ReflectionUtility.FindSimpleMember(LType, LAttribute.MemberName), AValue);
 				else
-					return String.Empty;
+				{
+					var LConverter = Persistence.GetTypeConverter(LType);
+					if (LConverter != null)
+					{
+						AReference = false;
+						return LConverter.ConvertToString(AValue);
+					}
+				}
+				return String.Empty;
 			}
 		}
 

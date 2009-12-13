@@ -12,6 +12,7 @@ using Alphora.Dataphor.Frontend.Client.WPF;
 using Alphora.Dataphor.BOP;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
+using System.Windows.Input;
 
 namespace Alphora.Dataphor.Frontend.Client.Windows
 {
@@ -646,6 +647,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			{
 				new Application();
 				Application.Current.Resources.MergedDictionaries.Add(Application.LoadComponent(new Uri("Alphora.Dataphor.Frontend.Client.Windows;component/Schedule.xaml", UriKind.Relative)) as ResourceDictionary);
+				Application.Current.DispatcherUnhandledException += new System.Windows.Threading.DispatcherUnhandledExceptionEventHandler(HandleUnhandledWPFException);
 			}
 
 			FControl = CreateControl();
@@ -653,6 +655,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			FControl.AddHandler(System.Windows.Controls.ContextMenuService.ContextMenuOpeningEvent, new RoutedEventHandler(ContextMenuOpened));
 			DependencyPropertyDescriptor.FromProperty(Scheduler.SelectedAppointmentProperty, typeof(Scheduler)).AddValueChanged(FControl, new EventHandler(SelectedAppointmentChanged));
 			FControl.MouseDoubleClick += new System.Windows.Input.MouseButtonEventHandler(ControlDoubleClicked);
+			FControl.KeyDown += new System.Windows.Input.KeyEventHandler(ControlKeyDown);
 			InternalUpdateStartDate();
 						
 			FAppointmentSourceLink = new DataLink();
@@ -681,6 +684,12 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			FElementHost.Child = FControl;
 			
 			base.Activate();
+		}
+
+		private void HandleUnhandledWPFException(object ASender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs AArgs)
+		{
+			AArgs.Handled = true;
+			Session.HandleException(AArgs.Exception);
 		}
 
 		protected virtual Scheduler CreateControl()
@@ -794,7 +803,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				{
 					AArgs.Handled = true;
 					var LVerb = FindFirstVerb(typeof(ScheduleTimeBlockVerb));
-					if (LVerb != null && LVerb.Action != null)
+					if (LVerb != null && LVerb.GetEnabled())
 						LVerb.Execute(AArgs.OriginalSource);
 				}
 				else
@@ -804,7 +813,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					{
 						AArgs.Handled = true;
 						var LVerb = FindFirstVerb(typeof(ScheduleAppointmentVerb));
-						if (LVerb != null && LVerb.Action != null)
+						if (LVerb != null && LVerb.GetEnabled())
 							LVerb.Execute(AArgs.OriginalSource);
 					}
 				}
@@ -819,6 +828,51 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				{
 					var LVerb = LChild as BaseVerb;
 					if (LVerb != null && LVerb.Enabled)
+						return LVerb;
+				}
+			}
+			return null;
+		}
+
+		private void ControlKeyDown(object ASender, System.Windows.Input.KeyEventArgs AArgs)
+		{
+			var LItem = AArgs.OriginalSource as DependencyObject;
+			if (LItem != null)
+			{
+				FrameworkElement LElement = Utilities.GetAncestorOfTypeInVisualTree<ScheduleTimeBlock>(LItem);
+				if (LElement != null)
+				{
+					var LVerb = FindVerbForKey(typeof(ScheduleTimeBlockVerb), AArgs.Key);
+					if (LVerb != null && LVerb.GetEnabled())
+					{
+						AArgs.Handled = true;
+						LVerb.Execute(AArgs.OriginalSource);
+					}
+				}
+				else
+				{
+					LElement = Utilities.GetAncestorOfTypeInVisualTree<ScheduleAppointment>(LItem);
+					if (LElement != null)
+					{
+						var LVerb = FindVerbForKey(typeof(ScheduleAppointmentVerb), AArgs.Key);
+						if (LVerb != null && LVerb.GetEnabled())
+						{
+							AArgs.Handled = true;
+							LVerb.Execute(AArgs.OriginalSource);
+						}
+					}
+				}
+			}
+		}
+
+		private BaseVerb FindVerbForKey(Type AType, System.Windows.Input.Key AKey)
+		{
+			foreach (INode LChild in Children)
+			{
+				if (AType.IsAssignableFrom(LChild.GetType()))
+				{
+					var LVerb = LChild as BaseVerb;
+					if (LVerb != null && LVerb.Enabled && LVerb.KeyboardShortcut != null && LVerb.KeyboardShortcut.Key == AKey && LVerb.KeyboardShortcut.Modifiers == Keyboard.Modifiers)
 						return LVerb;
 				}
 			}
@@ -901,15 +955,25 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return (Action == null ? false : Action.GetEnabled()) && FEnabled;
 		}
 		
+		// KeyboardShortcut
+		
+		private KeyGesture FKeyboardShortcut = null;
+		public KeyGesture KeyboardShortcut
+		{
+			get { return FKeyboardShortcut; }
+			set { FKeyboardShortcut = value; }
+		}
+		
 		protected internal virtual MenuItem BuildMenuItem(object AOwner)
 		{
 			var LItem = 
 				new MenuItem
 				{
-					Header = TitleUtility.RemoveAccellerators(GetText()),
+					Header = GetText().Replace('&', '_'),
 					IsEnabled = GetEnabled(),
 					Icon = (Action == null ? null : new System.Windows.Controls.Image() { Source = ImageToBitmapSource(((Action)Action).LoadedImage) }),
-					Tag = AOwner
+					Tag = AOwner,
+					InputGestureText = FKeyboardShortcut == null  ? "" : new KeyGestureConverter().ConvertToString(FKeyboardShortcut)
 				};
 			LItem.Click += new RoutedEventHandler(ItemClicked);
 			return LItem;

@@ -582,6 +582,40 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <para>Default: False</para></value>
 		bool CompileWithDebug { get; set; }
 	}
+	
+	/// <summary> Sets the sources associated with the child data arguments from the action params. </summary>
+	public interface ISetArgumentsFromParams : IAction
+	{
+	}
+	
+	/// <summary> When attached to an event that originates from a form (such as FormAccepted), sets the sources associated with the child data arguments from the form's main source fields. </summary>
+	public interface ISetArgumentsFromFormMainSource : IAction
+	{
+	}
+	
+	/// <summary> Copies the parameters provided by DataArgument nodes to the clipboard. </summary>
+	/// <remarks> Cut can be implemented by following the copy or paste action with a deltion. </remarks>
+	public interface ICopyAction : IAction
+	{
+		// Published
+
+		/// <summary> The identifier to use when storing or retrieving information from the clipboard. </summary> <doc/>
+		/// <value> <para>String</para>
+		/// <para>Default: DataphorData</para></value>
+		string ClipboardFormatName { get; set; }
+	}
+	
+	/// <summary> Pastes parameters previously placed on the clipboard by applying the parameters to any var or out parameters in DataArgument nodes. </summary>
+	/// <remarks> Cut can be implemented by following the copy or paste action with a deltion. </remarks>
+	public interface IPasteAction : IAction
+	{
+		// Published
+
+		/// <summary> The identifier to use when storing or retrieving information from the clipboard. </summary> <doc/>
+		/// <value> <para>String</para>
+		/// <para>Default: DataphorData</para></value>
+		string ClipboardFormatName { get; set; }
+	}
 
 	/**************  Interfaces  **************/
 

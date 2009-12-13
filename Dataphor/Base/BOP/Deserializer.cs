@@ -163,8 +163,16 @@ namespace Alphora.Dataphor.BOP
 				return ReflectionUtility.StringToValue(AValue, AType);
 			else if (AType.IsSubclassOf(typeof(Delegate)))
 				throw new BOPException(BOPException.Codes.DelegatesNotSupported);		// TODO: Read delegates
-			else // reference types
-				return GetReference(AValue, AInstance, AMember);
+			else
+			{
+				 // reference type, try a type converter, then assume it is a reference to another object in the tree
+				// Attempt to load the reference using a value converter, maybe it's not a name but a converted value
+				var LConverter = Persistence.GetTypeConverter(AType);
+				if (LConverter != null)
+					return LConverter.ConvertFromString(AValue);
+				else
+					return GetReference(AValue, AInstance, AMember);
+			}
 		}
 
 		/// <summary> Reads the default value for a type's member. </summary>
