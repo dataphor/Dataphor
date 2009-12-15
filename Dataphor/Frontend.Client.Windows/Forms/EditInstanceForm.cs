@@ -8,6 +8,7 @@ using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
+using System.Reflection;
 using System.Windows.Forms;
 
 using Alphora.Dataphor.DAE.Client;
@@ -17,6 +18,7 @@ using Alphora.Dataphor.DAE.Server;
 using System.Text;
 using System.IO;
 using Alphora.Dataphor.DAE.Schema;
+using System.Collections.Generic;
 
 
 namespace Alphora.Dataphor.Frontend.Client.Windows
@@ -28,10 +30,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		public EditInstanceForm()
 		{
 			InitializeComponent();
+            tbCatalogStoreClassName.AutoCompleteCustomSource.AddRange(GetCatalogStoreClassNames());
+                //= GetCatalogStoreClassNames();
 			FStatusBar.Visible = false;
 			SetAcceptReject(true, false);
 		}
 
+        
 		/// <summary>
 		/// Clean up any resources being used.
 		/// </summary>
@@ -225,5 +230,36 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 			catch (AbortException) { }
         }
+
+        private string[] GetCatalogStoreClassNames()
+        {
+            string LPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            DirectoryInfo LDirectory = new DirectoryInfo(LPath);
+            FileInfo[] LFiles = LDirectory.GetFiles("*.dll", SearchOption.TopDirectoryOnly);
+            List<string> LCatalogStoreClassNames = new List<string>();
+
+            foreach (FileInfo file in LFiles)
+            {
+                // Load the file into the application domain.
+                try
+                {
+                    AssemblyName LAssemblyName = AssemblyName.GetAssemblyName(file.FullName);
+                    var LAssembly = Assembly.Load(LAssemblyName.ToString());
+                    foreach (var LType in LAssembly.GetTypes())
+                    {
+                        if(LType.IsSubclassOf(typeof(Alphora.Dataphor.DAE.Store.SQLStore)))
+                        {
+                            LCatalogStoreClassNames.Add(LType.FullName +","+ LAssemblyName.Name);
+                        }
+                    }
+                }
+                catch (BadImageFormatException LBadImageFormatException)
+                {
+                    //HACK: How do I know if a .dll file is (or not) a .NET assembly?                   
+                }
+            }
+            return LCatalogStoreClassNames.ToArray();
+        }
+
 	}
 }

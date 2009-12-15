@@ -245,6 +245,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             // 
             // tbCatalogStoreClassName
             // 
+            this.tbCatalogStoreClassName.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.tbCatalogStoreClassName.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
             this.tbCatalogStoreClassName.Location = new System.Drawing.Point(14, 32);
             this.tbCatalogStoreClassName.Name = "tbCatalogStoreClassName";
             this.tbCatalogStoreClassName.Size = new System.Drawing.Size(331, 20);
