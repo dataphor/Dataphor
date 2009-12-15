@@ -26,7 +26,7 @@ namespace Alphora.Dataphor.Dataphoria
 			//
 			InitializeComponent();
 
-			txtVersion.Text = this.GetType().Assembly.GetName(false).Version.ToString();
+			FTxtVersion.Text = this.GetType().Assembly.GetName(false).Version.ToString();
 
             
             string LPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);            
@@ -39,7 +39,7 @@ namespace Alphora.Dataphor.Dataphoria
                 try
                 {
                     AssemblyName LAssemblyName = AssemblyName.GetAssemblyName(file.FullName);
-                    lvModules.Items.Add(new ListViewItem(new string[] { LAssemblyName.Name, LAssemblyName.Version.ToString() }));
+                    FLvModules.Items.Add(new ListViewItem(new string[] { LAssemblyName.Name, LAssemblyName.Version.ToString() }));
                 }
                 catch (BadImageFormatException LBadImageFormatException)
                 {
