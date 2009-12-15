@@ -337,6 +337,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Utility\ClipboardChangeNotifier.cs" />
+    <Compile Include="Utility\WPFInteropUtility.cs" />
     <Compile Include="WindowsInterfaces.cs">
       <SubType>Code</SubType>
     </Compile>

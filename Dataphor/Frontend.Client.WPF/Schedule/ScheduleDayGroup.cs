@@ -228,6 +228,20 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 				LDay.ItemContainerStyle = AppointmentContainerStyle;
 				LDay.ItemTemplate = AppointmentItemTemplate;
 
+				if (!String.IsNullOrEmpty(DisplayMemberPath))
+				{
+					LBinding = new Binding(DisplayMemberPath);
+					LBinding.Source = AItem;
+					LDay.SetBinding(ScheduleDay.HeaderProperty, LBinding);
+				}
+
+				if (!String.IsNullOrEmpty(GroupIDMemberPath))
+				{
+					LBinding = new Binding(GroupIDMemberPath);
+					LBinding.Source = AItem;
+					LDay.SetBinding(ScheduleDay.GroupIDProperty, LBinding);
+				}
+
 				LBinding = new Binding("AppointmentDateMemberPath");
 				LBinding.Source = this;
 				LDay.SetBinding(ScheduleDay.AppointmentDateMemberPathProperty, LBinding);
@@ -236,10 +250,6 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 				LBinding.Source = this;
 				LDay.SetBinding(ScheduleDay.AppointmentGroupIDMemberPathProperty, LBinding);
 
-				LBinding = new Binding("AppointmentSource");
-				LBinding.Source = this;
-				LDay.SetBinding(ScheduleDay.AppointmentSourceProperty, LBinding);
-
 				LBinding = new Binding("ShiftDateMemberPath");
 				LBinding.Source = this;
 				LDay.SetBinding(ScheduleDay.ShiftDateMemberPathProperty, LBinding);
@@ -247,10 +257,6 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 				LBinding = new Binding("ShiftGroupIDMemberPath");
 				LBinding.Source = this;
 				LDay.SetBinding(ScheduleDay.ShiftGroupIDMemberPathProperty, LBinding);
-
-				LBinding = new Binding("ShiftSource");
-				LBinding.Source = this;
-				LDay.SetBinding(ScheduleDay.ShiftSourceProperty, LBinding);
 
 				LBinding = new Binding("ShiftItemTemplate");
 				LBinding.Source = this;
@@ -277,20 +283,14 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 				LBinding = new Binding("Granularity");
 				LBinding.Source = this;
 				LDay.SetBinding(ScheduleDay.GranularityProperty, LBinding);
-				
-				if (!String.IsNullOrEmpty(DisplayMemberPath))
-				{
-					LBinding = new Binding(DisplayMemberPath);
-					LBinding.Source = AItem;
-					LDay.SetBinding(ScheduleDay.HeaderProperty, LBinding);
-				}
-				
-				if (!String.IsNullOrEmpty(GroupIDMemberPath))
-				{
-					LBinding = new Binding(GroupIDMemberPath);
-					LBinding.Source = AItem;
-					LDay.SetBinding(ScheduleDay.GroupIDProperty, LBinding);
-				}
+
+				LBinding = new Binding("AppointmentSource");
+				LBinding.Source = this;
+				LDay.SetBinding(ScheduleDay.AppointmentSourceProperty, LBinding);
+
+				LBinding = new Binding("ShiftSource");
+				LBinding.Source = this;
+				LDay.SetBinding(ScheduleDay.ShiftSourceProperty, LBinding);
 			}
 			base.PrepareContainerForItemOverride(AElement, AItem);
 		}

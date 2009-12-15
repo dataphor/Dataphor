@@ -266,6 +266,18 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(ShiftContainerStyleProperty, value); }
 		}
 
+		// DayStyle
+
+		public static readonly DependencyProperty DayStyleProperty =
+			DependencyProperty.Register("DayStyle", typeof(Style), typeof(Scheduler), new PropertyMetadata(null));
+
+		/// <summary> The style to apply to a ScheduleDay within this control's template. </summary>
+		public Style DayStyle
+		{
+			get { return (Style)GetValue(DayStyleProperty); }
+			set { SetValue(DayStyleProperty, value); }
+		}
+
 		// TimeBarElement
 
 		private ScheduleTimeBar TimeBarElement { get; set; }

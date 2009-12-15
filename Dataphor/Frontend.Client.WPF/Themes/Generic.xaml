@@ -114,6 +114,7 @@
 								Date="{Binding StartDate, RelativeSource={RelativeSource TemplatedParent}}"
 								StartTime="{TemplateBinding StartTime}"
 								ItemsSource="{TemplateBinding GroupSource}"
+								ItemContainerStyle="{TemplateBinding DayStyle}"
 								AppointmentSource="{TemplateBinding AppointmentSource}"
 								AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}"
 								DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}"
@@ -173,6 +174,7 @@
 									Date="{Binding Days[0], RelativeSource={RelativeSource TemplatedParent}}" 
 									StartTime="{TemplateBinding StartTime}" 
 									ItemsSource="{TemplateBinding GroupSource}" 
+									ItemContainerStyle="{TemplateBinding DayStyle}"
 									AppointmentSource="{TemplateBinding AppointmentSource}" 
 									AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}" 
 									DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}"
@@ -192,6 +194,7 @@
 									Date="{Binding Days[1], RelativeSource={RelativeSource TemplatedParent}}" 
 									StartTime="{TemplateBinding StartTime}" 
 									ItemsSource="{TemplateBinding GroupSource}" 
+									ItemContainerStyle="{TemplateBinding DayStyle}"
 									AppointmentSource="{TemplateBinding AppointmentSource}" 
 									AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}" 
 									DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}"
@@ -211,6 +214,7 @@
 									Date="{Binding Days[2], RelativeSource={RelativeSource TemplatedParent}}" 
 									StartTime="{TemplateBinding StartTime}" 
 									ItemsSource="{TemplateBinding GroupSource}" 
+									ItemContainerStyle="{TemplateBinding DayStyle}"
 									AppointmentSource="{TemplateBinding AppointmentSource}" 
 									AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}" 
 									DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}" 
@@ -230,6 +234,7 @@
 									Date="{Binding Days[3], RelativeSource={RelativeSource TemplatedParent}}"
 									StartTime="{TemplateBinding StartTime}" 
 									ItemsSource="{TemplateBinding GroupSource}" 
+									ItemContainerStyle="{TemplateBinding DayStyle}"
 									AppointmentSource="{TemplateBinding AppointmentSource}" 
 									AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}" 
 									DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}"
@@ -249,6 +254,7 @@
 									Date="{Binding Days[4], RelativeSource={RelativeSource TemplatedParent}}" 
 									StartTime="{TemplateBinding StartTime}" 
 									ItemsSource="{TemplateBinding GroupSource}" 
+									ItemContainerStyle="{TemplateBinding DayStyle}"
 									AppointmentSource="{TemplateBinding AppointmentSource}" 
 									AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}" 
 									DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}" 
@@ -268,6 +274,7 @@
 									Date="{Binding Days[5], RelativeSource={RelativeSource TemplatedParent}}" 
 									StartTime="{TemplateBinding StartTime}" 
 									ItemsSource="{TemplateBinding GroupSource}" 
+									ItemContainerStyle="{TemplateBinding DayStyle}"
 									AppointmentSource="{TemplateBinding AppointmentSource}" 
 									AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}" 
 									DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}" 
@@ -287,6 +294,7 @@
 									Date="{Binding Days[6], RelativeSource={RelativeSource TemplatedParent}}" 
 									StartTime="{TemplateBinding StartTime}" 
 									ItemsSource="{TemplateBinding GroupSource}" 
+									ItemContainerStyle="{TemplateBinding DayStyle}"
 									AppointmentSource="{TemplateBinding AppointmentSource}" 
 									AppointmentItemTemplate="{TemplateBinding AppointmentItemTemplate}" 
 									DisplayMemberPath="{TemplateBinding GroupHeaderMemberPath}" 
@@ -337,7 +345,7 @@
 		<Setter Property="ItemsPanel">
 			<Setter.Value>
 				<ItemsPanelTemplate>
-					<StackPanel IsItemsHost="True" Orientation="Horizontal"/>
+					<local:FillPanel IsItemsHost="True" />
 				</ItemsPanelTemplate>
 			</Setter.Value>
 		</Setter>
@@ -373,6 +381,8 @@
 		</Setter>
 	</Style>
 
+	<local:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+	
 	<Style TargetType="{x:Type local:ScheduleDay}">
 		<Setter Property="IsSynchronizedWithCurrentItem" Value="False" />
 		<Setter Property="IsTabStop" Value="False" />
@@ -384,7 +394,7 @@
 							<RowDefinition Height="Auto" SharedSizeGroup="DayHeaderHeight"/>
 							<RowDefinition/>
 						</Grid.RowDefinitions>
-						<ContentPresenter Margin="4,2" Content="{TemplateBinding Header}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+						<ContentPresenter Margin="4,2" Content="{TemplateBinding Header}" Visibility="{Binding Header, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource NullToVisibilityConverter}}" Style="{TemplateBinding HeaderStyle}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 						<ItemsControl Grid.Row="1" VerticalAlignment="Top" ItemsSource="{TemplateBinding ShiftView}" ItemTemplate="{TemplateBinding ShiftItemTemplate}" ItemContainerStyle="{TemplateBinding ShiftContainerStyle}">
 							<ItemsControl.ItemsPanel>
 								<ItemsPanelTemplate>

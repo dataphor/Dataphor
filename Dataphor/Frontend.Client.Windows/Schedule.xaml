@@ -10,6 +10,7 @@
 	<local:FullDateToStringConverter x:Key="FullDateToStringConverter" />
 	<client:ScheduleTimeBlockTimeConverter x:Key="TimeConverter" />
 	<local:BooleanToBorderBrushConverter x:Key="BooleanToBorderBrushConverter" />
+	<client:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
 
 	<Style x:Key="HeaderTextBlockStyle" TargetType="{x:Type TextBlock}">
 		<Setter Property="VerticalAlignment" Value="Bottom"/>
@@ -39,9 +40,8 @@
 					<Setter Property="BorderBrush" Value="{x:Null}" />
 					<Setter Property="BorderThickness" Value="0" />
 					<Setter Property="Padding" Value="0" />
-					<Setter Property="MinWidth" Value="75" />
-					<Setter Property="MaxWidth" Value="150" />
 					<Setter Property="Margin" Value="2,0,4,0" />
+					<Setter Property="MinWidth" Value="75" />
 				</Style>
 			</Setter.Value>
 		</Setter>
@@ -83,7 +83,14 @@
 									<TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding EndTime, Converter={StaticResource TimeConverter}}" Style="{StaticResource DataTextBlockStyle}"/>
 								</Grid>
 							</Border.ToolTip>
-							<TextBlock Text="{Binding Description}" Margin="4,2" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"/>
+							<Grid Margin="4,2">
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="Auto" />
+									<ColumnDefinition/>
+								</Grid.ColumnDefinitions>
+								<Image Width="16" Height="16" Source="{Binding Image}" Margin="0,0,4,0" Visibility="{Binding Image, Converter={StaticResource NullToVisibilityConverter}}"/>
+								<TextBlock Grid.Column="1" Text="{Binding Description}" MaxWidth="80" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"/>
+							</Grid>
 						</Border>
 					</Border>
 				</DataTemplate>
@@ -109,6 +116,19 @@
 						</Border.Background>
 					</Border>
 				</DataTemplate>
+			</Setter.Value>
+		</Setter>
+		<Setter Property="DayStyle">
+			<Setter.Value>
+				<Style TargetType="{x:Type client:ScheduleDay}">
+					<Setter Property="HeaderStyle">
+						<Setter.Value>
+							<Style TargetType="{x:Type ContentPresenter}" >
+								<Setter Property="MaxWidth" Value="100" />
+							</Style>
+						</Setter.Value>
+					</Setter>
+				</Style>
 			</Setter.Value>
 		</Setter>
 	</Style>

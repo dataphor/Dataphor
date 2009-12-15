@@ -13,6 +13,7 @@ using Alphora.Dataphor.BOP;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.Windows.Input;
+using System.IO;
 
 namespace Alphora.Dataphor.Frontend.Client.Windows
 {
@@ -227,6 +228,26 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
+		// AppointmentImageColumn
+
+		private string FAppointmentImageColumn = String.Empty;
+		[DefaultValue("")]
+		[TypeConverter(typeof(ColumnNameConverter))]
+		[ColumnNameSourceProperty("AppointmentSource")]
+		[Description("The column in the appointment source that represents the Image.")]
+		public string AppointmentImageColumn
+		{
+			get { return FAppointmentImageColumn; }
+			set
+			{
+				if (FAppointmentImageColumn != value)
+				{
+					FAppointmentImageColumn = value;
+					UpdateAppointmentData();
+				}
+			}
+		}
+
 		// AppointmentData
 		
 		protected void UpdateAppointmentData()
@@ -253,18 +274,21 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 				// Replace the appointment source
 				ScheduleData LActiveItem = null;
-				var LItems = new ScheduleData[FAppointmentSourceLink.LastOffset + 1];
+				var LItems = new ScheduleAppointmentData[FAppointmentSourceLink.LastOffset + 1];
 				for (int i = 0; i <= FAppointmentSourceLink.LastOffset; i++)
 				{
 					var LRow = FAppointmentSourceLink.Buffer(i);
 					var LItem =
-						new ScheduleData
+						new ScheduleAppointmentData
 						{
 							Date = ((Scalar)LRow.GetValue(FAppointmentDateColumn)).AsDateTime,
 							StartTime = ((Scalar)LRow.GetValue(FAppointmentStartTimeColumn)).AsDateTime,
 							EndTime = ((Scalar)LRow.GetValue(FAppointmentEndTimeColumn)).AsDateTime,
 							Description = ((Scalar)LRow.GetValue(FAppointmentDescriptionColumn)).AsString,
-							Group = (String.IsNullOrEmpty(FAppointmentGroupColumn) ? null : ((Scalar)LRow.GetValue(FAppointmentGroupColumn)).AsNative)
+							Group = (String.IsNullOrEmpty(FAppointmentGroupColumn) ? null : ((Scalar)LRow.GetValue(FAppointmentGroupColumn)).AsNative),
+							Image = (String.IsNullOrEmpty(FAppointmentImageColumn) || !LRow.HasValue(FAppointmentImageColumn) 
+								? null 
+								: LoadImage((Scalar)LRow.GetValue(FAppointmentImageColumn)))
 						};
 					LItems[i] = LItem;
 					if (i == FAppointmentSourceLink.ActiveOffset)
@@ -280,6 +304,26 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				{
 					FSettingSelection = false;
 				}
+			}
+		}
+		
+		// Appointment Image Loading
+		
+		private ImageSource LoadImage(Scalar AValue)
+		{
+			Stream LStream = AValue.OpenStream();
+			try
+			{
+				var LImage = new BitmapImage();
+				LImage.BeginInit();
+				LImage.CacheOption = BitmapCacheOption.OnLoad;
+				LImage.StreamSource = LStream;
+				LImage.EndInit();
+				return LImage;
+			}
+			finally
+			{
+				LStream.Close();
 			}
 		}
 
@@ -971,7 +1015,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				{
 					Header = GetText().Replace('&', '_'),
 					IsEnabled = GetEnabled(),
-					Icon = (Action == null ? null : new System.Windows.Controls.Image() { Source = ImageToBitmapSource(((Action)Action).LoadedImage) }),
+					Icon = (Action == null ? null : new System.Windows.Controls.Image() { Source = WPFInteropUtility.ImageToBitmapSource(((Action)Action).LoadedImage) }),
 					Tag = AOwner,
 					InputGestureText = FKeyboardShortcut == null  ? "" : new KeyGestureConverter().ConvertToString(FKeyboardShortcut)
 				};
@@ -989,36 +1033,6 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		}
 
 		public abstract void Execute(object ASender);
-		
-		[System.Runtime.InteropServices.DllImport("gdi32")]
-		private static extern int DeleteObject(IntPtr o);
-		
-		/// <summary> Convert from a WinForms bitmap to a WPF ImageSource. </summary>
-		/// <remarks> Credits: http://stackoverflow.com/questions/1118496/using-image-control-in-wpf-to-display-system-drawing-bitmap/1118557#1118557 </remarks>
-		public static BitmapSource ImageToBitmapSource(System.Drawing.Image ASource) 
-		{ 
-			var LSource = ASource as System.Drawing.Bitmap;
-			if (LSource != null)
-			{
-				IntPtr LHandle = LSource.GetHbitmap(); 
-				try 
-				{ 
-					return System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap
-					(
-						LHandle, 
-						IntPtr.Zero, 
-						Int32Rect.Empty, 
-						System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions()
-					); 
-				} 
-				finally 
-				{ 
-					DeleteObject(LHandle); 
-				} 
-			}
-			else
-				return null;
-		}
 	}
 
 	[DesignerImage("Image('Frontend', 'Nodes.Schedule')")]
@@ -1193,6 +1207,23 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			if (PropertyChanged != null)
 				PropertyChanged(this, new PropertyChangedEventArgs(APropertyName));
+		}
+	}
+	
+	public class ScheduleAppointmentData : ScheduleData
+	{
+		private ImageSource FImage;
+		public ImageSource Image
+		{
+			get { return FImage; }
+			set
+			{
+				if (FImage != value)
+				{
+					FImage = value;
+					NotifyPropertyChanged("Image");
+				}
+			}
 		}
 	}
 
