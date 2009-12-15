@@ -772,6 +772,18 @@ namespace Alphora.Dataphor.Frontend.Client
 			else
 				return null;
 		}
+		
+		public bool IsTopMostOfSomeStack(IFormInterface AForm)
+		{
+			FormStack LSearchStack = FFirst;
+			while (LSearchStack != null)
+			{
+				if (AForm == LSearchStack.GetTopmostForm())
+					return true;
+				LSearchStack = LSearchStack.FNext;
+			}
+			return false;
+		}			
 
 		public bool IsEmpty()
 		{
