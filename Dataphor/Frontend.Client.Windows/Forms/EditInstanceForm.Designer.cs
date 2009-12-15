@@ -27,7 +27,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox tbInstanceName;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
-        private Button button2;
+        private Button buttonSelectInstanceDirectory;
         private System.Windows.Forms.TextBox tbInstanceDirectory;
         private System.Windows.Forms.TextBox tbPortNumber;
         private Label label11;
@@ -55,7 +55,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
         private Button UpdateLibraryDirectoryButton;
         private Button AddLibraryDirectoryButton;
         private ListBox LibraryDirectoriesListBox;
-        private Button button1;
+        private Button buttonSelectLibraryDirectory;
         private System.Windows.Forms.TextBox tbLibraryDirectories;
         private System.Windows.Forms.CheckBox cbRequireSecureConnection;
         private GroupBox groupBox5;
@@ -87,7 +87,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.label11 = new System.Windows.Forms.Label();
             this.tbPortNumber = new System.Windows.Forms.TextBox();
             this.tbInstanceDirectory = new System.Windows.Forms.TextBox();
-            this.button2 = new System.Windows.Forms.Button();
+            this.buttonSelectInstanceDirectory = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.label3 = new System.Windows.Forms.Label();
             this.tbCatalogStoreConnectionString = new System.Windows.Forms.TextBox();
@@ -111,21 +111,21 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.UpdateLibraryDirectoryButton = new System.Windows.Forms.Button();
             this.AddLibraryDirectoryButton = new System.Windows.Forms.Button();
             this.LibraryDirectoriesListBox = new System.Windows.Forms.ListBox();
-            this.button1 = new System.Windows.Forms.Button();
+            this.buttonSelectLibraryDirectory = new System.Windows.Forms.Button();
             this.tbLibraryDirectories = new System.Windows.Forms.TextBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.cbRequireSecureConnection = new System.Windows.Forms.CheckBox();
             this.label7 = new System.Windows.Forms.Label();
             this.tbSecurePortNumber = new System.Windows.Forms.TextBox();
+            this.cbRequireSecureConnection = new System.Windows.Forms.CheckBox();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.cbAllowSilverlightClients = new System.Windows.Forms.CheckBox();
+            this.cbShouldListen = new System.Windows.Forms.CheckBox();
+            this.label10 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.tbOverrideSecureListenerPortNumber = new System.Windows.Forms.TextBox();
             this.cbRequireSecureListenerConnection = new System.Windows.Forms.CheckBox();
             this.label9 = new System.Windows.Forms.Label();
             this.tbOverrideListenerPortNumber = new System.Windows.Forms.TextBox();
-            this.label10 = new System.Windows.Forms.Label();
-            this.cbShouldListen = new System.Windows.Forms.CheckBox();
-            this.cbAllowSilverlightClients = new System.Windows.Forms.CheckBox();
             this.FContentPanel.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -194,14 +194,14 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.tbInstanceDirectory.Size = new System.Drawing.Size(261, 20);
             this.tbInstanceDirectory.TabIndex = 2;
             // 
-            // button2
+            // buttonSelectInstanceDirectory
             // 
-            this.button2.Location = new System.Drawing.Point(276, 108);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(24, 22);
-            this.button2.TabIndex = 56;
-            this.button2.Text = "...";
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.buttonSelectInstanceDirectory.Location = new System.Drawing.Point(276, 108);
+            this.buttonSelectInstanceDirectory.Name = "buttonSelectInstanceDirectory";
+            this.buttonSelectInstanceDirectory.Size = new System.Drawing.Size(24, 22);
+            this.buttonSelectInstanceDirectory.TabIndex = 56;
+            this.buttonSelectInstanceDirectory.Text = "...";
+            this.buttonSelectInstanceDirectory.Click += new System.EventHandler(this.buttonSelectInstanceDirectory_Click);
             // 
             // groupBox1
             // 
@@ -249,6 +249,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.tbCatalogStoreClassName.Name = "tbCatalogStoreClassName";
             this.tbCatalogStoreClassName.Size = new System.Drawing.Size(331, 20);
             this.tbCatalogStoreClassName.TabIndex = 0;
+            this.tbCatalogStoreClassName.Tag = "n";
             // 
             // groupBox2
             // 
@@ -364,7 +365,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.groupBox3.Controls.Add(this.UpdateLibraryDirectoryButton);
             this.groupBox3.Controls.Add(this.AddLibraryDirectoryButton);
             this.groupBox3.Controls.Add(this.LibraryDirectoriesListBox);
-            this.groupBox3.Controls.Add(this.button1);
+            this.groupBox3.Controls.Add(this.buttonSelectLibraryDirectory);
             this.groupBox3.Controls.Add(this.tbLibraryDirectories);
             this.groupBox3.Location = new System.Drawing.Point(12, 148);
             this.groupBox3.Name = "groupBox3";
@@ -432,14 +433,14 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.LibraryDirectoriesListBox.TabIndex = 1;
             this.LibraryDirectoriesListBox.SelectedIndexChanged += new System.EventHandler(this.LibraryDirectoriesListBox_SelectedIndexChanged);
             // 
-            // button1
+            // buttonSelectLibraryDirectory
             // 
-            this.button1.Location = new System.Drawing.Point(273, 22);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(24, 22);
-            this.button1.TabIndex = 72;
-            this.button1.Text = "...";
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.buttonSelectLibraryDirectory.Location = new System.Drawing.Point(273, 22);
+            this.buttonSelectLibraryDirectory.Name = "buttonSelectLibraryDirectory";
+            this.buttonSelectLibraryDirectory.Size = new System.Drawing.Size(24, 22);
+            this.buttonSelectLibraryDirectory.TabIndex = 72;
+            this.buttonSelectLibraryDirectory.Text = "...";
+            this.buttonSelectLibraryDirectory.Click += new System.EventHandler(this.buttonSelectLibraryDirectory_Click);
             // 
             // tbLibraryDirectories
             // 
@@ -457,7 +458,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.groupBox4.Controls.Add(this.label1);
             this.groupBox4.Controls.Add(this.label13);
             this.groupBox4.Controls.Add(this.label11);
-            this.groupBox4.Controls.Add(this.button2);
+            this.groupBox4.Controls.Add(this.buttonSelectInstanceDirectory);
             this.groupBox4.Controls.Add(this.tbPortNumber);
             this.groupBox4.Controls.Add(this.tbInstanceDirectory);
             this.groupBox4.Location = new System.Drawing.Point(12, 4);
@@ -465,16 +466,6 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.groupBox4.Size = new System.Drawing.Size(306, 138);
             this.groupBox4.TabIndex = 0;
             this.groupBox4.TabStop = false;
-            // 
-            // cbRequireSecureConnection
-            // 
-            this.cbRequireSecureConnection.AutoSize = true;
-            this.cbRequireSecureConnection.Location = new System.Drawing.Point(149, 72);
-            this.cbRequireSecureConnection.Name = "cbRequireSecureConnection";
-            this.cbRequireSecureConnection.Size = new System.Drawing.Size(157, 17);
-            this.cbRequireSecureConnection.TabIndex = 60;
-            this.cbRequireSecureConnection.Text = "Require Secure Connection";
-            this.cbRequireSecureConnection.UseVisualStyleBackColor = true;
             // 
             // label7
             // 
@@ -493,6 +484,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.tbSecurePortNumber.TabIndex = 61;
             this.tbSecurePortNumber.TextChanged += new System.EventHandler(this.tbPortNumber_TextChanged);
             // 
+            // cbRequireSecureConnection
+            // 
+            this.cbRequireSecureConnection.AutoSize = true;
+            this.cbRequireSecureConnection.Location = new System.Drawing.Point(149, 72);
+            this.cbRequireSecureConnection.Name = "cbRequireSecureConnection";
+            this.cbRequireSecureConnection.Size = new System.Drawing.Size(157, 17);
+            this.cbRequireSecureConnection.TabIndex = 60;
+            this.cbRequireSecureConnection.Text = "Require Secure Connection";
+            this.cbRequireSecureConnection.UseVisualStyleBackColor = true;
+            // 
             // groupBox5
             // 
             this.groupBox5.Controls.Add(this.cbAllowSilverlightClients);
@@ -509,6 +510,35 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.groupBox5.TabIndex = 4;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Advanced Network Configuration";
+            // 
+            // cbAllowSilverlightClients
+            // 
+            this.cbAllowSilverlightClients.AutoSize = true;
+            this.cbAllowSilverlightClients.Location = new System.Drawing.Point(14, 112);
+            this.cbAllowSilverlightClients.Name = "cbAllowSilverlightClients";
+            this.cbAllowSilverlightClients.Size = new System.Drawing.Size(139, 17);
+            this.cbAllowSilverlightClients.TabIndex = 70;
+            this.cbAllowSilverlightClients.Text = "Allow Silverlight Clients?";
+            this.cbAllowSilverlightClients.UseVisualStyleBackColor = true;
+            // 
+            // cbShouldListen
+            // 
+            this.cbShouldListen.AutoSize = true;
+            this.cbShouldListen.Location = new System.Drawing.Point(14, 19);
+            this.cbShouldListen.Name = "cbShouldListen";
+            this.cbShouldListen.Size = new System.Drawing.Size(150, 17);
+            this.cbShouldListen.TabIndex = 69;
+            this.cbShouldListen.Text = "Should Establish Listener?";
+            this.cbShouldListen.UseVisualStyleBackColor = true;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(11, 38);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(117, 13);
+            this.label10.TabIndex = 68;
+            this.label10.Text = "Listener Port Overrides:";
             // 
             // label8
             // 
@@ -551,35 +581,6 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.tbOverrideListenerPortNumber.Name = "tbOverrideListenerPortNumber";
             this.tbOverrideListenerPortNumber.Size = new System.Drawing.Size(64, 20);
             this.tbOverrideListenerPortNumber.TabIndex = 63;
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(11, 38);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(117, 13);
-            this.label10.TabIndex = 68;
-            this.label10.Text = "Listener Port Overrides:";
-            // 
-            // cbShouldListen
-            // 
-            this.cbShouldListen.AutoSize = true;
-            this.cbShouldListen.Location = new System.Drawing.Point(14, 19);
-            this.cbShouldListen.Name = "cbShouldListen";
-            this.cbShouldListen.Size = new System.Drawing.Size(150, 17);
-            this.cbShouldListen.TabIndex = 69;
-            this.cbShouldListen.Text = "Should Establish Listener?";
-            this.cbShouldListen.UseVisualStyleBackColor = true;
-            // 
-            // cbAllowSilverlightClients
-            // 
-            this.cbAllowSilverlightClients.AutoSize = true;
-            this.cbAllowSilverlightClients.Location = new System.Drawing.Point(14, 112);
-            this.cbAllowSilverlightClients.Name = "cbAllowSilverlightClients";
-            this.cbAllowSilverlightClients.Size = new System.Drawing.Size(139, 17);
-            this.cbAllowSilverlightClients.TabIndex = 70;
-            this.cbAllowSilverlightClients.Text = "Allow Silverlight Clients?";
-            this.cbAllowSilverlightClients.UseVisualStyleBackColor = true;
             // 
             // EditInstanceForm
             // 

@@ -208,7 +208,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				DeviceSettingsListBox.Items.RemoveAt(DeviceSettingsListBox.SelectedIndex);
 		}
 
-		private void button2_Click(object sender, EventArgs e)
+		private void buttonSelectInstanceDirectory_Click(object sender, EventArgs e)
 		{
 			try
 			{
@@ -217,13 +217,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			catch (AbortException) { }
 		}
 
-		private void button1_Click(object sender, EventArgs e)
+		private void buttonSelectLibraryDirectory_Click(object sender, EventArgs e)
 		{
 			try
 			{
 				tbLibraryDirectories.Text = FolderUtility.GetDirectory(tbLibraryDirectories.Text);
 			}
 			catch (AbortException) { }
-		}
+        }
 	}
 }
