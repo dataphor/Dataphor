@@ -246,6 +246,9 @@
     <Compile Include="Forms\EditFilterForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Forms\EditInstanceForm.Designer.cs">
+      <DependentUpon>EditInstanceForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\ErrorListForm.cs">
       <SubType>Form</SubType>
     </Compile>
