@@ -8,6 +8,7 @@ using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
+using System.IO;
 using System.Windows.Forms;
 using System.Reflection;
 
@@ -27,12 +28,25 @@ namespace Alphora.Dataphor.Dataphoria
 
 			txtVersion.Text = this.GetType().Assembly.GetName(false).Version.ToString();
 
-			AssemblyName LName;
-			foreach (Assembly LAssembly in AppDomain.CurrentDomain.GetAssemblies())
-			{
-				LName = LAssembly.GetName(false);
-				lvModules.Items.Add(new ListViewItem(new string[] {LName.Name, LName.Version.ToString()}));
-			}
+            
+            string LPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);            
+            DirectoryInfo LDirectory = new DirectoryInfo(LPath);
+            FileInfo[] LFiles = LDirectory.GetFiles("*.dll", SearchOption.TopDirectoryOnly);
+
+            foreach (FileInfo file in LFiles)
+            {
+                // Load the file into the application domain.
+                try
+                {
+                    AssemblyName LAssemblyName = AssemblyName.GetAssemblyName(file.FullName);
+                    lvModules.Items.Add(new ListViewItem(new string[] { LAssemblyName.Name, LAssemblyName.Version.ToString() }));
+                }
+                catch (BadImageFormatException LBadImageFormatException)
+                {
+                    //HACK: How do I know if a .dll file is (or not) a .NET assembly?                   
+                }                                                
+            } 
+			
 		}
 
 		/// <summary>
