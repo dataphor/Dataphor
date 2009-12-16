@@ -9,6 +9,19 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		{
 			// TODO: Implement
 		}
+
+		public string ClipboardFormatName 
+		{ 
+			get 
+			{ 
+				// TODO: Implement
+				return null;
+			} 
+			set
+			{
+				// TODO: Implement
+			} 
+		}
 	}
 
 	public class PasteAction : Action, IPasteAction
@@ -16,6 +29,19 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		protected override void InternalExecute(INode ASender, EventParams AParams)
 		{
 			// TODO: Implement
+		}
+
+		public string ClipboardFormatName 
+		{ 
+			get
+			{
+				// TODO: Implement
+				return null;
+			}
+			set
+			{
+				// TODO: Implement
+			}
 		}
 	}
 }
