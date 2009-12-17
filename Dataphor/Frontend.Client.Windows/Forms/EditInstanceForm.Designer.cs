@@ -25,50 +25,50 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
     {
         private System.ComponentModel.Container components = null;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox tbInstanceName;
-        private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        private System.Windows.Forms.TextBox FInstanceNameTextBox;
+        private System.Windows.Forms.OpenFileDialog FOpenFileDialog1;
         private Button FSelectInstanceDirectoryButton;
-        private System.Windows.Forms.TextBox tbInstanceDirectory;
-        private System.Windows.Forms.TextBox tbPortNumber;
+        private System.Windows.Forms.TextBox FInstanceDirectoryTextBox;
+        private System.Windows.Forms.TextBox FPortNumberTextBox;
         private Label label11;
         private GroupBox groupBox2;
         private Label label6;
         private Label label5;
         private Label label4;
-        private Button RemoveDeviceSettingButton;
-        private Button UpdateDeviceSettingButton;
-        private Button AddDeviceSettingButton;
-        private System.Windows.Forms.TextBox SettingValueTextBox;
-        private System.Windows.Forms.TextBox SettingNameTextBox;
-        private System.Windows.Forms.TextBox DeviceNameTextBox;
-        private ListBox DeviceSettingsListBox;
+        private Button FRemoveDeviceSettingButton;
+        private Button FUpdateDeviceSettingButton;
+        private Button FAddDeviceSettingButton;
+        private System.Windows.Forms.TextBox FSettingValueTextBox;
+        private System.Windows.Forms.TextBox FSettingNameTextBox;
+        private System.Windows.Forms.TextBox FDeviceNameTextBox;
+        private ListBox FDeviceSettingsListBox;
         private GroupBox groupBox1;
         private Label label3;
-        private System.Windows.Forms.TextBox tbCatalogStoreConnectionString;
+        private System.Windows.Forms.TextBox FCatalogStoreConnectionStringTextBox;
         private Label label2;
-        private System.Windows.Forms.TextBox tbCatalogStoreClassName;
+        private System.Windows.Forms.TextBox FCatalogStoreClassNameTextBox;
         private GroupBox groupBox4;
         private GroupBox groupBox3;
-        private Button MoveLibraryDirectoryDownButton;
-        private Button MoveLibraryDirectoryUpButton;
-        private Button RemoveLibraryDirectoryButton;
-        private Button UpdateLibraryDirectoryButton;
-        private Button AddLibraryDirectoryButton;
-        private ListBox LibraryDirectoriesListBox;
+        private Button FMoveLibraryDirectoryDownButton;
+        private Button FMoveLibraryDirectoryUpButton;
+        private Button FRemoveLibraryDirectoryButton;
+        private Button FUpdateLibraryDirectoryButton;
+        private Button FAddLibraryDirectoryButton;
+        private ListBox FLibraryDirectoriesListBox;
         private Button FSelectLibraryDirectoryButton;
-        private System.Windows.Forms.TextBox tbLibraryDirectories;
-        private System.Windows.Forms.CheckBox cbRequireSecureConnection;
-        private GroupBox groupBox5;
+        private System.Windows.Forms.TextBox FLibraryDirectoriesTextBox;
+        private System.Windows.Forms.CheckBox FRequireSecureConnectionComboBox;
+        private GroupBox FGroupBox5;
         private Label label7;
-        private System.Windows.Forms.TextBox tbSecurePortNumber;
-        private System.Windows.Forms.CheckBox cbShouldListen;
-        private Label label10;
-        private Label label8;
-        private System.Windows.Forms.TextBox tbOverrideSecureListenerPortNumber;
-        private System.Windows.Forms.CheckBox cbRequireSecureListenerConnection;
-        private Label label9;
-        private System.Windows.Forms.TextBox tbOverrideListenerPortNumber;
-        private System.Windows.Forms.CheckBox cbAllowSilverlightClients;
+        private System.Windows.Forms.TextBox FSecurePortNumberTextBox;
+        private System.Windows.Forms.CheckBox FShouldListenComboBox;
+        private Label FLabel10;
+        private Label FLabel8;
+        private System.Windows.Forms.TextBox FOverrideSecureListenerPortNumberTextBox;
+        private System.Windows.Forms.CheckBox FRequireSecureListenerConnectionComboBox;
+        private Label FLabel9;
+        private System.Windows.Forms.TextBox FOverrideListenerPortNumberTextBox;
+        private System.Windows.Forms.CheckBox FAllowSilverlightClientsComboBox;
         private Label label13;
 
 
@@ -80,76 +80,76 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
         /// </summary>
         private void InitializeComponent()
         {
-            this.tbInstanceName = new System.Windows.Forms.TextBox();
+            this.FInstanceNameTextBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.FOpenFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.label13 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
-            this.tbPortNumber = new System.Windows.Forms.TextBox();
-            this.tbInstanceDirectory = new System.Windows.Forms.TextBox();
+            this.FPortNumberTextBox = new System.Windows.Forms.TextBox();
+            this.FInstanceDirectoryTextBox = new System.Windows.Forms.TextBox();
             this.FSelectInstanceDirectoryButton = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.tbCatalogStoreConnectionString = new System.Windows.Forms.TextBox();
+            this.FCatalogStoreConnectionStringTextBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.tbCatalogStoreClassName = new System.Windows.Forms.TextBox();
+            this.FCatalogStoreClassNameTextBox = new System.Windows.Forms.TextBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-            this.RemoveDeviceSettingButton = new System.Windows.Forms.Button();
-            this.UpdateDeviceSettingButton = new System.Windows.Forms.Button();
-            this.AddDeviceSettingButton = new System.Windows.Forms.Button();
-            this.SettingValueTextBox = new System.Windows.Forms.TextBox();
-            this.SettingNameTextBox = new System.Windows.Forms.TextBox();
-            this.DeviceNameTextBox = new System.Windows.Forms.TextBox();
-            this.DeviceSettingsListBox = new System.Windows.Forms.ListBox();
+            this.FRemoveDeviceSettingButton = new System.Windows.Forms.Button();
+            this.FUpdateDeviceSettingButton = new System.Windows.Forms.Button();
+            this.FAddDeviceSettingButton = new System.Windows.Forms.Button();
+            this.FSettingValueTextBox = new System.Windows.Forms.TextBox();
+            this.FSettingNameTextBox = new System.Windows.Forms.TextBox();
+            this.FDeviceNameTextBox = new System.Windows.Forms.TextBox();
+            this.FDeviceSettingsListBox = new System.Windows.Forms.ListBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.MoveLibraryDirectoryDownButton = new System.Windows.Forms.Button();
-            this.MoveLibraryDirectoryUpButton = new System.Windows.Forms.Button();
-            this.RemoveLibraryDirectoryButton = new System.Windows.Forms.Button();
-            this.UpdateLibraryDirectoryButton = new System.Windows.Forms.Button();
-            this.AddLibraryDirectoryButton = new System.Windows.Forms.Button();
-            this.LibraryDirectoriesListBox = new System.Windows.Forms.ListBox();
+            this.FMoveLibraryDirectoryDownButton = new System.Windows.Forms.Button();
+            this.FMoveLibraryDirectoryUpButton = new System.Windows.Forms.Button();
+            this.FRemoveLibraryDirectoryButton = new System.Windows.Forms.Button();
+            this.FUpdateLibraryDirectoryButton = new System.Windows.Forms.Button();
+            this.FAddLibraryDirectoryButton = new System.Windows.Forms.Button();
+            this.FLibraryDirectoriesListBox = new System.Windows.Forms.ListBox();
             this.FSelectLibraryDirectoryButton = new System.Windows.Forms.Button();
-            this.tbLibraryDirectories = new System.Windows.Forms.TextBox();
+            this.FLibraryDirectoriesTextBox = new System.Windows.Forms.TextBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.tbSecurePortNumber = new System.Windows.Forms.TextBox();
-            this.cbRequireSecureConnection = new System.Windows.Forms.CheckBox();
-            this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.cbAllowSilverlightClients = new System.Windows.Forms.CheckBox();
-            this.cbShouldListen = new System.Windows.Forms.CheckBox();
-            this.label10 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.tbOverrideSecureListenerPortNumber = new System.Windows.Forms.TextBox();
-            this.cbRequireSecureListenerConnection = new System.Windows.Forms.CheckBox();
-            this.label9 = new System.Windows.Forms.Label();
-            this.tbOverrideListenerPortNumber = new System.Windows.Forms.TextBox();
+            this.FSecurePortNumberTextBox = new System.Windows.Forms.TextBox();
+            this.FRequireSecureConnectionComboBox = new System.Windows.Forms.CheckBox();
+            this.FGroupBox5 = new System.Windows.Forms.GroupBox();
+            this.FAllowSilverlightClientsComboBox = new System.Windows.Forms.CheckBox();
+            this.FShouldListenComboBox = new System.Windows.Forms.CheckBox();
+            this.FLabel10 = new System.Windows.Forms.Label();
+            this.FLabel8 = new System.Windows.Forms.Label();
+            this.FOverrideSecureListenerPortNumberTextBox = new System.Windows.Forms.TextBox();
+            this.FRequireSecureListenerConnectionComboBox = new System.Windows.Forms.CheckBox();
+            this.FLabel9 = new System.Windows.Forms.Label();
+            this.FOverrideListenerPortNumberTextBox = new System.Windows.Forms.TextBox();
             this.FContentPanel.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
-            this.groupBox5.SuspendLayout();
+            this.FGroupBox5.SuspendLayout();
             this.SuspendLayout();
             // 
             // FContentPanel
             // 
             this.FContentPanel.AutoScroll = true;
-            this.FContentPanel.Controls.Add(this.groupBox5);
+            this.FContentPanel.Controls.Add(this.FGroupBox5);
             this.FContentPanel.Controls.Add(this.groupBox4);
             this.FContentPanel.Controls.Add(this.groupBox3);
             this.FContentPanel.Controls.Add(this.groupBox2);
             this.FContentPanel.Controls.Add(this.groupBox1);
             this.FContentPanel.Size = new System.Drawing.Size(687, 447);
             // 
-            // tbInstanceName
+            // FInstanceNameTextBox
             // 
-            this.tbInstanceName.Location = new System.Drawing.Point(9, 30);
-            this.tbInstanceName.Name = "tbInstanceName";
-            this.tbInstanceName.Size = new System.Drawing.Size(197, 20);
-            this.tbInstanceName.TabIndex = 0;
+            this.FInstanceNameTextBox.Location = new System.Drawing.Point(9, 30);
+            this.FInstanceNameTextBox.Name = "FInstanceNameTextBox";
+            this.FInstanceNameTextBox.Size = new System.Drawing.Size(197, 20);
+            this.FInstanceNameTextBox.TabIndex = 0;
             // 
             // label1
             // 
@@ -179,20 +179,20 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.label11.TabIndex = 59;
             this.label11.Text = "Port Number";
             // 
-            // tbPortNumber
+            // FPortNumberTextBox
             // 
-            this.tbPortNumber.Location = new System.Drawing.Point(9, 70);
-            this.tbPortNumber.Name = "tbPortNumber";
-            this.tbPortNumber.Size = new System.Drawing.Size(64, 20);
-            this.tbPortNumber.TabIndex = 1;
-            this.tbPortNumber.TextChanged += new System.EventHandler(this.tbPortNumber_TextChanged);
+            this.FPortNumberTextBox.Location = new System.Drawing.Point(9, 70);
+            this.FPortNumberTextBox.Name = "FPortNumberTextBox";
+            this.FPortNumberTextBox.Size = new System.Drawing.Size(64, 20);
+            this.FPortNumberTextBox.TabIndex = 1;
+            this.FPortNumberTextBox.TextChanged += new System.EventHandler(this.tbPortNumber_TextChanged);
             // 
-            // tbInstanceDirectory
+            // FInstanceDirectoryTextBox
             // 
-            this.tbInstanceDirectory.Location = new System.Drawing.Point(9, 110);
-            this.tbInstanceDirectory.Name = "tbInstanceDirectory";
-            this.tbInstanceDirectory.Size = new System.Drawing.Size(261, 20);
-            this.tbInstanceDirectory.TabIndex = 2;
+            this.FInstanceDirectoryTextBox.Location = new System.Drawing.Point(9, 110);
+            this.FInstanceDirectoryTextBox.Name = "FInstanceDirectoryTextBox";
+            this.FInstanceDirectoryTextBox.Size = new System.Drawing.Size(261, 20);
+            this.FInstanceDirectoryTextBox.TabIndex = 2;
             // 
             // FSelectInstanceDirectoryButton
             // 
@@ -206,9 +206,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.label3);
-            this.groupBox1.Controls.Add(this.tbCatalogStoreConnectionString);
+            this.groupBox1.Controls.Add(this.FCatalogStoreConnectionStringTextBox);
             this.groupBox1.Controls.Add(this.label2);
-            this.groupBox1.Controls.Add(this.tbCatalogStoreClassName);
+            this.groupBox1.Controls.Add(this.FCatalogStoreClassNameTextBox);
             this.groupBox1.Location = new System.Drawing.Point(326, 148);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(354, 98);
@@ -226,12 +226,12 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.label3.TabIndex = 68;
             this.label3.Text = "Connection String";
             // 
-            // tbCatalogStoreConnectionString
+            // FCatalogStoreConnectionStringTextBox
             // 
-            this.tbCatalogStoreConnectionString.Location = new System.Drawing.Point(14, 72);
-            this.tbCatalogStoreConnectionString.Name = "tbCatalogStoreConnectionString";
-            this.tbCatalogStoreConnectionString.Size = new System.Drawing.Size(331, 20);
-            this.tbCatalogStoreConnectionString.TabIndex = 1;
+            this.FCatalogStoreConnectionStringTextBox.Location = new System.Drawing.Point(14, 72);
+            this.FCatalogStoreConnectionStringTextBox.Name = "FCatalogStoreConnectionStringTextBox";
+            this.FCatalogStoreConnectionStringTextBox.Size = new System.Drawing.Size(331, 20);
+            this.FCatalogStoreConnectionStringTextBox.TabIndex = 1;
             // 
             // label2
             // 
@@ -243,28 +243,28 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.label2.TabIndex = 66;
             this.label2.Text = "Class Name";
             // 
-            // tbCatalogStoreClassName
+            // FCatalogStoreClassNameTextBox
             // 
-            this.tbCatalogStoreClassName.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
-            this.tbCatalogStoreClassName.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
-            this.tbCatalogStoreClassName.Location = new System.Drawing.Point(14, 32);
-            this.tbCatalogStoreClassName.Name = "tbCatalogStoreClassName";
-            this.tbCatalogStoreClassName.Size = new System.Drawing.Size(331, 20);
-            this.tbCatalogStoreClassName.TabIndex = 0;
-            this.tbCatalogStoreClassName.Tag = "n";
+            this.FCatalogStoreClassNameTextBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.FCatalogStoreClassNameTextBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
+            this.FCatalogStoreClassNameTextBox.Location = new System.Drawing.Point(14, 32);
+            this.FCatalogStoreClassNameTextBox.Name = "FCatalogStoreClassNameTextBox";
+            this.FCatalogStoreClassNameTextBox.Size = new System.Drawing.Size(331, 20);
+            this.FCatalogStoreClassNameTextBox.TabIndex = 0;
+            this.FCatalogStoreClassNameTextBox.Tag = "n";
             // 
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.label6);
             this.groupBox2.Controls.Add(this.label5);
             this.groupBox2.Controls.Add(this.label4);
-            this.groupBox2.Controls.Add(this.RemoveDeviceSettingButton);
-            this.groupBox2.Controls.Add(this.UpdateDeviceSettingButton);
-            this.groupBox2.Controls.Add(this.AddDeviceSettingButton);
-            this.groupBox2.Controls.Add(this.SettingValueTextBox);
-            this.groupBox2.Controls.Add(this.SettingNameTextBox);
-            this.groupBox2.Controls.Add(this.DeviceNameTextBox);
-            this.groupBox2.Controls.Add(this.DeviceSettingsListBox);
+            this.groupBox2.Controls.Add(this.FRemoveDeviceSettingButton);
+            this.groupBox2.Controls.Add(this.FUpdateDeviceSettingButton);
+            this.groupBox2.Controls.Add(this.FAddDeviceSettingButton);
+            this.groupBox2.Controls.Add(this.FSettingValueTextBox);
+            this.groupBox2.Controls.Add(this.FSettingNameTextBox);
+            this.groupBox2.Controls.Add(this.FDeviceNameTextBox);
+            this.groupBox2.Controls.Add(this.FDeviceSettingsListBox);
             this.groupBox2.Location = new System.Drawing.Point(324, 252);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(354, 184);
@@ -299,76 +299,76 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.label4.TabIndex = 87;
             this.label4.Text = "Device Name";
             // 
-            // RemoveDeviceSettingButton
+            // FRemoveDeviceSettingButton
             // 
-            this.RemoveDeviceSettingButton.Location = new System.Drawing.Point(172, 64);
-            this.RemoveDeviceSettingButton.Name = "RemoveDeviceSettingButton";
-            this.RemoveDeviceSettingButton.Size = new System.Drawing.Size(75, 23);
-            this.RemoveDeviceSettingButton.TabIndex = 86;
-            this.RemoveDeviceSettingButton.Text = "Remove";
-            this.RemoveDeviceSettingButton.UseVisualStyleBackColor = true;
-            this.RemoveDeviceSettingButton.Click += new System.EventHandler(this.RemoveDeviceSettingButton_Click);
+            this.FRemoveDeviceSettingButton.Location = new System.Drawing.Point(172, 64);
+            this.FRemoveDeviceSettingButton.Name = "FRemoveDeviceSettingButton";
+            this.FRemoveDeviceSettingButton.Size = new System.Drawing.Size(75, 23);
+            this.FRemoveDeviceSettingButton.TabIndex = 86;
+            this.FRemoveDeviceSettingButton.Text = "Remove";
+            this.FRemoveDeviceSettingButton.UseVisualStyleBackColor = true;
+            this.FRemoveDeviceSettingButton.Click += new System.EventHandler(this.RemoveDeviceSettingButton_Click);
             // 
-            // UpdateDeviceSettingButton
+            // FUpdateDeviceSettingButton
             // 
-            this.UpdateDeviceSettingButton.Location = new System.Drawing.Point(91, 64);
-            this.UpdateDeviceSettingButton.Name = "UpdateDeviceSettingButton";
-            this.UpdateDeviceSettingButton.Size = new System.Drawing.Size(75, 23);
-            this.UpdateDeviceSettingButton.TabIndex = 85;
-            this.UpdateDeviceSettingButton.Text = "Update";
-            this.UpdateDeviceSettingButton.UseVisualStyleBackColor = true;
-            this.UpdateDeviceSettingButton.Click += new System.EventHandler(this.UpdateDeviceSettingButton_Click);
+            this.FUpdateDeviceSettingButton.Location = new System.Drawing.Point(91, 64);
+            this.FUpdateDeviceSettingButton.Name = "FUpdateDeviceSettingButton";
+            this.FUpdateDeviceSettingButton.Size = new System.Drawing.Size(75, 23);
+            this.FUpdateDeviceSettingButton.TabIndex = 85;
+            this.FUpdateDeviceSettingButton.Text = "Update";
+            this.FUpdateDeviceSettingButton.UseVisualStyleBackColor = true;
+            this.FUpdateDeviceSettingButton.Click += new System.EventHandler(this.UpdateDeviceSettingButton_Click);
             // 
-            // AddDeviceSettingButton
+            // FAddDeviceSettingButton
             // 
-            this.AddDeviceSettingButton.Location = new System.Drawing.Point(10, 64);
-            this.AddDeviceSettingButton.Name = "AddDeviceSettingButton";
-            this.AddDeviceSettingButton.Size = new System.Drawing.Size(75, 23);
-            this.AddDeviceSettingButton.TabIndex = 84;
-            this.AddDeviceSettingButton.Text = "Add";
-            this.AddDeviceSettingButton.UseVisualStyleBackColor = true;
-            this.AddDeviceSettingButton.Click += new System.EventHandler(this.AddDeviceSettingButton_Click);
+            this.FAddDeviceSettingButton.Location = new System.Drawing.Point(10, 64);
+            this.FAddDeviceSettingButton.Name = "FAddDeviceSettingButton";
+            this.FAddDeviceSettingButton.Size = new System.Drawing.Size(75, 23);
+            this.FAddDeviceSettingButton.TabIndex = 84;
+            this.FAddDeviceSettingButton.Text = "Add";
+            this.FAddDeviceSettingButton.UseVisualStyleBackColor = true;
+            this.FAddDeviceSettingButton.Click += new System.EventHandler(this.AddDeviceSettingButton_Click);
             // 
-            // SettingValueTextBox
+            // FSettingValueTextBox
             // 
-            this.SettingValueTextBox.Location = new System.Drawing.Point(238, 39);
-            this.SettingValueTextBox.Name = "SettingValueTextBox";
-            this.SettingValueTextBox.Size = new System.Drawing.Size(108, 20);
-            this.SettingValueTextBox.TabIndex = 2;
+            this.FSettingValueTextBox.Location = new System.Drawing.Point(238, 39);
+            this.FSettingValueTextBox.Name = "FSettingValueTextBox";
+            this.FSettingValueTextBox.Size = new System.Drawing.Size(108, 20);
+            this.FSettingValueTextBox.TabIndex = 2;
             // 
-            // SettingNameTextBox
+            // FSettingNameTextBox
             // 
-            this.SettingNameTextBox.Location = new System.Drawing.Point(124, 39);
-            this.SettingNameTextBox.Name = "SettingNameTextBox";
-            this.SettingNameTextBox.Size = new System.Drawing.Size(108, 20);
-            this.SettingNameTextBox.TabIndex = 1;
+            this.FSettingNameTextBox.Location = new System.Drawing.Point(124, 39);
+            this.FSettingNameTextBox.Name = "FSettingNameTextBox";
+            this.FSettingNameTextBox.Size = new System.Drawing.Size(108, 20);
+            this.FSettingNameTextBox.TabIndex = 1;
             // 
-            // DeviceNameTextBox
+            // FDeviceNameTextBox
             // 
-            this.DeviceNameTextBox.Location = new System.Drawing.Point(10, 39);
-            this.DeviceNameTextBox.Name = "DeviceNameTextBox";
-            this.DeviceNameTextBox.Size = new System.Drawing.Size(108, 20);
-            this.DeviceNameTextBox.TabIndex = 0;
+            this.FDeviceNameTextBox.Location = new System.Drawing.Point(10, 39);
+            this.FDeviceNameTextBox.Name = "FDeviceNameTextBox";
+            this.FDeviceNameTextBox.Size = new System.Drawing.Size(108, 20);
+            this.FDeviceNameTextBox.TabIndex = 0;
             // 
-            // DeviceSettingsListBox
+            // FDeviceSettingsListBox
             // 
-            this.DeviceSettingsListBox.FormattingEnabled = true;
-            this.DeviceSettingsListBox.Location = new System.Drawing.Point(9, 93);
-            this.DeviceSettingsListBox.Name = "DeviceSettingsListBox";
-            this.DeviceSettingsListBox.Size = new System.Drawing.Size(336, 82);
-            this.DeviceSettingsListBox.TabIndex = 3;
-            this.DeviceSettingsListBox.SelectedIndexChanged += new System.EventHandler(this.DeviceSettingsListBox_SelectedIndexChanged);
+            this.FDeviceSettingsListBox.FormattingEnabled = true;
+            this.FDeviceSettingsListBox.Location = new System.Drawing.Point(9, 93);
+            this.FDeviceSettingsListBox.Name = "FDeviceSettingsListBox";
+            this.FDeviceSettingsListBox.Size = new System.Drawing.Size(336, 82);
+            this.FDeviceSettingsListBox.TabIndex = 3;
+            this.FDeviceSettingsListBox.SelectedIndexChanged += new System.EventHandler(this.DeviceSettingsListBox_SelectedIndexChanged);
             // 
             // groupBox3
             // 
-            this.groupBox3.Controls.Add(this.MoveLibraryDirectoryDownButton);
-            this.groupBox3.Controls.Add(this.MoveLibraryDirectoryUpButton);
-            this.groupBox3.Controls.Add(this.RemoveLibraryDirectoryButton);
-            this.groupBox3.Controls.Add(this.UpdateLibraryDirectoryButton);
-            this.groupBox3.Controls.Add(this.AddLibraryDirectoryButton);
-            this.groupBox3.Controls.Add(this.LibraryDirectoriesListBox);
+            this.groupBox3.Controls.Add(this.FMoveLibraryDirectoryDownButton);
+            this.groupBox3.Controls.Add(this.FMoveLibraryDirectoryUpButton);
+            this.groupBox3.Controls.Add(this.FRemoveLibraryDirectoryButton);
+            this.groupBox3.Controls.Add(this.FUpdateLibraryDirectoryButton);
+            this.groupBox3.Controls.Add(this.FAddLibraryDirectoryButton);
+            this.groupBox3.Controls.Add(this.FLibraryDirectoriesListBox);
             this.groupBox3.Controls.Add(this.FSelectLibraryDirectoryButton);
-            this.groupBox3.Controls.Add(this.tbLibraryDirectories);
+            this.groupBox3.Controls.Add(this.FLibraryDirectoriesTextBox);
             this.groupBox3.Location = new System.Drawing.Point(12, 148);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(306, 288);
@@ -376,66 +376,66 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Library Directories";
             // 
-            // MoveLibraryDirectoryDownButton
+            // FMoveLibraryDirectoryDownButton
             // 
-            this.MoveLibraryDirectoryDownButton.Location = new System.Drawing.Point(239, 49);
-            this.MoveLibraryDirectoryDownButton.Name = "MoveLibraryDirectoryDownButton";
-            this.MoveLibraryDirectoryDownButton.Size = new System.Drawing.Size(58, 23);
-            this.MoveLibraryDirectoryDownButton.TabIndex = 78;
-            this.MoveLibraryDirectoryDownButton.Text = "Down";
-            this.MoveLibraryDirectoryDownButton.UseVisualStyleBackColor = true;
-            this.MoveLibraryDirectoryDownButton.Click += new System.EventHandler(this.MoveLibraryDirectoryDownButton_Click);
+            this.FMoveLibraryDirectoryDownButton.Location = new System.Drawing.Point(239, 49);
+            this.FMoveLibraryDirectoryDownButton.Name = "FMoveLibraryDirectoryDownButton";
+            this.FMoveLibraryDirectoryDownButton.Size = new System.Drawing.Size(58, 23);
+            this.FMoveLibraryDirectoryDownButton.TabIndex = 78;
+            this.FMoveLibraryDirectoryDownButton.Text = "Down";
+            this.FMoveLibraryDirectoryDownButton.UseVisualStyleBackColor = true;
+            this.FMoveLibraryDirectoryDownButton.Click += new System.EventHandler(this.MoveLibraryDirectoryDownButton_Click);
             // 
-            // MoveLibraryDirectoryUpButton
+            // FMoveLibraryDirectoryUpButton
             // 
-            this.MoveLibraryDirectoryUpButton.Location = new System.Drawing.Point(181, 49);
-            this.MoveLibraryDirectoryUpButton.Name = "MoveLibraryDirectoryUpButton";
-            this.MoveLibraryDirectoryUpButton.Size = new System.Drawing.Size(58, 23);
-            this.MoveLibraryDirectoryUpButton.TabIndex = 77;
-            this.MoveLibraryDirectoryUpButton.Text = "Up";
-            this.MoveLibraryDirectoryUpButton.UseVisualStyleBackColor = true;
-            this.MoveLibraryDirectoryUpButton.Click += new System.EventHandler(this.MoveLibraryDirectoryUpButton_Click);
+            this.FMoveLibraryDirectoryUpButton.Location = new System.Drawing.Point(181, 49);
+            this.FMoveLibraryDirectoryUpButton.Name = "FMoveLibraryDirectoryUpButton";
+            this.FMoveLibraryDirectoryUpButton.Size = new System.Drawing.Size(58, 23);
+            this.FMoveLibraryDirectoryUpButton.TabIndex = 77;
+            this.FMoveLibraryDirectoryUpButton.Text = "Up";
+            this.FMoveLibraryDirectoryUpButton.UseVisualStyleBackColor = true;
+            this.FMoveLibraryDirectoryUpButton.Click += new System.EventHandler(this.MoveLibraryDirectoryUpButton_Click);
             // 
-            // RemoveLibraryDirectoryButton
+            // FRemoveLibraryDirectoryButton
             // 
-            this.RemoveLibraryDirectoryButton.Location = new System.Drawing.Point(123, 49);
-            this.RemoveLibraryDirectoryButton.Name = "RemoveLibraryDirectoryButton";
-            this.RemoveLibraryDirectoryButton.Size = new System.Drawing.Size(58, 23);
-            this.RemoveLibraryDirectoryButton.TabIndex = 76;
-            this.RemoveLibraryDirectoryButton.Text = "Remove";
-            this.RemoveLibraryDirectoryButton.UseVisualStyleBackColor = true;
-            this.RemoveLibraryDirectoryButton.Click += new System.EventHandler(this.RemoveLibraryDirectoryButton_Click);
+            this.FRemoveLibraryDirectoryButton.Location = new System.Drawing.Point(123, 49);
+            this.FRemoveLibraryDirectoryButton.Name = "FRemoveLibraryDirectoryButton";
+            this.FRemoveLibraryDirectoryButton.Size = new System.Drawing.Size(58, 23);
+            this.FRemoveLibraryDirectoryButton.TabIndex = 76;
+            this.FRemoveLibraryDirectoryButton.Text = "Remove";
+            this.FRemoveLibraryDirectoryButton.UseVisualStyleBackColor = true;
+            this.FRemoveLibraryDirectoryButton.Click += new System.EventHandler(this.RemoveLibraryDirectoryButton_Click);
             // 
-            // UpdateLibraryDirectoryButton
+            // FUpdateLibraryDirectoryButton
             // 
-            this.UpdateLibraryDirectoryButton.Location = new System.Drawing.Point(65, 49);
-            this.UpdateLibraryDirectoryButton.Name = "UpdateLibraryDirectoryButton";
-            this.UpdateLibraryDirectoryButton.Size = new System.Drawing.Size(58, 23);
-            this.UpdateLibraryDirectoryButton.TabIndex = 75;
-            this.UpdateLibraryDirectoryButton.Text = "Update";
-            this.UpdateLibraryDirectoryButton.UseVisualStyleBackColor = true;
-            this.UpdateLibraryDirectoryButton.Click += new System.EventHandler(this.UpdateLibraryDirectoryButton_Click);
+            this.FUpdateLibraryDirectoryButton.Location = new System.Drawing.Point(65, 49);
+            this.FUpdateLibraryDirectoryButton.Name = "FUpdateLibraryDirectoryButton";
+            this.FUpdateLibraryDirectoryButton.Size = new System.Drawing.Size(58, 23);
+            this.FUpdateLibraryDirectoryButton.TabIndex = 75;
+            this.FUpdateLibraryDirectoryButton.Text = "Update";
+            this.FUpdateLibraryDirectoryButton.UseVisualStyleBackColor = true;
+            this.FUpdateLibraryDirectoryButton.Click += new System.EventHandler(this.UpdateLibraryDirectoryButton_Click);
             // 
-            // AddLibraryDirectoryButton
+            // FAddLibraryDirectoryButton
             // 
-            this.AddLibraryDirectoryButton.Location = new System.Drawing.Point(7, 49);
-            this.AddLibraryDirectoryButton.Name = "AddLibraryDirectoryButton";
-            this.AddLibraryDirectoryButton.Size = new System.Drawing.Size(58, 23);
-            this.AddLibraryDirectoryButton.TabIndex = 74;
-            this.AddLibraryDirectoryButton.Text = "Add";
-            this.AddLibraryDirectoryButton.UseVisualStyleBackColor = true;
-            this.AddLibraryDirectoryButton.Click += new System.EventHandler(this.AddLibraryDirectoryButton_Click);
+            this.FAddLibraryDirectoryButton.Location = new System.Drawing.Point(7, 49);
+            this.FAddLibraryDirectoryButton.Name = "FAddLibraryDirectoryButton";
+            this.FAddLibraryDirectoryButton.Size = new System.Drawing.Size(58, 23);
+            this.FAddLibraryDirectoryButton.TabIndex = 74;
+            this.FAddLibraryDirectoryButton.Text = "Add";
+            this.FAddLibraryDirectoryButton.UseVisualStyleBackColor = true;
+            this.FAddLibraryDirectoryButton.Click += new System.EventHandler(this.AddLibraryDirectoryButton_Click);
             // 
-            // LibraryDirectoriesListBox
+            // FLibraryDirectoriesListBox
             // 
-            this.LibraryDirectoriesListBox.FormattingEnabled = true;
-            this.LibraryDirectoriesListBox.Location = new System.Drawing.Point(6, 78);
-            this.LibraryDirectoriesListBox.Name = "LibraryDirectoriesListBox";
-            this.LibraryDirectoriesListBox.Size = new System.Drawing.Size(291, 199);
-            this.LibraryDirectoriesListBox.TabIndex = 1;
-            this.LibraryDirectoriesListBox.SelectedIndexChanged += new System.EventHandler(this.LibraryDirectoriesListBox_SelectedIndexChanged);
+            this.FLibraryDirectoriesListBox.FormattingEnabled = true;
+            this.FLibraryDirectoriesListBox.Location = new System.Drawing.Point(6, 78);
+            this.FLibraryDirectoriesListBox.Name = "FLibraryDirectoriesListBox";
+            this.FLibraryDirectoriesListBox.Size = new System.Drawing.Size(291, 199);
+            this.FLibraryDirectoriesListBox.TabIndex = 1;
+            this.FLibraryDirectoriesListBox.SelectedIndexChanged += new System.EventHandler(this.LibraryDirectoriesListBox_SelectedIndexChanged);
             // 
-            // buttonSelectLibraryDirectory
+            // FSelectLibraryDirectoryButton
             // 
             this.FSelectLibraryDirectoryButton.Location = new System.Drawing.Point(273, 22);
             this.FSelectLibraryDirectoryButton.Name = "FSelectLibraryDirectoryButton";
@@ -444,25 +444,25 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.FSelectLibraryDirectoryButton.Text = "...";
             this.FSelectLibraryDirectoryButton.Click += new System.EventHandler(this.SelectLibraryDirectoryButton_Click);
             // 
-            // tbLibraryDirectories
+            // FLibraryDirectoriesTextBox
             // 
-            this.tbLibraryDirectories.Location = new System.Drawing.Point(6, 24);
-            this.tbLibraryDirectories.Name = "tbLibraryDirectories";
-            this.tbLibraryDirectories.Size = new System.Drawing.Size(261, 20);
-            this.tbLibraryDirectories.TabIndex = 0;
+            this.FLibraryDirectoriesTextBox.Location = new System.Drawing.Point(6, 24);
+            this.FLibraryDirectoriesTextBox.Name = "FLibraryDirectoriesTextBox";
+            this.FLibraryDirectoriesTextBox.Size = new System.Drawing.Size(261, 20);
+            this.FLibraryDirectoriesTextBox.TabIndex = 0;
             // 
             // groupBox4
             // 
             this.groupBox4.Controls.Add(this.label7);
-            this.groupBox4.Controls.Add(this.tbSecurePortNumber);
-            this.groupBox4.Controls.Add(this.cbRequireSecureConnection);
-            this.groupBox4.Controls.Add(this.tbInstanceName);
+            this.groupBox4.Controls.Add(this.FSecurePortNumberTextBox);
+            this.groupBox4.Controls.Add(this.FRequireSecureConnectionComboBox);
+            this.groupBox4.Controls.Add(this.FInstanceNameTextBox);
             this.groupBox4.Controls.Add(this.label1);
             this.groupBox4.Controls.Add(this.label13);
             this.groupBox4.Controls.Add(this.label11);
             this.groupBox4.Controls.Add(this.FSelectInstanceDirectoryButton);
-            this.groupBox4.Controls.Add(this.tbPortNumber);
-            this.groupBox4.Controls.Add(this.tbInstanceDirectory);
+            this.groupBox4.Controls.Add(this.FPortNumberTextBox);
+            this.groupBox4.Controls.Add(this.FInstanceDirectoryTextBox);
             this.groupBox4.Location = new System.Drawing.Point(12, 4);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(306, 138);
@@ -478,111 +478,111 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.label7.TabIndex = 62;
             this.label7.Text = "Secure Port Number";
             // 
-            // tbSecurePortNumber
+            // FSecurePortNumberTextBox
             // 
-            this.tbSecurePortNumber.Location = new System.Drawing.Point(79, 70);
-            this.tbSecurePortNumber.Name = "tbSecurePortNumber";
-            this.tbSecurePortNumber.Size = new System.Drawing.Size(64, 20);
-            this.tbSecurePortNumber.TabIndex = 61;
-            this.tbSecurePortNumber.TextChanged += new System.EventHandler(this.tbPortNumber_TextChanged);
+            this.FSecurePortNumberTextBox.Location = new System.Drawing.Point(79, 70);
+            this.FSecurePortNumberTextBox.Name = "FSecurePortNumberTextBox";
+            this.FSecurePortNumberTextBox.Size = new System.Drawing.Size(64, 20);
+            this.FSecurePortNumberTextBox.TabIndex = 61;
+            this.FSecurePortNumberTextBox.TextChanged += new System.EventHandler(this.tbPortNumber_TextChanged);
             // 
-            // cbRequireSecureConnection
+            // FRequireSecureConnectionComboBox
             // 
-            this.cbRequireSecureConnection.AutoSize = true;
-            this.cbRequireSecureConnection.Location = new System.Drawing.Point(149, 72);
-            this.cbRequireSecureConnection.Name = "cbRequireSecureConnection";
-            this.cbRequireSecureConnection.Size = new System.Drawing.Size(157, 17);
-            this.cbRequireSecureConnection.TabIndex = 60;
-            this.cbRequireSecureConnection.Text = "Require Secure Connection";
-            this.cbRequireSecureConnection.UseVisualStyleBackColor = true;
+            this.FRequireSecureConnectionComboBox.AutoSize = true;
+            this.FRequireSecureConnectionComboBox.Location = new System.Drawing.Point(149, 72);
+            this.FRequireSecureConnectionComboBox.Name = "FRequireSecureConnectionComboBox";
+            this.FRequireSecureConnectionComboBox.Size = new System.Drawing.Size(157, 17);
+            this.FRequireSecureConnectionComboBox.TabIndex = 60;
+            this.FRequireSecureConnectionComboBox.Text = "Require Secure Connection";
+            this.FRequireSecureConnectionComboBox.UseVisualStyleBackColor = true;
             // 
-            // groupBox5
+            // FGroupBox5
             // 
-            this.groupBox5.Controls.Add(this.cbAllowSilverlightClients);
-            this.groupBox5.Controls.Add(this.cbShouldListen);
-            this.groupBox5.Controls.Add(this.label10);
-            this.groupBox5.Controls.Add(this.label8);
-            this.groupBox5.Controls.Add(this.tbOverrideSecureListenerPortNumber);
-            this.groupBox5.Controls.Add(this.cbRequireSecureListenerConnection);
-            this.groupBox5.Controls.Add(this.label9);
-            this.groupBox5.Controls.Add(this.tbOverrideListenerPortNumber);
-            this.groupBox5.Location = new System.Drawing.Point(326, 4);
-            this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(354, 138);
-            this.groupBox5.TabIndex = 4;
-            this.groupBox5.TabStop = false;
-            this.groupBox5.Text = "Advanced Network Configuration";
+            this.FGroupBox5.Controls.Add(this.FAllowSilverlightClientsComboBox);
+            this.FGroupBox5.Controls.Add(this.FShouldListenComboBox);
+            this.FGroupBox5.Controls.Add(this.FLabel10);
+            this.FGroupBox5.Controls.Add(this.FLabel8);
+            this.FGroupBox5.Controls.Add(this.FOverrideSecureListenerPortNumberTextBox);
+            this.FGroupBox5.Controls.Add(this.FRequireSecureListenerConnectionComboBox);
+            this.FGroupBox5.Controls.Add(this.FLabel9);
+            this.FGroupBox5.Controls.Add(this.FOverrideListenerPortNumberTextBox);
+            this.FGroupBox5.Location = new System.Drawing.Point(326, 4);
+            this.FGroupBox5.Name = "FGroupBox5";
+            this.FGroupBox5.Size = new System.Drawing.Size(354, 138);
+            this.FGroupBox5.TabIndex = 4;
+            this.FGroupBox5.TabStop = false;
+            this.FGroupBox5.Text = "Advanced Network Configuration";
             // 
-            // cbAllowSilverlightClients
+            // FAllowSilverlightClientsComboBox
             // 
-            this.cbAllowSilverlightClients.AutoSize = true;
-            this.cbAllowSilverlightClients.Location = new System.Drawing.Point(14, 112);
-            this.cbAllowSilverlightClients.Name = "cbAllowSilverlightClients";
-            this.cbAllowSilverlightClients.Size = new System.Drawing.Size(139, 17);
-            this.cbAllowSilverlightClients.TabIndex = 70;
-            this.cbAllowSilverlightClients.Text = "Allow Silverlight Clients?";
-            this.cbAllowSilverlightClients.UseVisualStyleBackColor = true;
+            this.FAllowSilverlightClientsComboBox.AutoSize = true;
+            this.FAllowSilverlightClientsComboBox.Location = new System.Drawing.Point(14, 112);
+            this.FAllowSilverlightClientsComboBox.Name = "FAllowSilverlightClientsComboBox";
+            this.FAllowSilverlightClientsComboBox.Size = new System.Drawing.Size(139, 17);
+            this.FAllowSilverlightClientsComboBox.TabIndex = 70;
+            this.FAllowSilverlightClientsComboBox.Text = "Allow Silverlight Clients?";
+            this.FAllowSilverlightClientsComboBox.UseVisualStyleBackColor = true;
             // 
-            // cbShouldListen
+            // FShouldListenComboBox
             // 
-            this.cbShouldListen.AutoSize = true;
-            this.cbShouldListen.Location = new System.Drawing.Point(14, 19);
-            this.cbShouldListen.Name = "cbShouldListen";
-            this.cbShouldListen.Size = new System.Drawing.Size(150, 17);
-            this.cbShouldListen.TabIndex = 69;
-            this.cbShouldListen.Text = "Should Establish Listener?";
-            this.cbShouldListen.UseVisualStyleBackColor = true;
+            this.FShouldListenComboBox.AutoSize = true;
+            this.FShouldListenComboBox.Location = new System.Drawing.Point(14, 19);
+            this.FShouldListenComboBox.Name = "FShouldListenComboBox";
+            this.FShouldListenComboBox.Size = new System.Drawing.Size(150, 17);
+            this.FShouldListenComboBox.TabIndex = 69;
+            this.FShouldListenComboBox.Text = "Should Establish Listener?";
+            this.FShouldListenComboBox.UseVisualStyleBackColor = true;
             // 
-            // label10
+            // FLabel10
             // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(11, 38);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(117, 13);
-            this.label10.TabIndex = 68;
-            this.label10.Text = "Listener Port Overrides:";
+            this.FLabel10.AutoSize = true;
+            this.FLabel10.Location = new System.Drawing.Point(11, 38);
+            this.FLabel10.Name = "FLabel10";
+            this.FLabel10.Size = new System.Drawing.Size(117, 13);
+            this.FLabel10.TabIndex = 68;
+            this.FLabel10.Text = "Listener Port Overrides:";
             // 
-            // label8
+            // FLabel8
             // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(81, 55);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(103, 13);
-            this.label8.TabIndex = 67;
-            this.label8.Text = "Secure Port Number";
+            this.FLabel8.AutoSize = true;
+            this.FLabel8.Location = new System.Drawing.Point(81, 55);
+            this.FLabel8.Name = "FLabel8";
+            this.FLabel8.Size = new System.Drawing.Size(103, 13);
+            this.FLabel8.TabIndex = 67;
+            this.FLabel8.Text = "Secure Port Number";
             // 
-            // tbOverrideSecureListenerPortNumber
+            // FOverrideSecureListenerPortNumberTextBox
             // 
-            this.tbOverrideSecureListenerPortNumber.Location = new System.Drawing.Point(84, 72);
-            this.tbOverrideSecureListenerPortNumber.Name = "tbOverrideSecureListenerPortNumber";
-            this.tbOverrideSecureListenerPortNumber.Size = new System.Drawing.Size(64, 20);
-            this.tbOverrideSecureListenerPortNumber.TabIndex = 66;
+            this.FOverrideSecureListenerPortNumberTextBox.Location = new System.Drawing.Point(84, 72);
+            this.FOverrideSecureListenerPortNumberTextBox.Name = "FOverrideSecureListenerPortNumberTextBox";
+            this.FOverrideSecureListenerPortNumberTextBox.Size = new System.Drawing.Size(64, 20);
+            this.FOverrideSecureListenerPortNumberTextBox.TabIndex = 66;
             // 
-            // cbRequireSecureListenerConnection
+            // FRequireSecureListenerConnectionComboBox
             // 
-            this.cbRequireSecureListenerConnection.AutoSize = true;
-            this.cbRequireSecureListenerConnection.Location = new System.Drawing.Point(154, 74);
-            this.cbRequireSecureListenerConnection.Name = "cbRequireSecureListenerConnection";
-            this.cbRequireSecureListenerConnection.Size = new System.Drawing.Size(157, 17);
-            this.cbRequireSecureListenerConnection.TabIndex = 65;
-            this.cbRequireSecureListenerConnection.Text = "Require Secure Connection";
-            this.cbRequireSecureListenerConnection.UseVisualStyleBackColor = true;
+            this.FRequireSecureListenerConnectionComboBox.AutoSize = true;
+            this.FRequireSecureListenerConnectionComboBox.Location = new System.Drawing.Point(154, 74);
+            this.FRequireSecureListenerConnectionComboBox.Name = "FRequireSecureListenerConnectionComboBox";
+            this.FRequireSecureListenerConnectionComboBox.Size = new System.Drawing.Size(157, 17);
+            this.FRequireSecureListenerConnectionComboBox.TabIndex = 65;
+            this.FRequireSecureListenerConnectionComboBox.Text = "Require Secure Connection";
+            this.FRequireSecureListenerConnectionComboBox.UseVisualStyleBackColor = true;
             // 
-            // label9
+            // FLabel9
             // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(11, 55);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(66, 13);
-            this.label9.TabIndex = 64;
-            this.label9.Text = "Port Number";
+            this.FLabel9.AutoSize = true;
+            this.FLabel9.Location = new System.Drawing.Point(11, 55);
+            this.FLabel9.Name = "FLabel9";
+            this.FLabel9.Size = new System.Drawing.Size(66, 13);
+            this.FLabel9.TabIndex = 64;
+            this.FLabel9.Text = "Port Number";
             // 
-            // tbOverrideListenerPortNumber
+            // FOverrideListenerPortNumberTextBox
             // 
-            this.tbOverrideListenerPortNumber.Location = new System.Drawing.Point(14, 72);
-            this.tbOverrideListenerPortNumber.Name = "tbOverrideListenerPortNumber";
-            this.tbOverrideListenerPortNumber.Size = new System.Drawing.Size(64, 20);
-            this.tbOverrideListenerPortNumber.TabIndex = 63;
+            this.FOverrideListenerPortNumberTextBox.Location = new System.Drawing.Point(14, 72);
+            this.FOverrideListenerPortNumberTextBox.Name = "FOverrideListenerPortNumberTextBox";
+            this.FOverrideListenerPortNumberTextBox.Size = new System.Drawing.Size(64, 20);
+            this.FOverrideListenerPortNumberTextBox.TabIndex = 63;
             // 
             // EditInstanceForm
             // 
@@ -602,8 +602,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.groupBox3.PerformLayout();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
-            this.groupBox5.ResumeLayout(false);
-            this.groupBox5.PerformLayout();
+            this.FGroupBox5.ResumeLayout(false);
+            this.FGroupBox5.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 

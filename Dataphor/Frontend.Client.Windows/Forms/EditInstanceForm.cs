@@ -30,7 +30,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		public EditInstanceForm()
 		{
 			InitializeComponent();
-            tbCatalogStoreClassName.AutoCompleteCustomSource.AddRange(GetCatalogStoreClassNames());
+            FCatalogStoreClassNameTextBox.AutoCompleteCustomSource.AddRange(GetCatalogStoreClassNames());
                 //= GetCatalogStoreClassNames();
 			FStatusBar.Visible = false;
 			SetAcceptReject(true, false);
@@ -71,55 +71,55 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		public void SetFromConfiguration(ServerConfiguration AConfiguration)
 		{
-			tbInstanceName.Text = AConfiguration.Name;
-			tbPortNumber.Text = AConfiguration.PortNumber.ToString();
-			tbSecurePortNumber.Text = AConfiguration.SecurePortNumber.ToString();
-			cbRequireSecureConnection.Checked = AConfiguration.RequireSecureConnection;
-			cbShouldListen.Checked = AConfiguration.ShouldListen;
-			tbOverrideListenerPortNumber.Text = AConfiguration.OverrideListenerPortNumber.ToString();
-			tbOverrideSecureListenerPortNumber.Text = AConfiguration.OverrideSecureListenerPortNumber.ToString();
-			cbRequireSecureListenerConnection.Checked = AConfiguration.RequireSecureListenerConnection;
-			cbAllowSilverlightClients.Checked = AConfiguration.AllowSilverlightClients;
-			tbInstanceDirectory.Text = AConfiguration.InstanceDirectory;
-			LibraryDirectoriesListBox.Items.Clear();
+			FInstanceNameTextBox.Text = AConfiguration.Name;
+			FPortNumberTextBox.Text = AConfiguration.PortNumber.ToString();
+			FSecurePortNumberTextBox.Text = AConfiguration.SecurePortNumber.ToString();
+			FRequireSecureConnectionComboBox.Checked = AConfiguration.RequireSecureConnection;
+			FShouldListenComboBox.Checked = AConfiguration.ShouldListen;
+			FOverrideListenerPortNumberTextBox.Text = AConfiguration.OverrideListenerPortNumber.ToString();
+			FOverrideSecureListenerPortNumberTextBox.Text = AConfiguration.OverrideSecureListenerPortNumber.ToString();
+			FRequireSecureListenerConnectionComboBox.Checked = AConfiguration.RequireSecureListenerConnection;
+			FAllowSilverlightClientsComboBox.Checked = AConfiguration.AllowSilverlightClients;
+			FInstanceDirectoryTextBox.Text = AConfiguration.InstanceDirectory;
+			FLibraryDirectoriesListBox.Items.Clear();
             if (AConfiguration.LibraryDirectories != null)
             {
                 string[] LLibraryDirectories = AConfiguration.LibraryDirectories.Split(';');
                 for (int LIndex = 0; LIndex < LLibraryDirectories.Length; LIndex++)
-                    LibraryDirectoriesListBox.Items.Add(LLibraryDirectories[LIndex]);
+                    FLibraryDirectoriesListBox.Items.Add(LLibraryDirectories[LIndex]);
             }
-		    tbCatalogStoreClassName.Text = AConfiguration.CatalogStoreClassName;
-			tbCatalogStoreConnectionString.Text = AConfiguration.CatalogStoreConnectionString;
-			DeviceSettingsListBox.Items.Clear();
+		    FCatalogStoreClassNameTextBox.Text = AConfiguration.CatalogStoreClassName;
+			FCatalogStoreConnectionStringTextBox.Text = AConfiguration.CatalogStoreConnectionString;
+			FDeviceSettingsListBox.Items.Clear();
 			foreach (DeviceSetting LDeviceSetting in AConfiguration.DeviceSettings)
-				DeviceSettingsListBox.Items.Add(LDeviceSetting);
+				FDeviceSettingsListBox.Items.Add(LDeviceSetting);
 		}
 		
 		public ServerConfiguration CreateConfiguration()
 		{
 			ServerConfiguration LResult = new ServerConfiguration();
-			LResult.Name = tbInstanceName.Text;
-			LResult.PortNumber = Int32.Parse(tbPortNumber.Text);
-			LResult.SecurePortNumber = Int32.Parse(tbSecurePortNumber.Text);
-			LResult.RequireSecureConnection = cbRequireSecureConnection.Checked;
-			LResult.ShouldListen = cbShouldListen.Checked;
-			LResult.OverrideListenerPortNumber = Int32.Parse(tbOverrideListenerPortNumber.Text);
-			LResult.OverrideSecureListenerPortNumber = Int32.Parse(tbOverrideSecureListenerPortNumber.Text);
-			LResult.RequireSecureListenerConnection = cbRequireSecureListenerConnection.Checked;
-			LResult.AllowSilverlightClients = cbAllowSilverlightClients.Checked;
-			LResult.InstanceDirectory = tbInstanceDirectory.Text;
+			LResult.Name = FInstanceNameTextBox.Text;
+			LResult.PortNumber = Int32.Parse(FPortNumberTextBox.Text);
+			LResult.SecurePortNumber = Int32.Parse(FSecurePortNumberTextBox.Text);
+			LResult.RequireSecureConnection = FRequireSecureConnectionComboBox.Checked;
+			LResult.ShouldListen = FShouldListenComboBox.Checked;
+			LResult.OverrideListenerPortNumber = Int32.Parse(FOverrideListenerPortNumberTextBox.Text);
+			LResult.OverrideSecureListenerPortNumber = Int32.Parse(FOverrideSecureListenerPortNumberTextBox.Text);
+			LResult.RequireSecureListenerConnection = FRequireSecureListenerConnectionComboBox.Checked;
+			LResult.AllowSilverlightClients = FAllowSilverlightClientsComboBox.Checked;
+			LResult.InstanceDirectory = FInstanceDirectoryTextBox.Text;
 			StringBuilder LLibraryDirectories = new StringBuilder();
-			for (int LIndex = 0; LIndex < LibraryDirectoriesListBox.Items.Count; LIndex++)
+			for (int LIndex = 0; LIndex < FLibraryDirectoriesListBox.Items.Count; LIndex++)
 			{
 				if (LIndex > 0)
 					LLibraryDirectories.Append(Path.PathSeparator);
-				LLibraryDirectories.Append(LibraryDirectoriesListBox.Items[LIndex] as String);
+				LLibraryDirectories.Append(FLibraryDirectoriesListBox.Items[LIndex] as String);
 			}
 			LResult.LibraryDirectories = LLibraryDirectories.ToString();
-			LResult.CatalogStoreClassName = tbCatalogStoreClassName.Text;
-			LResult.CatalogStoreConnectionString = tbCatalogStoreConnectionString.Text;
-			for (int LIndex = 0; LIndex < DeviceSettingsListBox.Items.Count; LIndex++)
-				LResult.DeviceSettings.Add((DeviceSetting)DeviceSettingsListBox.Items[LIndex]);
+			LResult.CatalogStoreClassName = FCatalogStoreClassNameTextBox.Text;
+			LResult.CatalogStoreConnectionString = FCatalogStoreConnectionStringTextBox.Text;
+			for (int LIndex = 0; LIndex < FDeviceSettingsListBox.Items.Count; LIndex++)
+				LResult.DeviceSettings.Add((DeviceSetting)FDeviceSettingsListBox.Items[LIndex]);
 			return LResult;
 		}
 
@@ -130,63 +130,63 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void LibraryDirectoriesListBox_SelectedIndexChanged(object sender, EventArgs e)
 		{
-			tbLibraryDirectories.Text = LibraryDirectoriesListBox.SelectedItem as String;
+			FLibraryDirectoriesTextBox.Text = FLibraryDirectoriesListBox.SelectedItem as String;
 		}
 
 		private void AddLibraryDirectoryButton_Click(object sender, EventArgs e)
 		{
-			LibraryDirectoriesListBox.Items.Add(tbLibraryDirectories.Text);
+			FLibraryDirectoriesListBox.Items.Add(FLibraryDirectoriesTextBox.Text);
 		}
 
 		private void UpdateLibraryDirectoryButton_Click(object sender, EventArgs e)
 		{
-			if (LibraryDirectoriesListBox.SelectedIndex >= 0)
-				LibraryDirectoriesListBox.Items[LibraryDirectoriesListBox.SelectedIndex] = tbLibraryDirectories.Text;
+			if (FLibraryDirectoriesListBox.SelectedIndex >= 0)
+				FLibraryDirectoriesListBox.Items[FLibraryDirectoriesListBox.SelectedIndex] = FLibraryDirectoriesTextBox.Text;
 		}
 
 		private void RemoveLibraryDirectoryButton_Click(object sender, EventArgs e)
 		{
-			if (LibraryDirectoriesListBox.SelectedIndex >= 0)
-				LibraryDirectoriesListBox.Items.RemoveAt(LibraryDirectoriesListBox.SelectedIndex);
+			if (FLibraryDirectoriesListBox.SelectedIndex >= 0)
+				FLibraryDirectoriesListBox.Items.RemoveAt(FLibraryDirectoriesListBox.SelectedIndex);
 		}
 
 		private void MoveLibraryDirectoryUpButton_Click(object sender, EventArgs e)
 		{
-			int LIndex = LibraryDirectoriesListBox.SelectedIndex;
+			int LIndex = FLibraryDirectoriesListBox.SelectedIndex;
 			if (LIndex >= 1)
 			{
-				string LValue = LibraryDirectoriesListBox.Items[LIndex] as String;
-				LibraryDirectoriesListBox.Items.RemoveAt(LIndex);
-				LibraryDirectoriesListBox.Items.Insert(LIndex - 1, LValue);
+				string LValue = FLibraryDirectoriesListBox.Items[LIndex] as String;
+				FLibraryDirectoriesListBox.Items.RemoveAt(LIndex);
+				FLibraryDirectoriesListBox.Items.Insert(LIndex - 1, LValue);
 			}
 		}
 
 		private void MoveLibraryDirectoryDownButton_Click(object sender, EventArgs e)
 		{
-			int LIndex = LibraryDirectoriesListBox.SelectedIndex;
-			if ((LIndex >= 0) && (LIndex < LibraryDirectoriesListBox.Items.Count - 1))
+			int LIndex = FLibraryDirectoriesListBox.SelectedIndex;
+			if ((LIndex >= 0) && (LIndex < FLibraryDirectoriesListBox.Items.Count - 1))
 			{
-				string LValue = LibraryDirectoriesListBox.Items[LIndex] as String;
-				LibraryDirectoriesListBox.Items.RemoveAt(LIndex);
-				LibraryDirectoriesListBox.Items.Insert(LIndex + 1, LValue);
+				string LValue = FLibraryDirectoriesListBox.Items[LIndex] as String;
+				FLibraryDirectoriesListBox.Items.RemoveAt(LIndex);
+				FLibraryDirectoriesListBox.Items.Insert(LIndex + 1, LValue);
 			}
 		}
 		
 		private void PushSetting(DeviceSetting ASetting)
 		{
-			ASetting.DeviceName = DeviceNameTextBox.Text;
-			ASetting.SettingName = SettingNameTextBox.Text;
-			ASetting.SettingValue = SettingValueTextBox.Text;
+			ASetting.DeviceName = FDeviceNameTextBox.Text;
+			ASetting.SettingName = FSettingNameTextBox.Text;
+			ASetting.SettingValue = FSettingValueTextBox.Text;
 		}
 
 		private void DeviceSettingsListBox_SelectedIndexChanged(object sender, EventArgs e)
 		{
-			DeviceSetting LSetting = DeviceSettingsListBox.SelectedItem as DeviceSetting;
+			DeviceSetting LSetting = FDeviceSettingsListBox.SelectedItem as DeviceSetting;
 			if (LSetting != null)
 			{
-				DeviceNameTextBox.Text = LSetting.DeviceName;
-				SettingNameTextBox.Text = LSetting.SettingName;
-				SettingValueTextBox.Text = LSetting.SettingValue;
+				FDeviceNameTextBox.Text = LSetting.DeviceName;
+				FSettingNameTextBox.Text = LSetting.SettingName;
+				FSettingValueTextBox.Text = LSetting.SettingValue;
 			}
 		}
 
@@ -194,30 +194,30 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			DeviceSetting LSetting = new DeviceSetting();
 			PushSetting(LSetting);
-			DeviceSettingsListBox.Items.Add(LSetting);
+			FDeviceSettingsListBox.Items.Add(LSetting);
 		}
 
 		private void UpdateDeviceSettingButton_Click(object sender, EventArgs e)
 		{
-			if (DeviceSettingsListBox.SelectedIndex >= 0)
+			if (FDeviceSettingsListBox.SelectedIndex >= 0)
 			{
 				DeviceSetting LSetting = new DeviceSetting();
 				PushSetting(LSetting);
-				DeviceSettingsListBox.Items[DeviceSettingsListBox.SelectedIndex] = LSetting;
+				FDeviceSettingsListBox.Items[FDeviceSettingsListBox.SelectedIndex] = LSetting;
 			}
 		}
 
 		private void RemoveDeviceSettingButton_Click(object sender, EventArgs e)
 		{
-			if (DeviceSettingsListBox.SelectedIndex >= 0)
-				DeviceSettingsListBox.Items.RemoveAt(DeviceSettingsListBox.SelectedIndex);
+			if (FDeviceSettingsListBox.SelectedIndex >= 0)
+				FDeviceSettingsListBox.Items.RemoveAt(FDeviceSettingsListBox.SelectedIndex);
 		}
 
 		private void SelectInstanceDirectoryButton_Click(object sender, EventArgs e)
 		{
 			try
 			{
-				tbInstanceDirectory.Text = FolderUtility.GetDirectory(tbInstanceDirectory.Text);
+				FInstanceDirectoryTextBox.Text = FolderUtility.GetDirectory(FInstanceDirectoryTextBox.Text);
 			}
 			catch (AbortException) { }
 		}
@@ -226,7 +226,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			try
 			{
-				tbLibraryDirectories.Text = FolderUtility.GetDirectory(tbLibraryDirectories.Text);
+				FLibraryDirectoriesTextBox.Text = FolderUtility.GetDirectory(FLibraryDirectoriesTextBox.Text);
 			}
 			catch (AbortException) { }
         }
