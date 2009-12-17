@@ -56,8 +56,20 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	public class HTMLAttributeEncodeNode : InstructionNode
 	{
 		public override object InternalExecute(Program AProgram, object[] AArguments)
-		{			
-			return HttpUtility.HtmlAttributeEncode((string)AArguments[0]);
+		{
+			// I would have thought that the framework implementation of HtmlAttributeEncode would,
+			// well, encode html attributes. However, it does not seem to replace carriage-returns
+			// or line feeds, so I'm doing that here.
+			string LEncodedString = HttpUtility.HtmlAttributeEncode((string)AArguments[0]);
+			StringBuilder LResult = new StringBuilder(LEncodedString.Length);
+			for (int LIndex = 0; LIndex < LEncodedString.Length; LIndex++)
+				switch (LEncodedString[LIndex])
+				{
+					case '\r': LResult.Append("&#xD;"); break;
+					case '\n': LResult.Append("&#xA;"); break;
+					default : LResult.Append(LEncodedString[LIndex]); break;
+				}
+			return LResult.ToString();
 		}
 	}
 
