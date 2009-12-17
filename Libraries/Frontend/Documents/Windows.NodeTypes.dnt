@@ -77,4 +77,6 @@
 
 		<nodetype name="copyaction"/>
 		<nodetype name="pasteaction"/>
+
+		<nodetype name="notifyaction"/>
 	</namespace>

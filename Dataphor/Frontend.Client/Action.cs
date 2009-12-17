@@ -16,6 +16,14 @@ using System.Collections.Generic;
 
 namespace Alphora.Dataphor.Frontend.Client
 {
+	public enum NotifyIcon
+	{
+		None,
+		Info,
+		Warning,
+		Error
+	}
+		
 	public class EventParams : IndexedDictionary<string, object>
 	{
 		public EventParams() : base() {}
@@ -393,5 +401,6 @@ namespace Alphora.Dataphor.Frontend.Client
 		{
 			HostNode.Session.InvokeHelp((ASender == null ? this : ASender), FHelpKeyword, FHelpKeywordBehavior, FHelpString);
 		}
-	}
+	}  	
 }
+

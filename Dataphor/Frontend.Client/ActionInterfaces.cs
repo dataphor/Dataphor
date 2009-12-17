@@ -174,6 +174,29 @@ namespace Alphora.Dataphor.Frontend.Client
 		string HelpString { get; set; }
 	}
 
+	// Published
+
+	/// <summary> Displays a notification/tip to the user. </summary> <doc/>
+	public interface INotifyAction : IAction
+	{
+		// Published
+
+		/// <summary> The title to display. </summary> <doc/>
+		/// <value> <para>String</para>
+		/// <para>Default: empty string</para></value> 		
+		string TipTitle { get; set; }
+
+		/// <summary> The text to display. </summary> <doc/>
+		/// <value> <para>String</para>
+		/// <para>Default: empty string</para></value> 		
+		string TipText { get; set; }
+
+		/// <summary> The icon to display. </summary> <doc/>
+		/// <value> <para>NotifyIcon</para>
+		/// <para>Default: NotifyIcon.Info</para></value>
+		NotifyIcon TipIcon { get; set; }
+	}
+	
 	/// <summary> An action that sets a property of a specified node when triggered.
 	/// </summary> <doc/>
 	/// <remarks> The property, specified by MemberName, of the node, specified by 

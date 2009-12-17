@@ -82,23 +82,34 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				{
 					try
 					{
-						DisposeDefaultIcon();
+						if (FNotifyIcon != null)
+						{
+							FNotifyIcon.Dispose();
+							FNotifyIcon = null;
+						}
 					}
 					finally
 					{
 						try
 						{
-							ClearDocumentCache();	// this must happen before the call to base (because we need the pipe)
+							DisposeDefaultIcon();
 						}
 						finally
 						{
 							try
 							{
-								ClearImageCache();
+								ClearDocumentCache();	// this must happen before the call to base (because we need the pipe)
 							}
 							finally
 							{
-								base.Dispose(ADisposing);
+								try
+								{
+									ClearImageCache();
+								}
+								finally
+								{								
+									base.Dispose(ADisposing); 					
+								}
 							}
 						}
 					}
@@ -114,7 +125,26 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			get { return FToolTip; }
 		}
+		
+		// NotifyIcon
 
+		private WinForms.NotifyIcon FNotifyIcon;
+		
+		public WinForms.NotifyIcon NotifyIcon
+		{
+			get 
+			{
+				if (FNotifyIcon == null)
+				{
+					System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(BaseForm));
+					FNotifyIcon = new System.Windows.Forms.NotifyIcon();
+					FNotifyIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("FNotifyIcon.Icon")));
+					FNotifyIcon.Visible = true;
+				}
+				return FNotifyIcon; 
+			}
+		}
+						   
 		// Theme
 
 		private Theme FTheme = new Theme();

@@ -195,6 +195,7 @@
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="NotifyAction.cs" />
     <Compile Include="BaseElement.cs">
       <SubType>Code</SubType>
     </Compile>
