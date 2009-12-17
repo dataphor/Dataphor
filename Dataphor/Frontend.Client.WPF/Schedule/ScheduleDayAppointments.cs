@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Media;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.Frontend.Client.WPF
 {
@@ -125,24 +126,117 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 					BlockHeight * (1440 / Granularity)
 				);
 		}
-
+		
+		private class Appointment
+		{
+			public Appointment(UIElement AChild, int AStart, int AEnd)
+			{
+				FChild = AChild;
+				FStart = AStart;
+				FEnd = AEnd;
+			}
+			
+			private UIElement FChild;
+			public UIElement Child { get { return FChild; } }
+			
+			private int FStart;
+			public int Start { get { return FStart; } }
+			
+			private int FEnd;
+			public int End { get { return FEnd; } }
+		}
+		
+		private class Slot
+		{
+			private List<Appointment> FAppointments = new List<Appointment>();
+			public List<Appointment> Appointments { get { return FAppointments; } }
+			
+			/// <summary>
+			/// Determines the index at which the appointment could be inserted if it will fit in the slot, -1 otherwise.
+			/// </summary>
+			/// <param name="AAppointment">The appointment to be tested.</param>
+			/// <returns>The index at which the appointment could be inserted if it will fit in the slot, -1 otherwise.</returns>
+			public int FitIndex(Appointment AAppointment)
+			{
+				var LLastEnd = 0;
+				for (int LIndex = 0; LIndex < FAppointments.Count; LIndex++)
+				{
+					if ((AAppointment.Start >= LLastEnd) && (AAppointment.End <= FAppointments[LIndex].Start))
+						return LIndex;
+					
+					if (LLastEnd > AAppointment.Start)
+						break;
+					
+					LLastEnd = FAppointments[LIndex].End;
+				}
+				
+				if (AAppointment.Start >= LLastEnd)
+					return FAppointments.Count;
+				
+				return -1;
+			}
+			
+			/// <summary>
+			/// Inserts an appointment in the slot if there is an available time-slot.
+			/// </summary>
+			/// <param name="AAppointment">The appointment to be inserted.</param>
+			/// <returns>The index of the appointment in the list if it could be inserted, -1 otherwise.</returns>
+			public int Add(Appointment AAppointment)
+			{
+				int LIndex = FitIndex(AAppointment);
+				if (LIndex >= 0)
+					FAppointments.Insert(LIndex, AAppointment);
+					
+				return LIndex;
+			}
+		}
+		
 		protected override Size ArrangeOverride(Size AFinalSize)
 		{
+			var LSlots = new List<Slot>();
+			LSlots.Add(new Slot());
+			
 			foreach (UIElement LChild in Children)
 			{
-				var LStart = (int)new TimeSpan(GetStart(LChild).Ticks).TotalMinutes;
-				var LEnd = (int)new TimeSpan(GetEnd(LChild).Ticks).TotalMinutes;
-				LChild.Arrange
-				(
-					new Rect
+				var LAppointment = 
+					new Appointment
 					(
-						0,
-						(LStart - (int)new TimeSpan(StartTime.Ticks).TotalMinutes) / Granularity * BlockHeight,
-						AFinalSize.Width,
-						Math.Max((LEnd - LStart) / Granularity, 1) * BlockHeight
-					)
-				);
+						LChild,
+						(int)new TimeSpan(GetStart(LChild).Ticks).TotalMinutes,
+						(int)new TimeSpan(GetEnd(LChild).Ticks).TotalMinutes
+					);
+					
+				var LSlotIndex = 0;
+				while (LSlots[LSlotIndex].Add(LAppointment) < 0)
+				{
+					LSlotIndex++;
+					if (LSlots.Count <= LSlotIndex)
+						LSlots.Add(new Slot());
+				}
 			}
+			
+			var LDefaultWidth = AFinalSize.Width / LSlots.Count;
+			for (int LSlotIndex = 0; LSlotIndex < LSlots.Count; LSlotIndex++)
+			{
+				foreach (Appointment LAppointment in LSlots[LSlotIndex].Appointments)
+				{
+					int LNextSlotIndex = LSlotIndex + 1;
+					while ((LNextSlotIndex < LSlots.Count) && (LSlots[LNextSlotIndex].FitIndex(LAppointment) >= 0))
+						LNextSlotIndex++;
+						
+					LAppointment.Child.Arrange
+					(
+						new Rect
+						(
+							LDefaultWidth * LSlotIndex,
+							(LAppointment.Start - (int)new TimeSpan(StartTime.Ticks).TotalMinutes) / Granularity * BlockHeight,
+							LDefaultWidth * (LNextSlotIndex - LSlotIndex),
+							Math.Max((LAppointment.End - LAppointment.Start) / Granularity, 1) * BlockHeight
+						)
+					);
+				}
+			}
+			
 			return AFinalSize;
 		}
 	}
