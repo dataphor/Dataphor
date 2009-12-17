@@ -27,7 +27,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox tbInstanceName;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
-        private Button buttonSelectInstanceDirectory;
+        private Button FSelectInstanceDirectoryButton;
         private System.Windows.Forms.TextBox tbInstanceDirectory;
         private System.Windows.Forms.TextBox tbPortNumber;
         private Label label11;
@@ -55,7 +55,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
         private Button UpdateLibraryDirectoryButton;
         private Button AddLibraryDirectoryButton;
         private ListBox LibraryDirectoriesListBox;
-        private Button buttonSelectLibraryDirectory;
+        private Button FSelectLibraryDirectoryButton;
         private System.Windows.Forms.TextBox tbLibraryDirectories;
         private System.Windows.Forms.CheckBox cbRequireSecureConnection;
         private GroupBox groupBox5;
@@ -87,7 +87,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.label11 = new System.Windows.Forms.Label();
             this.tbPortNumber = new System.Windows.Forms.TextBox();
             this.tbInstanceDirectory = new System.Windows.Forms.TextBox();
-            this.buttonSelectInstanceDirectory = new System.Windows.Forms.Button();
+            this.FSelectInstanceDirectoryButton = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.label3 = new System.Windows.Forms.Label();
             this.tbCatalogStoreConnectionString = new System.Windows.Forms.TextBox();
@@ -111,7 +111,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.UpdateLibraryDirectoryButton = new System.Windows.Forms.Button();
             this.AddLibraryDirectoryButton = new System.Windows.Forms.Button();
             this.LibraryDirectoriesListBox = new System.Windows.Forms.ListBox();
-            this.buttonSelectLibraryDirectory = new System.Windows.Forms.Button();
+            this.FSelectLibraryDirectoryButton = new System.Windows.Forms.Button();
             this.tbLibraryDirectories = new System.Windows.Forms.TextBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.label7 = new System.Windows.Forms.Label();
@@ -194,14 +194,14 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.tbInstanceDirectory.Size = new System.Drawing.Size(261, 20);
             this.tbInstanceDirectory.TabIndex = 2;
             // 
-            // buttonSelectInstanceDirectory
+            // FSelectInstanceDirectoryButton
             // 
-            this.buttonSelectInstanceDirectory.Location = new System.Drawing.Point(276, 108);
-            this.buttonSelectInstanceDirectory.Name = "buttonSelectInstanceDirectory";
-            this.buttonSelectInstanceDirectory.Size = new System.Drawing.Size(24, 22);
-            this.buttonSelectInstanceDirectory.TabIndex = 56;
-            this.buttonSelectInstanceDirectory.Text = "...";
-            this.buttonSelectInstanceDirectory.Click += new System.EventHandler(this.buttonSelectInstanceDirectory_Click);
+            this.FSelectInstanceDirectoryButton.Location = new System.Drawing.Point(276, 108);
+            this.FSelectInstanceDirectoryButton.Name = "FSelectInstanceDirectoryButton";
+            this.FSelectInstanceDirectoryButton.Size = new System.Drawing.Size(24, 22);
+            this.FSelectInstanceDirectoryButton.TabIndex = 56;
+            this.FSelectInstanceDirectoryButton.Text = "...";
+            this.FSelectInstanceDirectoryButton.Click += new System.EventHandler(this.SelectInstanceDirectoryButton_Click);
             // 
             // groupBox1
             // 
@@ -367,7 +367,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.groupBox3.Controls.Add(this.UpdateLibraryDirectoryButton);
             this.groupBox3.Controls.Add(this.AddLibraryDirectoryButton);
             this.groupBox3.Controls.Add(this.LibraryDirectoriesListBox);
-            this.groupBox3.Controls.Add(this.buttonSelectLibraryDirectory);
+            this.groupBox3.Controls.Add(this.FSelectLibraryDirectoryButton);
             this.groupBox3.Controls.Add(this.tbLibraryDirectories);
             this.groupBox3.Location = new System.Drawing.Point(12, 148);
             this.groupBox3.Name = "groupBox3";
@@ -437,12 +437,12 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             // 
             // buttonSelectLibraryDirectory
             // 
-            this.buttonSelectLibraryDirectory.Location = new System.Drawing.Point(273, 22);
-            this.buttonSelectLibraryDirectory.Name = "buttonSelectLibraryDirectory";
-            this.buttonSelectLibraryDirectory.Size = new System.Drawing.Size(24, 22);
-            this.buttonSelectLibraryDirectory.TabIndex = 72;
-            this.buttonSelectLibraryDirectory.Text = "...";
-            this.buttonSelectLibraryDirectory.Click += new System.EventHandler(this.buttonSelectLibraryDirectory_Click);
+            this.FSelectLibraryDirectoryButton.Location = new System.Drawing.Point(273, 22);
+            this.FSelectLibraryDirectoryButton.Name = "FSelectLibraryDirectoryButton";
+            this.FSelectLibraryDirectoryButton.Size = new System.Drawing.Size(24, 22);
+            this.FSelectLibraryDirectoryButton.TabIndex = 72;
+            this.FSelectLibraryDirectoryButton.Text = "...";
+            this.FSelectLibraryDirectoryButton.Click += new System.EventHandler(this.SelectLibraryDirectoryButton_Click);
             // 
             // tbLibraryDirectories
             // 
@@ -460,7 +460,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.groupBox4.Controls.Add(this.label1);
             this.groupBox4.Controls.Add(this.label13);
             this.groupBox4.Controls.Add(this.label11);
-            this.groupBox4.Controls.Add(this.buttonSelectInstanceDirectory);
+            this.groupBox4.Controls.Add(this.FSelectInstanceDirectoryButton);
             this.groupBox4.Controls.Add(this.tbPortNumber);
             this.groupBox4.Controls.Add(this.tbInstanceDirectory);
             this.groupBox4.Location = new System.Drawing.Point(12, 4);
