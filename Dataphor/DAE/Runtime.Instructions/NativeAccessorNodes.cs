@@ -355,7 +355,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (AArgument1 == null)
 				return null;
 			#endif
-			return ((decimal)AArgument1).ToString();
+			return ((decimal)AArgument1).ToString("F");
 		}
     }
     
