@@ -142,7 +142,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
-		private void ControlGotFocus(object ASender, EventArgs AArgs)
+		protected void ControlGotFocus(object ASender, EventArgs AArgs)
 		{
 			FindParent(typeof(IFormInterface)).BroadcastEvent(new FocusChangedEvent(this));
 		}
