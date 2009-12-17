@@ -525,6 +525,10 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 			
 			// Use the column's title for the group (only in the case of a quick lookup)
 			LLookupGroup.Title = LControlElement.Title;
+			
+			// If the control has a flow break specified, push it onto the lookup group (only in the case of a quick lookup)
+			if (LControlElement.FlowBreak)
+				LLookupGroup.FlowBreak = true;
 		}
 
 		protected virtual void BuildFullLookup
