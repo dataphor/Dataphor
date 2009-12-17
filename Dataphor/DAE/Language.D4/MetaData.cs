@@ -187,8 +187,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		{
 			return GetTag(AName, false);
 		}
-		
-		/// <summary>Returns the Tag for the given name. If the tag does not exist, an error is thrown if AShouldThrow is true, otherwise, null is returned.</summary>
+
+        /// <summary>Returns the Tag for the given name. If the tag does not exist, an error is thrown if AShouldThrow is true, otherwise, Tag.None is returned.</summary>
 		public Tag GetTag(string AName, bool AShouldThrow)
 		{
 			int LIndex = IndexOfName(AName);
