@@ -620,7 +620,7 @@ namespace Alphora.Dataphor.DAE.Server
 			if (FLogErrors)
 				LogError(AException);
 				
-			return new Exception("Wrapped Exception: "+AException.Message,AException);
+			return AException;
 		}
 
 		#endregion
