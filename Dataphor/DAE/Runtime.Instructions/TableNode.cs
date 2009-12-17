@@ -1861,7 +1861,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Row LOldPreparedRow = AOldRow == null ? null : PrepareOldRow(AProgram, AOldRow, false);
 				try
 				{
-					Row LNewPreparedRow = PrepareNewRow(AProgram, AOldRow, ANewRow, ref AValueFlags);
+					BitArray LValueFlags = AValueFlags;
+					Row LNewPreparedRow = PrepareNewRow(AProgram, AOldRow, ANewRow, ref LValueFlags);
 					try
 					{
 						bool LChanged = PreparedValidate(AProgram, LOldPreparedRow, LNewPreparedRow, AValueFlags, AColumnName, true, true);
@@ -1993,7 +1994,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Row LOldPreparedRow = PrepareOldRow(AProgram, AOldRow, false);
 				try
 				{
-					Row LNewPreparedRow = PrepareNewRow(AProgram, AOldRow, ANewRow, ref AValueFlags);
+					BitArray LValueFlags = AValueFlags;
+					Row LNewPreparedRow = PrepareNewRow(AProgram, AOldRow, ANewRow, ref LValueFlags);
 					try
 					{
 						#if USEPROPOSALEVENTS
@@ -2011,7 +2013,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					finally
 					{
 						if (!Object.ReferenceEquals(ANewRow, LNewPreparedRow))
+						{
+							if (AValueFlags != null)
+								for (int LIndex = 0; LIndex < LValueFlags.Count; LIndex++)
+									if (LValueFlags[LIndex])
+										AValueFlags[ANewRow.DataType.Columns.IndexOfName(LNewPreparedRow.DataType.Columns[LIndex].Name)] = LValueFlags[LIndex];
+			
 							LNewPreparedRow.Dispose();
+						}
 					}
 				}
 				finally

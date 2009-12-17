@@ -3310,6 +3310,168 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return false;
 		}
 		
+		private bool PerformChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, ref bool AChangePropagated)
+		{
+			bool LChanged = false;
+
+			if (AColumnName != String.Empty)
+			{
+				bool LIsRowExistsColumn = IsRowExistsColumn(AColumnName);
+				if (FLeftKey.Columns.ContainsName(AColumnName) || LIsRowExistsColumn)
+				{
+					LChanged = true;
+					if (IsNatural)
+						AChangePropagated = true;
+					if (!LIsRowExistsColumn || HasRow(ANewRow))
+					{
+						if (!AProgram.ServerProcess.ServerSession.Server.IsEngine && RetrieveRight)
+						{
+							EnsureRightSelectNode(AProgram.Plan);
+							using (Table LTable = FRightSelectNode.Execute(AProgram) as Table)
+							{
+								LTable.Open();
+								if (LTable.Next())
+								{
+									LTable.Select(ANewRow);
+									if (HasRowExistsColumn() && !LIsRowExistsColumn)
+										ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = true;
+
+									if (PropagateChangeRight)
+										foreach (Schema.Column LColumn in RightTableType.Columns)
+											RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+								}
+								else
+								{
+									if (!LIsRowExistsColumn)
+										if (HasRowExistsColumn())
+											ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = false;
+										else
+										{
+											// Clear any of/all of columns
+											// TODO: This should be looked at, if any of/all of are both subsets of the right side, nothing needs to happen here
+											// I don't want to run through them all here because it will end up firing changes twice in the default case
+										}
+										
+									foreach (Schema.Column LColumn in RightTableType.Columns)
+									{
+										int LRightKeyIndex = FRightKey.Columns.IndexOfName(LColumn.Name);
+										if (!HasRowExistsColumn() && (LRightKeyIndex >= 0) && CoordinateRight)
+										{
+											int LLeftRowIndex = ANewRow.DataType.Columns.IndexOfName(FLeftKey.Columns[LRightKeyIndex].Name);
+											if (ANewRow.HasValue(LLeftRowIndex))
+												ANewRow[LColumn.Name] = ANewRow[LLeftRowIndex];
+											else
+												ANewRow.ClearValue(LColumn.Name);
+										}
+										else
+										{
+											if (ClearRight)
+												ANewRow.ClearValue(LColumn.Name);
+
+											if (LIsRowExistsColumn && PropagateDefaultRight)
+												RightNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+										}
+											
+										if (PropagateChangeRight)
+											RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+									}
+								}
+							}
+						}
+						else
+						{
+							if (!LIsRowExistsColumn)
+							{
+								if (HasRow(ANewRow) && CoordinateRight)
+									CoordinateRightJoinKey(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+							}
+							else // rowexists was set
+							{
+								foreach (Schema.TableVarColumn LColumn in RightTableVar.Columns)
+								{
+									int LRightKeyIndex = FRightKey.Columns.IndexOfName(LColumn.Name);
+									if ((LRightKeyIndex >= 0) && CoordinateRight)
+									{
+										int LLeftRowIndex = ANewRow.DataType.Columns.IndexOfName(FLeftKey.Columns[LRightKeyIndex].Name);
+										if (ANewRow.HasValue(LLeftRowIndex))
+											ANewRow[LColumn.Name] = ANewRow[LLeftRowIndex];
+										else
+											ANewRow.ClearValue(LColumn.Name);
+									}
+									else
+									{
+										if (ClearRight)
+											ANewRow.ClearValue(LColumn.Name);
+
+										if (!ANewRow.HasValue(LColumn.Name) && PropagateDefaultRight)
+											RightNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+									}
+									
+									if (PropagateChangeRight)
+										RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+								}
+							}
+						}
+					}
+					else // rowexists was cleared
+					{
+						if (ClearRight)
+							foreach (Schema.TableVarColumn LColumn in RightTableVar.Columns)
+							{
+								ANewRow.ClearValue(LColumn.Name);
+								if (PropagateChangeRight)
+									RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+							}
+					}
+				}
+				
+				if (FRightKey.Columns.ContainsName(AColumnName) && HasRow(ANewRow) && CoordinateLeft)
+				{
+					LChanged = true;
+					if (IsNatural)
+						AChangePropagated = true;
+					CoordinateLeftJoinKey(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+				}
+					
+				if (FAnyOfKey.Columns.ContainsName(AColumnName) || FAllOfKey.Columns.ContainsName(AColumnName))
+				{
+					LChanged = true;
+					if (HasValues(ANewRow))
+					{
+						if (HasRowExistsColumn())
+							ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = true;
+							
+						foreach (Schema.TableVarColumn LColumn in RightTableVar.Columns)
+						{
+							int LRightKeyIndex = FRightKey.Columns.IndexOfName(LColumn.Name);
+							if ((LRightKeyIndex >= 0) && CoordinateRight)
+								CoordinateRightJoinKey(AProgram, AOldRow, ANewRow, AValueFlags, FLeftKey.Columns[LRightKeyIndex].Name);
+							else
+							{
+								if (PropagateDefaultRight && RightNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name) && PropagateChangeRight)
+									RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+							}
+						}
+					}
+					else
+					{
+						if (HasRowExistsColumn())
+							ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = false;
+							
+						if (ClearRight)
+							foreach (Schema.TableVarColumn LColumn in RightTableVar.Columns)
+							{
+								ANewRow.ClearValue(LColumn.Name);
+								if (PropagateChangeRight)
+									RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+							}
+					}
+				}
+			}
+			
+			return LChanged;
+		}
+		
 		/*
 			if the change is made to a specific column and the join is not natural
 				if a change is made to a left join-key column
@@ -3404,163 +3566,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				bool LChanged = false;
 				bool LChangePropagated = false;
 				
-				if (AColumnName != String.Empty)
+				LChanged = PerformChange(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, ref LChangePropagated);
+				
+				if (!LChangePropagated && PropagateChangeLeft && ((AColumnName == String.Empty) || LeftTableType.Columns.ContainsName(AColumnName)))
 				{
-					bool LIsRowExistsColumn = IsRowExistsColumn(AColumnName);
-					if (FLeftKey.Columns.ContainsName(AColumnName) || LIsRowExistsColumn)
+					// TODO: Need to generalize this solution and integrate it better with overall value-flags determination
+					// For now, instead of passing the given AValueFlags, we create a new LValueFlags and use it to detect whether or not
+					// the change affected any of the join columns. If it did, we need to refire the lookup logic.
+					// This is safe at this point, because nothing is actually using the ValueFlags on change.
+					BitArray LValueFlags = new BitArray(ANewRow.DataType.Columns.Count);
+					LValueFlags.SetAll(false);
+					LChanged = LeftNode.Change(AProgram, AOldRow, ANewRow, LValueFlags, AColumnName) || LChanged;
+					for (int LIndex = 0; LIndex < LValueFlags.Count; LIndex++)
 					{
-						LChanged = true;
-						if (IsNatural)
-							LChangePropagated = true;
-						if (!LIsRowExistsColumn || HasRow(ANewRow))
+						if (LValueFlags[LIndex])
 						{
-							if (!AProgram.ServerProcess.ServerSession.Server.IsEngine && RetrieveRight)
-							{
-								EnsureRightSelectNode(AProgram.Plan);
-								using (Table LTable = FRightSelectNode.Execute(AProgram) as Table)
-								{
-									LTable.Open();
-									if (LTable.Next())
-									{
-										LTable.Select(ANewRow);
-										if (HasRowExistsColumn() && !LIsRowExistsColumn)
-											ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = true;
-
-										if (PropagateChangeRight)
-											foreach (Schema.Column LColumn in RightTableType.Columns)
-												RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
-									}
-									else
-									{
-										if (!LIsRowExistsColumn)
-											if (HasRowExistsColumn())
-												ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = false;
-											else
-											{
-												// Clear any of/all of columns
-												// TODO: This should be looked at, if any of/all of are both subsets of the right side, nothing needs to happen here
-												// I don't want to run through them all here because it will end up firing changes twice in the default case
-											}
-											
-										foreach (Schema.Column LColumn in RightTableType.Columns)
-										{
-											int LRightKeyIndex = FRightKey.Columns.IndexOfName(LColumn.Name);
-											if (!HasRowExistsColumn() && (LRightKeyIndex >= 0) && CoordinateRight)
-											{
-												int LLeftRowIndex = ANewRow.DataType.Columns.IndexOfName(FLeftKey.Columns[LRightKeyIndex].Name);
-												if (ANewRow.HasValue(LLeftRowIndex))
-													ANewRow[LColumn.Name] = ANewRow[LLeftRowIndex];
-												else
-													ANewRow.ClearValue(LColumn.Name);
-											}
-											else
-											{
-												if (ClearRight)
-													ANewRow.ClearValue(LColumn.Name);
-
-												if (LIsRowExistsColumn && PropagateDefaultRight)
-													RightNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
-											}
-												
-											if (PropagateChangeRight)
-												RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
-										}
-									}
-								}
-							}
-							else
-							{
-								if (!LIsRowExistsColumn)
-								{
-									if (HasRow(ANewRow) && CoordinateRight)
-										CoordinateRightJoinKey(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
-								}
-								else // rowexists was set
-								{
-									foreach (Schema.TableVarColumn LColumn in RightTableVar.Columns)
-									{
-										int LRightKeyIndex = FRightKey.Columns.IndexOfName(LColumn.Name);
-										if ((LRightKeyIndex >= 0) && CoordinateRight)
-										{
-											int LLeftRowIndex = ANewRow.DataType.Columns.IndexOfName(FLeftKey.Columns[LRightKeyIndex].Name);
-											if (ANewRow.HasValue(LLeftRowIndex))
-												ANewRow[LColumn.Name] = ANewRow[LLeftRowIndex];
-											else
-												ANewRow.ClearValue(LColumn.Name);
-										}
-										else
-										{
-											if (ClearRight)
-												ANewRow.ClearValue(LColumn.Name);
-
-											if (!ANewRow.HasValue(LColumn.Name) && PropagateDefaultRight)
-												RightNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
-										}
-										
-										if (PropagateChangeRight)
-											RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
-									}
-								}
-							}
-						}
-						else // rowexists was cleared
-						{
-							if (ClearRight)
-								foreach (Schema.TableVarColumn LColumn in RightTableVar.Columns)
-								{
-									ANewRow.ClearValue(LColumn.Name);
-									if (PropagateChangeRight)
-										RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
-								}
-						}
-					}
-					
-					if (FRightKey.Columns.ContainsName(AColumnName) && HasRow(ANewRow) && CoordinateLeft)
-					{
-						LChanged = true;
-						if (IsNatural)
-							LChangePropagated = true;
-						CoordinateLeftJoinKey(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
-					}
-						
-					if (FAnyOfKey.Columns.ContainsName(AColumnName) || FAllOfKey.Columns.ContainsName(AColumnName))
-					{
-						LChanged = true;
-						if (HasValues(ANewRow))
-						{
-							if (HasRowExistsColumn())
-								ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = true;
-								
-							foreach (Schema.TableVarColumn LColumn in RightTableVar.Columns)
-							{
-								int LRightKeyIndex = FRightKey.Columns.IndexOfName(LColumn.Name);
-								if ((LRightKeyIndex >= 0) && CoordinateRight)
-									CoordinateRightJoinKey(AProgram, AOldRow, ANewRow, AValueFlags, FLeftKey.Columns[LRightKeyIndex].Name);
-								else
-								{
-									if (PropagateDefaultRight && RightNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name) && PropagateChangeRight)
-										RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
-								}
-							}
-						}
-						else
-						{
-							if (HasRowExistsColumn())
-								ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = false;
-								
-							if (ClearRight)
-								foreach (Schema.TableVarColumn LColumn in RightTableVar.Columns)
-								{
-									ANewRow.ClearValue(LColumn.Name);
-									if (PropagateChangeRight)
-										RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
-								}
+							string LColumnName = ANewRow.DataType.Columns[LIndex].Name;
+							if (LeftKey.Columns.ContainsName(LColumnName))
+								LChanged = PerformChange(AProgram, AOldRow, ANewRow, AValueFlags, LColumnName, ref LChangePropagated) || LChanged;
 						}
 					}
 				}
-					
-				if (!LChangePropagated && PropagateChangeLeft && ((AColumnName == String.Empty) || LeftTableType.Columns.ContainsName(AColumnName)))
-					LChanged = LeftNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;
 					
 				if (!LChangePropagated && PropagateChangeRight && ((AColumnName == String.Empty) || RightTableType.Columns.ContainsName(AColumnName)))
 					LChanged = RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;

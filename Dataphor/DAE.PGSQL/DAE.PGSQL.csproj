@@ -25,7 +25,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\bin\</OutputPath>
     <DefineConstants>TRACE;SIGNASSEMBLIES</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -47,18 +47,22 @@
     <ProjectReference Include="..\..\Libraries\PGSQLConnection\Source\DAE.Connection.PGSQL.csproj">
       <Project>{7887C79A-4A65-4F31-95C0-67C3558ADB6B}</Project>
       <Name>DAE.Connection.PGSQL</Name>
+      <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\Base\Base.csproj">
       <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
       <Name>Base</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\DAE\Engine.csproj">
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
       <Name>Engine</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Server\Server.csproj">
       <Project>{1DB01C91-3F92-4094-A8AE-1F7FF01F2E1B}</Project>
       <Name>Server %28Server\Server%29</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

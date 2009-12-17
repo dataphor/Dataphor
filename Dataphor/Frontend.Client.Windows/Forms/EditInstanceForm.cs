@@ -238,26 +238,36 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             FileInfo[] LFiles = LDirectory.GetFiles("*.dll", SearchOption.TopDirectoryOnly);
             List<string> LCatalogStoreClassNames = new List<string>();
 
-            foreach (FileInfo file in LFiles)
-            {
-                // Load the file into the application domain.
-                try
-                {
-                    AssemblyName LAssemblyName = AssemblyName.GetAssemblyName(file.FullName);
-                    var LAssembly = Assembly.Load(LAssemblyName.ToString());
-                    foreach (var LType in LAssembly.GetTypes())
-                    {
-                        if(LType.IsSubclassOf(typeof(Alphora.Dataphor.DAE.Store.SQLStore)))
-                        {
-                            LCatalogStoreClassNames.Add(LType.FullName +","+ LAssemblyName.Name);
-                        }
-                    }
-                }
-                catch (BadImageFormatException LBadImageFormatException)
-                {
-                    //HACK: How do I know if a .dll file is (or not) a .NET assembly?                   
-                }
-            }
+			try
+			{
+				foreach (FileInfo file in LFiles)
+				{
+					// Load the file into the application domain.
+					try
+					{
+						AssemblyName LAssemblyName = AssemblyName.GetAssemblyName(file.FullName);
+						var LAssembly = Assembly.Load(LAssemblyName.ToString());
+						foreach (var LType in LAssembly.GetTypes())
+						{
+							if (LType.IsSubclassOf(typeof(Alphora.Dataphor.DAE.Store.SQLStore)))
+							{
+								LCatalogStoreClassNames.Add(LType.FullName + "," + LAssemblyName.Name);
+							}
+						}
+					}
+					catch (BadImageFormatException)
+					{
+						//HACK: How do I know if a .dll file is (or not) a .NET assembly?
+						// BTR: According to Microsoft, this hack is the correct way to determine whether you have a .NET assembly.
+						// See the FileUtility.IsAssembly
+					}
+				}
+			}
+			catch
+			{
+				// Eat the exception here, do not let this stop the configuration utility from loading.
+			}
+			
             return LCatalogStoreClassNames.ToArray();
         }
 
