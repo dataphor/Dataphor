@@ -12,6 +12,7 @@ using System.Data.SqlTypes;
 using System.Collections.Specialized;
 
 using Alphora.Dataphor.DAE;
+using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
@@ -116,7 +117,7 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 		public static Type GetNativeType(IDataType ADataType, TableVarColumn AColumn, Schema.DataTypes ADataTypes)
 		{
 			DAE.Language.D4.Tag LTag = AColumn.MetaData.Tags.GetTag("DAEDataReader.NativeType");
-			if (LTag != null)
+            if (LTag != Tag.None)
 				return Type.GetType(LTag.Value, true, true);
 			else
 				return GetNativeType(ADataType, ADataTypes);
