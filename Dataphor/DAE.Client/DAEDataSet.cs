@@ -1413,6 +1413,8 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			if (!Source.DataSet.IsEmpty() && Source.DataSet.Fields[ColumnName].HasValue())
 				Value = Source.DataSet.Fields[ColumnName].AsNative;
+			else
+				Value = null;
 		}
 	}
 	
