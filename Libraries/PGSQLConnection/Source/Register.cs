@@ -5,7 +5,7 @@
 */
 using Alphora.Dataphor.DAE.Connection.PGSQL;
 
-namespace Alphora.Dataphor.DAE.Connection.Oracle
+namespace Alphora.Dataphor.DAE.Connection.PGSQL
 {
 	using System;
 	using System.Reflection;
@@ -15,13 +15,13 @@ namespace Alphora.Dataphor.DAE.Connection.Oracle
 
 	class DAERegister
 	{
-		protected const string CD4ClassDefinitionNameSpace = "PGSQLConnection";
+        protected const string CD4ClassDefinitionNameSpace = "PGSQLConnection";
 
 		public static SettingsList GetClasses()
 		{
 			SettingsList LClasses = new SettingsList();
 
-            LClasses.Add(new SettingsItem(String.Format("{0}.{1}", CD4ClassDefinitionNameSpace, "PGSQLConnection"), typeof(PostgreSQLConnection).AssemblyQualifiedName));
+            LClasses.Add(new SettingsItem(String.Format("{0}.{1}", CD4ClassDefinitionNameSpace, "PostgreSQLConnection"), typeof(PostgreSQLConnection).AssemblyQualifiedName));
 			
 			return LClasses;
 		}

@@ -18,7 +18,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCopyright("Copyright © Microsoft 2009")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-[assembly: Alphora.Dataphor.DAE.Server.DAERegister("Alphora.Dataphor.DAE.Connection.Oracle.DAERegister")]
+[assembly: Alphora.Dataphor.DAE.Server.DAERegister("Alphora.Dataphor.DAE.Connection.PGSQL.DAERegister")]
 
 // Si establece ComVisible como false, los tipos de este ensamblado no estarán visibles 
 // para los componentes COM. Si necesita obtener acceso a un tipo de este ensamblado desde 
