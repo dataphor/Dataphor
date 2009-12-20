@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Device.PGSQL\PostgreSQLDeviceSession.cs" />
     <Compile Include="Device.PGSQL\PostgreSQLConnectionStringBuilder.cs" />
     <Compile Include="Device.PGSQL\PostgreSQLDevice.cs">
       <SubType>Code</SubType>

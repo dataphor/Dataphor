@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Globalization;
 using System.IO;
-using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Connection;
 using Alphora.Dataphor.DAE.Device.SQL;
 using Alphora.Dataphor.DAE.Language;
@@ -39,7 +37,9 @@ if not exists (select * from pg_database where datname = '{0}')
         protected bool FShouldEnsureDatabase = true;
         protected bool FShouldEnsureOperators = true;
         protected bool FShouldReconcileRowGUIDCol;
-        protected bool FUseIntegratedSecurity;
+        protected string FUserName;
+        protected string FPassword;
+        
 
         public PostgreSQLDevice(int AID, string AName)
             : base(AID, AName)
@@ -98,11 +98,18 @@ if not exists (select * from pg_database where datname = '{0}')
             set { FApplicationName = value ?? "Dataphor Server"; }
         }
 
-        public bool UseIntegratedSecurity
+        public string UserName
         {
-            get { return FUseIntegratedSecurity; }
-            set { FUseIntegratedSecurity = value; }
+            get { return FUserName; }
+            set { FUserName = value ?? String.Empty; ; }
         }
+
+        public string Password
+        {
+            get { return FPassword; }
+            set { FPassword = value ?? String.Empty; }
+        }
+
 
         protected override void SetMaxIdentifierLength()
         {
@@ -502,64 +509,6 @@ if not exists (select * from pg_database where datname = '{0}')
             AStatement.Modifiers.Add(new LanguageModifier("OptimizerHints", "option (fast 1)"));
             return base.TranslateOrder(ADevicePlan, ANode, AStatement);
         }
-    }
-
-    public class PostgreSQLDeviceSession : SQLDeviceSession
-    {
-        public PostgreSQLDeviceSession(PostgreSQLDevice ADevice, ServerProcess AServerProcess,
-                                  DeviceSessionInfo ADeviceSessionInfo)
-            : base(ADevice, AServerProcess, ADeviceSessionInfo)
-        {
-        }
-
-        public new PostgreSQLDevice Device
-        {
-            get { return (PostgreSQLDevice)base.Device; }
-        }
-
-        protected override SQLConnection InternalCreateConnection()
-        {
-        	string LConnectionClassName = Device.ConnectionClass == String.Empty
-        	            	?"Connection.PostgreSQLConnection": Device.ConnectionClass;
-        	
-			var LClassDefinition = new ClassDefinition(LConnectionClassName);
-
-        	string LConnectionStringBuilderClassName = Device.ConnectionStringBuilderClass == String.Empty
-        	               	?
-								"PostgreSQLDevice.PostgreSQLConnectionStringBuilder" : Device.ConnectionStringBuilderClass;
-        	
-			var LBuilderClassDefinition =new ClassDefinition(LConnectionStringBuilderClassName);
-
-            var LConnectionStringBuilder =
-                (ConnectionStringBuilder)ServerProcess.CreateObject
-                (
-                    LBuilderClassDefinition,
-                    new object[] { }
-                );
-
-            var LTags = new Tags();
-            LTags.AddOrUpdate("ServerName", Device.ServerName);
-            LTags.AddOrUpdate("DatabaseName", Device.DatabaseName);
-            LTags.AddOrUpdate("ApplicationName", Device.ApplicationName);
-            if (Device.UseIntegratedSecurity)
-                LTags.AddOrUpdate("IntegratedSecurity", "true");
-            else
-            {
-                LTags.AddOrUpdate("UserName", DeviceSessionInfo.UserName);
-                LTags.AddOrUpdate("Password", DeviceSessionInfo.Password);
-            }
-
-            LTags = LConnectionStringBuilder.Map(LTags);
-            Device.GetConnectionParameters(LTags, DeviceSessionInfo);
-            string LConnectionString = SQLDevice.TagsToString(LTags);
-            return
-                (SQLConnection)ServerProcess.CreateObject
-                (
-                    LClassDefinition,
-                    new object[] { LConnectionString }
-                );
-        }
-    }
-
+    }    
     
 }
