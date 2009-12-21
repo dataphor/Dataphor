@@ -43,11 +43,19 @@ namespace Alphora.Dataphor.Device.PGSQL
                 );
 
             var LTags = new Tags();
-            LTags.AddOrUpdate("ServerName", Device.ServerName);
-            LTags.AddOrUpdate("DatabaseName", Device.DatabaseName);
-            LTags.AddOrUpdate("ApplicationName", Device.ApplicationName);
-            LTags.AddOrUpdate("UserName", DeviceSessionInfo.UserName);
-            LTags.AddOrUpdate("Password", DeviceSessionInfo.Password);
+            LTags.AddOrUpdate("Server", Device.Server);
+            LTags.AddOrUpdate("Port", Device.Port);
+            LTags.AddOrUpdate("Database", Device.Database);
+            LTags.AddOrUpdate("SearchPath", Device.SearchPath);            
+            if (Device.UseIntegratedSecurity)
+                LTags.AddOrUpdate("Integrated Security", "true");
+            else
+            {
+                LTags.AddOrUpdate("User Id", DeviceSessionInfo.UserName);
+                LTags.AddOrUpdate("Password", DeviceSessionInfo.Password);
+            }
+
+            
             
 
             LTags = LConnectionStringBuilder.Map(LTags);

@@ -27,18 +27,18 @@ namespace Alphora.Dataphor.Device.PGSQL
 if not exists (select * from pg_database where datname = '{0}')
 	create database {0}
 			";
-
-        protected string FApplicationName = "Dataphor Server";
-        protected string FDatabaseName = String.Empty;
+        
+        protected string FDatabase = String.Empty;
+        protected string FPort = "5432";
 
         private int FMajorVersion = 8; // default to Postgresql 8 (pending detection)
-        protected string FServerName = String.Empty;
+        protected string FServer = String.Empty;
         protected bool FShouldDetermineVersion = true;
         protected bool FShouldEnsureDatabase = true;
         protected bool FShouldEnsureOperators = true;
-        protected bool FShouldReconcileRowGUIDCol;
-        protected string FUserName;
-        protected string FPassword;
+        protected bool FShouldReconcileRowGUIDCol;        
+        protected string FSearchPath;
+        protected bool FUseIntegratedSecurity;
         
 
         public PostgreSQLDevice(int AID, string AName)
@@ -80,34 +80,34 @@ if not exists (select * from pg_database where datname = '{0}')
             set { FShouldEnsureOperators = value; }
         }
 
-        public string ServerName
+        public string Server
         {
-            get { return FServerName; }
-            set { FServerName = value ?? String.Empty; }
+            get { return FServer; }
+            set { FServer = value ?? String.Empty; }
         }
 
-        public string DatabaseName
+        public string Database
         {
-            get { return FDatabaseName; }
-            set { FDatabaseName = value ?? String.Empty; }
+            get { return FDatabase; }
+            set { FDatabase = value ?? String.Empty; }
+        }
+        
+        public string SearchPath
+        {
+            get { return FSearchPath; }
+            set { FSearchPath = value; }
         }
 
-        public string ApplicationName
+        public bool UseIntegratedSecurity
         {
-            get { return FApplicationName; }
-            set { FApplicationName = value ?? "Dataphor Server"; }
+            get { return FUseIntegratedSecurity; }
+            set { FUseIntegratedSecurity = value; }
         }
 
-        public string UserName
+        public string Port
         {
-            get { return FUserName; }
-            set { FUserName = value ?? String.Empty; ; }
-        }
-
-        public string Password
-        {
-            get { return FPassword; }
-            set { FPassword = value ?? String.Empty; }
+            get { return FPort; }
+            set { FPort = value; }
         }
 
 
@@ -154,32 +154,32 @@ if not exists (select * from pg_database where datname = '{0}')
 
         protected void EnsureDatabase(ServerProcess AProcess)
         {
-            string LDatabaseName = DatabaseName;
-            DatabaseName = "postgres";
+           /* string LDatabaseName = Database;
+            Database = "postgres";
             try
-            {
+            {*/
                 var LDeviceSession = (SQLDeviceSession)Connect(AProcess, AProcess.ServerSession.SessionInfo);
                 try
                 {
-                    LDeviceSession.Connection.Execute(String.Format(CEnsureDatabase, LDatabaseName));
+                    LDeviceSession.Connection.Execute(String.Format(CEnsureDatabase, Database));
                 }
                 finally
                 {
                     Disconnect(LDeviceSession);
                 }
-            }
+            /*}
             finally
             {
-                DatabaseName = LDatabaseName;
-            }
+                Database = LDatabaseName;
+            }*/
         }
 
         protected void DetermineVersion(ServerProcess AProcess)
         {
-            string LDatabaseName = DatabaseName;
-			DatabaseName = "postgres";
+           /* string LDatabaseName = Database;
+			Database = "postgres";
             try
-            {
+            {*/
                 var LDeviceSession = (SQLDeviceSession)Connect(AProcess, AProcess.ServerSession.SessionInfo);
                 try
                 {
@@ -201,11 +201,11 @@ if not exists (select * from pg_database where datname = '{0}')
                 {
                     Disconnect(LDeviceSession);
                 }
-            }
+           /* }
             finally
             {
-                DatabaseName = LDatabaseName;
-            }
+                Database = LDatabaseName;
+            }*/
         }
 
         protected void InitializeDatabase(ServerProcess AProcess)

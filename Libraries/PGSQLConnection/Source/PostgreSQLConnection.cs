@@ -23,7 +23,7 @@ namespace Alphora.Dataphor.DAE.Connection.PGSQL
 			}
 			catch (Exception LException)
 			{
-				WrapException(LException, "connect", true);
+                WrapException(LException, string.Format("connect ({0})", AConnectionString), true);
 				throw;
 			}
 		}
