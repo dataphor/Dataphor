@@ -436,11 +436,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			string LText;
 			if (!FEnterNavigates || LastControlActive())
 			{
-				if (ActiveControlProcessesEnter())
-					LText = Strings.F9ToDefault;
+				string LDefaultActionDescription = OnGetDefaultActionDescription();
+				if (!String.IsNullOrEmpty(LDefaultActionDescription))
+				{
+					if (ActiveControlProcessesEnter())
+						LText = Strings.F9ToDefault;
+					else
+						LText = Strings.EnterToDefault;
+					LText = String.Format(LText, LDefaultActionDescription);
+				}
 				else
-					LText = Strings.EnterToDefault;
-				LText = String.Format(LText, OnGetDefaultActionDescription());
+					LText = "";
 			}
 			else
 			{

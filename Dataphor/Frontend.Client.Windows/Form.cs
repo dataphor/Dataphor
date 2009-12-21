@@ -450,16 +450,22 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		public override void PerformDefaultAction()
 		{
-			if ((FMode == FormMode.None) && (OnDefault != null))
-				OnDefault.Execute(this, new EventParams());
+			if (FMode == FormMode.None) 
+			{
+				if (OnDefault != null)
+					OnDefault.Execute(this, new EventParams());
+			}
 			else
 				Close(CloseBehavior.AcceptOrClose);
 		}
 
 		public string GetDefaultActionDescription()
 		{
-			if ((FMode == FormMode.None) && (OnDefault != null))
-				return OnDefault.GetDescription();
+			if (FMode == FormMode.None)
+				if (OnDefault != null)
+					return OnDefault.GetDescription();
+				else
+					return String.Empty;
 			else
 				return Strings.Close;
 		}
