@@ -541,7 +541,7 @@ begin
 		create operator System.iDivision(System.Short, System.Short) class "SQLDevice.SQLIntegerDivision" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iDivision(System.TimeSpan, System.Integer) class "SQLDevice.SQLIntegerDivision" static tags {{ DAE.IsSystem = "true" }}, 
 		create operator System.iDivision(System.TimeSpan, System.Decimal) class "SQLDevice.SQLDivision" static tags {{ DAE.IsSystem = "true" }}, 
-		create operator System.iDiv(System.Decimal, System.Decimal) static tags {{ Storage.TranslationString = "floor(cast({{0}} as Decimal) / cast({{1}} as Decimal))", DAE.IsSystem = "true" }}, 
+		create operator System.iDiv(System.Decimal, System.Decimal) static tags {{ Storage.TranslationString = "floor({{0}} / {{1}})", DAE.IsSystem = "true" }}, 
 		create operator System.iDiv(System.Integer, System.Integer) static tags {{ Storage.TranslationString = "floor(cast({{0}} as Decimal) / cast({{1}} as Decimal))", DAE.IsSystem = "true" }}, 
 		create operator System.iDiv(System.Long, System.Long) static tags {{ Storage.TranslationString = "floor(cast({{0}} as Decimal) / cast({{1}} as Decimal))", DAE.IsSystem = "true" }}, 
 		create operator System.iDiv(System.Short, System.Short) static tags {{ Storage.TranslationString = "floor(cast({{0}} as Decimal) / cast({{1}} as Decimal))", DAE.IsSystem = "true" }}, 
