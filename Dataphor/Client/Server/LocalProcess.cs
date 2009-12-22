@@ -447,6 +447,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public DataValue Evaluate(string AExpression, DataParams AParams)
 		{
+			#if USECOLLAPSEDEVALUATECALLS
 			#if LOGCACHEEVENTS
 			FSession.FServer.FInternalServer.LogMessage(String.Format("Thread {0} evaluating expression '{1}'.", Thread.CurrentThread.GetHashCode(), AExpression));
 			#endif
@@ -471,6 +472,17 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				UnprepareExpression(LLocalPlan);
 			}
+			#else
+			IServerExpressionPlan LLocalPlan = PrepareExpression(AExpression, AParams);
+			try
+			{
+				return LLocalPlan.Evaluate(AParams);
+			}
+			finally
+			{
+				UnprepareExpression(LLocalPlan);
+			}
+			#endif
 		}
 		
 		public IServerCursor OpenCursor(string AExpression, DataParams AParams)
