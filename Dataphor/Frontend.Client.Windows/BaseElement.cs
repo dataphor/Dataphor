@@ -130,13 +130,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					if (FControl != null)
 					{
 						((Session)HostNode.Session).UnregisterControlHelp(FControl);
-						FControl.GotFocus -= new EventHandler(ControlGotFocus);
+						FControl.Enter -= new EventHandler(ControlGotFocus);
 					}
 					FControl = value;
 					if (FControl != null)
 					{
 						((Session)HostNode.Session).RegisterControlHelp(FControl, this);
-						FControl.GotFocus += new EventHandler(ControlGotFocus);
+						FControl.Enter += new EventHandler(ControlGotFocus);
 					}
 				}
 			}

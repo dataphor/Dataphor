@@ -687,6 +687,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return new DAE.Client.Controls.LookupPanel();
 		}
 
+		protected override void InitializeControl()
+		{
+			base.InitializeControl();
+			Control.Enter += new EventHandler(ControlGotFocus);
+		}
+
+		protected void ControlGotFocus(object ASender, EventArgs AArgs)
+		{
+			FindParent(typeof(IFormInterface)).BroadcastEvent(new FocusChangedEvent(this));
+		}
+
 		// Element
 
 		public override bool GetDefaultTabStop()

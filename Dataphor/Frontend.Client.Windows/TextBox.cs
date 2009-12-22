@@ -487,7 +487,6 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			NumericControl.TextBox.NoValueBackColor = ((Session)HostNode.Session).Theme.NoValueBackColor;
 			NumericControl.TextBox.NoValueReadOnlyBackColor = ((Session)HostNode.Session).Theme.NoValueReadOnlyBackColor;
-			NumericControl.TextBox.Enter += new EventHandler(ControlGotFocus); 			
 			InternalUpdateTextBox();
 			base.InitializeControl();
 		}
