@@ -104,6 +104,7 @@
     <ProjectReference Include="..\Base.Windows\Base.Windows.csproj">
       <Project>{24D70A7F-F43A-45A3-8C54-EA31764841C7}</Project>
       <Name>Base.Windows</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Base\Base.csproj">
       <Name>Base</Name>
@@ -114,10 +115,12 @@
     <ProjectReference Include="..\Client\Client.csproj">
       <Project>{F342F781-894F-4A6F-A59A-86080E1AC737}</Project>
       <Name>Client %28Client\Client%29</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Common\Common.csproj">
       <Project>{B488ECA3-95AD-4814-BC9B-69D062B7B333}</Project>
       <Name>Common %28Common\Common%29</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\DAE.NativeCLI\DAE.NativeCLI.csproj">
       <Project>{7CCBA92D-BB78-49E3-8C11-4CC29B173296}</Project>
@@ -133,6 +136,7 @@
     <ProjectReference Include="..\Server\Server.csproj">
       <Project>{1DB01C91-3F92-4094-A8AE-1F7FF01F2E1B}</Project>
       <Name>Server %28Server\Server%29</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

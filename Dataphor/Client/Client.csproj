@@ -73,18 +73,22 @@
     <ProjectReference Include="..\Base.Windows\Base.Windows.csproj">
       <Project>{24D70A7F-F43A-45A3-8C54-EA31764841C7}</Project>
       <Name>Base.Windows</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Base\Base.csproj">
       <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
       <Name>Base</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Common\Common.csproj">
       <Project>{B488ECA3-95AD-4814-BC9B-69D062B7B333}</Project>
       <Name>Common %28Common\Common%29</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\DAE\Engine.csproj">
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
       <Name>Engine</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

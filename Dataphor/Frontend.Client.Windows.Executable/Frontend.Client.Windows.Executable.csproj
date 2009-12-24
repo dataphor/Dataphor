@@ -26,13 +26,15 @@
     </UpgradeBackupLocation>
     <ManifestCertificateThumbprint>DC4B9358A665A5D9DAC32AF64ADCFB31F352851B</ManifestCertificateThumbprint>
     <ManifestKeyFile>Frontend.Client.Windows.Executable_TemporaryKey.pfx</ManifestKeyFile>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
     <SignManifests>false</SignManifests>
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <OldToolsVersion>2.0</OldToolsVersion>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkSubset>
     </TargetFrameworkSubset>
+    <TargetZone>LocalIntranet</TargetZone>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
     <PublishUrl>http://dataphor.org/downloads/WindowsClient/</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
@@ -115,6 +117,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="Properties\app.manifest" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -165,22 +168,27 @@
     <ProjectReference Include="..\Base\Base.csproj">
       <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
       <Name>Base</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\DAE.Client\DAE.Client.csproj">
       <Project>{146ABD06-FA98-4B90-9E85-1B4CE7BE598D}</Project>
       <Name>DAE.Client</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\DAE\Engine.csproj">
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
       <Name>Engine</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Frontend.Client.Windows\Frontend.Client.Windows.csproj">
       <Project>{E7152100-FDC7-4BF1-957C-75051BF7D8E8}</Project>
       <Name>Frontend.Client.Windows</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Frontend.Client\Frontend.Client.csproj">
       <Project>{D054B27F-366C-4C4E-BA32-472BD14DC86D}</Project>
       <Name>Frontend.Client</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

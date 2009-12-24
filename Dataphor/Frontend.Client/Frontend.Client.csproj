@@ -109,6 +109,7 @@
     <ProjectReference Include="..\Client\Client.csproj">
       <Project>{F342F781-894F-4A6F-A59A-86080E1AC737}</Project>
       <Name>Client %28Client\Client%29</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\DAE.Client.Controls\DAE.Client.Controls.csproj">
       <Name>DAE.Client.Controls</Name>

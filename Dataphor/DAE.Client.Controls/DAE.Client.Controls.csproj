@@ -116,6 +116,7 @@
     <ProjectReference Include="..\Base.Windows\Base.Windows.csproj">
       <Project>{24D70A7F-F43A-45A3-8C54-EA31764841C7}</Project>
       <Name>Base.Windows</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Base\Base.csproj">
       <Name>Base</Name>

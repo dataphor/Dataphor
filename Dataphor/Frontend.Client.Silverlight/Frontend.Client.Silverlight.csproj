@@ -264,6 +264,7 @@
     <ProjectReference Include="..\SilverlightDAE\SilverlightDAE.csproj">
       <Project>{B190A64D-B46B-4C63-A217-1ABD2C97021A}</Project>
       <Name>SilverlightDAE</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

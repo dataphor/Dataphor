@@ -148,10 +148,12 @@
     <ProjectReference Include="..\Client\Client.csproj">
       <Project>{F342F781-894F-4A6F-A59A-86080E1AC737}</Project>
       <Name>Client %28Client\Client%29</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Common\Common.csproj">
       <Project>{B488ECA3-95AD-4814-BC9B-69D062B7B333}</Project>
       <Name>Common %28Common\Common%29</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\DAE.Client.Controls\DAE.Client.Controls.csproj">
       <Name>DAE.Client.Controls</Name>
@@ -179,6 +181,7 @@
     <ProjectReference Include="..\Frontend.Client.WPF\Frontend.Client.WPF.csproj">
       <Project>{057EFD5F-E1A7-43BB-AD4A-0F4B02C00E1A}</Project>
       <Name>Frontend.Client.WPF</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Frontend.Client\Frontend.Client.csproj">
       <Name>Frontend.Client</Name>
@@ -189,6 +192,7 @@
     <ProjectReference Include="..\Server\Server.csproj">
       <Project>{1DB01C91-3F92-4094-A8AE-1F7FF01F2E1B}</Project>
       <Name>Server %28Server\Server%29</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
