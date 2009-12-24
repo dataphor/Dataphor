@@ -385,6 +385,8 @@ namespace Alphora.Dataphor.Frontend.Client
 	
 	public class UserStateArgument : BaseArgument, IUserStateArgument
 	{
+		public const string CDefaultDefaultValue = "nil";
+		
 		// KeyName
 
 		private string FKeyName = String.Empty;
@@ -397,8 +399,9 @@ namespace Alphora.Dataphor.Frontend.Client
 		
 		// DefaultValue
 
-		private string FDefaultValue = String.Empty;
+		private string FDefaultValue = CDefaultDefaultValue;
 		[Description("The default value to get and/or set if the key name isn't set or doesn't reference an existing item. This value is expected to be a D4 literal (e.g. 'string', nil, etc.).")]
+		[DefaultValue(CDefaultDefaultValue)]
 		public string DefaultValue
 		{
 			get { return FDefaultValue; }
