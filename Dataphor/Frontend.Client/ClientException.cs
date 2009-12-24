@@ -73,7 +73,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			/// <summary>Error code 201128: "Choice node ({0}) items must be comma or semicolon separated list of available name-value pairs. (First=1, Second=2)"</summary>
 			InvalidChoiceItems = 201128,
 
-//			/// <summary>Error code 201129: Depricated. </summary>
+//			/// <summary>Error code 201129: Deprecated. </summary>
 
 			/// <summary>Error code 201130: "Invalid argument.  Syntax: &gt;application name&lt;.exe [-alias &gt;alias name&lt;] [-application &gt;application ID&lt;]"</summary>
 			InvalidCommandLine = 201130,
@@ -116,6 +116,9 @@ namespace Alphora.Dataphor.Frontend.Client
 			
 			/// <summary>Error code 201148: "Expecting only value expressions in the expression list." </summary>
 			ValueExpressionExpected = 201148,
+			
+			/// <summary>Error code 201149: "{0}".</summary>
+			Error = 201149,
 		}
 
 		// Resource manager for this exception class

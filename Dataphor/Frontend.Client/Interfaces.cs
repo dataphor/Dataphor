@@ -517,6 +517,22 @@ namespace Alphora.Dataphor.Frontend.Client
 
 	/// <summary>Generic container for non-visual frontend modules.</summary> <doc/>
 	public interface IModule { }
+	
+	/// <summary>
+	/// Node event handler delegate.
+	/// </summary>
+	public delegate void NodeEventHandler(INode ANode, EventParams AParams);
+	
+	/// <summary>
+	/// An interface implemented to allow synchronous chaining.
+	/// </summary>
+	public interface IBlockable : INode
+	{
+		/// <summary>
+		/// Invoked when the component implementing the IBlockable interface is done executing.
+		/// </summary>
+		event NodeEventHandler OnCompleted;
+	}
 
 	public interface IEnableable
 	{

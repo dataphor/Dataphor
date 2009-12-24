@@ -458,6 +458,14 @@ namespace Alphora.Dataphor.Frontend.Client
 			get { return FManageRefreshAfterPost; }
 			set { FManageRefreshAfterPost = value; }
 		}
+		
+		// OnCompleted (IBlockable)
+		public event NodeEventHandler OnCompleted;
+		private void DoCompleted(EventParams AParams)
+		{
+			if (OnCompleted != null)
+				OnCompleted(this, AParams);
+		}
 
 		// These hooks are provided so that the ShowFormAction can be used in the eventing system
 		public event FormInterfaceHandler OnFormAcceptedEvent;
@@ -667,6 +675,9 @@ namespace Alphora.Dataphor.Frontend.Client
 				FSourceLink.TargetSource = null;
 			if (FOnFormClose != null)
 				FOnFormClose.Execute(this, new EventParams("AForm", sender));
+				
+			DoCompleted(FParams);
+
 			FParams = null;
 		}
 

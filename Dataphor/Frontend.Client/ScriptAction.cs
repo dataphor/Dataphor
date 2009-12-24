@@ -410,6 +410,10 @@ namespace Alphora.Dataphor.Frontend.Client
 					SetNodeReferences(LScript);
 					LScript.Execute(ASender, AParams);
 				}
+				catch (AbortException)
+				{
+					throw;
+				}
 				catch (Exception LException)
 				{
 					throw new ClientException(ClientException.Codes.ScriptExecutionError, LException, Name);

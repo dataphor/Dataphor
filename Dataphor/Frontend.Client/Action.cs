@@ -57,7 +57,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		{
 			Execute(this, new EventParams());
 		}
-
+		
 		public void Execute(INode ASender, EventParams AParams)
 		{
 			if (GetEnabled()) 
@@ -67,9 +67,8 @@ namespace Alphora.Dataphor.Frontend.Client
 					LLayoutDisableable.DisableLayout();
 				try 
 				{
-					DoBeforeExecute(AParams);
-					InternalExecute(ASender, AParams);
-					DoAfterExecute(AParams);
+					if (DoBeforeExecute(ASender, AParams))
+						FinishExecute(ASender, AParams);
 				}
 				finally
 				{
@@ -106,10 +105,41 @@ namespace Alphora.Dataphor.Frontend.Client
 			BeforeExecute = null;
 		}
 		
-		private void DoBeforeExecute(EventParams AParams)
+		/// <summary>
+		/// Returns true if the before execute action is not a Blockable node, meaning that the FinishExecute should be called immediately.
+		/// </summary>
+		/// <param name="AParams"></param>
+		/// <returns></returns>
+		private bool DoBeforeExecute(INode ASender, EventParams AParams)
 		{
 			if (FBeforeExecute != null)
+			{
+				IBlockable LBlockable = FBeforeExecute as IBlockable;
+				if (LBlockable != null)
+					LBlockable.OnCompleted += new NodeEventHandler(BeforeExecuteCompleted);
+
 				FBeforeExecute.Execute(this, AParams);
+				
+				// return true to indicate the FinishExecute should be called immediately
+				// return false to indicate the FinishExecute should be called on the ExecuteCompleted of the BeforeExecute action
+				return LBlockable == null;
+			}
+			
+			return true;
+		}
+
+		private void BeforeExecuteCompleted(INode ASender, EventParams AParams)
+		{
+			IBlockable LBlockable = FBeforeExecute as IBlockable;
+			if (LBlockable != null)
+				LBlockable.OnCompleted -= new NodeEventHandler(BeforeExecuteCompleted);
+			FinishExecute(ASender, AParams);
+		}
+
+		private void FinishExecute(INode ASender, EventParams AParams)
+		{
+			InternalExecute(ASender, AParams);
+			DoAfterExecute(AParams);
 		}
 
 		// AfterExecute		
@@ -294,6 +324,59 @@ namespace Alphora.Dataphor.Frontend.Client
 			base.AfterActivate();
 		}
 
+	}
+	
+	/// <summary>
+	/// Default implementation of a BlockableAction
+	/// </summary>
+	public abstract class BlockableAction : Action, IBlockable
+	{
+		public event NodeEventHandler OnCompleted;
+		
+		protected void DoCompleted(EventParams AParams)
+		{
+			if (OnCompleted != null)
+				OnCompleted(this, AParams);
+		}
+		
+		/// <summary>
+		/// Executes the given action, hooking the OnCompleted if it is a Blockable action.
+		/// </summary>
+		/// <param name="AAction"></param>
+		protected void BlockableExecute(IAction AAction, EventParams AParams)
+		{
+			IBlockable LBlockable = AAction as IBlockable;
+			if (LBlockable != null)
+			{
+				LBlockable.OnCompleted += new NodeEventHandler(BlockableCompleted);
+				LBlockable.Disposed += new EventHandler(BlockableDisposed);
+			}
+				
+			AAction.Execute(this, AParams);
+			
+			if (LBlockable == null)
+				DoCompleted(AParams);
+		}
+		
+		protected void DetachBlockable(IBlockable ABlockable)
+		{
+			if (ABlockable != null)
+			{
+				ABlockable.OnCompleted -= new NodeEventHandler(BlockableCompleted);
+				ABlockable.Disposed -= new EventHandler(BlockableDisposed);
+			}
+		}
+		
+		private void BlockableCompleted(INode ASender, EventParams AParams)
+		{
+			DetachBlockable(ASender as IBlockable);
+			DoCompleted(AParams);
+		}
+		
+		private void BlockableDisposed(object ASender, EventArgs AArgs)
+		{
+			DetachBlockable(ASender as IBlockable);
+		}
 	}
     
 	[Description("Executes a list of actions sequentially, like a begin...end block.")]

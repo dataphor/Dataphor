@@ -113,7 +113,7 @@ namespace Alphora.Dataphor.Frontend.Client
 	public interface IBlockAction : IAction
 	{
 	}
-
+	
 	/// <summary> Executes the specified action node when executed. </summary> <doc/>
 	/// <remarks>
 	///	This action is useful within a block action to re-use an existing action.
@@ -402,7 +402,7 @@ namespace Alphora.Dataphor.Frontend.Client
 	/// When the new form is closed the calling form will be active again.</remarks>
 	/// <example> An example can be seen in the Sample.Components library
 	/// in the Sample06 [dfd] document.</example>
-	public interface IShowFormAction : IAction, IDocumentReference, ISourceLink
+	public interface IShowFormAction : IAction, IDocumentReference, ISourceLink, IBlockable
 	{
 		// Published
 
