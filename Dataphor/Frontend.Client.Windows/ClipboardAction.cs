@@ -31,7 +31,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		protected override void InternalExecute(INode ASender, EventParams AParams)
 		{
 			// Collect the params
-			DataParams LParams = DataArgument.CollectArguments(this);
+			DataParams LParams = BaseArgument.CollectArguments(this);
 			
 			// Serialize the params and place them on the clipboard
 			if (LParams != null)
@@ -85,7 +85,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				LParam.Modifier = Modifier.Out;
 			
 			// Apply the params	
-			DataArgument.ApplyArguments(this, LParams);
+			BaseArgument.ApplyArguments(this, LParams);
 		}
 
 		public override bool GetEnabled()

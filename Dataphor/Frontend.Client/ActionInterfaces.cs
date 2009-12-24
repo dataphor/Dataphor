@@ -322,11 +322,39 @@ namespace Alphora.Dataphor.Frontend.Client
 		ISource EnlistWith { get; set; }
 	}
 
+	public interface IBaseArgument : INode
+	{
+	}
+
+	/// <summary> A UserStateArgument provides parameter(s) to a parent component. </summary> <doc/>
+	/// <remarks> The DataArgument can be child of a Source or a DataScriptAction.</remarks>
+	/// <example> An example can be seen in the Sample.Components library
+	/// in the Sample08 [dfd] document.</example>
+	public interface IUserStateArgument : IBaseArgument
+	{
+		// Published
+
+		/// <summary> The name of the UserState item of the current interface to get/set for this param. </summary> <doc/>
+		string KeyName { get; set; }
+		
+		/// <summary> The default value to get and/or set if the key name isn't set or doesn't 
+		/// reference an existing item. This value is expected to be a D4 literal (e.g. 'string', nil, etc.). </summary> <doc/>
+		string DefaultValue { get; set; }
+		
+		/// <summary> The name of the parameter produced by this argument. </summary> <doc/>
+		string ParamName { get; set; }
+		
+		/// <summary> Indicates the "direction" of the parameters. </summary> <doc/>
+		/// <value> <para><see cref="DAE.Language.Modifier"/></para>
+		/// <para>Default: Modifier.Const</para></value>
+		DAE.Language.Modifier Modifier { get; set; }
+	}
+	
 	/// <summary> A DataArgument provides parameter(s) to a parent component. </summary> <doc/>
 	/// <remarks> The DataArgument can be child of a Source or a DataScriptAction.</remarks>
 	/// <example> An example can be seen in the Sample.Components library
 	/// in the Sample08 [dfd] document.</example>
-	public interface IDataArgument : INode
+	public interface IDataArgument : IBaseArgument
 	{
 		// Published
 

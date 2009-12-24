@@ -15,6 +15,7 @@ using Alphora.Dataphor.DAE.Compiling;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Schema = Alphora.Dataphor.DAE.Schema;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.Frontend.Client
 {
@@ -1484,47 +1485,24 @@ namespace Alphora.Dataphor.Frontend.Client
 		
 		private DataSetParamGroup FParamsParamGroup;
 		
-		private DataSetParamGroup FArgumentParamGroup;
+		private List<DataSetParamGroup> FArgumentParamGroups = new List<DataSetParamGroup>();
 
 		private void InternalUpdateParams()
 		{
 			if (FDataView != null)
 			{
-				if (FArgumentParamGroup != null)
+				// Remove the old argument param groups
+				foreach (var LGroup in FArgumentParamGroups)
 				{
-					if (FDataView.ParamGroups.Contains(FArgumentParamGroup))
-						FDataView.ParamGroups.Remove(FArgumentParamGroup);
-					FArgumentParamGroup = null;
+					if (FDataView.ParamGroups.Contains(LGroup))
+						FDataView.ParamGroups.Remove(LGroup);
 				}
-				IDataArgument LArgument;
-				foreach (INode LNode in Children)
-				{
-					LArgument = LNode as IDataArgument;
-					if ((LArgument != null) && (LArgument.Source != null) && (LArgument.Source.DataView != null))
-					{
-						DataSetParamGroup LParamGroup = new DataSetParamGroup();
-						LParamGroup.Source = LArgument.Source.DataSource;
-
-						string[] LParamNames;
-						DAE.Schema.Column[] LColumns;
-
-						DataArgument.GetParams(LArgument, out LParamNames, out LColumns);
-
-						for (int i = 0; i < LColumns.Length; i++)
-						{
-							DAE.Schema.Column LColumn = LColumns[i];
-							DataSetParam LParam = new DataSetParam();
-							LParam.Name = LParamNames[i];
-							LParam.Modifier = LArgument.Modifier;
-							LParam.DataType = LColumn.DataType;
-							LParam.ColumnName = LColumn.Name;
-							LParamGroup.Params.Add(LParam);
-						}
+				FArgumentParamGroups.Clear();
 				
-						FDataView.ParamGroups.Add(LParamGroup);
-						FArgumentParamGroup = LParamGroup;
-					}
-				}
+				// Add new argument param groups
+				BaseArgument.CollectDataSetParamGroup(this, FArgumentParamGroups);
+				foreach (var LGroup in FArgumentParamGroups)
+					FDataView.ParamGroups.Add(LGroup);
 				
 				if (FParams != null)
 				{
@@ -1768,7 +1746,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		public override bool IsValidChild(Type AChildType)
 		{
-			if (typeof(ISourceChild).IsAssignableFrom(AChildType) || typeof(IDataArgument).IsAssignableFrom(AChildType))
+			if (typeof(ISourceChild).IsAssignableFrom(AChildType) || typeof(IBaseArgument).IsAssignableFrom(AChildType))
 				return true;
 			return base.IsValidChild(AChildType);
 		}

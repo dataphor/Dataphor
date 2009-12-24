@@ -4,6 +4,7 @@
 		<nodetype name="sourceaction"/>
 		<nodetype name="datascriptaction"/>
 		<nodetype name="dataargument"/>
+		<nodetype name="userstateargument"/>
 		<nodetype name="setpropertyaction"/>
 		<nodetype name="blockaction"/>
 		<nodetype name="formaction"/>

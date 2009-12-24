@@ -12,6 +12,7 @@ using Alphora.Dataphor.DAE.Language.D4;
 using DAE = Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Client;
 using System.Collections.Generic;
+using Alphora.Dataphor.DAE.Language;
 
 namespace Alphora.Dataphor.Frontend.Client
 {
@@ -253,7 +254,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		public override bool IsValidChild(Type AChildType)
 		{
-			return typeof(IDataArgument).IsAssignableFrom(AChildType) || base.IsValidChild(AChildType);
+			return typeof(IBaseArgument).IsAssignableFrom(AChildType) || base.IsValidChild(AChildType);
 		}
 
 		// Action
@@ -261,7 +262,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <summary> Runs script on the local server. </summary>
 		protected override void InternalExecute(INode ASender, EventParams AParams)
 		{
-			DAE.Runtime.DataParams LParams = DataArgument.CollectArguments(this);
+			DAE.Runtime.DataParams LParams = BaseArgument.CollectArguments(this);
 
 			if (FScript != String.Empty)
 			{
@@ -328,14 +329,242 @@ namespace Alphora.Dataphor.Frontend.Client
 					HostNode.Session.DataSession.ServerSession.StopProcess(LProcess);
 				}
 
-				DataArgument.ApplyArguments(this, LParams);
+				BaseArgument.ApplyArguments(this, LParams);
 			}
 		}
 	}
 
 	[DesignerImage("Image('Frontend', 'Nodes.DataArgument')")]
 	[DesignerCategory("Non Visual")]
-	public class DataArgument : Node, IDataArgument
+	public abstract class BaseArgument : Node
+	{
+		public static DAE.Runtime.DataParams CollectArguments(INode ANode)
+		{
+			DAE.Runtime.DataParams LParams = null;
+			if (ANode != null)
+			{
+				foreach (Node LNode in ANode.Children)
+				{
+					BaseArgument LArgument = LNode as BaseArgument;
+					if (LArgument != null)
+						LArgument.CollectArguments(ref LParams);
+				}
+			}
+			return LParams;
+		}
+		
+		protected abstract void CollectArguments(ref DAE.Runtime.DataParams AParams);
+
+		public static void ApplyArguments(INode ANode, DAE.Runtime.DataParams AParams)
+		{
+			if (ANode != null)
+			{
+				foreach (Node LNode in ANode.Children)
+				{
+					BaseArgument LArgument = LNode as BaseArgument;
+					if (LArgument != null)
+						LArgument.ApplyArguments(AParams);
+				}
+			}
+		}
+
+		protected abstract void ApplyArguments(DAE.Runtime.DataParams AParams);
+
+		public static void CollectDataSetParamGroup(INode ANode, List<DataSetParamGroup> AGroups)
+		{
+			foreach (INode LNode in ANode.Children)
+			{
+				BaseArgument LArgument = LNode as BaseArgument;
+				if (LArgument != null)
+					LArgument.CollectDataSetParamGroup(AGroups);
+			}
+		}
+
+		protected abstract void CollectDataSetParamGroup(List<DataSetParamGroup> AGroups);
+	}
+	
+	public class UserStateArgument : BaseArgument, IUserStateArgument
+	{
+		// KeyName
+
+		private string FKeyName = String.Empty;
+		[Description("The name of the UserState item of the current interface to get/set for this param.")]
+		public string KeyName
+		{
+			get { return FKeyName; }
+			set { FKeyName = (value == null ? String.Empty : value); }
+		}
+		
+		// DefaultValue
+
+		private string FDefaultValue = String.Empty;
+		[Description("The default value to get and/or set if the key name isn't set or doesn't reference an existing item. This value is expected to be a D4 literal (e.g. 'string', nil, etc.).")]
+		public string DefaultValue
+		{
+			get { return FDefaultValue; }
+			set { FDefaultValue = (value == null ? String.Empty : value); }
+		}
+
+		// ParamName
+
+		private string FParamName = String.Empty;
+		[Description("The name of the parameter produced by this argument.")]
+		public string ParamName
+		{
+			get { return FParamName; }
+			set { FParamName = (value == null ? String.Empty : value); }
+		}
+
+		// Modifier
+
+		private DAE.Language.Modifier FModifier = DAE.Language.Modifier.Const;
+		[DefaultValue(DAE.Language.Modifier.Const)]
+		[Description(@"The ""direction"" of the parameters (In, Out, Var, Const)")]
+		public DAE.Language.Modifier Modifier
+		{
+			get { return FModifier; }
+			set { FModifier = value; }
+		}
+
+		protected override void CollectArguments(ref DAE.Runtime.DataParams AParams)
+		{
+			if (!(String.IsNullOrEmpty(FKeyName) && String.IsNullOrEmpty(FDefaultValue)) && !String.IsNullOrEmpty(FParamName))
+			{
+				DAE.Schema.IDataType LType;
+				object LValue;
+				GetTypeAndValue(out LType, out LValue);
+
+				if (LType != null)
+				{
+					if (AParams == null)
+						AParams = new DAE.Runtime.DataParams();
+					AParams.Add
+					(
+						new DAE.Runtime.DataParam
+						(
+							FParamName,
+							LType,
+							Modifier,
+							LValue
+						)
+					);
+				}
+			}
+		}
+
+		private void GetTypeAndValue(out DAE.Schema.IDataType LType, out object LValue)
+		{
+			LType = null;
+			LValue = null;
+			var LInterface = FindParent(typeof(IInterface)) as IInterface;
+			if (LInterface == null || String.IsNullOrEmpty(FKeyName) || !LInterface.UserState.ContainsKey(FKeyName))
+			{
+				// Get from the default value by parsing
+				var LExpression = new Alphora.Dataphor.DAE.Language.D4.Parser().ParseExpression(FDefaultValue);
+				if (!(LExpression is ValueExpression))
+					throw new ClientException(ClientException.Codes.ValueExpressionExpected);
+				var LProcess = HostNode.Session.DataSession.UtilityProcess;
+				var LSource = (ValueExpression)LExpression;
+				switch (LSource.Token)
+				{
+					case TokenType.Boolean:
+						LType = LProcess.DataTypes.SystemBoolean;
+						LValue = (bool)LSource.Value;
+						break;
+					case TokenType.Decimal:
+						LType = LProcess.DataTypes.SystemDecimal;
+						LValue = (decimal)LSource.Value;
+						break;
+					case TokenType.Integer:
+						LType = LProcess.DataTypes.SystemInteger;
+						LValue = (int)LSource.Value;
+						break;
+					case TokenType.Money:
+						LType = LProcess.DataTypes.SystemMoney;
+						LValue = (decimal)LSource.Value;
+						break;
+					case TokenType.Nil:
+						LType = LProcess.DataTypes.SystemNilGeneric;
+						LValue = null;
+						break;
+					case TokenType.String:
+						LType = LProcess.DataTypes.SystemString;
+						LValue = (string)LSource.Value;
+						break;
+				}
+			}
+			else
+			{
+				// Get from user state
+				LValue = LInterface.UserState[FKeyName];
+				LType = LValue == null ? null : DataSession.ScalarTypeFromNativeType(HostNode.Session.DataSession.UtilityProcess, LValue.GetType());
+			}
+		}
+
+		protected override void ApplyArguments(DAE.Runtime.DataParams AParams)
+		{
+			if
+			(
+				(Modifier == DAE.Language.Modifier.Out || Modifier == DAE.Language.Modifier.Var)
+					&& !(String.IsNullOrEmpty(FKeyName) && String.IsNullOrEmpty(FDefaultValue)) 
+					&& !String.IsNullOrEmpty(FParamName)
+			)
+			{
+				var LInterface = FindParent(typeof(IInterface)) as IInterface;
+				if (LInterface == null || String.IsNullOrEmpty(FKeyName) || !LInterface.UserState.ContainsKey(FKeyName))
+				{
+					var LParam = AParams[FParamName];
+					TokenType LTokenType = TokenType.EOF;
+					if (LParam.Value == null)
+						LTokenType = TokenType.Nil;
+					else
+					{
+						switch (LParam.DataType.Name)
+						{
+							case "System.Boolean": LTokenType = TokenType.Boolean; break;
+							case "System.Decimal": LTokenType = TokenType.Decimal; break;
+							case "System.Integer": LTokenType = TokenType.Integer; break;
+							case "System.Money": LTokenType = TokenType.Money; break;
+							case "System.String": LTokenType = TokenType.String; break;
+						}
+					}
+					if (LTokenType != TokenType.EOF)
+					{
+						var LExpression = new ValueExpression(LParam.Value, LTokenType);
+						var LEmitter = new Alphora.Dataphor.DAE.Language.D4.D4TextEmitter();
+						DefaultValue = LEmitter.Emit(LExpression);
+					}
+				}
+				else
+					LInterface.UserState[FKeyName] = AParams[FParamName].Value;
+			}
+		}
+
+		protected override void CollectDataSetParamGroup(List<DataSetParamGroup> AGroups)
+		{
+			DAE.Schema.IDataType LType;
+			object LValue;
+			GetTypeAndValue(out LType, out LValue);
+
+			if (LType != null)
+			{
+				var LGroup = new DataSetParamGroup();
+				LGroup.Params.Add
+				(
+					new DataSetParam
+					{
+						Name = FParamName,
+						DataType = LType,
+						Modifier = Modifier,
+						Value = LValue
+					}
+				);
+				AGroups.Add(LGroup);
+			}
+		}
+	}
+
+	public class DataArgument : BaseArgument, IDataArgument
 	{
 		protected override void Dispose(bool ADisposing)
 		{
@@ -389,92 +618,102 @@ namespace Alphora.Dataphor.Frontend.Client
 			get { return FColumns; }
 			set { FColumns = (value == null ? String.Empty : value); }
 		}
-
-		public static DAE.Runtime.DataParams CollectArguments(INode ANode)
+		
+		protected override void CollectArguments(ref DAE.Runtime.DataParams AParams)
 		{
-			DAE.Runtime.DataParams LParams = null;
-			if (ANode != null)
+			if ((Source != null) && (Source.DataView != null) && Source.DataView.Active)
 			{
-				foreach (Node LNode in ANode.Children)
+				string[] LParamNames;
+				DAE.Schema.Column[] LColumns;
+
+				GetParams(out LParamNames, out LColumns);
+
+				for (int i = 0; i < LColumns.Length; i++)
 				{
-					DataArgument LArgument = LNode as DataArgument;
-					if ((LArgument != null) && (LArgument.Source != null) && (LArgument.Source.DataView != null) && LArgument.Source.DataView.Active)
-					{
-						string[] LParamNames;
-						DAE.Schema.Column[] LColumns;
+					// Create the collection when we find the first item to add to it
+					if (AParams == null)
+						AParams = new DAE.Runtime.DataParams();
 
-						GetParams(LArgument, out LParamNames, out LColumns);
+					DAE.Schema.Column LColumn = LColumns[i];
+					DataField LField = Source.DataView.Fields[LColumn.Name];
 
-						for (int i = 0; i < LColumns.Length; i++)
-						{
-							// Create the collection when we find the first item to add to it
-							if (LParams == null)
-								LParams = new DAE.Runtime.DataParams();
-
-							DAE.Schema.Column LColumn = LColumns[i];
-							DataField LField = LArgument.Source.DataView.Fields[LColumn.Name];
-
-							LParams.Add
-							(
-								new DAE.Runtime.DataParam
-								(
-									LParamNames[i], 
-									LColumn.DataType, 
-									LArgument.Modifier, 
-									LArgument.Source.IsEmpty ? null : (LField.HasValue() ? LField.AsNative : null)
-								)
-							);
-						}
-					}
-				}
-			}
-			return LParams;
-		}
-
-		public static void ApplyArguments(INode ANode, DAE.Runtime.DataParams AParams)
-		{
-			if (ANode != null)
-			{
-				foreach (Node LNode in ANode.Children)
-				{
-					DataArgument LArgument = LNode as DataArgument;
-					if 
+					AParams.Add
 					(
-						(LArgument != null) 
-							&& (LArgument.Modifier == DAE.Language.Modifier.Out || LArgument.Modifier == DAE.Language.Modifier.Var) 
-							&& (LArgument.Source != null) 
-							&& (LArgument.Source.DataView != null) 
-							&& LArgument.Source.DataView.Active 
-							&& !LArgument.Source.DataView.IsReadOnly
-					)
+						new DAE.Runtime.DataParam
+						(
+							LParamNames[i],
+							LColumn.DataType,
+							Modifier,
+							Source.IsEmpty ? null : (LField.HasValue() ? LField.AsNative : null)
+						)
+					);
+				}
+			}
+		}
+
+		protected override void ApplyArguments(DAE.Runtime.DataParams AParams)
+		{
+			if
+			(
+				(Modifier == DAE.Language.Modifier.Out || Modifier == DAE.Language.Modifier.Var)
+					&& (Source != null)
+					&& (Source.DataView != null)
+					&& Source.DataView.Active
+					&& !Source.DataView.IsReadOnly
+			)
+			{
+				string[] LParamNames;
+				DAE.Schema.Column[] LColumns;
+
+				GetParams(out LParamNames, out LColumns);
+
+				for (int i = 0; i < LColumns.Length; i++)
+				{
+					DAE.Runtime.DataParam LParam = AParams[LParamNames[i]];
+					if (((LParam.Modifier == DAE.Language.Modifier.Out) || (LParam.Modifier == DAE.Language.Modifier.Var)) && !Source.IsEmpty)
 					{
-						string[] LParamNames;
-						DAE.Schema.Column[] LColumns;
-
-						GetParams(LArgument, out LParamNames, out LColumns);
-
-						for (int i = 0; i < LColumns.Length; i++)
-						{
-							DAE.Runtime.DataParam LParam = AParams[LParamNames[i]];
-							if (((LParam.Modifier == DAE.Language.Modifier.Out) || (LParam.Modifier == DAE.Language.Modifier.Var)) && !LArgument.Source.IsEmpty)
-							{
-								DAE.Schema.Column LColumn = LColumns[i];
-								DataField LField = LArgument.Source.DataView.Fields[LColumn.Name];
-								LField.AsNative = LParam.Value;
-							}
-						}
+						DAE.Schema.Column LColumn = LColumns[i];
+						DataField LField = Source.DataView.Fields[LColumn.Name];
+						LField.AsNative = LParam.Value;
 					}
 				}
 			}
 		}
 
-		public static void GetParams(IDataArgument LArgument, out string[] LParamNames, out DAE.Schema.Column[] LColumns)
+		protected override void CollectDataSetParamGroup(List<DataSetParamGroup> AGroups)
 		{
-			if (LArgument.Columns != String.Empty)
+			if ((Source != null) && (Source.DataView != null))
+			{
+				var LParamGroup = new DataSetParamGroup();
+				LParamGroup.Source = Source.DataSource;
+
+				string[] LParamNames;
+				DAE.Schema.Column[] LColumns;
+
+				GetParams(out LParamNames, out LColumns);
+
+				for (int i = 0; i < LColumns.Length; i++)
+				{
+					DAE.Schema.Column LColumn = LColumns[i];
+					DataSetParam LParam = new DataSetParam();
+					LParam.Name = LParamNames[i];
+					LParam.Modifier = Modifier;
+					LParam.DataType = LColumn.DataType;
+					LParam.ColumnName = LColumn.Name;
+					LParamGroup.Params.Add(LParam);
+				}
+
+				AGroups.Add(LParamGroup);
+			}
+		}
+
+		public void GetParams(out string[] LParamNames, out DAE.Schema.Column[] LColumns)
+		{
+			if (Columns != String.Empty)
 			{
 				string LParamName;
 				string LColumnName;
-				LParamNames = LArgument.Columns.Split(new char[] { ';', ',', '\n', '\r' });
+				LParamNames = Columns.Split(new char[] { ';', ',', '\n', '\r' });
 				LColumns = new DAE.Schema.Column[LParamNames.Length];
 				for (int i = 0; i < LParamNames.Length; i++)
 				{
@@ -490,14 +729,14 @@ namespace Alphora.Dataphor.Frontend.Client
 						LParamName = LParamName.Trim();
 						LColumnName = LParamName;
 					}
-					LColumns[i] = LArgument.Source.DataView.TableType.Columns[LColumnName];
+					LColumns[i] = Source.DataView.TableType.Columns[LColumnName];
 					LParamNames[i] = LParamName;
 				}
 			}
 			else
 			{
-				LColumns = new DAE.Schema.Column[LArgument.Source.DataView.TableType.Columns.Count];
-				LArgument.Source.DataView.TableType.Columns.CopyTo(LColumns, 0);
+				LColumns = new DAE.Schema.Column[Source.DataView.TableType.Columns.Count];
+				Source.DataView.TableType.Columns.CopyTo(LColumns, 0);
 				LParamNames = new string[LColumns.Length];
 				for (int i = 0; i < LColumns.Length; i++)
 					LParamNames[i] = LColumns[i].Name;
@@ -527,12 +766,12 @@ namespace Alphora.Dataphor.Frontend.Client
 					)
 				);
 			} 
-			DataArgument.ApplyArguments(this, LParams);
+			BaseArgument.ApplyArguments(this, LParams);
 		}
 
 		public override bool IsValidChild(Type AChildType)
 		{
-			return typeof(IDataArgument).IsAssignableFrom(AChildType) || base.IsValidChild(AChildType);
+			return typeof(IBaseArgument).IsAssignableFrom(AChildType) || base.IsValidChild(AChildType);
 		}
 	}
 
@@ -546,13 +785,13 @@ namespace Alphora.Dataphor.Frontend.Client
 				var LParams = new Alphora.Dataphor.DAE.Runtime.DataParams();
 				foreach (DataField LField in LForm.MainSource.DataView.Fields)
 					LParams.Add(new DAE.Runtime.DataParam(LField.Name, LField.DataType, DAE.Language.Modifier.Out, LField.AsNative));
-				DataArgument.ApplyArguments(this, LParams);
+				BaseArgument.ApplyArguments(this, LParams);
 			}
 		}
 
 		public override bool IsValidChild(Type AChildType)
 		{
-			return typeof(IDataArgument).IsAssignableFrom(AChildType) || base.IsValidChild(AChildType);
+			return typeof(IBaseArgument).IsAssignableFrom(AChildType) || base.IsValidChild(AChildType);
 		}
 	}
 }
