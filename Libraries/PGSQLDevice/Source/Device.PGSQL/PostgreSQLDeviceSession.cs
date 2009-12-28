@@ -6,7 +6,7 @@ using Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.DAE.Server;
 
 
-namespace Alphora.Dataphor.Device.PGSQL
+namespace Alphora.Dataphor.DAE.Device.PGSQL
 {
        
     public class PostgreSQLDeviceSession : SQLDeviceSession

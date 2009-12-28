@@ -14,19 +14,17 @@ using ColumnExpression = Alphora.Dataphor.DAE.Language.SQL.ColumnExpression;
 using DropIndexStatement = Alphora.Dataphor.DAE.Language.PGSQL.DropIndexStatement;
 using SelectStatement = Alphora.Dataphor.DAE.Language.SQL.SelectStatement;
 
-namespace Alphora.Dataphor.Device.PGSQL
+namespace Alphora.Dataphor.DAE.Device.PGSQL
 {
     
-
     public class PostgreSQLDevice : SQLDevice
     {
-        public const string CPostgreSQLBinaryScalarType = "PostgreSQLDevice.PostgreSQLBinary";
+        public const string CPostgreSQLBinaryScalarType = "SQLDevice.PostgreSQLBinary";
 
         public static string CEnsureDatabase =
-			@"
-if not exists (select * from pg_database where datname = '{0}')
-	create database {0}
-			";
+			@"select count(*) from pg_database where datname = '{0}'";
+        public static string CCreateDatabase =
+            @"create database '{0}'";
         
         protected string FDatabase = String.Empty;
         protected string FPort = "5432";
@@ -142,13 +140,17 @@ if not exists (select * from pg_database where datname = '{0}')
             // Perform system type and operator mapping registration
             using (Stream LStream = GetType().Assembly.GetManifestResourceStream("SystemCatalog.d4"))
             {
+                if (LStream != null)
+                {
+                    var LScript = new StreamReader(LStream).ReadToEnd();
 #if USEISTRING
-				RunScript(AProcess, String.Format(new StreamReader(LStream).ReadToEnd(), Name, IsCaseSensitive.ToString().ToLower(), IsPostgreSQL70.ToString().ToLower(), IsAccess.ToString().ToLower()));
+				RunScript(AProcess, String.Format(LScript, Name, IsCaseSensitive.ToString().ToLower(), IsPostgreSQL70.ToString().ToLower(), IsAccess.ToString().ToLower()));
 #else
-                RunScript(AProcess,
-                          String.Format(new StreamReader(LStream).ReadToEnd(), Name, "false",
-                                        false.ToString().ToLower(), false.ToString().ToLower()));
+                    RunScript(AProcess,
+                              String.Format(LScript, Name, "false",
+                                            false.ToString().ToLower(), false.ToString().ToLower()));
 #endif
+                }
             }
         }
 
@@ -158,15 +160,28 @@ if not exists (select * from pg_database where datname = '{0}')
             Database = "postgres";
             try
             {*/
-                var LDeviceSession = (SQLDeviceSession)Connect(AProcess, AProcess.ServerSession.SessionInfo);
+            var LDeviceSession = (SQLDeviceSession)Connect(AProcess, AProcess.ServerSession.SessionInfo);
+            try
+            {
+                SQLCursor LCursor = LDeviceSession.Connection.Open(String.Format(CEnsureDatabase, Database));
                 try
                 {
-                    LDeviceSession.Connection.Execute(String.Format(CEnsureDatabase, Database));
+                    LCursor.Next();
+                    var LCount = (long)LCursor[0];
+                    var LExists = LCount > 0;
+                    if (!LExists) {
+                        LDeviceSession.Connection.Execute(String.Format(CCreateDatabase, Database));
+                    }   
                 }
                 finally
                 {
-                    Disconnect(LDeviceSession);
+                    LCursor.Command.Connection.Close(LCursor);
                 }
+            }
+            finally
+            {
+                Disconnect(LDeviceSession);
+            }
             /*}
             finally
             {
@@ -187,7 +202,9 @@ if not exists (select * from pg_database where datname = '{0}')
                     try
                     {
                         string LVersion = String.Empty;
-						LVersion  = ((string) LCursor[0]).Split(' ')[1];                    	                        
+                        LCursor.Next();
+                        var LRawVersion = (string) LCursor[0];
+						LVersion  = LRawVersion.Split(' ')[1];                    	                        
 
                         if (LVersion.Length > 0)
                             FMajorVersion = Convert.ToInt32(LVersion.Substring(0, LVersion.IndexOf('.')));
@@ -236,11 +253,18 @@ if not exists (select * from pg_database where datname = '{0}')
                     {
                         using (Stream LStream = GetType().Assembly.GetManifestResourceStream("SystemCatalog.sql"))
                         {
-                            foreach (
-                                string LBatch in SQLUtility.ProcessBatches(new StreamReader(LStream).ReadToEnd(), "go"))
+                            if (LStream != null)
                             {
-                                LCommand.Statement = LBatch;
-                                LCommand.Execute();
+                                var LSystemCatalog = new StreamReader(LStream).ReadToEnd();
+                                if (LSystemCatalog.Length > 0)
+                                {
+                                    var LBatches = SQLUtility.ProcessBatches(LSystemCatalog, @"\");
+                                    foreach (string LBatch in LBatches)
+                                    {
+                                        LCommand.Statement = LBatch;
+                                        LCommand.Execute();
+                                    }
+                                }
                             }
                         }
                     }

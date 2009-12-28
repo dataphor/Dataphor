@@ -18,7 +18,7 @@ using ColumnExpression = Alphora.Dataphor.DAE.Language.SQL.ColumnExpression;
 using DropIndexStatement = Alphora.Dataphor.DAE.Language.PGSQL.DropIndexStatement;
 using SelectStatement = Alphora.Dataphor.DAE.Language.SQL.SelectStatement;
 
-namespace Alphora.Dataphor.Device.PGSQL
+namespace Alphora.Dataphor.DAE.Device.PGSQL
 {
 
     public class PostgreSQLPostgreSQLBinaryCompareNode : BinaryInstructionNode

@@ -3,7 +3,7 @@ using Alphora.Dataphor.DAE.Connection;
 using Alphora.Dataphor.DAE.Language.D4;
 
 
-namespace Alphora.Dataphor.Device.PGSQL
+namespace Alphora.Dataphor.DAE.Device.PGSQL
 {
 	
 	// for the PostgreSQL.NET data provider

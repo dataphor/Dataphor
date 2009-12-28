@@ -7,7 +7,7 @@ using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Runtime;
 
 
-namespace Alphora.Dataphor.Device.PGSQL
+namespace Alphora.Dataphor.DAE.Device.PGSQL
 {
 
 	/// <summary>

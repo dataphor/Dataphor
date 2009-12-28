@@ -94,20 +94,40 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
         protected void EnsureOperators(ServerProcess AProcess)
         {
-            var LDeviceSession = (SQLDeviceSession) Connect(AProcess, AProcess.ServerSession.SessionInfo);
+            // no access
+            var LDeviceSession = (SQLDeviceSession)Connect(AProcess, AProcess.ServerSession.SessionInfo);
             try
             {
-                EnsureOperatorDDL LDDL;
-                for (int LIndex = 0; LIndex < OracleDDL.EnsureOperatorDDLCommands.Count; LIndex++)
+                SQLConnection LConnection = LDeviceSession.Connection;
+                if (!LConnection.InTransaction)
+                    LConnection.BeginTransaction(SQLIsolationLevel.Serializable);
+                try
                 {
-                    LDDL = OracleDDL.EnsureOperatorDDLCommands[LIndex] as EnsureOperatorDDL;
-                    LDeviceSession.Connection.Execute(LDDL.CreateStatement);
+                    using (SQLCommand LCommand = LConnection.CreateCommand(false))
+                    {
+                        using (Stream LStream = GetType().Assembly.GetManifestResourceStream("SystemCatalog.sql"))
+                        {
+                            foreach (
+                                string LBatch in SQLUtility.ProcessBatches(new StreamReader(LStream).ReadToEnd(), @"\"))
+                            {
+                                LCommand.Statement = LBatch;
+                                LCommand.Execute();
+                            }
+                        }
+                    }
+                    LConnection.CommitTransaction();
+                }
+                catch
+                {
+                    LConnection.RollbackTransaction();
+                    throw;
                 }
             }
             finally
             {
                 Disconnect(LDeviceSession);
             }
+
         }
 
         protected override DeviceSession InternalConnect(ServerProcess AServerProcess,

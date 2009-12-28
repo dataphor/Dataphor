@@ -8,7 +8,8 @@
     <ProjectGuid>{40E33930-93EC-4371-97E1-D709B022132C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Alphora.Dataphor</RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
     <AssemblyName>AlphoraPGSQLDevice</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -45,6 +46,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Device.PGSQL\PostgreSQLInstructionNodes.cs" />
+    <Compile Include="Device.PGSQL\PostgreSQLOperators.cs" />
     <Compile Include="Device.PGSQL\PostgreSQLTypes.cs" />
     <Compile Include="Device.PGSQL\Register.cs" />
     <Compile Include="Language.PGSQL\Emitter.cs" />
