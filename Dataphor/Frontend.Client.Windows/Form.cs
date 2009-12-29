@@ -300,7 +300,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					FAcceptRejectState = AcceptRejectState.True;
 				else
 					FAcceptRejectState = AcceptRejectState.False;
-				FForm.SetAcceptReject(LIsAcceptReject, FSupressCloseButton);
+
+				if (FForm != null)
+					FForm.SetAcceptReject(LIsAcceptReject, FSupressCloseButton);
 			}
 		}
 
