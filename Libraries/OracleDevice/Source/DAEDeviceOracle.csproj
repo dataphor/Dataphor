@@ -108,7 +108,6 @@
       <SubType>Code</SubType>
     </Compile>
     <EmbeddedResource Include="SystemCatalog.d4" />
-    <Content Include="Device.Oracle\Oraclefunction.sql" />
     <Content Include="Language.Oracle\BNF.txt" />
   </ItemGroup>
   <ItemGroup>
