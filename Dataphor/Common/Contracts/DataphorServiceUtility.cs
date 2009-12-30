@@ -75,7 +75,10 @@ namespace Alphora.Dataphor.DAE.Contracts
 			LTransportElement.MaxBufferSize = CMaxMessageLength;
 			LTransportElement.MaxReceivedMessageSize = CMaxMessageLength;
 			
-			return new CustomBinding(LMessageEncodingElement, LTransportElement);
+			var LBinding = new CustomBinding(LMessageEncodingElement, LTransportElement);
+			LBinding.SendTimeout = TimeSpan.MaxValue;
+			LBinding.ReceiveTimeout = TimeSpan.MaxValue;
+			return LBinding;
 		}
 	}
 }
