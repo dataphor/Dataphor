@@ -5,41 +5,47 @@ using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Language.SQL;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Schema;
-using TableExpression = Alphora.Dataphor.DAE.Language.PGSQL.TableExpression;
+//using TableExpression = Alphora.Dataphor.DAE.Language.PGSQL.TableExpression;
+using D4 = Alphora.Dataphor.DAE.Language.D4;
 
 namespace Alphora.Dataphor.DAE.Device.PGSQL
 {
-    public class PostgreSQLRetrieve : SQLDeviceOperator
+    public class PostgreSQLRetrieve : SQLRetrieve
     {
         public PostgreSQLRetrieve(int AID, string AName) : base(AID, AName) { }
 		
 		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
 		{
-			SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-			TableVar LTableVar = ((TableVarNode)APlanNode).TableVar;
+            SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            TableVar LTableVar = ((TableVarNode)APlanNode).TableVar;
 
-			if (LTableVar is BaseTableVar)
-			{
-				SQLRangeVar LRangeVar = new SQLRangeVar(LDevicePlan.GetNextTableAlias());
-				LDevicePlan.CurrentQueryContext().RangeVars.Add(LRangeVar);
-				SelectExpression LSelectExpression = new SelectExpression();
-				LSelectExpression.FromClause = new AlgebraicFromClause(new TableSpecifier(new TableExpression(Alphora.Dataphor.DAE.Language.D4.MetaData.GetTag(LTableVar.MetaData, "Storage.Schema", LDevicePlan.Device.Schema), LDevicePlan.Device.ToSQLIdentifier(LTableVar)), LRangeVar.Name));
-				LSelectExpression.SelectClause = new SelectClause();
-				foreach (TableVarColumn LColumn in LTableVar.Columns)
-				{
-					SQLRangeVarColumn LRangeVarColumn = new SQLRangeVarColumn(LColumn, LRangeVar.Name, LDevicePlan.Device.ToSQLIdentifier(LColumn), LDevicePlan.Device.ToSQLIdentifier(LColumn.Name));
-					LRangeVar.Columns.Add(LRangeVarColumn);
-					LSelectExpression.SelectClause.Columns.Add(LRangeVarColumn.GetColumnExpression());
-				}
+            if (LTableVar is BaseTableVar)
+            {
+                SQLRangeVar LRangeVar = new SQLRangeVar(LDevicePlan.GetNextTableAlias());
+                LDevicePlan.CurrentQueryContext().RangeVars.Add(LRangeVar);
+                var LSelectExpression = new SelectExpression();
+                string LSQLIdentifier = LDevicePlan.Device.ToSQLIdentifier(LTableVar);
+                string LTag = D4.MetaData.GetTag(LTableVar.MetaData, "Storage.Schema", LDevicePlan.Device.Schema);
+                var LTableExpression = new TableExpression(LTag,LSQLIdentifier);
+                var LTableSpecifier = new TableSpecifier(LTableExpression, LRangeVar.Name);
+                LSelectExpression.FromClause = new AlgebraicFromClause(LTableSpecifier);
+                LSelectExpression.SelectClause = new SelectClause();
+                foreach (TableVarColumn LColumn in LTableVar.Columns)
+                {
+                    SQLRangeVarColumn LRangeVarColumn = new SQLRangeVarColumn(LColumn, LRangeVar.Name, LDevicePlan.Device.ToSQLIdentifier(LColumn), LDevicePlan.Device.ToSQLIdentifier(LColumn.Name));
+                    LRangeVar.Columns.Add(LRangeVarColumn);
+                    LSelectExpression.SelectClause.Columns.Add(LRangeVarColumn.GetColumnExpression());
+                }
 
-				LSelectExpression.SelectClause.Distinct = 
-					(LTableVar.Keys.Count == 1) && 
-					Convert.ToBoolean(Alphora.Dataphor.DAE.Language.D4.MetaData.GetTag(LTableVar.Keys[0].MetaData, "Storage.IsImposedKey", "false"));
-				
-				return LSelectExpression;
-			}
-			else
-				return LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
+                LSelectExpression.SelectClause.Distinct =
+                    (LTableVar.Keys.Count == 1) &&
+                    Convert.ToBoolean(D4.MetaData.GetTag(LTableVar.Keys[0].MetaData, "Storage.IsImposedKey", "false"));
+
+                return LSelectExpression;
+            }
+            else
+                return LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
+		   // return base.Translate(ADevicePlan, APlanNode);
 		}
  
     }

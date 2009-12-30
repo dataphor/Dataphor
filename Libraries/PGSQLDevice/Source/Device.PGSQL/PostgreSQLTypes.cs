@@ -393,7 +393,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 		protected override string InternalNativeDomainName(MetaData AMetaData)
 		{
-			return "image";
+            return "oid";
 		}
 	}
 
@@ -416,11 +416,11 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 	/// <summary>
 	/// PostgreSQL type : binary(Storage.Length)
-	/// D4 Type : PostgreSQLBinary
+	/// D4 Type : MSSQLBinary
 	/// </summary>
-	public class PostgreSQLPostgreSQLBinary : SQLScalarType
+	public class PostgreSQLMSSQLBinary : SQLScalarType
 	{
-		public PostgreSQLPostgreSQLBinary(int AID, string AName) : base(AID, AName) { }
+        public PostgreSQLMSSQLBinary(int AID, string AName) : base(AID, AName) { }
 
 		public override string ToLiteral(IValueManager AManager, object AValue)
 		{
@@ -452,7 +452,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 		protected override string InternalNativeDomainName(MetaData AMetaData)
 		{
-			return String.Format("binary({0})", GetLength(AMetaData)); // todo: what about varbiniary?
+            return String.Format("BYTEA({0})", GetLength(AMetaData)); // todo: what about varbiniary?
 		}
 	}
 
