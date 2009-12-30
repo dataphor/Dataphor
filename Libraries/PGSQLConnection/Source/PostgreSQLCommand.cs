@@ -75,7 +75,7 @@ namespace Alphora.Dataphor.DAE.Connection.PGSQL
                 }
                 else if (LParameter.Type is SQLDateTimeType)
                 {
-                    LNpgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Date;
+                    LNpgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Timestamp;
                 }
                 else if (LParameter.Type is SQLDateType)
                 {
