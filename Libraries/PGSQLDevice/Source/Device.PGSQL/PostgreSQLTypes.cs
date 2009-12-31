@@ -54,7 +54,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 		protected override string InternalNativeDomainName(MetaData AMetaData)
 		{
-			return "bit";
+			return "boolean";
 		}
 	}
 
@@ -88,7 +88,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 		protected override string InternalNativeDomainName(MetaData AMetaData)
 		{
-			return "tinyint";
+            return "smallint";
 		}
 	}
 
@@ -302,7 +302,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 		protected override string InternalNativeDomainName(MetaData AMetaData)
 		{
-			return "uniqueidentifier";
+			return "uuid";
 		}
 	}
 
@@ -353,7 +353,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 		protected override string InternalNativeDomainName(MetaData AMetaData)
 		{
-			return "image";
+            return "oid";
 		}
 	}
 
@@ -395,7 +395,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
 		protected override string InternalNativeDomainName(MetaData AMetaData)
 		{
-            return String.Format("BYTEA({0})", GetLength(AMetaData)); // todo: what about varbiniary?
+            return String.Format("bytea({0})", GetLength(AMetaData));
 		}
 	}
 
