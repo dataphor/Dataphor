@@ -269,11 +269,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			FocusControl();
 		}
 	
+		protected bool CanModify()
+		{
+			return !GetReadOnly() && (Source != null) && (Source.DataView != null);
+		}
+		
 		private void LookupAccepted(IFormInterface AForm) 
 		{
 			FocusControl();
 
-			if (!GetReadOnly() && (Source != null) && (Source.DataView != null))
+			if (CanModify())
 			{
 				string[] LLookupColumns = GetLookupColumnNames().Split(DAE.Client.DataView.CColumnNameDelimiters);
 				string[] LSourceColumns = GetColumnNames().Split(DAE.Client.DataView.CColumnNameDelimiters);
@@ -691,11 +696,28 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			base.InitializeControl();
 			Control.Enter += new EventHandler(ControlGotFocus);
+			((DAE.Client.Controls.LookupPanel)Control).ClearValue += new EventHandler(ControlClearValue);
 		}
 
 		protected void ControlGotFocus(object ASender, EventArgs AArgs)
 		{
 			FindParent(typeof(IFormInterface)).BroadcastEvent(new FocusChangedEvent(this));
+		}
+
+		private void ControlClearValue(object sender, EventArgs e)
+		{
+			if (CanModify())
+			{
+				string[] LSourceColumns = GetColumnNames().Split(DAE.Client.DataView.CColumnNameDelimiters);
+
+				// Clear the field values
+				for (int i = 0; i < LSourceColumns.Length; i++)
+				{
+					var LField = Source.DataView.Fields[LSourceColumns[i].Trim()];
+					if (LField.HasValue())
+						LField.ClearValue();
+				}
+			}
 		}
 
 		// Element

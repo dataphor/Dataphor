@@ -42,6 +42,19 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			return Focused;
 		}
 
+		public event EventHandler ClearValue;
+		
+		protected virtual void OnClearValue(EventArgs AArgs)
+		{
+			if (ClearValue != null)
+				ClearValue(this, AArgs);
+		}
+		
+		protected void PerformClearValue()
+		{
+			OnClearValue(EventArgs.Empty);
+		}
+		
 		#region Keyboard & Mouse
 
 		protected override void OnClick(EventArgs AArgs)
@@ -59,6 +72,29 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 			else
 				return base.ProcessMnemonic(AChar);
+		}
+
+		protected override bool ProcessDialogKey(Keys AKey)
+		{
+			if (AKey == (Keys.Control | Keys.Back))
+			{
+				PerformClearValue();
+				return true;
+			}
+			else
+				return base.ProcessDialogKey(AKey);
+		}
+
+		protected override bool ProcessKeyPreview(ref Message AMessage)
+		{
+			const int WM_KEYUP = 0x101;
+			if (AMessage.Msg == WM_KEYUP && (((Keys)((int)((long)AMessage.WParam))) | ModifierKeys) == (Keys.Control | Keys.Back))
+			{
+				PerformClearValue();
+				return true;
+			}
+			else
+				return base.ProcessKeyPreview(ref AMessage);
 		}
 
 		#endregion
