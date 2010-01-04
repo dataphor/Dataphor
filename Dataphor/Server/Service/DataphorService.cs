@@ -560,7 +560,7 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).Close();
+				FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).Dispose();
 			}
 			catch (DataphorException LException)
 			{
