@@ -532,7 +532,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 							EndTime = ((Scalar)LRow.GetValue(FShiftEndTimeColumn)).AsDateTime,
 							Description = ((Scalar)LRow.GetValue(FShiftDescriptionColumn)).AsString,
 							Group = (String.IsNullOrEmpty(FShiftGroupColumn) ? null : ((Scalar)LRow.GetValue(FShiftGroupColumn)).AsNative),
-							HighlightInterval = (String.IsNullOrEmpty(FShiftHighlightIntervalColumn) ? (int?)null : ((Scalar)LRow.GetValue(FShiftHighlightIntervalColumn)).AsInt32)
+							HighlightInterval = 
+							(
+								String.IsNullOrEmpty(FShiftHighlightIntervalColumn) 
+									? (int?)null 
+									: 
+									(
+										LRow.HasValue(FShiftHighlightIntervalColumn) 
+											? ((Scalar)LRow.GetValue(FShiftHighlightIntervalColumn)).AsInt32
+											: (int?)null
+									)
+							)
 						}
 					);
 				}
