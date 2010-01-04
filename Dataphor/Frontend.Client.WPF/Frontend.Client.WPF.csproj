@@ -86,6 +86,7 @@
     <Compile Include="Schedule\ScheduleDayAppointments.cs" />
     <Compile Include="Schedule\ScheduleDayGroup.cs" />
     <Compile Include="Schedule\Scheduler.cs" />
+    <Compile Include="Schedule\ScheduleShift.cs" />
     <Compile Include="Schedule\ScheduleTimeBar.cs" />
     <Compile Include="Schedule\ScheduleTimeBlock.cs" />
     <Compile Include="Utilities.cs" />

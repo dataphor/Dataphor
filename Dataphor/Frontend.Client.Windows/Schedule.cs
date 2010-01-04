@@ -474,6 +474,26 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				}
 			}
 		}
+		
+		// ShiftHighlightIntervalColumn
+
+		private string FShiftHighlightIntervalColumn = String.Empty;
+		[DefaultValue("")]
+		[TypeConverter(typeof(ColumnNameConverter))]
+		[ColumnNameSourceProperty("ShiftSource")]
+		[Description("The column in the Shift source that represents the highlighting interval.")]
+		public string ShiftHighlightIntervalColumn
+		{
+			get { return FShiftHighlightIntervalColumn; }
+			set
+			{
+				if (FShiftHighlightIntervalColumn != value)
+				{
+					FShiftHighlightIntervalColumn = value;
+					UpdateShiftData();
+				}
+			}
+		}
 
 		// ShiftData
 		
@@ -505,13 +525,14 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					var LRow = FShiftSourceLink.Buffer(i);
 					LData.Add
 					(
-						new ScheduleData
+						new ScheduleShiftData
 						{
 							Date = ((Scalar)LRow.GetValue(FShiftDateColumn)).AsDateTime,
 							StartTime = ((Scalar)LRow.GetValue(FShiftStartTimeColumn)).AsDateTime,
 							EndTime = ((Scalar)LRow.GetValue(FShiftEndTimeColumn)).AsDateTime,
 							Description = ((Scalar)LRow.GetValue(FShiftDescriptionColumn)).AsString,
-							Group = (String.IsNullOrEmpty(FShiftGroupColumn) ? null : ((Scalar)LRow.GetValue(FShiftGroupColumn)).AsNative)
+							Group = (String.IsNullOrEmpty(FShiftGroupColumn) ? null : ((Scalar)LRow.GetValue(FShiftGroupColumn)).AsNative),
+							HighlightInterval = (String.IsNullOrEmpty(FShiftHighlightIntervalColumn) ? (int?)null : ((Scalar)LRow.GetValue(FShiftHighlightIntervalColumn)).AsInt32)
 						}
 					);
 				}
@@ -1222,6 +1243,23 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				{
 					FImage = value;
 					NotifyPropertyChanged("Image");
+				}
+			}
+		}
+	}
+	
+	public class ScheduleShiftData : ScheduleData
+	{
+		private int? FHighlightInterval;
+		public int? HighlightInterval
+		{
+			get { return FHighlightInterval; }
+			set
+			{
+				if (FHighlightInterval != value)
+				{
+					FHighlightInterval = value;
+					NotifyPropertyChanged("HighlightInterval");
 				}
 			}
 		}

@@ -107,14 +107,33 @@
 		<Setter Property="ShiftItemTemplate">
 			<Setter.Value>
 				<DataTemplate>
-					<Border SnapsToDevicePixels="True">
-						<Border.Background>
+					<client:ScheduleShift 
+						SnapsToDevicePixels="True"
+						HighlightInterval="{Binding HighlightInterval}"
+						Granularity="{Binding Granularity, RelativeSource={RelativeSource AncestorType={x:Type client:ScheduleDay}}}"
+						BlockHeight="{Binding TimeBar.BlockHeight, RelativeSource={RelativeSource AncestorType={x:Type client:ScheduleDay}}}"
+						ClipToBounds="True"
+						>
+						<client:ScheduleShift.Background>
 							<LinearGradientBrush EndPoint="0.854,0.5" StartPoint="0.146,0.5">
 								<GradientStop Color="#FFE6C070"/>
 								<GradientStop Color="#FFF6D48F" Offset="1"/>
 							</LinearGradientBrush>
-						</Border.Background>
-					</Border>
+						</client:ScheduleShift.Background>
+						<client:ScheduleShift.HighlightStyle>
+							<Style TargetType="{x:Type Rectangle}">
+								<Setter Property="Fill">
+									<Setter.Value>
+										<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+											<GradientStop Color="#0C000000" Offset="0"/>
+											<GradientStop Color="#3291B4FC" Offset="0.06"/>
+											<GradientStop Offset="1" Color="#00000000"/>
+										</LinearGradientBrush>
+									</Setter.Value>
+								</Setter>
+							</Style>
+						</client:ScheduleShift.HighlightStyle>
+					</client:ScheduleShift>
 				</DataTemplate>
 			</Setter.Value>
 		</Setter>
