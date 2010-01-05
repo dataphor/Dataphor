@@ -3093,7 +3093,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 				if (!ATableVar.Orders.Contains(LOrder))
 					ATableVar.Orders.Add(LOrder);
 				else
-					throw new Schema.SchemaException(Schema.SchemaException.Codes.DuplicateObjectName, LOrder.Name);
+				{
+					// Do not throw if this is a view definition, the order is present, so the view should behave as expected.
+					if (ATableVar is Schema.BaseTableVar)
+						throw new Schema.SchemaException(Schema.SchemaException.Codes.DuplicateObjectName, LOrder.Name);
+				}
 			}
 		}
 		
