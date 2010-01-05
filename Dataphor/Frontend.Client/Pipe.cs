@@ -99,7 +99,8 @@ namespace Alphora.Dataphor.Frontend.Client
 
 			base.Dispose(ADisposing);
 			
-			FServerSession.StopProcess(FAsyncProcess);
+			if (FAsyncProcess != null)
+				FServerSession.StopProcess(FAsyncProcess);
 			FServerSession.StopProcess(FSyncProcess);
 		}
 
@@ -354,12 +355,15 @@ namespace Alphora.Dataphor.Frontend.Client
 			FAsyncThread.IsBackground = true;
 			FAsyncThread.Start();
 		}
-
+		
 		private void CreateAsyncProcess()
 		{
 			ProcessInfo LProcessInfo = new ProcessInfo(FServerSession.SessionInfo);
 			LProcessInfo.DefaultIsolationLevel = DAE.IsolationLevel.Browse;
-			FAsyncProcess = FServerSession.StartProcess(LProcessInfo);
+			if (!FStoppingAsync)
+				FAsyncProcess = FServerSession.StartProcess(LProcessInfo);
+			else
+				FAsyncProcess = null;
 		}
 
 		/// <summary> Cancels all queued requests. </summary>
@@ -381,9 +385,12 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// invocation. </remarks>
 		private void CancelCurrent()
 		{
-			FCancellingCurrent = true;
-			ThreadPool.QueueUserWorkItem(new WaitCallback(AsyncCancelCurrent), FAsyncProcess.ProcessID);
-			CreateAsyncProcess();	// Old AsyncProcess is toast, must create a new one
+			if (FAsyncProcess != null)
+			{
+				FCancellingCurrent = true;
+				ThreadPool.QueueUserWorkItem(new WaitCallback(AsyncCancelCurrent), FAsyncProcess.ProcessID);
+				CreateAsyncProcess();
+			}
 		}
 
 		private void AsyncCancelCurrent(object AState)
@@ -404,6 +411,10 @@ namespace Alphora.Dataphor.Frontend.Client
 			catch
 			{
 				// Do nothing, but catch all exceptions; the framework aborts the app if a thread leaves unhandled exceptions
+			}
+			finally
+			{
+				FCancellingCurrent = false;
 			}
 		}
 
@@ -483,6 +494,7 @@ namespace Alphora.Dataphor.Frontend.Client
 							}
 							finally
 							{
+/*
 								if (FCancellingCurrent)
 								{
 									// Reset the cancel flag
@@ -491,6 +503,7 @@ namespace Alphora.Dataphor.Frontend.Client
 									// Start a new process, the old one was stopped
 									CreateAsyncProcess();
 								}
+*/
 							}
 						}
 					}

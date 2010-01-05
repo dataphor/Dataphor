@@ -184,6 +184,7 @@ namespace Alphora.Dataphor.DAE.Server
 					CachedPlans LPlans;
 					if (FPlans.TryGetValue(LHeader, out LPlans))
 					{
+						APlan.UnbindFromProcess();
 						LPlans.Add(APlan);
 						return true;
 					}

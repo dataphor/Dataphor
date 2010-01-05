@@ -189,7 +189,8 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 			try
 			{
-				FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).Stop();
+				FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).Dispose();
+				//FHandleManager.GetObject<RemoteServerProcess>(AProcessHandle).Stop();
 			}
 			catch (DataphorException LException)
 			{

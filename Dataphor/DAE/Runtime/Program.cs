@@ -56,6 +56,13 @@ namespace Alphora.Dataphor.DAE.Runtime
 			FStatistics.DeviceExecuteTime = TimeSpan.Zero;
 		}
 		
+		public void UnbindFromProcess()
+		{
+			FServerProcess = null;
+			if (FPlan != null)
+				FPlan.UnbindFromProcess();
+		}
+		
 		private Guid FID;
 		public Guid ID { get { return FID; } }
 		

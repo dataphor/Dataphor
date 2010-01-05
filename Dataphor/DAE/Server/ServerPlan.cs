@@ -102,6 +102,13 @@ namespace Alphora.Dataphor.DAE.Server
 			FProgram.BindToProcess(AProcess, FPlan);
 		}
 		
+		public void UnbindFromProcess()
+		{
+			FProcess = null;
+			FPlan.UnbindFromProcess();
+			FProgram.UnbindFromProcess();
+		}
+		
 		// Released
 		/// <summary>
 		/// Used to indicate that the plan has been released back to the cache and should be considered disposed for anything looking at the plan external to the server.
