@@ -129,6 +129,27 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 
+		protected override void Dispose(bool disposing)
+		{
+			try
+			{
+				try
+				{
+					IAsyncResult LResult = GetServiceInterface().BeginCloseStream(FStreamHandle, null, null);
+					LResult.AsyncWaitHandle.WaitOne();
+					GetServiceInterface().EndCloseStream(LResult);
+				}
+				catch (FaultException<DataphorFault> LFault)
+				{
+					throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				}
+			}
+			finally
+			{
+				base.Dispose(disposing);
+			}
+		}
+
 		#region IRemoteStream Members
 
 		long IRemoteStream.Length
