@@ -869,6 +869,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     /// </summary>
     public class SQLBinary : SQLScalarType
     {
+		public const int CStreamAllocationThreshold = 32767;
+		
 		public SQLBinary(int AID, string AName) : base(AID, AName) {}
 		
 		private byte[] GetNativeValue(IValueManager AManager, object AValue)
@@ -892,11 +894,20 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
-			using (Scalar LScalar = new Scalar(AManager, this.ScalarType, AManager.StreamManager.Allocate()))
+			if (AValue == null)
+				return null;
+				
+			byte[] LValue = (byte[])AValue;
+			if (LValue.Length >= CStreamAllocationThreshold)
 			{
-				LScalar.AsByteArray = (byte[])AValue;
-				return LScalar.StreamID;
+				using (Scalar LScalar = new Scalar(AManager, this.ScalarType, AManager.StreamManager.Allocate()))
+				{
+					LScalar.AsByteArray = (byte[])AValue;
+					return LScalar.StreamID;
+				}
 			}
+			
+			return LValue;
 		}
 		
 		public override object FromScalar(IValueManager AManager, object AValue)
@@ -921,6 +932,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     /// </summary>
     public class SQLGraphic : SQLScalarType
     {
+		public const int CStreamAllocationThreshold = 32767;
+		
 		public SQLGraphic(int AID, string AName) : base(AID, AName) {}
 
 		private byte[] GetNativeValue(IValueManager AManager, object AValue)
@@ -944,11 +957,20 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 		public override object ToScalar(IValueManager AManager, object AValue)
 		{
-			using (Scalar LScalar = new Scalar(AManager, this.ScalarType, AManager.StreamManager.Allocate()))
+			if (AValue == null)
+				return null;
+				
+			byte[] LValue = (byte[])AValue;
+			if (LValue.Length >= CStreamAllocationThreshold)
 			{
-				LScalar.AsByteArray = (byte[])AValue;
-				return LScalar.StreamID;
+				using (Scalar LScalar = new Scalar(AManager, this.ScalarType, AManager.StreamManager.Allocate()))
+				{
+					LScalar.AsByteArray = (byte[])AValue;
+					return LScalar.StreamID;
+				}
 			}
+
+			return LValue;
 		}
 		
 		public override object FromScalar(IValueManager AManager, object AValue)
