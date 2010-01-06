@@ -31,7 +31,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 	{
 		public Plan(ServerProcess AServerProcess) : base()
 		{
-			FServerProcess = AServerProcess;
+			ServerProcess = AServerProcess;
 			FSymbols = new Symbols(FServerProcess.ServerSession.SessionInfo.DefaultMaxStackDepth, FServerProcess.ServerSession.SessionInfo.DefaultMaxCallDepth);
 			PushSecurityContext(new SecurityContext(FServerProcess.ServerSession.User));
 			PushStatementContext(new StatementContext(StatementType.Select));
@@ -75,7 +75,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			}
 			finally
 			{
-				FServerProcess = null;
+				ServerProcess = null;
 
 				base.Dispose(ADisposing);
 			}
@@ -83,7 +83,25 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 		// Process        
 		protected ServerProcess FServerProcess;
-		public ServerProcess ServerProcess { get { return FServerProcess; } }
+		public ServerProcess ServerProcess 
+		{ 
+			get { return FServerProcess; }
+			set
+			{
+				if (FServerProcess != null)
+					FServerProcess.Disposed -= new EventHandler(ServerProcessDisposed);
+					
+				FServerProcess = value;
+
+				if (FServerProcess != null)
+					FServerProcess.Disposed += new EventHandler(ServerProcessDisposed);
+			}
+		}
+		
+		private void ServerProcessDisposed(object ASender, EventArgs AArgs)
+		{
+			ServerProcess = null;
+		}
 		
 		private Program FInternalProgram;
 		protected Program InternalProgram
@@ -101,7 +119,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			PopSecurityContext();
 			PushSecurityContext(new SecurityContext(AProcess.ServerSession.User));
 			
-			FServerProcess = AProcess;
+			ServerProcess = AProcess;
 			if (FInternalProgram != null)
 				FInternalProgram.BindToProcess(AProcess, this);
 			
@@ -112,9 +130,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public void UnbindFromProcess()
 		{
-			FServerProcess = null;
-			if (FInternalProgram != null)
-				FInternalProgram.UnbindFromProcess();
+			//FServerProcess = null;
+			//if (FInternalProgram != null)
+			//	FInternalProgram.UnbindFromProcess();
 		}
 		
 		public void CheckCompiled()

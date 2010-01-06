@@ -28,13 +28,31 @@ namespace Alphora.Dataphor.DAE.Runtime
 		public Program(ServerProcess AProcess) : this(AProcess, Guid.NewGuid()) { }
 		public Program(ServerProcess AProcess, Guid AID)
 		{
-			FServerProcess = AProcess;
+			ServerProcess = AProcess;
 			FID = AID;
 			FStack = new Stack(FServerProcess.MaxStackDepth, FServerProcess.MaxCallDepth);
 		}
 		
 		private ServerProcess FServerProcess;
-		public ServerProcess ServerProcess { get { return FServerProcess; } }
+		public ServerProcess ServerProcess 
+		{ 
+			get { return FServerProcess; }
+			set
+			{
+				if (FServerProcess != null)
+					FServerProcess.Disposed -= new EventHandler(ServerProcessDisposed);
+				
+				FServerProcess = value;
+				
+				if (FServerProcess != null)
+					FServerProcess.Disposed += new EventHandler(ServerProcessDisposed);
+			}
+		}
+		
+		private void ServerProcessDisposed(object ASender, EventArgs AArgs)
+		{
+			ServerProcess = null;
+		}
 		
 		private bool FIsCached;
 		public bool IsCached
@@ -45,9 +63,11 @@ namespace Alphora.Dataphor.DAE.Runtime
 		
 		public void BindToProcess(ServerProcess AProcess, Plan APlan)
 		{
-			FServerProcess = AProcess;
+			ServerProcess = AProcess;
+			
 			if (FCode != null)
 				FCode.BindToProcess(APlan);
+
 			if (FPlan != null)
 				FPlan.BindToProcess(FServerProcess);
 			
@@ -58,9 +78,9 @@ namespace Alphora.Dataphor.DAE.Runtime
 		
 		public void UnbindFromProcess()
 		{
-			FServerProcess = null;
-			if (FPlan != null)
-				FPlan.UnbindFromProcess();
+			//FServerProcess = null;
+			//if (FPlan != null)
+			//	FPlan.UnbindFromProcess();
 		}
 		
 		private Guid FID;
