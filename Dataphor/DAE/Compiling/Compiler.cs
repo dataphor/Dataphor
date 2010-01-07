@@ -8860,9 +8860,9 @@ indicative of other problems, a reference will never be attached as an explicit 
 								ResolveCall(APlan, APlan.Catalog, AContext);
 							}
 				#if USEOPERATORRESOLUTIONCACHE
-							if ((AContext.Operator == null) || !(AContext.Operator.IsSessionObject || AContext.Operator.IsATObject))
+							if ((AContext.Operator == null) || !(AContext.Operator.IsSessionObject || AContext.Operator.IsATObject || AContext.Operator.Signature.HasNonScalarElements()))
 							{
-								// Only cache the resolution if this is not a session or A/T operator
+								// Only cache the resolution if this is not a session or A/T operator, and it is a pure-scalar operator
 								LContext = new OperatorBindingContext(null, AContext.OperatorName, AContext.ResolutionPath, AContext.CallSignature, AContext.IsExact);
 								LContext.SetBindingDataFromContext(AContext);
 								APlan.Catalog.OperatorResolutionCache.Add(LContext);

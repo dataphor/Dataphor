@@ -4,6 +4,8 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
+//#define USEPROCESSDISPOSED // Determines whether or not the plan and program listen to the process disposed event
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -28,30 +30,32 @@ namespace Alphora.Dataphor.DAE.Runtime
 		public Program(ServerProcess AProcess) : this(AProcess, Guid.NewGuid()) { }
 		public Program(ServerProcess AProcess, Guid AID)
 		{
-			ServerProcess = AProcess;
+			SetServerProcess(AProcess);
 			FID = AID;
 			FStack = new Stack(FServerProcess.MaxStackDepth, FServerProcess.MaxCallDepth);
 		}
 		
 		private ServerProcess FServerProcess;
-		public ServerProcess ServerProcess 
-		{ 
-			get { return FServerProcess; }
-			set
-			{
-				if (FServerProcess != null)
-					FServerProcess.Disposed -= new EventHandler(ServerProcessDisposed);
-				
-				FServerProcess = value;
-				
-				if (FServerProcess != null)
-					FServerProcess.Disposed += new EventHandler(ServerProcessDisposed);
-			}
+		public ServerProcess ServerProcess { get { return FServerProcess; } }
+		 
+		private void SetServerProcess(ServerProcess AServerProcess)
+		{
+			#if USEPROCESSDISPOSED 
+			if (FServerProcess != null)
+				FServerProcess.Disposed -= new EventHandler(ServerProcessDisposed);
+			#endif
+			
+			FServerProcess = AServerProcess;
+			
+			#if USEPROCESSDISPOSED
+			if (FServerProcess != null)
+				FServerProcess.Disposed += new EventHandler(ServerProcessDisposed);
+			#endif
 		}
 		
 		private void ServerProcessDisposed(object ASender, EventArgs AArgs)
 		{
-			ServerProcess = null;
+			SetServerProcess(null);
 		}
 		
 		private bool FIsCached;
@@ -63,7 +67,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 		
 		public void BindToProcess(ServerProcess AProcess, Plan APlan)
 		{
-			ServerProcess = AProcess;
+			SetServerProcess(AProcess);
 			
 			if (FCode != null)
 				FCode.BindToProcess(APlan);
@@ -78,9 +82,11 @@ namespace Alphora.Dataphor.DAE.Runtime
 		
 		public void UnbindFromProcess()
 		{
-			//FServerProcess = null;
-			//if (FPlan != null)
-			//	FPlan.UnbindFromProcess();
+			#if USEPROCESSUNBIND
+			SetServerProcess(null);
+			if (FPlan != null)
+				FPlan.UnbindFromProcess();
+			#endif
 		}
 		
 		private Guid FID;

@@ -164,6 +164,14 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 			return false;
 		}
+		
+		public bool HasNonScalarElements()
+		{
+			for (int LIndex = 0; LIndex < Count; LIndex++)
+				if (!((this[LIndex].DataType is Schema.IScalarType) || (this[LIndex].DataType is Schema.IGenericType)))
+					return true;
+			return false; 
+		}
 
 		public override string ToString()
 		{

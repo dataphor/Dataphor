@@ -31,6 +31,8 @@
 #define USENATIVECONCURRENCYCOMPARE // ?? Enables native object comparison when performing concurrency checks
 //#define USEOLEDBCONNECTION in MSSQLDevice (currently disabled) // Uses the OLEDBConnection as the default connectivity implementation for the MSSQL device
 #define USEOPERATORRESOLUTIONCACHE int Alphora.Dataphor.DAE // Enables the operator resolution cache
+//#define USEPROCESSDISPOSED in Plan and Program // Determines whether or not the plan and program listen to the process disposed event
+//#define USEPROCESSUNBIND in Plan and Program // Determines whether or not to use process unbinding
 //#define UseReaderWriterLock in Alphora.Dataphor.DAE (currently disabled) // Uses the .NET reader/writer lock rather than the Dataphor semaphore
 #define UseReferenceDerivation in Alphora.Dataphor.DAE // Enables reference inference in the compiler
 #define USEROOTEDIDENTIFIERSINKEYEXPRESSIONS in Alphora.Dataphor.DAE // Enables rooted identifiers in key expressions

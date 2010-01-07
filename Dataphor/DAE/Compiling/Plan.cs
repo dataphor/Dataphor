@@ -5,6 +5,7 @@
 */
 
 //#define CHECKCLASSDEPENDENCY // Indicates whether or not class dependencies will be checked
+//#define USEPROCESSDISPOSED // Determines whether or not the plan and program listen to the process disposed event
 
 using System;
 using System.Text;
@@ -31,7 +32,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 	{
 		public Plan(ServerProcess AServerProcess) : base()
 		{
-			ServerProcess = AServerProcess;
+			SetServerProcess(AServerProcess);
 			FSymbols = new Symbols(FServerProcess.ServerSession.SessionInfo.DefaultMaxStackDepth, FServerProcess.ServerSession.SessionInfo.DefaultMaxCallDepth);
 			PushSecurityContext(new SecurityContext(FServerProcess.ServerSession.User));
 			PushStatementContext(new StatementContext(StatementType.Select));
@@ -75,7 +76,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			}
 			finally
 			{
-				ServerProcess = null;
+				SetServerProcess(null);
 
 				base.Dispose(ADisposing);
 			}
@@ -83,24 +84,26 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 		// Process        
 		protected ServerProcess FServerProcess;
-		public ServerProcess ServerProcess 
-		{ 
-			get { return FServerProcess; }
-			set
-			{
-				if (FServerProcess != null)
-					FServerProcess.Disposed -= new EventHandler(ServerProcessDisposed);
-					
-				FServerProcess = value;
+		public ServerProcess ServerProcess { get { return FServerProcess; } }
+		
+		private void SetServerProcess(ServerProcess AServerProcess)
+		{
+			#if USEPROCESSDISPOSED
+			if (FServerProcess != null)
+				FServerProcess.Disposed -= new EventHandler(ServerProcessDisposed);
+			#endif	
+			
+			FServerProcess = AServerProcess;
 
-				if (FServerProcess != null)
-					FServerProcess.Disposed += new EventHandler(ServerProcessDisposed);
-			}
+			#if USEPROCESSDISPOSED
+			if (FServerProcess != null)
+				FServerProcess.Disposed += new EventHandler(ServerProcessDisposed);
+			#endif
 		}
 		
 		private void ServerProcessDisposed(object ASender, EventArgs AArgs)
 		{
-			ServerProcess = null;
+			SetServerProcess(null);
 		}
 		
 		private Program FInternalProgram;
@@ -119,7 +122,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			PopSecurityContext();
 			PushSecurityContext(new SecurityContext(AProcess.ServerSession.User));
 			
-			ServerProcess = AProcess;
+			SetServerProcess(AProcess);
 			if (FInternalProgram != null)
 				FInternalProgram.BindToProcess(AProcess, this);
 			
@@ -130,9 +133,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public void UnbindFromProcess()
 		{
-			//FServerProcess = null;
-			//if (FInternalProgram != null)
-			//	FInternalProgram.UnbindFromProcess();
+			#if USEPROCESSUNBIND
+			SetServerProcess(null);
+			if (FInternalProgram != null)
+				FInternalProgram.UnbindFromProcess();
+			#endif
 		}
 		
 		public void CheckCompiled()
