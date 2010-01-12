@@ -117,8 +117,8 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 				var LValue = (DateTime)value;
 				switch (LValue.Hour)
 				{
-					case 0 : return "12mid";
-					case 12 : return "12noon";
+					case 0 : return "12m";
+					case 12 : return "12n";
 					default : return LValue.Hour < 12 ? (LValue.Hour.ToString() + "am") : ((LValue.Hour - 12).ToString() + "pm");
 				}
 			}
