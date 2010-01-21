@@ -13,6 +13,7 @@ using System.Drawing;
 using Alphora.Dataphor.Dataphoria;
 using Alphora.Dataphor.Dataphoria.Designers;
 using Alphora.Dataphor.Frontend.Client.Windows;
+using Alphora.Dataphor.DAE;
 
 namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 {
@@ -371,6 +372,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		private void RegisterToggleClicked(object ASender, EventArgs AArgs)
 		{
+			Dataphoria.Warnings.ClearErrors(Dataphoria);
 			if (!Registered)
 			{
 				try
@@ -398,7 +400,14 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 							while (LCursor.Next())
 							{
 								LCursor.Select(LRow);
-								Dataphoria.ExecuteScript(String.Format("RegisterLibrary('{0}');", (string)LRow["Library_Name"]));
+								try
+								{
+									Dataphoria.ExecuteScript(String.Format("RegisterLibrary('{0}');", (string)LRow["Library_Name"]));
+								}
+								catch (Exception LException)
+								{
+									Dataphoria.Warnings.AppendError(Dataphoria, LException, false);
+								}
 							}
 						}
 					}
@@ -407,7 +416,14 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 						Dataphoria.CloseCursor(LCursor);
 					}
 					
-					Dataphoria.ExecuteScript(String.Format("RegisterLibrary(\"{0}\");", FLibraryName));
+					try
+					{
+						Dataphoria.ExecuteScript(String.Format("RegisterLibrary(\"{0}\");", FLibraryName));
+					}
+					catch (Exception LException)
+					{
+						Dataphoria.Warnings.AppendError(Dataphoria, LException, false);
+					}
 				}
 				finally
 				{
@@ -430,11 +446,25 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 						LView.First();
 						foreach (DAE.Runtime.Data.Row LRow in LView)
 						{
-							Dataphoria.ExecuteScript(String.Format("UnregisterLibrary(\"{0}\");", (string)LRow["Library_Name"]));
+							try
+							{
+								Dataphoria.ExecuteScript(String.Format("UnregisterLibrary(\"{0}\");", (string)LRow["Library_Name"]));
+							}
+							catch (Exception LException)
+							{
+								Dataphoria.Warnings.AppendError(Dataphoria, LException, false);
+							}
 						}
 					}
 
-					Dataphoria.ExecuteScript(String.Format("UnregisterLibrary(\"{0}\");", FLibraryName));
+					try
+					{
+						Dataphoria.ExecuteScript(String.Format("UnregisterLibrary(\"{0}\");", FLibraryName));
+					}
+					catch (Exception LException)
+					{
+						Dataphoria.Warnings.AppendError(Dataphoria, LException, false);
+					}
 				}
 				finally
 				{
@@ -446,6 +476,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		private void LoadToggleClicked(object ASender, EventArgs AArgs)
 		{
+			Dataphoria.Warnings.ClearErrors(Dataphoria);
 			if (!Registered)
 			{
 				try
@@ -473,7 +504,14 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 							while (LCursor.Next())
 							{
 								LCursor.Select(LRow);
-								Dataphoria.ExecuteScript(String.Format("RegisterLibrary('{0}', false);", (string)LRow["Library_Name"]));
+								try
+								{
+									Dataphoria.ExecuteScript(String.Format("RegisterLibrary('{0}', false);", (string)LRow["Library_Name"]));
+								}
+								catch (Exception LException)
+								{
+									Dataphoria.Warnings.AppendError(Dataphoria, LException, false);
+								}
 							}
 						}
 					}
@@ -481,8 +519,15 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 					{
 						Dataphoria.CloseCursor(LCursor);
 					}
-					
-					Dataphoria.ExecuteScript(String.Format("RegisterLibrary('{0}', false);", FLibraryName));
+	
+					try
+					{				
+						Dataphoria.ExecuteScript(String.Format("RegisterLibrary('{0}', false);", FLibraryName));
+					}
+					catch (Exception LException)
+					{
+						Dataphoria.Warnings.AppendError(Dataphoria, LException, false);
+					}
 				}
 				finally
 				{
@@ -505,11 +550,25 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 						LView.First();
 						foreach (DAE.Runtime.Data.Row LRow in LView)
 						{
-							Dataphoria.ExecuteScript(String.Format("UnregisterLibrary('{0}', false);", (string)LRow["Library_Name"]));
+							try
+							{
+								Dataphoria.ExecuteScript(String.Format("UnregisterLibrary('{0}', false);", (string)LRow["Library_Name"]));
+							}
+							catch (Exception LException)
+							{
+								Dataphoria.Warnings.AppendError(Dataphoria, LException, false);
+							}
 						}
 					}
 
-					Dataphoria.ExecuteScript(String.Format("UnregisterLibrary('{0}', false);", FLibraryName));
+					try
+					{
+						Dataphoria.ExecuteScript(String.Format("UnregisterLibrary('{0}', false);", FLibraryName));
+					}
+					catch (Exception LException)
+					{
+						Dataphoria.Warnings.AppendError(Dataphoria, LException, false);
+					}
 					FCanLoad = true;
 				}
 				finally

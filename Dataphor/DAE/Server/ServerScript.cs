@@ -23,6 +23,7 @@ namespace Alphora.Dataphor.DAE.Server
 			FMessages = new ParserMessages();
 			FSourceContext = new SourceContext(AScript, ALocator);
 			FScript = FProcess.ParseScript(AScript, FMessages);
+			FMessages.SetLocator(ALocator);
 			if ((FScript is Block) && (((Block)FScript).Statements.Count > 0))
 			{
 				Block LBlock = (Block)FScript;
@@ -95,7 +96,8 @@ namespace Alphora.Dataphor.DAE.Server
 		public void CheckParsed()
 		{
 			if (FMessages.HasErrors())
-				throw new ServerException(ServerException.Codes.UnparsedScript, FMessages.ToString());
+				throw FMessages.FirstError;
+			// TODO: throw an AggregateException if there is more than 1 error
 		}
 		
 		// Batches

@@ -1399,6 +1399,36 @@ namespace Alphora.Dataphor.Dataphoria
 
 		// IErrorSource
 
+		private DebugLocator GetInnermostLocator(Exception AException)
+		{
+			var LInner = AException != null ? GetInnermostLocator(AException.InnerException) : null;
+			if (LInner != null)
+				return LInner;
+			var LLocator = AException as ILocatorException;
+			if (LLocator != null)
+				return new DebugLocator(LLocator.Locator, LLocator.Line, LLocator.LinePos);
+			else
+				return null;
+		}
+		
+		public bool LocateToError(Exception AException)
+		{
+			var LLocator = GetInnermostLocator(AException);
+			if (LLocator != null)
+			{
+				try
+				{
+					OpenLocator(LLocator);
+				}
+				catch
+				{
+					// ignore exceptions trying to locate, the locator may no longer even be valid
+					return false;
+				}
+			}
+			return true;
+		}
+		
 		void IErrorSource.ErrorHighlighted(Exception AException)
 		{
 			// nothing
@@ -1406,7 +1436,7 @@ namespace Alphora.Dataphor.Dataphoria
 
 		void IErrorSource.ErrorSelected(Exception AException)
 		{
-			// nothing
+			LocateToError(AException);
 		}
 
 		#endregion

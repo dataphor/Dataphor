@@ -635,6 +635,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 			
 			APlan.Statistics.CompileTime = new TimeSpan((long)((((double)(TimingUtility.CurrentTicks - LStartTicks)) / TimingUtility.TicksPerSecond) * TimeSpan.TicksPerSecond));
 
+			// Set the locators for the compiler exceptions
+			if (ASourceContext != null && ASourceContext.Locator != null)
+				APlan.Messages.SetLocator(ASourceContext.Locator.Locator);
+				
 			if (!APlan.Messages.HasErrors)
 			{
 				long LStartSubTicks = TimingUtility.CurrentTicks;

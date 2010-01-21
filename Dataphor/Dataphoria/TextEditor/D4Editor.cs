@@ -130,19 +130,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		void IErrorSource.ErrorSelected(Exception AException)
 		{
-			var LLocator = AException as ILocatorException;
-			if (LLocator != null)
-			{
-				try
-				{
-					Dataphoria.OpenLocator(new DebugLocator(LLocator.Locator, LLocator.Line, LLocator.LinePos));
-				}
-				catch
-				{
-					// ignore exceptions trying to locate, the locator may no longer even be valid
-				}
-			}
-			else
+			if (!Service.Dataphoria.LocateToError(AException))
 			{
 				var LLocated = AException as ILocatedException;
 				if (LLocated != null)

@@ -18,7 +18,7 @@ namespace Alphora.Dataphor.DAE.Language
 	/// during lexical analysis or parsing.  Any exception encountered during these phases will be wrapped with an exception
 	/// of this type.  Only the parser should throw exceptions of this type.
 	/// </remarks>
-	public class SyntaxException : DAEException, ILocatedException
+	public class SyntaxException : DAEException, ILocatorException
 	{
 		public enum Codes : int
 		{
@@ -65,5 +65,12 @@ namespace Alphora.Dataphor.DAE.Language
 			
 		private string FToken;
 		public string Token { get { return FToken; } }
+
+		private string FLocator;
+		public string Locator 
+		{ 
+			get { return FLocator; }
+			set { FLocator = value; }
+		}
 	}
 }

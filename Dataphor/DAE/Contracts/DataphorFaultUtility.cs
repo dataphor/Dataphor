@@ -52,6 +52,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 			SyntaxException LSyntaxException = AException as SyntaxException;
 			if (LSyntaxException != null)
 			{
+				LFault.Locator = LSyntaxException.Locator;
 				LFault.Line = LSyntaxException.Line;
 				LFault.LinePos = LSyntaxException.LinePos;
 				LFault.Token = LSyntaxException.Token;
@@ -61,6 +62,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 			CompilerException LCompilerException = AException as CompilerException;
 			if (LCompilerException != null)
 			{
+				LFault.Locator = LCompilerException.Locator;
 				LFault.Line = LCompilerException.Line;
 				LFault.LinePos = LCompilerException.LinePos;
 				LFault.ErrorLevel = LCompilerException.ErrorLevel;
@@ -99,7 +101,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 			{
 				case "BaseException" : return new BaseException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
 				case "BOPException" : return new BOPException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
-				case "CompilerException" : return new CompilerException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.ErrorLevel, AFault.Line, AFault.LinePos, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
+				case "CompilerException" : return new CompilerException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.ErrorLevel, AFault.Line, AFault.LinePos, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault)) { Locator = AFault.Locator };
 				case "RuntimeException" : return new RuntimeException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.Locator, AFault.Line, AFault.LinePos, AFault.Context, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
 				#if !SILVERLIGHT
 				case "ConnectionException" : return new ConnectionException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.Statement, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
@@ -115,7 +117,7 @@ namespace Alphora.Dataphor.DAE.Contracts
 				case "LanguageException" : return new LanguageException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
 				case "LexerException" : return new LexerException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
 				case "ParserException" : return new ParserException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
-				case "SyntaxException" : return new SyntaxException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.Line, AFault.LinePos, AFault.TokenType, AFault.Token, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
+				case "SyntaxException" : return new SyntaxException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.Line, AFault.LinePos, AFault.TokenType, AFault.Token, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault)) { Locator = AFault.Locator };
 				case "IndexException" : return new IndexException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
 				case "ScanException" : return new ScanException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
 				case "SchemaException" : return new SchemaException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));

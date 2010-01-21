@@ -9,6 +9,7 @@ using System.Resources;
 
 using Alphora.Dataphor.DAE;
 using System.Collections.Generic;
+using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.DAE.Language
 {
@@ -150,12 +151,37 @@ namespace Alphora.Dataphor.DAE.Language
 			return Count > 0;
 		}
 		
+		public Exception FirstError
+		{
+			get { return this[0]; }
+		}
+		
 		public override string ToString()
 		{
 			StringBuilder LBuilder = new StringBuilder();
 			foreach (Exception LException in this)
 				ExceptionUtility.AppendMessage(LBuilder, 0, LException);
 			return LBuilder.ToString();
+		}
+
+		/// <summary> Sets the locator and increments the offsets for all locator exceptions that don't have one. </summary>
+		public void SetLocator(DebugLocator ALocator)
+		{
+			foreach (Exception LException in this)
+			{
+				ILocatorException LLocatorException = LException as ILocatorException;
+				if (LLocatorException != null && String.IsNullOrEmpty(LLocatorException.Locator))
+				{
+					if (ALocator != null)
+					{
+						LLocatorException.Locator = ALocator.Locator;
+						LLocatorException.Line += ALocator.Line - 1;
+						LLocatorException.LinePos += ALocator.LinePos - 1;
+					}
+					else
+						LLocatorException.Locator = null;
+				}
+			}
 		}
 	}
 }

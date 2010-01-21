@@ -102,6 +102,8 @@ namespace Alphora.Dataphor.Dataphoria
         void CheckNotRegistered(DesignBuffer ABuffer);
 
 		object Invoke(Delegate method);
-		object Invoke(Delegate method, params object[] args);        
+		object Invoke(Delegate method, params object[] args);       
+		
+		bool LocateToError(Exception AException); 
     }
 }

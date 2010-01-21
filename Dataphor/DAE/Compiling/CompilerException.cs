@@ -30,7 +30,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 	///	processing the abstract syntax tree for a given program.  The line number and position of the
 	/// invalid constructs will be given if possible.  Only the compiler should throw exceptions of this type.
 	/// </remarks>
-	public class CompilerException : DAEException, ILocatedException
+	public class CompilerException : DAEException, ILocatorException
 	{
 		public enum Codes : int
 		{
@@ -799,7 +799,15 @@ namespace Alphora.Dataphor.DAE.Compiling
 				FLinePos = AStatement.LinePos;
 			}
 		}
-		
+
+		public CompilerException(ErrorSeverity ASeverity, int ACode, string AMessage, string ADetails, string AServerContext, CompilerErrorLevel AErrorLevel, int ALine, int ALinePos, DataphorException AInnerException)
+			: base(ASeverity, ACode, AMessage, ADetails, AServerContext, AInnerException)
+		{
+			FErrorLevel = AErrorLevel;
+			FLine = ALine;
+			FLinePos = ALinePos;
+		}
+
 		private CompilerErrorLevel FErrorLevel = CompilerErrorLevel.NonFatal;
 		public CompilerErrorLevel ErrorLevel { get { return FErrorLevel; } }
 
@@ -816,13 +824,12 @@ namespace Alphora.Dataphor.DAE.Compiling
 			get { return FLinePos; } 
 			set { FLinePos = value; }
 		}
-		
-		public CompilerException(ErrorSeverity ASeverity, int ACode, string AMessage, string ADetails, string AServerContext, CompilerErrorLevel AErrorLevel, int ALine, int ALinePos, DataphorException AInnerException) 
-			: base(ASeverity, ACode, AMessage, ADetails, AServerContext, AInnerException)
+
+		private string FLocator;
+		public string Locator
 		{
-			FErrorLevel = AErrorLevel;
-			FLine = ALine;
-			FLinePos = ALinePos;
+			get { return FLocator; }
+			set { FLocator = value; }
 		}
 	}
 	
@@ -946,6 +953,18 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public override string ToString()
 		{
 			return ToString(CompilerErrorLevel.NonFatal);
+		}
+
+		/// <summary> Sets the locator for all locator exceptions that don't have one. </summary>
+		/// <remarks> Note: Doesn't update the offsets. </remarks>
+		public void SetLocator(string ALocator)
+		{
+			foreach (Exception LException in this)
+			{
+				ILocatorException LLocatorException = LException as ILocatorException;
+				if (LLocatorException != null && String.IsNullOrEmpty(LLocatorException.Locator))
+					LLocatorException.Locator = !String.IsNullOrEmpty(ALocator) ? ALocator : null;
+			}
 		}
 	}
 }
