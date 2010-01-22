@@ -880,7 +880,18 @@ namespace Alphora.Dataphor.DAE.Compiling
 				return FHasErrors; 
 			} 
 		}
-		
+
+		public Exception FirstError
+		{
+			get 
+			{
+				for (int LIndex = 0; LIndex < Count; LIndex++)
+					if ((!(this[LIndex] is CompilerException)) || ((((CompilerException)this[LIndex]).ErrorLevel == CompilerErrorLevel.Fatal) || (((CompilerException)this[LIndex]).ErrorLevel == CompilerErrorLevel.NonFatal)))
+						return this[LIndex];
+				return null;
+			}
+		}
+
 		#if USETYPEDLIST
 		protected override void Adding(object AValue, int AIndex)
 		#else

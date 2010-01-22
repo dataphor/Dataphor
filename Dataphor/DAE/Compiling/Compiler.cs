@@ -866,6 +866,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 						LException.Line = AStatement.Line;
 						LException.LinePos = AStatement.LinePos;
 					}
+					if (String.IsNullOrEmpty(LException.Locator) && APlan != null && APlan.SourceContext != null && APlan.SourceContext.Locator != null)
+						LException.Locator = APlan.SourceContext.Locator.Locator;
 					throw;
 				}
 				catch (Exception LException)
@@ -873,8 +875,14 @@ namespace Alphora.Dataphor.DAE.Compiling
 					if (!(LException is DataphorException))
 						throw new CompilerException(CompilerException.Codes.InternalError, ErrorSeverity.System, CompilerErrorLevel.NonFatal, AStatement, LException);
 						
-					if (!(LException is ILocatedException))
-						throw new CompilerException(CompilerException.Codes.CompilerMessage, CompilerErrorLevel.NonFatal, AStatement, LException, LException.Message);
+					if (!(LException is ILocatorException))
+						throw new CompilerException(CompilerException.Codes.CompilerMessage, CompilerErrorLevel.NonFatal, AStatement, LException, LException.Message)
+						{ 
+							Locator = 
+								(APlan != null && APlan.SourceContext != null && APlan.SourceContext.Locator != null) 
+									? APlan.SourceContext.Locator.Locator 
+									: null
+						};
 					throw;
 				}
 			}
@@ -10505,6 +10513,8 @@ indicative of other problems, a reference will never be attached as an explicit 
 						LException.Line = AExpression.Line;
 						LException.LinePos = AExpression.LinePos;
 					}
+					if (String.IsNullOrEmpty(LException.Locator) && APlan != null && APlan.SourceContext != null && APlan.SourceContext.Locator != null)
+						LException.Locator = APlan.SourceContext.Locator.Locator;
 					throw;
 				}
 				catch (Exception LException)
@@ -10512,8 +10522,15 @@ indicative of other problems, a reference will never be attached as an explicit 
 					if (!(LException is DataphorException))
 						throw new CompilerException(CompilerException.Codes.InternalError, ErrorSeverity.System, CompilerErrorLevel.NonFatal, AExpression, LException);
 						
-					if (!(LException is ILocatedException))
-						throw new CompilerException(CompilerException.Codes.CompilerMessage, CompilerErrorLevel.NonFatal, AExpression, LException, LException.Message);
+					if (!(LException is ILocatorException))
+						throw 
+							new CompilerException(CompilerException.Codes.CompilerMessage, CompilerErrorLevel.NonFatal, AExpression, LException, LException.Message) 
+							{ 
+								Locator = 
+									(APlan != null && APlan.SourceContext != null && APlan.SourceContext.Locator != null) 
+										? APlan.SourceContext.Locator.Locator 
+										: null
+							};
 					throw;
 				}
 			}

@@ -143,10 +143,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public void CheckCompiled()
 		{
 			if (FMessages.HasErrors)
-				if (FMessages.Count == 1)
-					throw FMessages[0];
-				else
-					throw new ServerException(ServerException.Codes.UncompiledPlan, FMessages.ToString(CompilerErrorLevel.NonFatal));
+				throw FMessages.FirstError;
+			// TODO: throw an AggregateException if there is more than 1 error
 		}
 		
 		// Statistics
