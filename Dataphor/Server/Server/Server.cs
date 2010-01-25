@@ -11,6 +11,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Security.Principal;
 using System.Text;
@@ -515,19 +516,33 @@ namespace Alphora.Dataphor.DAE.Server
 
 		private string GetLogFileName()
 		{
-			string LLogFileName = GetLogFileName(CMaxLogs);
-			if (File.Exists(LLogFileName))
-				File.Delete(LLogFileName);
-			for (int LIndex = CMaxLogs - 1; LIndex >= 0; LIndex--)
-			{
-				LLogFileName = GetLogFileName(LIndex);
-				if (File.Exists(LLogFileName))
-					File.Move(LLogFileName, GetLogFileName(LIndex + 1));
-			}
-			return GetLogFileName(0);
+		    var LLogFiles = GetLogFiles(GetLogDirectory());
+		    var LDifference = (1+LLogFiles.Count) - CMaxLogs;
+            var OrderedFiles =
+                    (from LFile in LLogFiles
+                     let LLogIndex = GetLogIndex(LFile.Name)
+                     orderby LLogIndex ascending
+                     select LFile).ToList();
+            if (LDifference>0)
+            {                
+                for(int LIndex=0;LIndex<LDifference;LIndex++)
+                {
+                    OrderedFiles[LIndex].Delete();
+                }
+            }		    
+		    int LLastLogIndex = GetLogIndex(OrderedFiles.Last().Name);
+		    return GetLogFileName(LLastLogIndex+1);           
 		}
 
-		private string GetLogName(int ALogIndex)
+	    private int GetLogIndex(string LNameExtension)
+	    {
+	        var LDotIndex = LNameExtension.LastIndexOf(".");
+	        var LOnlyName = LNameExtension.Substring(0, LDotIndex);
+	        var LOnlyNumber = LOnlyName.Substring(CServerLogName.Length);
+	        return Convert.ToInt32(LOnlyNumber);
+	    }
+
+	    private string GetLogName(int ALogIndex)
 		{
 			return String.Format("{0}{1}", CServerLogName, ALogIndex == 0 ? " (current)" : ALogIndex.ToString());
 		}
@@ -538,6 +553,23 @@ namespace Alphora.Dataphor.DAE.Server
 			Directory.CreateDirectory(LResult);
 			return LResult;
 		}
+
+        private List<System.IO.FileInfo> GetLogFiles(string APath)
+        {
+            if (!System.IO.Directory.Exists(APath))
+                throw new System.IO.DirectoryNotFoundException();
+
+            string[] LFileNames = null;
+            List<System.IO.FileInfo> files = new List<System.IO.FileInfo>();
+
+            LFileNames = System.IO.Directory.GetFiles(APath, "*.log", System.IO.SearchOption.AllDirectories);
+            foreach (string name in LFileNames)
+            {
+                files.Add(new System.IO.FileInfo(name));
+            }
+            return files;
+        }
+
 
 		private string GetLogFileName(int ALogIndex)
 		{
@@ -617,7 +649,8 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				try
 				{
-					OpenLogFile(GetLogFileName());
+				    string LLogFileName = GetLogFileName();
+				    OpenLogFile(LLogFileName);
 				}
 				catch
 				{
