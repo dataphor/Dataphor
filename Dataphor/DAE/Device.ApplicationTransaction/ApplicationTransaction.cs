@@ -1656,7 +1656,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					LPlan.EnterRowContext();
 					try
 					{
-						LPlan.Symbols.Push(new Symbol(LOldRowType));
+						LPlan.Symbols.Push(new Symbol(String.Empty, LOldRowType));
 						try
 						{
 							ATableMap.HasDeletedRowNode =

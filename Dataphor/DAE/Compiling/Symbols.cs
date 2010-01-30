@@ -38,14 +38,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 			FIsModified = false;
 		}
 		
-		public Symbol(Schema.IDataType ADataType)
-		{
-			FName = String.Empty;
-			FDataType = ADataType;
-			FIsConstant = false;
-			FIsModified = false;
-		}
-		
 		public Symbol(Symbol ASymbol)
 		{
 			FName = ASymbol.Name;

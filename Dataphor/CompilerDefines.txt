@@ -28,6 +28,8 @@
 //#define UseFileStreamProvider in Alphora.Dataphor.DAE // ??
 #define USEINCLUDENILSWITHBROWSE in Alphora.Dataphor.DAE // Enables the include nil clause in the order by statement
 #define USEINTERNALID in Alphora.Dataphor.DAE // This allows the internal index to store duplicates of logical values for non-unique indexes
+#define USENAMEDROWVARIABLES in Alphora.Dataphor.DAE // Uses named variables in row contexts such as constraint evaluation, rather than prefix qualification of column names of unnamed variables
+	// NOTE: This define is believed to obselesce the USEROOTEDIDENTIFIERSINKEYEXPRESSIONS define
 #define USENATIVECONCURRENCYCOMPARE // ?? Enables native object comparison when performing concurrency checks
 //#define USEOLEDBCONNECTION in MSSQLDevice (currently disabled) // Uses the OLEDBConnection as the default connectivity implementation for the MSSQL device
 #define USEOPERATORRESOLUTIONCACHE int Alphora.Dataphor.DAE // Enables the operator resolution cache
@@ -35,7 +37,10 @@
 //#define USEPROCESSUNBIND in Plan and Program // Determines whether or not to use process unbinding
 //#define UseReaderWriterLock in Alphora.Dataphor.DAE (currently disabled) // Uses the .NET reader/writer lock rather than the Dataphor semaphore
 #define UseReferenceDerivation in Alphora.Dataphor.DAE // Enables reference inference in the compiler
-#define USEROOTEDIDENTIFIERSINKEYEXPRESSIONS in Alphora.Dataphor.DAE // Enables rooted identifiers in key expressions
+//#define USEROOTEDIDENTIFIERSINKEYEXPRESSIONS in Alphora.Dataphor.DAE // Enables rooted identifiers in key expressions
+	// NOTE: This define was introduced to address a specific issue with ambiguous names
+	// However, I believe this issue is more elegantly resolved with the USENAMEDROWVARIABLES define
+	// I cannot be certain though, because I don't know exactly which issue was resolved by this define
 #define USESPINLOCK in Alphora.Dataphor.DAE // ??
 #define USESQLCONNECTION in Alphora.Dataphor.DAE, store assemblies // Use an SQLConnection descendent for connectivity in the SQLStore
 #define USESQLOLEDB in MSSQLDevice // Uses the SQLOLEDB provider when using the ADO connection for MSSQL device connectivity

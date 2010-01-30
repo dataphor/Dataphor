@@ -162,7 +162,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				{
 					LDevicePlan.CurrentQueryContext().IsWhereClause = true;
 
-					LDevicePlan.Stack.Push(new Symbol(((TableNode)APlanNode).DataType.CreateRowType()));
+					LDevicePlan.Stack.Push(new Symbol(String.Empty, ((TableNode)APlanNode).DataType.CreateRowType()));
 					try
 					{
 						LDevicePlan.CurrentQueryContext().ResetReferenceFlags();
@@ -330,7 +330,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				SelectExpression LSelectExpression = LDevicePlan.Device.EnsureUnarySelectExpression(LDevicePlan, ((TableNode)APlanNode.Nodes[0]).TableVar, LStatement, true);
 				LStatement = LSelectExpression;
 
-				LDevicePlan.Stack.Push(new Symbol(LExtendNode.DataType.CreateRowType()));
+				LDevicePlan.Stack.Push(new Symbol(String.Empty, LExtendNode.DataType.CreateRowType()));
 				try
 				{
 					LDevicePlan.CurrentQueryContext().IsExtension = true;
@@ -390,7 +390,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				SelectExpression LSelectExpression = LDevicePlan.Device.EnsureUnarySelectExpression(LDevicePlan, ((TableNode)APlanNode.Nodes[0]).TableVar, LStatement, true);
 				LStatement = LSelectExpression;
 
-				LDevicePlan.Stack.Push(new Symbol(LRedefineNode.DataType.CreateRowType()));
+				LDevicePlan.Stack.Push(new Symbol(String.Empty, LRedefineNode.DataType.CreateRowType()));
 				try
 				{
 					LDevicePlan.CurrentQueryContext().IsExtension = true;
@@ -997,10 +997,10 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 								LJoinClause.JoinType = JoinType.Inner;
 						}
 
-						LDevicePlan.Stack.Push(new Symbol(new Schema.RowType(((TableNode)APlanNode.Nodes[0]).DataType.Columns, Keywords.Left)));
+						LDevicePlan.Stack.Push(new Symbol(String.Empty, new Schema.RowType(((TableNode)APlanNode.Nodes[0]).DataType.Columns, Keywords.Left)));
 						try
 						{
-							LDevicePlan.Stack.Push(new Symbol(new Schema.RowType(((TableNode)APlanNode.Nodes[1]).DataType.Columns, Keywords.Right)));
+							LDevicePlan.Stack.Push(new Symbol(String.Empty, new Schema.RowType(((TableNode)APlanNode.Nodes[1]).DataType.Columns, Keywords.Right)));
 							try
 							{
 								LJoinClause.JoinExpression = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[2], true);

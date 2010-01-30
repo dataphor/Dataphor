@@ -53,11 +53,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			try
 			{
 				Schema.IRowType LLeftRowType = LeftTableNode.DataType.CreateRowType(Keywords.Left);
-				APlan.Symbols.Push(new Symbol(LLeftRowType));
+				APlan.Symbols.Push(new Symbol(String.Empty, LLeftRowType));
 				try
 				{
 					Schema.IRowType LRightRowType = RightTableNode.DataType.CreateRowType(Keywords.Right);
-					APlan.Symbols.Push(new Symbol(LRightRowType));
+					APlan.Symbols.Push(new Symbol(String.Empty, LRightRowType));
 					try
 					{
 						FRowEqualNode = Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, LLeftRowType.Columns, LRightRowType.Columns));
@@ -85,10 +85,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(LeftTableNode.DataType.CreateRowType(Keywords.Left)));
+				APlan.Symbols.Push(new Symbol(String.Empty, LeftTableNode.DataType.CreateRowType(Keywords.Left)));
 				try
 				{
-					APlan.Symbols.Push(new Symbol(RightTableNode.DataType.CreateRowType(Keywords.Right)));
+					APlan.Symbols.Push(new Symbol(String.Empty, RightTableNode.DataType.CreateRowType(Keywords.Right)));
 					try
 					{
 						RowEqualNode.DetermineBinding(APlan);

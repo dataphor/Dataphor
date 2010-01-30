@@ -105,7 +105,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(DataType.CreateRowType(Keywords.Source)));
+				APlan.Symbols.Push(new Symbol(String.Empty, DataType.CreateRowType(Keywords.Source)));
 				try
 				{
 					Schema.RowType LRowType = new Schema.RowType(LCompareKey.Columns);
@@ -211,7 +211,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(SourceTableType.CreateRowType(Keywords.Source)));
+				APlan.Symbols.Push(new Symbol(String.Empty, SourceTableType.CreateRowType(Keywords.Source)));
 				try
 				{
 					for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)	

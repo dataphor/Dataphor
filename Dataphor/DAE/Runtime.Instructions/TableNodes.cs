@@ -774,7 +774,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(((Schema.TableType)Nodes[0].DataType).RowType));
+				APlan.Symbols.Push(new Symbol(String.Empty, ((Schema.TableType)Nodes[0].DataType).RowType));
 				try
 				{
 					for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
@@ -935,7 +935,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				APlan.EnterRowContext();
 				try
 				{
-					APlan.Symbols.Push(new Symbol(Nodes[0].DataType));
+					APlan.Symbols.Push(new Symbol(String.Empty, Nodes[0].DataType));
 					try
 					{
 						foreach (UpdateColumnExpression LExpression in FColumnExpressions)
@@ -967,7 +967,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				APlan.EnterRowContext();
 				try
 				{
-					APlan.Symbols.Push(new Symbol(Nodes[0].DataType));
+					APlan.Symbols.Push(new Symbol(String.Empty, Nodes[0].DataType));
 					try
 					{
 						for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
@@ -1024,7 +1024,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				AProgram.Plan.EnterRowContext();
 				try
 				{
-					AProgram.Plan.Symbols.Push(new Symbol(LTarget.DataType));
+					AProgram.Plan.Symbols.Push(new Symbol(String.Empty, LTarget.DataType));
 					try
 					{
 						for (int LIndex = 0; LIndex < FColumnExpressions.Count; LIndex++)

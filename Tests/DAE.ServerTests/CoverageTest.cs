@@ -131,6 +131,7 @@ namespace Alphora.Dataphor.DAE.ServerTests
 		[Test] public void ExecuteExists() { ExecuteScript("Coverage.Scripts", "Exists"); }
 		[Test] public void ExecuteDML() { ExecuteScript("Coverage.Scripts", "DML"); }
 		[Test] public void ExecuteCursors() { ExecuteScript("Coverage.Scripts", "Cursors"); }
+		[Test] public void ExecuteTransitionConstraintWithNamedRowVariables() { ExecuteScript("Coverage.Scripts", "TransitionConstraintWithNamedRowVariables"); }
 
 		[Test]
 		public void ExecuteSecurityLibrary()

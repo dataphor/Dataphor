@@ -130,7 +130,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(SourceTableType.CreateRowType(Keywords.Parent)));
+				APlan.Symbols.Push(new Symbol(String.Empty, SourceTableType.CreateRowType(Keywords.Parent)));
 				try
 				{
 					Nodes[2].DetermineBinding(APlan);

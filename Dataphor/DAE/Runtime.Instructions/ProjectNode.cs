@@ -87,10 +87,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				APlan.EnterRowContext();
 				try
 				{	
-					APlan.Symbols.Push(new Symbol(DataType.CreateRowType(Keywords.Left)));
+					APlan.Symbols.Push(new Symbol(String.Empty, DataType.CreateRowType(Keywords.Left)));
 					try
 					{
-						APlan.Symbols.Push(new Symbol(DataType.CreateRowType(Keywords.Right)));
+						APlan.Symbols.Push(new Symbol(String.Empty, DataType.CreateRowType(Keywords.Right)));
 						try
 						{
 							FEqualNode = 
@@ -145,10 +145,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				APlan.EnterRowContext();
 				try
 				{
-					APlan.Symbols.Push(new Symbol(DataType.CreateRowType(Keywords.Left)));
+					APlan.Symbols.Push(new Symbol(String.Empty, DataType.CreateRowType(Keywords.Left)));
 					try
 					{
-						APlan.Symbols.Push(new Symbol(DataType.CreateRowType(Keywords.Right)));
+						APlan.Symbols.Push(new Symbol(String.Empty, DataType.CreateRowType(Keywords.Right)));
 						try
 						{
 							FEqualNode.DetermineBinding(APlan);

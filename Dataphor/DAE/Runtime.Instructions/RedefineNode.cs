@@ -72,7 +72,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						APlan.EnterRowContext();
 						try
 						{
-							APlan.Symbols.Push(new Symbol(SourceTableType.RowType));
+							APlan.Symbols.Push(new Symbol(String.Empty, SourceTableType.RowType));
 							try
 							{
 								// Add a column for each expression
@@ -266,7 +266,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(SourceTableType.RowType));
+				APlan.Symbols.Push(new Symbol(String.Empty, SourceTableType.RowType));
 				try
 				{
 					for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)

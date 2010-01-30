@@ -7,6 +7,7 @@
 #define REMOVESUPERKEYS
 #define WRAPRUNTIMEEXCEPTIONS // Determines whether or not runtime exceptions are wrapped
 //#define TRACKCALLDEPTH // Determines whether or not call depth tracking is enabled
+#define USENAMEDROWVARIABLES
 
 using System;
 using System.IO;
@@ -950,10 +951,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					APlan.EnterRowContext();
 					try
 					{
-						APlan.Symbols.Push(new Symbol(DataType.OldRowType));
+						APlan.Symbols.Push(new Symbol(String.Empty, DataType.OldRowType));
 						try
 						{
-							APlan.Symbols.Push(new Symbol(DataType.RowType));
+							APlan.Symbols.Push(new Symbol(String.Empty, DataType.RowType));
 							try
 							{
 								if (TableVar.Owner != null)
@@ -1266,13 +1267,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public void PushNewRow(Program AProgram, Row ARow)
 		{
+			#if USENAMEDROWVARIABLES
+			Row LRow = new Row(AProgram.ValueManager, DataType.RowType, (NativeRow)ARow.AsNative);
+			#else
 			Row LRow = new Row(AProgram.ValueManager, DataType.NewRowType, (NativeRow)ARow.AsNative);
+			#endif
 			AProgram.Stack.Push(LRow);
 		}
 		
 		public void PushOldRow(Program AProgram, Row ARow)
 		{
+			#if USENAMEDROWVARIABLES
+			Row LOldRow = new Row(AProgram.ValueManager, DataType.RowType, (NativeRow)ARow.AsNative);
+			#else
 			Row LOldRow = new Row(AProgram.ValueManager, DataType.OldRowType, (NativeRow)ARow.AsNative);
+			#endif
 			AProgram.Stack.Push(LOldRow);
 		}
 
@@ -2656,9 +2665,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (AProgram.ServerProcess.InTransaction && TableVar.HasDeferredConstraints())
 				AProgram.ServerProcess.AddInsertTableVarCheck(TableVar, (Row)AProgram.Stack.Peek(0));
 
+			#if !USENAMEDROWVARIABLES
 			PushRow(AProgram, (Row)AProgram.Stack.Peek(0));
 			try
-			{			
+			#endif		
+			{	
 				Schema.RowConstraint LConstraint;
 				for (int LIndex = 0; LIndex < TableVar.RowConstraints.Count; LIndex++)
 				{
@@ -2667,10 +2678,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						LConstraint.Validate(AProgram, Schema.Transition.Insert);
 				}
 			}
+			#if !USENAMEDROWVARIABLES
 			finally
 			{
 				PopRow(AProgram);
 			}
+			#endif
 	
 			if (TableVar.InsertConstraints.Count > 0)
 			{
@@ -2692,8 +2705,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (AProgram.ServerProcess.InTransaction && TableVar.HasDeferredConstraints(AValueFlags, Schema.Transition.Update))
 				AProgram.ServerProcess.AddUpdateTableVarCheck(TableVar, (Row)AProgram.Stack.Peek(1), (Row)AProgram.Stack.Peek(0));
 			
+			#if !USENAMEDROWVARIABLES
 			PushRow(AProgram, (Row)AProgram.Stack.Peek(0));
 			try
+			#endif
 			{
 				Schema.RowConstraint LConstraint;
 				for (int LIndex = 0; LIndex < TableVar.RowConstraints.Count; LIndex++)
@@ -2703,10 +2718,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						LConstraint.Validate(AProgram, Schema.Transition.Insert);
 				}
 			}
+			#if !USENAMEDROWVARIABLES
 			finally
 			{
 				PopRow(AProgram);
 			}
+			#endif
 	
 			if (TableVar.UpdateConstraints.Count > 0)
 			{

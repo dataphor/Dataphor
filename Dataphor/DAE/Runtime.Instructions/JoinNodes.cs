@@ -6,6 +6,7 @@
 #define UseReferenceDerivation
 #define USEUNIFIEDJOINKEYINFERENCE // Unified join key inference uses the same algorithm for all joins. See InferJoinKeys for more information.
 //#define DISALLOWMANYTOMANYOUTERJOINS
+#define USENAMEDROWVARIABLES
 	
 using System;
 using System.Text;
@@ -324,7 +325,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									APlan.EnterRowContext();
 									try
 									{
-										APlan.Symbols.Push(new Symbol(DataType.NewRowType));
+										#if USENAMEDROWVARIABLES
+										APlan.Symbols.Push(new Symbol(Keywords.New, DataType.RowType));
+										#else
+										APlan.Symbols.Push(new Symbol(String.Empty, DataType.NewRowType));
+										#endif
 										try
 										{
 											FLeftExistsNode =
@@ -339,12 +344,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 														(
 															APlan,
 															Compiler.CompileExpression(APlan, (Expression)LeftNode.EmitStatement(EmitMode.ForCopy)),
+															#if USENAMEDROWVARIABLES
+															Compiler.BuildKeyEqualExpression
+															(
+																APlan,
+																String.Empty,
+																Keywords.New,
+																FLeftKey.Columns,
+																FLeftKey.Columns
+															)
+															#else
 															Compiler.BuildKeyEqualExpression
 															(
 																APlan,
 																new Schema.RowType(FLeftKey.Columns).Columns,
 																new Schema.RowType(FLeftKey.Columns, Keywords.New).Columns
 															)
+															#endif
 														)
 													)
 												);
@@ -413,7 +429,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									APlan.EnterRowContext();
 									try
 									{
-										APlan.Symbols.Push(new Symbol(DataType.NewRowType));
+										#if USENAMEDROWVARIABLES
+										APlan.Symbols.Push(new Symbol(Keywords.New, DataType.RowType));
+										#else
+										APlan.Symbols.Push(new Symbol(String.Empty, DataType.NewRowType));
+										#endif
 										try
 										{
 											FRightExistsNode =
@@ -428,12 +448,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 														(
 															APlan,
 															Compiler.CompileExpression(APlan, (Expression)RightNode.EmitStatement(EmitMode.ForCopy)),
+															#if USENAMEDROWVARIABLES
+															Compiler.BuildKeyEqualExpression
+															(
+																APlan,
+																String.Empty,
+																Keywords.New,
+																FRightKey.Columns,
+																FRightKey.Columns
+															)
+															#else
 															Compiler.BuildKeyEqualExpression
 															(
 																APlan,
 																new Schema.RowType(FRightKey.Columns).Columns,
 																new Schema.RowType(FRightKey.Columns, Keywords.New).Columns
 															)
+															#endif
 														)
 													)
 												);
@@ -606,10 +637,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{			
-				APlan.Symbols.Push(new Symbol(new Schema.RowType(LeftTableType.Columns, Keywords.Left)));
+				APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(LeftTableType.Columns, Keywords.Left)));
 				try
 				{
-					APlan.Symbols.Push(new Symbol(new Schema.RowType(RightTableType.Columns, Keywords.Right)));
+					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(RightTableType.Columns, Keywords.Right)));
 					try
 					{
 						if (FExpression != null)
@@ -654,10 +685,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(new Schema.RowType(LeftTableType.Columns, Keywords.Left)));
+				APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(LeftTableType.Columns, Keywords.Left)));
 				try
 				{
-					APlan.Symbols.Push(new Symbol(new Schema.RowType(RightTableType.Columns, Keywords.Right)));
+					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(RightTableType.Columns, Keywords.Right)));
 					try
 					{
 						Nodes[2].DetermineBinding(APlan);
@@ -1818,10 +1849,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{			
-				APlan.Symbols.Push(new Symbol(new Schema.RowType(LeftTableType.Columns, FIsNatural ? Keywords.Left : String.Empty)));
+				APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(LeftTableType.Columns, FIsNatural ? Keywords.Left : String.Empty)));
 				try
 				{
-					APlan.Symbols.Push(new Symbol(new Schema.RowType(RightTableType.Columns, FIsNatural ? Keywords.Right : String.Empty)));
+					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(RightTableType.Columns, FIsNatural ? Keywords.Right : String.Empty)));
 					try
 					{
 						if (FExpression != null)
@@ -1869,10 +1900,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(new Schema.RowType(LeftTableType.Columns, FIsNatural ? Keywords.Left : String.Empty)));
+				APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(LeftTableType.Columns, FIsNatural ? Keywords.Left : String.Empty)));
 				try
 				{
-					APlan.Symbols.Push(new Symbol(new Schema.RowType(RightTableType.Columns, FIsNatural ? Keywords.Right : String.Empty)));
+					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(RightTableType.Columns, FIsNatural ? Keywords.Right : String.Empty)));
 					try
 					{
 						Nodes[2].DetermineBinding(APlan);
@@ -2025,7 +2056,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									APlan.EnterRowContext();
 									try
 									{
-										APlan.Symbols.Push(new Symbol(DataType.NewRowType));
+										#if USENAMEDROWVARIABLES
+										APlan.Symbols.Push(new Symbol(Keywords.New, DataType.RowType));
+										#else
+										APlan.Symbols.Push(new Symbol(String.Empty, DataType.NewRowType));
+										#endif
 										try
 										{
 											FLeftSelectNode =
@@ -2036,12 +2071,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 													(
 														APlan,
 														Compiler.CompileExpression(APlan, (Expression)LeftNode.EmitStatement(EmitMode.ForCopy)),
+														#if USENAMEDROWVARIABLES
+														Compiler.BuildKeyEqualExpression
+														(
+															APlan,
+															String.Empty,
+															Keywords.New,
+															FLeftKey.Columns,
+															FRightKey.Columns
+														)
+														#else
 														Compiler.BuildKeyEqualExpression
 														(
 															APlan,
 															new Schema.RowType(FLeftKey.Columns).Columns,
 															new Schema.RowType(FRightKey.Columns, Keywords.New).Columns
 														)
+														#endif
 													)
 												);
 										}
@@ -2109,7 +2155,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									APlan.EnterRowContext();
 									try
 									{
-										APlan.Symbols.Push(new Symbol(DataType.NewRowType));
+										#if USENAMEDROWVARIABLES
+										APlan.Symbols.Push(new Symbol(Keywords.New, DataType.RowType));
+										#else
+										APlan.Symbols.Push(new Symbol(String.Empty, DataType.NewRowType));
+										#endif
 										try
 										{
 											FRightSelectNode =
@@ -2120,12 +2170,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 													(
 														APlan,
 														Compiler.CompileExpression(APlan, (Expression)RightNode.EmitStatement(EmitMode.ForCopy)),
+														#if USENAMEDROWVARIABLES
+														Compiler.BuildKeyEqualExpression
+														(
+															APlan,
+															String.Empty,
+															Keywords.New,
+															FRightKey.Columns,
+															FLeftKey.Columns
+														)
+														#else
 														Compiler.BuildKeyEqualExpression
 														(
 															APlan,
 															new Schema.RowType(FRightKey.Columns).Columns,
 															new Schema.RowType(FLeftKey.Columns, Keywords.New).Columns
 														)
+														#endif
 													)
 												);
 										}
@@ -4088,10 +4149,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(new Schema.RowType(LeftTableType.Columns, FIsNatural ? Keywords.Left : String.Empty)));
+				APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(LeftTableType.Columns, FIsNatural ? Keywords.Left : String.Empty)));
 				try
 				{
-					APlan.Symbols.Push(new Symbol(new Schema.RowType(RightTableType.Columns, FIsNatural ? Keywords.Right : String.Empty)));
+					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(RightTableType.Columns, FIsNatural ? Keywords.Right : String.Empty)));
 					try
 					{
 						Nodes[2].DetermineBinding(APlan);

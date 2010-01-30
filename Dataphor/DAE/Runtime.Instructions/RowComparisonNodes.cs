@@ -59,10 +59,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				APlan.EnterRowContext();
 				try
 				{
-					APlan.Symbols.Push(new Symbol(LLeftRowType));
+					APlan.Symbols.Push(new Symbol(String.Empty, LLeftRowType));
 					try
 					{
-						APlan.Symbols.Push(new Symbol(LRightRowType));
+						APlan.Symbols.Push(new Symbol(String.Empty, LRightRowType));
 						try
 						{
 							FComparisonNode = Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, LLeftRowType.Columns, LRightRowType.Columns));
@@ -93,10 +93,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				APlan.EnterRowContext();
 				try
 				{
-					APlan.Symbols.Push(new Symbol(new Schema.RowType(((Schema.RowType)Nodes[0].DataType).Columns, Keywords.Left)));
+					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(((Schema.RowType)Nodes[0].DataType).Columns, Keywords.Left)));
 					try
 					{
-						APlan.Symbols.Push(new Symbol(new Schema.RowType(((Schema.RowType)Nodes[1].DataType).Columns, Keywords.Right)));
+						APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(((Schema.RowType)Nodes[1].DataType).Columns, Keywords.Right)));
 						try
 						{
 							FComparisonNode.DetermineBinding(APlan);
@@ -191,10 +191,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(LLeftRowType));
+				APlan.Symbols.Push(new Symbol(String.Empty, LLeftRowType));
 				try
 				{
-					APlan.Symbols.Push(new Symbol(LRightRowType));
+					APlan.Symbols.Push(new Symbol(String.Empty, LRightRowType));
 					try
 					{
 						FComparisonNode = Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, LLeftRowType.Columns, LRightRowType.Columns));
@@ -222,10 +222,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(new Schema.RowType(((Schema.ScalarType)Nodes[0].DataType).CompoundRowType.Columns, Keywords.Left)));
+				APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(((Schema.ScalarType)Nodes[0].DataType).CompoundRowType.Columns, Keywords.Left)));
 				try
 				{
-					APlan.Symbols.Push(new Symbol(new Schema.RowType(((Schema.ScalarType)Nodes[1].DataType).CompoundRowType.Columns, Keywords.Right)));
+					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(((Schema.ScalarType)Nodes[1].DataType).CompoundRowType.Columns, Keywords.Right)));
 					try
 					{
 						FComparisonNode.DetermineBinding(APlan);

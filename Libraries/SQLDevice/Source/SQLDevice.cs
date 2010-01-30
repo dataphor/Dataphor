@@ -1178,7 +1178,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			LStatement.UpdateClause.TableExpression.TableSchema = D4.MetaData.GetTag(LTarget.MetaData, "Storage.Schema", Schema);
 			LStatement.UpdateClause.TableExpression.TableName = ToSQLIdentifier(LTarget);
 
-			ADevicePlan.Stack.Push(new Symbol(LTarget.DataType.RowType));
+			ADevicePlan.Stack.Push(new Symbol(String.Empty, LTarget.DataType.RowType));
 			try
 			{
 				for (int LIndex = 1; LIndex < ANode.Nodes.Count; LIndex++)

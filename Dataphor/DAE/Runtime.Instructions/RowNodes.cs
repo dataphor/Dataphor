@@ -176,7 +176,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{			
-				APlan.Symbols.Push(new Symbol(SourceRowType));
+				APlan.Symbols.Push(new Symbol(String.Empty, SourceRowType));
 				try
 				{
 					// Add a column for each expression
@@ -214,7 +214,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(SourceRowType));
+				APlan.Symbols.Push(new Symbol(String.Empty, SourceRowType));
 				try
 				{
 					for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
@@ -338,7 +338,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(SourceRowType));
+				APlan.Symbols.Push(new Symbol(String.Empty, SourceRowType));
 				try
 				{
 					// Add a column for each expression
@@ -387,7 +387,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(SourceRowType));
+				APlan.Symbols.Push(new Symbol(String.Empty, SourceRowType));
 				try
 				{
 					for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
@@ -647,10 +647,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				APlan.EnterRowContext();
 				try
 				{
-					APlan.Symbols.Push(new Symbol(new Schema.RowType(LeftRowType.Columns, Keywords.Left)));
+					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(LeftRowType.Columns, Keywords.Left)));
 					try
 					{
-						APlan.Symbols.Push(new Symbol(new Schema.RowType(RightRowType.Columns, Keywords.Right)));
+						APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(RightRowType.Columns, Keywords.Right)));
 						try
 						{
 							FEqualNode = Compiler.CompileExpression(APlan, LExpression);

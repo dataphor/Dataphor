@@ -6,8 +6,9 @@
 
 #define USEOPERATORRESOLUTIONCACHE
 #define USECONVERSIONPATHCACHE
-#define USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
+//#define USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
 //#define DISALLOWAMBIGUOUSNAMES
+#define USENAMEDROWVARIABLES
 
 using System;
 using System.Collections;
@@ -1034,7 +1035,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				
 				PlanNode LSelectorNode = CompileExpression(APlan, LStatement.Expression);
 				PlanNode LEqualNode = null;
-				APlan.Symbols.Push(new Symbol(LSelectorNode.DataType));
+				APlan.Symbols.Push(new Symbol(String.Empty, LSelectorNode.DataType));
 				try
 				{
 					LNode.Nodes.Add(LSelectorNode);
@@ -1045,7 +1046,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						LCaseItemNode.SetLineInfo(APlan, LCaseItemStatement.LineInfo);
 						PlanNode LWhenNode = CompileTypedExpression(APlan, LCaseItemStatement.WhenExpression, LSelectorNode.DataType);
 						LCaseItemNode.Nodes.Add(LWhenNode);
-						APlan.Symbols.Push(new Symbol(LWhenNode.DataType));
+						APlan.Symbols.Push(new Symbol(String.Empty, LWhenNode.DataType));
 						try
 						{
 							if (LEqualNode == null)
@@ -2641,7 +2642,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				APlan.EnterRowContext();
 				try
 				{
-					APlan.Symbols.Push(new Symbol(LTargetTableVar.DataType.RowType));
+					APlan.Symbols.Push(new Symbol(String.Empty, LTargetTableVar.DataType.RowType));
 					try
 					{
 						UpdateColumnNode LColumnNode;
@@ -3216,7 +3217,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 				APlan.EnterRowContext();
 				try
 				{
+					#if USENAMEDROWVARIABLES
+					APlan.Symbols.Push(new Symbol(Keywords.Value, ATableVar.DataType.RowType));
+					#else
 					APlan.Symbols.Push(new Symbol(String.Empty, ATableVar.DataType.RowType));
+					#endif
 					try
 					{
 						PlanNode LConstraintNode = CompileBooleanExpression(APlan, AConstraint.Expression);
@@ -3305,7 +3310,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 				{
 					if (AConstraint.OnInsertExpression != null)
 					{
+						#if USENAMEDROWVARIABLES
+						APlan.Symbols.Push(new Symbol(Keywords.New, ATableVar.DataType.RowType));
+						#else
 						APlan.Symbols.Push(new Symbol(String.Empty, ATableVar.DataType.NewRowType));
+						#endif
 						try
 						{
 							LConstraintNode = CompileBooleanExpression(APlan, AConstraint.OnInsertExpression);
@@ -3325,10 +3334,18 @@ namespace Alphora.Dataphor.DAE.Compiling
 					
 					if (AConstraint.OnUpdateExpression != null)
 					{
+						#if USENAMEDROWVARIABLES
+						APlan.Symbols.Push(new Symbol(Keywords.Old, ATableVar.DataType.RowType));
+						#else
 						APlan.Symbols.Push(new Symbol(String.Empty, ATableVar.DataType.OldRowType));
+						#endif
 						try
 						{
+							#if USENAMEDROWVARIABLES
+							APlan.Symbols.Push(new Symbol(Keywords.New, ATableVar.DataType.RowType));
+							#else
 							APlan.Symbols.Push(new Symbol(String.Empty, ATableVar.DataType.NewRowType));
+							#endif
 							try
 							{
 								LConstraintNode = CompileBooleanExpression(APlan, AConstraint.OnUpdateExpression);
@@ -3353,7 +3370,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 					
 					if (AConstraint.OnDeleteExpression != null)
 					{
+						#if USENAMEDROWVARIABLES
+						APlan.Symbols.Push(new Symbol(Keywords.Old, ATableVar.DataType.RowType));
+						#else
 						APlan.Symbols.Push(new Symbol(String.Empty, ATableVar.DataType.OldRowType));
+						#endif
 						try
 						{
 							LConstraintNode = CompileBooleanExpression(APlan, AConstraint.OnDeleteExpression);
@@ -3508,9 +3529,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 				LRepresentation = LScalarType.FindRepresentation(NativeAccessors.AsDisplayString);
 				bool LIsString = LScalarType.NativeType == NativeAccessors.AsDisplayString.NativeType;
 				if (LIsString)
-					LMessage.AppendFormat(@"""' + (if IsNil({0}{1}{2}) then ""<no value>"" else {0}{1}{2}{3}{4}) + '""", new object[]{Keywords.New, Keywords.Qualifier, AKey.Columns[LIndex].Name, Keywords.Qualifier, LRepresentation.Properties[0].Name});
+					LMessage.AppendFormat(@"""' + (if IsNil({0}{1}{2}) then ""<no value>"" else {0}{1}{2}{3}{4}) + '""", new object[]{ Keywords.New, Keywords.Qualifier, AKey.Columns[LIndex].Name, Keywords.Qualifier, LRepresentation.Properties[0].Name });
 				else
-					LMessage.AppendFormat(@"(' + (if IsNil({0}{1}{2}) then ""<no value>"" else {0}{1}{2}{3}{4}) + ')", new object[]{Keywords.New, Keywords.Qualifier, AKey.Columns[LIndex].Name, Keywords.Qualifier, LRepresentation.Properties[0].Name});
+					LMessage.AppendFormat(@"(' + (if IsNil({0}{1}{2}) then ""<no value>"" else {0}{1}{2}{3}{4}) + ')", new object[]{ Keywords.New, Keywords.Qualifier, AKey.Columns[LIndex].Name, Keywords.Qualifier, LRepresentation.Properties[0].Name });
 			}
 			
 			LMessage.Append(".'");
@@ -3549,8 +3570,39 @@ namespace Alphora.Dataphor.DAE.Compiling
 						(
 							new IdentifierExpression(ATableVar.Name), 
 							AKey.IsSparse ?
-								BuildKeyEqualExpression(APlan, new Schema.RowType(AKey.Columns).Columns, new Schema.RowType(AKey.Columns, Keywords.New).Columns) :
-								BuildRowEqualExpression(APlan, new Schema.RowType(AKey.Columns).Columns, new Schema.RowType(AKey.Columns, Keywords.New).Columns, LIsNilable, LIsNilable)
+								#if USENAMEDROWVARIABLES
+								BuildKeyEqualExpression
+								(
+									APlan, 
+									String.Empty,
+									Keywords.New,
+									AKey.Columns,
+									AKey.Columns
+								) :
+								BuildRowEqualExpression
+								(
+									APlan, 
+									String.Empty,
+									Keywords.New,
+									AKey.Columns,
+									LIsNilable
+								)
+								#else
+								BuildKeyEqualExpression
+								(
+									APlan, 
+									new Schema.RowType(AKey.Columns).Columns, 
+									new Schema.RowType(AKey.Columns, Keywords.New).Columns
+								) :
+								BuildRowEqualExpression
+								(
+									APlan, 
+									new Schema.RowType(AKey.Columns).Columns, 
+									new Schema.RowType(AKey.Columns, Keywords.New).Columns, 
+									LIsNilable, 
+									LIsNilable
+								)
+								#endif
 						)
 					)
 				);
@@ -3558,7 +3610,25 @@ namespace Alphora.Dataphor.DAE.Compiling
 			LDefinition.OnUpdateExpression =
 				new BinaryExpression
 				(
-					BuildRowEqualExpression(APlan, new Schema.RowType(AKey.Columns, Keywords.Old).Columns, new Schema.RowType(AKey.Columns, Keywords.New).Columns, LIsNilable, LIsNilable),
+					#if USENAMEDROWVARIABLES
+					BuildRowEqualExpression
+					(
+						APlan, 
+						Keywords.Old,
+						Keywords.New,
+						AKey.Columns,
+						LIsNilable
+					),
+					#else
+					BuildRowEqualExpression
+					(
+						APlan, 
+						new Schema.RowType(AKey.Columns, Keywords.Old).Columns, 
+						new Schema.RowType(AKey.Columns, Keywords.New).Columns, 
+						LIsNilable, 
+						LIsNilable
+					),
+					#endif
 					Instructions.Or,
 					new UnaryExpression
 					(
@@ -3570,8 +3640,13 @@ namespace Alphora.Dataphor.DAE.Compiling
 							(
 								new IdentifierExpression(ATableVar.Name), 
 								AKey.IsSparse ?
+									#if USENAMEDROWVARIABLES
+									BuildKeyEqualExpression(APlan, String.Empty, Keywords.New, AKey.Columns, AKey.Columns) :
+									BuildRowEqualExpression(APlan, String.Empty, Keywords.New, AKey.Columns, LIsNilable)
+									#else
 									BuildKeyEqualExpression(APlan, new Schema.RowType(AKey.Columns).Columns, new Schema.RowType(AKey.Columns, Keywords.New).Columns) :
 									BuildRowEqualExpression(APlan, new Schema.RowType(AKey.Columns).Columns, new Schema.RowType(AKey.Columns, Keywords.New).Columns, LIsNilable, LIsNilable)
+									#endif
 							)
 						)
 					)
@@ -7009,8 +7084,13 @@ namespace Alphora.Dataphor.DAE.Compiling
 			APlan.EnterRowContext();
 			try
 			{
+				#if USENAMEDROWVARIABLES
+				Schema.IRowType LRowType = new Schema.RowType(AReference.SourceKey.Columns);
+				APlan.Symbols.Push(new Symbol(Keywords.New, AReference.SourceTable.DataType.RowType));
+				#else
 				Schema.IRowType LRowType = new Schema.RowType(AReference.SourceKey.Columns, Keywords.New);
-				APlan.Symbols.Push(new Symbol(AReference.SourceTable.DataType.NewRowType));
+				APlan.Symbols.Push(new Symbol(String.Empty, AReference.SourceTable.DataType.NewRowType));
+				#endif
 				try
 				{
 					BitArray LIsNilable = new BitArray(AReference.SourceKey.Columns.Count);
@@ -7027,12 +7107,20 @@ namespace Alphora.Dataphor.DAE.Compiling
 						AppendNode
 						(
 							APlan,
+							#if USENAMEDROWVARIABLES
+							EmitKeyIsNilNode(APlan, Keywords.New, LRowType.Columns, LIsNilable),
+							#else
 							EmitKeyIsNilNode(APlan, LRowType.Columns, LIsNilable),
+							#endif
 							Instructions.Or,
 							AppendNode
 							(
 								APlan,
+								#if USENAMEDROWVARIABLES
+								EmitKeyIsSpecialNode(APlan, Keywords.New, LRowType.Columns, LHasSpecials),
+								#else
 								EmitKeyIsSpecialNode(APlan, LRowType.Columns, LHasSpecials),
+								#endif
 								Instructions.Or,
 								EmitUnaryNode
 								(
@@ -7042,12 +7130,23 @@ namespace Alphora.Dataphor.DAE.Compiling
 									(
 										APlan,
 										EmitTableVarNode(APlan, AReference.TargetTable), 
+										#if USENAMEDROWVARIABLES
+										BuildKeyEqualExpression
+										(
+											APlan,
+											String.Empty,
+											Keywords.New,
+											AReference.TargetKey.Columns,
+											AReference.SourceKey.Columns
+										)
+										#else
 										BuildKeyEqualExpression
 										(
 											APlan,
 											new Schema.RowType(AReference.TargetKey.Columns).Columns, 
 											LRowType.Columns
 										)
+										#endif
 									)
 								)
 							)
@@ -7077,14 +7176,26 @@ namespace Alphora.Dataphor.DAE.Compiling
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(AReference.SourceTable.DataType.OldRowType));
+				#if USENAMEDROWVARIABLES
+				APlan.Symbols.Push(new Symbol(Keywords.Old, AReference.SourceTable.DataType.RowType));
+				#else
+				APlan.Symbols.Push(new Symbol(String.Empty, AReference.SourceTable.DataType.OldRowType));
+				#endif
 				try
 				{
-					APlan.Symbols.Push(new Symbol(AReference.SourceTable.DataType.NewRowType));
+					#if USENAMEDROWVARIABLES
+					APlan.Symbols.Push(new Symbol(Keywords.New, AReference.SourceTable.DataType.RowType));
+					#else
+					APlan.Symbols.Push(new Symbol(String.Empty, AReference.SourceTable.DataType.NewRowType));
+					#endif
 					try
 					{
+						#if USENAMEDROWVARIABLES
+						Schema.IRowType LSourceRowType = new Schema.RowType(AReference.SourceKey.Columns);
+						#else
 						Schema.IRowType LNewSourceRowType = new Schema.RowType(AReference.SourceKey.Columns, Keywords.New);
 						Schema.IRowType LOldSourceRowType = new Schema.RowType(AReference.SourceKey.Columns, Keywords.Old);
+						#endif
 
 						BitArray LIsNilable = new BitArray(AReference.SourceKey.Columns.Count);
 						BitArray LHasSpecials = new BitArray(AReference.SourceKey.Columns.Count);
@@ -7096,18 +7207,30 @@ namespace Alphora.Dataphor.DAE.Compiling
 									&& (((Schema.ScalarType)AReference.SourceKey.Columns[LIndex].DataType).Specials.Count > 0);
 						}
 						
+						#if USENAMEDROWVARIABLES
+						PlanNode LEqualNode = CompileExpression(APlan, BuildKeyEqualExpression(APlan, Keywords.Old, Keywords.New, LSourceRowType.Columns, LSourceRowType.Columns));
+						#else
 						PlanNode LEqualNode = CompileExpression(APlan, BuildKeyEqualExpression(APlan, LOldSourceRowType.Columns, LNewSourceRowType.Columns));
+						#endif
 
 						PlanNode LNode = 
 							AppendNode
 							(
 								APlan,
+								#if USENAMEDROWVARIABLES
+								EmitKeyIsNilNode(APlan, Keywords.New, LSourceRowType.Columns, LIsNilable),
+								#else
 								EmitKeyIsNilNode(APlan, LNewSourceRowType.Columns, LIsNilable),
+								#endif
 								Instructions.Or,
 								AppendNode
 								(
 									APlan,
+									#if USENAMEDROWVARIABLES
+									EmitKeyIsSpecialNode(APlan, Keywords.New, LSourceRowType.Columns, LHasSpecials),
+									#else
 									EmitKeyIsSpecialNode(APlan, LNewSourceRowType.Columns, LHasSpecials),
+									#endif
 									Instructions.Or,
 									AppendNode
 									(
@@ -7122,12 +7245,23 @@ namespace Alphora.Dataphor.DAE.Compiling
 											(
 												APlan, 
 												EmitTableVarNode(APlan, AReference.TargetTable), 
+												#if USENAMEDROWVARIABLES
+												BuildKeyEqualExpression
+												(
+													APlan,
+													String.Empty,
+													Keywords.New,
+													AReference.TargetKey.Columns,
+													AReference.SourceKey.Columns
+												)
+												#else
 												BuildKeyEqualExpression
 												(
 													APlan,
 													new Schema.RowType(AReference.TargetKey.Columns).Columns, 
 													LNewSourceRowType.Columns
 												)
+												#endif
 											)
 										)
 									)
@@ -7189,16 +7323,33 @@ namespace Alphora.Dataphor.DAE.Compiling
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(AReference.TargetTable.DataType.OldRowType));
+				#if USENAMEDROWVARIABLES
+				APlan.Symbols.Push(new Symbol(Keywords.Old, AReference.TargetTable.DataType.RowType));
+				#else
+				APlan.Symbols.Push(new Symbol(String.Empty, AReference.TargetTable.DataType.OldRowType));
+				#endif
 				try
 				{
-					APlan.Symbols.Push(new Symbol(AReference.TargetTable.DataType.NewRowType));
+					#if USENAMEDROWVARIABLES
+					APlan.Symbols.Push(new Symbol(Keywords.New, AReference.TargetTable.DataType.RowType));
+					#else
+					APlan.Symbols.Push(new Symbol(String.Empty, AReference.TargetTable.DataType.NewRowType));
+					#endif
 					try
 					{
+						#if USENAMEDROWVARIABLES
+						Schema.IRowType LTargetRowType = new Schema.RowType(AReference.TargetKey.Columns);
+						#else
 						Schema.IRowType LOldTargetRowType = new Schema.RowType(AReference.TargetKey.Columns, Keywords.Old);
 						Schema.IRowType LNewTargetRowType = new Schema.RowType(AReference.TargetKey.Columns, Keywords.New);
+						#endif
 
+						#if USENAMEDROWVARIABLES
+						PlanNode LEqualNode = CompileExpression(APlan, BuildKeyEqualExpression(APlan, Keywords.Old, Keywords.New, LTargetRowType.Columns, LTargetRowType.Columns));
+						#else
 						PlanNode LEqualNode = CompileExpression(APlan, BuildKeyEqualExpression(APlan, LOldTargetRowType.Columns, LNewTargetRowType.Columns));
+						#endif
+						
 						PlanNode LNode = 
 							EmitBinaryNode
 							(
@@ -7217,12 +7368,23 @@ namespace Alphora.Dataphor.DAE.Compiling
 										(
 											APlan, 
 											EmitTableVarNode(APlan, AReference.SourceTable), 
+											#if USENAMEDROWVARIABLES
+											BuildKeyEqualExpression
+											(
+												APlan,
+												String.Empty,
+												Keywords.Old,
+												AReference.SourceKey.Columns,
+												AReference.TargetKey.Columns
+											)
+											#else
 											BuildKeyEqualExpression
 											(
 												APlan,
 												new Schema.RowType(AReference.SourceKey.Columns).Columns, 
 												LOldTargetRowType.Columns
 											)
+											#endif
 										)
 									)
 								)
@@ -7257,7 +7419,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(AReference.TargetTable.DataType.OldRowType));
+				#if USENAMEDROWVARIABLES
+				APlan.Symbols.Push(new Symbol(Keywords.Old, AReference.TargetTable.DataType.RowType));
+				#else
+				APlan.Symbols.Push(new Symbol(String.Empty, AReference.TargetTable.DataType.OldRowType));
+				#endif
 				try
 				{
 					PlanNode LNode = 
@@ -7273,12 +7439,23 @@ namespace Alphora.Dataphor.DAE.Compiling
 								(
 									APlan, 
 									EmitTableVarNode(APlan, AReference.SourceTable), 
+									#if USENAMEDROWVARIABLES
+									BuildKeyEqualExpression
+									(
+										APlan,
+										String.Empty,
+										Keywords.Old,
+										AReference.SourceKey.Columns,
+										AReference.TargetKey.Columns
+									)
+									#else
 									BuildKeyEqualExpression
 									(
 										APlan,
 										new Schema.RowType(AReference.SourceKey.Columns).Columns, 
 										new Schema.RowType(AReference.TargetKey.Columns, Keywords.Old).Columns
 									)
+									#endif
 								)
 							)
 						);
@@ -7308,19 +7485,35 @@ namespace Alphora.Dataphor.DAE.Compiling
 			APlan.EnterRowContext();
 			try
 			{
+				#if USENAMEDROWVARIABLES
+				APlan.Symbols.Push(new Symbol(Keywords.Old, AReference.TargetTable.DataType.RowType));
+				#else
 				APlan.Symbols.Push(new Symbol("AOldRow", AReference.TargetTable.DataType.RowType));
+				#endif
 				try
 				{
+					#if USENAMEDROWVARIABLES
+					APlan.Symbols.Push(new Symbol(Keywords.New, AReference.TargetTable.DataType.RowType));
+					#else
 					APlan.Symbols.Push(new Symbol("ANewRow", AReference.TargetTable.DataType.RowType));
+					#endif
 					try
 					{
+						#if USENAMEDROWVARIABLES
+						PlanNode LConditionNode = CompileExpression(APlan, new UnaryExpression(Instructions.Not, BuildKeyEqualExpression(APlan, Keywords.Old, Keywords.New, AReference.TargetKey.Columns, AReference.TargetKey.Columns)));
+						#else
 						PlanNode LConditionNode = CompileExpression(APlan, new UnaryExpression(Instructions.Not, BuildKeyEqualExpression(APlan, "AOldRow", "ANewRow", AReference.TargetKey.Columns, AReference.TargetKey.Columns)));
+						#endif
 						UpdateNode LUpdateNode = new UpdateNode();
 						LUpdateNode.IsBreakable = false;
-						APlan.Symbols.Push(new Symbol(((Schema.ITableType)ASourceNode.DataType).RowType));
+						APlan.Symbols.Push(new Symbol(String.Empty, ((Schema.ITableType)ASourceNode.DataType).RowType));
 						try
 						{
-							LUpdateNode.Nodes.Add(EmitUpdateConditionNode(APlan, ASourceNode, CompileExpression(APlan, BuildKeyEqualExpression(APlan, "", "AOldRow", AReference.SourceKey.Columns, AReference.TargetKey.Columns))));
+							#if USENAMEDROWVARIABLES
+							LUpdateNode.Nodes.Add(EmitUpdateConditionNode(APlan, ASourceNode, CompileExpression(APlan, BuildKeyEqualExpression(APlan, String.Empty, Keywords.Old, AReference.SourceKey.Columns, AReference.TargetKey.Columns))));
+							#else
+							LUpdateNode.Nodes.Add(EmitUpdateConditionNode(APlan, ASourceNode, CompileExpression(APlan, BuildKeyEqualExpression(APlan, String.Empty, "AOldRow", AReference.SourceKey.Columns, AReference.TargetKey.Columns))));
+							#endif
 							LUpdateNode.TargetNode = LUpdateNode.Nodes[0].Nodes[0];
 							LUpdateNode.ConditionNode = LUpdateNode.Nodes[0].Nodes[1];
 
@@ -7334,7 +7527,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 									(
 										LSourceColumn.DataType,
 										LSourceColumn.Name,
+										#if USENAMEDROWVARIABLES
+										CompileQualifierExpression(APlan, new QualifierExpression(new IdentifierExpression(Keywords.New), new IdentifierExpression(LTargetColumn.Name)))
+										#else
 										CompileQualifierExpression(APlan, new QualifierExpression(new IdentifierExpression("ANewRow"), new IdentifierExpression(LTargetColumn.Name)))
+										#endif
 									)
 								);
 							}
@@ -7375,15 +7572,23 @@ namespace Alphora.Dataphor.DAE.Compiling
 			APlan.EnterRowContext();
 			try
 			{
+				#if USENAMEDROWVARIABLES
+				APlan.Symbols.Push(new Symbol(Keywords.Old, AReference.TargetTable.DataType.RowType));
+				#else
 				APlan.Symbols.Push(new Symbol("AOldRow", AReference.TargetTable.DataType.RowType));
+				#endif
 				try
 				{
 					DeleteNode LNode = new DeleteNode();
 					LNode.IsBreakable = false;
-					APlan.Symbols.Push(new Symbol(AReference.SourceTable.DataType.RowType));
+					APlan.Symbols.Push(new Symbol(String.Empty, AReference.SourceTable.DataType.RowType));
 					try
 					{
-						LNode.Nodes.Add(EmitRestrictNode(APlan, ASourceNode, CompileExpression(APlan, BuildKeyEqualExpression(APlan, "", "AOldRow", AReference.SourceKey.Columns, AReference.TargetKey.Columns))));
+						#if USENAMEDROWVARIABLES
+						LNode.Nodes.Add(EmitRestrictNode(APlan, ASourceNode, CompileExpression(APlan, BuildKeyEqualExpression(APlan, String.Empty, Keywords.Old, AReference.SourceKey.Columns, AReference.TargetKey.Columns))));
+						#else
+						LNode.Nodes.Add(EmitRestrictNode(APlan, ASourceNode, CompileExpression(APlan, BuildKeyEqualExpression(APlan, String.Empty, "AOldRow", AReference.SourceKey.Columns, AReference.TargetKey.Columns))));
+						#endif
 					}
 					finally
 					{
@@ -7531,7 +7736,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			{
 				UpdateNode LNode = new UpdateNode();
 				LNode.IsBreakable = false;
-				APlan.Symbols.Push(new Symbol(((Schema.ITableType)ASourceNode.DataType).RowType));
+				APlan.Symbols.Push(new Symbol(String.Empty, ((Schema.ITableType)ASourceNode.DataType).RowType));
 				try
 				{
 					LNode.Nodes.Add
@@ -7812,10 +8017,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 				APlan.EnterRowContext();
 				try
 				{
-					APlan.Symbols.Push(new Symbol(((TableNode)LSourceNode).DataType.CreateRowType(Keywords.Source)));
+					APlan.Symbols.Push(new Symbol(String.Empty, ((TableNode)LSourceNode).DataType.CreateRowType(Keywords.Source)));
 					try
 					{
-						APlan.Symbols.Push(new Symbol(((TableNode)LTargetNode).DataType.CreateRowType(Keywords.Target)));
+						APlan.Symbols.Push(new Symbol(String.Empty, ((TableNode)LTargetNode).DataType.CreateRowType(Keywords.Target)));
  						try
 						{
 							BitArray LIsNilable = new BitArray(AReference.SourceKey.Columns.Count);
@@ -9939,7 +10144,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				
 				for (int LIndex = LArguments.Length - 1; LIndex >= 0; LIndex--)
 				{
-					APlan.Symbols.Push(new Symbol(LArguments[LIndex].DataType));
+					APlan.Symbols.Push(new Symbol(String.Empty, LArguments[LIndex].DataType));
 				}
 				try
 				{
@@ -12037,7 +12242,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				
 				PlanNode LSelectorNode = CompileExpression(APlan, LExpression.Expression);
 				PlanNode LEqualNode = null;
-				Symbol LSelectorVar = new Symbol(LSelectorNode.DataType);
+				Symbol LSelectorVar = new Symbol(String.Empty, LSelectorNode.DataType);
 				LNode.Nodes.Add(LSelectorNode);
 
 				foreach (CaseItemExpression LCaseItemExpression in LExpression.CaseItems)
@@ -12050,7 +12255,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 						APlan.Symbols.Push(LSelectorVar);
 						try
 						{
-							APlan.Symbols.Push(new Symbol(LWhenNode.DataType));
+							APlan.Symbols.Push(new Symbol(String.Empty, LWhenNode.DataType));
 							try
 							{
 								LEqualNode = EmitBinaryNode(APlan, new StackReferenceNode(LSelectorNode.DataType, 1, true), Instructions.Equal, new StackReferenceNode(LWhenNode.DataType, 0, true));
@@ -12801,6 +13006,25 @@ indicative of other problems, a reference will never be attached as an explicit 
 			for (int LIndex = 0; LIndex < ALeftRow.Count; LIndex++)
 			{
 				int LRightIndex = ARightRow.IndexOf(Schema.Object.Dequalify(ALeftRow[LIndex].Name));
+
+				LEqualExpression =
+					TagLine<Expression>
+					(
+						new BinaryExpression
+						(
+							#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
+							TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ALeftRow[LIndex].Name)), LLineInfo),
+							Instructions.Equal,
+							TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ARightRow[LRightIndex].Name)), LLineInfo)
+							#else
+							TagLine<Expression>(new IdentifierExpression(ALeftRow[LIndex].Name), LLineInfo),
+							Instructions.Equal,
+							TagLine<Expression>(new IdentifierExpression(ARightRow[LRightIndex].Name), LLineInfo)
+							#endif
+						),
+						LLineInfo
+					);
+
 				if (((ALeftIsNilable == null) || ALeftIsNilable[LIndex]) || ((ARightIsNilable == null) || ARightIsNilable[LRightIndex]))
 					LEqualExpression =
 						TagLine<Expression>
@@ -12816,7 +13040,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 										Instructions.And, 
 										TagLine<Expression>(new CallExpression(CIsNilOperatorName, new Expression[]{ TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ARightRow[LRightIndex].Name)), LLineInfo) }), LLineInfo)
 										#else
-										TagLine<Expression>(new CallExpression(CIsNilOperatorName, new Expression[]{ TagLine<Expression>(new IdentifierExpression(ALeftRow[LIndex].Name), LLineInfo) }), LLineInfo)
+										TagLine<Expression>(new CallExpression(CIsNilOperatorName, new Expression[]{ TagLine<Expression>(new IdentifierExpression(ALeftRow[LIndex].Name), LLineInfo) }), LLineInfo),
 										Instructions.And, 
 										TagLine<Expression>(new CallExpression(CIsNilOperatorName, new Expression[]{ TagLine<Expression>(new IdentifierExpression(ARightRow[LRightIndex].Name), LLineInfo) }), LLineInfo)
 										#endif
@@ -12824,34 +13048,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 									LLineInfo
 								),
 								Instructions.Or,
-								TagLine<Expression>
-								(
-									new BinaryExpression
-									(
-										TagLine<Expression>(new IdentifierExpression(ALeftRow[LIndex].Name), LLineInfo),
-										Instructions.Equal, 
-										TagLine<Expression>(new IdentifierExpression(ARightRow[LRightIndex].Name), LLineInfo)
-									),
-									LLineInfo
-								)
-							),
-							LLineInfo
-						);
-				else
-					LEqualExpression =
-						TagLine<Expression>
-						(
-							new BinaryExpression
-							(
-								#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
-								TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ALeftRow[LIndex].Name)), LLineInfo),
-								Instructions.Equal,
-								TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ARightRow[LRightIndex].Name)), LLineInfo)
-								#else
-								TagLine<Expression>(new IdentifierExpression(ALeftRow[LIndex].Name), LLineInfo),
-								Instructions.Equal,
-								TagLine<Expression>(new IdentifierExpression(ARightRow[LRightIndex].Name), LLineInfo)
-								#endif
+								LEqualExpression
 							),
 							LLineInfo
 						);
@@ -12867,13 +13064,113 @@ indicative of other problems, a reference will never be attached as an explicit 
 				
 			return LExpression;
 		}
-		
+
 		public static Expression BuildRowEqualExpression(Plan APlan, string ALeftRowVarName, string ARightRowVarName, Schema.TableVarColumnsBase AColumns)
 		{
-			Schema.Columns LColumns = new Schema.Columns();
-			foreach (Schema.TableVarColumn LColumn in AColumns)
-				LColumns.Add(LColumn.Column);
-			return BuildRowEqualExpression(APlan, ALeftRowVarName, ARightRowVarName, LColumns);
+			return BuildRowEqualExpression(APlan, ALeftRowVarName, ARightRowVarName, AColumns, null);
+		}
+		
+		public static Expression BuildRowEqualExpression(Plan APlan, string ALeftRowVarName, string ARightRowVarName, Schema.TableVarColumnsBase AColumns, BitArray AIsNilable)
+		{
+			if ((ALeftRowVarName == null) || (ARightRowVarName == null) || ((ALeftRowVarName == String.Empty) && (ARightRowVarName == String.Empty)))
+				throw new ArgumentException("Row variable name is required for at least one side of the row comparison expression to be built.");
+
+			Expression LExpression = null;
+			Expression LEqualExpression;
+			LineInfo LLineInfo = APlan.GetCurrentLineInfo();
+
+			for (int LIndex = 0; LIndex < AColumns.Count; LIndex++)
+			{
+				LEqualExpression =
+					TagLine<Expression>
+					(
+						new BinaryExpression
+						(
+							ALeftRowVarName == String.Empty
+								#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
+								? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(AColumns[LIndex].Name)), LLineInfo)
+								#else
+								? TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)
+								#endif
+								: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ALeftRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)), LLineInfo),
+							Instructions.Equal,
+							ARightRowVarName == String.Empty
+								#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
+								? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(AColumns[LIndex].Name)), LLineInfo)
+								#else
+								? TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)
+								#endif
+								: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ARightRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)), LLineInfo)
+						),
+						LLineInfo
+					);
+					
+				if ((AIsNilable == null) || AIsNilable[LIndex])
+					LEqualExpression =
+						TagLine<Expression>
+						(
+							new BinaryExpression
+							(
+								TagLine<Expression>
+								(
+									new BinaryExpression
+									(
+										TagLine<Expression>
+										(
+											new CallExpression
+											(
+												CIsNilOperatorName,
+												new Expression[]
+												{
+													ALeftRowVarName == String.Empty
+														#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
+														? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(AColumns[LIndex].Name)), LLineInfo)
+														#else
+														? TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)
+														#endif
+														: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ALeftRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)), LLineInfo)
+												}
+											),
+											LLineInfo
+										),
+										Instructions.And,
+										TagLine<Expression>
+										(
+											new CallExpression
+											(
+												CIsNilOperatorName,
+												new Expression[]
+												{
+													ARightRowVarName == String.Empty
+														#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
+														? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(AColumns[LIndex].Name)), LLineInfo)
+														#else
+														? TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)
+														#endif
+														: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ARightRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)), LLineInfo)
+												}
+											),
+											LLineInfo
+										)
+									),
+									LLineInfo
+								),
+								Instructions.Or,
+								LEqualExpression
+							),
+							LLineInfo
+						);
+					
+				if (LExpression != null)
+					LExpression = TagLine<Expression>(new BinaryExpression(LExpression, Instructions.And, LEqualExpression), LLineInfo);
+				else
+					LExpression = LEqualExpression;
+			}
+			
+			if (LExpression == null)
+				LExpression = TagLine<Expression>(new ValueExpression(true), LLineInfo);
+			
+			return LExpression;
 		}
 		
 		public static Expression BuildOptimisticRowEqualExpression(Plan APlan, string ALeftRowVarName, string ARightRowVarName, Schema.Columns AColumns)
@@ -12966,7 +13263,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 										#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
 										? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(AColumns[LIndex].Name)), LLineInfo)
 										#else
-										? TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo) :
+										? TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)
 										#endif
 										: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ARightRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)), LLineInfo)
 								),
@@ -13084,7 +13381,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
 				LEqualExpression = TagLine<Expression>(new BinaryExpression(TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ALeftKey[LIndex].Name)), LLineInfo), Instructions.Equal, TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ARightKey[LIndex].Name)), LLineInfo)), LLineInfo);
 				#else
-				LEqualExpression = TagLine<Expression>(new BinaryExpression(TagLine<Expression>(new IdentifierExpression(ALeftKey[LIndex].Name), LLineInfo), Instructions.Equal, TagLine<Expression>(new IdentifierExpression(ARightKey[LIndex].Name), LLineInfo), LLineInfo);
+				LEqualExpression = TagLine<Expression>(new BinaryExpression(TagLine<Expression>(new IdentifierExpression(ALeftKey[LIndex].Name), LLineInfo), Instructions.Equal, TagLine<Expression>(new IdentifierExpression(ARightKey[LIndex].Name), LLineInfo)), LLineInfo);
 				#endif
 				
 				if (LExpression == null)
@@ -13706,7 +14003,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(new Schema.RowType(((Schema.ITableType)LRootNode.DataType).Columns, Keywords.Parent)));
+				APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(((Schema.ITableType)LRootNode.DataType).Columns, Keywords.Parent)));
 				try
 				{
 					LParentNode = CompileExpression(APlan, LByExpression);

@@ -1113,7 +1113,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			Nodes[0].DetermineBinding(APlan);
 			// Do not bind node 1, it will fail (it contains nameless stack references)
-			APlan.Symbols.Push(new Symbol(Nodes[0].DataType));
+			APlan.Symbols.Push(new Symbol(String.Empty, Nodes[0].DataType));
 			try
 			{
 				for (int LIndex = 2; LIndex < Nodes.Count; LIndex++)

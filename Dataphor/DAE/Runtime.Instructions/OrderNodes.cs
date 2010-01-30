@@ -675,12 +675,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				APlan.EnterRowContext();
 				try
 				{
-					APlan.Symbols.Push(new Symbol(LOrigin));
+					APlan.Symbols.Push(new Symbol(String.Empty, LOrigin));
 					try
 					{
 						PlanNode LResultNode;
 						PlanNode LSourceNode = GetSourceNode(APlan);
-						APlan.Symbols.Push(new Symbol(DataType.RowType));
+						APlan.Symbols.Push(new Symbol(String.Empty, DataType.RowType));
 						try
 						{
 							LResultNode =
