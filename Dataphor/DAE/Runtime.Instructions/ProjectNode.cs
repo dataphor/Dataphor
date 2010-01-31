@@ -3,7 +3,9 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
 #define UseReferenceDerivation
+#define USENAMEDROWVARIABLES
 	
 using System;
 using System.Text;
@@ -87,22 +89,41 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				APlan.EnterRowContext();
 				try
 				{	
+					#if USENAMEDROWVARIABLES
+					APlan.Symbols.Push(new Symbol(Keywords.Left, DataType.RowType));
+					#else
 					APlan.Symbols.Push(new Symbol(String.Empty, DataType.CreateRowType(Keywords.Left)));
+					#endif
 					try
 					{
+						#if USENAMEDROWVARIABLES
+						APlan.Symbols.Push(new Symbol(Keywords.Right, DataType.RowType));
+						#else
 						APlan.Symbols.Push(new Symbol(String.Empty, DataType.CreateRowType(Keywords.Right)));
+						#endif
 						try
 						{
 							FEqualNode = 
 								Compiler.CompileExpression
 								(
 									APlan, 
+									#if USENAMEDROWVARIABLES
+									Compiler.BuildRowEqualExpression
+									(
+										APlan, 
+										Keywords.Left,
+										Keywords.Right,
+										LNewKey.Columns,
+										LNewKey.Columns
+									)
+									#else
 									Compiler.BuildRowEqualExpression
 									(
 										APlan, 
 										new Schema.RowType(LNewKey.Columns, Keywords.Left).Columns, 
 										new Schema.RowType(LNewKey.Columns, Keywords.Right).Columns
 									)
+									#endif
 								);
 						}
 						finally
@@ -145,10 +166,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				APlan.EnterRowContext();
 				try
 				{
+					#if USENAMEDROWVARIABLES
+					APlan.Symbols.Push(new Symbol(Keywords.Left, DataType.RowType));
+					#else
 					APlan.Symbols.Push(new Symbol(String.Empty, DataType.CreateRowType(Keywords.Left)));
+					#endif
 					try
 					{
+						#if USENAMEDROWVARIABLES
+						APlan.Symbols.Push(new Symbol(Keywords.Right, DataType.RowType));
+						#else
 						APlan.Symbols.Push(new Symbol(String.Empty, DataType.CreateRowType(Keywords.Right)));
+						#endif
 						try
 						{
 							FEqualNode.DetermineBinding(APlan);

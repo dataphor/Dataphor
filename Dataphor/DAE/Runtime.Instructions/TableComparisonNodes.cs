@@ -3,8 +3,10 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
 #define UseReferenceDerivation
 #define NILPROPOGATION
+#define USENAMEDROWVARIABLES
 	
 using System;
 using System.Text;
@@ -52,15 +54,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
+				#if USENAMEDROWVARIABLES
+				APlan.Symbols.Push(new Symbol(Keywords.Left, LeftTableNode.DataType.RowType));
+				#else
 				Schema.IRowType LLeftRowType = LeftTableNode.DataType.CreateRowType(Keywords.Left);
 				APlan.Symbols.Push(new Symbol(String.Empty, LLeftRowType));
+				#endif
 				try
 				{
+					#if USENAMEDROWVARIABLES
+					APlan.Symbols.Push(new Symbol(Keywords.Right, RightTableNode.DataType.RowType));
+					#else
 					Schema.IRowType LRightRowType = RightTableNode.DataType.CreateRowType(Keywords.Right);
 					APlan.Symbols.Push(new Symbol(String.Empty, LRightRowType));
+					#endif
 					try
 					{
-						FRowEqualNode = Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, LLeftRowType.Columns, LRightRowType.Columns));
+						FRowEqualNode = 
+							#if USENAMEDROWVARIABLES
+							Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, Keywords.Left, Keywords.Right, LeftTableNode.TableVar.Columns, RightTableNode.TableVar.Columns));
+							#else
+							Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, LLeftRowType.Columns, LRightRowType.Columns));
+							#endif
 					}
 					finally
 					{
@@ -85,10 +100,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
+				#if USENAMEDROWVARIABLES
+				APlan.Symbols.Push(new Symbol(Keywords.Left, LeftTableNode.DataType.RowType));
+				#else
 				APlan.Symbols.Push(new Symbol(String.Empty, LeftTableNode.DataType.CreateRowType(Keywords.Left)));
+				#endif
 				try
 				{
+					#if USENAMEDROWVARIABLES
+					APlan.Symbols.Push(new Symbol(Keywords.Right, RightTableNode.DataType.RowType));
+					#else
 					APlan.Symbols.Push(new Symbol(String.Empty, RightTableNode.DataType.CreateRowType(Keywords.Right)));
+					#endif
 					try
 					{
 						RowEqualNode.DetermineBinding(APlan);

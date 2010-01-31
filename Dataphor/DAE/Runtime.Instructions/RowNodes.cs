@@ -647,10 +647,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				APlan.EnterRowContext();
 				try
 				{
+					#if USENAMEDROWVARIABLES
+					APlan.Symbols.Push(new Symbol(Keywords.Left, LeftRowType));
+					#else
 					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(LeftRowType.Columns, Keywords.Left)));
+					#endif
 					try
 					{
+						#if USENAMEDROWVARIABLES
+						APlan.Symbols.Push(new Symbol(Keywords.Right, RightRowType));
+						#else
 						APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(RightRowType.Columns, Keywords.Right)));
+						#endif
 						try
 						{
 							FEqualNode = Compiler.CompileExpression(APlan, LExpression);

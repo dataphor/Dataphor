@@ -4,6 +4,8 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
+#define USENAMEDROWVARIABLES // Can be disabled independently in this unit without being disabled globally
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -1650,13 +1652,19 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					}
 
 					Schema.Key LClusteringKey = Compiler.FindClusteringKey(LPlan, ATableMap.TableVar);
+					#if !USENAMEDROWVARIABLES
 					Schema.RowType LOldRowType = new Schema.RowType(ATableMap.TableVar.DataType.Columns, Keywords.Old);
 					Schema.RowType LOldKeyType = new Schema.RowType(LClusteringKey.Columns, Keywords.Old);
 					Schema.RowType LKeyType = new Schema.RowType(LClusteringKey.Columns);
+					#endif
 					LPlan.EnterRowContext();
 					try
 					{
+						#if USENAMEDROWVARIABLES
+						LPlan.Symbols.Push(new Symbol(Keywords.Old, ATableMap.TableVar.DataType.RowType));
+						#else
 						LPlan.Symbols.Push(new Symbol(String.Empty, LOldRowType));
+						#endif
 						try
 						{
 							ATableMap.HasDeletedRowNode =
@@ -1671,7 +1679,11 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 										(
 											LPlan,
 											Compiler.EmitBaseTableVarNode(LPlan, ATableMap.DeletedTableVar),
+											#if USENAMEDROWVARIABLES
+											Compiler.BuildKeyEqualExpression(LPlan, Keywords.Old, String.Empty, LClusteringKey.Columns, LClusteringKey.Columns)
+											#else
 											Compiler.BuildKeyEqualExpression(LPlan, LOldKeyType.Columns, LKeyType.Columns)
+											#endif
 										)
 									)
 								);
@@ -1691,7 +1703,11 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 											(
 												LPlan,
 												Compiler.EmitBaseTableVarNode(LPlan, ATableMap.TableVar),
+												#if USENAMEDROWVARIABLES
+												Compiler.BuildKeyEqualExpression(LPlan, Keywords.Old, String.Empty, LClusteringKey.Columns, LClusteringKey.Columns)
+												#else
 												Compiler.BuildKeyEqualExpression(LPlan, LOldKeyType.Columns, LKeyType.Columns)
+												#endif
 											)
 										),
 										Instructions.Or,

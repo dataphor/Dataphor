@@ -3,8 +3,10 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
 #define UseReferenceDerivation
 #define NILPROPOGATION
+#define USENAMEDROWVARIABLES
 	
 using System;
 using System.Text;
@@ -54,18 +56,31 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 				}
 
-				Schema.RowType LLeftRowType = new Schema.RowType(((Schema.RowType)Nodes[0].DataType).Columns, Keywords.Left);
-				Schema.RowType LRightRowType = new Schema.RowType(((Schema.RowType)Nodes[1].DataType).Columns, Keywords.Right);
 				APlan.EnterRowContext();
 				try
 				{
+					#if USENAMEDROWVARIABLES
+					APlan.Symbols.Push(new Symbol(Keywords.Left, (Schema.RowType)Nodes[0].DataType));
+					#else
+					Schema.RowType LLeftRowType = new Schema.RowType(((Schema.RowType)Nodes[0].DataType).Columns, Keywords.Left);
 					APlan.Symbols.Push(new Symbol(String.Empty, LLeftRowType));
+					#endif
 					try
 					{
+						#if USENAMEDROWVARIABLES
+						APlan.Symbols.Push(new Symbol(Keywords.Right, (Schema.RowType)Nodes[1].DataType));
+						#else
+						Schema.RowType LRightRowType = new Schema.RowType(((Schema.RowType)Nodes[1].DataType).Columns, Keywords.Right);
 						APlan.Symbols.Push(new Symbol(String.Empty, LRightRowType));
+						#endif
 						try
 						{
-							FComparisonNode = Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, LLeftRowType.Columns, LRightRowType.Columns));
+							FComparisonNode = 
+								#if USENAMEDROWVARIABLES
+								Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, Keywords.Left, Keywords.Right, ((Schema.RowType)Nodes[0].DataType).Columns, ((Schema.RowType)Nodes[1].DataType).Columns));
+								#else
+								Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, LLeftRowType.Columns, LRightRowType.Columns));
+								#endif
 						}
 						finally
 						{
@@ -93,10 +108,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				APlan.EnterRowContext();
 				try
 				{
+					#if USENAMEDROWVARIABLES
+					APlan.Symbols.Push(new Symbol(Keywords.Left, (Schema.RowType)Nodes[0].DataType));
+					#else
 					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(((Schema.RowType)Nodes[0].DataType).Columns, Keywords.Left)));
+					#endif
 					try
 					{
+						#if USENAMEDROWVARIABLES
+						APlan.Symbols.Push(new Symbol(Keywords.Right, (Schema.RowType)Nodes[1].DataType));
+						#else
 						APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(((Schema.RowType)Nodes[1].DataType).Columns, Keywords.Right)));
+						#endif
 						try
 						{
 							FComparisonNode.DetermineBinding(APlan);
@@ -186,18 +209,31 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 			}
 
-			Schema.RowType LLeftRowType = new Schema.RowType(((Schema.ScalarType)Nodes[0].DataType).CompoundRowType.Columns, Keywords.Left);
-			Schema.RowType LRightRowType = new Schema.RowType(((Schema.ScalarType)Nodes[1].DataType).CompoundRowType.Columns, Keywords.Right);
 			APlan.EnterRowContext();
 			try
 			{
+				#if USENAMEDROWVARIABLES
+				APlan.Symbols.Push(new Symbol(Keywords.Left, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType));
+				#else
+				Schema.RowType LLeftRowType = new Schema.RowType(((Schema.ScalarType)Nodes[0].DataType).CompoundRowType.Columns, Keywords.Left);
 				APlan.Symbols.Push(new Symbol(String.Empty, LLeftRowType));
+				#endif
 				try
 				{
+					#if USENAMEDROWVARIABLES
+					APlan.Symbols.Push(new Symbol(String.Empty, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType));
+					#else
+					Schema.RowType LRightRowType = new Schema.RowType(((Schema.ScalarType)Nodes[1].DataType).CompoundRowType.Columns, Keywords.Right);
 					APlan.Symbols.Push(new Symbol(String.Empty, LRightRowType));
+					#endif
 					try
 					{
-						FComparisonNode = Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, LLeftRowType.Columns, LRightRowType.Columns));
+						FComparisonNode = 
+							#if USENAMEDROWVARIABLES
+							Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, Keywords.Left, Keywords.Right, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType.Columns, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType.Columns));
+							#else
+							Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, LLeftRowType.Columns, LRightRowType.Columns));
+							#endif
 					}
 					finally
 					{
@@ -222,10 +258,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
+				#if USENAMEDROWVARIABLES
+				APlan.Symbols.Push(new Symbol(Keywords.Left, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType));
+				#else
 				APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(((Schema.ScalarType)Nodes[0].DataType).CompoundRowType.Columns, Keywords.Left)));
+				#endif
 				try
 				{
+					#if USENAMEDROWVARIABLES
+					APlan.Symbols.Push(new Symbol(Keywords.Right, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType));
+					#else
 					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(((Schema.ScalarType)Nodes[1].DataType).CompoundRowType.Columns, Keywords.Right)));
+					#endif
 					try
 					{
 						FComparisonNode.DetermineBinding(APlan);

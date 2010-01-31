@@ -3,6 +3,9 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
+#define USENAMEDROWVARIABLES
+
 namespace Alphora.Dataphor.DAE.Device.SQL
 {
 	using System;
@@ -162,7 +165,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				{
 					LDevicePlan.CurrentQueryContext().IsWhereClause = true;
 
-					LDevicePlan.Stack.Push(new Symbol(String.Empty, ((TableNode)APlanNode).DataType.CreateRowType()));
+					LDevicePlan.Stack.Push(new Symbol(String.Empty, ((TableNode)APlanNode).DataType.RowType));
 					try
 					{
 						LDevicePlan.CurrentQueryContext().ResetReferenceFlags();
@@ -330,7 +333,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				SelectExpression LSelectExpression = LDevicePlan.Device.EnsureUnarySelectExpression(LDevicePlan, ((TableNode)APlanNode.Nodes[0]).TableVar, LStatement, true);
 				LStatement = LSelectExpression;
 
-				LDevicePlan.Stack.Push(new Symbol(String.Empty, LExtendNode.DataType.CreateRowType()));
+				LDevicePlan.Stack.Push(new Symbol(String.Empty, LExtendNode.DataType.RowType));
 				try
 				{
 					LDevicePlan.CurrentQueryContext().IsExtension = true;
@@ -390,7 +393,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				SelectExpression LSelectExpression = LDevicePlan.Device.EnsureUnarySelectExpression(LDevicePlan, ((TableNode)APlanNode.Nodes[0]).TableVar, LStatement, true);
 				LStatement = LSelectExpression;
 
-				LDevicePlan.Stack.Push(new Symbol(String.Empty, LRedefineNode.DataType.CreateRowType()));
+				LDevicePlan.Stack.Push(new Symbol(String.Empty, LRedefineNode.DataType.RowType));
 				try
 				{
 					LDevicePlan.CurrentQueryContext().IsExtension = true;
@@ -997,10 +1000,18 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 								LJoinClause.JoinType = JoinType.Inner;
 						}
 
+						#if USENAMEDROWVARIABLES
+						LDevicePlan.Stack.Push(new Symbol(Keywords.Left, ((TableNode)APlanNode.Nodes[0]).DataType.RowType));
+						#else
 						LDevicePlan.Stack.Push(new Symbol(String.Empty, new Schema.RowType(((TableNode)APlanNode.Nodes[0]).DataType.Columns, Keywords.Left)));
+						#endif
 						try
 						{
+							#if USENAMEDROWVARIABLES
+							LDevicePlan.Stack.Push(new Symbol(Keywords.Right, ((TableNode)APlanNode.Nodes[1]).DataType.RowType));
+							#else
 							LDevicePlan.Stack.Push(new Symbol(String.Empty, new Schema.RowType(((TableNode)APlanNode.Nodes[1]).DataType.Columns, Keywords.Right)));
+							#endif
 							try
 							{
 								LJoinClause.JoinExpression = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[2], true);

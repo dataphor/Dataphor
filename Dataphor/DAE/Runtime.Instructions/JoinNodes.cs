@@ -228,9 +228,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					LEqualExpression = 
 						new BinaryExpression
 						(
+							#if USENAMEDROWVARIABLES
+							new QualifierExpression(new IdentifierExpression(Keywords.Left), new IdentifierExpression(LLeftColumn.Name)),
+							#else
 							new IdentifierExpression(Schema.Object.Qualify(LLeftColumn.Name, Keywords.Left)), 
+							#endif
 							Instructions.Equal, 
+							#if USENAMEDROWVARIABLES
+							new QualifierExpression(new IdentifierExpression(Keywords.Right), new IdentifierExpression(LRightColumn.Name))
+							#else
 							new IdentifierExpression(Schema.Object.Qualify(LRightColumn.Name, Keywords.Right))
+							#endif
 						);
 						
 					FLeftKey.Columns.Add(LLeftColumn);
@@ -637,10 +645,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{			
+				#if USENAMEDROWVARIABLES
+				APlan.Symbols.Push(new Symbol(Keywords.Left, LeftTableType.RowType));
+				#else
 				APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(LeftTableType.Columns, Keywords.Left)));
+				#endif
 				try
 				{
+					#if USENAMEDROWVARIABLES
+					APlan.Symbols.Push(new Symbol(Keywords.Right, RightTableType.RowType));
+					#else
 					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(RightTableType.Columns, Keywords.Right)));
+					#endif
 					try
 					{
 						if (FExpression != null)
@@ -685,10 +701,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
+				#if USENAMEDROWVARIABLES
+				APlan.Symbols.Push(new Symbol(Keywords.Left, LeftTableType.RowType));
+				#else
 				APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(LeftTableType.Columns, Keywords.Left)));
+				#endif
 				try
 				{
+					#if USENAMEDROWVARIABLES
+					APlan.Symbols.Push(new Symbol(Keywords.Right, RightTableType.RowType));
+					#else
 					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(RightTableType.Columns, Keywords.Right)));
+					#endif
 					try
 					{
 						Nodes[2].DetermineBinding(APlan);
@@ -1849,10 +1873,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{			
+				#if USENAMEDROWVARIABLES
+				APlan.Symbols.Push(new Symbol(Keywords.Left, LeftTableType.RowType));
+				#else
 				APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(LeftTableType.Columns, FIsNatural ? Keywords.Left : String.Empty)));
+				#endif
 				try
 				{
+					#if USENAMEDROWVARIABLES
+					APlan.Symbols.Push(new Symbol(Keywords.Right, RightTableType.RowType));
+					#else
 					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(RightTableType.Columns, FIsNatural ? Keywords.Right : String.Empty)));
+					#endif
 					try
 					{
 						if (FExpression != null)
@@ -1900,10 +1932,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
+				#if USENAMEDROWVARIABLES
+				APlan.Symbols.Push(new Symbol(Keywords.Left, LeftTableType.RowType));
+				#else
 				APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(LeftTableType.Columns, FIsNatural ? Keywords.Left : String.Empty)));
+				#endif
 				try
 				{
+					#if USENAMEDROWVARIABLES
+					APlan.Symbols.Push(new Symbol(Keywords.Right, RightTableType.RowType));
+					#else
 					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(RightTableType.Columns, FIsNatural ? Keywords.Right : String.Empty)));
+					#endif
 					try
 					{
 						Nodes[2].DetermineBinding(APlan);
@@ -4149,10 +4189,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
+				#if USENAMEDROWVARIABLES
+				APlan.Symbols.Push(new Symbol(Keywords.Left, LeftTableType.RowType));
+				#else
 				APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(LeftTableType.Columns, FIsNatural ? Keywords.Left : String.Empty)));
+				#endif
 				try
 				{
+					#if USENAMEDROWVARIABLES
+					APlan.Symbols.Push(new Symbol(Keywords.Right, RightTableType.RowType));
+					#else
 					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(RightTableType.Columns, FIsNatural ? Keywords.Right : String.Empty)));
+					#endif
 					try
 					{
 						Nodes[2].DetermineBinding(APlan);

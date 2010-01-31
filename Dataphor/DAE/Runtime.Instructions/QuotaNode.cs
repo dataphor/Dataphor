@@ -3,7 +3,9 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
 #define UseReferenceDerivation
+#define USENAMEDROWVARIABLES
 	
 using System;
 using System.Text;
@@ -31,6 +33,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			get { return FQuotaOrder; }
 			set { FQuotaOrder = value; }
 		}
+		
+		#if USENAMEDROWVARIABLES
+		private Schema.IRowType FQuotaRowType;
+		#endif
 		
 		// EqualNode
 		protected PlanNode FEqualNode;
@@ -100,15 +106,29 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
+				#if USENAMEDROWVARIABLES
+				FQuotaRowType = new Schema.RowType(FQuotaOrder.Columns);
+				APlan.Symbols.Push(new Symbol(Keywords.Left, FQuotaRowType));
+				#else
 				Schema.IRowType LLeftRowType = new Schema.RowType(FQuotaOrder.Columns, Keywords.Left);
 				APlan.Symbols.Push(new Symbol(String.Empty, LLeftRowType));
+				#endif
 				try
 				{
+					#if USENAMEDROWVARIABLES
+					APlan.Symbols.Push(new Symbol(Keywords.Right, FQuotaRowType));
+					#else
 					Schema.IRowType LRightRowType = new Schema.RowType(FQuotaOrder.Columns, Keywords.Right);
 					APlan.Symbols.Push(new Symbol(String.Empty, LRightRowType));
+					#endif
 					try
 					{
-						FEqualNode = Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, LLeftRowType.Columns, LRightRowType.Columns));
+						FEqualNode = 
+							#if USENAMEDROWVARIABLES
+							Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, Keywords.Left, Keywords.Right, FQuotaRowType.Columns, FQuotaRowType.Columns));
+							#else
+							Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, LLeftRowType.Columns, LRightRowType.Columns));
+							#endif
 					}
 					finally
 					{
@@ -132,10 +152,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
+				#if USENAMEDROWVARIABLES
+				APlan.Symbols.Push(new Symbol(Keywords.Left, FQuotaRowType));
+				#else
 				APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(FQuotaOrder.Columns, Keywords.Left)));
+				#endif
 				try
 				{
+					#if USENAMEDROWVARIABLES
+					APlan.Symbols.Push(new Symbol(Keywords.Right, FQuotaRowType));
+					#else
 					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(FQuotaOrder.Columns, Keywords.Right)));
+					#endif
 					try
 					{
 						FEqualNode.DetermineBinding(APlan);

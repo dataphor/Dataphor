@@ -3,7 +3,9 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
 #define UseReferenceDerivation
+#define USENAMEDROWVARIABLES
 	
 using System;
 using System.Text;
@@ -130,7 +132,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
+				#if USENAMEDROWVARIABLES
+				APlan.Symbols.Push(new Symbol(Keywords.Parent, SourceTableType.RowType));
+				#else
 				APlan.Symbols.Push(new Symbol(String.Empty, SourceTableType.CreateRowType(Keywords.Parent)));
+				#endif
 				try
 				{
 					Nodes[2].DetermineBinding(APlan);

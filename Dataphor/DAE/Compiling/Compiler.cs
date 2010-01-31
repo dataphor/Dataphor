@@ -13067,10 +13067,20 @@ indicative of other problems, a reference will never be attached as an explicit 
 
 		public static Expression BuildRowEqualExpression(Plan APlan, string ALeftRowVarName, string ARightRowVarName, Schema.TableVarColumnsBase AColumns)
 		{
-			return BuildRowEqualExpression(APlan, ALeftRowVarName, ARightRowVarName, AColumns, null);
+			return BuildRowEqualExpression(APlan, ALeftRowVarName, ARightRowVarName, AColumns, (BitArray)null);
 		}
 		
 		public static Expression BuildRowEqualExpression(Plan APlan, string ALeftRowVarName, string ARightRowVarName, Schema.TableVarColumnsBase AColumns, BitArray AIsNilable)
+		{
+			return BuildRowEqualExpression(APlan, ALeftRowVarName, ARightRowVarName, AColumns, AColumns, AIsNilable, AIsNilable);
+		}
+		
+		public static Expression BuildRowEqualExpression(Plan APlan, string ALeftRowVarName, string ARightRowVarName, Schema.TableVarColumnsBase ALeftColumns, Schema.TableVarColumnsBase ARightColumns)
+		{
+			return BuildRowEqualExpression(APlan, ALeftRowVarName, ARightRowVarName, ALeftColumns, ARightColumns, null, null);
+		}
+		
+		public static Expression BuildRowEqualExpression(Plan APlan, string ALeftRowVarName, string ARightRowVarName, Schema.TableVarColumnsBase ALeftColumns, Schema.TableVarColumnsBase ARightColumns, BitArray ALeftIsNilable, BitArray ARightIsNilable)
 		{
 			if ((ALeftRowVarName == null) || (ARightRowVarName == null) || ((ALeftRowVarName == String.Empty) && (ARightRowVarName == String.Empty)))
 				throw new ArgumentException("Row variable name is required for at least one side of the row comparison expression to be built.");
@@ -13079,8 +13089,10 @@ indicative of other problems, a reference will never be attached as an explicit 
 			Expression LEqualExpression;
 			LineInfo LLineInfo = APlan.GetCurrentLineInfo();
 
-			for (int LIndex = 0; LIndex < AColumns.Count; LIndex++)
+			for (int LIndex = 0; LIndex < ALeftColumns.Count; LIndex++)
 			{
+				int LRightIndex = Object.ReferenceEquals(ALeftColumns, ARightColumns) ? LIndex : ARightColumns.IndexOf(ALeftColumns[LIndex].Name);
+
 				LEqualExpression =
 					TagLine<Expression>
 					(
@@ -13088,24 +13100,24 @@ indicative of other problems, a reference will never be attached as an explicit 
 						(
 							ALeftRowVarName == String.Empty
 								#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
-								? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(AColumns[LIndex].Name)), LLineInfo)
+								? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ALeftColumns[LIndex].Name)), LLineInfo)
 								#else
-								? TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)
+								? TagLine<Expression>(new IdentifierExpression(ALeftColumns[LIndex].Name), LLineInfo)
 								#endif
-								: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ALeftRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)), LLineInfo),
+								: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ALeftRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(ALeftColumns[LIndex].Name), LLineInfo)), LLineInfo),
 							Instructions.Equal,
 							ARightRowVarName == String.Empty
 								#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
-								? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(AColumns[LIndex].Name)), LLineInfo)
+								? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ARightColumns[LRightIndex].Name)), LLineInfo)
 								#else
-								? TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)
+								? TagLine<Expression>(new IdentifierExpression(ARightColumns[LRightIndex].Name), LLineInfo)
 								#endif
-								: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ARightRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)), LLineInfo)
+								: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ARightRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(ARightColumns[LRightIndex].Name), LLineInfo)), LLineInfo)
 						),
 						LLineInfo
 					);
 					
-				if ((AIsNilable == null) || AIsNilable[LIndex])
+				if ((ALeftIsNilable == null) || ALeftIsNilable[LIndex])
 					LEqualExpression =
 						TagLine<Expression>
 						(
@@ -13124,11 +13136,11 @@ indicative of other problems, a reference will never be attached as an explicit 
 												{
 													ALeftRowVarName == String.Empty
 														#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
-														? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(AColumns[LIndex].Name)), LLineInfo)
+														? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ALeftColumns[LIndex].Name)), LLineInfo)
 														#else
-														? TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)
+														? TagLine<Expression>(new IdentifierExpression(ALeftColumns[LIndex].Name), LLineInfo)
 														#endif
-														: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ALeftRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)), LLineInfo)
+														: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ALeftRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(ALeftColumns[LIndex].Name), LLineInfo)), LLineInfo)
 												}
 											),
 											LLineInfo
@@ -13143,11 +13155,11 @@ indicative of other problems, a reference will never be attached as an explicit 
 												{
 													ARightRowVarName == String.Empty
 														#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
-														? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(AColumns[LIndex].Name)), LLineInfo)
+														? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ARightColumns[LRightIndex].Name)), LLineInfo)
 														#else
-														? TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)
+														? TagLine<Expression>(new IdentifierExpression(ARightColumns[LRightIndex].Name), LLineInfo)
 														#endif
-														: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ARightRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)), LLineInfo)
+														: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ARightRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(ARightColumns[LRightIndex].Name), LLineInfo)), LLineInfo)
 												}
 											),
 											LLineInfo
@@ -13190,13 +13202,20 @@ indicative of other problems, a reference will never be attached as an explicit 
 		
 		public static Expression BuildRowEqualExpression(Plan APlan, string ALeftRowVarName, string ARightRowVarName, Schema.Columns AColumns)
 		{
+			return BuildRowEqualExpression(APlan, ALeftRowVarName, ARightRowVarName, AColumns, AColumns);
+		}
+		
+		public static Expression BuildRowEqualExpression(Plan APlan, string ALeftRowVarName, string ARightRowVarName, Schema.Columns ALeftColumns, Schema.Columns ARightColumns)
+		{
 			if ((ALeftRowVarName == null) || (ARightRowVarName == null) || ((ALeftRowVarName == String.Empty) && (ARightRowVarName == String.Empty)))
 				throw new ArgumentException("Row variable name is required for at least one side of the row comparison expression to be built.");
 
 			Expression LExpression = null;
 			var LLineInfo = APlan.GetCurrentLineInfo();
-			for (int LIndex = 0; LIndex < AColumns.Count; LIndex++)
+			for (int LIndex = 0; LIndex < ALeftColumns.Count; LIndex++)
 			{
+				int LRightIndex = Object.ReferenceEquals(ALeftColumns, ARightColumns) ? LIndex : ARightColumns.IndexOf(ALeftColumns[LIndex].Name);
+
 				Expression LEqualExpression =
 					TagLine<Expression>
 					(
@@ -13215,11 +13234,11 @@ indicative of other problems, a reference will never be attached as an explicit 
 											{
 												ALeftRowVarName == String.Empty
 													#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
-													? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(AColumns[LIndex].Name)), LLineInfo)
+													? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ALeftColumns[LIndex].Name)), LLineInfo)
 													#else
-													? TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)
+													? TagLine<Expression>(new IdentifierExpression(ALeftColumns[LIndex].Name), LLineInfo)
 													#endif
-													: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ALeftRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)), LLineInfo)
+													: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ALeftRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(ALeftColumns[LIndex].Name), LLineInfo)), LLineInfo)
 											}
 										),
 										LLineInfo
@@ -13234,11 +13253,11 @@ indicative of other problems, a reference will never be attached as an explicit 
 											{
 												ARightRowVarName == String.Empty
 													#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
-													? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(AColumns[LIndex].Name)), LLineInfo)
+													? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ARightColumns[LRightIndex].Name)), LLineInfo)
 													#else
-													? TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)
+													? TagLine<Expression>(new IdentifierExpression(ARightColumns[LRightIndex].Name), LLineInfo)
 													#endif
-													: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ARightRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)), LLineInfo)
+													: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ARightRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(ARightColumns[LRightIndex].Name), LLineInfo)), LLineInfo)
 											}
 										),
 										LLineInfo
@@ -13253,19 +13272,19 @@ indicative of other problems, a reference will never be attached as an explicit 
 								(
 									ALeftRowVarName == String.Empty
 										#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
-										? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(AColumns[LIndex].Name)), LLineInfo)
+										? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ALeftColumns[LIndex].Name)), LLineInfo)
 										#else
-										? TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)
+										? TagLine<Expression>(new IdentifierExpression(ALeftColumns[LIndex].Name), LLineInfo)
 										#endif
-										: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ALeftRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)), LLineInfo),
+										: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ALeftRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(ALeftColumns[LIndex].Name), LLineInfo)), LLineInfo),
 									Instructions.Equal,
 									ARightRowVarName == String.Empty
 										#if USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
-										? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(AColumns[LIndex].Name)), LLineInfo)
+										? TagLine<Expression>(new IdentifierExpression(Schema.Object.EnsureRooted(ARightColumns[LRightIndex].Name)), LLineInfo)
 										#else
-										? TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)
+										? TagLine<Expression>(new IdentifierExpression(ARightColumns[LRightIndex].Name), LLineInfo)
 										#endif
-										: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ARightRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(AColumns[LIndex].Name), LLineInfo)), LLineInfo)
+										: TagLine<Expression>(new QualifierExpression(TagLine<Expression>(new IdentifierExpression(ARightRowVarName), LLineInfo), TagLine<Expression>(new IdentifierExpression(ARightColumns[LRightIndex].Name), LLineInfo)), LLineInfo)
 								),
 								LLineInfo
 							)
@@ -13956,6 +13975,22 @@ indicative of other problems, a reference will never be attached as an explicit 
 		
 		public static PlanNode CompileExplodeColumnExpression(Plan APlan, ExplodeColumnExpression AExpression)
 		{
+			#if USENAMEDROWVARIABLES
+			return 
+				CompileQualifierExpression
+				(
+					APlan, 
+					TagLine<QualifierExpression>
+					(
+						new QualifierExpression
+						(
+							TagLine<IdentifierExpression>(new IdentifierExpression(Keywords.Parent), AExpression.LineInfo), 
+							TagLine<IdentifierExpression>(new IdentifierExpression(AExpression.ColumnName), AExpression.LineInfo)
+						),
+						AExpression.LineInfo
+					)
+				);
+			#else
 			NameBindingContext LContext = new NameBindingContext(String.Format("{0}{1}{2}", Keywords.Parent, Keywords.Qualifier, AExpression.ColumnName), APlan.NameResolutionPath);
 			PlanNode LNode = EmitIdentifierNode(APlan, AExpression, LContext);
 			if (LNode == null)
@@ -13964,6 +13999,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				else
 					throw new CompilerException(CompilerException.Codes.UnknownIdentifier, AExpression, String.Format("{0} {1}", Keywords.Parent, AExpression.ColumnName));
 			return LNode;
+			#endif
 		}
 		
 		public static PlanNode CompileExplodeExpression(Plan APlan, ExplodeExpression AExpression)
@@ -14003,7 +14039,11 @@ indicative of other problems, a reference will never be attached as an explicit 
 			APlan.EnterRowContext();
 			try
 			{
+				#if USENAMEDROWVARIABLES
+				APlan.Symbols.Push(new Symbol(Keywords.Parent, ((Schema.ITableType)LRootNode.DataType).RowType));
+				#else
 				APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(((Schema.ITableType)LRootNode.DataType).Columns, Keywords.Parent)));
+				#endif
 				try
 				{
 					LParentNode = CompileExpression(APlan, LByExpression);

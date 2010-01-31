@@ -3,6 +3,9 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
+#define USENAMEDROWVARIABLES
+
 using System;
 using System.Collections;
 
@@ -45,7 +48,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected Row NewParentRow(Row ACurrentRow)
 		{
+			#if USENAMEDROWVARIABLES
+			Row LRow = new Row(Manager, ACurrentRow.DataType);
+			#else
 			Row LRow = new Row(Manager, new Schema.RowType(ACurrentRow.DataType.Columns, Keywords.Parent));
+			#endif
 			ACurrentRow.CopyTo(LRow);
 			return LRow;
 		}
