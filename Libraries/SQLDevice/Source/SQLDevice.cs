@@ -912,8 +912,37 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 		protected virtual Statement TranslateExtractColumnNode(SQLDevicePlan ADevicePlan, ExtractColumnNode ANode)
 		{
-			if (ANode.Nodes[0] is StackReferenceNode)
-				return FromScalar(ADevicePlan, new StackColumnReferenceNode(ANode.Identifier, ANode.DataType, ((StackReferenceNode)ANode.Nodes[0]).Location - ADevicePlan.Stack.Count));
+			StackReferenceNode LSourceNode = ANode.Nodes[0] as StackReferenceNode;
+			if (LSourceNode != null)
+			{
+				if (LSourceNode.Location < ADevicePlan.Stack.Count)
+				{
+					Expression LExpression = new QualifiedFieldExpression();
+					SQLRangeVarColumn LRangeVarColumn = null;
+					
+					if (DAE.Schema.Object.EnsureUnrooted(LSourceNode.Identifier) == Keywords.Left)
+						LRangeVarColumn = ADevicePlan.CurrentJoinContext().LeftQueryContext.FindRangeVarColumn(ANode.Identifier);
+					else if (DAE.Schema.Object.EnsureUnrooted(LSourceNode.Identifier) == Keywords.Right)
+						LRangeVarColumn = ADevicePlan.CurrentJoinContext().RightQueryContext.FindRangeVarColumn(ANode.Identifier);
+					else
+						LRangeVarColumn = ADevicePlan.FindRangeVarColumn(DAE.Schema.Object.Qualify(ANode.Identifier, LSourceNode.Identifier), false);
+
+					if (LRangeVarColumn == null)
+					{
+						ADevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(String.Format(@"Plan is not supported because the reference to column ""{0}"" is out of context.", ANode.Identifier), ANode));
+						ADevicePlan.IsSupported = false;
+					}
+					else
+						LExpression = LRangeVarColumn.GetExpression();
+					
+					if (ADevicePlan.IsBooleanContext())
+						return new BinaryExpression(LExpression, "iEqual", new ValueExpression(1)); // <> 0 is more robust, but = 1 is potentially more efficient
+
+					return LExpression;
+				}
+				else
+					return FromScalar(ADevicePlan, new StackColumnReferenceNode(ANode.Identifier, ANode.DataType, LSourceNode.Location - ADevicePlan.Stack.Count));
+			}
 			else
 			{
 				Statement LStatement = Translate(ADevicePlan, ANode.Nodes[0]);
