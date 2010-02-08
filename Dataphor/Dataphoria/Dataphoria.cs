@@ -1676,20 +1676,20 @@ namespace Alphora.Dataphor.Dataphoria
 
 		public void OpenLocator(DebugLocator ALocator)
 		{
-					DesignerInfo LInfo;
+			DesignerInfo LInfo;
 			DesignBuffer LBuffer = DesignBufferFromLocator(out LInfo, ALocator);
-					if (LBuffer != null)
-					{
-						IDesigner LDesigner = this.GetDesigner(LBuffer);
-						if (LDesigner != null)
+			if (LBuffer != null)
+			{
+				IDesigner LDesigner = this.GetDesigner(LBuffer);
+				if (LDesigner != null)
 				{
 					LDesigner.Service.RequestLocate(ALocator);
-							LDesigner.Select();
+					LDesigner.Select();
 				}
-						else
-							OpenDesigner(LInfo, LBuffer);
-					}
-				}
+				else
+					OpenDesigner(LInfo, LBuffer);
+			}
+		}
 
 		public DesignBuffer DesignBufferFromLocator(out DesignerInfo AInfo, DebugLocator ALocator)
 		{

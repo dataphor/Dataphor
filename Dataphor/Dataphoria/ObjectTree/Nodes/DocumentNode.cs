@@ -82,7 +82,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		protected DocumentDesignBuffer GetBuffer()
 		{
-			return new DocumentDesignBuffer(Dataphoria, LibraryName, FDocumentName);
+			return new DocumentDesignBuffer(Dataphoria, Alphora.Dataphor.DAE.Schema.Object.EnsureRooted(LibraryName), FDocumentName);
 		}
 
 		private void OpenDesigner(DesignerInfo AInfo)
