@@ -1405,7 +1405,7 @@ namespace Alphora.Dataphor.Dataphoria
 			if (LInner != null)
 				return LInner;
 			var LLocator = AException as ILocatorException;
-			if (LLocator != null)
+			if (LLocator != null && LLocator.Line > -1 && LLocator.LinePos > -1)
 				return new DebugLocator(LLocator.Locator, LLocator.Line, LLocator.LinePos);
 			else
 				return null;
@@ -1419,6 +1419,7 @@ namespace Alphora.Dataphor.Dataphoria
 				try
 				{
 					OpenLocator(LLocator);
+					return true;
 				}
 				catch
 				{
@@ -1426,7 +1427,7 @@ namespace Alphora.Dataphor.Dataphoria
 					return false;
 				}
 			}
-			return true;
+			return false;
 		}
 		
 		void IErrorSource.ErrorHighlighted(Exception AException)

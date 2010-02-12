@@ -183,7 +183,9 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		private void ProcessErrors(ErrorList AErrors)
 		{
 			TextLocation LOffset = GetSelectionPosition();
-
+			DebugLocator LLocator = Service.GetLocator();
+			string LLocatorLocator = LLocator == null ? null : LLocator.Locator;
+			
 			for (int LIndex = AErrors.Count - 1; LIndex >= 0; LIndex--)
 			{
 				Exception LException = AErrors[LIndex];
@@ -196,17 +198,41 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 					LIsWarning = false;
 
 				// Adjust the offset of the exception to account for the current selection
-				var LLocatedException = LException as ILocatedException;
-				if (LLocatedException != null)
-				{
-					if (LLocatedException.Line == 1)
-						LLocatedException.LinePos += LOffset.X;
-					if (LLocatedException.Line >= 0)
-						LLocatedException.Line += LOffset.Y;
-				}
+				ShiftException(LOffset, LLocatorLocator, LException);
 
 				Dataphoria.Warnings.AppendError(this, LException, LIsWarning);
 			}
+		}
+
+		private static void ShiftException(TextLocation AOffset, string ALocator, Exception AException)
+		{
+			var LLocatorException = AException as ILocatorException;
+			if (LLocatorException != null)
+			{
+				if (String.IsNullOrEmpty(LLocatorException.Locator))
+				{
+					LLocatorException.Locator = ALocator;
+					OffsetLocatedException(AOffset, LLocatorException);
+				}
+				else if (LLocatorException.Locator == ALocator)
+					OffsetLocatedException(AOffset, LLocatorException);
+			}
+			else
+			{
+				var LLocatedException = AException as ILocatedException;
+				if (LLocatedException != null)
+					OffsetLocatedException(AOffset, LLocatedException);
+			}
+			if (AException.InnerException != null)
+				ShiftException(AOffset, ALocator, AException.InnerException);
+		}
+
+		private static void OffsetLocatedException(TextLocation AOffset, ILocatedException ALocatedException)
+		{
+			if (ALocatedException.Line == 1)
+				ALocatedException.LinePos += AOffset.X;
+			if (ALocatedException.Line >= 0)
+				ALocatedException.Line += AOffset.Y;
 		}
 
 		public void Prepare()

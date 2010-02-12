@@ -166,10 +166,16 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             FDockContentTextEdit.ShowHint = DockState.Document;
             FDockContentTextEdit.Show(FDockPanel);
             FDockContentTextEdit.Name = "DockContentTextEdit";
-        	FDockContentTextEdit.ActiveControl = FTextEdit;
-        }
+			FDockContentTextEdit.ActiveControl = FTextEdit;
+		}
 
-
+		protected override void Select(bool directed, bool forward)
+		{
+			base.Select(directed, forward);
+			FDockContentTextEdit.ActiveControl = FTextEdit;
+			FTextEdit.Focus();
+		}
+		
         protected virtual IHighlightingStrategy GetHighlightingStrategy()
         {
             switch (FDesignerID)
