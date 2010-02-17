@@ -2276,7 +2276,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 
 				// Don't insert a row if it is in the DeletedTableVar or the TableVar of the TableMap for this TableVar
 				// if not(exists(DeletedTableVar where ARow) or exists(TableVar where ARow))
-				Row LRow = new Row(AProgram.ValueManager, ATableVar.DataType.OldRowType, (NativeRow)ARow.AsNative);
+				Row LRow = new Row(AProgram.ValueManager, ATableVar.DataType.RowType, (NativeRow)ARow.AsNative);
 				try
 				{
 					AProgram.Stack.Push(LRow);
@@ -2340,7 +2340,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		protected void LogDeletedRow(Program AProgram, TableVar ATableVar, Row ARow)
 		{
 			TableMap LTableMap = GetTableMap(ATableVar);
-			Row LRow = new Row(AProgram.ValueManager, ATableVar.DataType.OldRowType, (NativeRow)ARow.AsNative);
+			Row LRow = new Row(AProgram.ValueManager, ATableVar.DataType.RowType, (NativeRow)ARow.AsNative);
 			try
 			{
 				AProgram.Stack.Push(LRow);
