@@ -57,6 +57,8 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		private static AliasList FOverriddenAliases;
 		
+		private static DateTime FMachineConfigurationFileDate;
+		
 		private static string GetMachineAliasConfigurationFileName()
 		{
 			return Path.Combine(PathUtility.CommonAppDataPath(String.Empty, VersionModifier.MajorSpecific), CAliasConfigurationFileName);
@@ -64,7 +66,12 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		private static AliasConfiguration LoadMachineAliasConfiguration()
 		{
-			return AliasConfiguration.Load(GetMachineAliasConfigurationFileName());
+			var LFileName = GetMachineAliasConfigurationFileName();
+			if (File.Exists(LFileName))
+				FMachineConfigurationFileDate = File.GetLastWriteTimeUtc(LFileName);
+			else
+				FMachineConfigurationFileDate = default(DateTime);
+			return AliasConfiguration.Load(LFileName);
 		}
 		
 		private static string GetUserAliasConfigurationFileName()
@@ -84,7 +91,21 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		private static void SaveMachineAliasConfiguration(AliasConfiguration AConfiguration)
 		{
-			AConfiguration.Save(GetMachineAliasConfigurationFileName());
+			var LFileName = GetMachineAliasConfigurationFileName();
+			if 
+			(
+				FMachineConfigurationFileDate == default(DateTime) 
+					|| !File.Exists(LFileName)
+					|| (File.GetLastWriteTimeUtc(LFileName) <= FMachineConfigurationFileDate)
+			)
+				try
+				{
+					AConfiguration.Save(LFileName);
+				}
+				catch (UnauthorizedAccessException)
+				{
+					// Don't throw if machine level saving fails due to permission error
+				}
 		}
 		
 		public static void Load()
@@ -145,6 +166,7 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			FDefaultAliasName = String.Empty;
 			FAliases = new AliasList();
+			FMachineConfigurationFileDate = default(DateTime);
 			FOverriddenAliases = new AliasList();
 		}
 		
