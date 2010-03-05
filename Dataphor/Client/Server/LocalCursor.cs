@@ -22,6 +22,8 @@ namespace Alphora.Dataphor.DAE.Server
 {
     public class LocalCursor : LocalServerChildObject, IServerCursor
     {	
+		public const int CSourceCursorIndexUnknown = -2;
+		
 		public LocalCursor(LocalExpressionPlan APlan, IRemoteServerCursor ACursor) : base()
 		{
 			FPlan = APlan;
@@ -32,6 +34,8 @@ namespace Alphora.Dataphor.DAE.Server
 			FBuffer = new LocalRows();
 			FBookmarks = new LocalBookmarks();
 			FFetchCount = FPlan.FProcess.ProcessInfo.FetchCount;
+			FTrivialBOF = true;
+			FSourceCursorIndex = -1;
 		}
 		
 		protected override void Dispose(bool ADisposing)
@@ -230,6 +234,8 @@ namespace Alphora.Dataphor.DAE.Server
 		protected bool FBufferFull;
 		//protected bool FBufferFirst;
 		protected BufferDirection FBufferDirection = BufferDirection.Forward;
+		/// <summary> Index of FCursor relative to the buffer or CSourceCursorIndexUnknown if unknown. </summary>
+		protected int FSourceCursorIndex;
 		
 		protected bool BufferActive()
 		{
@@ -243,13 +249,18 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		protected void ClearBuffer()
 		{
+			// Dereference all used bookmarks
+			Guid[] LBookmarks = new Guid[FBuffer.Count];
 			for (int LIndex = 0; LIndex < FBuffer.Count; LIndex++)
-				BufferDisposeBookmark(FBuffer[LIndex].Bookmark);
+				LBookmarks[LIndex] = FBuffer[LIndex].Bookmark;
+			BufferDisposeBookmarks(LBookmarks);
+			
 			FBuffer.Clear();
 			FBufferIndex = -1;
 			FBufferFull = false;
+			FSourceCursorIndex = CSourceCursorIndexUnknown;
 		}
-		
+
 		protected void SetBufferDirection(BufferDirection ABufferDirection)
 		{
 			FBufferDirection = ABufferDirection;
@@ -276,11 +287,14 @@ namespace Alphora.Dataphor.DAE.Server
 		// Flags tracks the current status of the remote cursor, BOF, EOF, none, or both
 		protected bool FFlagsCached;
 		protected CursorGetFlags FFlags;
+		protected bool FTrivialBOF;
+		// TrivialEOF unneccesary because Last returns flags
 		
 		protected void SetFlags(CursorGetFlags AFlags)
 		{
 			FFlags = AFlags;
 			FFlagsCached = true;
+			FTrivialBOF = false;
 		}
 		
 		protected CursorGetFlags GetFlags()
@@ -297,6 +311,7 @@ namespace Alphora.Dataphor.DAE.Server
         {
 			if (BufferActive())
 				ClearBuffer();
+			FSourceCursorIndex = -1;
 			SetFlags(FCursor.Reset(FPlan.FProcess.GetProcessCallInfo()));
 			SetBufferDirection(BufferDirection.Forward);
 			FPlan.FProgramStatisticsCached = false;
@@ -379,6 +394,7 @@ namespace Alphora.Dataphor.DAE.Server
 					FBufferIndex = 0;
 				else
 					FBufferIndex = -1;
+				FSourceCursorIndex = FBuffer.Count - 1;
 			}
 			else
 			{
@@ -394,6 +410,7 @@ namespace Alphora.Dataphor.DAE.Server
 					FBufferIndex = FBuffer.Count - 1;
 				else
 					FBufferIndex = -1;
+				FSourceCursorIndex = 0;
 			}
 			
 			SetFlags(AFetchData.Flags);
@@ -407,11 +424,36 @@ namespace Alphora.Dataphor.DAE.Server
 			SetFlags(LMoveData.Flags);
 			return LMoveData.Flags == CursorGetFlags.None;
 		}
-		
-		protected void SyncSource(bool AForward)
+
+		private void GotoBookmarkIndex(int AIndex, bool AForward)
 		{
-			if (!SourceGotoBookmark(FBuffer[FBufferIndex].Bookmark, AForward))
+			if (!SourceGotoBookmark(FBuffer[AIndex].Bookmark, AForward))
 				throw new ServerException(ServerException.Codes.CursorSyncError);
+		}		
+		
+		protected bool SyncSource(bool AForward)
+		{
+			if (FSourceCursorIndex != FBufferIndex)
+			{
+				FSourceCursorIndex = FBufferIndex;
+				if (FBufferIndex == -1)
+				{
+					GotoBookmarkIndex(0, false);
+					return SourcePrior();
+				}
+				else if (FBufferIndex == FBuffer.Count)
+				{
+					GotoBookmarkIndex(FBuffer.Count - 1, true);
+					return SourceNext();
+				}
+				else
+				{
+					GotoBookmarkIndex(FBufferIndex, AForward);
+					return true;
+				}
+			}
+			else
+				return true;
 		}
 		
         public bool Next()
@@ -430,9 +472,10 @@ namespace Alphora.Dataphor.DAE.Server
 						return false;
 					}
 
-					SyncSource(true);
+					bool LSynced = SyncSource(true);
 					ClearBuffer();
-					return SourceNext();
+					SourceFetch(false);
+					return LSynced && !EOF();
 				}
 				FBufferIndex++;
 				return true;
@@ -459,7 +502,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		protected bool SourceBOF()
 		{
-			return (GetFlags() & CursorGetFlags.BOF) != 0;
+			return FTrivialBOF || ((GetFlags() & CursorGetFlags.BOF) != 0);
 		}
 
         public bool BOF()
@@ -573,8 +616,11 @@ namespace Alphora.Dataphor.DAE.Server
         public bool Prior()
         {
 			SetBufferDirection(BufferDirection.Backward);
-			if (BufferActive())
+			if (UseBuffer())
 			{
+				if (!BufferActive())
+					SourceFetch(SourceEOF());
+
 				if (FBufferIndex <= 0)
 				{
 					if (SourceBOF())
@@ -583,13 +629,15 @@ namespace Alphora.Dataphor.DAE.Server
 						return false;
 					}
 
-					SyncSource(false);
+					bool LSynced = SyncSource(false);
 					ClearBuffer();
-					return SourcePrior();
+					SourceFetch(false);
+					return LSynced && !BOF();
 				}
 				FBufferIndex--;
 				return true;
 			}
+
 			if (FFlagsCached && SourceBOF())
 				return false;
 			return SourcePrior();
@@ -656,7 +704,13 @@ namespace Alphora.Dataphor.DAE.Server
 			FCursor.DisposeBookmark(ABookmark, FPlan.FProcess.GetProcessCallInfo());
 			FPlan.FProgramStatisticsCached = false;
 		}
-		
+
+		protected void SourceDisposeBookmarks(Guid[] ABookmarks)
+		{
+			FCursor.DisposeBookmarks(ABookmarks, FPlan.FProcess.GetProcessCallInfo());
+			FPlan.FProgramStatisticsCached = false;
+		}
+
 		protected void BufferDisposeBookmark(Guid ABookmark)
 		{
 			if (ABookmark != Guid.Empty)
@@ -667,12 +721,32 @@ namespace Alphora.Dataphor.DAE.Server
 					
 				LBookmark.ReferenceCount--;
 				
-				if (LBookmark.ReferenceCount <= 0)
+				if (LBookmark.ReferenceCount == 0)
 				{
 					SourceDisposeBookmark(LBookmark.Bookmark);
 					FBookmarks.Remove(LBookmark.Bookmark);
 				}
 			}
+		}
+
+		protected void BufferDisposeBookmarks(Guid[] ABookmarks)
+		{
+			// Dereference each bookmark and prepare list of unreferenced bookmarks
+			List<Guid> LToDispose = new List<Guid>(ABookmarks.Length);
+			for (int LIndex = 0; LIndex < FBuffer.Count; LIndex++)
+			{
+				var LBookmark = FBookmarks[ABookmarks[LIndex]];
+				LBookmark.ReferenceCount--;
+				if (LBookmark.ReferenceCount == 0)
+				{
+					LToDispose.Add(LBookmark.Bookmark);
+					FBookmarks.Remove(LBookmark.Bookmark);
+				}
+			}
+
+			// Free all unreferenced bookmarks together
+			if (LToDispose.Count > 0)
+				SourceDisposeBookmarks(LToDispose.ToArray());
 		}
 
 		public void DisposeBookmark(Guid ABookmark)
@@ -681,18 +755,6 @@ namespace Alphora.Dataphor.DAE.Server
 				BufferDisposeBookmark(ABookmark);
 			else
 				SourceDisposeBookmark(ABookmark);
-		}
-		
-		protected void SourceDisposeBookmarks(Guid[] ABookmarks)
-		{
-			FCursor.DisposeBookmarks(ABookmarks, FPlan.FProcess.GetProcessCallInfo());
-			FPlan.FProgramStatisticsCached = false;
-		}
-		
-		protected void BufferDisposeBookmarks(Guid[] ABookmarks)
-		{
-			for (int LIndex = 0; LIndex < ABookmarks.Length; LIndex++)
-				BufferDisposeBookmark(ABookmarks[LIndex]);
 		}
 
 		public void DisposeBookmarks(Guid[] ABookmarks)

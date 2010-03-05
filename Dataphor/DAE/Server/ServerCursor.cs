@@ -1021,10 +1021,7 @@ namespace Alphora.Dataphor.DAE.Server
 					{
 						if (ACount > 0)
 						{
-							if ((LCount == 0) && FSourceTable.BOF() && !FSourceTable.Next())
-								break;
-
-							if ((LCount > 0) && (!FSourceTable.Next()))
+							if (!FSourceTable.Next())
 								break;
 							FSourceTable.Select(ARows[LCount]);
 							ABookmarks[LCount] = InternalGetBookmark();
@@ -1032,10 +1029,7 @@ namespace Alphora.Dataphor.DAE.Server
 						}
 						else
 						{
-							if ((LCount == 0) && FSourceTable.EOF() && !FSourceTable.Prior())
-								break;
-								
-							if ((LCount > 0) && (!FSourceTable.Prior()))
+							if (!FSourceTable.Prior())
 								break;
 							FSourceTable.Select(ARows[LCount]);
 							ABookmarks[LCount] = InternalGetBookmark();
