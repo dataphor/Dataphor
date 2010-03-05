@@ -733,15 +733,20 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			// Dereference each bookmark and prepare list of unreferenced bookmarks
 			List<Guid> LToDispose = new List<Guid>(ABookmarks.Length);
-			for (int LIndex = 0; LIndex < FBuffer.Count; LIndex++)
+			for (int LIndex = 0; LIndex < ABookmarks.Length; LIndex++)
 			{
-				var LBookmark = FBookmarks[ABookmarks[LIndex]];
-				LBookmark.ReferenceCount--;
-				if (LBookmark.ReferenceCount == 0)
+				LocalBookmark LBookmark;
+				if (FBookmarks.TryGetValue(ABookmarks[LIndex], out LBookmark))
 				{
-					LToDispose.Add(LBookmark.Bookmark);
-					FBookmarks.Remove(LBookmark.Bookmark);
+					LBookmark.ReferenceCount--;
+					if (LBookmark.ReferenceCount == 0)
+					{
+						LToDispose.Add(LBookmark.Bookmark);
+						FBookmarks.Remove(LBookmark.Bookmark);
+					}
 				}
+				else
+					LToDispose.Add(ABookmarks[LIndex]);
 			}
 
 			// Free all unreferenced bookmarks together

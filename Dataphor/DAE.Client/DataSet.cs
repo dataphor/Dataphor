@@ -246,14 +246,16 @@ namespace Alphora.Dataphor.DAE.Client
 
 		private void FinalizeBuffers(int LFirst, int LLast)
 		{
-			Guid[] LBookmarks = new Guid[LLast - LFirst + 1];
+			List<Guid> LBookmarks = new List<Guid>(LLast - LFirst + 1);
 			for (int i = LFirst; i <= LLast; i++)
 			{
-				LBookmarks[i - LFirst] = FBuffer[i].Bookmark;
+				var LBookmark = FBuffer[i].Bookmark;
+				if (LBookmark != Guid.Empty)
+					LBookmarks.Add(LBookmark);
 				FBuffer[i].Bookmark = Guid.Empty;
 				FBuffer[i].Row.ClearValues();
 			}
-			InternalDisposeBookmarks(LBookmarks);
+			InternalDisposeBookmarks(LBookmarks.ToArray());
 		}
 
 		private void FinalizeBuffer(DataSetRow ARow)
