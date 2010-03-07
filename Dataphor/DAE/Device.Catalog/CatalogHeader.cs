@@ -52,7 +52,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 	public class CatalogHeader : System.Object
 	{
-		public CatalogHeader(Schema.TableVar ATableVar, NativeTable ANativeTable, long ATimeStamp, CatalogCacheLevel ACacheLevel) : base()
+		public CatalogHeader(Schema.TableVar ATableVar, INativeTable ANativeTable, long ATimeStamp, CatalogCacheLevel ACacheLevel) : base()
 		{
 			FTableVar = ATableVar;
 			FNativeTable = ANativeTable;
@@ -63,8 +63,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		private Schema.TableVar FTableVar;
 		public Schema.TableVar TableVar { get { return FTableVar; } }
 		
-		private NativeTable FNativeTable;
-		public NativeTable NativeTable { get { return FNativeTable; } }
+		private INativeTable FNativeTable;
+		public INativeTable NativeTable { get { return FNativeTable; } }
 		
 		public long TimeStamp;
 		

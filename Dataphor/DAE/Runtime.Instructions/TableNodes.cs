@@ -1325,7 +1325,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				LTableVar.EnsureTableVarColumns();
 				AProgram.EnsureKey(LTableVar);
 				
-				NativeTable LNativeTable = new NativeTable(AProgram.ValueManager, LTableVar);
+				INativeTable LNativeTable = new NativeTable(AProgram.ValueManager, LTableVar);
 				while (LTable.Next())
 				{
 					using (Row LRow = LTable.Select())
@@ -1394,14 +1394,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return Nodes[0].EmitStatement(AMode);
 		}
 		
-		protected NativeTable GetNativeTable(Program AProgram)
+		protected INativeTable GetNativeTable(Program AProgram)
 		{
 			StackReferenceNode LNode = Nodes[0] as StackReferenceNode;
 			if (LNode != null)
 			{
 				TableValue LTableValue = AProgram.Stack.Peek(LNode.Location) as TableValue;
 				if (LTableValue != null)
-					return LTableValue.AsNative as NativeTable;
+                    return LTableValue.AsNative as INativeTable;
 			}
 			return null;
 		}
@@ -1409,7 +1409,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// TODO: Revisit update semantics here. Why are we updating what should be an rvalue?		
 		protected override void InternalExecuteInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
 		{
-			NativeTable LNativeTable = GetNativeTable(AProgram);
+			INativeTable LNativeTable = GetNativeTable(AProgram);
 			if (LNativeTable != null)
 				LNativeTable.Insert(AProgram.ValueManager, ANewRow);
 			else
@@ -1419,7 +1419,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected override void InternalExecuteUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
 		{
 		
-			NativeTable LNativeTable = GetNativeTable(AProgram);
+			INativeTable LNativeTable = GetNativeTable(AProgram);
 			if (LNativeTable != null)
 				LNativeTable.Update(AProgram.ValueManager, AOldRow, ANewRow);
 			else
@@ -1428,7 +1428,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected override void InternalExecuteDelete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
 		{
-			NativeTable LNativeTable = GetNativeTable(AProgram);
+			INativeTable LNativeTable = GetNativeTable(AProgram);
 			if (LNativeTable != null)
 				LNativeTable.Delete(AProgram.ValueManager, ARow);
 			else

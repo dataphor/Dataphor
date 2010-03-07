@@ -239,6 +239,7 @@
     <Compile Include="Runtime.Data\AggregateTable.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Runtime.Data\NativeTableCopy.cs" />
     <Compile Include="Runtime.Data\CursorValue.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -254,6 +255,7 @@
     <Compile Include="Runtime.Data\ExtendTable.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Runtime.Data\INativeTable.cs" />
     <Compile Include="Runtime.Data\IndexException.cs">
       <SubType>Code</SubType>
     </Compile>

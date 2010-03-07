@@ -15,8 +15,8 @@ using Alphora.Dataphor.DAE.Runtime;
 
 namespace Alphora.Dataphor.DAE.Runtime.Data
 {
-	public class NativeTable : System.Object
-	{
+    public class NativeTable : System.Object, INativeTable
+    {
 		public const int CDefaultFanout = 100;
 		public const int CDefaultCapacity = 100;
 
@@ -36,15 +36,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			Create(AManager);
 		}
 		
-		public Schema.TableVar TableVar;
-		
-		public Schema.ITableType TableType;
-		
-		public Schema.IRowType RowType;
-		
-		public NativeRowTree ClusteredIndex;
-		
-		public NativeRowTreeList NonClusteredIndexes = new NativeRowTreeList();
+		public Schema.TableVar TableVar{ get; set;}
+
+        public Schema.ITableType TableType { get; set; }
+
+        public Schema.IRowType RowType { get; set; }
+
+        public NativeRowTree ClusteredIndex { get; set; }
+
+	    private NativeRowTreeList FNonClusteredIndexes = new NativeRowTreeList();
+	    public NativeRowTreeList NonClusteredIndexes
+	    {
+	        get { return FNonClusteredIndexes; }
+	        set { FNonClusteredIndexes = value; }
+	    }
+	
 
 		private int FFanout;
 		public int Fanout { get { return FFanout; } }
@@ -521,9 +527,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	{
 		public NativeTables() : base(){}
 		
-		public new NativeTable this[int AIndex]
+		public new INativeTable this[int AIndex]
 		{
-			get { lock (this) { return (NativeTable)base[AIndex]; } } 
+			get { lock (this) { return (INativeTable)base[AIndex]; } } 
 			set { lock (this) { base[AIndex] = value; } }
 		}
 
@@ -543,7 +549,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return IndexOf(ATableVar) >= 0;
 		}
 		
-		public NativeTable this[Schema.TableVar ATableVar]
+		public INativeTable this[Schema.TableVar ATableVar]
 		{
 			get
 			{

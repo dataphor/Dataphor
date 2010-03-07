@@ -100,7 +100,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			return LDevicePlan;
 		}
 		
-		private void PopulateServerSettings(Program AProgram, NativeTable ANativeTable, Row ARow)
+		private void PopulateServerSettings(Program AProgram, INativeTable ANativeTable, Row ARow)
 		{
 			DAE.Server.Server LServer = (DAE.Server.Server)AProgram.ServerProcess.ServerSession.Server;
 			ARow[0] = LServer.Name;
@@ -120,7 +120,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			ANativeTable.Insert(AProgram.ValueManager, ARow);
 		}
 
-		private void PopulateLoadedLibraries(Program AProgram, NativeTable ANativeTable, Row ARow)
+		private void PopulateLoadedLibraries(Program AProgram, INativeTable ANativeTable, Row ARow)
 		{
 			List<string> LLibraryNames = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SelectLoadedLibraries();
 			for (int LIndex = 0; LIndex < LLibraryNames.Count; LIndex++)
@@ -130,12 +130,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private void PopulateLibraryOwners(Program AProgram, NativeTable ANativeTable, Row ARow)
+		private void PopulateLibraryOwners(Program AProgram, INativeTable ANativeTable, Row ARow)
 		{
 			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SelectLibraryOwners(AProgram, ANativeTable, ARow);
 		}
 
-		private void PopulateLibraryVersions(Program AProgram, NativeTable ANativeTable, Row ARow)
+		private void PopulateLibraryVersions(Program AProgram, INativeTable ANativeTable, Row ARow)
 		{
 			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SelectLibraryVersions(AProgram, ANativeTable, ARow);
 		}

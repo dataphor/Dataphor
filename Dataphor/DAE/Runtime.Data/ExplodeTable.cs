@@ -39,7 +39,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		protected Schema.TableType FTableType;
 		protected Schema.BaseTableVar FTableVar;
 		protected Schema.Order FSequenceOrder;
-		protected NativeTable FBuffer;
+		protected INativeTable FBuffer;
 		protected Scan FScan;
 		protected Table FRootTable;
 		protected int FSequence;

@@ -28,7 +28,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public new BaseOrderNode Node { get { return (BaseOrderNode)FNode; } }
 		
-        protected NativeTable FTable;
+        protected INativeTable FTable;
         protected Scan FScan;
         protected int FRowCount;
         

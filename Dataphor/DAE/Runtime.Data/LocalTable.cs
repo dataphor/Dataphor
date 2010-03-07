@@ -17,7 +17,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     {
 		public LocalTable(TableNode ATableNode, Program AProgram, TableValue ATableValue) : base(ATableNode, AProgram)
 		{
-			FNativeTable = (NativeTable)ATableValue.AsNative;
+			FNativeTable = (INativeTable)ATableValue.AsNative;
 			FKey = AProgram.OrderFromKey(AProgram.FindClusteringKey(FNativeTable.TableVar));
 		}
 		
@@ -39,7 +39,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public new TableNode Node { get { return (TableNode)FNode; } }
 		
-		protected internal NativeTable FNativeTable;
+		protected internal INativeTable FNativeTable;
 		private Schema.Order FKey;
 		private Scan FScan;
 
