@@ -16,12 +16,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	
 	public class TableValue : DataValue
 	{
-		public TableValue(IValueManager AManager, INativeTable ATable) : base(AManager, ATable.TableType)
+		public TableValue(IValueManager AManager, NativeTable ATable) : base(AManager, ATable.TableType)
 		{	
 			FTable = ATable;
 		}
 		
-		private INativeTable FTable;
+		private NativeTable FTable;
 		
 		public override bool IsNil { get { return FTable == null; } }
 		
@@ -32,7 +32,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			{
 				if (FTable != null)
 					FTable.Drop(Manager);
-				FTable = (INativeTable)value; 
+				FTable = (NativeTable)value; 
 			} 
 		}
 		
@@ -143,8 +143,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public override object CopyNativeAs(Schema.IDataType ADataType)
 		{
-		    return new NativeTableCopy(Manager,FTable);
-            /*INativeTable LNewTable = new NativeTable(Manager, FTable.TableVar);
+			NativeTable LNewTable = new NativeTable(Manager, FTable.TableVar);
 			using (Scan LScan = new Scan(Manager, FTable, FTable.ClusteredIndex, ScanDirection.Forward, null, null))
 			{
 				LScan.Open();
@@ -156,7 +155,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					}
 				}
 			}
-			return LNewTable;*/		             
+			return LNewTable;
 		}
 	}
 	
@@ -859,7 +858,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		protected TableScan(TableNode ANode, Program AProgram) : base(ANode, AProgram) { }
 		protected TableScan(IValueManager AManager, TableNode ANode) : base(AManager, ANode) { }
 		
-		public TableScan(IValueManager AManager, INativeTable ATable, Schema.Order AKey, ScanDirection ADirection, Row AFirstKey, Row ALastKey) : base(AManager, ATable.TableType)
+		public TableScan(IValueManager AManager, NativeTable ATable, Schema.Order AKey, ScanDirection ADirection, Row AFirstKey, Row ALastKey) : base(AManager, ATable.TableType)
 		{
 			FNativeTable = ATable;
 			FKey = AKey;
@@ -868,8 +867,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			FLastKey = ALastKey;
 		}
 		
-		protected INativeTable FNativeTable;
-		public INativeTable NativeTable
+		protected NativeTable FNativeTable;
+		public NativeTable NativeTable
 		{
 			get { return FNativeTable; }
 			set { FNativeTable = value; }
@@ -1012,7 +1011,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	{
 		public TableValueScan(TableNode ANode, TableValue ATableValue) : base(ATableValue.Manager, ANode)
 		{
-			FNativeTable = ATableValue.AsNative as INativeTable;
+			FNativeTable = ATableValue.AsNative as NativeTable;
 			Key = Manager.FindClusteringOrder(FNativeTable.TableVar); // ?? Why doesn't this use the order from the compile (ANode.Order)?
 			Direction = ScanDirection.Forward;
 		}

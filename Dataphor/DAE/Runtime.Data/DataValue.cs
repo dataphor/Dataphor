@@ -242,7 +242,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			Schema.ITableType LTableType = ADataType as Schema.ITableType;
 			if (LTableType != null)
 			{
-				TableValue LTable = new TableValue(Manager, (INativeTable)LValue);
+				TableValue LTable = new TableValue(Manager, (NativeTable)LValue);
 				LTable.ValuesOwned = true;
 				return LTable;
 			}
@@ -290,7 +290,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			Schema.ITableType LTableType = DataType as Schema.ITableType;
 			if (LTableType != null)
 			{
-				TableValue LTable = new TableValue(Manager, (INativeTable)LValue);
+				TableValue LTable = new TableValue(Manager, (NativeTable)LValue);
 				LTable.ValuesOwned = true;
 				return LTable;
 			}
@@ -338,7 +338,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			Schema.ITableType LTableType = DataType as Schema.ITableType;
 			if (LTableType != null)
 			{
-				TableValue LTable = new TableValue(AManager, (INativeTable)LValue);
+				TableValue LTable = new TableValue(AManager, (NativeTable)LValue);
 				LTable.ValuesOwned = true;
 				return LTable;
 			}
@@ -412,7 +412,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				
 			Schema.ITableType LTableType = ADataType as Schema.ITableType;
 			if (LTableType != null)
-				return new TableValue(AManager, (INativeTable)AValue);
+				return new TableValue(AManager, (NativeTable)AValue);
 				
 			Schema.ICursorType LCursorType = ADataType as Schema.ICursorType;
 			if (LCursorType != null)
@@ -447,7 +447,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				
 			Schema.ITableType LTableType = LDataType as Schema.ITableType;
 			if (LTableType != null)
-				return new TableValue(AManager, (INativeTable)ANativeRow.Values[ANativeRowIndex]);
+				return new TableValue(AManager, (NativeTable)ANativeRow.Values[ANativeRowIndex]);
 				
 			Schema.ICursorType LCursorType = LDataType as Schema.ICursorType;
 			if (LCursorType != null)
@@ -478,7 +478,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				
 			Schema.ITableType LTableType = ANativeList.DataTypes[ANativeListIndex] as Schema.ITableType;
 			if (LTableType != null)
-				return new TableValue(AManager, (INativeTable)ANativeList.Values[ANativeListIndex]);
+				return new TableValue(AManager, (NativeTable)ANativeList.Values[ANativeListIndex]);
 				
 			Schema.ICursorType LCursorType = ANativeList.DataTypes[ANativeListIndex] as Schema.ICursorType;
 			if (LCursorType != null)
@@ -588,8 +588,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			Schema.ITableType LTableType = ADataType as Schema.ITableType;
 			if (LTableType != null)
 			{
-				INativeTable LNativeTable = (INativeTable)AValue;
-				INativeTable LNewTable = new NativeTable(AManager, LNativeTable.TableVar);
+				NativeTable LNativeTable = (NativeTable)AValue;
+				NativeTable LNewTable = new NativeTable(AManager, LNativeTable.TableVar);
 				using (Scan LScan = new Scan(AManager, LNativeTable, LNativeTable.ClusteredIndex, ScanDirection.Forward, null, null))
 				{
 					while (!LScan.EOF())

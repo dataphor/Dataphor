@@ -729,7 +729,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			SystemSetLibraryDescriptorNode.RemoveLibraryFileEnvironment(AProgram, Schema.Object.EnsureRooted((string)ARow[0]), (string)ARow[1], (string)ARow[2]);
 		}
 
-		protected internal void SelectLibraryVersions(Program AProgram, INativeTable ANativeTable, Row ARow)
+		protected internal void SelectLibraryVersions(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -795,7 +795,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		protected internal void SelectLibraryOwners(Program AProgram, INativeTable ANativeTable, Row ARow)
+		protected internal void SelectLibraryOwners(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			AcquireCatalogStoreConnection(false);
 			try

@@ -459,7 +459,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		}
 		#endif
 		
-		public INativeTable EnsureNativeTable(Program AProgram, Schema.TableVar ATableVar)
+		public NativeTable EnsureNativeTable(Program AProgram, Schema.TableVar ATableVar)
 		{
 			int LIndex = Tables.IndexOf(ATableVar);
 			if (LIndex < 0)
@@ -470,7 +470,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		private void InsertDocument(Program AProgram, FrontendLibrary ALibrary, Document ADocument)
 		{
 			EnsureLibrariesLoaded(AProgram);
-			INativeTable LNativeTable = EnsureNativeTable(AProgram, GetDocumentsTableVar(AProgram.Plan));
+			NativeTable LNativeTable = EnsureNativeTable(AProgram, GetDocumentsTableVar(AProgram.Plan));
 			Row LRow = new Row(AProgram.ValueManager, LNativeTable.TableVar.DataType.CreateRowType());
 			try
 			{
@@ -488,7 +488,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		private void InsertLibraryDocuments(Program AProgram, FrontendLibrary ALibrary)
 		{
 			// Insert all the documents from this library
-			INativeTable LNativeTable = EnsureNativeTable(AProgram, GetDocumentsTableVar(AProgram.Plan));
+			NativeTable LNativeTable = EnsureNativeTable(AProgram, GetDocumentsTableVar(AProgram.Plan));
 			Row LRow = new Row(AProgram.ValueManager, LNativeTable.TableVar.DataType.CreateRowType());
 			try
 			{
@@ -524,7 +524,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		private void DeleteDocument(Program AProgram, FrontendLibrary ALibrary, Document ADocument)
 		{	
 			EnsureLibrariesLoaded(AProgram);
-			INativeTable LNativeTable = EnsureNativeTable(AProgram, GetDocumentsTableVar(AProgram.Plan));
+			NativeTable LNativeTable = EnsureNativeTable(AProgram, GetDocumentsTableVar(AProgram.Plan));
 			Row LRow = new Row(AProgram.ValueManager, LNativeTable.TableVar.DataType.CreateRowType());
 			try
 			{
@@ -542,7 +542,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		private void DeleteLibraryDocuments(Program AProgram, FrontendLibrary ALibrary)
 		{
 			// Delete all the documents from this library
-			INativeTable LNativeTable = EnsureNativeTable(AProgram, GetDocumentsTableVar(AProgram.Plan));
+			NativeTable LNativeTable = EnsureNativeTable(AProgram, GetDocumentsTableVar(AProgram.Plan));
 			Row LRow = new Row(AProgram.ValueManager, LNativeTable.TableVar.DataType.CreateRowType());
 			try
 			{
@@ -1210,12 +1210,12 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		
 		public new FrontendDevice Device { get { return (FrontendDevice)base.Device; } }
 		
-		protected void PopulateDocuments(Program AProgram, INativeTable ANativeTable, Row ARow)
+		protected void PopulateDocuments(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			Device.EnsureLibrariesLoaded(AProgram);
 		}
 		
-		protected void PopulateDocumentTypes(Program AProgram, INativeTable ANativeTable, Row ARow)
+		protected void PopulateDocumentTypes(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			if (Device.DocumentTypesBufferTimeStamp < Device.DocumentTypesTimeStamp)
 			{
@@ -1231,7 +1231,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		protected void PopulateDesigners(Program AProgram, INativeTable ANativeTable, Row ARow)
+		protected void PopulateDesigners(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			if (Device.DesignersBufferTimeStamp < Device.DesignersTimeStamp)
 			{
@@ -1247,7 +1247,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		protected void PopulateDocumentTypeDesigners(Program AProgram, INativeTable ANativeTable, Row ARow)
+		protected void PopulateDocumentTypeDesigners(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			if (Device.DocumentTypeDesignersBufferTimeStamp < Device.DocumentTypesTimeStamp)
 			{
@@ -1267,7 +1267,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 
 		protected virtual void PopulateTableVar(Program AProgram, Schema.TableVar ATableVar)
 		{
-			INativeTable LNativeTable = Device.Tables[ATableVar];
+			NativeTable LNativeTable = Device.Tables[ATableVar];
 			Row LRow = new Row(AProgram.ValueManager, ATableVar.DataType.CreateRowType());
 			try
 			{

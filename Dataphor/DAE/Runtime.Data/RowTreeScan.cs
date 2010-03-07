@@ -26,7 +26,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	public class Scan : Disposable
 	{
 		/// <remarks> Scan range keys are inclusive. </remarks>		
-		public Scan(IValueManager AManager, INativeTable ATable, NativeRowTree AAccessPath, ScanDirection ADirection, Row AFirstKey, Row ALastKey)
+		public Scan(IValueManager AManager, NativeTable ATable, NativeRowTree AAccessPath, ScanDirection ADirection, Row AFirstKey, Row ALastKey)
 		{
 			FManager = AManager;
 			FTable = ATable;
@@ -37,7 +37,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		}
 
 		private IValueManager FManager;
-		private INativeTable FTable;
+		private NativeTable FTable;
 		private NativeRowTree FAccessPath;
 		private ScanDirection FDirection;
 		private Row FFirstKey;

@@ -411,7 +411,7 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 			#endif
 		}
 		
-		protected INativeTable EnsureNativeTable(Schema.TableVar ATableVar)
+		protected NativeTable EnsureNativeTable(Schema.TableVar ATableVar)
 		{
 			if (!ATableVar.IsSessionObject && !ATableVar.IsATObject)
 				ATableVar.Scope = (Schema.TableVarScope)Enum.Parse(typeof(Schema.TableVarScope), MetaData.GetTag(ATableVar.MetaData, "Storage.Scope", "Database"), false);
@@ -482,7 +482,7 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 					int LTableIndex = LTables.IndexOf(LTableVar);
 					if (LTableIndex >= 0)
 					{
-						INativeTable LNativeTable = LTables[LTableIndex];
+						NativeTable LNativeTable = LTables[LTableIndex];
 						#if USEMEMORYDEVICETRANSACTIONS
 						RemoveTransactionReferences(LNativeTable.TableVar);
 						#endif
@@ -498,7 +498,7 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 		
 		protected override void InternalInsertRow(Program AProgram, Schema.TableVar ATable, Row ARow, BitArray AValueFlags)
 		{
-			INativeTable LTable = GetTables(ATable.Scope)[ATable];
+			NativeTable LTable = GetTables(ATable.Scope)[ATable];
 			
 			if ((Device.MaxRowCount >= 0) && (LTable.RowCount >= Device.MaxRowCount) && (!InTransaction || !ServerProcess.CurrentTransaction.InRollback))
 				throw new DeviceException(DeviceException.Codes.MaxRowCountExceeded, Device.MaxRowCount.ToString(), ATable.DisplayName, Device.DisplayName);

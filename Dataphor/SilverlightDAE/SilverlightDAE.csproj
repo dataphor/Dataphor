@@ -492,12 +492,6 @@
     <Compile Include="..\DAE\Runtime.Data\NativeRowIndex.cs">
       <Link>DAE\Runtime.Data\NativeRowIndex.cs</Link>
     </Compile>
-	<Compile Include="..\DAE\Runtime.Data\INativeTable.cs">
-      <Link>DAE\Runtime.Data\NativeTable.cs</Link>
-    </Compile>
-	<Compile Include="..\DAE\Runtime.Data\NativeTableCopy.cs">
-      <Link>DAE\Runtime.Data\NativeTable.cs</Link>
-    </Compile>
     <Compile Include="..\DAE\Runtime.Data\NativeTable.cs">
       <Link>DAE\Runtime.Data\NativeTable.cs</Link>
     </Compile>

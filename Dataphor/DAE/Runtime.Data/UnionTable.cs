@@ -29,7 +29,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		protected Table FLeftTable;
 		protected Table FRightTable;
 		protected Row FSourceRow;
-		protected INativeTable FBuffer;
+		protected NativeTable FBuffer;
 		protected Scan FScan;
         
         protected override void InternalOpen()

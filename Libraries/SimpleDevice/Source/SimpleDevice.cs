@@ -240,7 +240,7 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 					{
 						using (FileStream LStream = new FileStream(GetTableVarFileName(ATableVar), FileMode.Open, FileAccess.Read))
 						{
-							INativeTable LNativeTable = Tables[ATableVar];
+							NativeTable LNativeTable = Tables[ATableVar];
 							while (LStream.Position < LStream.Length)
 							{
 								int LLength = StreamUtility.ReadInteger(LStream);

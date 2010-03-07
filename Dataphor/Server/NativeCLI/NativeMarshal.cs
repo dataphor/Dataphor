@@ -166,7 +166,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			NativeTableValue LNativeTable = ANativeValue as NativeTableValue;
 			if (LNativeTable != null)
 			{
-				INativeTable LInternalTable = new NativeTable(AProcess.ValueManager, NativeTableToTableVar(AProcess, LNativeTable));
+				NativeTable LInternalTable = new NativeTable(AProcess.ValueManager, NativeTableToTableVar(AProcess, LNativeTable));
 				TableValue LTable = new TableValue(AProcess.ValueManager, LInternalTable); 
 				if (LNativeTable.Rows == null)
 					LTable.AsNative = null;

@@ -83,7 +83,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			return base.InternalPrepare(ADevicePlan, APlanNode);
 		}
 		
-		private void PopulateConnections(Program AProgram, INativeTable ANativeTable, Row ARow)
+		private void PopulateConnections(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 /*
 			foreach (ServerConnection LConnection in AProgram.ServerProcess.ServerSession.Server.Connections)
@@ -95,7 +95,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 */
 		}
 		
-		private void PopulateSessions(Program AProgram, INativeTable ANativeTable, Row ARow)
+		private void PopulateSessions(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			foreach (ServerSession LSession in AProgram.ServerProcess.ServerSession.Server.Sessions)
 			{
@@ -118,7 +118,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private void PopulateProcesses(Program AProgram, INativeTable ANativeTable, Row ARow)
+		private void PopulateProcesses(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			foreach (ServerSession LSession in AProgram.ServerProcess.ServerSession.Server.Sessions)
 				foreach (ServerProcess LProcess in LSession.Processes)
@@ -135,7 +135,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				}
 		}
 		
-		private void PopulateScripts(Program AProgram, INativeTable ANativeTable, Row ARow)
+		private void PopulateScripts(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			foreach (ServerSession LSession in AProgram.ServerProcess.ServerSession.Server.Sessions)
 				foreach (ServerProcess LProcess in LSession.Processes)
@@ -147,7 +147,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					}
 		}
 
-		private void PopulatePlans(Program AProgram, INativeTable ANativeTable, Row ARow)
+		private void PopulatePlans(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			foreach (ServerSession LSession in AProgram.ServerProcess.ServerSession.Server.Sessions)
 				foreach (ServerProcess LProcess in LSession.Processes)
@@ -159,7 +159,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					}
 		}
 
-		private void PopulateLibraries(Program AProgram, INativeTable ANativeTable, Row ARow)
+		private void PopulateLibraries(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			foreach (Library LLibrary in AProgram.Catalog.Libraries)
 			{
@@ -174,7 +174,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}											
 		
-		private void PopulateLibraryFiles(Program AProgram, INativeTable ANativeTable, Row ARow)
+		private void PopulateLibraryFiles(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			foreach (Library LLibrary in AProgram.Catalog.Libraries)
 				foreach (Schema.FileReference LReference in LLibrary.Files)
@@ -186,7 +186,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				}
 		}											
 		
-		private void PopulateLibraryFileEnvironments(Program AProgram, INativeTable ANativeTable, Row ARow)
+		private void PopulateLibraryFileEnvironments(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			foreach (Library LLibrary in AProgram.Catalog.Libraries)
 				foreach (Schema.FileReference LReference in LLibrary.Files)
@@ -199,7 +199,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					}
 		}
 		
-		private void PopulateLibraryRequisites(Program AProgram, INativeTable ANativeTable, Row ARow)
+		private void PopulateLibraryRequisites(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			foreach (Library LLibrary in AProgram.Catalog.Libraries)
 				foreach (LibraryReference LReference in LLibrary.Libraries)
@@ -211,7 +211,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				}
 		}											
 		
-		private void PopulateLibrarySettings(Program AProgram, INativeTable ANativeTable, Row ARow)
+		private void PopulateLibrarySettings(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			foreach (Library LLibrary in AProgram.Catalog.Libraries)
 				if (LLibrary.MetaData != null)
@@ -233,7 +233,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				}
 		}
 		
-		private void PopulateRegisteredAssemblies(Program AProgram, INativeTable ANativeTable, Row ARow)
+		private void PopulateRegisteredAssemblies(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			foreach (RegisteredAssembly LAssembly in AProgram.Catalog.ClassLoader.Assemblies)
 			{
@@ -244,7 +244,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}											
 		
-		private void PopulateRegisteredClasses(Program AProgram, INativeTable ANativeTable, Row ARow)
+		private void PopulateRegisteredClasses(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			foreach (RegisteredClass LClass in AProgram.Catalog.ClassLoader.Classes)
 			{
@@ -256,7 +256,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}											
 		
-		private void PopulateSessionCatalogObjects(Program AProgram, INativeTable ANativeTable, Row ARow)
+		private void PopulateSessionCatalogObjects(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			foreach (ServerSession LSession in AProgram.ServerProcess.ServerSession.Server.Sessions)
 				foreach (Schema.SessionObject LObject in LSession.SessionObjects)
@@ -300,7 +300,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		}
 		#endif
 		
-		private void PopulateServerLinks(Program AProgram, INativeTable ANativeTable, Row ARow)
+		private void PopulateServerLinks(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			foreach (Schema.Object LObject in AProgram.Catalog)
 			{
@@ -322,7 +322,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private void PopulateServerLinkUsers(Program AProgram, INativeTable ANativeTable, Row ARow)
+		private void PopulateServerLinkUsers(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			foreach (Schema.Object LObject in AProgram.Catalog)
 			{
@@ -340,7 +340,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private void PopulateRemoteSessions(Program AProgram, INativeTable ANativeTable, Row ARow)
+		private void PopulateRemoteSessions(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			foreach (ServerSession LSession in AProgram.ServerProcess.ServerSession.Server.Sessions)
 				foreach (ServerProcess LProcess in LSession.Processes)
@@ -352,7 +352,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					}
 		}
 		
-		private void PopulateDeviceSessions(Program AProgram, INativeTable ANativeTable, Row ARow)
+		private void PopulateDeviceSessions(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			foreach (ServerSession LSession in AProgram.ServerProcess.ServerSession.Server.Sessions)
 				foreach (ServerProcess LProcess in LSession.Processes)
@@ -364,7 +364,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					}
 		}
 		
-		private void PopulateApplicationTransactions(Program AProgram, INativeTable ANativeTable, Row ARow)
+		private void PopulateApplicationTransactions(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			lock (AProgram.ServerProcess.ServerSession.Server.ATDevice.ApplicationTransactions.SyncRoot)
 			{
