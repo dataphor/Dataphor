@@ -455,6 +455,38 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private DAE.SessionInfo FSessionInfo = new DAE.SessionInfo();
 
+		public int OverridePortNumber
+		{
+			get 
+			{
+				int LPortNumber;
+				return Int32.TryParse(tbOverridePortNumber.Text, out LPortNumber) ? LPortNumber : 0;
+			}
+			set { tbOverridePortNumber.Text = value.ToString(); }
+		}
+		
+		public ConnectionSecurityMode SecurityMode
+		{
+			get { return (ConnectionSecurityMode)Math.Min(Math.Max(cbSecurityMode.SelectedIndex, 0), 2); }
+			set { cbSecurityMode.SelectedIndex = (int)value; }
+		}
+		
+		public int OverrideListenerPortNumber
+		{
+			get
+			{
+				int LPortNumber;
+				return Int32.TryParse(tbOverrideListenerPortNumber.Text, out LPortNumber) ? LPortNumber : 0;
+			}
+			set { tbOverrideListenerPortNumber.Text = value.ToString(); }
+		}
+		
+		public ConnectionSecurityMode ListenerSecurityMode
+		{
+			get { return (ConnectionSecurityMode)Math.Min(Math.Max(cbListenerSecurityMode.SelectedIndex, 0), 2); }
+			set { cbListenerSecurityMode.SelectedIndex = (int)value; }
+		}
+
 		public void SetFromAlias(ServerAlias AAlias)
 		{
 			tbAliasName.Text = AAlias.Name;
@@ -475,14 +507,14 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				tcAliasType.SelectedTab = tpConnectionAlias;
 				tbHost.Text = LConnection.HostName;
 				cbInstanceName.Text = LConnection.InstanceName;
-				tbOverridePortNumber.Text = LConnection.OverridePortNumber.ToString();
-				cbSecurityMode.SelectedIndex = (int)LConnection.SecurityMode;
-				tbOverrideListenerPortNumber.Text = LConnection.OverrideListenerPortNumber.ToString();
-				cbListenerSecurityMode.SelectedIndex = (int)LConnection.ListenerSecurityMode;
+				OverridePortNumber = LConnection.OverridePortNumber;
+				SecurityMode = LConnection.SecurityMode;
+				OverrideListenerPortNumber = LConnection.OverrideListenerPortNumber;
+				ListenerSecurityMode = LConnection.ListenerSecurityMode;
 				cbClientSideLogging.Checked = LConnection.ClientSideLoggingEnabled;
 			}
 		}
-
+		
 		public ServerAlias CreateAlias()
 		{
 			ServerAlias LResult;
@@ -498,10 +530,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				ConnectionAlias LConnection = new ConnectionAlias();
 				LConnection.HostName = tbHost.Text;
 				LConnection.InstanceName = cbInstanceName.Text;
-				LConnection.OverridePortNumber = Int32.Parse(tbOverridePortNumber.Text);
-				LConnection.SecurityMode = (ConnectionSecurityMode)cbSecurityMode.SelectedIndex;
-				LConnection.OverrideListenerPortNumber = Int32.Parse(tbOverrideListenerPortNumber.Text);
-				LConnection.ListenerSecurityMode = (ConnectionSecurityMode)cbListenerSecurityMode.SelectedIndex;
+				LConnection.OverridePortNumber = OverridePortNumber;
+				LConnection.SecurityMode = SecurityMode;
+				LConnection.OverrideListenerPortNumber = OverrideListenerPortNumber;
+				LConnection.ListenerSecurityMode = ListenerSecurityMode;
 				LConnection.ClientSideLoggingEnabled = cbClientSideLogging.Checked;
 				LResult = LConnection;
 			}
@@ -547,7 +579,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				{
 					FInstancesEnumerated = true;
 					cbInstanceName.Items.Clear();
-					string[] LInstanceNames = ListenerFactory.EnumerateInstances(tbHost.Text, Int32.Parse(tbOverrideListenerPortNumber.Text), cbListenerSecurityMode.SelectedIndex >= 0 ? (ConnectionSecurityMode)cbListenerSecurityMode.SelectedIndex : ConnectionSecurityMode.None);
+					string[] LInstanceNames = ListenerFactory.EnumerateInstances(tbHost.Text, OverrideListenerPortNumber, ListenerSecurityMode);
 					for (int LIndex = 0; LIndex < LInstanceNames.Length; LIndex++)
 						cbInstanceName.Items.Add(LInstanceNames[LIndex]);
 				}
