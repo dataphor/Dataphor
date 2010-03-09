@@ -20,7 +20,8 @@ namespace Alphora.Dataphor.DAE.ServerTests.Utilities
 			FTestConfiguration = new ServerConfiguration();
 			FTestConfiguration.Name = AInstanceName;
 			FTestConfiguration.LibraryDirectories = Path.Combine(Path.GetDirectoryName(PathUtility.GetInstallationDirectory()), "Libraries");
-			FTestConfiguration.PortNumber = 8090;
+			FTestConfiguration.PortNumber = 8061;
+			FTestConfiguration.SecurePortNumber = 8601;
 
 			FTestConfiguration.CatalogStoreClassName = "Alphora.Dataphor.DAE.Store.MSSQL.MSSQLStore,Alphora.Dataphor.DAE.MSSQL";
 			FTestConfiguration.CatalogStoreConnectionString = "Data Source=localhost;Initial Catalog=DAECatalog;Integrated Security=True";

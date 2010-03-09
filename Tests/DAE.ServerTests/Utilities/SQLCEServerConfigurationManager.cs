@@ -21,7 +21,8 @@ namespace Alphora.Dataphor.DAE.ServerTests.Utilities
 			FTestConfiguration = new ServerConfiguration();
 			FTestConfiguration.Name = AInstanceName;
 			FTestConfiguration.LibraryDirectories = Path.Combine(Path.GetDirectoryName(PathUtility.GetInstallationDirectory()), "Libraries");
-			FTestConfiguration.PortNumber = 8090;			
+			FTestConfiguration.PortNumber = 8061;			
+			FTestConfiguration.SecurePortNumber = 8601;
 
 			return FTestConfiguration;
 		}

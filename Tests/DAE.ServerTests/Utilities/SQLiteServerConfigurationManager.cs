@@ -16,12 +16,11 @@ namespace Alphora.Dataphor.DAE.ServerTests.Utilities
 			FTestConfiguration = new ServerConfiguration();
 			FTestConfiguration.Name = AInstanceName;
 			FTestConfiguration.LibraryDirectories = Path.Combine(Path.GetDirectoryName(PathUtility.GetInstallationDirectory()), "Libraries");
-			FTestConfiguration.PortNumber = 8090;
+			FTestConfiguration.PortNumber = 8061;
+			FTestConfiguration.SecurePortNumber = 8601;
 			
-				
 			FTestConfiguration.CatalogStoreClassName = "Alphora.Dataphor.DAE.Store.SQLite.SQLiteStore,Alphora.Dataphor.DAE.SQLite";
 			FTestConfiguration.CatalogStoreConnectionString = @"Data Source=%CatalogPath%\DAECatalog";		
-		
 
 			return FTestConfiguration;
 		}
