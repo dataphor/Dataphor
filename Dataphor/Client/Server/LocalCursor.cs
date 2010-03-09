@@ -521,7 +521,7 @@ namespace Alphora.Dataphor.DAE.Server
         public bool EOF()
         {
 			if (BufferActive())
-				return SourceEOF() && (FBufferIndex >= FBuffer.Count);
+				return SourceEOF() && ((FBuffer.Count == 0) || (FBufferIndex >= FBuffer.Count));
 			else
 				return SourceEOF();
 		}
