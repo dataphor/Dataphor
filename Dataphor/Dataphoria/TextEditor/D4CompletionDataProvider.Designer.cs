@@ -71,6 +71,10 @@
             this.FImageList.Images.SetKeyName(32, "Table - System.png");
             this.FImageList.Images.SetKeyName(33, "Views - System.png");
             this.FImageList.Images.SetKeyName(34, "View - System.png");
+            this.FImageList.Images.SetKeyName(35, "Tables - Generated.png");
+            this.FImageList.Images.SetKeyName(36, "Table - Generated.png");
+            this.FImageList.Images.SetKeyName(37, "Views - Generated.png");
+            this.FImageList.Images.SetKeyName(38, "View - Generated.png");
 
         }
 

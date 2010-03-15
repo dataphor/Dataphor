@@ -854,6 +854,8 @@ namespace Alphora.Dataphor.Dataphoria
             this.FTreeImageList.Images.SetKeyName(32, "Table - System.png");
             this.FTreeImageList.Images.SetKeyName(33, "Views - System.png");
             this.FTreeImageList.Images.SetKeyName(34, "View - System.png");
+            this.FTreeImageList.Images.SetKeyName(35, "Tables - Generated.png");
+            this.FTreeImageList.Images.SetKeyName(36, "Table - Generated.png");
             // 
             // Dataphoria
             // 
