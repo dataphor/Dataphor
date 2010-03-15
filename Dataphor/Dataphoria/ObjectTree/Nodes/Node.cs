@@ -43,46 +43,26 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 		}
 		
 		protected abstract BaseNode CreateChildNode(DAE.Runtime.Data.Row ARow);
-		
-		protected override void InternalReconcileChildren()
-		{
-			ArrayList LItems = new ArrayList(Nodes.Count);
-			foreach (TreeNode LNode in Nodes)
-				LItems.Add(LNode);
 
-			DAE.IServerCursor LCursor = Dataphoria.OpenCursor(GetChildExpression(), GetParams());
-			try
-			{
-				DAE.Runtime.Data.Row LRow = LCursor.Plan.RequestRow();
-				try
-				{
-					TreeNode LNode;
-					while (LCursor.Next())
-					{
-						LCursor.Select(LRow);
-						LNode = FindByKey(LRow);
-						if (LNode != null)
-						{
-							LItems.Remove(LNode);
-							ReconcileNode((BaseNode)LNode, LRow);
-						}
-						else
-							AddNode(CreateChildNode(LRow));
-					}
-				}
-				finally
-				{
-					LCursor.Plan.ReleaseRow(LRow);
-				}
-			}
-			finally
-			{
-				Dataphoria.CloseCursor(LCursor);
-			}
-
-			foreach (TreeNode LNode in LItems)
-				Nodes.Remove(LNode);
-		}
+        protected override void InternalReconcileChildren()
+        {
+            ArrayList LItems = new ArrayList(Nodes.Count);
+            foreach (TreeNode LNode in Nodes)
+                LItems.Add(LNode);
+            Dataphoria.Execute(GetChildExpression(), GetParams(), ARow =>
+                                                                      {
+                                                                          TreeNode LNode = FindByKey(ARow);
+                                                                          if (LNode != null)
+                                                                          {
+                                                                              LItems.Remove(LNode);
+                                                                              ReconcileNode((BaseNode)LNode, ARow);
+                                                                          }
+                                                                          else
+                                                                              AddNode(CreateChildNode(ARow));
+                                                                      });
+            foreach (TreeNode LNode in LItems)
+                Nodes.Remove(LNode);
+        }
 
  		/// <summary> Finds the first node using the specified row. </summary>
 		/// <returns> The matching node reference or null (if not found). </returns>

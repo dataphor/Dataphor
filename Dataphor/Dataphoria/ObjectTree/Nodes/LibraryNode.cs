@@ -108,30 +108,12 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 		
 		public void RefreshRegistered()
 		{
-			DAE.IServerCursor LCursor = Dataphoria.OpenCursor(GetChildExpression(), GetParams());
-			try
-			{
-				DAE.Runtime.Data.Row LRow = LCursor.Plan.RequestRow();
-				try
-				{
-					LibraryNode LNode;
-					while (LCursor.Next())
-					{
-						LCursor.Select(LRow);
-						LNode = FindByKey(LRow) as LibraryNode;
-						if (LNode != null)
-							UpdateNode(LNode, LRow);
-					}
-				}
-				finally
-				{
-					LCursor.Plan.ReleaseRow(LRow);
-				}
-			}
-			finally
-			{
-				Dataphoria.CloseCursor(LCursor);
-			}
+            Dataphoria.Execute(GetChildExpression(), GetParams(), ARow =>
+                                                                      {
+                                                                          var LNode = FindByKey(ARow) as LibraryNode;
+                                                                          if (LNode != null)
+                                                                              UpdateNode(LNode, ARow); 
+                                                                      });           
 		}
 		
 		public void RefreshCurrent()
