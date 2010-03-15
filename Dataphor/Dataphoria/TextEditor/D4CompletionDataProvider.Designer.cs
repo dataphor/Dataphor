@@ -77,6 +77,9 @@
             this.FImageList.Images.SetKeyName(38, "View - Generated.png");
             this.FImageList.Images.SetKeyName(39, "Run - System.PNG");
             this.FImageList.Images.SetKeyName(40, "Run - Generated.PNG");
+            this.FImageList.Images.SetKeyName(41, "Table - Current Library.png");
+            this.FImageList.Images.SetKeyName(42, "View - Current Library.png");
+            this.FImageList.Images.SetKeyName(43, "Run - Current Library.png");
 
         }
 

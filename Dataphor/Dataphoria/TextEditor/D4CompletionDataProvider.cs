@@ -55,19 +55,22 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             
             var LCompletionList = new HashSet<ICompletionData>();
             if (ACharTyped == ' ')
-            {                
-
+            {
+                var LCurrentLibrary = this.FDataphoria.GetCurrentLibraryName();
                 int LImageIndexTables = 14;                
                 int LImageIndexSystemTables = 32;                                
                 int LImageIndexGeneratedTables = 36;
+                int LImageIndexTablesCurrentLib = 41;
                 
                 int LImageIndexViews = 30;
                 int LImageIndexSystemViews = 34;
                 int LImageIndexGeneratedViews = 38;
+                int LImageIndexViewsCurrentLib = 42;
 
                 int LImageIndexOperator = 12;
                 int LImageIndexOperatorSystem = 39;
                 int LImageIndexOperatorGenerated = 40;
+                int LImageIndexOperatorCurrentLib = 43;
 
                 var LQueryTables = ".System.BaseTableVars";
                 AddTableVarToCompletionList(LQueryTables, LCompletionList, ARow=>
@@ -79,7 +82,11 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                                                                                            return LImageIndexGeneratedTables;
                                                                                        }  
                                                                                        return LImageIndexSystemTables;
-                                                                                   }                                                                                   
+                                                                                   }
+                                                                                   if (LCurrentLibrary == (string)ARow["Library_Name"])
+                                                                                   {
+                                                                                       return LImageIndexTablesCurrentLib;
+                                                                                   }
                                                                                    return LImageIndexTables;                                                                                   
                                                                                });
                 var LQueryViews = ".System.DerivedTableVars";
@@ -92,6 +99,10 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                                                                                           return LImageIndexGeneratedViews;
                                                                                       }  
                                                                                       return LImageIndexSystemViews; 
+                                                                                  }
+                                                                                  if (LCurrentLibrary == (string)ARow["Library_Name"])
+                                                                                  {
+                                                                                      return LImageIndexViewsCurrentLib;
                                                                                   }
                                                                                   return LImageIndexViews;
                                                                                       
@@ -108,6 +119,10 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                                                                                       }
                                                                                       return LImageIndexOperatorSystem;
                                                                                   }
+                                                                                  if (LCurrentLibrary == (string)ARow["Library_Name"])
+                                                                                  {
+                                                                                      return LImageIndexOperatorCurrentLib;
+                                                                                  }                                                                                  
                                                                                   return LImageIndexOperator;
                                                                               });                
                                                          
