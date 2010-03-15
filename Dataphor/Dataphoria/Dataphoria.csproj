@@ -417,6 +417,12 @@
       <DependentUpon>Strings.cs</DependentUpon>
     </Compile>
     <Compile Include="TextEditor\BlockActions\BaseBlockAction.cs" />
+    <Compile Include="TextEditor\D4CompletionDataProvider.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="TextEditor\D4CompletionDataProvider.Designer.cs">
+      <DependentUpon>D4CompletionDataProvider.cs</DependentUpon>
+    </Compile>
     <Compile Include="TextEditor\D4Editor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -546,6 +552,9 @@
       <SubType>Designer</SubType>
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>MenuImages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TextEditor\D4CompletionDataProvider.resx">
+      <DependentUpon>D4CompletionDataProvider.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TextEditor\D4Editor.resx">
       <DependentUpon>D4Editor.cs</DependentUpon>

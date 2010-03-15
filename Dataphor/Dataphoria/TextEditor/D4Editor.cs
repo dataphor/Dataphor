@@ -12,6 +12,7 @@ using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
+using ICSharpCode.TextEditor.Gui.CompletionWindow;
 using DataSet = System.Data.DataSet;
 using Image = System.Drawing.Image;
 
@@ -42,6 +43,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		{
 			InitializeComponent();
 			InitializeDocking();
+            InitializeCodeCompletion();
 		}
 
 		public D4Editor(IDataphoria ADataphoria, string ADesignerID) : base(ADataphoria, ADesignerID)
@@ -49,6 +51,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			InitializeComponent();
 			InitializeDocking();
 			InitializeDebugger();
+		    InitializeCodeCompletion();
 			
 			FTextEdit.EditActions[Keys.Shift | Keys.Control | Keys.OemQuestion] = new ToggleBlockDelimiter();
 			FTextEdit.EditActions[Keys.Control | Keys.Oemcomma] = new PriorBlock();
@@ -63,7 +66,48 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			UpdateCurrentLocation();
 		}
 
-		private void Deinitialize()
+        private void InitializeCodeCompletion()
+        {                        
+            FTextEdit.ActiveTextAreaControl.TextArea.KeyEventHandler+=
+                (AKey =>
+                     {
+                         if (FCodeCompletionWindow != null)
+                         {
+                             if (FCodeCompletionWindow.ProcessKeyEvent(AKey))
+                                 return true;
+                         }
+                         if (AKey == ' ')
+                         {
+                             var LCompletionDataProvider = new D4CompletionDataProvider(this.Dataphoria);
+
+                             FCodeCompletionWindow = CodeCompletionWindow.ShowCompletionWindow(
+                                 this,
+                                 FTextEdit,
+                                 Text,
+                                 LCompletionDataProvider,
+                                 AKey
+                                 );
+                             if (FCodeCompletionWindow != null)
+                             {
+                                 FCodeCompletionWindow.Closed +=
+                                     ((ASender, AE) =>
+                                          {
+                                              if (FCodeCompletionWindow != null)
+                                              {
+                                                  FCodeCompletionWindow.Dispose();
+                                                  FCodeCompletionWindow = null;
+                                              }
+                                          });
+                             }
+                         }
+                         return false;
+                     });
+        }
+
+	    
+
+
+	    private void Deinitialize()
 		{
 			DeinitializeDebugger();
 		}
@@ -750,8 +794,9 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		}
 
 		private CurrentLineBookmark FCurrentBookmark;
-		
-		private void UpdateCurrentLocation()
+	    private CodeCompletionWindow FCodeCompletionWindow;
+
+	    private void UpdateCurrentLocation()
 		{
 			var LNewCurrent = Dataphoria.Debugger.CurrentLocation;
 			
