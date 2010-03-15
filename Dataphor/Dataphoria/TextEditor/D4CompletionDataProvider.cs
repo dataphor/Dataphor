@@ -55,10 +55,15 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             var LCompletionList = new List<ICompletionData>();
             if (ACharTyped == ' ')
             {                
-                string LQueryTables = ".System.BaseTableVars where (Library_Name = ALibraryName) and (not(IsGenerated)) and (not(IsSystem)) over { Name }";
+                var LQueryTables = ".System.BaseTableVars where (Library_Name = ALibraryName) and (not(IsGenerated)) and (not(IsSystem)) over { Name }";
                 AddToCompletionList(LQueryTables, 14, LCompletionList);
-                string LQueryViews = "System.DerivedTableVars where (Library_Name = ALibraryName) and (not(IsGenerated)) and (not(IsSystem)) over { Name }";
+                var LQueryViews = ".System.DerivedTableVars where (Library_Name = ALibraryName) and (not(IsGenerated)) and (not(IsSystem)) over { Name }";
                 AddToCompletionList(LQueryViews, 30, LCompletionList);
+
+                var LQuerySystemTables = ".System.BaseTableVars where (Library_Name = ALibraryName) and (IsGenerated = true) or (IsSystem = true) over { Name }";
+                AddToCompletionList(LQuerySystemTables, 14, LCompletionList); //TODO: Change image for system/generated tables
+                var LQuerySystemViews = ".System.DerivedTableVars where (Library_Name = ALibraryName) and (IsGenerated = true) or (IsSystem = true) over { Name }";
+                AddToCompletionList(LQuerySystemViews, 30, LCompletionList);  //TODO: Change image for system/generated views
             }
             return LCompletionList.ToArray();
         }
@@ -72,12 +77,11 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                                                      {
                                                          var LName = (string) ARow["Name"];
                                                          var LLibraryAndTableName = LName.Split('.');
-                                                         if (LLibraryName == LLibraryAndTableName[0])
-                                                         {
-                                                             LName = LLibraryAndTableName[1];
-                                                         }
-                                                         ACompletionList.Add(new DefaultCompletionData(LName,
-                                                                                                       AImageIndex));
+                                                         LLibraryName = LLibraryAndTableName[0];
+                                                         LName = LLibraryAndTableName[1];                                                         
+                                                         var LCompletionData = new D4CompletionData(LName,LName+" at "+LLibraryName,
+                                                                                               AImageIndex);                                                                                                                
+                                                         ACompletionList.Add(LCompletionData);
                                                      });
         }
 

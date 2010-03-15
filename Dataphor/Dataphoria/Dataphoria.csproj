@@ -417,6 +417,7 @@
       <DependentUpon>Strings.cs</DependentUpon>
     </Compile>
     <Compile Include="TextEditor\BlockActions\BaseBlockAction.cs" />
+    <Compile Include="TextEditor\D4CompletionData.cs" />
     <Compile Include="TextEditor\D4CompletionDataProvider.cs">
       <SubType>Component</SubType>
     </Compile>
