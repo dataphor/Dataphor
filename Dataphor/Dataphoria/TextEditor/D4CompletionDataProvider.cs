@@ -54,27 +54,32 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
         {
             var LCompletionList = new List<ICompletionData>();
             if (ACharTyped == ' ')
-            {
-
-                string LQuery = ".System.BaseTableVars where (Library_Name = ALibraryName) and (not(IsGenerated)) and (not(IsSystem)) over { Name }";
-                var LParams = new DataParams();
-                string LLibraryName = FDataphoria.GetCurrentLibraryName();
-                LParams.Add(DataParam.Create(FDataphoria.UtilityProcess, "ALibraryName", LLibraryName));
-                FDataphoria.Execute(LQuery, LParams, ARow =>
-                                                         {
-                                                             var LTableName = (string) ARow["Name"];
-                                                             var LLibrarYAndTableName = LTableName.Split('.');
-                                                             if (LLibraryName == LLibrarYAndTableName[0])
-                                                             {
-                                                                 LTableName = LLibrarYAndTableName[1];
-                                                             }
-                                                             LCompletionList.Add(new DefaultCompletionData(LTableName,
-                                                                                                           14));
-                                                         });
-
+            {                
+                string LQueryTables = ".System.BaseTableVars where (Library_Name = ALibraryName) and (not(IsGenerated)) and (not(IsSystem)) over { Name }";
+                AddToCompletionList(LQueryTables, 14, LCompletionList);
+                string LQueryViews = "System.DerivedTableVars where (Library_Name = ALibraryName) and (not(IsGenerated)) and (not(IsSystem)) over { Name }";
+                AddToCompletionList(LQueryViews, 30, LCompletionList);
             }
             return LCompletionList.ToArray();
-        }       
+        }
+
+        private void AddToCompletionList(string AQuery, int AImageIndex, List<ICompletionData> ACompletionList)
+        {
+            string LLibraryName = FDataphoria.GetCurrentLibraryName();
+            var LParams = new DataParams();
+            LParams.Add(DataParam.Create(FDataphoria.UtilityProcess, "ALibraryName", LLibraryName));
+            FDataphoria.Execute(AQuery, LParams, ARow =>
+                                                     {
+                                                         var LName = (string) ARow["Name"];
+                                                         var LLibraryAndTableName = LName.Split('.');
+                                                         if (LLibraryName == LLibraryAndTableName[0])
+                                                         {
+                                                             LName = LLibraryAndTableName[1];
+                                                         }
+                                                         ACompletionList.Add(new DefaultCompletionData(LName,
+                                                                                                       AImageIndex));
+                                                     });
+        }
 
         public ImageList ImageList
         {
