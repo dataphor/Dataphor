@@ -13,8 +13,6 @@ namespace DAEServer
 
 	public class Program
 	{
-		private static DataphorServiceHost LServiceHost;
-		
 		private static string GetInstanceName(string[] AArgs)
 		{
 			for (int i = 0; i < AArgs.Length - 1; i++)

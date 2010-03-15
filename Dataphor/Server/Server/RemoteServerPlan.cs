@@ -202,7 +202,7 @@ namespace Alphora.Dataphor.DAE.Server
 		public IRemoteServerCursor Open(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, out Guid[] ABookmarks, int ACount, out RemoteFetchData AFetchData, ProcessCallInfo ACallInfo)
 		{
 			IRemoteServerCursor LServerCursor = Open(ref AParams, out AExecuteTime, ACallInfo);
-			AFetchData = LServerCursor.Fetch(out ABookmarks, ACount, FProcess.EmptyCallInfo());
+			AFetchData = LServerCursor.Fetch(out ABookmarks, ACount, true, FProcess.EmptyCallInfo());
 			return LServerCursor;
 		}
 		

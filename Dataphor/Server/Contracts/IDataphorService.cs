@@ -432,10 +432,11 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// <param name="ACursorHandle">The handle of the cursor from which the rows will be fetched.</param>
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="ACount">The number of rows to be fetched.</param>
+        /// <param name='ASkipCurrent'> True if the fetch should skip the current row of the cursor, false to include the current row in the fetch. </param>
 		/// <returns>A FetchResult describing the results of the fetch.</returns>
 		[OperationContract]
 		[FaultContract(typeof(DataphorFault))]
-		FetchResult Fetch(int ACursorHandle, ProcessCallInfo ACallInfo, int ACount);
+		FetchResult Fetch(int ACursorHandle, ProcessCallInfo ACallInfo, int ACount, bool ASkipCurrent);
 		
 		/// <summary>
 		/// Fetches a number of rows with a specific set of columns from a cursor.
@@ -444,10 +445,11 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="ACallInfo">A CallInfo containing information to be processed prior to the call.</param>
 		/// <param name="AHeader">A RemoteRowHeader describing the set of columns to be included in the fetched rows.</param>
 		/// <param name="ACount">The number of rows to be fetched.</param>
+        /// <param name='ASkipCurrent'> True if the fetch should skip the current row of the cursor, false to include the current row in the fetch. </param>
 		/// <returns>A FetchResult describing the results of the fetch.</returns>
 		[OperationContract]
 		[FaultContract(typeof(DataphorFault))]
-		FetchResult FetchSpecific(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRowHeader AHeader, int ACount);
+		FetchResult FetchSpecific(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRowHeader AHeader, int ACount, bool ASkipCurrent);
 		
 		/// <summary>
 		/// Gets the current navigation state of a cursor.

@@ -344,8 +344,16 @@ namespace Alphora.Dataphor.DAE.Server
 			FPlan.FProgramStatisticsCached = false;
 		}
 		
+		private void BufferCheckNotOnCrack()
+		{
+			if ((FBufferIndex < 0) || (FBufferIndex >= FBuffer.Count))
+				throw new RuntimeException(RuntimeException.Codes.NoCurrentRow);
+		}
+		
 		private void BufferSelect(Row ARow)
 		{
+			//BufferCheckNotOnCrack();
+
 			// TODO: implement a version of CopyTo that does not copy overflow 
 			// problem is that this requires a row type of exactly the same type as the cursor table type
 			FBuffer[FBufferIndex].Row.CopyTo(ARow);
@@ -369,9 +377,14 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		protected void SourceFetch(bool AIsFirst)
 		{
+			SourceFetch(AIsFirst, AIsFirst);
+		}
+		
+		protected void SourceFetch(bool AIsFirst, bool ASkipCurrent)
+		{
 			// Execute fetch on the remote cursor, selecting all columns, requesting FFetchCount rows from the current position
 			Guid[] LBookmarks;
-			RemoteFetchData LFetchData = FCursor.Fetch(out LBookmarks, FFetchCount * (int)FBufferDirection, FPlan.FProcess.GetProcessCallInfo());
+			RemoteFetchData LFetchData = FCursor.Fetch(out LBookmarks, FFetchCount * (int)FBufferDirection, ASkipCurrent, FPlan.FProcess.GetProcessCallInfo());
 			ProcessFetchData(LFetchData, LBookmarks, AIsFirst);
 			FPlan.FProgramStatisticsCached = false;
 		}
@@ -394,7 +407,11 @@ namespace Alphora.Dataphor.DAE.Server
 					FBufferIndex = 0;
 				else
 					FBufferIndex = -1;
-				FSourceCursorIndex = FBuffer.Count - 1;
+					
+				if ((AFetchData.Flags & CursorGetFlags.EOF) != 0)
+					FSourceCursorIndex = FBuffer.Count;
+				else
+					FSourceCursorIndex = FBuffer.Count - 1;
 			}
 			else
 			{
@@ -410,7 +427,11 @@ namespace Alphora.Dataphor.DAE.Server
 					FBufferIndex = FBuffer.Count - 1;
 				else
 					FBufferIndex = -1;
-				FSourceCursorIndex = 0;
+
+				if ((AFetchData.Flags & CursorGetFlags.BOF) != 0)
+					FSourceCursorIndex = -1;
+				else
+					FSourceCursorIndex = 0;
 			}
 			
 			SetFlags(AFetchData.Flags);
@@ -474,7 +495,7 @@ namespace Alphora.Dataphor.DAE.Server
 
 					bool LSynced = SyncSource(true);
 					ClearBuffer();
-					SourceFetch(false);
+					SourceFetch(false, true);
 					return LSynced && !EOF();
 				}
 				FBufferIndex++;
@@ -631,7 +652,7 @@ namespace Alphora.Dataphor.DAE.Server
 
 					bool LSynced = SyncSource(false);
 					ClearBuffer();
-					SourceFetch(false);
+					SourceFetch(false, true);
 					return LSynced && !BOF();
 				}
 				FBufferIndex--;
@@ -653,6 +674,7 @@ namespace Alphora.Dataphor.DAE.Server
         {
 			if (BufferActive())
 			{
+				//BufferCheckNotOnCrack();
 				FBookmarks[FBuffer[FBufferIndex].Bookmark].ReferenceCount++;
 				return FBuffer[FBufferIndex].Bookmark;
 			}
@@ -660,6 +682,7 @@ namespace Alphora.Dataphor.DAE.Server
 			if (UseBuffer())
 			{
 				SourceFetch(FBuffer.BufferDirection == BufferDirection.Forward ? SourceBOF() : SourceEOF());
+				//BufferCheckNotOnCrack();
 				FBookmarks[FBuffer[FBufferIndex].Bookmark].ReferenceCount++;
 				return FBuffer[FBufferIndex].Bookmark;
 			}

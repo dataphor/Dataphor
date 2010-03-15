@@ -349,7 +349,7 @@ namespace Alphora.Dataphor.DAE.Server
 			try
 			{
 				IRemoteServerCursor LCursor = APlan.Open(ref AParams, out AExecuteTime, EmptyCallInfo());
-				AFetchData = LCursor.Fetch(out ABookmarks, ACount, EmptyCallInfo());
+				AFetchData = LCursor.Fetch(out ABookmarks, ACount, true, EmptyCallInfo());
 				return LCursor;
 			}
 			catch

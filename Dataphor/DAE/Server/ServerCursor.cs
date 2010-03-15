@@ -1007,7 +1007,7 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		// Fetch
-		public int Fetch(Row[] ARows, Guid[] ABookmarks, int ACount, out CursorGetFlags AFlags)
+		public int Fetch(Row[] ARows, Guid[] ABookmarks, int ACount, bool ASkipCurrent, out CursorGetFlags AFlags)
 		{
 			Exception LException = null;
 			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
@@ -1021,15 +1021,22 @@ namespace Alphora.Dataphor.DAE.Server
 					{
 						if (ACount > 0)
 						{
-							if (!FSourceTable.Next())
+							if ((LCount == 0) && ASkipCurrent && !FSourceTable.Next())
+								break;							   
+
+							if ((LCount > 0) && (!FSourceTable.Next()))
 								break;
+
 							FSourceTable.Select(ARows[LCount]);
 							ABookmarks[LCount] = InternalGetBookmark();
 							ACount--;
 						}
 						else
 						{
-							if (!FSourceTable.Prior())
+							if ((LCount == 0) && ASkipCurrent && !FSourceTable.Prior())
+								break;
+								
+							if ((LCount > 0) && (!FSourceTable.Prior()))
 								break;
 							FSourceTable.Select(ARows[LCount]);
 							ABookmarks[LCount] = InternalGetBookmark();

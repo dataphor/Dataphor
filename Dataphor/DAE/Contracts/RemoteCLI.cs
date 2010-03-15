@@ -308,14 +308,16 @@ namespace Alphora.Dataphor.DAE.Contracts
         /// <param name="AHeader"> A <see cref="RemoteRowHeader"/> structure containing the columns to be returned. </param>
         /// <param name="ABookmarks"> An Guid array that will receive the bookmarks for the selected rows. </param>
         /// <param name='ACount'> The number of rows to fetch, with a negative number indicating backwards movement. </param>
+        /// <param name='ASkipCurrent'> True if the fetch should skip the current row of the cursor, false to include the current row in the fetch. </param>
         /// <returns> A <see cref="RemoteFetchData"/> structure containing the result of the fetch. </returns>
-        RemoteFetchData Fetch(RemoteRowHeader AHeader, out Guid[] ABookmarks, int ACount, ProcessCallInfo ACallInfo);
+        RemoteFetchData Fetch(RemoteRowHeader AHeader, out Guid[] ABookmarks, int ACount, bool ASkipCurrent, ProcessCallInfo ACallInfo);
         
         /// <summary> Returns the requested number of rows from the cursor. </summary>
         /// <param name="ABookmarks"> A Guid array that will receive the bookmarks for the selected rows. </param>
         /// <param name="ACount"> The number of rows to fetch, with a negative number indicating backwards movement. </param>
+        /// <param name='ASkipCurrent'> True if the fetch should skip the current row of the cursor, false to include the current row in the fetch. </param>
         /// <returns> A <see cref="RemoteFetchData"/> structure containing the result of the fetch. </returns>
-        RemoteFetchData Fetch(out Guid[] ABookmarks, int ACount, ProcessCallInfo ACallInfo);
+        RemoteFetchData Fetch(out Guid[] ABookmarks, int ACount, bool ASkipCurrent, ProcessCallInfo ACallInfo);
 
         /// <summary> Indicates whether the cursor is on the BOF crack, the EOF crack, or both, which indicates an empty cursor. </summary>
         /// <returns> A <see cref="CursorGetFlags"/> value indicating the current position of the cursor. </returns>

@@ -166,7 +166,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
         
-		private RemoteFetchData InternalFetch(Schema.IRowType ARowType, Guid[] ABookmarks, int ACount)
+		private RemoteFetchData InternalFetch(Schema.IRowType ARowType, Guid[] ABookmarks, int ACount, bool ASkipCurrent)
 		{
 			Row[] LRows = new Row[Math.Abs(ACount)];
 			try
@@ -178,7 +178,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				
 				CursorGetFlags LFlags;
-				int LCount = FServerCursor.Fetch(LRows, ABookmarks, ACount, out LFlags);
+				int LCount = FServerCursor.Fetch(LRows, ABookmarks, ACount, ASkipCurrent, out LFlags);
 				
 				RemoteFetchData LFetchData = new RemoteFetchData();
 				LFetchData.Body = new RemoteRowBody[LCount];
@@ -200,14 +200,14 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <param name="AHeader"> A <see cref="RemoteRowHeader"/> structure containing the columns to be returned. </param>
 		/// <param name='ACount'> The number of rows to fetch, with a negative number indicating backwards movement. </param>
 		/// <returns> A <see cref="RemoteFetchData"/> structure containing the result of the fetch. </returns>
-		public RemoteFetchData Fetch(RemoteRowHeader AHeader, out Guid[] ABookmarks, int ACount, ProcessCallInfo ACallInfo)
+		public RemoteFetchData Fetch(RemoteRowHeader AHeader, out Guid[] ABookmarks, int ACount, bool ASkipCurrent, ProcessCallInfo ACallInfo)
 		{
 			FPlan.Process.ProcessCallInfo(ACallInfo);
 
 			try
 			{
 				ABookmarks = new Guid[Math.Abs(ACount)];
-				return InternalFetch(GetRowType(AHeader), ABookmarks, ACount);
+				return InternalFetch(GetRowType(AHeader), ABookmarks, ACount, ASkipCurrent);
 			}
 			catch (Exception E)
 			{
@@ -215,13 +215,13 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
         
-		public RemoteFetchData Fetch(out Guid[] ABookmarks, int ACount, ProcessCallInfo ACallInfo)
+		public RemoteFetchData Fetch(out Guid[] ABookmarks, int ACount, bool ASkipCurrent, ProcessCallInfo ACallInfo)
 		{
 			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
 				ABookmarks = new Guid[Math.Abs(ACount)];
-				return InternalFetch(FServerCursor.SourceRowType, ABookmarks, ACount);
+				return InternalFetch(FServerCursor.SourceRowType, ABookmarks, ACount, ASkipCurrent);
 			}
 			catch (Exception E)
 			{

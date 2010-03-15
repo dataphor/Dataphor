@@ -593,12 +593,12 @@ namespace Alphora.Dataphor.DAE.Service
 			}
 		}
 
-		public FetchResult Fetch(int ACursorHandle, ProcessCallInfo ACallInfo, int ACount)
+		public FetchResult Fetch(int ACursorHandle, ProcessCallInfo ACallInfo, int ACount, bool ASkipCurrent)
 		{
 			try
 			{
 				Guid[] LBookmarks;
-				RemoteFetchData LFetchData = FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).Fetch(out LBookmarks, ACount, ACallInfo);
+				RemoteFetchData LFetchData = FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).Fetch(out LBookmarks, ACount, ASkipCurrent, ACallInfo);
 				return new FetchResult { Bookmarks = LBookmarks, FetchData = LFetchData };
 			}
 			catch (DataphorException LException)
@@ -607,12 +607,12 @@ namespace Alphora.Dataphor.DAE.Service
 			}
 		}
 
-		public FetchResult FetchSpecific(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRowHeader AHeader, int ACount)
+		public FetchResult FetchSpecific(int ACursorHandle, ProcessCallInfo ACallInfo, RemoteRowHeader AHeader, int ACount, bool ASkipCurrent)
 		{
 			try
 			{
 				Guid[] LBookmarks;
-				RemoteFetchData LFetchData = FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).Fetch(AHeader, out LBookmarks, ACount, ACallInfo);
+				RemoteFetchData LFetchData = FHandleManager.GetObject<RemoteServerCursor>(ACursorHandle).Fetch(AHeader, out LBookmarks, ACount, ASkipCurrent, ACallInfo);
 				return new FetchResult { Bookmarks = LBookmarks, FetchData = LFetchData };
 			}
 			catch (DataphorException LException)

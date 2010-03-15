@@ -69,11 +69,11 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 
-		public RemoteFetchData Fetch(RemoteRowHeader AHeader, out Guid[] ABookmarks, int ACount, ProcessCallInfo ACallInfo)
+		public RemoteFetchData Fetch(RemoteRowHeader AHeader, out Guid[] ABookmarks, int ACount, bool ASkipCurrent, ProcessCallInfo ACallInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginFetchSpecific(CursorHandle, ACallInfo, AHeader, ACount, null, null);
+				IAsyncResult LResult = GetServiceInterface().BeginFetchSpecific(CursorHandle, ACallInfo, AHeader, ACount, ASkipCurrent, null, null);
 				LResult.AsyncWaitHandle.WaitOne();
 				FetchResult LFetchResult = GetServiceInterface().EndFetchSpecific(LResult);
 				ABookmarks = LFetchResult.Bookmarks;
@@ -85,11 +85,11 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 
-		public RemoteFetchData Fetch(out Guid[] ABookmarks, int ACount, ProcessCallInfo ACallInfo)
+		public RemoteFetchData Fetch(out Guid[] ABookmarks, int ACount, bool ASkipCurrent, ProcessCallInfo ACallInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginFetch(CursorHandle, ACallInfo, ACount, null, null);
+				IAsyncResult LResult = GetServiceInterface().BeginFetch(CursorHandle, ACallInfo, ACount, ASkipCurrent, null, null);
 				LResult.AsyncWaitHandle.WaitOne();
 				FetchResult LFetchResult = GetServiceInterface().EndFetch(LResult);
 				ABookmarks = LFetchResult.Bookmarks;
