@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using Alphora.Dataphor.DAE.Runtime;
+using Alphora.Dataphor.DAE.Runtime.Data;
 using ICSharpCode.TextEditor;
 using ICSharpCode.TextEditor.Gui.CompletionWindow;
 
@@ -58,35 +59,22 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                 string LQuery = ".System.BaseTableVars where (Library_Name = ALibraryName) and (not(IsGenerated)) and (not(IsSystem)) over { Name }";
                 var LParams = new DataParams();
                 string LLibraryName = FDataphoria.GetCurrentLibraryName();
-                LParams.Add(DataParam.Create(FDataphoria.UtilityProcess, "ALibraryName", LLibraryName));                
-                DAE.IServerCursor LCursor = FDataphoria.OpenCursor(LQuery, LParams);
-                
-                try
-                {
-                    DAE.Runtime.Data.Row LRow = LCursor.Plan.RequestRow();
-                    try
-                    {
-                        TreeNode LNode;
-                        while (LCursor.Next())
-                        {
-                            LCursor.Select(LRow);
-                            string LTableName=  (string) LRow["Name"];
-                            LCompletionList.Add(new DefaultCompletionData(LTableName, 14));
-                        }
-                    }
-                    finally
-                    {
-                        LCursor.Plan.ReleaseRow(LRow);
-                    }
-                }
-                finally
-                {
-                    FDataphoria.CloseCursor(LCursor);
-                }                
-                //LCompletionList.Add(new DefaultCompletionData("view1", 30));
+                LParams.Add(DataParam.Create(FDataphoria.UtilityProcess, "ALibraryName", LLibraryName));
+                FDataphoria.Execute(LQuery, LParams, ARow =>
+                                                         {
+                                                             var LTableName = (string) ARow["Name"];
+                                                             var LLibrarYAndTableName = LTableName.Split('.');
+                                                             if (LLibraryName == LLibrarYAndTableName[0])
+                                                             {
+                                                                 LTableName = LLibrarYAndTableName[1];
+                                                             }
+                                                             LCompletionList.Add(new DefaultCompletionData(LTableName,
+                                                                                                           14));
+                                                         });
+
             }
             return LCompletionList.ToArray();
-        }
+        }       
 
         public ImageList ImageList
         {

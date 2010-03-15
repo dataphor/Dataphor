@@ -31,6 +31,7 @@ using Alphora.Dataphor.DAE.Debug;
 using Alphora.Dataphor.Windows;
 
 using WeifenLuo.WinFormsUI.Docking;
+using Action=System.Action;
 
 namespace Alphora.Dataphor.Dataphoria
 {
@@ -1199,7 +1200,33 @@ namespace Alphora.Dataphor.Dataphoria
 			return OpenCursor(AQuery, null);
 		}
 
-		public IServerCursor OpenCursor(string AQuery, DAE.Runtime.DataParams AParams)
+        public void Execute(string AQuery, DAE.Runtime.DataParams AParams, Action<DAE.Runtime.Data.Row> AAction)
+        {
+            IServerCursor LCursor = this.OpenCursor(AQuery, AParams);
+            
+            try
+            {
+                DAE.Runtime.Data.Row LRow = LCursor.Plan.RequestRow();
+                try
+                {
+                    while (LCursor.Next())
+                    {
+                        LCursor.Select(LRow);
+                        AAction(LRow);
+                    }
+                }
+                finally
+                {
+                    LCursor.Plan.ReleaseRow(LRow);
+                }
+            }
+            finally
+            {
+                CloseCursor(LCursor);
+            }          
+        }
+
+	    public IServerCursor OpenCursor(string AQuery, DAE.Runtime.DataParams AParams)
 		{
 			Cursor LOldCursor = Cursor.Current;
 			Cursor.Current = Cursors.WaitCursor;
