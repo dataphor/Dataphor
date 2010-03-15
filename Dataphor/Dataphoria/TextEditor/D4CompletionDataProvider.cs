@@ -93,7 +93,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                                                                                       }  
                                                                                       return LImageIndexSystemViews; 
                                                                                   }
-                                                                                  return LImageIndexOperator;
+                                                                                  return LImageIndexViews;
                                                                                       
                                                                                   
                                                                               });
@@ -108,7 +108,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                                                                                       }
                                                                                       return LImageIndexOperatorSystem;
                                                                                   }
-                                                                                  return LImageIndexViews;
+                                                                                  return LImageIndexOperator;
                                                                               });                
                                                          
             }
