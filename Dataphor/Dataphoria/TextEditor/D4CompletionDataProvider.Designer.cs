@@ -49,8 +49,8 @@
             this.FImageList.Images.SetKeyName(10, "");
             this.FImageList.Images.SetKeyName(11, "");
             this.FImageList.Images.SetKeyName(12, "");
-            this.FImageList.Images.SetKeyName(13, "Tables2.png");
-            this.FImageList.Images.SetKeyName(14, "Table2.png");
+            this.FImageList.Images.SetKeyName(13, "Tables.png");
+            this.FImageList.Images.SetKeyName(14, "Table.png");
             this.FImageList.Images.SetKeyName(15, "");
             this.FImageList.Images.SetKeyName(16, "");
             this.FImageList.Images.SetKeyName(17, "");
@@ -67,6 +67,10 @@
             this.FImageList.Images.SetKeyName(28, "");
             this.FImageList.Images.SetKeyName(29, "Views.png");
             this.FImageList.Images.SetKeyName(30, "View.png");
+            this.FImageList.Images.SetKeyName(31, "Tables - System.png");
+            this.FImageList.Images.SetKeyName(32, "Table - System.png");
+            this.FImageList.Images.SetKeyName(33, "Views - System.png");
+            this.FImageList.Images.SetKeyName(34, "View - System.png");
 
         }
 

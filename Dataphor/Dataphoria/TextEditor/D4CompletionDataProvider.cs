@@ -61,9 +61,9 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                 AddToCompletionList(LQueryViews, 30, LCompletionList);
 
                 var LQuerySystemTables = ".System.BaseTableVars where (Library_Name = ALibraryName) and (IsGenerated = true) or (IsSystem = true) over { Name }";
-                AddToCompletionList(LQuerySystemTables, 14, LCompletionList); //TODO: Change image for system/generated tables
+                AddToCompletionList(LQuerySystemTables, 32, LCompletionList); //TODO: Change image for system/generated tables
                 var LQuerySystemViews = ".System.DerivedTableVars where (Library_Name = ALibraryName) and (IsGenerated = true) or (IsSystem = true) over { Name }";
-                AddToCompletionList(LQuerySystemViews, 30, LCompletionList);  //TODO: Change image for system/generated views
+                AddToCompletionList(LQuerySystemViews, 34, LCompletionList);  //TODO: Change image for system/generated views
             }
             return LCompletionList.ToArray();
         }
