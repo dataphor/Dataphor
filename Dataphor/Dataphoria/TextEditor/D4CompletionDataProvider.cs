@@ -54,9 +54,13 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             var LCompletionList = new List<ICompletionData>();
             if (ACharTyped == ' ')
             {
-                string LQuery = ".System.BaseTableVars where (not(IsGenerated)) and (not(IsSystem)) over { Name }";
-                DataParams LParams  = null;
+
+                string LQuery = ".System.BaseTableVars where (Library_Name = ALibraryName) and (not(IsGenerated)) and (not(IsSystem)) over { Name }";
+                var LParams = new DataParams();
+                string LLibraryName = FDataphoria.GetCurrentLibraryName();
+                LParams.Add(DataParam.Create(FDataphoria.UtilityProcess, "ALibraryName", LLibraryName));                
                 DAE.IServerCursor LCursor = FDataphoria.OpenCursor(LQuery, LParams);
+                
                 try
                 {
                     DAE.Runtime.Data.Row LRow = LCursor.Plan.RequestRow();
