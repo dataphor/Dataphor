@@ -244,7 +244,12 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		protected bool UseBuffer()
 		{
-			return (FFetchCount > 1) && Supports(CursorCapability.Bookmarkable);
+			return (FFetchCount > 1) 
+				&& 
+				(
+					Supports(CursorCapability.Bookmarkable) 
+						|| ((Capabilities & (CursorCapability.Updateable | CursorCapability.BackwardsNavigable)) == 0)
+				);
 		}
 		
 		protected void ClearBuffer()
@@ -400,7 +405,9 @@ namespace Alphora.Dataphor.DAE.Server
 					LocalRow LRow = new LocalRow(new Row(FPlan.FProcess.ValueManager, LRowType), ABookmarks[LIndex]);
 					LRow.Row.AsPhysical = AFetchData.Body[LIndex].Data;
 					FBuffer.Add(LRow);
-					FBookmarks.Add(new LocalBookmark(ABookmarks[LIndex]));
+					var LBookmark = ABookmarks[LIndex];
+					if (LBookmark != Guid.Empty)
+						FBookmarks.Add(new LocalBookmark(LBookmark));
 				}
 				
 				if ((AFetchData.Body.Length > 0) && !AIsFirst)

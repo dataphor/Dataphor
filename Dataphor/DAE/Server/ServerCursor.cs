@@ -1028,7 +1028,7 @@ namespace Alphora.Dataphor.DAE.Server
 								break;
 
 							FSourceTable.Select(ARows[LCount]);
-							ABookmarks[LCount] = InternalGetBookmark();
+							ABookmarks[LCount] = Supports(CursorCapability.Bookmarkable) ? InternalGetBookmark() : Guid.Empty;
 							ACount--;
 						}
 						else
@@ -1039,7 +1039,7 @@ namespace Alphora.Dataphor.DAE.Server
 							if ((LCount > 0) && (!FSourceTable.Prior()))
 								break;
 							FSourceTable.Select(ARows[LCount]);
-							ABookmarks[LCount] = InternalGetBookmark();
+							ABookmarks[LCount] = Supports(CursorCapability.Bookmarkable) ? InternalGetBookmark() : Guid.Empty;
 							ACount++;
 						}
 						LCount++;
