@@ -68,40 +68,50 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
         private void InitializeCodeCompletion()
         {                        
-            FTextEdit.ActiveTextAreaControl.TextArea.KeyEventHandler+=
-                (AKey =>
-                     {
-                         if (FCodeCompletionWindow != null)
-                         {
-                             if (FCodeCompletionWindow.ProcessKeyEvent(AKey))
-                                 return true;
-                         }
-                         if (AKey == ' ')
-                         {
-                             var LCompletionDataProvider = new D4CompletionDataProvider(this.Dataphoria);
+            FTextEdit.ActiveTextAreaControl.TextArea.KeyEventHandler +=
+                (
+					AKey =>
+					{
+						// Send the command to the existing code completion window if there is one
+						if (FCodeCompletionWindow != null)
+						{
+							if (FCodeCompletionWindow.ProcessKeyEvent(AKey))
+								return true;
+						}
+						
+						// Handle the request to show code completion
+						if (AKey == ' ' && ModifierKeys == Keys.Control)
+						{
+							var LCompletionDataProvider = new D4CompletionDataProvider(this.Dataphoria);
 
-                             FCodeCompletionWindow = CodeCompletionWindow.ShowCompletionWindow(
-                                 this,
-                                 FTextEdit,
-                                 Text,
-                                 LCompletionDataProvider,
-                                 AKey
-                                 );
-                             if (FCodeCompletionWindow != null)
-                             {
-                                 FCodeCompletionWindow.Closed +=
-                                     ((ASender, AE) =>
-                                          {
-                                              if (FCodeCompletionWindow != null)
-                                              {
-                                                  FCodeCompletionWindow.Dispose();
-                                                  FCodeCompletionWindow = null;
-                                              }
-                                          });
-                             }
-                         }
-                         return false;
-                     });
+							FCodeCompletionWindow = 
+								CodeCompletionWindow.ShowCompletionWindow
+								(
+									this,
+									FTextEdit,
+									Text,
+									LCompletionDataProvider,
+									AKey
+								);
+							if (FCodeCompletionWindow != null)
+							{
+								FCodeCompletionWindow.Closed +=
+									(
+										(ASender, AE) =>
+										{
+											if (FCodeCompletionWindow != null)
+											{
+												FCodeCompletionWindow.Dispose();
+												FCodeCompletionWindow = null;
+											}
+										}
+									);
+							}
+							return true;
+						}
+						return false;
+					}
+				);
         }
 
 	    
