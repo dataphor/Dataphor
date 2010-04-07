@@ -525,35 +525,44 @@ namespace Alphora.Dataphor.DAE.Debug
 					{
 						Program LProgram = LProcess.ExecutingPrograms[LProgramIndex];
 						PlanNode LCurrentNode = LProgram.CurrentNode;
-						
-						if (AWindowIndex < 0)
-							break;
-						
-						if (AWindowIndex < LProgram.Stack.CallDepth)
-						{
-							object[] LStackWindow = LProgram.Stack.GetStack(AWindowIndex);
-							int LIndex;
-							for (int LStackWindowIndex = LStackWindow.Length - 1; LStackWindowIndex >= 0; LStackWindowIndex--)
-							{
-								// reverse the index of the entries
-								LIndex = LStackWindow.Length - (LStackWindowIndex + 1);
-								LStack.Add
-								(
-									new StackEntry
-									{
-										Index = LIndex,
-										Name = String.Format("Location{0}", LIndex),
-										Type = LStackWindow[LStackWindowIndex] == null ? "<no value>" : LStackWindow[LStackWindowIndex].GetType().FullName,
-										Value = LStackWindow[LStackWindowIndex] == null ? "<no value>" : LStackWindow[LStackWindowIndex].ToString()
-									}
-								);
-							}
+						// temporarily clear the debugger so we can evaluate against the target process without yielding
+						Debugger LDebugger = LProgram.ServerProcess.DebuggedBy;
+						LProgram.ServerProcess.SetDebuggedBy(null);					
+						try
+						{							
+							if (AWindowIndex < 0)
+								break;
 							
-							break;
+							if (AWindowIndex < LProgram.Stack.CallDepth)
+							{
+								object[] LStackWindow = LProgram.Stack.GetStack(AWindowIndex);
+								int LIndex;
+								for (int LStackWindowIndex = LStackWindow.Length - 1; LStackWindowIndex >= 0; LStackWindowIndex--)
+								{
+									// reverse the index of the entries
+									LIndex = LStackWindow.Length - (LStackWindowIndex + 1);
+									LStack.Add
+									(
+										new StackEntry
+										{
+											Index = LIndex,
+											Name = String.Format("Location{0}", LIndex),
+											Type = LStackWindow[LStackWindowIndex] == null ? "<no value>" : LStackWindow[LStackWindowIndex].GetType().FullName,
+											Value = LStackWindow[LStackWindowIndex] == null ? "<no value>" : LStackWindow[LStackWindowIndex].ToString()
+										}
+									);
+								}
+								
+								break;
+							}
+							else
+							{
+								AWindowIndex -= LProgram.Stack.CallDepth;
+							}	  
 						}
-						else
+						finally
 						{
-							AWindowIndex -= LProgram.Stack.CallDepth;
+							LProgram.ServerProcess.SetDebuggedBy(LDebugger);
 						}
 					}
 				}
