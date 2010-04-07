@@ -532,16 +532,19 @@ namespace Alphora.Dataphor.DAE.Debug
 						if (AWindowIndex < LProgram.Stack.CallDepth)
 						{
 							object[] LStackWindow = LProgram.Stack.GetStack(AWindowIndex);
-							for (int LIndex = 0; LIndex < LStackWindow.Length; LIndex++)
+							int LIndex;
+							for (int LStackWindowIndex = LStackWindow.Length - 1; LStackWindowIndex >= 0; LStackWindowIndex--)
 							{
+								// reverse the index of the entries
+								LIndex = LStackWindow.Length - (LStackWindowIndex + 1);
 								LStack.Add
 								(
 									new StackEntry
 									{
 										Index = LIndex,
 										Name = String.Format("Location{0}", LIndex),
-										Type = LStackWindow[LIndex] == null ? "<no value>" : LStackWindow[LIndex].GetType().FullName,
-										Value = LStackWindow[LIndex] == null ? "<no value>" : LStackWindow[LIndex].ToString()
+										Type = LStackWindow[LStackWindowIndex] == null ? "<no value>" : LStackWindow[LStackWindowIndex].GetType().FullName,
+										Value = LStackWindow[LStackWindowIndex] == null ? "<no value>" : LStackWindow[LStackWindowIndex].ToString()
 									}
 								);
 							}
