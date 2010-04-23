@@ -385,6 +385,17 @@ namespace Alphora.Dataphor.Frontend.Client
 			set { FAutoAcceptAfterInsertOnQuery = value; }
 		}
 
+		// TopMost
+
+		private bool FTopMost;
+		[DefaultValue(false)]
+		[Description("The TopMost setting of the shown form.")]
+		public bool TopMost
+		{
+			get { return FTopMost; }
+			set { FTopMost = value; }
+		}
+
 		// Action
 
 		public override bool GetEnabled()
@@ -491,6 +502,7 @@ namespace Alphora.Dataphor.Frontend.Client
 						try
 						{
 							LForm.OnClosed += new EventHandler(OnClosedHandler);
+							LForm.TopMost = TopMost;
 							InternalAfterActivateForm(LForm);
 							bool LForceAcceptReject = (FOnFormAccepted != null) || (FOnFormRejected != null) || (OnFormAcceptedEvent != null) || (OnFormRejectedEvent != null);
 							if ((FMode != FormMode.None) || (SourceLinkType != SourceLinkType.None) || LForceAcceptReject)

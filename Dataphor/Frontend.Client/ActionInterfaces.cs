@@ -489,6 +489,9 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <value> <para>String:</para>
 		/// <para>Default: empty string</para></value>
 		string Filter { get; set; }
+		
+		/// <summary> The TopMost setting of the shown form. </summary>
+		bool TopMost { get; set; }
 
 		/// <summary> An action that will be executed after the form is closed. </summary> <doc/>
 		/// <value> <para>IAction: The name of an action.</para>

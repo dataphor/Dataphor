@@ -176,6 +176,17 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			BroadcastEvent(new FormShownEvent());
 		}
 
+		// TopMost
+
+		private bool FTopMost;
+		[DefaultValue(false)]
+		[Publish(PublishMethod.None)]
+		public bool TopMost
+		{
+			get { return FTopMost; }
+			set { FTopMost = value; }
+		}
+
 		// ErrorList - DFD loading errors
 
 		private ErrorList FErrorList;

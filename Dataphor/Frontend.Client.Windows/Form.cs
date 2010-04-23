@@ -225,6 +225,30 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				FForm.ResetIcon();
 		}
 
+		// TopMost
+		
+		private bool FTopMost;
+		[DefaultValue(false)]
+		[Publish(PublishMethod.None)]
+		public bool TopMost 
+		{ 
+			get { return FTopMost; }
+			set 
+			{
+				if (FTopMost != value)
+				{
+					FTopMost = value;
+					if (Active)
+						UpdateTopMost();
+				}
+			}
+		}
+
+		private void UpdateTopMost()
+		{
+			Form.TopMost = FTopMost;
+		}
+
 		#endregion
 
 		#region Accept / Reject
@@ -414,6 +438,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 						UpdateActiveControl(null);
 						UpdateBackgroundImage();
 						UpdateImage();
+						UpdateTopMost();
 					}
 					finally
 					{

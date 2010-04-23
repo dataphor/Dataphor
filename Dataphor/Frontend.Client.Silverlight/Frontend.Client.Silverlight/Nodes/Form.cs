@@ -433,6 +433,30 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			FMode = FormMode.None;
 		}
 
+		// TopMost
+
+		private bool FTopMost;
+		[DefaultValue(false)]
+		[Publish(PublishMethod.None)]
+		public bool TopMost
+		{
+			get { return FTopMost; }
+			set
+			{
+				if (FTopMost != value)
+				{
+					FTopMost = value;
+					if (Active)
+						UpdateTopMost();
+				}
+			}
+		}
+
+		private void UpdateTopMost()
+		{
+			// TODO: implement top-most
+		}
+
 		#endregion
 
 		#region Enabled / Disabled

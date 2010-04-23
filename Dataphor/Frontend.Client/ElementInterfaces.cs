@@ -1019,6 +1019,9 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <summary> If true, the accept/reject state is forced. </summary> <doc/>
 		/// <value>Default: False</value>
 		bool ForceAcceptReject { get; set; }
+		
+		/// <summary> If true, the form should be remain in front of other non top-most forms. </summary>
+		bool TopMost { get; set; }
 	}
 
 	/// <summary> A Frame control embeds a user interface document as an element. </summary> <doc/>

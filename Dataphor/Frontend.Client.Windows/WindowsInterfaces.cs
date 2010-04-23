@@ -204,6 +204,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		Point Location { get; set; }
 		System.Drawing.Icon Icon { get; set; }
 		bool TopLevel { get; set; }
+		bool TopMost { get; set; }
 		bool HelpButton { get; set; }
 		WinForms.Form Owner { get; set; }
 
