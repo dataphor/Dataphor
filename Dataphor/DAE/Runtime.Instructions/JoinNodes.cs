@@ -1456,7 +1456,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					LNewKey.IsInherited = true;
 					LNewKey.IsSparse = 
 						LLeftKey.IsSparse 
-							|| (AIsRightOuter && !IsNatural && ((ACardinality == JoinCardinality.OneToOne) || (ACardinality == JoinCardinality.OneToMany)));
+							|| 
+							(
+								AIsRightOuter 
+									&& (!IsNatural || (IsNatural && !LLeftKey.Columns.IsSubsetOf(RightTableVar.Columns))) 
+									&& ((ACardinality == JoinCardinality.OneToOne) || (ACardinality == JoinCardinality.OneToMany))
+							);
 							
 					foreach (Schema.TableVarColumn LColumn in LLeftKey.Columns)
 						LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
@@ -1475,7 +1480,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					LNewKey.IsInherited = true;
 					LNewKey.IsSparse =
 						LRightKey.IsSparse
-							|| (AIsLeftOuter && !IsNatural && ((ACardinality == JoinCardinality.OneToOne) || (ACardinality == JoinCardinality.ManyToOne)));
+							|| 
+							(
+								AIsLeftOuter 
+									&& (!IsNatural || (IsNatural && !LRightKey.Columns.IsSubsetOf(LeftTableVar.Columns))) 
+									&& ((ACardinality == JoinCardinality.OneToOne) || (ACardinality == JoinCardinality.ManyToOne))
+							);
 							
 					foreach (Schema.TableVarColumn LColumn in LLeftKey.Columns)
 						if (!LeftKey.Columns.ContainsName(LColumn.Name) ) // if this is not a left join column
