@@ -12,7 +12,7 @@ using Alphora.Dataphor.DAE.Client;
 using System.Threading;
 using Alphora.Dataphor.DAE.Runtime.Data;
 
-namespace Alphora.Dataphor.DAE.ServerTests
+namespace Alphora.Dataphor.DAE.Client.Tests
 {
 	[TestFixture]
 	public class OutOfProcessTest
