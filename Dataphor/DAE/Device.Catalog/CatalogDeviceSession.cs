@@ -1738,10 +1738,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				Catalog.SafeRemove(AObject);
 				
 				// Clear the name resolution cache
-				Device.NameCache.Clear();
+				Device.NameCache.Clear(AObject.Name);
 				
 				// Clear the operator name resolution cache
-				Device.OperatorNameCache.Clear();
+				Device.OperatorNameCache.Clear(AObject.Name);
 			}
 		}
 		
@@ -3494,7 +3494,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			CacheCatalogObject(ARole);
 
 			// Clear the name cache (this is done in InsertPersistentObject for all other catalog objects)
-			Device.NameCache.Clear();
+			Device.NameCache.Clear(ARole.Name);
 
 			// If we are not deserializing
 			if (!ServerProcess.InLoadingContext())

@@ -641,6 +641,13 @@ namespace Alphora.Dataphor.DAE.Schema
 				return String.Empty;
 		}
 		
+		/// <summary> Returns true if the given identifier isn't qualified (not including the root).</summary>
+		public static bool IsQualified(string AName)
+		{
+			AName = EnsureUnrooted(AName);
+			return AName.IndexOf(Keywords.Qualifier) >= 0;
+		}
+		
 		/// <summary>Returns the given name with the given qualifier removed.  If the name does not begin with the given qualifier, the given name is returned unchanged.  If the name is equal to the given qualifier, the empty string is returned.</summary>
 		public static string RemoveQualifier(string AName, string AQualifier)
 		{

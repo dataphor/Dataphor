@@ -1867,20 +1867,28 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
+		int FMaxCatalogObjectNamesIndexCache = -1;
+		
 		private int GetMaxCatalogObjectNamesIndexDepth()
 		{
-			SQLStoreCursor LCursor = OpenCursor("PK_DAECatalogObjectNames", false);
-			try
+			if (FMaxCatalogObjectNamesIndexCache >= 0)
+				return FMaxCatalogObjectNamesIndexCache;
+			else
 			{
-				int LMax = 0; // TODO: Could cache this... would only ever be changed by adding or deleting catalog objects
-				LCursor.Last();
-				if (LCursor.Prior())
-					LMax = (int)LCursor[0];
-				return LMax;
-			}
-			finally
-			{
-				CloseCursor(LCursor);
+				SQLStoreCursor LCursor = OpenCursor("PK_DAECatalogObjectNames", false);
+				try
+				{
+					int LMax = 0; 
+					LCursor.Last();
+					if (LCursor.Prior())
+						LMax = (int)LCursor[0];
+					FMaxCatalogObjectNamesIndexCache = LMax;
+					return LMax;
+				}
+				finally
+				{
+					CloseCursor(LCursor);
+				}
 			}
 		}
 
@@ -2203,6 +2211,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 						LCatalogObjectNames.Insert(new object[] { LIndex, LName, LCatalogObject.ID });
 						LName = Schema.Object.Dequalify(LName);
 					}
+				
+					// Set if depth of clearing name is greater than cached value
+					if (FMaxCatalogObjectNamesIndexCache >= 0 && FMaxCatalogObjectNamesIndexCache < LDepth)
+						FMaxCatalogObjectNamesIndexCache = LDepth;
 				}
 				finally
 				{
@@ -2446,6 +2458,14 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			
 			if (AObject is Schema.CatalogObject)
 			{
+				// Maintain the max names depth cache
+				if (FMaxCatalogObjectNamesIndexCache >= 0)
+				{
+					var LDepth = Schema.Object.GetQualifierCount(AObject.Name);
+					if (LDepth >= FMaxCatalogObjectNamesIndexCache)
+						FMaxCatalogObjectNamesIndexCache = -1;
+				}
+				
 				// Delete the DAECatalogObjectNames rows
 				DeleteRows("IDX_DAECatalogObjectNames_ID", AObject.ID);
 			

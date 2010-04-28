@@ -330,10 +330,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		private void InsertPersistentObject(Schema.Object AObject)
 		{
 			if (AObject is CatalogObject)
-				Device.NameCache.Clear();
+				Device.NameCache.Clear(AObject.Name);
 
 			if (AObject is Operator)
-				Device.OperatorNameCache.Clear();
+				Device.OperatorNameCache.Clear(AObject.Name);
 
 			AcquireCatalogStoreConnection(true);
 			try
@@ -377,10 +377,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		private void DeletePersistentObject(Schema.Object AObject)
 		{
 			if (AObject is Schema.CatalogObject)
-				Device.NameCache.Clear();
+				Device.NameCache.Clear(AObject.Name);
 
 			if (AObject is Schema.Operator)
-				Device.OperatorNameCache.Clear();
+				Device.OperatorNameCache.Clear(AObject.Name);
 
 			AcquireCatalogStoreConnection(true);
 			try
@@ -588,14 +588,21 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		public override bool CatalogObjectExists(string AObjectName)
 		{
-			AcquireCatalogStoreConnection(false);
-			try
+			// Search for a positive in the cache first
+			Schema.CatalogObjectHeaders LResult = Device.NameCache.Resolve(AObjectName);
+			if (LResult != null)
+				return true;
+			else
 			{
-				return CatalogStoreConnection.CatalogObjectExists(AObjectName);
-			}
-			finally
-			{
-				ReleaseCatalogStoreConnection();
+				AcquireCatalogStoreConnection(false);
+				try
+				{
+					return CatalogStoreConnection.CatalogObjectExists(AObjectName);
+				}
+				finally
+				{
+					ReleaseCatalogStoreConnection();
+				}
 			}
 		}
 
@@ -1438,8 +1445,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		/// <summary>Resolves the given name and returns the catalog object, if an unambiguous match is found. Otherwise, returns null.</summary>
 		public override Schema.CatalogObject ResolveName(string AName, NameResolutionPath APath, List<string> ANames)
 		{
+			bool LRooted = Schema.Object.IsRooted(AName);
+			
 			// If the name is rooted, then it is safe to search for it in the catalog cache first
-			if (Schema.Object.IsRooted(AName))
+			if (LRooted)
 			{
 				int LIndex = Catalog.ResolveName(AName, APath, ANames);
 				if (LIndex >= 0)
@@ -1448,7 +1457,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 			Schema.CatalogObjectHeaders LHeaders = CachedResolveCatalogObjectName(AName);
 
-			if (!Schema.Object.IsRooted(AName))
+			if (!LRooted)
 			{
 				Schema.CatalogObjectHeaders LLevelHeaders = new Schema.CatalogObjectHeaders();
 

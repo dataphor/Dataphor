@@ -81,14 +81,30 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			
 			return null;
 		}
-		
+
+		/// <summary> Remove all entries from the cache. </summary>
 		public void Clear()
 		{
 			lock (this)
 			{
-				// TODO: Could potentially only remove affected entries?
 				if (FCache != null)
 					FCache.Clear();
+			}
+		}
+
+		/// <summary> Removes entries that could potentially be affected by the given object name. </summary>
+		public void Clear(string AName)
+		{
+			lock (this)
+			{
+				while (true)
+				{
+					FCache.Remove(AName);
+					if (Schema.Object.IsQualified(AName))
+						AName = Schema.Object.Dequalify(AName);
+					else
+						break;
+				}
 			}
 		}
 	}
