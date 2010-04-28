@@ -1739,7 +1739,7 @@ namespace Alphora.Dataphor.Dataphoria
 				var LDocumentBuffer = new DocumentDesignBuffer(this, ALocator);
 				AInfo = GetDefaultDesigner(GetDocumentType(LDocumentBuffer.LibraryName, LDocumentBuffer.DocumentName));
 				LBuffer = LDocumentBuffer;
-				}
+			}
 			else if (ProgramDesignBuffer.IsProgramLocator(ALocator.Locator))
 			{
 				LBuffer = new ProgramDesignBuffer(this, ALocator);

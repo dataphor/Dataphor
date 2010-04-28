@@ -16,7 +16,7 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 			var LSegments = ALocator.Locator.Split(':');
 			if (LSegments.Length == 3)
 			{
-				FLibraryName = LSegments[1];
+				FLibraryName = DAE.Schema.Object.EnsureRooted(LSegments[1]);
 				FDocumentName = LSegments[2];
 			}
 			else
