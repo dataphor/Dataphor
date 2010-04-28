@@ -84,7 +84,7 @@ create view AddUser
 	AddUserBase
 	{
 		constraint PasswordValid Password = ConfirmPassword static tags { DAE.SimpleMessage = "Password and Confirm Password must match." }//,
-//		reference AddUser_Group { Group_Name } references Group { Name } tags { Storage.Enforced = "true", Frontend.Detail.Visible = "false", Frontend.Lookup.Title = "Group" }
+//		reference AddUser_Group { Group_Name } references Group { Name } tags { DAE.Enforced = "true", Frontend.Detail.Visible = "false", Frontend.Lookup.Title = "Group" }
 	}
 	tags
 	{
@@ -175,7 +175,7 @@ create view UserDeviceUser
 		transition constraint UserDeviceUser_Update on update
 			old.User_ID = new.User_ID and old.Device_Name = new.Device_Name,
 		reference UserDeviceUser_DevicesView { Device_Name } references DevicesView { Name }
-			tags { Storage.Enforced = "true", Frontend.Priority = "-1", Frontend.Lookup.Title = "Device", Frontend.Detail.Visible = "false" }
+			tags { DAE.Enforced = "true", Frontend.Priority = "-1", Frontend.Lookup.Title = "Device", Frontend.Detail.Visible = "false" }
 	}
 	tags 
 	{
@@ -332,7 +332,7 @@ create view UserRole
 		}
 	{
 		reference UserRole_Role { Role_Name } references Role { Name }
-			tags { Storage.Enforced = "true", Frontend.Priority = "-1", Frontend.Lookup.Title = "Role", Frontend.Detail.Visible = "false" }
+			tags { DAE.Enforced = "true", Frontend.Priority = "-1", Frontend.Lookup.Title = "Role", Frontend.Detail.Visible = "false" }
 	}
 	tags 
 	{ 
@@ -408,8 +408,8 @@ attach operator Right_Delete to Right on before delete;
 
 //* View: UserRights
 create view UserRights
-	(Users over { ID } rename { ID User_ID }) 
-		join (Rights over { Name } rename { Name Right_Name }) 
+	Users { ID User_ID }
+		times (Rights { Name Right_Name }) 
 		add { UserHasRight(User_ID, Right_Name) HasRight }
 		left join UserRightAssignments include rowexists HasAssignment
 		adorn
@@ -483,8 +483,8 @@ select Rights over { Name } rename { Name Right_Name }
 
 //* View: RoleRights
 create view RoleRights
-	(Roles over { Name } rename { Name Role_Name })
-		join (Rights over { Name } rename { Name Right_Name })
+	Roles { Name Role_Name }
+		times (Rights { Name Right_Name })
 		add { RoleHasRight(Role_Name, Right_Name) HasRight }
 		left join RoleRightAssignments include rowexists HasAssignment
 		adorn
