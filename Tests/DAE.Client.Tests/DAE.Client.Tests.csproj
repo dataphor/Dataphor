@@ -51,6 +51,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CLI\CLITest.cs" />
+    <Compile Include="Frontend\DataViewTest.cs" />
     <Compile Include="OutOfProcessTestFixture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Provider\ConnectionTest.cs" />
@@ -88,10 +90,6 @@
       <Project>{C9B535D4-E7D3-4009-857C-82CC8CC2013C}</Project>
       <Name>DAE.Server.Tests</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="CLI\" />
-    <Folder Include="Frontend\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
