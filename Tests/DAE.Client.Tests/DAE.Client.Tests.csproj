@@ -8,8 +8,8 @@
     <ProjectGuid>{A0EC803A-8DF9-45A2-B793-C4E76E892419}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Alphora.Dataphor.DAE.ClientTests</RootNamespace>
-    <AssemblyName>DAE.ClientTests</AssemblyName>
+    <RootNamespace>Alphora.Dataphor.DAE.Client.Tests</RootNamespace>
+    <AssemblyName>DAE.Client.Tests</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -75,9 +75,9 @@
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
       <Name>Engine</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DAE.ServerTests\DAE.ServerTests.csproj">
+    <ProjectReference Include="..\DAE.Server.Tests\DAE.Server.Tests.csproj">
       <Project>{C9B535D4-E7D3-4009-857C-82CC8CC2013C}</Project>
-      <Name>DAE.ServerTests</Name>
+      <Name>DAE.Server.Tests</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

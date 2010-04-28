@@ -1,8 +1,9 @@
 ﻿/*
 	Dataphor
-	© Copyright 2000-2008 Alphora
+	© Copyright 2000-2010 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -10,12 +11,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("DAE.ClientTests")]
+[assembly: AssemblyTitle("DAE.Client.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Alphora")]
 [assembly: AssemblyProduct("Dataphor")]
-[assembly: AssemblyCopyright("Copyright © Alphora 2009")]
+[assembly: AssemblyCopyright("Copyright © Alphora 2010")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

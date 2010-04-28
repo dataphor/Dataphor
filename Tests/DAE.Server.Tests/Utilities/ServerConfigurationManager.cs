@@ -1,14 +1,21 @@
-﻿using System;
+﻿/*
+	Dataphor
+	© Copyright 2000-2010 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+using System;
 using System.Collections.Generic;
 using System.Text;
-using Alphora.Dataphor.DAE.Server;
 
-namespace Alphora.Dataphor.DAE.ServerTests.Utilities
+namespace Alphora.Dataphor.DAE.Server.Tests.Utilities
 {
-	interface ServerConfigurationManager
+	using Alphora.Dataphor.DAE.Server;
+	
+	public interface ServerConfigurationManager
 	{
 		ServerConfiguration GetTestConfiguration(string AInstanceName);
 		void ResetInstance();
-		Server.Server GetServer();
+		Server GetServer();
 	}
 }

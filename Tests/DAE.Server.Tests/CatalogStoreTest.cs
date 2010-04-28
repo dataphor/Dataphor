@@ -1,6 +1,6 @@
 ﻿/*
 	Dataphor
-	© Copyright 2000-2008 Alphora
+	© Copyright 2000-2010 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
@@ -13,10 +13,6 @@ using System.Data.Common;
 using System.Data.SqlClient;
 
 using NUnit.Framework;
-
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Language.D4;
-using Alphora.Dataphor.DAE.ServerTests.Utilities;
 
 /*
 create table SQLCETiming from
@@ -52,8 +48,12 @@ select
 		right join (MSSQLTiming group by { Operation } add { Count() MSSQLCount, Sum(Duration) MSSQLSumDuration, Avg(Duration) MSSQLAvgDuration })
 */
 
-namespace Alphora.Dataphor.DAE.ServerTests
+namespace Alphora.Dataphor.DAE.Server.Tests
 {
+	using Alphora.Dataphor.DAE.Server;
+	using Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Server.Tests.Utilities;
+
 	[TestFixture]
 	public class CatalogStoreTest
 	{
@@ -66,7 +66,7 @@ namespace Alphora.Dataphor.DAE.ServerTests
 			AServerConfigurationManager.ResetInstance();
 				
 			// Start a server based on the StoreRegression instance
-			Server.Engine LServer = AServerConfigurationManager.GetServer();
+			Server LServer = AServerConfigurationManager.GetServer();
 			LServer.Start();
 			
 			// Stop the server

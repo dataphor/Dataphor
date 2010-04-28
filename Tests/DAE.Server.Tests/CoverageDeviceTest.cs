@@ -8,13 +8,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+
 using NUnit.Framework;
 
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.ServerTests.Utilities;
-
-namespace Alphora.Dataphor.DAE.ServerTests
+namespace Alphora.Dataphor.DAE.Server.Tests
 {
+	using Alphora.Dataphor.DAE.Server;
+	using Alphora.Dataphor.DAE.Server.Tests.Utilities;
+
 	[TestFixture]
 	public class CoverageDeviceTest
 	{

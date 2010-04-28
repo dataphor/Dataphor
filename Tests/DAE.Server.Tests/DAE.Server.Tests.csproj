@@ -8,8 +8,8 @@
     <ProjectGuid>{C9B535D4-E7D3-4009-857C-82CC8CC2013C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Alphora.Dataphor.DAE.ServerTests</RootNamespace>
-    <AssemblyName>DAE.ServerTests</AssemblyName>
+    <RootNamespace>Alphora.Dataphor.DAE.Server.Tests</RootNamespace>
+    <AssemblyName>DAE.Server.Tests</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

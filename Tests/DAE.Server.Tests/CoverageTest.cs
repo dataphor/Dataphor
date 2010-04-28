@@ -1,18 +1,20 @@
 ﻿/*
 	Dataphor
-	© Copyright 2000-2009 Alphora
+	© Copyright 2000-2010 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Alphora.Dataphor.DAE.ServerTests.Utilities;
-using NUnit.Framework;
-using Alphora.Dataphor.DAE.Server;
 
-namespace Alphora.Dataphor.DAE.ServerTests
+using NUnit.Framework;
+
+namespace Alphora.Dataphor.DAE.Server.Tests
 {
+	using Alphora.Dataphor.DAE.Server;
+	using Alphora.Dataphor.DAE.Server.Tests.Utilities;
+
 	[TestFixture]
 	public class CoverageTest
 	{

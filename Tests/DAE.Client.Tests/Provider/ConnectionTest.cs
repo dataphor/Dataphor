@@ -1,18 +1,24 @@
-﻿using System;
+﻿/*
+	Dataphor
+	© Copyright 2000-2010 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Text;
-using Alphora.Dataphor.DAE.Client;
-using Alphora.Dataphor.DAE.Client.Provider;
+
 using NUnit.Framework;
 
-namespace Alphora.Dataphor.DAE.ClientTests.Provider
+namespace Alphora.Dataphor.DAE.Client.Tests.Provider
 {
+	using Alphora.Dataphor.DAE.Client;
+	using Alphora.Dataphor.DAE.Client.Provider;
+
     [TestFixture]
     public class ConnectionTest
     {
-       
-
         [Test]
         public void OpenConnection()
         {
@@ -31,6 +37,5 @@ namespace Alphora.Dataphor.DAE.ClientTests.Provider
                 }
             }
         }
-
     }
 }
