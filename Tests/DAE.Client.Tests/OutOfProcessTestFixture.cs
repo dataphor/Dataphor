@@ -1,21 +1,29 @@
-﻿using System;
+﻿/*
+	Dataphor
+	© Copyright 2000-2010 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using NUnit.Framework;
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.ServerTests.Utilities;
 using System.Diagnostics;
-using Alphora.Dataphor.Windows;
 using System.IO;
-using Alphora.Dataphor.DAE.Client;
 using System.Threading;
-using Alphora.Dataphor.DAE.Runtime.Data;
+
+using NUnit.Framework;
 
 namespace Alphora.Dataphor.DAE.Client.Tests
 {
+	using Alphora.Dataphor.Windows;
+	using Alphora.Dataphor.DAE.Server;
+	using Alphora.Dataphor.DAE.Server.Tests.Utilities;
+	using Alphora.Dataphor.DAE.Client;
+	using Alphora.Dataphor.DAE.Runtime.Data;
+
 	[TestFixture]
-	public class OutOfProcessTest
+	public class OutOfProcessTestFixture
 	{
 		private ServerConfigurationManager FConfigurationManager;
 		private ServerConfiguration FConfiguration;
