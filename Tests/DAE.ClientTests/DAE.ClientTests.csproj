@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Alphora.Dataphor.DAE.ClientTests</RootNamespace>
     <AssemblyName>DAE.ClientTests</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -44,6 +44,9 @@
       <HintPath>.\pnunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -72,6 +75,14 @@
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
       <Name>Engine</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DAE.ServerTests\DAE.ServerTests.csproj">
+      <Project>{C9B535D4-E7D3-4009-857C-82CC8CC2013C}</Project>
+      <Name>DAE.ServerTests</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="CLI\" />
+    <Folder Include="Frontend\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

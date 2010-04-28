@@ -45,22 +45,37 @@ namespace Alphora.Dataphor.DAE.ServerTests
 			FProcess = Process.Start(LProcessStartInfo);
 			
 			// TODO: This should be a wait for the process, but WaitForInputIdle only works on GUI apps
-			Thread.Sleep(10000);
+			//Thread.Sleep(10000);
 			
 			ConnectionAlias LAlias = new ConnectionAlias();
 			LAlias.Name = "TestOOPInstanceConnection";
 			LAlias.InstanceName = "TestOOPInstance";
 			
-			FDataSession = new DataSession();
-			FDataSession.Alias = LAlias;
-			FDataSession.Open();
+			int LRetryCount = 0;
+			while ((FDataSession == null) && (LRetryCount++ < 3))
+			{
+				Thread.Sleep(500);
+				try
+				{
+					FDataSession = new DataSession();
+					FDataSession.Alias = LAlias;
+					FDataSession.Open();
+				}
+				catch
+				{
+					FDataSession = null;
+				}
+			}
 		}
 		
 		[TestFixtureTearDown]
 		public void FixtureTearDown()
 		{
-			// Close the data session
-			FDataSession.Close();
+			if (FDataSession != null)
+			{
+				// Close the data session
+				FDataSession.Close();
+			}
 			
 			// Send to stop the server
 			FProcess.StandardInput.WriteLine();
@@ -76,6 +91,11 @@ namespace Alphora.Dataphor.DAE.ServerTests
 			
 			// Try to reset the instance
 			FConfigurationManager.ResetInstance();
+		}
+		
+		[Test]
+		public void TestSetupAndTeardown()
+		{
 		}
 		
 		[Test]
@@ -233,7 +253,7 @@ namespace Alphora.Dataphor.DAE.ServerTests
 			DataView LDataView = FDataSession.OpenDataView("TestForDataView");
 			try
 			{
-				LDataView.UseApplicationTransactions = false;
+				//LDataView.UseApplicationTransactions = false;
 				if (!LDataView.IsEmpty())
 				{
 					LDataView.First();
@@ -241,6 +261,16 @@ namespace Alphora.Dataphor.DAE.ServerTests
 					LDataView["Name"].AsString = "John";
 					LDataView.Refresh();
 				}
+				
+				LDataView.Insert();
+				LDataView["ID"].AsInt32 = 2;
+				LDataView["Name"].AsString = "Jacob";
+				LDataView.Post();
+				
+				LDataView.Delete();
+				
+				if (LDataView.IsEmpty())
+					throw new Exception("Data View Delete Failed");
 			}
 			finally
 			{

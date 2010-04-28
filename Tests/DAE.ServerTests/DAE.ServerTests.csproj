@@ -56,7 +56,6 @@
     <Compile Include="CoverageDeviceTest.cs" />
     <Compile Include="CoverageTest.cs" />
     <Compile Include="InternalCoverageTests.cs" />
-    <Compile Include="OutOfProcessTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SQLStoreTest.cs" />
     <Compile Include="Utilities\SQLCEServerConfigurationManager.cs" />
