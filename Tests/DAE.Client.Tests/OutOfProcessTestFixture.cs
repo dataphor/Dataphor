@@ -22,7 +22,6 @@ namespace Alphora.Dataphor.DAE.Client.Tests
 	using Alphora.Dataphor.DAE.Client;
 	using Alphora.Dataphor.DAE.Runtime.Data;
 
-	[TestFixture]
 	public class OutOfProcessTestFixture
 	{
 		private ServerConfigurationManager FConfigurationManager;
@@ -47,7 +46,7 @@ namespace Alphora.Dataphor.DAE.Client.Tests
 			InstanceManager.Save();
 			
 			ProcessStartInfo LProcessStartInfo = new ProcessStartInfo();
-			LProcessStartInfo.FileName = Path.Combine(Path.GetDirectoryName(PathUtility.GetInstallationDirectory()), "Dataphor\\bin\\DAEServer.exe");
+			LProcessStartInfo.FileName = Path.Combine(ServerConfigurationManager.GetInstallationDirectory(), "Dataphor\\bin\\DAEServer.exe");
 			LProcessStartInfo.WorkingDirectory = Path.GetDirectoryName(LProcessStartInfo.FileName);
 			LProcessStartInfo.Arguments = "-n \"TestOOPInstance\"";
 			LProcessStartInfo.UseShellExecute = false;
