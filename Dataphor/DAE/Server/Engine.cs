@@ -1164,34 +1164,28 @@ namespace Alphora.Dataphor.DAE.Server
 				FStreamManager = new ServerStreamManager(this);
 		}
 
-		private bool FCatalogRegistered;
 		private void RegisterCatalog()
 		{
 			// Startup the catalog
-			if (!FCatalogRegistered)
+			if (!IsEngine && FFirstRun)
 			{
-				FCatalogRegistered = true;
-
-				if (!IsEngine && FFirstRun)
+				LogMessage("Registering system catalog...");
+				using (Stream LStream = typeof(Engine).Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.Schema.SystemCatalog.d4"))
 				{
-					LogMessage("Registering system catalog...");
-					using (Stream LStream = typeof(Engine).Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.Schema.SystemCatalog.d4"))
-					{
-						RunScript(new StreamReader(LStream).ReadToEnd(), CSystemLibraryName);
-					}
-					LogMessage("System catalog registered.");
-					LogMessage("Registering debug operators...");
-					using (Stream LStream = typeof(Engine).Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.Debug.Debug.d4"))
-					{
-						RunScript(new StreamReader(LStream).ReadToEnd(), CSystemLibraryName);
-					}
-					LogMessage("Debug operators registered.");
+					RunScript(new StreamReader(LStream).ReadToEnd(), CSystemLibraryName);
 				}
+				LogMessage("System catalog registered.");
+				LogMessage("Registering debug operators...");
+				using (Stream LStream = typeof(Engine).Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.Debug.Debug.d4"))
+				{
+					RunScript(new StreamReader(LStream).ReadToEnd(), CSystemLibraryName);
+				}
+				LogMessage("Debug operators registered.");
 			}
 		}
 
 		protected bool FFirstRun; // Indicates whether or not this is the first time this server has run on the configured store
-		private bool FCatalogInitialized;
+
 		/*
 			Catalog Startup ->
 				Catalog startup occurs in 5 phases
@@ -1213,57 +1207,52 @@ namespace Alphora.Dataphor.DAE.Server
 		*/
 		private void InitializeCatalog()
 		{
-			if (!FCatalogInitialized)
+			LogMessage("Initializing Catalog...");
+			
+			// Create the Catalog device
+			// Note that this must be the first object created to avoid the ID being different on subsequent loads
+			Schema.Object.SetNextObjectID(0);
+			FCatalogDevice = CreateCatalogDevice();
+
+			// Create the system user
+			FSystemUser = new Schema.User(CSystemUserID, "System User", String.Empty);
+
+			// Create the system library
+			FSystemLibrary = new Schema.LoadedLibrary(CSystemLibraryName);
+			FSystemLibrary.Owner = FSystemUser;
+			LoadSystemAssemblies();
+			FCatalog.LoadedLibraries.Add(FSystemLibrary);
+
+			// Load available libraries
+			LoadAvailableLibraries();
+
+			// Connect the System Session
+			if (FSystemSession != null)
 			{
-				LogMessage("Initializing Catalog...");
-				
-				// Create the Catalog device
-				// Note that this must be the first object created to avoid the ID being different on subsequent loads
-				Schema.Object.SetNextObjectID(0);
-				FCatalogDevice = CreateCatalogDevice();
-
-				// Create the system user
-				FSystemUser = new Schema.User(CSystemUserID, "System User", String.Empty);
-
-				// Create the system library
-				FSystemLibrary = new Schema.LoadedLibrary(CSystemLibraryName);
-				FSystemLibrary.Owner = FSystemUser;
-				LoadSystemAssemblies();
-				FCatalog.LoadedLibraries.Add(FSystemLibrary);
-
-				// Load available libraries
-				LoadAvailableLibraries();
-
-				// Connect the System Session
-				if (FSystemSession != null)
-				{
-					FSystemSession.Dispose();
-					FSystemProcess = null;
-				}
-				FSystemSession = (ServerSession)InternalConnect(CSystemSessionID, new SessionInfo(FSystemUser.ID, FSystemUser.Password, CSystemLibraryName));
-				FSystemSession.SessionInfo.UsePlanCache = false;
-				FSystemProcess = (ServerProcess)((IServerSession)FSystemSession).StartProcess(new ProcessInfo(FSystemSession.SessionInfo));
-				FSystemProcess.SuppressWarnings = true;
-
-				// Register the Catalog device
-				FCatalogDevice.Owner = FSystemUser;
-				FCatalogDevice.Library = FSystemLibrary;
-				FCatalogDevice.ClassDefinition = new ClassDefinition("System.CatalogDevice");
-				FCatalogDevice.Start(FSystemProcess);
-				FCatalogDevice.Register(FSystemProcess);
-
-				FFirstRun = DetermineFirstRun();
-
-				// If this is a repository or there are no objects in the catalog, register, else resolve
-				InternalInitializeCatalog();
-
-				// Bind the native type references to the system data types
-				BindNativeTypes();
-				
-				LogMessage("Catalog Initialized.");
-				
-				FCatalogInitialized = true;
+				FSystemSession.Dispose();
+				FSystemProcess = null;
 			}
+			FSystemSession = (ServerSession)InternalConnect(CSystemSessionID, new SessionInfo(FSystemUser.ID, FSystemUser.Password, CSystemLibraryName));
+			FSystemSession.SessionInfo.UsePlanCache = false;
+			FSystemProcess = (ServerProcess)((IServerSession)FSystemSession).StartProcess(new ProcessInfo(FSystemSession.SessionInfo));
+			FSystemProcess.SuppressWarnings = true;
+
+			// Register the Catalog device
+			FCatalogDevice.Owner = FSystemUser;
+			FCatalogDevice.Library = FSystemLibrary;
+			FCatalogDevice.ClassDefinition = new ClassDefinition("System.CatalogDevice");
+			FCatalogDevice.Start(FSystemProcess);
+			FCatalogDevice.Register(FSystemProcess);
+
+			FFirstRun = DetermineFirstRun();
+
+			// If this is a repository or there are no objects in the catalog, register, else resolve
+			InternalInitializeCatalog();
+
+			// Bind the native type references to the system data types
+			BindNativeTypes();
+			
+			LogMessage("Catalog Initialized.");
 		}
 		
 		protected virtual CatalogDevice CreateCatalogDevice()
@@ -1335,9 +1324,7 @@ namespace Alphora.Dataphor.DAE.Server
 		public virtual void ClearCatalog()
 		{
 			InternalCreateCatalog();
-			FCatalogInitialized = false;
 			InitializeCatalog();
-			FCatalogRegistered = false;
 			RegisterCatalog();
 			LoadServerState();
 		}
