@@ -4,6 +4,8 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
+//#define USESTRICTNAMERESOLUTIONCACHECLEARING
+
 using System;
 using System.IO;
 using System.Text;
@@ -95,6 +97,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		/// <summary> Removes entries that could potentially be affected by the given object name. </summary>
 		public void Clear(string AName)
 		{
+			#if !USESTRICTNAMERESOLUTIONCACHECLEARING 
+			Clear();
+			#else
 			lock (this)
 			{
 				while (true)
@@ -106,6 +111,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 						break;
 				}
 			}
+			#endif
 		}
 	}
 }

@@ -44,6 +44,10 @@
 #define USESPINLOCK in Alphora.Dataphor.DAE // ??
 #define USESQLCONNECTION in Alphora.Dataphor.DAE, store assemblies // Use an SQLConnection descendent for connectivity in the SQLStore
 #define USESQLOLEDB in MSSQLDevice // Uses the SQLOLEDB provider when using the ADO connection for MSSQL device connectivity
+//#define USESTRICTNAMERESOLUTIONCACHECLEARING in Alphora.Dataphor.DAE (currently disabled) // Determines whether or not the name resolution cache only clears for potentially affected names, rather than a full clear
+	// NOTE: This define was introduced because if the strict clearing algorithm is used, a catalog header lookup error occurs
+	// Rather than fix the issue, it was decided to leave the define, because the strict algorithm did not have any affect on cache hits,
+	// leading us to suspect that there is a larger issue with name resolution cache usage.
 //#define USETAGNAMECACHE in Alphora.Dataphor.DAE (currently disabled)
 // This define uses a tag name cache for the names of all tags.
 // The idea is to try to reduce the amount of memory used for tags by using
