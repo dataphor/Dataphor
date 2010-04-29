@@ -22,26 +22,19 @@ namespace Alphora.Dataphor.DAE.Server.Tests.Utilities
 	{
 		ServerConfiguration FTestConfiguration;
 
-		public ServerConfiguration GetTestConfiguration(string AInstanceName)
+		public override ServerConfiguration GetTestConfiguration(string AInstanceName)
 		{
-			FTestConfiguration = new ServerConfiguration();
-			FTestConfiguration.Name = AInstanceName;
-			FTestConfiguration.LibraryDirectories = Path.Combine(Path.GetDirectoryName(PathUtility.GetInstallationDirectory()), "Libraries");
-			FTestConfiguration.PortNumber = 8061;
-			FTestConfiguration.SecurePortNumber = 8601;
+			var LResult = base.GetTestConfiguration(AInstanceName);
+			
+			LResult.CatalogStoreClassName = "Alphora.Dataphor.DAE.Store.MSSQL.MSSQLStore,Alphora.Dataphor.DAE.MSSQL";
+			LResult.CatalogStoreConnectionString = "Data Source=localhost;Initial Catalog=DAECatalog;Integrated Security=True";
 
-			FTestConfiguration.CatalogStoreClassName = "Alphora.Dataphor.DAE.Store.MSSQL.MSSQLStore,Alphora.Dataphor.DAE.MSSQL";
-			FTestConfiguration.CatalogStoreConnectionString = "Data Source=localhost;Initial Catalog=DAECatalog;Integrated Security=True";
-
-			return FTestConfiguration;
+			return LResult;
 		}
 
-		public void ResetInstance()
+		public override void ResetInstance()
 		{
-			// Delete the instance directory
-			string LInstanceDirectory = Path.Combine(Path.Combine(PathUtility.CommonAppDataPath(string.Empty, VersionModifier.None), Server.CDefaultInstanceDirectory), FTestConfiguration.Name);
-			if (Directory.Exists(LInstanceDirectory))
-				Directory.Delete(LInstanceDirectory, true);
+			base.ResetInstance();
 
 			// Delete the DAECatalog database if this is an MSSQL store regression test
 			ResetMSSQLCatalog();
@@ -94,13 +87,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests.Utilities
 					}
 				}
 			}
-		}
-
-		public Server GetServer()
-		{
-			Server LServer = new Server();
-			FTestConfiguration.ApplyTo(LServer);
-			return LServer;
 		}
 	}
 }

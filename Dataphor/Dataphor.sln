@@ -97,6 +97,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.MSSQL", "DAE.MSSQL\DAE.MSSQL.csproj", "{E9B0A9CA-0D3D-4EA9-A265-4D8D1C1AE53E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0C5BCC79-C673-4FA3-96BA-89A30215A6F5}"
+	ProjectSection(SolutionItems) = preProject
+		..\Tests\Dataphor.Tests.nunit = ..\Tests\Dataphor.Tests.nunit
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAEDevicePGSQL", "..\Libraries\PGSQLDevice\Source\DAEDevicePGSQL.csproj", "{40E33930-93EC-4371-97E1-D709B022132C}"
 EndProject

@@ -20,32 +20,5 @@ namespace Alphora.Dataphor.DAE.Server.Tests.Utilities
 
 	public class SQLCEServerConfigurationManager: ServerConfigurationManager
 	{
-		private ServerConfiguration FTestConfiguration;
-
-		public ServerConfiguration GetTestConfiguration(string AInstanceName)
-		{
-			FTestConfiguration = new ServerConfiguration();
-			FTestConfiguration.Name = AInstanceName;
-			FTestConfiguration.LibraryDirectories = Path.Combine(Path.GetDirectoryName(PathUtility.GetInstallationDirectory()), "Libraries");
-			FTestConfiguration.PortNumber = 8061;			
-			FTestConfiguration.SecurePortNumber = 8601;
-
-			return FTestConfiguration;
-		}
-
-		public void ResetInstance()
-		{
-			// Delete the instance directory
-			string LInstanceDirectory = Path.Combine(Path.Combine(PathUtility.CommonAppDataPath(string.Empty, VersionModifier.None), Server.CDefaultInstanceDirectory), FTestConfiguration.Name);
-			if (Directory.Exists(LInstanceDirectory))
-				Directory.Delete(LInstanceDirectory, true);
-		}
-
-		public Server GetServer()
-		{
-			Server LServer = new Server();
-			FTestConfiguration.ApplyTo(LServer);
-			return LServer;
-		}
 	}
 }

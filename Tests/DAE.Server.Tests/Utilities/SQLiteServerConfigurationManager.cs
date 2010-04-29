@@ -20,31 +20,12 @@ namespace Alphora.Dataphor.DAE.Server.Tests.Utilities
 		
 		public ServerConfiguration GetTestConfiguration(string AInstanceName)
 		{
-			FTestConfiguration = new ServerConfiguration();
-			FTestConfiguration.Name = AInstanceName;
-			FTestConfiguration.LibraryDirectories = Path.Combine(Path.GetDirectoryName(PathUtility.GetInstallationDirectory()), "Libraries");
-			FTestConfiguration.PortNumber = 8061;
-			FTestConfiguration.SecurePortNumber = 8601;
+			ServerConfiguration LResult = base.GetTestConfiguration(AInstanceName);
 			
-			FTestConfiguration.CatalogStoreClassName = "Alphora.Dataphor.DAE.Store.SQLite.SQLiteStore,Alphora.Dataphor.DAE.SQLite";
-			FTestConfiguration.CatalogStoreConnectionString = @"Data Source=%CatalogPath%\DAECatalog";		
+			LResult.CatalogStoreClassName = "Alphora.Dataphor.DAE.Store.SQLite.SQLiteStore,Alphora.Dataphor.DAE.SQLite";
+			LResult.CatalogStoreConnectionString = @"Data Source=%CatalogPath%\DAECatalog";		
 
-			return FTestConfiguration;
-		}
-
-		public void ResetInstance()
-		{
-			// Delete the instance directory
-			string LInstanceDirectory = Path.Combine(Path.Combine(PathUtility.CommonAppDataPath(string.Empty, VersionModifier.None), Server.CDefaultInstanceDirectory), FTestConfiguration.Name);
-			if (Directory.Exists(LInstanceDirectory))
-				Directory.Delete(LInstanceDirectory, true);
-		}
-
-		public Server GetServer()
-		{
-			Server LServer = new Server();
-			FTestConfiguration.ApplyTo(LServer);
-			return LServer;
+			return LResult;
 		}
 	}
 }
