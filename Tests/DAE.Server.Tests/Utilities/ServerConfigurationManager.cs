@@ -16,16 +16,31 @@ namespace Alphora.Dataphor.DAE.Server.Tests.Utilities
 	
 	public abstract class ServerConfigurationManager
 	{
-		private ServerConfiguration FTestConfiguration;
-
-		public string InstanceName { get { return FTestConfiguration.Name; } }
-		
 		public static string GetInstallationDirectory()
 		{
 			var LDirectoryName = AppDomain.CurrentDomain.BaseDirectory;
 			if (Path.GetFileName(LDirectoryName) != "Tests")
 				LDirectoryName = PathUtility.GetInstallationDirectory();
 			return Path.GetDirectoryName(LDirectoryName);
+		}
+		
+		private ServerConfiguration FTestConfiguration;
+		protected ServerConfiguration TestConfiguration
+		{
+			get
+			{
+				CheckTestConfiguration();
+				return FTestConfiguration;
+			}
+		}
+
+		public string InstanceName 
+		{ 
+			get 
+			{ 
+				CheckTestConfiguration();
+				return FTestConfiguration.Name;
+			} 
 		}
 		
 		protected void CheckTestConfiguration()

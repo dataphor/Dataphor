@@ -20,8 +20,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests.Utilities
 
 	class MSSQLServerConfigurationManager: ServerConfigurationManager
 	{
-		ServerConfiguration FTestConfiguration;
-
 		public override ServerConfiguration GetTestConfiguration(string AInstanceName)
 		{
 			var LResult = base.GetTestConfiguration(AInstanceName);
@@ -57,7 +55,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests.Utilities
 		private void ResetMSSQLCatalog()
 		{
 			DbConnectionStringBuilder LBuilder = new DbConnectionStringBuilder();
-			LBuilder.ConnectionString = FTestConfiguration.CatalogStoreConnectionString;
+			LBuilder.ConnectionString = TestConfiguration.CatalogStoreConnectionString;
 
 			string LDatabaseName = null;
 			if (LBuilder.ContainsKey("Initial Catalog"))

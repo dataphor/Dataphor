@@ -48,6 +48,7 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -65,6 +66,10 @@
     <ProjectReference Include="..\..\Dataphor\Base\Base.csproj">
       <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
       <Name>Base</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Dataphor\DAE.Client.Controls\DAE.Client.Controls.csproj">
+      <Project>{A295FB41-D9B6-418C-9EA7-0C0A17BA26DD}</Project>
+      <Name>DAE.Client.Controls</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\DAE.Client.Provider\DAE.Client.Provider.csproj">
       <Project>{2A36CE97-A296-462A-8C3F-C194F1A2D758}</Project>

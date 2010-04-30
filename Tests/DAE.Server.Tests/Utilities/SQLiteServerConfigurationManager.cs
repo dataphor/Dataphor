@@ -16,9 +16,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests.Utilities
 
 	class SQLiteServerConfigurationManager : ServerConfigurationManager
 	{
-		private ServerConfiguration FTestConfiguration;
-		
-		public ServerConfiguration GetTestConfiguration(string AInstanceName)
+		public override ServerConfiguration GetTestConfiguration(string AInstanceName)
 		{
 			ServerConfiguration LResult = base.GetTestConfiguration(AInstanceName);
 			

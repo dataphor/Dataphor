@@ -155,5 +155,86 @@ namespace Alphora.Dataphor.DAE.Client.Tests.CLI
 				DataSession.ServerSession.StopProcess(LProcess);
 			}
 		}
+		
+		[Test]
+		public void TestDeleteAtEOF()
+		{
+			IServerProcess LProcess = DataSession.ServerSession.StartProcess(new ProcessInfo(DataSession.SessionInfo));
+			try
+			{
+				var LFetchCount = DataSession.ServerSession.SessionInfo.FetchCount;
+				LProcess.Execute("create table TestDeleteAtEOF { ID : Integer, Name : String, key { ID } };", null);
+				LProcess.Execute("insert row { 1 ID, 'Joe' Name } into TestDeleteAtEOF;", null);
+				LProcess.Execute("insert row { 2 ID, 'John' Name } into TestDeleteAtEOF;", null);
+				
+				IServerCursor LCursor = LProcess.OpenCursor("select TestDeleteAtEOF browse by { ID } capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable } isolation browse", null);
+				try
+				{
+					var LRow = LCursor.Plan.RequestRow();
+					try
+					{
+						LCursor.Next();
+						LCursor.Next();
+						LCursor.Delete();
+						if (LCursor.EOF() && !LCursor.Prior())
+							throw new Exception("Delete At EOF failed");
+					}
+					finally
+					{
+						LCursor.Plan.ReleaseRow(LRow);
+					}
+					
+				}
+				finally
+				{
+					LProcess.CloseCursor(LCursor);
+				}
+			}
+			finally
+			{
+				DataSession.ServerSession.StopProcess(LProcess);
+			}
+		}
+
+		[Test]
+		public void TestDeleteAtBOF()
+		{
+			IServerProcess LProcess = DataSession.ServerSession.StartProcess(new ProcessInfo(DataSession.SessionInfo));
+			try
+			{
+				var LFetchCount = DataSession.ServerSession.SessionInfo.FetchCount;
+				LProcess.Execute("create table TestDeleteAtBOF { ID : Integer, Name : String, key { ID } };", null);
+				LProcess.Execute("insert row { 1 ID, 'Joe' Name } into TestDeleteAtBOF;", null);
+				LProcess.Execute("insert row { 2 ID, 'John' Name } into TestDeleteAtBOF;", null);
+				
+				IServerCursor LCursor = LProcess.OpenCursor("select TestDeleteAtBOF browse by { ID } capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable } isolation browse", null);
+				try
+				{
+					var LRow = LCursor.Plan.RequestRow();
+					try
+					{
+						LCursor.Last();
+						LCursor.Prior();
+						LCursor.Prior();
+						LCursor.Delete();
+						if (LCursor.BOF() && !LCursor.Next())
+							throw new Exception("Delete At BOF failed");
+					}
+					finally
+					{
+						LCursor.Plan.ReleaseRow(LRow);
+					}
+					
+				}
+				finally
+				{
+					LProcess.CloseCursor(LCursor);
+				}
+			}
+			finally
+			{
+				DataSession.ServerSession.StopProcess(LProcess);
+			}
+		}
 	}
 }

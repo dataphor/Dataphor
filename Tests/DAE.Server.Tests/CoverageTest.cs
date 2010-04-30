@@ -16,78 +16,8 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 	using Alphora.Dataphor.DAE.Server.Tests.Utilities;
 
 	[TestFixture]
-	public class CoverageTest
+	public class CoverageTest : InProcessTestFixture
 	{
-		private ServerConfigurationManager FServerConfigurationManager;
-		private ServerConfiguration FConfiguration;
-		private IServer FServer;
-		private IServerSession FSession;
-		private IServerProcess FProcess;
-		
-		[TestFixtureSetUp]
-		public void SetUpFixture()
-		{
-			FServerConfigurationManager = new SQLCEServerConfigurationManager();
-			FConfiguration = FServerConfigurationManager.GetTestConfiguration("TestInstance");
-			FServerConfigurationManager.ResetInstance();
-			FServer = FServerConfigurationManager.GetServer();
-			FServer.Start();
-			
-			IServerSession LSession = FServer.Connect(new SessionInfo("Admin", ""));
-			try
-			{
-				IServerProcess LProcess = LSession.StartProcess(new ProcessInfo(LSession.SessionInfo));
-				try
-				{
-					LProcess.ExecuteScript("EnsureLibraryRegistered('Frontend');");
-					LProcess.ExecuteScript("EnsureLibraryRegistered('TestFramework.Coverage.Base');");
-				}
-				finally
-				{
-					LSession.StopProcess(LProcess);
-				}
-			}
-			finally
-			{
-				FServer.Disconnect(LSession);
-			}
-		}
-		
-		[TestFixtureTearDown]
-		public void TearDownFixture()
-		{
-			FServer.Stop();
-			FServerConfigurationManager.ResetInstance();
-		}
-		
-		[SetUp]
-		public void SetUp()
-		{
-			FSession = FServer.Connect(new SessionInfo("Admin", ""));
-			FProcess = FSession.StartProcess(new ProcessInfo(FSession.SessionInfo));
-		}
-		
-		[TearDown]
-		public void TearDown()
-		{
-			if (FProcess != null)
-			{
-				FSession.StopProcess(FProcess);
-				FProcess = null;
-			}
-			
-			if (FSession != null)
-			{
-				FServer.Disconnect(FSession);
-				FSession = null;
-			}
-		}
-		
-		private void ExecuteScript(string ALibraryName, string AScriptName)
-		{
-			FProcess.ExecuteScript(String.Format("ExecuteScript('{0}', '{1}');", ALibraryName, AScriptName));
-		}
-		
 		[Test, Ignore("Rewrite for native values processing")] public void ExecuteDAE() { ExecuteScript("Coverage.Scripts", "DAE"); }
 		[Test, Ignore("Rewrite for native values processing")] public void ExecuteExceptions() { ExecuteScript("Coverage.Scripts", "Exceptions"); }
 		[Test, Ignore("Fix")] public void ExecuteParserEmitter() { ExecuteScript("Coverage.Scripts", "ParserEmitter"); }
@@ -139,7 +69,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		public void ExecuteSecurityLibrary()
 		{
 			// This script must not be executed within a transaction because it executes some statements on a separate process, causing a block with itself.
-			FProcess.ExecuteScript("SetUseImplicitTransactions(false);");
+			ExecuteScript("SetUseImplicitTransactions(false);");
 			ExecuteScript("Coverage.Scripts", "SecurityLibrary");
 		}
 
