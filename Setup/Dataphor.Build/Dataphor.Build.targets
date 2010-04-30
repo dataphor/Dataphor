@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+		<DataphorBuildLib>$(DataphorBuildExtensionsPath)\Dataphor.Build.dll</DataphorBuildLib>
+	</PropertyGroup>
+
+	<UsingTask AssemblyFile="$(DataphorBuildLib)" TaskName="Dataphor.Build.SyncWiXFiles" />
+
+
+</Project>

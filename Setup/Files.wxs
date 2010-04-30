@@ -1,0 +1,248 @@
+<?xml version="1.0"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Fragment>
+    <DirectoryRef Id="TARGETDIR">
+      <Directory Id="ProgramFilesFolder" Name="PFiles">
+        <Directory Id="INSTALLDIR" Name="Dataphor">
+          <Directory Id="Documentation" Name="Documentation">
+            <Component Id="DocumentationFiles" Guid="0F9B9D65-4CC3-47B7-96D5-D30C1BF40F8C" DiskId="1">
+              <File Id="DocumentationFiles_Dataphor_chm" Name="Dataphor.chm" Source="..\Deploy\Documentation\Dataphor.chm" />
+              <File Id="DocumentationFiles_DataphorSet_pdf" Name="DataphorSet.pdf" Source="..\Deploy\Documentation\DataphorSet.pdf" />
+            </Component>
+          </Directory>
+          <Directory Id="Bin" Name="Bin">
+            <Component Id="BinFiles" Guid="C94BE2EE-E916-4f32-B289-DEA9ED5DD009" DiskId="1">
+              <File Id="BinFiles_Alphora_Dataphor_DAE_Client_Controls_dll" Name="Alphora.Dataphor.DAE.Client.Controls.dll" Source="..\Deploy\Dataphor\Alphora.Dataphor.DAE.Client.Controls.dll" />
+              <File Id="BinFiles_Alphora_Dataphor_DAE_Client_Controls_dll_config" Name="Alphora.Dataphor.DAE.Client.Controls.dll.config" Source="..\Deploy\Dataphor\Alphora.Dataphor.DAE.Client.Controls.dll.config" />
+              <File Id="BinFiles_Alphora_Dataphor_DAE_Client_dll" Name="Alphora.Dataphor.DAE.Client.dll" Source="..\Deploy\Dataphor\Alphora.Dataphor.DAE.Client.dll" />
+              <File Id="BinFiles_Alphora_Dataphor_DAE_Client_dll_config" Name="Alphora.Dataphor.DAE.Client.dll.config" Source="..\Deploy\Dataphor\Alphora.Dataphor.DAE.Client.dll.config" />
+              <File Id="BinFiles_Alphora_Dataphor_DAE_Client_Provider_dll" Name="Alphora.Dataphor.DAE.Client.Provider.dll" Source="..\Deploy\Dataphor\Alphora.Dataphor.DAE.Client.Provider.dll" />
+              <File Id="BinFiles_Alphora_Dataphor_DAE_Connection_PGSQL_dll" Name="Alphora.Dataphor.DAE.Connection.PGSQL.dll" Source="..\Deploy\Dataphor\Alphora.Dataphor.DAE.Connection.PGSQL.dll" />
+              <File Id="BinFiles_Alphora_Dataphor_DAE_dll" Name="Alphora.Dataphor.DAE.dll" Source="..\Deploy\Dataphor\Alphora.Dataphor.DAE.dll" />
+              <File Id="BinFiles_Alphora_Dataphor_DAE_dll_config" Name="Alphora.Dataphor.DAE.dll.config" Source="..\Deploy\Dataphor\Alphora.Dataphor.DAE.dll.config" />
+              <File Id="BinFiles_Alphora_Dataphor_DAE_MSSQL_dll" Name="Alphora.Dataphor.DAE.MSSQL.dll" Source="..\Deploy\Dataphor\Alphora.Dataphor.DAE.MSSQL.dll" />
+              <File Id="BinFiles_Alphora_Dataphor_DAE_NativeCLI_dll" Name="Alphora.Dataphor.DAE.NativeCLI.dll" Source="..\Deploy\Dataphor\Alphora.Dataphor.DAE.NativeCLI.dll" />
+              <File Id="BinFiles_Alphora_Dataphor_DAE_PGSQL_dll" Name="Alphora.Dataphor.DAE.PGSQL.dll" Source="..\Deploy\Dataphor\Alphora.Dataphor.DAE.PGSQL.dll" />
+              <File Id="BinFiles_Alphora_Dataphor_DAE_SQLCE_dll" Name="Alphora.Dataphor.DAE.SQLCE.dll" Source="..\Deploy\Dataphor\Alphora.Dataphor.DAE.SQLCE.dll" />
+              <File Id="BinFiles_Alphora_Dataphor_DAE_SQLite_dll" Name="Alphora.Dataphor.DAE.SQLite.dll" Source="..\Deploy\Dataphor\Alphora.Dataphor.DAE.SQLite.dll" />
+              <File Id="BinFiles_Alphora_Dataphor_dll" Name="Alphora.Dataphor.dll" Source="..\Deploy\Dataphor\Alphora.Dataphor.dll" />
+              <File Id="BinFiles_Alphora_Dataphor_Frontend_Client_dll" Name="Alphora.Dataphor.Frontend.Client.dll" Source="..\Deploy\Dataphor\Alphora.Dataphor.Frontend.Client.dll" />
+              <File Id="BinFiles_Alphora_Dataphor_Frontend_Client_dll_config" Name="Alphora.Dataphor.Frontend.Client.dll.config" Source="..\Deploy\Dataphor\Alphora.Dataphor.Frontend.Client.dll.config" />
+              <File Id="BinFiles_Alphora_Dataphor_Frontend_Client_Windows_dll" Name="Alphora.Dataphor.Frontend.Client.Windows.dll" Source="..\Deploy\Dataphor\Alphora.Dataphor.Frontend.Client.Windows.dll" />
+              <File Id="BinFiles_Alphora_Dataphor_Logging_dll_config" Name="Alphora.Dataphor.Logging.dll.config" Source="..\Deploy\Dataphor\Alphora.Dataphor.Logging.dll.config" />
+              <File Id="BinFiles_Alphora_Dataphor_Windows_dll" Name="Alphora.Dataphor.Windows.dll" Source="..\Deploy\Dataphor\Alphora.Dataphor.Windows.dll" />
+              <File Id="BinFiles_Alphora_Dataphor_Windows_dll_config" Name="Alphora.Dataphor.Windows.dll.config" Source="..\Deploy\Dataphor\Alphora.Dataphor.Windows.dll.config" />
+              <File Id="BinFiles_AlphoraDataphorClient_dll" Name="AlphoraDataphorClient.dll" Source="..\Deploy\Dataphor\AlphoraDataphorClient.dll" />
+              <File Id="BinFiles_AlphoraDataphorCommon_dll" Name="AlphoraDataphorCommon.dll" Source="..\Deploy\Dataphor\AlphoraDataphorCommon.dll" />
+              <File Id="BinFiles_AlphoraDataphorServer_dll" Name="AlphoraDataphorServer.dll" Source="..\Deploy\Dataphor\AlphoraDataphorServer.dll" />
+              <File Id="BinFiles_Ascend_dll" Name="Ascend.dll" Source="..\Deploy\Dataphor\Ascend.dll" />
+              <File Id="BinFiles_Ascend_Resources_dll" Name="Ascend.Resources.dll" Source="..\Deploy\Dataphor\Ascend.Resources.dll" />
+              <File Id="BinFiles_Ascend_Windows_Forms_dll" Name="Ascend.Windows.Forms.dll" Source="..\Deploy\Dataphor\Ascend.Windows.Forms.dll" />
+              <File Id="BinFiles_Base_xml" Name="Base.xml" Source="..\Deploy\Dataphor\Base.xml" />
+              <File Id="BinFiles_Client_dll" Name="Client.dll" Source="..\Deploy\Dataphor\Client.dll" />
+              <File Id="BinFiles_clientaccesspolicy_xml" Name="clientaccesspolicy.xml" Source="..\Deploy\Dataphor\clientaccesspolicy.xml" />
+              <File Id="BinFiles_CS_Mode_xshd" Name="CS-Mode.xshd" Source="..\Deploy\Dataphor\CS-Mode.xshd" />
+              <File Id="BinFiles_D4_Mode_xshd" Name="D4-Mode.xshd" Source="..\Deploy\Dataphor\D4-Mode.xshd" />
+              <File Id="BinFiles_D4Runner_exe" Name="D4Runner.exe" Source="..\Deploy\Dataphor\D4Runner.exe" />
+              <File Id="BinFiles_DAE_xml" Name="DAE.xml" Source="..\Deploy\Dataphor\DAE.xml" />
+              <File Id="BinFiles_DAEConfigUtil_exe" Name="DAEConfigUtil.exe" Source="..\Deploy\Dataphor\DAEConfigUtil.exe" />
+              <File Id="BinFiles_DAEService_exe" Name="DAEService.exe" Source="..\Deploy\Dataphor\DAEService.exe" />
+              <File Id="BinFiles_DAEService_exe_config" Name="DAEService.exe.config" Source="..\Deploy\Dataphor\DAEService.exe.config" />
+              <File Id="BinFiles_Dataphoria_application" Name="Dataphoria.application" Source="..\Deploy\Dataphor\Dataphoria.application" />
+              <File Id="BinFiles_Dataphoria_exe" Name="Dataphoria.exe" Source="..\Deploy\Dataphor\Dataphoria.exe" />
+              <File Id="BinFiles_Dataphoria_exe_config" Name="Dataphoria.exe.config" Source="..\Deploy\Dataphor\Dataphoria.exe.config" />
+              <File Id="BinFiles_Dataphoria_exe_manifest" Name="Dataphoria.exe.manifest" Source="..\Deploy\Dataphor\Dataphoria.exe.manifest" />
+              <File Id="BinFiles_en_US_Crick_dic" Name="en-US-Crick.dic" Source="..\Deploy\Dataphor\en-US-Crick.dic" />
+              <File Id="BinFiles_ICSharpCode_TextEditor_dll" Name="ICSharpCode.TextEditor.dll" Source="..\Deploy\Dataphor\ICSharpCode.TextEditor.dll" />
+              <File Id="BinFiles_Mono_Security_dll" Name="Mono.Security.dll" Source="..\Deploy\Dataphor\Mono.Security.dll" />
+              <File Id="BinFiles_netspell_spellchecker_dll" Name="netspell.spellchecker.dll" Source="..\Deploy\Dataphor\netspell.spellchecker.dll" />
+              <File Id="BinFiles_Npgsql_dll" Name="Npgsql.dll" Source="..\Deploy\Dataphor\Npgsql.dll" />
+              <File Id="BinFiles_Placeholder_1_txt_txt" Name="Placeholder-1.txt.txt" Source="..\Deploy\Dataphor\Placeholder-1.txt.txt" />
+              <File Id="BinFiles_Result_Mode_xshd" Name="Result-Mode.xshd" Source="..\Deploy\Dataphor\Result-Mode.xshd" />
+              <File Id="BinFiles_SQL_xshd" Name="SQL.xshd" Source="..\Deploy\Dataphor\SQL.xshd" />
+              <File Id="BinFiles_sqlceca35_dll" Name="sqlceca35.dll" Source="..\Deploy\Dataphor\sqlceca35.dll" />
+              <File Id="BinFiles_sqlcecompact35_dll" Name="sqlcecompact35.dll" Source="..\Deploy\Dataphor\sqlcecompact35.dll" />
+              <File Id="BinFiles_sqlceer35EN_dll" Name="sqlceer35EN.dll" Source="..\Deploy\Dataphor\sqlceer35EN.dll" />
+              <File Id="BinFiles_sqlceme35_dll" Name="sqlceme35.dll" Source="..\Deploy\Dataphor\sqlceme35.dll" />
+              <File Id="BinFiles_sqlceoledb35_dll" Name="sqlceoledb35.dll" Source="..\Deploy\Dataphor\sqlceoledb35.dll" />
+              <File Id="BinFiles_sqlceqp35_dll" Name="sqlceqp35.dll" Source="..\Deploy\Dataphor\sqlceqp35.dll" />
+              <File Id="BinFiles_sqlcese35_dll" Name="sqlcese35.dll" Source="..\Deploy\Dataphor\sqlcese35.dll" />
+              <File Id="BinFiles_System_Data_SQLite_DLL" Name="System.Data.SQLite.DLL" Source="..\Deploy\Dataphor\System.Data.SQLite.DLL" />
+              <File Id="BinFiles_System_Data_SqlServerCe_dll" Name="System.Data.SqlServerCe.dll" Source="..\Deploy\Dataphor\System.Data.SqlServerCe.dll" />
+              <File Id="BinFiles_Text_Mode_xshd" Name="Text-Mode.xshd" Source="..\Deploy\Dataphor\Text-Mode.xshd" />
+              <File Id="BinFiles_WeifenLuo_WinFormsUI_Docking_dll" Name="WeifenLuo.WinFormsUI.Docking.dll" Source="..\Deploy\Dataphor\WeifenLuo.WinFormsUI.Docking.dll" />
+              <File Id="BinFiles_WindowsClient_application" Name="WindowsClient.application" Source="..\Deploy\Dataphor\WindowsClient.application" />
+              <File Id="BinFiles_WindowsClient_exe" Name="WindowsClient.exe" Source="..\Deploy\Dataphor\WindowsClient.exe" />
+              <File Id="BinFiles_WindowsClient_exe_config" Name="WindowsClient.exe.config" Source="..\Deploy\Dataphor\WindowsClient.exe.config" />
+              <File Id="BinFiles_WindowsClient_exe_manifest" Name="WindowsClient.exe.manifest" Source="..\Deploy\Dataphor\WindowsClient.exe.manifest" />
+            </Component>
+            <Component Id="WebClientService" Guid="3C36E6AE-039B-42d8-8D62-451D612A868E" DiskId="1">
+              <ServiceInstall Id="DataphorServiceInstall" Name="Alphora Dataphor [ShortVersion]" DisplayName="Alphora Dataphor Server [ProductVersion]" Type="ownProcess" Start="auto" ErrorControl="normal" Description="Alphora Dataphor Server" Account="[ServiceAccount]" />
+              <ServiceControl Id="DataphorServiceControl" Name="Alphora Dataphor [ShortVersion]" Start="install" Remove="uninstall" Wait="yes" />
+              <File Id="BinFiles_WindowsClient_exe_manifest" Name="WindowsClient.exe.manifest" Source="..\Deploy\Dataphor\WindowsClient.exe.manifest" />
+            </Component>
+          </Directory>
+          <Directory Id="Libraries" Name="Libraries">
+            <Component Id="LibraryFiles" Guid="B8AF005A-94BE-4d9e-8926-4CDD31CA5127" DiskId="1">
+              <File Id="LibraryFiles_ADOConnection_d4l" Name="ADOConnection.d4l" Source="..\Deploy\Libraries\ADOConnection\ADOConnection.d4l" />
+              <File Id="LibraryFiles_adodb_dll" Name="adodb.dll" Source="..\Deploy\Libraries\ADOConnection\adodb.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_BOP_dll" Name="Alphora.Dataphor.BOP.dll" Source="..\Deploy\Libraries\ADOConnection\Alphora.Dataphor.BOP.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_Connection_ADO_dll" Name="Alphora.Dataphor.DAE.Connection.ADO.dll" Source="..\Deploy\Libraries\ADOConnection\Alphora.Dataphor.DAE.Connection.ADO.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_dll" Name="Alphora.Dataphor.DAE.dll" Source="..\Deploy\Libraries\ADOConnection\Alphora.Dataphor.DAE.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_dll" Name="Alphora.Dataphor.dll" Source="..\Deploy\Libraries\ADOConnection\Alphora.Dataphor.dll" />
+              <File Id="LibraryFiles_AlphoraDataphorServer_dll" Name="AlphoraDataphorServer.dll" Source="..\Deploy\Libraries\ADOConnection\AlphoraDataphorServer.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_BOP_dll" Name="Alphora.Dataphor.BOP.dll" Source="..\Deploy\Libraries\Connection\Alphora.Dataphor.BOP.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_Connection_dll" Name="Alphora.Dataphor.DAE.Connection.dll" Source="..\Deploy\Libraries\Connection\Alphora.Dataphor.DAE.Connection.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_dll" Name="Alphora.Dataphor.DAE.dll" Source="..\Deploy\Libraries\Connection\Alphora.Dataphor.DAE.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_NativeCLI_dll" Name="Alphora.Dataphor.DAE.NativeCLI.dll" Source="..\Deploy\Libraries\Connection\Alphora.Dataphor.DAE.NativeCLI.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_SQLCE_dll" Name="Alphora.Dataphor.DAE.SQLCE.dll" Source="..\Deploy\Libraries\Connection\Alphora.Dataphor.DAE.SQLCE.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_dll" Name="Alphora.Dataphor.dll" Source="..\Deploy\Libraries\Connection\Alphora.Dataphor.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_Logging_dll" Name="Alphora.Dataphor.Logging.dll" Source="..\Deploy\Libraries\Connection\Alphora.Dataphor.Logging.dll" />
+              <File Id="LibraryFiles_AlphoraDataphorServer_dll" Name="AlphoraDataphorServer.dll" Source="..\Deploy\Libraries\Connection\AlphoraDataphorServer.dll" />
+              <File Id="LibraryFiles_Connection_d4l" Name="Connection.d4l" Source="..\Deploy\Libraries\Connection\Connection.d4l" />
+              <File Id="LibraryFiles_System_Data_SqlServerCe_dll" Name="System.Data.SqlServerCe.dll" Source="..\Deploy\Libraries\Connection\System.Data.SqlServerCe.dll" />
+              <File Id="LibraryFiles_DB2400Connection_d4l" Name="DB2400Connection.d4l" Source="..\Deploy\Libraries\DB2400Connection\DB2400Connection.d4l" />
+              <File Id="LibraryFiles_DB2Connection_d4l" Name="DB2Connection.d4l" Source="..\Deploy\Libraries\DB2Connection\DB2Connection.d4l" />
+              <File Id="LibraryFiles_AlphoraDB2Device_dll" Name="AlphoraDB2Device.dll" Source="..\Deploy\Libraries\DB2Device\AlphoraDB2Device.dll" />
+              <File Id="LibraryFiles_DB2Device_d4l" Name="DB2Device.d4l" Source="..\Deploy\Libraries\DB2Device\DB2Device.d4l" />
+              <File Id="LibraryFiles_Alphora_Dataphor_BOP_dll" Name="Alphora.Dataphor.BOP.dll" Source="..\Deploy\Libraries\Documentation\Alphora.Dataphor.BOP.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_Client_dll" Name="Alphora.Dataphor.DAE.Client.dll" Source="..\Deploy\Libraries\Documentation\Alphora.Dataphor.DAE.Client.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_Connection_dll" Name="Alphora.Dataphor.DAE.Connection.dll" Source="..\Deploy\Libraries\Documentation\Alphora.Dataphor.DAE.Connection.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_dll" Name="Alphora.Dataphor.DAE.dll" Source="..\Deploy\Libraries\Documentation\Alphora.Dataphor.DAE.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_NativeCLI_dll" Name="Alphora.Dataphor.DAE.NativeCLI.dll" Source="..\Deploy\Libraries\Documentation\Alphora.Dataphor.DAE.NativeCLI.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_SQLCE_dll" Name="Alphora.Dataphor.DAE.SQLCE.dll" Source="..\Deploy\Libraries\Documentation\Alphora.Dataphor.DAE.SQLCE.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_dll" Name="Alphora.Dataphor.dll" Source="..\Deploy\Libraries\Documentation\Alphora.Dataphor.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_Logging_dll" Name="Alphora.Dataphor.Logging.dll" Source="..\Deploy\Libraries\Documentation\Alphora.Dataphor.Logging.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_Windows_dll" Name="Alphora.Dataphor.Windows.dll" Source="..\Deploy\Libraries\Documentation\Alphora.Dataphor.Windows.dll" />
+              <File Id="LibraryFiles_AlphoraDataphorClient_dll" Name="AlphoraDataphorClient.dll" Source="..\Deploy\Libraries\Documentation\AlphoraDataphorClient.dll" />
+              <File Id="LibraryFiles_AlphoraDataphorCommon_dll" Name="AlphoraDataphorCommon.dll" Source="..\Deploy\Libraries\Documentation\AlphoraDataphorCommon.dll" />
+              <File Id="LibraryFiles_AlphoraDataphorServer_dll" Name="AlphoraDataphorServer.dll" Source="..\Deploy\Libraries\Documentation\AlphoraDataphorServer.dll" />
+              <File Id="LibraryFiles_Client_dll" Name="Client.dll" Source="..\Deploy\Libraries\Documentation\Client.dll" />
+              <File Id="LibraryFiles_DocSamples_dll" Name="DocSamples.dll" Source="..\Deploy\Libraries\Documentation\DocSamples.dll" />
+              <File Id="LibraryFiles_Documentation_d4l" Name="Documentation.d4l" Source="..\Deploy\Libraries\Documentation\Documentation.d4l" />
+              <File Id="LibraryFiles_Alphora_Dataphor_BOP_dll" Name="Alphora.Dataphor.BOP.dll" Source="..\Deploy\Libraries\Frontend\Alphora.Dataphor.BOP.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_dll" Name="Alphora.Dataphor.DAE.dll" Source="..\Deploy\Libraries\Frontend\Alphora.Dataphor.DAE.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_NativeCLI_dll" Name="Alphora.Dataphor.DAE.NativeCLI.dll" Source="..\Deploy\Libraries\Frontend\Alphora.Dataphor.DAE.NativeCLI.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_dll" Name="Alphora.Dataphor.dll" Source="..\Deploy\Libraries\Frontend\Alphora.Dataphor.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_Frontend_Server_dll" Name="Alphora.Dataphor.Frontend.Server.dll" Source="..\Deploy\Libraries\Frontend\Alphora.Dataphor.Frontend.Server.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_Logging_dll" Name="Alphora.Dataphor.Logging.dll" Source="..\Deploy\Libraries\Frontend\Alphora.Dataphor.Logging.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_Windows_dll" Name="Alphora.Dataphor.Windows.dll" Source="..\Deploy\Libraries\Frontend\Alphora.Dataphor.Windows.dll" />
+              <File Id="LibraryFiles_AlphoraDataphorCommon_dll" Name="AlphoraDataphorCommon.dll" Source="..\Deploy\Libraries\Frontend\AlphoraDataphorCommon.dll" />
+              <File Id="LibraryFiles_AlphoraDataphorServer_dll" Name="AlphoraDataphorServer.dll" Source="..\Deploy\Libraries\Frontend\AlphoraDataphorServer.dll" />
+              <File Id="LibraryFiles_Frontend_d4l" Name="Frontend.d4l" Source="..\Deploy\Libraries\Frontend\Frontend.d4l" />
+              <File Id="LibraryFiles_General_d4l" Name="General.d4l" Source="..\Deploy\Libraries\General\General.d4l" />
+              <File Id="LibraryFiles_Alphora_Dataphor_BOP_dll" Name="Alphora.Dataphor.BOP.dll" Source="..\Deploy\Libraries\LinterDevice\Alphora.Dataphor.BOP.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_dll" Name="Alphora.Dataphor.DAE.dll" Source="..\Deploy\Libraries\LinterDevice\Alphora.Dataphor.DAE.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_dll" Name="Alphora.Dataphor.dll" Source="..\Deploy\Libraries\LinterDevice\Alphora.Dataphor.dll" />
+              <File Id="LibraryFiles_AlphoraDataphorServer_dll" Name="AlphoraDataphorServer.dll" Source="..\Deploy\Libraries\LinterDevice\AlphoraDataphorServer.dll" />
+              <File Id="LibraryFiles_AlphoraLinterDevice_dll" Name="AlphoraLinterDevice.dll" Source="..\Deploy\Libraries\LinterDevice\AlphoraLinterDevice.dll" />
+              <File Id="LibraryFiles_LinterDevice_d4l" Name="LinterDevice.d4l" Source="..\Deploy\Libraries\LinterDevice\LinterDevice.d4l" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_Connection_Oracle_dll" Name="Alphora.Dataphor.DAE.Connection.Oracle.dll" Source="..\Deploy\Libraries\MSOracleConnection\Alphora.Dataphor.DAE.Connection.Oracle.dll" />
+              <File Id="LibraryFiles_MSOracleConnection_d4l" Name="MSOracleConnection.d4l" Source="..\Deploy\Libraries\MSOracleConnection\MSOracleConnection.d4l" />
+              <File Id="LibraryFiles_Alphora_Dataphor_BOP_dll" Name="Alphora.Dataphor.BOP.dll" Source="..\Deploy\Libraries\MSSQLDevice\Alphora.Dataphor.BOP.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_dll" Name="Alphora.Dataphor.DAE.dll" Source="..\Deploy\Libraries\MSSQLDevice\Alphora.Dataphor.DAE.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_dll" Name="Alphora.Dataphor.dll" Source="..\Deploy\Libraries\MSSQLDevice\Alphora.Dataphor.dll" />
+              <File Id="LibraryFiles_AlphoraDataphorServer_dll" Name="AlphoraDataphorServer.dll" Source="..\Deploy\Libraries\MSSQLDevice\AlphoraDataphorServer.dll" />
+              <File Id="LibraryFiles_AlphoraMSSQLDevice_dll" Name="AlphoraMSSQLDevice.dll" Source="..\Deploy\Libraries\MSSQLDevice\AlphoraMSSQLDevice.dll" />
+              <File Id="LibraryFiles_MSSQLDevice_d4l" Name="MSSQLDevice.d4l" Source="..\Deploy\Libraries\MSSQLDevice\MSSQLDevice.d4l" />
+              <File Id="LibraryFiles_AlphoraMySQLDevice_dll" Name="AlphoraMySQLDevice.dll" Source="..\Deploy\Libraries\MySQLDevice\AlphoraMySQLDevice.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_Connection_ODBC_dll" Name="Alphora.Dataphor.DAE.Connection.ODBC.dll" Source="..\Deploy\Libraries\ODBCConnection\Alphora.Dataphor.DAE.Connection.ODBC.dll" />
+              <File Id="LibraryFiles_ODBCConnection_d4l" Name="ODBCConnection.d4l" Source="..\Deploy\Libraries\ODBCConnection\ODBCConnection.d4l" />
+              <File Id="LibraryFiles_OracleConnection_d4l" Name="OracleConnection.d4l" Source="..\Deploy\Libraries\OracleConnection\OracleConnection.d4l" />
+              <File Id="LibraryFiles_AlphoraOracleDevice_dll" Name="AlphoraOracleDevice.dll" Source="..\Deploy\Libraries\OracleDevice\AlphoraOracleDevice.dll" />
+              <File Id="LibraryFiles_OracleDevice_d4l" Name="OracleDevice.d4l" Source="..\Deploy\Libraries\OracleDevice\OracleDevice.d4l" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_Connection_PGSQL_dll" Name="Alphora.Dataphor.DAE.Connection.PGSQL.dll" Source="..\Deploy\Libraries\PGSQLConnection\Alphora.Dataphor.DAE.Connection.PGSQL.dll" />
+              <File Id="LibraryFiles_PGSQLConnection_d4l" Name="PGSQLConnection.d4l" Source="..\Deploy\Libraries\PGSQLConnection\PGSQLConnection.d4l" />
+              <File Id="LibraryFiles_AlphoraPGSQLDevice_dll" Name="AlphoraPGSQLDevice.dll" Source="..\Deploy\Libraries\PGSQLDevice\AlphoraPGSQLDevice.dll" />
+              <File Id="LibraryFiles_PGSQLDevice_d4l" Name="PGSQLDevice.d4l" Source="..\Deploy\Libraries\PGSQLDevice\PGSQLDevice.d4l" />
+              <File Id="LibraryFiles_Sample_Common_d4l" Name="Sample.Common.d4l" Source="..\Deploy\Libraries\Sample.Common\Sample.Common.d4l" />
+              <File Id="LibraryFiles_Sample_Components_d4l" Name="Sample.Components.d4l" Source="..\Deploy\Libraries\Sample.Components\Sample.Components.d4l" />
+              <File Id="LibraryFiles_Sample_Demo_d4l" Name="Sample.Demo.d4l" Source="..\Deploy\Libraries\Sample.Demo\Sample.Demo.d4l" />
+              <File Id="LibraryFiles_Sample_DetailAdd_d4l" Name="Sample.DetailAdd.d4l" Source="..\Deploy\Libraries\Sample.DetailAdd\Sample.DetailAdd.d4l" />
+              <File Id="LibraryFiles_Sample_Forms_d4l" Name="Sample.Forms.d4l" Source="..\Deploy\Libraries\Sample.Forms\Sample.Forms.d4l" />
+              <File Id="LibraryFiles_Sample_Forum_d4l" Name="Sample.Forum.d4l" Source="..\Deploy\Libraries\Sample.Forum\Sample.Forum.d4l" />
+              <File Id="LibraryFiles_Sample_IssueTracker_d4l" Name="Sample.IssueTracker.d4l" Source="..\Deploy\Libraries\Sample.IssueTracker\Sample.IssueTracker.d4l" />
+              <File Id="LibraryFiles_Sample_Pubs_d4l" Name="Sample.Pubs.d4l" Source="..\Deploy\Libraries\Sample.Pubs\Sample.Pubs.d4l" />
+              <File Id="LibraryFiles_Sample_Rental_d4l" Name="Sample.Rental.d4l" Source="..\Deploy\Libraries\Sample.Rental\Sample.Rental.d4l" />
+              <File Id="LibraryFiles_Sample_SendEmail_d4l" Name="Sample.SendEmail.d4l" Source="..\Deploy\Libraries\Sample.SendEmail\Sample.SendEmail.d4l" />
+              <File Id="LibraryFiles_Alphora_Dataphor_BOP_dll" Name="Alphora.Dataphor.BOP.dll" Source="..\Deploy\Libraries\Sample.Shipping\Alphora.Dataphor.BOP.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_dll" Name="Alphora.Dataphor.DAE.dll" Source="..\Deploy\Libraries\Sample.Shipping\Alphora.Dataphor.DAE.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_dll" Name="Alphora.Dataphor.dll" Source="..\Deploy\Libraries\Sample.Shipping\Alphora.Dataphor.dll" />
+              <File Id="LibraryFiles_Alphora_Shipping_dll" Name="Alphora.Shipping.dll" Source="..\Deploy\Libraries\Sample.Shipping\Alphora.Shipping.dll" />
+              <File Id="LibraryFiles_AlphoraDataphorServer_dll" Name="AlphoraDataphorServer.dll" Source="..\Deploy\Libraries\Sample.Shipping\AlphoraDataphorServer.dll" />
+              <File Id="LibraryFiles_Sample_Shipping_d4l" Name="Sample.Shipping.d4l" Source="..\Deploy\Libraries\Sample.Shipping\Sample.Shipping.d4l" />
+              <File Id="LibraryFiles_AlphoraSASDevice_dll" Name="AlphoraSASDevice.dll" Source="..\Deploy\Libraries\SASDevice\AlphoraSASDevice.dll" />
+              <File Id="LibraryFiles_SASDevice_d4l" Name="SASDevice.d4l" Source="..\Deploy\Libraries\SASDevice\SASDevice.d4l" />
+              <File Id="LibraryFiles_Security_d4l" Name="Security.d4l" Source="..\Deploy\Libraries\Security\Security.d4l" />
+              <File Id="LibraryFiles_Alphora_Dataphor_BOP_dll" Name="Alphora.Dataphor.BOP.dll" Source="..\Deploy\Libraries\SimpleDevice\Alphora.Dataphor.BOP.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_Device_Simple_dll" Name="Alphora.Dataphor.DAE.Device.Simple.dll" Source="..\Deploy\Libraries\SimpleDevice\Alphora.Dataphor.DAE.Device.Simple.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_dll" Name="Alphora.Dataphor.DAE.dll" Source="..\Deploy\Libraries\SimpleDevice\Alphora.Dataphor.DAE.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_NativeCLI_dll" Name="Alphora.Dataphor.DAE.NativeCLI.dll" Source="..\Deploy\Libraries\SimpleDevice\Alphora.Dataphor.DAE.NativeCLI.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_dll" Name="Alphora.Dataphor.dll" Source="..\Deploy\Libraries\SimpleDevice\Alphora.Dataphor.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_Logging_dll" Name="Alphora.Dataphor.Logging.dll" Source="..\Deploy\Libraries\SimpleDevice\Alphora.Dataphor.Logging.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_Windows_dll" Name="Alphora.Dataphor.Windows.dll" Source="..\Deploy\Libraries\SimpleDevice\Alphora.Dataphor.Windows.dll" />
+              <File Id="LibraryFiles_AlphoraDataphorCommon_dll" Name="AlphoraDataphorCommon.dll" Source="..\Deploy\Libraries\SimpleDevice\AlphoraDataphorCommon.dll" />
+              <File Id="LibraryFiles_AlphoraDataphorServer_dll" Name="AlphoraDataphorServer.dll" Source="..\Deploy\Libraries\SimpleDevice\AlphoraDataphorServer.dll" />
+              <File Id="LibraryFiles_SimpleDevice_d4l" Name="SimpleDevice.d4l" Source="..\Deploy\Libraries\SimpleDevice\SimpleDevice.d4l" />
+              <File Id="LibraryFiles_Alphora_Dataphor_BOP_dll" Name="Alphora.Dataphor.BOP.dll" Source="..\Deploy\Libraries\SQLDevice\Alphora.Dataphor.BOP.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_Device_SQL_dll" Name="Alphora.Dataphor.DAE.Device.SQL.dll" Source="..\Deploy\Libraries\SQLDevice\Alphora.Dataphor.DAE.Device.SQL.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_dll" Name="Alphora.Dataphor.DAE.dll" Source="..\Deploy\Libraries\SQLDevice\Alphora.Dataphor.DAE.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_dll" Name="Alphora.Dataphor.dll" Source="..\Deploy\Libraries\SQLDevice\Alphora.Dataphor.dll" />
+              <File Id="LibraryFiles_AlphoraDataphorServer_dll" Name="AlphoraDataphorServer.dll" Source="..\Deploy\Libraries\SQLDevice\AlphoraDataphorServer.dll" />
+              <File Id="LibraryFiles_SQLDevice_d4l" Name="SQLDevice.d4l" Source="..\Deploy\Libraries\SQLDevice\SQLDevice.d4l" />
+              <File Id="LibraryFiles_Alphora_Dataphor_BOP_dll" Name="Alphora.Dataphor.BOP.dll" Source="..\Deploy\Libraries\System.Integration\Alphora.Dataphor.BOP.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_dll" Name="Alphora.Dataphor.DAE.dll" Source="..\Deploy\Libraries\System.Integration\Alphora.Dataphor.DAE.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_NativeCLI_dll" Name="Alphora.Dataphor.DAE.NativeCLI.dll" Source="..\Deploy\Libraries\System.Integration\Alphora.Dataphor.DAE.NativeCLI.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_dll" Name="Alphora.Dataphor.dll" Source="..\Deploy\Libraries\System.Integration\Alphora.Dataphor.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_Logging_dll" Name="Alphora.Dataphor.Logging.dll" Source="..\Deploy\Libraries\System.Integration\Alphora.Dataphor.Logging.dll" />
+              <File Id="LibraryFiles_System_Integration_d4l" Name="System.Integration.d4l" Source="..\Deploy\Libraries\System.Integration\System.Integration.d4l" />
+              <File Id="LibraryFiles_System_Integration_dll" Name="System.Integration.dll" Source="..\Deploy\Libraries\System.Integration\System.Integration.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_BOP_dll" Name="Alphora.Dataphor.BOP.dll" Source="..\Deploy\Libraries\System.Internet\Alphora.Dataphor.BOP.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_dll" Name="Alphora.Dataphor.DAE.dll" Source="..\Deploy\Libraries\System.Internet\Alphora.Dataphor.DAE.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_NativeCLI_dll" Name="Alphora.Dataphor.DAE.NativeCLI.dll" Source="..\Deploy\Libraries\System.Internet\Alphora.Dataphor.DAE.NativeCLI.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_dll" Name="Alphora.Dataphor.dll" Source="..\Deploy\Libraries\System.Internet\Alphora.Dataphor.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_Logging_dll" Name="Alphora.Dataphor.Logging.dll" Source="..\Deploy\Libraries\System.Internet\Alphora.Dataphor.Logging.dll" />
+              <File Id="LibraryFiles_System_Internet_d4l" Name="System.Internet.d4l" Source="..\Deploy\Libraries\System.Internet\System.Internet.d4l" />
+              <File Id="LibraryFiles_System_Internet_dll" Name="System.Internet.dll" Source="..\Deploy\Libraries\System.Internet\System.Internet.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_BOP_dll" Name="Alphora.Dataphor.BOP.dll" Source="..\Deploy\Libraries\System.Platform\Alphora.Dataphor.BOP.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_dll" Name="Alphora.Dataphor.DAE.dll" Source="..\Deploy\Libraries\System.Platform\Alphora.Dataphor.DAE.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_NativeCLI_dll" Name="Alphora.Dataphor.DAE.NativeCLI.dll" Source="..\Deploy\Libraries\System.Platform\Alphora.Dataphor.DAE.NativeCLI.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_dll" Name="Alphora.Dataphor.dll" Source="..\Deploy\Libraries\System.Platform\Alphora.Dataphor.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_Logging_dll" Name="Alphora.Dataphor.Logging.dll" Source="..\Deploy\Libraries\System.Platform\Alphora.Dataphor.Logging.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_Windows_dll" Name="Alphora.Dataphor.Windows.dll" Source="..\Deploy\Libraries\System.Platform\Alphora.Dataphor.Windows.dll" />
+              <File Id="LibraryFiles_System_Platform_d4l" Name="System.Platform.d4l" Source="..\Deploy\Libraries\System.Platform\System.Platform.d4l" />
+              <File Id="LibraryFiles_System_Platform_dll" Name="System.Platform.dll" Source="..\Deploy\Libraries\System.Platform\System.Platform.dll" />
+              <File Id="LibraryFiles_TestFramework_Controls_d4l" Name="TestFramework.Controls.d4l" Source="..\Deploy\Libraries\TestFramework.Controls\TestFramework.Controls.d4l" />
+              <File Id="LibraryFiles_Alphora_Dataphor_BOP_dll" Name="Alphora.Dataphor.BOP.dll" Source="..\Deploy\Libraries\TestFramework.Coverage.Base\Alphora.Dataphor.BOP.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_Client_dll" Name="Alphora.Dataphor.DAE.Client.dll" Source="..\Deploy\Libraries\TestFramework.Coverage.Base\Alphora.Dataphor.DAE.Client.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_Client_Provider_dll" Name="Alphora.Dataphor.DAE.Client.Provider.dll" Source="..\Deploy\Libraries\TestFramework.Coverage.Base\Alphora.Dataphor.DAE.Client.Provider.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_Diagnostics_dll" Name="Alphora.Dataphor.DAE.Diagnostics.dll" Source="..\Deploy\Libraries\TestFramework.Coverage.Base\Alphora.Dataphor.DAE.Diagnostics.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_dll" Name="Alphora.Dataphor.DAE.dll" Source="..\Deploy\Libraries\TestFramework.Coverage.Base\Alphora.Dataphor.DAE.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_MSSQL_dll" Name="Alphora.Dataphor.DAE.MSSQL.dll" Source="..\Deploy\Libraries\TestFramework.Coverage.Base\Alphora.Dataphor.DAE.MSSQL.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_NativeCLI_dll" Name="Alphora.Dataphor.DAE.NativeCLI.dll" Source="..\Deploy\Libraries\TestFramework.Coverage.Base\Alphora.Dataphor.DAE.NativeCLI.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_DAE_SQLCE_dll" Name="Alphora.Dataphor.DAE.SQLCE.dll" Source="..\Deploy\Libraries\TestFramework.Coverage.Base\Alphora.Dataphor.DAE.SQLCE.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_dll" Name="Alphora.Dataphor.dll" Source="..\Deploy\Libraries\TestFramework.Coverage.Base\Alphora.Dataphor.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_Logging_dll" Name="Alphora.Dataphor.Logging.dll" Source="..\Deploy\Libraries\TestFramework.Coverage.Base\Alphora.Dataphor.Logging.dll" />
+              <File Id="LibraryFiles_Alphora_Dataphor_Windows_dll" Name="Alphora.Dataphor.Windows.dll" Source="..\Deploy\Libraries\TestFramework.Coverage.Base\Alphora.Dataphor.Windows.dll" />
+              <File Id="LibraryFiles_AlphoraDataphorCommon_dll" Name="AlphoraDataphorCommon.dll" Source="..\Deploy\Libraries\TestFramework.Coverage.Base\AlphoraDataphorCommon.dll" />
+              <File Id="LibraryFiles_AlphoraDataphorServer_dll" Name="AlphoraDataphorServer.dll" Source="..\Deploy\Libraries\TestFramework.Coverage.Base\AlphoraDataphorServer.dll" />
+              <File Id="LibraryFiles_nunit_framework_dll" Name="nunit.framework.dll" Source="..\Deploy\Libraries\TestFramework.Coverage.Base\nunit.framework.dll" />
+              <File Id="LibraryFiles_nunit_mocks_dll" Name="nunit.mocks.dll" Source="..\Deploy\Libraries\TestFramework.Coverage.Base\nunit.mocks.dll" />
+              <File Id="LibraryFiles_pnunit_framework_dll" Name="pnunit.framework.dll" Source="..\Deploy\Libraries\TestFramework.Coverage.Base\pnunit.framework.dll" />
+              <File Id="LibraryFiles_TestFramework_Coverage_Base_d4l" Name="TestFramework.Coverage.Base.d4l" Source="..\Deploy\Libraries\TestFramework.Coverage.Base\TestFramework.Coverage.Base.d4l" />
+              <File Id="LibraryFiles_TestFramework_Coverage_Devices_d4l" Name="TestFramework.Coverage.Devices.d4l" Source="..\Deploy\Libraries\TestFramework.Coverage.Devices\TestFramework.Coverage.Devices.d4l" />
+              <File Id="LibraryFiles_TestFramework_Coverage_Scripts_d4l" Name="TestFramework.Coverage.Scripts.d4l" Source="..\Deploy\Libraries\TestFramework.Coverage.Scripts\TestFramework.Coverage.Scripts.d4l" />
+              <File Id="LibraryFiles_TestFramework_Coverage_d4l" Name="TestFramework.Coverage.d4l" Source="..\Deploy\Libraries\TestFramework.Coverage\TestFramework.Coverage.d4l" />
+              <File Id="LibraryFiles_TestFramework_StressTest_d4l" Name="TestFramework.StressTest.d4l" Source="..\Deploy\Libraries\TestFramework.StressTest\TestFramework.StressTest.d4l" />
+              <File Id="LibraryFiles_TestFramework_d4l" Name="TestFramework.d4l" Source="..\Deploy\Libraries\TestFramework\TestFramework.d4l" />
+            </Component>
+          </Directory>
+          <Directory Id="WebClient" Name="Web Client">
+            <Component Id="WebClientFiles" Guid="33C2127E-AD18-478a-BE0E-318D531E2CA3" DiskId="1">
+            </Component>
+          </Directory>
+        </Directory>
+      </Directory>
+    </DirectoryRef>
+  </Fragment>
+</Wix>
