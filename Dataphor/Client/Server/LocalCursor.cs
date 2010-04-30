@@ -433,7 +433,7 @@ namespace Alphora.Dataphor.DAE.Server
 				if ((AFetchData.Body.Length > 0) && !AIsFirst)
 					FBufferIndex = FBuffer.Count - 1;
 				else
-					FBufferIndex = -1;
+					FBufferIndex = FBuffer.Count; // was -1? Seems inconsistent
 
 				if ((AFetchData.Flags & CursorGetFlags.BOF) != 0)
 					FSourceCursorIndex = -1;

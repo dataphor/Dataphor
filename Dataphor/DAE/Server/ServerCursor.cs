@@ -1038,6 +1038,7 @@ namespace Alphora.Dataphor.DAE.Server
 								
 							if ((LCount > 0) && (!FSourceTable.Prior()))
 								break;
+
 							FSourceTable.Select(ARows[LCount]);
 							ABookmarks[LCount] = Supports(CursorCapability.Bookmarkable) ? InternalGetBookmark() : Guid.Empty;
 							ACount++;
