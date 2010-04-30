@@ -246,7 +246,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void UpdateTopMost()
 		{
-			Form.TopMost = FTopMost;
+			// HACK: if the form's TopMost property is set to false (even though it already is false) the first control is not focused.
+			if (FTopMost != Form.TopMost)
+				Form.TopMost = FTopMost;
 		}
 
 		#endregion
