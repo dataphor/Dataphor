@@ -71,23 +71,26 @@ namespace Dataphor.Build
 				if (LComponent == null)
 					throw new Exception(String.Format("Specified component ID ({0}) not found in the document.", FComponentId));
 				
-				// Remove the file entries from the given component
-				RemoveAllChildElements(LComponent);
-
 				// Add the file contents
 				string LRelativePath = 
 					String.IsNullOrEmpty(FRelativePath) 
 						? Path.GetDirectoryName(Path.GetFullPath(FWiXFile)) 
 						: FRelativePath;
+				
+				// Determine the rootmost folder for the given source file set
+				string LRootmostPath = null;
 				foreach (string LSourceFile in FSourceFiles)
-				{
-					XmlElement LFileElement = LDocument.CreateElement("File", CWiXNamespace);
-					LFileElement.SetAttribute("Id", GenerateFileId(LSourceFile));
-					LFileElement.SetAttribute("Name", Path.GetFileName(LSourceFile));
-					LFileElement.SetAttribute("Source", MakePathRelative(Path.GetFullPath(LRelativePath) + "\\", Path.GetFullPath(LSourceFile)));
-					LComponent.AppendChild(LFileElement);
-					Log.LogMessage(MessageImportance.Low, "Added file element Id={0} Name={1} Source={2}.", LFileElement.Attributes["Id"].Value, LFileElement.Attributes["Name"].Value, LFileElement.Attributes["Source"].Value);
-				}
+					LRootmostPath = 
+						String.IsNullOrEmpty(LRootmostPath) 
+							? Path.GetDirectoryName(Path.GetFullPath(LSourceFile))
+							: GetMostRooted(LRootmostPath, Path.GetDirectoryName(Path.GetFullPath(LSourceFile)));
+
+				// Remove the file entries from the given component
+				RemoveAllChildElements(LComponent);
+				RemoveAllGeneratedDirectories(LDocument, LComponent);
+
+				// Recursively add the files and directories
+				AddFilesAndDirectories(LRootmostPath, LComponent, LDocument, LRelativePath);
 				
 				// Copy old WiX file
 				string LBackupFileName = FWiXFile + ".bak";
@@ -112,6 +115,114 @@ namespace Dataphor.Build
 			}
 
 			return true;
+		}
+
+		private int FGenerator = 0;
+		
+		private void AddFilesAndDirectories(string APath, XmlElement AParent, XmlDocument ADocument, string ARelativePath)
+		{
+			string LPrefix;
+			
+			// Add a component element (if AElement isn't one)
+			XmlElement LComponent;
+			if (AParent.LocalName != "Component")
+			{
+				LComponent = ADocument.CreateElement("Component", CWiXNamespace);
+				LComponent.SetAttribute("Id", AParent.Attributes["Id"].Value + "Files");
+				LComponent.SetAttribute("Guid", Guid.NewGuid().ToString("D"));
+				LComponent.SetAttribute("DiskId", "1");
+				LPrefix = "";
+			}
+			else
+			{
+				LComponent = AParent;
+				LPrefix = LComponent.Attributes["Id"].Value;
+			}
+
+			// Add all files that belong directly in this path
+			foreach (string LSourceFile in FSourceFiles)
+			{
+				if (APath == Path.GetDirectoryName(Path.GetFullPath(LSourceFile)))
+				{
+					XmlElement LFileElement = ADocument.CreateElement("File", CWiXNamespace);
+					LFileElement.SetAttribute("Id", GenerateFileId(LSourceFile));
+					LFileElement.SetAttribute("Name", Path.GetFileName(LSourceFile));
+					LFileElement.SetAttribute("Source", MakePathRelative(Path.GetFullPath(ARelativePath) + "\\", Path.GetFullPath(LSourceFile)));
+					LComponent.AppendChild(LFileElement);
+					Log.LogMessage(MessageImportance.Low, "Added file element Id={0} Name={1} Source={2}.", LFileElement.Attributes["Id"].Value, LFileElement.Attributes["Name"].Value, LFileElement.Attributes["Source"].Value);
+				}
+			}
+			
+			if (LComponent.ChildNodes.Count > 0)
+			{
+				// Add the component if it was needed
+				if (LComponent != AParent)
+					AParent.AppendChild(LComponent);
+			}
+			else
+			{
+				// Ensure that the directory is created if no other files or directories are contained
+				LComponent.AppendChild(ADocument.CreateElement("CreateFolder", CWiXNamespace));
+			}
+			
+			var LAddedSubfolders = new List<string>();
+			// Add each sub-folder
+			foreach (string LSourceFile in FSourceFiles)
+			{
+				var LSubFolderName = SubFolderName(Path.GetFullPath(LSourceFile), APath);
+				if (!String.IsNullOrEmpty(LSubFolderName))
+				{
+					if (!LAddedSubfolders.Contains(LSubFolderName))
+					{
+						// Generate a directory ID
+						var LID = LPrefix + LSubFolderName + FGenerator.ToString();
+						FGenerator++;
+
+						// Determine the parent directory
+						var LParentDirectory = AParent == LComponent ? AParent.ParentNode : AParent;
+						
+						// Add a directory element
+						var LDirectoryElement = ADocument.CreateElement("Directory", CWiXNamespace);
+						LDirectoryElement.SetAttribute("Id", LID);
+						LDirectoryElement.SetAttribute("Name", LSubFolderName);
+						LParentDirectory.AppendChild(LDirectoryElement);
+
+						// Recurse on the given sub-folder
+						AddFilesAndDirectories(Path.Combine(APath, LSubFolderName), LDirectoryElement, ADocument, ARelativePath);
+
+						// Indicate that the given sub-folder has been handled
+						LAddedSubfolders.Add(LSubFolderName);
+					}
+				}
+			}
+		}
+
+		/// <summary> Returns the next sub-folder of the given file name, relative to the given path. </summary>
+		private string SubFolderName(string AFile, string APath)
+		{
+			AFile = Path.GetDirectoryName(AFile);
+			if (AFile.Length > APath.Length && AFile.StartsWith(APath, StringComparison.OrdinalIgnoreCase))
+			{
+				AFile = AFile.Substring(APath.Length + 1);
+				var LSep = AFile.IndexOf(Path.DirectorySeparatorChar);
+				if (LSep > 0)
+					return AFile.Substring(0, LSep);
+				else
+					return AFile;
+			}
+			else
+				return "";
+		}
+
+		/// <summary> Given two paths, returns the common subset. </summary>
+		private string GetMostRooted(string ALeft, string ARight)
+		{
+			var LLeftSplit = ALeft.Split(Path.DirectorySeparatorChar);
+			var LRightSplit = ARight.Split(Path.DirectorySeparatorChar);
+			int i = 0;
+			while (i < Math.Min(LLeftSplit.Length, LRightSplit.Length) && String.Equals(LLeftSplit[i], LRightSplit[i], StringComparison.OrdinalIgnoreCase))
+				i++;
+			return String.Join(Path.DirectorySeparatorChar.ToString(), LLeftSplit, 0, i);
 		}
 
 		private string GenerateFileId(string ASourceFile)
@@ -161,6 +272,21 @@ namespace Dataphor.Build
 				LNextSibling = LFirstChild.NextSibling;
 				AElement.RemoveChild(LFirstChild);
 				LFirstChild = LNextSibling;
+			}
+		}
+
+		private void RemoveAllGeneratedDirectories(XmlDocument ADocument, XmlElement AComponent)
+		{
+			var LID = AComponent.Attributes["Id"].Value;
+			XmlNamespaceManager LNamespaceManager = new XmlNamespaceManager(ADocument.NameTable);
+			LNamespaceManager.AddNamespace("WixNs", CWiXNamespace);
+			while (true)
+			{
+				var LDirectory = AComponent.ParentNode.SelectSingleNode(@"//WixNs:Directory[starts-with(@Id, '" + LID + "')]", LNamespaceManager) as XmlElement;
+				if (LDirectory == null)
+					break;
+				else
+					AComponent.ParentNode.RemoveChild(LDirectory);
 			}
 		}
 	}

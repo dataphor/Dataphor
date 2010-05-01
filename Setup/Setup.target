@@ -31,7 +31,7 @@
 
   <!-- Synchronize LibraryFiles -->
   <ItemGroup>
-    <LibraryFiles Include="..\Deploy\Libraries\*\*.*" />
+    <LibraryFiles Include="..\Deploy\Libraries\**\*.*" />
   </ItemGroup>
   <Target Name="SyncLibraries" >
     <Message Text="Synchronize Library files with WiX." />
