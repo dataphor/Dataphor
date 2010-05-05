@@ -93,7 +93,7 @@ namespace Dataphor.Build
 				
 				// Remove the file entries from the given component
 				RemoveAllChildElements(LComponent);
-				RemoveAllGeneratedDirectories(LDocument, LComponent);
+				RemoveAllGeneratedDirectories(LDocument, LComponent.ParentNode);
 
 				// Determine the relative path to the source files
 				string LRelativePath =
@@ -284,18 +284,18 @@ namespace Dataphor.Build
 			}
 		}
 
-		private void RemoveAllGeneratedDirectories(XmlDocument ADocument, XmlElement AComponent)
+		private void RemoveAllGeneratedDirectories(XmlDocument ADocument, XmlNode ADirectory)
 		{
-			var LID = AComponent.Attributes["Id"].Value;
+			var LID = ADirectory.Attributes["Id"].Value;
 			XmlNamespaceManager LNamespaceManager = new XmlNamespaceManager(ADocument.NameTable);
 			LNamespaceManager.AddNamespace("WixNs", CWiXNamespace);
 			while (true)
 			{
-				var LDirectory = AComponent.ParentNode.SelectSingleNode(@"//WixNs:Directory[starts-with(@Id, '" + LID + "')]", LNamespaceManager) as XmlElement;
+				var LDirectory = ADirectory.SelectSingleNode(@"self::node()/descendant::WixNs:Directory[starts-with(@Id, '" + LID + "')]", LNamespaceManager) as XmlElement;
 				if (LDirectory == null)
 					break;
 				else
-					AComponent.ParentNode.RemoveChild(LDirectory);
+					ADirectory.RemoveChild(LDirectory);
 			}
 		}
 	}
