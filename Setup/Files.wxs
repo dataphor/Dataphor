@@ -1,32 +1,36 @@
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Fragment>
-    <DirectoryRef Id="TARGETDIR">
-      <Directory Id="ProgramFilesFolder" Name="PFiles">
-        <Directory Id="INSTALLDIR" Name="Dataphor">
-          <Directory Id="Documentation" Name="Documentation">
-            <Component Id="DocumentationFiles" Guid="0F9B9D65-4CC3-47B7-96D5-D30C1BF40F8C" DiskId="1">
-            </Component>
-          </Directory>
-          <Directory Id="Bin" Name="Bin">
-            <Component Id="BinFiles" Guid="C94BE2EE-E916-4f32-B289-DEA9ED5DD009" DiskId="1">
-            </Component>
-            <Component Id="WebClientService" Guid="3C36E6AE-039B-42d8-8D62-451D612A868E" DiskId="1">
-              <ServiceInstall Id="DataphorServiceInstall" Name="Alphora Dataphor [ShortVersion]" DisplayName="Alphora Dataphor Server [ProductVersion]" Type="ownProcess" Start="auto" ErrorControl="normal" Description="Alphora Dataphor Server" Account="[ServiceAccount]" />
-              <ServiceControl Id="DataphorServiceControl" Name="Alphora Dataphor [ShortVersion]" Start="install" Remove="uninstall" Wait="yes" />
-              <File Id="BinFiles_WindowsClient_exe_manifest" Name="WindowsClient.exe.manifest" Source="..\Deploy\Dataphor\WindowsClient.exe.manifest" />
-            </Component>
-          </Directory>
-          <Directory Id="Libraries" Name="Libraries">
-            <Component Id="LibraryFiles" Guid="B8AF005A-94BE-4d9e-8926-4CDD31CA5127" DiskId="1">
-            </Component>
-          </Directory>
-          <Directory Id="WebClient" Name="Web Client">
-            <Component Id="WebClientFiles" Guid="33C2127E-AD18-478a-BE0E-318D531E2CA3" DiskId="1">
-            </Component>
-          </Directory>
-        </Directory>
-      </Directory>
-    </DirectoryRef>
-  </Fragment>
+	<Fragment>
+		<ComponentGroup Id="WebClientFilesGroup">
+		</ComponentGroup>
+		<ComponentGroup Id="LibraryFilesGroup">
+		</ComponentGroup>
+		<DirectoryRef Id="TARGETDIR">
+			<Directory Id="ProgramFilesFolder" Name="PFiles">
+				<Directory Id="INSTALLDIR" Name="Dataphor">
+					<Directory Id="Documentation" Name="Documentation">
+						<Component Id="DocumentationFiles" Guid="0F9B9D65-4CC3-47B7-96D5-D30C1BF40F8C" DiskId="1">
+						</Component>
+					</Directory>
+					<Directory Id="Bin" Name="Bin">
+						<Component Id="BinFiles" Guid="C94BE2EE-E916-4f32-B289-DEA9ED5DD009" DiskId="1">
+						</Component>
+						<Component Id="WebClientService" Guid="3C36E6AE-039B-42d8-8D62-451D612A868E" DiskId="1">
+							<ServiceInstall Id="DataphorServiceInstall" Name="Alphora Dataphor [ShortVersion]" DisplayName="Alphora Dataphor Server [ProductVersion]" Type="ownProcess" Start="auto" ErrorControl="normal" Description="Alphora Dataphor Server" Account="[ServiceAccount]" />
+							<ServiceControl Id="DataphorServiceControl" Name="Alphora Dataphor [ShortVersion]" Start="install" Remove="uninstall" Wait="yes" />
+							<File Id="BinFiles_WindowsClient_exe_manifest" Name="WindowsClient.exe.manifest" Source="..\Deploy\Dataphor\WindowsClient.exe.manifest" />
+						</Component>
+					</Directory>
+					<Directory Id="Libraries" Name="Libraries">
+						<Component Id="LibraryFiles" Guid="B8AF005A-94BE-4d9e-8926-4CDD31CA5127" DiskId="1">
+						</Component>
+					</Directory>
+					<Directory Id="WebClient" Name="Web Client">
+						<Component Id="WebClientFiles" Guid="33C2127E-AD18-478a-BE0E-318D531E2CA3" DiskId="1">
+						</Component>
+					</Directory>
+				</Directory>
+			</Directory>
+		</DirectoryRef>
+	</Fragment>
 </Wix>

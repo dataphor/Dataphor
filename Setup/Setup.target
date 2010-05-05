@@ -35,7 +35,7 @@
   </ItemGroup>
   <Target Name="SyncLibraries" >
     <Message Text="Synchronize Library files with WiX." />
-    <SyncWiXFiles WiXFile="Files.wxs" ComponentID="LibraryFiles" SourceFiles="@(LibraryFiles)" />
+    <SyncWiXFiles WiXFile="Files.wxs" ComponentID="LibraryFiles" ComponentGroupID ="LibraryFilesGroup" SourceFiles="@(LibraryFiles)" />
   </Target>
 
 
