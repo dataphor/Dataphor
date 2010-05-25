@@ -405,11 +405,9 @@ namespace Alphora.Dataphor.DAE.Server
 					LocalRow LRow = new LocalRow(new Row(FPlan.FProcess.ValueManager, LRowType), ABookmarks[LIndex]);
 					LRow.Row.AsPhysical = AFetchData.Body[LIndex].Data;
 					FBuffer.Add(LRow);
-					var LBookmark = ABookmarks[LIndex];
-					if (LBookmark != Guid.Empty)
-						FBookmarks.Add(new LocalBookmark(LBookmark));
+					AddBookmarkIfNotEmpty(ABookmarks[LIndex]);
 				}
-				
+
 				if ((AFetchData.Body.Length > 0) && !AIsFirst)
 					FBufferIndex = 0;
 				else
@@ -427,13 +425,13 @@ namespace Alphora.Dataphor.DAE.Server
 					LocalRow LRow = new LocalRow(new Row(FPlan.FProcess.ValueManager, LRowType), ABookmarks[LIndex]);
 					LRow.Row.AsPhysical = AFetchData.Body[LIndex].Data;
 					FBuffer.Insert(0, LRow);
-					FBookmarks.Add(new LocalBookmark(ABookmarks[LIndex]));
+					AddBookmarkIfNotEmpty(ABookmarks[LIndex]);
 				}
-				
+
 				if ((AFetchData.Body.Length > 0) && !AIsFirst)
 					FBufferIndex = FBuffer.Count - 1;
 				else
-					FBufferIndex = FBuffer.Count; // was -1? Seems inconsistent
+					FBufferIndex = FBuffer.Count; 
 
 				if ((AFetchData.Flags & CursorGetFlags.BOF) != 0)
 					FSourceCursorIndex = -1;
@@ -443,6 +441,12 @@ namespace Alphora.Dataphor.DAE.Server
 			
 			SetFlags(AFetchData.Flags);
 			FBufferFull = true;
+		}
+
+		private void AddBookmarkIfNotEmpty(Guid ABookmark)
+		{
+			if (ABookmark != Guid.Empty)
+				FBookmarks.Add(new LocalBookmark(ABookmark));
 		}
 		
 		protected bool SourceNext()
@@ -494,7 +498,7 @@ namespace Alphora.Dataphor.DAE.Server
 					
 				if (FBufferIndex >= FBuffer.Count - 1)
 				{
-					if (SourceEOF())
+					if (FBufferIndex == FSourceCursorIndex - 1 && SourceEOF())
 					{
 						FBufferIndex++;
 						return false;
@@ -536,7 +540,7 @@ namespace Alphora.Dataphor.DAE.Server
         public bool BOF()
 		{
 			if (BufferActive())
-				return SourceBOF() && (FBufferIndex < 0);
+				return SourceBOF() && ((FBuffer.Count == 0) || (FBufferIndex < 0));
 			else
 				return SourceBOF();
 		}
@@ -651,7 +655,7 @@ namespace Alphora.Dataphor.DAE.Server
 
 				if (FBufferIndex <= 0)
 				{
-					if (SourceBOF())
+					if (FBufferIndex == FSourceCursorIndex + 1 && SourceBOF())
 					{
 						FBufferIndex--;
 						return false;
