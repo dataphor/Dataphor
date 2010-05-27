@@ -104,23 +104,29 @@ namespace Alphora.Dataphor.Frontend.Client
 				catch
 				{
 					//Prevent future problems by clearing the directory
-					foreach (string LFileName in Directory.GetFiles(FCachePath, "*.*"))
-					{
-						if (!String.Equals(Path.GetFileName(LFileName), CLockFileName, StringComparison.OrdinalIgnoreCase))
-							File.Delete(LFileName);
-					}
+					EmptyCacheDirectory();
 					throw;
 				}
 			}
 			catch
 			{
-				UnlockDirectory();
+				UnlockDirectory(false);
 				throw;
+			}
+		}
+
+		private void EmptyCacheDirectory()
+		{
+			foreach (string LFileName in Directory.GetFiles(FCachePath, "*.*"))
+			{
+				if (!String.Equals(Path.GetFileName(LFileName), CLockFileName, StringComparison.OrdinalIgnoreCase))
+					File.Delete(LFileName);
 			}
 		}
 
 		public void Dispose()
 		{
+			var LSuccess = false;
 			try
 			{
 				string LIndexFileName = Path.Combine(FCachePath, CIndexFileName);
@@ -137,10 +143,12 @@ namespace Alphora.Dataphor.Frontend.Client
 
 				// Synchronize the index and CRC3 file times so that we know they were saved properly
 				File.SetLastWriteTimeUtc(LIndexFileName, File.GetLastWriteTimeUtc(LCRC32FileName));
+				
+				LSuccess = true;
 			}
 			finally
 			{
-				UnlockDirectory();
+				UnlockDirectory(LSuccess);
 			}
 		}
 
@@ -159,6 +167,14 @@ namespace Alphora.Dataphor.Frontend.Client
 				try
 				{
 					FLockFile = new FileStream(Path.Combine(FCachePath, CLockFileName), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+					var LLockValue = FLockFile.Length > 0 ? FLockFile.ReadByte() : 1;
+					FLockFile.Position = 0;
+					FLockFile.WriteByte(1);
+					FLockFile.Flush();
+					
+					// The cache may not have been shut-down properly... must clear cache to be safe
+					if (LLockValue != 0)
+						EmptyCacheDirectory();
 				}
 				catch (IOException)
 				{
@@ -174,10 +190,12 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 		}
 
-		private void UnlockDirectory()
+		private void UnlockDirectory(bool ASucceeded)
 		{
 			if (FLockFile != null)
 			{
+				FLockFile.Position = 0;
+				FLockFile.WriteByte(ASucceeded ? (byte)0 : (byte)1);
 				FLockFile.Close();
 				FLockFile = null;
 
