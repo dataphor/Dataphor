@@ -1743,7 +1743,15 @@ namespace Alphora.Dataphor.DAE.Client
 			if (OnValidate != null)
 				OnValidate(this, EventArgs.Empty);
 		}
-		
+
+		public event ErrorsOccurredHandler OnErrors;
+
+		protected void ReportErrors(CompilerMessages AMessages)
+		{
+			if (OnErrors != null)
+				OnErrors(this, AMessages);
+		}
+
 		/// <summary>Forces a data changed, ignoring any exceptions that occur.</summary>
 		protected void ForcedDataChanged()
 		{
@@ -1751,9 +1759,10 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				DoDataChanged();
 			}
-			catch
+			catch (Exception LException)
 			{
-				// ignore any exceptions
+				ReportErrors(new CompilerMessages { LException });
+				// Don't rethrow
 			}
 		}
 		

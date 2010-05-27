@@ -659,7 +659,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		public override Client.IHost CreateHost()
 		{
 			Host LHost = new Host(this);
-			LHost.OnDeserializationErrors += new DeserializationErrorsHandler(DeserializationErrors);
+			LHost.OnDeserializationErrors += new DeserializationErrorsHandler(ReportErrors);
 			return LHost;
 		}
 
@@ -676,7 +676,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		/// <remarks> If this event is set, then the default behavior will not be invoked. </remarks>
 		public event DeserializationErrorsHandler OnDeserializationErrors;
 
-		private void DeserializationErrors(IHost AHost, ErrorList AErrorList)
+		public override void ReportErrors(IHost AHost, ErrorList AErrorList)
 		{
 			if (OnDeserializationErrors != null)
 				OnDeserializationErrors(AHost, AErrorList);
@@ -694,15 +694,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 						return;
 					}
 				}
-				
+
 				ErrorListForm.ShowErrorList(AErrorList, true);
 			}
-		}
-		
-		public override void ReportErrors(IHost AHost, ErrorList AErrorList)
-		{
-			if (OnDeserializationErrors != null)
-				OnDeserializationErrors((Host)AHost, AErrorList);
 		}
 
 		protected override void InitializePipe()

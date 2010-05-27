@@ -312,13 +312,6 @@ namespace Alphora.Dataphor.DAE.Client
 			ReportErrors(AMessages);
 		}
 
-		public event ErrorsOccurredHandler OnErrors;
-		protected void ReportErrors(CompilerMessages AMessages)
-		{
-			if (OnErrors != null)
-				OnErrors(this, AMessages);
-		}
-		
 		protected virtual void OpenCursor()
 		{
 			try
