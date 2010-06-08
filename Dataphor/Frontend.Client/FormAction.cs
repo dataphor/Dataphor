@@ -683,10 +683,14 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		protected virtual void OnClosedHandler(object sender, EventArgs e)
 		{
-			if (FSourceLink != null)
-				FSourceLink.TargetSource = null;
 			if (FOnFormClose != null)
 				FOnFormClose.Execute(this, new EventParams("AForm", sender));
+
+			// Disable the source(s) first before disestablishing the link
+			((IFormInterface)sender).BroadcastEvent(new DisableSourceEvent());
+			
+			if (FSourceLink != null)
+				FSourceLink.TargetSource = null;
 				
 			DoCompleted(FParams);
 
