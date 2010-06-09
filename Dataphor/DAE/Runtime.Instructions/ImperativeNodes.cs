@@ -2674,6 +2674,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return false;
 			return true;
 		}
+
+		public override void DetermineCharacteristics(Plan APlan)
+		{
+			var LColumn =
+			IsLiteral = false;
+			IsFunctional = true;
+			IsDeterministic = true;
+			IsRepeatable = true;
+			// TODO: introduce infrastructure (possible by merging tablevar with tabletype) to infer nilability through columns
+			IsNilable = false;  //((Schema.RowType)APlan.Symbols[Location].DataType).Columns[FResolvingIdentifier].IsNilable;
+			base.DetermineCharacteristics(APlan);
+		}
     }
 
     public class PropertyReferenceNode : VarReferenceNode
