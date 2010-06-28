@@ -676,6 +676,22 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		/// <remarks> If this event is set, then the default behavior will not be invoked. </remarks>
 		public event DeserializationErrorsHandler OnDeserializationErrors;
 
+		private bool HasErrors(ErrorList AErrorList)
+		{
+			for (int LIndex = 0; LIndex < AErrorList.Count; LIndex++)
+				if 
+				(
+					(!(AErrorList[LIndex] is Alphora.Dataphor.DAE.Compiling.CompilerException)) 
+						|| 
+						(
+							(((Alphora.Dataphor.DAE.Compiling.CompilerException)AErrorList[LIndex]).ErrorLevel == Alphora.Dataphor.DAE.Compiling.CompilerErrorLevel.Fatal) 
+								|| (((Alphora.Dataphor.DAE.Compiling.CompilerException)AErrorList[LIndex]).ErrorLevel == Alphora.Dataphor.DAE.Compiling.CompilerErrorLevel.NonFatal)
+						)
+				)
+					return true;
+			return false;
+		}
+		
 		public override void ReportErrors(IHost AHost, ErrorList AErrorList)
 		{
 			if (OnDeserializationErrors != null)
@@ -695,7 +711,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					}
 				}
 
-				ErrorListForm.ShowErrorList(AErrorList, true);
+				#if (DEBUG)
+				if (HasErrors(AErrorList))
+					ErrorListForm.ShowErrorList(AErrorList, true);
+				#endif
 			}
 		}
 
