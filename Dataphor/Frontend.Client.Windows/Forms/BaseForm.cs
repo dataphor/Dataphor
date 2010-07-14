@@ -726,10 +726,23 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			if (Enabled)
 				Close(CloseBehavior.AcceptOrClose);
 		}
-	
+
+		// Accept Enabled
+
+		private bool FAcceptEnabled = true;
+
+		public bool AcceptEnabled
+		{
+			get { return FAcceptEnabled; }
+			set { FAcceptEnabled = value; }
+		}
+
+		public event EventHandler Accepting;  	
 		private void AcceptClick(object ASender, EventArgs AArgs)
 		{
-			if (Enabled)
+			if (Accepting != null)
+				Accepting(this, EventArgs.Empty);
+			if (Enabled && AcceptEnabled)
 				Close(CloseBehavior.AcceptOrClose);
 		}
 	
@@ -915,7 +928,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					this.SelectNextControl(null, true, true, true, false);
 				ContainerControl LControl = (ContainerControl)typeof(ContainerControl).GetProperty("InnerMostActiveContainerControl", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(this, new object[] {});
 				typeof(ContainerControl).GetMethod("FocusActiveControlInternal", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).Invoke(LControl, new object[] {});
-			}
+			} 	
 		}
 
 		protected override bool ProcessCmdKey(ref Message AMessage, Keys AKeyData)

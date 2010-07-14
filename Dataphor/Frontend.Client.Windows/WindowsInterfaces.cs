@@ -188,6 +188,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		WinForms.FormWindowState WindowState { get; set; }
 		bool Visible { get; set; }
 		event EventHandler Activated;
+		event EventHandler Accepting;
 		event CancelEventHandler Closing;
 		event EventHandler Closed;
 		event EventHandler Resize;
@@ -232,5 +233,6 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		Dictionary<WinForms.Keys, DialogKeyHandler> DialogKeys { get; }
 		void Close(CloseBehavior ABehavior);
 		bool IsLookup { get; set; }
+		bool AcceptEnabled { get; set; }
 	}
 }

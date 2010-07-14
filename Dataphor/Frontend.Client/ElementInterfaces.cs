@@ -1007,12 +1007,18 @@ namespace Alphora.Dataphor.Frontend.Client
 		
 		bool Close(CloseBehavior ABehavior);
 		bool IsAcceptReject { get; }
+		bool AcceptEnabled { get; set; }
 
 		void Enable();
 		void Disable(IFormInterface AChildForm);
 		bool GetEnabled();
 
 		event EventHandler OnClosed;
+		
+		/// <summary> Action taken before when the user interface is Accepted. </summary> <doc/>
+		/// <value> <para>IAction</para>
+		/// <para>Default: (None)</para> </value>
+		IAction OnBeforeAccept { get; set; }			
 
 		// Published
 

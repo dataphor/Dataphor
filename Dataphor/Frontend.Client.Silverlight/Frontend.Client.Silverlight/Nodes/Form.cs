@@ -115,6 +115,51 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		{
 			UpdateAcceptReject();
 		}
+		
+		private bool FAcceptEnabled = true;
+		public bool AcceptEnabled
+		{
+			get { return FAcceptEnabled; }
+			set { FAcceptEnabled = value; }
+		}
+
+		// OnBeforeAccept
+
+		private IAction FOnBeforeAccept;
+		[Description("An action that will be executed before the form is accepted.")]
+		public IAction OnBeforeAccept
+		{
+			get { return FOnBeforeAccept; }
+			set
+			{
+				if (FOnBeforeAccept != value)
+				{
+					if (FOnBeforeAccept != null)
+						FOnBeforeAccept.Disposed -= new EventHandler(OnBeforeAcceptDisposed);
+					FOnBeforeAccept = value;
+					if (FOnBeforeAccept != null)
+						FOnBeforeAccept.Disposed += new EventHandler(OnBeforeAcceptDisposed);
+				}
+			}
+		}
+
+		private void OnBeforeAcceptDisposed(object ASender, EventArgs AArgs)
+		{
+			FOnBeforeAccept = null;
+		}
+
+		protected void BeforeAccept()
+		{
+			try
+			{
+				if (OnBeforeAccept != null)
+					OnBeforeAccept.Execute(this, new EventParams());
+			}
+			catch (Exception LException)
+			{
+				this.HandleException(LException);
+			}
+		}
 
 		#endregion
 
@@ -224,12 +269,26 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			Session.Invoke((System.Action)(() => { Close(ABehavior); }));
 		}
 
+		public event EventHandler Accepting; 
 		/// <summary> Requests that the form close. </summary>
 		/// <returns> True if the form is closed. </returns>
 		public bool Close(CloseBehavior ABehavior)
 		{
-			if (Closing(ABehavior))
-				return Closed(ABehavior);
+			try
+			{
+				if (Accepting != null)
+					Accepting(this, EventArgs.Empty);
+			}
+			catch (Exception AException)
+			{
+				this.HandleException(AException);
+				return false;
+			}
+			if (AcceptEnabled)
+				if (Closing(ABehavior))
+					return Closed(ABehavior);
+				else
+					return false;
 			else
 				return false;
 		}

@@ -122,14 +122,72 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			}
 		}
 
+		private bool FAcceptEnabled = true;
+		public bool AcceptEnabled
+		{
+			get { return FAcceptEnabled; }
+			set { FAcceptEnabled = value; }
+		}
+
+		// OnBeforeAccept
+
+		private IAction FOnBeforeAccept;
+		[TypeConverter(typeof(NodeReferenceConverter))]
+		[Description("An action that will be executed before the form is accepted.")]
+		public IAction OnBeforeAccept
+		{
+			get { return FOnBeforeAccept; }
+			set
+			{
+				if (FOnBeforeAccept != value)
+				{
+					if (FOnBeforeAccept != null)
+						FOnBeforeAccept.Disposed -= new EventHandler(OnBeforeAcceptDisposed);
+					FOnBeforeAccept = value;
+					if (FOnBeforeAccept != null)
+						FOnBeforeAccept.Disposed += new EventHandler(OnBeforeAcceptDisposed);
+				}
+			}
+		}
+
+		private void OnBeforeAcceptDisposed(object ASender, EventArgs AArgs)
+		{
+			FOnBeforeAccept = null;
+		}
+
+		protected virtual void BeforeAccept()
+		{
+			try
+			{
+				if (OnBeforeAccept != null)
+					OnBeforeAccept.Execute(this, new EventParams());
+			}
+			catch (Exception LException)
+			{
+				WebSession.ErrorList.Add(LException);
+			}
+		}
+
 		private void CloseClick(object ASender, EventArgs AArgs)
 		{
 			Close(CloseBehavior.AcceptOrClose);
 		}
-		
+											 
+		public event EventHandler Accepting; 
 		private void AcceptClick(object ASender, EventArgs AArgs)
 		{
-			Close(CloseBehavior.AcceptOrClose);
+			try
+			{
+				if (Accepting != null)
+					Accepting(this, AArgs);
+			}
+			catch (Exception LException)
+			{
+				WebSession.ErrorList.Add(LException);
+				// don't rethrow
+			}
+			if (AcceptEnabled) 
+				Close(CloseBehavior.AcceptOrClose);
 		}
 		
 		private void RejectClick(object ASender, EventArgs AArgs)

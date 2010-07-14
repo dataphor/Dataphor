@@ -39,6 +39,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		string BackgroundImageID { get; }
 		string IconImageID { get; }
 		event CancelEventHandler OnClosing;
+		event EventHandler Accepting; 
 		void PreprocessRequest(HttpContext AContext);
 		ErrorList ErrorList { get; }
 	}

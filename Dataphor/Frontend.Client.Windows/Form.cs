@@ -34,6 +34,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		public const int CMarginBottom = 6;
 
 		public const int WM_NEXTDLGCTL = 0x0028;
+
+		protected override void Dispose(bool ADisposed)
+		{
+			try
+			{
+				base.Dispose(ADisposed);
+			}
+			finally
+			{
+				OnBeforeAccept = null;
+			}
+		}
 	
 		#region IAccelerates
 
@@ -311,6 +323,52 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
+		[DefaultValue(true)]	
+		public bool AcceptEnabled
+		{
+			get { return FForm.AcceptEnabled; }
+			set { FForm.AcceptEnabled = value; }
+		}
+
+		// OnBeforeAccept
+
+		private IAction FOnBeforeAccept;
+		[TypeConverter(typeof(NodeReferenceConverter))]
+		[Description("An action that will be executed before the form is accepted.")]
+		public IAction OnBeforeAccept
+		{
+			get { return FOnBeforeAccept; }
+			set
+			{
+				if (FOnBeforeAccept != value)
+				{
+					if (FOnBeforeAccept != null)
+						FOnBeforeAccept.Disposed -= new EventHandler(OnBeforeAcceptDisposed);
+					FOnBeforeAccept = value;
+					if (FOnBeforeAccept != null)
+						FOnBeforeAccept.Disposed += new EventHandler(OnBeforeAcceptDisposed);
+				}
+			}
+		}
+		 
+		private void OnBeforeAcceptDisposed(object ASender, EventArgs AArgs)
+		{
+			FOnBeforeAccept = null;
+		}
+
+		protected virtual void BeforeAccept()
+		{
+			try
+			{
+				if (OnBeforeAccept != null)
+					OnBeforeAccept.Execute(this, new EventParams());
+			}
+			catch (Exception LException)
+			{
+				Session.HandleException(LException);
+			}
+		} 		
+				
 		private AcceptRejectState FAcceptRejectState;
 
 		protected void AcceptRejectChanged()
@@ -524,6 +582,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			{
 				if (FForm != null)
 				{
+					FForm.Accepting -= new EventHandler(FormAccepting);
 					FForm.Closing -= new CancelEventHandler(FormClosing);
 					FForm.Closed -= new EventHandler(FormClosed);
 					FForm.PaintBackground -= new PaintHandledEventHandler(FormPaintBackground);
@@ -538,6 +597,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				FForm = AForm;
 				if (FForm != null)
 				{
+					FForm.Accepting += new EventHandler(FormAccepting);
 					FForm.Closing += new CancelEventHandler(FormClosing);
 					FForm.Closed += new EventHandler(FormClosed);
 					FForm.PaintBackground += new PaintHandledEventHandler(FormPaintBackground);
@@ -608,6 +668,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return GetDefaultActionDescription();
 		}
 
+		private void FormAccepting(object ASender, EventArgs AArgs)
+		{
+			BeforeAccept();
+		}
+		
 		private void FormClosing(object ASender, CancelEventArgs AArgs)
 		{
 			AArgs.Cancel = FormClosing();
@@ -884,7 +949,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					FOnRejectForm(this);
 			}
 		}
-
+		
 		private void UpdateActiveControl(IWindowsElement ANode)
 		{
 			FForm.SetHintText((ANode != null) ? ANode.GetHint() : String.Empty);
