@@ -43,8 +43,11 @@ namespace D4Runner
 		[Argument(ArgumentType.AtMostOnce, HelpText="User to login with.", DefaultValue="Admin")]
 		public string User = null;
 
-		[Argument(ArgumentType.AtMostOnce, HelpText="Pasword to login with.", DefaultValue="")]
+		[Argument(ArgumentType.AtMostOnce, HelpText="Password to login with.", DefaultValue="")]
 		public string Password = null;
+
+		[Argument(ArgumentType.AtMostOnce, HelpText = "When set to true the Password argument has been encrypted.", DefaultValue = true)]
+		public bool PasswordEncrypted = true;
 
 		[Argument(ArgumentType.AtMostOnce, HelpText="When set to true do not print extras or prompt.", DefaultValue=false)]
 		public bool Quiet = false;
@@ -87,9 +90,15 @@ namespace D4Runner
 
 					if (User != null)
 						LDataphorConnection.SessionInfo.UserID = User;
-					if (Password != null)
-						LDataphorConnection.SessionInfo.Password = Password;
 
+					if (Password != null) 
+					{
+						if (PasswordEncrypted == true)
+							LDataphorConnection.SessionInfo.UnstructuredData = Password;
+						else 
+							LDataphorConnection.SessionInfo.Password = Password;
+					}
+					
 					LDataphorConnection.Open();
 
 					if (!Quiet)
