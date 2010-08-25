@@ -52,7 +52,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.FHintPanel = new System.Windows.Forms.ToolStripStatusLabel();
 			this.FStatusPanel = new System.Windows.Forms.ToolStripStatusLabel();
 			this.FToolBar = new System.Windows.Forms.ToolStrip();
-			this.FContentPanel = new System.Windows.Forms.Panel();
+			this.FContentPanel = new Alphora.Dataphor.Frontend.Client.Windows.Panel();
 			this.FMainMenu.SuspendLayout();
 			this.FStatusBar.SuspendLayout();
 			this.FContentPanel.SuspendLayout();

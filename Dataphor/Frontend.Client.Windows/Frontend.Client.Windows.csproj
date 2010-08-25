@@ -298,6 +298,9 @@
     <Compile Include="Notebook.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Panel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Schedule.cs" />
     <Compile Include="Search.cs">
       <SubType>Code</SubType>
