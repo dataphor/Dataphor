@@ -262,9 +262,9 @@ namespace Alphora.Dataphor.DAE.Server
 			EnsureServerTableVar(ATableVar).AddInsertTableVarCheck(Count - 1, ARow);
 		}
 		
-		public void AddUpdateTableVarCheck(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
+		public void AddUpdateTableVarCheck(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow, BitArray AValueFlags)
 		{
-			EnsureServerTableVar(ATableVar).AddUpdateTableVarCheck(Count - 1, AOldRow, ANewRow);
+			EnsureServerTableVar(ATableVar).AddUpdateTableVarCheck(Count - 1, AOldRow, ANewRow, AValueFlags);
 		}
 		
 		public void AddDeleteTableVarCheck(Schema.TableVar ATableVar, Row ARow)
@@ -722,57 +722,81 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public void AddUpdateTableVarCheck(int ATransactionIndex, Row AOldRow, Row ANewRow)
+		private bool UpdateInvolvesKey(BitArray AValueFlags)
+		{
+			if (AValueFlags != null)
+			{
+				for (int LIndex = 0; LIndex < AValueFlags.Count; LIndex++)
+					if (AValueFlags[LIndex] && FCheckTableKey.Columns.ContainsName(FOldRowType.Columns[LIndex].Name))
+						return true;
+				return false;
+			}
+
+			// If we cannot determine if the update involves a key, we must assume that it does.			
+			return true;
+		}
+		
+		public void AddUpdateTableVarCheck(int ATransactionIndex, Row AOldRow, Row ANewRow, BitArray AValueFlags)
 		{
 			PrepareCheckTable();
 			if (FOldRowType == null)
 				FOldRowType = AOldRow.DataType;
 			if (FNewRowType == null)
 				FNewRowType = ANewRow.DataType;
-			IServerCursor LCursor = FPlan.Open(null);
-			try
+
+			// If the update involves the key of the check table, log it as a delete of AOldRow, followed by an insert of ANewRow
+			if (UpdateInvolvesKey(AValueFlags))
 			{
-				// If there is an existing insert transition check for AOldRow, delete it and log ANewRow as an insert transition.
-				// If there is an existing update transition check for AOldRow, delete it and log AOldRow from the existing check and ANewRow from the new check as an update transition.
-				// Else log AOldRow, ANewRow as an update transition.
-				Row LCheckRow = FPlan.RequestRow();
+				AddDeleteTableVarCheck(ATransactionIndex, AOldRow);
+				AddInsertTableVarCheck(ATransactionIndex, ANewRow);
+			}
+			else
+			{
+				IServerCursor LCursor = FPlan.Open(null);
 				try
 				{
-					// delete <check table name> where <key names> = <old key values>;
-					CopyKeyValues(AOldRow, LCheckRow);
-					if (LCursor.FindKey(LCheckRow))
+					// If there is an existing insert transition check for AOldRow, delete it and log ANewRow as an insert transition.
+					// If there is an existing update transition check for AOldRow, delete it and log AOldRow from the existing check and ANewRow from the new check as an update transition.
+					// Else log AOldRow, ANewRow as an update transition.
+					Row LCheckRow = FPlan.RequestRow();
+					try
 					{
-						using (Row LRow = LCursor.Select())
+						// delete <check table name> where <key names> = <old key values>;
+						CopyKeyValues(AOldRow, LCheckRow);
+						if (LCursor.FindKey(LCheckRow))
 						{
-							if (LRow.HasValue(FOldRowColumnName))
-								AOldRow = (Row)LRow[FOldRowColumnName];
-							else
-								AOldRow = null;
+							using (Row LRow = LCursor.Select())
+							{
+								if (LRow.HasValue(FOldRowColumnName))
+									AOldRow = (Row)LRow[FOldRowColumnName];
+								else
+									AOldRow = null;
+							}
+							LCursor.Delete();
 						}
-						LCursor.Delete();
-					}
 
-					CopyKeyValues(ANewRow, LCheckRow);
-					LCheckRow[FTransactionIndexColumnName] = ATransactionIndex;
-					if (AOldRow != null)
+						CopyKeyValues(ANewRow, LCheckRow);
+						LCheckRow[FTransactionIndexColumnName] = ATransactionIndex;
+						if (AOldRow != null)
+						{
+							LCheckRow[FTransitionColumnName] = Keywords.Update;
+							LCheckRow[FOldRowColumnName] = AOldRow;
+						}
+						else
+							LCheckRow[FTransitionColumnName] = Keywords.Insert;
+
+						LCheckRow[FNewRowColumnName] = ANewRow;
+						LCursor.Insert(LCheckRow);
+					}
+					finally
 					{
-						LCheckRow[FTransitionColumnName] = Keywords.Update;
-						LCheckRow[FOldRowColumnName] = AOldRow;
+						FPlan.ReleaseRow(LCheckRow);
 					}
-					else
-						LCheckRow[FTransitionColumnName] = Keywords.Insert;
-
-					LCheckRow[FNewRowColumnName] = ANewRow;
-					LCursor.Insert(LCheckRow);
 				}
 				finally
 				{
-					FPlan.ReleaseRow(LCheckRow);
+					FPlan.Close(LCursor);
 				}
-			}
-			finally
-			{
-				FPlan.Close(LCursor);
 			}
 		}
 

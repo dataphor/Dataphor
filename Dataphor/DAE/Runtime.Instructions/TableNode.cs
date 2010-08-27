@@ -2703,7 +2703,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected virtual void ValidateUpdateConstraints(Program AProgram, BitArray AValueFlags)
 		{
 			if (AProgram.ServerProcess.InTransaction && TableVar.HasDeferredConstraints(AValueFlags, Schema.Transition.Update))
-				AProgram.ServerProcess.AddUpdateTableVarCheck(TableVar, (Row)AProgram.Stack.Peek(1), (Row)AProgram.Stack.Peek(0));
+				AProgram.ServerProcess.AddUpdateTableVarCheck(TableVar, (Row)AProgram.Stack.Peek(1), (Row)AProgram.Stack.Peek(0), AValueFlags);
 			
 			#if !USENAMEDROWVARIABLES
 			PushRow(AProgram, (Row)AProgram.Stack.Peek(0));

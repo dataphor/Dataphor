@@ -107,5 +107,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[Test] public void ExecuteDebugLibrary() { ExecuteScript("Coverage.Scripts", "DebugLibrary"); }
 		[Test] public void ExecutePlanCache() { ExecuteScript("Coverage.Scripts", "PlanCache"); }
 		[Test] public void ExecuteOperatorText() { ExecuteScript("Coverage.Scripts", "OperatorText"); }
+		[Test] public void ExecuteDeferredConstraintChecking() { ExecuteScript("Coverage.Scripts", "DeferredConstraintChecking"); }
 	}
 }

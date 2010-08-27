@@ -1087,9 +1087,9 @@ namespace Alphora.Dataphor.DAE.Server
 			FTransactions.AddInsertTableVarCheck(ATableVar, ARow);
 		}
 		
-		internal void AddUpdateTableVarCheck(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
+		internal void AddUpdateTableVarCheck(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow, BitArray AValueFlags)
 		{
-			FTransactions.AddUpdateTableVarCheck(ATableVar, AOldRow, ANewRow);
+			FTransactions.AddUpdateTableVarCheck(ATableVar, AOldRow, ANewRow, AValueFlags);
 		}
 		
 		internal void AddDeleteTableVarCheck(Schema.TableVar ATableVar, Row ARow)
