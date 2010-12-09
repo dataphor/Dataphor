@@ -693,7 +693,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			#endif
 			
-			return DataValue.CopyValue(AProgram.ValueManager, ((NativeRow)AArgument1).Values[FPropertyIndex]);
+			if (FDataType is Schema.IScalarType)
+				return DataValue.CopyValue(AProgram.ValueManager, ((NativeRow)AArgument1).Values[FPropertyIndex]);
+			return 
+				DataValue.FromNativeRow
+				(
+					AProgram.ValueManager, 
+					((Schema.ScalarType)Nodes[0].DataType).CompoundRowType, 
+					(NativeRow)AArgument1, 
+					FPropertyIndex
+				).Copy(AProgram.ValueManager);
 		}
     }
     

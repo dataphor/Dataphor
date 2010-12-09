@@ -664,6 +664,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				return LNewRow;
 			}
 			
+			NativeList LNativeList = AValue as NativeList;
+			if (LNativeList != null)
+			{
+				NativeList LNewList = new NativeList();
+				for (int LIndex = 0; LIndex < LNativeList.Values.Count; LIndex++)
+				{
+					LNewList.DataTypes.Add(LNativeList.DataTypes[LIndex]);
+					LNewList.Values.Add(CopyValue(AManager, LNativeList.Values[LIndex]));
+				}
+				return LNewList;
+			}
+			
 			return AValue;
 		}
 		
