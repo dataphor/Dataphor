@@ -36,6 +36,8 @@ begin
 	create operator ToString(const AValue : Date) : String class "System.DateToStringNode";
 	create operator ToString(const AValue : TimeSpan) : String class "System.TimeSpanToStringNode";
 	create operator ToString(const AValue : Time) : String class "System.TimeToStringNode";
+	create operator ToBase64String(const AValue : Binary) : String class "System.BinaryToBase64StringNode";
+	create operator ToBase64String(const AValue : Graphic) : String class "System.BinaryToBase64StringNode";
 	create operator ToByte(const AValue : Boolean) : Byte class "System.BooleanToByteNode" static tags { DAE.IsOrderPreserving = "True" };
 	create operator ToByte(const AValue : String) : Byte class "System.StringToByteNode";
 	create operator ToByte(const AValue : Short) : Byte class "System.ShortToByteNode" static tags { DAE.IsOrderPreserving = "True" };

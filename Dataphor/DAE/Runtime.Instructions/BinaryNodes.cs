@@ -32,7 +32,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 
 			if (AArgument1 is byte[])
-				return ((byte[])AArgument1).Length;
+				return (long)((byte[])AArgument1).Length;
 			if (AArgument1 is StreamID)
 			{
 				Stream LStream = AProgram.StreamManager.Open((StreamID)AArgument1, LockMode.Exclusive);
@@ -138,6 +138,54 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					LLeftStream.Close();
 				}	
+			}
+		}
+	}
+
+	/// <remarks> operator ToBase64String(AGraphic : Graphic) : string </remarks>
+	/// <remarks> operator ToBase64String(ABinary : Binary) : string </remarks>
+	public class BinaryToBase64StringNode : UnaryInstructionNode
+	{
+		public override object InternalExecute(Program AProgram, object AArgument1)
+		{
+			#if NILPROPOGATION
+			if (AArgument1 == null)
+				return null;
+			#endif
+
+			if (AArgument1 is byte[])
+				return Convert.ToBase64String(((byte[])AArgument1));
+			if (AArgument1 is StreamID)
+			{
+				Stream LStream = AProgram.StreamManager.Open((StreamID)AArgument1, LockMode.Exclusive);				 				
+				try
+				{
+					byte[] LBuffer = new byte[LStream.Length];
+					LStream.Read(LBuffer, 0, (int)LStream.Length);
+					return Convert.ToBase64String(LBuffer);
+				}
+				finally
+				{
+					LStream.Close();
+				}
+			}
+
+			Scalar LScalar = (Scalar)DataValue.FromNative(AProgram.ValueManager, Nodes[0].DataType, AArgument1);
+			if (LScalar.IsNative)
+				return LScalar.AsBase64String;
+			else
+			{
+				Stream LStream = LScalar.OpenStream();
+				try
+				{
+					byte[] LBuffer = new byte[LStream.Length];
+					LStream.Read(LBuffer, 0, (int)LStream.Length);
+					return Convert.ToBase64String(LBuffer);
+				}
+				finally
+				{
+					LStream.Close();
+				}
 			}
 		}
 	}
