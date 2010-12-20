@@ -734,8 +734,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			
 			NativeRow LResult = (NativeRow)DataValue.CopyValue(AProgram.ValueManager, AArgument1);
-			DataValue.DisposeValue(AProgram.ValueManager, LResult.Values[FPropertyIndex]);
-			LResult.Values[FPropertyIndex] = DataValue.CopyValue(AProgram.ValueManager, AArgument2);
+			using (Row LRow = new Row(AProgram.ValueManager, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType, LResult))
+			{
+				LRow[FPropertyIndex] = AArgument2;
+			}
+
 			return LResult;
 		}
     }

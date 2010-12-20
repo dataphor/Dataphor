@@ -660,7 +660,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			{
 				NativeRow LNewRow = new NativeRow(LNativeRow.Values.Length);
 				for (int LIndex = 0; LIndex < LNativeRow.Values.Length; LIndex++)
+				{
+					#if USEDATATYPESINNATIVEROW
+					LNewRow.DataTypes[LIndex] = LNativeRow.DataTypes[LIndex];
+					#endif
 					LNewRow.Values[LIndex] = CopyValue(AManager, LNativeRow.Values[LIndex]);
+				}
 				return LNewRow;
 			}
 			
