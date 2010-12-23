@@ -470,12 +470,14 @@ namespace Alphora.Dataphor.DAE.Server
 				FSourceCursorIndex = FBufferIndex;
 				if (FBufferIndex == -1)
 				{
-					GotoBookmarkIndex(0, false);
+					if (FBuffer.Count > 0)
+						GotoBookmarkIndex(0, false);
 					return SourcePrior();
 				}
 				else if (FBufferIndex == FBuffer.Count)
 				{
-					GotoBookmarkIndex(FBuffer.Count - 1, true);
+					if (FBuffer.Count > 0)
+						GotoBookmarkIndex(FBuffer.Count - 1, true);
 					return SourceNext();
 				}
 				else

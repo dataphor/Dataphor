@@ -140,5 +140,26 @@ namespace Alphora.Dataphor.DAE.Client.Tests.Frontend
 				LDataView.Dispose();
 			}
 		}
+		
+		[Test]
+		public void TestCancelOfEmpty()
+		{
+			DataSession.Execute("create table TestForCancelOfEmpty { ID : Integer, Name : String, key { ID } };");
+
+			DataView LDataView = DataSession.OpenDataView("TestForCancelOfEmpty rename Main browse by { Main.ID } capabilities { navigable, backwardsnavigable, bookmarkable, searchable, updateable } isolation browse");
+			try
+			{
+				LDataView.UseApplicationTransactions = false; 				
+
+				LDataView.Insert();
+				LDataView["ID"].AsInt32 = 2;
+				LDataView["Name"].AsString = "Jacob";
+				LDataView.Cancel();						
+			}
+			finally
+			{
+				LDataView.Dispose();
+			}
+		}
 	}
 }
