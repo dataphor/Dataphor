@@ -105,6 +105,9 @@
     <Compile Include="..\Base\FixedSizeCache.cs">
       <Link>Base\FixedSizeCache.cs</Link>
     </Compile>
+    <Compile Include="..\Base\ProperFraction.cs">
+      <Link>Base\ProperFraction.cs</Link>
+    </Compile>
     <Compile Include="..\Base\IndexList.cs">
       <Link>Base\IndexList.cs</Link>
     </Compile>

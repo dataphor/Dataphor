@@ -1,25 +1,41 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Alphora.Dataphor
 {
+	public struct FixedSizeCacheSettings
+	{ 
+		public ProperFraction Cutoff { get; set; } 	
+		public uint CorrelatedReferencePeriod { get; set; } 		
+	}
+		
 	/// <summary> Fixed size cache list. </summary>
 	/// <remarks> Currently implemented as a LRU (Least Recently Used) algorithm. </remarks>
 	public class FixedSizeCache<TKey, TValue> : IDictionary<TKey, TValue>, IEnumerable<TValue>
 	{
+		public static readonly ProperFraction CDefaultCutoff = new ProperFraction(0.33m);
+		public const uint CDefaultCorrelatedReferencePeriod = 30;
+
 		/// <param name="ASize"> The size of the cache (in entries). </param>
 		public FixedSizeCache(int ASize)
 		{
 			if (ASize < 2)
 				throw new BaseException(BaseException.Codes.MinimumSize);
-			FSize = ASize;
+			Size = ASize;
 			FEntries = new Dictionary<TKey, Entry>(ASize);
+			DefaultSettings();
 		}
 
 		private Dictionary<TKey, Entry> FEntries;
-		private int FSize;
-		public int Size { get { return FSize; } }
+
+		/// <summary> Logical time used to track recency of page frame usage. </summary>
+		/// <remarks> Incremented with each page access (logical clock).  This may roll over. Note that this does not necessarily 
+		/// indicate the relative index of a frame in the LRU chain because there are multiple insertion points into the LRU. </remarks>
+		private int FLogicalTime;
+				
+		public int Size { get; private set; }
 
 		/// <summary> The number of cache entries. </summary>
 		public int Count
@@ -27,48 +43,198 @@ namespace Alphora.Dataphor
 			get { return FEntries.Count; }
 		}
 
-		#region LRU maintenance
+		/// <summary> Gets or sets the settings for the cache. </summary>
+		/// <remarks> Changing these settings will not affect the current state of the cache, but will be used for subsequent operations. </remarks>
+		public FixedSizeCacheSettings Settings { get; set; }		
+		
 
-		internal class Entry
+		/// <summary> Sets or resets the cache's settings to their defaults. </summary>
+		public void DefaultSettings()
 		{
-			internal Entry FNext;
-			internal Entry FPrior;
-			internal TKey FKey;
-			internal TValue FValue;
+			FixedSizeCacheSettings LSettings = new FixedSizeCacheSettings();   			
+			LSettings.CorrelatedReferencePeriod = CDefaultCorrelatedReferencePeriod;
+			LSettings.Cutoff = CDefaultCutoff; 			
+			Settings = LSettings;
 		}
 
-		private Entry FHead;
-		private Entry FTail;
+		#region LRU Maintenance
 
-		private void RemoveEntry(Entry AEntry)
+		// TODO: Investigate splitting FCacheLatch into LRU and FFrames latches
+
+		public class Entry
+		{
+			internal Entry(int ALLogicalCreationTime)
+			{
+				FLastAccess = ALLogicalCreationTime;
+			}
+			internal TKey FKey;
+			public TKey Key { get { return FKey; } }
+			internal TValue FValue;
+			public TValue Value { get { return FValue; } }
+			internal Entry FNext;
+			internal Entry FPrior; 			
+			internal bool FPreCutoff;
+			internal int FLastAccess;	 
+		}
+
+		/// <summary> Latch used to protect the LRU chain as well as the FFrames table. </summary>
+		private object FCacheLatch = new object();
+
+		/// <summary> Pointer to the head of the LRU chain. </summary>
+		private Entry FLRUHead;
+		/// <summary> Pointer to the cuttoff point within the LRU chain. </summary>
+		private Entry FLRUCutoff;
+		/// <summary> Pointer to the tail of the LRU chain. </summary>
+		private Entry FLRUTail;
+		/// <summary> The number of entries that occur before (exclusive of) the cutoff entry. </summary>
+		private int FLRUPreCutoffCount;
+		/// <summary> The total number of entries in the LRU chain. </summary>
+		private int FLRUCount;
+
+		private void InitializeList(Entry AEntry)
+		{
+			FLRUCutoff = AEntry;
+			FLRUHead = AEntry;
+			FLRUTail = AEntry;
+			AEntry.FPrior = null;
+			AEntry.FNext = null;
+			AEntry.FPreCutoff = false;
+			AdjustEntryCount(1, false);
+		}
+
+		private void CutFromList(Entry AEntry)
+		{  			
+			if (AEntry.FPrior != null)
+				AEntry.FPrior.FNext = AEntry.FNext;
+			if (AEntry == FLRUHead && AEntry.FPrior != null)
+				FLRUHead = AEntry.FPrior;
+		
+			if (AEntry.FNext != null)
+				AEntry.FNext.FPrior = AEntry.FPrior;
+			if (AEntry == FLRUTail && AEntry.FNext != null)
+				FLRUTail = AEntry.FNext;
+		}
+
+		/// <summary> Places the entry at the head of the LRU chain. </summary>
+		/// <remarks> Locks-> Expects: FCacheLatch </remarks>
+		private void PlaceAtHead(Entry AEntry)
+		{ 			
+			if (AEntry == FLRUHead)
+				return;
+			if (FLRUHead == null)
+				InitializeList(AEntry);
+			else
+			{
+				AEntry.FPreCutoff = true;  		
+				CutFromList(AEntry);
+				FLRUHead.FNext = AEntry;
+				AEntry.FPrior = FLRUHead;
+				AEntry.FNext = null; 				
+				FLRUHead = AEntry;	 				
+				AdjustEntryCount(1, true);
+			}
+			UpdateCutoff();
+		}
+
+		/// <summary> Places the entry at the cutoff point of the LRU chain. </summary>
+		/// <remarks> Locks-> Expects: FCacheLatch </remarks>
+		private void PlaceAtCutoff(Entry AEntry)
+		{
+			if (AEntry == FLRUCutoff)
+				return;
+			if (FLRUCutoff == null)
+				InitializeList(AEntry);
+			else
+			{
+				CutFromList(AEntry);
+				if (FLRUCutoff == FLRUHead)
+					FLRUHead = AEntry;
+
+				if (FLRUCutoff.FNext != null)
+					FLRUCutoff.FNext.FPrior = AEntry;
+				AEntry.FNext = FLRUCutoff.FNext;
+				AEntry.FPrior = FLRUCutoff;
+				FLRUCutoff.FNext = AEntry;				
+				FLRUCutoff = AEntry;
+				AEntry.FPreCutoff = false;
+				AdjustEntryCount(1, false);
+			}  			
+			UpdateCutoff();
+		}
+
+		/// <summary> Removes the specified entry from the FLU chain. </summary>
+		/// <remarks> Locks-> Expects: FCacheLatch </remarks>
+		private void Remove(Entry AEntry)
 		{
 			if (AEntry.FPrior != null)
 				AEntry.FPrior.FNext = AEntry.FNext;
 			if (AEntry.FNext != null)
 				AEntry.FNext.FPrior = AEntry.FPrior;
-			if (AEntry == FTail)
-				FTail = AEntry.FNext;
-			if (AEntry == FHead)
-				FHead = AEntry.FPrior;
+			if (AEntry == FLRUHead)
+				FLRUHead = AEntry.FPrior;
+			if (AEntry == FLRUCutoff)
+				if (AEntry.FPrior != null)
+					FLRUCutoff = AEntry.FPrior;
+				else
+				{
+					if (AEntry.FNext != null)
+						ShiftCutoff(-1);
+					else
+						FLRUCutoff = null;
+				}
+			if (AEntry == FLRUTail)
+				FLRUTail = AEntry.FNext;
 			AEntry.FPrior = null;
 			AEntry.FNext = null;
+			AdjustEntryCount(-1, AEntry.FPreCutoff);
+			UpdateCutoff();
 		}
 
-		private void AddEntry(Entry AEntry)
+		/// <summary> Maintains the total and cutoff LRU counts. </summary>
+		/// <remarks> Locks-> Expects: FCacheLatch </remarks>
+		private void AdjustEntryCount(int ADelta, bool APreCutoff)
 		{
-			AEntry.FPrior = FHead;
-			AEntry.FNext = null;
-			if (FHead != null)
-				FHead.FNext = AEntry;
-			else
-				FTail = AEntry;
-			FHead = AEntry;
+			FLRUCount += ADelta;
+			if (APreCutoff)
+				FLRUPreCutoffCount += ADelta;
 		}
+
+		/// <summary> Shifts the cutoff point to the point configured in the settings. </summary>
+		/// <remarks> Locks-> Expects: FCacheLatch </remarks>
+		private void UpdateCutoff()
+		{
+			ShiftCutoff((FLRUCount * Settings.Cutoff) - FLRUPreCutoffCount);
+		}
+
+		/// <summary> Adjusts the cutoff point by the given delta. </summary>
+		/// <remarks> This method assumes that the given delta will not adjust the cutoff point off of 
+		/// the edge of the list.
+		/// Locks-> Expects: FCacheLatch </remarks>
+		private void ShiftCutoff(int ADelta)
+		{
+			while (ADelta > 0)
+			{
+				FLRUCutoff.FPreCutoff = true;
+				FLRUCutoff = FLRUCutoff.FPrior;
+				ADelta--;
+				FLRUPreCutoffCount++;
+			}
+			while (ADelta < 0)
+			{
+				FLRUCutoff = FLRUCutoff.FNext;
+				FLRUCutoff.FPreCutoff = false;
+				ADelta++;
+				FLRUPreCutoffCount--;
+			}
+		} 	   
 
 		private void ClearEntries()
 		{
-			FHead = null;
-			FTail = null;
+			FLRUHead = null;
+			FLRUCutoff = null;
+			FLRUTail = null;
+			FLRUPreCutoffCount = 0;
+			FLRUCount = 0;
 		}
 
 		#endregion
@@ -79,33 +245,80 @@ namespace Alphora.Dataphor
 		public TValue Reference(TKey AKey, TValue AValue)
 		{
 			TValue LResult = default(TValue);
-			Entry LEntry;
-			if (FEntries.TryGetValue(AKey, out LEntry))
+			Entry LEntry; 
+
+			// Increment the logical clock and remember the logical time of this access
+			int LLogicalTime = Interlocked.Increment(ref FLogicalTime);
+
+			for (; ; )	// Restart point
 			{
-				// Move the item to the head of the MRU
-				RemoveEntry(LEntry);
-				AddEntry(LEntry);
-			}
-			else
-			{
-				// If the list is full, remove and re-use the oldest; otherwise create a new entry
-				if (FEntries.Count >= FSize)
+				//Monitor.Enter(FCacheLatch);
+				FEntries.TryGetValue(AKey, out LEntry);
+				if (LEntry != null)
 				{
-					LEntry = FTail;
-					LResult = FTail.FValue;
-					FEntries.Remove(FTail.FKey);
-					RemoveEntry(FTail);
+					//if (!Monitor.TryEnter(LEntry))
+					//{
+					//    Monitor.Exit(FCacheLatch);
+					//    continue;
+					//}
+					try
+					{ 						
+						try
+						{
+							if (SubtractTime(LLogicalTime, LEntry.FLastAccess) > Settings.CorrelatedReferencePeriod)   					
+								if (LEntry.FPreCutoff)
+									PlaceAtHead(LEntry);
+								else
+									PlaceAtCutoff(LEntry);
+						}
+						finally
+						{
+							//Monitor.Exit(FCacheLatch);
+						}						
+						
+						LEntry.FLastAccess = LLogicalTime;	 					
+					}
+					finally
+					{
+						//Monitor.Exit(LEntry);
+					}	 			
 				}
 				else
-					LEntry = new Entry();
-
-				LEntry.FKey = AKey;
-				AddEntry(LEntry);
-				FEntries.Add(AKey, LEntry);
+				{							
+					// If the list is full, remove and re-use the oldest; otherwise create a new entry
+					if (FEntries.Count >= Size)
+					{
+						//if (!Monitor.TryEnter(FLRUTail))
+						//{
+						//    Monitor.Exit(FCacheLatch);
+						//    continue;
+						//}
+						try
+						{
+							LEntry = FLRUTail;
+							LResult = FLRUTail.FValue;
+							FEntries.Remove(FLRUTail.FKey);
+							Remove(FLRUTail);
+						}
+						finally
+						{
+							//Monitor.Exit(LEntry);
+						}
+					}
+					else
+						LEntry = new Entry(LLogicalTime);  
+					   
+					LEntry.FKey = AKey;		 					
+					PlaceAtCutoff(LEntry);
+					FEntries.Add(AKey, LEntry);	  					
+				}
+				break;
 			}
+
 			// Adjust the entry's value
 			LEntry.FValue = AValue;
-			return LResult;
+
+			return LResult;	 
 		}
 
 		#region IDictionary Members
@@ -152,7 +365,37 @@ namespace Alphora.Dataphor
 				yield return new KeyValuePair<TKey, TValue>(LEntry.Key, LEntry.Value.FValue);
 		}
 
-	
+		//TODO: necessary to lock on Entry?
+		private void InternalRemove(TKey AKey, Entry AEntry)
+		{
+			for (; ; )	// Restart point
+			{
+				//Monitor.Enter(FCacheLatch);
+				//if (!Monitor.TryEnter(AEntry))
+				//{
+				//    Monitor.Exit(FCacheLatch);
+				//    continue;
+				//}
+				try
+				{
+					try
+					{
+						Remove(AEntry);
+						FEntries.Remove(AKey);						
+					}
+					finally
+					{
+						//Monitor.Exit(FCacheLatch);
+					}						
+				}
+				finally
+				{
+					//Monitor.Exit(AEntry);
+				}
+				break;
+			}			
+		}
+
 		public TValue this[TKey AKey]
 		{
 			get
@@ -169,8 +412,7 @@ namespace Alphora.Dataphor
 				Entry LEntry;
 				if (FEntries.TryGetValue(AKey, out LEntry))
 				{
-					FEntries.Remove(AKey);
-					RemoveEntry(LEntry);
+					InternalRemove(AKey, LEntry);
 				}
 				// Add the new one if it is not null
 				if (value != null)
@@ -197,8 +439,7 @@ namespace Alphora.Dataphor
 			Entry LEntry;
 			if (FEntries.TryGetValue(AKey, out LEntry))
 			{
-				RemoveEntry(LEntry);
-				FEntries.Remove(AKey);
+				InternalRemove(AKey, LEntry);
 				return true;
 			}
 			else
@@ -240,6 +481,19 @@ namespace Alphora.Dataphor
 				yield return LEntry.Value.FValue;
 		}
 
+		#endregion
+
+		#region Static Utilities
+
+		/// <summary> Subtracts one logical time from another accounting for rollover. </summary>
+		private static uint SubtractTime(int AMinuend, int ASubtrahend)
+		{
+			long LResult = AMinuend - ASubtrahend;
+			if (LResult >= 0)
+				return (uint)LResult;
+			else
+				return (uint)((Int32.MaxValue - ASubtrahend) + AMinuend);
+		}
 		#endregion
 	}
 }
