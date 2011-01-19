@@ -28,44 +28,6 @@ namespace Alphora.Dataphor.Common.Tests
 		   FTestEntry = 0;
 		}
 
-		private FixedSizeCache<string, string> FTestCache;
-
-		private int FTestEntry = 0;
-		private void IncrementTestEntry()
-		{
-			FTestEntry++;
-			FTestCache.Add(GetKey(FTestEntry), GetValue(FTestEntry));
-		}
-		private int TestEntry
-		{ get { return FTestEntry; } }
-		
-		private string FromTemplate(string AValue, string ATemplate)
-		{
-			return String.Format(ATemplate, AValue);
-		}
-
-		private const string CKeyTemplate = "Key{0}";
-		private string GetKey(string AKey)
-		{
-			return FromTemplate(AKey, CKeyTemplate);
-		}
-
-		private string GetKey(int AKey)
-		{
-			return GetKey(AKey.ToString());
-		}
-
-		private const string CValueTemplate = "Value{0}";
-		private string GetValue(string AValue)
-		{
-			return FromTemplate(AValue, CValueTemplate);
-		}
-
-		private string GetValue(int AValue)
-		{
-			return GetValue(AValue.ToString());
-		}
-
 		[Test]
 		public void Add()
 		{
@@ -81,6 +43,7 @@ namespace Alphora.Dataphor.Common.Tests
 
 			FTestCache.Add(GetKey(FTestCache.Size + 1), GetValue(FTestCache.Size + 1));
 			Assert.AreEqual(LCacheSize, FTestCache.Count);
+			Assert.True(ValidateList());
 		}
 
 		[Test]
@@ -97,6 +60,7 @@ namespace Alphora.Dataphor.Common.Tests
 
 			FTestCache.Clear();
 			Assert.AreEqual(0, FTestCache.Count);
+			Assert.True(ValidateList());
 		}
 
 		[Test]
@@ -115,6 +79,7 @@ namespace Alphora.Dataphor.Common.Tests
 
 			FTestCache.Clear();
 			Assert.False(FTestCache.ContainsKey(GetKey(LTestCacheItem)));
+			Assert.True(ValidateList());
 		}			
 
 		[Test]
@@ -135,6 +100,7 @@ namespace Alphora.Dataphor.Common.Tests
 			LReference = FTestCache.Reference(GetKey(FTestCache.Size + 1), GetValue(FTestCache.Size + 1));
 			Assert.AreEqual(LCacheSize, FTestCache.Count);
 			Assert.IsNotNull(LReference);
+			Assert.True(ValidateList());
 		}
 
 		[Test]
@@ -159,6 +125,7 @@ namespace Alphora.Dataphor.Common.Tests
 			FTestCache.Remove(GetKey(LTestKey));
 			Assert.False(FTestCache.ContainsKey(GetValue(LTestKey)));
 			Assert.AreEqual(LCacheSize - 3, FTestCache.Count);
+			Assert.True(ValidateList());
 		}
 
 		[Test]
@@ -166,6 +133,7 @@ namespace Alphora.Dataphor.Common.Tests
 		{
 			FTestCache = new FixedSizeCache<string, string>(5);
 			Assert.AreEqual(5, FTestCache.Size);
+			Assert.True(ValidateList());
 		}
 
 		[Test]
@@ -212,6 +180,251 @@ namespace Alphora.Dataphor.Common.Tests
 			Assert.IsNull(FTestCache[GetKey(FTestCache.Size + 1)]);	 
 		}
 
+		[Test]
+		public void InternalAdd()
+		{
+			try
+			{
+				ReflectionPermission LReflectionPermission = new ReflectionPermission(ReflectionPermissionFlag.RestrictedMemberAccess | ReflectionPermissionFlag.AllFlags);
+				LReflectionPermission.Assert();
+
+				FTestCache = new FixedSizeCache<string, string>(25);
+				int LPreCutoffCount;
+				FixedSizeCache<string, string>.Entry LHead;
+				FixedSizeCache<string, string>.Entry LCutoff;
+				FixedSizeCache<string, string>.Entry LTail;
+
+				//disregarding CorrelatedReferencePeriod
+				while (TestEntry < FTestCache.Size)
+				{	 
+					IncrementTestEntry();
+					LPreCutoffCount = (int)(TestEntry * FixedSizeCache<string, string>.CDefaultCutoff);
+					Assert.AreEqual(LPreCutoffCount, PreCutoffCount());
+
+					LHead = GetHead();
+					LCutoff = GetCutoff();
+					LTail = GetTail();
+					
+					if (LPreCutoffCount == 0)
+					{
+						if (TestEntry == 1)
+						{
+							Assert.True(CompareEntry(TestEntry, LHead));
+							Assert.True(CompareEntry(TestEntry, LCutoff));
+							Assert.True(CompareEntry(TestEntry, LTail));
+							Assert.False(GetPreCutoff(TestEntry));							
+						}
+						else
+						{
+							Assert.True(CompareEntry(TestEntry, LHead));
+							Assert.True(CompareEntry(TestEntry, LCutoff));
+							Assert.False(CompareEntry(TestEntry, LTail));
+							Assert.False(GetPreCutoff(TestEntry));
+						}
+					}
+					else if (((TestEntry - 1) % 3) == 0)
+					{
+						if (LPreCutoffCount == 1)
+							Assert.True(CompareEntry(TestEntry, LHead)); 
+						else
+							Assert.False(CompareEntry(TestEntry, LHead));
+						Assert.False(CompareEntry(TestEntry, LCutoff));
+						Assert.False(CompareEntry(TestEntry, LTail));
+						Assert.True(GetPreCutoff(TestEntry));  						
+					}
+					else
+					{
+						Assert.False(CompareEntry(TestEntry, LHead));
+						Assert.True(CompareEntry(TestEntry, LCutoff));
+						Assert.False(CompareEntry(TestEntry, LTail));
+						Assert.False(GetPreCutoff(TestEntry));
+					}				
+				}	
+				
+				Assert.True(ValidateList());  								
+			}
+			finally
+			{
+				CodeAccessPermission.RevertAssert();	 
+			}							
+		}
+
+		[Test]
+		public void InternalReference()
+		{
+			try
+			{
+				ReflectionPermission LReflectionPermission = new ReflectionPermission(ReflectionPermissionFlag.RestrictedMemberAccess | ReflectionPermissionFlag.AllFlags);
+				LReflectionPermission.Assert();
+
+				// Entries don't get promoted until Correlated Period is exceeded and when they do they are promoted to Head
+				FTestCache = new FixedSizeCache<string, string>(25);
+				while (TestEntry < FTestCache.Size)		 				 
+					IncrementTestEntry();
+				FixedSizeCache<string, string>.Entry LEntry = GetHead().GetType().GetField(CPriorName, CFieldFlags).GetValue(GetHead()) as FixedSizeCache<string, string>.Entry;
+				Assert.AreNotEqual(GetHead(), LEntry); 
+				int LLocation = GetLocation(LEntry);
+				for (int i = (FTestCache.Size - GetLastAccess(LEntry)); i < FixedSizeCache<string, string>.CDefaultCorrelatedReferencePeriod; i++)
+				{
+					FTestCache.Reference(LEntry.Key, LEntry.Value);
+					Assert.AreEqual(LLocation, GetLocation(LEntry));
+				}
+
+				FTestCache.Reference(LEntry.Key, LEntry.Value);
+				Assert.AreNotEqual(LLocation, GetLocation(LEntry));
+				Assert.AreEqual(GetHead(), LEntry);
+				Assert.True(ValidateList());
+
+				// Entries PreCutoff get demoted to not PreCutoff 
+				TestSetUp();
+				FTestCache = new FixedSizeCache<string, string>(25);
+				while (TestEntry < FTestCache.Size)
+					IncrementTestEntry();
+
+				LEntry = GetHead();
+				FixedSizeCache<string, string>.Entry LReferenced;
+				FixedSizeCache<string, string>.Entry LTail;
+				
+				Assert.True(GetPreCutoff(LEntry));
+				int LPreCutoffCount = PreCutoffCount();
+				int LMoveCount = 0;			
+				while (LMoveCount < LPreCutoffCount)
+				{
+					LTail = GetTail();
+					if (LEntry == LTail)
+						LReferenced = LTail.GetType().GetField(CNextName, CFieldFlags).GetValue(LTail) as FixedSizeCache<string, string>.Entry;
+					else
+						LReferenced = LTail;   
+					Assert.False(GetPreCutoff(LReferenced));
+					FTestCache.Reference(LReferenced.Key, LReferenced.Value);
+					if (GetPreCutoff(LReferenced))
+						LMoveCount++;					
+				}					
+				Assert.False(GetPreCutoff(LEntry));
+				Assert.True(ValidateList());
+			}
+			finally
+			{
+				CodeAccessPermission.RevertAssert();
+			}
+		}
+
+		[Test]
+		public void InternalRemove()
+		{
+			try
+			{
+				ReflectionPermission LReflectionPermission = new ReflectionPermission(ReflectionPermissionFlag.RestrictedMemberAccess | ReflectionPermissionFlag.AllFlags);
+				LReflectionPermission.Assert();
+
+				FTestCache = new FixedSizeCache<string, string>(25);
+				while (TestEntry < FTestCache.Size)		 				 
+					IncrementTestEntry();
+
+				FTestCache.Remove(GetHead().Key);
+				Assert.True(ValidateList());
+
+				FTestCache.Remove(GetCutoff().Key);
+				Assert.True(ValidateList());
+
+				FTestCache.Remove(GetTail().Key);
+				Assert.True(ValidateList());	 
+
+				while (FTestCache.Count > 0)
+				{
+					FTestCache.Remove(GetCutoff().Key);
+					Assert.True(ValidateList());
+				}
+			}
+			finally
+			{
+				CodeAccessPermission.RevertAssert();
+			}
+		}
+
+		[Test]
+		public void RandomAccess()
+		{
+			try
+			{
+				ReflectionPermission LReflectionPermission = new ReflectionPermission(ReflectionPermissionFlag.RestrictedMemberAccess | ReflectionPermissionFlag.AllFlags);
+				LReflectionPermission.Assert();
+
+				for (int j = 0; j < 50; j++)
+				{
+					FTestCache = new FixedSizeCache<string, string>(50);
+					Random LRandom = new Random();
+					int LEntry;
+					for (int i = 0; i < 100000; i++)
+					{
+						LEntry = LRandom.Next(1, 100);
+						switch (LRandom.Next(1, 10))
+						{
+							case 1:
+							case 2:
+							case 3:
+								FTestCache.Add(GetKey(LEntry), GetValue(LEntry));
+								break;
+							case 4:
+							case 5:
+							case 6:
+							case 7:
+							case 8:
+								FTestCache.Reference(GetKey(LEntry), GetValue(LEntry));
+								break;
+							default:
+								FTestCache.Remove(GetKey(LEntry));
+								break;
+						}
+					}
+				}
+			}
+			finally
+			{
+				CodeAccessPermission.RevertAssert();
+			}
+		}
+
+		#region Helpers
+
+		private FixedSizeCache<string, string> FTestCache;
+
+		private int FTestEntry = 0;
+		private void IncrementTestEntry()
+		{
+			FTestEntry++;
+			FTestCache.Add(GetKey(FTestEntry), GetValue(FTestEntry));
+		}
+		private int TestEntry
+		{ get { return FTestEntry; } }
+
+		private string FromTemplate(string AValue, string ATemplate)
+		{
+			return String.Format(ATemplate, AValue);
+		}
+
+		private const string CKeyTemplate = "Key{0}";
+		private string GetKey(string AKey)
+		{
+			return FromTemplate(AKey, CKeyTemplate);
+		}
+
+		private string GetKey(int AKey)
+		{
+			return GetKey(AKey.ToString());
+		}
+
+		private const string CValueTemplate = "Value{0}";
+		private string GetValue(string AValue)
+		{
+			return FromTemplate(AValue, CValueTemplate);
+		}
+
+		private string GetValue(int AValue)
+		{
+			return GetValue(AValue.ToString());
+		}
+
 		private bool CompareEntry(int ANumber, FixedSizeCache<string, string>.Entry AEntry)
 		{
 			if (AEntry == null || GetKey(ANumber) != AEntry.Key || GetValue(ANumber) != AEntry.Value)
@@ -227,7 +440,7 @@ namespace Alphora.Dataphor.Common.Tests
 			if (FFixedSizeCacheType == null)
 				FFixedSizeCacheType = FTestCache.GetType();
 
-			return	FFixedSizeCacheType.GetField(CHeadName, CFieldFlags).GetValue(FTestCache) as FixedSizeCache<string, string>.Entry;
+			return FFixedSizeCacheType.GetField(CHeadName, CFieldFlags).GetValue(FTestCache) as FixedSizeCache<string, string>.Entry;
 		}
 
 		const string CCutoffName = "FLRUCutoff";
@@ -237,8 +450,8 @@ namespace Alphora.Dataphor.Common.Tests
 				FFixedSizeCacheType = FTestCache.GetType();
 
 			return FFixedSizeCacheType.GetField(CCutoffName, CFieldFlags).GetValue(FTestCache) as FixedSizeCache<string, string>.Entry;
-		}	
-		
+		}
+
 		const string CTailName = "FLRUTail";
 		private FixedSizeCache<string, string>.Entry GetTail()
 		{
@@ -246,11 +459,11 @@ namespace Alphora.Dataphor.Common.Tests
 				FFixedSizeCacheType = FTestCache.GetType();
 
 			return FFixedSizeCacheType.GetField(CTailName, CFieldFlags).GetValue(FTestCache) as FixedSizeCache<string, string>.Entry;
-		}	
+		}
 
 		const string CPriorName = "FPrior";
 		private FixedSizeCache<string, string>.Entry GetEntry(int AKey)
-		{				
+		{
 			FixedSizeCache<string, string>.Entry LEntry = GetHead();
 			FixedSizeCache<string, string>.Entry LPrior = LEntry.GetType().GetField(CPriorName, CFieldFlags).GetValue(LEntry) as FixedSizeCache<string, string>.Entry;
 			while (LEntry.Key != GetKey(AKey) && LPrior != null)
@@ -262,10 +475,20 @@ namespace Alphora.Dataphor.Common.Tests
 		}
 
 		const string CPreCutoffName = "FPreCutoff";
+		private bool GetPreCutoff(FixedSizeCache<string, string>.Entry AEntry)
+		{
+			return (bool)AEntry.GetType().GetField(CPreCutoffName, CFieldFlags).GetValue(AEntry);
+		}
 		private bool GetPreCutoff(int AKey)
 		{
-			FixedSizeCache<string, string>.Entry LEntry = GetEntry(AKey);
-			return (bool)LEntry.GetType().GetField(CPreCutoffName, CFieldFlags).GetValue(LEntry);
+			return GetPreCutoff(GetEntry(AKey));
+
+		}
+
+		const string CLastAccessName = "FLastAccess";
+		private int GetLastAccess(FixedSizeCache<string, string>.Entry AEntry)
+		{
+			return (int)AEntry.GetType().GetField(CLastAccessName, CFieldFlags).GetValue(AEntry);
 		}
 
 		const string CPreCutoffCountName = "FLRUPreCutoffCount";
@@ -274,77 +497,62 @@ namespace Alphora.Dataphor.Common.Tests
 			if (FFixedSizeCacheType == null)
 				FFixedSizeCacheType = FTestCache.GetType();
 
-			return (int)FFixedSizeCacheType.GetField(CPreCutoffCountName, CFieldFlags).GetValue(FTestCache);	  		
+			return (int)FFixedSizeCacheType.GetField(CPreCutoffCountName, CFieldFlags).GetValue(FTestCache);
 		}
-		
-		[Test]
-		public void InternalAdd()
+
+		const string CNextName = "FNext";
+		private bool ValidateList()
 		{
-			try
+			FixedSizeCache<string, string>.Entry LEntry = GetHead();
+			FixedSizeCache<string, string>.Entry LPrior = LEntry == null ? null : LEntry.GetType().GetField(CPriorName, CFieldFlags).GetValue(LEntry) as FixedSizeCache<string, string>.Entry;
+			FixedSizeCache<string, string>.Entry LNext = LEntry == null ? null : LEntry.GetType().GetField(CNextName, CFieldFlags).GetValue(LEntry) as FixedSizeCache<string, string>.Entry;
+
+			if (LNext != null)
+				return false;
+
+			for (int i = 1; i < FTestCache.Count; i++)
 			{
-				ReflectionPermission LReflectionPermission = new ReflectionPermission(ReflectionPermissionFlag.RestrictedMemberAccess | ReflectionPermissionFlag.AllFlags);
-				LReflectionPermission.Assert();
+				if (LPrior == null)
+					return false;
+				LNext = LEntry;
+				LEntry = LPrior;
+				if (LEntry.GetType().GetField(CNextName, CFieldFlags).GetValue(LEntry) != LNext)
+					return false;
 
-				FTestCache = new FixedSizeCache<string, string>(25);
-
-				//disregarding CorrelatedReferencePeriod
-				while (TestEntry < FTestCache.Size)
-				{	 
-					IncrementTestEntry(); 
-
-					if (TestEntry == 1)
-					{	  								
-						Assert.IsTrue(CompareEntry(TestEntry, GetHead())); 
-						Assert.IsTrue(CompareEntry(TestEntry, GetCutoff()));
-						Assert.IsTrue(CompareEntry(TestEntry, GetTail()));
-						Assert.IsFalse(GetPreCutoff(TestEntry));
-						Assert.AreEqual(0, PreCutoffCount());
-					} 					
-					else if (TestEntry <= 3)
-					{
-						Assert.IsTrue(CompareEntry(TestEntry, GetHead()));
-						Assert.IsTrue(CompareEntry(TestEntry, GetCutoff()));
-						Assert.IsFalse(CompareEntry(TestEntry, GetTail()));
-						Assert.IsFalse(GetPreCutoff(TestEntry));
-						Assert.AreEqual(0, PreCutoffCount());
-					}
-					else if (((TestEntry - 1) % 3) == 0)
-					{
-						if (PreCutoffCount() == 1)
-							Assert.IsTrue(CompareEntry(TestEntry, GetHead())); 
-						else
-							Assert.IsFalse(CompareEntry(TestEntry, GetHead()));						
-						Assert.IsFalse(CompareEntry(TestEntry, GetCutoff()));
-						Assert.IsFalse(CompareEntry(TestEntry, GetTail()));
-						Assert.IsTrue(GetPreCutoff(TestEntry));
-						Assert.AreEqual((int)((TestEntry - 1) / 3), PreCutoffCount());
-					}
-					else
-					{
-						Assert.IsFalse(CompareEntry(TestEntry, GetHead()));
-						Assert.IsTrue(CompareEntry(TestEntry, GetCutoff()));
-						Assert.IsFalse(CompareEntry(TestEntry, GetTail()));
-						Assert.IsFalse(GetPreCutoff(TestEntry));
-					}					
-				}						
+				LPrior = LEntry.GetType().GetField(CPriorName, CFieldFlags).GetValue(LEntry) as FixedSizeCache<string, string>.Entry;
 			}
-			finally
+
+			if (LPrior != null)
+				return false;
+
+			LNext = LEntry;
+			LEntry = LPrior;
+			if (LEntry != null && LEntry.GetType().GetField(CNextName, CFieldFlags).GetValue(LEntry) != LNext)
+				return false;
+
+			return true;
+		}
+
+		private int GetLocation(FixedSizeCache<string, string>.Entry AEntry)
+		{	 	
+			FixedSizeCache<string, string>.Entry LEntry = GetHead();
+			FixedSizeCache<string, string>.Entry LPrior = LEntry.GetType().GetField(CPriorName, CFieldFlags).GetValue(LEntry) as FixedSizeCache<string, string>.Entry;
+			int i;
+			for (i = 0; i < FTestCache.Size; i++)
 			{
-				CodeAccessPermission.RevertAssert();	 
+				if (LEntry == AEntry)
+					return i;  
+							
+				LEntry = LPrior;
+				LPrior = LEntry.GetType().GetField(CPriorName, CFieldFlags).GetValue(LEntry) as FixedSizeCache<string, string>.Entry;
 			}
-			
+
+			if (LEntry == AEntry)
+				return i; 
+			else
+				throw new Exception("Entry not in list");			
 		}
 
-		[Test]
-		public void InternalReference()
-		{
-			throw new NotImplementedException();
-		}
-
-		[Test]
-		public void InternalRemove()
-		{
-			throw new NotImplementedException();
-		}
+		#endregion
 	}
 }

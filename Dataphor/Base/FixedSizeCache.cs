@@ -45,8 +45,7 @@ namespace Alphora.Dataphor
 
 		/// <summary> Gets or sets the settings for the cache. </summary>
 		/// <remarks> Changing these settings will not affect the current state of the cache, but will be used for subsequent operations. </remarks>
-		public FixedSizeCacheSettings Settings { get; set; }		
-		
+		public FixedSizeCacheSettings Settings { get; set; }						
 
 		/// <summary> Sets or resets the cache's settings to their defaults. </summary>
 		public void DefaultSettings()
@@ -102,17 +101,30 @@ namespace Alphora.Dataphor
 			AdjustEntryCount(1, false);
 		}
 
-		private void CutFromList(Entry AEntry)
+		private void DetachFromList(Entry AEntry)
 		{  			
 			if (AEntry.FPrior != null)
 				AEntry.FPrior.FNext = AEntry.FNext;
-			if (AEntry == FLRUHead && AEntry.FPrior != null)
-				FLRUHead = AEntry.FPrior;
-		
+
 			if (AEntry.FNext != null)
 				AEntry.FNext.FPrior = AEntry.FPrior;
+
+			if (AEntry == FLRUHead && AEntry.FPrior != null)
+				FLRUHead = AEntry.FPrior;
+
+			if (AEntry == FLRUCutoff)
+				if (AEntry.FPrior != null)
+					FLRUCutoff = AEntry.FPrior;
+				else
+				{
+					if (AEntry.FNext != null)
+						ShiftCutoff(-1);
+					else
+						FLRUCutoff = null;
+				}
+
 			if (AEntry == FLRUTail && AEntry.FNext != null)
-				FLRUTail = AEntry.FNext;
+				FLRUTail = AEntry.FNext;  							
 		}
 
 		/// <summary> Places the entry at the head of the LRU chain. </summary>
@@ -124,14 +136,14 @@ namespace Alphora.Dataphor
 			if (FLRUHead == null)
 				InitializeList(AEntry);
 			else
-			{
-				AEntry.FPreCutoff = true;  		
-				CutFromList(AEntry);
+			{  						
+				DetachFromList(AEntry);
 				FLRUHead.FNext = AEntry;
 				AEntry.FPrior = FLRUHead;
-				AEntry.FNext = null; 				
-				FLRUHead = AEntry;	 				
-				AdjustEntryCount(1, true);
+				AEntry.FNext = null;
+				AEntry.FPreCutoff = true;
+				FLRUPreCutoffCount++;			
+				FLRUHead = AEntry;									
 			}
 			UpdateCutoff();
 		}
@@ -146,44 +158,27 @@ namespace Alphora.Dataphor
 				InitializeList(AEntry);
 			else
 			{
-				CutFromList(AEntry);
 				if (FLRUCutoff == FLRUHead)
 					FLRUHead = AEntry;
 
 				if (FLRUCutoff.FNext != null)
 					FLRUCutoff.FNext.FPrior = AEntry;
+
 				AEntry.FNext = FLRUCutoff.FNext;
 				AEntry.FPrior = FLRUCutoff;
 				FLRUCutoff.FNext = AEntry;				
 				FLRUCutoff = AEntry;
 				AEntry.FPreCutoff = false;
 				AdjustEntryCount(1, false);
-			}  			
+			}			
 			UpdateCutoff();
-		}
+		}  		 
 
 		/// <summary> Removes the specified entry from the FLU chain. </summary>
 		/// <remarks> Locks-> Expects: FCacheLatch </remarks>
 		private void Remove(Entry AEntry)
 		{
-			if (AEntry.FPrior != null)
-				AEntry.FPrior.FNext = AEntry.FNext;
-			if (AEntry.FNext != null)
-				AEntry.FNext.FPrior = AEntry.FPrior;
-			if (AEntry == FLRUHead)
-				FLRUHead = AEntry.FPrior;
-			if (AEntry == FLRUCutoff)
-				if (AEntry.FPrior != null)
-					FLRUCutoff = AEntry.FPrior;
-				else
-				{
-					if (AEntry.FNext != null)
-						ShiftCutoff(-1);
-					else
-						FLRUCutoff = null;
-				}
-			if (AEntry == FLRUTail)
-				FLRUTail = AEntry.FNext;
+			DetachFromList(AEntry);
 			AEntry.FPrior = null;
 			AEntry.FNext = null;
 			AdjustEntryCount(-1, AEntry.FPreCutoff);
@@ -265,18 +260,16 @@ namespace Alphora.Dataphor
 					{ 						
 						try
 						{
-							if (SubtractTime(LLogicalTime, LEntry.FLastAccess) > Settings.CorrelatedReferencePeriod)   					
-								if (LEntry.FPreCutoff)
-									PlaceAtHead(LEntry);
-								else
-									PlaceAtCutoff(LEntry);
+							if (SubtractTime(LLogicalTime, LEntry.FLastAccess) > Settings.CorrelatedReferencePeriod)   			
+							{		
+								PlaceAtHead(LEntry); 									
+								LEntry.FLastAccess = LLogicalTime;	
+							}  							
 						}
 						finally
 						{
 							//Monitor.Exit(FCacheLatch);
-						}						
-						
-						LEntry.FLastAccess = LLogicalTime;	 					
+						}					 					
 					}
 					finally
 					{
@@ -297,8 +290,9 @@ namespace Alphora.Dataphor
 						{
 							LEntry = FLRUTail;
 							LResult = FLRUTail.FValue;
-							FEntries.Remove(FLRUTail.FKey);
-							Remove(FLRUTail);
+							DetachFromList(LEntry);
+							FEntries.Remove(FLRUTail.FKey);								
+							LEntry.FLastAccess = LLogicalTime;
 						}
 						finally
 						{
@@ -310,7 +304,7 @@ namespace Alphora.Dataphor
 					   
 					LEntry.FKey = AKey;		 					
 					PlaceAtCutoff(LEntry);
-					FEntries.Add(AKey, LEntry);	  					
+					FEntries.Add(AKey, LEntry);										
 				}
 				break;
 			}
