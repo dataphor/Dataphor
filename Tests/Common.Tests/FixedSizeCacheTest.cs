@@ -12,6 +12,7 @@ using System.Text;
 using System.Reflection;
 using System.Security;
 using System.Security.Permissions;
+using System.Threading;
 
 using NUnit.Framework;
 
@@ -350,39 +351,52 @@ namespace Alphora.Dataphor.Common.Tests
 				ReflectionPermission LReflectionPermission = new ReflectionPermission(ReflectionPermissionFlag.RestrictedMemberAccess | ReflectionPermissionFlag.AllFlags);
 				LReflectionPermission.Assert();
 
-				for (int j = 0; j < 50; j++)
+				new RandomFixedSizeCacheAccess(new FixedSizeCache<string, string>(50), 50, 100000, 100).Run();				
+			}
+			finally
+			{
+				CodeAccessPermission.RevertAssert();
+			}
+		}
+
+		[Test]
+		public void ConcurrentAccess()
+		{
+			try
+			{
+				ReflectionPermission LReflectionPermission = new ReflectionPermission(ReflectionPermissionFlag.RestrictedMemberAccess | ReflectionPermissionFlag.AllFlags);
+				LReflectionPermission.Assert();
+
+				FTestCache = new FixedSizeCache<string, string>(50);
+				RandomFixedSizeCacheAccess LRandomFixedSizeCacheAccess;
+				Thread LThread;
+				Thread[] LThreads = new Thread[5];
+				TimeSpan LWaitTime = new TimeSpan(0, 0, 30);
+				for (int i = 0; i < 5; i++)
 				{
-					FTestCache = new FixedSizeCache<string, string>(50);
-					Random LRandom = new Random();
-					int LEntry;
-					for (int i = 0; i < 100000; i++)
+					LRandomFixedSizeCacheAccess = new RandomFixedSizeCacheAccess(FTestCache, 50, 100000, 100);
+					LThread = new Thread(new ThreadStart(LRandomFixedSizeCacheAccess.Run));
+					LThreads[i] = LThread;
+					LThread.Start();
+				}
+				LThreads[4].Join(LWaitTime);
+				bool LDeadlock = false;
+				foreach (Thread LRunningThread in LThreads)
+				{
+					if (LRunningThread.ThreadState != ThreadState.Stopped)
 					{
-						LEntry = LRandom.Next(1, 100);
-						switch (LRandom.Next(1, 10))
-						{
-							case 1:
-							case 2:
-							case 3:
-								FTestCache.Add(GetKey(LEntry), GetValue(LEntry));
-								break;
-							case 4:
-							case 5:
-							case 6:
-							case 7:
-							case 8:
-								FTestCache.Reference(GetKey(LEntry), GetValue(LEntry));
-								break;
-							default:
-								FTestCache.Remove(GetKey(LEntry));
-								break;
-						}
+						LDeadlock = true;
+						LRunningThread.Abort();
 					}
+					if (LDeadlock)
+						throw new Exception("Deadlock");
 				}
 			}
 			finally
 			{
 				CodeAccessPermission.RevertAssert();
 			}
+
 		}
 
 		#region Helpers
@@ -398,29 +412,29 @@ namespace Alphora.Dataphor.Common.Tests
 		private int TestEntry
 		{ get { return FTestEntry; } }
 
-		private string FromTemplate(string AValue, string ATemplate)
+		private static string FromTemplate(string AValue, string ATemplate)
 		{
 			return String.Format(ATemplate, AValue);
 		}
 
 		private const string CKeyTemplate = "Key{0}";
-		private string GetKey(string AKey)
+		public static string GetKey(string AKey)
 		{
 			return FromTemplate(AKey, CKeyTemplate);
 		}
 
-		private string GetKey(int AKey)
+		public static string GetKey(int AKey)
 		{
 			return GetKey(AKey.ToString());
 		}
 
 		private const string CValueTemplate = "Value{0}";
-		private string GetValue(string AValue)
+		public static string GetValue(string AValue)
 		{
 			return FromTemplate(AValue, CValueTemplate);
 		}
 
-		private string GetValue(int AValue)
+		public static string GetValue(int AValue)
 		{
 			return GetValue(AValue.ToString());
 		}
@@ -554,5 +568,54 @@ namespace Alphora.Dataphor.Common.Tests
 		}
 
 		#endregion
+	}
+
+	public class RandomFixedSizeCacheAccess
+	{
+		public RandomFixedSizeCacheAccess(FixedSizeCache<string, string> AFixedSizeCache, int AIterations, int AAccessCount, int ASeed)
+		{
+			FFixedSizeCache = AFixedSizeCache;
+			FIterations = AIterations;
+			FAccessCount = AAccessCount;
+			FSeed = ASeed;
+		}
+
+		FixedSizeCache<string, string> FFixedSizeCache;
+		int FIterations;
+		int FAccessCount;
+		int FSeed;
+
+		public void Run()
+		{
+			Random LRandom = new Random(); 
+			for (int j = 0; j < FIterations; j++)
+			{						
+				int LEntry;
+				for (int i = 0; i < FAccessCount; i++)
+				{
+					LEntry = LRandom.Next(1, FSeed);
+					//FFixedSizeCache.Reference(FixedSizeCacheTest.GetKey(LEntry), FixedSizeCacheTest.GetValue(LEntry));
+					//FFixedSizeCache.Add(FixedSizeCacheTest.GetKey(LEntry), FixedSizeCacheTest.GetValue(LEntry));
+					switch (LRandom.Next(1, 10))
+					{
+						case 1:
+						case 2:
+						case 3:
+							FFixedSizeCache.Add(FixedSizeCacheTest.GetKey(LEntry), FixedSizeCacheTest.GetValue(LEntry));
+							break;
+						case 4:
+						case 5:
+						case 6:
+						case 7:
+						case 8:
+							FFixedSizeCache.Reference(FixedSizeCacheTest.GetKey(LEntry), FixedSizeCacheTest.GetValue(LEntry));
+							break;
+						default:
+							FFixedSizeCache.Remove(FixedSizeCacheTest.GetKey(LEntry));
+							break;
+					}
+				}
+			}
+		}
 	}
 }
