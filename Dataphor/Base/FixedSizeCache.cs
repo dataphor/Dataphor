@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using System.Diagnostics;
 
 namespace Alphora.Dataphor
 {
@@ -103,26 +104,31 @@ namespace Alphora.Dataphor
 			AEntry.FPrior = null;
 			AEntry.FNext = null;
 			AEntry.FPreCutoff = false;
-			SynAdjustEntryCount(1, false);
+			FLRUCount = 1;
 		}
 
 		/// <summary> Detaches the Entry from the list. </summary>
 		/// <remarks> Locks-> Expects: FCacheLatch </remarks>
 		private void SynDetach(Entry AEntry)
-		{  			
+		{ 					
 			if (AEntry.FPrior != null)
 				AEntry.FPrior.FNext = AEntry.FNext;
 
 			if (AEntry.FNext != null)
 				AEntry.FNext.FPrior = AEntry.FPrior;
 
-			if (AEntry == FLRUHead && AEntry.FPrior != null)
-				FLRUHead = AEntry.FPrior;
+			if (AEntry == FLRUHead)
+				if (AEntry.FPrior != null)
+					FLRUHead = AEntry.FPrior;
+				else
+					FLRUHead = null;
 
 			if (AEntry == FLRUCutoff)
 				if (AEntry.FPrior != null)
-					FLRUCutoff = AEntry.FPrior;
-				else
+				{
+					FLRUCutoff = AEntry.FPrior;	 		
+				}
+				else 
 				{
 					if (AEntry.FNext != null)
 						SynShiftCutoff(-1);
@@ -130,55 +136,60 @@ namespace Alphora.Dataphor
 						FLRUCutoff = null;
 				}
 
-			if (AEntry == FLRUTail && AEntry.FNext != null)
-				FLRUTail = AEntry.FNext;  							
+			if (AEntry == FLRUTail)
+				if (AEntry.FNext != null)
+				{
+					if (FLRUTail.FNext == FLRUCutoff && FLRUCutoff.FNext != null)
+					{
+						FLRUCutoff = FLRUCutoff.FNext;
+						SynShiftCutoff(-1);
+					}
+					FLRUTail = AEntry.FNext;
+				}
+				else
+					FLRUTail = null;   							
 		}
 
 		/// <summary> Places the entry at the head of the LRU chain. </summary>
 		/// <remarks> Locks-> Expects: FCacheLatch </remarks>
 		private void SynPlaceAtHead(Entry AEntry)
-		{ 			
-			if (AEntry == FLRUHead)
-				return;
-			if (FLRUHead == null)
-				SynInitializeLRU(AEntry);
-			else
-			{  						
-				SynDetach(AEntry);
-				FLRUHead.FNext = AEntry;
-				AEntry.FPrior = FLRUHead;
-				AEntry.FNext = null;
-				AEntry.FPreCutoff = true;
-				FLRUPreCutoffCount++;			
-				FLRUHead = AEntry;									
-			}
-			SynUpdateCutoff();
+		{ 			 						
+			SynDetach(AEntry);
+			FLRUHead.FNext = AEntry;
+			AEntry.FPrior = FLRUHead;
+			AEntry.FNext = null;
+			if (FLRUHead == FLRUCutoff)	 			
+				FLRUCutoff = AEntry;  		
+		
+			if (AEntry.FPreCutoff == false && FLRUHead.FPreCutoff == true)
+			{
+				AEntry.FPreCutoff = true;  
+				FLRUPreCutoffCount++;
+			}						
+			FLRUHead = AEntry;									
+			SynUpdateCutoff();	 			
 		}
 
 		/// <summary> Places the entry at the cutoff point of the LRU chain. </summary>
 		/// <remarks> Locks-> Expects: FCacheLatch </remarks>
 		private void SynPlaceAtCutoff(Entry AEntry)
 		{
-			if (AEntry == FLRUCutoff)
-				return;
-			if (FLRUCutoff == null)
-				SynInitializeLRU(AEntry);
-			else
+			if (FLRUHead == null)
 			{
-				if (FLRUCutoff == FLRUHead)
-					FLRUHead = AEntry;
+				SynInitializeLRU(AEntry);
+				return;
+			}
 
-				if (FLRUCutoff.FNext != null)
-					FLRUCutoff.FNext.FPrior = AEntry;
-
-				AEntry.FNext = FLRUCutoff.FNext;
-				AEntry.FPrior = FLRUCutoff;
-				FLRUCutoff.FNext = AEntry;				
-				FLRUCutoff = AEntry;
-				AEntry.FPreCutoff = false;
-				SynAdjustEntryCount(1, false);
-			}			
-			SynUpdateCutoff();
+			AEntry.FPreCutoff = false;		
+			AEntry.FPrior = FLRUCutoff;
+			AEntry.FNext = FLRUCutoff.FNext;
+			if (FLRUCutoff.FNext != null)
+				FLRUCutoff.FNext.FPrior = AEntry;
+			FLRUCutoff.FNext = AEntry;				
+			if (FLRUCutoff == FLRUHead)
+				FLRUHead = AEntry;
+			FLRUCutoff = AEntry;			
+			SynUpdateCutoff(); 							
 		}  		 
 
 		/// <summary> Removes the specified entry from the FLU chain. </summary>
@@ -215,15 +226,15 @@ namespace Alphora.Dataphor
 		private void SynShiftCutoff(int ADelta)
 		{
 			while (ADelta > 0)
-			{
+			{  				
 				FLRUCutoff.FPreCutoff = true;
-				FLRUCutoff = FLRUCutoff.FPrior;
+				FLRUCutoff = FLRUCutoff.FPrior;			
 				ADelta--;
 				FLRUPreCutoffCount++;
 			}
 			while (ADelta < 0)
 			{
-				FLRUCutoff = FLRUCutoff.FNext;
+				FLRUCutoff = FLRUCutoff.FNext; 		
 				FLRUCutoff.FPreCutoff = false;
 				ADelta++;
 				FLRUPreCutoffCount--;
@@ -252,83 +263,51 @@ namespace Alphora.Dataphor
 			Entry LEntry; 
 
 			// Increment the logical clock and remember the logical time of this access
-			int LLogicalTime = Interlocked.Increment(ref FLogicalTime);
-
-			//for (; ; )	// Restart point
-			//{
-				//Monitor.Enter(FCacheLatch);
-				FEntries.TryGetValue(AKey, out LEntry);
-				if (LEntry != null)
+			int LLogicalTime = Interlocked.Increment(ref FLogicalTime);			
+			FEntries.TryGetValue(AKey, out LEntry);
+			if (LEntry != null)
+			{ 				
+				if (SubtractTime(LLogicalTime, LEntry.FLastAccess) > Settings.CorrelatedReferencePeriod)   			
+				{		
+				    if (LEntry != FLRUHead)
+				        SynPlaceAtHead(LEntry); 									
+				    LEntry.FLastAccess = LLogicalTime;	
+				}
+				LEntry.FValue = AValue;			 			
+			}
+			else
+			{							
+				// If the list is full, remove and re-use the oldest; otherwise create a new entry					
+				if (FEntries.Count >= Size)
 				{
-					//if (!Monitor.TryEnter(LEntry))
-					//{
-					//    Monitor.Exit(FCacheLatch);
-					//    continue;
-					//}
-					//try
-					//{ 						
-						//try
-						//{
-							if (SubtractTime(LLogicalTime, LEntry.FLastAccess) > Settings.CorrelatedReferencePeriod)   			
-							{		
-								SynPlaceAtHead(LEntry); 									
-								LEntry.FLastAccess = LLogicalTime;	
-							}  							
-						//}
-						//finally
-						//{
-						//	Monitor.Exit(FCacheLatch);
-						//}					 					
-					//}
-					//finally
-					//{
-					//    Monitor.Exit(LEntry);
-					//}	 			
+					LResult = FLRUTail.FValue;	
+					LEntry = FLRUTail;
+					FLRUTail = FLRUTail.FNext;
+					FLRUTail.FPrior = null;							
+					FEntries.Remove(FLRUTail.FKey);
+					LEntry.FLastAccess = LLogicalTime; 											
 				}
 				else
-				{							
-					// If the list is full, remove and re-use the oldest; otherwise create a new entry
-					//try
-					//{
-						if (FEntries.Count >= Size)
-						{
-							//if (!Monitor.TryEnter(FLRUTail))
-							//{
-							//    Monitor.Exit(FCacheLatch);
-							//    continue;
-							//}
-							//try
-							//{
-								LEntry = FLRUTail;
-								LResult = FLRUTail.FValue;
-								SynDetach(LEntry);
-								FEntries.Remove(FLRUTail.FKey);								
-								LEntry.FLastAccess = LLogicalTime;
-							//}
-							//finally
-							//{
-							//    Monitor.Exit(FLRUTail);
-							//}
-						}
-						else
-							LEntry = new Entry(LLogicalTime);  
-					   
-						LEntry.FKey = AKey;		 					
-						SynPlaceAtCutoff(LEntry);
-						FEntries.Add(AKey, LEntry);	
-					//}
-					//finally
-					//{
-					//	Monitor.Exit(FCacheLatch);
-					//}									
+				{
+					LEntry = new Entry(LLogicalTime);
+					if (FLRUHead != null) 												
+						SynAdjustEntryCount(1, false);									     					 					
 				}
-				//break;
-			//}
-
-			// Adjust the entry's value
-			LEntry.FValue = AValue;
+				LEntry.FValue = AValue;
+				LEntry.FKey = AKey;
+				
+				SynPlaceAtCutoff(LEntry);				
+				 
+				FEntries.Add(AKey, LEntry); 																			
+			}
 
 			return LResult;	 
+		}
+
+		private void SynInternalRemove(TKey AKey, Entry AEntry)
+		{  			
+			SynLRURemove(AEntry);
+			FEntries.Remove(AKey);				
 		}
 
 		#region IDictionary Members
@@ -363,55 +342,17 @@ namespace Alphora.Dataphor
 			throw new NotImplementedException();
 		}
 
-		private void SynInternalRemove(TKey AKey, Entry AEntry)
-		{
-			//for (; ; )	// Restart point
-			//{
-			//Monitor.Enter(FCacheLatch);
-			//if (!Monitor.TryEnter(AEntry))
-			//{
-			//   Monitor.Exit(FCacheLatch);
-			//   continue;
-			//}
-			//try
-			//{
-		//	try
-		//	{
-				SynLRURemove(AEntry);
-				FEntries.Remove(AKey);
-		//	}
-		//	finally
-		//	{
-		//		Monitor.Exit(FCacheLatch);
-		//	}
-			//}
-			//finally
-			//{
-			//	Monitor.Exit(AEntry);
-			//}
-			//break;
-			//}			
-		}
-		
 		/// <summary> Removes the specified key from the cache. </summary>
 		public bool Remove(TKey AKey)
 		{
-			Entry LEntry;
-			//Monitor.Enter(FCacheLatch);
-			//try
-			//{
-				if (FEntries.TryGetValue(AKey, out LEntry))
-				{
-					SynInternalRemove(AKey, LEntry);
-					return true;
-				}
-				else
-					return false;
-			//}
-			//finally
-			//{
-			//	Monitor.Exit(FCacheLatch);
-			//}
+			Entry LEntry;				
+			if (FEntries.TryGetValue(AKey, out LEntry))
+			{
+				SynInternalRemove(AKey, LEntry);
+				return true;
+			}
+			else
+				return false;  			
 		}
 
 		public bool Remove(KeyValuePair<TKey, TValue> AItem)
@@ -440,22 +381,14 @@ namespace Alphora.Dataphor
 			set
 			{
 				// Remove the old entry if it exists
-				Entry LEntry;
-				//Monitor.Enter(FCacheLatch);
-				//try
-				//{
-					if (FEntries.TryGetValue(AKey, out LEntry))
-					{
-						SynInternalRemove(AKey, LEntry);
-					}
-					// Add the new one if it is not null
-					if (value != null)
-						Add(AKey, value);
-				//}
-				//finally
-				//{
-				//	Monitor.Exit(FCacheLatch);
-				//}
+				Entry LEntry;  				
+				if (FEntries.TryGetValue(AKey, out LEntry))
+				{
+					SynInternalRemove(AKey, LEntry);
+				}
+				// Add the new one if it is not null
+				if (value != null)
+					Add(AKey, value); 				
 			}
 		}
 
@@ -474,17 +407,9 @@ namespace Alphora.Dataphor
 
 		/// <summary> Clears the cache of all entries. </summary>
 		public void Clear()
-		{
-			//Monitor.Enter(FCacheLatch); 
-			//try
-			//{
-				FEntries.Clear();
-				SynLRUClear();
-			//}
-			//finally
-			//{
-			//	Monitor.Exit(FCacheLatch);
-			//}
+		{	  			
+			FEntries.Clear();
+			SynLRUClear(); 		
 		}
 
 		public ICollection<TKey> Keys
