@@ -147,7 +147,10 @@ namespace Alphora.Dataphor
 					FLRUTail = AEntry.FNext;
 				}
 				else
-					FLRUTail = null;   							
+					FLRUTail = null;   
+					
+			AEntry.FPrior = null;
+			AEntry.FNext = null;						
 		}
 
 		/// <summary> Places the entry at the head of the LRU chain. </summary>
@@ -156,8 +159,7 @@ namespace Alphora.Dataphor
 		{ 			 						
 			SynDetach(AEntry);
 			FLRUHead.FNext = AEntry;
-			AEntry.FPrior = FLRUHead;
-			AEntry.FNext = null;
+			AEntry.FPrior = FLRUHead; 		
 			if (FLRUHead == FLRUCutoff)	 			
 				FLRUCutoff = AEntry;  		
 		
@@ -196,9 +198,7 @@ namespace Alphora.Dataphor
 		/// <remarks> Locks-> Expects: FCacheLatch </remarks>
 		private void SynLRURemove(Entry AEntry)
 		{
-			SynDetach(AEntry);
-			AEntry.FPrior = null;
-			AEntry.FNext = null;
+			SynDetach(AEntry);			
 			SynAdjustEntryCount(-1, AEntry.FPreCutoff);
 			SynUpdateCutoff();
 		}
@@ -250,7 +250,7 @@ namespace Alphora.Dataphor
 			FLRUTail = null;
 			FLRUPreCutoffCount = 0;
 			FLRUCount = 0;
-		}
+		}  	
 
 		#endregion
 
@@ -272,19 +272,18 @@ namespace Alphora.Dataphor
 				    if (LEntry != FLRUHead)
 				        SynPlaceAtHead(LEntry); 									
 				    LEntry.FLastAccess = LLogicalTime;	
-				}
-				LEntry.FValue = AValue;			 			
+				}  						 			
 			}
 			else
 			{							
 				// If the list is full, remove and re-use the oldest; otherwise create a new entry					
 				if (FEntries.Count >= Size)
 				{
-					LResult = FLRUTail.FValue;	
-					LEntry = FLRUTail;
+					FEntries.Remove(FLRUTail.FKey); 
+					LResult = FLRUTail.FValue;
+					LEntry = FLRUTail; 
 					FLRUTail = FLRUTail.FNext;
-					FLRUTail.FPrior = null;							
-					FEntries.Remove(FLRUTail.FKey);
+					FLRUTail.FPrior = null;						 									
 					LEntry.FLastAccess = LLogicalTime; 											
 				}
 				else
@@ -292,22 +291,14 @@ namespace Alphora.Dataphor
 					LEntry = new Entry(LLogicalTime);
 					if (FLRUHead != null) 												
 						SynAdjustEntryCount(1, false);									     					 					
-				}
-				LEntry.FValue = AValue;
-				LEntry.FKey = AKey;
-				
-				SynPlaceAtCutoff(LEntry);				
-				 
+				}				
+				LEntry.FKey = AKey;	  				
+				SynPlaceAtCutoff(LEntry);					 
 				FEntries.Add(AKey, LEntry); 																			
 			}
 
+			LEntry.FValue = AValue;	
 			return LResult;	 
-		}
-
-		private void SynInternalRemove(TKey AKey, Entry AEntry)
-		{  			
-			SynLRURemove(AEntry);
-			FEntries.Remove(AKey);				
 		}
 
 		#region IDictionary Members
@@ -342,19 +333,6 @@ namespace Alphora.Dataphor
 			throw new NotImplementedException();
 		}
 
-		/// <summary> Removes the specified key from the cache. </summary>
-		public bool Remove(TKey AKey)
-		{
-			Entry LEntry;				
-			if (FEntries.TryGetValue(AKey, out LEntry))
-			{
-				SynInternalRemove(AKey, LEntry);
-				return true;
-			}
-			else
-				return false;  			
-		}
-
 		public bool Remove(KeyValuePair<TKey, TValue> AItem)
 		{
 			return Remove(AItem.Key);
@@ -382,10 +360,12 @@ namespace Alphora.Dataphor
 			{
 				// Remove the old entry if it exists
 				Entry LEntry;  				
-				if (FEntries.TryGetValue(AKey, out LEntry))
+				if (FEntries.TryGetValue(AKey, out LEntry))	
 				{
-					SynInternalRemove(AKey, LEntry);
-				}
+					FEntries.Remove(AKey);
+					SynLRURemove(LEntry);	
+				}				
+			
 				// Add the new one if it is not null
 				if (value != null)
 					Add(AKey, value); 				
@@ -403,6 +383,20 @@ namespace Alphora.Dataphor
 		public void Add(TKey AKey, TValue AValue)
 		{
 			Reference(AKey, AValue);
+		}
+
+		/// <summary> Removes the specified key from the cache. </summary>
+		public bool Remove(TKey AKey)
+		{
+			Entry LEntry;
+			if (FEntries.TryGetValue(AKey, out LEntry))
+			{
+				SynLRURemove(LEntry);
+				FEntries.Remove(AKey);
+				return true;
+			}
+			else
+				return false;
 		}
 
 		/// <summary> Clears the cache of all entries. </summary>
