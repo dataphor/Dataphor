@@ -1,11 +1,11 @@
 ﻿/*
-	Dataphor
-	© Copyright 2000-2010 Alphora
-	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+    Dataphor
+    © Copyright 2000-2010 Alphora
+    This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
 using System;
-using System.Collections;	
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,7 +26,7 @@ namespace Alphora.Dataphor.Common.Tests
 		[SetUp]
 		public void TestSetUp()
 		{
-		   FTestEntry = 0;
+			FTestEntry = 0;
 		}
 
 		[Test]
@@ -38,14 +38,16 @@ namespace Alphora.Dataphor.Common.Tests
 			{
 				FTestCache.Add(GetKey(i), GetValue(i));
 				Assert.AreEqual(i, FTestCache.Count);
+				Assert.AreEqual(FTestCache[GetKey(i)], GetValue(i));
 				Assert.True(FTestCache.ContainsKey(GetKey(i)));
-				Assert.True(ValidateCutoff()); 
+
+				Assert.True(ValidateCutoff());
 			}
 			Assert.AreEqual(5, FTestCache.Count);
 
 			FTestCache.Add(GetKey(FTestCache.Size + 1), GetValue(FTestCache.Size + 1));
 			Assert.AreEqual(LCacheSize, FTestCache.Count);
-			Assert.True(ValidateCutoff()); 
+			Assert.True(ValidateCutoff());
 			Assert.True(ValidateList());
 		}
 
@@ -57,7 +59,7 @@ namespace Alphora.Dataphor.Common.Tests
 			for (int i = 1; i <= FTestCache.Size; i++)
 			{
 				FTestCache.Add(GetKey(i), GetValue(i));
-				Assert.AreEqual(i, FTestCache.Count);			
+				Assert.AreEqual(i, FTestCache.Count);
 			}
 			Assert.AreEqual(LCacheSize, FTestCache.Count);
 
@@ -75,15 +77,15 @@ namespace Alphora.Dataphor.Common.Tests
 
 			Assert.False(FTestCache.ContainsKey(GetKey(LTestCacheItem)));
 
-			for (int i = 1; i <= FTestCache.Size; i++) 			
-				FTestCache.Add(GetKey(i), GetValue(i));			
-			
+			for (int i = 1; i <= FTestCache.Size; i++)
+				FTestCache.Add(GetKey(i), GetValue(i));
+
 			Assert.True(FTestCache.ContainsKey(GetKey(LTestCacheItem)));
 
 			FTestCache.Clear();
 			Assert.False(FTestCache.ContainsKey(GetKey(LTestCacheItem)));
 			Assert.True(ValidateList());
-		}			
+		}
 
 		[Test]
 		public void Reference()
@@ -96,14 +98,15 @@ namespace Alphora.Dataphor.Common.Tests
 				LReference = FTestCache.Reference(GetKey(i), GetValue(i));
 				Assert.AreEqual(i, FTestCache.Count);
 				Assert.True(FTestCache.ContainsKey(GetKey(i)));
+				Assert.AreEqual(FTestCache[GetKey(i)], GetValue(i));
 				Assert.IsNull(LReference);
 			}
 			Assert.AreEqual(LCacheSize, FTestCache.Count);
 
 			LReference = FTestCache.Reference(GetKey(1), GetValue(1));
-			
+
 			Assert.IsNull(LReference);
-			
+
 			LReference = null;
 			LCacheSize = 5;
 			FTestCache = new FixedSizeCache<string, string>(LCacheSize);
@@ -112,6 +115,7 @@ namespace Alphora.Dataphor.Common.Tests
 				LReference = FTestCache.Reference(GetKey(i), GetValue(i));
 				Assert.AreEqual(i, FTestCache.Count);
 				Assert.True(FTestCache.ContainsKey(GetKey(i)));
+				Assert.AreEqual(FTestCache[GetKey(i)], GetValue(i));
 				Assert.IsNull(LReference);
 			}
 			Assert.AreEqual(LCacheSize, FTestCache.Count);
@@ -126,16 +130,16 @@ namespace Alphora.Dataphor.Common.Tests
 		public void Remove()
 		{
 			int LCacheSize = 5;
-			FTestCache = new FixedSizeCache<string, string>(LCacheSize);  
+			FTestCache = new FixedSizeCache<string, string>(LCacheSize);
 			for (int i = 1; i <= FTestCache.Size; i++)
-				FTestCache.Add(GetKey(i), GetValue(i)); 
+				FTestCache.Add(GetKey(i), GetValue(i));
 
 			int LTestKey = 3;
 			FTestCache.Remove(GetKey(LTestKey));
 			Assert.False(FTestCache.ContainsKey(GetValue(LTestKey)));
-			Assert.AreEqual(LCacheSize -1, FTestCache.Count);
+			Assert.AreEqual(LCacheSize - 1, FTestCache.Count);
 
-			LTestKey = 1; 
+			LTestKey = 1;
 			FTestCache.Remove(GetKey(LTestKey));
 			Assert.False(FTestCache.ContainsKey(GetValue(LTestKey)));
 			Assert.AreEqual(LCacheSize - 2, FTestCache.Count);
@@ -148,7 +152,7 @@ namespace Alphora.Dataphor.Common.Tests
 		}
 
 		[Test]
-		public void Size()										   
+		public void Size()
 		{
 			FTestCache = new FixedSizeCache<string, string>(5);
 			Assert.AreEqual(5, FTestCache.Size);
@@ -160,14 +164,14 @@ namespace Alphora.Dataphor.Common.Tests
 		{
 			int LCacheSize = 5;
 			FTestCache = new FixedSizeCache<string, string>(LCacheSize);
-			for (int i = 1; i <= FTestCache.Size; i++) 		
+			for (int i = 1; i <= FTestCache.Size; i++)
 				FTestCache.Add(GetKey(i), GetValue(i));
 
 			int LValueIndex = 0;
 			foreach (string LValue in (IEnumerable<string>)FTestCache)
 			{
-				LValueIndex++; 
-				Assert.AreEqual(GetValue(LValueIndex), LValue);				
+				LValueIndex++;
+				Assert.AreEqual(GetValue(LValueIndex), LValue);
 			}
 
 			Assert.AreEqual(FTestCache.Size, LValueIndex);
@@ -176,10 +180,10 @@ namespace Alphora.Dataphor.Common.Tests
 			foreach (FixedSizeCache<string, string>.Entry LEntry in (IEnumerable)FTestCache)
 			{
 				LValueIndex++;
-				Assert.AreEqual(GetValue(LValueIndex), LEntry.Value);				
+				Assert.AreEqual(GetValue(LValueIndex), LEntry.Value);
 			}
 
-			Assert.AreEqual(FTestCache.Size, LValueIndex);		
+			Assert.AreEqual(FTestCache.Size, LValueIndex);
 		}
 
 		[Test]
@@ -191,12 +195,12 @@ namespace Alphora.Dataphor.Common.Tests
 			Assert.IsNull(FTestCache[GetKey(0)]);
 
 			for (int i = 1; i <= FTestCache.Size; i++)
-				FTestCache.Add(GetKey(i), GetValue(i));  
+				FTestCache.Add(GetKey(i), GetValue(i));
 
 			for (int j = 1; j <= FTestCache.Size; j++)
 				Assert.AreEqual(GetValue(j), FTestCache[GetKey(j)]);
 
-			Assert.IsNull(FTestCache[GetKey(FTestCache.Size + 1)]);	 
+			Assert.IsNull(FTestCache[GetKey(FTestCache.Size + 1)]);
 		}
 
 		[Test]
@@ -205,13 +209,13 @@ namespace Alphora.Dataphor.Common.Tests
 			try
 			{
 				ReflectionPermission LReflectionPermission = new ReflectionPermission(ReflectionPermissionFlag.RestrictedMemberAccess | ReflectionPermissionFlag.AllFlags);
-				LReflectionPermission.Assert();				   
-				
+				LReflectionPermission.Assert();
+
 				int LPreCutoffCount;
 				FixedSizeCache<string, string>.Entry LHead;
 				FixedSizeCache<string, string>.Entry LCutoff;
-				FixedSizeCache<string, string>.Entry LTail;	   
-				
+				FixedSizeCache<string, string>.Entry LTail;
+
 				FTestCache = new FixedSizeCache<string, string>(7);
 
 				LHead = GetHead();
@@ -221,10 +225,10 @@ namespace Alphora.Dataphor.Common.Tests
 				Assert.AreEqual(0, PreCutoffCount());
 				Assert.IsNull(LHead);
 				Assert.IsNull(LCutoff);
-				Assert.IsNull(LTail);					
+				Assert.IsNull(LTail);
 
 				IncrementTestEntry();
-				
+
 				string LKey = GetKey(1);
 				LHead = GetHead();
 				LCutoff = GetCutoff();
@@ -232,17 +236,17 @@ namespace Alphora.Dataphor.Common.Tests
 				FixedSizeCache<string, string>.Entry LEntry1 = LHead;
 
 				Assert.AreEqual(1, FTestCache.Count);
-				Assert.AreEqual(0, PreCutoffCount()); 
-				
+				Assert.AreEqual(0, PreCutoffCount());
+
 				Assert.AreEqual(LKey, LHead.Key);
 				Assert.AreEqual(LKey, LCutoff.Key);
 				Assert.AreEqual(LKey, LTail.Key);
-				
+
 				Assert.IsNull(GetPrior(LHead));
 				Assert.IsNull(GetNext(LHead));
 
 				Assert.False(GetPreCutoff(LHead));
-				
+
 				IncrementTestEntry();
 
 				LKey = GetKey(2);
@@ -272,7 +276,7 @@ namespace Alphora.Dataphor.Common.Tests
 				LCutoff = GetCutoff();
 				LTail = GetTail();
 				FixedSizeCache<string, string>.Entry LEntry3 = GetEntry(3);
-				
+
 				Assert.AreEqual(3, FTestCache.Count);
 				Assert.AreEqual(0, PreCutoffCount());
 
@@ -378,8 +382,8 @@ namespace Alphora.Dataphor.Common.Tests
 
 				Assert.AreEqual(LEntry6, GetNext(LEntry5));
 				Assert.AreEqual(LEntry3, GetPrior(LEntry5));
-				Assert.False(GetPreCutoff(LEntry5)); 
-				
+				Assert.False(GetPreCutoff(LEntry5));
+
 				Assert.AreEqual(LEntry5, GetNext(LEntry3));
 				Assert.AreEqual(LEntry2, GetPrior(LEntry3));
 				Assert.False(GetPreCutoff(LEntry3));
@@ -479,12 +483,12 @@ namespace Alphora.Dataphor.Common.Tests
 					}
 				}
 
-				Assert.True(ValidateList());	  										
+				Assert.True(ValidateList());
 			}
 			finally
 			{
-				CodeAccessPermission.RevertAssert();	 
-			}							
+				CodeAccessPermission.RevertAssert();
+			}
 		}
 
 		[Test]
@@ -497,10 +501,10 @@ namespace Alphora.Dataphor.Common.Tests
 
 				// Entries don't get promoted until Correlated Period is exceeded and when they do they are promoted to Head
 				FTestCache = new FixedSizeCache<string, string>(25);
-				while (TestEntry < FTestCache.Size)		 				 
+				while (TestEntry < FTestCache.Size)
 					IncrementTestEntry();
 				FixedSizeCache<string, string>.Entry LEntry = GetPrior(GetHead());
-				Assert.AreNotEqual(GetHead(), LEntry); 
+				Assert.AreNotEqual(GetHead(), LEntry);
 				int LLocation = GetLocation(LEntry);
 				for (int i = (FTestCache.Size - GetLastAccess(LEntry)); i < FixedSizeCache<string, string>.CDefaultCorrelatedReferencePeriod; i++)
 				{
@@ -525,23 +529,23 @@ namespace Alphora.Dataphor.Common.Tests
 				LEntry = GetHead();
 				FixedSizeCache<string, string>.Entry LReferenced;
 				FixedSizeCache<string, string>.Entry LTail;
-				
+
 				Assert.True(GetPreCutoff(LEntry));
 				int LPreCutoffCount = PreCutoffCount();
-				int LMoveCount = 0;			
+				int LMoveCount = 0;
 				while (LMoveCount < LPreCutoffCount)
 				{
 					LTail = GetTail();
 					if (LEntry == LTail)
 						LReferenced = LTail.GetType().GetField(CNextName, CFieldFlags).GetValue(LTail) as FixedSizeCache<string, string>.Entry;
 					else
-						LReferenced = LTail;  
-					Assert.True(ValidateCutoff()); 
+						LReferenced = LTail;
+					Assert.True(ValidateCutoff());
 					Assert.False(GetPreCutoff(LReferenced));
 					FTestCache.Reference(LReferenced.Key, LReferenced.Value);
 					if (GetPreCutoff(LReferenced))
-						LMoveCount++;					
-				}					
+						LMoveCount++;
+				}
 				Assert.False(GetPreCutoff(LEntry));
 				Assert.True(ValidateList());
 			}
@@ -556,12 +560,12 @@ namespace Alphora.Dataphor.Common.Tests
 		{
 			try
 			{
-				
+
 				//add four remove middle
 				//add four remove tail
-											  				
+
 				ReflectionPermission LReflectionPermission = new ReflectionPermission(ReflectionPermissionFlag.RestrictedMemberAccess | ReflectionPermissionFlag.AllFlags);
-				LReflectionPermission.Assert();	 
+				LReflectionPermission.Assert();
 
 				FixedSizeCache<string, string>.Entry LHead;
 				FixedSizeCache<string, string>.Entry LCutoff;
@@ -569,17 +573,17 @@ namespace Alphora.Dataphor.Common.Tests
 
 				//add one remove one
 				FTestCache = new FixedSizeCache<string, string>(2);
-					IncrementTestEntry();
-					
+				IncrementTestEntry();
+
 				FTestCache.Remove(GetKey(1));
-				
+
 				LHead = GetHead();
 				LCutoff = GetCutoff();
 				LTail = GetTail();
 
 				Assert.AreEqual(0, FTestCache.Count);
 				Assert.AreEqual(0, PreCutoffCount());
-				
+
 				Assert.IsNull(LHead);
 				Assert.IsNull(LCutoff);
 				Assert.IsNull(LTail);
@@ -591,9 +595,9 @@ namespace Alphora.Dataphor.Common.Tests
 					IncrementTestEntry();
 
 				string LKey = GetKey(2);
-				
+
 				FTestCache.Remove(LKey);
-				
+
 				LHead = GetHead();
 				LCutoff = GetCutoff();
 				LTail = GetTail();
@@ -651,8 +655,8 @@ namespace Alphora.Dataphor.Common.Tests
 				Assert.AreEqual(LCutoff.Key, GetKey(2));
 				Assert.IsNull(GetNext(LHead));
 				Assert.AreEqual(LTail, GetPrior(LHead));
-				Assert.False(GetPreCutoff(LHead));				
-				
+				Assert.False(GetPreCutoff(LHead));
+
 				Assert.AreEqual(LTail.Key, GetKey(1));
 				Assert.AreEqual(LHead, GetNext(LTail));
 				Assert.IsNull(GetPrior(LTail));
@@ -921,7 +925,7 @@ namespace Alphora.Dataphor.Common.Tests
 				Assert.AreEqual(LHead.Key, GetKey(4));
 				Assert.AreEqual(LCutoff.Key, GetKey(3));
 				Assert.AreEqual(LTail.Key, GetKey(1));
-				
+
 				//add five remove middle, next to cutoff
 				TestSetUp();
 				FTestCache = new FixedSizeCache<string, string>(5);
@@ -959,12 +963,12 @@ namespace Alphora.Dataphor.Common.Tests
 				Assert.AreEqual(LHead.Key, GetKey(4));
 				Assert.AreEqual(LCutoff.Key, GetKey(5));
 				Assert.AreEqual(LTail.Key, GetKey(1));
-				
+
 				//FTestCache = new FixedSizeCache<string, string>(2);
 				//while (TestEntry < FTestCache.Size)
 				//    IncrementTestEntry();
-				
-				
+
+
 				//FTestCache = new FixedSizeCache<string, string>(25);
 				//while (TestEntry < FTestCache.Size)		 				 
 				//    IncrementTestEntry();
@@ -998,7 +1002,8 @@ namespace Alphora.Dataphor.Common.Tests
 				ReflectionPermission LReflectionPermission = new ReflectionPermission(ReflectionPermissionFlag.RestrictedMemberAccess | ReflectionPermissionFlag.AllFlags);
 				LReflectionPermission.Assert();
 
-				new RandomFixedSizeCacheAccess(new FixedSizeCache<string, string>(50), 50, 100000, 100).Run();				
+				new RandomFixedSizeCacheAccess(new FixedSizeCache<string, string>(50), 50, 100000, 100).Run();
+				Assert.True(ValidateList());
 			}
 			finally
 			{
@@ -1055,10 +1060,10 @@ namespace Alphora.Dataphor.Common.Tests
 			FixedSizeCache<string, string>.Entry LEntry = GetHead();
 			for (int i = 0; i < PreCutoffCount(); i++)
 				LEntry = GetPrior(LEntry);
-				
-			return GetCutoff() == LEntry;	
+
+			return GetCutoff() == LEntry;
 		}
-		
+
 		private int FTestEntry = 0;
 		private void IncrementTestEntry()
 		{
@@ -1143,10 +1148,10 @@ namespace Alphora.Dataphor.Common.Tests
 			}
 			return LEntry;
 		}
-		
+
 		private FixedSizeCache<string, string>.Entry GetPrior(FixedSizeCache<string, string>.Entry AEntry)
 		{
-			return AEntry.GetType().GetField(CPriorName, CFieldFlags).GetValue(AEntry) as FixedSizeCache<string, string>.Entry;				
+			return AEntry.GetType().GetField(CPriorName, CFieldFlags).GetValue(AEntry) as FixedSizeCache<string, string>.Entry;
 		}
 
 		const string CFNextName = "FNext";
@@ -1195,6 +1200,10 @@ namespace Alphora.Dataphor.Common.Tests
 			{
 				if (LPrior == null)
 					return false;
+				Assert.AreEqual(LEntry.Key.Replace("Key", "Value"), LEntry.Value);
+				Assert.AreEqual(FTestCache[LEntry.Key], LEntry.Value);
+				Assert.AreEqual(LEntry.Key.Replace("Key", "Value"), FTestCache[LEntry.Key]);
+
 				LNext = LEntry;
 				LEntry = LPrior;
 				if (LEntry.GetType().GetField(CNextName, CFieldFlags).GetValue(LEntry) != LNext)
@@ -1215,23 +1224,23 @@ namespace Alphora.Dataphor.Common.Tests
 		}
 
 		private int GetLocation(FixedSizeCache<string, string>.Entry AEntry)
-		{	 	
+		{
 			FixedSizeCache<string, string>.Entry LEntry = GetHead();
 			FixedSizeCache<string, string>.Entry LPrior = LEntry.GetType().GetField(CPriorName, CFieldFlags).GetValue(LEntry) as FixedSizeCache<string, string>.Entry;
 			int i;
 			for (i = 0; i < FTestCache.Size; i++)
 			{
 				if (LEntry == AEntry)
-					return i;  
-							
+					return i;
+
 				LEntry = LPrior;
 				LPrior = LEntry.GetType().GetField(CPriorName, CFieldFlags).GetValue(LEntry) as FixedSizeCache<string, string>.Entry;
 			}
 
 			if (LEntry == AEntry)
-				return i; 
+				return i;
 			else
-				throw new Exception("Entry not in list");			
+				throw new Exception("Entry not in list");
 		}
 
 		#endregion
@@ -1254,33 +1263,32 @@ namespace Alphora.Dataphor.Common.Tests
 
 		public void Run()
 		{
-			Random LRandom = new Random(); 
+			Random LRandom = new Random();
 			for (int j = 0; j < FIterations; j++)
-			{						
+			{
 				int LEntry;
 				for (int i = 0; i < FAccessCount; i++)
 				{
 					LEntry = LRandom.Next(1, FSeed);
-					//FFixedSizeCache.Reference(FixedSizeCacheTest.GetKey(LEntry), FixedSizeCacheTest.GetValue(LEntry));
-					FFixedSizeCache.Add(FixedSizeCacheTest.GetKey(LEntry), FixedSizeCacheTest.GetValue(LEntry));
-					//switch (LRandom.Next(1, 10))
-					//{
-					//    case 1:
-					//    case 2:
-					//    case 3:
-					//        FFixedSizeCache.Add(FixedSizeCacheTest.GetKey(LEntry), FixedSizeCacheTest.GetValue(LEntry));
-					//        break;
-					//    case 4:
-					//    case 5:
-					//    case 6:
-					//    case 7:
-					//    case 8:
-					//        FFixedSizeCache.Reference(FixedSizeCacheTest.GetKey(LEntry), FixedSizeCacheTest.GetValue(LEntry));
-					//        break;
-					//    default:
-					//        FFixedSizeCache.Remove(FixedSizeCacheTest.GetKey(LEntry));
-					//        break;
-					//}
+					switch (LRandom.Next(1, 10))
+					{
+						case 1:
+						case 2:
+						case 3:
+							FFixedSizeCache.Add(FixedSizeCacheTest.GetKey(LEntry), FixedSizeCacheTest.GetValue(LEntry));
+							break;
+						case 4:
+						case 5:
+						case 6:
+							FFixedSizeCache[FixedSizeCacheTest.GetKey(LEntry)] = FixedSizeCacheTest.GetValue(LRandom.Next(1, FSeed));
+							break;
+						case 8:
+							FFixedSizeCache.Reference(FixedSizeCacheTest.GetKey(LEntry), FixedSizeCacheTest.GetValue(LEntry));
+							break;
+						default:
+							FFixedSizeCache.Remove(FixedSizeCacheTest.GetKey(LEntry));
+							break;
+					}
 				}
 			}
 		}
