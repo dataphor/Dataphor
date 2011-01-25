@@ -158,7 +158,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private const int WM_CAP_FILE_SAVEDIB = 0x419;        
 		private void FCapture_Click(object sender, EventArgs e)
 		{
-			String LTempFileName = Application.LocalUserAppDataPath + @"\" + Strings.CTempFileName;
+			String LTempFileName = Path.Combine(Application.LocalUserAppDataPath, Strings.CTempFileName);
 			SendMessage(FVideoHandle, WM_CAP_FILE_SAVEDIB, CSendMessagenNullParameter, LTempFileName);
 			using (FileStream LImageFile = new FileStream(LTempFileName, FileMode.Open, FileAccess.Read))
 			{
