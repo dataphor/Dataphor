@@ -12,7 +12,7 @@ using Alphora.Dataphor.DAE.Debug;
 namespace Alphora.Dataphor.Dataphoria.Designers
 {
 	public interface IDesignService
-	{
+	{  		
 		IDataphoria Dataphoria { get; }
 		IDesigner Designer { get; }
 		void RegisterDesigner(DesignBuffer ABuffer);
@@ -33,6 +33,8 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 		void Open(DesignBuffer ABuffer);
 		void New();
 		void Save();
+		void StartAutoSave();
+		void StopAutoSave();
 		void SaveAs();
 		event RequestHandler AfterSaveAsDocument;
 		void SaveAsDocument();
@@ -45,6 +47,8 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 	public class DesignService : IDesignService
 	{
+		public const int CDefaultSaveInterval = 120;	// 2 Minutes
+		
 		public DesignService(IDataphoria ADataphoria, IDesigner ADesigner)
 		{
 			FDataphoria = ADataphoria;
@@ -52,7 +56,7 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 			if (ADesigner != null)
 				ADesigner.Disposed += new EventHandler(DesignerDisposed);
 		}
-
+			  
 		// Dataphoria
 
 		private IDataphoria FDataphoria;
@@ -71,8 +75,9 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 		private void DesignerDisposed(object sender, EventArgs e)
 		{
+			StopAutoSave(); 
 			if (FBuffer != null)
-				UnregisterDesigner(FBuffer);
+				UnregisterDesigner(FBuffer);  			
 		}
 
 		public void RegisterDesigner(DesignBuffer ABuffer)
@@ -223,6 +228,39 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 				Save(FBuffer);
 		}
 
+		Timer FTimer;
+		public void StartAutoSave()
+		{
+			if (FTimer == null)
+			{
+				FTimer = new Timer();
+				FTimer.Tick += new EventHandler(AutoSaveTimer_Tick);
+				FTimer.Interval = CDefaultSaveInterval * 1000;
+			}
+			FTimer.Start();			
+		}
+
+		private void AutoSaveTimer_Tick(object sender, EventArgs e)
+		{
+			if (IsModified)
+				Save();
+		} 
+		
+		public void StopAutoSave()
+		{
+			if (FTimer != null)
+			{
+				try
+				{
+					FTimer.Stop();
+				}
+				finally
+				{
+					FTimer = null;
+				}
+			}
+		}
+
 		private void Save(DesignBuffer ABuffer)
 		{
 			RequestSave(ABuffer);
@@ -333,6 +371,8 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 			else
 				return FBuffer.LocatorNameMatches(AName);
 		}
+		
+		
 	}
 
 	public delegate void RequestHandler(DesignService AService, DesignBuffer ABuffer);

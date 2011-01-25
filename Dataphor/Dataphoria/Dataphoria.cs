@@ -38,8 +38,7 @@ namespace Alphora.Dataphor.Dataphoria
 	public partial class Dataphoria : Form, IDataphoria
 	{
 		public const string CConfigurationFileName = "Dataphoria{0}.config";
-		public const string CScratchPadFileName = "ScratchPad.d4";
-		public const int CSaveScratchPadInterval = 120;	// 2 Minutes
+		public const string CScratchPadFileName = "ScratchPad.d4";		
 		
 		public Dataphoria()
 		{
@@ -137,9 +136,8 @@ namespace Alphora.Dataphor.Dataphoria
 		
 		#endif
 
-		protected override void OnClosing(CancelEventArgs AArgs)
-		{
-			StopSaveScratchPad();
+		protected override void OnClosing(CancelEventArgs AArgs)   
+		{	 		
 			// HACK: Something in the WinForms validation process is returning false.  We don't care so always make sure Cancel is false at the beginning of OnClosing
 			AArgs.Cancel = false;
 			base.OnClosing(AArgs);
@@ -271,11 +269,9 @@ namespace Alphora.Dataphor.Dataphoria
 																	
 				DesignerInfo LInfo = GetDefaultDesigner(Program.DocumentTypeFromFileName(LFileName));
 				FileDesignBuffer LBuffer = new FileDesignBuffer(this, LFileName);
-				if (!System.IO.File.Exists(LFileName))
-					LBuffer.SaveData(String.Empty);
-
-				OpenDesigner(LInfo, LBuffer);
-				StartSaveScratchPad();					
+				LBuffer.EnsureFile();
+				IDesigner LDesigner = OpenDesigner(LInfo, LBuffer);	   									
+				LDesigner.Service.StartAutoSave();
 			}
 			catch (Exception LException)
 			{
@@ -960,70 +956,7 @@ namespace Alphora.Dataphor.Dataphoria
 				if ((LDesigner != null) && LDesigner.Service.IsModified)
 					LDesigner.Service.Save();
 			}
-		}
-
-		/// <summary> Signal used to indicate that the save scratchpad thread can terminate. </summary>
-		private ManualResetEvent FSaveScratchPadSignal;
-		private Object FSaveScratchPadReferenceLock = new Object();
-
-		private void StartSaveScratchPad()
-		{
-			lock (FSaveScratchPadReferenceLock)
-			{
-				if (FSaveScratchPadSignal != null)
-					Error.Fail("Scratch Pad save started more than once");
-				FSaveScratchPadSignal = new ManualResetEvent(false);
-			}
-			new Thread(new ThreadStart(SaveScratchPad)).Start();	// Don't use the thread pool... long running thread
-		}
-
-		private void SaveScratchPad()
-		{
-			try
-			{
-				bool LSignaled = false;
-				while (!LSignaled)
-				{
-					// Wait for either a signal or a time-out
-					LSignaled = FSaveScratchPadSignal.WaitOne(CSaveScratchPadInterval * 1000);
-
-					// If WaitOne ended due to timeout, save scratch pad (then wait again)
-					if (!LSignaled)
-					{
-						IDesigner LDesigner;  						 
-						foreach (Form LForm in this.MdiChildren)
-						{
-							LDesigner = LForm as IDesigner;
-							if ((LDesigner != null) && LDesigner.Service.IsModified && (LDesigner.Service.Buffer.GetDescription() == CScratchPadFileName))
-							{								
-								LDesigner.Service.Save();
-								break; 							
-							}
-						}
-					}
-				}
-
-				// The save scratch pad processing is complete.  Clean up...
-				lock (FSaveScratchPadReferenceLock)
-				{
-					((IDisposable)FSaveScratchPadSignal).Dispose();
-					FSaveScratchPadSignal = null;	// Free the reference 
-				}
-			}
-			catch
-			{
-				// Don't allow exceptions to go unhandled... 
-			}
-		}
-
-		private void StopSaveScratchPad()
-		{
-			lock (FSaveScratchPadReferenceLock)
-			{
-				if (FSaveScratchPadSignal != null)
-					FSaveScratchPadSignal.Set();
-			}
-		}	
+		}	   		
 
 		public string GetDocumentType(string ALibraryName, string ADocumentName)
 		{

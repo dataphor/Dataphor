@@ -96,6 +96,12 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 				StreamUtility.CopyStream(LStream, AData);
 			}
 		}
+		
+		public void EnsureFile()
+		{
+			if (!File.Exists(FileName))
+				SaveData(String.Empty);
+		}
 
 		public const string CFileLocatorPrefix = "file:";
 		
