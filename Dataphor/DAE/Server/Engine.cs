@@ -103,7 +103,7 @@ namespace Alphora.Dataphor.DAE.Server
 		public const int CDefaultMaxCallDepth = 1024; // Also specified in the base window stack
 		public const int CDefaultProcessWaitTimeout = 30;
 		public const int CDefaultProcessTerminationTimeout = 30;
-		public const int CDefaultPlanCacheSize = 1000;
+		public const int CDefaultPlanCacheSize = 100;
 		
 		// constructor		
 		public Engine() : base()
