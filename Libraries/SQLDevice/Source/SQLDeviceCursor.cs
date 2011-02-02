@@ -590,13 +590,17 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						else
 						{
 							FEOF = true;
+							// OPTIMIZATION: if browse isolation and EOF, release the connection
+							if (FIsolationLevel == SQLIsolationLevel.ReadUncommitted)
+								FDeviceSession.ReleaseConnection(FConnection, false);
 							break;
 						}
 					}
 				}
 				catch (Exception LException)
 				{
-					FDeviceSession.TransactionFailure = FConnection.TransactionFailure;
+					if (FConnection != null)
+						FDeviceSession.TransactionFailure = FConnection.TransactionFailure;
 					throw FDeviceSession.WrapException(LException);
 				}
 				finally

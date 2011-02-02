@@ -3753,6 +3753,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		}
 		
 		private bool FTransactionFailure;
+		/// <summary> Indicates whether the DBMS-side transaction has been rolled-back. </summary>
 		public bool TransactionFailure
 		{
 			get { return FTransactionFailure; }
