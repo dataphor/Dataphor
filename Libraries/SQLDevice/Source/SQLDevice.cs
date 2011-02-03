@@ -3690,12 +3690,28 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		{
 			int LIndex = FBrowsePool.IndexOfConnection(AConnection);
 			if (LIndex >= 0)
-				FBrowsePool[LIndex].DeviceCursor.ReleaseConnection(FBrowsePool[LIndex], ADisposing);
+			{
+				var LHeader = FBrowsePool[LIndex];
+				if (LHeader.DeviceCursor != null)
+					LHeader.DeviceCursor.ReleaseConnection(LHeader, ADisposing);
+					
+				if (LHeader.Connection.InTransaction)
+					LHeader.Connection.CommitTransaction();
+					
+				LHeader.Dispose(); // Always release browse connections
+			}
 			else
 			{
 				LIndex = FExecutePool.IndexOfConnection(AConnection);
 				if (LIndex >= 0)
-					FExecutePool[LIndex].DeviceCursor.ReleaseConnection(FExecutePool[LIndex], ADisposing);
+				{
+					var LHeader = FExecutePool[LIndex];
+					if (LHeader.DeviceCursor != null)
+						LHeader.DeviceCursor.ReleaseConnection(LHeader, ADisposing);
+						
+					if (!Device.UseTransactions || Transactions.Count == 0)
+						LHeader.Dispose();
+				}
 				else
 					throw new SQLException(SQLException.Codes.ConnectionNotFound);
 			}
@@ -3772,22 +3788,35 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		{
 			if (Device.UseTransactions && (Transactions.Count == 1) && FTransactionStarted)
 			{
-				for (int LIndex = 0; LIndex < FExecutePool.Count; LIndex++)
+				for (int LIndex = FExecutePool.Count - 1; LIndex >= 0; LIndex--)
 				{
-					if (FExecutePool[LIndex].DeviceCursor != null)
-						FExecutePool[LIndex].DeviceCursor.ReleaseConnection(FExecutePool[LIndex], true);
-
+					var LHeader = FExecutePool[LIndex];
+					
+					if (LHeader.DeviceCursor != null)
+						LHeader.DeviceCursor.ReleaseConnection(LHeader, true);
+						
 					try
 					{
-						if (FExecutePool[LIndex].Connection.InTransaction)
-							FExecutePool[LIndex].Connection.CommitTransaction();
+						if (LHeader.Connection.InTransaction)
+							LHeader.Connection.CommitTransaction();
 					}
 					catch
 					{
-						FTransactionFailure = FExecutePool[LIndex].Connection.TransactionFailure;
+						FTransactionFailure = LHeader.Connection.TransactionFailure;
 						throw;
 					}
+
+					// Dispose the connection to release it back to the server
+					try
+					{
+						FExecutePool.DisownAt(LIndex).Dispose();
+					}
+					catch
+					{
+						// Ignore errors disposing the connection, as long as it removed from the execute pool, we are good
+					}
 				}
+
 				FTransactionStarted = false;
 			}
 		}
@@ -3797,6 +3826,35 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		{
 			if (Device.UseTransactions && (Transactions.Count == 1) && FTransactionStarted)
 			{
+				for (int LIndex = FExecutePool.Count - 1; LIndex >= 0; LIndex--)
+				{
+					var LHeader = FExecutePool[LIndex];
+					
+					if (LHeader.DeviceCursor != null)
+						LHeader.DeviceCursor.ReleaseConnection(LHeader, true);
+						
+					try
+					{
+						if (LHeader.Connection.InTransaction)
+							LHeader.Connection.RollbackTransaction();
+					}
+					catch
+					{
+						FTransactionFailure = LHeader.Connection.TransactionFailure;
+						// Don't rethrow, we do not care if there was an issue rolling back on the server, there's nothing we can do about it here
+					}
+					
+					// Dispose the connection to release it back to the server
+					try
+					{
+						FExecutePool.DisownAt(LIndex).Dispose();
+					}
+					catch
+					{
+						// Ignore errors disposing the connection, as long as it is removed from the execute pool, we are good
+					}
+				}
+			
 				for (int LIndex = 0; LIndex < FExecutePool.Count; LIndex++)
 				{
 					if (FExecutePool[LIndex].DeviceCursor != null)
