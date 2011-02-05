@@ -271,12 +271,12 @@ namespace Alphora.Dataphor
 			StreamUtility.CopyStream(AStream, this);
 		}
 		
-		public virtual void CopyTo(Stream AStream, int ACount)
+		public new virtual void CopyTo(Stream AStream, int ACount)
 		{
 			StreamUtility.CopyStream(this, AStream, ACount);
 		}
 		
-		public virtual void CopyTo(Stream AStream)
+		public new virtual void CopyTo(Stream AStream)
 		{
 			StreamUtility.CopyStream(this, AStream);
 		}

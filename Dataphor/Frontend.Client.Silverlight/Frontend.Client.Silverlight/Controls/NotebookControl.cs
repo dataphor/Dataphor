@@ -24,6 +24,11 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			return LItem;
 		}
 
+		protected override bool IsItemItsOwnContainerOverride(object AItem)
+		{
+			return AItem is NotebookItem;
+		}
+
 		protected override void OnItemsChanged(NotifyCollectionChangedEventArgs e)
 		{
 			base.OnItemsChanged(e);

@@ -58,17 +58,6 @@ namespace System.ComponentModel
 		public EditorAttribute(string AClassName, string AUITypeEditor) { }
 	}
 	
-	public class BrowsableAttribute : Attribute
-	{
-		public BrowsableAttribute(bool AValue) { }
-	}
-
-	public interface ISupportInitialize
-	{
-		void BeginInit();
-		void EndInit();
-	}
-
 	public enum DesignerSerializationVisibility
 	{
 		Hidden,
@@ -91,11 +80,6 @@ namespace System.ComponentModel
 	public class RefreshPropertiesAttribute : Attribute
 	{
 		public RefreshPropertiesAttribute(RefreshProperties A) { }
-	}
-	
-	public class DefaultEventAttribute : Attribute
-	{
-		public DefaultEventAttribute(string A) { }
 	}
 	
 	public class DesignerCategoryAttribute : Attribute

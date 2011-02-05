@@ -22,6 +22,20 @@
 							<RowDefinition Height="Auto"/>
 							<RowDefinition/>
 						</Grid.RowDefinitions>
+						<local:Menu x:Name="Menu" VerticalAlignment="Top" HorizontalAlignment="Left">
+							<local:MenuItem Header="Test 1" />
+							<local:MenuItem Header="Test 2" >
+								<local:MenuItem Header="Test 21" />
+								<local:MenuItem Header="Test 22" />
+								<local:MenuItem Header="Test 23" >
+									<local:MenuItem Header="Test 231" >
+										<local:MenuItem Header="Test 2311" />
+										<local:MenuItem Header="Test 2312" />
+									</local:MenuItem>
+									<local:MenuItem Header="Test 232" />
+								</local:MenuItem>
+							</local:MenuItem>
+						</local:Menu>
 						<ContentPresenter Content="{TemplateBinding Content}"
 							ContentTemplate="{TemplateBinding ContentTemplate}"
 							HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
@@ -574,4 +588,258 @@
 		</Setter>
 	</Style>
 
+    <Style TargetType="local:Menu">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:Menu">
+					<local:PopupProtector ProtectorBrush="#55000000" IsActive="{TemplateBinding IsActive}">
+						<Border d:DesignWidth="400" d:DesignHeight="20" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+							<local:ButtonScrollViewer>
+								<ItemsPresenter/>
+							</local:ButtonScrollViewer>
+						</Border>
+					</local:PopupProtector>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="IsTabStop" Value="False"/>
+        <Setter Property="Background">
+        	<Setter.Value>
+        		<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+        			<GradientStop Color="#FF7D88CE" Offset="0"/>
+        			<GradientStop Color="#FFB0B8EC" Offset="1"/>
+        		</LinearGradientBrush>
+        	</Setter.Value>
+        </Setter>
+        <Setter Property="ItemsPanel" >
+			<Setter.Value>
+				<ItemsPanelTemplate >
+					<StackPanel Orientation="Horizontal"/>
+				</ItemsPanelTemplate>
+			</Setter.Value>
+		</Setter>
+		<Setter Property="ItemContainerStyle">
+			<Setter.Value>
+				<Style TargetType="local:MenuItem">
+					<Setter Property="IsTabStop" Value="True" />
+					<Setter Property="Padding" Value="4,2,4,0"/>
+					<Setter Property="SubMenuPlacement" Value="Bottom" />
+					<Setter Property="Template">
+						<Setter.Value>
+							<ControlTemplate TargetType="local:MenuItem">
+								<Border d:DesignWidth="100" d:DesignHeight="24" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" >
+									<VisualStateManager.VisualStateGroups>
+										<VisualStateGroup x:Name="CommonStates">
+											<VisualState x:Name="Normal"/>
+											<VisualState x:Name="Highlighted">
+												<Storyboard>
+													<DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(Brush.Opacity)">
+														<EasingDoubleKeyFrame KeyTime="00:00:00" Value="0.2"/>
+													</DoubleAnimationUsingKeyFrames>
+													<ColorAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)">
+														<EasingColorKeyFrame KeyTime="00:00:00" Value="#FF4D62C1"/>
+													</ColorAnimationUsingKeyFrames>
+												</Storyboard>
+											</VisualState>
+											<VisualState x:Name="Pressed">
+												<Storyboard>
+													<DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(Brush.Opacity)">
+														<EasingDoubleKeyFrame KeyTime="00:00:00" Value="0.5"/>
+													</DoubleAnimationUsingKeyFrames>
+													<ColorAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)">
+														<EasingColorKeyFrame KeyTime="00:00:00" Value="#FF4D62C1"/>
+													</ColorAnimationUsingKeyFrames>
+												</Storyboard>
+											</VisualState>
+											<VisualState x:Name="Disabled">
+												<Storyboard>
+													<ColorAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)">
+														<EasingColorKeyFrame KeyTime="00:00:00" Value="#FF848484"/>
+													</ColorAnimationUsingKeyFrames>
+													<DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(Brush.Opacity)">
+														<EasingDoubleKeyFrame KeyTime="00:00:00" Value="0.3"/>
+													</DoubleAnimationUsingKeyFrames>
+													<DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="contentPresenter" Storyboard.TargetProperty="(UIElement.Opacity)">
+														<EasingDoubleKeyFrame KeyTime="00:00:00" Value="0.7"/>
+													</DoubleAnimationUsingKeyFrames>
+												</Storyboard>
+											</VisualState>
+										</VisualStateGroup>
+										<VisualStateGroup x:Name="ExpandedStates">
+											<VisualState x:Name="Collapsed"/>
+											<VisualState x:Name="Expanded">
+												<Storyboard>
+													<DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(Brush.Opacity)">
+														<EasingDoubleKeyFrame KeyTime="00:00:00" Value="0.2"/>
+													</DoubleAnimationUsingKeyFrames>
+													<ColorAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)">
+														<EasingColorKeyFrame KeyTime="00:00:00" Value="#FF4D62C1"/>
+													</ColorAnimationUsingKeyFrames>
+													<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="Popup" Storyboard.TargetProperty="(Popup.IsOpen)">
+														<DiscreteObjectKeyFrame KeyTime="00:00:00">
+															<DiscreteObjectKeyFrame.Value>
+																<System:Boolean>True</System:Boolean>
+															</DiscreteObjectKeyFrame.Value>
+														</DiscreteObjectKeyFrame>
+													</ObjectAnimationUsingKeyFrames>
+												</Storyboard>
+											</VisualState>
+										</VisualStateGroup>
+										<VisualStateGroup x:Name="HastItemsStates">
+											<VisualState x:Name="NoItems"/>
+											<VisualState x:Name="HasItems"/>
+										</VisualStateGroup>
+									</VisualStateManager.VisualStateGroups>
+									<Border x:Name="border" BorderBrush="Transparent" CornerRadius="2" BorderThickness="1">
+										<Border.Background>
+											<SolidColorBrush Opacity="0" Color="White"/>
+										</Border.Background>
+										<Grid>
+											<Grid.RowDefinitions>
+												<RowDefinition/>
+												<RowDefinition Height="Auto" />
+											</Grid.RowDefinitions>
+											<ContentPresenter x:Name="contentPresenter" Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}" Margin="{TemplateBinding Padding}"/>
+											<Popup x:Name="Popup" Grid.Row="1">
+												<Border x:Name="ItemsHost" MinWidth="200" CornerRadius="2" BorderBrush="#f8a0a0a0" Background="#f8f0f0f0" BorderThickness="1">
+													<Border.Effect>
+														<DropShadowEffect ShadowDepth="3"/>
+													</Border.Effect>
+													<Grid>
+														<ItemsPresenter Margin="2"/>
+													</Grid>
+												</Border>
+											</Popup>
+										</Grid>
+									</Border>
+								</Border>
+							</ControlTemplate>
+						</Setter.Value>
+					</Setter>
+				</Style>
+			</Setter.Value>
+		</Setter>
+    </Style>
+
+    <Style TargetType="local:MenuItem">
+		<Setter Property="IsTabStop" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:MenuItem">
+					<Border d:DesignWidth="100" d:DesignHeight="24" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" >
+                		<VisualStateManager.VisualStateGroups>
+                			<VisualStateGroup x:Name="CommonStates">
+								<VisualState x:Name="Normal"/>
+								<VisualState x:Name="Highlighted">
+                					<Storyboard>
+                						<DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(Brush.Opacity)">
+                							<EasingDoubleKeyFrame KeyTime="00:00:00" Value="0.2"/>
+                						</DoubleAnimationUsingKeyFrames>
+                						<ColorAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)">
+                							<EasingColorKeyFrame KeyTime="00:00:00" Value="#FF4D62C1"/>
+                						</ColorAnimationUsingKeyFrames>
+                					</Storyboard>
+                				</VisualState>
+                				<VisualState x:Name="Pressed">
+                					<Storyboard>
+                						<DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(Brush.Opacity)">
+                							<EasingDoubleKeyFrame KeyTime="00:00:00" Value="0.5"/>
+                						</DoubleAnimationUsingKeyFrames>
+                						<ColorAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)">
+                							<EasingColorKeyFrame KeyTime="00:00:00" Value="#FF4D62C1"/>
+                						</ColorAnimationUsingKeyFrames>
+                					</Storyboard>
+                				</VisualState>
+                				<VisualState x:Name="Disabled">
+                					<Storyboard>
+                						<ColorAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)">
+                							<EasingColorKeyFrame KeyTime="00:00:00" Value="#FF848484"/>
+                						</ColorAnimationUsingKeyFrames>
+                						<DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(Brush.Opacity)">
+                							<EasingDoubleKeyFrame KeyTime="00:00:00" Value="0.3"/>
+                						</DoubleAnimationUsingKeyFrames>
+                						<DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="contentPresenter" Storyboard.TargetProperty="(UIElement.Opacity)">
+                							<EasingDoubleKeyFrame KeyTime="00:00:00" Value="0.7"/>
+                						</DoubleAnimationUsingKeyFrames>
+                						<ColorAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="path" Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)">
+                							<EasingColorKeyFrame KeyTime="00:00:00" Value="#FF3B3A3A"/>
+                						</ColorAnimationUsingKeyFrames>
+                					</Storyboard>
+                				</VisualState>
+                			</VisualStateGroup>
+                			<VisualStateGroup x:Name="ExpandedStates">
+								<VisualState x:Name="Collapsed"/>
+								<VisualState x:Name="Expanded">
+                					<Storyboard>
+										<DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(Brush.Opacity)">
+											<EasingDoubleKeyFrame KeyTime="00:00:00" Value="0.2"/>
+										</DoubleAnimationUsingKeyFrames>
+										<ColorAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)">
+											<EasingColorKeyFrame KeyTime="00:00:00" Value="#FF4D62C1"/>
+										</ColorAnimationUsingKeyFrames>
+										<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="Popup" Storyboard.TargetProperty="(Popup.IsOpen)">
+                							<DiscreteObjectKeyFrame KeyTime="00:00:00">
+                								<DiscreteObjectKeyFrame.Value>
+                									<System:Boolean>True</System:Boolean>
+                								</DiscreteObjectKeyFrame.Value>
+                							</DiscreteObjectKeyFrame>
+                						</ObjectAnimationUsingKeyFrames>
+                					</Storyboard>
+                				</VisualState>
+                			</VisualStateGroup>
+                			<VisualStateGroup x:Name="HastItemsStates">
+								<VisualState x:Name="NoItems"/>
+								<VisualState x:Name="HasItems">
+                					<Storyboard>
+                						<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:00.0010000" Storyboard.TargetName="path" Storyboard.TargetProperty="(UIElement.Visibility)">
+                							<DiscreteObjectKeyFrame KeyTime="00:00:00">
+                								<DiscreteObjectKeyFrame.Value>
+                									<Visibility>Visible</Visibility>
+                								</DiscreteObjectKeyFrame.Value>
+                							</DiscreteObjectKeyFrame>
+                						</ObjectAnimationUsingKeyFrames>
+                					</Storyboard>
+                				</VisualState>
+                			</VisualStateGroup>
+                		</VisualStateManager.VisualStateGroups>
+                		<Border x:Name="border" BorderBrush="Transparent" CornerRadius="2" BorderThickness="1">
+                			<Border.Background>
+                				<SolidColorBrush Opacity="0" Color="White"/>
+                			</Border.Background>
+                			<Grid>
+                				<Grid.ColumnDefinitions>
+                					<ColumnDefinition/>
+                					<ColumnDefinition Width="Auto"/>
+                					<ColumnDefinition Width="Auto"/>
+                				</Grid.ColumnDefinitions>
+                				<ContentPresenter x:Name="contentPresenter" Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}" Margin="{TemplateBinding Padding}"/>
+                				<Path x:Name="path" Fill="Black" Grid.Column="1" VerticalAlignment="Center" Data="M0,0 L3,3 L0,6 Z" Visibility="Collapsed" UseLayoutRounding="False" d:LayoutOverrides="GridBox" Margin="4,0,0,0"/>
+                				<Popup x:Name="Popup" Grid.Column="2">
+                					<Border x:Name="ItemsHost" MinWidth="200" CornerRadius="2" BorderBrush="#f8a0a0a0" Background="#f8f0f0f0" BorderThickness="1">
+                						<Border.Effect>
+                							<DropShadowEffect ShadowDepth="3"/>
+                						</Border.Effect>
+                						<Grid>
+                							<ItemsPresenter Margin="2"/>
+                						</Grid>
+                					</Border>
+                				</Popup>
+                			</Grid>
+                		</Border>
+                	</Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Padding" Value="4,2,4,0"/>
+    </Style>
+
+    <Style TargetType="local:PopupProtector">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:PopupProtector">
+                    <ContentPresenter Content="{TemplateBinding Content}" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>
