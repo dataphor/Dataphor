@@ -1198,7 +1198,7 @@
     </Style>
 
     <Style TargetType="local:PopupProtector">
-        <Setter Property="ProtectorBrush" Value="#55000000" />
+        <Setter Property="ProtectorBrush" Value="#00000000" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="local:PopupProtector">
