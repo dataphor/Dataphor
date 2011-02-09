@@ -1,9 +1,29 @@
 ﻿<UserControl x:Class="Frontend.Client.Silverlight.Tests.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:client="clr-namespace:Alphora.Dataphor.Frontend.Client.Silverlight;assembly=Alphora.Dataphor.Frontend.Client.Silverlight"
     mc:Ignorable="d" d:DesignWidth="640" d:DesignHeight="480">
-  <Grid x:Name="LayoutRoot">
-
-  </Grid>
+    <Grid x:Name="LayoutRoot">
+        <client:Menu VerticalAlignment="Top">
+            <client:MenuItem Header="File" >
+                <client:MenuItem Header="New" ImageSource="Images/file.png" >
+                    <client:MenuItem Header="Thing1" >
+                        <client:MenuItem Header="Sub1" />
+                        <client:MenuItem Header="Sub2" />
+                    </client:MenuItem>
+                    <client:MenuItem Header="Thing2" />
+                </client:MenuItem>
+                <client:MenuItem Header="Open" ImageSource="Images/file.png"/>
+                <client:MenuItem Header="Thing1" >
+                    <client:MenuItem Header="Sub1" />
+                    <client:MenuItem Header="Sub2" />
+                </client:MenuItem>
+                <client:MenuItem Header="Save" ImageSource="Images/save.png" />
+            </client:MenuItem>
+            <client:MenuItem Header="Edit" />
+            <client:MenuItem Header="View" />
+        </client:Menu>
+    </Grid>
 </UserControl>

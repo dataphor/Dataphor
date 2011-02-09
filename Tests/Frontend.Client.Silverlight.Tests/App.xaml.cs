@@ -26,8 +26,8 @@ namespace Frontend.Client.Silverlight.Tests
 
 		private void Application_Startup(object sender, StartupEventArgs e)
 		{
-			//this.RootVisual = new MainPage();
-			this.RootVisual = new NotebookTest();
+			this.RootVisual = new MainPage();
+			//this.RootVisual = new NotebookTest();
 		}
 
 		private void Application_Exit(object sender, EventArgs e)

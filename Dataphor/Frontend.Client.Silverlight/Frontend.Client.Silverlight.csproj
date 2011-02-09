@@ -78,10 +78,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Menu, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\Menu.dll</HintPath>
-    </Reference>
     <Reference Include="System.ComponentModel.DataAnnotations, Version=2.0.5.0, Culture=neutral, PublicKeyToken=ddd0da4d3e678217" />
     <Reference Include="System.Windows" />
     <Reference Include="mscorlib" />
@@ -91,10 +87,7 @@
     <Reference Include="System.Windows.Controls, Version=2.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Windows.Controls.Data, Version=2.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
     <Reference Include="System.Windows.Controls.Data.Input, Version=2.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
-    <Reference Include="System.Windows.Controls.Layout.Toolkit, Version=2.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\System.Windows.Controls.Layout.Toolkit.dll</HintPath>
-    </Reference>
+    <Reference Include="System.Windows.Controls.Layout.Toolkit, Version=4.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Windows.Data, Version=2.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Windows.Browser" />
@@ -201,8 +194,11 @@
     <Compile Include="Frontend.Client.Silverlight\Controls\FormControl.cs" />
     <Compile Include="Frontend.Client.Silverlight\Controls\FormStackControl.cs" />
     <Compile Include="Frontend.Client.Silverlight\Controls\GroupBox.cs" />
+    <Compile Include="Frontend.Client.Silverlight\Controls\Menu.cs" />
+    <Compile Include="Frontend.Client.Silverlight\Controls\MenuItem.cs" />
     <Compile Include="Frontend.Client.Silverlight\Controls\NotebookControl.cs" />
     <Compile Include="Frontend.Client.Silverlight\Controls\NotebookItem.cs" />
+    <Compile Include="Frontend.Client.Silverlight\Controls\PopupProtector.cs" />
     <Compile Include="Frontend.Client.Silverlight\Controls\ScrollPresenter.cs" />
     <Compile Include="Frontend.Client.Silverlight\Controls\SessionControl.cs" />
     <Compile Include="Frontend.Client.Silverlight\Controls\TriggerControl.cs" />
@@ -306,7 +302,7 @@
     <ProjectReference Include="..\SilverlightDAE\SilverlightDAE.csproj">
       <Project>{B190A64D-B46B-4C63-A217-1ABD2C97021A}</Project>
       <Name>SilverlightDAE</Name>
-      <Private>False</Private>
+      <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -344,6 +340,9 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="System.Windows.Controls.Layout.Toolkit.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\$(SilverlightVersion)\Microsoft.Silverlight.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
