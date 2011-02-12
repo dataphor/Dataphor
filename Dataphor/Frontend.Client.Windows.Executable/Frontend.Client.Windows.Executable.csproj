@@ -46,7 +46,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>false</MapFileExtensions>
     <InstallUrl>\\appsvr01\DCG\Crick\Alphora\ClickOnceClient\</InstallUrl>
-    <ProductName>Crick - Production</ProductName>
+    <ProductName>medig - Production</ProductName>
     <PublisherName>Alphora</PublisherName>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
     <ApplicationRevision>41</ApplicationRevision>
