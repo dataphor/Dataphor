@@ -12,25 +12,25 @@ namespace Alphora.Dataphor.DAE.Debug
 {
 	public class DebugContext
 	{
-		public DebugContext(string AScript, string ALocator, int ALine, int ALinePos) : base()
+		public DebugContext(string script, string locator, int line, int linePos) : base()
 		{
-			FScript = AScript;
-			FLocator = ALocator;
-			FLine = ALine;
-			FLinePos = ALinePos;
+			_script = script;
+			_locator = locator;
+			_line = line;
+			_linePos = linePos;
 		}
 		
-		private string FScript;
-		public string Script { get { return FScript; } }
+		private string _script;
+		public string Script { get { return _script; } }
 		
-		private string FLocator;
-		public string Locator { get { return FLocator; } }
+		private string _locator;
+		public string Locator { get { return _locator; } }
 		
-		private int FLine;
-		public int Line { get { return FLine; } }
+		private int _line;
+		public int Line { get { return _line; } }
 		
-		private int FLinePos;
-		public int LinePos { get { return FLinePos; } }
+		private int _linePos;
+		public int LinePos { get { return _linePos; } }
 	}
 	
 	public class DebugContexts : Stack<DebugContext> { }

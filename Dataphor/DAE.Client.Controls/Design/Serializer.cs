@@ -15,34 +15,34 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 	{
 		public GridColumnsSerializer() {}
 
-		public override object Serialize(IDesignerSerializationManager AManager, object AValue)
+		public override object Serialize(IDesignerSerializationManager manager, object tempValue)
 		{
-			CodeDomSerializer LBaseSerializer = (CodeDomSerializer)AManager.GetSerializer
+			CodeDomSerializer baseSerializer = (CodeDomSerializer)manager.GetSerializer
 				(
 				typeof(System.Collections.ArrayList),
 				typeof(CodeDomSerializer)
 				);
-			GridColumns LColumns = (GridColumns)AValue;
-			if ((LColumns.Count > 0) && (LColumns.HasDefaultColumn()))
+			GridColumns columns = (GridColumns)tempValue;
+			if ((columns.Count > 0) && (columns.HasDefaultColumn()))
 			{
-				ArrayList LSerializeColumns = new ArrayList();
-				foreach (GridColumn LColumn in LColumns)
-					if (!(LColumn is Alphora.Dataphor.DAE.Client.Controls.DataColumn))
-						LSerializeColumns.Add(LColumn);
-				return LBaseSerializer.Serialize(AManager, LSerializeColumns);
+				ArrayList serializeColumns = new ArrayList();
+				foreach (GridColumn column in columns)
+					if (!(column is Alphora.Dataphor.DAE.Client.Controls.DataColumn))
+						serializeColumns.Add(column);
+				return baseSerializer.Serialize(manager, serializeColumns);
 			}
 			else
-				return LBaseSerializer.Serialize(AManager, AValue);
+				return baseSerializer.Serialize(manager, tempValue);
 		}
 
-		public override object Deserialize(IDesignerSerializationManager AManager, object AValue) 
+		public override object Deserialize(IDesignerSerializationManager manager, object tempValue) 
 		{
-			CodeDomSerializer LBaseSerializer = (CodeDomSerializer)AManager.GetSerializer
+			CodeDomSerializer baseSerializer = (CodeDomSerializer)manager.GetSerializer
 				(
 				typeof(Alphora.Dataphor.DAE.Client.Controls.GridColumns).BaseType,
 				typeof(CodeDomSerializer)
 				);
-			return LBaseSerializer.Deserialize(AManager, AValue);
+			return baseSerializer.Deserialize(manager, tempValue);
 		}
 	}
 }

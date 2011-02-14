@@ -42,10 +42,10 @@ namespace Alphora.Dataphor.DAE.Server
 	public class RemoteServer : RemoteServerObject, IDisposable, IRemoteServer, ITrackingHandler
 	{
 		// constructor		
-		internal RemoteServer(Server AServer) : base()
+		internal RemoteServer(Server server) : base()
 		{
-			FServer = AServer;
-			FConnections = new RemoteServerConnections(false);
+			_server = server;
+			_connections = new RemoteServerConnections(false);
 			InitializeCatalogCaches();
 			TrackingServices.RegisterTrackingHandler(this);
 		}
@@ -57,111 +57,111 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		private void AttachServer()
 		{
-			FServer.Disposed += new EventHandler(FServerDisposed);
+			_server.Disposed += new EventHandler(FServerDisposed);
 		}
 
-		private void FServerDisposed(object ASender, EventArgs AArgs)
+		private void FServerDisposed(object sender, EventArgs args)
 		{
 			DetachServer();
-			FServer = null;
+			_server = null;
 			Dispose();
 		}
 		
 		private void DetachServer()
 		{
-			FServer.Disposed -= new EventHandler(FServerDisposed);
+			_server.Disposed -= new EventHandler(FServerDisposed);
 		}
         
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
-				if (FConnections != null)
+				if (_connections != null)
 				{
 					CloseConnections();
-					FConnections.Dispose();
-					FConnections = null;
+					_connections.Dispose();
+					_connections = null;
 				}
 				
-				if (FServer != null)
+				if (_server != null)
 				{
 					DetachServer();
-					FServer = null;
+					_server = null;
 				}
 			}
 			finally
 			{
 				TrackingServices.UnregisterTrackingHandler(this);
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 		
 		// Server
-		private Server FServer;
-		internal Server Server { get { return FServer; } }
+		private Server _server;
+		internal Server Server { get { return _server; } }
 
 		// Catalog Caches
-		private CatalogCaches FCatalogCaches;
-		internal CatalogCaches CatalogCaches { get { return FCatalogCaches; } }
+		private CatalogCaches _catalogCaches;
+		internal CatalogCaches CatalogCaches { get { return _catalogCaches; } }
 		
 		// Name 
 		public string Name
 		{
-			get { return FServer.Name; } 
-			set { FServer.Name = value; }
+			get { return _server.Name; } 
+			set { _server.Name = value; }
 		}
 		
-		public static bool IsRemotableExceptionClass(Exception AException)
+		public static bool IsRemotableExceptionClass(Exception exception)
 		{
-			return (AException is DAEException) || (AException.GetType() == typeof(DataphorException));
+			return (exception is DAEException) || (exception.GetType() == typeof(DataphorException));
 		}
 		
-		public static bool IsRemotableException(Exception AException)
+		public static bool IsRemotableException(Exception exception)
 		{
-			if (!IsRemotableExceptionClass(AException))
+			if (!IsRemotableExceptionClass(exception))
 				return false;
 				
-			Exception LException = AException;
-			while (LException != null)
+			Exception localException = exception;
+			while (localException != null)
 			{
-				if (!IsRemotableExceptionClass(LException))
+				if (!IsRemotableExceptionClass(localException))
 					return false;
-				LException = LException.InnerException;
+				localException = localException.InnerException;
 			}
 			return true;
 		}
 		
-		public static Exception EnsureRemotableException(Exception AException)
+		public static Exception EnsureRemotableException(Exception exception)
 		{
-			if (!IsRemotableException(AException))
+			if (!IsRemotableException(exception))
 			{
-                Exception LInnerException = null;
-				if (AException.InnerException != null)
-					LInnerException = EnsureRemotableException(AException.InnerException);
+                Exception innerException = null;
+				if (exception.InnerException != null)
+					innerException = EnsureRemotableException(exception.InnerException);
 					
-				AException = new DataphorException(AException, LInnerException);
+				exception = new DataphorException(exception, innerException);
 			}
 			
-			return AException;
+			return exception;
 		}
 		
-		public static Exception WrapException(Exception AException)
+		public static Exception WrapException(Exception exception)
 		{			
-			return EnsureRemotableException(AException);
+			return EnsureRemotableException(exception);
 		}
 		
 		private void EnsureCatalogCaches()
 		{
-			if (FCatalogCaches == null)
+			if (_catalogCaches == null)
 				InitializeCatalogCaches();
 		}
 		
 		private void InitializeCatalogCaches()
 		{
-			if (FServer.State == ServerState.Started)
+			if (_server.State == ServerState.Started)
 			{
-				FCatalogCaches = new CatalogCaches();
-				CatalogCaches.GatherDefaultCachedObjects(FServer.GetBaseCatalogObjects());
+				_catalogCaches = new CatalogCaches();
+				CatalogCaches.GatherDefaultCachedObjects(_server.GetBaseCatalogObjects());
 			}
 		}
 
@@ -170,12 +170,12 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			try
 			{
-				FServer.Start();
+				_server.Start();
 				InitializeCatalogCaches();
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw WrapException(LException);
+				throw WrapException(exception);
 			}
 		}
 
@@ -190,43 +190,43 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FServer.Stop();
+					_server.Stop();
 				}
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw WrapException(LException);
+				throw WrapException(exception);
 			}
 		}
 		
 		// State
-		public ServerState State { get { return FServer.State; } }
+		public ServerState State { get { return _server.State; } }
 		
 		// Execution
-		private object FSyncHandle = new System.Object();
+		private object _syncHandle = new System.Object();
 		private void BeginCall()
 		{
-			Monitor.Enter(FSyncHandle);
+			Monitor.Enter(_syncHandle);
 		}
 		
 		private void EndCall()
 		{
-			Monitor.Exit(FSyncHandle);
+			Monitor.Exit(_syncHandle);
 		}
 		
 		// Connections
-		private RemoteServerConnections FConnections;
-		internal RemoteServerConnections Connections { get { return FConnections; } }
+		private RemoteServerConnections _connections;
+		internal RemoteServerConnections Connections { get { return _connections; } }
 		
 		internal RemoteServerConnection[] GetCurrentConnections()
 		{
 			BeginCall();
 			try
 			{
-				RemoteServerConnection[] LResult = new RemoteServerConnection[FConnections == null ? 0 : FConnections.Count];
-				if (FConnections != null)
-					FConnections.CopyTo(LResult, 0);
-				return LResult;
+				RemoteServerConnection[] result = new RemoteServerConnection[_connections == null ? 0 : _connections.Count];
+				if (_connections != null)
+					_connections.CopyTo(result, 0);
+				return result;
 			}
 			finally
 			{
@@ -234,7 +234,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		public void DisconnectedObject(object AObject)
+		public void DisconnectedObject(object objectValue)
 		{
 			// Check if this object is a connection that needs to be disposed and dispose it if so
 			// This should not recurse because the RemotingServices.Disconnect call in the connection dispose
@@ -242,32 +242,32 @@ namespace Alphora.Dataphor.DAE.Server
 			//  connection has already been disposed than it should no longer be associated with this server
 			// BTR 5/12/2005 -> Use a thread pool to perform this call so that there is no chance of blocking
 			// the lease manager.
-			RemoteServerConnection LConnection = AObject as RemoteServerConnection;
-			if ((LConnection != null) && (LConnection.Server == this))
-				ThreadPool.QueueUserWorkItem(new WaitCallback(DisposeConnection), LConnection);
+			RemoteServerConnection connection = objectValue as RemoteServerConnection;
+			if ((connection != null) && (connection.Server == this))
+				ThreadPool.QueueUserWorkItem(new WaitCallback(DisposeConnection), connection);
 		}
 		
-		private void DisposeConnection(Object AStateInfo)
+		private void DisposeConnection(Object stateInfo)
 		{
 			try
 			{
-				RemoteServerConnection LConnection = AStateInfo as RemoteServerConnection;
+				RemoteServerConnection connection = stateInfo as RemoteServerConnection;
 				
-				if (LConnection != null)
+				if (connection != null)
 				{
-					LConnection.CloseSessions();
+					connection.CloseSessions();
 					
 					BeginCall();	// sync here; we may be coming in on a remoting thread
 					try
 					{
-						FConnections.SafeDisown(LConnection);
+						_connections.SafeDisown(connection);
 					}
 					finally
 					{
 						EndCall();
 					}
 					
-					LConnection.Dispose();
+					connection.Dispose();
 				}
 			}
 			catch
@@ -276,31 +276,31 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		public void UnmarshaledObject(object AObject, System.Runtime.Remoting.ObjRef ARef)
+		public void UnmarshaledObject(object objectValue, System.Runtime.Remoting.ObjRef refValue)
 		{
 			// nothing (part of ITrackingHandler)
 		}
 
-		public void MarshaledObject(object AObject, System.Runtime.Remoting.ObjRef ARef)
+		public void MarshaledObject(object objectValue, System.Runtime.Remoting.ObjRef refValue)
 		{
 			// nothing (part of ITrackingHandler)
 		}
 
-		public IRemoteServerConnection Establish(string AConnectionName, string AHostName)
+		public IRemoteServerConnection Establish(string connectionName, string hostName)
 		{
 			BeginCall();
 			try
 			{
 				EnsureCatalogCaches();
-				RemoteServerConnection LConnection = new RemoteServerConnection(this, AConnectionName, AHostName);
+				RemoteServerConnection connection = new RemoteServerConnection(this, connectionName, hostName);
 				try
 				{
-					FConnections.Add(LConnection);
-					return LConnection;
+					_connections.Add(connection);
+					return connection;
 				}
 				catch
 				{
-					LConnection.Dispose();
+					connection.Dispose();
 					throw;
 				}
 			}
@@ -314,15 +314,15 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
         
-        public void Relinquish(IRemoteServerConnection AConnection)
+        public void Relinquish(IRemoteServerConnection connection)
         {
-			RemoteServerConnection LConnection = AConnection as RemoteServerConnection;
-			LConnection.CloseSessions();
+			RemoteServerConnection localConnection = connection as RemoteServerConnection;
+			localConnection.CloseSessions();
 
 			BeginCall();
 			try
 			{
-				FConnections.SafeDisown(LConnection);
+				_connections.SafeDisown(localConnection);
 			}
 			finally
 			{
@@ -330,7 +330,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 			try
 			{
-				LConnection.Dispose();
+				localConnection.Dispose();
 			}
 			catch (Exception E)
 			{
@@ -340,29 +340,29 @@ namespace Alphora.Dataphor.DAE.Server
         
 		private void CloseConnections()
 		{
-			if (FConnections != null)
+			if (_connections != null)
 			{
-				while (FConnections.Count > 0)
+				while (_connections.Count > 0)
 				{
 					try
 					{
-						Relinquish(FConnections[0]);
+						Relinquish(_connections[0]);
 					}
 					catch (Exception E)
 					{
-						FServer.LogError(E);
+						_server.LogError(E);
 					}
 				}
 			}
 		}
 		
 		// CacheTimeStamp
-		public long CacheTimeStamp { get { return FServer.CacheTimeStamp; } }
+		public long CacheTimeStamp { get { return _server.CacheTimeStamp; } }
 		
 		// PlanCacheTimeStamp
-		public long PlanCacheTimeStamp { get { return FServer.PlanCacheTimeStamp; } }
+		public long PlanCacheTimeStamp { get { return _server.PlanCacheTimeStamp; } }
 		
 		// DerivationTimeStamp
-		public long DerivationTimeStamp { get { return FServer.DerivationTimeStamp; } }
+		public long DerivationTimeStamp { get { return _server.DerivationTimeStamp; } }
 	}
 }

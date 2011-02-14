@@ -77,17 +77,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	/// </remarks>
 	public abstract class DataValue : System.Object, IDisposable //, IDisposableNotify
 	{
-		public DataValue(IValueManager AManager, Schema.IDataType ADataType) : base()
+		public DataValue(IValueManager manager, Schema.IDataType dataType) : base()
 		{
-			FManager = AManager;
-			FDataType = ADataType;
+			_manager = manager;
+			_dataType = dataType;
 		}
 		
-		protected IValueManager FManager;
-		public IValueManager Manager { get { return FManager; } }
+		protected IValueManager _manager;
+		public IValueManager Manager { get { return _manager; } }
 		
-		protected Schema.IDataType FDataType;
-		public Schema.IDataType DataType { get	{ return FDataType;	} }
+		protected Schema.IDataType _dataType;
+		public Schema.IDataType DataType { get	{ return _dataType;	} }
 		
 		#if USEFINALIZER
 		~DataValue()
@@ -102,18 +102,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public void Dispose()
 		{
-			if (FManager != null)
+			if (_manager != null)
 			{
 				#if USEFINALIZER
 				System.GC.SuppressFinalize(this);
 				#endif
 				Dispose(true);
-				FManager = null;
-				FDataType = null;
+				_manager = null;
+				_dataType = null;
 			}
 		}
 		
-		protected virtual void Dispose(bool ADisposing) { }
+		protected virtual void Dispose(bool disposing) { }
 
 		/// <summary>Indicates whether disposal of the value should deallocate any resources associated with the value.</summary>
 		public bool ValuesOwned = true;
@@ -134,23 +134,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			{
 				if (IsPhysicalStreaming)
 				{
-					MemoryStream LStream = new MemoryStream(64);
-					WriteToPhysical(LStream, false);
-					return LStream.GetBuffer();
+					MemoryStream stream = new MemoryStream(64);
+					WriteToPhysical(stream, false);
+					return stream.GetBuffer();
 				}
 				else
 				{
-					byte[] LValue = new byte[GetPhysicalSize(false)];
-					WriteToPhysical(LValue, 0, false);
-					return LValue;
+					byte[] tempValue = new byte[GetPhysicalSize(false)];
+					WriteToPhysical(tempValue, 0, false);
+					return tempValue;
 				}
 			} 
 			set
 			{
 				if (IsPhysicalStreaming)
 				{
-					MemoryStream LStream = new MemoryStream(value, 0, value.Length, false, true);
-					ReadFromPhysical(LStream);
+					MemoryStream stream = new MemoryStream(value, 0, value.Length, false, true);
+					ReadFromPhysical(stream);
 				}
 				else
 					ReadFromPhysical(value, 0);
@@ -161,31 +161,31 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		public virtual bool IsPhysicalStreaming { get { return false; } }
 		
 		/// <summary>Returns the number of bytes required to store the physical representation of this value.</summary>
-		public virtual int GetPhysicalSize(bool AExpandStreams)
+		public virtual int GetPhysicalSize(bool expandStreams)
 		{
 			throw new NotSupportedException();
 		}
 		
 		/// <summary>Writes the physical representation of this value into the byte array given in ABuffer, beginning at the offset given by AOffset.</summary>		
-		public virtual void WriteToPhysical(byte[] ABuffer, int AOffset, bool AExpandStreams)
+		public virtual void WriteToPhysical(byte[] buffer, int offset, bool expandStreams)
 		{
 			throw new NotSupportedException();
 		}
 		
 		/// <summary>Writes the physical representation of this value into the stream given in AStream.</summary>
-		public virtual void WriteToPhysical(Stream AStream, bool AExpandStreams)
+		public virtual void WriteToPhysical(Stream stream, bool expandStreams)
 		{
 			throw new NotSupportedException();
 		}
 		
 		/// <summary>Sets the native representation of this value by reading the physical representation from the byte array given in ABuffer, beginning at the offset given by AOffset.</summary>
-		public virtual void ReadFromPhysical(byte[] ABuffer, int AOffset)
+		public virtual void ReadFromPhysical(byte[] buffer, int offset)
 		{
 			throw new NotSupportedException();
 		}
 		
 		/// <summary>Sets the native representation of this value by reading the physical representation from the stream given in AStream.</summary>
-		public virtual void ReadFromPhysical(Stream AStream)
+		public virtual void ReadFromPhysical(Stream stream)
 		{
 			throw new NotSupportedException();
 		}
@@ -195,7 +195,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			throw new RuntimeException(RuntimeException.Codes.UnableToProvideStreamAccess, DataType.Name);
 		}
 		
-		public virtual Stream OpenStream(string ARepresentationName)
+		public virtual Stream OpenStream(string representationName)
 		{
 			throw new RuntimeException(RuntimeException.Codes.UnableToProvideStreamAccess, DataType.Name);
 		}
@@ -206,504 +206,504 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		}
 		
 		/// <summary>Copies the native representation of this value and returns the host representation as the given type.</summary>
-		public DataValue CopyAs(Schema.IDataType ADataType)
+		public DataValue CopyAs(Schema.IDataType dataType)
 		{
 			// This code is duplicated in the Copy and FromNative methods for performance...
-			object LValue = CopyNativeAs(ADataType);
+			object tempValue = CopyNativeAs(dataType);
 
-			Schema.IScalarType LScalarType = ADataType as Schema.IScalarType;
-			if (LScalarType != null)
+			Schema.IScalarType scalarType = dataType as Schema.IScalarType;
+			if (scalarType != null)
 			{
-				if (LValue is StreamID)
+				if (tempValue is StreamID)
 				{
-					Scalar LScalar = new Scalar(Manager, LScalarType, (StreamID)LValue);
-					LScalar.ValuesOwned = true;
-					return LScalar;
+					Scalar scalar = new Scalar(Manager, scalarType, (StreamID)tempValue);
+					scalar.ValuesOwned = true;
+					return scalar;
 				}
-				return new Scalar(Manager, LScalarType, LValue);
+				return new Scalar(Manager, scalarType, tempValue);
 			}
 				
-			Schema.IRowType LRowType = ADataType as Schema.IRowType;
-			if (LRowType != null)
+			Schema.IRowType rowType = dataType as Schema.IRowType;
+			if (rowType != null)
 			{
-				Row LRow = new Row(Manager, LRowType, (NativeRow)LValue);
-				LRow.ValuesOwned = true;
-				return LRow;
+				Row row = new Row(Manager, rowType, (NativeRow)tempValue);
+				row.ValuesOwned = true;
+				return row;
 			}
 			
-			Schema.IListType LListType = ADataType as Schema.IListType;
-			if (LListType != null)
+			Schema.IListType listType = dataType as Schema.IListType;
+			if (listType != null)
 			{
-				ListValue LList = new ListValue(Manager, LListType, (NativeList)LValue);
-				LList.ValuesOwned = true;
-				return LList;
+				ListValue list = new ListValue(Manager, listType, (NativeList)tempValue);
+				list.ValuesOwned = true;
+				return list;
 			}
 				
-			Schema.ITableType LTableType = ADataType as Schema.ITableType;
-			if (LTableType != null)
+			Schema.ITableType tableType = dataType as Schema.ITableType;
+			if (tableType != null)
 			{
-				TableValue LTable = new TableValue(Manager, (NativeTable)LValue);
-				LTable.ValuesOwned = true;
-				return LTable;
+				TableValue table = new TableValue(Manager, (NativeTable)tempValue);
+				table.ValuesOwned = true;
+				return table;
 			}
 				
-			Schema.ICursorType LCursorType = ADataType as Schema.ICursorType;
-			if (LCursorType != null)
-				return new CursorValue(Manager, LCursorType, (int)LValue);
+			Schema.ICursorType cursorType = dataType as Schema.ICursorType;
+			if (cursorType != null)
+				return new CursorValue(Manager, cursorType, (int)tempValue);
 				
-			throw new RuntimeException(RuntimeException.Codes.InvalidValueType, ADataType == null ? "<null>" : ADataType.GetType().Name);
+			throw new RuntimeException(RuntimeException.Codes.InvalidValueType, dataType == null ? "<null>" : dataType.GetType().Name);
 		}
 		
 		public DataValue Copy()
 		{
 			// This code is duplicated in the FromNative and CopyAs methods for performance...
-			object LValue = CopyNative();
-			Schema.IScalarType LScalarType = DataType as Schema.IScalarType;
+			object tempValue = CopyNative();
+			Schema.IScalarType scalarType = DataType as Schema.IScalarType;
 
-			if (LScalarType != null)
+			if (scalarType != null)
 			{
-				if (LValue is StreamID)
+				if (tempValue is StreamID)
 				{
-					Scalar LScalar = new Scalar(Manager, LScalarType, (StreamID)LValue);
-					LScalar.ValuesOwned = true;
-					return LScalar;
+					Scalar scalar = new Scalar(Manager, scalarType, (StreamID)tempValue);
+					scalar.ValuesOwned = true;
+					return scalar;
 				}
-				return new Scalar(Manager, LScalarType, LValue);
+				return new Scalar(Manager, scalarType, tempValue);
 			}
 				
-			Schema.IRowType LRowType = DataType as Schema.IRowType;
-			if (LRowType != null)
+			Schema.IRowType rowType = DataType as Schema.IRowType;
+			if (rowType != null)
 			{
-				Row LRow = new Row(Manager, LRowType, (NativeRow)LValue);
-				LRow.ValuesOwned = true;
-				return LRow;
+				Row row = new Row(Manager, rowType, (NativeRow)tempValue);
+				row.ValuesOwned = true;
+				return row;
 			}
 			
-			Schema.IListType LListType = DataType as Schema.IListType;
-			if (LListType != null)
+			Schema.IListType listType = DataType as Schema.IListType;
+			if (listType != null)
 			{
-				ListValue LList = new ListValue(Manager, LListType, (NativeList)LValue);
-				LList.ValuesOwned = true;
-				return LList;
+				ListValue list = new ListValue(Manager, listType, (NativeList)tempValue);
+				list.ValuesOwned = true;
+				return list;
 			}
 				
-			Schema.ITableType LTableType = DataType as Schema.ITableType;
-			if (LTableType != null)
+			Schema.ITableType tableType = DataType as Schema.ITableType;
+			if (tableType != null)
 			{
-				TableValue LTable = new TableValue(Manager, (NativeTable)LValue);
-				LTable.ValuesOwned = true;
-				return LTable;
+				TableValue table = new TableValue(Manager, (NativeTable)tempValue);
+				table.ValuesOwned = true;
+				return table;
 			}
 				
-			Schema.ICursorType LCursorType = DataType as Schema.ICursorType;
-			if (LCursorType != null)
-				return new CursorValue(Manager, LCursorType, (int)LValue);
+			Schema.ICursorType cursorType = DataType as Schema.ICursorType;
+			if (cursorType != null)
+				return new CursorValue(Manager, cursorType, (int)tempValue);
 				
 			throw new RuntimeException(RuntimeException.Codes.InvalidValueType, DataType == null ? "<null>" : DataType.GetType().Name);
 		}
 		
-		public object Copy(IValueManager AManager)
+		public object Copy(IValueManager manager)
 		{
 			// This code is duplicated in the FromNative and CopyAs methods for performance...
-			object LValue = CopyNative();
+			object tempValue = CopyNative();
 
-			Schema.IScalarType LScalarType = DataType as Schema.IScalarType;
-			if (LScalarType != null)
+			Schema.IScalarType scalarType = DataType as Schema.IScalarType;
+			if (scalarType != null)
 			{
-				if (LValue is StreamID)
+				if (tempValue is StreamID)
 				{
-					Scalar LScalar = new Scalar(AManager, LScalarType, (StreamID)LValue);
-					LScalar.ValuesOwned = true;
-					return LScalar;
+					Scalar scalar = new Scalar(manager, scalarType, (StreamID)tempValue);
+					scalar.ValuesOwned = true;
+					return scalar;
 				}
-				return new Scalar(AManager, LScalarType, LValue);
+				return new Scalar(manager, scalarType, tempValue);
 			}
 				
-			Schema.IRowType LRowType = DataType as Schema.IRowType;
-			if (LRowType != null)
+			Schema.IRowType rowType = DataType as Schema.IRowType;
+			if (rowType != null)
 			{
-				Row LRow = new Row(AManager, LRowType, (NativeRow)LValue);
-				LRow.ValuesOwned = true;
-				return LRow;
+				Row row = new Row(manager, rowType, (NativeRow)tempValue);
+				row.ValuesOwned = true;
+				return row;
 			}
 			
-			Schema.IListType LListType = DataType as Schema.IListType;
-			if (LListType != null)
+			Schema.IListType listType = DataType as Schema.IListType;
+			if (listType != null)
 			{
-				ListValue LList = new ListValue(AManager, LListType, (NativeList)LValue);
-				LList.ValuesOwned = true;
-				return LList;
+				ListValue list = new ListValue(manager, listType, (NativeList)tempValue);
+				list.ValuesOwned = true;
+				return list;
 			}
 				
-			Schema.ITableType LTableType = DataType as Schema.ITableType;
-			if (LTableType != null)
+			Schema.ITableType tableType = DataType as Schema.ITableType;
+			if (tableType != null)
 			{
-				TableValue LTable = new TableValue(AManager, (NativeTable)LValue);
-				LTable.ValuesOwned = true;
-				return LTable;
+				TableValue table = new TableValue(manager, (NativeTable)tempValue);
+				table.ValuesOwned = true;
+				return table;
 			}
 				
-			Schema.ICursorType LCursorType = DataType as Schema.ICursorType;
-			if (LCursorType != null)
-				return new CursorValue(AManager, LCursorType, (int)LValue);
+			Schema.ICursorType cursorType = DataType as Schema.ICursorType;
+			if (cursorType != null)
+				return new CursorValue(manager, cursorType, (int)tempValue);
 				
 			throw new RuntimeException(RuntimeException.Codes.InvalidValueType, DataType == null ? "<null>" : DataType.GetType().Name);
 		}
 		
-		public abstract object CopyNativeAs(Schema.IDataType ADataType);
+		public abstract object CopyNativeAs(Schema.IDataType dataType);
 		
 		public object CopyNative()
 		{
 			return CopyNativeAs(DataType);
 		}
 		
-		public static Schema.IScalarType NativeTypeToScalarType(IValueManager AManager, Type AType)
+		public static Schema.IScalarType NativeTypeToScalarType(IValueManager manager, Type type)
 		{
-			if (AType == NativeAccessors.AsBoolean.NativeType) return AManager.DataTypes.SystemBoolean;
-			if (AType == NativeAccessors.AsByte.NativeType) return AManager.DataTypes.SystemByte;
-			if (AType == NativeAccessors.AsByteArray.NativeType) return AManager.DataTypes.SystemBinary;
-			if (AType == NativeAccessors.AsDateTime.NativeType) return AManager.DataTypes.SystemDateTime;
-			if (AType == NativeAccessors.AsDecimal.NativeType) return AManager.DataTypes.SystemDecimal;
-			if (AType == NativeAccessors.AsException.NativeType) return AManager.DataTypes.SystemError;
-			if (AType == NativeAccessors.AsGuid.NativeType) return AManager.DataTypes.SystemGuid;
-			if (AType == NativeAccessors.AsInt16.NativeType) return AManager.DataTypes.SystemShort;
-			if (AType == NativeAccessors.AsInt32.NativeType) return AManager.DataTypes.SystemInteger;
-			if (AType == NativeAccessors.AsInt64.NativeType) return AManager.DataTypes.SystemLong;
-			if (AType == NativeAccessors.AsString.NativeType) return AManager.DataTypes.SystemString;
-			if (AType == NativeAccessors.AsTimeSpan.NativeType) return AManager.DataTypes.SystemTimeSpan;
-			return AManager.DataTypes.SystemScalar;
+			if (type == NativeAccessors.AsBoolean.NativeType) return manager.DataTypes.SystemBoolean;
+			if (type == NativeAccessors.AsByte.NativeType) return manager.DataTypes.SystemByte;
+			if (type == NativeAccessors.AsByteArray.NativeType) return manager.DataTypes.SystemBinary;
+			if (type == NativeAccessors.AsDateTime.NativeType) return manager.DataTypes.SystemDateTime;
+			if (type == NativeAccessors.AsDecimal.NativeType) return manager.DataTypes.SystemDecimal;
+			if (type == NativeAccessors.AsException.NativeType) return manager.DataTypes.SystemError;
+			if (type == NativeAccessors.AsGuid.NativeType) return manager.DataTypes.SystemGuid;
+			if (type == NativeAccessors.AsInt16.NativeType) return manager.DataTypes.SystemShort;
+			if (type == NativeAccessors.AsInt32.NativeType) return manager.DataTypes.SystemInteger;
+			if (type == NativeAccessors.AsInt64.NativeType) return manager.DataTypes.SystemLong;
+			if (type == NativeAccessors.AsString.NativeType) return manager.DataTypes.SystemString;
+			if (type == NativeAccessors.AsTimeSpan.NativeType) return manager.DataTypes.SystemTimeSpan;
+			return manager.DataTypes.SystemScalar;
 		}
 		
-		public static DataValue FromNative(IValueManager AManager, object AValue)
+		public static DataValue FromNative(IValueManager manager, object tempValue)
 		{
-			if (AValue == null)
-				return new Scalar(AManager, AManager.DataTypes.SystemScalar, null);
+			if (tempValue == null)
+				return new Scalar(manager, manager.DataTypes.SystemScalar, null);
 				
-			if (AValue is StreamID)
-				return new Scalar(AManager, AManager.DataTypes.SystemScalar, (StreamID)AValue);
+			if (tempValue is StreamID)
+				return new Scalar(manager, manager.DataTypes.SystemScalar, (StreamID)tempValue);
 				
-			return new Scalar(AManager, NativeTypeToScalarType(AManager, AValue.GetType()), AValue);
+			return new Scalar(manager, NativeTypeToScalarType(manager, tempValue.GetType()), tempValue);
 		}
 		
 		/// <summary>Returns the host representation of the given native value.  This is a by-reference operation.</summary>		
-		public static DataValue FromNative(IValueManager AManager, Schema.IDataType ADataType, object AValue)
+		public static DataValue FromNative(IValueManager manager, Schema.IDataType dataType, object tempValue)
 		{
-			if (AValue == null)
+			if (tempValue == null)
 				return null;
 				
 			// This code is duplicated in the Copy method and the FromNative overloads for performance
-			Schema.IScalarType LScalarType = ADataType as Schema.IScalarType;
-			if (LScalarType != null)
+			Schema.IScalarType scalarType = dataType as Schema.IScalarType;
+			if (scalarType != null)
 			{
-				if (AValue is StreamID)
-					return new Scalar(AManager, LScalarType, (StreamID)AValue);
-				if (LScalarType.IsGeneric)
-					return new Scalar(AManager, NativeTypeToScalarType(AManager, AValue.GetType()), AValue);
-				return new Scalar(AManager, LScalarType, AValue);
+				if (tempValue is StreamID)
+					return new Scalar(manager, scalarType, (StreamID)tempValue);
+				if (scalarType.IsGeneric)
+					return new Scalar(manager, NativeTypeToScalarType(manager, tempValue.GetType()), tempValue);
+				return new Scalar(manager, scalarType, tempValue);
 			}
 				
-			Schema.IRowType LRowType = ADataType as Schema.IRowType;
-			if (LRowType != null)
-				return new Row(AManager, LRowType, (NativeRow)AValue);
+			Schema.IRowType rowType = dataType as Schema.IRowType;
+			if (rowType != null)
+				return new Row(manager, rowType, (NativeRow)tempValue);
 			
-			Schema.IListType LListType = ADataType as Schema.IListType;
-			if (LListType != null)
-				return new ListValue(AManager, LListType, (NativeList)AValue);
+			Schema.IListType listType = dataType as Schema.IListType;
+			if (listType != null)
+				return new ListValue(manager, listType, (NativeList)tempValue);
 				
-			Schema.ITableType LTableType = ADataType as Schema.ITableType;
-			if (LTableType != null)
-				return new TableValue(AManager, (NativeTable)AValue);
+			Schema.ITableType tableType = dataType as Schema.ITableType;
+			if (tableType != null)
+				return new TableValue(manager, (NativeTable)tempValue);
 				
-			Schema.ICursorType LCursorType = ADataType as Schema.ICursorType;
-			if (LCursorType != null)
-				return new CursorValue(AManager, LCursorType, (int)AValue);
+			Schema.ICursorType cursorType = dataType as Schema.ICursorType;
+			if (cursorType != null)
+				return new CursorValue(manager, cursorType, (int)tempValue);
 				
-			throw new RuntimeException(RuntimeException.Codes.InvalidValueType, ADataType == null ? "<null>" : ADataType.GetType().Name);
+			throw new RuntimeException(RuntimeException.Codes.InvalidValueType, dataType == null ? "<null>" : dataType.GetType().Name);
 		}
 		
 		/// <summary>Returns the host representation of the given native value.  This is a by-reference operation.</summary>		
-		public static DataValue FromNativeRow(IValueManager AManager, Schema.IRowType ARowType, NativeRow ANativeRow, int ANativeRowIndex)
+		public static DataValue FromNativeRow(IValueManager manager, Schema.IRowType rowType, NativeRow nativeRow, int nativeRowIndex)
 		{
 			// This code is duplicated in the Copy method and the FromNative overloads for performance
 			#if USEDATATYPESINNATIVEROW
-			Schema.IDataType LDataType = ANativeRow.DataTypes[ANativeRowIndex];
-			if (LDataType == null)
-				LDataType = ARowType.Columns[ANativeRowIndex].DataType;
+			Schema.IDataType dataType = nativeRow.DataTypes[nativeRowIndex];
+			if (dataType == null)
+				dataType = rowType.Columns[nativeRowIndex].DataType;
 			#else
-			Schema.IDataType LDataType = ARowType.Columns[ANativeRowIndex].DataType;
+			Schema.IDataType dataType = ARowType.Columns[ANativeRowIndex].DataType;
 			#endif
 
-			Schema.IScalarType LScalarType = LDataType as Schema.IScalarType;
-			if (LScalarType != null)
-				return new RowInternedScalar(AManager, LScalarType, ANativeRow, ANativeRowIndex);
+			Schema.IScalarType scalarType = dataType as Schema.IScalarType;
+			if (scalarType != null)
+				return new RowInternedScalar(manager, scalarType, nativeRow, nativeRowIndex);
 				
-			Schema.IRowType LRowType = LDataType as Schema.IRowType;
-			if (LRowType != null)
-				return new Row(AManager, LRowType, (NativeRow)ANativeRow.Values[ANativeRowIndex]);
+			Schema.IRowType localRowType = dataType as Schema.IRowType;
+			if (localRowType != null)
+				return new Row(manager, localRowType, (NativeRow)nativeRow.Values[nativeRowIndex]);
 			
-			Schema.IListType LListType = LDataType as Schema.IListType;
-			if (LListType != null)
-				return new ListValue(AManager, LListType, (NativeList)ANativeRow.Values[ANativeRowIndex]);
+			Schema.IListType listType = dataType as Schema.IListType;
+			if (listType != null)
+				return new ListValue(manager, listType, (NativeList)nativeRow.Values[nativeRowIndex]);
 				
-			Schema.ITableType LTableType = LDataType as Schema.ITableType;
-			if (LTableType != null)
-				return new TableValue(AManager, (NativeTable)ANativeRow.Values[ANativeRowIndex]);
+			Schema.ITableType tableType = dataType as Schema.ITableType;
+			if (tableType != null)
+				return new TableValue(manager, (NativeTable)nativeRow.Values[nativeRowIndex]);
 				
-			Schema.ICursorType LCursorType = LDataType as Schema.ICursorType;
-			if (LCursorType != null)
-				return new CursorValue(AManager, LCursorType, (int)ANativeRow.Values[ANativeRowIndex]);
+			Schema.ICursorType cursorType = dataType as Schema.ICursorType;
+			if (cursorType != null)
+				return new CursorValue(manager, cursorType, (int)nativeRow.Values[nativeRowIndex]);
 				
-			throw new RuntimeException(RuntimeException.Codes.InvalidValueType, LDataType == null ? "<null>" : LDataType.GetType().Name);
+			throw new RuntimeException(RuntimeException.Codes.InvalidValueType, dataType == null ? "<null>" : dataType.GetType().Name);
 		}
 		
 		/// <summary>Returns the host representation of the given native value.  This is a by-reference operation.</summary>		
-		public static DataValue FromNativeList(IValueManager AManager, Schema.IListType AListType, NativeList ANativeList, int ANativeListIndex)
+		public static DataValue FromNativeList(IValueManager manager, Schema.IListType listType, NativeList nativeList, int nativeListIndex)
 		{
 			// This code is duplicated in the Copy method and the FromNative overloads for performance
-			Schema.IDataType LDataType = ANativeList.DataTypes[ANativeListIndex];
-			if (LDataType == null)
-				LDataType = AListType.ElementType;
+			Schema.IDataType dataType = nativeList.DataTypes[nativeListIndex];
+			if (dataType == null)
+				dataType = listType.ElementType;
 
-			Schema.IScalarType LScalarType = ANativeList.DataTypes[ANativeListIndex] as Schema.IScalarType;
-			if (LScalarType != null)
-				return new ListInternedScalar(AManager, LScalarType, ANativeList, ANativeListIndex);
+			Schema.IScalarType scalarType = nativeList.DataTypes[nativeListIndex] as Schema.IScalarType;
+			if (scalarType != null)
+				return new ListInternedScalar(manager, scalarType, nativeList, nativeListIndex);
 				
-			Schema.IRowType LRowType = ANativeList.DataTypes[ANativeListIndex] as Schema.IRowType;
-			if (LRowType != null)
-				return new Row(AManager, LRowType, (NativeRow)ANativeList.Values[ANativeListIndex]);
+			Schema.IRowType rowType = nativeList.DataTypes[nativeListIndex] as Schema.IRowType;
+			if (rowType != null)
+				return new Row(manager, rowType, (NativeRow)nativeList.Values[nativeListIndex]);
 			
-			Schema.IListType LListType = ANativeList.DataTypes[ANativeListIndex] as Schema.IListType;
-			if (LListType != null)
-				return new ListValue(AManager, LListType, (NativeList)ANativeList.Values[ANativeListIndex]);
+			Schema.IListType localListType = nativeList.DataTypes[nativeListIndex] as Schema.IListType;
+			if (localListType != null)
+				return new ListValue(manager, localListType, (NativeList)nativeList.Values[nativeListIndex]);
 				
-			Schema.ITableType LTableType = ANativeList.DataTypes[ANativeListIndex] as Schema.ITableType;
-			if (LTableType != null)
-				return new TableValue(AManager, (NativeTable)ANativeList.Values[ANativeListIndex]);
+			Schema.ITableType tableType = nativeList.DataTypes[nativeListIndex] as Schema.ITableType;
+			if (tableType != null)
+				return new TableValue(manager, (NativeTable)nativeList.Values[nativeListIndex]);
 				
-			Schema.ICursorType LCursorType = ANativeList.DataTypes[ANativeListIndex] as Schema.ICursorType;
-			if (LCursorType != null)
-				return new CursorValue(AManager, LCursorType, (int)ANativeList.Values[ANativeListIndex]);
+			Schema.ICursorType cursorType = nativeList.DataTypes[nativeListIndex] as Schema.ICursorType;
+			if (cursorType != null)
+				return new CursorValue(manager, cursorType, (int)nativeList.Values[nativeListIndex]);
 				
-			throw new RuntimeException(RuntimeException.Codes.InvalidValueType, ANativeList.DataTypes[ANativeListIndex] == null ? "<null>" : ANativeList.DataTypes[ANativeListIndex].GetType().Name);
+			throw new RuntimeException(RuntimeException.Codes.InvalidValueType, nativeList.DataTypes[nativeListIndex] == null ? "<null>" : nativeList.DataTypes[nativeListIndex].GetType().Name);
 		}
 		
 		/// <summary>Returns the host representation of the given physical value.</summary>
-		public static DataValue FromPhysical(IValueManager AManager, Schema.IDataType ADataType, byte[] ABuffer, int AOffset)
+		public static DataValue FromPhysical(IValueManager manager, Schema.IDataType dataType, byte[] buffer, int offset)
 		{
-			Schema.ScalarType LScalarType = ADataType as Schema.ScalarType;
-			if (LScalarType != null)
+			Schema.ScalarType scalarType = dataType as Schema.ScalarType;
+			if (scalarType != null)
 			{
-				Scalar LScalar = new Scalar(AManager, LScalarType, null);
-				LScalar.ReadFromPhysical(ABuffer, AOffset);
-				return LScalar;
+				Scalar scalar = new Scalar(manager, scalarType, null);
+				scalar.ReadFromPhysical(buffer, offset);
+				return scalar;
 			}
 			
-			Schema.IRowType LRowType = ADataType as Schema.IRowType;
-			if (LRowType != null)
+			Schema.IRowType rowType = dataType as Schema.IRowType;
+			if (rowType != null)
 			{
-				Row LRow = new Row(AManager, LRowType);
-				LRow.ReadFromPhysical(ABuffer, AOffset);
-				return LRow;
+				Row row = new Row(manager, rowType);
+				row.ReadFromPhysical(buffer, offset);
+				return row;
 			}
 			
-			Schema.IListType LListType = ADataType as Schema.IListType;
-			if (LListType != null)
+			Schema.IListType listType = dataType as Schema.IListType;
+			if (listType != null)
 			{
-				ListValue LList = new ListValue(AManager, LListType);
-				LList.ReadFromPhysical(ABuffer, AOffset);
-				return LList;
+				ListValue list = new ListValue(manager, listType);
+				list.ReadFromPhysical(buffer, offset);
+				return list;
 			}
 			
-			Schema.ITableType LTableType = ADataType as Schema.ITableType;
-			if (LTableType != null)
+			Schema.ITableType tableType = dataType as Schema.ITableType;
+			if (tableType != null)
 			{
-				TableValue LTable = new TableValue(AManager, null);
-				LTable.ReadFromPhysical(ABuffer, AOffset);
-				return LTable;
+				TableValue table = new TableValue(manager, null);
+				table.ReadFromPhysical(buffer, offset);
+				return table;
 			}
 			
-			Schema.ICursorType LCursorType = ADataType as Schema.ICursorType;
-			if (LCursorType != null)
+			Schema.ICursorType cursorType = dataType as Schema.ICursorType;
+			if (cursorType != null)
 			{
-				CursorValue LCursor = new CursorValue(AManager, LCursorType, -1);
-				LCursor.ReadFromPhysical(ABuffer, AOffset);
-				return LCursor;
+				CursorValue cursor = new CursorValue(manager, cursorType, -1);
+				cursor.ReadFromPhysical(buffer, offset);
+				return cursor;
 			}
 
-			throw new RuntimeException(RuntimeException.Codes.InvalidValueType, ADataType == null ? "<null>" : ADataType.GetType().Name);
+			throw new RuntimeException(RuntimeException.Codes.InvalidValueType, dataType == null ? "<null>" : dataType.GetType().Name);
 		}
 
-		public static object CopyNative(IValueManager AManager, Schema.IDataType ADataType, object AValue)
+		public static object CopyNative(IValueManager manager, Schema.IDataType dataType, object tempValue)
 		{
 			// This code is duplicated in the descendent CopyNative methods for performance
-			if (AValue == null)
-				return AValue;
+			if (tempValue == null)
+				return tempValue;
 				
-			Schema.ScalarType LScalarType = ADataType as Schema.ScalarType;
-			if (LScalarType != null)
+			Schema.ScalarType scalarType = dataType as Schema.ScalarType;
+			if (scalarType != null)
 			{
-				if (AValue is StreamID)
-					return AManager.StreamManager.Reference((StreamID)AValue);
+				if (tempValue is StreamID)
+					return manager.StreamManager.Reference((StreamID)tempValue);
 				
-				ICloneable LCloneable = AValue as ICloneable;
-				if (LCloneable != null)
-					return LCloneable.Clone();
+				ICloneable cloneable = tempValue as ICloneable;
+				if (cloneable != null)
+					return cloneable.Clone();
 					
-				if (LScalarType.IsCompound)
-					return CopyNative(AManager, LScalarType.CompoundRowType, AValue);
+				if (scalarType.IsCompound)
+					return CopyNative(manager, scalarType.CompoundRowType, tempValue);
 					
-				return AValue;
+				return tempValue;
 			}
 			
-			Schema.IRowType LRowType = ADataType as Schema.IRowType;
-			if (LRowType != null)
+			Schema.IRowType rowType = dataType as Schema.IRowType;
+			if (rowType != null)
 			{
-				NativeRow LNativeRow = (NativeRow)AValue;
-				NativeRow LNewRow = new NativeRow(LRowType.Columns.Count);
-				for (int LIndex = 0; LIndex < LRowType.Columns.Count; LIndex++)
+				NativeRow nativeRow = (NativeRow)tempValue;
+				NativeRow newRow = new NativeRow(rowType.Columns.Count);
+				for (int index = 0; index < rowType.Columns.Count; index++)
 				{
 					#if USEDATATYPESINNATIVEROW
-					LNewRow.DataTypes[LIndex] = LNativeRow.DataTypes[LIndex];
-					LNewRow.Values[LIndex] = CopyNative(AManager, LNativeRow.DataTypes[LIndex], LNativeRow.Values[LIndex]);
+					newRow.DataTypes[index] = nativeRow.DataTypes[index];
+					newRow.Values[index] = CopyNative(manager, nativeRow.DataTypes[index], nativeRow.Values[index]);
 					#else
-					LNewRow.Values[LIndex] = CopyNative(AManager, LRowType.Columns[LIndex].DataType, LNativeRow.Values[LIndex]);
+					newRow.Values[index] = CopyNative(AManager, rowType.Columns[index].DataType, nativeRow.Values[index]);
 					#endif
 				}
-				return LNewRow;
+				return newRow;
 			}
 			
-			Schema.IListType LListType = ADataType as Schema.IListType;
-			if (LListType != null)
+			Schema.IListType listType = dataType as Schema.IListType;
+			if (listType != null)
 			{
-				NativeList LNativeList = (NativeList)AValue;
-				NativeList LNewList = new NativeList();
-				for (int LIndex = 0; LIndex < LNativeList.DataTypes.Count; LIndex++)
+				NativeList nativeList = (NativeList)tempValue;
+				NativeList newList = new NativeList();
+				for (int index = 0; index < nativeList.DataTypes.Count; index++)
 				{
-					LNewList.DataTypes.Add(LNativeList.DataTypes[LIndex]);
-					LNewList.Values.Add(CopyNative(AManager, LNativeList.DataTypes[LIndex], LNativeList.Values[LIndex]));
+					newList.DataTypes.Add(nativeList.DataTypes[index]);
+					newList.Values.Add(CopyNative(manager, nativeList.DataTypes[index], nativeList.Values[index]));
 				}
-				return LNewList;
+				return newList;
 			}
 			
-			Schema.ITableType LTableType = ADataType as Schema.ITableType;
-			if (LTableType != null)
+			Schema.ITableType tableType = dataType as Schema.ITableType;
+			if (tableType != null)
 			{
-				NativeTable LNativeTable = (NativeTable)AValue;
-				NativeTable LNewTable = new NativeTable(AManager, LNativeTable.TableVar);
-				using (Scan LScan = new Scan(AManager, LNativeTable, LNativeTable.ClusteredIndex, ScanDirection.Forward, null, null))
+				NativeTable nativeTable = (NativeTable)tempValue;
+				NativeTable newTable = new NativeTable(manager, nativeTable.TableVar);
+				using (Scan scan = new Scan(manager, nativeTable, nativeTable.ClusteredIndex, ScanDirection.Forward, null, null))
 				{
-					while (!LScan.EOF())
+					while (!scan.EOF())
 					{
-						using (Row LRow = LScan.GetRow())
+						using (Row row = scan.GetRow())
 						{
-							LNewTable.Insert(AManager, LRow);
+							newTable.Insert(manager, row);
 						}
 					}
 				}
-				return LNewTable;
+				return newTable;
 			}
 			
-			Schema.ICursorType LCursorType = ADataType as Schema.ICursorType;
-			if (LCursorType != null)
-				return AValue;
+			Schema.ICursorType cursorType = dataType as Schema.ICursorType;
+			if (cursorType != null)
+				return tempValue;
 			
-			throw new RuntimeException(RuntimeException.Codes.InvalidValueType, ADataType == null ? "<null>" : ADataType.GetType().Name);
+			throw new RuntimeException(RuntimeException.Codes.InvalidValueType, dataType == null ? "<null>" : dataType.GetType().Name);
 		}
 
 		/// <summary>Disposes the given native value.</summary>		
-		public static void DisposeNative(IValueManager AManager, Schema.IDataType ADataType, object AValue)
+		public static void DisposeNative(IValueManager manager, Schema.IDataType dataType, object tempValue)
 		{
-			if (AValue == null)
+			if (tempValue == null)
 				return;
 
-			Schema.ScalarType LScalarType = ADataType as Schema.ScalarType;
-			if (LScalarType != null)
+			Schema.ScalarType scalarType = dataType as Schema.ScalarType;
+			if (scalarType != null)
 			{
-				if (AValue is StreamID)
-					AManager.StreamManager.Deallocate((StreamID)AValue);
+				if (tempValue is StreamID)
+					manager.StreamManager.Deallocate((StreamID)tempValue);
 					
-				if (LScalarType.IsCompound)
-					DisposeNative(AManager, LScalarType.CompoundRowType, AValue);
+				if (scalarType.IsCompound)
+					DisposeNative(manager, scalarType.CompoundRowType, tempValue);
 
 				return;
 			}
 			
-			using (DataValue LDataValue = DataValue.FromNative(AManager, ADataType, AValue))
+			using (DataValue dataValue = DataValue.FromNative(manager, dataType, tempValue))
 			{
-				LDataValue.ValuesOwned = true;
+				dataValue.ValuesOwned = true;
 			}
 		}
 		
-		public static object CopyValue(IValueManager AManager, object AValue)
+		public static object CopyValue(IValueManager manager, object value)
 		{
-			DataValue LValue = AValue as DataValue;
-			if (LValue != null)
-				return LValue.Copy();
+			DataValue dataValue = value as DataValue;
+			if (dataValue != null)
+				return dataValue.Copy();
 				
-			ICloneable LCloneable = AValue as ICloneable;
-			if (LCloneable != null)
-				return LCloneable.Clone();
+			ICloneable cloneable = value as ICloneable;
+			if (cloneable != null)
+				return cloneable.Clone();
 				
 			#if SILVERLIGHT
 			
-			System.Array LArray = AValue as System.Array;
-			if (LArray != null)
-				return LArray.Clone();
+			System.Array array = value as System.Array;
+			if (array != null)
+				return array.Clone();
 			
 			#endif
 				
-			if (AValue is StreamID)
-				return AManager.StreamManager.Reference((StreamID)AValue);
+			if (value is StreamID)
+				return manager.StreamManager.Reference((StreamID)value);
 				
-			NativeRow LNativeRow = AValue as NativeRow;
-			if (LNativeRow != null)
+			NativeRow nativeRow = value as NativeRow;
+			if (nativeRow != null)
 			{
-				NativeRow LNewRow = new NativeRow(LNativeRow.Values.Length);
-				for (int LIndex = 0; LIndex < LNativeRow.Values.Length; LIndex++)
+				NativeRow newRow = new NativeRow(nativeRow.Values.Length);
+				for (int index = 0; index < nativeRow.Values.Length; index++)
 				{
 					#if USEDATATYPESINNATIVEROW
-					LNewRow.DataTypes[LIndex] = LNativeRow.DataTypes[LIndex];
+					newRow.DataTypes[index] = nativeRow.DataTypes[index];
 					#endif
-					LNewRow.Values[LIndex] = CopyValue(AManager, LNativeRow.Values[LIndex]);
+					newRow.Values[index] = CopyValue(manager, nativeRow.Values[index]);
 				}
-				return LNewRow;
+				return newRow;
 			}
 			
-			NativeList LNativeList = AValue as NativeList;
-			if (LNativeList != null)
+			NativeList nativeList = value as NativeList;
+			if (nativeList != null)
 			{
-				NativeList LNewList = new NativeList();
-				for (int LIndex = 0; LIndex < LNativeList.Values.Count; LIndex++)
+				NativeList newList = new NativeList();
+				for (int index = 0; index < nativeList.Values.Count; index++)
 				{
-					LNewList.DataTypes.Add(LNativeList.DataTypes[LIndex]);
-					LNewList.Values.Add(CopyValue(AManager, LNativeList.Values[LIndex]));
+					newList.DataTypes.Add(nativeList.DataTypes[index]);
+					newList.Values.Add(CopyValue(manager, nativeList.Values[index]));
 				}
-				return LNewList;
+				return newList;
 			}
 			
-			return AValue;
+			return value;
 		}
 		
-		public static void DisposeValue(IValueManager AManager, object AValue)
+		public static void DisposeValue(IValueManager manager, object tempValue)
 		{
-			DataValue LValue = AValue as DataValue;
-			if (LValue != null)
+			DataValue localTempValue = tempValue as DataValue;
+			if (localTempValue != null)
 			{
-				LValue.Dispose();
+				localTempValue.Dispose();
 				return;
 			}
 			
-			if (AValue is StreamID)
+			if (tempValue is StreamID)
 			{
-				AManager.StreamManager.Deallocate((StreamID)AValue);
+				manager.StreamManager.Deallocate((StreamID)tempValue);
 				return;
 			}
 			
-			NativeRow LNativeRow = AValue as NativeRow;
-			if (LNativeRow != null)
+			NativeRow nativeRow = tempValue as NativeRow;
+			if (nativeRow != null)
 			{
-				for (int LIndex = 0; LIndex < LNativeRow.Values.Length; LIndex++)
-					DisposeValue(AManager, LNativeRow.Values[LIndex]);
+				for (int index = 0; index < nativeRow.Values.Length; index++)
+					DisposeValue(manager, nativeRow.Values[index]);
 				return;
 			}
 		}
@@ -717,50 +717,50 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		/// Note that this method expects that neither argument is null.
 		/// </remarks>
 		/// <returns>True if the values are equal, false otherwise.</returns>
-		public static bool NativeValuesEqual(IValueManager AManager, object LOldValue, object LCurrentValue)
+		public static bool NativeValuesEqual(IValueManager manager, object LOldValue, object LCurrentValue)
 		{
 			if (((LOldValue is StreamID) || (LOldValue is byte[])) && ((LCurrentValue is StreamID) || (LCurrentValue is byte[])))
 			{
-				Stream LOldStream = 
+				Stream oldStream = 
 					LOldValue is StreamID 
-						? AManager.StreamManager.Open((StreamID)LOldValue, LockMode.Exclusive)
+						? manager.StreamManager.Open((StreamID)LOldValue, LockMode.Exclusive)
 						: new MemoryStream((byte[])LOldValue, false);
 				try
 				{
-					Stream LCurrentStream = 
+					Stream currentStream = 
 						LCurrentValue is StreamID
-							? AManager.StreamManager.Open((StreamID)LCurrentValue, LockMode.Exclusive)
+							? manager.StreamManager.Open((StreamID)LCurrentValue, LockMode.Exclusive)
 							: new MemoryStream((byte[])LCurrentValue, false);
 					try
 					{
-						bool LValuesEqual = true;
-						int LOldByte;
-						int LCurrentByte;
-						while (LValuesEqual)
+						bool valuesEqual = true;
+						int oldByte;
+						int currentByte;
+						while (valuesEqual)
 						{
-							LOldByte = LOldStream.ReadByte();
-							LCurrentByte = LCurrentStream.ReadByte();
+							oldByte = oldStream.ReadByte();
+							currentByte = currentStream.ReadByte();
 							
-							if (LOldByte != LCurrentByte)
+							if (oldByte != currentByte)
 							{
-								LValuesEqual = false;
+								valuesEqual = false;
 								break;
 							}
 							
-							if (LOldByte == -1)
+							if (oldByte == -1)
 								break;
 						}
 						
-						return LValuesEqual;
+						return valuesEqual;
 					}
 					finally
 					{
-						LCurrentStream.Close();
+						currentStream.Close();
 					}
 				}
 				finally
 				{
-					LOldStream.Close();
+					oldStream.Close();
 				}
 			}
 			

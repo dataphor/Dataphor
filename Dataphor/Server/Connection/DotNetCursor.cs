@@ -12,129 +12,129 @@ namespace Alphora.Dataphor.DAE.Connection
 {
 	public class DotNetCursor : SQLCursor
 	{
-		public DotNetCursor(DotNetCommand ACommand, IDataReader ACursor) : base(ACommand)
+		public DotNetCursor(DotNetCommand command, IDataReader cursor) : base(command)
 		{
-			FCursor = ACursor;
-			FRecord = (IDataRecord)ACursor;
+			_cursor = cursor;
+			_record = (IDataRecord)cursor;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (FCursor != null)
+			if (_cursor != null)
 			{
                 try
                 {
-                    FCursor.Dispose();
+                    _cursor.Dispose();
                 }
                 finally
                 {
-					FCursor = null;
-					FRecord = null;
+					_cursor = null;
+					_record = null;
                 }
 			}
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 		
-		protected IDataReader FCursor;
-		protected IDataRecord FRecord;
+		protected IDataReader _cursor;
+		protected IDataRecord _record;
 		
-		protected bool IsNull(object AValue)
+		protected bool IsNull(object tempValue)
 		{
-			return (AValue == null) || (AValue == DBNull.Value);
+			return (tempValue == null) || (tempValue == DBNull.Value);
 		}
 		
 		protected override SQLTableSchema InternalGetSchema()
 		{
-			DataTable LDataTable = FCursor.GetSchemaTable();
-			SQLTableSchema LSchema = new SQLTableSchema();
+			DataTable dataTable = _cursor.GetSchemaTable();
+			SQLTableSchema schema = new SQLTableSchema();
 			
-			if (LDataTable.Rows.Count > 0)
+			if (dataTable.Rows.Count > 0)
 			{
-				SQLIndex LIndex = new SQLIndex("");
-				LIndex.IsUnique = true;
+				SQLIndex index = new SQLIndex("");
+				index.IsUnique = true;
 				
-				bool LContainsIsHidden = LDataTable.Columns.Contains("IsHidden");
-				int LColumnIndex = 0;
-				foreach (System.Data.DataRow LRow in LDataTable.Rows)
+				bool containsIsHidden = dataTable.Columns.Contains("IsHidden");
+				int columnIndex = 0;
+				foreach (System.Data.DataRow row in dataTable.Rows)
 				{
-					string LColumnName = (string)LRow["ColumnName"];
+					string columnName = (string)row["ColumnName"];
 
-					object LValue = LRow["IsUnique"];
-					bool LIsUnique = IsNull(LValue) ? false : (bool)LValue;
+					object tempValue = row["IsUnique"];
+					bool isUnique = IsNull(tempValue) ? false : (bool)tempValue;
 
-					LValue = LRow["IsKey"];
-					bool LIsKey = IsNull(LValue) ? false : (bool)LValue;
+					tempValue = row["IsKey"];
+					bool isKey = IsNull(tempValue) ? false : (bool)tempValue;
 					
-					if (LIsUnique || LIsKey)
-						LIndex.Columns.Add(new SQLIndexColumn(LColumnName));
+					if (isUnique || isKey)
+						index.Columns.Add(new SQLIndexColumn(columnName));
 					
-					Type LDataType = FCursor.GetFieldType(LColumnIndex);
+					Type dataType = _cursor.GetFieldType(columnIndex);
 					
-					LValue = LRow["ColumnSize"];
-					int LLength = IsNull(LValue) ? 0 : (int)LValue;
+					tempValue = row["ColumnSize"];
+					int length = IsNull(tempValue) ? 0 : (int)tempValue;
 					
-					LValue = LRow["NumericPrecision"];
-					int LPrecision = IsNull(LValue) ? 0 : Convert.ToInt32(LValue);
+					tempValue = row["NumericPrecision"];
+					int precision = IsNull(tempValue) ? 0 : Convert.ToInt32(tempValue);
 					
-					LValue = LRow["NumericScale"];
-					int LScale = IsNull(LValue) ? 0 : Convert.ToInt32(LValue);
+					tempValue = row["NumericScale"];
+					int scale = IsNull(tempValue) ? 0 : Convert.ToInt32(tempValue);
 					
-					LValue = LRow["IsLong"];
-					bool LIsLong = IsNull(LValue) ? false : (bool)LValue;
+					tempValue = row["IsLong"];
+					bool isLong = IsNull(tempValue) ? false : (bool)tempValue;
 
-					bool LIsHidden = false;
-					if (LContainsIsHidden)
+					bool isHidden = false;
+					if (containsIsHidden)
 					{
-						LValue = LRow["IsHidden"];
-						LIsHidden = IsNull(LValue) ? false : (bool)LValue;
+						tempValue = row["IsHidden"];
+						isHidden = IsNull(tempValue) ? false : (bool)tempValue;
 					}
 
-                    if (!LIsHidden)
-    					LSchema.Columns.Add(new SQLColumn(LColumnName, new SQLDomain(LDataType, LLength, LPrecision, LScale, LIsLong)));
+                    if (!isHidden)
+    					schema.Columns.Add(new SQLColumn(columnName, new SQLDomain(dataType, length, precision, scale, isLong)));
 					
-					LColumnIndex++;
+					columnIndex++;
 				}
 
-				if (LIndex.Columns.Count > 0)
-					LSchema.Indexes.Add(LIndex);
+				if (index.Columns.Count > 0)
+					schema.Indexes.Add(index);
 			}
 			else
 			{
-				for (int LIndex = 0; LIndex < FCursor.FieldCount; LIndex++)
-					LSchema.Columns.Add(new SQLColumn(FCursor.GetName(LIndex), new SQLDomain(FCursor.GetFieldType(LIndex), 0, 0, 0, false)));
+				for (int index = 0; index < _cursor.FieldCount; index++)
+					schema.Columns.Add(new SQLColumn(_cursor.GetName(index), new SQLDomain(_cursor.GetFieldType(index), 0, 0, 0, false)));
 			}
 			
-			return LSchema;
+			return schema;
 		}
 		
 		protected override int InternalGetColumnCount()
 		{
-			return ((System.Data.Common.DbDataReader)FCursor).VisibleFieldCount;	// Visible field count hides internal fields like "rowstat" returned by server side cursors
+			return ((System.Data.Common.DbDataReader)_cursor).VisibleFieldCount;	// Visible field count hides internal fields like "rowstat" returned by server side cursors
 		}
 
-		protected override string InternalGetColumnName(int AIndex)
+		protected override string InternalGetColumnName(int index)
 		{
-			return FCursor.GetName(AIndex);
+			return _cursor.GetName(index);
 		}
 		
 		protected override bool InternalNext()
 		{
-			return FCursor.Read();
+			return _cursor.Read();
 		}
 		
-		protected override object InternalGetColumnValue(int AIndex)
+		protected override object InternalGetColumnValue(int index)
 		{
-			return FRecord.GetValue(AIndex);
+			return _record.GetValue(index);
 		}
 		
-		protected override bool InternalIsNull(int AIndex)
+		protected override bool InternalIsNull(int index)
 		{
-			return FRecord.IsDBNull(AIndex);
+			return _record.IsDBNull(index);
 		}
 		
-		protected override bool InternalIsDeferred(int AIndex)
+		protected override bool InternalIsDeferred(int index)
 		{
-			switch (FRecord.GetDataTypeName(AIndex).ToLower())
+			switch (_record.GetDataTypeName(index).ToLower())
 			{
 				case "image": 
 					return true;
@@ -142,20 +142,20 @@ namespace Alphora.Dataphor.DAE.Connection
 			}
 		}
 		
-		protected override Stream InternalOpenDeferredStream(int AIndex)
+		protected override Stream InternalOpenDeferredStream(int index)
 		{
-			switch (FRecord.GetDataTypeName(AIndex).ToLower())
+			switch (_record.GetDataTypeName(index).ToLower())
 			{
 				case "image": 
-					long LLength = FRecord.GetBytes(AIndex, 0, null, 0, 0);
-					if (LLength > Int32.MaxValue)
+					long length = _record.GetBytes(index, 0, null, 0, 0);
+					if (length > Int32.MaxValue)
 						throw new ConnectionException(ConnectionException.Codes.DeferredOverflow);
 						
-					byte[] LData = new byte[(int)LLength];
-					FRecord.GetBytes(AIndex, 0, LData, 0, LData.Length);
-					return new MemoryStream(LData, 0, LData.Length, true, true);	// Must use this overload or GetBuffer() will not be accessible
+					byte[] data = new byte[(int)length];
+					_record.GetBytes(index, 0, data, 0, data.Length);
+					return new MemoryStream(data, 0, data.Length, true, true);	// Must use this overload or GetBuffer() will not be accessible
 
-				default: throw new ConnectionException(ConnectionException.Codes.NonDeferredDataType, FRecord.GetDataTypeName(AIndex));
+				default: throw new ConnectionException(ConnectionException.Codes.NonDeferredDataType, _record.GetDataTypeName(index));
 			}
 		}
 	}

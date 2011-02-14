@@ -11,106 +11,106 @@ namespace Alphora.Dataphor.DAE
 {
 	public class StackWindow : System.Object
 	{
-		public StackWindow(int ABase) : base()
+		public StackWindow(int baseValue) : base()
 		{
-			Base = ABase;
+			Base = baseValue;
 		}
 		
 		public int Base;
-		public int FrameBase { get { return FFrames.CurrentFrame.Base; } }
-		public int FrameRowBase { get { return FFrames.RowBase; } }
+		public int FrameBase { get { return _frames.CurrentFrame.Base; } }
+		public int FrameRowBase { get { return _frames.RowBase; } }
 		
-		private FrameList FFrames = new FrameList();
+		private FrameList _frames = new FrameList();
 
-		public void PushFrame(int ACount)
+		public void PushFrame(int count)
 		{
-			FFrames.Push(new Frame(ACount, FFrames.Count == 0 ? false : FFrames.CurrentFrame.RowContext));
+			_frames.Push(new Frame(count, _frames.Count == 0 ? false : _frames.CurrentFrame.RowContext));
 		}
 		
-		public void PushFrame(int ACount, bool ARowContext)
+		public void PushFrame(int count, bool rowContext)
 		{
-			FFrames.Push(new Frame(ACount, ARowContext));
+			_frames.Push(new Frame(count, rowContext));
 		}
 		
 		public int PopFrame()
 		{
-			return FFrames.Pop().Base;
+			return _frames.Pop().Base;
 		}
 	}
 	
 	public class StackWindowList
 	{
-		public const int CInitialCapacity = 0;
-		public const int CDefaultMaxCallDepth = 1024;
+		public const int InitialCapacity = 0;
+		public const int DefaultMaxCallDepth = 1024;
 		
-		public StackWindowList() : this(CDefaultMaxCallDepth) { }
-		public StackWindowList(int AMaxCallDepth) : base()
+		public StackWindowList() : this(DefaultMaxCallDepth) { }
+		public StackWindowList(int maxCallDepth) : base()
 		{
-			FMaxCallDepth = AMaxCallDepth;
+			_maxCallDepth = maxCallDepth;
 		}
 		
-		private StackWindow[] FStackWindows = new StackWindow[CInitialCapacity];
+		private StackWindow[] _stackWindows = new StackWindow[InitialCapacity];
 		
-		private int FCount;
-		public int Count { get { return FCount; } }
+		private int _count;
+		public int Count { get { return _count; } }
 
-		private int FMaxCallDepth;
+		private int _maxCallDepth;
 		public int MaxCallDepth
 		{
-			get { return FMaxCallDepth; }
+			get { return _maxCallDepth; }
 			set
 			{
-				if (FCount > value)
-					throw new BaseException(BaseException.Codes.CallDepthExceedsNewSetting, FCount, value);
+				if (_count > value)
+					throw new BaseException(BaseException.Codes.CallDepthExceedsNewSetting, _count, value);
 					
-				FMaxCallDepth = value;
+				_maxCallDepth = value;
 			}
 		}
 
-        private void EnsureCapacity(int ARequiredCapacity)
+        private void EnsureCapacity(int requiredCapacity)
         {
-			if (FStackWindows.Length <= ARequiredCapacity)
+			if (_stackWindows.Length <= requiredCapacity)
 			{
-				StackWindow[] LNewStackWindows = new StackWindow[Math.Max(FStackWindows.Length, 1) * 2];
-				for (int LIndex = 0; LIndex < FStackWindows.Length; LIndex++)
-					LNewStackWindows[LIndex] = FStackWindows[LIndex];
-				FStackWindows = LNewStackWindows;
+				StackWindow[] newStackWindows = new StackWindow[Math.Max(_stackWindows.Length, 1) * 2];
+				for (int index = 0; index < _stackWindows.Length; index++)
+					newStackWindows[index] = _stackWindows[index];
+				_stackWindows = newStackWindows;
 			}
         }
         
-        public void Push(StackWindow AStackWindow)
+        public void Push(StackWindow stackWindow)
         {
-			if (FCount >= FMaxCallDepth)
-				throw new BaseException(BaseException.Codes.CallStackOverflow, FMaxCallDepth);
+			if (_count >= _maxCallDepth)
+				throw new BaseException(BaseException.Codes.CallStackOverflow, _maxCallDepth);
 				
-			EnsureCapacity(FCount);
-			FStackWindows[FCount] = AStackWindow;
-			FCount++;
+			EnsureCapacity(_count);
+			_stackWindows[_count] = stackWindow;
+			_count++;
         }
         
         public StackWindow Pop()
         {
-			FCount--;
-			StackWindow LResult = FStackWindows[FCount];
-			FStackWindows[FCount] = null;
-			return LResult;
+			_count--;
+			StackWindow result = _stackWindows[_count];
+			_stackWindows[_count] = null;
+			return result;
         }
         
-        public StackWindow CurrentStackWindow { get { return FStackWindows[FCount - 1]; } }
+        public StackWindow CurrentStackWindow { get { return _stackWindows[_count - 1]; } }
         
         // Returns the highest frame row base in the stack, ragardless of windows
         public int FrameRowBase
         {
 			get
 			{
-				int LFrameRowBase = -1;
-				for (int LIndex = 0; LIndex < FCount; LIndex++)
+				int frameRowBase = -1;
+				for (int index = 0; index < _count; index++)
 				{
-					LFrameRowBase = FStackWindows[LIndex].FrameRowBase;
-					if (LFrameRowBase >= 0)
+					frameRowBase = _stackWindows[index].FrameRowBase;
+					if (frameRowBase >= 0)
 						break;
 				}
-				return LFrameRowBase;					
+				return frameRowBase;					
 			}
         }
         
@@ -125,12 +125,12 @@ namespace Alphora.Dataphor.DAE
 		/// </remarks>
         public List<StackWindow> GetCallStack()
         {
-			List<StackWindow> LResult = new List<StackWindow>();
-			for (int LIndex = FCount - 1; LIndex >= 0; LIndex--)
-				LResult.Add(FStackWindows[LIndex]);
-			return LResult;
+			List<StackWindow> result = new List<StackWindow>();
+			for (int index = _count - 1; index >= 0; index--)
+				result.Add(_stackWindows[index]);
+			return result;
         }
         
-        public StackWindow this[int AIndex] { get { return FStackWindows[FCount - AIndex - 1]; } }
+        public StackWindow this[int index] { get { return _stackWindows[_count - index - 1]; } }
 	}
 }

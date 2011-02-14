@@ -14,105 +14,105 @@ namespace Alphora.Dataphor.DAE.Streams
 	// TODO: Handle copy on write streams > 4GB
 	public class CopyOnWriteStream : StreamBase
 	{
-		public CopyOnWriteStream(Stream ASourceStream) : base()
+		public CopyOnWriteStream(Stream sourceStream) : base()
 		{
-			FSourceStream = ASourceStream;
+			_sourceStream = sourceStream;
 		}
 		
 		public override void Close()
 		{
-			if (FModifiedStream != null)
+			if (_modifiedStream != null)
 			{
-				FModifiedStream.Close();
-				FModifiedStream = null;
+				_modifiedStream.Close();
+				_modifiedStream = null;
 			}
 			
-			FSourceStream = null;
+			_sourceStream = null;
 			base.Close();
 		}
 		
 		// SourceStream
-		private Stream FSourceStream;
+		private Stream _sourceStream;
 		
 		// ModifiedStream
-		private Stream FModifiedStream;
+		private Stream _modifiedStream;
 
 		// IsModified
-		public bool IsModified { get { return FModifiedStream != null; } }
+		public bool IsModified { get { return _modifiedStream != null; } }
 		
 		// Length
 		public override long Length 
 		{ 
-			get { return IsModified ? FModifiedStream.Length : FSourceStream.Length; }
+			get { return IsModified ? _modifiedStream.Length : _sourceStream.Length; }
 		}
 		
 		private void SetModified()
 		{
 			if (!IsModified)
 			{
-				long LPosition = FSourceStream.Position;
-				FSourceStream.Position = 0;
-				if (FSourceStream.Length > Int32.MaxValue)
+				long position = _sourceStream.Position;
+				_sourceStream.Position = 0;
+				if (_sourceStream.Length > Int32.MaxValue)
 					throw new StreamsException(StreamsException.Codes.CopyOnWriteOverflow);
-				FModifiedStream = new MemoryStream((int)FSourceStream.Length);
-				StreamUtility.CopyStream(FSourceStream, FModifiedStream);
-				FModifiedStream.Position = LPosition;
+				_modifiedStream = new MemoryStream((int)_sourceStream.Length);
+				StreamUtility.CopyStream(_sourceStream, _modifiedStream);
+				_modifiedStream.Position = position;
 			}
 		}
 		
 		// SetLength
-		public override void SetLength(long ALength)
+		public override void SetLength(long length)
 		{
 			SetModified();
-			FModifiedStream.SetLength(ALength);
+			_modifiedStream.SetLength(length);
 		}
 		
 		// Position
 		public override long Position
 		{
-			get { return IsModified ? FModifiedStream.Position : FSourceStream.Position; }
+			get { return IsModified ? _modifiedStream.Position : _sourceStream.Position; }
 			set 
 			{ 
 				if (value >= Length)
 					SetModified();
 
 				if (IsModified)
-					FModifiedStream.Position = value; 
+					_modifiedStream.Position = value; 
 				else 
-					FSourceStream.Position = value; 
+					_sourceStream.Position = value; 
 			}
 		}
 		
 		// Read
-		public override int Read(byte[] ABuffer, int AOffset, int ACount)
+		public override int Read(byte[] buffer, int offset, int count)
 		{
 			if (IsModified)
-				return FModifiedStream.Read(ABuffer, AOffset, ACount);
+				return _modifiedStream.Read(buffer, offset, count);
 			else
-				return FSourceStream.Read(ABuffer, AOffset, ACount);
+				return _sourceStream.Read(buffer, offset, count);
 		}
 		
 		// ReadByte
 		public override int ReadByte()
 		{
 			if (IsModified)
-				return FModifiedStream.ReadByte();
+				return _modifiedStream.ReadByte();
 			else
-				return FSourceStream.ReadByte();
+				return _sourceStream.ReadByte();
 		}
 		
 		// Write
-		public override void Write(byte[] ABuffer, int AOffset, int ACount)
+		public override void Write(byte[] buffer, int offset, int count)
 		{
 			SetModified();
-			FModifiedStream.Write(ABuffer, AOffset, ACount);
+			_modifiedStream.Write(buffer, offset, count);
 		}
 		
 		// WriteByte
-		public override void WriteByte(byte AValue)
+		public override void WriteByte(byte tempValue)
 		{
 			SetModified();
-			FModifiedStream.WriteByte(AValue);
+			_modifiedStream.WriteByte(tempValue);
 		}
 	}
 }

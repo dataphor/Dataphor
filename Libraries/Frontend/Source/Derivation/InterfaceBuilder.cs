@@ -25,124 +25,124 @@ namespace Alphora.Dataphor.Frontend.Server.Derivation
 {
 	public class InterfaceBuilder : System.Object
 	{
-		public InterfaceBuilder(Program AProgram, DerivationSeed ASeed) : base()
+		public InterfaceBuilder(Program program, DerivationSeed seed) : base()
 		{
-			FProgram = AProgram;
-			FProcess = AProgram.ServerProcess;
-			FSeed = ASeed;
+			_program = program;
+			_process = program.ServerProcess;
+			_seed = seed;
 		}
 		
-		protected Program FProgram;
-		protected ServerProcess FProcess;
-		protected DerivationSeed FSeed;
+		protected Program _program;
+		protected ServerProcess _process;
+		protected DerivationSeed _seed;
 
 		// ElaborableExpression seed
-		protected Schema.Catalog FElaborableCatalog;
-		protected string FElaborableTableVarName;
+		protected Schema.Catalog _elaborableCatalog;
+		protected string _elaborableTableVarName;
 		
-		protected Schema.Catalog FCatalog; // main catalog where all referenced objects can be found
+		protected Schema.Catalog _catalog; // main catalog where all referenced objects can be found
 
 		protected virtual void Describe()
 		{
-			FCatalog = FProcess.Catalog;
-			Schema.Object LObject = null;
-			if (Parser.IsValidQualifiedIdentifier(FSeed.Query))
-				LObject = Compiler.ResolveCatalogIdentifier(FProgram.Plan, FSeed.Query, false);
+			_catalog = _process.Catalog;
+			Schema.Object objectValue = null;
+			if (Parser.IsValidQualifiedIdentifier(_seed.Query))
+				objectValue = Compiler.ResolveCatalogIdentifier(_program.Plan, _seed.Query, false);
 
-			if (LObject != null)
+			if (objectValue != null)
 			{
-				FElaborableTableVarName = LObject.Name;
-				FElaborableCatalog = FProcess.Catalog;
+				_elaborableTableVarName = objectValue.Name;
+				_elaborableCatalog = _process.Catalog;
 			}
 			else
 			{
-				IServerExpressionPlan LPlan = ((IServerProcess)FProcess).PrepareExpression(String.Format(@"select {0}", FSeed.Query), null);
+				IServerExpressionPlan plan = ((IServerProcess)_process).PrepareExpression(String.Format(@"select {0}", _seed.Query), null);
 				try
 				{
-					FElaborableTableVarName = LPlan.TableVar.Name;
-					FElaborableCatalog = LPlan.Catalog;
+					_elaborableTableVarName = plan.TableVar.Name;
+					_elaborableCatalog = plan.Catalog;
 				}
 				finally
 				{
-					((IServerProcess)FProcess).UnprepareExpression(LPlan);
+					((IServerProcess)_process).UnprepareExpression(plan);
 				}
 			}
 		}
 
 		// ElaboratedExpression
-		protected ElaboratedExpression FElaboratedExpression;
+		protected ElaboratedExpression _elaboratedExpression;
 		
 		protected virtual void Elaborate()
 		{
 			// Set the main table
-			FElaboratedExpression = 
+			_elaboratedExpression = 
 				new ElaboratedExpression
 				(
-					FProgram,
-					FSeed.Query,
-					FSeed.Elaborate,
-					FElaborableCatalog[FElaborableTableVarName] as Schema.TableVar,
-					FCatalog,
-					FSeed.DetailKeyNames == String.Empty
+					_program,
+					_seed.Query,
+					_seed.Elaborate,
+					_elaborableCatalog[_elaborableTableVarName] as Schema.TableVar,
+					_catalog,
+					_seed.DetailKeyNames == String.Empty
 						? new String[0]
-						: FSeed.DetailKeyNames.Split(DerivationInfo.CColumnNameDelimiters), 
-					DerivationUtility.CMainElaboratedTableName, 
-					FSeed.PageType
+						: _seed.DetailKeyNames.Split(DerivationInfo.ColumnNameDelimiters), 
+					DerivationUtility.MainElaboratedTableName, 
+					_seed.PageType
 				);
 		}
 		
 		// Prepare
-		protected string FExpression;
-		protected Schema.TableVar FTableVar;
-		protected DerivationInfo FDerivationInfo;
+		protected string _expression;
+		protected Schema.TableVar _tableVar;
+		protected DerivationInfo _derivationInfo;
 
-		protected string GetKeyNames(Schema.TableVar ATableVar)
+		protected string GetKeyNames(Schema.TableVar tableVar)
 		{
-			StringBuilder LKeyNames = new StringBuilder();
-			Schema.Key LClusteringKey = FProgram.FindClusteringKey(ATableVar);
-			for (int LIndex = 0; LIndex < LClusteringKey.Columns.Count; LIndex++)
+			StringBuilder keyNames = new StringBuilder();
+			Schema.Key clusteringKey = _program.FindClusteringKey(tableVar);
+			for (int index = 0; index < clusteringKey.Columns.Count; index++)
 			{
-				if (LIndex > 0)
-					LKeyNames.Append(", ");
-				LKeyNames.Append(Schema.Object.Qualify(LClusteringKey.Columns[LIndex].Name, DerivationUtility.CMainElaboratedTableName));
+				if (index > 0)
+					keyNames.Append(", ");
+				keyNames.Append(Schema.Object.Qualify(clusteringKey.Columns[index].Name, DerivationUtility.MainElaboratedTableName));
 			}
-			return LKeyNames.ToString();
+			return keyNames.ToString();
 		}
 		
-		protected bool IsOrderVisible(Schema.Order AOrder)
+		protected bool IsOrderVisible(Schema.Order order)
 		{
-			return DerivationUtility.IsOrderVisible(AOrder, FSeed.PageType);
+			return DerivationUtility.IsOrderVisible(order, _seed.PageType);
 		}
 		
-		protected Schema.Order GetDefaultOrder(Schema.TableVar ATableVar)
+		protected Schema.Order GetDefaultOrder(Schema.TableVar tableVar)
 		{
-			foreach (Schema.Order LOrder in ATableVar.Orders)
-				if (Convert.ToBoolean(DerivationUtility.GetTag(LOrder.MetaData, "IsDefault", "False")))
-					return new Schema.Order(LOrder);
+			foreach (Schema.Order order in tableVar.Orders)
+				if (Convert.ToBoolean(DerivationUtility.GetTag(order.MetaData, "IsDefault", "False")))
+					return new Schema.Order(order);
 			
-			foreach (Schema.Key LKey in ATableVar.Keys)
-				if (Convert.ToBoolean(DerivationUtility.GetTag(LKey.MetaData, "IsDefault", "False")))
-					return new Schema.Order(LKey);
+			foreach (Schema.Key key in tableVar.Keys)
+				if (Convert.ToBoolean(DerivationUtility.GetTag(key.MetaData, "IsDefault", "False")))
+					return new Schema.Order(key);
 			
-			if (ATableVar.Keys.Count > 0)
+			if (tableVar.Keys.Count > 0)
 			{
-				Schema.Order LOrder = new Schema.Order(FProgram.FindClusteringKey(ATableVar));
-				if (IsOrderVisible(LOrder))
-					return LOrder;
+				Schema.Order order = new Schema.Order(_program.FindClusteringKey(tableVar));
+				if (IsOrderVisible(order))
+					return order;
 
-				foreach (Schema.Key LKey in ATableVar.Keys)
+				foreach (Schema.Key key in tableVar.Keys)
 				{
-					LOrder = new Schema.Order(LKey);
-					if (IsOrderVisible(LOrder))
-						return LOrder;
+					order = new Schema.Order(key);
+					if (IsOrderVisible(order))
+						return order;
 				}
 			}
 
-			if (ATableVar.Orders.Count > 0)
-				foreach (Schema.Order LOrder in ATableVar.Orders)
+			if (tableVar.Orders.Count > 0)
+				foreach (Schema.Order order in tableVar.Orders)
 				{
-					if (IsOrderVisible(LOrder))
-						return LOrder;
+					if (IsOrderVisible(order))
+						return order;
 				}
 
 			return null;
@@ -150,32 +150,32 @@ namespace Alphora.Dataphor.Frontend.Server.Derivation
 
 		protected virtual void Prepare()
 		{
-			Expression LExpression = FElaboratedExpression.Expression;
-			FTableVar = FElaboratedExpression.MainElaboratedTableVar.TableVar;
-			Schema.Order LOrder = GetDefaultOrder(FTableVar);
-			if (LOrder != null)
+			Expression expression = _elaboratedExpression.Expression;
+			_tableVar = _elaboratedExpression.MainElaboratedTableVar.TableVar;
+			Schema.Order order = GetDefaultOrder(_tableVar);
+			if (order != null)
 			{
-				BaseOrderExpression LBrowseExpression;
-				if (Convert.ToBoolean(DerivationUtility.GetTag(FTableVar.MetaData, "UseBrowse", FElaboratedExpression.PageType, "True")))
-					LBrowseExpression = new BrowseExpression();
+				BaseOrderExpression browseExpression;
+				if (Convert.ToBoolean(DerivationUtility.GetTag(_tableVar.MetaData, "UseBrowse", _elaboratedExpression.PageType, "True")))
+					browseExpression = new BrowseExpression();
 				else
-					LBrowseExpression = new OrderExpression();
-				LBrowseExpression.Expression = LExpression;
-				foreach (Schema.OrderColumn LColumn in LOrder.Columns)
+					browseExpression = new OrderExpression();
+				browseExpression.Expression = expression;
+				foreach (Schema.OrderColumn column in order.Columns)
 				{
-					OrderColumnDefinition LDefinition = LColumn.EmitStatement(EmitMode.ForCopy) as OrderColumnDefinition;
-					LDefinition.ColumnName = Schema.Object.Qualify(LColumn.Column.Name, FElaboratedExpression.MainElaboratedTableVar.ElaboratedName);
-					LBrowseExpression.Columns.Add(LDefinition);
+					OrderColumnDefinition definition = column.EmitStatement(EmitMode.ForCopy) as OrderColumnDefinition;
+					definition.ColumnName = Schema.Object.Qualify(column.Column.Name, _elaboratedExpression.MainElaboratedTableVar.ElaboratedName);
+					browseExpression.Columns.Add(definition);
 				}
-				LExpression = LBrowseExpression;
+				expression = browseExpression;
 			}
 
-			FExpression = 
+			_expression = 
 				new D4TextEmitter().Emit
 				(
 					new CursorDefinition
 					(
-						LExpression, 
+						expression, 
 							CursorCapability.Navigable | 
 							CursorCapability.BackwardsNavigable | 
 							CursorCapability.Bookmarkable | 
@@ -187,59 +187,59 @@ namespace Alphora.Dataphor.Frontend.Server.Derivation
 				);
 
 			// Build the derivation info structure for use in structuring, layout and document production.			
-			FDerivationInfo = new DerivationInfo();
-			FDerivationInfo.Program = FProgram;
-			FDerivationInfo.Process = FProcess;
-			FDerivationInfo.PageType = FSeed.PageType;
-			FDerivationInfo.Query = FSeed.Query;
-			FDerivationInfo.Elaborate = FSeed.Elaborate;
-			FDerivationInfo.MasterKeyNames = FSeed.MasterKeyNames;
-			FDerivationInfo.DetailKeyNames = FSeed.DetailKeyNames;
-			FDerivationInfo.KeyNames = GetKeyNames(FTableVar);
-			FDerivationInfo.Expression = FExpression;
-			FDerivationInfo.ElaboratedExpression = FElaboratedExpression;
-			FDerivationInfo.TableVar = FTableVar;
-			FDerivationInfo.MainSourceName = DerivationUtility.CMainSourceName;
-			FDerivationInfo.IsReadOnly = DerivationUtility.IsReadOnlyPageType(FSeed.PageType);
+			_derivationInfo = new DerivationInfo();
+			_derivationInfo.Program = _program;
+			_derivationInfo.Process = _process;
+			_derivationInfo.PageType = _seed.PageType;
+			_derivationInfo.Query = _seed.Query;
+			_derivationInfo.Elaborate = _seed.Elaborate;
+			_derivationInfo.MasterKeyNames = _seed.MasterKeyNames;
+			_derivationInfo.DetailKeyNames = _seed.DetailKeyNames;
+			_derivationInfo.KeyNames = GetKeyNames(_tableVar);
+			_derivationInfo.Expression = _expression;
+			_derivationInfo.ElaboratedExpression = _elaboratedExpression;
+			_derivationInfo.TableVar = _tableVar;
+			_derivationInfo.MainSourceName = DerivationUtility.MainSourceName;
+			_derivationInfo.IsReadOnly = DerivationUtility.IsReadOnlyPageType(_seed.PageType);
 		}
 		
 		public virtual XmlDocument Structure()
 		{
-			switch (FSeed.PageType)
+			switch (_seed.PageType)
 			{
-				case DerivationUtility.CBrowse :
+				case DerivationUtility.Browse :
 					return 
 						new BrowseDocumentBuilder
 						(
-							FDerivationInfo, 
-							(SearchElement)new SearchStructureBuilder(FDerivationInfo).Build(), 
-							(GridElement)new PluralStructureBuilder(FDerivationInfo).Build()
+							_derivationInfo, 
+							(SearchElement)new SearchStructureBuilder(_derivationInfo).Build(), 
+							(GridElement)new PluralStructureBuilder(_derivationInfo).Build()
 						).Build();
 						
-				case DerivationUtility.CList :
+				case DerivationUtility.List :
 					return
 						new ListDocumentBuilder
 						(
-							FDerivationInfo,
-							(SearchElement)new SearchStructureBuilder(FDerivationInfo).Build(),
-							(GridElement)new PluralStructureBuilder(FDerivationInfo).Build()
+							_derivationInfo,
+							(SearchElement)new SearchStructureBuilder(_derivationInfo).Build(),
+							(GridElement)new PluralStructureBuilder(_derivationInfo).Build()
 						).Build();
 						
-				case DerivationUtility.CBrowseReport :
-					return new ReportDocumentBuilder(FDerivationInfo).Build();
+				case DerivationUtility.BrowseReport :
+					return new ReportDocumentBuilder(_derivationInfo).Build();
 				
-				case DerivationUtility.COrderBrowse :
-					return new OrderBrowseDocumentBuilder(FDerivationInfo).Build();
+				case DerivationUtility.OrderBrowse :
+					return new OrderBrowseDocumentBuilder(_derivationInfo).Build();
 				
-				case DerivationUtility.CAdd :
-				case DerivationUtility.CEdit :
-				case DerivationUtility.CView :
-					return new SingularDocumentBuilder(FDerivationInfo, new LayoutBuilder().Layout(((GroupElement)new SingularStructureBuilder(FDerivationInfo).Build()).Elements)).Build();
+				case DerivationUtility.Add :
+				case DerivationUtility.Edit :
+				case DerivationUtility.View :
+					return new SingularDocumentBuilder(_derivationInfo, new LayoutBuilder().Layout(((GroupElement)new SingularStructureBuilder(_derivationInfo).Build()).Elements)).Build();
 
-				case DerivationUtility.CDelete :
-					return new DeleteDocumentBuilder(FDerivationInfo, new LayoutBuilder().Layout(((GroupElement)new SingularStructureBuilder(FDerivationInfo).Build()).Elements)).Build();
+				case DerivationUtility.Delete :
+					return new DeleteDocumentBuilder(_derivationInfo, new LayoutBuilder().Layout(((GroupElement)new SingularStructureBuilder(_derivationInfo).Build()).Elements)).Build();
 				
-				default : throw new Frontend.Server.ServerException(Frontend.Server.ServerException.Codes.UnknownPageType, FSeed.PageType);
+				default : throw new Frontend.Server.ServerException(Frontend.Server.ServerException.Codes.UnknownPageType, _seed.PageType);
 			}
 		}
 		

@@ -39,63 +39,63 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			TableNode LSourceNode = (TableNode)Nodes[0];
-			bool LHasEmptyKey = false;
-			foreach (Schema.Key LKey in LSourceNode.TableVar.Keys)
-				if (LKey.Columns.Count == 0)
+			DetermineModifiers(plan);
+			TableNode sourceNode = (TableNode)Nodes[0];
+			bool hasEmptyKey = false;
+			foreach (Schema.Key key in sourceNode.TableVar.Keys)
+				if (key.Columns.Count == 0)
 				{
-					LHasEmptyKey = true;
+					hasEmptyKey = true;
 					break;
 				}
 			
-			if (!LHasEmptyKey && !APlan.SuppressWarnings && !APlan.InTypeOfContext)
-				APlan.Messages.Add(new CompilerException(CompilerException.Codes.InvalidRowExtractorExpression, CompilerErrorLevel.Warning, APlan.CurrentStatement()));
-			FDataType = LSourceNode.TableVar.DataType.RowType;
+			if (!hasEmptyKey && !plan.SuppressWarnings && !plan.InTypeOfContext)
+				plan.Messages.Add(new CompilerException(CompilerException.Codes.InvalidRowExtractorExpression, CompilerErrorLevel.Warning, plan.CurrentStatement()));
+			_dataType = sourceNode.TableVar.DataType.RowType;
 		}
 		
 		public override Schema.IDataType DataType { get { return base.DataType; } set { base.DataType = value; } }
 		
-		public override void DetermineCharacteristics(Plan APlan)
+		public override void DetermineCharacteristics(Plan plan)
 		{
-			FIsLiteral = true;
-			FIsFunctional = true;
-			FIsDeterministic = true;
-			FIsRepeatable = true;
-			FIsNilable = true;
-			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
+			_isLiteral = true;
+			_isFunctional = true;
+			_isDeterministic = true;
+			_isRepeatable = true;
+			_isNilable = true;
+			for (int index = 0; index < NodeCount; index++)
 			{
-				FIsLiteral = FIsLiteral && Nodes[LIndex].IsLiteral;
-				FIsFunctional = FIsFunctional && Nodes[LIndex].IsFunctional;
-				FIsDeterministic = FIsDeterministic && Nodes[LIndex].IsDeterministic;
-				FIsRepeatable = FIsRepeatable && Nodes[LIndex].IsRepeatable;
+				_isLiteral = _isLiteral && Nodes[index].IsLiteral;
+				_isFunctional = _isFunctional && Nodes[index].IsFunctional;
+				_isDeterministic = _isDeterministic && Nodes[index].IsDeterministic;
+				_isRepeatable = _isRepeatable && Nodes[index].IsRepeatable;
 			} 
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			Table LTable = Nodes[0].Execute(AProgram) as Table;
+			Table table = Nodes[0].Execute(program) as Table;
 			#if NILPROPOGATION
-			if ((LTable == null))
+			if ((table == null))
 				return null;
 			#endif
 			try
 			{
-				LTable.Open();
-				if (LTable.Next())
+				table.Open();
+				if (table.Next())
 				{
-					Row LRow = LTable.Select();
+					Row row = table.Select();
 					try
 					{
-						if (LTable.Next())
+						if (table.Next())
 							throw new CompilerException(CompilerException.Codes.InvalidRowExtractorExpression);
-						return LRow;
+						return row;
 					}
 					catch
 					{
-						LRow.Dispose();
+						row.Dispose();
 						throw;
 					}
 				}
@@ -108,26 +108,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
-				LTable.Dispose();
+				table.Dispose();
 			}
 		}
 		
-		private D4IndexerExpression FIndexerExpression;
+		private D4IndexerExpression _indexerExpression;
 		public D4IndexerExpression IndexerExpression
 		{
-			get { return FIndexerExpression; }
-			set { FIndexerExpression = value; }
+			get { return _indexerExpression; }
+			set { _indexerExpression = value; }
 		}
 
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			if (FIndexerExpression != null)
-				return FIndexerExpression;
+			if (_indexerExpression != null)
+				return _indexerExpression;
 			else
 			{
-				D4IndexerExpression LIndexerExpression = new D4IndexerExpression();
-				LIndexerExpression.Expression = (Expression)Nodes[0].EmitStatement(AMode);
-				return LIndexerExpression;
+				D4IndexerExpression indexerExpression = new D4IndexerExpression();
+				indexerExpression.Expression = (Expression)Nodes[0].EmitStatement(mode);
+				return indexerExpression;
 			}
 		}
 	}
@@ -136,25 +136,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	//  Extract(table{}, ColumnName): scalar
 	public class ExtractColumnNode : PlanNode
 	{		
-		public override void DetermineCharacteristics(Plan APlan)
+		public override void DetermineCharacteristics(Plan plan)
 		{
-			FIsLiteral = true;
-			FIsFunctional = true;
-			FIsDeterministic = true;
-			FIsRepeatable = true;
-			FIsNilable = true;
-			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
+			_isLiteral = true;
+			_isFunctional = true;
+			_isDeterministic = true;
+			_isRepeatable = true;
+			_isNilable = true;
+			for (int index = 0; index < NodeCount; index++)
 			{
-				FIsLiteral = FIsLiteral && Nodes[LIndex].IsLiteral;
-				FIsFunctional = FIsFunctional && Nodes[LIndex].IsFunctional;
-				FIsDeterministic = FIsDeterministic && Nodes[LIndex].IsDeterministic;
-				FIsRepeatable = FIsRepeatable && Nodes[LIndex].IsRepeatable;
+				_isLiteral = _isLiteral && Nodes[index].IsLiteral;
+				_isFunctional = _isFunctional && Nodes[index].IsFunctional;
+				_isDeterministic = _isDeterministic && Nodes[index].IsDeterministic;
+				_isRepeatable = _isRepeatable && Nodes[index].IsRepeatable;
 			} 
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
+			DetermineModifiers(plan);
 			#if USECOLUMNLOCATIONBINDING
 			if (Nodes[0].DataType is Schema.RowType)
 				FDataType = ((Schema.RowType)Nodes[0].DataType).Columns[Location].DataType;
@@ -163,15 +163,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#else
 			if (Nodes[0].DataType is Schema.RowType)
 			{
-				FDataType = ((Schema.RowType)Nodes[0].DataType).Columns[Identifier].DataType;
+				_dataType = ((Schema.RowType)Nodes[0].DataType).Columns[Identifier].DataType;
 				if (Nodes[0] is StackReferenceNode)
 				{
-					FShouldDisposeSource = false;
+					_shouldDisposeSource = false;
 					((StackReferenceNode)Nodes[0]).ByReference = true;
 				}
 			}
 			else
-				FDataType = ((Schema.TableType)Nodes[0].DataType).Columns[Identifier].DataType;
+				_dataType = ((Schema.TableType)Nodes[0].DataType).Columns[Identifier].DataType;
 			#endif
 		}
 		
@@ -181,45 +181,45 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		public string Identifier = String.Empty;		
 		
-		private bool FShouldDisposeSource = true;
+		private bool _shouldDisposeSource = true;
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			object LObject = Nodes[0].Execute(AProgram);
+			object objectValue = Nodes[0].Execute(program);
 			#if NILPROPOGATION
-			if (LObject == null)
+			if (objectValue == null)
 				return null;
 			#endif
 
-			Table LTable = LObject as Table;
-			if (LTable != null)
+			Table table = objectValue as Table;
+			if (table != null)
 			{
 				try
 				{
-					LTable.Open();
-					if (LTable.Next())
+					table.Open();
+					if (table.Next())
 					{
-						Row LRow = LTable.Select();
+						Row row = table.Select();
 						try
 						{
-							if (LTable.Next())
+							if (table.Next())
 								throw new CompilerException(CompilerException.Codes.InvalidRowExtractorExpression);
 							#if USECOLUMNLOCATIONBINDING
-							if (LRow.HasValue(Location))
-								return LRow[Location].AsNative;
+							if (row.HasValue(Location))
+								return row[Location].AsNative;
 							else
 								return null;
 							#else
-							int LColumnIndex = LRow.DataType.Columns.IndexOf(Identifier);
-							if (LRow.HasValue(LColumnIndex))
-								return LRow[LColumnIndex];
+							int columnIndex = row.DataType.Columns.IndexOf(Identifier);
+							if (row.HasValue(columnIndex))
+								return row[columnIndex];
 							else
 								return null;
 							#endif
 						}
 						finally
 						{
-							LRow.Dispose();
+							row.Dispose();
 						}
 					}
 					else
@@ -231,66 +231,66 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 				finally
 				{
-					if (FShouldDisposeSource)
-						LTable.Dispose();
+					if (_shouldDisposeSource)
+						table.Dispose();
 				}
 			}
 			else
 			{
-				Row LRow = (Row)LObject;
+				Row row = (Row)objectValue;
 				try
 				{
 					#if USECOLUMNLOCATIONBINDING
-					if (LRow.HasValue(Location))
-						return LRow[Location].AsNative;
+					if (row.HasValue(Location))
+						return row[Location].AsNative;
 					else
 						return null;
 					#else
-					int LColumnIndex = LRow.DataType.Columns.IndexOf(Identifier);
-					if (!LRow.IsNil && LRow.HasValue(LColumnIndex))
-						return LRow[LColumnIndex];
+					int columnIndex = row.DataType.Columns.IndexOf(Identifier);
+					if (!row.IsNil && row.HasValue(columnIndex))
+						return row[columnIndex];
 					else
 						return null;
 					#endif
 				}
 				finally
 				{
-					if (FShouldDisposeSource)
-						LRow.Dispose();
+					if (_shouldDisposeSource)
+						row.Dispose();
 				}
 			}
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			return new QualifierExpression((Expression)Nodes[0].EmitStatement(AMode), new IdentifierExpression(Schema.Object.EnsureUnrooted(Identifier)));
+			return new QualifierExpression((Expression)Nodes[0].EmitStatement(mode), new IdentifierExpression(Schema.Object.EnsureUnrooted(Identifier)));
 		}
 	}
 	
     // operator iExists(table) : bool
     public class ExistsNode : InstructionNodeBase
     {
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = APlan.DataTypes.SystemBoolean;
+			DetermineModifiers(plan);
+			_dataType = plan.DataTypes.SystemBoolean;
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			Table LTable = Nodes[0].Execute(AProgram) as Table;
+			Table table = Nodes[0].Execute(program) as Table;
 			#if NILPROPOGATION
-			if (LTable == null)
+			if (table == null)
 				return null;
 			#endif
 			try
 			{
-				LTable.Open();
-				return !LTable.IsEmpty();
+				table.Open();
+				return !table.IsEmpty();
 			}
 			finally
 			{
-				LTable.Dispose();
+				table.Dispose();
 			}
 		}
     }

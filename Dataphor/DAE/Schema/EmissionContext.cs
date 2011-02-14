@@ -22,26 +22,26 @@ namespace Alphora.Dataphor.DAE.Schema
     {
 		public EmissionContext
 		(
-			CatalogDeviceSession ASession,
-			Catalog ACatalog,
-			EmitMode AMode, 
-			ObjectList ARequestedObjects, 
-			string ALibraryName, 
-			bool AIncludeSystem, 
-			bool AIncludeGenerated, 
-			bool AIncludeDependents, 
-			bool AIncludeObject
+			CatalogDeviceSession session,
+			Catalog catalog,
+			EmitMode mode, 
+			ObjectList requestedObjects, 
+			string libraryName, 
+			bool includeSystem, 
+			bool includeGenerated, 
+			bool includeDependents, 
+			bool includeObject
 		) : base()
 		{
-			Session = ASession;
-			Catalog = ACatalog;
-			Mode = AMode;
-			RequestedObjects = ARequestedObjects;
-			LibraryName = ALibraryName;
-			IncludeSystem = AIncludeSystem;
-			IncludeGenerated = AIncludeGenerated;
-			IncludeDependents = AIncludeDependents;
-			IncludeObject = AIncludeObject;
+			Session = session;
+			Catalog = catalog;
+			Mode = mode;
+			RequestedObjects = requestedObjects;
+			LibraryName = libraryName;
+			IncludeSystem = includeSystem;
+			IncludeGenerated = includeGenerated;
+			IncludeDependents = includeDependents;
+			IncludeObject = includeObject;
 		}
 
 		public CatalogDeviceSession Session;		
@@ -57,56 +57,56 @@ namespace Alphora.Dataphor.DAE.Schema
 		public LoadedLibraries EmittedLibraries = new LoadedLibraries();
 		public Block Block = new Block();
 		
-		public bool ShouldEmit(Schema.Object AObject)
+		public bool ShouldEmit(Schema.Object objectValue)
 		{
 			return
 				(
 					(
 						(RequestedObjects.Count == 0) || 
-						(RequestedObjects.Contains(AObject.ID))
+						(RequestedObjects.Contains(objectValue.ID))
 					) && 
-					(IncludeSystem || !AObject.IsSystem) &&
-					(!(AObject is DeviceObject) || (Mode != EmitMode.ForRemote)) &&
-					(!AObject.IsGenerated || IncludeGenerated || (AObject.IsSessionObject) || (AObject.IsATObject && RequestedObjects.Contains(AObject.ID))) // an AT object will be generated, but must be emitted if specifically requested
+					(IncludeSystem || !objectValue.IsSystem) &&
+					(!(objectValue is DeviceObject) || (Mode != EmitMode.ForRemote)) &&
+					(!objectValue.IsGenerated || IncludeGenerated || (objectValue.IsSessionObject) || (objectValue.IsATObject && RequestedObjects.Contains(objectValue.ID))) // an AT object will be generated, but must be emitted if specifically requested
 				);
 		}
 		
-		public bool ShouldEmitDrop(Schema.Object AObject)
+		public bool ShouldEmitDrop(Schema.Object objectValue)
 		{
 			return
 				(
 					(
-						(AObject is CatalogObject) && 
+						(objectValue is CatalogObject) && 
 						(
 							IncludeSystem || 
-							((LibraryName == String.Empty) && ((AObject.Library == null) || (AObject.Library.Name == Engine.CSystemLibraryName))) ||
-							(LibraryName != Engine.CSystemLibraryName)
+							((LibraryName == String.Empty) && ((objectValue.Library == null) || (objectValue.Library.Name == Engine.SystemLibraryName))) ||
+							(LibraryName != Engine.SystemLibraryName)
 						) ||
 						(
-							!(AObject is CatalogObject) &&
-							(IncludeSystem || !AObject.IsSystem)
+							!(objectValue is CatalogObject) &&
+							(IncludeSystem || !objectValue.IsSystem)
 						)
 					) &&
-					(!AObject.IsGenerated || IncludeGenerated || (AObject.IsSessionObject) || (RequestedObjects.Count > 0)) &&
+					(!objectValue.IsGenerated || IncludeGenerated || (objectValue.IsSessionObject) || (RequestedObjects.Count > 0)) &&
 					(
-						(AObject is CatalogObject) ||
-						(AObject is Schema.Representation) ||
-						(AObject is Schema.Default) ||
-						(AObject is Schema.Special) ||
-						(AObject is Schema.Constraint)
+						(objectValue is CatalogObject) ||
+						(objectValue is Schema.Representation) ||
+						(objectValue is Schema.Default) ||
+						(objectValue is Schema.Special) ||
+						(objectValue is Schema.Constraint)
 					)
 				);
 		}
 		
-		public bool ShouldEmitWithLibrary(Schema.Object AObject)
+		public bool ShouldEmitWithLibrary(Schema.Object objectValue)
 		{
 			return 
 			(
 				(LibraryName == String.Empty) || 
 				(
 					(LibraryName != String.Empty) && 
-					(AObject.Library != null) &&
-					Schema.Object.NamesEqual(AObject.Library.Name, LibraryName)
+					(objectValue.Library != null) &&
+					Schema.Object.NamesEqual(objectValue.Library.Name, LibraryName)
 				)
 			);
 		}

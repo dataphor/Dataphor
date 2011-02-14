@@ -15,43 +15,43 @@ namespace System.Diagnostics
 			return sw;
 		}
 
-		private int FStartTick;
-		private long FElapsed;
-		private bool FIsRunning;
+		private int _startTick;
+		private long _elapsed;
+		private bool _isRunning;
 
 		/// <summary> Completely resets and deactivates the timer. </summary>
 		public void Reset()
 		{
-			FElapsed = 0;
-			FIsRunning = false;
-			FStartTick = 0;
+			_elapsed = 0;
+			_isRunning = false;
+			_startTick = 0;
 		}
 
 		/// <summary> Begins or restarts the timer. </summary>
 		/// <remarks> Accumulated time remains. </remarks>
 		public void Start()
 		{
-			if (!FIsRunning)
+			if (!_isRunning)
 			{
-				FStartTick = Environment.TickCount;
-				FIsRunning = true;
+				_startTick = Environment.TickCount;
+				_isRunning = true;
 			}
 		}
 
 		/// <summary> Stops the current timer. </summary>
 		public void Stop()
 		{
-			if (FIsRunning)
+			if (_isRunning)
 			{
-				FElapsed += Environment.TickCount - FStartTick;
-				FIsRunning = false;
+				_elapsed += Environment.TickCount - _startTick;
+				_isRunning = false;
 			}
 		}
 
 		/// <summary> Gets a value indicating whether the instance is currently recording. </summary>
 		public bool IsRunning
 		{
-			get { return FIsRunning; }
+			get { return _isRunning; }
 		}
 
 		/// <summary> Gets the Ellapsed time as a Timespan. </summary>
@@ -74,7 +74,7 @@ namespace System.Diagnostics
 
 		private long GetCurrentElapsed()
 		{
-			return FElapsed + (IsRunning ? (Environment.TickCount - FStartTick) : 0);
+			return _elapsed + (IsRunning ? (Environment.TickCount - _startTick) : 0);
 		}
 	}
 }

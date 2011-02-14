@@ -20,31 +20,31 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 	{
 		public AnalyzerControl()
 		{
-			FMainSurface = new PlanTree();
-			Push(FMainSurface, Strings.Analyzer_MainSurfaceTitle);
+			_mainSurface = new PlanTree();
+			Push(_mainSurface, Strings.Analyzer_MainSurfaceTitle);
 		}
 
-		private PlanTree FMainSurface;
-		public PlanTree MainSurface { get { return FMainSurface; } }
+		private PlanTree _mainSurface;
+		public PlanTree MainSurface { get { return _mainSurface; } }
 
-		private XDocument FDocument;
-		private XElement FRoot;
+		private XDocument _document;
+		private XElement _root;
 
-		public void Load(string APlan)
+		public void Load(string plan)
 		{
-			XDocument LDocument = XDocument.Load(new StringReader(APlan));
+			XDocument document = XDocument.Load(new StringReader(plan));
 			Clear();
-			Set(LDocument.Root);
-			FDocument = LDocument;
+			Set(document.Root);
+			_document = document;
 		}
 
 		public string Save()
 		{
-			if (FDocument != null)
+			if (_document != null)
 			{
-				System.IO.StringWriter LWriter = new System.IO.StringWriter();
-				FDocument.Save(LWriter);
-				return LWriter.ToString();
+				System.IO.StringWriter writer = new System.IO.StringWriter();
+				_document.Save(writer);
+				return writer.ToString();
 			}
 			else
 				return String.Empty;
@@ -53,15 +53,15 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 		public virtual void Clear()
 		{
 			PopAllButTop();
-			FRoot = null;
-			FDocument = null;
-			FMainSurface.Clear();
+			_root = null;
+			_document = null;
+			_mainSurface.Clear();
 		}
 
-		private void Set(XElement ARoot)
+		private void Set(XElement root)
 		{
-			FRoot = ARoot;
-			FMainSurface.Set(ARoot);
+			_root = root;
+			_mainSurface.Set(root);
 		}
 	}
 }

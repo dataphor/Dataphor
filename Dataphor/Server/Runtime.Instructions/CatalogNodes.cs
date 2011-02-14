@@ -28,17 +28,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator System.ObjectName(const ASpecifier : System.String) : System.Name
 	public class FullObjectNameNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
 				return null;
 			else
 			#endif
-				if (Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemString))
-					return AProgram.ResolveCatalogObjectSpecifier((string)AArgument1).Name;
+				if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemString))
+					return program.ResolveCatalogObjectSpecifier((string)argument1).Name;
 				else
-					return AProgram.ResolveCatalogIdentifier((string)AArgument1).Name;
+					return program.ResolveCatalogIdentifier((string)argument1).Name;
 		}
 	}
 
@@ -46,31 +46,31 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator System.ObjectID(System.String) : System.Integer
 	public class SystemObjectIDNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
 				return null;
 			else
 			#endif
-				if (Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemString))
-					return AProgram.ResolveCatalogObjectSpecifier((string)AArgument1).ID;
+				if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemString))
+					return program.ResolveCatalogObjectSpecifier((string)argument1).ID;
 				else
-					return AProgram.ResolveCatalogIdentifier((string)AArgument1).ID;
+					return program.ResolveCatalogIdentifier((string)argument1).ID;
 		}
 	}
 	
 	// operator System.ObjectName(System.Integer) : System.String
 	public class SystemObjectNameNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
 				return null;
 			else
 			#endif
-				return ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).GetObjectHeader((int)AArgument1).Name;
+				return ((ServerCatalogDeviceSession)program.CatalogDeviceSession).GetObjectHeader((int)argument1).Name;
 		}
 	}
 	
@@ -79,19 +79,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator System.ObjectDescription(const AObjectID : System.Integer) : System.String;
 	public class ObjectDescriptionNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
 				return null;
 			else
 			#endif
-				if (Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemString))
-					return AProgram.ResolveCatalogObjectSpecifier((string)AArgument1).Description;
-				else if (Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemName))
-					return AProgram.ResolveCatalogIdentifier((string)AArgument1).Description;
+				if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemString))
+					return program.ResolveCatalogObjectSpecifier((string)argument1).Description;
+				else if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemName))
+					return program.ResolveCatalogIdentifier((string)argument1).Description;
 				else
-					return AProgram.CatalogDeviceSession.ResolveObject((int)AArgument1).Description;
+					return program.CatalogDeviceSession.ResolveObject((int)argument1).Description;
 		}
 	}
 	
@@ -100,19 +100,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator System.ObjectDisplayName(const AObjectID : System.Integer) : System.String
 	public class ObjectDisplayNameNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
 				return null;
 			else
 			#endif
-				if (Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemString))
-					return AProgram.ResolveCatalogObjectSpecifier((string)AArgument1).DisplayName;
-				else if (Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemName))
-					return AProgram.ResolveCatalogIdentifier((string)AArgument1).DisplayName;
+				if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemString))
+					return program.ResolveCatalogObjectSpecifier((string)argument1).DisplayName;
+				else if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemName))
+					return program.ResolveCatalogIdentifier((string)argument1).DisplayName;
 				else
-					return ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).GetObjectHeader((int)AArgument1).DisplayName;
+					return ((ServerCatalogDeviceSession)program.CatalogDeviceSession).GetObjectHeader((int)argument1).DisplayName;
 		}
 	}
 	
@@ -121,19 +121,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator System.OperatorSignature(const AObjectID : System.Integer) : System.String
 	public class OperatorSignatureNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
 				return null;
 			else
 			#endif
-				if (Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemString))
-					return ((Schema.Operator)AProgram.ResolveCatalogObjectSpecifier((string)AArgument1)).Signature.ToString();
-				else if (Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemName))
-					return ((Schema.Operator)AProgram.ResolveCatalogIdentifier((string)AArgument1)).Signature.ToString();
+				if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemString))
+					return ((Schema.Operator)program.ResolveCatalogObjectSpecifier((string)argument1)).Signature.ToString();
+				else if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemName))
+					return ((Schema.Operator)program.ResolveCatalogIdentifier((string)argument1)).Signature.ToString();
 				else
-					return ((Schema.Operator)AProgram.CatalogDeviceSession.ResolveCatalogObject((int)AArgument1)).Signature.ToString();
+					return ((Schema.Operator)program.CatalogDeviceSession.ResolveCatalogObject((int)argument1)).Signature.ToString();
 		}
 	}
 	
@@ -144,9 +144,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// similar to ObjectDescriptionNode
 	public class ObjectMetaDataNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.Object LObject = null;
+			Schema.Object objectValue = null;
 
 			#if NILPROPOGATION
 			if (AArguments[0] == null || AArguments[1] == null || AArguments[2] == null)
@@ -154,13 +154,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			else
 			#endif
 			{
-				if (Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemString))
-					LObject = AProgram.ResolveCatalogObjectSpecifier((string)AArguments[0]);
-				else if (Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemName))
-					LObject = AProgram.ResolveCatalogIdentifier((string)AArguments[0]);
+				if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemString))
+					objectValue = program.ResolveCatalogObjectSpecifier((string)arguments[0]);
+				else if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemName))
+					objectValue = program.ResolveCatalogIdentifier((string)arguments[0]);
 				else
-					LObject = AProgram.CatalogDeviceSession.ResolveObject((int)AArguments[0]);
-				return MetaData.GetTag(LObject.MetaData, (string)AArguments[1], (string)AArguments[2]);
+					objectValue = program.CatalogDeviceSession.ResolveObject((int)arguments[0]);
+				return MetaData.GetTag(objectValue.MetaData, (string)arguments[1], (string)arguments[2]);
 			}
 		}
 	}
@@ -170,19 +170,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator System.IsSystem(const AObjectID : System.Integer) : System.Boolean
 	public class ObjectIsSystemNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
 				return null;
 			else
 			#endif
-				if (Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemString))
-					return AProgram.ResolveCatalogObjectSpecifier((string)AArgument1).IsSystem;
-				else if (Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemInteger))
-					return ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).GetObjectHeader((int)AArgument1).IsSystem;
+				if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemString))
+					return program.ResolveCatalogObjectSpecifier((string)argument1).IsSystem;
+				else if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemInteger))
+					return ((ServerCatalogDeviceSession)program.CatalogDeviceSession).GetObjectHeader((int)argument1).IsSystem;
 				else
-					return AProgram.ResolveCatalogIdentifier((string)AArgument1).IsSystem;
+					return program.ResolveCatalogIdentifier((string)argument1).IsSystem;
 		}
 	}
 	
@@ -191,19 +191,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator System.IsGenerated(const AObjectID : System.Integer) : System.Boolean
 	public class ObjectIsGeneratedNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
 				return null;
 			else
 			#endif
-				if (Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemInteger))
-					return ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).GetObjectHeader((int)AArgument1).IsGenerated;
-				else if (Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemString))
-					return AProgram.ResolveCatalogObjectSpecifier((string)AArgument1).IsGenerated;
+				if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemInteger))
+					return ((ServerCatalogDeviceSession)program.CatalogDeviceSession).GetObjectHeader((int)argument1).IsGenerated;
+				else if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemString))
+					return program.ResolveCatalogObjectSpecifier((string)argument1).IsGenerated;
 				else
-					return AProgram.ResolveCatalogIdentifier((string)AArgument1).IsGenerated;
+					return program.ResolveCatalogIdentifier((string)argument1).IsGenerated;
 		}
 	}
 
@@ -212,62 +212,62 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator System.LibraryName(const AObjectID : System.Integer) : System.Name	
 	public class SystemLibraryNameNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			if (AArguments.Length == 1)
+			if (arguments.Length == 1)
 			{
-				string LLibraryName;
-				if (Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemInteger))
-					LLibraryName = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).GetObjectHeader((int)AArguments[0]).LibraryName;
+				string libraryName;
+				if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemInteger))
+					libraryName = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).GetObjectHeader((int)arguments[0]).LibraryName;
 				else
 				{
-					Schema.Object LObject = AProgram.ResolveCatalogIdentifier((string)AArguments[0], true);
-					LLibraryName = LObject.Library == null ? String.Empty : LObject.Library.Name;
+					Schema.Object objectValue = program.ResolveCatalogIdentifier((string)arguments[0], true);
+					libraryName = objectValue.Library == null ? String.Empty : objectValue.Library.Name;
 				}
-				return LLibraryName;
+				return libraryName;
 			}
 			else
-				return AProgram.CurrentLibrary.Name;
+				return program.CurrentLibrary.Name;
 		}
 	}
 	
     /// <remarks> operator System.CatalogTimeStamp() : Long; </remarks>
     public class SystemCatalogTimeStampNode : NilaryInstructionNode
     {
-		public override object NilaryInternalExecute(Program AProgram)
+		public override object NilaryInternalExecute(Program program)
 		{
-			return AProgram.Catalog.TimeStamp;
+			return program.Catalog.TimeStamp;
 		}
 	}
     
     /// <remarks> operator System.CacheTimeStamp() : Long; </remarks>
     public class SystemCacheTimeStampNode : NilaryInstructionNode
     {
-		public override object NilaryInternalExecute(Program AProgram)
+		public override object NilaryInternalExecute(Program program)
 		{
-			return AProgram.Catalog.CacheTimeStamp;
+			return program.Catalog.CacheTimeStamp;
 		}
     }
     
     /// <remarks> operator System.DerivationTimeStamp() : Long; </remarks>
     public class SystemDerivationTimeStampNode : NilaryInstructionNode
     {
-		public override object NilaryInternalExecute(Program AProgram)
+		public override object NilaryInternalExecute(Program program)
 		{
-			return AProgram.Catalog.DerivationTimeStamp;
+			return program.Catalog.DerivationTimeStamp;
 		}
     }
     
 	// operator UpdateTimeStamps();
 	public class SystemUpdateTimeStampsNode : NilaryInstructionNode
 	{
-		public override object NilaryInternalExecute(Program AProgram)
+		public override object NilaryInternalExecute(Program program)
 		{
 			// This call is no longer necessary because the catalog timestamp only controls library information now
 			//AProgram.ServerProcess.ServerSession.Server.Catalog.UpdateTimeStamp(); 
-			AProgram.Catalog.UpdateCacheTimeStamp();
-			AProgram.Catalog.UpdatePlanCacheTimeStamp();
-			AProgram.Catalog.UpdateDerivationTimeStamp();
+			program.Catalog.UpdateCacheTimeStamp();
+			program.Catalog.UpdatePlanCacheTimeStamp();
+			program.Catalog.UpdateDerivationTimeStamp();
 			return null;
 		}
 	}
@@ -278,32 +278,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // operator Script(const ASpecifier : String, const AIncludeDependents : Boolean, const AIncludeObject : Boolean) : String
     public class SystemScriptNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			D4TextEmitter LEmitter = new D4TextEmitter();
+			D4TextEmitter emitter = new D4TextEmitter();
 
-			Schema.Object LObject;		
-			if (Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemName))
-				LObject = AProgram.ResolveCatalogIdentifier((string)AArguments[0], true);
+			Schema.Object objectValue;		
+			if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemName))
+				objectValue = program.ResolveCatalogIdentifier((string)arguments[0], true);
 			else
-				LObject = AProgram.ResolveCatalogObjectSpecifier((string)AArguments[0], true);
+				objectValue = program.ResolveCatalogObjectSpecifier((string)arguments[0], true);
 				
-			bool LIncludeDependents = AArguments.Length > 1 ? (bool)AArguments[1] : false;
-			bool LIncludeObject = AArguments.Length > 2 ? (bool)AArguments[2] : true;
+			bool includeDependents = arguments.Length > 1 ? (bool)arguments[1] : false;
+			bool includeObject = arguments.Length > 2 ? (bool)arguments[2] : true;
 				
 			return 
-				LEmitter.Emit
+				emitter.Emit
 				(
-					AProgram.Catalog.EmitStatement
+					program.Catalog.EmitStatement
 					(
-						AProgram.CatalogDeviceSession,
+						program.CatalogDeviceSession,
 						EmitMode.ForCopy, 
-						new string[] { LObject.Name }, 
+						new string[] { objectValue.Name }, 
 						String.Empty, 
 						true, 
 						true, 
-						LIncludeDependents, 
-						LIncludeObject
+						includeDependents, 
+						includeObject
 					)
 				);
 		}
@@ -312,19 +312,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // operator ScriptExpression(const AExpression : String) : String
     public class SystemScriptExpressionNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			D4TextEmitter LEmitter = new D4TextEmitter();
+			D4TextEmitter emitter = new D4TextEmitter();
 		
-			IServerExpressionPlan LPlan = ((IServerProcess)AProgram.ServerProcess).PrepareExpression((string)AArguments[0], null);
+			IServerExpressionPlan plan = ((IServerProcess)program.ServerProcess).PrepareExpression((string)arguments[0], null);
 			try
 			{
-				LPlan.CheckCompiled();
-				return LEmitter.Emit(LPlan.Catalog.EmitStatement(AProgram.CatalogDeviceSession, EmitMode.ForCopy, new string[] { LPlan.TableVar.Name } ));
+				plan.CheckCompiled();
+				return emitter.Emit(plan.Catalog.EmitStatement(program.CatalogDeviceSession, EmitMode.ForCopy, new string[] { plan.TableVar.Name } ));
 			}
 			finally
 			{
-				((IServerProcess)AProgram.ServerProcess).UnprepareExpression(LPlan);
+				((IServerProcess)program.ServerProcess).UnprepareExpression(plan);
 			}
 		}
     }
@@ -334,9 +334,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		// TODO: Update this to work with non-scalar-valued attributes
 
-		private bool IsParserLiteral(Program AProgram, Schema.ScalarType AType)
+		private bool IsParserLiteral(Program program, Schema.ScalarType type)
 		{
-			switch (AType.Name)
+			switch (type.Name)
 			{
 				case "System.Boolean" :
 				case "System.Byte" :
@@ -355,115 +355,115 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// returns true if all the properties of the representation are parser literals, or can be specified in terms of parser literals, recursively
-		private bool IsRepresentationLiteral(Program AProgram, Schema.Representation ARepresentation)
+		private bool IsRepresentationLiteral(Program program, Schema.Representation representation)
 		{
-			foreach (Schema.Property LProperty in ARepresentation.Properties)
-				if ((!(LProperty.DataType is Schema.ScalarType)) || !IsParserLiteral(AProgram, (Schema.ScalarType)LProperty.DataType))
+			foreach (Schema.Property property in representation.Properties)
+				if ((!(property.DataType is Schema.ScalarType)) || !IsParserLiteral(program, (Schema.ScalarType)property.DataType))
 					return false;
 			return true;
 		}
 		
-		private Expression EmitScalarRepresentationSelector(Program AProgram, Schema.Representation ARepresentation, object AValue)
+		private Expression EmitScalarRepresentationSelector(Program program, Schema.Representation representation, object tempValue)
 		{
-			CallExpression LSelector = new CallExpression();
-			LSelector.Identifier = ARepresentation.Selector.OperatorName;
-			foreach (Schema.Property LProperty in ARepresentation.Properties)
-				LSelector.Expressions.Add
+			CallExpression selector = new CallExpression();
+			selector.Identifier = representation.Selector.OperatorName;
+			foreach (Schema.Property property in representation.Properties)
+				selector.Expressions.Add
 				(
 					EmitScalarSelector
 					(
-						AProgram, 
+						program, 
 						Compiler.EmitCallNode
 						(
-							AProgram.Plan, 
-							LProperty.ReadAccessor.OperatorName, 
-							new PlanNode[] { new ValueNode(ARepresentation.ScalarType, AValue) }
-						).Execute(AProgram), 
-						(Schema.ScalarType)LProperty.DataType
+							program.Plan, 
+							property.ReadAccessor.OperatorName, 
+							new PlanNode[] { new ValueNode(representation.ScalarType, tempValue) }
+						).Execute(program), 
+						(Schema.ScalarType)property.DataType
 					)
 				);
-			return LSelector;
+			return selector;
 		}
 		
-		private Expression EmitScalarSelector(Program AProgram, object AValue, Schema.ScalarType ADataType)
+		private Expression EmitScalarSelector(Program program, object tempValue, Schema.ScalarType dataType)
 		{
 			// if the value is a parser literal, emit the value expression for it,
 			// search for a selector in terms of parser literals, recursively
 			// if a parser literal can be converted to the value, emit the expression to convert it
 			// Compile the template to use for each row so the search does not have to take place for each row.
-			switch (ADataType.Name)
+			switch (dataType.Name)
 			{
-				case "System.Boolean" : return new ValueExpression((bool)AValue);
-				case "System.Byte" : return new ValueExpression((int)(byte)AValue);
-				case "System.Short" : return new ValueExpression((int)(short)AValue);
-				case "System.Integer" : return new ValueExpression((int)AValue);
-				case "System.Long" : return new ValueExpression((long)AValue, TokenType.Integer);
-				case "System.Decimal" : return new ValueExpression((decimal)AValue);
+				case "System.Boolean" : return new ValueExpression((bool)tempValue);
+				case "System.Byte" : return new ValueExpression((int)(byte)tempValue);
+				case "System.Short" : return new ValueExpression((int)(short)tempValue);
+				case "System.Integer" : return new ValueExpression((int)tempValue);
+				case "System.Long" : return new ValueExpression((long)tempValue, TokenType.Integer);
+				case "System.Decimal" : return new ValueExpression((decimal)tempValue);
 				case "System.Money" : 
-					if ((decimal)AValue < 0)
-						return new UnaryExpression(Alphora.Dataphor.DAE.Language.D4.Instructions.Negate, new ValueExpression(-((decimal)AValue), TokenType.Money));
+					if ((decimal)tempValue < 0)
+						return new UnaryExpression(Alphora.Dataphor.DAE.Language.D4.Instructions.Negate, new ValueExpression(-((decimal)tempValue), TokenType.Money));
 					else
-						return new ValueExpression((decimal)AValue, TokenType.Money);
-				case "System.String" : return new ValueExpression((string)AValue);
+						return new ValueExpression((decimal)tempValue, TokenType.Money);
+				case "System.String" : return new ValueExpression((string)tempValue);
 				#if USEISTRING
 				case "System.IString" : return new ValueExpression((string)AValue, LexerToken.IString);
 				#endif
 				default :
 				{
-					foreach (Schema.Representation LRepresentation in ADataType.Representations)
-						if (IsRepresentationLiteral(AProgram, LRepresentation))
-							return EmitScalarRepresentationSelector(AProgram, LRepresentation, AValue);
+					foreach (Schema.Representation representation in dataType.Representations)
+						if (IsRepresentationLiteral(program, representation))
+							return EmitScalarRepresentationSelector(program, representation, tempValue);
 					break;
 				}
 			}
 			
-			Error.Fail("Unable to construct a literal selector for values of type {0}.", ADataType.Name);
+			Error.Fail("Unable to construct a literal selector for values of type {0}.", dataType.Name);
 			return null;
 		}
 		
-		private RowSelectorExpressionBase EmitRowSelector(Program AProgram, Row ARow)
+		private RowSelectorExpressionBase EmitRowSelector(Program program, Row row)
 		{
-			DAE.Language.D4.RowSelectorExpressionBase LSelector = ARow.DataType is Schema.RowType ? (RowSelectorExpressionBase)new RowSelectorExpression() : new EntrySelectorExpression();
-			for (int LIndex = 0; LIndex < ARow.DataType.Columns.Count; LIndex++)
-				if (ARow.HasValue(LIndex))
-					LSelector.Expressions.Add(new NamedColumnExpression(EmitScalarSelector(AProgram, ARow[LIndex], (Schema.ScalarType)ARow.DataType.Columns[LIndex].DataType), ARow.DataType.Columns[LIndex].Name));
+			DAE.Language.D4.RowSelectorExpressionBase selector = row.DataType is Schema.RowType ? (RowSelectorExpressionBase)new RowSelectorExpression() : new EntrySelectorExpression();
+			for (int index = 0; index < row.DataType.Columns.Count; index++)
+				if (row.HasValue(index))
+					selector.Expressions.Add(new NamedColumnExpression(EmitScalarSelector(program, row[index], (Schema.ScalarType)row.DataType.Columns[index].DataType), row.DataType.Columns[index].Name));
 				else
-					LSelector.Expressions.Add(new NamedColumnExpression(new AsExpression(new ValueExpression(null, TokenType.Nil), ARow.DataType.Columns[LIndex].DataType.EmitSpecifier(EmitMode.ForCopy)), ARow.DataType.Columns[LIndex].Name));
-			return LSelector;
+					selector.Expressions.Add(new NamedColumnExpression(new AsExpression(new ValueExpression(null, TokenType.Nil), row.DataType.Columns[index].DataType.EmitSpecifier(EmitMode.ForCopy)), row.DataType.Columns[index].Name));
+			return selector;
 		}
 		
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			D4TextEmitter LEmitter = new D4TextEmitter();
+			D4TextEmitter emitter = new D4TextEmitter();
 		
-			string LExpression = (string)AArguments[0];
-			CursorNode LNode = (CursorNode)Compiler.BindNode(AProgram.Plan, Compiler.OptimizeNode(AProgram.Plan, Compiler.CompileCursor(AProgram.Plan, new Parser().ParseCursorDefinition(LExpression))));
-			TableSelectorExpressionBase LSelector = LNode.SourceNode.DataType is Schema.TableType ? (TableSelectorExpressionBase)new TableSelectorExpression() : new PresentationSelectorExpression();
-			LSelector.TypeSpecifier = LNode.SourceNode.DataType.EmitSpecifier(EmitMode.ForCopy);
-			LSelector.Keys.Add(AProgram.FindClusteringKey(LNode.SourceNode.TableVar).EmitStatement(EmitMode.ForCopy));
-			Table LTable = (Table)LNode.SourceNode.Execute(AProgram);
+			string expression = (string)arguments[0];
+			CursorNode node = (CursorNode)Compiler.BindNode(program.Plan, Compiler.OptimizeNode(program.Plan, Compiler.CompileCursor(program.Plan, new Parser().ParseCursorDefinition(expression))));
+			TableSelectorExpressionBase selector = node.SourceNode.DataType is Schema.TableType ? (TableSelectorExpressionBase)new TableSelectorExpression() : new PresentationSelectorExpression();
+			selector.TypeSpecifier = node.SourceNode.DataType.EmitSpecifier(EmitMode.ForCopy);
+			selector.Keys.Add(program.FindClusteringKey(node.SourceNode.TableVar).EmitStatement(EmitMode.ForCopy));
+			Table table = (Table)node.SourceNode.Execute(program);
 			try
 			{
-				Row LRow = new Row(AProgram.ValueManager, LTable.DataType.RowType);
+				Row row = new Row(program.ValueManager, table.DataType.RowType);
 				try
 				{
-					while (LTable.Next())
+					while (table.Next())
 					{
-						LTable.Select(LRow);
+						table.Select(row);
 						
-						LSelector.Expressions.Add(EmitRowSelector(AProgram, LRow));
+						selector.Expressions.Add(EmitRowSelector(program, row));
 					}
 					
-					return LEmitter.Emit(LSelector);
+					return emitter.Emit(selector);
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 			}
 			finally
 			{
-				LTable.Dispose();
+				table.Dispose();
 			}
 		}
     }
@@ -471,27 +471,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator ScriptLibrary(ALibraryName : System.Name) : System.String;</remarks>
     public class SystemScriptLibraryNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			return AProgram.ServerProcess.ServerSession.Server.ScriptLibrary(AProgram.CatalogDeviceSession, (string)AArguments[0]);
+			return program.ServerProcess.ServerSession.Server.ScriptLibrary(program.CatalogDeviceSession, (string)arguments[0]);
 		}
     }
     
     /// <remarks>operator ScriptCatalog() : System.String;</remarks>
 	public class SystemScriptCatalogNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			return AProgram.ServerProcess.ServerSession.Server.ScriptCatalog(AProgram.CatalogDeviceSession);
+			return program.ServerProcess.ServerSession.Server.ScriptCatalog(program.CatalogDeviceSession);
 		}
 	}
 	
 	/// <remarks>operator ScriptServerState() : System.String;</remarks>
 	public class SystemScriptServerStateNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			return ((Server)AProgram.ServerProcess.ServerSession.Server).ScriptServerState(AProgram.ServerProcess);
+			return ((Server)program.ServerProcess.ServerSession.Server).ScriptServerState(program.ServerProcess);
 		}
 	}
 
@@ -501,46 +501,46 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // operator ScriptDrop(const ASpecifier : String, const AIncludeDependents : Boolean, const AIncludeObject : Boolean) : String
     public class SystemScriptDropNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			D4TextEmitter LEmitter = new D4TextEmitter();
+			D4TextEmitter emitter = new D4TextEmitter();
 			
-			Schema.Object LObject;
+			Schema.Object objectValue;
 			
-			if (Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemName))
-				LObject = AProgram.ResolveCatalogIdentifier((string)AArguments[0], true);
+			if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemName))
+				objectValue = program.ResolveCatalogIdentifier((string)arguments[0], true);
 			else
-				LObject = AProgram.ResolveCatalogObjectSpecifier((string)AArguments[0], true);
+				objectValue = program.ResolveCatalogObjectSpecifier((string)arguments[0], true);
 				
-			bool LIncludeDependents = AArguments.Length > 1 ? (bool)AArguments[1] : true;
-			bool LIncludeObject = AArguments.Length > 2 ? (bool)AArguments[2] : true;
+			bool includeDependents = arguments.Length > 1 ? (bool)arguments[1] : true;
+			bool includeObject = arguments.Length > 2 ? (bool)arguments[2] : true;
 		
-			return LEmitter.Emit(AProgram.Catalog.EmitDropStatement(AProgram.CatalogDeviceSession, new string[] { LObject.Name }, String.Empty, true, true, LIncludeDependents, LIncludeObject));
+			return emitter.Emit(program.Catalog.EmitDropStatement(program.CatalogDeviceSession, new string[] { objectValue.Name }, String.Empty, true, true, includeDependents, includeObject));
 		}
     }
     
     /// <remarks>operator ScriptDropLibrary(AName : System.Name) : System.String;</remarks>
     public class SystemScriptDropLibraryNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			return AProgram.ServerProcess.ServerSession.Server.ScriptDropLibrary(AProgram.CatalogDeviceSession, (string)AArguments[0]);
+			return program.ServerProcess.ServerSession.Server.ScriptDropLibrary(program.CatalogDeviceSession, (string)arguments[0]);
 		}
     }
     
     /// <remarks>operator ScriptDropCatalog() : System.String;</remarks>
     public class SystemScriptDropCatalogNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			return AProgram.ServerProcess.ServerSession.Server.ScriptDropCatalog(AProgram.CatalogDeviceSession);
+			return program.ServerProcess.ServerSession.Server.ScriptDropCatalog(program.CatalogDeviceSession);
 		}
     }
 
 	/// <remarks>operator ScriptLibraryChanges(const AOldCatalogDirectory : String, const ALibraryName : Name) : String;</remarks>
 	public class SystemScriptLibraryChangesNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			return null;
 			//return AProgram.ServerProcess.ServerSession.Server.ScriptLibraryChanges((string)AArguments[0], (string)AArguments[1]);
@@ -550,7 +550,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Diagnostics.IsCatalogObjectLoaded(const AObjectID : Integer) : Boolean;
 	public class SystemIsCatalogObjectLoadedNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null)
@@ -558,13 +558,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			else
 			#endif
 			{
-				if (AProgram.ServerProcess.ServerSession.User.ID != AProgram.ServerProcess.ServerSession.Server.AdminUser.ID)
-					throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, AProgram.ServerProcess.ServerSession.User.ID);
+				if (program.ServerProcess.ServerSession.User.ID != program.ServerProcess.ServerSession.Server.AdminUser.ID)
+					throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, program.ServerProcess.ServerSession.User.ID);
 					
-				if (Nodes[0].DataType.Is(AProgram.DataTypes.SystemInteger))
-					return AProgram.CatalogDeviceSession.ResolveCachedCatalogObject((int)AArguments[0], false) != null;
+				if (Nodes[0].DataType.Is(program.DataTypes.SystemInteger))
+					return program.CatalogDeviceSession.ResolveCachedCatalogObject((int)arguments[0], false) != null;
 
-				return AProgram.CatalogDeviceSession.ResolveCachedCatalogObject((string)AArguments[0], false) != null;
+				return program.CatalogDeviceSession.ResolveCachedCatalogObject((string)arguments[0], false) != null;
 			}
 		}
 	}
@@ -573,18 +573,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator ClearCatalogObject(const AObjectName : Name);
     public class SystemClearCatalogObjectNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			if (AProgram.ServerProcess.ServerSession.User.ID != AProgram.ServerProcess.ServerSession.Server.AdminUser.ID)
-				throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, AProgram.ServerProcess.ServerSession.User.ID);
+			if (program.ServerProcess.ServerSession.User.ID != program.ServerProcess.ServerSession.Server.AdminUser.ID)
+				throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, program.ServerProcess.ServerSession.User.ID);
 
-			Schema.CatalogObject LCatalogObject;
-			if (Nodes[0].DataType.Is(AProgram.DataTypes.SystemInteger))
-				LCatalogObject = AProgram.CatalogDeviceSession.ResolveCachedCatalogObject((int)AArguments[0]);
+			Schema.CatalogObject catalogObject;
+			if (Nodes[0].DataType.Is(program.DataTypes.SystemInteger))
+				catalogObject = program.CatalogDeviceSession.ResolveCachedCatalogObject((int)arguments[0]);
 			else
-				LCatalogObject = AProgram.CatalogDeviceSession.ResolveCachedCatalogObject((string)AArguments[0]);
+				catalogObject = program.CatalogDeviceSession.ResolveCachedCatalogObject((string)arguments[0]);
 				
-			AProgram.CatalogDeviceSession.ClearCachedCatalogObject(LCatalogObject);
+			program.CatalogDeviceSession.ClearCachedCatalogObject(catalogObject);
 				
 			return null;
 		}
@@ -593,20 +593,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator ClearLibrary(string ALibraryName);
     public class SystemClearLibraryNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			if (AProgram.ServerProcess.ServerSession.User.ID != AProgram.ServerProcess.ServerSession.Server.AdminUser.ID)
-				throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, AProgram.ServerProcess.ServerSession.User.ID);
-			string LLibraryName = AProgram.Catalog.Libraries[(string)AArguments[0]].Name;
-			Schema.Objects LObjects = new Schema.Objects();
-			lock (AProgram.Catalog)
+			if (program.ServerProcess.ServerSession.User.ID != program.ServerProcess.ServerSession.Server.AdminUser.ID)
+				throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, program.ServerProcess.ServerSession.User.ID);
+			string libraryName = program.Catalog.Libraries[(string)arguments[0]].Name;
+			Schema.Objects objects = new Schema.Objects();
+			lock (program.Catalog)
 			{
-				for (int LIndex = 0; LIndex < AProgram.Catalog.Count; LIndex++)
-					if ((AProgram.Catalog[LIndex].Library != null) && (AProgram.Catalog[LIndex].Library.Name == LLibraryName))
-						LObjects.Add(AProgram.Catalog[LIndex]);
+				for (int index = 0; index < program.Catalog.Count; index++)
+					if ((program.Catalog[index].Library != null) && (program.Catalog[index].Library.Name == libraryName))
+						objects.Add(program.Catalog[index]);
 			}
 			
-			AProgram.CatalogDeviceSession.ClearCachedCatalogObjects(LObjects);
+			program.CatalogDeviceSession.ClearCachedCatalogObjects(objects);
 				
 			return null;
 		}
@@ -615,7 +615,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator ClearCatalog();
     public class SystemClearCatalogNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			throw new NotSupportedException();
 			// This hasn't worked for a long time anyway, so rather than try to expose SetUser safely, just commenting it out.
@@ -634,77 +634,77 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // operator DependentObjects(const AObjectName : Name, const ARecursive : Boolean) : table { Object_ID : Integer, Object_Name : Name, Object_Description : String, Sequence : Integer, Level : Integer };
     public class SystemDependentObjectsNode : TableNode
     {
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
 
-			DataType.Columns.Add(new Schema.Column("Object_ID", APlan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("Object_Name", APlan.DataTypes.SystemName));
-			DataType.Columns.Add(new Schema.Column("Object_Description", APlan.DataTypes.SystemString));
-			DataType.Columns.Add(new Schema.Column("Sequence", APlan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("Level", APlan.DataTypes.SystemInteger));
-			foreach (Schema.Column LColumn in DataType.Columns)
-				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
+			DataType.Columns.Add(new Schema.Column("Object_ID", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Object_Name", plan.DataTypes.SystemName));
+			DataType.Columns.Add(new Schema.Column("Object_Description", plan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Sequence", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Level", plan.DataTypes.SystemInteger));
+			foreach (Schema.Column column in DataType.Columns)
+				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 				
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Sequence"]}));
-			Schema.Order LOrder = new Schema.Order();
-			LOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Level"], false));
-			LOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Sequence"], true));
+			Schema.Order order = new Schema.Order();
+			order.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Level"], false));
+			order.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Sequence"], true));
 
-			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = Compiler.FindClusteringOrder(APlan, TableVar);
+			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
+			Order = Compiler.FindClusteringOrder(plan, TableVar);
 			
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			LocalTable LResult = new LocalTable(this, AProgram);
+			LocalTable result = new LocalTable(this, program);
 			try
 			{
-				LResult.Open();
+				result.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
+				Row row = new Row(program.ValueManager, result.DataType.RowType);
 				try
 				{
-					LRow.ValuesOwned = false;
+					row.ValuesOwned = false;
 
-					int LID;
-					if (Nodes[0].DataType.Is(AProgram.DataTypes.SystemName))
-						LID = AProgram.ResolveCatalogIdentifier((string)Nodes[0].Execute(AProgram), true).ID;
+					int iD;
+					if (Nodes[0].DataType.Is(program.DataTypes.SystemName))
+						iD = program.ResolveCatalogIdentifier((string)Nodes[0].Execute(program), true).ID;
 					else
-						LID = (int)Nodes[0].Execute(AProgram);
+						iD = (int)Nodes[0].Execute(program);
 						
-					List<Schema.DependentObjectHeader> LHeaders = AProgram.CatalogDeviceSession.SelectObjectDependents(LID, Nodes.Count == 2 ? (bool)Nodes[1].Execute(AProgram) : true);
+					List<Schema.DependentObjectHeader> headers = program.CatalogDeviceSession.SelectObjectDependents(iD, Nodes.Count == 2 ? (bool)Nodes[1].Execute(program) : true);
 					
-					for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
+					for (int index = 0; index < headers.Count; index++)
 					{
-						LRow[0] = LHeaders[LIndex].ID;
-						LRow[1] = LHeaders[LIndex].Name;
-						LRow[2] = LHeaders[LIndex].Description;
-						LRow[3] = LHeaders[LIndex].Sequence;
-						LRow[4] = LHeaders[LIndex].Level;
-						LResult.Insert(LRow);
+						row[0] = headers[index].ID;
+						row[1] = headers[index].Name;
+						row[2] = headers[index].Description;
+						row[3] = headers[index].Sequence;
+						row[4] = headers[index].Level;
+						result.Insert(row);
 					}
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 				
-				LResult.First();
+				result.First();
 				
-				return LResult;
+				return result;
 			}
 			catch
 			{
-				LResult.Dispose();
+				result.Dispose();
 				throw;
 			}
 		}
@@ -716,102 +716,102 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // operator RequiredObjects(const AObjectName : Name, const ARecursive : Boolean) : table { Object_ID : Integer, Object_Name : Name, Object_Description : String, Sequence : Integer, Level : Integer };
     public class SystemRequiredObjectsNode : TableNode
     {
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
 			
-			DataType.Columns.Add(new Schema.Column("Object_ID", APlan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("Object_Name", APlan.DataTypes.SystemName));
-			DataType.Columns.Add(new Schema.Column("Object_Description", APlan.DataTypes.SystemString));
-			DataType.Columns.Add(new Schema.Column("Sequence", APlan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("Level", APlan.DataTypes.SystemInteger));
-			foreach (Schema.Column LColumn in DataType.Columns)
-				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
+			DataType.Columns.Add(new Schema.Column("Object_ID", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Object_Name", plan.DataTypes.SystemName));
+			DataType.Columns.Add(new Schema.Column("Object_Description", plan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Sequence", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Level", plan.DataTypes.SystemInteger));
+			foreach (Schema.Column column in DataType.Columns)
+				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 				
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Sequence"]}));
-			Schema.Order LOrder = new Schema.Order();
-			LOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Level"], true));
-			LOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Sequence"], true));
+			Schema.Order order = new Schema.Order();
+			order.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Level"], true));
+			order.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Sequence"], true));
 
-			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = Compiler.FindClusteringOrder(APlan, TableVar);
+			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
+			Order = Compiler.FindClusteringOrder(plan, TableVar);
 			
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 		
-		private void PopulateRequiredObject(Program AProgram, Table ATable, Row ARow, Schema.Object AObject, bool ARecursive, ref int ASequence, int ALevel)
+		private void PopulateRequiredObject(Program program, Table table, Row row, Schema.Object objectValue, bool recursive, ref int sequence, int level)
 		{
-			ARow[0] = AObject.ID;
-			ARow[1] = AObject.Name;
-			ARow[2] = AObject.Description;
-			ARow[3] = ASequence;
-			ARow[4] = ALevel;
-			ATable.Insert(ARow);
-			if (ARecursive)
+			row[0] = objectValue.ID;
+			row[1] = objectValue.Name;
+			row[2] = objectValue.Description;
+			row[3] = sequence;
+			row[4] = level;
+			table.Insert(row);
+			if (recursive)
 			{
-				ALevel += 1;
-				PopulateRequiredObjects(AProgram, ATable, ARow, AObject, ARecursive, ref ASequence, ALevel);
+				level += 1;
+				PopulateRequiredObjects(program, table, row, objectValue, recursive, ref sequence, level);
 			}
 		}
 		
-		private void PopulateRequiredObjects(Program AProgram, Table ATable, Row ARow, Schema.Object AObject, bool ARecursive, ref int ASequence, int ALevel)
+		private void PopulateRequiredObjects(Program program, Table table, Row row, Schema.Object objectValue, bool recursive, ref int sequence, int level)
 		{
-			if (AObject.HasDependencies())
-				for (int LIndex = 0; LIndex < AObject.Dependencies.Count; LIndex++)
+			if (objectValue.HasDependencies())
+				for (int index = 0; index < objectValue.Dependencies.Count; index++)
 				{
-					ASequence += 1;
-					PopulateRequiredObject(AProgram, ATable, ARow, AObject.Dependencies.ResolveObject(AProgram.CatalogDeviceSession, LIndex), ARecursive, ref ASequence, ALevel);
+					sequence += 1;
+					PopulateRequiredObject(program, table, row, objectValue.Dependencies.ResolveObject(program.CatalogDeviceSession, index), recursive, ref sequence, level);
 				}
 		}
 
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			LocalTable LResult = new LocalTable(this, AProgram);
+			LocalTable result = new LocalTable(this, program);
 			try
 			{
-				LResult.Open();
+				result.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
+				Row row = new Row(program.ValueManager, result.DataType.RowType);
 				try
 				{
-					LRow.ValuesOwned = false;
+					row.ValuesOwned = false;
 					
-					int LID;
-					if (Nodes[0].DataType.Is(AProgram.DataTypes.SystemName))
-						LID = AProgram.ResolveCatalogIdentifier((string)Nodes[0].Execute(AProgram), true).ID;
+					int iD;
+					if (Nodes[0].DataType.Is(program.DataTypes.SystemName))
+						iD = program.ResolveCatalogIdentifier((string)Nodes[0].Execute(program), true).ID;
 					else
-						LID = (int)Nodes[0].Execute(AProgram);
+						iD = (int)Nodes[0].Execute(program);
 						
-					List<Schema.DependentObjectHeader> LHeaders = AProgram.CatalogDeviceSession.SelectObjectDependencies(LID, Nodes.Count == 2 ? (bool)Nodes[1].Execute(AProgram) : true);
+					List<Schema.DependentObjectHeader> headers = program.CatalogDeviceSession.SelectObjectDependencies(iD, Nodes.Count == 2 ? (bool)Nodes[1].Execute(program) : true);
 					
-					for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
+					for (int index = 0; index < headers.Count; index++)
 					{
-						LRow[0] = LHeaders[LIndex].ID;
-						LRow[1] = LHeaders[LIndex].Name;
-						LRow[2] = LHeaders[LIndex].Description;
-						LRow[3] = LHeaders[LIndex].Sequence;
-						LRow[4] = LHeaders[LIndex].Level;
-						LResult.Insert(LRow);
+						row[0] = headers[index].ID;
+						row[1] = headers[index].Name;
+						row[2] = headers[index].Description;
+						row[3] = headers[index].Sequence;
+						row[4] = headers[index].Level;
+						result.Insert(row);
 					}
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 				
-				LResult.First();
+				result.First();
 				
-				return LResult;
+				return result;
 			}
 			catch
 			{
-				LResult.Dispose();
+				result.Dispose();
 				throw;
 			}
 		}
@@ -821,90 +821,90 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // operator DependentLibraries(const ALibraryName : Name, const ARecursive : Boolean) : table { Library_Name : Name, Sequence : Integer, Level : Integer };
     public class SystemDependentLibrariesNode : TableNode
     {
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
 			
-			DataType.Columns.Add(new Schema.Column("Library_Name", APlan.DataTypes.SystemName));
-			DataType.Columns.Add(new Schema.Column("Sequence", APlan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("Level", APlan.DataTypes.SystemInteger));
-			foreach (Schema.Column LColumn in DataType.Columns)
-				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
+			DataType.Columns.Add(new Schema.Column("Library_Name", plan.DataTypes.SystemName));
+			DataType.Columns.Add(new Schema.Column("Sequence", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Level", plan.DataTypes.SystemInteger));
+			foreach (Schema.Column column in DataType.Columns)
+				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 				
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Sequence"]}));
-			Schema.Order LOrder = new Schema.Order();
-			LOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Level"], false));
-			LOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Sequence"], true));
+			Schema.Order order = new Schema.Order();
+			order.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Level"], false));
+			order.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Sequence"], true));
 
-			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = Compiler.FindClusteringOrder(APlan, TableVar);
+			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
+			Order = Compiler.FindClusteringOrder(plan, TableVar);
 			
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 		
-		private void PopulateLibrary(Program AProgram, Table ATable, Row ARow, Schema.LoadedLibrary ALibrary, bool ARecursive, ref int ASequence, int ALevel)
+		private void PopulateLibrary(Program program, Table table, Row row, Schema.LoadedLibrary library, bool recursive, ref int sequence, int level)
 		{
-			ARow[0] = ALibrary.Name;
-			ARow[1] = ASequence;
-			ARow[2] = ALevel;
-			ATable.Insert(ARow);
-			if (ARecursive)
+			row[0] = library.Name;
+			row[1] = sequence;
+			row[2] = level;
+			table.Insert(row);
+			if (recursive)
 			{
-				ALevel += 1;
-				PopulateDependentLibraries(AProgram, ATable, ARow, ALibrary, ARecursive, ref ASequence, ALevel);
+				level += 1;
+				PopulateDependentLibraries(program, table, row, library, recursive, ref sequence, level);
 			}
 		}
 		
-		private void PopulateDependentLibraries(Program AProgram, Table ATable, Row ARow, Schema.LoadedLibrary ALibrary, bool ARecursive, ref int ASequence, int ALevel)
+		private void PopulateDependentLibraries(Program program, Table table, Row row, Schema.LoadedLibrary library, bool recursive, ref int sequence, int level)
 		{
-			foreach (Schema.LoadedLibrary LLibrary in ALibrary.RequiredByLibraries)
+			foreach (Schema.LoadedLibrary localLibrary in library.RequiredByLibraries)
 			{
-				ASequence += 1;
-				PopulateLibrary(AProgram, ATable, ARow, LLibrary, ARecursive, ref ASequence, ALevel);
+				sequence += 1;
+				PopulateLibrary(program, table, row, localLibrary, recursive, ref sequence, level);
 			}
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			LocalTable LResult = new LocalTable(this, AProgram);
+			LocalTable result = new LocalTable(this, program);
 			try
 			{
-				LResult.Open();
+				result.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
+				Row row = new Row(program.ValueManager, result.DataType.RowType);
 				try
 				{
-					LRow.ValuesOwned = false;
-					int LSequence = 0;
+					row.ValuesOwned = false;
+					int sequence = 0;
 					PopulateDependentLibraries
 					(
-						AProgram, 
-						LResult, 
-						LRow,
-						AProgram.CatalogDeviceSession.ResolveLoadedLibrary((string)Nodes[0].Execute(AProgram)), 
-						Nodes.Count == 2 ? (bool)Nodes[1].Execute(AProgram) : true, 
-						ref LSequence, 
+						program, 
+						result, 
+						row,
+						program.CatalogDeviceSession.ResolveLoadedLibrary((string)Nodes[0].Execute(program)), 
+						Nodes.Count == 2 ? (bool)Nodes[1].Execute(program) : true, 
+						ref sequence, 
 						1
 					);
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 				
-				LResult.First();
+				result.First();
 				
-				return LResult;
+				return result;
 			}
 			catch
 			{
-				LResult.Dispose();
+				result.Dispose();
 				throw;
 			}
 		}
@@ -914,90 +914,90 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // operator RequiredLibraries(const ALibraryName : Name, const ARecursive : Boolean) : table { Library_Name : Name, Sequence : Integer, Level : Integer };
     public class SystemRequiredLibrariesNode : TableNode
     {
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
 			
-			DataType.Columns.Add(new Schema.Column("Library_Name", APlan.DataTypes.SystemName));
-			DataType.Columns.Add(new Schema.Column("Sequence", APlan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("Level", APlan.DataTypes.SystemInteger));
-			foreach (Schema.Column LColumn in DataType.Columns)
-				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
+			DataType.Columns.Add(new Schema.Column("Library_Name", plan.DataTypes.SystemName));
+			DataType.Columns.Add(new Schema.Column("Sequence", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Level", plan.DataTypes.SystemInteger));
+			foreach (Schema.Column column in DataType.Columns)
+				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 				
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Sequence"]}));
-			Schema.Order LOrder = new Schema.Order();
-			LOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Level"], true));
-			LOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Sequence"], true));
+			Schema.Order order = new Schema.Order();
+			order.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Level"], true));
+			order.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Sequence"], true));
 
-			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = Compiler.FindClusteringOrder(APlan, TableVar);
+			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
+			Order = Compiler.FindClusteringOrder(plan, TableVar);
 			
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 		
-		private void PopulateRequiredLibrary(Program AProgram, Table ATable, Row ARow, Schema.Library ALibrary, bool ARecursive, ref int ASequence, int ALevel)
+		private void PopulateRequiredLibrary(Program program, Table table, Row row, Schema.Library library, bool recursive, ref int sequence, int level)
 		{
-			ARow[0] = ALibrary.Name;
-			ARow[1] = ASequence;
-			ARow[2] = ALevel;
-			ATable.Insert(ARow);
-			if (ARecursive)
+			row[0] = library.Name;
+			row[1] = sequence;
+			row[2] = level;
+			table.Insert(row);
+			if (recursive)
 			{
-				ALevel += 1;
-				PopulateRequiredLibraries(AProgram, ATable, ARow, ALibrary, ARecursive, ref ASequence, ALevel);
+				level += 1;
+				PopulateRequiredLibraries(program, table, row, library, recursive, ref sequence, level);
 			}
 		}
 		
-		private void PopulateRequiredLibraries(Program AProgram, Table ATable, Row ARow, Schema.Library ALibrary, bool ARecursive, ref int ASequence, int ALevel)
+		private void PopulateRequiredLibraries(Program program, Table table, Row row, Schema.Library library, bool recursive, ref int sequence, int level)
 		{
-			foreach (Schema.LibraryReference LLibrary in ALibrary.Libraries)
+			foreach (Schema.LibraryReference localLibrary in library.Libraries)
 			{
-				ASequence += 1;
-				PopulateRequiredLibrary(AProgram, ATable, ARow, AProgram.Catalog.Libraries[LLibrary.Name], ARecursive, ref ASequence, ALevel);
+				sequence += 1;
+				PopulateRequiredLibrary(program, table, row, program.Catalog.Libraries[localLibrary.Name], recursive, ref sequence, level);
 			}
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			LocalTable LResult = new LocalTable(this, AProgram);
+			LocalTable result = new LocalTable(this, program);
 			try
 			{
-				LResult.Open();
+				result.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
+				Row row = new Row(program.ValueManager, result.DataType.RowType);
 				try
 				{
-					LRow.ValuesOwned = false;
-					int LSequence = 0;
+					row.ValuesOwned = false;
+					int sequence = 0;
 					PopulateRequiredLibraries
 					(
-						AProgram, 
-						LResult, 
-						LRow, 
-						AProgram.Catalog.Libraries[(string)Nodes[0].Execute(AProgram)],
-						Nodes.Count == 2 ? (bool)Nodes[1].Execute(AProgram) : true, 
-						ref LSequence, 
+						program, 
+						result, 
+						row, 
+						program.Catalog.Libraries[(string)Nodes[0].Execute(program)],
+						Nodes.Count == 2 ? (bool)Nodes[1].Execute(program) : true, 
+						ref sequence, 
 						1
 					);
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 				
-				LResult.First();
+				result.First();
 				
-				return LResult;
+				return result;
 			}
 			catch
 			{
-				LResult.Dispose();
+				result.Dispose();
 				throw;
 			}
 		}
@@ -1005,9 +1005,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
     public class SystemClearStoreCountersNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ClearStoreCounters();
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).ClearStoreCounters();
 			return null;
 		}
     }
@@ -1015,60 +1015,60 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // operator GetStoreCounters() : table { Sequence : Integer, Operation : String, TableName : String, IndexName : String, IsMatched : Boolean, IsRanged : Boolean, Duration : TimeSpan };
     public class SystemGetStoreCountersNode : TableNode
     {
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
 			
-			DataType.Columns.Add(new Schema.Column("Sequence", APlan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("Operation", APlan.DataTypes.SystemString));
-			DataType.Columns.Add(new Schema.Column("TableName", APlan.DataTypes.SystemString));
-			DataType.Columns.Add(new Schema.Column("IndexName", APlan.DataTypes.SystemString));
-			DataType.Columns.Add(new Schema.Column("IsMatched", APlan.DataTypes.SystemBoolean));
-			DataType.Columns.Add(new Schema.Column("IsRanged", APlan.DataTypes.SystemBoolean));
-			DataType.Columns.Add(new Schema.Column("IsUpdatable", APlan.DataTypes.SystemBoolean));
-			DataType.Columns.Add(new Schema.Column("Duration", APlan.DataTypes.SystemTimeSpan));
-			foreach (Schema.Column LColumn in DataType.Columns)
-				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
+			DataType.Columns.Add(new Schema.Column("Sequence", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Operation", plan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("TableName", plan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("IndexName", plan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("IsMatched", plan.DataTypes.SystemBoolean));
+			DataType.Columns.Add(new Schema.Column("IsRanged", plan.DataTypes.SystemBoolean));
+			DataType.Columns.Add(new Schema.Column("IsUpdatable", plan.DataTypes.SystemBoolean));
+			DataType.Columns.Add(new Schema.Column("Duration", plan.DataTypes.SystemTimeSpan));
+			foreach (Schema.Column column in DataType.Columns)
+				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 				
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Sequence"]}));
 
-			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = Compiler.FindClusteringOrder(APlan, TableVar);
+			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
+			Order = Compiler.FindClusteringOrder(plan, TableVar);
 			
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			LocalTable LResult = new LocalTable(this, AProgram);
+			LocalTable result = new LocalTable(this, program);
 			try
 			{
-				LResult.Open();
+				result.Open();
 				
 				// Populate the result
-				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
+				Row row = new Row(program.ValueManager, result.DataType.RowType);
 				try
 				{
-					LRow.ValuesOwned = false;
-					((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).PopulateStoreCounters(LResult, LRow);
+					row.ValuesOwned = false;
+					((ServerCatalogDeviceSession)program.CatalogDeviceSession).PopulateStoreCounters(result, row);
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 				
-				LResult.First();
+				result.First();
 				
-				return LResult;
+				return result;
 			}
 			catch
 			{
-				LResult.Dispose();
+				result.Dispose();
 				throw;
 			}
 		}

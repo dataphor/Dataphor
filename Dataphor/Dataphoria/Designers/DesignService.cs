@@ -47,70 +47,70 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 	public class DesignService : IDesignService
 	{
-		public const int CDefaultSaveInterval = 120;	// 2 Minutes
+		public const int DefaultSaveInterval = 120;	// 2 Minutes
 		
-		public DesignService(IDataphoria ADataphoria, IDesigner ADesigner)
+		public DesignService(IDataphoria dataphoria, IDesigner designer)
 		{
-			FDataphoria = ADataphoria;
-			FDesigner = ADesigner;
-			if (ADesigner != null)
-				ADesigner.Disposed += new EventHandler(DesignerDisposed);
+			_dataphoria = dataphoria;
+			_designer = designer;
+			if (designer != null)
+				designer.Disposed += new EventHandler(DesignerDisposed);
 		}
 			  
 		// Dataphoria
 
-		private IDataphoria FDataphoria;
+		private IDataphoria _dataphoria;
 		public IDataphoria Dataphoria
 		{
-			get { return FDataphoria; }
+			get { return _dataphoria; }
 		}
 
 		// Designer
 
-		private IDesigner FDesigner;
+		private IDesigner _designer;
 		public IDesigner Designer
 		{
-			get { return FDesigner; }
+			get { return _designer; }
 		}
 
 		private void DesignerDisposed(object sender, EventArgs e)
 		{
 			StopAutoSave(); 
-			if (FBuffer != null)
-				UnregisterDesigner(FBuffer);  			
+			if (_buffer != null)
+				UnregisterDesigner(_buffer);  			
 		}
 
-		public void RegisterDesigner(DesignBuffer ABuffer)
+		public void RegisterDesigner(DesignBuffer buffer)
 		{
-			Dataphoria.RegisterDesigner(ABuffer, FDesigner);
+			Dataphoria.RegisterDesigner(buffer, _designer);
 		}
 
-		public void UnregisterDesigner(DesignBuffer ABuffer)
+		public void UnregisterDesigner(DesignBuffer buffer)
 		{
-			Dataphoria.UnregisterDesigner(ABuffer);
+			Dataphoria.UnregisterDesigner(buffer);
 		}
 
 		// IsModified
 
-		private bool FIsModified;
+		private bool _isModified;
 		/// <remarks> ModifiedChanged will not occur if IsModified is set directly. </remarks>
 		public bool IsModified
 		{
-			get { return FIsModified; }
-			set { FIsModified = value; }
+			get { return _isModified; }
+			set { _isModified = value; }
 		}
 
 		/// <summary> Returns true if the service or any of the dependant services (transitively) are modified. </summary>
 		public bool AnyModified 
 		{ 
-			get { return FIsModified || FDependants.Exists(delegate(IDesignService AService) { return AService.AnyModified; }); } 
+			get { return _isModified || _dependants.Exists(delegate(IDesignService AService) { return AService.AnyModified; }); } 
 		}
 
-		public void SetModified(bool AValue)
+		public void SetModified(bool tempValue)
 		{
-			if (AValue != FIsModified)
+			if (tempValue != _isModified)
 			{
-				FIsModified = AValue;
+				_isModified = tempValue;
 				ModifiedChanged();
 			}
 		}
@@ -133,48 +133,48 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 				}
 		}
 
-		private List<IDesignService> FDependants = new List<IDesignService>();
+		private List<IDesignService> _dependants = new List<IDesignService>();
 		public List<IDesignService> Dependants
 		{
-			get { return FDependants; }
+			get { return _dependants; }
 		}
 
 		// Data callbacks
 
 		public event RequestHandler OnRequestLoad;
-		protected virtual void RequestLoad(DesignBuffer ABuffer)
+		protected virtual void RequestLoad(DesignBuffer buffer)
 		{
 			if (OnRequestLoad != null)
-				OnRequestLoad(this, ABuffer);
+				OnRequestLoad(this, buffer);
 		}
 
 		public event RequestHandler OnRequestSave;
-		protected virtual void RequestSave(DesignBuffer ABuffer)
+		protected virtual void RequestSave(DesignBuffer buffer)
 		{
-			foreach (IDesignService LDependant in FDependants)
-				LDependant.Save();
+			foreach (IDesignService dependant in _dependants)
+				dependant.Save();
 
 			if (OnRequestSave != null)
-				OnRequestSave(this, ABuffer);
+				OnRequestSave(this, buffer);
 		}
 
 		// DesignBuffer
 
-		private DesignBuffer FBuffer;
+		private DesignBuffer _buffer;
 		public DesignBuffer Buffer
 		{
-			get { return FBuffer; }
+			get { return _buffer; }
 		}
 
-		public void SetBuffer(DesignBuffer ABuffer)
+		public void SetBuffer(DesignBuffer buffer)
 		{
-			if (ABuffer != FBuffer)
+			if (buffer != _buffer)
 			{
-				if (FBuffer != null)
-					UnregisterDesigner(FBuffer);
-				FBuffer = ABuffer;
-				if (FBuffer != null)
-					RegisterDesigner(FBuffer);
+				if (_buffer != null)
+					UnregisterDesigner(_buffer);
+				_buffer = buffer;
+				if (_buffer != null)
+					RegisterDesigner(_buffer);
 				NameChanged();
 			}
 		}
@@ -188,28 +188,28 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 		public string GetDescription()
 		{
-			if (FBuffer == null)
+			if (_buffer == null)
 				return Strings.UntitledDocumentDescription;
 			else
-				return FBuffer.GetDescription();
+				return _buffer.GetDescription();
 		}
 
-		public void ValidateBuffer(DesignBuffer ABuffer)
+		public void ValidateBuffer(DesignBuffer buffer)
 		{
-			Dataphoria.CheckNotRegistered(ABuffer);
+			Dataphoria.CheckNotRegistered(buffer);
 		}
 
 		// I/O
 
-		public void Open(DesignBuffer ABuffer)
+		public void Open(DesignBuffer buffer)
 		{
-			ValidateBuffer(ABuffer);
+			ValidateBuffer(buffer);
 			CheckModified();
-			RequestLoad(ABuffer);
-			SetBuffer(ABuffer);
+			RequestLoad(buffer);
+			SetBuffer(buffer);
 			SetModified(false);
-			if (ABuffer.Locator != null)
-				RequestLocate(ABuffer.Locator);
+			if (buffer.Locator != null)
+				RequestLocate(buffer.Locator);
 		}
 
 		public void New()
@@ -222,22 +222,22 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 		public void Save()
 		{
 			//don't check if modified (always save)
-			if (FBuffer == null)
+			if (_buffer == null)
 				SaveAs();
 			else
-				Save(FBuffer);
+				Save(_buffer);
 		}
 
-		Timer FTimer;
+		Timer _timer;
 		public void StartAutoSave()
 		{
-			if (FTimer == null)
+			if (_timer == null)
 			{
-				FTimer = new Timer();
-				FTimer.Tick += new EventHandler(AutoSaveTimer_Tick);
-				FTimer.Interval = CDefaultSaveInterval * 1000;
+				_timer = new Timer();
+				_timer.Tick += new EventHandler(AutoSaveTimer_Tick);
+				_timer.Interval = DefaultSaveInterval * 1000;
 			}
-			FTimer.Start();			
+			_timer.Start();			
 		}
 
 		private void AutoSaveTimer_Tick(object sender, EventArgs e)
@@ -248,23 +248,23 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 		
 		public void StopAutoSave()
 		{
-			if (FTimer != null)
+			if (_timer != null)
 			{
 				try
 				{
-					FTimer.Stop();
+					_timer.Stop();
 				}
 				finally
 				{
-					FTimer = null;
+					_timer = null;
 				}
 			}
 		}
 
-		private void Save(DesignBuffer ABuffer)
+		private void Save(DesignBuffer buffer)
 		{
-			RequestSave(ABuffer);
-			SetBuffer(ABuffer);
+			RequestSave(buffer);
+			SetBuffer(buffer);
 			SetModified(false);
 		}
 
@@ -280,39 +280,39 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 		public void SaveAsDocument()
 		{
-			DocumentDesignBuffer LBuffer;
-			DocumentDesignBuffer LCurrent = FBuffer as DocumentDesignBuffer;
-			if (LCurrent != null)
-				LBuffer = LCurrent.PromptForBuffer(FDesigner);
+			DocumentDesignBuffer buffer;
+			DocumentDesignBuffer current = _buffer as DocumentDesignBuffer;
+			if (current != null)
+				buffer = current.PromptForBuffer(_designer);
 			else
-				LBuffer = Dataphoria.PromptForDocumentBuffer(FDesigner, Dataphoria.GetCurrentLibraryName(), String.Empty);
-			ValidateBuffer(LBuffer);
-			Save(LBuffer);
+				buffer = Dataphoria.PromptForDocumentBuffer(_designer, Dataphoria.GetCurrentLibraryName(), String.Empty);
+			ValidateBuffer(buffer);
+			Save(buffer);
 			if (AfterSaveAsDocument != null)
-				AfterSaveAsDocument(this, LBuffer);
+				AfterSaveAsDocument(this, buffer);
 		}
 
 		public void SaveAsFile()
 		{
-			FileDesignBuffer LBuffer;
-			FileDesignBuffer LCurrent = FBuffer as FileDesignBuffer;
-			if (LCurrent != null)
-				LBuffer = LCurrent.PromptForBuffer(FDesigner);
+			FileDesignBuffer buffer;
+			FileDesignBuffer current = _buffer as FileDesignBuffer;
+			if (current != null)
+				buffer = current.PromptForBuffer(_designer);
 			else
-				LBuffer = Dataphoria.PromptForFileBuffer(FDesigner, String.Empty);
-			ValidateBuffer(LBuffer);
-			Save(LBuffer);
+				buffer = Dataphoria.PromptForFileBuffer(_designer, String.Empty);
+			ValidateBuffer(buffer);
+			Save(buffer);
 		}
 
-		private void PreparePromptForFileOrDocument(Frontend.Client.IFormInterface AForm)
+		private void PreparePromptForFileOrDocument(Frontend.Client.IFormInterface form)
 		{
-			AForm.MainSource.OpenState = DAE.Client.DataSetState.Edit;
-			AForm.MainSource.RefreshAfterPost = false;
+			form.MainSource.OpenState = DAE.Client.DataSetState.Edit;
+			form.MainSource.RefreshAfterPost = false;
 		}
 
 		private bool PromptFileOrDocument()
 		{
-			Frontend.Client.Windows.IWindowsFormInterface LForm = 
+			Frontend.Client.Windows.IWindowsFormInterface form = 
 				Dataphoria.FrontendSession.LoadForm
 				(
 					null, 
@@ -338,38 +338,38 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 				);
 			try
 			{
-				if (LForm.ShowModal(Frontend.Client.FormMode.Edit) != DialogResult.OK)
+				if (form.ShowModal(Frontend.Client.FormMode.Edit) != DialogResult.OK)
 					throw new AbortException();
-				return LForm.MainSource.DataView["Main.Value"].AsBoolean;
+				return form.MainSource.DataView["Main.Value"].AsBoolean;
 			}
 			finally
 			{
-				LForm.HostNode.Dispose();
+				form.HostNode.Dispose();
 			}
 		}
 
 		public event LocateEventHandler LocateRequested;
 
-		public void RequestLocate(DebugLocator ALocator)
+		public void RequestLocate(DebugLocator locator)
 		{
 			if (LocateRequested != null)
-				LocateRequested(this, ALocator);
+				LocateRequested(this, locator);
 		}
 
 		public DebugLocator GetLocator()
 		{
-			if (FBuffer == null || FBuffer.Locator == null)
+			if (_buffer == null || _buffer.Locator == null)
 				return null;
 			else
-				return new DebugLocator(FBuffer.Locator.Locator, 1, 1);
+				return new DebugLocator(_buffer.Locator.Locator, 1, 1);
 		}
 
-		public bool LocatorNameMatches(string AName)
+		public bool LocatorNameMatches(string name)
 		{
-			if (FBuffer == null)
+			if (_buffer == null)
 				return false;
 			else
-				return FBuffer.LocatorNameMatches(AName);
+				return _buffer.LocatorNameMatches(name);
 		}
 		
 		

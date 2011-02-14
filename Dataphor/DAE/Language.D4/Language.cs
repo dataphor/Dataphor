@@ -236,25 +236,25 @@ namespace Alphora.Dataphor.DAE.Language.D4
     public class TableIdentifierExpression : IdentifierExpression
     {
 		public TableIdentifierExpression() : base(){}
-		public TableIdentifierExpression(string AIdentifier) : base(AIdentifier){}
+		public TableIdentifierExpression(string identifier) : base(identifier){}
     }
     
     public class ColumnIdentifierExpression : IdentifierExpression
     {
 		public ColumnIdentifierExpression() : base(){}
-		public ColumnIdentifierExpression(string AIdentifier) : base(AIdentifier){}
+		public ColumnIdentifierExpression(string identifier) : base(identifier){}
     }
     
     public class ServerIdentifierExpression : IdentifierExpression
     {
 		public ServerIdentifierExpression() : base(){}
-		public ServerIdentifierExpression(string AIdentifier) : base(AIdentifier){}
+		public ServerIdentifierExpression(string identifier) : base(identifier){}
     }
     
     public class VariableIdentifierExpression : IdentifierExpression
     {
 		public VariableIdentifierExpression() : base(){}
-		public VariableIdentifierExpression(string AIdentifier) : base(AIdentifier){}
+		public VariableIdentifierExpression(string identifier) : base(identifier){}
     }
     
 	public abstract class D4Statement : Statement{}
@@ -265,305 +265,305 @@ namespace Alphora.Dataphor.DAE.Language.D4
     public class SelectStatement : D4DMLStatement
     {
 		public SelectStatement() : base(){}
-		public SelectStatement(CursorDefinition ACursorDefinition) : base()
+		public SelectStatement(CursorDefinition cursorDefinition) : base()
 		{
-			FCursorDefinition = ACursorDefinition;
+			_cursorDefinition = cursorDefinition;
 		}
 		
         // CursorDefinition
-        protected CursorDefinition FCursorDefinition;
+        protected CursorDefinition _cursorDefinition;
         public CursorDefinition CursorDefinition
         {
-            get { return FCursorDefinition; }
-            set { FCursorDefinition = value; }
+            get { return _cursorDefinition; }
+            set { _cursorDefinition = value; }
         }
     }
     
     public class InsertStatement : D4DMLStatement
     {
 		public InsertStatement() : base(){}
-		public InsertStatement(Expression ASourceExpression, Expression ATarget) : base()
+		public InsertStatement(Expression sourceExpression, Expression target) : base()
 		{
-			FSourceExpression = ASourceExpression;
-			FTarget = ATarget;
+			_sourceExpression = sourceExpression;
+			_target = target;
 		}
 		
         // SourceExpression
-        protected Expression FSourceExpression;
+        protected Expression _sourceExpression;
         public Expression SourceExpression
         {
-            get { return FSourceExpression; }
-            set { FSourceExpression = value; }
+            get { return _sourceExpression; }
+            set { _sourceExpression = value; }
         }
         
         // Target
-        protected Expression FTarget;
+        protected Expression _target;
         public Expression Target
         {
-			get { return FTarget; }
-			set { FTarget = value; }
+			get { return _target; }
+			set { _target = value; }
         }
     }
     
     public class UpdateColumnExpression : Expression
     {
 		public UpdateColumnExpression() : base(){}
-		public UpdateColumnExpression(Expression ATarget, Expression AExpression) : base()
+		public UpdateColumnExpression(Expression target, Expression expression) : base()
 		{
-			Target = ATarget;
-			Expression = AExpression;
+			Target = target;
+			Expression = expression;
 		}
 		
         // Target
-        protected Expression FTarget;
+        protected Expression _target;
         public Expression Target
         {
-            get { return FTarget; }
-            set { FTarget = value; }
+            get { return _target; }
+            set { _target = value; }
         }
 
         // Expression
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
     }
     
     public class UpdateColumnExpressions : Expressions
     {
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is UpdateColumnExpression))
+			if (!(item is UpdateColumnExpression))
 				throw new LanguageException(LanguageException.Codes.UpdateColumnExpressionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new UpdateColumnExpression this[int AIndex]
+		public new UpdateColumnExpression this[int index]
 		{
-			get { return (UpdateColumnExpression)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (UpdateColumnExpression)base[index]; }
+			set { base[index] = value; }
 		}
     }
     
     public class UpdateStatement : D4DMLStatement
     {
 		public UpdateStatement() : base(){}
-		public UpdateStatement(Expression ATarget)
+		public UpdateStatement(Expression target)
 		{
-			FTarget = ATarget;
+			_target = target;
 		}
 		
-		public UpdateStatement(Expression ATarget, UpdateColumnExpression[] AColumns)
+		public UpdateStatement(Expression target, UpdateColumnExpression[] columns)
 		{
-			FTarget = ATarget;
-			FColumns.AddRange(AColumns);
+			_target = target;
+			_columns.AddRange(columns);
 		}
 		
-		public UpdateStatement(Expression ATarget, UpdateColumnExpression[] AColumns, Expression ACondition)
+		public UpdateStatement(Expression target, UpdateColumnExpression[] columns, Expression condition)
 		{
-			FTarget = ATarget;
-			FColumns.AddRange(AColumns);
-			FCondition = ACondition;
+			_target = target;
+			_columns.AddRange(columns);
+			_condition = condition;
 		}
 		
         // Target
-        protected Expression FTarget;
+        protected Expression _target;
         public Expression Target
         {
-			get { return FTarget; }
-			set { FTarget = value; }
+			get { return _target; }
+			set { _target = value; }
         }
         
         // Columns
-        protected UpdateColumnExpressions FColumns = new UpdateColumnExpressions();
-        public UpdateColumnExpressions Columns { get { return FColumns; } }
+        protected UpdateColumnExpressions _columns = new UpdateColumnExpressions();
+        public UpdateColumnExpressions Columns { get { return _columns; } }
         
         // Condition
-        protected Expression FCondition;
+        protected Expression _condition;
         public Expression Condition
         {
-			get { return FCondition; }
-			set { FCondition = value; }
+			get { return _condition; }
+			set { _condition = value; }
 		}
     }
     
     public class DeleteStatement : D4DMLStatement
     {
 		public DeleteStatement() : base(){}
-		public DeleteStatement(Expression ATarget) : base()
+		public DeleteStatement(Expression target) : base()
 		{
-			FTarget = ATarget;
+			_target = target;
 		}
 		
         // Target
-        protected Expression FTarget;
+        protected Expression _target;
         public Expression Target
         {
-			get { return FTarget; }
-			set { FTarget = value; }
+			get { return _target; }
+			set { _target = value; }
         }
     }
     
     public class RestrictExpression : Expression
     {
 		public RestrictExpression() : base(){}
-		public RestrictExpression(Expression AExpression, Expression ACondition)
+		public RestrictExpression(Expression expression, Expression condition)
 		{
-			FExpression = AExpression;
-			FCondition = ACondition;
+			_expression = expression;
+			_condition = condition;
 		}
 		
         // Expression
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
 
         // Condition
-        protected Expression FCondition;
+        protected Expression _condition;
         public Expression Condition
         {
-            get { return FCondition; }
-            set { FCondition = value; }
+            get { return _condition; }
+            set { _condition = value; }
         }
     }
 
     public class OnExpression : Expression
     {		
 		public OnExpression() : base(){}
-		public OnExpression(Expression AExpression, string AServerName)
+		public OnExpression(Expression expression, string serverName)
 		{
-			FExpression = AExpression;
-			FServerName = AServerName;
+			_expression = expression;
+			_serverName = serverName;
 		}
 		
         // Expression
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
 
         // ServerName
-        protected string FServerName = String.Empty;
+        protected string _serverName = String.Empty;
         public string ServerName
         {
-            get { return FServerName; }
-            set { FServerName = value == null ? String.Empty : value; }
+            get { return _serverName; }
+            set { _serverName = value == null ? String.Empty : value; }
         }
     }
     
     public class AsExpression : Expression
     {
 		public AsExpression() : base(){}
-		public AsExpression(Expression AExpression, TypeSpecifier ATypeSpecifier) : base()
+		public AsExpression(Expression expression, TypeSpecifier typeSpecifier) : base()
 		{
-			FExpression = AExpression;
-			FTypeSpecifier = ATypeSpecifier;
+			_expression = expression;
+			_typeSpecifier = typeSpecifier;
 		}
 		
         // Expression
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
 
         // TypeSpecifier
-        protected TypeSpecifier FTypeSpecifier;
+        protected TypeSpecifier _typeSpecifier;
         public TypeSpecifier TypeSpecifier
         {
-			get { return FTypeSpecifier; }
-			set { FTypeSpecifier = value; }
+			get { return _typeSpecifier; }
+			set { _typeSpecifier = value; }
         }
     }
     
     public class IsExpression : Expression
     {
 		public IsExpression() : base(){}
-		public IsExpression(Expression AExpression, TypeSpecifier ATypeSpecifier) : base()
+		public IsExpression(Expression expression, TypeSpecifier typeSpecifier) : base()
 		{
-			FExpression = AExpression;
-			FTypeSpecifier = ATypeSpecifier;
+			_expression = expression;
+			_typeSpecifier = typeSpecifier;
 		}
 		
         // Expression
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
 
         // TypeSpecifier
-        protected TypeSpecifier FTypeSpecifier;
+        protected TypeSpecifier _typeSpecifier;
         public TypeSpecifier TypeSpecifier
         {
-			get { return FTypeSpecifier; }
-			set { FTypeSpecifier = value; }
+			get { return _typeSpecifier; }
+			set { _typeSpecifier = value; }
         }
     }
     
     public class ColumnExpression : Expression
     {
 		public ColumnExpression() : base(){}
-		public ColumnExpression(string AColumnName) : base()
+		public ColumnExpression(string columnName) : base()
 		{
-			ColumnName = AColumnName;
+			ColumnName = columnName;
 		}
 		
 		// ColumnName
-		protected string FColumnName = String.Empty;
+		protected string _columnName = String.Empty;
 		public string ColumnName
 		{
-			get { return FColumnName; }
-			set { FColumnName = value == null ? String.Empty : value; }
+			get { return _columnName; }
+			set { _columnName = value == null ? String.Empty : value; }
 		}
     }
     
 	public class ColumnExpressions : Expressions
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is ColumnExpression))
+			if (!(item is ColumnExpression))
 				throw new LanguageException(LanguageException.Codes.ColumnExpressionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new ColumnExpression this[int AIndex]
+		public new ColumnExpression this[int index]
 		{
-			get { return (ColumnExpression)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (ColumnExpression)base[index]; }
+			set { base[index] = value; }
 		}
 	}
     
 	public class ProjectExpression : Expression
     {
         public ProjectExpression() : base() {}
-        public ProjectExpression(Expression AExpression, string[] AColumnNames) : base()
+        public ProjectExpression(Expression expression, string[] columnNames) : base()
         {
-			FExpression = AExpression;
-			for (int LIndex = 0; LIndex < AColumnNames.Length; LIndex++)
-				FColumns.Add(new ColumnExpression(AColumnNames[LIndex]));
+			_expression = expression;
+			for (int index = 0; index < columnNames.Length; index++)
+				_columns.Add(new ColumnExpression(columnNames[index]));
         }
         
         // Expression
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
         
         // Columns
-        protected ColumnExpressions FColumns = new ColumnExpressions();
-        public ColumnExpressions Columns { get { return FColumns; } }
+        protected ColumnExpressions _columns = new ColumnExpressions();
+        public ColumnExpressions Columns { get { return _columns; } }
     }
 
 	#if CALCULESQUE    
@@ -597,596 +597,596 @@ namespace Alphora.Dataphor.DAE.Language.D4
     public class NamedColumnExpression : Expression, IMetaData
     {
 		public NamedColumnExpression() : base(){}
-		public NamedColumnExpression(Expression AExpression, string AColumnAlias) : base()
+		public NamedColumnExpression(Expression expression, string columnAlias) : base()
 		{
-			ColumnAlias = AColumnAlias;
-			FExpression = AExpression;
+			ColumnAlias = columnAlias;
+			_expression = expression;
 		}
 		
-		public NamedColumnExpression(Expression AExpression, string AColumnAlias, MetaData AMetaData) : base()
+		public NamedColumnExpression(Expression expression, string columnAlias, MetaData metaData) : base()
 		{
-			ColumnAlias = AColumnAlias;
-			FExpression = AExpression;
-			FMetaData = AMetaData;
+			ColumnAlias = columnAlias;
+			_expression = expression;
+			_metaData = metaData;
 		}
 		
         // Expression
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
 
 		// ColumnAlias
-		protected string FColumnAlias = String.Empty;
+		protected string _columnAlias = String.Empty;
 		public string ColumnAlias
 		{
-			get { return FColumnAlias; }
-			set { FColumnAlias = value == null ? String.Empty : value; }
+			get { return _columnAlias; }
+			set { _columnAlias = value == null ? String.Empty : value; }
 		}
         
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
     }
     
 	public class NamedColumnExpressions : Expressions
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is NamedColumnExpression))
+			if (!(item is NamedColumnExpression))
 				throw new LanguageException(LanguageException.Codes.NamedColumnExpressionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new NamedColumnExpression this[int AIndex]
+		public new NamedColumnExpression this[int index]
 		{
-			get { return (NamedColumnExpression)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (NamedColumnExpression)base[index]; }
+			set { base[index] = value; }
 		}
 	}
     
 	public class ExtendExpression : Expression
     {
 		public ExtendExpression() : base(){}
-		public ExtendExpression(Expression AExpression) : base()
+		public ExtendExpression(Expression expression) : base()
 		{
-			FExpression = AExpression;
+			_expression = expression;
 		}
 		
-		public ExtendExpression(Expression AExpression, NamedColumnExpression[] AExpressions) : base()
+		public ExtendExpression(Expression expression, NamedColumnExpression[] expressions) : base()
 		{
-			FExpression = AExpression;
-			FExpressions.AddRange(AExpressions);
+			_expression = expression;
+			_expressions.AddRange(expressions);
 		}
 
         // Expression
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
         
         // Expressions
-        protected NamedColumnExpressions FExpressions = new NamedColumnExpressions();
-        public NamedColumnExpressions Expressions { get { return FExpressions; } }
+        protected NamedColumnExpressions _expressions = new NamedColumnExpressions();
+        public NamedColumnExpressions Expressions { get { return _expressions; } }
     }
     
 	public class SpecifyExpression : Expression
     {
 		public SpecifyExpression() : base(){}
-		public SpecifyExpression(Expression AExpression) : base()
+		public SpecifyExpression(Expression expression) : base()
 		{
-			FExpression = AExpression;
+			_expression = expression;
 		}
 		
-		public SpecifyExpression(Expression AExpression, NamedColumnExpression[] AExpressions) : base()
+		public SpecifyExpression(Expression expression, NamedColumnExpression[] expressions) : base()
 		{
-			FExpression = AExpression;
-			FExpressions.AddRange(AExpressions);
+			_expression = expression;
+			_expressions.AddRange(expressions);
 		}
 
         // Expression
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
         
         // Expressions
-        protected NamedColumnExpressions FExpressions = new NamedColumnExpressions();
-        public NamedColumnExpressions Expressions { get { return FExpressions; } }
+        protected NamedColumnExpressions _expressions = new NamedColumnExpressions();
+        public NamedColumnExpressions Expressions { get { return _expressions; } }
     }
     
     public class ListSelectorExpression : Expression
     {
         public ListSelectorExpression() : base(){}
-        public ListSelectorExpression(Expression[] AExpressions) : base()
+        public ListSelectorExpression(Expression[] expressions) : base()
         {
-			FExpressions.AddRange(AExpressions);
+			_expressions.AddRange(expressions);
         }
         
-        public ListSelectorExpression(TypeSpecifier ATypeSpecifier, Expression[] AExpressions) : base()
+        public ListSelectorExpression(TypeSpecifier typeSpecifier, Expression[] expressions) : base()
         {
-			FTypeSpecifier = ATypeSpecifier;
-			FExpressions.AddRange(AExpressions);
+			_typeSpecifier = typeSpecifier;
+			_expressions.AddRange(expressions);
         }
         
         // TypeSpecifier
-        protected TypeSpecifier FTypeSpecifier;
+        protected TypeSpecifier _typeSpecifier;
         public TypeSpecifier TypeSpecifier
         {
-			get { return FTypeSpecifier; }
-			set { FTypeSpecifier = value; }
+			get { return _typeSpecifier; }
+			set { _typeSpecifier = value; }
         }
 
         // Expressions
-        protected Expressions FExpressions = new Expressions();
-        public Expressions Expressions { get { return FExpressions; } }
+        protected Expressions _expressions = new Expressions();
+        public Expressions Expressions { get { return _expressions; } }
     }
     
     public class CursorDefinition : Expression
     {
 		public CursorDefinition() : base(){}
-		public CursorDefinition(Expression AExpression) : base()
+		public CursorDefinition(Expression expression) : base()
 		{
-			FExpression = AExpression;
+			_expression = expression;
 		}
 		
-		public CursorDefinition(Expression AExpression, CursorCapability ACapabilities) : base()
+		public CursorDefinition(Expression expression, CursorCapability capabilities) : base()
 		{
-			FExpression = AExpression;
-			FCapabilities = ACapabilities;
+			_expression = expression;
+			_capabilities = capabilities;
 		}
 		
-		public CursorDefinition(Expression AExpression, CursorCapability ACapabilities, CursorIsolation AIsolation) : base()
+		public CursorDefinition(Expression expression, CursorCapability capabilities, CursorIsolation isolation) : base()
 		{
-			FExpression = AExpression;
-			FCapabilities = ACapabilities;
-			FIsolation = AIsolation;
+			_expression = expression;
+			_capabilities = capabilities;
+			_isolation = isolation;
 		}
 		
-		public CursorDefinition(Expression AExpression, CursorCapability ACapabilities, CursorIsolation AIsolation, CursorType ACursorType) : base()
+		public CursorDefinition(Expression expression, CursorCapability capabilities, CursorIsolation isolation, CursorType cursorType) : base()
 		{
-			FExpression = AExpression;
-			FCapabilities = ACapabilities;
-			FIsolation = AIsolation;
-			FCursorType = ACursorType;
+			_expression = expression;
+			_capabilities = capabilities;
+			_isolation = isolation;
+			_cursorType = cursorType;
 		}
 		
-		protected Expression FExpression;
+		protected Expression _expression;
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
 		
-		protected CursorCapability FCapabilities = 0;
+		protected CursorCapability _capabilities = 0;
 		public CursorCapability Capabilities
 		{
-			get { return FCapabilities; }
-			set { FCapabilities = value; }
+			get { return _capabilities; }
+			set { _capabilities = value; }
 		}
 
-		protected CursorIsolation FIsolation = CursorIsolation.None;
+		protected CursorIsolation _isolation = CursorIsolation.None;
 		public CursorIsolation Isolation
 		{
-			get { return FIsolation; }
-			set { FIsolation = value; }
+			get { return _isolation; }
+			set { _isolation = value; }
 		}
 		
-		protected bool FSpecifiesType;
+		protected bool _specifiesType;
 		public bool SpecifiesType
 		{
-			get { return FSpecifiesType; }
-			set { FSpecifiesType = value; }
+			get { return _specifiesType; }
+			set { _specifiesType = value; }
 		}
 		
-		protected CursorType FCursorType = CursorType.Dynamic;
+		protected CursorType _cursorType = CursorType.Dynamic;
 		public CursorType CursorType
 		{
-			get { return FCursorType; }
-			set { FCursorType = value; }
+			get { return _cursorType; }
+			set { _cursorType = value; }
 		}
     }
     
     public class CursorSelectorExpression : Expression
     {
         public CursorSelectorExpression() : base(){}
-        public CursorSelectorExpression(CursorDefinition ACursorDefinition) : base()
+        public CursorSelectorExpression(CursorDefinition cursorDefinition) : base()
         {
-			FCursorDefinition = ACursorDefinition;
+			_cursorDefinition = cursorDefinition;
         }
 
         // CursorDefinition
-        protected CursorDefinition FCursorDefinition;
+        protected CursorDefinition _cursorDefinition;
         public CursorDefinition CursorDefinition
         {
-            get { return FCursorDefinition; }
-            set { FCursorDefinition = value; }
+            get { return _cursorDefinition; }
+            set { _cursorDefinition = value; }
         }
     }
     
     public class ForEachStatement : Statement 
     {
-		protected bool FIsAllocation;
+		protected bool _isAllocation;
 		/// <summary>Indicates whether the variable exists in the current stack window, or should be allocated by the statement</summary>
 		public bool IsAllocation
 		{
-			get { return FIsAllocation; }
-			set { FIsAllocation = value; }
+			get { return _isAllocation; }
+			set { _isAllocation = value; }
 		}
 		
-		protected string FVariableName = String.Empty;
+		protected string _variableName = String.Empty;
 		/// <summary>The name of the variable that will receive the value for each successive iteration. If variable name is empty, this is a row foreach statement.</summary>
 		public string VariableName
 		{
-			get { return FVariableName; }
-			set { FVariableName = value == null ? String.Empty : value; }
+			get { return _variableName; }
+			set { _variableName = value == null ? String.Empty : value; }
 		}
 		
-		protected CursorDefinition FExpression;
+		protected CursorDefinition _expression;
 		/// <summary>The list or cursor to be iterated over.</summary>
 		public CursorDefinition Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
 
-		protected Statement FStatement;
+		protected Statement _statement;
 		/// <summary>The iterative statement to be executed.</summary>
 		public Statement Statement
 		{
-			get { return FStatement; }
-			set { FStatement = value; }
+			get { return _statement; }
+			set { _statement = value; }
 		}
     }
     
     public class ColumnExtractorExpression : Expression
     {		
 		public ColumnExtractorExpression() : base(){}
-		public ColumnExtractorExpression(string AColumnName, Expression AExpression) : base()
+		public ColumnExtractorExpression(string columnName, Expression expression) : base()
 		{
-			FColumns.Add(new ColumnExpression(AColumnName));
-			FExpression = AExpression;
+			_columns.Add(new ColumnExpression(columnName));
+			_expression = expression;
 		}
 		
-		protected ColumnExpressions FColumns = new ColumnExpressions();
-		public ColumnExpressions Columns { get { return FColumns; } }
+		protected ColumnExpressions _columns = new ColumnExpressions();
+		public ColumnExpressions Columns { get { return _columns; } }
 		
-		protected Expression FExpression;
+		protected Expression _expression;
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
 
         // HasByClause
-        protected bool FHasByClause;
+        protected bool _hasByClause;
         public bool HasByClause
         {
-			get { return FHasByClause; }
-			set { FHasByClause = value; }
+			get { return _hasByClause; }
+			set { _hasByClause = value; }
 		}
         
         // OrderColumns
-        protected OrderColumnDefinitions FOrderColumns = new OrderColumnDefinitions();
-        public OrderColumnDefinitions OrderColumns { get { return FOrderColumns; } }
+        protected OrderColumnDefinitions _orderColumns = new OrderColumnDefinitions();
+        public OrderColumnDefinitions OrderColumns { get { return _orderColumns; } }
 	}
     
     public class RowExtractorExpressionBase : Expression
     {
 		public RowExtractorExpressionBase() : base(){}
-		public RowExtractorExpressionBase(Expression AExpression) : base()
+		public RowExtractorExpressionBase(Expression expression) : base()
 		{
-			FExpression = AExpression;
+			_expression = expression;
 		}
 		
-		protected Expression FExpression;
+		protected Expression _expression;
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
     }
     
     public class RowExtractorExpression : RowExtractorExpressionBase
     {
 		public RowExtractorExpression() : base(){}
-		public RowExtractorExpression(Expression AExpression) : base(AExpression){}
+		public RowExtractorExpression(Expression expression) : base(expression){}
     }
     
     public class EntryExtractorExpression : RowExtractorExpressionBase
     {
 		public EntryExtractorExpression() : base(){}
-		public EntryExtractorExpression(Expression AExpression) : base(AExpression){}
+		public EntryExtractorExpression(Expression expression) : base(expression){}
     }
     
     public class RowSelectorExpressionBase : Expression
     {
 		public RowSelectorExpressionBase() : base(){}
-		public RowSelectorExpressionBase(NamedColumnExpression[] AExpressions) : base()
+		public RowSelectorExpressionBase(NamedColumnExpression[] expressions) : base()
 		{
-			FExpressions.AddRange(AExpressions);
+			_expressions.AddRange(expressions);
 		}
 
         // TypeSpecifier
-        protected TypeSpecifier FTypeSpecifier;
+        protected TypeSpecifier _typeSpecifier;
         public TypeSpecifier TypeSpecifier
         {
-			get { return FTypeSpecifier; }
-			set { FTypeSpecifier = value; }
+			get { return _typeSpecifier; }
+			set { _typeSpecifier = value; }
 		}
 
         // Expressions
-        protected NamedColumnExpressions FExpressions = new NamedColumnExpressions();
-        public NamedColumnExpressions Expressions { get { return FExpressions; } }
+        protected NamedColumnExpressions _expressions = new NamedColumnExpressions();
+        public NamedColumnExpressions Expressions { get { return _expressions; } }
     }
     
     public class RowSelectorExpression : RowSelectorExpressionBase
     {
 		public RowSelectorExpression() : base(){}
-		public RowSelectorExpression(NamedColumnExpression[] AColumns) : base(AColumns){}
+		public RowSelectorExpression(NamedColumnExpression[] columns) : base(columns){}
     }
     
     public class EntrySelectorExpression : RowSelectorExpressionBase
     {
 		public EntrySelectorExpression() : base(){}
-		public EntrySelectorExpression(NamedColumnExpression[] AColumns) : base(AColumns){}
+		public EntrySelectorExpression(NamedColumnExpression[] columns) : base(columns){}
     }
     
     public class TableSelectorExpressionBase : Expression
     {
 		public TableSelectorExpressionBase() : base(){}
-		public TableSelectorExpressionBase(Expression[] AExpressions) : base()
+		public TableSelectorExpressionBase(Expression[] expressions) : base()
 		{
-			FExpressions.AddRange(AExpressions);
+			_expressions.AddRange(expressions);
 		}
 		
-		public TableSelectorExpressionBase(Expression[] AExpressions, KeyDefinition[] AKeyDefinitions) : base()
+		public TableSelectorExpressionBase(Expression[] expressions, KeyDefinition[] keyDefinitions) : base()
 		{
-			FExpressions.AddRange(AExpressions);
-			FKeys.AddRange(AKeyDefinitions);
+			_expressions.AddRange(expressions);
+			_keys.AddRange(keyDefinitions);
 		}
 		
         // TypeSpecifier
-        protected TypeSpecifier FTypeSpecifier;
+        protected TypeSpecifier _typeSpecifier;
         public TypeSpecifier TypeSpecifier
         {
-			get { return FTypeSpecifier; }
-			set { FTypeSpecifier = value; }
+			get { return _typeSpecifier; }
+			set { _typeSpecifier = value; }
 		}
 
         // Expressions
-        protected Expressions FExpressions = new Expressions();
-        public Expressions Expressions { get { return FExpressions; } }
+        protected Expressions _expressions = new Expressions();
+        public Expressions Expressions { get { return _expressions; } }
         
         // Keys
-        protected KeyDefinitions FKeys = new KeyDefinitions();
-        public KeyDefinitions Keys { get { return FKeys; } }
+        protected KeyDefinitions _keys = new KeyDefinitions();
+        public KeyDefinitions Keys { get { return _keys; } }
     }
     
 	public class TableSelectorExpression : TableSelectorExpressionBase
     {
 		public TableSelectorExpression() : base(){}
-		public TableSelectorExpression(Expression[] AExpressions) : base(AExpressions){}
-		public TableSelectorExpression(Expression[] AExpressions, KeyDefinition[] AKeys) : base(AExpressions, AKeys){}
+		public TableSelectorExpression(Expression[] expressions) : base(expressions){}
+		public TableSelectorExpression(Expression[] expressions, KeyDefinition[] keys) : base(expressions, keys){}
     }
     
 	public class PresentationSelectorExpression : TableSelectorExpressionBase
     {
 		public PresentationSelectorExpression() : base(){}
-		public PresentationSelectorExpression(Expression[] AExpressions) : base(AExpressions){}
-		public PresentationSelectorExpression(Expression[] AExpressions, KeyDefinition[] AKeys) : base(AExpressions, AKeys){}
+		public PresentationSelectorExpression(Expression[] expressions) : base(expressions){}
+		public PresentationSelectorExpression(Expression[] expressions, KeyDefinition[] keys) : base(expressions, keys){}
     }
     
     public class RenameColumnExpression : Expression, IMetaData
     {
 		public RenameColumnExpression() : base(){}
-		public RenameColumnExpression(string AColumnName, string AColumnAlias) : base()
+		public RenameColumnExpression(string columnName, string columnAlias) : base()
 		{
-			FColumnName = AColumnName;
-			FColumnAlias = AColumnAlias;
+			_columnName = columnName;
+			_columnAlias = columnAlias;
 		}
 		
-		public RenameColumnExpression(string AColumnName, string AColumnAlias, MetaData AMetaData) : base()
+		public RenameColumnExpression(string columnName, string columnAlias, MetaData metaData) : base()
 		{
-			FColumnName = AColumnName;
-			FColumnAlias = AColumnAlias;
-			FMetaData = AMetaData;
+			_columnName = columnName;
+			_columnAlias = columnAlias;
+			_metaData = metaData;
 		}
 		
 		// ColumnName
-		protected string FColumnName = String.Empty;
+		protected string _columnName = String.Empty;
 		public string ColumnName
 		{
-			get { return FColumnName; }
-			set { FColumnName = value == null ? String.Empty : value; }
+			get { return _columnName; }
+			set { _columnName = value == null ? String.Empty : value; }
 		}
 		
 		// ColumnAlias
-		protected string FColumnAlias = String.Empty;
+		protected string _columnAlias = String.Empty;
 		public string ColumnAlias
 		{
-			get { return FColumnAlias; }
-			set { FColumnAlias = value == null ? String.Empty : value; }
+			get { return _columnAlias; }
+			set { _columnAlias = value == null ? String.Empty : value; }
 		}
         
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
     }
     
 	public class RenameColumnExpressions : Expressions
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is RenameColumnExpression))
+			if (!(item is RenameColumnExpression))
 				throw new LanguageException(LanguageException.Codes.RenameColumnExpressionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new RenameColumnExpression this[int AIndex]
+		public new RenameColumnExpression this[int index]
 		{
-			get { return (RenameColumnExpression)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (RenameColumnExpression)base[index]; }
+			set { base[index] = value; }
 		}
 	}
     
 	public class RenameExpression : Expression
     {
 		public RenameExpression() : base(){}
-		public RenameExpression(Expression AExpression, RenameColumnExpression[] AColumns) : base()
+		public RenameExpression(Expression expression, RenameColumnExpression[] columns) : base()
 		{
-			FExpression = AExpression;
-			FExpressions.AddRange(AColumns);
+			_expression = expression;
+			_expressions.AddRange(columns);
 		}
 		
         // Expression
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
         
         // Expressions
-        protected RenameColumnExpressions FExpressions = new RenameColumnExpressions();
-        public RenameColumnExpressions Expressions { get { return FExpressions; } }
+        protected RenameColumnExpressions _expressions = new RenameColumnExpressions();
+        public RenameColumnExpressions Expressions { get { return _expressions; } }
     }
     
     public class RenameAllExpression : Expression, IMetaData
     {
 		public RenameAllExpression() : base(){}
-		public RenameAllExpression(Expression AExpression, string AIdentifier) : base()
+		public RenameAllExpression(Expression expression, string identifier) : base()
 		{
-			FExpression = AExpression;
-			Identifier = AIdentifier;
+			_expression = expression;
+			Identifier = identifier;
 		}
 		
-		public RenameAllExpression(Expression AExpression, string AIdentifier, MetaData AMetaData) : base()
+		public RenameAllExpression(Expression expression, string identifier, MetaData metaData) : base()
 		{
-			FExpression = AExpression;
-			Identifier = AIdentifier;
-			MetaData = FMetaData;
+			_expression = expression;
+			Identifier = identifier;
+			MetaData = _metaData;
 		}
 
         // Expression
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
 
         // Identifier
-        protected string FIdentifier = String.Empty;
+        protected string _identifier = String.Empty;
         public string Identifier
         {
-            get { return FIdentifier; }
-            set { FIdentifier = value == null ? String.Empty : value; }
+            get { return _identifier; }
+            set { _identifier = value == null ? String.Empty : value; }
         }
         
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
     }
     
     public class AdornColumnExpression : Expression, IMetaData, IAlterMetaData
     {
 		// ColumnName
-		protected string FColumnName = String.Empty;
+		protected string _columnName = String.Empty;
 		public string ColumnName
 		{
-			get { return FColumnName; }
+			get { return _columnName; }
 			set 
 			{ 
-				if (FColumnName != value)
+				if (_columnName != value)
 				{
-					FColumnName = value == null ? String.Empty : value; 
+					_columnName = value == null ? String.Empty : value; 
 				}
 			}
 		}
 		
 		// ChangeNilable
-		private bool FChangeNilable;
+		private bool _changeNilable;
 		public bool ChangeNilable
 		{
-			get { return FChangeNilable; }
-			set { FChangeNilable = value; }
+			get { return _changeNilable; }
+			set { _changeNilable = value; }
 		}
 		
 		// IsNilable
-		private bool FIsNilable;
+		private bool _isNilable;
 		public bool IsNilable
 		{
-			get { return FIsNilable; }
-			set { FIsNilable = value; }
+			get { return _isNilable; }
+			set { _isNilable = value; }
 		}
 
 		// Default		
-		protected DefaultDefinition FDefault;
+		protected DefaultDefinition _default;
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.DefaultDefinitionEdit,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		public DefaultDefinition Default
 		{
-			get { return FDefault; }
-			set { FDefault = value; }
+			get { return _default; }
+			set { _default = value; }
 		}
 
 		// Constraints
-		protected ConstraintDefinitions FConstraints = new ConstraintDefinitions();
+		protected ConstraintDefinitions _constraints = new ConstraintDefinitions();
 		public ConstraintDefinitions Constraints
 		{
-			get { return FConstraints; }
-			set { FConstraints = value; }
+			get { return _constraints; }
+			set { _constraints = value; }
 		}
 		
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MetaDataEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
         
-		protected AlterMetaData FAlterMetaData;
+		protected AlterMetaData _alterMetaData;
 		public AlterMetaData AlterMetaData
 		{
-			get { return FAlterMetaData; }
-			set { FAlterMetaData = value; }
+			get { return _alterMetaData; }
+			set { _alterMetaData = value; }
 		}
     }
     
 	[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.AdornColumnExpressionEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 	public class AdornColumnExpressions : Expressions
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is AdornColumnExpression))
+			if (!(item is AdornColumnExpression))
 				throw new LanguageException(LanguageException.Codes.AdornColumnExpressionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new AdornColumnExpression this[int AIndex]
+		public new AdornColumnExpression this[int index]
 		{
-			get { return (AdornColumnExpression)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (AdornColumnExpression)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
@@ -1194,118 +1194,118 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	{
 		public AdornExpression()
 		{
-			FAlterOrders = new AlterOrderDefinitions();
-			FDropOrders = new DropOrderDefinitions();
-			FKeys = new KeyDefinitions();
-			FAlterKeys = new AlterKeyDefinitions();
-			FDropKeys = new DropKeyDefinitions();
-			FAlterReferences = new AlterReferenceDefinitions();
-			FDropReferences = new DropReferenceDefinitions();
+			_alterOrders = new AlterOrderDefinitions();
+			_dropOrders = new DropOrderDefinitions();
+			_keys = new KeyDefinitions();
+			_alterKeys = new AlterKeyDefinitions();
+			_dropKeys = new DropKeyDefinitions();
+			_alterReferences = new AlterReferenceDefinitions();
+			_dropReferences = new DropReferenceDefinitions();
 		}
 
         // Expression
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
         
         // Expressions
-        protected AdornColumnExpressions FExpressions = new AdornColumnExpressions();
-        public AdornColumnExpressions Expressions { get { return FExpressions; } }
+        protected AdornColumnExpressions _expressions = new AdornColumnExpressions();
+        public AdornColumnExpressions Expressions { get { return _expressions; } }
         
         // Constraints
-        protected CreateConstraintDefinitions FConstraints = new CreateConstraintDefinitions();
-        public CreateConstraintDefinitions Constraints { get { return FConstraints; } }
+        protected CreateConstraintDefinitions _constraints = new CreateConstraintDefinitions();
+        public CreateConstraintDefinitions Constraints { get { return _constraints; } }
         
         // Orders
-        protected OrderDefinitions FOrders = new OrderDefinitions();
-        public OrderDefinitions Orders { get { return FOrders; } }
+        protected OrderDefinitions _orders = new OrderDefinitions();
+        public OrderDefinitions Orders { get { return _orders; } }
 
         // AlterOrders
-        protected AlterOrderDefinitions FAlterOrders = new AlterOrderDefinitions();
-        public AlterOrderDefinitions AlterOrders { get { return FAlterOrders; } }
+        protected AlterOrderDefinitions _alterOrders = new AlterOrderDefinitions();
+        public AlterOrderDefinitions AlterOrders { get { return _alterOrders; } }
 
         // DropOrders
-        protected DropOrderDefinitions FDropOrders = new DropOrderDefinitions();
-        public DropOrderDefinitions DropOrders { get { return FDropOrders; } }
+        protected DropOrderDefinitions _dropOrders = new DropOrderDefinitions();
+        public DropOrderDefinitions DropOrders { get { return _dropOrders; } }
 
         // Keys
-        protected KeyDefinitions FKeys = new KeyDefinitions();
-        public KeyDefinitions Keys { get { return FKeys; } }
+        protected KeyDefinitions _keys = new KeyDefinitions();
+        public KeyDefinitions Keys { get { return _keys; } }
         
         // AlterKeys
-        protected AlterKeyDefinitions FAlterKeys = new AlterKeyDefinitions();
-        public AlterKeyDefinitions AlterKeys { get { return FAlterKeys; } }
+        protected AlterKeyDefinitions _alterKeys = new AlterKeyDefinitions();
+        public AlterKeyDefinitions AlterKeys { get { return _alterKeys; } }
 
         // DropKeys
-        protected DropKeyDefinitions FDropKeys = new DropKeyDefinitions();
-        public DropKeyDefinitions DropKeys { get { return FDropKeys; } }
+        protected DropKeyDefinitions _dropKeys = new DropKeyDefinitions();
+        public DropKeyDefinitions DropKeys { get { return _dropKeys; } }
 
 		// References
-		protected ReferenceDefinitions FReferences = new ReferenceDefinitions();
-		public ReferenceDefinitions References { get { return FReferences; } }
+		protected ReferenceDefinitions _references = new ReferenceDefinitions();
+		public ReferenceDefinitions References { get { return _references; } }
 
         // AlterReferences
-        protected AlterReferenceDefinitions FAlterReferences = new AlterReferenceDefinitions();
-        public AlterReferenceDefinitions AlterReferences { get { return FAlterReferences; } }
+        protected AlterReferenceDefinitions _alterReferences = new AlterReferenceDefinitions();
+        public AlterReferenceDefinitions AlterReferences { get { return _alterReferences; } }
 
         // DropReferences
-        protected DropReferenceDefinitions FDropReferences = new DropReferenceDefinitions();
-        public DropReferenceDefinitions DropReferences { get { return FDropReferences; } }
+        protected DropReferenceDefinitions _dropReferences = new DropReferenceDefinitions();
+        public DropReferenceDefinitions DropReferences { get { return _dropReferences; } }
 
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
 		}
 
-		protected AlterMetaData FAlterMetaData;
+		protected AlterMetaData _alterMetaData;
 		public AlterMetaData AlterMetaData
 		{
-			get { return FAlterMetaData; }
-			set { FAlterMetaData = value; }
+			get { return _alterMetaData; }
+			set { _alterMetaData = value; }
 		}
 	}
     
 	public class RedefineExpression : Expression
 	{
         // Expression
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
         
         // Expressions
-        protected NamedColumnExpressions FExpressions = new NamedColumnExpressions();
-        public NamedColumnExpressions Expressions { get { return FExpressions; } }
+        protected NamedColumnExpressions _expressions = new NamedColumnExpressions();
+        public NamedColumnExpressions Expressions { get { return _expressions; } }
 	}
     
 	public class RemoveExpression : Expression
     {
         public RemoveExpression() : base(){}
-        public RemoveExpression(Expression AExpression, ColumnExpression[] AColumns)
+        public RemoveExpression(Expression expression, ColumnExpression[] columns)
         {
-			Expression = AExpression;
-			FColumns.AddRange(AColumns);
+			Expression = expression;
+			_columns.AddRange(columns);
         }
         
         // Expression
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
         
         // Columns
-        protected ColumnExpressions FColumns = new ColumnExpressions();
-        public ColumnExpressions Columns { get { return FColumns; } }
+        protected ColumnExpressions _columns = new ColumnExpressions();
+        public ColumnExpressions Columns { get { return _columns; } }
     }
     
     public class AggregateColumnExpression : Expression, IMetaData
@@ -1313,134 +1313,134 @@ namespace Alphora.Dataphor.DAE.Language.D4
         public AggregateColumnExpression() : base(){}
 
         // AggregateOperator
-        protected string FAggregateOperator = String.Empty;
+        protected string _aggregateOperator = String.Empty;
         public string AggregateOperator
         {
-            get { return FAggregateOperator; }
-            set { FAggregateOperator = value == null ? String.Empty : value; }
+            get { return _aggregateOperator; }
+            set { _aggregateOperator = value == null ? String.Empty : value; }
         }
         
         // Distinct
-        protected bool FDistinct;
+        protected bool _distinct;
         public bool Distinct
         {
-			get { return FDistinct; }
-			set { FDistinct = value; }
+			get { return _distinct; }
+			set { _distinct = value; }
         }
 
         // Columns
-        protected ColumnExpressions FColumns = new ColumnExpressions();
-        public ColumnExpressions Columns { get { return FColumns; } }
+        protected ColumnExpressions _columns = new ColumnExpressions();
+        public ColumnExpressions Columns { get { return _columns; } }
 
         // HasByClause
-        protected bool FHasByClause;
+        protected bool _hasByClause;
         public bool HasByClause
         {
-			get { return FHasByClause; }
-			set { FHasByClause = value; }
+			get { return _hasByClause; }
+			set { _hasByClause = value; }
 		}
         
         // OrderColumns
-        protected OrderColumnDefinitions FOrderColumns = new OrderColumnDefinitions();
-        public OrderColumnDefinitions OrderColumns { get { return FOrderColumns; } }
+        protected OrderColumnDefinitions _orderColumns = new OrderColumnDefinitions();
+        public OrderColumnDefinitions OrderColumns { get { return _orderColumns; } }
 
         // ColumnAlias
-        protected string FColumnAlias = String.Empty;
+        protected string _columnAlias = String.Empty;
         public string ColumnAlias
         {
-            get { return FColumnAlias; }
-            set { FColumnAlias = value == null ? String.Empty : value; }
+            get { return _columnAlias; }
+            set { _columnAlias = value == null ? String.Empty : value; }
         }
         
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
     }
     
 	public class AggregateColumnExpressions : Expressions
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is AggregateColumnExpression))
+			if (!(item is AggregateColumnExpression))
 				throw new LanguageException(LanguageException.Codes.AggregateColumnExpressionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new AggregateColumnExpression this[int AIndex]
+		public new AggregateColumnExpression this[int index]
 		{
-			get { return (AggregateColumnExpression)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (AggregateColumnExpression)base[index]; }
+			set { base[index] = value; }
 		}
 	}
     
 	public class AggregateExpression : Expression
     {
         public AggregateExpression() : base(){}
-        public AggregateExpression(Expression AExpression, ColumnExpression[] AByColumns, AggregateColumnExpression[] AComputeColumns) : base()
+        public AggregateExpression(Expression expression, ColumnExpression[] byColumns, AggregateColumnExpression[] computeColumns) : base()
         {
-			FExpression = AExpression;
-			FByColumns.AddRange(AByColumns);
-			FComputeColumns.AddRange(AComputeColumns);
+			_expression = expression;
+			_byColumns.AddRange(byColumns);
+			_computeColumns.AddRange(computeColumns);
         }
         
         // Expression
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
         
         // ByColumns
-        protected ColumnExpressions FByColumns = new ColumnExpressions();
-        public ColumnExpressions ByColumns { get { return FByColumns; } }
+        protected ColumnExpressions _byColumns = new ColumnExpressions();
+        public ColumnExpressions ByColumns { get { return _byColumns; } }
         
         // ComputeColumns
-        protected AggregateColumnExpressions FComputeColumns = new AggregateColumnExpressions();
-        public AggregateColumnExpressions ComputeColumns { get { return FComputeColumns; } }
+        protected AggregateColumnExpressions _computeColumns = new AggregateColumnExpressions();
+        public AggregateColumnExpressions ComputeColumns { get { return _computeColumns; } }
     }
     
 	public abstract class BaseOrderExpression : Expression
     {
         public BaseOrderExpression() : base(){}
-        public BaseOrderExpression(Expression AExpression, OrderColumnDefinition[] AColumns) : base()
+        public BaseOrderExpression(Expression expression, OrderColumnDefinition[] columns) : base()
         {
-			FExpression = AExpression;
-            FColumns.AddRange(AColumns);
+			_expression = expression;
+            _columns.AddRange(columns);
         }
         
         // Expression
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
         
         // Columns
-        protected OrderColumnDefinitions FColumns = new OrderColumnDefinitions();
-        public OrderColumnDefinitions Columns { get { return FColumns; } }
+        protected OrderColumnDefinitions _columns = new OrderColumnDefinitions();
+        public OrderColumnDefinitions Columns { get { return _columns; } }
     }
     
     public class OrderExpression : BaseOrderExpression
     {
 		public OrderExpression() : base() {}
-		public OrderExpression(Expression AExpression, OrderColumnDefinitions AColumns) : base()
+		public OrderExpression(Expression expression, OrderColumnDefinitions columns) : base()
 		{
-			Expression = AExpression;
-			Columns.AddRange(AColumns);
+			Expression = expression;
+			Columns.AddRange(columns);
 		}
 		
 		// SequenceColumn
-        protected IncludeColumnExpression FSequenceColumn;
+        protected IncludeColumnExpression _sequenceColumn;
         public IncludeColumnExpression SequenceColumn
         {
-			get { return FSequenceColumn; }
-			set { FSequenceColumn = value; }
+			get { return _sequenceColumn; }
+			set { _sequenceColumn = value; }
         }
     }
     
@@ -1448,272 +1448,272 @@ namespace Alphora.Dataphor.DAE.Language.D4
     
     public class D4IndexerExpression : IndexerExpression
     {
-		protected bool FHasByClause;
+		protected bool _hasByClause;
 		public bool HasByClause
 		{
-			get { return FHasByClause; }
-			set { FHasByClause = value; }
+			get { return _hasByClause; }
+			set { _hasByClause = value; }
 		}
 		
-		protected KeyColumnDefinitions FByClause = new KeyColumnDefinitions();
-		public KeyColumnDefinitions ByClause { get { return FByClause; } }
+		protected KeyColumnDefinitions _byClause = new KeyColumnDefinitions();
+		public KeyColumnDefinitions ByClause { get { return _byClause; } }
     }
     
     public class QuotaExpression : Expression
     {
         public QuotaExpression() : base(){}
-        public QuotaExpression(Expression AExpression, Expression AQuota, OrderColumnDefinition[] AColumns) : base()
+        public QuotaExpression(Expression expression, Expression quota, OrderColumnDefinition[] columns) : base()
         {
-			FExpression = AExpression;
-			FQuota = AQuota;
-			FColumns.AddRange(AColumns);
+			_expression = expression;
+			_quota = quota;
+			_columns.AddRange(columns);
         }
 
         // Expression
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
         
         // Quota
-        protected Expression FQuota;
+        protected Expression _quota;
         public Expression Quota
         {
-			get { return FQuota; }
-			set { FQuota = value; }
+			get { return _quota; }
+			set { _quota = value; }
         }
         
         // HasByClause
-        protected bool FHasByClause;
+        protected bool _hasByClause;
         public bool HasByClause
         {
-			get { return FHasByClause; }
-			set { FHasByClause = value; }
+			get { return _hasByClause; }
+			set { _hasByClause = value; }
 		}
         
         // Columns
-        protected OrderColumnDefinitions FColumns = new OrderColumnDefinitions();
-        public OrderColumnDefinitions Columns { get { return FColumns; } }
+        protected OrderColumnDefinitions _columns = new OrderColumnDefinitions();
+        public OrderColumnDefinitions Columns { get { return _columns; } }
     }
     
     public class ExplodeColumnExpression : Expression
     {
         public ExplodeColumnExpression() : base(){}
-        public ExplodeColumnExpression(string AColumnName) : base()
+        public ExplodeColumnExpression(string columnName) : base()
         {
-            FColumnName = AColumnName;
+            _columnName = columnName;
         }
         
         // ColumnName
-        protected string FColumnName = String.Empty;
+        protected string _columnName = String.Empty;
         public string ColumnName
         {
-            get { return FColumnName; }
-            set { FColumnName = value == null ? String.Empty : value; }
+            get { return _columnName; }
+            set { _columnName = value == null ? String.Empty : value; }
         }
     }
     
     public class IncludeColumnExpression : Expression, IMetaData
     {
 		public IncludeColumnExpression() : base(){}
-		public IncludeColumnExpression(string AColumnAlias) : base()
+		public IncludeColumnExpression(string columnAlias) : base()
 		{
-			ColumnAlias = AColumnAlias;
+			ColumnAlias = columnAlias;
 		}
 		
-		public IncludeColumnExpression(string AColumnAlias, MetaData AMetaData)
+		public IncludeColumnExpression(string columnAlias, MetaData metaData)
 		{
-			ColumnAlias = AColumnAlias;
-			FMetaData = AMetaData;
+			ColumnAlias = columnAlias;
+			_metaData = metaData;
 		}
 		
 		// ColumnAlias
-		protected string FColumnAlias = String.Empty;
+		protected string _columnAlias = String.Empty;
 		public string ColumnAlias
 		{
-			get { return FColumnAlias; }
-			set { FColumnAlias = value == null ? String.Empty : value; }
+			get { return _columnAlias; }
+			set { _columnAlias = value == null ? String.Empty : value; }
 		}
         
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
     }
     
     public class ExplodeExpression : Expression
     {
         public ExplodeExpression() : base(){}
-        public ExplodeExpression(Expression AExpression, Expression AByExpression, Expression ARootExpression) : base()
+        public ExplodeExpression(Expression expression, Expression byExpression, Expression rootExpression) : base()
         {
-			FExpression = AExpression;
-			FByExpression = AByExpression;
-			FRootExpression = ARootExpression;
+			_expression = expression;
+			_byExpression = byExpression;
+			_rootExpression = rootExpression;
         }
         
         // Expression
-        protected Expression FExpression;
+        protected Expression _expression;
         public Expression Expression
         {
-            get { return FExpression; }
-            set { FExpression = value; }
+            get { return _expression; }
+            set { _expression = value; }
         }
         
         // ByExpression
-        protected Expression FByExpression;
+        protected Expression _byExpression;
         public Expression ByExpression
         {
-            get { return FByExpression; }
-            set { FByExpression = value; }
+            get { return _byExpression; }
+            set { _byExpression = value; }
         }
         
         // RootExpression
-        protected Expression FRootExpression;
+        protected Expression _rootExpression;
         public Expression RootExpression
         {
-            get { return FRootExpression; }
-            set { FRootExpression = value; }
+            get { return _rootExpression; }
+            set { _rootExpression = value; }
         }
         
         // HasOrderByClause
-        protected bool FHasOrderByClause;
+        protected bool _hasOrderByClause;
         public bool HasOrderByClause
         {
-			get { return FHasOrderByClause; }
-			set { FHasOrderByClause = value; }
+			get { return _hasOrderByClause; }
+			set { _hasOrderByClause = value; }
 		}
         
         // OrderColumns
-        protected OrderColumnDefinitions FOrderColumns = new OrderColumnDefinitions();
-        public OrderColumnDefinitions OrderColumns { get { return FOrderColumns; } }
+        protected OrderColumnDefinitions _orderColumns = new OrderColumnDefinitions();
+        public OrderColumnDefinitions OrderColumns { get { return _orderColumns; } }
 
         // LevelColumn
-        protected IncludeColumnExpression FLevelColumn;
+        protected IncludeColumnExpression _levelColumn;
         public IncludeColumnExpression LevelColumn
         {
-            get { return FLevelColumn; }
-            set { FLevelColumn = value; }
+            get { return _levelColumn; }
+            set { _levelColumn = value; }
         }
 
         // SequenceColumn
-        protected IncludeColumnExpression FSequenceColumn;
+        protected IncludeColumnExpression _sequenceColumn;
         public IncludeColumnExpression SequenceColumn
         {
-            get { return FSequenceColumn; }
-            set { FSequenceColumn = value; }
+            get { return _sequenceColumn; }
+            set { _sequenceColumn = value; }
         }
     }
     
     public abstract class BinaryTableExpression : Expression
     {
 		public BinaryTableExpression() : base(){}
-		public BinaryTableExpression(Expression ALeftExpression, Expression ARightExpression)
+		public BinaryTableExpression(Expression leftExpression, Expression rightExpression)
 		{
-			FLeftExpression = ALeftExpression;
-			FRightExpression = ARightExpression;
+			_leftExpression = leftExpression;
+			_rightExpression = rightExpression;
 		}
 		
         // LeftExpression
-        protected Expression FLeftExpression;
+        protected Expression _leftExpression;
         public Expression LeftExpression
         {
-            get { return FLeftExpression; }
-            set { FLeftExpression = value; }
+            get { return _leftExpression; }
+            set { _leftExpression = value; }
         }
         
         // RightExpression
-        protected Expression FRightExpression;
+        protected Expression _rightExpression;
         public Expression RightExpression
         {
-            get { return FRightExpression; }
-            set { FRightExpression = value; }
+            get { return _rightExpression; }
+            set { _rightExpression = value; }
         }
     }
     
     public class UnionExpression : BinaryTableExpression
     {
 		public UnionExpression() : base(){}
-		public UnionExpression(Expression ALeftExpression, Expression ARightExpression)
+		public UnionExpression(Expression leftExpression, Expression rightExpression)
 		{
-			FLeftExpression = ALeftExpression;
-			FRightExpression = ARightExpression;
+			_leftExpression = leftExpression;
+			_rightExpression = rightExpression;
 		}
     }
     
     public class IntersectExpression : BinaryTableExpression
     {
 		public IntersectExpression() : base(){}
-		public IntersectExpression(Expression ALeftExpression, Expression ARightExpression)
+		public IntersectExpression(Expression leftExpression, Expression rightExpression)
 		{
-			FLeftExpression = ALeftExpression;
-			FRightExpression = ARightExpression;
+			_leftExpression = leftExpression;
+			_rightExpression = rightExpression;
 		}
     }
     
     public class DifferenceExpression : BinaryTableExpression
     {
 		public DifferenceExpression() : base(){}
-		public DifferenceExpression(Expression ALeftExpression, Expression ARightExpression)
+		public DifferenceExpression(Expression leftExpression, Expression rightExpression)
 		{
-			FLeftExpression = ALeftExpression;
-			FRightExpression = ARightExpression;
+			_leftExpression = leftExpression;
+			_rightExpression = rightExpression;
 		}
     }
     
     public class ProductExpression : BinaryTableExpression
     {
 		public ProductExpression() : base(){}
-		public ProductExpression(Expression ALeftExpression, Expression ARightExpression)
+		public ProductExpression(Expression leftExpression, Expression rightExpression)
 		{
-			FLeftExpression = ALeftExpression;
-			FRightExpression = ARightExpression;
+			_leftExpression = leftExpression;
+			_rightExpression = rightExpression;
 		}
     }
     
     public class DivideExpression : BinaryTableExpression
     {
 		public DivideExpression() : base(){}
-		public DivideExpression(Expression ALeftExpression, Expression ARightExpression)
+		public DivideExpression(Expression leftExpression, Expression rightExpression)
 		{
-			FLeftExpression = ALeftExpression;
-			FRightExpression = ARightExpression;
+			_leftExpression = leftExpression;
+			_rightExpression = rightExpression;
 		}
     }
     
     public class ConditionedBinaryTableExpression : BinaryTableExpression
     {
-		private Expression FCondition;
+		private Expression _condition;
 		public Expression Condition
 		{
-			get { return FCondition; }
-			set { FCondition = value; }
+			get { return _condition; }
+			set { _condition = value; }
 		}
     }
     
     public class HavingExpression : ConditionedBinaryTableExpression
     {
 		public HavingExpression() : base() { }
-		public HavingExpression(Expression ALeftExpression, Expression ARightExpression, Expression ACondition)
+		public HavingExpression(Expression leftExpression, Expression rightExpression, Expression condition)
 		{
-			LeftExpression = ALeftExpression;
-			RightExpression = ARightExpression;
-			Condition = ACondition;
+			LeftExpression = leftExpression;
+			RightExpression = rightExpression;
+			Condition = condition;
 		}
     }
     
     public class WithoutExpression : ConditionedBinaryTableExpression
     {
 		public WithoutExpression() : base() { }
-		public WithoutExpression(Expression ALeftExpression, Expression ARightExpression, Expression ACondition)
+		public WithoutExpression(Expression leftExpression, Expression rightExpression, Expression condition)
 		{
-			LeftExpression = ALeftExpression;
-			RightExpression = ARightExpression;
-			Condition = ACondition;
+			LeftExpression = leftExpression;
+			RightExpression = rightExpression;
+			Condition = condition;
 		}
     }
     
@@ -1722,27 +1722,27 @@ namespace Alphora.Dataphor.DAE.Language.D4
     public abstract class JoinExpression : ConditionedBinaryTableExpression
     {
         // IsLookup
-		protected bool FIsLookup;
+		protected bool _isLookup;
 		public bool IsLookup
 		{
-			get { return FIsLookup; }
-			set { FIsLookup = value; }
+			get { return _isLookup; }
+			set { _isLookup = value; }
 		}
 		
 		// This is not used by the compiler, it is set by statement emission of a compiled plan and used by the application transaction emitter.
-		protected JoinCardinality FCardinality;
+		protected JoinCardinality _cardinality;
 		public JoinCardinality Cardinality
 		{
-			get { return FCardinality; }
-			set { FCardinality = value; }
+			get { return _cardinality; }
+			set { _cardinality = value; }
 		}
 		
 		// IsDetailLookup
-		protected bool FIsDetailLookup;
+		protected bool _isDetailLookup;
 		public bool IsDetailLookup
 		{
-			get { return FIsDetailLookup; }
-			set { FIsDetailLookup = value; }
+			get { return _isDetailLookup; }
+			set { _isDetailLookup = value; }
 		}
     }
     
@@ -1753,11 +1753,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public OuterJoinExpression() : base(){}
 		
         // RowExistsColumn
-        protected IncludeColumnExpression FRowExistsColumn;
+        protected IncludeColumnExpression _rowExistsColumn;
         public IncludeColumnExpression RowExistsColumn
         {
-            get { return FRowExistsColumn; }
-            set { FRowExistsColumn = value; }
+            get { return _rowExistsColumn; }
+            set { _rowExistsColumn = value; }
         }
     }
     
@@ -1879,691 +1879,691 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	public class VariableStatement : Statement
 	{
 		public VariableStatement() : base(){}
-		public VariableStatement(string AVariableName, TypeSpecifier ATypeSpecifier) : base()
+		public VariableStatement(string variableName, TypeSpecifier typeSpecifier) : base()
 		{
-			VariableName = new IdentifierExpression(AVariableName);
-			FTypeSpecifier = ATypeSpecifier;
+			VariableName = new IdentifierExpression(variableName);
+			_typeSpecifier = typeSpecifier;
 		}
 		
-		public VariableStatement(string AVariableName, TypeSpecifier ATypeSpecifier, Expression AExpression) : base()
+		public VariableStatement(string variableName, TypeSpecifier typeSpecifier, Expression expression) : base()
 		{
-			VariableName = new IdentifierExpression(AVariableName);
-			FTypeSpecifier = ATypeSpecifier;
-			FExpression = AExpression;
+			VariableName = new IdentifierExpression(variableName);
+			_typeSpecifier = typeSpecifier;
+			_expression = expression;
 		}
 		
 		// VariableName
-		protected IdentifierExpression FVariableName;
+		protected IdentifierExpression _variableName;
 		public IdentifierExpression VariableName
 		{
-			get { return FVariableName; }
-			set { FVariableName = value; }
+			get { return _variableName; }
+			set { _variableName = value; }
 		}
 		
 		// TypeSpecifier
-		protected TypeSpecifier FTypeSpecifier;
+		protected TypeSpecifier _typeSpecifier;
 		public TypeSpecifier TypeSpecifier
 		{
-			get { return FTypeSpecifier; }
-			set { FTypeSpecifier = value; }
+			get { return _typeSpecifier; }
+			set { _typeSpecifier = value; }
 		}
 		
 		// Expression
-		protected Expression FExpression;
+		protected Expression _expression;
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
 	}
 	
 	public class ExpressionStatement : Statement
 	{
 		public ExpressionStatement() : base(){}
-		public ExpressionStatement(Expression AExpression) : base()
+		public ExpressionStatement(Expression expression) : base()
 		{
-			FExpression = AExpression;
+			_expression = expression;
 		}
 		
-		protected Expression FExpression;
+		protected Expression _expression;
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
 	}
 	
 	public class AssignmentStatement : Statement
 	{
 		public AssignmentStatement() : base(){}
-		public AssignmentStatement(Expression ATarget, Expression AExpression)
+		public AssignmentStatement(Expression target, Expression expression)
 		{
-			FTarget = ATarget;
-			FExpression = AExpression;
+			_target = target;
+			_expression = expression;
 		}
 		
 		// Target
-		protected Expression FTarget;
+		protected Expression _target;
 		public Expression Target
 		{
-			get { return FTarget; }
-			set { FTarget = value; }
+			get { return _target; }
+			set { _target = value; }
 		}
 		
 		// Expression
-		protected Expression FExpression;
+		protected Expression _expression;
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
 	}
 	
 	public abstract class CreateTableVarStatement : D4Statement, IMetaData
 	{
 		// TableVarName
-		protected string FTableVarName = String.Empty;
+		protected string _tableVarName = String.Empty;
 		public string TableVarName
 		{
-			get { return FTableVarName; }
-			set { FTableVarName = value == null ? String.Empty : value; }
+			get { return _tableVarName; }
+			set { _tableVarName = value == null ? String.Empty : value; }
 		}
 		
 		// IsSession
-		protected bool FIsSession = false;
+		protected bool _isSession = false;
 		public bool IsSession
 		{
-			get { return FIsSession; }
-			set { FIsSession = value; }
+			get { return _isSession; }
+			set { _isSession = value; }
 		}
 		
 		// Keys
-		protected KeyDefinitions FKeys = new KeyDefinitions();
-		public KeyDefinitions Keys { get { return FKeys; } }
+		protected KeyDefinitions _keys = new KeyDefinitions();
+		public KeyDefinitions Keys { get { return _keys; } }
 
 		// References
-		protected ReferenceDefinitions FReferences = new ReferenceDefinitions();
-		public ReferenceDefinitions References { get { return FReferences; } }
+		protected ReferenceDefinitions _references = new ReferenceDefinitions();
+		public ReferenceDefinitions References { get { return _references; } }
 
 		// Constraints
-		protected CreateConstraintDefinitions FConstraints = new CreateConstraintDefinitions();
-		public CreateConstraintDefinitions Constraints { get { return FConstraints; } }
+		protected CreateConstraintDefinitions _constraints = new CreateConstraintDefinitions();
+		public CreateConstraintDefinitions Constraints { get { return _constraints; } }
 		
 		// Orders
-		protected OrderDefinitions FOrders = new OrderDefinitions();
-		public OrderDefinitions Orders { get { return FOrders; } }
+		protected OrderDefinitions _orders = new OrderDefinitions();
+		public OrderDefinitions Orders { get { return _orders; } }
 
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
 	}
 
 	public class CreateTableStatement : CreateTableVarStatement
 	{		
 		// DeviceName
-		protected IdentifierExpression FDeviceName;
+		protected IdentifierExpression _deviceName;
 		public IdentifierExpression DeviceName
 		{
-			get { return FDeviceName; }
-			set { FDeviceName = value; }
+			get { return _deviceName; }
+			set { _deviceName = value; }
 		}
 		
 		// Columns
-		protected ColumnDefinitions FColumns = new ColumnDefinitions();
-		public ColumnDefinitions Columns { get { return FColumns; } }
+		protected ColumnDefinitions _columns = new ColumnDefinitions();
+		public ColumnDefinitions Columns { get { return _columns; } }
 
 		// FromExpression		
-		protected Expression FFromExpression;
+		protected Expression _fromExpression;
 		public Expression FromExpression
 		{
-			get { return FFromExpression; }
-			set { FFromExpression = value; }
+			get { return _fromExpression; }
+			set { _fromExpression = value; }
 		}
 	}
 	
 	public class CreateViewStatement : CreateTableVarStatement
 	{		
 		// Expression		
-		protected Expression FExpression;
+		protected Expression _expression;
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
 	}
 	
 	public class AccessorBlock : D4Statement
 	{
-		private ClassDefinition FClassDefinition;
+		private ClassDefinition _classDefinition;
 		public ClassDefinition ClassDefinition
 		{
-			get { return FClassDefinition; }
-			set { FClassDefinition = value; }
+			get { return _classDefinition; }
+			set { _classDefinition = value; }
 		}
 		
-		private Expression FExpression;
+		private Expression _expression;
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
 		
-		private Statement FBlock;
+		private Statement _block;
 		public Statement Block
 		{
-			get { return FBlock; }
-			set { FBlock = value; }
+			get { return _block; }
+			set { _block = value; }
 		}
 		
 		public bool IsD4Implemented()
 		{
-			return (FExpression != null) || (FBlock != null);
+			return (_expression != null) || (_block != null);
 		}
 	}
 	
 	public class AlterAccessorBlock : D4Statement
 	{
-		private AlterClassDefinition FAlterClassDefinition;
+		private AlterClassDefinition _alterClassDefinition;
 		public AlterClassDefinition AlterClassDefinition
 		{
-			get { return FAlterClassDefinition; }
-			set { FAlterClassDefinition = value; }
+			get { return _alterClassDefinition; }
+			set { _alterClassDefinition = value; }
 		}
 		
-		private Expression FExpression;
+		private Expression _expression;
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
 		
-		private Statement FBlock;
+		private Statement _block;
 		public Statement Block
 		{
-			get { return FBlock; }
-			set { FBlock = value; }
+			get { return _block; }
+			set { _block = value; }
 		}
 	}
 	
 	public abstract class PropertyDefinitionBase : D4Statement
 	{
 		public PropertyDefinitionBase() : base() {}
-		public PropertyDefinitionBase(string APropertyName) : base()
+		public PropertyDefinitionBase(string propertyName) : base()
 		{
-			PropertyName = APropertyName;
+			PropertyName = propertyName;
 		}
 		
 		// PropertyName		
-		private string FPropertyName = String.Empty;
+		private string _propertyName = String.Empty;
 		public string PropertyName
 		{
-			get { return FPropertyName; }
-			set { FPropertyName = value == null ? String.Empty : value; }
+			get { return _propertyName; }
+			set { _propertyName = value == null ? String.Empty : value; }
 		}
 	}
 	
 	public class PropertyDefinition : PropertyDefinitionBase, IMetaData
 	{
 		public PropertyDefinition() : base() {}
-		public PropertyDefinition(string APropertyName) : base(APropertyName){}
-		public PropertyDefinition(string APropertyName, TypeSpecifier APropertyType) : base(APropertyName)
+		public PropertyDefinition(string propertyName) : base(propertyName){}
+		public PropertyDefinition(string propertyName, TypeSpecifier propertyType) : base(propertyName)
 		{
-			FPropertyType = APropertyType;
+			_propertyType = propertyType;
 		}
 		
 		// PropertyType
-		protected TypeSpecifier FPropertyType;
+		protected TypeSpecifier _propertyType;
 		public TypeSpecifier PropertyType
 		{
-			get { return FPropertyType; }
-			set { FPropertyType = value; }
+			get { return _propertyType; }
+			set { _propertyType = value; }
 		}
 		
 		// ReadAccessorBlock
-		private AccessorBlock FReadAccessorBlock;
+		private AccessorBlock _readAccessorBlock;
 		public AccessorBlock ReadAccessorBlock
 		{
-			get { return FReadAccessorBlock; }
-			set { FReadAccessorBlock = value; }
+			get { return _readAccessorBlock; }
+			set { _readAccessorBlock = value; }
 		}
 		
 		// WriteAccessorBlock
-		private AccessorBlock FWriteAccessorBlock;
+		private AccessorBlock _writeAccessorBlock;
 		public AccessorBlock WriteAccessorBlock
 		{
-			get { return FWriteAccessorBlock; }
-			set { FWriteAccessorBlock = value; }
+			get { return _writeAccessorBlock; }
+			set { _writeAccessorBlock = value; }
 		}
 		
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
 	}
 	
 	public class PropertyDefinitions : Statements
 	{										
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is PropertyDefinition))
+			if (!(item is PropertyDefinition))
 				throw new LanguageException(LanguageException.Codes.PropertyDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new PropertyDefinition this[int AIndex]
+		public new PropertyDefinition this[int index]
 		{
-			get { return (PropertyDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (PropertyDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
 	public class AlterPropertyDefinition : PropertyDefinitionBase, IAlterMetaData
 	{
 		public AlterPropertyDefinition() : base() {} 
-		public AlterPropertyDefinition(string APropertyName) : base(APropertyName){}
+		public AlterPropertyDefinition(string propertyName) : base(propertyName){}
 		
 		// PropertyType
-		protected TypeSpecifier FPropertyType;
+		protected TypeSpecifier _propertyType;
 		public TypeSpecifier PropertyType
 		{
-			get { return FPropertyType; }
-			set { FPropertyType = value; }
+			get { return _propertyType; }
+			set { _propertyType = value; }
 		}
 		
 		// ReadAccessorBlock
-		private AlterAccessorBlock FReadAccessorBlock;
+		private AlterAccessorBlock _readAccessorBlock;
 		public AlterAccessorBlock ReadAccessorBlock
 		{
-			get { return FReadAccessorBlock; }
-			set { FReadAccessorBlock = value; }
+			get { return _readAccessorBlock; }
+			set { _readAccessorBlock = value; }
 		}
 		
 		// WriteAccessorBlock
-		private AlterAccessorBlock FWriteAccessorBlock;
+		private AlterAccessorBlock _writeAccessorBlock;
 		public AlterAccessorBlock WriteAccessorBlock
 		{
-			get { return FWriteAccessorBlock; }
-			set { FWriteAccessorBlock = value; }
+			get { return _writeAccessorBlock; }
+			set { _writeAccessorBlock = value; }
 		}
 
         // AlterMetaData
-        protected AlterMetaData FAlterMetaData;
+        protected AlterMetaData _alterMetaData;
         public AlterMetaData AlterMetaData
         {
-			get { return FAlterMetaData; }
-			set { FAlterMetaData = value; }
+			get { return _alterMetaData; }
+			set { _alterMetaData = value; }
         }
 	}
 	
 	public class AlterPropertyDefinitions : Statements
 	{										
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is AlterPropertyDefinition))
+			if (!(item is AlterPropertyDefinition))
 				throw new LanguageException(LanguageException.Codes.AlterPropertyDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new AlterPropertyDefinition this[int AIndex]
+		public new AlterPropertyDefinition this[int index]
 		{
-			get { return (AlterPropertyDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (AlterPropertyDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
 	public class DropPropertyDefinition : PropertyDefinitionBase
 	{
 		public DropPropertyDefinition() : base() {}
-		public DropPropertyDefinition(string APropertyName) : base(APropertyName){}
+		public DropPropertyDefinition(string propertyName) : base(propertyName){}
 	}
 	
 	public class DropPropertyDefinitions : Statements
 	{										
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is DropPropertyDefinition))
+			if (!(item is DropPropertyDefinition))
 				throw new LanguageException(LanguageException.Codes.DropPropertyDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new DropPropertyDefinition this[int AIndex]
+		public new DropPropertyDefinition this[int index]
 		{
-			get { return (DropPropertyDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (DropPropertyDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
 	public abstract class RepresentationDefinitionBase : D4Statement
 	{
 		public RepresentationDefinitionBase() : base() {}
-		public RepresentationDefinitionBase(string ARepresentationName) : base()
+		public RepresentationDefinitionBase(string representationName) : base()
 		{
-			RepresentationName = ARepresentationName;
+			RepresentationName = representationName;
 		}
 		
-		private string FRepresentationName = String.Empty;
+		private string _representationName = String.Empty;
 		public string RepresentationName
 		{
-			get { return FRepresentationName; }
-			set { FRepresentationName = value == null ? String.Empty : value; }
+			get { return _representationName; }
+			set { _representationName = value == null ? String.Empty : value; }
 		}
 	}
 	
 	public class RepresentationDefinition : RepresentationDefinitionBase, IMetaData
 	{
 		public RepresentationDefinition() : base() {}
-		public RepresentationDefinition(string ARepresentationName) : base(ARepresentationName) {}
+		public RepresentationDefinition(string representationName) : base(representationName) {}
 		
-		private bool FIsGenerated;
+		private bool _isGenerated;
 		public bool IsGenerated
 		{
-			get { return FIsGenerated; }
-			set { FIsGenerated = value; }
+			get { return _isGenerated; }
+			set { _isGenerated = value; }
 		}
 		
 		public bool HasD4ImplementedComponents()
 		{
-			if ((FSelectorAccessorBlock != null) && FSelectorAccessorBlock.IsD4Implemented())
+			if ((_selectorAccessorBlock != null) && _selectorAccessorBlock.IsD4Implemented())
 				return true;
 			
-			foreach (PropertyDefinition LProperty in FProperties)
+			foreach (PropertyDefinition property in _properties)
 				if 
 				(
-					((LProperty.ReadAccessorBlock != null) && LProperty.ReadAccessorBlock.IsD4Implemented()) || 
-					((LProperty.WriteAccessorBlock != null) && LProperty.WriteAccessorBlock.IsD4Implemented())
+					((property.ReadAccessorBlock != null) && property.ReadAccessorBlock.IsD4Implemented()) || 
+					((property.WriteAccessorBlock != null) && property.WriteAccessorBlock.IsD4Implemented())
 				)
 					return true;
 					
 			return false;
 		}
 		
-		private PropertyDefinitions FProperties = new PropertyDefinitions();
-		public PropertyDefinitions Properties { get { return FProperties; } }
+		private PropertyDefinitions _properties = new PropertyDefinitions();
+		public PropertyDefinitions Properties { get { return _properties; } }
 		
 		// SelectorAccessorBlock
-		private AccessorBlock FSelectorAccessorBlock;
+		private AccessorBlock _selectorAccessorBlock;
 		public AccessorBlock SelectorAccessorBlock
 		{
-			get { return FSelectorAccessorBlock; }
-			set { FSelectorAccessorBlock = value; }
+			get { return _selectorAccessorBlock; }
+			set { _selectorAccessorBlock = value; }
 		}
 
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
 	}
 	
 	public class RepresentationDefinitions : Statements
 	{										
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is RepresentationDefinition))
+			if (!(item is RepresentationDefinition))
 				throw new LanguageException(LanguageException.Codes.RepresentationDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new RepresentationDefinition this[int AIndex]
+		public new RepresentationDefinition this[int index]
 		{
-			get { return (RepresentationDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (RepresentationDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 		
-		public int IndexOf(string AName)
+		public int IndexOf(string name)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (String.Compare(AName, this[LIndex].RepresentationName) == 0)
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if (String.Compare(name, this[index].RepresentationName) == 0)
+					return index;
 			return -1;
 		}
 		
-		public bool Contains(string AName)
+		public bool Contains(string name)
 		{
-			return IndexOf(AName) >= 0;
+			return IndexOf(name) >= 0;
 		}
 	}
 	
 	public class AlterRepresentationDefinition : RepresentationDefinitionBase, IAlterMetaData
 	{
 		public AlterRepresentationDefinition() : base() {}
-		public AlterRepresentationDefinition(string ARepresentationName) : base(ARepresentationName) {}
+		public AlterRepresentationDefinition(string representationName) : base(representationName) {}
 
 		// CreateProperties		
-		private PropertyDefinitions FCreateProperties = new PropertyDefinitions();
-		public PropertyDefinitions CreateProperties { get { return FCreateProperties; } }
+		private PropertyDefinitions _createProperties = new PropertyDefinitions();
+		public PropertyDefinitions CreateProperties { get { return _createProperties; } }
 
 		// AlterProperties		
-		private AlterPropertyDefinitions FAlterProperties = new AlterPropertyDefinitions();
-		public AlterPropertyDefinitions AlterProperties { get { return FAlterProperties; } }
+		private AlterPropertyDefinitions _alterProperties = new AlterPropertyDefinitions();
+		public AlterPropertyDefinitions AlterProperties { get { return _alterProperties; } }
 
 		// DropProperties		
-		private DropPropertyDefinitions FDropProperties = new DropPropertyDefinitions();
-		public DropPropertyDefinitions DropProperties { get { return FDropProperties; } }
+		private DropPropertyDefinitions _dropProperties = new DropPropertyDefinitions();
+		public DropPropertyDefinitions DropProperties { get { return _dropProperties; } }
 
 		// SelectorAccessorBlock
-		private AlterAccessorBlock FSelectorAccessorBlock;
+		private AlterAccessorBlock _selectorAccessorBlock;
 		public AlterAccessorBlock SelectorAccessorBlock
 		{
-			get { return FSelectorAccessorBlock; }
-			set { FSelectorAccessorBlock = value; }
+			get { return _selectorAccessorBlock; }
+			set { _selectorAccessorBlock = value; }
 		}
 
         // AlterMetaData
-        protected AlterMetaData FAlterMetaData;
+        protected AlterMetaData _alterMetaData;
         public AlterMetaData AlterMetaData
         {
-			get { return FAlterMetaData; }
-			set { FAlterMetaData = value; }
+			get { return _alterMetaData; }
+			set { _alterMetaData = value; }
         }
 	}
 	
 	public class AlterRepresentationDefinitions : Statements
 	{										
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is AlterRepresentationDefinition))
+			if (!(item is AlterRepresentationDefinition))
 				throw new LanguageException(LanguageException.Codes.AlterRepresentationDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new AlterRepresentationDefinition this[int AIndex]
+		public new AlterRepresentationDefinition this[int index]
 		{
-			get { return (AlterRepresentationDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (AlterRepresentationDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
 	public class DropRepresentationDefinition : RepresentationDefinitionBase
 	{
 		public DropRepresentationDefinition() : base() {}
-		public DropRepresentationDefinition(string AName) : base(AName) {}
+		public DropRepresentationDefinition(string name) : base(name) {}
 	}
 	
 	public class DropRepresentationDefinitions : Statements
 	{										
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is DropRepresentationDefinition))
+			if (!(item is DropRepresentationDefinition))
 				throw new LanguageException(LanguageException.Codes.DropRepresentationDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new DropRepresentationDefinition this[int AIndex]
+		public new DropRepresentationDefinition this[int index]
 		{
-			get { return (DropRepresentationDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (DropRepresentationDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
 	public abstract class SpecialDefinitionBase : D4Statement
 	{
 		public SpecialDefinitionBase() : base() {}
-		public SpecialDefinitionBase(string AName) : base()
+		public SpecialDefinitionBase(string name) : base()
 		{
-			Name = AName;
+			Name = name;
 		}
 		
 		// Name
-		protected string FName = String.Empty;
+		protected string _name = String.Empty;
 		public string Name
 		{
-			get { return FName; }
-			set { FName = value == null ? String.Empty : value; }
+			get { return _name; }
+			set { _name = value == null ? String.Empty : value; }
 		}
 	}
 	
 	public class SpecialDefinition : SpecialDefinitionBase, IMetaData
 	{
 		// Value
-		protected Expression FValue;
+		protected Expression _value;
 		public Expression Value
 		{
-			get { return FValue; }
-			set { FValue = value; }
+			get { return _value; }
+			set { _value = value; }
 		}
 
-		private bool FIsGenerated;
+		private bool _isGenerated;
 		public bool IsGenerated
 		{
-			get { return FIsGenerated; }
-			set { FIsGenerated = value; }
+			get { return _isGenerated; }
+			set { _isGenerated = value; }
 		}
         
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
 	}
 	
 	public class SpecialDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is SpecialDefinition))
+			if (!(item is SpecialDefinition))
 				throw new LanguageException(LanguageException.Codes.SpecialDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new SpecialDefinition this[int AIndex]
+		public new SpecialDefinition this[int index]
 		{
-			get { return (SpecialDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (SpecialDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 		
-		public int IndexOf(string AName)
+		public int IndexOf(string name)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (String.Compare(AName, this[LIndex].Name) == 0)
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if (String.Compare(name, this[index].Name) == 0)
+					return index;
 			return -1;
 		}
 		
-		public bool Contains(string AName)
+		public bool Contains(string name)
 		{
-			return IndexOf(AName) >= 0;
+			return IndexOf(name) >= 0;
 		}
 	}
     
 	public class AlterSpecialDefinition : SpecialDefinitionBase, IAlterMetaData
 	{
 		// Value
-		protected Expression FValue;
+		protected Expression _value;
 		public Expression Value
 		{
-			get { return FValue; }
-			set { FValue = value; }
+			get { return _value; }
+			set { _value = value; }
 		}
 
         // AlterMetaData
-        protected AlterMetaData FAlterMetaData;
+        protected AlterMetaData _alterMetaData;
         public AlterMetaData AlterMetaData
         {
-			get { return FAlterMetaData; }
-			set { FAlterMetaData = value; }
+			get { return _alterMetaData; }
+			set { _alterMetaData = value; }
         }
 	}
 	
 	public class AlterSpecialDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is AlterSpecialDefinition))
+			if (!(item is AlterSpecialDefinition))
 				throw new LanguageException(LanguageException.Codes.AlterSpecialDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new AlterSpecialDefinition this[int AIndex]
+		public new AlterSpecialDefinition this[int index]
 		{
-			get { return (AlterSpecialDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (AlterSpecialDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
     
 	public class DropSpecialDefinition : SpecialDefinitionBase
 	{
 		public DropSpecialDefinition() : base() {}
-		public DropSpecialDefinition(string AName) : base(AName) {}
+		public DropSpecialDefinition(string name) : base(name) {}
 	}
 	
 	public class DropSpecialDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is DropSpecialDefinition))
+			if (!(item is DropSpecialDefinition))
 				throw new LanguageException(LanguageException.Codes.DropSpecialDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new DropSpecialDefinition this[int AIndex]
+		public new DropSpecialDefinition this[int index]
 		{
-			get { return (DropSpecialDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (DropSpecialDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
     
     public class ScalarTypeNameDefinition : D4Statement
     {
 		public ScalarTypeNameDefinition() : base() {}
-		public ScalarTypeNameDefinition(string AScalarTypeName) : base()
+		public ScalarTypeNameDefinition(string scalarTypeName) : base()
 		{
-			ScalarTypeName = AScalarTypeName;
+			ScalarTypeName = scalarTypeName;
 		}
 		
 		// ScalarTypeName
-		protected string FScalarTypeName = String.Empty;
+		protected string _scalarTypeName = String.Empty;
 		public string ScalarTypeName
 		{
-			get { return FScalarTypeName; }
-			set { FScalarTypeName = value == null ? String.Empty : value; }
+			get { return _scalarTypeName; }
+			set { _scalarTypeName = value == null ? String.Empty : value; }
 		}
     }
     
 	public class ScalarTypeNameDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is ScalarTypeNameDefinition))
+			if (!(item is ScalarTypeNameDefinition))
 				throw new LanguageException(LanguageException.Codes.ScalarTypeNameDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new ScalarTypeNameDefinition this[int AIndex]
+		public new ScalarTypeNameDefinition this[int index]
 		{
-			get { return (ScalarTypeNameDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (ScalarTypeNameDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 
@@ -2573,82 +2573,82 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public CreateScalarTypeStatement() : base(){}
 		
 		// ScalarTypeName
-		protected string FScalarTypeName = String.Empty;
+		protected string _scalarTypeName = String.Empty;
 		public string ScalarTypeName
 		{
-			get { return FScalarTypeName; }
-			set { FScalarTypeName = value == null ? String.Empty : value; }
+			get { return _scalarTypeName; }
+			set { _scalarTypeName = value == null ? String.Empty : value; }
 		}
 		
 		// LikeScalarTypeName
-		protected string FLikeScalarTypeName = String.Empty;
+		protected string _likeScalarTypeName = String.Empty;
 		public string LikeScalarTypeName
 		{
-			get { return FLikeScalarTypeName; }
-			set { FLikeScalarTypeName = value; }
+			get { return _likeScalarTypeName; }
+			set { _likeScalarTypeName = value; }
 		}
 
 		// ParentScalarTypes
-		protected ScalarTypeNameDefinitions FParentScalarTypes = new ScalarTypeNameDefinitions();
-		public ScalarTypeNameDefinitions ParentScalarTypes { get { return FParentScalarTypes; } }
+		protected ScalarTypeNameDefinitions _parentScalarTypes = new ScalarTypeNameDefinitions();
+		public ScalarTypeNameDefinitions ParentScalarTypes { get { return _parentScalarTypes; } }
 
 		// Representations
-		protected RepresentationDefinitions FRepresentations = new RepresentationDefinitions();
-		public RepresentationDefinitions Representations { get { return FRepresentations; } }
+		protected RepresentationDefinitions _representations = new RepresentationDefinitions();
+		public RepresentationDefinitions Representations { get { return _representations; } }
 
 		// Default		
-		protected DefaultDefinition FDefault;
+		protected DefaultDefinition _default;
 		public DefaultDefinition Default
 		{
-			get { return FDefault; }
-			set { FDefault = value; }
+			get { return _default; }
+			set { _default = value; }
 		}
 
 		// Constraints
-		protected ConstraintDefinitions FConstraints = new ConstraintDefinitions();
+		protected ConstraintDefinitions _constraints = new ConstraintDefinitions();
 		public ConstraintDefinitions Constraints
 		{
-			get { return FConstraints; }
-			set { FConstraints = value; }
+			get { return _constraints; }
+			set { _constraints = value; }
 		}
 		
 		// Specials
-		protected SpecialDefinitions FSpecials = new SpecialDefinitions();
-		public SpecialDefinitions Specials { get { return FSpecials; } }
+		protected SpecialDefinitions _specials = new SpecialDefinitions();
+		public SpecialDefinitions Specials { get { return _specials; } }
 		
 		// ClassDefinition		
-		protected ClassDefinition FClassDefinition;
+		protected ClassDefinition _classDefinition;
 		public ClassDefinition ClassDefinition
 		{
-			get { return FClassDefinition; }
-			set { FClassDefinition = value; }
+			get { return _classDefinition; }
+			set { _classDefinition = value; }
 		}
         
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
 	}
 	
 	public class CreateReferenceStatement : ReferenceDefinition
 	{
 		// TableVarName
-		protected string FTableVarName = String.Empty;
+		protected string _tableVarName = String.Empty;
 		public string TableVarName
 		{
-			get { return FTableVarName; }
-			set { FTableVarName = value == null ? String.Empty : value; }
+			get { return _tableVarName; }
+			set { _tableVarName = value == null ? String.Empty : value; }
 		}
 
 		// IsSession
-		protected bool FIsSession = false;
+		protected bool _isSession = false;
 		public bool IsSession
 		{
-			get { return FIsSession; }
-			set { FIsSession = value; }
+			get { return _isSession; }
+			set { _isSession = value; }
 		}
 	}
 	
@@ -2659,229 +2659,229 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	public class OperatorBlock : D4Statement
 	{
 		// ClassDefinition		
-		protected ClassDefinition FClassDefinition;
+		protected ClassDefinition _classDefinition;
 		public ClassDefinition ClassDefinition
 		{
-			get { return FClassDefinition; }
-			set { FClassDefinition = value; }
+			get { return _classDefinition; }
+			set { _classDefinition = value; }
 		}
 		
 		// Block
-		protected Statement FBlock;
+		protected Statement _block;
 		public Statement Block
 		{
-			get { return FBlock; }
-			set { FBlock = value; }
+			get { return _block; }
+			set { _block = value; }
 		}
 	}
 	
 	public class AlterOperatorBlock : D4Statement
 	{
 		// AlterClassDefinition		
-		protected AlterClassDefinition FAlterClassDefinition;
+		protected AlterClassDefinition _alterClassDefinition;
 		public AlterClassDefinition AlterClassDefinition
 		{
-			get { return FAlterClassDefinition; }
-			set { FAlterClassDefinition = value; }
+			get { return _alterClassDefinition; }
+			set { _alterClassDefinition = value; }
 		}
 		
 		// Block
-		protected Statement FBlock;
+		protected Statement _block;
 		public Statement Block
 		{
-			get { return FBlock; }
-			set { FBlock = value; }
+			get { return _block; }
+			set { _block = value; }
 		}
 	}
 	
 	public class SourceStatement : Statement, IMetaData
 	{
-		private string FSource;
+		private string _source;
 		public string Source
 		{
-			get { return FSource; }
-			set { FSource = value; }
+			get { return _source; }
+			set { _source = value; }
 		}
 		
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
 	}
 	
 	public abstract class CreateOperatorStatementBase : D4Statement, IMetaData
 	{
 		// OperatorName
-		protected string FOperatorName = String.Empty;
+		protected string _operatorName = String.Empty;
 		public string OperatorName
 		{
-			get { return FOperatorName; }
-			set { FOperatorName = value == null ? String.Empty : value; }
+			get { return _operatorName; }
+			set { _operatorName = value == null ? String.Empty : value; }
 		}
 		
 		// IsSession
-		protected bool FIsSession;
+		protected bool _isSession;
 		public bool IsSession
 		{
-			get { return FIsSession; }
-			set { FIsSession = value; }
+			get { return _isSession; }
+			set { _isSession = value; }
 		}
 
 		// FormalParameters
-		protected FormalParameters FFormalParameters = new FormalParameters();
-		public FormalParameters FormalParameters { get { return FFormalParameters; } }
+		protected FormalParameters _formalParameters = new FormalParameters();
+		public FormalParameters FormalParameters { get { return _formalParameters; } }
 		
 		// ReturnType
-		protected TypeSpecifier FReturnType;
+		protected TypeSpecifier _returnType;
 		public TypeSpecifier ReturnType
 		{
-			get { return FReturnType; }
-			set { FReturnType = value; }
+			get { return _returnType; }
+			set { _returnType = value; }
 		}
 		
 		// IsReintroduced
-		protected bool FIsReintroduced;
+		protected bool _isReintroduced;
 		public bool IsReintroduced
 		{
-			get { return FIsReintroduced; }
-			set { FIsReintroduced = value; }
+			get { return _isReintroduced; }
+			set { _isReintroduced = value; }
 		}
 
 		// IsAbstract
-		protected bool FIsAbstract;
+		protected bool _isAbstract;
 		public bool IsAbstract
 		{
-			get { return FIsAbstract; }
-			set { FIsAbstract = value; }
+			get { return _isAbstract; }
+			set { _isAbstract = value; }
 		}
 
 		// IsVirtual
-		protected bool FIsVirtual;
+		protected bool _isVirtual;
 		public bool IsVirtual
 		{
-			get { return FIsVirtual; }
-			set { FIsVirtual = value; }
+			get { return _isVirtual; }
+			set { _isVirtual = value; }
 		}
 
 		// IsOverride
-		protected bool FIsOverride;
+		protected bool _isOverride;
 		public bool IsOverride
 		{
-			get { return FIsOverride; }
-			set { FIsOverride = value; }
+			get { return _isOverride; }
+			set { _isOverride = value; }
 		}
 
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
 	}
 	
 	public class CreateOperatorStatement : CreateOperatorStatementBase
 	{
 		// Block
-		protected OperatorBlock FBlock = new OperatorBlock();
-		public OperatorBlock Block { get { return FBlock; } }
+		protected OperatorBlock _block = new OperatorBlock();
+		public OperatorBlock Block { get { return _block; } }
 	}
 
 	public class CreateAggregateOperatorStatement : CreateOperatorStatementBase
 	{
 		// Initialization
-		protected OperatorBlock FInitialization = new OperatorBlock();
-		public OperatorBlock Initialization { get { return FInitialization; } }
+		protected OperatorBlock _initialization = new OperatorBlock();
+		public OperatorBlock Initialization { get { return _initialization; } }
 		
 		// Aggregation		
-		protected OperatorBlock FAggregation = new OperatorBlock();
-		public OperatorBlock Aggregation { get { return FAggregation; } }
+		protected OperatorBlock _aggregation = new OperatorBlock();
+		public OperatorBlock Aggregation { get { return _aggregation; } }
 		
 		// Finalization
-		protected OperatorBlock FFinalization = new OperatorBlock();
-		public OperatorBlock Finalization { get { return FFinalization; } }
+		protected OperatorBlock _finalization = new OperatorBlock();
+		public OperatorBlock Finalization { get { return _finalization; } }
 	}
 	
 	public class OperatorSpecifier : D4Statement
 	{
 		public OperatorSpecifier() : base(){}
-		public OperatorSpecifier(string AOperatorName, FormalParameterSpecifier[] AFormalParameterSpecifiers) : base()
+		public OperatorSpecifier(string operatorName, FormalParameterSpecifier[] formalParameterSpecifiers) : base()
 		{
-			OperatorName = AOperatorName;
-			FFormalParameterSpecifiers.AddRange(AFormalParameterSpecifiers);
+			OperatorName = operatorName;
+			_formalParameterSpecifiers.AddRange(formalParameterSpecifiers);
 		}
 		
-		public OperatorSpecifier(string AOperatorName, FormalParameterSpecifiers AFormalParameterSpecifiers) : base()
+		public OperatorSpecifier(string operatorName, FormalParameterSpecifiers formalParameterSpecifiers) : base()
 		{
-			OperatorName = AOperatorName;
-			FFormalParameterSpecifiers.AddRange(AFormalParameterSpecifiers);
+			OperatorName = operatorName;
+			_formalParameterSpecifiers.AddRange(formalParameterSpecifiers);
 		}
 		
 		// OperatorName
-		protected string FOperatorName = String.Empty;
+		protected string _operatorName = String.Empty;
 		public string OperatorName
 		{
-			get { return FOperatorName; }
-			set { FOperatorName = value == null ? String.Empty : value; }
+			get { return _operatorName; }
+			set { _operatorName = value == null ? String.Empty : value; }
 		}
 
 		// FormalParameterSpecifiers
-		protected FormalParameterSpecifiers FFormalParameterSpecifiers = new FormalParameterSpecifiers();
-		public FormalParameterSpecifiers FormalParameterSpecifiers { get { return FFormalParameterSpecifiers; } }
+		protected FormalParameterSpecifiers _formalParameterSpecifiers = new FormalParameterSpecifiers();
+		public FormalParameterSpecifiers FormalParameterSpecifiers { get { return _formalParameterSpecifiers; } }
 	}
 	
 	public abstract class AlterOperatorStatementBase : D4Statement, IAlterMetaData
 	{
 		// OperatorSpecifier
-		protected OperatorSpecifier FOperatorSpecifier;
+		protected OperatorSpecifier _operatorSpecifier;
 		public OperatorSpecifier OperatorSpecifier
 		{
-			get { return FOperatorSpecifier; }
-			set { FOperatorSpecifier = value; }
+			get { return _operatorSpecifier; }
+			set { _operatorSpecifier = value; }
 		}
 		
         // AlterMetaData
-        protected AlterMetaData FAlterMetaData;
+        protected AlterMetaData _alterMetaData;
         public AlterMetaData AlterMetaData
         {
-			get { return FAlterMetaData; }
-			set { FAlterMetaData = value; }
+			get { return _alterMetaData; }
+			set { _alterMetaData = value; }
         }
 	}
 	
 	public class AlterOperatorStatement : AlterOperatorStatementBase
 	{
 		// Block
-		protected AlterOperatorBlock FBlock = new AlterOperatorBlock();
-		public AlterOperatorBlock Block { get { return FBlock; } }
+		protected AlterOperatorBlock _block = new AlterOperatorBlock();
+		public AlterOperatorBlock Block { get { return _block; } }
 	}
 	
 	public class AlterAggregateOperatorStatement : AlterOperatorStatementBase
 	{
 		// Initialization
-		protected AlterOperatorBlock FInitialization = new AlterOperatorBlock();
-		public AlterOperatorBlock Initialization { get { return FInitialization; } }
+		protected AlterOperatorBlock _initialization = new AlterOperatorBlock();
+		public AlterOperatorBlock Initialization { get { return _initialization; } }
 		
 		// Aggregation		
-		protected AlterOperatorBlock FAggregation = new AlterOperatorBlock();
-		public AlterOperatorBlock Aggregation { get { return FAggregation; } }
+		protected AlterOperatorBlock _aggregation = new AlterOperatorBlock();
+		public AlterOperatorBlock Aggregation { get { return _aggregation; } }
 		
 		// Finalization
-		protected AlterOperatorBlock FFinalization = new AlterOperatorBlock();
-		public AlterOperatorBlock Finalization { get { return FFinalization; } }
+		protected AlterOperatorBlock _finalization = new AlterOperatorBlock();
+		public AlterOperatorBlock Finalization { get { return _finalization; } }
 	}
 	
 	public class CreateServerStatement : D4Statement, IMetaData
 	{
 		// ServerName
-		protected string FServerName = String.Empty;
+		protected string _serverName = String.Empty;
 		public string ServerName
 		{
-			get { return FServerName; }
-			set { FServerName = value == null ? String.Empty : value; }
+			get { return _serverName; }
+			set { _serverName = value == null ? String.Empty : value; }
 		}
 
 /*		
@@ -2911,22 +2911,22 @@ namespace Alphora.Dataphor.DAE.Language.D4
 */
 		
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
 	}
 	
 	public class AlterServerStatement : D4Statement, IAlterMetaData
 	{
 		// ServerName
-		protected string FServerName = String.Empty;
+		protected string _serverName = String.Empty;
 		public string ServerName
 		{
-			get { return FServerName; }
-			set { FServerName = value == null ? String.Empty : value; }
+			get { return _serverName; }
+			set { _serverName = value == null ? String.Empty : value; }
 		}
 		
 /*
@@ -2956,11 +2956,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 */
 		
         // AlterMetaData
-        protected AlterMetaData FAlterMetaData;
+        protected AlterMetaData _alterMetaData;
         public AlterMetaData AlterMetaData
         {
-			get { return FAlterMetaData; }
-			set { FAlterMetaData = value; }
+			get { return _alterMetaData; }
+			set { _alterMetaData = value; }
         }
 	}
 	
@@ -2969,102 +2969,102 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	public class DeviceScalarTypeMapBase : DeviceMapItem
 	{
 		public DeviceScalarTypeMapBase() : base() {}
-		public DeviceScalarTypeMapBase(string AScalarTypeName) : base()
+		public DeviceScalarTypeMapBase(string scalarTypeName) : base()
 		{
-			ScalarTypeName = AScalarTypeName;
+			ScalarTypeName = scalarTypeName;
 		}
 		
 		// ScalarTypeName
-		protected string FScalarTypeName = String.Empty;
+		protected string _scalarTypeName = String.Empty;
 		public string ScalarTypeName
 		{
-			get { return FScalarTypeName; }
-			set { FScalarTypeName = value == null ? String.Empty : value; }
+			get { return _scalarTypeName; }
+			set { _scalarTypeName = value == null ? String.Empty : value; }
 		}
 	}
 	
 	public class DeviceScalarTypeMap : DeviceScalarTypeMapBase, IMetaData
 	{
 		public DeviceScalarTypeMap() : base() {}
-		public DeviceScalarTypeMap(string AScalarTypeName) : base(AScalarTypeName) {}
+		public DeviceScalarTypeMap(string scalarTypeName) : base(scalarTypeName) {}
 
-		public DeviceScalarTypeMap(string AScalarTypeName, bool AIsGenerated) : base(AScalarTypeName)
+		public DeviceScalarTypeMap(string scalarTypeName, bool isGenerated) : base(scalarTypeName)
 		{
-			FIsGenerated = AIsGenerated;
+			_isGenerated = isGenerated;
 		}
 		
-		private bool FIsGenerated;
+		private bool _isGenerated;
 		public bool IsGenerated
 		{
-			get { return FIsGenerated; }
-			set { FIsGenerated = value; }
+			get { return _isGenerated; }
+			set { _isGenerated = value; }
 		}
 		
 		// ClassDefinition		
-		protected ClassDefinition FClassDefinition;
+		protected ClassDefinition _classDefinition;
 		public ClassDefinition ClassDefinition
 		{
-			get { return FClassDefinition; }
-			set { FClassDefinition = value; }
+			get { return _classDefinition; }
+			set { _classDefinition = value; }
 		}
 
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
 	}
 	
 	public class DeviceScalarTypeMaps : Statements
 	{										
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is DeviceScalarTypeMap))
+			if (!(item is DeviceScalarTypeMap))
 				throw new LanguageException(LanguageException.Codes.DeviceScalarTypeMapContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new DeviceScalarTypeMap this[int AIndex]
+		public new DeviceScalarTypeMap this[int index]
 		{
-			get { return (DeviceScalarTypeMap)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (DeviceScalarTypeMap)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
 	public class AlterDeviceScalarTypeMap : DeviceScalarTypeMapBase, IAlterMetaData
 	{
 		// AlterClassDefinition		
-		protected AlterClassDefinition FAlterClassDefinition;
+		protected AlterClassDefinition _alterClassDefinition;
 		public AlterClassDefinition AlterClassDefinition
 		{
-			get { return FAlterClassDefinition; }
-			set { FAlterClassDefinition = value; }
+			get { return _alterClassDefinition; }
+			set { _alterClassDefinition = value; }
 		}
 
         // AlterMetaData
-        protected AlterMetaData FAlterMetaData;
+        protected AlterMetaData _alterMetaData;
         public AlterMetaData AlterMetaData
         {
-			get { return FAlterMetaData; }
-			set { FAlterMetaData = value; }
+			get { return _alterMetaData; }
+			set { _alterMetaData = value; }
         }
 	}
 	
 	public class AlterDeviceScalarTypeMaps : Statements
 	{										
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is AlterDeviceScalarTypeMap))
+			if (!(item is AlterDeviceScalarTypeMap))
 				throw new LanguageException(LanguageException.Codes.AlterDeviceScalarTypeMapContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new AlterDeviceScalarTypeMap this[int AIndex]
+		public new AlterDeviceScalarTypeMap this[int index]
 		{
-			get { return (AlterDeviceScalarTypeMap)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (AlterDeviceScalarTypeMap)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
@@ -3072,98 +3072,98 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	
 	public class DropDeviceScalarTypeMaps : Statements
 	{										
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is DropDeviceScalarTypeMap))
+			if (!(item is DropDeviceScalarTypeMap))
 				throw new LanguageException(LanguageException.Codes.DropDeviceScalarTypeMapContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new DropDeviceScalarTypeMap this[int AIndex]
+		public new DropDeviceScalarTypeMap this[int index]
 		{
-			get { return (DropDeviceScalarTypeMap)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (DropDeviceScalarTypeMap)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
 	public class DeviceOperatorMapBase : DeviceMapItem
 	{
 		// OperatorSpecifier
-		protected OperatorSpecifier FOperatorSpecifier;
+		protected OperatorSpecifier _operatorSpecifier;
 		public OperatorSpecifier OperatorSpecifier
 		{
-			get { return FOperatorSpecifier; }
-			set { FOperatorSpecifier = value; }
+			get { return _operatorSpecifier; }
+			set { _operatorSpecifier = value; }
 		}
 	}
 	
 	public class DeviceOperatorMap : DeviceOperatorMapBase, IMetaData
 	{
 		// ClassDefinition		
-		protected ClassDefinition FClassDefinition;
+		protected ClassDefinition _classDefinition;
 		public ClassDefinition ClassDefinition
 		{
-			get { return FClassDefinition; }
-			set { FClassDefinition = value; }
+			get { return _classDefinition; }
+			set { _classDefinition = value; }
 		}
 
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
 	}
 	
 	public class DeviceOperatorMaps : Statements
 	{										
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is DeviceOperatorMap))
+			if (!(item is DeviceOperatorMap))
 				throw new LanguageException(LanguageException.Codes.DeviceOperatorMapContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new DeviceOperatorMap this[int AIndex]
+		public new DeviceOperatorMap this[int index]
 		{
-			get { return (DeviceOperatorMap)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (DeviceOperatorMap)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
 	public class AlterDeviceOperatorMap : DeviceOperatorMapBase, IAlterMetaData
 	{
 		// AlterClassDefinition		
-		protected AlterClassDefinition FAlterClassDefinition;
+		protected AlterClassDefinition _alterClassDefinition;
 		public AlterClassDefinition AlterClassDefinition
 		{
-			get { return FAlterClassDefinition; }
-			set { FAlterClassDefinition = value; }
+			get { return _alterClassDefinition; }
+			set { _alterClassDefinition = value; }
 		}
 
         // AlterMetaData
-        protected AlterMetaData FAlterMetaData;
+        protected AlterMetaData _alterMetaData;
         public AlterMetaData AlterMetaData
         {
-			get { return FAlterMetaData; }
-			set { FAlterMetaData = value; }
+			get { return _alterMetaData; }
+			set { _alterMetaData = value; }
         }
 	}
 
 	public class AlterDeviceOperatorMaps : Statements
 	{										
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is AlterDeviceOperatorMap))
+			if (!(item is AlterDeviceOperatorMap))
 				throw new LanguageException(LanguageException.Codes.AlterDeviceOperatorMapContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new AlterDeviceOperatorMap this[int AIndex]
+		public new AlterDeviceOperatorMap this[int index]
 		{
-			get { return (AlterDeviceOperatorMap)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (AlterDeviceOperatorMap)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
@@ -3171,162 +3171,162 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	
 	public class DropDeviceOperatorMaps : Statements
 	{										
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is DropDeviceOperatorMap))
+			if (!(item is DropDeviceOperatorMap))
 				throw new LanguageException(LanguageException.Codes.DropDeviceOperatorMapContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new DropDeviceOperatorMap this[int AIndex]
+		public new DropDeviceOperatorMap this[int index]
 		{
-			get { return (DropDeviceOperatorMap)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (DropDeviceOperatorMap)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
 	public class DeviceStoreDefinitionBase : DeviceMapItem
 	{
 		// StoreName
-		protected string FStoreName;
+		protected string _storeName;
 		public string StoreName
 		{
-			get { return FStoreName; }
-			set { FStoreName = value; }
+			get { return _storeName; }
+			set { _storeName = value; }
 		}
 	}
 	
 	public class DeviceStoreDefinition : DeviceStoreDefinitionBase, IMetaData
 	{
 		// Expression
-		private Expression FExpression;
+		private Expression _expression;
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
 		
 		// ClusteredDefault
-		private bool FClusteredDefault;
+		private bool _clusteredDefault;
 		public bool ClusteredDefault
 		{
-			get { return FClusteredDefault; }
-			set { FClusteredDefault = value; }
+			get { return _clusteredDefault; }
+			set { _clusteredDefault = value; }
 		}
 
 		// ClusteredIndexDefinition
-		private IndexDefinition FClusteredIndexDefinition;
+		private IndexDefinition _clusteredIndexDefinition;
 		public IndexDefinition ClusteredIndexDefinition
 		{
-			get { return FClusteredIndexDefinition; }
-			set { FClusteredIndexDefinition = value; }
+			get { return _clusteredIndexDefinition; }
+			set { _clusteredIndexDefinition = value; }
 		}
 		
 		// IndexesDefault
-		private bool FIndexesDefault;
+		private bool _indexesDefault;
 		public bool IndexesDefault
 		{
-			get { return FIndexesDefault; }
-			set { FIndexesDefault = value; }
+			get { return _indexesDefault; }
+			set { _indexesDefault = value; }
 		}
 
 		// IndexDefinitions
-		private IndexDefinitions FIndexDefinitions = new IndexDefinitions();
-		public IndexDefinitions IndexDefinitions { get { return FIndexDefinitions; } }
+		private IndexDefinitions _indexDefinitions = new IndexDefinitions();
+		public IndexDefinitions IndexDefinitions { get { return _indexDefinitions; } }
 
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
 	}
 	
 	public class DeviceStoreDefinitions : Statements
 	{										
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is DeviceStoreDefinition))
+			if (!(item is DeviceStoreDefinition))
 				throw new LanguageException(LanguageException.Codes.InvalidContainer, "DeviceStoreDefinition");
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new DeviceStoreDefinition this[int AIndex]
+		public new DeviceStoreDefinition this[int index]
 		{
-			get { return (DeviceStoreDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (DeviceStoreDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
 	public class AlterDeviceStoreDefinition : DeviceStoreDefinitionBase, IAlterMetaData
 	{
 		// Expression
-		private Expression FExpression;
+		private Expression _expression;
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
 		
 		// ClusteredDefault
-		private bool FClusteredDefault;
+		private bool _clusteredDefault;
 		public bool ClusteredDefault
 		{
-			get { return FClusteredDefault; }
-			set { FClusteredDefault = value; }
+			get { return _clusteredDefault; }
+			set { _clusteredDefault = value; }
 		}
 
 		// ClusteredIndexDefinition
-		private IndexDefinition FClusteredIndexDefinition;
+		private IndexDefinition _clusteredIndexDefinition;
 		public IndexDefinition ClusteredIndexDefinition
 		{
-			get { return FClusteredIndexDefinition; }
-			set { FClusteredIndexDefinition = value; }
+			get { return _clusteredIndexDefinition; }
+			set { _clusteredIndexDefinition = value; }
 		}
 		
 		// IndexesDefault
-		private bool FIndexesDefault;
+		private bool _indexesDefault;
 		public bool IndexesDefault
 		{
-			get { return FIndexesDefault; }
-			set { FIndexesDefault = value; }
+			get { return _indexesDefault; }
+			set { _indexesDefault = value; }
 		}
 
 		// IndexDefinitions
-		private IndexDefinitions FCreateIndexDefinitions = new IndexDefinitions();
-		public IndexDefinitions CreateIndexDefinitions { get { return FCreateIndexDefinitions; } }
+		private IndexDefinitions _createIndexDefinitions = new IndexDefinitions();
+		public IndexDefinitions CreateIndexDefinitions { get { return _createIndexDefinitions; } }
 
 		// AlterIndexDefinitions
-		private AlterIndexDefinitions FAlterIndexDefinitions = new AlterIndexDefinitions();
-		public AlterIndexDefinitions AlterIndexDefinitions { get { return FAlterIndexDefinitions; } }
+		private AlterIndexDefinitions _alterIndexDefinitions = new AlterIndexDefinitions();
+		public AlterIndexDefinitions AlterIndexDefinitions { get { return _alterIndexDefinitions; } }
 
 		// DropIndexDefinitions
-		private DropIndexDefinitions FDropIndexDefinitions = new DropIndexDefinitions();
-		public DropIndexDefinitions DropIndexDefinitions { get { return FDropIndexDefinitions; } }
+		private DropIndexDefinitions _dropIndexDefinitions = new DropIndexDefinitions();
+		public DropIndexDefinitions DropIndexDefinitions { get { return _dropIndexDefinitions; } }
 
         // AlterMetaData
-        protected AlterMetaData FAlterMetaData;
+        protected AlterMetaData _alterMetaData;
         public AlterMetaData AlterMetaData
         {
-			get { return FAlterMetaData; }
-			set { FAlterMetaData = value; }
+			get { return _alterMetaData; }
+			set { _alterMetaData = value; }
         }
 	}
 
 	public class AlterDeviceStoreDefinitions : Statements
 	{										
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is AlterDeviceStoreDefinition))
+			if (!(item is AlterDeviceStoreDefinition))
 				throw new LanguageException(LanguageException.Codes.InvalidContainer, "AlterDeviceStoreDefinition");
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new AlterDeviceStoreDefinition this[int AIndex]
+		public new AlterDeviceStoreDefinition this[int index]
 		{
-			get { return (AlterDeviceStoreDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (AlterDeviceStoreDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
@@ -3334,78 +3334,78 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	
 	public class DropDeviceStoreDefinitions : Statements
 	{										
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is DropDeviceStoreDefinition))
+			if (!(item is DropDeviceStoreDefinition))
 				throw new LanguageException(LanguageException.Codes.InvalidContainer, "DropDeviceStoreDefinition");
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new DropDeviceStoreDefinition this[int AIndex]
+		public new DropDeviceStoreDefinition this[int index]
 		{
-			get { return (DropDeviceStoreDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (DropDeviceStoreDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
 	public abstract class IndexDefinitionBase : D4Statement
 	{
 		// Columns
-		protected IndexColumnDefinitions FColumns = new IndexColumnDefinitions();
-		public IndexColumnDefinitions Columns { get { return FColumns; } }
+		protected IndexColumnDefinitions _columns = new IndexColumnDefinitions();
+		public IndexColumnDefinitions Columns { get { return _columns; } }
 	}
 	
 	public class IndexDefinition : IndexDefinitionBase, IMetaData
 	{
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
 	}
 	
 	public class IndexDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is IndexDefinition))
+			if (!(item is IndexDefinition))
 				throw new LanguageException(LanguageException.Codes.InvalidContainer, "IndexDefinition");
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new IndexDefinition this[int AIndex]
+		public new IndexDefinition this[int index]
 		{
-			get { return (IndexDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (IndexDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
     
 	public class AlterIndexDefinition : IndexDefinitionBase, IAlterMetaData
 	{
         // AlterMetaData
-        protected AlterMetaData FAlterMetaData;
+        protected AlterMetaData _alterMetaData;
         public AlterMetaData AlterMetaData
         {
-			get { return FAlterMetaData; }
-			set { FAlterMetaData = value; }
+			get { return _alterMetaData; }
+			set { _alterMetaData = value; }
         }
 	}
 	
 	public class AlterIndexDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is AlterIndexDefinition))
+			if (!(item is AlterIndexDefinition))
 				throw new LanguageException(LanguageException.Codes.InvalidContainer, "AlterIndexDefinition");
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new AlterIndexDefinition this[int AIndex]
+		public new AlterIndexDefinition this[int index]
 		{
-			get { return (AlterIndexDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (AlterIndexDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
     
@@ -3413,62 +3413,62 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	
 	public class DropIndexDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is DropIndexDefinition))
+			if (!(item is DropIndexDefinition))
 				throw new LanguageException(LanguageException.Codes.InvalidContainer, "DropIndexDefinition");
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new DropIndexDefinition this[int AIndex]
+		public new DropIndexDefinition this[int index]
 		{
-			get { return (DropIndexDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (DropIndexDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
     
 	public class IndexColumnDefinition : ColumnDefinitionBase
 	{
 		public IndexColumnDefinition() : base(){}
-		public IndexColumnDefinition(string AColumnName, bool AAscending) : base(AColumnName)
+		public IndexColumnDefinition(string columnName, bool ascending) : base(columnName)
 		{
-			FAscending = AAscending;
+			_ascending = ascending;
 		}
 		
-		public IndexColumnDefinition(string AColumnName, bool AAscending, SortDefinition ASort) : base(AColumnName)
+		public IndexColumnDefinition(string columnName, bool ascending, SortDefinition sort) : base(columnName)
 		{
-			FAscending = AAscending;
-			FSort = ASort;
+			_ascending = ascending;
+			_sort = sort;
 		}
 		
-		protected bool FAscending = true;
+		protected bool _ascending = true;
 		public bool Ascending
 		{
-			get { return FAscending; }
-			set { FAscending = value; }
+			get { return _ascending; }
+			set { _ascending = value; }
 		}
 		
-		protected SortDefinition FSort;
+		protected SortDefinition _sort;
 		public SortDefinition Sort
 		{
-			get { return FSort; }
-			set { FSort = value; }
+			get { return _sort; }
+			set { _sort = value; }
 		}
 	}
 
 	public class IndexColumnDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is IndexColumnDefinition))
+			if (!(item is IndexColumnDefinition))
 				throw new LanguageException(LanguageException.Codes.InvalidContainer, "IndexColumnDefinition");
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new IndexColumnDefinition this[int AIndex]
+		public new IndexColumnDefinition this[int index]
 		{
-			get { return (IndexColumnDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (IndexColumnDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
@@ -3492,34 +3492,34 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	public class ReconciliationSettings : D4Statement
 	{
 		// ReconcileModeSet
-		private bool FReconcileModeSet;
-		public bool ReconcileModeSet { get { return FReconcileModeSet; } }
+		private bool _reconcileModeSet;
+		public bool ReconcileModeSet { get { return _reconcileModeSet; } }
 		
 		// ReconcileMode
-		private ReconcileMode FReconcileMode;
+		private ReconcileMode _reconcileMode;
 		public ReconcileMode ReconcileMode
 		{
-			get { return FReconcileMode; }
+			get { return _reconcileMode; }
 			set 
 			{
-				FReconcileMode = value; 
-				FReconcileModeSet = true;
+				_reconcileMode = value; 
+				_reconcileModeSet = true;
 			}
 		}
 		
 		// ReconcileMasterSet
-		private bool FReconcileMasterSet;
-		public bool ReconcileMasterSet { get { return FReconcileMasterSet; } }
+		private bool _reconcileMasterSet;
+		public bool ReconcileMasterSet { get { return _reconcileMasterSet; } }
 		
 		// ReconcileMaster
-		private ReconcileMaster FReconcileMaster;
+		private ReconcileMaster _reconcileMaster;
 		public ReconcileMaster ReconcileMaster
 		{
-			get { return FReconcileMaster; }
+			get { return _reconcileMaster; }
 			set 
 			{ 
-				FReconcileMaster = value; 
-				FReconcileMasterSet = true;
+				_reconcileMaster = value; 
+				_reconcileMasterSet = true;
 			}
 		}
 	}
@@ -3527,201 +3527,201 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	public class CreateDeviceStatement : D4Statement, IMetaData
 	{
 		// DeviceName
-		protected string FDeviceName = String.Empty;
+		protected string _deviceName = String.Empty;
 		public string DeviceName
 		{
-			get { return FDeviceName; }
-			set { FDeviceName = value == null ? String.Empty : value; }
+			get { return _deviceName; }
+			set { _deviceName = value == null ? String.Empty : value; }
 		}
 		
 		// DeviceScalarTypeMaps
-		private DeviceScalarTypeMaps FDeviceScalarTypeMaps = new DeviceScalarTypeMaps();
-		public DeviceScalarTypeMaps DeviceScalarTypeMaps { get { return FDeviceScalarTypeMaps; } }
+		private DeviceScalarTypeMaps _deviceScalarTypeMaps = new DeviceScalarTypeMaps();
+		public DeviceScalarTypeMaps DeviceScalarTypeMaps { get { return _deviceScalarTypeMaps; } }
 
 		// DeviceOperatorMaps
-		private DeviceOperatorMaps FDeviceOperatorMaps = new DeviceOperatorMaps();
-		public DeviceOperatorMaps DeviceOperatorMaps { get { return FDeviceOperatorMaps; } }
+		private DeviceOperatorMaps _deviceOperatorMaps = new DeviceOperatorMaps();
+		public DeviceOperatorMaps DeviceOperatorMaps { get { return _deviceOperatorMaps; } }
 		
 		// DeviceStoreDefinitions
-		private DeviceStoreDefinitions FDeviceStoreDefinitions = new DeviceStoreDefinitions();
-		public DeviceStoreDefinitions DeviceStoreDefinitions { get { return FDeviceStoreDefinitions; } }
+		private DeviceStoreDefinitions _deviceStoreDefinitions = new DeviceStoreDefinitions();
+		public DeviceStoreDefinitions DeviceStoreDefinitions { get { return _deviceStoreDefinitions; } }
 		
 		// ReconciliationSettings
-		private ReconciliationSettings FReconciliationSettings;
+		private ReconciliationSettings _reconciliationSettings;
 		public ReconciliationSettings ReconciliationSettings
 		{
-			get { return FReconciliationSettings; }
-			set { FReconciliationSettings = value; }
+			get { return _reconciliationSettings; }
+			set { _reconciliationSettings = value; }
 		}
 		
 		// ClassDefinition		
-		protected ClassDefinition FClassDefinition;
+		protected ClassDefinition _classDefinition;
 		public ClassDefinition ClassDefinition
 		{
-			get { return FClassDefinition; }
-			set { FClassDefinition = value; }
+			get { return _classDefinition; }
+			set { _classDefinition = value; }
 		}
         
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
 	}
 	
 	public class AlterDeviceStatement : D4Statement, IAlterMetaData
 	{
 		// DeviceName
-		protected string FDeviceName = String.Empty;
+		protected string _deviceName = String.Empty;
 		public string DeviceName
 		{
-			get { return FDeviceName; }
-			set { FDeviceName = value == null ? String.Empty : value; }
+			get { return _deviceName; }
+			set { _deviceName = value == null ? String.Empty : value; }
 		}
 		
 		// CreateDeviceScalarTypeMaps
-		private DeviceScalarTypeMaps FCreateDeviceScalarTypeMaps = new DeviceScalarTypeMaps();
-		public DeviceScalarTypeMaps CreateDeviceScalarTypeMaps { get { return FCreateDeviceScalarTypeMaps; } }
+		private DeviceScalarTypeMaps _createDeviceScalarTypeMaps = new DeviceScalarTypeMaps();
+		public DeviceScalarTypeMaps CreateDeviceScalarTypeMaps { get { return _createDeviceScalarTypeMaps; } }
 
 		// AlterDeviceScalarTypeMaps
-		private AlterDeviceScalarTypeMaps FAlterDeviceScalarTypeMaps = new AlterDeviceScalarTypeMaps();
-		public AlterDeviceScalarTypeMaps AlterDeviceScalarTypeMaps { get { return FAlterDeviceScalarTypeMaps; } }
+		private AlterDeviceScalarTypeMaps _alterDeviceScalarTypeMaps = new AlterDeviceScalarTypeMaps();
+		public AlterDeviceScalarTypeMaps AlterDeviceScalarTypeMaps { get { return _alterDeviceScalarTypeMaps; } }
 
 		// DropDeviceScalarTypeMaps
-		private DropDeviceScalarTypeMaps FDropDeviceScalarTypeMaps = new DropDeviceScalarTypeMaps();
-		public DropDeviceScalarTypeMaps DropDeviceScalarTypeMaps { get { return FDropDeviceScalarTypeMaps; } }
+		private DropDeviceScalarTypeMaps _dropDeviceScalarTypeMaps = new DropDeviceScalarTypeMaps();
+		public DropDeviceScalarTypeMaps DropDeviceScalarTypeMaps { get { return _dropDeviceScalarTypeMaps; } }
 
 		// CreateDeviceOperatorMaps
-		private DeviceOperatorMaps FCreateDeviceOperatorMaps = new DeviceOperatorMaps();
-		public DeviceOperatorMaps CreateDeviceOperatorMaps { get { return FCreateDeviceOperatorMaps; } }
+		private DeviceOperatorMaps _createDeviceOperatorMaps = new DeviceOperatorMaps();
+		public DeviceOperatorMaps CreateDeviceOperatorMaps { get { return _createDeviceOperatorMaps; } }
 		
 		// AlterDeviceOperatorMaps
-		private AlterDeviceOperatorMaps FAlterDeviceOperatorMaps = new AlterDeviceOperatorMaps();
-		public AlterDeviceOperatorMaps AlterDeviceOperatorMaps { get { return FAlterDeviceOperatorMaps; } }
+		private AlterDeviceOperatorMaps _alterDeviceOperatorMaps = new AlterDeviceOperatorMaps();
+		public AlterDeviceOperatorMaps AlterDeviceOperatorMaps { get { return _alterDeviceOperatorMaps; } }
 
 		// DropDeviceOperatorMaps
-		private DropDeviceOperatorMaps FDropDeviceOperatorMaps = new DropDeviceOperatorMaps();
-		public DropDeviceOperatorMaps DropDeviceOperatorMaps { get { return FDropDeviceOperatorMaps; } }
+		private DropDeviceOperatorMaps _dropDeviceOperatorMaps = new DropDeviceOperatorMaps();
+		public DropDeviceOperatorMaps DropDeviceOperatorMaps { get { return _dropDeviceOperatorMaps; } }
 
 		// CreateDeviceStoreDefinitions
-		private DeviceStoreDefinitions FCreateDeviceStoreDefinitions = new DeviceStoreDefinitions();
-		public DeviceStoreDefinitions CreateDeviceStoreDefinitions { get { return FCreateDeviceStoreDefinitions; } }
+		private DeviceStoreDefinitions _createDeviceStoreDefinitions = new DeviceStoreDefinitions();
+		public DeviceStoreDefinitions CreateDeviceStoreDefinitions { get { return _createDeviceStoreDefinitions; } }
 		
 		// AlterDeviceStoreDefinitions
-		private AlterDeviceStoreDefinitions FAlterDeviceStoreDefinitions = new AlterDeviceStoreDefinitions();
-		public AlterDeviceStoreDefinitions AlterDeviceStoreDefinitions { get { return FAlterDeviceStoreDefinitions; } }
+		private AlterDeviceStoreDefinitions _alterDeviceStoreDefinitions = new AlterDeviceStoreDefinitions();
+		public AlterDeviceStoreDefinitions AlterDeviceStoreDefinitions { get { return _alterDeviceStoreDefinitions; } }
 
 		// DropDeviceStoreDefinitions
-		private DropDeviceStoreDefinitions FDropDeviceStoreDefinitions = new DropDeviceStoreDefinitions();
-		public DropDeviceStoreDefinitions DropDeviceStoreDefinitions { get { return FDropDeviceStoreDefinitions; } }
+		private DropDeviceStoreDefinitions _dropDeviceStoreDefinitions = new DropDeviceStoreDefinitions();
+		public DropDeviceStoreDefinitions DropDeviceStoreDefinitions { get { return _dropDeviceStoreDefinitions; } }
 
 		// ReconciliationSettings
-		private ReconciliationSettings FReconciliationSettings;
+		private ReconciliationSettings _reconciliationSettings;
 		public ReconciliationSettings ReconciliationSettings
 		{
-			get { return FReconciliationSettings; }
-			set { FReconciliationSettings = value; }
+			get { return _reconciliationSettings; }
+			set { _reconciliationSettings = value; }
 		}
 		
 		// AlterClassDefinition		
-		protected AlterClassDefinition FAlterClassDefinition;
+		protected AlterClassDefinition _alterClassDefinition;
 		public AlterClassDefinition AlterClassDefinition
 		{
-			get { return FAlterClassDefinition; }
-			set { FAlterClassDefinition = value; }
+			get { return _alterClassDefinition; }
+			set { _alterClassDefinition = value; }
 		}
         
         // AlterMetaData
-        protected AlterMetaData FAlterMetaData;
+        protected AlterMetaData _alterMetaData;
         public AlterMetaData AlterMetaData
         {
-			get { return FAlterMetaData; }
-			set { FAlterMetaData = value; }
+			get { return _alterMetaData; }
+			set { _alterMetaData = value; }
         }
 	}
 
 	public abstract class AlterTableVarStatement : D4Statement, IAlterMetaData
 	{
 		// TableVarName
-		protected string FTableVarName = String.Empty;
+		protected string _tableVarName = String.Empty;
 		public string TableVarName
 		{
-			get { return FTableVarName; }
-			set { FTableVarName = value == null ? String.Empty : value; }
+			get { return _tableVarName; }
+			set { _tableVarName = value == null ? String.Empty : value; }
 		}
 		
 		// CreateKeys
-		private KeyDefinitions FCreateKeys = new KeyDefinitions();
-		public KeyDefinitions CreateKeys { get { return FCreateKeys; } }
+		private KeyDefinitions _createKeys = new KeyDefinitions();
+		public KeyDefinitions CreateKeys { get { return _createKeys; } }
 
 		// AlterKeys
-		private AlterKeyDefinitions FAlterKeys = new AlterKeyDefinitions();
-		public AlterKeyDefinitions AlterKeys { get { return FAlterKeys; } }
+		private AlterKeyDefinitions _alterKeys = new AlterKeyDefinitions();
+		public AlterKeyDefinitions AlterKeys { get { return _alterKeys; } }
 
 		// DropKeys
-		private DropKeyDefinitions FDropKeys = new DropKeyDefinitions();
-		public DropKeyDefinitions DropKeys { get { return FDropKeys; } }
+		private DropKeyDefinitions _dropKeys = new DropKeyDefinitions();
+		public DropKeyDefinitions DropKeys { get { return _dropKeys; } }
 
 		// CreateOrders
-		private OrderDefinitions FCreateOrders = new OrderDefinitions();
-		public OrderDefinitions CreateOrders { get { return FCreateOrders; } }
+		private OrderDefinitions _createOrders = new OrderDefinitions();
+		public OrderDefinitions CreateOrders { get { return _createOrders; } }
 
 		// AlterOrders
-		private AlterOrderDefinitions FAlterOrders = new AlterOrderDefinitions();
-		public AlterOrderDefinitions AlterOrders { get { return FAlterOrders; } }
+		private AlterOrderDefinitions _alterOrders = new AlterOrderDefinitions();
+		public AlterOrderDefinitions AlterOrders { get { return _alterOrders; } }
 
 		// DropOrders
-		private DropOrderDefinitions FDropOrders = new DropOrderDefinitions();
-		public DropOrderDefinitions DropOrders { get { return FDropOrders; } }
+		private DropOrderDefinitions _dropOrders = new DropOrderDefinitions();
+		public DropOrderDefinitions DropOrders { get { return _dropOrders; } }
 
 		// CreateReferences
-		private ReferenceDefinitions FCreateReferences = new ReferenceDefinitions();
-		public ReferenceDefinitions CreateReferences { get { return FCreateReferences; } }
+		private ReferenceDefinitions _createReferences = new ReferenceDefinitions();
+		public ReferenceDefinitions CreateReferences { get { return _createReferences; } }
 
 		// AlterReferences
-		private AlterReferenceDefinitions FAlterReferences = new AlterReferenceDefinitions();
-		public AlterReferenceDefinitions AlterReferences { get { return FAlterReferences; } }
+		private AlterReferenceDefinitions _alterReferences = new AlterReferenceDefinitions();
+		public AlterReferenceDefinitions AlterReferences { get { return _alterReferences; } }
 
 		// DropReferences
-		private DropReferenceDefinitions FDropReferences = new DropReferenceDefinitions();
-		public DropReferenceDefinitions DropReferences { get { return FDropReferences; } }
+		private DropReferenceDefinitions _dropReferences = new DropReferenceDefinitions();
+		public DropReferenceDefinitions DropReferences { get { return _dropReferences; } }
 
 		// CreateConstraints
-		private CreateConstraintDefinitions FCreateConstraints = new CreateConstraintDefinitions();
-		public CreateConstraintDefinitions CreateConstraints { get { return FCreateConstraints; } }
+		private CreateConstraintDefinitions _createConstraints = new CreateConstraintDefinitions();
+		public CreateConstraintDefinitions CreateConstraints { get { return _createConstraints; } }
 
 		// AlterConstraints
-		private AlterConstraintDefinitions FAlterConstraints = new AlterConstraintDefinitions();
-		public AlterConstraintDefinitions AlterConstraints { get { return FAlterConstraints; } }
+		private AlterConstraintDefinitions _alterConstraints = new AlterConstraintDefinitions();
+		public AlterConstraintDefinitions AlterConstraints { get { return _alterConstraints; } }
 
 		// DropConstraints
-		private DropConstraintDefinitions FDropConstraints = new DropConstraintDefinitions();
-		public DropConstraintDefinitions DropConstraints { get { return FDropConstraints; } }
+		private DropConstraintDefinitions _dropConstraints = new DropConstraintDefinitions();
+		public DropConstraintDefinitions DropConstraints { get { return _dropConstraints; } }
 
         // AlterMetaData
-        protected AlterMetaData FAlterMetaData;
+        protected AlterMetaData _alterMetaData;
         public AlterMetaData AlterMetaData
         {
-			get { return FAlterMetaData; }
-			set { FAlterMetaData = value; }
+			get { return _alterMetaData; }
+			set { _alterMetaData = value; }
         }
 	}
 	
 	public class AlterTableStatement : AlterTableVarStatement
 	{
 		// CreateColumns
-		private ColumnDefinitions FCreateColumns = new ColumnDefinitions();
-		public ColumnDefinitions CreateColumns { get { return FCreateColumns; } }
+		private ColumnDefinitions _createColumns = new ColumnDefinitions();
+		public ColumnDefinitions CreateColumns { get { return _createColumns; } }
 
 		// AlterColumns
-		private AlterColumnDefinitions FAlterColumns = new AlterColumnDefinitions();
-		public AlterColumnDefinitions AlterColumns { get { return FAlterColumns; } }
+		private AlterColumnDefinitions _alterColumns = new AlterColumnDefinitions();
+		public AlterColumnDefinitions AlterColumns { get { return _alterColumns; } }
 
 		// DropColumns
-		private DropColumnDefinitions FDropColumns = new DropColumnDefinitions();
-		public DropColumnDefinitions DropColumns { get { return FDropColumns; } }
+		private DropColumnDefinitions _dropColumns = new DropColumnDefinitions();
+		public DropColumnDefinitions DropColumns { get { return _dropColumns; } }
 	}
 	
 	public class AlterViewStatement : AlterTableVarStatement{}
@@ -3729,92 +3729,92 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	public class AlterScalarTypeStatement : D4Statement, IAlterMetaData
 	{
 		// ScalarTypeName
-		protected string FScalarTypeName = String.Empty;
+		protected string _scalarTypeName = String.Empty;
 		public string ScalarTypeName
 		{
-			get { return FScalarTypeName; }
-			set { FScalarTypeName = value == null ? String.Empty : value; }
+			get { return _scalarTypeName; }
+			set { _scalarTypeName = value == null ? String.Empty : value; }
 		}
 
 		// CreateRepresentations
-		private RepresentationDefinitions FCreateRepresentations = new RepresentationDefinitions();
-		public RepresentationDefinitions CreateRepresentations { get { return FCreateRepresentations; } }
+		private RepresentationDefinitions _createRepresentations = new RepresentationDefinitions();
+		public RepresentationDefinitions CreateRepresentations { get { return _createRepresentations; } }
 
 		// AlterRepresentations
-		private AlterRepresentationDefinitions FAlterRepresentations = new AlterRepresentationDefinitions();
-		public AlterRepresentationDefinitions AlterRepresentations { get { return FAlterRepresentations; } }
+		private AlterRepresentationDefinitions _alterRepresentations = new AlterRepresentationDefinitions();
+		public AlterRepresentationDefinitions AlterRepresentations { get { return _alterRepresentations; } }
 
 		// DropRepresentations
-		private DropRepresentationDefinitions FDropRepresentations = new DropRepresentationDefinitions();
-		public DropRepresentationDefinitions DropRepresentations { get { return FDropRepresentations; } }
+		private DropRepresentationDefinitions _dropRepresentations = new DropRepresentationDefinitions();
+		public DropRepresentationDefinitions DropRepresentations { get { return _dropRepresentations; } }
 
 		// CreateConstraints
-		private ConstraintDefinitions FCreateConstraints = new ConstraintDefinitions();
-		public ConstraintDefinitions CreateConstraints { get { return FCreateConstraints; } }
+		private ConstraintDefinitions _createConstraints = new ConstraintDefinitions();
+		public ConstraintDefinitions CreateConstraints { get { return _createConstraints; } }
 
 		// AlterConstraints
-		private AlterConstraintDefinitions FAlterConstraints = new AlterConstraintDefinitions();
-		public AlterConstraintDefinitions AlterConstraints { get { return FAlterConstraints; } }
+		private AlterConstraintDefinitions _alterConstraints = new AlterConstraintDefinitions();
+		public AlterConstraintDefinitions AlterConstraints { get { return _alterConstraints; } }
 
 		// DropConstraints
-		private DropConstraintDefinitions FDropConstraints = new DropConstraintDefinitions();
-		public DropConstraintDefinitions DropConstraints { get { return FDropConstraints; } }
+		private DropConstraintDefinitions _dropConstraints = new DropConstraintDefinitions();
+		public DropConstraintDefinitions DropConstraints { get { return _dropConstraints; } }
 
 		// CreateSpecials
-		private SpecialDefinitions FCreateSpecials = new SpecialDefinitions();
-		public SpecialDefinitions CreateSpecials { get { return FCreateSpecials; } }
+		private SpecialDefinitions _createSpecials = new SpecialDefinitions();
+		public SpecialDefinitions CreateSpecials { get { return _createSpecials; } }
 
 		// AlterSpecials
-		private AlterSpecialDefinitions FAlterSpecials = new AlterSpecialDefinitions();
-		public AlterSpecialDefinitions AlterSpecials { get { return FAlterSpecials; } }
+		private AlterSpecialDefinitions _alterSpecials = new AlterSpecialDefinitions();
+		public AlterSpecialDefinitions AlterSpecials { get { return _alterSpecials; } }
 
 		// DropSpecials
-		private DropSpecialDefinitions FDropSpecials = new DropSpecialDefinitions();
-		public DropSpecialDefinitions DropSpecials { get { return FDropSpecials; } }
+		private DropSpecialDefinitions _dropSpecials = new DropSpecialDefinitions();
+		public DropSpecialDefinitions DropSpecials { get { return _dropSpecials; } }
 		
 		// Default		
-		protected DefaultDefinitionBase FDefault;
+		protected DefaultDefinitionBase _default;
 		public DefaultDefinitionBase Default
 		{
-			get { return FDefault; }
-			set { FDefault = value; }
+			get { return _default; }
+			set { _default = value; }
 		}
 		
 		// AlterClassDefinition		
-		protected AlterClassDefinition FAlterClassDefinition;
+		protected AlterClassDefinition _alterClassDefinition;
 		public AlterClassDefinition AlterClassDefinition
 		{
-			get { return FAlterClassDefinition; }
-			set { FAlterClassDefinition = value; }
+			get { return _alterClassDefinition; }
+			set { _alterClassDefinition = value; }
 		}
         
         // AlterMetaData
-        protected AlterMetaData FAlterMetaData;
+        protected AlterMetaData _alterMetaData;
         public AlterMetaData AlterMetaData
         {
-			get { return FAlterMetaData; }
-			set { FAlterMetaData = value; }
+			get { return _alterMetaData; }
+			set { _alterMetaData = value; }
         }
 	}
 	
 	public class ColumnDefinitionBase : D4Statement
 	{
 		public ColumnDefinitionBase() : base(){}
-		public ColumnDefinitionBase(string AColumnName) : base()
+		public ColumnDefinitionBase(string columnName) : base()
 		{
-			FColumnName = AColumnName;
+			_columnName = columnName;
 		}
 		
 		// ColumnName
-		protected string FColumnName = String.Empty;
+		protected string _columnName = String.Empty;
 		public string ColumnName
 		{
-			get { return FColumnName; }
+			get { return _columnName; }
 			set 
 			{ 
-				if (FColumnName != value)
+				if (_columnName != value)
 				{
-					FColumnName = value == null ? String.Empty : value; 
+					_columnName = value == null ? String.Empty : value; 
 				}
 			}
 		}
@@ -3823,331 +3823,331 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	public class ColumnDefinition : ColumnDefinitionBase, IMetaData
 	{
 		public ColumnDefinition() : base(){}
-		public ColumnDefinition(string AColumnName, TypeSpecifier ATypeSpecifier) : base(AColumnName)
+		public ColumnDefinition(string columnName, TypeSpecifier typeSpecifier) : base(columnName)
 		{
-			FTypeSpecifier = ATypeSpecifier;
+			_typeSpecifier = typeSpecifier;
 		}
 		
 		// TypeSpecifier
-		protected TypeSpecifier FTypeSpecifier;
+		protected TypeSpecifier _typeSpecifier;
 		public TypeSpecifier TypeSpecifier
 		{
-			get { return FTypeSpecifier; }
-			set { FTypeSpecifier = value; }
+			get { return _typeSpecifier; }
+			set { _typeSpecifier = value; }
 		}
 		
 		// Default		
-		protected DefaultDefinition FDefault;
+		protected DefaultDefinition _default;
 		public DefaultDefinition Default
 		{
-			get { return FDefault; }
-			set { FDefault = value; }
+			get { return _default; }
+			set { _default = value; }
 		}
 
 		// Constraints
-		protected ConstraintDefinitions FConstraints = new ConstraintDefinitions();
+		protected ConstraintDefinitions _constraints = new ConstraintDefinitions();
 		public ConstraintDefinitions Constraints
 		{
-			get { return FConstraints; }
-			set { FConstraints = value; }
+			get { return _constraints; }
+			set { _constraints = value; }
 		}
 		
 		// IsNilable
-		protected bool FIsNilable;
+		protected bool _isNilable;
 		public bool IsNilable
 		{
-			get { return FIsNilable; }
-			set { FIsNilable = value; } 
+			get { return _isNilable; }
+			set { _isNilable = value; } 
 		}
 		
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
 	}
 	
 	public class ColumnDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is ColumnDefinition))
+			if (!(item is ColumnDefinition))
 				throw new LanguageException(LanguageException.Codes.ColumnDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new ColumnDefinition this[int AIndex]
+		public new ColumnDefinition this[int index]
 		{
-			get { return (ColumnDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (ColumnDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
     
 	public class AlterColumnDefinition : ColumnDefinitionBase, IAlterMetaData
 	{
 		// TypeSpecifier
-		protected TypeSpecifier FTypeSpecifier;
+		protected TypeSpecifier _typeSpecifier;
 		public TypeSpecifier TypeSpecifier
 		{
-			get { return FTypeSpecifier; }
-			set { FTypeSpecifier = value; }
+			get { return _typeSpecifier; }
+			set { _typeSpecifier = value; }
 		}
 		
 		// Default		
-		protected DefaultDefinitionBase FDefault;
+		protected DefaultDefinitionBase _default;
 		public DefaultDefinitionBase Default
 		{
-			get { return FDefault; }
-			set { FDefault = value; }
+			get { return _default; }
+			set { _default = value; }
 		}
 
 		// CreateConstraints
-		private ConstraintDefinitions FCreateConstraints = new ConstraintDefinitions();
-		public ConstraintDefinitions CreateConstraints { get { return FCreateConstraints; } }
+		private ConstraintDefinitions _createConstraints = new ConstraintDefinitions();
+		public ConstraintDefinitions CreateConstraints { get { return _createConstraints; } }
 
 		// AlterConstraints
-		private AlterConstraintDefinitions FAlterConstraints = new AlterConstraintDefinitions();
-		public AlterConstraintDefinitions AlterConstraints { get { return FAlterConstraints; } }
+		private AlterConstraintDefinitions _alterConstraints = new AlterConstraintDefinitions();
+		public AlterConstraintDefinitions AlterConstraints { get { return _alterConstraints; } }
 
 		// DropConstraints
-		private DropConstraintDefinitions FDropConstraints = new DropConstraintDefinitions();
-		public DropConstraintDefinitions DropConstraints { get { return FDropConstraints; } }
+		private DropConstraintDefinitions _dropConstraints = new DropConstraintDefinitions();
+		public DropConstraintDefinitions DropConstraints { get { return _dropConstraints; } }
 		
 		// ChangeNilable
-		private bool FChangeNilable;
+		private bool _changeNilable;
 		public bool ChangeNilable
 		{
-			get { return FChangeNilable; }
-			set { FChangeNilable = value; }
+			get { return _changeNilable; }
+			set { _changeNilable = value; }
 		}
 		
 		// IsNilable
-		private bool FIsNilable;
+		private bool _isNilable;
 		public bool IsNilable
 		{
-			get { return FIsNilable; }
-			set { FIsNilable = value; }
+			get { return _isNilable; }
+			set { _isNilable = value; }
 		}
 
         // AlterMetaData
-        protected AlterMetaData FAlterMetaData;
+        protected AlterMetaData _alterMetaData;
         public AlterMetaData AlterMetaData
         {
-			get { return FAlterMetaData; }
-			set { FAlterMetaData = value; }
+			get { return _alterMetaData; }
+			set { _alterMetaData = value; }
         }
 	}
 	
 	public class AlterColumnDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is AlterColumnDefinition))
+			if (!(item is AlterColumnDefinition))
 				throw new LanguageException(LanguageException.Codes.AlterColumnDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new AlterColumnDefinition this[int AIndex]
+		public new AlterColumnDefinition this[int index]
 		{
-			get { return (AlterColumnDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (AlterColumnDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
     
 	public class DropColumnDefinition : ColumnDefinitionBase
 	{
 		public DropColumnDefinition() : base() { }
-		public DropColumnDefinition(string AColumnName) : base(AColumnName) { }
+		public DropColumnDefinition(string columnName) : base(columnName) { }
 	}
 	
 	public class DropColumnDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is DropColumnDefinition))
+			if (!(item is DropColumnDefinition))
 				throw new LanguageException(LanguageException.Codes.DropColumnDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new DropColumnDefinition this[int AIndex]
+		public new DropColumnDefinition this[int index]
 		{
-			get { return (DropColumnDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (DropColumnDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
     
 	public class KeyColumnDefinition : ColumnDefinitionBase
 	{
 		public KeyColumnDefinition() : base(){}
-		public KeyColumnDefinition(string AColumnName) : base(AColumnName){}
+		public KeyColumnDefinition(string columnName) : base(columnName){}
 	}
 
 	public class KeyColumnDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is KeyColumnDefinition))
+			if (!(item is KeyColumnDefinition))
 				throw new LanguageException(LanguageException.Codes.KeyColumnDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new KeyColumnDefinition this[int AIndex]
+		public new KeyColumnDefinition this[int index]
 		{
-			get { return (KeyColumnDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (KeyColumnDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
     
 	public class ReferenceColumnDefinition : ColumnDefinitionBase
 	{
 		public ReferenceColumnDefinition() : base(){}
-		public ReferenceColumnDefinition(string AColumnName) : base(AColumnName){}
+		public ReferenceColumnDefinition(string columnName) : base(columnName){}
 	}
 
 	public class ReferenceColumnDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is ReferenceColumnDefinition))
+			if (!(item is ReferenceColumnDefinition))
 				throw new LanguageException(LanguageException.Codes.ReferenceColumnDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new ReferenceColumnDefinition this[int AIndex]
+		public new ReferenceColumnDefinition this[int index]
 		{
-			get { return (ReferenceColumnDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (ReferenceColumnDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
     
 	public class OrderColumnDefinition : ColumnDefinitionBase
 	{
 		public OrderColumnDefinition() : base(){}
-		public OrderColumnDefinition(string AColumnName, bool AAscending) : base(AColumnName)
+		public OrderColumnDefinition(string columnName, bool ascending) : base(columnName)
 		{
-			FAscending = AAscending;
+			_ascending = ascending;
 		}
 		
-		public OrderColumnDefinition(string AColumnName, bool AAscending, SortDefinition ASort) : base(AColumnName)
+		public OrderColumnDefinition(string columnName, bool ascending, SortDefinition sort) : base(columnName)
 		{
-			FAscending = AAscending;
-			FSort = ASort;
+			_ascending = ascending;
+			_sort = sort;
 		}
 		
-		public OrderColumnDefinition(string AColumnName, bool AAscending, bool AIncludeNils) : base(AColumnName)
+		public OrderColumnDefinition(string columnName, bool ascending, bool includeNils) : base(columnName)
 		{
-			FAscending = AAscending;
-			FIncludeNils = AIncludeNils;
+			_ascending = ascending;
+			_includeNils = includeNils;
 		}
 		
-		public OrderColumnDefinition(string AColumnName, bool AAscending, bool AIncludeNils, SortDefinition ASort) : base(AColumnName)
+		public OrderColumnDefinition(string columnName, bool ascending, bool includeNils, SortDefinition sort) : base(columnName)
 		{
-			FAscending = AAscending;
-			FIncludeNils = AIncludeNils;
-			FSort = ASort;
+			_ascending = ascending;
+			_includeNils = includeNils;
+			_sort = sort;
 		}
 		
-		protected bool FAscending = true;
+		protected bool _ascending = true;
 		public bool Ascending
 		{
-			get { return FAscending; }
-			set { FAscending = value; }
+			get { return _ascending; }
+			set { _ascending = value; }
 		}
 		
-		protected bool FIncludeNils = false;
+		protected bool _includeNils = false;
 		public bool IncludeNils
 		{
-			get { return FIncludeNils; }
-			set { FIncludeNils = value; }
+			get { return _includeNils; }
+			set { _includeNils = value; }
 		}
 		
-		protected SortDefinition FSort;
+		protected SortDefinition _sort;
 		public SortDefinition Sort
 		{
-			get { return FSort; }
-			set { FSort = value; }
+			get { return _sort; }
+			set { _sort = value; }
 		}
 	}
 
 	public class OrderColumnDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is OrderColumnDefinition))
+			if (!(item is OrderColumnDefinition))
 				throw new LanguageException(LanguageException.Codes.OrderColumnDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new OrderColumnDefinition this[int AIndex]
+		public new OrderColumnDefinition this[int index]
 		{
-			get { return (OrderColumnDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (OrderColumnDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
 	public abstract class KeyDefinitionBase : D4Statement
 	{
 		// Columns
-		protected KeyColumnDefinitions FColumns = new KeyColumnDefinitions();
-		public KeyColumnDefinitions Columns {  get { return FColumns; } }
+		protected KeyColumnDefinitions _columns = new KeyColumnDefinitions();
+		public KeyColumnDefinitions Columns {  get { return _columns; } }
 	}
 
     [Editor("Alphora.Dataphor.DAE.Client.Controls.Design.KeyEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 	public class KeyDefinition : KeyDefinitionBase, IMetaData
 	{
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MetaDataEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
 	}
 	
 	[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.KeyDefinitionsEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 	public class KeyDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is KeyDefinition))
+			if (!(item is KeyDefinition))
 				throw new LanguageException(LanguageException.Codes.KeyDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new KeyDefinition this[int AIndex]
+		public new KeyDefinition this[int index]
 		{
-			get { return (KeyDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (KeyDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
 	public class AlterKeyDefinition : KeyDefinitionBase, IAlterMetaData
 	{
         // AlterMetaData
-        protected AlterMetaData FAlterMetaData;
+        protected AlterMetaData _alterMetaData;
         public AlterMetaData AlterMetaData
         {
-			get { return FAlterMetaData; }
-			set { FAlterMetaData = value; }
+			get { return _alterMetaData; }
+			set { _alterMetaData = value; }
         }
 	}
 	
 	public class AlterKeyDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is AlterKeyDefinition))
+			if (!(item is AlterKeyDefinition))
 				throw new LanguageException(LanguageException.Codes.AlterKeyDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new AlterKeyDefinition this[int AIndex]
+		public new AlterKeyDefinition this[int index]
 		{
-			get { return (AlterKeyDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (AlterKeyDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
@@ -4155,28 +4155,28 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	
 	public class DropKeyDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is DropKeyDefinition))
+			if (!(item is DropKeyDefinition))
 				throw new LanguageException(LanguageException.Codes.DropKeyDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new DropKeyDefinition this[int AIndex]
+		public new DropKeyDefinition this[int index]
 		{
-			get { return (DropKeyDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (DropKeyDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
 	public abstract class ReferenceDefinitionBase : D4Statement
 	{
 		// ReferenceName
-		protected string FReferenceName = String.Empty;
+		protected string _referenceName = String.Empty;
 		public string ReferenceName
 		{
-			get { return FReferenceName; }
-			set { FReferenceName = value == null ? String.Empty : value; }
+			get { return _referenceName; }
+			set { _referenceName = value == null ? String.Empty : value; }
 		}
 	}
     
@@ -4185,70 +4185,70 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		// constructor
 		public ReferenceDefinition() : base()
 		{
-			FColumns = new ReferenceColumnDefinitions();
+			_columns = new ReferenceColumnDefinitions();
 		}
 		
 		// Columns
-		protected ReferenceColumnDefinitions FColumns;
-		public ReferenceColumnDefinitions Columns { get { return FColumns; } }
+		protected ReferenceColumnDefinitions _columns;
+		public ReferenceColumnDefinitions Columns { get { return _columns; } }
 
 		// ReferencesDefinition		
-		protected ReferencesDefinition FReferencesDefinition;
+		protected ReferencesDefinition _referencesDefinition;
 		public ReferencesDefinition ReferencesDefinition
 		{
-			get { return FReferencesDefinition; }
-			set { FReferencesDefinition = value; }
+			get { return _referencesDefinition; }
+			set { _referencesDefinition = value; }
 		}
         
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
 	}
 	
 	public class ReferenceDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is ReferenceDefinition))
+			if (!(item is ReferenceDefinition))
 				throw new LanguageException(LanguageException.Codes.ReferenceDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new ReferenceDefinition this[int AIndex]
+		public new ReferenceDefinition this[int index]
 		{
-			get { return (ReferenceDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (ReferenceDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
 	public class AlterReferenceDefinition : ReferenceDefinitionBase, IAlterMetaData
 	{
         // AlterMetaData
-        protected AlterMetaData FAlterMetaData;
+        protected AlterMetaData _alterMetaData;
         public AlterMetaData AlterMetaData
         {
-			get { return FAlterMetaData; }
-			set { FAlterMetaData = value; }
+			get { return _alterMetaData; }
+			set { _alterMetaData = value; }
         }
 	}
 	
 	public class AlterReferenceDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is AlterReferenceDefinition))
+			if (!(item is AlterReferenceDefinition))
 				throw new LanguageException(LanguageException.Codes.AlterReferenceDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new AlterReferenceDefinition this[int AIndex]
+		public new AlterReferenceDefinition this[int index]
 		{
-			get { return (AlterReferenceDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (AlterReferenceDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
@@ -4256,17 +4256,17 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	
 	public class DropReferenceDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is DropReferenceDefinition))
+			if (!(item is DropReferenceDefinition))
 				throw new LanguageException(LanguageException.Codes.DropReferenceDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new DropReferenceDefinition this[int AIndex]
+		public new DropReferenceDefinition this[int index]
 		{
-			get { return (DropReferenceDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (DropReferenceDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
@@ -4277,106 +4277,106 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		// constructor
 		public ReferencesDefinition() : base()
 		{
-			FColumns = new ReferenceColumnDefinitions();
+			_columns = new ReferenceColumnDefinitions();
 		}
 		
 		// Columns
-		protected ReferenceColumnDefinitions FColumns;
-		public ReferenceColumnDefinitions Columns { get { return FColumns; } }
+		protected ReferenceColumnDefinitions _columns;
+		public ReferenceColumnDefinitions Columns { get { return _columns; } }
 
 		// TableVarName
-		protected string FTableVarName = String.Empty;
+		protected string _tableVarName = String.Empty;
 		public string TableVarName
 		{
-			get { return FTableVarName; }
-			set { FTableVarName = value == null ? String.Empty : value; }
+			get { return _tableVarName; }
+			set { _tableVarName = value == null ? String.Empty : value; }
 		}
 		
 		// UpdateReferenceAction
-		protected ReferenceAction FUpdateReferenceAction;
+		protected ReferenceAction _updateReferenceAction;
 		public ReferenceAction UpdateReferenceAction
 		{
-			get { return FUpdateReferenceAction; }
-			set { FUpdateReferenceAction = value; }
+			get { return _updateReferenceAction; }
+			set { _updateReferenceAction = value; }
 		}
 		
 		// UpdateReferenceExpressions
-		protected Expressions FUpdateReferenceExpressions = new Expressions();
-		public Expressions UpdateReferenceExpressions { get { return FUpdateReferenceExpressions; } }
+		protected Expressions _updateReferenceExpressions = new Expressions();
+		public Expressions UpdateReferenceExpressions { get { return _updateReferenceExpressions; } }
 		
 		// DeleteReferenceAction
-		protected ReferenceAction FDeleteReferenceAction;
+		protected ReferenceAction _deleteReferenceAction;
 		public ReferenceAction DeleteReferenceAction
 		{
-			get { return FDeleteReferenceAction; }
-			set { FDeleteReferenceAction = value; }
+			get { return _deleteReferenceAction; }
+			set { _deleteReferenceAction = value; }
 		}
 
 		// DeleteReferenceExpressions
-		protected Expressions FDeleteReferenceExpressions = new Expressions();
-		public Expressions DeleteReferenceExpressions { get { return FDeleteReferenceExpressions; } }
+		protected Expressions _deleteReferenceExpressions = new Expressions();
+		public Expressions DeleteReferenceExpressions { get { return _deleteReferenceExpressions; } }
 	}
 	
 	public abstract class OrderDefinitionBase : D4Statement
 	{
 		// Columns
-		protected OrderColumnDefinitions FColumns = new OrderColumnDefinitions();
-		public OrderColumnDefinitions Columns { get { return FColumns; } }
+		protected OrderColumnDefinitions _columns = new OrderColumnDefinitions();
+		public OrderColumnDefinitions Columns { get { return _columns; } }
 	}
 	
 	[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.OrderEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 	public class OrderDefinition : OrderDefinitionBase, IMetaData
 	{
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
 	}
 	
 	[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.OrderDefinitionsEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 	public class OrderDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is OrderDefinition))
+			if (!(item is OrderDefinition))
 				throw new LanguageException(LanguageException.Codes.OrderDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new OrderDefinition this[int AIndex]
+		public new OrderDefinition this[int index]
 		{
-			get { return (OrderDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (OrderDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
     
 	public class AlterOrderDefinition : OrderDefinitionBase, IAlterMetaData
 	{
         // AlterMetaData
-        protected AlterMetaData FAlterMetaData;
+        protected AlterMetaData _alterMetaData;
         public AlterMetaData AlterMetaData
         {
-			get { return FAlterMetaData; }
-			set { FAlterMetaData = value; }
+			get { return _alterMetaData; }
+			set { _alterMetaData = value; }
         }
 	}
 	
 	public class AlterOrderDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is AlterOrderDefinition))
+			if (!(item is AlterOrderDefinition))
 				throw new LanguageException(LanguageException.Codes.AlterOrderDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new AlterOrderDefinition this[int AIndex]
+		public new AlterOrderDefinition this[int index]
 		{
-			get { return (AlterOrderDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (AlterOrderDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
     
@@ -4384,32 +4384,32 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	
 	public class DropOrderDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is DropOrderDefinition))
+			if (!(item is DropOrderDefinition))
 				throw new LanguageException(LanguageException.Codes.DropOrderDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new DropOrderDefinition this[int AIndex]
+		public new DropOrderDefinition this[int index]
 		{
-			get { return (DropOrderDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (DropOrderDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
     
 	public abstract class ConstraintDefinitionBase : D4Statement
 	{
 		// ConstraintName
-		protected string FConstraintName = String.Empty;
+		protected string _constraintName = String.Empty;
 		public string ConstraintName
 		{
-			get { return FConstraintName; }
+			get { return _constraintName; }
 			set 
 			{ 
-				if (FConstraintName != value)
+				if (_constraintName != value)
 				{
-					FConstraintName = value == null ? String.Empty : value; 
+					_constraintName = value == null ? String.Empty : value; 
 				}
 			}
 		}
@@ -4418,61 +4418,61 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	public class CreateConstraintDefinition : ConstraintDefinitionBase, IMetaData
 	{
 		public CreateConstraintDefinition() : base() {}
-		public CreateConstraintDefinition(string AName, MetaData AMetaData)
+		public CreateConstraintDefinition(string name, MetaData metaData)
 		{
-			FConstraintName = AName;
-			FMetaData = AMetaData;
+			_constraintName = name;
+			_metaData = metaData;
 		}
 
-		private bool FIsGenerated;
+		private bool _isGenerated;
 		public bool IsGenerated
 		{
-			get { return FIsGenerated; }
-			set { FIsGenerated = value; }
+			get { return _isGenerated; }
+			set { _isGenerated = value; }
 		}
         
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MetaDataEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
 	}
 	
 	public class ConstraintDefinition : CreateConstraintDefinition
 	{
 		public ConstraintDefinition() : base(){}
-		public ConstraintDefinition(string AName, Expression AExpression, MetaData AMetaData) : base(AName, AMetaData)
+		public ConstraintDefinition(string name, Expression expression, MetaData metaData) : base(name, metaData)
 		{
-			FExpression = AExpression;
+			_expression = expression;
 		}
 		
 		// Expression		
-		protected Expression FExpression;
+		protected Expression _expression;
 		[Browsable(false)]
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
 
-		private string ExpressionToString(Expression AExpression)
+		private string ExpressionToString(Expression expression)
 		{
-			if (AExpression == null)
+			if (expression == null)
 				return String.Empty;
 			else
 			{
-				D4TextEmitter LEmitter = new D4TextEmitter();
-				return LEmitter.Emit(AExpression);
+				D4TextEmitter emitter = new D4TextEmitter();
+				return emitter.Emit(expression);
 			}
 		}
 
-		private Expression StringToExpression(string AValue)
+		private Expression StringToExpression(string tempValue)
 		{
-			Parser LParser = new Alphora.Dataphor.DAE.Language.D4.Parser();
-			return LParser.ParseExpression(AValue);
+			Parser parser = new Alphora.Dataphor.DAE.Language.D4.Parser();
+			return parser.ParseExpression(tempValue);
 		}
 
 		[Description("D4 constraint expression.")]
@@ -4480,7 +4480,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.D4ExpressionEmitEdit,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		public string ExpressionString
 		{
-			get { return FExpression != null ? ExpressionToString(FExpression) : String.Empty; }
+			get { return _expression != null ? ExpressionToString(_expression) : String.Empty; }
 
 			set
 			{
@@ -4493,57 +4493,57 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.ConstraintsEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 	public class ConstraintDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is ConstraintDefinition))
+			if (!(item is ConstraintDefinition))
 				throw new LanguageException(LanguageException.Codes.ConstraintDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new ConstraintDefinition this[int AIndex]
+		public new ConstraintDefinition this[int index]
 		{
-			get { return (ConstraintDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (ConstraintDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 
-		public int IndexOf(string AName)
+		public int IndexOf(string name)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (String.Compare(AName, this[LIndex].ConstraintName) == 0)
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if (String.Compare(name, this[index].ConstraintName) == 0)
+					return index;
 			return -1;
 		}
 		
-		public bool Contains(string AName)
+		public bool Contains(string name)
 		{
-			return IndexOf(AName) >= 0;
+			return IndexOf(name) >= 0;
 		}
 	}
     
 	public class CreateConstraintDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is CreateConstraintDefinition))
+			if (!(item is CreateConstraintDefinition))
 				throw new LanguageException(LanguageException.Codes.ConstraintDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new CreateConstraintDefinition this[int AIndex]
+		public new CreateConstraintDefinition this[int index]
 		{
-			get { return (CreateConstraintDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (CreateConstraintDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
     
 	public class CreateConstraintStatement : ConstraintDefinition
 	{
 		// IsSession
-		protected bool FIsSession = false;
+		protected bool _isSession = false;
 		public bool IsSession
 		{
-			get { return FIsSession; }
-			set { FIsSession = value; }
+			get { return _isSession; }
+			set { _isSession = value; }
 		}
 	}
 
@@ -4552,65 +4552,65 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public TransitionConstraintDefinition() : base() {}
 		
 		// OnInsertExpression		
-		protected Expression FOnInsertExpression;
+		protected Expression _onInsertExpression;
 		public Expression OnInsertExpression
 		{
-			get { return FOnInsertExpression; }
-			set { FOnInsertExpression = value; }
+			get { return _onInsertExpression; }
+			set { _onInsertExpression = value; }
 		}
 
 		// OnUpdateExpression		
-		protected Expression FOnUpdateExpression;
+		protected Expression _onUpdateExpression;
 		public Expression OnUpdateExpression
 		{
-			get { return FOnUpdateExpression; }
-			set { FOnUpdateExpression = value; }
+			get { return _onUpdateExpression; }
+			set { _onUpdateExpression = value; }
 		}
 
 		// OnDeleteExpression		
-		protected Expression FOnDeleteExpression;
+		protected Expression _onDeleteExpression;
 		public Expression OnDeleteExpression
 		{
-			get { return FOnDeleteExpression; }
-			set { FOnDeleteExpression = value; }
+			get { return _onDeleteExpression; }
+			set { _onDeleteExpression = value; }
 		}
 	}
 	
 	public class AlterConstraintDefinitionBase : ConstraintDefinitionBase, IAlterMetaData
 	{
         // AlterMetaData
-        protected AlterMetaData FAlterMetaData;
+        protected AlterMetaData _alterMetaData;
         public AlterMetaData AlterMetaData
         {
-			get { return FAlterMetaData; }
-			set { FAlterMetaData = value; }
+			get { return _alterMetaData; }
+			set { _alterMetaData = value; }
         }
 	}
 	
 	public class AlterConstraintDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is AlterConstraintDefinitionBase))
+			if (!(item is AlterConstraintDefinitionBase))
 				throw new LanguageException(LanguageException.Codes.AlterConstraintDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new AlterConstraintDefinitionBase this[int AIndex]
+		public new AlterConstraintDefinitionBase this[int index]
 		{
-			get { return (AlterConstraintDefinitionBase)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (AlterConstraintDefinitionBase)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
 	public class AlterConstraintDefinition : AlterConstraintDefinitionBase
 	{
 		// Expression		
-		protected Expression FExpression;
+		protected Expression _expression;
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
 	}
 	
@@ -4621,34 +4621,34 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	public class AlterTransitionConstraintDefinitionCreateItem : AlterTransitionConstraintDefinitionItemBase
 	{
 		public AlterTransitionConstraintDefinitionCreateItem() : base() {}
-		public AlterTransitionConstraintDefinitionCreateItem(Expression AExpression) : base()
+		public AlterTransitionConstraintDefinitionCreateItem(Expression expression) : base()
 		{
-			FExpression = AExpression;
+			_expression = expression;
 		}
 		
 		// Expression		
-		protected Expression FExpression;
+		protected Expression _expression;
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
 	}
 	
 	public class AlterTransitionConstraintDefinitionAlterItem : AlterTransitionConstraintDefinitionItemBase
 	{
 		public AlterTransitionConstraintDefinitionAlterItem() : base() {}
-		public AlterTransitionConstraintDefinitionAlterItem(Expression AExpression) : base()
+		public AlterTransitionConstraintDefinitionAlterItem(Expression expression) : base()
 		{
-			FExpression = AExpression;
+			_expression = expression;
 		}
 		
 		// Expression		
-		protected Expression FExpression;
+		protected Expression _expression;
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
 	}
 	
@@ -4656,58 +4656,58 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	
 	public class AlterTransitionConstraintDefinition : AlterConstraintDefinitionBase
 	{
-		private AlterTransitionConstraintDefinitionItemBase FOnInsert;
+		private AlterTransitionConstraintDefinitionItemBase _onInsert;
 		public AlterTransitionConstraintDefinitionItemBase OnInsert
 		{
-			get { return FOnInsert; }
-			set { FOnInsert = value; }
+			get { return _onInsert; }
+			set { _onInsert = value; }
 		}
 		
-		private AlterTransitionConstraintDefinitionItemBase FOnUpdate;
+		private AlterTransitionConstraintDefinitionItemBase _onUpdate;
 		public AlterTransitionConstraintDefinitionItemBase OnUpdate
 		{
-			get { return FOnUpdate; }
-			set { FOnUpdate = value; }
+			get { return _onUpdate; }
+			set { _onUpdate = value; }
 		}
 		
-		private AlterTransitionConstraintDefinitionItemBase FOnDelete;
+		private AlterTransitionConstraintDefinitionItemBase _onDelete;
 		public AlterTransitionConstraintDefinitionItemBase OnDelete
 		{
-			get { return FOnDelete; }
-			set { FOnDelete = value; }
+			get { return _onDelete; }
+			set { _onDelete = value; }
 		}
 	}
     
 	public class DropConstraintDefinition : ConstraintDefinitionBase
 	{
 		public DropConstraintDefinition() : base(){}
-		public DropConstraintDefinition(string AConstraintName) : base()
+		public DropConstraintDefinition(string constraintName) : base()
 		{
-			ConstraintName = AConstraintName;
+			ConstraintName = constraintName;
 		}
 
 		// IsTransition
-		protected bool FIsTransition;
+		protected bool _isTransition;
 		public bool IsTransition
 		{
-			get { return FIsTransition; }
-			set { FIsTransition = value; }
+			get { return _isTransition; }
+			set { _isTransition = value; }
 		}
 	}
 
 	public class DropConstraintDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is DropConstraintDefinition))
+			if (!(item is DropConstraintDefinition))
 				throw new LanguageException(LanguageException.Codes.DropConstraintDefinitionContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new DropConstraintDefinition this[int AIndex]
+		public new DropConstraintDefinition this[int index]
 		{
-			get { return (DropConstraintDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (DropConstraintDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
@@ -4717,40 +4717,40 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	{
 		public CreateConversionStatement() : base() {}
 		
-		private TypeSpecifier FSourceScalarTypeName;
+		private TypeSpecifier _sourceScalarTypeName;
 		public TypeSpecifier SourceScalarTypeName
 		{
-			get { return FSourceScalarTypeName; }
-			set { FSourceScalarTypeName = value; }
+			get { return _sourceScalarTypeName; }
+			set { _sourceScalarTypeName = value; }
 		}
 		
-		private TypeSpecifier FTargetScalarTypeName;
+		private TypeSpecifier _targetScalarTypeName;
 		public TypeSpecifier TargetScalarTypeName
 		{
-			get { return FTargetScalarTypeName; }
-			set { FTargetScalarTypeName = value; }
+			get { return _targetScalarTypeName; }
+			set { _targetScalarTypeName = value; }
 		}
 		
-		private IdentifierExpression FOperatorName;
+		private IdentifierExpression _operatorName;
 		public IdentifierExpression OperatorName
 		{
-			get { return FOperatorName; }
-			set { FOperatorName = value; }
+			get { return _operatorName; }
+			set { _operatorName = value; }
 		}
 		
-		private bool FIsNarrowing = true;
+		private bool _isNarrowing = true;
 		public bool IsNarrowing
 		{
-			get { return FIsNarrowing; }
-			set { FIsNarrowing = value; }
+			get { return _isNarrowing; }
+			set { _isNarrowing = value; }
 		}
 
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
 	}
 	
@@ -4758,88 +4758,88 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	{
 		public DropConversionStatement() : base() {}
 		
-		private TypeSpecifier FSourceScalarTypeName;
+		private TypeSpecifier _sourceScalarTypeName;
 		public TypeSpecifier SourceScalarTypeName
 		{
-			get { return FSourceScalarTypeName; }
-			set { FSourceScalarTypeName = value; }
+			get { return _sourceScalarTypeName; }
+			set { _sourceScalarTypeName = value; }
 		}
 		
-		private TypeSpecifier FTargetScalarTypeName;
+		private TypeSpecifier _targetScalarTypeName;
 		public TypeSpecifier TargetScalarTypeName
 		{
-			get { return FTargetScalarTypeName; }
-			set { FTargetScalarTypeName = value; }
+			get { return _targetScalarTypeName; }
+			set { _targetScalarTypeName = value; }
 		}
 	}
 	
 	public class CreateRoleStatement : D4Statement, IMetaData
 	{
 		// RoleName
-		protected string FRoleName;
+		protected string _roleName;
 		public string RoleName
 		{
-			get { return FRoleName; }
-			set { FRoleName = value; }
+			get { return _roleName; }
+			set { _roleName = value; }
 		}
 
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
 	}
 	
 	public class AlterRoleStatement : D4Statement, IAlterMetaData
 	{
 		// RoleName
-		protected string FRoleName;
+		protected string _roleName;
 		public string RoleName
 		{
-			get { return FRoleName; }
-			set { FRoleName = value; }
+			get { return _roleName; }
+			set { _roleName = value; }
 		}
 
-		protected AlterMetaData FAlterMetaData;
+		protected AlterMetaData _alterMetaData;
 		public AlterMetaData AlterMetaData
 		{
-			get { return FAlterMetaData; }
-			set { FAlterMetaData = value; }
+			get { return _alterMetaData; }
+			set { _alterMetaData = value; }
 		}
 	}
 	
 	public class DropRoleStatement : D4Statement
 	{
 		// RoleName
-		protected string FRoleName;
+		protected string _roleName;
 		public string RoleName
 		{
-			get { return FRoleName; }
-			set { FRoleName = value; }
+			get { return _roleName; }
+			set { _roleName = value; }
 		}
 	}
 	
 	public class CreateRightStatement : D4Statement
 	{
 		// RightName
-		protected string FRightName;
+		protected string _rightName;
 		public string RightName
 		{
-			get { return FRightName; }
-			set { FRightName = value; }
+			get { return _rightName; }
+			set { _rightName = value; }
 		}
 	}
 	
 	public class DropRightStatement : D4Statement
 	{
 		// RightName
-		protected string FRightName;
+		protected string _rightName;
 		public string RightName
 		{
-			get { return FRightName; }
-			set { FRightName = value; }
+			get { return _rightName; }
+			set { _rightName = value; }
 		}
 	}
 	
@@ -4848,83 +4848,83 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	public class SortDefinition : SortDefinitionBase, IMetaData
 	{
 		public SortDefinition() : base() {}
-		public SortDefinition(Expression AExpression)
+		public SortDefinition(Expression expression)
 		{
-			FExpression = AExpression;
+			_expression = expression;
 		}
 		
 		// Expression
-		protected Expression FExpression;
+		protected Expression _expression;
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
         
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
 	}
 	
 	public class CreateSortStatement : SortDefinition
 	{
 		public CreateSortStatement() : base() {}
-		public CreateSortStatement(string AScalarTypeName, Expression AExpression) : base(AExpression)
+		public CreateSortStatement(string scalarTypeName, Expression expression) : base(expression)
 		{
-			FScalarTypeName = AScalarTypeName;
+			_scalarTypeName = scalarTypeName;
 		}
 		
 		// ScalarTypeName
-		protected string FScalarTypeName;
+		protected string _scalarTypeName;
 		public string ScalarTypeName
 		{
-			get { return FScalarTypeName; }
-			set { FScalarTypeName = value; }
+			get { return _scalarTypeName; }
+			set { _scalarTypeName = value; }
 		}
 	}
 	
 	public class AlterSortDefinition : SortDefinitionBase, IAlterMetaData
 	{
 		public AlterSortDefinition() : base() {}
-		public AlterSortDefinition(Expression AExpression)
+		public AlterSortDefinition(Expression expression)
 		{
-			FExpression = AExpression;
+			_expression = expression;
 		}
 		
 		// Expression
-		protected Expression FExpression;
+		protected Expression _expression;
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
 
-		protected AlterMetaData FAlterMetaData;
+		protected AlterMetaData _alterMetaData;
 		public AlterMetaData AlterMetaData
 		{
-			get { return FAlterMetaData; }
-			set { FAlterMetaData = value; }
+			get { return _alterMetaData; }
+			set { _alterMetaData = value; }
 		}
 	}
 
 	public class AlterSortStatement : AlterSortDefinition
 	{
 		public AlterSortStatement() : base() {}
-		public AlterSortStatement(string AScalarTypeName, Expression AExpression) : base(AExpression)
+		public AlterSortStatement(string scalarTypeName, Expression expression) : base(expression)
 		{
-			FScalarTypeName = AScalarTypeName;
+			_scalarTypeName = scalarTypeName;
 		}
 		
 		// ScalarTypeName
-		protected string FScalarTypeName;
+		protected string _scalarTypeName;
 		public string ScalarTypeName
 		{
-			get { return FScalarTypeName; }
-			set { FScalarTypeName = value; }
+			get { return _scalarTypeName; }
+			set { _scalarTypeName = value; }
 		}
 	}
 	
@@ -4933,30 +4933,30 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	public class DropSortStatement : DropSortDefinition
 	{
 		public DropSortStatement() : base() {}
-		public DropSortStatement(string AScalarTypeName) : base()
+		public DropSortStatement(string scalarTypeName) : base()
 		{
-			FScalarTypeName = AScalarTypeName;
+			_scalarTypeName = scalarTypeName;
 		}
 		
-		public DropSortStatement(string AScalarTypeName, bool AIsUnique) : base()
+		public DropSortStatement(string scalarTypeName, bool isUnique) : base()
 		{
-			FScalarTypeName = AScalarTypeName;
-			FIsUnique = AIsUnique;
+			_scalarTypeName = scalarTypeName;
+			_isUnique = isUnique;
 		}
 		
 		// ScalarTypeName
-		protected string FScalarTypeName;
+		protected string _scalarTypeName;
 		public string ScalarTypeName
 		{
-			get { return FScalarTypeName; }
-			set { FScalarTypeName = value; }
+			get { return _scalarTypeName; }
+			set { _scalarTypeName = value; }
 		}
 		
-		private bool FIsUnique;
+		private bool _isUnique;
 		public bool IsUnique
 		{
-			get { return FIsUnique; }
-			set { FIsUnique = value; }
+			get { return _isUnique; }
+			set { _isUnique = value; }
 		}
 	}
 
@@ -4965,43 +4965,43 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	public class DefaultDefinition : DefaultDefinitionBase, IMetaData
 	{
 		public DefaultDefinition() : base(){}
-		public DefaultDefinition(Expression AExpression, MetaData AMetaData)
+		public DefaultDefinition(Expression expression, MetaData metaData)
 		{
-			FExpression = AExpression;
-			FMetaData = AMetaData;
+			_expression = expression;
+			_metaData = metaData;
 		}
 		
 		// Expression		
-		protected Expression FExpression;
+		protected Expression _expression;
 		[Browsable(false)]
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
 		
-		private bool FIsGenerated;
+		private bool _isGenerated;
 		public bool IsGenerated
 		{
-			get { return FIsGenerated; }
-			set { FIsGenerated = value; }
+			get { return _isGenerated; }
+			set { _isGenerated = value; }
 		}
         
-		private string ExpressionToString(Expression AExpression)
+		private string ExpressionToString(Expression expression)
 		{
-			if (AExpression == null)
+			if (expression == null)
 				return String.Empty;
 			else
 			{
-				D4TextEmitter LEmitter = new D4TextEmitter();
-				return LEmitter.Emit(AExpression);
+				D4TextEmitter emitter = new D4TextEmitter();
+				return emitter.Emit(expression);
 			}
 		}
 
-		private Expression StringToExpression(string AValue)
+		private Expression StringToExpression(string tempValue)
 		{
-			Parser LParser = new Alphora.Dataphor.DAE.Language.D4.Parser();
-			return LParser.ParseExpression(AValue);
+			Parser parser = new Alphora.Dataphor.DAE.Language.D4.Parser();
+			return parser.ParseExpression(tempValue);
 		}
 
 		[Description("Default expression. For example value = 0")]
@@ -5009,7 +5009,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.D4ExpressionEmitEdit,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		public string ExpressionString
 		{
-			get { return FExpression != null ? ExpressionToString(FExpression) : String.Empty; }
+			get { return _expression != null ? ExpressionToString(_expression) : String.Empty; }
 
 			set
 			{
@@ -5019,31 +5019,31 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		}
         
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MetaDataEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
 	}
 
 	public class AlterDefaultDefinition : DefaultDefinitionBase, IAlterMetaData
 	{
 		// Expression		
-		protected Expression FExpression;
+		protected Expression _expression;
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
         
         // AlterMetaData
-        protected AlterMetaData FAlterMetaData;
+        protected AlterMetaData _alterMetaData;
         public AlterMetaData AlterMetaData
         {
-			get { return FAlterMetaData; }
-			set { FAlterMetaData = value; }
+			get { return _alterMetaData; }
+			set { _alterMetaData = value; }
         }
 	}
 	
@@ -5053,104 +5053,104 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	{
 		// constructor
 		public ClassDefinition() : base(){}
-		public ClassDefinition(string AClassName) : base()
+		public ClassDefinition(string className) : base()
 		{
-			ClassName = AClassName;
+			ClassName = className;
 		}
 		
-		public ClassDefinition(string AClassName, ClassAttributeDefinition[] AAttributes) : base()
+		public ClassDefinition(string className, ClassAttributeDefinition[] attributes) : base()
 		{
-			ClassName = AClassName;
-			FAttributes.AddRange(AAttributes);
+			ClassName = className;
+			_attributes.AddRange(attributes);
 		}
 		
 		// ClassName
-		protected string FClassName = String.Empty;
+		protected string _className = String.Empty;
 		public string ClassName
 		{
-			get { return FClassName; }
+			get { return _className; }
 			set 
 			{ 
-				if (FClassName != value)
-					FClassName = value == null ? String.Empty : value;
+				if (_className != value)
+					_className = value == null ? String.Empty : value;
 			}
 		}
 
 		// Attributes
-		protected ClassAttributeDefinitions FAttributes = new ClassAttributeDefinitions();
-		public ClassAttributeDefinitions Attributes { get { return FAttributes; } }
+		protected ClassAttributeDefinitions _attributes = new ClassAttributeDefinitions();
+		public ClassAttributeDefinitions Attributes { get { return _attributes; } }
 		
 		public virtual object Clone()
 		{
-			ClassDefinition LClassDefinition = new ClassDefinition(FClassName);
-			foreach (ClassAttributeDefinition LAttribute in FAttributes)
-				LClassDefinition.Attributes.Add(LAttribute.Clone());
-			return LClassDefinition;
+			ClassDefinition classDefinition = new ClassDefinition(_className);
+			foreach (ClassAttributeDefinition attribute in _attributes)
+				classDefinition.Attributes.Add(attribute.Clone());
+			return classDefinition;
 		}
 	}
 	
 	public class AlterClassDefinition : D4Statement
 	{
-		private string FClassName = string.Empty;
+		private string _className = string.Empty;
 		public string ClassName
 		{
-			get { return FClassName; }
-			set { FClassName = value == null ? String.Empty : value; }
+			get { return _className; }
+			set { _className = value == null ? String.Empty : value; }
 		}
 		
-		private ClassAttributeDefinitions FCreateAttributes = new ClassAttributeDefinitions();
-		public ClassAttributeDefinitions CreateAttributes { get { return FCreateAttributes; } }
+		private ClassAttributeDefinitions _createAttributes = new ClassAttributeDefinitions();
+		public ClassAttributeDefinitions CreateAttributes { get { return _createAttributes; } }
 
-		private ClassAttributeDefinitions FAlterAttributes = new ClassAttributeDefinitions();
-		public ClassAttributeDefinitions AlterAttributes { get { return FAlterAttributes; } }
+		private ClassAttributeDefinitions _alterAttributes = new ClassAttributeDefinitions();
+		public ClassAttributeDefinitions AlterAttributes { get { return _alterAttributes; } }
 
-		private ClassAttributeDefinitions FDropAttributes = new ClassAttributeDefinitions();
-		public ClassAttributeDefinitions DropAttributes { get { return FDropAttributes; } }
+		private ClassAttributeDefinitions _dropAttributes = new ClassAttributeDefinitions();
+		public ClassAttributeDefinitions DropAttributes { get { return _dropAttributes; } }
 	}
 	
 	public class ClassAttributeDefinitions : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			ClassAttributeDefinition LAttribute = AItem as ClassAttributeDefinition;
-			if (LAttribute == null)
+			ClassAttributeDefinition attribute = item as ClassAttributeDefinition;
+			if (attribute == null)
 				throw new LanguageException(LanguageException.Codes.ClassAttributeDefinitionContainer);
-			if (IndexOf(LAttribute.AttributeName) >= 0)
-				throw new LanguageException(LanguageException.Codes.DuplicateAttributeDefinition, LAttribute.AttributeName);
-			base.Validate(AItem);
+			if (IndexOf(attribute.AttributeName) >= 0)
+				throw new LanguageException(LanguageException.Codes.DuplicateAttributeDefinition, attribute.AttributeName);
+			base.Validate(item);
 		}
 		
-		public new ClassAttributeDefinition this[int AIndex]
+		public new ClassAttributeDefinition this[int index]
 		{
-			get { return (ClassAttributeDefinition)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (ClassAttributeDefinition)base[index]; }
+			set { base[index] = value; }
 		}
 		
-		public ClassAttributeDefinition this[string AName]
+		public ClassAttributeDefinition this[string name]
 		{
 			get
 			{
-				int LIndex = IndexOf(AName);
-				if (LIndex >= 0)
-					return this[LIndex];
+				int index = IndexOf(name);
+				if (index >= 0)
+					return this[index];
 				else
-					throw new LanguageException(LanguageException.Codes.ClassAttributeNotFound, AName);
+					throw new LanguageException(LanguageException.Codes.ClassAttributeNotFound, name);
 			}
 			set
 			{
-				int LIndex = IndexOf(AName);
-				if (LIndex >= 0)
-					this[LIndex] = value;
+				int index = IndexOf(name);
+				if (index >= 0)
+					this[index] = value;
 				else
-					throw new LanguageException(LanguageException.Codes.ClassAttributeNotFound, AName);
+					throw new LanguageException(LanguageException.Codes.ClassAttributeNotFound, name);
 			}
 		}
 		
-		public int IndexOf(string AName)
+		public int IndexOf(string name)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (String.Equals(this[LIndex].AttributeName, AName, StringComparison.OrdinalIgnoreCase))
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if (String.Equals(this[index].AttributeName, name, StringComparison.OrdinalIgnoreCase))
+					return index;
 			return -1;
 		}
 	}
@@ -5159,106 +5159,106 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	{
 		// constructor
 		public ClassAttributeDefinition() : base(){}
-		public ClassAttributeDefinition(string AName, string AValue)
+		public ClassAttributeDefinition(string name, string tempValue)
 		{
-			AttributeName = AName;
-			AttributeValue = AValue;
+			AttributeName = name;
+			AttributeValue = tempValue;
 		}
 
 		// AttributeName
-		protected string FAttributeName = String.Empty;
+		protected string _attributeName = String.Empty;
 		public string AttributeName
 		{
-			get { return FAttributeName; }
-			set { FAttributeName = value == null ? String.Empty : value; }
+			get { return _attributeName; }
+			set { _attributeName = value == null ? String.Empty : value; }
 		}
 		
 		// AttributeValue
-		protected string FAttributeValue = String.Empty;
+		protected string _attributeValue = String.Empty;
 		public string AttributeValue
 		{
-			get { return FAttributeValue; }
-			set { FAttributeValue = value == null ? String.Empty : value; }
+			get { return _attributeValue; }
+			set { _attributeValue = value == null ? String.Empty : value; }
 		}
 		
 		public virtual object Clone()
 		{
-			ClassAttributeDefinition LAttribute = new ClassAttributeDefinition();
-			LAttribute.AttributeName = FAttributeName;
-			LAttribute.AttributeValue = FAttributeValue;
-			return LAttribute;
+			ClassAttributeDefinition attribute = new ClassAttributeDefinition();
+			attribute.AttributeName = _attributeName;
+			attribute.AttributeValue = _attributeValue;
+			return attribute;
 		}
 	}
 
 	public class NamedTypeSpecifiers : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is NamedTypeSpecifier))
+			if (!(item is NamedTypeSpecifier))
 				throw new LanguageException(LanguageException.Codes.NamedTypeSpecifierContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new NamedTypeSpecifier this[int AIndex]
+		public new NamedTypeSpecifier this[int index]
 		{
-			get { return (NamedTypeSpecifier)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (NamedTypeSpecifier)base[index]; }
+			set { base[index] = value; }
 		}
 	}
     
 	public class NamedTypeSpecifier : D4Statement
 	{
 		// Identifier
-		protected string FIdentifier = String.Empty;
+		protected string _identifier = String.Empty;
 		public string Identifier
 		{
-			get { return FIdentifier; }
-			set { FIdentifier = value == null ? String.Empty : value; }
+			get { return _identifier; }
+			set { _identifier = value == null ? String.Empty : value; }
 		}
 		
 		// TypeSpecifier		
-		protected TypeSpecifier FTypeSpecifier;
+		protected TypeSpecifier _typeSpecifier;
 		public TypeSpecifier TypeSpecifier
 		{
-			get { return FTypeSpecifier; }
-			set { FTypeSpecifier = value; }
+			get { return _typeSpecifier; }
+			set { _typeSpecifier = value; }
 		}
 	}
 	
 	public class FormalParameters : NamedTypeSpecifiers
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is FormalParameter))
+			if (!(item is FormalParameter))
 				throw new LanguageException(LanguageException.Codes.FormalParameterContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new FormalParameter this[int AIndex]
+		public new FormalParameter this[int index]
 		{
-			get { return (FormalParameter)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (FormalParameter)base[index]; }
+			set { base[index] = value; }
 		}
 	}
     
 	public class FormalParameter : NamedTypeSpecifier
 	{
-		protected Modifier FModifier;
+		protected Modifier _modifier;
 		public Modifier Modifier
 		{
-			get { return FModifier; }
-			set { FModifier = value; }
+			get { return _modifier; }
+			set { _modifier = value; }
 		}
 	}
 	
 	public abstract class TypeSpecifier : D4Statement
 	{
 		// IsGeneric
-		private bool FIsGeneric;
+		private bool _isGeneric;
 		public bool IsGeneric
 		{
-			get { return FIsGeneric; }
-			set { FIsGeneric = value; }
+			get { return _isGeneric; }
+			set { _isGeneric = value; }
 		}
 	}
 	
@@ -5273,17 +5273,17 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	public class ScalarTypeSpecifier : TypeSpecifier
 	{
 		public ScalarTypeSpecifier() : base(){}
-		public ScalarTypeSpecifier(string AScalarTypeName) : base()
+		public ScalarTypeSpecifier(string scalarTypeName) : base()
 		{
-			FScalarTypeName = AScalarTypeName;
+			_scalarTypeName = scalarTypeName;
 		}
 		
 		// ScalarTypeName
-		protected string FScalarTypeName = String.Empty;
+		protected string _scalarTypeName = String.Empty;
 		public string ScalarTypeName
 		{
-			get { return FScalarTypeName; }
-			set { FScalarTypeName = value == null ? String.Empty : value; }
+			get { return _scalarTypeName; }
+			set { _scalarTypeName = value == null ? String.Empty : value; }
 		}
 	}
 	
@@ -5292,12 +5292,12 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		// constructor
 		public RowTypeSpecifier() : base()
 		{
-			FColumns = new NamedTypeSpecifiers();
+			_columns = new NamedTypeSpecifiers();
 		}
 		
 		// Columns
-		protected NamedTypeSpecifiers FColumns;
-		public NamedTypeSpecifiers Columns { get { return FColumns; } }
+		protected NamedTypeSpecifiers _columns;
+		public NamedTypeSpecifiers Columns { get { return _columns; } }
 	}
 	
 	public class TableTypeSpecifier : TypeSpecifier
@@ -5305,166 +5305,166 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		// constructor
 		public TableTypeSpecifier() : base()
 		{
-			FColumns = new NamedTypeSpecifiers();
+			_columns = new NamedTypeSpecifiers();
 		}
 
 		// Columns
-		protected NamedTypeSpecifiers FColumns;
-		public NamedTypeSpecifiers Columns { get { return FColumns; } }
+		protected NamedTypeSpecifiers _columns;
+		public NamedTypeSpecifiers Columns { get { return _columns; } }
 	}
 	
 	public class TypeOfTypeSpecifier : TypeSpecifier
 	{
 		public TypeOfTypeSpecifier() : base(){}
-		public TypeOfTypeSpecifier(Expression AExpression) : base()
+		public TypeOfTypeSpecifier(Expression expression) : base()
 		{
-			FExpression = AExpression;
+			_expression = expression;
 		}
 		
 		// Expression
-		protected Expression FExpression;
+		protected Expression _expression;
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
 	}
 	
 	public class ListTypeSpecifier : TypeSpecifier
 	{
 		public ListTypeSpecifier() : base(){}
-		public ListTypeSpecifier(TypeSpecifier ATypeSpecifier) : base()
+		public ListTypeSpecifier(TypeSpecifier typeSpecifier) : base()
 		{
-			FTypeSpecifier = ATypeSpecifier;
+			_typeSpecifier = typeSpecifier;
 		}
 
 		// TypeSpecifier		
-		protected TypeSpecifier FTypeSpecifier;
+		protected TypeSpecifier _typeSpecifier;
 		public TypeSpecifier TypeSpecifier
 		{
-			get { return FTypeSpecifier; }
-			set { FTypeSpecifier = value; }
+			get { return _typeSpecifier; }
+			set { _typeSpecifier = value; }
 		}
 	}
 	
 	public class FormalParameterSpecifier : D4Statement
 	{
 		public FormalParameterSpecifier() : base(){}
-		public FormalParameterSpecifier(Modifier AModifier, TypeSpecifier ATypeSpecifier) : base()
+		public FormalParameterSpecifier(Modifier modifier, TypeSpecifier typeSpecifier) : base()
 		{
-			FModifier = AModifier;
-			FTypeSpecifier = ATypeSpecifier;
+			_modifier = modifier;
+			_typeSpecifier = typeSpecifier;
 		}
 		
-		protected Modifier FModifier;
+		protected Modifier _modifier;
 		public Modifier Modifier
 		{
-			get { return FModifier; }
-			set { FModifier = value; }
+			get { return _modifier; }
+			set { _modifier = value; }
 		}
 		
-		protected TypeSpecifier FTypeSpecifier;
+		protected TypeSpecifier _typeSpecifier;
 		public TypeSpecifier TypeSpecifier
 		{
-			get { return FTypeSpecifier; }
-			set { FTypeSpecifier = value; }
+			get { return _typeSpecifier; }
+			set { _typeSpecifier = value; }
 		}
 	}
 	
 	public class FormalParameterSpecifiers : Statements
 	{										
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is FormalParameterSpecifier))
+			if (!(item is FormalParameterSpecifier))
 				throw new LanguageException(LanguageException.Codes.FormalParameterSpecifierContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new FormalParameterSpecifier this[int AIndex]
+		public new FormalParameterSpecifier this[int index]
 		{
-			get { return (FormalParameterSpecifier)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (FormalParameterSpecifier)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
 	public class OperatorTypeSpecifier : TypeSpecifier
 	{
-		protected FormalParameterSpecifiers FTypeSpecifiers = new FormalParameterSpecifiers();
-		public FormalParameterSpecifiers TypeSpecifiers { get { return FTypeSpecifiers; } }
+		protected FormalParameterSpecifiers _typeSpecifiers = new FormalParameterSpecifiers();
+		public FormalParameterSpecifiers TypeSpecifiers { get { return _typeSpecifiers; } }
 	}
 
 	public class CursorTypeSpecifier : TypeSpecifier
 	{
 		public CursorTypeSpecifier() : base(){}
-		public CursorTypeSpecifier(TypeSpecifier ATypeSpecifier) : base()
+		public CursorTypeSpecifier(TypeSpecifier typeSpecifier) : base()
 		{
-			FTypeSpecifier = ATypeSpecifier;
+			_typeSpecifier = typeSpecifier;
 		}
 
 		// TypeSpecifier		
-		protected TypeSpecifier FTypeSpecifier;
+		protected TypeSpecifier _typeSpecifier;
 		public TypeSpecifier TypeSpecifier
 		{
-			get { return FTypeSpecifier; }
-			set { FTypeSpecifier = value; }
+			get { return _typeSpecifier; }
+			set { _typeSpecifier = value; }
 		}
 	}
 
 	public abstract class DropObjectStatement : D4Statement
 	{
 		public DropObjectStatement() : base(){}
-		public DropObjectStatement(string AObjectName)
+		public DropObjectStatement(string objectName)
 		{
-			FObjectName = AObjectName;
+			_objectName = objectName;
 		}
 		
 		// ObjectName
-		protected string FObjectName = String.Empty;
+		protected string _objectName = String.Empty;
 		public string ObjectName
 		{
-			get { return FObjectName; }
-			set { FObjectName = value == null ? String.Empty : value; }
+			get { return _objectName; }
+			set { _objectName = value == null ? String.Empty : value; }
 		}
 	}
 
 	public class DropTableStatement : DropObjectStatement
 	{
 		public DropTableStatement() : base(){}
-		public DropTableStatement(string AObjectName) : base(AObjectName){}
+		public DropTableStatement(string objectName) : base(objectName){}
 	}
 	
 	public class DropViewStatement : DropObjectStatement
 	{
 		public DropViewStatement() : base(){}
-		public DropViewStatement(string AObjectName) : base(AObjectName){}
+		public DropViewStatement(string objectName) : base(objectName){}
 	}
 
 	public class DropScalarTypeStatement : DropObjectStatement
 	{
 		public DropScalarTypeStatement() : base(){}
-		public DropScalarTypeStatement(string AObjectName) : base(AObjectName){}
+		public DropScalarTypeStatement(string objectName) : base(objectName){}
 	}
 	
 	public class DropOperatorStatement : DropObjectStatement
 	{
 		public DropOperatorStatement() : base(){}
-		public DropOperatorStatement(string AObjectName) : base(AObjectName){}
+		public DropOperatorStatement(string objectName) : base(objectName){}
 
 		// FormalParameterSpecifiers
-		protected FormalParameterSpecifiers FFormalParameterSpecifiers = new FormalParameterSpecifiers();
-		public FormalParameterSpecifiers FormalParameterSpecifiers { get { return FFormalParameterSpecifiers; } }
+		protected FormalParameterSpecifiers _formalParameterSpecifiers = new FormalParameterSpecifiers();
+		public FormalParameterSpecifiers FormalParameterSpecifiers { get { return _formalParameterSpecifiers; } }
 	}
 
 	public class DropServerStatement : DropObjectStatement
 	{
 		public DropServerStatement() : base(){}
-		public DropServerStatement(string AObjectName) : base(AObjectName){}
+		public DropServerStatement(string objectName) : base(objectName){}
 	}
 
 	public class DropDeviceStatement : DropObjectStatement
 	{
 		public DropDeviceStatement() : base(){}
-		public DropDeviceStatement(string AObjectName) : base(AObjectName){}
+		public DropDeviceStatement(string objectName) : base(objectName){}
 	}
 	
 	public abstract class EventSourceSpecifier : D4Statement
@@ -5475,54 +5475,54 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	public class ObjectEventSourceSpecifier : EventSourceSpecifier
 	{
 		public ObjectEventSourceSpecifier() : base(){}
-		public ObjectEventSourceSpecifier(string AObjectName) : base()
+		public ObjectEventSourceSpecifier(string objectName) : base()
 		{
-			ObjectName = AObjectName;
+			ObjectName = objectName;
 		}
 		
 		// ObjectName
-		protected string FObjectName = String.Empty;
+		protected string _objectName = String.Empty;
 		public string ObjectName
 		{
-			get { return FObjectName; }
-			set { FObjectName = value == null ? String.Empty : value; }
+			get { return _objectName; }
+			set { _objectName = value == null ? String.Empty : value; }
 		}
 	}
 	
 	public class ColumnEventSourceSpecifier : EventSourceSpecifier
 	{
 		public ColumnEventSourceSpecifier() : base(){}
-		public ColumnEventSourceSpecifier(string ATableVarName, string AColumnName) : base()
+		public ColumnEventSourceSpecifier(string tableVarName, string columnName) : base()
 		{
-			TableVarName = ATableVarName;
-			ColumnName = AColumnName;
+			TableVarName = tableVarName;
+			ColumnName = columnName;
 		}
 
 		// TableVarName
-		protected string FTableVarName = String.Empty;
+		protected string _tableVarName = String.Empty;
 		public string TableVarName
 		{
-			get { return FTableVarName; }
-			set { FTableVarName = value == null ? String.Empty : value; }
+			get { return _tableVarName; }
+			set { _tableVarName = value == null ? String.Empty : value; }
 		}
 
 		// ColumnName
-		protected string FColumnName = String.Empty;
+		protected string _columnName = String.Empty;
 		public string ColumnName
 		{
-			get { return FColumnName; }
-			set { FColumnName = value == null ? String.Empty : value; }
+			get { return _columnName; }
+			set { _columnName = value == null ? String.Empty : value; }
 		}
 	}
 	
 	public class ScalarTypeEventSourceSpecifier : EventSourceSpecifier
 	{
 		// ScalarTypeName
-		protected string FScalarTypeName = String.Empty;
+		protected string _scalarTypeName = String.Empty;
 		public string ScalarTypeName
 		{
-			get { return FScalarTypeName; }
-			set { FScalarTypeName = value == null ? String.Empty : value; }
+			get { return _scalarTypeName; }
+			set { _scalarTypeName = value == null ? String.Empty : value; }
 		}
 	}
 	
@@ -5531,69 +5531,69 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	
 	public class EventSpecifier : D4Statement 
 	{
-		protected EventType FEventType;
+		protected EventType _eventType;
 		public EventType EventType
 		{
-			get { return FEventType; }
-			set { FEventType = value; }
+			get { return _eventType; }
+			set { _eventType = value; }
 		}
 	}
 	
 	public abstract class AttachStatementBase : D4Statement
 	{
 		// OperatorName
-		protected string FOperatorName;
+		protected string _operatorName;
 		public string OperatorName
 		{
-			get { return FOperatorName; }
-			set { FOperatorName = value; }
+			get { return _operatorName; }
+			set { _operatorName = value; }
 		}
 		
 		// EventSourceSpecifier
-		protected EventSourceSpecifier FEventSourceSpecifier;
+		protected EventSourceSpecifier _eventSourceSpecifier;
 		public EventSourceSpecifier EventSourceSpecifier
 		{
-			get { return FEventSourceSpecifier; }
-			set { FEventSourceSpecifier = value; }
+			get { return _eventSourceSpecifier; }
+			set { _eventSourceSpecifier = value; }
 		}
 
 		// EventSpecifier
-		protected EventSpecifier FEventSpecifier;
+		protected EventSpecifier _eventSpecifier;
 		public EventSpecifier EventSpecifier
 		{
-			get { return FEventSpecifier; }
-			set { FEventSpecifier = value; }
+			get { return _eventSpecifier; }
+			set { _eventSpecifier = value; }
 		}
 	}
 	
 	public class AttachStatement : AttachStatementBase, IMetaData
 	{
 		// BeforeOperatorNames
-		protected List<string> FBeforeOperatorNames = new List<string>();
-		public List<string> BeforeOperatorNames { get { return FBeforeOperatorNames; } }
+		protected List<string> _beforeOperatorNames = new List<string>();
+		public List<string> BeforeOperatorNames { get { return _beforeOperatorNames; } }
 		
 		// IsGenerated
-		private bool FIsGenerated;
+		private bool _isGenerated;
 		public bool IsGenerated
 		{
-			get { return FIsGenerated; }
-			set { FIsGenerated = value; }
+			get { return _isGenerated; }
+			set { _isGenerated = value; }
 		}
 
         // MetaData
-        protected MetaData FMetaData;
+        protected MetaData _metaData;
         public MetaData MetaData
         {
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
         }
 	}
 	
 	public class InvokeStatement : AttachStatementBase
 	{
 		// BeforeOperatorNames
-		protected List<string> FBeforeOperatorNames = new List<string>();
-		public List<string> BeforeOperatorNames { get { return FBeforeOperatorNames; } }
+		protected List<string> _beforeOperatorNames = new List<string>();
+		public List<string> BeforeOperatorNames { get { return _beforeOperatorNames; } }
 	}
 
 	public class DetachStatement : AttachStatementBase {}
@@ -5601,56 +5601,56 @@ namespace Alphora.Dataphor.DAE.Language.D4
     public class RightSpecifier : D4Statement
     {
 		public RightSpecifier() : base() {}
-		public RightSpecifier(string ARightName) : base()
+		public RightSpecifier(string rightName) : base()
 		{
-			RightName = ARightName;
+			RightName = rightName;
 		}
 		
 		// RightName
-		protected string FRightName = String.Empty;
+		protected string _rightName = String.Empty;
 		public string RightName
 		{
-			get { return FRightName; }
-			set { FRightName = value == null ? String.Empty : value; }
+			get { return _rightName; }
+			set { _rightName = value == null ? String.Empty : value; }
 		}
     }
     
 	public class RightSpecifiers : Statements
 	{
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			if (!(AItem is RightSpecifier))
+			if (!(item is RightSpecifier))
 				throw new LanguageException(LanguageException.Codes.StatementContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new RightSpecifier this[int AIndex]
+		public new RightSpecifier this[int index]
 		{
-			get { return (RightSpecifier)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (RightSpecifier)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 
 	public class CatalogObjectSpecifier : D4Statement
 	{
 		// ObjectName
-		protected string FObjectName = String.Empty;
+		protected string _objectName = String.Empty;
 		public string ObjectName
 		{
-			get { return FObjectName; }
-			set { FObjectName = value == null ? String.Empty : value; }
+			get { return _objectName; }
+			set { _objectName = value == null ? String.Empty : value; }
 		}
 		
-		private bool FIsOperator;
+		private bool _isOperator;
 		public bool IsOperator 
 		{ 
-			get { return FIsOperator; } 
-			set { FIsOperator = value; } 
+			get { return _isOperator; } 
+			set { _isOperator = value; } 
 		}
 
 		// FormalParameterSpecifiers
-		protected FormalParameterSpecifiers FFormalParameterSpecifiers = new FormalParameterSpecifiers();
-		public FormalParameterSpecifiers FormalParameterSpecifiers { get { return FFormalParameterSpecifiers; } }
+		protected FormalParameterSpecifiers _formalParameterSpecifiers = new FormalParameterSpecifiers();
+		public FormalParameterSpecifiers FormalParameterSpecifiers { get { return _formalParameterSpecifiers; } }
 	}
 	
 	public enum GranteeType { User, Group, Role }
@@ -5659,56 +5659,56 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	
 	public class RightStatementBase : D4Statement
 	{
-		private RightSpecifierType FRightType;
+		private RightSpecifierType _rightType;
 		public RightSpecifierType RightType
 		{
-			get { return FRightType; }
-			set { FRightType = value; }
+			get { return _rightType; }
+			set { _rightType = value; }
 		}
 		
-		private RightSpecifiers FRights = new RightSpecifiers();
-		public RightSpecifiers Rights { get { return FRights; } }
+		private RightSpecifiers _rights = new RightSpecifiers();
+		public RightSpecifiers Rights { get { return _rights; } }
 
-		private CatalogObjectSpecifier FTarget;
+		private CatalogObjectSpecifier _target;
 		public CatalogObjectSpecifier Target
 		{
-			get { return FTarget; }
-			set { FTarget = value; }
+			get { return _target; }
+			set { _target = value; }
 		}
 
-		private GranteeType FGranteeType;
+		private GranteeType _granteeType;
 		public GranteeType GranteeType
 		{
-			get { return FGranteeType; }
-			set { FGranteeType = value; }
+			get { return _granteeType; }
+			set { _granteeType = value; }
 		}		
 		
-		private string FGrantee;
+		private string _grantee;
 		public string Grantee
 		{
-			get { return FGrantee; }
-			set { FGrantee = value; }
+			get { return _grantee; }
+			set { _grantee = value; }
 		}
 		
-		private bool FIsInherited;
+		private bool _isInherited;
 		public bool IsInherited
 		{
-			get { return FIsInherited; }
-			set { FIsInherited = value; }
+			get { return _isInherited; }
+			set { _isInherited = value; }
 		}
 		
-		private bool FApplyRecursively;
+		private bool _applyRecursively;
 		public bool ApplyRecursively
 		{
-			get { return FApplyRecursively; }
-			set { FApplyRecursively = value; }
+			get { return _applyRecursively; }
+			set { _applyRecursively = value; }
 		}
 		
-		private bool FIncludeUsers;
+		private bool _includeUsers;
 		public bool IncludeUsers
 		{
-			get { return FIncludeUsers; }
-			set { FIncludeUsers = value; }
+			get { return _includeUsers; }
+			set { _includeUsers = value; }
 		}
 	}
 	

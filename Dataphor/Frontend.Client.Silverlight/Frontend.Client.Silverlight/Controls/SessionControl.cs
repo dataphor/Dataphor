@@ -41,22 +41,22 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 	{
 		public virtual FormStackControl Create()
 		{
-			var LStack = new FormStackControl();
-			InitializeFormStackControl(LStack);
-			Add(LStack);
+			var stack = new FormStackControl();
+			InitializeFormStackControl(stack);
+			Add(stack);
 			MoveCurrentToPosition(Count - 1);
-			return LStack;
+			return stack;
 		}
 
-		public FormStackControl Find(FormControl AForm)
+		public FormStackControl Find(FormControl form)
 		{
-			foreach (var LItem in this)
-				if (LItem.FormStack.TopMatches(AForm))
-					return LItem;
+			foreach (var item in this)
+				if (item.FormStack.TopMatches(form))
+					return item;
 			return null;
 		}
 
-		protected virtual void InitializeFormStackControl(FormStackControl AStack)
+		protected virtual void InitializeFormStackControl(FormStackControl stack)
 		{
 			// pure virtual
 		}

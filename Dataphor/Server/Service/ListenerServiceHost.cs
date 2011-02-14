@@ -19,63 +19,63 @@ namespace Alphora.Dataphor.DAE.Service
 {
 	public class ListenerServiceHost : IDisposable
 	{
-		public ListenerServiceHost(int AOverridePortNumber, int AOverrideSecurePortNumber, bool ARequireSecureConnection, bool AUseCrossDomainService)
+		public ListenerServiceHost(int overridePortNumber, int overrideSecurePortNumber, bool requireSecureConnection, bool useCrossDomainService)
 		{
-			int LListenerPort = AOverridePortNumber == 0 ? DataphorServiceUtility.CDefaultListenerPortNumber : AOverridePortNumber;
-			int LSecureListenerPort = AOverrideSecurePortNumber == 0 ? DataphorServiceUtility.CDefaultSecureListenerPortNumber : AOverrideSecurePortNumber;
+			int listenerPort = overridePortNumber == 0 ? DataphorServiceUtility.DefaultListenerPortNumber : overridePortNumber;
+			int secureListenerPort = overrideSecurePortNumber == 0 ? DataphorServiceUtility.DefaultSecureListenerPortNumber : overrideSecurePortNumber;
 				
-			FListenerHost = new ServiceHost(typeof(ListenerService));
+			_listenerHost = new ServiceHost(typeof(ListenerService));
 			
-			if (!ARequireSecureConnection)
-				FListenerHost.AddServiceEndpoint
+			if (!requireSecureConnection)
+				_listenerHost.AddServiceEndpoint
 				(
 					typeof(IListenerService), 
 					DataphorServiceUtility.GetBinding(false), 
-					DataphorServiceUtility.BuildListenerURI(Environment.MachineName, LListenerPort, false)
+					DataphorServiceUtility.BuildListenerURI(Environment.MachineName, listenerPort, false)
 				);
 				
-			FListenerHost.AddServiceEndpoint
+			_listenerHost.AddServiceEndpoint
 			(
 				typeof(IListenerService), 
 				DataphorServiceUtility.GetBinding(true), 
-				DataphorServiceUtility.BuildListenerURI(Environment.MachineName, LSecureListenerPort, true)
+				DataphorServiceUtility.BuildListenerURI(Environment.MachineName, secureListenerPort, true)
 			);
 
 			try
 			{
-				FListenerHost.Open();
+				_listenerHost.Open();
 			}
 			catch
 			{
 				// An error indicates the service could not be started because there is already a listener running in another process.
 			}
 			
-			if (AUseCrossDomainService)
-				FCrossDomainServiceHost = new CrossDomainServiceHost(Environment.MachineName, LListenerPort, LSecureListenerPort, ARequireSecureConnection);
+			if (useCrossDomainService)
+				_crossDomainServiceHost = new CrossDomainServiceHost(Environment.MachineName, listenerPort, secureListenerPort, requireSecureConnection);
 		}
 
 		#region IDisposable Members
 
 		public void Dispose()
 		{
-			if (FCrossDomainServiceHost != null)
+			if (_crossDomainServiceHost != null)
 			{
-				FCrossDomainServiceHost.Dispose();
-				FCrossDomainServiceHost = null;
+				_crossDomainServiceHost.Dispose();
+				_crossDomainServiceHost = null;
 			}
 			
-			if (FListenerHost != null)
+			if (_listenerHost != null)
 			{
-				if (FListenerHost.State == CommunicationState.Opened)
-					FListenerHost.Close();
-				FListenerHost = null;
+				if (_listenerHost.State == CommunicationState.Opened)
+					_listenerHost.Close();
+				_listenerHost = null;
 			}
 		}
 
 		#endregion
 
-		private ServiceHost FListenerHost;
-		private CrossDomainServiceHost FCrossDomainServiceHost;
+		private ServiceHost _listenerHost;
+		private CrossDomainServiceHost _crossDomainServiceHost;
 		
 	}
 }

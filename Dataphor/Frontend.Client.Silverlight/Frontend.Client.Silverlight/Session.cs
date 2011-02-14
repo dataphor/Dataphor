@@ -27,21 +27,21 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		public static int CDefaultDocumentCacheSize = 800;
 		public static int CDefaultImageCacheSize = 60;
 
-		public const string CClientName = "Silverlight";
-		public const string CLibraryNodeTypesExpression = ".Frontend.GetLibraryNodeTypes('" + CClientName + "', ALibraryName)";
+		public const string ClientName = "Silverlight";
+		public const string LibraryNodeTypesExpression = ".Frontend.GetLibraryNodeTypes('" + ClientName + "', ALibraryName)";
 
-		public Session(Alphora.Dataphor.DAE.Client.DataSession ADataSession, bool AOwnsDataSession) 
-			: base(ADataSession, AOwnsDataSession) 
+		public Session(Alphora.Dataphor.DAE.Client.DataSession dataSession, bool ownsDataSession) 
+			: base(dataSession, ownsDataSession) 
 		{
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
 				CloseAllForms(null, CloseBehavior.RejectOrClose);
-				if (FRootFormHost != null)	// do this anyway because CloseAllForms may have failed
-					FRootFormHost.Dispose();
+				if (_rootFormHost != null)	// do this anyway because CloseAllForms may have failed
+					_rootFormHost.Dispose();
 			}
 			finally
 			{
@@ -51,16 +51,16 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				}
 				finally
 				{
-					base.Dispose(ADisposing);
+					base.Dispose(disposing);
 				}
 			}
 		}
 
 		#region Applications & Libraries
 
-		public string SetApplication(string AApplicationID)
+		public string SetApplication(string applicationID)
 		{
-			return SetApplication(AApplicationID, CClientName);
+			return SetApplication(applicationID, ClientName);
 		}
 
 		private void ClearImageCache()
@@ -68,11 +68,11 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			Pipe.ImageCache = null;
 		}
 
-		public override string SetApplication(string AApplicationID, string AClientType)
+		public override string SetApplication(string applicationID, string clientType)
 		{
 			// Reset our current settings
 			ClearImageCache();
-			int LImageCacheSize = CDefaultImageCacheSize;
+			int imageCacheSize = CDefaultImageCacheSize;
 
 			// Optimistically load the settings
 			// TODO: Load settings
@@ -80,35 +80,35 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			// Setup the image cache
 			try
 			{
-				if (LImageCacheSize > 0)
-					Pipe.ImageCache = new FixedSizeCache<string, byte[]>(LImageCacheSize);
+				if (imageCacheSize > 0)
+					Pipe.ImageCache = new FixedSizeCache<string, byte[]>(imageCacheSize);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				HandleException(LException);	// Don't fail, just warn
+				HandleException(exception);	// Don't fail, just warn
 			}
 
-			return base.SetApplication(AApplicationID, AClientType);
+			return base.SetApplication(applicationID, clientType);
 		}
 
 		#endregion
 
 		#region Controls
 		
-		private SessionControl FSessionControl;
+		private SessionControl _sessionControl;
 		
 		protected virtual void CreateSessionControl()
 		{
-			FSessionControl = 
+			_sessionControl = 
 				(SessionControl)DispatchAndWait
 				(
 					(System.Func<SessionControl>)
 					(
 						() => 
 						{ 
-							var LControl = new SessionControl();
-							InitializeSessionControl(LControl);
-							return LControl;
+							var control = new SessionControl();
+							InitializeSessionControl(control);
+							return control;
 						}
 					)
 				);
@@ -116,7 +116,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		/// <summary> Prepares the session control. </summary>
 		/// <remarks> This method is invoked on the main thread while the session thread is waiting. </remarks>
-		protected virtual void InitializeSessionControl(SessionControl AControl)
+		protected virtual void InitializeSessionControl(SessionControl control)
 		{
 			// pure virtual
 		}
@@ -125,9 +125,9 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		#region Forms
 		
-		public void Show(FormControl AForm, FormControl AParentForm)
+		public void Show(FormControl form, FormControl parentForm)
 		{
-			if (AForm == null)
+			if (form == null)
 				throw new ArgumentNullException("AForm");
 			
 			Session.DispatcherInvoke
@@ -136,47 +136,47 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				(
 					() => 
 					{
-						FormStackControl LStack;
-						if (AParentForm != null)
+						FormStackControl stack;
+						if (parentForm != null)
 						{
-							LStack = FSessionControl.FormStacks.Find(AParentForm);
-							if (LStack == null)
+							stack = _sessionControl.FormStacks.Find(parentForm);
+							if (stack == null)
 								Error.Fail("The parent form for the form being shown is not a visible, top-level form.");
 						}
 						else
-							LStack = FSessionControl.FormStacks.Create();
-						LStack.FormStack.Push(AForm);
+							stack = _sessionControl.FormStacks.Create();
+						stack.FormStack.Push(form);
 					}
 				)
 			);
 		}
 
-		public void DisposeFormHost(IHost AHost, bool AStack)
+		public void DisposeFormHost(IHost host, bool stack)
 		{
-			if (AStack)
+			if (stack)
 			{
-				if (AHost != null)
+				if (host != null)
 				{
-					if (AHost.NextRequest != null)
-						LoadNextForm(AHost).Show();
+					if (host.NextRequest != null)
+						LoadNextForm(host).Show();
 					else
-						if (AHost == FRootFormHost)
+						if (host == _rootFormHost)
 						{
 							SessionComplete();
 							Dispose();
 						}
 						else
-							AHost.Dispose();
+							host.Dispose();
 				}
 			}
 			else
-				if (AHost != null)
-					AHost.Dispose();
+				if (host != null)
+					host.Dispose();
 		}	
 			
-		public void Close(FormControl AForm)
+		public void Close(FormControl form)
 		{
-			if (AForm == null)
+			if (form == null)
 				throw new ArgumentNullException("AForm");
 			
 			Session.DispatcherInvoke
@@ -185,12 +185,12 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				(
 					() => 
 					{
-						var LStack = FSessionControl.FormStacks.Find(AForm);
-						if (LStack == null)
+						var stack = _sessionControl.FormStacks.Find(form);
+						if (stack == null)
 							Error.Fail("The form being closed is not a visible, top-level form.");
-						LStack.FormStack.Pop();
-						if (LStack.FormStack.IsEmpty)
-							FSessionControl.FormStacks.Remove(LStack);
+						stack.FormStack.Pop();
+						if (stack.FormStack.IsEmpty)
+							_sessionControl.FormStacks.Remove(stack);
 					}
 				)
 			);
@@ -200,30 +200,30 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		#region Layout
 
-		private static double FAverageCharacterWidth = 0d;
+		private static double _averageCharacterWidth = 0d;
 		
 		public static double AverageCharacterWidth
 		{
 			get 
 			{ 
-				if (FAverageCharacterWidth == 0d)
+				if (_averageCharacterWidth == 0d)
 				{
-					FAverageCharacterWidth = (double)
+					_averageCharacterWidth = (double)
 						DispatchAndWait
 						(
 							(Func<double>)
 							(
 								() =>
 								{
-									var LTextBlock = new TextBlock();
-									LTextBlock.Text = "abcdefghijklmnopqrstuvwzyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-									LTextBlock.Measure(new Size());
-									return (double)(int)(LTextBlock.ActualWidth / LTextBlock.Text.Length);
+									var textBlock = new TextBlock();
+									textBlock.Text = "abcdefghijklmnopqrstuvwzyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+									textBlock.Measure(new Size());
+									return (double)(int)(textBlock.ActualWidth / textBlock.Text.Length);
 								}
 							)
 						);
 				}
-				return FAverageCharacterWidth;
+				return _averageCharacterWidth;
 			}
 		}
 		
@@ -233,40 +233,40 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		public event EventHandler OnComplete;
 
-		private IHost FRootFormHost;
-		private ContentControl FContainer;
+		private IHost _rootFormHost;
+		private ContentControl _container;
 
 		/// <remarks> Must call SetApplication or SetLibrary before calling Start().  Upon completion, the given 
 		/// callback will be invoked and the session will be disposed.  Note that the session may leave its
 		/// control in place and it is up to the caller to replace the content of the given container. </remarks>
-		public void Start(string ADocument, ContentControl AContainer)
+		public void Start(string document, ContentControl container)
 		{
-			TimingUtility.PushTimer(String.Format("Silverlight.Session.Start('{0}')", ADocument));
+			TimingUtility.PushTimer(String.Format("Silverlight.Session.Start('{0}')", document));
 			try
 			{
 				// Create the session control
 				CreateSessionControl();
 
 				// Prepare the root form's host
-				FRootFormHost = CreateHost();
+				_rootFormHost = CreateHost();
 				try
 				{
-					FRootFormHost.NextRequest = new Request(ADocument);
-					FContainer = AContainer;
-					LoadNextForm(FRootFormHost).Show();
+					_rootFormHost.NextRequest = new Request(document);
+					_container = container;
+					LoadNextForm(_rootFormHost).Show();
 				}
 				catch
 				{
-					if (FRootFormHost != null)
+					if (_rootFormHost != null)
 					{
-						FRootFormHost.Dispose();
-						FRootFormHost = null;
+						_rootFormHost.Dispose();
+						_rootFormHost = null;
 					}
 					throw;
 				}
 				
 				// Show the session control as the content of the given container
-				DispatchAndWait((System.Action)(() => { if (FSessionControl != null) AContainer.Content = FSessionControl; }));
+				DispatchAndWait((System.Action)(() => { if (_sessionControl != null) container.Content = _sessionControl; }));
 			}
 			finally
 			{
@@ -274,19 +274,19 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			}
 		}
 
-		private ISilverlightFormInterface LoadNextForm(IHost AHost)
+		private ISilverlightFormInterface LoadNextForm(IHost host)
 		{
-			var LForm = (ISilverlightFormInterface)CreateForm();
+			var form = (ISilverlightFormInterface)CreateForm();
 			try
 			{
-				AHost.LoadNext(LForm);
-				AHost.Open();
-				return LForm;
+				host.LoadNext(form);
+				host.Open();
+				return form;
 			}
 			catch
 			{
-				LForm.Dispose();
-				LForm = null;
+				form.Dispose();
+				form = null;
 				throw;
 			}
 		}
@@ -303,9 +303,9 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		public override Client.IHost CreateHost()
 		{
-			Host LHost = new Host(this);
-			LHost.OnDeserializationErrors += new DeserializationErrorsHandler(ReportErrors);
-			return LHost;
+			Host host = new Host(this);
+			host.OnDeserializationErrors += new DeserializationErrorsHandler(ReportErrors);
+			return host;
 		}
 		
 		#endregion
@@ -314,18 +314,18 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		public event DeserializationErrorsHandler OnErrors;
 
-		public override void ReportErrors(IHost AHost, ErrorList AErrorList)
+		public override void ReportErrors(IHost host, ErrorList errorList)
 		{
 			if (OnErrors != null)
-				OnErrors(AHost, AErrorList);
+				OnErrors(host, errorList);
 
-			if ((AHost != null) && (AHost.Children.Count > 0))
+			if ((host != null) && (host.Children.Count > 0))
 			{
-				IFormInterface LFormInterface = AHost.Children[0] as IFormInterface;
-				if (LFormInterface == null)
-					LFormInterface = (IFormInterface)AHost.Children[0].FindParent(typeof(IFormInterface));
-				if (LFormInterface != null)
-					LFormInterface.EmbedErrors(AErrorList);
+				IFormInterface formInterface = host.Children[0] as IFormInterface;
+				if (formInterface == null)
+					formInterface = (IFormInterface)host.Children[0].FindParent(typeof(IFormInterface));
+				if (formInterface != null)
+					formInterface.EmbedErrors(errorList);
 			}
 		}
 
@@ -342,9 +342,9 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			base.UninitializePipe();
 		}
 
-		public void HandleException(Exception AException)
+		public void HandleException(Exception exception)
 		{
-			ReportErrors(null, new ErrorList() { AException });
+			ReportErrors(null, new ErrorList() { exception });
 		}
 		
 		#endregion
@@ -375,18 +375,18 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				the session thread in order to properly synchronize.
 		*/
 		
-		private static Dispatcher FDispatcher;
+		private static Dispatcher _dispatcher;
 		
 		/// <summary> Gets or sets the dispatcher used to synchronize onto the main UI thread. </summary>
 		public static Dispatcher Dispatcher 
 		{ 
 			get
 			{
-				if (FDispatcher == null)
-					FDispatcher = Deployment.Current.Dispatcher;
-				return FDispatcher;
+				if (_dispatcher == null)
+					_dispatcher = Deployment.Current.Dispatcher;
+				return _dispatcher;
 			}
-			set { FDispatcher = value; }
+			set { _dispatcher = value; }
 		}
 
 		/// <summary> Returns the verified non-null main UI thread dispatcher. </summary>
@@ -394,75 +394,75 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		{
 			get
 			{
-				Dispatcher LDispatcher = Dispatcher;	// Capture locally for thread safety
-				if (LDispatcher == null)
+				Dispatcher dispatcher = Dispatcher;	// Capture locally for thread safety
+				if (dispatcher == null)
 					throw new SilverlightClientException(SilverlightClientException.Codes.MissingDispatcher);
-				return LDispatcher;
+				return dispatcher;
 			}
 		}
 
 		/// <summary> Executes a delegate in the context of the main thread. </summary>
-		public static void DispatcherInvoke(Delegate ADelegate, params object[] AArguments)
+		public static void DispatcherInvoke(Delegate delegateValue, params object[] arguments)
 		{
-			CheckedDispatcher.BeginInvoke(ADelegate, AArguments);
+			CheckedDispatcher.BeginInvoke(delegateValue, arguments);
 		}
 		
 		/// <summary> Synchronously executes the given delegate on the main thread and returns the result. </summary>
-		public static object DispatchAndWait(Delegate ADelegate, params object[] AArguments)
+		public static object DispatchAndWait(Delegate delegateValue, params object[] arguments)
 		{
-			object LResult = null;
-			Exception LException = null;
-			var LEvent = new ManualResetEvent(false);
+			object result = null;
+			Exception exception = null;
+			var eventValue = new ManualResetEvent(false);
 			CheckedDispatcher.BeginInvoke
 			(
 				() => 
 				{ 
 					try
 					{
-						LResult = ADelegate.DynamicInvoke(AArguments);
+						result = delegateValue.DynamicInvoke(arguments);
 					}
-					catch (Exception LError)
+					catch (Exception error)
 					{
-						LException = LError;
+						exception = error;
 					}
 					finally
 					{
-						LEvent.Set();
+						eventValue.Set();
 					}
 				}
 			);
-			LEvent.WaitOne();
-			LEvent.Close();
-			if (LException != null)
-				throw LException;
-			return LResult;
+			eventValue.WaitOne();
+			eventValue.Close();
+			if (exception != null)
+				throw exception;
+			return result;
 		}
 
-		public static Queue<System.Action> FSessionQueue = new Queue<System.Action>();
-		public static Thread FSessionThread;
+		public static Queue<System.Action> _sessionQueue = new Queue<System.Action>();
+		public static Thread _sessionThread;
 		
-		public static void QueueSessionAction(System.Action AAction)
+		public static void QueueSessionAction(System.Action action)
 		{
-			if (AAction != null)
+			if (action != null)
 			{
-				var LExecuteSync = false;
+				var executeSync = false;
 				
-				lock (FSessionQueue)
+				lock (_sessionQueue)
 				{
-					if (FSessionThread == null)
+					if (_sessionThread == null)
 					{
-						FSessionThread = new Thread(new ThreadStart(ActionQueueServiceThread));
-						FSessionThread.Start();
+						_sessionThread = new Thread(new ThreadStart(ActionQueueServiceThread));
+						_sessionThread.Start();
 					}
 					else
-						LExecuteSync = (FSessionThread.ManagedThreadId == Thread.CurrentThread.ManagedThreadId);
+						executeSync = (_sessionThread.ManagedThreadId == Thread.CurrentThread.ManagedThreadId);
 					
-					if (!LExecuteSync)
-						FSessionQueue.Enqueue(AAction);
+					if (!executeSync)
+						_sessionQueue.Enqueue(action);
 				}
 			
-				if (LExecuteSync)
-					AAction();
+				if (executeSync)
+					action();
 			}
 		}
 		
@@ -470,24 +470,24 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		{
 			while (true)
 			{
-				System.Action LNextAction;
-				lock (FSessionQueue)
+				System.Action nextAction;
+				lock (_sessionQueue)
 				{
-					if (FSessionQueue.Count > 0)
-						LNextAction = FSessionQueue.Dequeue();
+					if (_sessionQueue.Count > 0)
+						nextAction = _sessionQueue.Dequeue();
 					else
 					{
-						FSessionThread = null;
+						_sessionThread = null;
 						break;
 					}
 				}
 				try
 				{
-					LNextAction();
+					nextAction();
 				}
-				catch  (Exception LException)
+				catch  (Exception exception)
 				{
-					System.Diagnostics.Debug.WriteLine(LException.ToString());
+					System.Diagnostics.Debug.WriteLine(exception.ToString());
 					// Don't allow exceptions to leave this thread or the application will terminate
 				}
 			}
@@ -495,105 +495,105 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		/// <summary> Synchronously executes the given delegate on the session thread and returns the result. </summary>
 		/// <remarks> This method will throw an exception if invoked from the main thread. </remarks>
-		public static object InvokeAndWait(Delegate ADelegate, params object[] AArguments)
+		public static object InvokeAndWait(Delegate delegateValue, params object[] arguments)
 		{
 			// Ensure that this method isn't called from the main thread
-			var LDispatcher = Silverlight.Session.Dispatcher;
-			Error.DebugAssertFail(LDispatcher == null || !LDispatcher.CheckAccess(), "InvokeAndWait may not be called from the main thread.");
+			var dispatcher = Silverlight.Session.Dispatcher;
+			Error.DebugAssertFail(dispatcher == null || !dispatcher.CheckAccess(), "InvokeAndWait may not be called from the main thread.");
 				
-			object LResult = null;
-			Exception LException = null;
-			var LEvent = new ManualResetEvent(false);
+			object result = null;
+			Exception exception = null;
+			var eventValue = new ManualResetEvent(false);
 			QueueSessionAction
 			(
 				() => 
 				{ 
 					try
 					{
-						LResult = ADelegate.DynamicInvoke(AArguments);
+						result = delegateValue.DynamicInvoke(arguments);
 					}
-					catch (Exception LError)
+					catch (Exception error)
 					{
-						LException = LError;
+						exception = error;
 					}
 					finally
 					{
-						LEvent.Set();
+						eventValue.Set();
 					}
 				}
 			);
-			LEvent.WaitOne();
-			LEvent.Close();
-			if (LException != null)
-				throw LException;
-			return LResult;
+			eventValue.WaitOne();
+			eventValue.Close();
+			if (exception != null)
+				throw exception;
+			return result;
 		}
 
 		/// <summary> Executes the given delegate on the session thread. </summary>
-		public static void Invoke(Delegate ADelegate, params object[] AArguments)
+		public static void Invoke(Delegate delegateValue, params object[] arguments)
 		{
-			Dispatcher LDispatcher = CheckedDispatcher;	
+			Dispatcher dispatcher = CheckedDispatcher;	
 			QueueSessionAction
 			(
 				() =>
 				{
 					try
 					{
-						ADelegate.DynamicInvoke(AArguments);
+						delegateValue.DynamicInvoke(arguments);
 					}
-					catch (Exception LException)
+					catch (Exception exception)
 					{
-						System.Diagnostics.Debug.WriteLine("Unhandled exception: ", LException);
+						System.Diagnostics.Debug.WriteLine("Unhandled exception: ", exception);
 					}
 				}
 			);
 		}
 
 		/// <summary> Executes the given delegate on the session thread, then calls back to the main thread for error or completion. </summary>
-		public static void Invoke(Delegate ADelegate, ErrorHandler AOnError, System.Action AOnCompletion, params object[] AArguments)
+		public static void Invoke(Delegate delegateValue, ErrorHandler onError, System.Action onCompletion, params object[] arguments)
 		{
-			Dispatcher LDispatcher = CheckedDispatcher;	
+			Dispatcher dispatcher = CheckedDispatcher;	
 			QueueSessionAction
 			(
 				() =>
 				{
 					try
 					{
-						ADelegate.DynamicInvoke(AArguments);
-						if (AOnCompletion != null)
-							LDispatcher.BeginInvoke(AOnCompletion);
+						delegateValue.DynamicInvoke(arguments);
+						if (onCompletion != null)
+							dispatcher.BeginInvoke(onCompletion);
 					}
-					catch (Exception LException)
+					catch (Exception exception)
 					{
-						if (AOnError != null)
-							LDispatcher.BeginInvoke(AOnError, LException is TargetInvocationException ? ((TargetInvocationException)LException).InnerException : LException);
+						if (onError != null)
+							dispatcher.BeginInvoke(onError, exception is TargetInvocationException ? ((TargetInvocationException)exception).InnerException : exception);
 						else
-							System.Diagnostics.Debug.WriteLine("Unhandled exception: ", LException);
+							System.Diagnostics.Debug.WriteLine("Unhandled exception: ", exception);
 					}
 				}
 			);
 		}
 
 		/// <summary> Executes the given delegate on the session thread, then calls back to the main thread for error or completion. </summary>
-		public static void Invoke<T>(Func<T> ADelegate, ErrorHandler AOnError, System.Action<T> AOnCompletion, params object[] AArguments)
+		public static void Invoke<T>(Func<T> delegateValue, ErrorHandler onError, System.Action<T> onCompletion, params object[] arguments)
 		{
-		    Dispatcher LDispatcher = CheckedDispatcher;	
+		    Dispatcher dispatcher = CheckedDispatcher;	
 		    QueueSessionAction
 		    (
 		        () =>
 		        {
 		            try
 		            {
-		                var LResult = (T)ADelegate.DynamicInvoke(AArguments);
-		                if (AOnCompletion != null)
-							LDispatcher.BeginInvoke(AOnCompletion, LResult);
+		                var result = (T)delegateValue.DynamicInvoke(arguments);
+		                if (onCompletion != null)
+							dispatcher.BeginInvoke(onCompletion, result);
 		            }
-		            catch (Exception LException)
+		            catch (Exception exception)
 		            {
-		                if (AOnError != null)
-		                    LDispatcher.BeginInvoke(AOnError, LException is TargetInvocationException ? ((TargetInvocationException)LException).InnerException : LException);
+		                if (onError != null)
+		                    dispatcher.BeginInvoke(onError, exception is TargetInvocationException ? ((TargetInvocationException)exception).InnerException : exception);
 		                else
-		                    System.Diagnostics.Debug.WriteLine("Unhandled exception: ", LException);
+		                    System.Diagnostics.Debug.WriteLine("Unhandled exception: ", exception);
 		            }
 		        }
 		    );
@@ -606,14 +606,14 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 	
 	public static class SessionExtensions
 	{
-		public static void HandleException(this Frontend.Client.Session ASession, Exception AException)
+		public static void HandleException(this Frontend.Client.Session session, Exception exception)
 		{
-			((Silverlight.Session)ASession).HandleException(AException);
+			((Silverlight.Session)session).HandleException(exception);
 		}
 		
-		public static void HandleException(this Frontend.Client.Node ANode, Exception AException)
+		public static void HandleException(this Frontend.Client.Node node, Exception exception)
 		{
-			((Silverlight.Session)ANode.HostNode.Session).HandleException(AException);
+			((Silverlight.Session)node.HostNode.Session).HandleException(exception);
 		}
 	}
 }

@@ -48,103 +48,103 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		// Initial constructor used to start elaboration of an expression for a given table variable
 		public ElaboratedExpression
 		(
-			Program AProgram,
-			string AQuery,
-			bool AElaborate,
-			Schema.TableVar ATableVar,
-			Schema.Catalog ACatalog,
-			string[] ADetailKeys,
-			string AMainElaboratedTableName,
-			string APageType
+			Program program,
+			string query,
+			bool elaborate,
+			Schema.TableVar tableVar,
+			Schema.Catalog catalog,
+			string[] detailKeys,
+			string mainElaboratedTableName,
+			string pageType
 		)
 		{
-			FProgram = AProgram;
-			FProcess = AProgram.ServerProcess;
-			FPageType = APageType;
-			FDetailKeys = ADetailKeys;
-			FElaborate = AElaborate;
-			FMainElaboratedTableVar = new ElaboratedTableVar(this, ATableVar, FPageType, AddTableName(AMainElaboratedTableName), AQuery);
+			_program = program;
+			_process = program.ServerProcess;
+			_pageType = pageType;
+			_detailKeys = detailKeys;
+			_elaborate = elaborate;
+			_mainElaboratedTableVar = new ElaboratedTableVar(this, tableVar, _pageType, AddTableName(mainElaboratedTableName), query);
 
 			// The invariant is the dequlified detail key
-			FInvariant = new Schema.Key();
-			for (int LIndex = 0; LIndex < FDetailKeys.Length; LIndex++)
-				FInvariant.Columns.Add(FMainElaboratedTableVar.TableVar.Columns[Schema.Object.Dequalify(FDetailKeys[LIndex])]);
+			_invariant = new Schema.Key();
+			for (int index = 0; index < _detailKeys.Length; index++)
+				_invariant.Columns.Add(_mainElaboratedTableVar.TableVar.Columns[Schema.Object.Dequalify(_detailKeys[index])]);
 
-			if (AElaborate)
+			if (elaborate)
 			{
-				BuildParentReferences(FMainElaboratedTableVar);
-				BuildExtensionReferences(FMainElaboratedTableVar);
-				BuildLookupReferences(ACatalog, FMainElaboratedTableVar);
-				BuildDetailReferences(FMainElaboratedTableVar);
+				BuildParentReferences(_mainElaboratedTableVar);
+				BuildExtensionReferences(_mainElaboratedTableVar);
+				BuildLookupReferences(catalog, _mainElaboratedTableVar);
+				BuildDetailReferences(_mainElaboratedTableVar);
 			}
 		}
 
 		// Subsequent constructor used to start nested derivation of a lookup expression for a given table variable
 		protected ElaboratedExpression
 		(
-			Program AProgram,
-			ElaboratedExpression AParentExpression,
-			bool AElaborate,
-			Schema.Catalog ACatalog,
-			string ATableName,
-			string[] ADetailKeys,
-			string AMainElaboratedTableName,
-			string APageType
+			Program program,
+			ElaboratedExpression parentExpression,
+			bool elaborate,
+			Schema.Catalog catalog,
+			string tableName,
+			string[] detailKeys,
+			string mainElaboratedTableName,
+			string pageType
 		)
 		{
-			FProgram = AProgram;
-			FProcess = AProgram.ServerProcess;
-			FPageType = APageType;
-			FDetailKeys = ADetailKeys;
-			FElaborate = AElaborate;
-			FParentExpression = AParentExpression;
-			FMainElaboratedTableVar = new ElaboratedTableVar(this, (Schema.TableVar)ACatalog.Objects[ATableName], FPageType, AMainElaboratedTableName);
-			if (AElaborate)
+			_program = program;
+			_process = program.ServerProcess;
+			_pageType = pageType;
+			_detailKeys = detailKeys;
+			_elaborate = elaborate;
+			_parentExpression = parentExpression;
+			_mainElaboratedTableVar = new ElaboratedTableVar(this, (Schema.TableVar)catalog.Objects[tableName], _pageType, mainElaboratedTableName);
+			if (elaborate)
 			{
-				BuildParentReferences(FMainElaboratedTableVar);
-				BuildExtensionReferences(FMainElaboratedTableVar);
-				BuildLookupReferences(ACatalog, FMainElaboratedTableVar);
+				BuildParentReferences(_mainElaboratedTableVar);
+				BuildExtensionReferences(_mainElaboratedTableVar);
+				BuildLookupReferences(catalog, _mainElaboratedTableVar);
 			}
 		}
 
-		public static string[] QualifyNames(string[] ANames, string ANameSpace)
+		public static string[] QualifyNames(string[] names, string nameSpace)
 		{
-			string[] LResult = new string[ANames.Length];
-			for (int LIndex = 0; LIndex < ANames.Length; LIndex++)
-				LResult[LIndex] = Schema.Object.Qualify(ANames[LIndex], ANameSpace);
-			return LResult;
+			string[] result = new string[names.Length];
+			for (int index = 0; index < names.Length; index++)
+				result[index] = Schema.Object.Qualify(names[index], nameSpace);
+			return result;
 		}
 		
-		public static string[] DequalifyNames(string[] ANames)
+		public static string[] DequalifyNames(string[] names)
 		{
-			string[] LResult = new string[ANames.Length];
-			for (int LIndex = 0; LIndex < ANames.Length; LIndex++)
-				LResult[LIndex] = Schema.Object.Dequalify(ANames[LIndex]);
-			return LResult;
+			string[] result = new string[names.Length];
+			for (int index = 0; index < names.Length; index++)
+				result[index] = Schema.Object.Dequalify(names[index]);
+			return result;
 		}
 		
-		public static string CombineGroups(string AOuterGroup, string AInnerGroup)
+		public static string CombineGroups(string outerGroup, string innerGroup)
 		{
-			if (AOuterGroup != String.Empty)
-				if (AInnerGroup != String.Empty)
-					return String.Format("{0}\\{1}", AOuterGroup, AInnerGroup);
+			if (outerGroup != String.Empty)
+				if (innerGroup != String.Empty)
+					return String.Format("{0}\\{1}", outerGroup, innerGroup);
 				else
-					return AOuterGroup;
+					return outerGroup;
 			else
-				return AInnerGroup;
+				return innerGroup;
 		}
 		
-		protected ElaboratedExpression FParentExpression;
-		public ElaboratedExpression RootExpression { get { return (FParentExpression == null) ? this : FParentExpression.RootExpression; } }
+		protected ElaboratedExpression _parentExpression;
+		public ElaboratedExpression RootExpression { get { return (_parentExpression == null) ? this : _parentExpression.RootExpression; } }
 		
-		protected bool FElaborate;
-		public bool Elaborate { get { return FElaborate; } }
+		protected bool _elaborate;
+		public bool Elaborate { get { return _elaborate; } }
 		
-		protected Program FProgram;
-		public Program Program { get { return FProgram; } }
+		protected Program _program;
+		public Program Program { get { return _program; } }
 		
-		protected ServerProcess FProcess;
-		public ServerProcess Process { get { return FProcess; } }
+		protected ServerProcess _process;
+		public ServerProcess Process { get { return _process; } }
 		
 		/*
 			An inclusion reference is a reference that should not be followed for the purpose of elaboration, or included for the purpose of presentation,
@@ -153,320 +153,320 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 			In the case that this is a nested expression, the inclusion reference is simply the reference that was used to arrive at this expression;
 			otherwise any reference that terminates as a subset of the detail columns is an inclusion reference.
 		*/		
-		protected bool IsInclusionReference(Schema.Reference AReference)
+		protected bool IsInclusionReference(Schema.Reference reference)
 		{
-			if (FParentExpression == null)
+			if (_parentExpression == null)
 				return
 					(
-						AReference.TargetTable.Equals(MainElaboratedTableVar.TableVar) &&
-						AReference.TargetKey.Columns.IsSubsetOf(Invariant.Columns)
+						reference.TargetTable.Equals(MainElaboratedTableVar.TableVar) &&
+						reference.TargetKey.Columns.IsSubsetOf(Invariant.Columns)
 					) ||
 					(
-						AReference.SourceTable.Equals(MainElaboratedTableVar.TableVar) &&
-						AReference.SourceKey.Columns.IsSubsetOf(Invariant.Columns)
+						reference.SourceTable.Equals(MainElaboratedTableVar.TableVar) &&
+						reference.SourceKey.Columns.IsSubsetOf(Invariant.Columns)
 					);
 			else
-				return (MainElaboratedTableVar.ElaboratedReference != null) && (MainElaboratedTableVar.ElaboratedReference.Reference.OriginatingReferenceName() == AReference.OriginatingReferenceName());
+				return (MainElaboratedTableVar.ElaboratedReference != null) && (MainElaboratedTableVar.ElaboratedReference.Reference.OriginatingReferenceName() == reference.OriginatingReferenceName());
 		}
 				
-		protected virtual bool IsCircularReference(ElaboratedTableVar ATableVar, Schema.Reference AReference)
+		protected virtual bool IsCircularReference(ElaboratedTableVar tableVar, Schema.Reference reference)
 		{
 			// A reference is circular if the source tablevar = target tablevar of the atablevar.derivedreference
 			return
-				(ATableVar.ElaboratedReference != null) &&
+				(tableVar.ElaboratedReference != null) &&
 				(
 					(
-						AReference.SourceTable.Equals(ATableVar.ElaboratedReference.Reference.TargetTable) &&
-						AReference.SourceKey.Equals(ATableVar.ElaboratedReference.Reference.TargetKey)
+						reference.SourceTable.Equals(tableVar.ElaboratedReference.Reference.TargetTable) &&
+						reference.SourceKey.Equals(tableVar.ElaboratedReference.Reference.TargetKey)
 					) ||
 					(
-						AReference.TargetTable.Equals(ATableVar.ElaboratedReference.Reference.SourceTable) &&
-						AReference.TargetKey.Equals(ATableVar.ElaboratedReference.Reference.SourceKey)
+						reference.TargetTable.Equals(tableVar.ElaboratedReference.Reference.SourceTable) &&
+						reference.TargetKey.Equals(tableVar.ElaboratedReference.Reference.SourceKey)
 					) ||
 					(
-						AReference.SourceTable.Equals(ATableVar.ElaboratedReference.Reference.SourceTable) &&
-						AReference.SourceKey.Equals(ATableVar.ElaboratedReference.Reference.SourceKey)
+						reference.SourceTable.Equals(tableVar.ElaboratedReference.Reference.SourceTable) &&
+						reference.SourceKey.Equals(tableVar.ElaboratedReference.Reference.SourceKey)
 					) ||
 					(
-						AReference.TargetTable.Equals(ATableVar.ElaboratedReference.Reference.TargetTable) &&
-						AReference.TargetKey.Equals(ATableVar.ElaboratedReference.Reference.TargetKey)
+						reference.TargetTable.Equals(tableVar.ElaboratedReference.Reference.TargetTable) &&
+						reference.TargetKey.Equals(tableVar.ElaboratedReference.Reference.TargetKey)
 					)
 				);
 		}
 		
-		protected virtual bool IsIncludedReference(ElaboratedTableVar ATableVar, Schema.Reference AReference, ReferenceType AReferenceType)
+		protected virtual bool IsIncludedReference(ElaboratedTableVar tableVar, Schema.Reference reference, ReferenceType referenceType)
 		{
 			// A reference is included if all the columns in the reference key are included in the table variable
-			foreach (Schema.TableVarColumn LColumn in ((AReferenceType == ReferenceType.Parent) || (AReferenceType == ReferenceType.Lookup)) ? AReference.SourceKey.Columns : AReference.TargetKey.Columns)
-				if (!ATableVar.ColumnNames.Contains(LColumn.Name))
+			foreach (Schema.TableVarColumn column in ((referenceType == ReferenceType.Parent) || (referenceType == ReferenceType.Lookup)) ? reference.SourceKey.Columns : reference.TargetKey.Columns)
+				if (!tableVar.ColumnNames.Contains(column.Name))
 					return false;
 			
-			return Convert.ToBoolean(DerivationUtility.GetTag(AReference.MetaData, "Include", FPageType, AReferenceType.ToString(), FElaborate ? "True" : "False"));
+			return Convert.ToBoolean(DerivationUtility.GetTag(reference.MetaData, "Include", _pageType, referenceType.ToString(), _elaborate ? "True" : "False"));
 		}
 		
-		protected bool FTreatParentAsLookup = true;
+		protected bool _treatParentAsLookup = true;
 		
-		protected virtual bool ShouldTreatParentAsLookup(Schema.Reference AReference)
+		protected virtual bool ShouldTreatParentAsLookup(Schema.Reference reference)
 		{
-			return Convert.ToBoolean(DerivationUtility.GetTag(AReference.MetaData, "TreatAsLookup", FPageType, ReferenceType.Parent.ToString(), FTreatParentAsLookup.ToString()));
+			return Convert.ToBoolean(DerivationUtility.GetTag(reference.MetaData, "TreatAsLookup", _pageType, ReferenceType.Parent.ToString(), _treatParentAsLookup.ToString()));
 		}
 		
-		protected virtual void BuildParentReferences(ElaboratedTableVar ATable)
+		protected virtual void BuildParentReferences(ElaboratedTableVar table)
 		{
-			foreach (Schema.Reference LReference in ATable.TableVar.SourceReferences)
-				if (LReference.SourceKey.IsUnique && !LReference.IsExcluded && FProgram.Plan.HasRight(LReference.TargetTable.GetRight(Schema.RightNames.Select)) && !ShouldTreatParentAsLookup(LReference) && !IsInclusionReference(LReference) && !IsCircularReference(ATable, LReference) && IsIncludedReference(ATable, LReference, ReferenceType.Parent))
+			foreach (Schema.Reference reference in table.TableVar.SourceReferences)
+				if (reference.SourceKey.IsUnique && !reference.IsExcluded && _program.Plan.HasRight(reference.TargetTable.GetRight(Schema.RightNames.Select)) && !ShouldTreatParentAsLookup(reference) && !IsInclusionReference(reference) && !IsCircularReference(table, reference) && IsIncludedReference(table, reference, ReferenceType.Parent))
 				{
-					ElaboratedReference LElaboratedReference = 
+					ElaboratedReference elaboratedReference = 
 						new ElaboratedReference
 						(
 							this, 
-							LReference, 
+							reference, 
 							ReferenceType.Parent, 
-							ATable, 
-							new ElaboratedTableVar(this, LReference.TargetTable, DerivationUtility.CView)
+							table, 
+							new ElaboratedTableVar(this, reference.TargetTable, DerivationUtility.View)
 						);
-					ATable.ElaboratedReferences.Add(LElaboratedReference);
-					LElaboratedReference.TargetElaboratedTableVar.ElaboratedReference = LElaboratedReference;
-					BuildParentReferences(LElaboratedReference.TargetElaboratedTableVar);
+					table.ElaboratedReferences.Add(elaboratedReference);
+					elaboratedReference.TargetElaboratedTableVar.ElaboratedReference = elaboratedReference;
+					BuildParentReferences(elaboratedReference.TargetElaboratedTableVar);
 				}
 		}
 		
-		protected virtual void BuildExtensionReferences(ElaboratedTableVar ATable)
+		protected virtual void BuildExtensionReferences(ElaboratedTableVar table)
 		{
-			foreach (Schema.Reference LReference in ATable.TableVar.TargetReferences)
-				if (LReference.SourceKey.IsUnique && !LReference.IsExcluded && FProgram.Plan.HasRight(LReference.SourceTable.GetRight(Schema.RightNames.Select)) && !IsInclusionReference(LReference) && !IsCircularReference(ATable, LReference) && IsIncludedReference(ATable, LReference, ReferenceType.Extension))
+			foreach (Schema.Reference reference in table.TableVar.TargetReferences)
+				if (reference.SourceKey.IsUnique && !reference.IsExcluded && _program.Plan.HasRight(reference.SourceTable.GetRight(Schema.RightNames.Select)) && !IsInclusionReference(reference) && !IsCircularReference(table, reference) && IsIncludedReference(table, reference, ReferenceType.Extension))
 				{
-					ElaboratedReference LElaboratedReference =
+					ElaboratedReference elaboratedReference =
 						new ElaboratedReference
 						(
 							this,
-							LReference,
+							reference,
 							ReferenceType.Extension,
-							new ElaboratedTableVar(this, LReference.SourceTable, DerivationUtility.IsReadOnlyPageType(FPageType) ? DerivationUtility.CView : DerivationUtility.CEdit),
-							ATable
+							new ElaboratedTableVar(this, reference.SourceTable, DerivationUtility.IsReadOnlyPageType(_pageType) ? DerivationUtility.View : DerivationUtility.Edit),
+							table
 						);
-					LElaboratedReference.SourceElaboratedTableVar.ElaboratedReference = LElaboratedReference;
-					ATable.ElaboratedReferences.Add(LElaboratedReference);
+					elaboratedReference.SourceElaboratedTableVar.ElaboratedReference = elaboratedReference;
+					table.ElaboratedReferences.Add(elaboratedReference);
 				}
 		}
 		
-		protected virtual void BuildLookupReferences(Schema.Catalog ACatalog, ElaboratedTableVar ATable)
+		protected virtual void BuildLookupReferences(Schema.Catalog catalog, ElaboratedTableVar table)
 		{
-			foreach (Schema.Reference LReference in ATable.TableVar.SourceReferences)
-				if ((ShouldTreatParentAsLookup(LReference) || !LReference.SourceKey.IsUnique) && !LReference.IsExcluded && FProgram.Plan.HasRight(LReference.TargetTable.GetRight(Schema.RightNames.Select)) && !IsInclusionReference(LReference) && !IsCircularReference(ATable, LReference) && IsIncludedReference(ATable, LReference, ReferenceType.Lookup))
+			foreach (Schema.Reference reference in table.TableVar.SourceReferences)
+				if ((ShouldTreatParentAsLookup(reference) || !reference.SourceKey.IsUnique) && !reference.IsExcluded && _program.Plan.HasRight(reference.TargetTable.GetRight(Schema.RightNames.Select)) && !IsInclusionReference(reference) && !IsCircularReference(table, reference) && IsIncludedReference(table, reference, ReferenceType.Lookup))
 				{
-					string LElaboratedName = AddTableName(LReference.TargetTable.Name);
-					ElaboratedExpression LLookupExpression = 
+					string elaboratedName = AddTableName(reference.TargetTable.Name);
+					ElaboratedExpression lookupExpression = 
 						new ElaboratedExpression
 						(
-							FProgram,
+							_program,
 							this, 
-							Convert.ToBoolean(DerivationUtility.GetTag(LReference.MetaData, "Elaborate", DerivationUtility.CPreview, ReferenceType.Lookup.ToString(), DerivationUtility.GetTag(LReference.TargetTable.MetaData, "Elaborate", DerivationUtility.CPreview, "False"))),
-							ACatalog, 
-							LReference.TargetTable.Name, 
-							QualifyNames(LReference.TargetKey.Columns.ColumnNames, LElaboratedName),
-							LElaboratedName,
-							DerivationUtility.CPreview
+							Convert.ToBoolean(DerivationUtility.GetTag(reference.MetaData, "Elaborate", DerivationUtility.Preview, ReferenceType.Lookup.ToString(), DerivationUtility.GetTag(reference.TargetTable.MetaData, "Elaborate", DerivationUtility.Preview, "False"))),
+							catalog, 
+							reference.TargetTable.Name, 
+							QualifyNames(reference.TargetKey.Columns.ColumnNames, elaboratedName),
+							elaboratedName,
+							DerivationUtility.Preview
 						);
 
-					ElaboratedReference LElaboratedReference =
+					ElaboratedReference elaboratedReference =
 						new ElaboratedReference
 						(
 							this,
-							LReference,
+							reference,
 							ReferenceType.Lookup,
-							ATable,
-							LLookupExpression.MainElaboratedTableVar
+							table,
+							lookupExpression.MainElaboratedTableVar
 						);
 
-					LElaboratedReference.TargetElaboratedTableVar.ElaboratedReference = LElaboratedReference;
-					ATable.ElaboratedReferences.Add(LElaboratedReference);
+					elaboratedReference.TargetElaboratedTableVar.ElaboratedReference = elaboratedReference;
+					table.ElaboratedReferences.Add(elaboratedReference);
 				}
 
-			foreach (ElaboratedReference LReference in ATable.ElaboratedReferences)
-				if (LReference.ReferenceType == ReferenceType.Parent)
-					BuildLookupReferences(ACatalog, LReference.TargetElaboratedTableVar);
-				else if (LReference.ReferenceType == ReferenceType.Extension)
-					BuildLookupReferences(ACatalog, LReference.SourceElaboratedTableVar);
+			foreach (ElaboratedReference reference in table.ElaboratedReferences)
+				if (reference.ReferenceType == ReferenceType.Parent)
+					BuildLookupReferences(catalog, reference.TargetElaboratedTableVar);
+				else if (reference.ReferenceType == ReferenceType.Extension)
+					BuildLookupReferences(catalog, reference.SourceElaboratedTableVar);
 		}
 		
-		protected virtual void BuildDetailReferences(ElaboratedTableVar ATable)
+		protected virtual void BuildDetailReferences(ElaboratedTableVar table)
 		{
-			foreach (Schema.Reference LReference in ATable.TableVar.TargetReferences)
-				if (!LReference.SourceKey.IsUnique && !LReference.IsExcluded && FProgram.Plan.HasRight(LReference.SourceTable.GetRight(Schema.RightNames.Select)) && !IsInclusionReference(LReference) && IsIncludedReference(ATable, LReference, ReferenceType.Detail))
+			foreach (Schema.Reference reference in table.TableVar.TargetReferences)
+				if (!reference.SourceKey.IsUnique && !reference.IsExcluded && _program.Plan.HasRight(reference.SourceTable.GetRight(Schema.RightNames.Select)) && !IsInclusionReference(reference) && IsIncludedReference(table, reference, ReferenceType.Detail))
 				{
-					ElaboratedReference LElaboratedReference =
+					ElaboratedReference elaboratedReference =
 						new ElaboratedReference
 						(
 							this,
-							LReference,
+							reference,
 							ReferenceType.Detail,
-							new ElaboratedTableVar(this, LReference.SourceTable, DerivationUtility.IsSingularPageType(FPageType) ? (DerivationUtility.IsReadOnlyPageType(FPageType) ? DerivationUtility.CList : DerivationUtility.CBrowse) : FPageType),
-							ATable
+							new ElaboratedTableVar(this, reference.SourceTable, DerivationUtility.IsSingularPageType(_pageType) ? (DerivationUtility.IsReadOnlyPageType(_pageType) ? DerivationUtility.List : DerivationUtility.Browse) : _pageType),
+							table
 						);
-					LElaboratedReference.SourceElaboratedTableVar.ElaboratedReference = LElaboratedReference;
-					ATable.ElaboratedReferences.Add(LElaboratedReference);
+					elaboratedReference.SourceElaboratedTableVar.ElaboratedReference = elaboratedReference;
+					table.ElaboratedReferences.Add(elaboratedReference);
 				}
 			
-			foreach (ElaboratedReference LReference in ATable.ElaboratedReferences)
-				if (LReference.ReferenceType == ReferenceType.Parent)
-					BuildDetailReferences(LReference.TargetElaboratedTableVar);
-				else if (LReference.ReferenceType == ReferenceType.Extension)
-					BuildDetailReferences(LReference.SourceElaboratedTableVar);
+			foreach (ElaboratedReference reference in table.ElaboratedReferences)
+				if (reference.ReferenceType == ReferenceType.Parent)
+					BuildDetailReferences(reference.TargetElaboratedTableVar);
+				else if (reference.ReferenceType == ReferenceType.Extension)
+					BuildDetailReferences(reference.SourceElaboratedTableVar);
 		}
 		
 		// Stores the names of all tables in the expression to ensure uniqueness is maintained
-		protected List<string> FTableNames = new List<string>();
+		protected List<string> _tableNames = new List<string>();
 		
-		protected string InternalAddTableName(string ATableName)
+		protected string InternalAddTableName(string tableName)
 		{
-			string LResult = Schema.Object.Unqualify(ATableName);
-			if (FTableNames.Contains(LResult))
+			string result = Schema.Object.Unqualify(tableName);
+			if (_tableNames.Contains(result))
 			{
-				int LCounter = 0;
+				int counter = 0;
 				do
 				{
-					LCounter++;
-				} while (FTableNames.Contains(String.Format("{0}{1}", LResult, LCounter.ToString())));
-				LResult = String.Format("{0}{1}", LResult, LCounter.ToString());
+					counter++;
+				} while (_tableNames.Contains(String.Format("{0}{1}", result, counter.ToString())));
+				result = String.Format("{0}{1}", result, counter.ToString());
 			}
-			FTableNames.Add(LResult);
-			return LResult;
+			_tableNames.Add(result);
+			return result;
 		}
 
-		protected internal string AddTableName(string ATableName)
+		protected internal string AddTableName(string tableName)
 		{
-			return RootExpression.InternalAddTableName(ATableName);
+			return RootExpression.InternalAddTableName(tableName);
 		}
 		
 		// Stores the names of all references in the expression to ensure uniqueness is maintained
 		// Note that the derived reference names could be used for this purpose, but this would
 		// break backwards compatibility with forms and customizations created before the derived
 		// reference name was introduced (#23692).
-		protected List<string> FReferenceNames = new List<string>();
+		protected List<string> _referenceNames = new List<string>();
 		
-		protected string InternalAddReferenceName(string AReferenceName)
+		protected string InternalAddReferenceName(string referenceName)
 		{
-			string LResult = AReferenceName;
-			if (FReferenceNames.Contains(LResult))
+			string result = referenceName;
+			if (_referenceNames.Contains(result))
 			{
-				int LCounter = 0; 
+				int counter = 0; 
 				do
 				{
-					LCounter++;
-				} while (FReferenceNames.Contains(String.Format("{0}{1}", LResult, LCounter.ToString())));
-				LResult = String.Format("{0}{1}", LResult, LCounter.ToString());
+					counter++;
+				} while (_referenceNames.Contains(String.Format("{0}{1}", result, counter.ToString())));
+				result = String.Format("{0}{1}", result, counter.ToString());
 			}
-			FReferenceNames.Add(LResult);
-			return LResult;
+			_referenceNames.Add(result);
+			return result;
 		}
 		
-		protected internal string AddReferenceName(string AReferenceName)
+		protected internal string AddReferenceName(string referenceName)
 		{
-			return RootExpression.InternalAddReferenceName(AReferenceName);
+			return RootExpression.InternalAddReferenceName(referenceName);
 		}
 		
 		// AGroupName must always be a qualification of AUnqualifiedGroupName (e.g. AGroupName = "Address\City", AUnqualifiedGroupName = "City")
 		// It is assumed that groups already exist for the qualifier portions of AGroupName, in other words, this procedure only ensures that
 		// groups exist for the groups specified in AUnqualifiedGroupName
-		public ElaboratedGroup EnsureGroups(string AGroupName, string AUnqualifiedGroupName, string AGroupTitle, ElaboratedTableVar ATableVar, ElaboratedReference AReference)
+		public ElaboratedGroup EnsureGroups(string groupName, string unqualifiedGroupName, string groupTitle, ElaboratedTableVar tableVar, ElaboratedReference reference)
 		{
-			string LQualifier = AGroupName;
-			if (AUnqualifiedGroupName != String.Empty)
+			string qualifier = groupName;
+			if (unqualifiedGroupName != String.Empty)
 			{
-				int LUnqualifiedIndex = AGroupName.LastIndexOf(AUnqualifiedGroupName);
-				if (LUnqualifiedIndex != (AGroupName.Length - AUnqualifiedGroupName.Length))
-					throw new Frontend.Server.ServerException(Frontend.Server.ServerException.Codes.InvalidGrouping, AUnqualifiedGroupName, AGroupName);
+				int unqualifiedIndex = groupName.LastIndexOf(unqualifiedGroupName);
+				if (unqualifiedIndex != (groupName.Length - unqualifiedGroupName.Length))
+					throw new Frontend.Server.ServerException(Frontend.Server.ServerException.Codes.InvalidGrouping, unqualifiedGroupName, groupName);
 				
-				LQualifier = AGroupName.Substring(0, LUnqualifiedIndex);
+				qualifier = groupName.Substring(0, unqualifiedIndex);
 			}
 				
-			string[] LUnqualifiedGroupNames = AUnqualifiedGroupName.Split('\\');
+			string[] unqualifiedGroupNames = unqualifiedGroupName.Split('\\');
 			
-			StringBuilder LUnqualifiedGroupName = new StringBuilder();
-			ElaboratedGroup LGroup = null;
-			for (int LIndex = 0; LIndex < LUnqualifiedGroupNames.Length; LIndex++)
+			StringBuilder localUnqualifiedGroupName = new StringBuilder();
+			ElaboratedGroup group = null;
+			for (int index = 0; index < unqualifiedGroupNames.Length; index++)
 			{
-				if (LUnqualifiedGroupName.Length > 0)
-					LUnqualifiedGroupName.Append("\\");
-				LUnqualifiedGroupName.Append(LUnqualifiedGroupNames[LIndex]);
-				LGroup =
+				if (localUnqualifiedGroupName.Length > 0)
+					localUnqualifiedGroupName.Append("\\");
+				localUnqualifiedGroupName.Append(unqualifiedGroupNames[index]);
+				group =
 					EnsureGroup
 					(
 						String.Format
 						(
 							"{0}{1}", 
-							LQualifier, 
-							LUnqualifiedGroupName.ToString()
+							qualifier, 
+							localUnqualifiedGroupName.ToString()
 						), 
-						LUnqualifiedGroupName.ToString(), 
-						(LIndex < (LUnqualifiedGroupNames.Length - 1)) ? String.Empty : AGroupTitle,	// only use title for innermost group
-						ATableVar,
-						AReference
+						localUnqualifiedGroupName.ToString(), 
+						(index < (unqualifiedGroupNames.Length - 1)) ? String.Empty : groupTitle,	// only use title for innermost group
+						tableVar,
+						reference
 					);
 			}
-			return LGroup;
+			return group;
 		}
 		
-		public ElaboratedGroup EnsureGroup(string AGroupName, string AUnqualifiedGroupName, string AGroupTitle, ElaboratedTableVar ATableVar, ElaboratedReference AReference)
+		public ElaboratedGroup EnsureGroup(string groupName, string unqualifiedGroupName, string groupTitle, ElaboratedTableVar tableVar, ElaboratedReference reference)
 		{
-			int LGroupIndex = FGroups.IndexOf(AGroupName);
-			if (LGroupIndex >= 0)
-				return FGroups[LGroupIndex];
-			return AddGroup(AGroupName, AUnqualifiedGroupName, AGroupTitle, ATableVar, AReference);
+			int groupIndex = _groups.IndexOf(groupName);
+			if (groupIndex >= 0)
+				return _groups[groupIndex];
+			return AddGroup(groupName, unqualifiedGroupName, groupTitle, tableVar, reference);
 		}
 		
-		public ElaboratedGroup AddGroup(string AGroupName, string AUnqualifiedGroupName, string AGroupTitle, ElaboratedTableVar ATableVar, ElaboratedReference AReference)
+		public ElaboratedGroup AddGroup(string groupName, string unqualifiedGroupName, string groupTitle, ElaboratedTableVar tableVar, ElaboratedReference reference)
 		{
-			ElaboratedGroup LGroup = new ElaboratedGroup(AGroupName, AUnqualifiedGroupName);
+			ElaboratedGroup group = new ElaboratedGroup(groupName, unqualifiedGroupName);
 
-			if (AUnqualifiedGroupName != String.Empty)
+			if (unqualifiedGroupName != String.Empty)
 			{
-				if (ATableVar.TableVar.MetaData != null)
+				if (tableVar.TableVar.MetaData != null)
 				{
-					MetaData LGroupMetaData = DerivationUtility.ExtractTags(ATableVar.TableVar.MetaData.Tags, String.Format("Group.{0}", AUnqualifiedGroupName.Replace("\\", ".")), ATableVar.PageType);
-					LGroup.Properties.AddOrUpdateRange(LGroupMetaData.Tags);
+					MetaData groupMetaData = DerivationUtility.ExtractTags(tableVar.TableVar.MetaData.Tags, String.Format("Group.{0}", unqualifiedGroupName.Replace("\\", ".")), tableVar.PageType);
+					group.Properties.AddOrUpdateRange(groupMetaData.Tags);
 				}
 
-				if ((AReference != null) && (AReference.GroupMetaData != null))
-					LGroup.Properties.AddOrUpdateRange(AReference.GroupMetaData.Tags);
+				if ((reference != null) && (reference.GroupMetaData != null))
+					group.Properties.AddOrUpdateRange(reference.GroupMetaData.Tags);
 			}
 
-			string LTitle = DerivationUtility.GetTag(new MetaData(LGroup.Properties), "Title", ATableVar.PageType, String.Empty);
-			if ((LTitle == String.Empty) && (AGroupTitle != String.Empty))
-				LGroup.Properties.AddOrUpdate("Frontend.Title", AGroupTitle);
-			FGroups.Add(LGroup);
-			return LGroup;
+			string title = DerivationUtility.GetTag(new MetaData(group.Properties), "Title", tableVar.PageType, String.Empty);
+			if ((title == String.Empty) && (groupTitle != String.Empty))
+				group.Properties.AddOrUpdate("Frontend.Title", groupTitle);
+			_groups.Add(group);
+			return group;
 		}
 		
-		protected ElaboratedGroups FGroups = new ElaboratedGroups();
-		public ElaboratedGroups Groups { get { return FGroups; } }
+		protected ElaboratedGroups _groups = new ElaboratedGroups();
+		public ElaboratedGroups Groups { get { return _groups; } }
 		
 		// GroupStack
-		protected ElaboratedGroups FGroupStack = new ElaboratedGroups();
-		protected void InternalPushGroup(string AGroupName)
+		protected ElaboratedGroups _groupStack = new ElaboratedGroups();
+		protected void InternalPushGroup(string groupName)
 		{
-			InternalPushGroup(new ElaboratedGroup(AGroupName));
+			InternalPushGroup(new ElaboratedGroup(groupName));
 		}
 		
-		protected void InternalPushGroup(ElaboratedGroup AGroup)
+		protected void InternalPushGroup(ElaboratedGroup group)
 		{
-			FGroupStack.Add(AGroup);
+			_groupStack.Add(group);
 		}
 		
-		public void PushGroup(string AGroupName)
+		public void PushGroup(string groupName)
 		{
-			RootExpression.InternalPushGroup(AGroupName);
+			RootExpression.InternalPushGroup(groupName);
 		}
 		
-		public void PushGroup(ElaboratedGroup AGroup)
+		public void PushGroup(ElaboratedGroup group)
 		{
-			RootExpression.InternalPushGroup(AGroup);
+			RootExpression.InternalPushGroup(group);
 		}
 		
 		protected void InternalPopGroup()
 		{
-			FGroupStack.RemoveAt(FGroupStack.Count - 1);
+			_groupStack.RemoveAt(_groupStack.Count - 1);
 		}
 		
 		public void PopGroup()
@@ -476,14 +476,14 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		
 		protected string InternalCurrentGroupName()
 		{
-			StringBuilder LGroupName = new StringBuilder();
-			foreach (ElaboratedGroup LGroup in FGroupStack)
+			StringBuilder groupName = new StringBuilder();
+			foreach (ElaboratedGroup group in _groupStack)
 			{
-				if (LGroupName.Length > 0)
-					LGroupName.Append("\\");
-				LGroupName.Append(LGroup.Name);
+				if (groupName.Length > 0)
+					groupName.Append("\\");
+				groupName.Append(group.Name);
 			}
-			return LGroupName.ToString();
+			return groupName.ToString();
 		}
 		
 		public string CurrentGroupName()
@@ -492,73 +492,73 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		}
 
 		// PageType
-		protected string FPageType;
-		public string PageType { get { return FPageType; } }
+		protected string _pageType;
+		public string PageType { get { return _pageType; } }
 		
 		// DetailKeys
-		protected string[] FDetailKeys;
-		public string[] DetailKeys { get { return FDetailKeys; } }
+		protected string[] _detailKeys;
+		public string[] DetailKeys { get { return _detailKeys; } }
 		
 		// Invariant
-		protected Schema.Key FInvariant;
-		public Schema.Key Invariant { get { return FInvariant; } }
+		protected Schema.Key _invariant;
+		public Schema.Key Invariant { get { return _invariant; } }
 		
 		// InclusionReference
-		protected Schema.Reference FInclusionReference;
-		public Schema.Reference InclusionReference { get { return FInclusionReference; } }
+		protected Schema.Reference _inclusionReference;
+		public Schema.Reference InclusionReference { get { return _inclusionReference; } }
 		
 		// MainElaboratedTableVar		
-		protected ElaboratedTableVar FMainElaboratedTableVar;
+		protected ElaboratedTableVar _mainElaboratedTableVar;
 		public ElaboratedTableVar MainElaboratedTableVar
 		{
-			get { return FMainElaboratedTableVar; }
+			get { return _mainElaboratedTableVar; }
 			set
 			{
-				if (FMainElaboratedTableVar != null)
+				if (_mainElaboratedTableVar != null)
 					throw new Frontend.Server.ServerException(Frontend.Server.ServerException.Codes.MainTableSet);
 				if (value == null)
 					throw new Frontend.Server.ServerException(Frontend.Server.ServerException.Codes.MainTableRequired);
-				FMainElaboratedTableVar = value;
+				_mainElaboratedTableVar = value;
 			}
 		}
 		
-		protected ElaboratedTableVarColumns FColumns = new ElaboratedTableVarColumns();
-		public ElaboratedTableVarColumns Columns { get { return FColumns; } }
+		protected ElaboratedTableVarColumns _columns = new ElaboratedTableVarColumns();
+		public ElaboratedTableVarColumns Columns { get { return _columns; } }
 		
 		public Expression Expression
 		{
 			get
 			{
-				FColumns.Clear();
-				FMainElaboratedTableVar.AddColumns();
-				Expression LExpression = FMainElaboratedTableVar.Expression;
-				return LExpression;
+				_columns.Clear();
+				_mainElaboratedTableVar.AddColumns();
+				Expression expression = _mainElaboratedTableVar.Expression;
+				return expression;
 			}
 		}
 	}
 	
 	public class ElaboratedGroup : System.Object
 	{
-		public ElaboratedGroup(string AName) : base()
+		public ElaboratedGroup(string name) : base()
 		{
-			FName = AName;
-			FUnqualifiedName = AName;
+			_name = name;
+			_unqualifiedName = name;
 		}
 		
-		public ElaboratedGroup(string AName, string AUnqualifiedName) : base()
+		public ElaboratedGroup(string name, string unqualifiedName) : base()
 		{
-			FName = AName;
-			FUnqualifiedName = AUnqualifiedName;
+			_name = name;
+			_unqualifiedName = unqualifiedName;
 		}
 
-		private string FName;
-		public string Name { get { return FName; } }
+		private string _name;
+		public string Name { get { return _name; } }
 		
-		private string FUnqualifiedName;
-		public string UnqualifiedName { get { return FUnqualifiedName; } }
+		private string _unqualifiedName;
+		public string UnqualifiedName { get { return _unqualifiedName; } }
 		
-		private Tags FProperties = new Tags();
-		public Tags Properties { get { return FProperties; } }
+		private Tags _properties = new Tags();
+		public Tags Properties { get { return _properties; } }
 	}
 
 	#if USETYPEDLIST
@@ -576,179 +576,179 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 	public class ElaboratedGroups : BaseList<ElaboratedGroup>
 	{
 	#endif
-		public ElaboratedGroup this[string AName] { get { return this[IndexOf(AName)]; } }
+		public ElaboratedGroup this[string name] { get { return this[IndexOf(name)]; } }
 		
-		public int IndexOf(string AName)
+		public int IndexOf(string name)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (this[LIndex].Name == AName)
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if (this[index].Name == name)
+					return index;
 			return -1;
 		}
 		
-		public bool Contains(string AName)
+		public bool Contains(string name)
 		{
-			return IndexOf(AName) >= 0;
+			return IndexOf(name) >= 0;
 		}
 
-		public string ResolveGroupName(string AName)
+		public string ResolveGroupName(string name)
 		{
-			if (IndexOf(AName) != -1)
-				return AName;
+			if (IndexOf(name) != -1)
+				return name;
             
 			// seach for any group that ends in AName
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (this[LIndex].Name.EndsWith(AName))
-					return this[LIndex].Name;
+			for (int index = 0; index < Count; index++)
+				if (this[index].Name.EndsWith(name))
+					return this[index].Name;
 
-			throw new Frontend.Server.ServerException(Frontend.Server.ServerException.Codes.GroupNotFound, AName);
+			throw new Frontend.Server.ServerException(Frontend.Server.ServerException.Codes.GroupNotFound, name);
 		}
 	}
 	
 	public class ElaboratedTableVar : Object
 	{
-		public ElaboratedTableVar(ElaboratedExpression AExpression, Schema.TableVar ATableVar, string APageType) : base()
+		public ElaboratedTableVar(ElaboratedExpression expression, Schema.TableVar tableVar, string pageType) : base()
 		{
-			FElaboratedName = AExpression.AddTableName(ATableVar.Name);
-			InternalCreateElaboratedTableVar(AExpression, ATableVar, APageType, ATableVar.Name);
+			_elaboratedName = expression.AddTableName(tableVar.Name);
+			InternalCreateElaboratedTableVar(expression, tableVar, pageType, tableVar.Name);
 		}
 		
-		public ElaboratedTableVar(ElaboratedExpression AExpression, Schema.TableVar ATableVar, string APageType, string AElaboratedName) : base()
+		public ElaboratedTableVar(ElaboratedExpression expression, Schema.TableVar tableVar, string pageType, string elaboratedName) : base()
 		{
-			FElaboratedName = AElaboratedName;
-			InternalCreateElaboratedTableVar(AExpression, ATableVar, APageType, ATableVar.Name);
+			_elaboratedName = elaboratedName;
+			InternalCreateElaboratedTableVar(expression, tableVar, pageType, tableVar.Name);
 		}
 		
-		public ElaboratedTableVar(ElaboratedExpression AExpression, Schema.TableVar ATableVar, string APageType, string AElaboratedName, string AQuery) : base()
+		public ElaboratedTableVar(ElaboratedExpression expression, Schema.TableVar tableVar, string pageType, string elaboratedName, string query) : base()
 		{
-			FElaboratedName = AElaboratedName;
-			InternalCreateElaboratedTableVar(AExpression, ATableVar, APageType, AQuery);
+			_elaboratedName = elaboratedName;
+			InternalCreateElaboratedTableVar(expression, tableVar, pageType, query);
 		}
 
 		/// <remarks> Don't try to parse an expression with normalized white space, line comments and embedded quotes can invalidate the query. </remarks>
-		private string NormalizeWhiteSpace(string AString)
+		private string NormalizeWhiteSpace(string stringValue)
 		{
-			StringBuilder LResult = new StringBuilder();
-			bool LInWhiteSpace = false;
-			for (int LIndex = 0; LIndex < AString.Length; LIndex++)
+			StringBuilder result = new StringBuilder();
+			bool inWhiteSpace = false;
+			for (int index = 0; index < stringValue.Length; index++)
 			{
-				if (Char.IsWhiteSpace(AString, LIndex))
+				if (Char.IsWhiteSpace(stringValue, index))
 				{
-					if (!LInWhiteSpace)
+					if (!inWhiteSpace)
 					{
-						LInWhiteSpace = true;
-						LResult.Append(" ");
+						inWhiteSpace = true;
+						result.Append(" ");
 					}
 				}
 				else
 				{
-					LInWhiteSpace = false;
-					LResult.Append(AString[LIndex]);
+					inWhiteSpace = false;
+					result.Append(stringValue[index]);
 				}
 			}
 			
-			return LResult.ToString();
+			return result.ToString();
 		}
 		
-		private void InternalCreateElaboratedTableVar(ElaboratedExpression AExpression, Schema.TableVar ATableVar, string APageType, string AQuery)
+		private void InternalCreateElaboratedTableVar(ElaboratedExpression expression, Schema.TableVar tableVar, string pageType, string query)
 		{
-			FQuery = AQuery;
-			string LDefaultTitle = NormalizeWhiteSpace(FQuery);	// Don't try to parse an expression with normalized white space, line comments can invalidate the query
-			Expression LExpression = new Parser().ParseExpression(FQuery);
-			if ((LExpression is IdentifierExpression) || (LExpression is QualifierExpression))
-				LDefaultTitle = Schema.Object.Unqualify(LDefaultTitle);
-			FElaboratedExpression = AExpression;
-			FTableVar = ATableVar;
-			FPageType = APageType;
-			FTableTitle = 
+			_query = query;
+			string defaultTitle = NormalizeWhiteSpace(_query);	// Don't try to parse an expression with normalized white space, line comments can invalidate the query
+			Expression localExpression = new Parser().ParseExpression(_query);
+			if ((localExpression is IdentifierExpression) || (localExpression is QualifierExpression))
+				defaultTitle = Schema.Object.Unqualify(defaultTitle);
+			_elaboratedExpression = expression;
+			_tableVar = tableVar;
+			_pageType = pageType;
+			_tableTitle = 
 				DerivationUtility.GetTag
 				(
-					FTableVar.MetaData, 
+					_tableVar.MetaData, 
 					"Title", 
-					FPageType, 
-					LDefaultTitle
+					_pageType, 
+					defaultTitle
 				);
 				
 			// Gather the included column list
 			#if USEINCLUDETAG
-			foreach (Schema.TableVarColumn LColumn in FTableVar.Columns)
-				if (Convert.ToBoolean(DerivationUtility.GetTag(LColumn.MetaData, "Include", FPageType, FPageType == DerivationUtility.CPreview ? "False" : "True")))
-					FColumnNames.Add(LColumn.Name);
+			foreach (Schema.TableVarColumn column in _tableVar.Columns)
+				if (Convert.ToBoolean(DerivationUtility.GetTag(column.MetaData, "Include", _pageType, _pageType == DerivationUtility.Preview ? "False" : "True")))
+					_columnNames.Add(column.Name);
 			#endif
 
 			// If no columns are marked to be included, the default for the include tag is true				
 			#if INCLUDEBYDEFAULT
 			if (FColumnNames.Count == 0)
-				foreach (Schema.TableVarColumn LColumn in FTableVar.Columns)
+				foreach (Schema.TableVarColumn column in FTableVar.Columns)
 					#if USEINCLUDETAG
-					if (Convert.ToBoolean(DerivationUtility.GetTag(LColumn.MetaData, "Include", FPageType, "True")))
+					if (Convert.ToBoolean(DerivationUtility.GetTag(column.MetaData, "Include", FPageType, "True")))
 					#endif
-						FColumnNames.Add(LColumn.Name);
+						FColumnNames.Add(column.Name);
 			#endif
 						
-			int LInsertIndex = 0;
+			int insertIndex = 0;
 
 			// Ensure that key columns for the clustered key are preserved if this is not a preview page type
-			if (FPageType != DerivationUtility.CPreview)
+			if (_pageType != DerivationUtility.Preview)
 				// TODO: Refactor this, it _cannot_ access the compiler, this is way too much.
-				foreach (Schema.TableVarColumn LColumn in AExpression.Program.FindClusteringKey(FTableVar).Columns)
-					if (!FColumnNames.Contains(LColumn.Name))
+				foreach (Schema.TableVarColumn column in expression.Program.FindClusteringKey(_tableVar).Columns)
+					if (!_columnNames.Contains(column.Name))
 					{
-						FColumnNames.Insert(LInsertIndex, LColumn.Name);
-						LInsertIndex++;
+						_columnNames.Insert(insertIndex, column.Name);
+						insertIndex++;
 					}
 
 			// Ensure that the detail key columns are preserved, if they are part of this table var
-			foreach (Schema.Column LColumn in FTableVar.DataType.Columns)
-				if (((IList)FElaboratedExpression.DetailKeys).Contains(Schema.Object.Qualify(LColumn.Name, FElaboratedName)) && !FColumnNames.Contains(LColumn.Name))
+			foreach (Schema.Column column in _tableVar.DataType.Columns)
+				if (((IList)_elaboratedExpression.DetailKeys).Contains(Schema.Object.Qualify(column.Name, _elaboratedName)) && !_columnNames.Contains(column.Name))
 				{
-					FColumnNames.Insert(LInsertIndex, LColumn.Name);
-					LInsertIndex++;
+					_columnNames.Insert(insertIndex, column.Name);
+					insertIndex++;
 				}
 		}
 		
 		// ElaboratedExpression
-		protected ElaboratedExpression FElaboratedExpression;
-		public ElaboratedExpression ElaboratedExpression { get { return FElaboratedExpression; } }
+		protected ElaboratedExpression _elaboratedExpression;
+		public ElaboratedExpression ElaboratedExpression { get { return _elaboratedExpression; } }
 		
 		// ElaboratedName
-		protected string FElaboratedName = String.Empty;
-		public string ElaboratedName { get { return FElaboratedName; } }
+		protected string _elaboratedName = String.Empty;
+		public string ElaboratedName { get { return _elaboratedName; } }
 		
 		// TableVar
-		protected Schema.TableVar FTableVar;
-		public Schema.TableVar TableVar { get { return FTableVar; } }
+		protected Schema.TableVar _tableVar;
+		public Schema.TableVar TableVar { get { return _tableVar; } }
 		
 		// PageType
-		protected string FPageType;
-		public string PageType { get { return FPageType; } }
+		protected string _pageType;
+		public string PageType { get { return _pageType; } }
 		
 		// Query
-		protected string FQuery;
-		public string Query { get { return FQuery; } }
+		protected string _query;
+		public string Query { get { return _query; } }
 		
 		// TableTitle
-		protected string FTableTitle = String.Empty;
-		public string TableTitle { get { return FTableTitle; } }
+		protected string _tableTitle = String.Empty;
+		public string TableTitle { get { return _tableTitle; } }
 
 		// ColumnNames
-		protected List<string> FColumnNames = new List<string>();
-		public List<string> ColumnNames { get { return FColumnNames; } }
+		protected List<string> _columnNames = new List<string>();
+		public List<string> ColumnNames { get { return _columnNames; } }
 		
 		// ElaboratedReferences
-		protected ElaboratedReferences FElaboratedReferences = new ElaboratedReferences();
-		public ElaboratedReferences ElaboratedReferences { get { return FElaboratedReferences; } }
+		protected ElaboratedReferences _elaboratedReferences = new ElaboratedReferences();
+		public ElaboratedReferences ElaboratedReferences { get { return _elaboratedReferences; } }
 		
 		// ElaboratedReference
-		protected ElaboratedReference FElaboratedReference;
+		protected ElaboratedReference _elaboratedReference;
 		public ElaboratedReference ElaboratedReference
 		{
-			get { return FElaboratedReference; }
+			get { return _elaboratedReference; }
 			set
 			{
-				if (FElaboratedReference != null)
-					throw new Frontend.Server.ServerException(Frontend.Server.ServerException.Codes.ElaboratedReferenceSet, FElaboratedName);
-				FElaboratedReference = value;
+				if (_elaboratedReference != null)
+					throw new Frontend.Server.ServerException(Frontend.Server.ServerException.Codes.ElaboratedReferenceSet, _elaboratedName);
+				_elaboratedReference = value;
 				EnsureElaboratedReferenceColumns();
 			}
 		}
@@ -756,53 +756,53 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		protected void EnsureElaboratedReferenceColumns()
 		{
 			// Make sure that all the columns named by the including reference are included in the expression
-			foreach (Schema.TableVarColumn LColumn in (FElaboratedReference.ReferenceType == ReferenceType.Lookup) || (FElaboratedReference.ReferenceType == ReferenceType.Parent) ? FElaboratedReference.Reference.TargetKey.Columns : FElaboratedReference.Reference.SourceKey.Columns)
-				if (!FColumnNames.Contains(LColumn.Name))
-					FColumnNames.Add(LColumn.Name);
+			foreach (Schema.TableVarColumn column in (_elaboratedReference.ReferenceType == ReferenceType.Lookup) || (_elaboratedReference.ReferenceType == ReferenceType.Parent) ? _elaboratedReference.Reference.TargetKey.Columns : _elaboratedReference.Reference.SourceKey.Columns)
+				if (!_columnNames.Contains(column.Name))
+					_columnNames.Add(column.Name);
 		}
 		
-		protected bool FIsEmbedded; // Internal to determine whether this table has been embedded into the expression
+		protected bool _isEmbedded; // Internal to determine whether this table has been embedded into the expression
 		public bool IsEmbedded
 		{
-			get { return FIsEmbedded; }
+			get { return _isEmbedded; }
 			set
 			{
-				if (FIsEmbedded)
-					throw new Frontend.Server.ServerException(Frontend.Server.ServerException.Codes.EmbeddedSet, FElaboratedName); 
-				FIsEmbedded = value;
+				if (_isEmbedded)
+					throw new Frontend.Server.ServerException(Frontend.Server.ServerException.Codes.EmbeddedSet, _elaboratedName); 
+				_isEmbedded = value;
 			}
 		}
 		
-		protected void InsertColumn(ElaboratedReference AReference, Schema.TableVarColumn AColumn, bool AVisible, string AGroupName, string AUnqualifiedGroupName, string AGroupTitle, int AIndex)
+		protected void InsertColumn(ElaboratedReference reference, Schema.TableVarColumn column, bool visible, string groupName, string unqualifiedGroupName, string groupTitle, int index)
 		{
-			string LElaboratedName = Schema.Object.Qualify(AColumn.Name, ElaboratedName);
-			AVisible = AVisible && !((IList)FElaboratedExpression.RootExpression.DetailKeys).Contains(LElaboratedName) && Convert.ToBoolean(DerivationUtility.GetTag(AColumn.MetaData, "Visible", PageType, "True"));
-			bool LReadOnly = AColumn.ReadOnly || DerivationUtility.IsReadOnlyPageType(PageType) || Convert.ToBoolean(DerivationUtility.GetTag(AColumn.MetaData, "ReadOnly", PageType, "False")) || ((ElaboratedReference != null) && (ElaboratedReference.ReferenceType == ReferenceType.Lookup));
-			FElaboratedExpression.RootExpression.EnsureGroups(AGroupName, AUnqualifiedGroupName, AGroupTitle, this, AReference);
-			ElaboratedTableVarColumn LColumn = new ElaboratedTableVarColumn(this, AReference, AColumn, AVisible, LReadOnly, AGroupName);
-			FElaboratedExpression.RootExpression.Columns.Insert(AIndex, LColumn);
-			if (AReference != null)
-				AReference.Columns.Add(LColumn);
+			string elaboratedName = Schema.Object.Qualify(column.Name, ElaboratedName);
+			visible = visible && !((IList)_elaboratedExpression.RootExpression.DetailKeys).Contains(elaboratedName) && Convert.ToBoolean(DerivationUtility.GetTag(column.MetaData, "Visible", PageType, "True"));
+			bool readOnly = column.ReadOnly || DerivationUtility.IsReadOnlyPageType(PageType) || Convert.ToBoolean(DerivationUtility.GetTag(column.MetaData, "ReadOnly", PageType, "False")) || ((ElaboratedReference != null) && (ElaboratedReference.ReferenceType == ReferenceType.Lookup));
+			_elaboratedExpression.RootExpression.EnsureGroups(groupName, unqualifiedGroupName, groupTitle, this, reference);
+			ElaboratedTableVarColumn localColumn = new ElaboratedTableVarColumn(this, reference, column, visible, readOnly, groupName);
+			_elaboratedExpression.RootExpression.Columns.Insert(index, localColumn);
+			if (reference != null)
+				reference.Columns.Add(localColumn);
 		} 
 		
-		protected void ProcessKey(ElaboratedReference AReference, Schema.Key AKey)
+		protected void ProcessKey(ElaboratedReference reference, Schema.Key key)
 		{
-			foreach (ElaboratedTableVarColumn LReferenceColumn in AReference.Columns)
-				if (AKey.Columns.Contains(LReferenceColumn.Column.Name))
+			foreach (ElaboratedTableVarColumn referenceColumn in reference.Columns)
+				if (key.Columns.Contains(referenceColumn.Column.Name))
 				{
-					LReferenceColumn.IsMaster = true;
-					LReferenceColumn.Visible = false;
+					referenceColumn.IsMaster = true;
+					referenceColumn.Visible = false;
 				}
 		}
 		
-		protected void InternalInsertColumns(ref int AColumnIndex)
+		protected void InternalInsertColumns(ref int columnIndex)
 		{
 			// Add all columns
-			if (FElaboratedReference != null && (FElaboratedReference.ReferenceType == ReferenceType.Extension))
+			if (_elaboratedReference != null && (_elaboratedReference.ReferenceType == ReferenceType.Extension))
 			{
-				Schema.TableVarColumn LRowExistsColumn = new Schema.TableVarColumn(new Schema.Column("RowExists", FElaboratedExpression.Process.DataTypes.SystemBoolean), Schema.TableVarColumnType.RowExists);
-				LRowExistsColumn.MetaData = new MetaData();
-				LRowExistsColumn.MetaData.Tags.Add
+				Schema.TableVarColumn rowExistsColumn = new Schema.TableVarColumn(new Schema.Column("RowExists", _elaboratedExpression.Process.DataTypes.SystemBoolean), Schema.TableVarColumnType.RowExists);
+				rowExistsColumn.MetaData = new MetaData();
+				rowExistsColumn.MetaData.Tags.Add
 				(
 					new Tag
 					(
@@ -810,79 +810,79 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 						String.Format
 						(
 							Strings.Get("HasColumnTitle"), 
-							(FElaboratedReference.ReferenceTitle != null ? FElaboratedReference.ReferenceTitle : FElaboratedReference.SourceElaboratedTableVar.TableTitle)
+							(_elaboratedReference.ReferenceTitle != null ? _elaboratedReference.ReferenceTitle : _elaboratedReference.SourceElaboratedTableVar.TableTitle)
 						)
 					)
 				);
-				LRowExistsColumn.MetaData.Tags.Add(new Tag("Frontend.ElementType", "CheckBox"));
+				rowExistsColumn.MetaData.Tags.Add(new Tag("Frontend.ElementType", "CheckBox"));
 
-				if (FElaboratedReference.Reference.MetaData != null)
+				if (_elaboratedReference.Reference.MetaData != null)
 				{
-					MetaData LMetaData = DerivationUtility.ExtractTags(FElaboratedReference.Reference.MetaData.Tags, "RowExists", FElaboratedReference.TargetElaboratedTableVar.PageType);
-					LRowExistsColumn.MetaData.Tags.AddOrUpdateRange(LMetaData.Tags);
+					MetaData metaData = DerivationUtility.ExtractTags(_elaboratedReference.Reference.MetaData.Tags, "RowExists", _elaboratedReference.TargetElaboratedTableVar.PageType);
+					rowExistsColumn.MetaData.Tags.AddOrUpdateRange(metaData.Tags);
 				}
 
-				InsertColumn(null, LRowExistsColumn, true, FElaboratedExpression.CurrentGroupName(), String.Empty, String.Empty, AColumnIndex);
-				AColumnIndex++;
+				InsertColumn(null, rowExistsColumn, true, _elaboratedExpression.CurrentGroupName(), String.Empty, String.Empty, columnIndex);
+				columnIndex++;
 			}
 				
 			// Add each column, making it invisible if it is the right side of a reference
-			foreach (Schema.TableVarColumn LColumn in FTableVar.Columns)
+			foreach (Schema.TableVarColumn column in _tableVar.Columns)
 			{
-				if (FColumnNames.Contains(LColumn.Name))
+				if (_columnNames.Contains(column.Name))
 				{
-					string LGroupName = DerivationUtility.GetTag(LColumn.MetaData, "Group", FPageType, String.Empty);
-					bool LIsRightSide =
-						(FElaboratedReference != null) && 
+					string groupName = DerivationUtility.GetTag(column.MetaData, "Group", _pageType, String.Empty);
+					bool isRightSide =
+						(_elaboratedReference != null) && 
 						(
 							(
-								(FElaboratedReference.ReferenceType == ReferenceType.Extension) && 
-								FElaboratedReference.Reference.SourceKey.Columns.Contains(LColumn.Name)
+								(_elaboratedReference.ReferenceType == ReferenceType.Extension) && 
+								_elaboratedReference.Reference.SourceKey.Columns.Contains(column.Name)
 							) ||
 							(
-								(FElaboratedReference.ReferenceType == ReferenceType.Lookup) &&
-								FElaboratedReference.Reference.TargetKey.Columns.Contains(LColumn.Name)
+								(_elaboratedReference.ReferenceType == ReferenceType.Lookup) &&
+								_elaboratedReference.Reference.TargetKey.Columns.Contains(column.Name)
 							)
 						);
 					
-					InsertColumn(null, LColumn, !LIsRightSide, ElaboratedExpression.CombineGroups(FElaboratedExpression.CurrentGroupName(), LGroupName), LGroupName, Schema.Object.Unqualify(LGroupName.Replace("\\", ".")), AColumnIndex);
-					AColumnIndex++;
+					InsertColumn(null, column, !isRightSide, ElaboratedExpression.CombineGroups(_elaboratedExpression.CurrentGroupName(), groupName), groupName, Schema.Object.Unqualify(groupName.Replace("\\", ".")), columnIndex);
+					columnIndex++;
 				}
 			}			
 
 			// Add columns for lookup references
-			foreach (ElaboratedReference LReference in ElaboratedReferences)
+			foreach (ElaboratedReference reference in ElaboratedReferences)
 			{
-				if (LReference.ReferenceType == ReferenceType.Lookup)
+				if (reference.ReferenceType == ReferenceType.Lookup)
 				{
-					string LLookupGroupName = String.Format("{0}{1}", LReference.ElaboratedName, "Group");
+					string lookupGroupName = String.Format("{0}{1}", reference.ElaboratedName, "Group");
 
-					string LReferenceGroupName = null;
+					string referenceGroupName = null;
 
 					// Default group name for the reference is the group name for the appearing columns, if the group name for all appearing columns is the same
-					foreach (ElaboratedTableVarColumn LReferenceColumn in LReference.Columns)
+					foreach (ElaboratedTableVarColumn referenceColumn in reference.Columns)
 					{
-						if (LReferenceColumn.Visible)
+						if (referenceColumn.Visible)
 						{
-							if (LReferenceGroupName == null)
-								LReferenceGroupName = DerivationUtility.GetTag(LReferenceColumn.Column.MetaData, "Group", FPageType, String.Empty);
+							if (referenceGroupName == null)
+								referenceGroupName = DerivationUtility.GetTag(referenceColumn.Column.MetaData, "Group", _pageType, String.Empty);
 							else
-								if (LReferenceGroupName != DerivationUtility.GetTag(LReferenceColumn.Column.MetaData, "Group", FPageType, String.Empty))
+								if (referenceGroupName != DerivationUtility.GetTag(referenceColumn.Column.MetaData, "Group", _pageType, String.Empty))
 								{
-									LReferenceGroupName = String.Empty;
+									referenceGroupName = String.Empty;
 									break;
 								}
 						}
 					}
 					
-					if (LReferenceGroupName == null)
-						LReferenceGroupName = String.Empty;
+					if (referenceGroupName == null)
+						referenceGroupName = String.Empty;
 						
-					LReferenceGroupName = DerivationUtility.GetTag(LReference.Reference.MetaData, "Group", FPageType, LReference.ReferenceType.ToString(), LReferenceGroupName);
-					string LReferenceLookupGroupName = ElaboratedExpression.CombineGroups(LReferenceGroupName, LLookupGroupName);
-					string LFullReferenceGroupName = ElaboratedExpression.CombineGroups(ElaboratedExpression.CurrentGroupName(), LReferenceLookupGroupName);
+					referenceGroupName = DerivationUtility.GetTag(reference.Reference.MetaData, "Group", _pageType, reference.ReferenceType.ToString(), referenceGroupName);
+					string referenceLookupGroupName = ElaboratedExpression.CombineGroups(referenceGroupName, lookupGroupName);
+					string fullReferenceGroupName = ElaboratedExpression.CombineGroups(ElaboratedExpression.CurrentGroupName(), referenceLookupGroupName);
 					
-					ElaboratedExpression.RootExpression.EnsureGroups(LFullReferenceGroupName, LReferenceLookupGroupName, LReference.GroupTitle, this, LReference);
+					ElaboratedExpression.RootExpression.EnsureGroups(fullReferenceGroupName, referenceLookupGroupName, reference.GroupTitle, this, reference);
 
 /*
 					// Ensure that each column appearing in the reference is displayed within the same group.						
@@ -892,134 +892,134 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 */
 					
 					// insert all source columns after the last source column as lookup reference columns
-					int LColumnIndex = -1;
-					foreach (Schema.TableVarColumn LReferenceColumn in LReference.Reference.SourceKey.Columns)
+					int localColumnIndex = -1;
+					foreach (Schema.TableVarColumn referenceColumn in reference.Reference.SourceKey.Columns)
 					{
-						int LElaboratedColumnIndex = ElaboratedExpression.RootExpression.Columns.IndexOf(Schema.Object.Qualify(LReferenceColumn.Column.Name, ElaboratedName));
-						if (LElaboratedColumnIndex > LColumnIndex)
-							LColumnIndex = LElaboratedColumnIndex;
+						int elaboratedColumnIndex = ElaboratedExpression.RootExpression.Columns.IndexOf(Schema.Object.Qualify(referenceColumn.Column.Name, ElaboratedName));
+						if (elaboratedColumnIndex > localColumnIndex)
+							localColumnIndex = elaboratedColumnIndex;
 					}
-					if (LColumnIndex == -1)
-						LColumnIndex = ElaboratedExpression.RootExpression.Columns.Count;
+					if (localColumnIndex == -1)
+						localColumnIndex = ElaboratedExpression.RootExpression.Columns.Count;
 
-					foreach (Schema.TableVarColumn LReferenceColumn in LReference.Reference.SourceKey.Columns)
+					foreach (Schema.TableVarColumn referenceColumn in reference.Reference.SourceKey.Columns)
 					{
-						string LGroupName = DerivationUtility.GetTag(LReferenceColumn.MetaData, "Group", FPageType, String.Empty);
-						bool LIsRightSide =
-							(FElaboratedReference != null) && 
+						string groupName = DerivationUtility.GetTag(referenceColumn.MetaData, "Group", _pageType, String.Empty);
+						bool isRightSide =
+							(_elaboratedReference != null) && 
 							(
 								(
-									(FElaboratedReference.ReferenceType == ReferenceType.Extension) && 
-									FElaboratedReference.Reference.SourceKey.Columns.Contains(LReferenceColumn.Name)
+									(_elaboratedReference.ReferenceType == ReferenceType.Extension) && 
+									_elaboratedReference.Reference.SourceKey.Columns.Contains(referenceColumn.Name)
 								) ||
 								(
-									(FElaboratedReference.ReferenceType == ReferenceType.Lookup) &&
-									FElaboratedReference.Reference.TargetKey.Columns.Contains(LReferenceColumn.Name)
+									(_elaboratedReference.ReferenceType == ReferenceType.Lookup) &&
+									_elaboratedReference.Reference.TargetKey.Columns.Contains(referenceColumn.Name)
 								)
 							);
 
 						InsertColumn
 						(
-							LReference,
-							LReferenceColumn, 
-							!LIsRightSide,
-							LFullReferenceGroupName,
-							LReferenceLookupGroupName,
-							LReference.GroupTitle,
-							LColumnIndex
+							reference,
+							referenceColumn, 
+							!isRightSide,
+							fullReferenceGroupName,
+							referenceLookupGroupName,
+							reference.GroupTitle,
+							localColumnIndex
 						);
 						
-						if (AColumnIndex >= LColumnIndex)
-							AColumnIndex++;
-						LColumnIndex++;
+						if (columnIndex >= localColumnIndex)
+							columnIndex++;
+						localColumnIndex++;
 					}
 					
 					// If the intersection of the reference columns and the detail key of the derivation is non-empty
-					Schema.Key LSubsetKey = new Schema.Key();
+					Schema.Key subsetKey = new Schema.Key();
 					if (ElaboratedExpression.DetailKeys.Length > 0)
 					{
-						foreach (Schema.TableVarColumn LColumn in LReference.Reference.SourceKey.Columns)
+						foreach (Schema.TableVarColumn column in reference.Reference.SourceKey.Columns)
 						{
-							string LReferenceColumnName = Schema.Object.Qualify(LColumn.Name, ElaboratedName);
-							if ((FElaboratedReference != null) && (FElaboratedReference.ReferenceType == ReferenceType.Extension))
+							string referenceColumnName = Schema.Object.Qualify(column.Name, ElaboratedName);
+							if ((_elaboratedReference != null) && (_elaboratedReference.ReferenceType == ReferenceType.Extension))
 							{
-								int LExtensionKeyIndex = FElaboratedReference.Reference.SourceKey.Columns.IndexOf(LColumn.Name);
-								if (LExtensionKeyIndex >= 0)
-									LReferenceColumnName = Schema.Object.Qualify(FElaboratedReference.Reference.TargetKey.Columns[LExtensionKeyIndex].Name, FElaboratedReference.TargetElaboratedTableVar.ElaboratedName);
+								int extensionKeyIndex = _elaboratedReference.Reference.SourceKey.Columns.IndexOf(column.Name);
+								if (extensionKeyIndex >= 0)
+									referenceColumnName = Schema.Object.Qualify(_elaboratedReference.Reference.TargetKey.Columns[extensionKeyIndex].Name, _elaboratedReference.TargetElaboratedTableVar.ElaboratedName);
 							}
 							
-							if (((IList)ElaboratedExpression.DetailKeys).Contains(LReferenceColumnName))
-								LSubsetKey.Columns.Add(LColumn);
+							if (((IList)ElaboratedExpression.DetailKeys).Contains(referenceColumnName))
+								subsetKey.Columns.Add(column);
 						}
 					}
 					
-					if (LSubsetKey.Columns.Count > 0)
+					if (subsetKey.Columns.Count > 0)
 					{
 						// the reference is a detail lookup
-						LReference.IsDetailLookup = true;
+						reference.IsDetailLookup = true;
 
 						// set the key lookup reference columns invisible
-						ProcessKey(LReference, LSubsetKey);
+						ProcessKey(reference, subsetKey);
 					}
 					
-					foreach (Schema.Key LKey in TableVar.Keys)
+					foreach (Schema.Key key in TableVar.Keys)
 						// if the columns in the reference form a non-trivial proper superset of the key
-						if ((LKey.Columns.Count > 0) && LReference.Reference.SourceKey.Columns.IsProperSupersetOf(LKey.Columns))
+						if ((key.Columns.Count > 0) && reference.Reference.SourceKey.Columns.IsProperSupersetOf(key.Columns))
 						{
 							// the reference is a detail lookup
-							LReference.IsDetailLookup = true;
+							reference.IsDetailLookup = true;
 							
 							// set the key lookup reference columns invisible
-							ProcessKey(LReference, LKey);
+							ProcessKey(reference, key);
 						}
 					
 					// For every reference that is included in the current reference, mark the columns of that reference as master
-					foreach (ElaboratedReference LOtherReference in ElaboratedReferences)	
-						if (LOtherReference.IsEmbedded && (LOtherReference.ReferenceType == ReferenceType.Lookup) && !Object.ReferenceEquals(LReference, LOtherReference) && LReference.Reference.SourceKey.Columns.IsProperSupersetOf(LOtherReference.Reference.SourceKey.Columns))
-							ProcessKey(LReference, LOtherReference.Reference.SourceKey);
+					foreach (ElaboratedReference otherReference in ElaboratedReferences)	
+						if (otherReference.IsEmbedded && (otherReference.ReferenceType == ReferenceType.Lookup) && !Object.ReferenceEquals(reference, otherReference) && reference.Reference.SourceKey.Columns.IsProperSupersetOf(otherReference.Reference.SourceKey.Columns))
+							ProcessKey(reference, otherReference.Reference.SourceKey);
 							
 					// If this is an extension table and the intersection of the extension reference and the current reference is non-empty
 					if 
 					(
-						(FElaboratedReference != null) && 
-						(FElaboratedReference.ReferenceType == ReferenceType.Extension) && 
-						(FElaboratedReference.Reference.SourceKey.Columns.Intersect(LReference.Reference.SourceKey.Columns).Columns.Count > 0)
+						(_elaboratedReference != null) && 
+						(_elaboratedReference.ReferenceType == ReferenceType.Extension) && 
+						(_elaboratedReference.Reference.SourceKey.Columns.Intersect(reference.Reference.SourceKey.Columns).Columns.Count > 0)
 					)
 					{
 						// Search the parent table for references including the current reference
-						foreach (ElaboratedReference LOtherReference in FElaboratedReference.TargetElaboratedTableVar.ElaboratedReferences)
-							if (LOtherReference.IsEmbedded && (LOtherReference.ReferenceType == ReferenceType.Lookup) && LOtherReference.Reference.SourceKey.Columns.IsSubsetOf(FElaboratedReference.Reference.TargetKey.Columns))
+						foreach (ElaboratedReference otherReference in _elaboratedReference.TargetElaboratedTableVar.ElaboratedReferences)
+							if (otherReference.IsEmbedded && (otherReference.ReferenceType == ReferenceType.Lookup) && otherReference.Reference.SourceKey.Columns.IsSubsetOf(_elaboratedReference.Reference.TargetKey.Columns))
 							{
 								// Translate the source key for LOtherReference into the current table var
-								Schema.Key LKey = new Schema.Key();
-								foreach (Schema.TableVarColumn LColumn in LOtherReference.Reference.SourceKey.Columns)
-									LKey.Columns.Add(FElaboratedReference.Reference.SourceKey.Columns[FElaboratedReference.Reference.TargetKey.Columns.IndexOfName(LColumn.Name)]);
+								Schema.Key key = new Schema.Key();
+								foreach (Schema.TableVarColumn column in otherReference.Reference.SourceKey.Columns)
+									key.Columns.Add(_elaboratedReference.Reference.SourceKey.Columns[_elaboratedReference.Reference.TargetKey.Columns.IndexOfName(column.Name)]);
 									
 								// Mark the columns of the included reference master
-								if (LReference.Reference.SourceKey.Columns.IsProperSupersetOf(LKey.Columns))
-									ProcessKey(LReference, LKey);
+								if (reference.Reference.SourceKey.Columns.IsProperSupersetOf(key.Columns))
+									ProcessKey(reference, key);
 							}
 					}
 					
 					// All columns still appearing with the reference should not appear in the rest of the interface
-					foreach (ElaboratedTableVarColumn LReferenceColumn in LReference.Columns)
-						if (!LReferenceColumn.IsMaster)
-							ElaboratedExpression.RootExpression.Columns[Schema.Object.Qualify(LReferenceColumn.Column.Name, ElaboratedName)].Visible = false;
+					foreach (ElaboratedTableVarColumn referenceColumn in reference.Columns)
+						if (!referenceColumn.IsMaster)
+							ElaboratedExpression.RootExpression.Columns[Schema.Object.Qualify(referenceColumn.Column.Name, ElaboratedName)].Visible = false;
 						
-					if (LReference.IsEmbedded)
+					if (reference.IsEmbedded)
 					{
 						// insert all columns
-						FElaboratedExpression.PushGroup(LReferenceLookupGroupName);
+						_elaboratedExpression.PushGroup(referenceLookupGroupName);
 						try
 						{
-							int LSaveColumnIndex = LColumnIndex;
-							LReference.TargetElaboratedTableVar.InsertColumns(ref LColumnIndex);
-							if (AColumnIndex >= LSaveColumnIndex)
-								AColumnIndex += LColumnIndex - LSaveColumnIndex;
+							int saveColumnIndex = localColumnIndex;
+							reference.TargetElaboratedTableVar.InsertColumns(ref localColumnIndex);
+							if (columnIndex >= saveColumnIndex)
+								columnIndex += localColumnIndex - saveColumnIndex;
 						}
 						finally
 						{
-							FElaboratedExpression.PopGroup();
+							_elaboratedExpression.PopGroup();
 						}
 					}
 				}
@@ -1028,93 +1028,93 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 				
 		public void AddColumns()
 		{
-			int LColumnIndex = ElaboratedExpression.RootExpression.Columns.Count;
-			InsertColumns(ref LColumnIndex);
+			int columnIndex = ElaboratedExpression.RootExpression.Columns.Count;
+			InsertColumns(ref columnIndex);
 		}
 		
-		public static bool HasContributingColumns(ElaboratedTableVar ATableVar)
+		public static bool HasContributingColumns(ElaboratedTableVar tableVar)
 		{
-			foreach (ElaboratedReference LReference in ATableVar.ElaboratedReferences)
-				if ((LReference.ReferenceType == ReferenceType.Lookup) && HasContributingColumns(LReference.TargetElaboratedTableVar))
+			foreach (ElaboratedReference reference in tableVar.ElaboratedReferences)
+				if ((reference.ReferenceType == ReferenceType.Lookup) && HasContributingColumns(reference.TargetElaboratedTableVar))
 					return true;
 					
-			return (ATableVar.ElaboratedReference == null) || (ATableVar.ElaboratedReference.ReferenceType != ReferenceType.Lookup) || (ATableVar.ColumnNames.Count > ATableVar.ElaboratedReference.Reference.SourceKey.Columns.Count);
+			return (tableVar.ElaboratedReference == null) || (tableVar.ElaboratedReference.ReferenceType != ReferenceType.Lookup) || (tableVar.ColumnNames.Count > tableVar.ElaboratedReference.Reference.SourceKey.Columns.Count);
 		}
 		
-		public void InsertColumns(ref int AColumnIndex)
+		public void InsertColumns(ref int columnIndex)
 		{
 			// Do not add any columns if this is a lookup reference that will not add any information to the expression
 			if (!HasContributingColumns(this))
 				return;
 				
-			string LGroupName;
+			string groupName;
 
 			// Add parent columns
-			foreach (ElaboratedReference LReference in FElaboratedReferences)
-				if ((LReference.ReferenceType == ReferenceType.Parent) && LReference.IsEmbedded)
+			foreach (ElaboratedReference reference in _elaboratedReferences)
+				if ((reference.ReferenceType == ReferenceType.Parent) && reference.IsEmbedded)
 				{
 					// If the reference has a group tag specified, ensure the group and push it on the group stack
-					LGroupName = DerivationUtility.GetTag(LReference.Reference.MetaData, "Group", FPageType, LReference.ReferenceType.ToString(), String.Empty);
-					if (LGroupName != String.Empty)
-						ElaboratedExpression.PushGroup(ElaboratedExpression.RootExpression.EnsureGroups(ElaboratedExpression.CombineGroups(ElaboratedExpression.CurrentGroupName(), LGroupName), LGroupName, LReference.GroupTitle, this, LReference));
+					groupName = DerivationUtility.GetTag(reference.Reference.MetaData, "Group", _pageType, reference.ReferenceType.ToString(), String.Empty);
+					if (groupName != String.Empty)
+						ElaboratedExpression.PushGroup(ElaboratedExpression.RootExpression.EnsureGroups(ElaboratedExpression.CombineGroups(ElaboratedExpression.CurrentGroupName(), groupName), groupName, reference.GroupTitle, this, reference));
 					try
 					{
-						LReference.TargetElaboratedTableVar.InsertColumns(ref AColumnIndex);
+						reference.TargetElaboratedTableVar.InsertColumns(ref columnIndex);
 					}
 					finally
 					{
-						if (LGroupName != String.Empty)
+						if (groupName != String.Empty)
 							ElaboratedExpression.PopGroup();
 					}
 				}
 					
-			InternalInsertColumns(ref AColumnIndex);
+			InternalInsertColumns(ref columnIndex);
 				
 			// Add extension columns
-			foreach (ElaboratedReference LReference in FElaboratedReferences)
-				if ((LReference.ReferenceType == ReferenceType.Extension) && LReference.IsEmbedded)
+			foreach (ElaboratedReference reference in _elaboratedReferences)
+				if ((reference.ReferenceType == ReferenceType.Extension) && reference.IsEmbedded)
 				{
 					// If the reference has a group tag specified, ensure the group and push it on the group stack
-					LGroupName = DerivationUtility.GetTag(LReference.Reference.MetaData, "Group", FPageType, LReference.ReferenceType.ToString(), String.Empty);
-					if (LGroupName != String.Empty)
-						ElaboratedExpression.PushGroup(ElaboratedExpression.RootExpression.EnsureGroups(ElaboratedExpression.CombineGroups(ElaboratedExpression.CurrentGroupName(), LGroupName), LGroupName, LReference.GroupTitle, this, LReference));
+					groupName = DerivationUtility.GetTag(reference.Reference.MetaData, "Group", _pageType, reference.ReferenceType.ToString(), String.Empty);
+					if (groupName != String.Empty)
+						ElaboratedExpression.PushGroup(ElaboratedExpression.RootExpression.EnsureGroups(ElaboratedExpression.CombineGroups(ElaboratedExpression.CurrentGroupName(), groupName), groupName, reference.GroupTitle, this, reference));
 					try
 					{
-						LReference.SourceElaboratedTableVar.InsertColumns(ref AColumnIndex);
+						reference.SourceElaboratedTableVar.InsertColumns(ref columnIndex);
 					}
 					finally
 					{
-						if (LGroupName != String.Empty)
+						if (groupName != String.Empty)
 							ElaboratedExpression.PopGroup();
 					}
 				}
 		}
 		
-		private static void ProcessModifierTags(ElaboratedReference AReference, JoinExpression AJoinExpression)
+		private static void ProcessModifierTags(ElaboratedReference reference, JoinExpression joinExpression)
 		{
-			MetaData LModifiers = 
+			MetaData modifiers = 
 				DerivationUtility.ExtractTags
 				(
-					AReference.Reference.MetaData.Tags, 
+					reference.Reference.MetaData.Tags, 
 					"Modifier", 						
-					((AReference.ReferenceType == ReferenceType.Lookup) || (AReference.ReferenceType == ReferenceType.Parent)) 
-						? AReference.SourceElaboratedTableVar.PageType 
-						: AReference.TargetElaboratedTableVar.PageType,
-					AReference.ReferenceType.ToString()
+					((reference.ReferenceType == ReferenceType.Lookup) || (reference.ReferenceType == ReferenceType.Parent)) 
+						? reference.SourceElaboratedTableVar.PageType 
+						: reference.TargetElaboratedTableVar.PageType,
+					reference.ReferenceType.ToString()
 				);
 
 			#if USEHASHTABLEFORTAGS
-			foreach (Tag LTag in LModifiers.Tags)
+			foreach (Tag tag in modifiers.Tags)
 			{
 			#else
-			Tag LTag;
-			for (int LIndex = 0; LIndex < LModifiers.Tags.Count; LIndex++)
+			Tag tag;
+			for (int index = 0; index < modifiers.Tags.Count; index++)
 			{
-				LTag = LModifiers.Tags[LIndex];
+				tag = modifiers.Tags[index];
 			#endif
-				if (AJoinExpression.Modifiers == null)
-					AJoinExpression.Modifiers = new LanguageModifiers();
-				AJoinExpression.Modifiers.Add(new LanguageModifier(Schema.Object.Unqualify(LTag.Name), LTag.Value));
+				if (joinExpression.Modifiers == null)
+					joinExpression.Modifiers = new LanguageModifiers();
+				joinExpression.Modifiers.Add(new LanguageModifier(Schema.Object.Unqualify(tag.Name), tag.Value));
 			}
 		}
 
@@ -1123,176 +1123,176 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 			get
 			{
 				// Build the base expression (projecting over columnnames if necessary)				
-				Expression LExpression = new Parser().ParseExpression(FQuery);
-				if (ColumnNames.Count < FTableVar.DataType.Columns.Count)
+				Expression expression = new Parser().ParseExpression(_query);
+				if (ColumnNames.Count < _tableVar.DataType.Columns.Count)
 				{
-					ProjectExpression LProjectExpression = new ProjectExpression();
-					LProjectExpression.Expression = LExpression;
-					foreach (string LString in ColumnNames)
-						LProjectExpression.Columns.Add(new ColumnExpression(Schema.Object.EnsureRooted(LString)));
-					LExpression = LProjectExpression;
+					ProjectExpression projectExpression = new ProjectExpression();
+					projectExpression.Expression = expression;
+					foreach (string stringValue in ColumnNames)
+						projectExpression.Columns.Add(new ColumnExpression(Schema.Object.EnsureRooted(stringValue)));
+					expression = projectExpression;
 				}
-				LExpression = new RenameAllExpression(LExpression, FElaboratedName);
+				expression = new RenameAllExpression(expression, _elaboratedName);
 				
 				// Join all lookup references
-				foreach (ElaboratedReference LReference in FElaboratedReferences)
-					if ((LReference.ReferenceType == ReferenceType.Lookup) && LReference.IsEmbedded && HasContributingColumns(LReference.TargetElaboratedTableVar)) //(LReference.TargetElaboratedTableVar.ColumnNames.Count > LReference.Reference.TargetKey.Columns.Count)) // LReference.TargetElaboratedTableVar.TableVar.Columns.IsProperSupersetOf(LReference.Reference.TargetKey.Columns))
+				foreach (ElaboratedReference reference in _elaboratedReferences)
+					if ((reference.ReferenceType == ReferenceType.Lookup) && reference.IsEmbedded && HasContributingColumns(reference.TargetElaboratedTableVar)) //(LReference.TargetElaboratedTableVar.ColumnNames.Count > LReference.Reference.TargetKey.Columns.Count)) // LReference.TargetElaboratedTableVar.TableVar.Columns.IsProperSupersetOf(LReference.Reference.TargetKey.Columns))
 					{
-						LeftOuterJoinExpression LJoinExpression = new LeftOuterJoinExpression();
-						LJoinExpression.IsLookup = true;
-						if (LReference.IsDetailLookup)
+						LeftOuterJoinExpression joinExpression = new LeftOuterJoinExpression();
+						joinExpression.IsLookup = true;
+						if (reference.IsDetailLookup)
 						{
-							LJoinExpression.Modifiers = new LanguageModifiers();
-							LJoinExpression.Modifiers.Add(new LanguageModifier("IsDetailLookup", "True"));
+							joinExpression.Modifiers = new LanguageModifiers();
+							joinExpression.Modifiers.Add(new LanguageModifier("IsDetailLookup", "True"));
 						}
-						ProcessModifierTags(LReference, LJoinExpression);
-						LJoinExpression.LeftExpression = LExpression;
-						LJoinExpression.RightExpression = LReference.TargetElaboratedTableVar.Expression;
-						LJoinExpression.Condition = LReference.JoinExpression;
-						LExpression = LJoinExpression;
+						ProcessModifierTags(reference, joinExpression);
+						joinExpression.LeftExpression = expression;
+						joinExpression.RightExpression = reference.TargetElaboratedTableVar.Expression;
+						joinExpression.Condition = reference.JoinExpression;
+						expression = joinExpression;
 					}
 
 				// Join all the extension references
-				foreach (ElaboratedReference LReference in FElaboratedReferences)
-					if ((LReference.ReferenceType == ReferenceType.Extension) && LReference.IsEmbedded)
+				foreach (ElaboratedReference reference in _elaboratedReferences)
+					if ((reference.ReferenceType == ReferenceType.Extension) && reference.IsEmbedded)
 					{
-						LReference.SourceElaboratedTableVar.IsEmbedded = true;
-						LeftOuterJoinExpression LJoinExpression = new LeftOuterJoinExpression();
-						ProcessModifierTags(LReference, LJoinExpression);
-						LJoinExpression.LeftExpression = LExpression;
-						LJoinExpression.RightExpression = LReference.SourceElaboratedTableVar.Expression;
-						LJoinExpression.Condition = LReference.JoinExpression;
-						LJoinExpression.RowExistsColumn = new IncludeColumnExpression();
-						LJoinExpression.RowExistsColumn.ColumnAlias = Schema.Object.Qualify("RowExists", LReference.SourceElaboratedTableVar.ElaboratedName);
-						LExpression = LJoinExpression;
+						reference.SourceElaboratedTableVar.IsEmbedded = true;
+						LeftOuterJoinExpression joinExpression = new LeftOuterJoinExpression();
+						ProcessModifierTags(reference, joinExpression);
+						joinExpression.LeftExpression = expression;
+						joinExpression.RightExpression = reference.SourceElaboratedTableVar.Expression;
+						joinExpression.Condition = reference.JoinExpression;
+						joinExpression.RowExistsColumn = new IncludeColumnExpression();
+						joinExpression.RowExistsColumn.ColumnAlias = Schema.Object.Qualify("RowExists", reference.SourceElaboratedTableVar.ElaboratedName);
+						expression = joinExpression;
 					}
 
 				// Join all parent references
-				foreach (ElaboratedReference LReference in FElaboratedReferences)
-					if ((LReference.ReferenceType == ReferenceType.Parent) && LReference.IsEmbedded)
+				foreach (ElaboratedReference reference in _elaboratedReferences)
+					if ((reference.ReferenceType == ReferenceType.Parent) && reference.IsEmbedded)
 					{
-						LReference.TargetElaboratedTableVar.IsEmbedded = true;
-						InnerJoinExpression LJoinExpression = new InnerJoinExpression();
-						ProcessModifierTags(LReference, LJoinExpression);
-						LJoinExpression.LeftExpression = LReference.TargetElaboratedTableVar.Expression;
-						LJoinExpression.RightExpression = LExpression;
-						LJoinExpression.Condition = LReference.JoinExpression;
-						LExpression = LJoinExpression;
+						reference.TargetElaboratedTableVar.IsEmbedded = true;
+						InnerJoinExpression joinExpression = new InnerJoinExpression();
+						ProcessModifierTags(reference, joinExpression);
+						joinExpression.LeftExpression = reference.TargetElaboratedTableVar.Expression;
+						joinExpression.RightExpression = expression;
+						joinExpression.Condition = reference.JoinExpression;
+						expression = joinExpression;
 					}
 					
-				return LExpression;
+				return expression;
 			}
 		}
 	}
 	
 	public class ElaboratedTableVarColumn : Object
 	{
-		public ElaboratedTableVarColumn(ElaboratedTableVar ATable, Schema.TableVarColumn AColumn, bool AVisible, string AGroupName) : base()
+		public ElaboratedTableVarColumn(ElaboratedTableVar table, Schema.TableVarColumn column, bool visible, string groupName) : base()
 		{
-			FElaboratedTableVar = ATable;
-			FColumn = AColumn;
-			FVisible = AVisible;
-			FElaboratedName = Schema.Object.Qualify(AColumn.Name, FElaboratedTableVar.ElaboratedName);
-			FGroupName = AGroupName;
+			_elaboratedTableVar = table;
+			_column = column;
+			_visible = visible;
+			_elaboratedName = Schema.Object.Qualify(column.Name, _elaboratedTableVar.ElaboratedName);
+			_groupName = groupName;
 		}
 		
-		public ElaboratedTableVarColumn(ElaboratedTableVar ATable, ElaboratedReference AReference, Schema.TableVarColumn AColumn, bool AVisible, bool AReadOnly, string AGroupName) : base()
+		public ElaboratedTableVarColumn(ElaboratedTableVar table, ElaboratedReference reference, Schema.TableVarColumn column, bool visible, bool readOnly, string groupName) : base()
 		{
-			FElaboratedTableVar = ATable;
-			FElaboratedReference = AReference;
-			FColumn = AColumn;
-			FVisible = AVisible;
-			FReadOnly = AReadOnly;
-			if (AReference == null)
-				FElaboratedName = Schema.Object.Qualify(AColumn.Name, FElaboratedTableVar.ElaboratedName);
+			_elaboratedTableVar = table;
+			_elaboratedReference = reference;
+			_column = column;
+			_visible = visible;
+			_readOnly = readOnly;
+			if (reference == null)
+				_elaboratedName = Schema.Object.Qualify(column.Name, _elaboratedTableVar.ElaboratedName);
 			else
-				FElaboratedName = String.Format("{0}_{1}.{2}", FElaboratedReference.Reference.OriginatingReferenceName(), FElaboratedTableVar.ElaboratedName, AColumn.Name);
-			FGroupName = AGroupName;
+				_elaboratedName = String.Format("{0}_{1}.{2}", _elaboratedReference.Reference.OriginatingReferenceName(), _elaboratedTableVar.ElaboratedName, column.Name);
+			_groupName = groupName;
 		}
 		
-		public ElaboratedTableVarColumn(ElaboratedTableVar ATable, Schema.TableVarColumn AColumn, string AElaboratedName, bool AVisible, string AGroupName) : base()
+		public ElaboratedTableVarColumn(ElaboratedTableVar table, Schema.TableVarColumn column, string elaboratedName, bool visible, string groupName) : base()
 		{
-			FElaboratedTableVar = ATable;
-			FColumn = AColumn;
-			FVisible = AVisible;
-			FElaboratedName = AElaboratedName;
-			FGroupName = AGroupName;
+			_elaboratedTableVar = table;
+			_column = column;
+			_visible = visible;
+			_elaboratedName = elaboratedName;
+			_groupName = groupName;
 		}
 		
 		// ElaboratedName
-		protected string FElaboratedName = String.Empty;
-		public string ElaboratedName {	get { return FElaboratedName; } }
+		protected string _elaboratedName = String.Empty;
+		public string ElaboratedName {	get { return _elaboratedName; } }
 		
 		// ElaboratedTableVar
-		protected ElaboratedTableVar FElaboratedTableVar;
+		protected ElaboratedTableVar _elaboratedTableVar;
 		public ElaboratedTableVar ElaboratedTableVar
 		{
-			get { return FElaboratedTableVar; }
-			set { FElaboratedTableVar = value; }
+			get { return _elaboratedTableVar; }
+			set { _elaboratedTableVar = value; }
 		}
 		
 		// ElaboratedReference
-		protected ElaboratedReference FElaboratedReference;
+		protected ElaboratedReference _elaboratedReference;
 		public ElaboratedReference ElaboratedReference
 		{
-			get { return FElaboratedReference; }
-			set { FElaboratedReference = value; }
+			get { return _elaboratedReference; }
+			set { _elaboratedReference = value; }
 		}
 
 		// Schema.TableVarColumn
-		protected Schema.TableVarColumn FColumn;
-		public Schema.TableVarColumn Column { get { return FColumn; } }
+		protected Schema.TableVarColumn _column;
+		public Schema.TableVarColumn Column { get { return _column; } }
 		
 		// IsMaster
-		protected bool FIsMaster;
+		protected bool _isMaster;
 		public bool IsMaster
 		{
-			get { return FIsMaster; }
-			set { FIsMaster = value; }
+			get { return _isMaster; }
+			set { _isMaster = value; }
 		}
 		
 		// Visible
-		protected bool FVisible;
+		protected bool _visible;
 		public bool Visible
 		{
-			get { return FVisible; }
-			set { FVisible = value; }
+			get { return _visible; }
+			set { _visible = value; }
 		}
 		
 		// ReadOnly
-		protected bool FReadOnly;
+		protected bool _readOnly;
 		public bool ReadOnly
 		{
-			get { return FReadOnly; }
-			set { FReadOnly = value; }
+			get { return _readOnly; }
+			set { _readOnly = value; }
 		}
 		
 		// GroupName
-		protected string FGroupName = String.Empty;
+		protected string _groupName = String.Empty;
 		public string GroupName 
 		{ 
-			get { return FGroupName; } 
-			set { FGroupName = value == null ? String.Empty : value; }
+			get { return _groupName; } 
+			set { _groupName = value == null ? String.Empty : value; }
 		}
 
 		// TitleSeed
 		public string GetTitleSeed()
 		{
-			StringBuilder LTitleSeed = new StringBuilder();
-			ElaboratedReference LReference = FElaboratedTableVar.ElaboratedReference;
-			while (LReference != null)
+			StringBuilder titleSeed = new StringBuilder();
+			ElaboratedReference reference = _elaboratedTableVar.ElaboratedReference;
+			while (reference != null)
 			{
-				if (Convert.ToBoolean(DerivationUtility.GetTag(LReference.Reference.MetaData, "IncludeGroupTitle", "True")))
-					LTitleSeed.Insert(0, String.Format("{0} ", LReference.GroupTitle));
+				if (Convert.ToBoolean(DerivationUtility.GetTag(reference.Reference.MetaData, "IncludeGroupTitle", "True")))
+					titleSeed.Insert(0, String.Format("{0} ", reference.GroupTitle));
 				else
 					break;
 
-				if ((LReference.ReferenceType == ReferenceType.Parent) || (LReference.ReferenceType == ReferenceType.Lookup))
-					LReference = LReference.SourceElaboratedTableVar.ElaboratedReference;
+				if ((reference.ReferenceType == ReferenceType.Parent) || (reference.ReferenceType == ReferenceType.Lookup))
+					reference = reference.SourceElaboratedTableVar.ElaboratedReference;
 				else
-					LReference = LReference.TargetElaboratedTableVar.ElaboratedReference;
+					reference = reference.TargetElaboratedTableVar.ElaboratedReference;
 			}
-			return LTitleSeed.ToString();
+			return titleSeed.ToString();
 		}
 	}
 	
@@ -1311,28 +1311,28 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 	public class ElaboratedTableVarColumns : BaseList<ElaboratedTableVarColumn>
 	{
 	#endif
-		public ElaboratedTableVarColumn this[string AColumnName] 
+		public ElaboratedTableVarColumn this[string columnName] 
 		{ 
 			get 
 			{ 
-				int LIndex = IndexOf(AColumnName);
-				if (LIndex < 0)
-					throw new ServerException(ServerException.Codes.ColumnNotFound, AColumnName);
-				return this[LIndex]; 
+				int index = IndexOf(columnName);
+				if (index < 0)
+					throw new ServerException(ServerException.Codes.ColumnNotFound, columnName);
+				return this[index]; 
 			} 
 		}
 		
-		public int IndexOf(string AColumnName)
+		public int IndexOf(string columnName)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (String.Compare(AColumnName, this[LIndex].ElaboratedName) == 0)
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if (String.Compare(columnName, this[index].ElaboratedName) == 0)
+					return index;
 			return -1;
 		}
 		
-		public bool Contains(string AColumnName)
+		public bool Contains(string columnName)
 		{
-			return IndexOf(AColumnName) >= 0;
+			return IndexOf(columnName) >= 0;
 		}
 	}
 	
@@ -1340,175 +1340,175 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 	{
 		public ElaboratedReference
 		(
-			ElaboratedExpression AExpression, 
-			Schema.Reference AReference, 
-			ReferenceType AReferenceType, 
-			ElaboratedTableVar ASourceTable, 
-			ElaboratedTableVar ATargetTable
+			ElaboratedExpression expression, 
+			Schema.Reference reference, 
+			ReferenceType referenceType, 
+			ElaboratedTableVar sourceTable, 
+			ElaboratedTableVar targetTable
 		) : base()
 		{
-			FElaboratedExpression = AExpression;
-			FReference = AReference;
-			FReferenceType = AReferenceType;
-			FReferenceTitle = 
+			_elaboratedExpression = expression;
+			_reference = reference;
+			_referenceType = referenceType;
+			_referenceTitle = 
 				DerivationUtility.GetTag
 				(
-					FReference.MetaData,
+					_reference.MetaData,
 					"Title",
-					((FReferenceType == ReferenceType.Lookup) || (FReferenceType == ReferenceType.Parent)) ? ATargetTable.PageType : ASourceTable.PageType,
-					FReferenceType.ToString(),
-					((FReferenceType == ReferenceType.Lookup) || (FReferenceType == ReferenceType.Parent)) ? ATargetTable.TableTitle : ASourceTable.TableTitle
+					((_referenceType == ReferenceType.Lookup) || (_referenceType == ReferenceType.Parent)) ? targetTable.PageType : sourceTable.PageType,
+					_referenceType.ToString(),
+					((_referenceType == ReferenceType.Lookup) || (_referenceType == ReferenceType.Parent)) ? targetTable.TableTitle : sourceTable.TableTitle
 				);
 				
-			FPriority = 
+			_priority = 
 				Convert.ToInt32
 				(
 					DerivationUtility.GetTag
 					(
-						FReference.MetaData, 
+						_reference.MetaData, 
 						"Priority", 
-						((FReferenceType == ReferenceType.Lookup) || (FReferenceType == ReferenceType.Parent)) ? ATargetTable.PageType : ASourceTable.PageType,
-						FReferenceType.ToString(),
-						DerivationUtility.CDefaultPriority
+						((_referenceType == ReferenceType.Lookup) || (_referenceType == ReferenceType.Parent)) ? targetTable.PageType : sourceTable.PageType,
+						_referenceType.ToString(),
+						DerivationUtility.DefaultPriority
 					)
 				);
 
-			FSourceElaboratedTableVar = ASourceTable;
-			FTargetElaboratedTableVar = ATargetTable;
+			_sourceElaboratedTableVar = sourceTable;
+			_targetElaboratedTableVar = targetTable;
 
-			if ((FReferenceType == ReferenceType.Extension) && (ASourceTable.PageType == DerivationUtility.CPreview))
+			if ((_referenceType == ReferenceType.Extension) && (sourceTable.PageType == DerivationUtility.Preview))
 			{
-				FIsEmbedded =
+				_isEmbedded =
 					Convert.ToBoolean
 					(
 						DerivationUtility.GetExplicitPageTag
 						(
-							FReference.MetaData,
+							_reference.MetaData,
 							"Embedded",
-							ASourceTable.PageType,
-							FReferenceType.ToString(),
+							sourceTable.PageType,
+							_referenceType.ToString(),
 							"False"
 						)
 					);
 			}
 			else
 			{
-				FIsEmbedded = 
+				_isEmbedded = 
 					Convert.ToBoolean
 					(
 						DerivationUtility.GetTag
 						(
-							FReference.MetaData, 
+							_reference.MetaData, 
 							"Embedded",
-							((FReferenceType == ReferenceType.Lookup) || (FReferenceType == ReferenceType.Parent)) ? ASourceTable.PageType : ATargetTable.PageType,
-							FReferenceType.ToString(),
-							((FReferenceType == ReferenceType.Lookup) || (FReferenceType == ReferenceType.Parent)) ? "True" : "False"
+							((_referenceType == ReferenceType.Lookup) || (_referenceType == ReferenceType.Parent)) ? sourceTable.PageType : targetTable.PageType,
+							_referenceType.ToString(),
+							((_referenceType == ReferenceType.Lookup) || (_referenceType == ReferenceType.Parent)) ? "True" : "False"
 						)
 					);
 			}
 				
-			StringBuilder LName = new StringBuilder();
-			if ((FReferenceType == ReferenceType.Lookup) || (FReferenceType == ReferenceType.Parent))
+			StringBuilder name = new StringBuilder();
+			if ((_referenceType == ReferenceType.Lookup) || (_referenceType == ReferenceType.Parent))
 			{
-				for (int LIndex = 0; LIndex < FReference.SourceKey.Columns.Count; LIndex++)
+				for (int index = 0; index < _reference.SourceKey.Columns.Count; index++)
 				{
-					if (LName.Length > 0)
-						LName.Append(Keywords.Qualifier);
-					LName.Append(Schema.Object.Qualify(FReference.SourceKey.Columns[LIndex].Name, FSourceElaboratedTableVar.ElaboratedName));
+					if (name.Length > 0)
+						name.Append(Keywords.Qualifier);
+					name.Append(Schema.Object.Qualify(_reference.SourceKey.Columns[index].Name, _sourceElaboratedTableVar.ElaboratedName));
 				}
 			}
 			else
 			{
-				for (int LIndex = 0; LIndex < FReference.TargetKey.Columns.Count; LIndex++)
+				for (int index = 0; index < _reference.TargetKey.Columns.Count; index++)
 				{
-					if (LName.Length > 0)
-						LName.Append(Keywords.Qualifier);
-					LName.Append(Schema.Object.Qualify(FReference.TargetKey.Columns[LIndex].Name, FTargetElaboratedTableVar.ElaboratedName));
+					if (name.Length > 0)
+						name.Append(Keywords.Qualifier);
+					name.Append(Schema.Object.Qualify(_reference.TargetKey.Columns[index].Name, _targetElaboratedTableVar.ElaboratedName));
 				}
 			}
-			if (LName.Length > 0)
-				LName.Append(Keywords.Qualifier);
-			LName.Append(FReference.OriginatingReferenceName());
-			FElaboratedName = AExpression.AddReferenceName(LName.ToString());
+			if (name.Length > 0)
+				name.Append(Keywords.Qualifier);
+			name.Append(_reference.OriginatingReferenceName());
+			_elaboratedName = expression.AddReferenceName(name.ToString());
 			
-			if (FReference.MetaData != null)
-				FGroupMetaData = 
+			if (_reference.MetaData != null)
+				_groupMetaData = 
 					DerivationUtility.ExtractTags
 					(
-						FReference.MetaData.Tags, 
+						_reference.MetaData.Tags, 
 						"Group", 
-						((FReferenceType == ReferenceType.Lookup) || (FReferenceType == ReferenceType.Parent)) ? 
-							ASourceTable.PageType :
-							ATargetTable.PageType, 
-						FReferenceType.ToString()
+						((_referenceType == ReferenceType.Lookup) || (_referenceType == ReferenceType.Parent)) ? 
+							sourceTable.PageType :
+							targetTable.PageType, 
+						_referenceType.ToString()
 					);
 					
-			FGroupTitle = 
+			_groupTitle = 
 				DerivationUtility.GetTag
 				(
-					FGroupMetaData, 
+					_groupMetaData, 
 					"Title", 
-					((FReferenceType == ReferenceType.Lookup) || (FReferenceType == ReferenceType.Parent)) ? 
-						ASourceTable.PageType :
-						ATargetTable.PageType, 
-					FReferenceType.ToString(),
-					FReferenceTitle
+					((_referenceType == ReferenceType.Lookup) || (_referenceType == ReferenceType.Parent)) ? 
+						sourceTable.PageType :
+						targetTable.PageType, 
+					_referenceType.ToString(),
+					_referenceTitle
 				);
 		}
 		
 		// ElaboratedExpression
-		protected ElaboratedExpression FElaboratedExpression;
-		public ElaboratedExpression ElaboratedExpression { get { return FElaboratedExpression; } }
+		protected ElaboratedExpression _elaboratedExpression;
+		public ElaboratedExpression ElaboratedExpression { get { return _elaboratedExpression; } }
 		
 		// Reference
-		protected Schema.Reference FReference;
-		public Schema.Reference Reference { get { return FReference; } }
+		protected Schema.Reference _reference;
+		public Schema.Reference Reference { get { return _reference; } }
 
 		// Columns		
-		protected ElaboratedTableVarColumns FColumns = new ElaboratedTableVarColumns();
-		public ElaboratedTableVarColumns Columns { get { return FColumns; } }
+		protected ElaboratedTableVarColumns _columns = new ElaboratedTableVarColumns();
+		public ElaboratedTableVarColumns Columns { get { return _columns; } }
 		
 		// Priority
-		protected int FPriority;
-		public int Priority { get { return FPriority; } }
+		protected int _priority;
+		public int Priority { get { return _priority; } }
 		
 		// ReferenceType
-		protected ReferenceType FReferenceType;
-		public ReferenceType ReferenceType { get { return FReferenceType; } }
+		protected ReferenceType _referenceType;
+		public ReferenceType ReferenceType { get { return _referenceType; } }
 		
 		// ReferenceTitle
-		protected string FReferenceTitle;
-		public string ReferenceTitle { get { return FReferenceTitle; } }
+		protected string _referenceTitle;
+		public string ReferenceTitle { get { return _referenceTitle; } }
 		
 		// GroupTitle
-		protected string FGroupTitle;
-		public string GroupTitle { get { return FGroupTitle; } }
+		protected string _groupTitle;
+		public string GroupTitle { get { return _groupTitle; } }
 		
-		protected MetaData FGroupMetaData;
-		public MetaData GroupMetaData { get { return FGroupMetaData; } }
+		protected MetaData _groupMetaData;
+		public MetaData GroupMetaData { get { return _groupMetaData; } }
 		
 		// ElaboratedName
-		protected string FElaboratedName;
-		public string ElaboratedName { get { return FElaboratedName; } }
+		protected string _elaboratedName;
+		public string ElaboratedName { get { return _elaboratedName; } }
 		
 		// SourceElaboratedTableVar
-		protected ElaboratedTableVar FSourceElaboratedTableVar;
-		public ElaboratedTableVar SourceElaboratedTableVar { get { return FSourceElaboratedTableVar; } }
+		protected ElaboratedTableVar _sourceElaboratedTableVar;
+		public ElaboratedTableVar SourceElaboratedTableVar { get { return _sourceElaboratedTableVar; } }
 		
 		// TargetElaboratedTableVar
-		protected ElaboratedTableVar FTargetElaboratedTableVar;
-		public ElaboratedTableVar TargetElaboratedTableVar { get { return FTargetElaboratedTableVar; } }
+		protected ElaboratedTableVar _targetElaboratedTableVar;
+		public ElaboratedTableVar TargetElaboratedTableVar { get { return _targetElaboratedTableVar; } }
 		
 		// IsEmbedded
-		protected bool FIsEmbedded;
-		public bool IsEmbedded { get { return FIsEmbedded; } }
+		protected bool _isEmbedded;
+		public bool IsEmbedded { get { return _isEmbedded; } }
 		
 		// IsDetailLookup
-		protected bool FIsDetailLookup;
+		protected bool _isDetailLookup;
 		public bool IsDetailLookup 
 		{ 
-			get { return FIsDetailLookup; } 
-			set { FIsDetailLookup = value; }
+			get { return _isDetailLookup; } 
+			set { _isDetailLookup = value; }
 		}
 		
 		// JoinExpression
@@ -1516,11 +1516,11 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		{
 			get
 			{
-				Expression LJoinCondition = null;
-				BinaryExpression LColumnExpression;
-				for (int LIndex = 0; LIndex < FReference.SourceKey.Columns.Count; LIndex++)
+				Expression joinCondition = null;
+				BinaryExpression columnExpression;
+				for (int index = 0; index < _reference.SourceKey.Columns.Count; index++)
 				{
-					LColumnExpression = 
+					columnExpression = 
 						new BinaryExpression
 						(
 							new IdentifierExpression
@@ -1529,8 +1529,8 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 								(
 									Schema.Object.Qualify
 									(
-										FReference.SourceKey.Columns[LIndex].Name, 
-										FSourceElaboratedTableVar.ElaboratedName
+										_reference.SourceKey.Columns[index].Name, 
+										_sourceElaboratedTableVar.ElaboratedName
 									)
 								)
 							),
@@ -1541,55 +1541,55 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 								(
 									Schema.Object.Qualify
 									(
-										FReference.TargetKey.Columns[LIndex].Name,
-										FTargetElaboratedTableVar.ElaboratedName
+										_reference.TargetKey.Columns[index].Name,
+										_targetElaboratedTableVar.ElaboratedName
 									)
 								)
 							)
 						);
 						
-					if (LJoinCondition != null)
-						LJoinCondition =
+					if (joinCondition != null)
+						joinCondition =
 							new BinaryExpression
 							(
-								LJoinCondition,
+								joinCondition,
 								Instructions.And,
-								LColumnExpression
+								columnExpression
 							);
 					else
-						LJoinCondition = LColumnExpression;
+						joinCondition = columnExpression;
 				}
 				
-				return LJoinCondition;
+				return joinCondition;
 			}
 		}
 	}
 	
 	public class ElaboratedReferences : System.Object, IEnumerable
 	{
-		private const int CDefaultCapacity = 4;
-		private const int CDefaultGrowth = 4;
+		private const int DefaultCapacity = 4;
+		private const int DefaultGrowth = 4;
 	
 		public ElaboratedReferences() : base()
 		{
-			FElaboratedReferences = new ElaboratedReference[CDefaultCapacity];
+			_elaboratedReferences = new ElaboratedReference[DefaultCapacity];
 		}
 
-		private int FCount;		
-		public int Count { get { return FCount; } }
+		private int _count;		
+		public int Count { get { return _count; } }
 
-		private ElaboratedReference[] FElaboratedReferences;
-		public ElaboratedReference this[int AIndex] 
+		private ElaboratedReference[] _elaboratedReferences;
+		public ElaboratedReference this[int index] 
 		{ 
 			get 
 			{
-				if ((AIndex < 0) || AIndex >= FCount)
+				if ((index < 0) || index >= _count)
 					throw new IndexOutOfRangeException();
-				return FElaboratedReferences[AIndex]; 
+				return _elaboratedReferences[index]; 
 			} 
 		}
 		
-		private bool FOrderByPriorityOnly = false;
+		private bool _orderByPriorityOnly = false;
 		/// <summary>Determines whether to order the list of references by priority only, or by number of columns, then priority.</summary>
 		/// <remarks>
 		/// <para>By default, the list of references for a table var is ordered by number of columns, then priority. This ordering is in
@@ -1600,95 +1600,95 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		/// </remarks>
 		public bool OrderByPriorityOnly
 		{
-			get { return FOrderByPriorityOnly; }
+			get { return _orderByPriorityOnly; }
 			set 
 			{ 
-				if (FOrderByPriorityOnly != value)
+				if (_orderByPriorityOnly != value)
 				{
-					FOrderByPriorityOnly = value; 
-					if (FCount > 0)
+					_orderByPriorityOnly = value; 
+					if (_count > 0)
 					{
-						ElaboratedReference[] LReferences = FElaboratedReferences;
-						FElaboratedReferences = new ElaboratedReference[LReferences.Length];
-						FCount = 0;
-						for (int LIndex = 0; LIndex < LReferences.Length; LIndex++)
-							Add(LReferences[LIndex]);
+						ElaboratedReference[] references = _elaboratedReferences;
+						_elaboratedReferences = new ElaboratedReference[references.Length];
+						_count = 0;
+						for (int index = 0; index < references.Length; index++)
+							Add(references[index]);
 					}
 				}
 			}
 		}
 		
-		public void Add(ElaboratedReference AElaboratedReference)
+		public void Add(ElaboratedReference elaboratedReference)
 		{
-			EnsureSize(FCount + 1);
-			if (FOrderByPriorityOnly)
-				for (int LIndex = 0; LIndex < FCount; LIndex++)
+			EnsureSize(_count + 1);
+			if (_orderByPriorityOnly)
+				for (int index = 0; index < _count; index++)
 				{
-					if (AElaboratedReference.Priority < FElaboratedReferences[LIndex].Priority)
+					if (elaboratedReference.Priority < _elaboratedReferences[index].Priority)
 					{
-						InsertAt(AElaboratedReference, LIndex);
+						InsertAt(elaboratedReference, index);
 						return;
 					}
 				}
 			else
-				for (int LIndex = 0; LIndex < FCount; LIndex++)
+				for (int index = 0; index < _count; index++)
 				{
 					if 
 					(
 						(
-							(AElaboratedReference.Reference.SourceKey.Columns.Count == FElaboratedReferences[LIndex].Reference.SourceKey.Columns.Count) && 
-							(AElaboratedReference.Priority < FElaboratedReferences[LIndex].Priority)
+							(elaboratedReference.Reference.SourceKey.Columns.Count == _elaboratedReferences[index].Reference.SourceKey.Columns.Count) && 
+							(elaboratedReference.Priority < _elaboratedReferences[index].Priority)
 						) || 
-						(AElaboratedReference.Reference.SourceKey.Columns.Count < FElaboratedReferences[LIndex].Reference.SourceKey.Columns.Count)
+						(elaboratedReference.Reference.SourceKey.Columns.Count < _elaboratedReferences[index].Reference.SourceKey.Columns.Count)
 					)
 					{
-						InsertAt(AElaboratedReference, LIndex);
+						InsertAt(elaboratedReference, index);
 						return;
 					}
 				}
 
-			InsertAt(AElaboratedReference, FCount);
+			InsertAt(elaboratedReference, _count);
 		}
 		
-		public void Remove(ElaboratedReference AElaboratedReference)
+		public void Remove(ElaboratedReference elaboratedReference)
 		{
-			RemoveAt(IndexOf(AElaboratedReference));
+			RemoveAt(IndexOf(elaboratedReference));
 		}
 		
-		public int IndexOf(ElaboratedReference AElaboratedReference)
+		public int IndexOf(ElaboratedReference elaboratedReference)
 		{
-			for (int LIndex = 0; LIndex < FCount; LIndex++)
-				if (Object.ReferenceEquals(FElaboratedReferences[LIndex], AElaboratedReference))
-					return LIndex;
+			for (int index = 0; index < _count; index++)
+				if (Object.ReferenceEquals(_elaboratedReferences[index], elaboratedReference))
+					return index;
 			return -1;
 		}
 		
-		public bool Contains(ElaboratedReference AElaboratedReference)
+		public bool Contains(ElaboratedReference elaboratedReference)
 		{
-			return IndexOf(AElaboratedReference) >= 0;
+			return IndexOf(elaboratedReference) >= 0;
 		}
 		
-		private void InsertAt(ElaboratedReference AElaboratedReference, int AIndex)
+		private void InsertAt(ElaboratedReference elaboratedReference, int index)
 		{
-			Array.Copy(FElaboratedReferences, AIndex, FElaboratedReferences, AIndex + 1, FCount - AIndex);
-			FElaboratedReferences[AIndex] = AElaboratedReference;
-			FCount++;
+			Array.Copy(_elaboratedReferences, index, _elaboratedReferences, index + 1, _count - index);
+			_elaboratedReferences[index] = elaboratedReference;
+			_count++;
 		}
 		
-		private void RemoveAt(int AIndex)
+		private void RemoveAt(int index)
 		{
-			Array.Copy(FElaboratedReferences, AIndex + 1, FElaboratedReferences, AIndex, FCount - AIndex);
-			FCount--;
-			FElaboratedReferences[FCount] = null;
+			Array.Copy(_elaboratedReferences, index + 1, _elaboratedReferences, index, _count - index);
+			_count--;
+			_elaboratedReferences[_count] = null;
 		}
 		
-		private void EnsureSize(int ACount)
+		private void EnsureSize(int count)
 		{
-			if (FElaboratedReferences.Length < ACount)
+			if (_elaboratedReferences.Length < count)
 			{
-				ElaboratedReference[] LNewElaboratedReferences = new ElaboratedReference[FElaboratedReferences.Length + CDefaultGrowth];
-				Array.Copy(FElaboratedReferences, LNewElaboratedReferences, FCount);
-				FElaboratedReferences = LNewElaboratedReferences;
+				ElaboratedReference[] newElaboratedReferences = new ElaboratedReference[_elaboratedReferences.Length + DefaultGrowth];
+				Array.Copy(_elaboratedReferences, newElaboratedReferences, _count);
+				_elaboratedReferences = newElaboratedReferences;
 			}
 		}
 
@@ -1705,25 +1705,25 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 
 		public class ElaboratedReferenceEnumerator : IEnumerator
         {
-            public ElaboratedReferenceEnumerator(ElaboratedReferences AElaboratedReferences) : base()
+            public ElaboratedReferenceEnumerator(ElaboratedReferences elaboratedReferences) : base()
             {
-                FElaboratedReferences = AElaboratedReferences;
+                _elaboratedReferences = elaboratedReferences;
             }
             
-            private int FCurrent = -1;
-            private ElaboratedReferences FElaboratedReferences;
+            private int _current = -1;
+            private ElaboratedReferences _elaboratedReferences;
 
-            public object Current { get { return FElaboratedReferences[FCurrent]; } }
+            public object Current { get { return _elaboratedReferences[_current]; } }
 
             public void Reset()
             {
-                FCurrent = -1;
+                _current = -1;
             }
 
             public bool MoveNext()
             {
-				FCurrent++;
-				return FCurrent < FElaboratedReferences.Count;
+				_current++;
+				return _current < _elaboratedReferences.Count;
             }
         }
 	}

@@ -19,53 +19,53 @@ namespace Alphora.Dataphor.DAE.Server
 	// RemoteServerCursor
 	public class RemoteServerCursor : RemoteServerChildObject, IRemoteServerCursor
 	{
-		public RemoteServerCursor(RemoteServerExpressionPlan APlan, ServerCursor AServerCursor) : base()
+		public RemoteServerCursor(RemoteServerExpressionPlan plan, ServerCursor serverCursor) : base()
 		{
-			FPlan = APlan;
-			FServerCursor = AServerCursor;
+			_plan = plan;
+			_serverCursor = serverCursor;
 			AttachServerCursor();
 		}
 		
 		private void AttachServerCursor()
 		{
-			FServerCursor.Disposed += new EventHandler(FServerCursorDisposed);
+			_serverCursor.Disposed += new EventHandler(FServerCursorDisposed);
 		}
 
-		void FServerCursorDisposed(object ASender, EventArgs AArgs)
+		void FServerCursorDisposed(object sender, EventArgs args)
 		{
 			DetachServerCursor();
-			FServerCursor = null;
+			_serverCursor = null;
 			Dispose();
 		}
 		
 		private void DetachServerCursor()
 		{
-			FServerCursor.Disposed -= new EventHandler(FServerCursorDisposed);
+			_serverCursor.Disposed -= new EventHandler(FServerCursorDisposed);
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (FServerCursor != null)
+			if (_serverCursor != null)
 			{
 				DetachServerCursor();
-				FServerCursor.Dispose();
-				FServerCursor = null;
+				_serverCursor.Dispose();
+				_serverCursor = null;
 			}
 
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 		
-		private RemoteServerExpressionPlan FPlan;
-		public RemoteServerExpressionPlan Plan { get { return FPlan; } }
+		private RemoteServerExpressionPlan _plan;
+		public RemoteServerExpressionPlan Plan { get { return _plan; } }
 		
-		IRemoteServerExpressionPlan IRemoteServerCursor.Plan { get { return FPlan; } }
+		IRemoteServerExpressionPlan IRemoteServerCursor.Plan { get { return _plan; } }
 		
-		private ServerCursor FServerCursor;
-		internal ServerCursor ServerCursor { get { return FServerCursor; } }
+		private ServerCursor _serverCursor;
+		internal ServerCursor ServerCursor { get { return _serverCursor; } }
 		
-		protected Exception WrapException(Exception AException)
+		protected Exception WrapException(Exception exception)
 		{
-			return RemoteServer.WrapException(AException);
+			return RemoteServer.WrapException(exception);
 		}
 		
 		// IActive
@@ -73,66 +73,66 @@ namespace Alphora.Dataphor.DAE.Server
 		// Open        
 		public void Open()
 		{
-			FServerCursor.Open();
+			_serverCursor.Open();
 			// TODO: Out params
 		}
         
 		// Close
 		public void Close()
 		{
-			FServerCursor.Close();
+			_serverCursor.Close();
 		}
         
 		// Active
 		public bool Active
 		{
-			get { return FServerCursor.Active; }
-			set { FServerCursor.Active = value; }
+			get { return _serverCursor.Active; }
+			set { _serverCursor.Active = value; }
 		}
         
 		// Isolation
-		public CursorIsolation Isolation { get { return FServerCursor.Isolation; } }
+		public CursorIsolation Isolation { get { return _serverCursor.Isolation; } }
 		
 		// CursorType
-		public CursorType CursorType { get { return FServerCursor.CursorType; } }
+		public CursorType CursorType { get { return _serverCursor.CursorType; } }
 
 		// Capabilities		
-		public CursorCapability Capabilities { get { return FServerCursor.Capabilities; } }
+		public CursorCapability Capabilities { get { return _serverCursor.Capabilities; } }
 
-		public bool Supports(CursorCapability ACapability)
+		public bool Supports(CursorCapability capability)
 		{
-			return FServerCursor.Supports(ACapability);
+			return _serverCursor.Supports(capability);
 		}
 
-		private Schema.IRowType GetRowType(RemoteRowHeader AHeader)
+		private Schema.IRowType GetRowType(RemoteRowHeader header)
 		{
-			Schema.IRowType LRowType = new Schema.RowType();
-			for (int LIndex = 0; LIndex < AHeader.Columns.Length; LIndex++)
-				LRowType.Columns.Add(FServerCursor.SourceRowType.Columns[AHeader.Columns[LIndex]].Copy());
-			return LRowType;
+			Schema.IRowType rowType = new Schema.RowType();
+			for (int index = 0; index < header.Columns.Length; index++)
+				rowType.Columns.Add(_serverCursor.SourceRowType.Columns[header.Columns[index]].Copy());
+			return rowType;
 		}
 		
 		// IRemoteServerCursor
 		/// <summary> Returns the current row of the cursor. </summary>
-		/// <param name="AHeader"> A <see cref="RemoteRowHeader"/> structure containing the columns to be returned. </param>
+		/// <param name="header"> A <see cref="RemoteRowHeader"/> structure containing the columns to be returned. </param>
 		/// <returns> A <see cref="RemoteRowBody"/> structure containing the row information. </returns>
-		public RemoteRowBody Select(RemoteRowHeader AHeader, ProcessCallInfo ACallInfo)
+		public RemoteRowBody Select(RemoteRowHeader header, ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				Row LRow = new Row(FPlan.Process.ServerProcess.ValueManager, GetRowType(AHeader));
+				Row row = new Row(_plan.Process.ServerProcess.ValueManager, GetRowType(header));
 				try
 				{
-					LRow.ValuesOwned = false;
-					FServerCursor.Select(LRow);
-					RemoteRowBody LBody = new RemoteRowBody();
-					LBody.Data = LRow.AsPhysical;
-					return LBody;
+					row.ValuesOwned = false;
+					_serverCursor.Select(row);
+					RemoteRowBody body = new RemoteRowBody();
+					body.Data = row.AsPhysical;
+					return body;
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 			}
 			catch (Exception E)
@@ -141,23 +141,23 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
         
-		public RemoteRowBody Select(ProcessCallInfo ACallInfo)
+		public RemoteRowBody Select(ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				Row LRow = new Row(FPlan.Process.ServerProcess.ValueManager, FServerCursor.SourceRowType);
+				Row row = new Row(_plan.Process.ServerProcess.ValueManager, _serverCursor.SourceRowType);
 				try
 				{
-					LRow.ValuesOwned = false;
-					FServerCursor.Select(LRow);
-					RemoteRowBody LBody = new RemoteRowBody();
-					LBody.Data = LRow.AsPhysical;
-					return LBody;
+					row.ValuesOwned = false;
+					_serverCursor.Select(row);
+					RemoteRowBody body = new RemoteRowBody();
+					body.Data = row.AsPhysical;
+					return body;
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 			}
 			catch (Exception E)
@@ -166,48 +166,48 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
         
-		private RemoteFetchData InternalFetch(Schema.IRowType ARowType, Guid[] ABookmarks, int ACount, bool ASkipCurrent)
+		private RemoteFetchData InternalFetch(Schema.IRowType rowType, Guid[] bookmarks, int count, bool skipCurrent)
 		{
-			Row[] LRows = new Row[Math.Abs(ACount)];
+			Row[] rows = new Row[Math.Abs(count)];
 			try
 			{
-				for (int LIndex = 0; LIndex < LRows.Length; LIndex++)
+				for (int index = 0; index < rows.Length; index++)
 				{
-					LRows[LIndex] = new Row(FPlan.Process.ServerProcess.ValueManager, ARowType);
-					LRows[LIndex].ValuesOwned = false;
+					rows[index] = new Row(_plan.Process.ServerProcess.ValueManager, rowType);
+					rows[index].ValuesOwned = false;
 				}
 				
-				CursorGetFlags LFlags;
-				int LCount = FServerCursor.Fetch(LRows, ABookmarks, ACount, ASkipCurrent, out LFlags);
+				CursorGetFlags flags;
+				int localCount = _serverCursor.Fetch(rows, bookmarks, count, skipCurrent, out flags);
 				
-				RemoteFetchData LFetchData = new RemoteFetchData();
-				LFetchData.Body = new RemoteRowBody[LCount];
-				for (int LIndex = 0; LIndex < LCount; LIndex++)
-					LFetchData.Body[LIndex].Data = LRows[LIndex].AsPhysical;
+				RemoteFetchData fetchData = new RemoteFetchData();
+				fetchData.Body = new RemoteRowBody[localCount];
+				for (int index = 0; index < localCount; index++)
+					fetchData.Body[index].Data = rows[index].AsPhysical;
 				
-				LFetchData.Flags = LFlags;
-				return LFetchData;
+				fetchData.Flags = flags;
+				return fetchData;
 			}
 			finally
 			{
-				for (int LIndex = 0; LIndex < LRows.Length; LIndex++)
-					if (LRows[LIndex] != null)
-						LRows[LIndex].Dispose();
+				for (int index = 0; index < rows.Length; index++)
+					if (rows[index] != null)
+						rows[index].Dispose();
 			}
 		}
         
 		/// <summary> Returns the requested number of rows from the cursor. </summary>
-		/// <param name="AHeader"> A <see cref="RemoteRowHeader"/> structure containing the columns to be returned. </param>
-		/// <param name='ACount'> The number of rows to fetch, with a negative number indicating backwards movement. </param>
+		/// <param name="header"> A <see cref="RemoteRowHeader"/> structure containing the columns to be returned. </param>
+		/// <param name='count'> The number of rows to fetch, with a negative number indicating backwards movement. </param>
 		/// <returns> A <see cref="RemoteFetchData"/> structure containing the result of the fetch. </returns>
-		public RemoteFetchData Fetch(RemoteRowHeader AHeader, out Guid[] ABookmarks, int ACount, bool ASkipCurrent, ProcessCallInfo ACallInfo)
+		public RemoteFetchData Fetch(RemoteRowHeader header, out Guid[] bookmarks, int count, bool skipCurrent, ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 
 			try
 			{
-				ABookmarks = new Guid[Math.Abs(ACount)];
-				return InternalFetch(GetRowType(AHeader), ABookmarks, ACount, ASkipCurrent);
+				bookmarks = new Guid[Math.Abs(count)];
+				return InternalFetch(GetRowType(header), bookmarks, count, skipCurrent);
 			}
 			catch (Exception E)
 			{
@@ -215,13 +215,13 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
         
-		public RemoteFetchData Fetch(out Guid[] ABookmarks, int ACount, bool ASkipCurrent, ProcessCallInfo ACallInfo)
+		public RemoteFetchData Fetch(out Guid[] bookmarks, int count, bool skipCurrent, ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				ABookmarks = new Guid[Math.Abs(ACount)];
-				return InternalFetch(FServerCursor.SourceRowType, ABookmarks, ACount, ASkipCurrent);
+				bookmarks = new Guid[Math.Abs(count)];
+				return InternalFetch(_serverCursor.SourceRowType, bookmarks, count, skipCurrent);
 			}
 			catch (Exception E)
 			{
@@ -231,12 +231,12 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		/// <summary> Indicates whether the cursor is on the BOF crack, the EOF crack, or both, which indicates an empty cursor. </summary>
 		/// <returns> A <see cref="CursorGetFlags"/> value indicating the current state of the cursor. </returns>
-		public CursorGetFlags GetFlags(ProcessCallInfo ACallInfo)
+		public CursorGetFlags GetFlags(ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				return FServerCursor.GetFlags();
+				return _serverCursor.GetFlags();
 			}
 			catch (Exception E)
 			{
@@ -245,16 +245,16 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		/// <summary> Provides a mechanism for navigating the cursor by a specified number of rows. </summary>        
-		/// <param name='ADelta'> The number of rows to move by, with a negative value indicating backwards movement. </param>
+		/// <param name='delta'> The number of rows to move by, with a negative value indicating backwards movement. </param>
 		/// <returns> A <see cref="RemoteMoveData"/> structure containing the result of the move. </returns>
-		public RemoteMoveData MoveBy(int ADelta, ProcessCallInfo ACallInfo)
+		public RemoteMoveData MoveBy(int delta, ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				RemoteMoveData LMoveData = new RemoteMoveData();
-				LMoveData.Count = FServerCursor.MoveBy(ADelta, out LMoveData.Flags);
-				return LMoveData;
+				RemoteMoveData moveData = new RemoteMoveData();
+				moveData.Count = _serverCursor.MoveBy(delta, out moveData.Flags);
+				return moveData;
 			}
 			catch (Exception E)
 			{
@@ -264,12 +264,12 @@ namespace Alphora.Dataphor.DAE.Server
 
 		/// <summary> Positions the cursor on the BOF crack. </summary>
 		/// <returns> A <see cref="CursorGetFlags"/> value indicating the state of the cursor after the move. </returns>
-		public CursorGetFlags First(ProcessCallInfo ACallInfo)
+		public CursorGetFlags First(ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				return FServerCursor.MoveTo(true);
+				return _serverCursor.MoveTo(true);
 			}
 			catch (Exception E)
 			{
@@ -279,12 +279,12 @@ namespace Alphora.Dataphor.DAE.Server
 
 		/// <summary> Positions the cursor on the EOF crack. </summary>
 		/// <returns> A <see cref="CursorGetFlags"/> value indicating the state of the cursor after the move. </returns>
-		public CursorGetFlags Last(ProcessCallInfo ACallInfo)
+		public CursorGetFlags Last(ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				return FServerCursor.MoveTo(false);
+				return _serverCursor.MoveTo(false);
 			}
 			catch (Exception E)
 			{
@@ -294,12 +294,12 @@ namespace Alphora.Dataphor.DAE.Server
 
 		/// <summary> Resets the server-side cursor, causing any data to be re-read and leaving the cursor on the BOF crack. </summary>        
 		/// <returns> A <see cref="CursorGetFlags"/> value indicating the state of the cursor after the reset. </returns>
-		public CursorGetFlags Reset(ProcessCallInfo ACallInfo)
+		public CursorGetFlags Reset(ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				return FServerCursor.ResetWithFlags();
+				return _serverCursor.ResetWithFlags();
 			}
 			catch (Exception E)
 			{
@@ -308,25 +308,25 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		/// <summary> Inserts the given <see cref="RemoteRow"/> into the cursor. </summary>        
-		/// <param name="ARow"> A <see cref="RemoteRow"/> structure containing the Row to be inserted. </param>
-		public void Insert(RemoteRow ARow, BitArray AValueFlags, ProcessCallInfo ACallInfo)
+		/// <param name="row"> A <see cref="RemoteRow"/> structure containing the Row to be inserted. </param>
+		public void Insert(RemoteRow row, BitArray valueFlags, ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				Schema.RowType LType = new Schema.RowType();
-				foreach (string LString in ARow.Header.Columns)
-					LType.Columns.Add(FServerCursor.SourceRowType.Columns[LString].Copy());
-				Row LRow = new Row(FPlan.Process.ServerProcess.ValueManager, LType);
+				Schema.RowType type = new Schema.RowType();
+				foreach (string stringValue in row.Header.Columns)
+					type.Columns.Add(_serverCursor.SourceRowType.Columns[stringValue].Copy());
+				Row localRow = new Row(_plan.Process.ServerProcess.ValueManager, type);
 				try
 				{
-					LRow.ValuesOwned = false;
-					LRow.AsPhysical = ARow.Body.Data;
-					FServerCursor.Insert(LRow, AValueFlags);
+					localRow.ValuesOwned = false;
+					localRow.AsPhysical = row.Body.Data;
+					_serverCursor.Insert(localRow, valueFlags);
 				}
 				finally
 				{
-					LRow.Dispose();
+					localRow.Dispose();
 				}
 			}
 			catch (Exception E)
@@ -336,25 +336,25 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		/// <summary> Updates the current row of the cursor using the given <see cref="RemoteRow"/>. </summary>        
-		/// <param name="ARow"> A <see cref="RemoteRow"/> structure containing the Row to be updated. </param>
-		public void Update(RemoteRow ARow, BitArray AValueFlags, ProcessCallInfo ACallInfo)
+		/// <param name="row"> A <see cref="RemoteRow"/> structure containing the Row to be updated. </param>
+		public void Update(RemoteRow row, BitArray valueFlags, ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				Schema.RowType LType = new Schema.RowType();
-				foreach (string LString in ARow.Header.Columns)
-					LType.Columns.Add(FServerCursor.SourceRowType.Columns[LString].Copy());
-				Row LRow = new Row(FPlan.Process.ServerProcess.ValueManager, LType);
+				Schema.RowType type = new Schema.RowType();
+				foreach (string stringValue in row.Header.Columns)
+					type.Columns.Add(_serverCursor.SourceRowType.Columns[stringValue].Copy());
+				Row localRow = new Row(_plan.Process.ServerProcess.ValueManager, type);
 				try
 				{
-					LRow.ValuesOwned = false;
-					LRow.AsPhysical = ARow.Body.Data;
-					FServerCursor.Update(LRow, AValueFlags);
+					localRow.ValuesOwned = false;
+					localRow.AsPhysical = row.Body.Data;
+					_serverCursor.Update(localRow, valueFlags);
 				}
 				finally
 				{
-					LRow.Dispose();
+					localRow.Dispose();
 				}
 			}
 			catch (Exception E)
@@ -364,12 +364,12 @@ namespace Alphora.Dataphor.DAE.Server
 		}
         
 		/// <summary> Deletes the current DataBuffer from the cursor. </summary>
-		public void Delete(ProcessCallInfo ACallInfo)
+		public void Delete(ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				FServerCursor.Delete();
+				_serverCursor.Delete();
 			}
 			catch (Exception E)
 			{
@@ -377,17 +377,17 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public const int CBookmarkTypeInt = 0;
-		public const int CBookmarkTypeRow = 1;
+		public const int BookmarkTypeInt = 0;
+		public const int BookmarkTypeRow = 1;
 
 		/// <summary> Gets a bookmark for the current DataBuffer suitable for use in the <c>GotoBookmark</c> and <c>CompareBookmark</c> methods. </summary>
 		/// <returns> A <see cref="RemoteRowBody"/> structure containing the data for the bookmark. </returns>
-		public Guid GetBookmark(ProcessCallInfo ACallInfo)
+		public Guid GetBookmark(ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				return FServerCursor.GetBookmark();
+				return _serverCursor.GetBookmark();
 			}
 			catch (Exception E)
 			{
@@ -396,16 +396,16 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		/// <summary> Positions the cursor on the DataBuffer denoted by the given bookmark obtained from a previous call to <c> GetBookmark </c> . </summary>
-		/// <param name="ABookmark"> A <see cref="RemoteRowBody"/> structure containing the data for the bookmark. </param>
+		/// <param name="bookmark"> A <see cref="RemoteRowBody"/> structure containing the data for the bookmark. </param>
 		/// <returns> A <see cref="RemoteGotoData"/> structure containing the results of the goto call. </returns>
-		public RemoteGotoData GotoBookmark(Guid ABookmark, bool AForward, ProcessCallInfo ACallInfo)
+		public RemoteGotoData GotoBookmark(Guid bookmark, bool forward, ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				RemoteGotoData LGotoData = new RemoteGotoData();
-				LGotoData.Success = FServerCursor.GotoBookmark(ABookmark, AForward, out LGotoData.Flags);
-				return LGotoData;
+				RemoteGotoData gotoData = new RemoteGotoData();
+				gotoData.Success = _serverCursor.GotoBookmark(bookmark, forward, out gotoData.Flags);
+				return gotoData;
 			}
 			catch (Exception E)
 			{
@@ -414,15 +414,15 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		/// <summary> Compares the value of two bookmarks obtained from previous calls to <c>GetBookmark</c> . </summary>        
-		/// <param name="ABookmark1"> A <see cref="RemoteRowBody"/> structure containing the data for the first bookmark to compare. </param>
-		/// <param name="ABookmark2"> A <see cref="RemoteRowBody"/> structure containing the data for the second bookmark to compare. </param>
+		/// <param name="bookmark1"> A <see cref="RemoteRowBody"/> structure containing the data for the first bookmark to compare. </param>
+		/// <param name="bookmark2"> A <see cref="RemoteRowBody"/> structure containing the data for the second bookmark to compare. </param>
 		/// <returns> An integer value indicating whether the first bookmark was less than (negative), equal to (0) or greater than (positive) the second bookmark. </returns>
-		public int CompareBookmarks(Guid ABookmark1, Guid ABookmark2, ProcessCallInfo ACallInfo)
+		public int CompareBookmarks(Guid bookmark1, Guid bookmark2, ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				return FServerCursor.CompareBookmarks(ABookmark1, ABookmark2);
+				return _serverCursor.CompareBookmarks(bookmark1, bookmark2);
 			}
 			catch (Exception E)
 			{
@@ -432,12 +432,12 @@ namespace Alphora.Dataphor.DAE.Server
 
 		/// <summary> Disposes a bookmark. </summary>
 		/// <remarks> Does nothing if the bookmark does not exist, or has already been disposed. </remarks>
-		public void DisposeBookmark(Guid ABookmark, ProcessCallInfo ACallInfo)
+		public void DisposeBookmark(Guid bookmark, ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				FServerCursor.DisposeBookmark(ABookmark);
+				_serverCursor.DisposeBookmark(bookmark);
 			}
 			catch (Exception E)
 			{
@@ -447,12 +447,12 @@ namespace Alphora.Dataphor.DAE.Server
 
 		/// <summary> Disposes a list of bookmarks. </summary>
 		/// <remarks> Does nothing if the bookmark does not exist, or has already been disposed. </remarks>
-		public void DisposeBookmarks(Guid[] ABookmarks, ProcessCallInfo ACallInfo)
+		public void DisposeBookmarks(Guid[] bookmarks, ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				FServerCursor.DisposeBookmarks(ABookmarks);
+				_serverCursor.DisposeBookmarks(bookmarks);
 			}
 			catch (Exception E)
 			{
@@ -461,23 +461,23 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		/// <value> Accesses the <see cref="Order"/> of the cursor. </value>
-		public string Order { get { return FServerCursor.Order.Name; } }
+		public string Order { get { return _serverCursor.Order.Name; } }
         
 		/// <returns> A <see cref="RemoteRow"/> structure containing the key for current row. </returns>
-		public RemoteRow GetKey(ProcessCallInfo ACallInfo)
+		public RemoteRow GetKey(ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				Row LKey = FServerCursor.GetKey();
-				RemoteRow LRow = new RemoteRow();
-				LRow.Header = new RemoteRowHeader();
-				LRow.Header.Columns = new string[LKey.DataType.Columns.Count];
-				for (int LIndex = 0; LIndex < LKey.DataType.Columns.Count; LIndex++)
-					LRow.Header.Columns[LIndex] = LKey.DataType.Columns[LIndex].Name;
-				LRow.Body = new RemoteRowBody();
-				LRow.Body.Data = LKey.AsPhysical;
-				return LRow;
+				Row key = _serverCursor.GetKey();
+				RemoteRow row = new RemoteRow();
+				row.Header = new RemoteRowHeader();
+				row.Header.Columns = new string[key.DataType.Columns.Count];
+				for (int index = 0; index < key.DataType.Columns.Count; index++)
+					row.Header.Columns[index] = key.DataType.Columns[index].Name;
+				row.Body = new RemoteRowBody();
+				row.Body.Data = key.AsPhysical;
+				return row;
 			}
 			catch (Exception E)
 			{
@@ -486,29 +486,29 @@ namespace Alphora.Dataphor.DAE.Server
 		}
         
 		/// <summary> Attempts to position the cursor on the row matching the given key.  If the key is not found, the cursor position remains unchanged. </summary>
-		/// <param name="AKey"> A <see cref="RemoteRow"/> structure containing the key to be found. </param>
+		/// <param name="key"> A <see cref="RemoteRow"/> structure containing the key to be found. </param>
 		/// <returns> A <see cref="RemoteGotoData"/> structure containing the results of the find. </returns>
-		public RemoteGotoData FindKey(RemoteRow AKey, ProcessCallInfo ACallInfo)
+		public RemoteGotoData FindKey(RemoteRow key, ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				Schema.RowType LType = new Schema.RowType();
-				for (int LIndex = 0; LIndex < AKey.Header.Columns.Length; LIndex++)
-					LType.Columns.Add(FServerCursor.SourceRowType.Columns[AKey.Header.Columns[LIndex]].Copy());
+				Schema.RowType type = new Schema.RowType();
+				for (int index = 0; index < key.Header.Columns.Length; index++)
+					type.Columns.Add(_serverCursor.SourceRowType.Columns[key.Header.Columns[index]].Copy());
 
-				Row LKey = new Row(FPlan.Process.ServerProcess.ValueManager, LType);
+				Row localKey = new Row(_plan.Process.ServerProcess.ValueManager, type);
 				try
 				{
-					LKey.ValuesOwned = false;
-					LKey.AsPhysical = AKey.Body.Data;
-					RemoteGotoData LGotoData = new RemoteGotoData();
-					LGotoData.Success = FServerCursor.FindKey(LKey, out LGotoData.Flags);
-					return LGotoData;
+					localKey.ValuesOwned = false;
+					localKey.AsPhysical = key.Body.Data;
+					RemoteGotoData gotoData = new RemoteGotoData();
+					gotoData.Success = _serverCursor.FindKey(localKey, out gotoData.Flags);
+					return gotoData;
 				}
 				finally
 				{
-					LKey.Dispose();
+					localKey.Dispose();
 				}
 			}
 			catch (Exception E)
@@ -518,29 +518,29 @@ namespace Alphora.Dataphor.DAE.Server
 		}
         
 		/// <summary> Positions the cursor on the record most closely matching the given key. </summary>
-		/// <param name="AKey"> A <see cref="RemoteRow"/> structure containing the key to be found. </param>
+		/// <param name="key"> A <see cref="RemoteRow"/> structure containing the key to be found. </param>
 		/// <returns> A <see cref="CursorGetFlags"/> value indicating the state of the cursor after the search. </returns>
-		public CursorGetFlags FindNearest(RemoteRow AKey, ProcessCallInfo ACallInfo)
+		public CursorGetFlags FindNearest(RemoteRow key, ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				Schema.RowType LType = new Schema.RowType();
-				for (int LIndex = 0; LIndex < AKey.Header.Columns.Length; LIndex++)
-					LType.Columns.Add(FServerCursor.SourceRowType.Columns[AKey.Header.Columns[LIndex]].Copy());
+				Schema.RowType type = new Schema.RowType();
+				for (int index = 0; index < key.Header.Columns.Length; index++)
+					type.Columns.Add(_serverCursor.SourceRowType.Columns[key.Header.Columns[index]].Copy());
 
-				Row LKey = new Row(FPlan.Process.ServerProcess.ValueManager, LType);
+				Row localKey = new Row(_plan.Process.ServerProcess.ValueManager, type);
 				try
 				{
-					LKey.ValuesOwned = false;
-					LKey.AsPhysical = AKey.Body.Data;
-					CursorGetFlags LFlags;
-					FServerCursor.FindNearest(LKey, out LFlags);
-					return LFlags;
+					localKey.ValuesOwned = false;
+					localKey.AsPhysical = key.Body.Data;
+					CursorGetFlags flags;
+					_serverCursor.FindNearest(localKey, out flags);
+					return flags;
 				}
 				finally
 				{
-					LKey.Dispose();
+					localKey.Dispose();
 				}
 			}
 			catch (Exception E)
@@ -550,29 +550,29 @@ namespace Alphora.Dataphor.DAE.Server
 		}
         
 		/// <summary> Refreshes the cursor and attempts to reposition it on the given row. </summary>
-		/// <param name="ARow"> A <see cref="RemoteRow"/> structure containing the row to be positioned on after the refresh. </param>
+		/// <param name="row"> A <see cref="RemoteRow"/> structure containing the row to be positioned on after the refresh. </param>
 		/// <returns> A <see cref="RemoteGotoData"/> structure containing the result of the refresh. </returns>
-		public RemoteGotoData Refresh(RemoteRow ARow, ProcessCallInfo ACallInfo)
+		public RemoteGotoData Refresh(RemoteRow row, ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				Schema.RowType LType = new Schema.RowType();
-				for (int LIndex = 0; LIndex < ARow.Header.Columns.Length; LIndex++)
-					LType.Columns.Add(FServerCursor.SourceRowType.Columns[ARow.Header.Columns[LIndex]].Copy());
+				Schema.RowType type = new Schema.RowType();
+				for (int index = 0; index < row.Header.Columns.Length; index++)
+					type.Columns.Add(_serverCursor.SourceRowType.Columns[row.Header.Columns[index]].Copy());
 
-				Row LRow = new Row(FPlan.Process.ServerProcess.ValueManager, LType);
+				Row localRow = new Row(_plan.Process.ServerProcess.ValueManager, type);
 				try
 				{
-					LRow.ValuesOwned = false;
-					LRow.AsPhysical = ARow.Body.Data;
-					RemoteGotoData LGotoData = new RemoteGotoData();
-					LGotoData.Success = FServerCursor.Refresh(LRow, out LGotoData.Flags);
-					return LGotoData;
+					localRow.ValuesOwned = false;
+					localRow.AsPhysical = row.Body.Data;
+					RemoteGotoData gotoData = new RemoteGotoData();
+					gotoData.Success = _serverCursor.Refresh(localRow, out gotoData.Flags);
+					return gotoData;
 				}
 				finally
 				{
-					LRow.Dispose();
+					localRow.Dispose();
 				}
 			}
 			catch (Exception E)
@@ -583,12 +583,12 @@ namespace Alphora.Dataphor.DAE.Server
 
 		// Countable
 		/// <returns>An integer value indicating the number of rows in the cursor.</returns>
-		public int RowCount(ProcessCallInfo ACallInfo)
+		public int RowCount(ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				return FServerCursor.RowCount();
+				return _serverCursor.RowCount();
 			}
 			catch (Exception E)
 			{
@@ -596,22 +596,22 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		private RemoteProposeData InternalDefault(RemoteRowBody ARow, string AColumn)
+		private RemoteProposeData InternalDefault(RemoteRowBody row, string column)
 		{
-			Row LRow = new Row(FPlan.Process.ServerProcess.ValueManager, FServerCursor.SourceRowType);
+			Row localRow = new Row(_plan.Process.ServerProcess.ValueManager, _serverCursor.SourceRowType);
 			try
 			{
-				LRow.ValuesOwned = false;
-				LRow.AsPhysical = ARow.Data;
-				RemoteProposeData LProposeData = new RemoteProposeData();
-				LProposeData.Success = FServerCursor.Default(LRow, AColumn);
-				LProposeData.Body = new RemoteRowBody();
-				LProposeData.Body.Data = LRow.AsPhysical;
-				return LProposeData;
+				localRow.ValuesOwned = false;
+				localRow.AsPhysical = row.Data;
+				RemoteProposeData proposeData = new RemoteProposeData();
+				proposeData.Success = _serverCursor.Default(localRow, column);
+				proposeData.Body = new RemoteRowBody();
+				proposeData.Body.Data = localRow.AsPhysical;
+				return proposeData;
 			}
 			finally
 			{
-				LRow.Dispose();
+				localRow.Dispose();
 			}
 		}
 		
@@ -619,15 +619,15 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <summary>
 		///	Requests the default values for a new row in the cursor.  
 		/// </summary>
-		/// <param name="ARow"></param>
-		/// <param name="AColumn"></param>
+		/// <param name="row"></param>
+		/// <param name="column"></param>
 		/// <returns></returns>
-		public RemoteProposeData Default(RemoteRowBody ARow, string AColumn, ProcessCallInfo ACallInfo)
+		public RemoteProposeData Default(RemoteRowBody row, string column, ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				return InternalDefault(ARow, AColumn);
+				return InternalDefault(row, column);
 			}
 			catch (Exception E)
 			{
@@ -635,33 +635,33 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
         
-		private RemoteProposeData InternalChange(RemoteRowBody AOldRow, RemoteRowBody ANewRow, string AColumn)
+		private RemoteProposeData InternalChange(RemoteRowBody oldRow, RemoteRowBody newRow, string column)
 		{
-			Row LOldRow = new Row(FPlan.Process.ServerProcess.ValueManager, FServerCursor.SourceRowType);
+			Row localOldRow = new Row(_plan.Process.ServerProcess.ValueManager, _serverCursor.SourceRowType);
 			try
 			{
-				LOldRow.ValuesOwned = false;
-				LOldRow.AsPhysical = AOldRow.Data;
+				localOldRow.ValuesOwned = false;
+				localOldRow.AsPhysical = oldRow.Data;
 				
-				Row LNewRow = new Row(FPlan.Process.ServerProcess.ValueManager, FServerCursor.SourceRowType);
+				Row localNewRow = new Row(_plan.Process.ServerProcess.ValueManager, _serverCursor.SourceRowType);
 				try
 				{
-					LNewRow.ValuesOwned = false;
-					LNewRow.AsPhysical = ANewRow.Data;
-					RemoteProposeData LProposeData = new RemoteProposeData();
-					LProposeData.Success = FServerCursor.Change(LOldRow, LNewRow, AColumn);
-					LProposeData.Body = new RemoteRowBody();
-					LProposeData.Body.Data = LNewRow.AsPhysical;
-					return LProposeData;
+					localNewRow.ValuesOwned = false;
+					localNewRow.AsPhysical = newRow.Data;
+					RemoteProposeData proposeData = new RemoteProposeData();
+					proposeData.Success = _serverCursor.Change(localOldRow, localNewRow, column);
+					proposeData.Body = new RemoteRowBody();
+					proposeData.Body.Data = localNewRow.AsPhysical;
+					return proposeData;
 				}
 				finally
 				{
-					LNewRow.Dispose();
+					localNewRow.Dispose();
 				}
 			}
 			finally
 			{
-				LOldRow.Dispose();
+				localOldRow.Dispose();
 			}
 		}
         
@@ -669,14 +669,14 @@ namespace Alphora.Dataphor.DAE.Server
 		/// Requests the affect of a change to the given row. 
 		/// </summary>
 		/// <param name="ARow"></param>
-		/// <param name="AColumn"></param>
+		/// <param name="column"></param>
 		/// <returns></returns>
-		public RemoteProposeData Change(RemoteRowBody AOldRow, RemoteRowBody ANewRow, string AColumn, ProcessCallInfo ACallInfo)
+		public RemoteProposeData Change(RemoteRowBody oldRow, RemoteRowBody newRow, string column, ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				return InternalChange(AOldRow, ANewRow, AColumn);
+				return InternalChange(oldRow, newRow, column);
 			}
 			catch (Exception E)
 			{
@@ -684,39 +684,39 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		private RemoteProposeData InternalValidate(RemoteRowBody AOldRow, RemoteRowBody ANewRow, string AColumn)
+		private RemoteProposeData InternalValidate(RemoteRowBody oldRow, RemoteRowBody newRow, string column)
 		{
-			Row LOldRow = null;
-			if (AOldRow.Data != null)
-				LOldRow = new Row(FPlan.Process.ServerProcess.ValueManager, FServerCursor.SourceRowType);
+			Row localOldRow = null;
+			if (oldRow.Data != null)
+				localOldRow = new Row(_plan.Process.ServerProcess.ValueManager, _serverCursor.SourceRowType);
 			try
 			{
-				if (LOldRow != null)
+				if (localOldRow != null)
 				{
-					LOldRow.ValuesOwned = false;
-					LOldRow.AsPhysical = AOldRow.Data;
+					localOldRow.ValuesOwned = false;
+					localOldRow.AsPhysical = oldRow.Data;
 				}
 				
-				Row LNewRow = new Row(FPlan.Process.ServerProcess.ValueManager, FServerCursor.SourceRowType);
+				Row localNewRow = new Row(_plan.Process.ServerProcess.ValueManager, _serverCursor.SourceRowType);
 				try
 				{
-					LNewRow.ValuesOwned = false;
-					LNewRow.AsPhysical = ANewRow.Data;
-					RemoteProposeData LProposeData = new RemoteProposeData();
-					LProposeData.Success = FServerCursor.Validate(LOldRow, LNewRow, AColumn);
-					LProposeData.Body = new RemoteRowBody();
-					LProposeData.Body.Data = LNewRow.AsPhysical;
-					return LProposeData;
+					localNewRow.ValuesOwned = false;
+					localNewRow.AsPhysical = newRow.Data;
+					RemoteProposeData proposeData = new RemoteProposeData();
+					proposeData.Success = _serverCursor.Validate(localOldRow, localNewRow, column);
+					proposeData.Body = new RemoteRowBody();
+					proposeData.Body.Data = localNewRow.AsPhysical;
+					return proposeData;
 				}
 				finally
 				{
-					LNewRow.Dispose();
+					localNewRow.Dispose();
 				}
 			}
 			finally
 			{
-				if (LOldRow != null)
-					LOldRow.Dispose();
+				if (localOldRow != null)
+					localOldRow.Dispose();
 			}
 		}
 
@@ -724,13 +724,13 @@ namespace Alphora.Dataphor.DAE.Server
 		/// Ensures that the given row is valid.
 		/// </summary>
 		/// <param name="ARow"></param>
-		/// <param name="AColumn"></param>
-		public RemoteProposeData Validate(RemoteRowBody AOldRow, RemoteRowBody ANewRow, string AColumn, ProcessCallInfo ACallInfo)
+		/// <param name="column"></param>
+		public RemoteProposeData Validate(RemoteRowBody oldRow, RemoteRowBody newRow, string column, ProcessCallInfo callInfo)
 		{
-			FPlan.Process.ProcessCallInfo(ACallInfo);
+			_plan.Process.ProcessCallInfo(callInfo);
 			try
 			{
-				return InternalValidate(ANewRow, AOldRow, AColumn);
+				return InternalValidate(newRow, oldRow, column);
 			}
 			catch (Exception E)
 			{

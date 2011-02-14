@@ -14,29 +14,29 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	{
 		public D4TextEmitter() : base()
 		{
-			FEmitMode = EmitMode.ForCopy;
+			_emitMode = EmitMode.ForCopy;
 		}
 		
-		public D4TextEmitter(EmitMode AEmitMode) : base()
+		public D4TextEmitter(EmitMode emitMode) : base()
 		{
-			FEmitMode = AEmitMode;
+			_emitMode = emitMode;
 		}
 		
-		private EmitMode FEmitMode;
+		private EmitMode _emitMode;
 		public EmitMode EmitMode
 		{
-			get { return FEmitMode; }
-			set { FEmitMode = value; }
+			get { return _emitMode; }
+			set { _emitMode = value; }
 		}
 		
-		private void EmitTags(Tags ATags, bool AStatic)
+		private void EmitTags(Tags tags, bool staticValue)
 		{
-			if (ATags.Count > 2)
+			if (tags.Count > 2)
 			{
 				NewLine();
 				IncreaseIndent();
 				Indent();
-				if (AStatic)
+				if (staticValue)
 					AppendFormat("{0} ", Keywords.Static);
 				Append(Keywords.Tags);
 				NewLine();
@@ -48,34 +48,34 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 			else
 			{
-				if (AStatic)
+				if (staticValue)
 					AppendFormat(" {0}", Keywords.Static);
 				AppendFormat(" {0} {1} ", Keywords.Tags, Keywords.BeginList);
 			}
 			
-			bool LFirst = true;
+			bool first = true;
 			#if USEHASHTABLEFORTAGS
-			foreach (Tag LTag in ATags)
+			foreach (Tag tag in ATags)
 			{
 			#else
-			Tag LTag;
-			for (int LIndex = 0; LIndex < ATags.Count; LIndex++)
+			Tag tag;
+			for (int index = 0; index < tags.Count; index++)
 			{
-				LTag = ATags[LIndex];
+				tag = tags[index];
 			#endif
-				if (!LFirst)
+				if (!first)
 					EmitListSeparator();
 				else
-					LFirst = false;
+					first = false;
 				
-				if (ATags.Count > 2)
+				if (tags.Count > 2)
 				{
 					NewLine();
 					Indent();
 				}
-				AppendFormat(@"{0} {1} ""{2}""", LTag.Name, Keywords.Equal, LTag.Value.Replace(@"""", @"""""")); 
+				AppendFormat(@"{0} {1} ""{2}""", tag.Name, Keywords.Equal, tag.Value.Replace(@"""", @"""""")); 
 			}
-			if (ATags.Count > 2)
+			if (tags.Count > 2)
 			{
 				DecreaseIndent();
 				NewLine();
@@ -87,278 +87,278 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				AppendFormat(" {0}", Keywords.EndList);
 		}
 
-		protected virtual void EmitMetaData(MetaData AMetaData)
+		protected virtual void EmitMetaData(MetaData metaData)
 		{
-			if (AMetaData != null)
+			if (metaData != null)
 			{
 				// Emit dynamic tags
-				Tags LTags = new Tags();
+				Tags tags = new Tags();
 				#if USEHASHTABLEFORTAGS
-				foreach (Tag LTag in AMetaData.Tags)
+				foreach (Tag tag in AMetaData.Tags)
 				{
 				#else
-				Tag LTag;
-				for (int LIndex = 0; LIndex < AMetaData.Tags.Count; LIndex++)
+				Tag tag;
+				for (int index = 0; index < metaData.Tags.Count; index++)
 				{
-					LTag = AMetaData.Tags[LIndex];
+					tag = metaData.Tags[index];
 				#endif
-					if ((!LTag.IsStatic) && ((FEmitMode == EmitMode.ForRemote) || !(/*AMetaData.Tags.IsReference(LTag.Name) || */LTag.IsInherited)))
-						LTags.Add(LTag);
+					if ((!tag.IsStatic) && ((_emitMode == EmitMode.ForRemote) || !(/*AMetaData.Tags.IsReference(LTag.Name) || */tag.IsInherited)))
+						tags.Add(tag);
 				}
 				
-				if (LTags.Count > 0)
-					EmitTags(LTags, false);
+				if (tags.Count > 0)
+					EmitTags(tags, false);
 				
 				// Emit static tags
-				LTags = new Tags();
+				tags = new Tags();
 				#if USEHASHTABLEFORTAGS
-				foreach (Tag LTag in AMetaData.Tags)
+				foreach (Tag tag2 in AMetaData.Tags)
 				{
 				#else
-				for (int LIndex = 0; LIndex < AMetaData.Tags.Count; LIndex++)
+				for (int index = 0; index < metaData.Tags.Count; index++)
 				{
-					LTag = AMetaData.Tags[LIndex];
+					tag = metaData.Tags[index];
 				#endif
-					if (LTag.IsStatic)
-						LTags.Add(LTag);
+					if (tag.IsStatic)
+						tags.Add(tag);
 				}
 				
-				if (LTags.Count > 0)
-					EmitTags(LTags, true);
+				if (tags.Count > 0)
+					EmitTags(tags, true);
 			}
 		}
 		
-		protected virtual void EmitAlterMetaData(AlterMetaData AAlterMetaData)
+		protected virtual void EmitAlterMetaData(AlterMetaData alterMetaData)
 		{
-			if (AAlterMetaData != null)
+			if (alterMetaData != null)
 			{
-				Tags LCreateTags = AAlterMetaData.CreateTags;
-				Tags LAlterTags = AAlterMetaData.AlterTags;
-				Tags LDropTags = AAlterMetaData.DropTags;
-				if (((LCreateTags.Count > 0) || (LAlterTags.Count > 0) || (LDropTags.Count > 0)))
+				Tags createTags = alterMetaData.CreateTags;
+				Tags alterTags = alterMetaData.AlterTags;
+				Tags dropTags = alterMetaData.DropTags;
+				if (((createTags.Count > 0) || (alterTags.Count > 0) || (dropTags.Count > 0)))
 				{
 					AppendFormat(" {0} {1} {2} ", Keywords.Alter, Keywords.Tags, Keywords.BeginList);
-					bool LFirst = true;
+					bool first = true;
 					#if USEHASHTABLEFORTAGS
-					foreach (Tag LTag in LCreateTags)
+					foreach (Tag tag in createTags)
 					{
 					#else
-					Tag LTag;
-					for (int LIndex = 0; LIndex < LCreateTags.Count; LIndex++)
+					Tag tag;
+					for (int index = 0; index < createTags.Count; index++)
 					{
-						LTag = LCreateTags[LIndex];
+						tag = createTags[index];
 					#endif
-						if (!LFirst)
+						if (!first)
 							EmitListSeparator();
 						else
-							LFirst = false;
-						AppendFormat(@"{0} {1} {2} {3} ""{4}""", new object[]{Keywords.Create, LTag.IsStatic ? Keywords.Static : Keywords.Dynamic, LTag.Name, Keywords.Equal, LTag.Value.Replace(@"""", @"""""")});
+							first = false;
+						AppendFormat(@"{0} {1} {2} {3} ""{4}""", new object[]{Keywords.Create, tag.IsStatic ? Keywords.Static : Keywords.Dynamic, tag.Name, Keywords.Equal, tag.Value.Replace(@"""", @"""""")});
 					}
 					
 					#if USEHASHTABLEFORTAGS
-					foreach (Tag LTag in LAlterTags)
+					foreach (Tag tag in alterTags)
 					{
 					#else
-					for (int LIndex = 0; LIndex < LAlterTags.Count; LIndex++)
+					for (int index = 0; index < alterTags.Count; index++)
 					{
-						LTag = LAlterTags[LIndex];
+						tag = alterTags[index];
 					#endif
-						if (!LFirst)
+						if (!first)
 							EmitListSeparator();
 						else
-							LFirst = false;
-						AppendFormat(@"{0} {1} {2} {3} ""{4}""", new object[]{Keywords.Alter, LTag.IsStatic ? Keywords.Static : Keywords.Dynamic, LTag.Name, Keywords.Equal, LTag.Value.Replace(@"""", @"""""")});
+							first = false;
+						AppendFormat(@"{0} {1} {2} {3} ""{4}""", new object[]{Keywords.Alter, tag.IsStatic ? Keywords.Static : Keywords.Dynamic, tag.Name, Keywords.Equal, tag.Value.Replace(@"""", @"""""")});
 					}
 					
 					#if USEHASHTABLEFORTAGS
-					foreach (Tag LTag in LDropTags)
+					foreach (Tag tag in dropTags)
 					{
 					#else
-					for (int LIndex = 0; LIndex < LDropTags.Count; LIndex++)
+					for (int index = 0; index < dropTags.Count; index++)
 					{
-						LTag = LDropTags[LIndex];
+						tag = dropTags[index];
 					#endif
-						if (!LFirst)
+						if (!first)
 							EmitListSeparator();
 						else
-							LFirst = false;
-						AppendFormat("{0} {1}", Keywords.Drop, LTag.Name);
+							first = false;
+						AppendFormat("{0} {1}", Keywords.Drop, tag.Name);
 					}
 					AppendFormat(" {0}", Keywords.EndList);
 				}
 			}
 		}
 		
-		protected virtual void EmitLanguageModifiers(Statement AStatement)
+		protected virtual void EmitLanguageModifiers(Statement statement)
 		{
-			if ((AStatement.Modifiers != null) && (AStatement.Modifiers.Count > 0))
+			if ((statement.Modifiers != null) && (statement.Modifiers.Count > 0))
 			{
 				AppendFormat(" {0} {1} ", D4.Keywords.With, D4.Keywords.BeginList);
-				for (int LIndex = 0; LIndex < AStatement.Modifiers.Count; LIndex++)
+				for (int index = 0; index < statement.Modifiers.Count; index++)
 				{
-					if (LIndex > 0)
+					if (index > 0)
 						AppendFormat("{0} ", D4.Keywords.ListSeparator);
-					AppendFormat(@"{0} {1} ""{2}""", AStatement.Modifiers[LIndex].Name, D4.Keywords.Equal, AStatement.Modifiers[LIndex].Value);
+					AppendFormat(@"{0} {1} ""{2}""", statement.Modifiers[index].Name, D4.Keywords.Equal, statement.Modifiers[index].Value);
 				}
 				AppendFormat(" {0}", D4.Keywords.EndList);
 			}
 		}
 		
-		protected override void EmitExpression(Expression AExpression)
+		protected override void EmitExpression(Expression expression)
 		{
-			if ((AExpression.Modifiers != null) && (AExpression.Modifiers.Count > 0))
+			if ((expression.Modifiers != null) && (expression.Modifiers.Count > 0))
 				Append(Keywords.BeginGroup);
 
-			bool LEmitModifiers = true;
-			if (AExpression is QualifierExpression)
-				EmitQualifierExpression((QualifierExpression)AExpression);
-			else if (AExpression is AsExpression)
-				EmitAsExpression((AsExpression)AExpression);
-			else if (AExpression is IsExpression)
-				EmitIsExpression((IsExpression)AExpression);
+			bool emitModifiers = true;
+			if (expression is QualifierExpression)
+				EmitQualifierExpression((QualifierExpression)expression);
+			else if (expression is AsExpression)
+				EmitAsExpression((AsExpression)expression);
+			else if (expression is IsExpression)
+				EmitIsExpression((IsExpression)expression);
 			#if CALCULESQUE
 			else if (AExpression is NamedExpression)
 				EmitNamedExpression((NamedExpression)AExpression);
 			#endif
-			else if (AExpression is ParameterExpression)
-				EmitParameterExpression((ParameterExpression)AExpression);
-			else if (AExpression is D4IndexerExpression)
-				EmitIndexerExpression((D4IndexerExpression)AExpression);
-			else if (AExpression is IfExpression)
-				EmitIfExpression((IfExpression)AExpression);
-			else if (AExpression is RowSelectorExpressionBase)
-				EmitRowSelectorExpressionBase((RowSelectorExpressionBase)AExpression);
-			else if (AExpression is RowExtractorExpressionBase)
-				EmitRowExtractorExpressionBase((RowExtractorExpressionBase)AExpression);
-			else if (AExpression is ColumnExtractorExpression)
-				EmitColumnExtractorExpression((ColumnExtractorExpression)AExpression);
-			else if (AExpression is ListSelectorExpression)
-				EmitListSelectorExpression((ListSelectorExpression)AExpression);
-			else if (AExpression is CursorSelectorExpression)
-				EmitCursorSelectorExpression((CursorSelectorExpression)AExpression);
-			else if (AExpression is CursorDefinition)
-				EmitCursorDefinition((CursorDefinition)AExpression);
-			else if (AExpression is ExplodeColumnExpression)
-				EmitExplodeColumnExpression((ExplodeColumnExpression)AExpression);
-			else if (AExpression is AdornExpression)
+			else if (expression is ParameterExpression)
+				EmitParameterExpression((ParameterExpression)expression);
+			else if (expression is D4IndexerExpression)
+				EmitIndexerExpression((D4IndexerExpression)expression);
+			else if (expression is IfExpression)
+				EmitIfExpression((IfExpression)expression);
+			else if (expression is RowSelectorExpressionBase)
+				EmitRowSelectorExpressionBase((RowSelectorExpressionBase)expression);
+			else if (expression is RowExtractorExpressionBase)
+				EmitRowExtractorExpressionBase((RowExtractorExpressionBase)expression);
+			else if (expression is ColumnExtractorExpression)
+				EmitColumnExtractorExpression((ColumnExtractorExpression)expression);
+			else if (expression is ListSelectorExpression)
+				EmitListSelectorExpression((ListSelectorExpression)expression);
+			else if (expression is CursorSelectorExpression)
+				EmitCursorSelectorExpression((CursorSelectorExpression)expression);
+			else if (expression is CursorDefinition)
+				EmitCursorDefinition((CursorDefinition)expression);
+			else if (expression is ExplodeColumnExpression)
+				EmitExplodeColumnExpression((ExplodeColumnExpression)expression);
+			else if (expression is AdornExpression)
 			{
-				EmitAdornExpression((AdornExpression)AExpression);
-				LEmitModifiers = false;
+				EmitAdornExpression((AdornExpression)expression);
+				emitModifiers = false;
 			}
-			else if (AExpression is RedefineExpression)
+			else if (expression is RedefineExpression)
 			{
-				EmitRedefineExpression((RedefineExpression)AExpression);
-				LEmitModifiers = false;
+				EmitRedefineExpression((RedefineExpression)expression);
+				emitModifiers = false;
 			}
-			else if (AExpression is OnExpression)
+			else if (expression is OnExpression)
 			{
-				EmitOnExpression((OnExpression)AExpression);
-				LEmitModifiers = false;
+				EmitOnExpression((OnExpression)expression);
+				emitModifiers = false;
 			}
-			else if (AExpression is RenameAllExpression)
+			else if (expression is RenameAllExpression)
 			{
-				EmitRenameAllExpression((RenameAllExpression)AExpression);
-				LEmitModifiers = false;
+				EmitRenameAllExpression((RenameAllExpression)expression);
+				emitModifiers = false;
 			}
-			else if (AExpression is TableSelectorExpressionBase)
-				EmitTableSelectorExpressionBase((TableSelectorExpressionBase)AExpression);
-			else if (AExpression is RestrictExpression)
+			else if (expression is TableSelectorExpressionBase)
+				EmitTableSelectorExpressionBase((TableSelectorExpressionBase)expression);
+			else if (expression is RestrictExpression)
 			{
-				EmitRestrictExpression((RestrictExpression)AExpression);
-				LEmitModifiers = false;
+				EmitRestrictExpression((RestrictExpression)expression);
+				emitModifiers = false;
 			}
-			else if (AExpression is ProjectExpression)
+			else if (expression is ProjectExpression)
 			{
-				EmitProjectExpression((ProjectExpression)AExpression);
-				LEmitModifiers = false;
+				EmitProjectExpression((ProjectExpression)expression);
+				emitModifiers = false;
 			}
-			else if (AExpression is RemoveExpression)
+			else if (expression is RemoveExpression)
 			{
-				EmitRemoveExpression((RemoveExpression)AExpression);
-				LEmitModifiers = false;
+				EmitRemoveExpression((RemoveExpression)expression);
+				emitModifiers = false;
 			}
-			else if (AExpression is ExtendExpression)
+			else if (expression is ExtendExpression)
 			{
-				EmitExtendExpression((ExtendExpression)AExpression);
-				LEmitModifiers = false;
+				EmitExtendExpression((ExtendExpression)expression);
+				emitModifiers = false;
 			}
-			else if (AExpression is SpecifyExpression)
+			else if (expression is SpecifyExpression)
 			{
-				EmitSpecifyExpression((SpecifyExpression)AExpression);
-				LEmitModifiers = false;
+				EmitSpecifyExpression((SpecifyExpression)expression);
+				emitModifiers = false;
 			}
-			else if (AExpression is RenameExpression)
+			else if (expression is RenameExpression)
 			{
-				EmitRenameExpression((RenameExpression)AExpression);
-				LEmitModifiers = false;
+				EmitRenameExpression((RenameExpression)expression);
+				emitModifiers = false;
 			}
-			else if (AExpression is AggregateExpression)
+			else if (expression is AggregateExpression)
 			{
-				EmitAggregateExpression((AggregateExpression)AExpression);
-				LEmitModifiers = false;
+				EmitAggregateExpression((AggregateExpression)expression);
+				emitModifiers = false;
 			}
-			else if (AExpression is BaseOrderExpression)
-				EmitBaseOrderExpression((BaseOrderExpression)AExpression);
-			else if (AExpression is QuotaExpression)
+			else if (expression is BaseOrderExpression)
+				EmitBaseOrderExpression((BaseOrderExpression)expression);
+			else if (expression is QuotaExpression)
 			{
-				EmitQuotaExpression((QuotaExpression)AExpression);
-				LEmitModifiers = false;
+				EmitQuotaExpression((QuotaExpression)expression);
+				emitModifiers = false;
 			}
-			else if (AExpression is ExplodeExpression)
+			else if (expression is ExplodeExpression)
 			{
-				EmitExplodeExpression((ExplodeExpression)AExpression);
-				LEmitModifiers = false;
+				EmitExplodeExpression((ExplodeExpression)expression);
+				emitModifiers = false;
 			}
-			else if (AExpression is BinaryTableExpression)
+			else if (expression is BinaryTableExpression)
 			{
-				EmitBinaryTableExpression((BinaryTableExpression)AExpression);
-				LEmitModifiers = false;
+				EmitBinaryTableExpression((BinaryTableExpression)expression);
+				emitModifiers = false;
 			}
 			else
-				base.EmitExpression(AExpression);
+				base.EmitExpression(expression);
 
-			if (LEmitModifiers)
-				EmitLanguageModifiers(AExpression);
+			if (emitModifiers)
+				EmitLanguageModifiers(expression);
 
-			if ((AExpression.Modifiers != null) && (AExpression.Modifiers.Count > 0))
+			if ((expression.Modifiers != null) && (expression.Modifiers.Count > 0))
 				Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitQualifierExpression(QualifierExpression AExpression)
+		protected virtual void EmitQualifierExpression(QualifierExpression expression)
 		{
-			EmitExpression(AExpression.LeftExpression);
+			EmitExpression(expression.LeftExpression);
 			Append(Keywords.Qualifier);
-			EmitExpression(AExpression.RightExpression);
+			EmitExpression(expression.RightExpression);
 		}
 		
-		protected virtual void EmitParameterExpression(ParameterExpression AExpression)
+		protected virtual void EmitParameterExpression(ParameterExpression expression)
 		{
-			if (AExpression.Modifier == Modifier.Var)
+			if (expression.Modifier == Modifier.Var)
 				AppendFormat("{0} ", Keywords.Var);
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 		}
 		
-		protected virtual void EmitIndexerExpression(D4IndexerExpression AExpression)
+		protected virtual void EmitIndexerExpression(D4IndexerExpression expression)
 		{
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 			Append(Keywords.BeginIndexer);
-			for (int LIndex = 0; LIndex < AExpression.Expressions.Count; LIndex++)
+			for (int index = 0; index < expression.Expressions.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitExpression(AExpression.Expressions[LIndex]);
+				EmitExpression(expression.Expressions[index]);
 			}
 			
-			if (AExpression.HasByClause)
+			if (expression.HasByClause)
 			{
 				AppendFormat(" {0} {1} ", Keywords.By, Keywords.BeginList);
-				for (int LIndex = 0; LIndex < AExpression.ByClause.Count; LIndex++)
+				for (int index = 0; index < expression.ByClause.Count; index++)
 				{
-					if (LIndex > 0)
+					if (index > 0)
 						EmitListSeparator();
-					EmitKeyColumnDefinition(AExpression.ByClause[LIndex]);
+					EmitKeyColumnDefinition(expression.ByClause[index]);
 				}
-				if (AExpression.ByClause.Count > 0)
+				if (expression.ByClause.Count > 0)
 					AppendFormat(" {0}", Keywords.EndList);
 				else
 					AppendFormat("{0}", Keywords.EndList);
@@ -367,25 +367,25 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			Append(Keywords.EndIndexer);
 		}
 		
-		protected virtual void EmitIfExpression(IfExpression AExpression)
+		protected virtual void EmitIfExpression(IfExpression expression)
 		{
 			Append(Keywords.BeginGroup);
 			AppendFormat("{0} ", Keywords.If);
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 			AppendFormat(" {0} ", Keywords.Then);
-			EmitExpression(AExpression.TrueExpression);
+			EmitExpression(expression.TrueExpression);
 			AppendFormat(" {0} ", Keywords.Else);
-			EmitExpression(AExpression.FalseExpression);
+			EmitExpression(expression.FalseExpression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitAdornExpression(AdornExpression AExpression)
+		protected virtual void EmitAdornExpression(AdornExpression expression)
 		{
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
@@ -394,205 +394,205 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			Indent();
 			if 
 			(
-				(AExpression.Expressions.Count > 0) || 
-				(AExpression.Constraints.Count > 0) || 
-				(AExpression.Orders.Count > 0) || 
-				(AExpression.AlterOrders.Count > 0) ||
-				(AExpression.DropOrders.Count > 0) ||
-				(AExpression.Keys.Count > 0) || 
-				(AExpression.AlterKeys.Count > 0) ||
-				(AExpression.DropKeys.Count > 0) ||
-				(AExpression.References.Count > 0) ||
-				(AExpression.AlterReferences.Count > 0) ||
-				(AExpression.DropReferences.Count > 0)
+				(expression.Expressions.Count > 0) || 
+				(expression.Constraints.Count > 0) || 
+				(expression.Orders.Count > 0) || 
+				(expression.AlterOrders.Count > 0) ||
+				(expression.DropOrders.Count > 0) ||
+				(expression.Keys.Count > 0) || 
+				(expression.AlterKeys.Count > 0) ||
+				(expression.DropKeys.Count > 0) ||
+				(expression.References.Count > 0) ||
+				(expression.AlterReferences.Count > 0) ||
+				(expression.DropReferences.Count > 0)
 			)
 			{
 				Append(Keywords.BeginList);
 				IncreaseIndent();																   
-				bool LFirst = true;
-				for (int LIndex = 0; LIndex < AExpression.Expressions.Count; LIndex++)
+				bool first = true;
+				for (int index = 0; index < expression.Expressions.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitAdornColumnExpression(AExpression.Expressions[LIndex]);
+					EmitAdornColumnExpression(expression.Expressions[index]);
 				}
-				for (int LIndex = 0; LIndex < AExpression.Constraints.Count; LIndex++)
+				for (int index = 0; index < expression.Constraints.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitCreateConstraintDefinition(AExpression.Constraints[LIndex]);
+					EmitCreateConstraintDefinition(expression.Constraints[index]);
 				}
-				for (int LIndex = 0; LIndex < AExpression.Orders.Count; LIndex++)
+				for (int index = 0; index < expression.Orders.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitOrderDefinition(AExpression.Orders[LIndex]);
+					EmitOrderDefinition(expression.Orders[index]);
 				}
-				for (int LIndex = 0; LIndex < AExpression.AlterOrders.Count; LIndex++)
+				for (int index = 0; index < expression.AlterOrders.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitAlterOrderDefinition(AExpression.AlterOrders[LIndex]);
+					EmitAlterOrderDefinition(expression.AlterOrders[index]);
 				}
-				for (int LIndex = 0; LIndex < AExpression.DropOrders.Count; LIndex++)
+				for (int index = 0; index < expression.DropOrders.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitDropOrderDefinition(AExpression.DropOrders[LIndex]);
+					EmitDropOrderDefinition(expression.DropOrders[index]);
 				}
-				for (int LIndex = 0; LIndex < AExpression.Keys.Count; LIndex++)
+				for (int index = 0; index < expression.Keys.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitKeyDefinition(AExpression.Keys[LIndex]);
+					EmitKeyDefinition(expression.Keys[index]);
 				}
-				for (int LIndex = 0; LIndex < AExpression.AlterKeys.Count; LIndex++)
+				for (int index = 0; index < expression.AlterKeys.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitAlterKeyDefinition(AExpression.AlterKeys[LIndex]);
+					EmitAlterKeyDefinition(expression.AlterKeys[index]);
 				}
-				for (int LIndex = 0; LIndex < AExpression.DropKeys.Count; LIndex++)
+				for (int index = 0; index < expression.DropKeys.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitDropKeyDefinition(AExpression.DropKeys[LIndex]);
+					EmitDropKeyDefinition(expression.DropKeys[index]);
 				}
-				for (int LIndex = 0; LIndex < AExpression.References.Count; LIndex++)
+				for (int index = 0; index < expression.References.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitReferenceDefinition(AExpression.References[LIndex]);
+					EmitReferenceDefinition(expression.References[index]);
 				}
-				for (int LIndex = 0; LIndex < AExpression.AlterReferences.Count; LIndex++)
+				for (int index = 0; index < expression.AlterReferences.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitAlterReferenceDefinition(AExpression.AlterReferences[LIndex]);
+					EmitAlterReferenceDefinition(expression.AlterReferences[index]);
 				}
-				for (int LIndex = 0; LIndex < AExpression.DropReferences.Count; LIndex++)
+				for (int index = 0; index < expression.DropReferences.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitDropReferenceDefinition(AExpression.DropReferences[LIndex]);
+					EmitDropReferenceDefinition(expression.DropReferences[index]);
 				}
 				DecreaseIndent();
 				NewLine();
 				Indent();
 				Append(Keywords.EndList);
 			}
-			EmitMetaData(AExpression.MetaData);
-			EmitAlterMetaData(AExpression.AlterMetaData);
+			EmitMetaData(expression.MetaData);
+			EmitAlterMetaData(expression.AlterMetaData);
 			DecreaseIndent();
 			DecreaseIndent();
 			NewLine();
 			Indent();
-			EmitLanguageModifiers(AExpression);
+			EmitLanguageModifiers(expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitAdornColumnExpression(AdornColumnExpression AExpression)
+		protected virtual void EmitAdornColumnExpression(AdornColumnExpression expression)
 		{
-			Append(AExpression.ColumnName);
+			Append(expression.ColumnName);
 			
-			if (AExpression.ChangeNilable)
+			if (expression.ChangeNilable)
 			{
-				if (AExpression.IsNilable)
+				if (expression.IsNilable)
 					AppendFormat(" {0}", Keywords.Nil);
 				else
 					AppendFormat(" {0} {1}", Keywords.Not, Keywords.Nil);
 			}
 
-			bool LFirst = true;			
-			if ((AExpression.Default != null) || (AExpression.Constraints.Count > 0))
+			bool first = true;			
+			if ((expression.Default != null) || (expression.Constraints.Count > 0))
 			{
 				NewLine();
 				Indent();
 				Append(Keywords.BeginList);
 				IncreaseIndent();
 				
-				if (AExpression.Default != null)
+				if (expression.Default != null)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 
 					NewLine();
 					Indent();
-					EmitDefaultDefinition(AExpression.Default);
+					EmitDefaultDefinition(expression.Default);
 				}
 					
-				for (int LIndex = 0; LIndex < AExpression.Constraints.Count; LIndex++)
+				for (int index = 0; index < expression.Constraints.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitConstraintDefinition(AExpression.Constraints[LIndex]);
+					EmitConstraintDefinition(expression.Constraints[index]);
 				}
 				DecreaseIndent();
 				NewLine();
 				Indent();
 				Append(Keywords.EndList);
 			}
-			EmitMetaData(AExpression.MetaData);
-			EmitAlterMetaData(AExpression.AlterMetaData);
+			EmitMetaData(expression.MetaData);
+			EmitAlterMetaData(expression.AlterMetaData);
 		}
 		
-		protected virtual void EmitRedefineExpression(RedefineExpression AExpression)
+		protected virtual void EmitRedefineExpression(RedefineExpression expression)
 		{
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
@@ -601,13 +601,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			Indent();
 			Append(Keywords.BeginList);
 			IncreaseIndent();
-			for (int LIndex = 0; LIndex < AExpression.Expressions.Count; LIndex++)
+			for (int index = 0; index < expression.Expressions.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
 				NewLine();
 				Indent();
-				EmitRedefineColumnExpression(AExpression.Expressions[LIndex]);
+				EmitRedefineColumnExpression(expression.Expressions[index]);
 			}
 			DecreaseIndent();
 			NewLine();
@@ -617,69 +617,69 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			DecreaseIndent();
 			NewLine();
 			Indent();
-			EmitLanguageModifiers(AExpression);
+			EmitLanguageModifiers(expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitRedefineColumnExpression(NamedColumnExpression AExpression)
+		protected virtual void EmitRedefineColumnExpression(NamedColumnExpression expression)
 		{
-			AppendFormat("{0} {1} ", AExpression.ColumnAlias, Keywords.Assign);
-			EmitExpression(AExpression.Expression);
+			AppendFormat("{0} {1} ", expression.ColumnAlias, Keywords.Assign);
+			EmitExpression(expression.Expression);
 		}
 		
-		protected virtual void EmitOnExpression(OnExpression AExpression)
+		protected virtual void EmitOnExpression(OnExpression expression)
 		{
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			AppendFormat("{0} {1}", Keywords.On, AExpression.ServerName);
+			AppendFormat("{0} {1}", Keywords.On, expression.ServerName);
 			DecreaseIndent();
 			DecreaseIndent();
 			NewLine();
 			Indent();
-			EmitLanguageModifiers(AExpression);
+			EmitLanguageModifiers(expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitRenameAllExpression(RenameAllExpression AExpression)
+		protected virtual void EmitRenameAllExpression(RenameAllExpression expression)
 		{
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			AppendFormat("{0} {1}", Keywords.Rename, AExpression.Identifier);
+			AppendFormat("{0} {1}", Keywords.Rename, expression.Identifier);
 			DecreaseIndent();
 			DecreaseIndent();
 			NewLine();
 			Indent();
-			EmitLanguageModifiers(AExpression);
+			EmitLanguageModifiers(expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitIsExpression(IsExpression AExpression)
+		protected virtual void EmitIsExpression(IsExpression expression)
 		{
 			Append(Keywords.BeginGroup);
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 			AppendFormat(" {0} ", Keywords.Is);
-			EmitTypeSpecifier(AExpression.TypeSpecifier);
+			EmitTypeSpecifier(expression.TypeSpecifier);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitAsExpression(AsExpression AExpression)
+		protected virtual void EmitAsExpression(AsExpression expression)
 		{
 			Append(Keywords.BeginGroup);
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 			AppendFormat(" {0} ", Keywords.As);
-			EmitTypeSpecifier(AExpression.TypeSpecifier);
+			EmitTypeSpecifier(expression.TypeSpecifier);
 			Append(Keywords.EndGroup);
 		}
 		
@@ -691,26 +691,26 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		}
 		#endif
 		
-		protected virtual void EmitTableSelectorExpressionBase(TableSelectorExpressionBase AExpression)
+		protected virtual void EmitTableSelectorExpressionBase(TableSelectorExpressionBase expression)
 		{
 			Append(Keywords.Table);
-			if (AExpression.TypeSpecifier != null)
+			if (expression.TypeSpecifier != null)
 			{
 				AppendFormat(" {0} ", Keywords.Of);
-				if (AExpression.TypeSpecifier is TableTypeSpecifier)
+				if (expression.TypeSpecifier is TableTypeSpecifier)
 				{
-					TableTypeSpecifier LTypeSpecifier = (TableTypeSpecifier)AExpression.TypeSpecifier;
+					TableTypeSpecifier typeSpecifier = (TableTypeSpecifier)expression.TypeSpecifier;
 					AppendFormat("{0} ", Keywords.BeginList);
-					for (int LIndex = 0; LIndex < LTypeSpecifier.Columns.Count; LIndex++)
+					for (int index = 0; index < typeSpecifier.Columns.Count; index++)
 					{
-						if (LIndex > 0)
+						if (index > 0)
 							EmitListSeparator();
-						EmitNamedTypeSpecifier(LTypeSpecifier.Columns[LIndex]);
+						EmitNamedTypeSpecifier(typeSpecifier.Columns[index]);
 					}
 					AppendFormat(" {0}", Keywords.EndList);
 				}
 				else
-					EmitTypeSpecifier(AExpression.TypeSpecifier);
+					EmitTypeSpecifier(expression.TypeSpecifier);
 			}
 			
 			NewLine();
@@ -718,22 +718,22 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			Append(Keywords.BeginList);
 			IncreaseIndent();
 			
-			for (int LIndex = 0; LIndex < AExpression.Expressions.Count; LIndex++)
+			for (int index = 0; index < expression.Expressions.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
 				NewLine();
 				Indent();
-				EmitExpression(AExpression.Expressions[LIndex]);
+				EmitExpression(expression.Expressions[index]);
 			}
 			
-			for (int LIndex = 0; LIndex < AExpression.Keys.Count; LIndex++)
+			for (int index = 0; index < expression.Keys.Count; index++)
 			{
-				if ((AExpression.Expressions.Count > 0) || (LIndex > 0))
+				if ((expression.Expressions.Count > 0) || (index > 0))
 					EmitListSeparator();
 				NewLine();
 				Indent();
-				EmitKeyDefinition(AExpression.Keys[LIndex]);
+				EmitKeyDefinition(expression.Keys[index]);
 			}
 
 			DecreaseIndent();
@@ -742,73 +742,73 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			Append(Keywords.EndList);
 		}
 		
-		protected virtual void EmitRowSelectorExpressionBase(RowSelectorExpressionBase AExpression)
+		protected virtual void EmitRowSelectorExpressionBase(RowSelectorExpressionBase expression)
 		{
 			Append(Keywords.Row);
 
-			if (AExpression.TypeSpecifier != null)
+			if (expression.TypeSpecifier != null)
 			{
 				AppendFormat(" {0} ", Keywords.Of);
-				if (AExpression.TypeSpecifier is RowTypeSpecifier)
+				if (expression.TypeSpecifier is RowTypeSpecifier)
 				{
-					RowTypeSpecifier LTypeSpecifier = (RowTypeSpecifier)AExpression.TypeSpecifier;
+					RowTypeSpecifier typeSpecifier = (RowTypeSpecifier)expression.TypeSpecifier;
 					AppendFormat("{0} ", Keywords.BeginList);
-					for (int LIndex = 0; LIndex < LTypeSpecifier.Columns.Count; LIndex++)
+					for (int index = 0; index < typeSpecifier.Columns.Count; index++)
 					{
-						if (LIndex > 0)
+						if (index > 0)
 							EmitListSeparator();
-						EmitNamedTypeSpecifier(LTypeSpecifier.Columns[LIndex]);
+						EmitNamedTypeSpecifier(typeSpecifier.Columns[index]);
 					}
 					AppendFormat(" {0}", Keywords.EndList);
 				}
 				else
-					EmitTypeSpecifier(AExpression.TypeSpecifier);
+					EmitTypeSpecifier(expression.TypeSpecifier);
 			}
 			
 			AppendFormat(" {0} ", Keywords.BeginList);
-			for (int LIndex = 0; LIndex < AExpression.Expressions.Count; LIndex++)
+			for (int index = 0; index < expression.Expressions.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitNamedColumnExpression(AExpression.Expressions[LIndex]);
+				EmitNamedColumnExpression(expression.Expressions[index]);
 			}
 			AppendFormat(" {0}", Keywords.EndList);
 		}
 		
-		protected virtual void EmitRowExtractorExpressionBase(RowExtractorExpressionBase AExpression)
+		protected virtual void EmitRowExtractorExpressionBase(RowExtractorExpressionBase expression)
 		{
 			Append(Keywords.BeginGroup);
 			AppendFormat("{0} {1} ", Keywords.Row, Keywords.From);
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitColumnExtractorExpression(ColumnExtractorExpression AExpression)
+		protected virtual void EmitColumnExtractorExpression(ColumnExtractorExpression expression)
 		{
 			Append(Keywords.BeginGroup);
-			if (AExpression.Columns.Count == 1)
-				AppendFormat("{0} {1} ", AExpression.Columns[0].ColumnName, Keywords.From);
+			if (expression.Columns.Count == 1)
+				AppendFormat("{0} {1} ", expression.Columns[0].ColumnName, Keywords.From);
 			else
 			{
 				AppendFormat("{0} ", Keywords.BeginList);
-				for (int LIndex = 0; LIndex < AExpression.Columns.Count; LIndex++)
+				for (int index = 0; index < expression.Columns.Count; index++)
 				{
-					if (LIndex > 0)
+					if (index > 0)
 						AppendFormat("{0} ", Keywords.ListSeparator);
-					Append(AExpression.Columns[LIndex].ColumnName);
+					Append(expression.Columns[index].ColumnName);
 				}
 				AppendFormat(" {0} {1} ", Keywords.EndList, Keywords.From);
 			}
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 			
-			if (AExpression.HasByClause)
+			if (expression.HasByClause)
 			{
 				AppendFormat(" {0} {1} {2} ", Keywords.Order, Keywords.By, Keywords.BeginList);
-				for (int LIndex = 0; LIndex < AExpression.OrderColumns.Count; LIndex++)
+				for (int index = 0; index < expression.OrderColumns.Count; index++)
 				{
-					if (LIndex > 0)
+					if (index > 0)
 						AppendFormat("{0} ", Keywords.ListSeparator);
-					EmitOrderColumnDefinition(AExpression.OrderColumns[LIndex]);
+					EmitOrderColumnDefinition(expression.OrderColumns[index]);
 				}
 				AppendFormat(" {0}", Keywords.EndList);
 			}
@@ -816,166 +816,166 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitListSelectorExpression(ListSelectorExpression AExpression)
+		protected virtual void EmitListSelectorExpression(ListSelectorExpression expression)
 		{
-			if (AExpression.TypeSpecifier != null)
-				EmitListTypeSpecifier((ListTypeSpecifier)AExpression.TypeSpecifier);
+			if (expression.TypeSpecifier != null)
+				EmitListTypeSpecifier((ListTypeSpecifier)expression.TypeSpecifier);
 			AppendFormat("{0} ", Keywords.BeginList);
-			for (int LIndex = 0; LIndex < AExpression.Expressions.Count; LIndex++)
+			for (int index = 0; index < expression.Expressions.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitExpression(AExpression.Expressions[LIndex]);
+				EmitExpression(expression.Expressions[index]);
 			}
 			AppendFormat(" {0}", Keywords.EndList);
 		}
 		
-		protected virtual void EmitCursorDefinition(CursorDefinition AExpression)
+		protected virtual void EmitCursorDefinition(CursorDefinition expression)
 		{
-			EmitExpression(AExpression.Expression);
-			if (AExpression.Capabilities != 0)
+			EmitExpression(expression.Expression);
+			if (expression.Capabilities != 0)
 			{
 				NewLine();
 				Indent();
 				AppendFormat("{0} {1} ", Keywords.Capabilities, Keywords.BeginList);
-				bool LFirst = true;
-				CursorCapability LCapability;
-				for (int LIndex = 0; LIndex < 7; LIndex++)
+				bool first = true;
+				CursorCapability capability;
+				for (int index = 0; index < 7; index++)
 				{
-					LCapability = (CursorCapability)Math.Pow(2, LIndex);
-					if ((AExpression.Capabilities & LCapability) != 0)
+					capability = (CursorCapability)Math.Pow(2, index);
+					if ((expression.Capabilities & capability) != 0)
 					{
-						if (!LFirst)
+						if (!first)
 							EmitListSeparator();
 						else
-							LFirst = false;
+							first = false;
 							
-						Append(LCapability.ToString().ToLower());
+						Append(capability.ToString().ToLower());
 					}
 				}
 				AppendFormat(" {0}", Keywords.EndList);
 			}
 
-			if (AExpression.Isolation != CursorIsolation.None)
+			if (expression.Isolation != CursorIsolation.None)
 			{
 				NewLine();
 				Indent();
-				AppendFormat("{0} {1}", Keywords.Isolation, AExpression.Isolation.ToString().ToLower());
+				AppendFormat("{0} {1}", Keywords.Isolation, expression.Isolation.ToString().ToLower());
 			}
 			
-			if (AExpression.SpecifiesType)
+			if (expression.SpecifiesType)
 			{
 				NewLine();
 				Indent();
-				AppendFormat("{0} {1}", Keywords.Type, AExpression.CursorType.ToString().ToLower());
+				AppendFormat("{0} {1}", Keywords.Type, expression.CursorType.ToString().ToLower());
 			}
 		}
 		
-		protected virtual void EmitCursorSelectorExpression(CursorSelectorExpression AExpression)
+		protected virtual void EmitCursorSelectorExpression(CursorSelectorExpression expression)
 		{
 			Append(Keywords.Cursor);
 			NewLine();
 			Indent();
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
-			EmitCursorDefinition(AExpression.CursorDefinition);
+			EmitCursorDefinition(expression.CursorDefinition);
 			DecreaseIndent();
 			NewLine();
 			Indent();
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitRestrictExpression(RestrictExpression AExpression)
+		protected virtual void EmitRestrictExpression(RestrictExpression expression)
 		{
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
 			AppendFormat("{0} ", Keywords.Where);
-			EmitExpression(AExpression.Condition);
+			EmitExpression(expression.Condition);
 			DecreaseIndent();
 			DecreaseIndent();
 			NewLine();
 			Indent();
-			EmitLanguageModifiers(AExpression);
+			EmitLanguageModifiers(expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitColumnExpression(ColumnExpression AExpression)
+		protected virtual void EmitColumnExpression(ColumnExpression expression)
 		{
-			Append(AExpression.ColumnName);
+			Append(expression.ColumnName);
 		}
 		
-		protected virtual void EmitProjectExpression(ProjectExpression AExpression)
+		protected virtual void EmitProjectExpression(ProjectExpression expression)
 		{
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
 			AppendFormat("{0} {1} ", Keywords.Over, Keywords.BeginList);
-			for (int LIndex = 0; LIndex < AExpression.Columns.Count; LIndex++)
+			for (int index = 0; index < expression.Columns.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitColumnExpression(AExpression.Columns[LIndex]);
+				EmitColumnExpression(expression.Columns[index]);
 			}
 			AppendFormat(" {0}", Keywords.EndList);
 			DecreaseIndent();
 			DecreaseIndent();
 			NewLine();
 			Indent();
-			EmitLanguageModifiers(AExpression);
+			EmitLanguageModifiers(expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitRemoveExpression(RemoveExpression AExpression)
+		protected virtual void EmitRemoveExpression(RemoveExpression expression)
 		{
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
 			AppendFormat("{0} {1} ", Keywords.Remove, Keywords.BeginList);
-			for (int LIndex = 0; LIndex < AExpression.Columns.Count; LIndex++)
+			for (int index = 0; index < expression.Columns.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitColumnExpression(AExpression.Columns[LIndex]);
+				EmitColumnExpression(expression.Columns[index]);
 			}
 			AppendFormat(" {0}", Keywords.EndList);
 			DecreaseIndent();
 			DecreaseIndent();
 			NewLine();
 			Indent();
-			EmitLanguageModifiers(AExpression);
+			EmitLanguageModifiers(expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitNamedColumnExpression(NamedColumnExpression AExpression)
+		protected virtual void EmitNamedColumnExpression(NamedColumnExpression expression)
 		{
-			EmitExpression(AExpression.Expression);
-			AppendFormat(" {0}", AExpression.ColumnAlias);
-			EmitMetaData(AExpression.MetaData);
+			EmitExpression(expression.Expression);
+			AppendFormat(" {0}", expression.ColumnAlias);
+			EmitMetaData(expression.MetaData);
 		}
 		
-		protected virtual void EmitExtendExpression(ExtendExpression AExpression)
+		protected virtual void EmitExtendExpression(ExtendExpression expression)
 		{
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
@@ -984,13 +984,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			Indent();
 			Append(Keywords.BeginList);
 			IncreaseIndent();
-			for (int LIndex = 0; LIndex < AExpression.Expressions.Count; LIndex++)
+			for (int index = 0; index < expression.Expressions.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
 				NewLine();
 				Indent();
-				EmitNamedColumnExpression(AExpression.Expressions[LIndex]);
+				EmitNamedColumnExpression(expression.Expressions[index]);
 			}
 			DecreaseIndent();
 			NewLine();
@@ -1000,29 +1000,29 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			DecreaseIndent();
 			NewLine();
 			Indent();
-			EmitLanguageModifiers(AExpression);
+			EmitLanguageModifiers(expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitSpecifyExpression(SpecifyExpression AExpression)
+		protected virtual void EmitSpecifyExpression(SpecifyExpression expression)
 		{
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
 			Append(Keywords.BeginList);
 			IncreaseIndent();
-			for (int LIndex = 0; LIndex < AExpression.Expressions.Count; LIndex++)
+			for (int index = 0; index < expression.Expressions.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
 				NewLine();
 				Indent();
-				EmitNamedColumnExpression(AExpression.Expressions[LIndex]);
+				EmitNamedColumnExpression(expression.Expressions[index]);
 			}
 			DecreaseIndent();
 			NewLine();
@@ -1032,23 +1032,23 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			DecreaseIndent();
 			NewLine();
 			Indent();
-			EmitLanguageModifiers(AExpression);
+			EmitLanguageModifiers(expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitRenameColumnExpression(RenameColumnExpression AExpression)
+		protected virtual void EmitRenameColumnExpression(RenameColumnExpression expression)
 		{
-			AppendFormat("{0} {1}", AExpression.ColumnName, AExpression.ColumnAlias);
-			EmitMetaData(AExpression.MetaData);
+			AppendFormat("{0} {1}", expression.ColumnName, expression.ColumnAlias);
+			EmitMetaData(expression.MetaData);
 		}
 		
-		protected virtual void EmitRenameExpression(RenameExpression AExpression)
+		protected virtual void EmitRenameExpression(RenameExpression expression)
 		{
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
@@ -1057,13 +1057,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			Indent();
 			Append(Keywords.BeginList);
 			IncreaseIndent();
-			for (int LIndex = 0; LIndex < AExpression.Expressions.Count; LIndex++)
+			for (int index = 0; index < expression.Expressions.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
 				NewLine();
 				Indent();
-				EmitRenameColumnExpression(AExpression.Expressions[LIndex]);
+				EmitRenameColumnExpression(expression.Expressions[index]);
 			}
 			DecreaseIndent();
 			NewLine();
@@ -1073,60 +1073,60 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			DecreaseIndent();
 			NewLine();
 			Indent();
-			EmitLanguageModifiers(AExpression);
+			EmitLanguageModifiers(expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitAggregateColumnExpression(AggregateColumnExpression AExpression)
+		protected virtual void EmitAggregateColumnExpression(AggregateColumnExpression expression)
 		{
-			AppendFormat("{0}{1}", AExpression.AggregateOperator, Keywords.BeginGroup);
-			if (AExpression.Distinct)
+			AppendFormat("{0}{1}", expression.AggregateOperator, Keywords.BeginGroup);
+			if (expression.Distinct)
 				AppendFormat("{0} ", Keywords.Distinct);
-			for (int LIndex = 0; LIndex < AExpression.Columns.Count; LIndex++)
+			for (int index = 0; index < expression.Columns.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					AppendFormat("{0} ", Keywords.ListSeparator);
-				Append(AExpression.Columns[LIndex].ColumnName);
+				Append(expression.Columns[index].ColumnName);
 			}
 
-			if (AExpression.HasByClause)
+			if (expression.HasByClause)
 			{
 				AppendFormat(" {0} {1} {2} ", Keywords.Order, Keywords.By, Keywords.BeginList);
-				for (int LIndex = 0; LIndex < AExpression.OrderColumns.Count; LIndex++)
+				for (int index = 0; index < expression.OrderColumns.Count; index++)
 				{
-					if (LIndex > 0)
+					if (index > 0)
 						AppendFormat("{0} ", Keywords.ListSeparator);
-					EmitOrderColumnDefinition(AExpression.OrderColumns[LIndex]);
+					EmitOrderColumnDefinition(expression.OrderColumns[index]);
 				}
 				AppendFormat(" {0}", Keywords.EndList);
 			}
 			
-			AppendFormat("{0} {1}", Keywords.EndGroup, AExpression.ColumnAlias);
-			EmitMetaData(AExpression.MetaData);
+			AppendFormat("{0} {1}", Keywords.EndGroup, expression.ColumnAlias);
+			EmitMetaData(expression.MetaData);
 		}
 		
-		protected virtual void EmitAggregateExpression(AggregateExpression AExpression)
+		protected virtual void EmitAggregateExpression(AggregateExpression expression)
 		{
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
 			AppendFormat("{0}", Keywords.Group);
 			IncreaseIndent();
-			if (AExpression.ByColumns.Count > 0)
+			if (expression.ByColumns.Count > 0)
 			{
 				NewLine();
 				Indent();
 				AppendFormat("{0} {1} ", Keywords.By, Keywords.BeginList);
-				for (int LIndex = 0; LIndex < AExpression.ByColumns.Count; LIndex++)
+				for (int index = 0; index < expression.ByColumns.Count; index++)
 				{
-					if (LIndex > 0)
+					if (index > 0)
 						EmitListSeparator();
-					EmitColumnExpression(AExpression.ByColumns[LIndex]);
+					EmitColumnExpression(expression.ByColumns[index]);
 				}
 				AppendFormat(" {0}", Keywords.EndList);
 			}
@@ -1137,13 +1137,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			Indent();
 			Append(Keywords.BeginList);
 			IncreaseIndent();
-			for (int LIndex = 0; LIndex < AExpression.ComputeColumns.Count; LIndex++)
+			for (int index = 0; index < expression.ComputeColumns.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
 				NewLine();
 				Indent();
-				EmitAggregateColumnExpression(AExpression.ComputeColumns[LIndex]);
+				EmitAggregateColumnExpression(expression.ComputeColumns[index]);
 			}
 			DecreaseIndent();
 			NewLine();
@@ -1154,112 +1154,112 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			DecreaseIndent();
 			NewLine();
 			Indent();
-			EmitLanguageModifiers(AExpression);
+			EmitLanguageModifiers(expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitBaseOrderExpression(BaseOrderExpression AExpression)
+		protected virtual void EmitBaseOrderExpression(BaseOrderExpression expression)
 		{
-			if (AExpression is OrderExpression)
-				EmitOrderExpression((OrderExpression)AExpression);
-			else if (AExpression is BrowseExpression)
-				EmitBrowseExpression((BrowseExpression)AExpression);
+			if (expression is OrderExpression)
+				EmitOrderExpression((OrderExpression)expression);
+			else if (expression is BrowseExpression)
+				EmitBrowseExpression((BrowseExpression)expression);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownExpressionClass, AExpression.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownExpressionClass, expression.GetType().Name);
 		}
 		
-		protected virtual void EmitOrderExpression(OrderExpression AExpression)
+		protected virtual void EmitOrderExpression(OrderExpression expression)
 		{
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
 			AppendFormat("{0} {1} {2} ", Keywords.Order, Keywords.By, Keywords.BeginList);
-			for (int LIndex = 0; LIndex < AExpression.Columns.Count; LIndex++)
+			for (int index = 0; index < expression.Columns.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitOrderColumnDefinition(AExpression.Columns[LIndex]);
+				EmitOrderColumnDefinition(expression.Columns[index]);
 			}
 			AppendFormat(" {0}", Keywords.EndList);
-			EmitIncludeColumnExpression(AExpression.SequenceColumn, Schema.TableVarColumnType.Sequence);
+			EmitIncludeColumnExpression(expression.SequenceColumn, Schema.TableVarColumnType.Sequence);
 			DecreaseIndent();
 		}
 		
-		protected virtual void EmitBrowseExpression(BrowseExpression AExpression)
+		protected virtual void EmitBrowseExpression(BrowseExpression expression)
 		{
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
 			AppendFormat("{0} {1} {2} ", Keywords.Browse, Keywords.By, Keywords.BeginList);
-			for (int LIndex = 0; LIndex < AExpression.Columns.Count; LIndex++)
+			for (int index = 0; index < expression.Columns.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitOrderColumnDefinition(AExpression.Columns[LIndex]);
+				EmitOrderColumnDefinition(expression.Columns[index]);
 			}
 			AppendFormat(" {0}", Keywords.EndList);
 			DecreaseIndent();
 		}
 
-		protected virtual void EmitQuotaExpression(QuotaExpression AExpression)
+		protected virtual void EmitQuotaExpression(QuotaExpression expression)
 		{
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
 			AppendFormat("{0} ", Keywords.Return);
-			EmitExpression(AExpression.Quota);
+			EmitExpression(expression.Quota);
 			AppendFormat(" {0} {1} ", Keywords.By, Keywords.BeginList);
-			for (int LIndex = 0; LIndex < AExpression.Columns.Count; LIndex++)
+			for (int index = 0; index < expression.Columns.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitOrderColumnDefinition(AExpression.Columns[LIndex]);
+				EmitOrderColumnDefinition(expression.Columns[index]);
 			}
 			AppendFormat(" {0}", Keywords.EndList);
 			DecreaseIndent();
 			DecreaseIndent();
 			NewLine();
 			Indent();
-			EmitLanguageModifiers(AExpression);
+			EmitLanguageModifiers(expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitExplodeColumnExpression(ExplodeColumnExpression AExpression)
+		protected virtual void EmitExplodeColumnExpression(ExplodeColumnExpression expression)
 		{
-			AppendFormat("{0}{1}{2}", Keywords.Parent, Keywords.Qualifier, AExpression.ColumnName);
+			AppendFormat("{0}{1}{2}", Keywords.Parent, Keywords.Qualifier, expression.ColumnName);
 		}
 		
-		protected virtual void EmitIncludeColumnExpression(IncludeColumnExpression AExpression, Schema.TableVarColumnType AColumnType)
+		protected virtual void EmitIncludeColumnExpression(IncludeColumnExpression expression, Schema.TableVarColumnType columnType)
 		{
-			if (AExpression != null)
+			if (expression != null)
 			{
 				AppendFormat(" {0}", Keywords.Include);
-				switch (AColumnType)
+				switch (columnType)
 				{
 					case Schema.TableVarColumnType.Sequence: AppendFormat(" {0}", Keywords.Sequence); break;
 					case Schema.TableVarColumnType.Level: AppendFormat(" {0}", Keywords.Level); break;
 					case Schema.TableVarColumnType.RowExists: AppendFormat(" {0}", Keywords.RowExists); break;
 				}
-				if (AExpression.ColumnAlias != String.Empty)
-					AppendFormat(" {0}", AExpression.ColumnAlias);
-				EmitMetaData(AExpression.MetaData);
+				if (expression.ColumnAlias != String.Empty)
+					AppendFormat(" {0}", expression.ColumnAlias);
+				EmitMetaData(expression.MetaData);
 			}
 		}
 		
-		protected virtual void EmitExplodeExpression(ExplodeExpression AExpression)
+		protected virtual void EmitExplodeExpression(ExplodeExpression expression)
 		{
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
@@ -1268,36 +1268,36 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			NewLine();
 			Indent();
 			AppendFormat("{0} ", Keywords.By);
-			EmitExpression(AExpression.ByExpression);
+			EmitExpression(expression.ByExpression);
 			NewLine();
 			Indent();
 			AppendFormat("{0} ", Keywords.Where);
-			EmitExpression(AExpression.RootExpression);
+			EmitExpression(expression.RootExpression);
 
-			if (AExpression.HasOrderByClause)
+			if (expression.HasOrderByClause)
 			{
 				AppendFormat(" {0} {1} {2} ", Keywords.Order, Keywords.By, Keywords.BeginList);
-				for (int LIndex = 0; LIndex < AExpression.OrderColumns.Count; LIndex++)
+				for (int index = 0; index < expression.OrderColumns.Count; index++)
 				{
-					if (LIndex > 0)
+					if (index > 0)
 						AppendFormat("{0} ", Keywords.ListSeparator);
-					EmitOrderColumnDefinition(AExpression.OrderColumns[LIndex]);
+					EmitOrderColumnDefinition(expression.OrderColumns[index]);
 				}
 				AppendFormat(" {0}", Keywords.EndList);
 			}
 			
-			if (AExpression.LevelColumn != null)
+			if (expression.LevelColumn != null)
 			{
 				NewLine();
 				Indent();
-				EmitIncludeColumnExpression(AExpression.LevelColumn, Schema.TableVarColumnType.Level);
+				EmitIncludeColumnExpression(expression.LevelColumn, Schema.TableVarColumnType.Level);
 			}
 			
-			if (AExpression.SequenceColumn != null)
+			if (expression.SequenceColumn != null)
 			{
 				NewLine();
 				Indent();
-				EmitIncludeColumnExpression(AExpression.SequenceColumn, Schema.TableVarColumnType.Sequence);
+				EmitIncludeColumnExpression(expression.SequenceColumn, Schema.TableVarColumnType.Sequence);
 			}
 
 			DecreaseIndent();
@@ -1305,406 +1305,406 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			DecreaseIndent();
 			NewLine();
 			Indent();
-			EmitLanguageModifiers(AExpression);
+			EmitLanguageModifiers(expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitBinaryTableExpression(BinaryTableExpression AExpression)
+		protected virtual void EmitBinaryTableExpression(BinaryTableExpression expression)
 		{
-			if (AExpression is JoinExpression)
-				EmitJoinExpression((JoinExpression)AExpression);
-			else if (AExpression is HavingExpression)
-				EmitHavingExpression((HavingExpression)AExpression);
-			else if (AExpression is WithoutExpression)
-				EmitWithoutExpression((WithoutExpression)AExpression);
-			else if (AExpression is UnionExpression)
-				EmitUnionExpression((UnionExpression)AExpression);
-			else if (AExpression is IntersectExpression)
-				EmitIntersectExpression((IntersectExpression)AExpression);
-			else if (AExpression is DifferenceExpression)
-				EmitDifferenceExpression((DifferenceExpression)AExpression);
-			else if (AExpression is ProductExpression)
-				EmitProductExpression((ProductExpression)AExpression);
-			else if (AExpression is DivideExpression)
-				EmitDivideExpression((DivideExpression)AExpression);
+			if (expression is JoinExpression)
+				EmitJoinExpression((JoinExpression)expression);
+			else if (expression is HavingExpression)
+				EmitHavingExpression((HavingExpression)expression);
+			else if (expression is WithoutExpression)
+				EmitWithoutExpression((WithoutExpression)expression);
+			else if (expression is UnionExpression)
+				EmitUnionExpression((UnionExpression)expression);
+			else if (expression is IntersectExpression)
+				EmitIntersectExpression((IntersectExpression)expression);
+			else if (expression is DifferenceExpression)
+				EmitDifferenceExpression((DifferenceExpression)expression);
+			else if (expression is ProductExpression)
+				EmitProductExpression((ProductExpression)expression);
+			else if (expression is DivideExpression)
+				EmitDivideExpression((DivideExpression)expression);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownExpressionClass, AExpression.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownExpressionClass, expression.GetType().Name);
 		}
 		
-		protected virtual void EmitUnionExpression(UnionExpression AExpression)
+		protected virtual void EmitUnionExpression(UnionExpression expression)
 		{
 			Append(Keywords.BeginGroup);
-			EmitExpression(AExpression.LeftExpression);
+			EmitExpression(expression.LeftExpression);
 			AppendFormat(" {0} ", Keywords.Union);
-			EmitExpression(AExpression.RightExpression);
-			EmitLanguageModifiers(AExpression);
+			EmitExpression(expression.RightExpression);
+			EmitLanguageModifiers(expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitIntersectExpression(IntersectExpression AExpression)
+		protected virtual void EmitIntersectExpression(IntersectExpression expression)
 		{
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.LeftExpression);
+			EmitExpression(expression.LeftExpression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
 			Append(Keywords.Intersect);
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.RightExpression);
+			EmitExpression(expression.RightExpression);
 			DecreaseIndent();
 			DecreaseIndent();
 			NewLine();
 			Indent();
-			EmitLanguageModifiers(AExpression);
+			EmitLanguageModifiers(expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitDifferenceExpression(DifferenceExpression AExpression)
+		protected virtual void EmitDifferenceExpression(DifferenceExpression expression)
 		{
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.LeftExpression);
+			EmitExpression(expression.LeftExpression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
 			Append(Keywords.Minus);
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.RightExpression);
+			EmitExpression(expression.RightExpression);
 			DecreaseIndent();
 			DecreaseIndent();
 			NewLine();
 			Indent();
-			EmitLanguageModifiers(AExpression);
+			EmitLanguageModifiers(expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitProductExpression(ProductExpression AExpression)
+		protected virtual void EmitProductExpression(ProductExpression expression)
 		{
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.LeftExpression);
+			EmitExpression(expression.LeftExpression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
 			Append(Keywords.Times);
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.RightExpression);
+			EmitExpression(expression.RightExpression);
 			DecreaseIndent();
 			DecreaseIndent();
 			NewLine();
 			Indent();
-			EmitLanguageModifiers(AExpression);
+			EmitLanguageModifiers(expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitDivideExpression(DivideExpression AExpression)
+		protected virtual void EmitDivideExpression(DivideExpression expression)
 		{
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.LeftExpression);
+			EmitExpression(expression.LeftExpression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
 			Append(Keywords.Divide);
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.RightExpression);
+			EmitExpression(expression.RightExpression);
 			DecreaseIndent();
 			DecreaseIndent();
 			NewLine();
 			Indent();
-			EmitLanguageModifiers(AExpression);
+			EmitLanguageModifiers(expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitJoinExpression(JoinExpression AExpression)
+		protected virtual void EmitJoinExpression(JoinExpression expression)
 		{
-			if (AExpression is OuterJoinExpression)
-				EmitOuterJoinExpression((OuterJoinExpression)AExpression);
-			else if (AExpression is InnerJoinExpression)
-				EmitInnerJoinExpression((InnerJoinExpression)AExpression);
+			if (expression is OuterJoinExpression)
+				EmitOuterJoinExpression((OuterJoinExpression)expression);
+			else if (expression is InnerJoinExpression)
+				EmitInnerJoinExpression((InnerJoinExpression)expression);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownExpressionClass, AExpression.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownExpressionClass, expression.GetType().Name);
 		}
 		
-		protected virtual void EmitHavingExpression(HavingExpression AExpression)
+		protected virtual void EmitHavingExpression(HavingExpression expression)
 		{
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.LeftExpression);
+			EmitExpression(expression.LeftExpression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
 			Append(Keywords.Having);
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.RightExpression);
-			if (AExpression.Condition != null)
+			EmitExpression(expression.RightExpression);
+			if (expression.Condition != null)
 			{
 				NewLine();
 				Indent();
 				AppendFormat("{0} ", Keywords.By);
-				EmitExpression(AExpression.Condition);
+				EmitExpression(expression.Condition);
 			}
 			DecreaseIndent();
 			DecreaseIndent();
 			NewLine();
 			Indent();
-			EmitLanguageModifiers(AExpression);
+			EmitLanguageModifiers(expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitWithoutExpression(WithoutExpression AExpression)
+		protected virtual void EmitWithoutExpression(WithoutExpression expression)
 		{
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.LeftExpression);
+			EmitExpression(expression.LeftExpression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
 			Append(Keywords.Without);
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.RightExpression);
-			if (AExpression.Condition != null)
+			EmitExpression(expression.RightExpression);
+			if (expression.Condition != null)
 			{
 				NewLine();
 				Indent();
 				AppendFormat("{0} ", Keywords.By);
-				EmitExpression(AExpression.Condition);
+				EmitExpression(expression.Condition);
 			}
 			DecreaseIndent();
 			DecreaseIndent();
 			NewLine();
 			Indent();
-			EmitLanguageModifiers(AExpression);
+			EmitLanguageModifiers(expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitInnerJoinExpression(InnerJoinExpression AExpression)
+		protected virtual void EmitInnerJoinExpression(InnerJoinExpression expression)
 		{
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.LeftExpression);
+			EmitExpression(expression.LeftExpression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			Append(AExpression.IsLookup ? Keywords.Lookup : Keywords.Join);
+			Append(expression.IsLookup ? Keywords.Lookup : Keywords.Join);
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.RightExpression);
-			if (AExpression.Condition != null)
+			EmitExpression(expression.RightExpression);
+			if (expression.Condition != null)
 			{
 				NewLine();
 				Indent();
 				AppendFormat("{0} ", Keywords.By);
-				EmitExpression(AExpression.Condition);
+				EmitExpression(expression.Condition);
 			}
 			DecreaseIndent();
 			DecreaseIndent();
 			NewLine();
 			Indent();
-			EmitLanguageModifiers(AExpression);
+			EmitLanguageModifiers(expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitOuterJoinExpression(OuterJoinExpression AExpression)
+		protected virtual void EmitOuterJoinExpression(OuterJoinExpression expression)
 		{
-			if (AExpression is LeftOuterJoinExpression)
-				EmitLeftOuterJoinExpression((LeftOuterJoinExpression)AExpression);
-			else if (AExpression is RightOuterJoinExpression)
-				EmitRightOuterJoinExpression((RightOuterJoinExpression)AExpression);
+			if (expression is LeftOuterJoinExpression)
+				EmitLeftOuterJoinExpression((LeftOuterJoinExpression)expression);
+			else if (expression is RightOuterJoinExpression)
+				EmitRightOuterJoinExpression((RightOuterJoinExpression)expression);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownExpressionClass, AExpression.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownExpressionClass, expression.GetType().Name);
 		}
 		
-		protected virtual void EmitLeftOuterJoinExpression(LeftOuterJoinExpression AExpression)
+		protected virtual void EmitLeftOuterJoinExpression(LeftOuterJoinExpression expression)
 		{
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.LeftExpression);
+			EmitExpression(expression.LeftExpression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			AppendFormat("{0} {1}", Keywords.Left, AExpression.IsLookup ? Keywords.Lookup : Keywords.Join);
+			AppendFormat("{0} {1}", Keywords.Left, expression.IsLookup ? Keywords.Lookup : Keywords.Join);
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.RightExpression);
+			EmitExpression(expression.RightExpression);
 
-			if (AExpression.Condition != null)
+			if (expression.Condition != null)
 			{
 				NewLine();
 				Indent();
 				AppendFormat("{0} ", Keywords.By);
-				EmitExpression(AExpression.Condition);
+				EmitExpression(expression.Condition);
 			}
 
-			if (AExpression.RowExistsColumn != null)
+			if (expression.RowExistsColumn != null)
 			{
 				NewLine();
 				Indent();
-				EmitIncludeColumnExpression(AExpression.RowExistsColumn, Schema.TableVarColumnType.RowExists);
+				EmitIncludeColumnExpression(expression.RowExistsColumn, Schema.TableVarColumnType.RowExists);
 			}
 
 			DecreaseIndent();
 			DecreaseIndent();
 			NewLine();
 			Indent();
-			EmitLanguageModifiers(AExpression);
+			EmitLanguageModifiers(expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitRightOuterJoinExpression(RightOuterJoinExpression AExpression)
+		protected virtual void EmitRightOuterJoinExpression(RightOuterJoinExpression expression)
 		{
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.LeftExpression);
+			EmitExpression(expression.LeftExpression);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			AppendFormat("{0} {1}", Keywords.Right, AExpression.IsLookup ? Keywords.Lookup : Keywords.Join);
+			AppendFormat("{0} {1}", Keywords.Right, expression.IsLookup ? Keywords.Lookup : Keywords.Join);
 			NewLine();
 			Indent();
-			EmitExpression(AExpression.RightExpression);
+			EmitExpression(expression.RightExpression);
 
-			if (AExpression.Condition != null)
+			if (expression.Condition != null)
 			{
 				NewLine();
 				Indent();
 				AppendFormat("{0} ", Keywords.By);
-				EmitExpression(AExpression.Condition);
+				EmitExpression(expression.Condition);
 			}
 
-			if (AExpression.RowExistsColumn != null)
+			if (expression.RowExistsColumn != null)
 			{
 				NewLine();
 				Indent();
-				EmitIncludeColumnExpression(AExpression.RowExistsColumn, Schema.TableVarColumnType.RowExists);
+				EmitIncludeColumnExpression(expression.RowExistsColumn, Schema.TableVarColumnType.RowExists);
 			}
 
 			DecreaseIndent();
 			DecreaseIndent();
 			NewLine();
 			Indent();
-			EmitLanguageModifiers(AExpression);
+			EmitLanguageModifiers(expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitTerminatedStatement(Statement AStatement)
+		protected virtual void EmitTerminatedStatement(Statement statement)
 		{
 			NewLine();
 			Indent();
-			EmitStatement(AStatement);
+			EmitStatement(statement);
 			EmitStatementTerminator();
 		}
 		
-		protected override void EmitStatement(Statement AStatement)
+		protected override void EmitStatement(Statement statement)
 		{
-			if (AStatement is D4Statement)
-				EmitD4Statement((D4Statement)AStatement);
-			else if (AStatement is AssignmentStatement)
-				EmitAssignmentStatement((AssignmentStatement)AStatement);
-			else if (AStatement is VariableStatement)
-				EmitVariableStatement((VariableStatement)AStatement);
-			else if (AStatement is ExpressionStatement)
-				EmitExpressionStatement((ExpressionStatement)AStatement);
-			else if (AStatement is IfStatement)
-				EmitIfStatement((IfStatement)AStatement);
-			else if (AStatement is DelimitedBlock)
-				EmitDelimitedBlock((DelimitedBlock)AStatement);
-			else if (AStatement is Block)
-				EmitBlock((Block)AStatement);
-			else if (AStatement is ExitStatement)
-				EmitExitStatement((ExitStatement)AStatement);
-			else if (AStatement is WhileStatement)
-				EmitWhileStatement((WhileStatement)AStatement);
-			else if (AStatement is DoWhileStatement)
-				EmitDoWhileStatement((DoWhileStatement)AStatement);
-			else if (AStatement is ForEachStatement)
-				EmitForEachStatement((ForEachStatement)AStatement);
-			else if (AStatement is BreakStatement)
-				EmitBreakStatement((BreakStatement)AStatement);
-			else if (AStatement is ContinueStatement)
-				EmitContinueStatement((ContinueStatement)AStatement);
-			else if (AStatement is CaseStatement)
-				EmitCaseStatement((CaseStatement)AStatement);
-			else if (AStatement is RaiseStatement)
-				EmitRaiseStatement((RaiseStatement)AStatement);
-			else if (AStatement is TryFinallyStatement)
-				EmitTryFinallyStatement((TryFinallyStatement)AStatement);
-			else if (AStatement is TryExceptStatement)
-				EmitTryExceptStatement((TryExceptStatement)AStatement);
-			else if (AStatement is EmptyStatement)
-				EmitEmptyStatement((EmptyStatement)AStatement);
-			else if (AStatement is SourceStatement)
-				EmitSourceStatement((SourceStatement)AStatement);
+			if (statement is D4Statement)
+				EmitD4Statement((D4Statement)statement);
+			else if (statement is AssignmentStatement)
+				EmitAssignmentStatement((AssignmentStatement)statement);
+			else if (statement is VariableStatement)
+				EmitVariableStatement((VariableStatement)statement);
+			else if (statement is ExpressionStatement)
+				EmitExpressionStatement((ExpressionStatement)statement);
+			else if (statement is IfStatement)
+				EmitIfStatement((IfStatement)statement);
+			else if (statement is DelimitedBlock)
+				EmitDelimitedBlock((DelimitedBlock)statement);
+			else if (statement is Block)
+				EmitBlock((Block)statement);
+			else if (statement is ExitStatement)
+				EmitExitStatement((ExitStatement)statement);
+			else if (statement is WhileStatement)
+				EmitWhileStatement((WhileStatement)statement);
+			else if (statement is DoWhileStatement)
+				EmitDoWhileStatement((DoWhileStatement)statement);
+			else if (statement is ForEachStatement)
+				EmitForEachStatement((ForEachStatement)statement);
+			else if (statement is BreakStatement)
+				EmitBreakStatement((BreakStatement)statement);
+			else if (statement is ContinueStatement)
+				EmitContinueStatement((ContinueStatement)statement);
+			else if (statement is CaseStatement)
+				EmitCaseStatement((CaseStatement)statement);
+			else if (statement is RaiseStatement)
+				EmitRaiseStatement((RaiseStatement)statement);
+			else if (statement is TryFinallyStatement)
+				EmitTryFinallyStatement((TryFinallyStatement)statement);
+			else if (statement is TryExceptStatement)
+				EmitTryExceptStatement((TryExceptStatement)statement);
+			else if (statement is EmptyStatement)
+				EmitEmptyStatement((EmptyStatement)statement);
+			else if (statement is SourceStatement)
+				EmitSourceStatement((SourceStatement)statement);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 		
-		protected virtual void EmitAssignmentStatement(AssignmentStatement AStatement)
+		protected virtual void EmitAssignmentStatement(AssignmentStatement statement)
 		{
-			EmitExpression(AStatement.Target);
+			EmitExpression(statement.Target);
 			AppendFormat(" {0} ", Keywords.Assign);
-			EmitExpression(AStatement.Expression);
+			EmitExpression(statement.Expression);
 		}
 		
-		protected virtual void EmitVariableStatement(VariableStatement AStatement)
+		protected virtual void EmitVariableStatement(VariableStatement statement)
 		{
 			AppendFormat("{0} ", Keywords.Var);
-			EmitIdentifierExpression(AStatement.VariableName);
-			if (AStatement.TypeSpecifier != null)
+			EmitIdentifierExpression(statement.VariableName);
+			if (statement.TypeSpecifier != null)
 			{
 				AppendFormat(" {0} ", Keywords.TypeSpecifier);
-				EmitTypeSpecifier(AStatement.TypeSpecifier);
+				EmitTypeSpecifier(statement.TypeSpecifier);
 			}
 
-			if (AStatement.Expression != null)
+			if (statement.Expression != null)
 			{
 				AppendFormat(" {0} ", Keywords.Assign);
-				EmitExpression(AStatement.Expression);
+				EmitExpression(statement.Expression);
 			}
 		}
 		
-		protected virtual void EmitExpressionStatement(ExpressionStatement AStatement)
+		protected virtual void EmitExpressionStatement(ExpressionStatement statement)
 		{
-			EmitExpression(AStatement.Expression);
+			EmitExpression(statement.Expression);
 		}
 		
-		protected virtual void EmitIfStatement(IfStatement AStatement)
+		protected virtual void EmitIfStatement(IfStatement statement)
 		{
 			AppendFormat("{0} ", Keywords.If);
-			EmitExpression(AStatement.Expression);
+			EmitExpression(statement.Expression);
 			AppendFormat(" {0}", Keywords.Then);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitStatement(AStatement.TrueStatement);
+			EmitStatement(statement.TrueStatement);
 			DecreaseIndent();
 
-			if (AStatement.FalseStatement != null)
+			if (statement.FalseStatement != null)
 			{
 				NewLine();
 				Indent();
@@ -1712,110 +1712,110 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				IncreaseIndent();
 				NewLine();
 				Indent();
-				EmitStatement(AStatement.FalseStatement);
+				EmitStatement(statement.FalseStatement);
 				DecreaseIndent();
 			}
 		}
 		
-		protected virtual void EmitDelimitedBlock(DelimitedBlock AStatement)
+		protected virtual void EmitDelimitedBlock(DelimitedBlock statement)
 		{
 			Append(Keywords.Begin);
 			IncreaseIndent();
-			EmitBlock(AStatement);
+			EmitBlock(statement);
 			DecreaseIndent();
 			NewLine();
 			Indent();
 			Append(Keywords.End);
 		}
 		
-		protected virtual void EmitBlock(Block AStatement)
+		protected virtual void EmitBlock(Block statement)
 		{
-			for (int LIndex = 0; LIndex < AStatement.Statements.Count; LIndex++)
-				EmitTerminatedStatement(AStatement.Statements[LIndex]);
+			for (int index = 0; index < statement.Statements.Count; index++)
+				EmitTerminatedStatement(statement.Statements[index]);
 		}
 		
-		protected virtual void EmitExitStatement(ExitStatement AStatement)
+		protected virtual void EmitExitStatement(ExitStatement statement)
 		{
 			Append(Keywords.Exit);
 		}
 		
-		protected virtual void EmitWhileStatement(WhileStatement AStatement)
+		protected virtual void EmitWhileStatement(WhileStatement statement)
 		{
 			AppendFormat("{0} ", Keywords.While);
-			EmitExpression(AStatement.Condition);
+			EmitExpression(statement.Condition);
 			AppendFormat(" {0}", Keywords.Do);
 			IncreaseIndent();
-			EmitTerminatedStatement(AStatement.Statement);
+			EmitTerminatedStatement(statement.Statement);
 			DecreaseIndent();
 		}
 		
-		protected virtual void EmitDoWhileStatement(DoWhileStatement AStatement)
+		protected virtual void EmitDoWhileStatement(DoWhileStatement statement)
 		{
 			AppendFormat("{0}", Keywords.Do);
 			IncreaseIndent();
-			EmitTerminatedStatement(AStatement.Statement);
+			EmitTerminatedStatement(statement.Statement);
 			DecreaseIndent();
 			NewLine();
 			Indent();
 			AppendFormat("{0} ", Keywords.While);
-			EmitExpression(AStatement.Condition);
+			EmitExpression(statement.Condition);
 		}
 		
-		protected virtual void EmitForEachStatement(ForEachStatement AStatement)
+		protected virtual void EmitForEachStatement(ForEachStatement statement)
 		{
 			AppendFormat("{0} ", Keywords.ForEach);
-			if (AStatement.VariableName == String.Empty)
+			if (statement.VariableName == String.Empty)
 				AppendFormat("{0} ", Keywords.Row);
 			else
 			{
-				if (AStatement.IsAllocation)
+				if (statement.IsAllocation)
 					AppendFormat("{0} ", Keywords.Var);
-				AppendFormat("{0} ", AStatement.VariableName);
+				AppendFormat("{0} ", statement.VariableName);
 			}
 			AppendFormat("{0} ", Keywords.In);
-			EmitCursorDefinition(AStatement.Expression);
+			EmitCursorDefinition(statement.Expression);
 			AppendFormat(" {0}", Keywords.Do);
 			IncreaseIndent();
-			EmitTerminatedStatement(AStatement.Statement);
+			EmitTerminatedStatement(statement.Statement);
 			DecreaseIndent();
 		}
 		
-		protected virtual void EmitBreakStatement(BreakStatement AStatement)
+		protected virtual void EmitBreakStatement(BreakStatement statement)
 		{
 			Append(Keywords.Break);
 		}
 		
-		protected virtual void EmitContinueStatement(ContinueStatement AStatement)
+		protected virtual void EmitContinueStatement(ContinueStatement statement)
 		{
 			Append(Keywords.Continue);
 		}
 		
-		protected virtual void EmitCaseStatement(CaseStatement AStatement)
+		protected virtual void EmitCaseStatement(CaseStatement statement)
 		{
 			Append(Keywords.Case);
-			if (AStatement.Expression != null)
+			if (statement.Expression != null)
 			{
 				Append(" ");
-				EmitExpression(AStatement.Expression);
+				EmitExpression(statement.Expression);
 			}
 			IncreaseIndent();
 
-			for (int LIndex = 0; LIndex < AStatement.CaseItems.Count; LIndex++)
+			for (int index = 0; index < statement.CaseItems.Count; index++)
 			{
 				NewLine();
 				Indent();
 				AppendFormat("{0} ", Keywords.When);
-				EmitExpression(AStatement.CaseItems[LIndex].WhenExpression);
+				EmitExpression(statement.CaseItems[index].WhenExpression);
 				AppendFormat(" {0} ", Keywords.Then);
-				EmitTerminatedStatement(AStatement.CaseItems[LIndex].ThenStatement);
+				EmitTerminatedStatement(statement.CaseItems[index].ThenStatement);
 			}
 			
-			if (AStatement.ElseStatement != null)
+			if (statement.ElseStatement != null)
 			{
 				NewLine();
 				Indent();
 				AppendFormat("{0} ", Keywords.Else);
-				EmitTerminatedStatement(AStatement.ElseStatement);
+				EmitTerminatedStatement(statement.ElseStatement);
 			}
 			
 			DecreaseIndent();
@@ -1824,241 +1824,241 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			Append(Keywords.End);
 		}
 		
-		protected virtual void EmitRaiseStatement(RaiseStatement AStatement)
+		protected virtual void EmitRaiseStatement(RaiseStatement statement)
 		{
 			Append(Keywords.Raise);
-			if (AStatement.Expression != null)
+			if (statement.Expression != null)
 			{
 				Append(" ");
-				EmitExpression(AStatement.Expression);
+				EmitExpression(statement.Expression);
 			}
 		}
 		
-		protected virtual void EmitTryFinallyStatement(TryFinallyStatement AStatement)
+		protected virtual void EmitTryFinallyStatement(TryFinallyStatement statement)
 		{
 			Append(Keywords.Try);
 			IncreaseIndent();
-			EmitTerminatedStatement(AStatement.TryStatement);
+			EmitTerminatedStatement(statement.TryStatement);
 			DecreaseIndent();
 			NewLine();
 			Indent();
 			Append(Keywords.Finally);
 			IncreaseIndent();
-			EmitTerminatedStatement(AStatement.FinallyStatement);
+			EmitTerminatedStatement(statement.FinallyStatement);
 			DecreaseIndent();
 			NewLine();
 			Indent();
 			Append(Keywords.End);
 		}
 		
-		protected virtual void EmitTryExceptStatement(TryExceptStatement AStatement)
+		protected virtual void EmitTryExceptStatement(TryExceptStatement statement)
 		{
 			Append(Keywords.Try);
 			IncreaseIndent();
-			EmitTerminatedStatement(AStatement.TryStatement);
+			EmitTerminatedStatement(statement.TryStatement);
 			DecreaseIndent();
 			NewLine();
 			Indent();
 			Append(Keywords.Except);
 			IncreaseIndent();
-			for (int LIndex = 0; LIndex < AStatement.ErrorHandlers.Count; LIndex++)
-				EmitErrorHandler(AStatement.ErrorHandlers[LIndex]);
+			for (int index = 0; index < statement.ErrorHandlers.Count; index++)
+				EmitErrorHandler(statement.ErrorHandlers[index]);
 			DecreaseIndent();
 			NewLine();
 			Indent();
 			Append(Keywords.End);
 		}
 		
-		protected virtual void EmitErrorHandler(GenericErrorHandler AStatement)
+		protected virtual void EmitErrorHandler(GenericErrorHandler statement)
 		{
-			if (AStatement is SpecificErrorHandler)
+			if (statement is SpecificErrorHandler)
 			{
 				NewLine();
 				Indent();
 				AppendFormat("{0} ", Keywords.On);
-				if (AStatement is ParameterizedErrorHandler)
-					AppendFormat("{0} {1} ", ((ParameterizedErrorHandler)AStatement).VariableName, Keywords.TypeSpecifier);
-				AppendFormat("{0} ", ((SpecificErrorHandler)AStatement).ErrorTypeName);
+				if (statement is ParameterizedErrorHandler)
+					AppendFormat("{0} {1} ", ((ParameterizedErrorHandler)statement).VariableName, Keywords.TypeSpecifier);
+				AppendFormat("{0} ", ((SpecificErrorHandler)statement).ErrorTypeName);
 				AppendFormat("{0} ", Keywords.Do);
 				IncreaseIndent();
 			}
-			EmitTerminatedStatement(AStatement.Statement);
-			if (AStatement is SpecificErrorHandler)
+			EmitTerminatedStatement(statement.Statement);
+			if (statement is SpecificErrorHandler)
 			{
 				DecreaseIndent();
 			}
 		}
 		
-		protected virtual void EmitEmptyStatement(Statement AStatement)
+		protected virtual void EmitEmptyStatement(Statement statement)
 		{
 		}
 		
-		protected virtual void EmitSourceStatement(SourceStatement AStatement)
+		protected virtual void EmitSourceStatement(SourceStatement statement)
 		{
-			Append(AStatement.Source);
-			EmitMetaData(AStatement.MetaData);
+			Append(statement.Source);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitD4Statement(Statement AStatement)
+		protected virtual void EmitD4Statement(Statement statement)
 		{
-			if (AStatement is D4DMLStatement)
-				EmitD4DMLStatement((D4DMLStatement)AStatement);
-			else if (AStatement is CreateTableVarStatement)
-				EmitCreateTableVarStatement((CreateTableVarStatement)AStatement);
-			else if (AStatement is CreateScalarTypeStatement)
-				EmitCreateScalarTypeStatement((CreateScalarTypeStatement)AStatement);
-			else if (AStatement is CreateOperatorStatementBase)
-				EmitCreateOperatorStatementBase((CreateOperatorStatementBase)AStatement);
-			else if (AStatement is CreateServerStatement)
-				EmitCreateServerStatement((CreateServerStatement)AStatement);
-			else if (AStatement is CreateDeviceStatement)
-				EmitCreateDeviceStatement((CreateDeviceStatement)AStatement);
-			else if (AStatement is AlterTableVarStatement)
-				EmitAlterTableVarStatement((AlterTableVarStatement)AStatement);
-			else if (AStatement is AlterScalarTypeStatement)
-				EmitAlterScalarTypeStatement((AlterScalarTypeStatement)AStatement);
-			else if (AStatement is AlterOperatorStatementBase)
-				EmitAlterOperatorStatementBase((AlterOperatorStatementBase)AStatement);
-			else if (AStatement is AlterServerStatement)
-				EmitAlterServerStatement((AlterServerStatement)AStatement);
-			else if (AStatement is AlterDeviceStatement)
-				EmitAlterDeviceStatement((AlterDeviceStatement)AStatement);
-			else if (AStatement is DropObjectStatement)
-				EmitDropObjectStatement((DropObjectStatement)AStatement);
-			else if (AStatement is CreateReferenceStatement)
-				EmitCreateReferenceStatement((CreateReferenceStatement)AStatement);
-			else if (AStatement is AlterReferenceStatement)
-				EmitAlterReferenceStatement((AlterReferenceStatement)AStatement);
-			else if (AStatement is DropReferenceStatement)
-				EmitDropReferenceStatement((DropReferenceStatement)AStatement);
-			else if (AStatement is CreateConstraintStatement)
-				EmitCreateConstraintStatement((CreateConstraintStatement)AStatement);
-			else if (AStatement is AlterConstraintStatement)
-				EmitAlterConstraintStatement((AlterConstraintStatement)AStatement);
-			else if (AStatement is DropConstraintStatement)
-				EmitDropConstraintStatement((DropConstraintStatement)AStatement);
-			else if (AStatement is CreateSortStatement)
-				EmitCreateSortStatement((CreateSortStatement)AStatement);
-			else if (AStatement is AlterSortStatement)
-				EmitAlterSortStatement((AlterSortStatement)AStatement);
-			else if (AStatement is DropSortStatement)
-				EmitDropSortStatement((DropSortStatement)AStatement);
-			else if (AStatement is CreateConversionStatement)
-				EmitCreateConversionStatement((CreateConversionStatement)AStatement);
-			else if (AStatement is DropConversionStatement)
-				EmitDropConversionStatement((DropConversionStatement)AStatement);
-			else if (AStatement is CreateRoleStatement)
-				EmitCreateRoleStatement((CreateRoleStatement)AStatement);
-			else if (AStatement is AlterRoleStatement)
-				EmitAlterRoleStatement((AlterRoleStatement)AStatement);
-			else if (AStatement is DropRoleStatement)
-				EmitDropRoleStatement((DropRoleStatement)AStatement);
-			else if (AStatement is CreateRightStatement)
-				EmitCreateRightStatement((CreateRightStatement)AStatement);
-			else if (AStatement is DropRightStatement)
-				EmitDropRightStatement((DropRightStatement)AStatement);
-			else if (AStatement is AttachStatementBase)
-				EmitAttachStatementBase((AttachStatementBase)AStatement);
-			else if (AStatement is RightStatementBase)
-				EmitRightStatementBase((RightStatementBase)AStatement);
-			else if (AStatement is TypeSpecifier)
-				EmitTypeSpecifier((TypeSpecifier)AStatement); // Not part of the grammer proper, used to emit type specifiers explicitly
-			else if (AStatement is KeyDefinition)
-				EmitKeyDefinition((KeyDefinition)AStatement); // ditto
-			else if (AStatement is OrderDefinition)
-				EmitOrderDefinition((OrderDefinition)AStatement); // ditto
+			if (statement is D4DMLStatement)
+				EmitD4DMLStatement((D4DMLStatement)statement);
+			else if (statement is CreateTableVarStatement)
+				EmitCreateTableVarStatement((CreateTableVarStatement)statement);
+			else if (statement is CreateScalarTypeStatement)
+				EmitCreateScalarTypeStatement((CreateScalarTypeStatement)statement);
+			else if (statement is CreateOperatorStatementBase)
+				EmitCreateOperatorStatementBase((CreateOperatorStatementBase)statement);
+			else if (statement is CreateServerStatement)
+				EmitCreateServerStatement((CreateServerStatement)statement);
+			else if (statement is CreateDeviceStatement)
+				EmitCreateDeviceStatement((CreateDeviceStatement)statement);
+			else if (statement is AlterTableVarStatement)
+				EmitAlterTableVarStatement((AlterTableVarStatement)statement);
+			else if (statement is AlterScalarTypeStatement)
+				EmitAlterScalarTypeStatement((AlterScalarTypeStatement)statement);
+			else if (statement is AlterOperatorStatementBase)
+				EmitAlterOperatorStatementBase((AlterOperatorStatementBase)statement);
+			else if (statement is AlterServerStatement)
+				EmitAlterServerStatement((AlterServerStatement)statement);
+			else if (statement is AlterDeviceStatement)
+				EmitAlterDeviceStatement((AlterDeviceStatement)statement);
+			else if (statement is DropObjectStatement)
+				EmitDropObjectStatement((DropObjectStatement)statement);
+			else if (statement is CreateReferenceStatement)
+				EmitCreateReferenceStatement((CreateReferenceStatement)statement);
+			else if (statement is AlterReferenceStatement)
+				EmitAlterReferenceStatement((AlterReferenceStatement)statement);
+			else if (statement is DropReferenceStatement)
+				EmitDropReferenceStatement((DropReferenceStatement)statement);
+			else if (statement is CreateConstraintStatement)
+				EmitCreateConstraintStatement((CreateConstraintStatement)statement);
+			else if (statement is AlterConstraintStatement)
+				EmitAlterConstraintStatement((AlterConstraintStatement)statement);
+			else if (statement is DropConstraintStatement)
+				EmitDropConstraintStatement((DropConstraintStatement)statement);
+			else if (statement is CreateSortStatement)
+				EmitCreateSortStatement((CreateSortStatement)statement);
+			else if (statement is AlterSortStatement)
+				EmitAlterSortStatement((AlterSortStatement)statement);
+			else if (statement is DropSortStatement)
+				EmitDropSortStatement((DropSortStatement)statement);
+			else if (statement is CreateConversionStatement)
+				EmitCreateConversionStatement((CreateConversionStatement)statement);
+			else if (statement is DropConversionStatement)
+				EmitDropConversionStatement((DropConversionStatement)statement);
+			else if (statement is CreateRoleStatement)
+				EmitCreateRoleStatement((CreateRoleStatement)statement);
+			else if (statement is AlterRoleStatement)
+				EmitAlterRoleStatement((AlterRoleStatement)statement);
+			else if (statement is DropRoleStatement)
+				EmitDropRoleStatement((DropRoleStatement)statement);
+			else if (statement is CreateRightStatement)
+				EmitCreateRightStatement((CreateRightStatement)statement);
+			else if (statement is DropRightStatement)
+				EmitDropRightStatement((DropRightStatement)statement);
+			else if (statement is AttachStatementBase)
+				EmitAttachStatementBase((AttachStatementBase)statement);
+			else if (statement is RightStatementBase)
+				EmitRightStatementBase((RightStatementBase)statement);
+			else if (statement is TypeSpecifier)
+				EmitTypeSpecifier((TypeSpecifier)statement); // Not part of the grammer proper, used to emit type specifiers explicitly
+			else if (statement is KeyDefinition)
+				EmitKeyDefinition((KeyDefinition)statement); // ditto
+			else if (statement is OrderDefinition)
+				EmitOrderDefinition((OrderDefinition)statement); // ditto
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 		
-		protected virtual void EmitD4DMLStatement(Statement AStatement)
+		protected virtual void EmitD4DMLStatement(Statement statement)
 		{
-			if (AStatement is SelectStatement)
-				EmitSelectStatement((SelectStatement)AStatement);
-			else if (AStatement is InsertStatement)
-				EmitInsertStatement((InsertStatement)AStatement);
-			else if (AStatement is UpdateStatement)
-				EmitUpdateStatement((UpdateStatement)AStatement);
-			else if (AStatement is DeleteStatement)
-				EmitDeleteStatement((DeleteStatement)AStatement);
+			if (statement is SelectStatement)
+				EmitSelectStatement((SelectStatement)statement);
+			else if (statement is InsertStatement)
+				EmitInsertStatement((InsertStatement)statement);
+			else if (statement is UpdateStatement)
+				EmitUpdateStatement((UpdateStatement)statement);
+			else if (statement is DeleteStatement)
+				EmitDeleteStatement((DeleteStatement)statement);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 
-		protected virtual void EmitSelectStatement(SelectStatement AStatement)
+		protected virtual void EmitSelectStatement(SelectStatement statement)
 		{
 			AppendFormat("{0} ", Keywords.Select);
-			EmitCursorDefinition(AStatement.CursorDefinition);
+			EmitCursorDefinition(statement.CursorDefinition);
 		}
 		
-		protected virtual void EmitInsertStatement(InsertStatement AStatement)
+		protected virtual void EmitInsertStatement(InsertStatement statement)
 		{
 			AppendFormat("{0} ", Keywords.Insert);
-			EmitLanguageModifiers(AStatement);
-			EmitExpression(AStatement.SourceExpression);
+			EmitLanguageModifiers(statement);
+			EmitExpression(statement.SourceExpression);
 			AppendFormat(" {0} ", Keywords.Into);
-			EmitExpression(AStatement.Target);
+			EmitExpression(statement.Target);
 		}
 		
-		protected virtual void EmitUpdateStatement(UpdateStatement AStatement)
+		protected virtual void EmitUpdateStatement(UpdateStatement statement)
 		{
 			AppendFormat("{0} ", Keywords.Update);
-			EmitLanguageModifiers(AStatement);
-			EmitExpression(AStatement.Target);
+			EmitLanguageModifiers(statement);
+			EmitExpression(statement.Target);
 			AppendFormat(" {0} {1} ", Keywords.Set, Keywords.BeginList);
-			for (int LIndex = 0; LIndex < AStatement.Columns.Count; LIndex++)
+			for (int index = 0; index < statement.Columns.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitUpdateColumnExpression(AStatement.Columns[LIndex]);
+				EmitUpdateColumnExpression(statement.Columns[index]);
 			}
 			AppendFormat(" {0}", Keywords.EndList);
-			if (AStatement.Condition != null)
+			if (statement.Condition != null)
 			{
 				AppendFormat(" {0} ", Keywords.Where);
-				EmitExpression(AStatement.Condition);
+				EmitExpression(statement.Condition);
 			}
 		}
 		
-		protected virtual void EmitUpdateColumnExpression(UpdateColumnExpression AExpression)
+		protected virtual void EmitUpdateColumnExpression(UpdateColumnExpression expression)
 		{
-			EmitExpression(AExpression.Target);
+			EmitExpression(expression.Target);
 			AppendFormat(" {0} ", Keywords.Assign);
-			EmitExpression(AExpression.Expression);
+			EmitExpression(expression.Expression);
 		}
 		
-		protected virtual void EmitDeleteStatement(DeleteStatement AStatement)
+		protected virtual void EmitDeleteStatement(DeleteStatement statement)
 		{
 			AppendFormat("{0} ", Keywords.Delete);
-			EmitLanguageModifiers(AStatement);
-			EmitExpression(AStatement.Target);
+			EmitLanguageModifiers(statement);
+			EmitExpression(statement.Target);
 		}
 		
-		protected virtual void EmitCreateTableVarStatement(CreateTableVarStatement AStatement)
+		protected virtual void EmitCreateTableVarStatement(CreateTableVarStatement statement)
 		{
-			if (AStatement is CreateTableStatement)
-				EmitCreateTableStatement((CreateTableStatement)AStatement);
-			else if (AStatement is CreateViewStatement)
-				EmitCreateViewStatement((CreateViewStatement)AStatement);
+			if (statement is CreateTableStatement)
+				EmitCreateTableStatement((CreateTableStatement)statement);
+			else if (statement is CreateViewStatement)
+				EmitCreateViewStatement((CreateViewStatement)statement);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 		
-		protected virtual void EmitCreateTableStatement(CreateTableStatement AStatement)
+		protected virtual void EmitCreateTableStatement(CreateTableStatement statement)
 		{
 			AppendFormat("{0} ", Keywords.Create);
-			if (AStatement.IsSession)
+			if (statement.IsSession)
 				AppendFormat("{0} ", Keywords.Session);
-			AppendFormat("{0} {1}", Keywords.Table, AStatement.TableVarName);
-			if (AStatement.DeviceName != null)
+			AppendFormat("{0} {1}", Keywords.Table, statement.TableVarName);
+			if (statement.DeviceName != null)
 			{
 				AppendFormat(" {0} ", Keywords.In);
-				EmitIdentifierExpression(AStatement.DeviceName);
+				EmitIdentifierExpression(statement.DeviceName);
 			}
-			if (AStatement.FromExpression != null)
+			if (statement.FromExpression != null)
 			{
 				AppendFormat(" {0} ", Keywords.From);
-				EmitExpression(AStatement.FromExpression);
+				EmitExpression(statement.FromExpression);
 			}
 			else
 			{
@@ -2066,60 +2066,60 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				Indent();
 				Append(Keywords.BeginList);
 				IncreaseIndent();
-				bool LFirst = true;
-				for (int LIndex = 0; LIndex < AStatement.Columns.Count; LIndex++)
+				bool first = true;
+				for (int index = 0; index < statement.Columns.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitColumnDefinition(AStatement.Columns[LIndex]);
+					EmitColumnDefinition(statement.Columns[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.Keys.Count; LIndex++)
+				for (int index = 0; index < statement.Keys.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitKeyDefinition(AStatement.Keys[LIndex]);
+					EmitKeyDefinition(statement.Keys[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.Orders.Count; LIndex++)
+				for (int index = 0; index < statement.Orders.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitOrderDefinition(AStatement.Orders[LIndex]);
+					EmitOrderDefinition(statement.Orders[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.Constraints.Count; LIndex++)
+				for (int index = 0; index < statement.Constraints.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitCreateConstraintDefinition(AStatement.Constraints[LIndex]);
+					EmitCreateConstraintDefinition(statement.Constraints[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.References.Count; LIndex++)
+				for (int index = 0; index < statement.References.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitReferenceDefinition(AStatement.References[LIndex]);
+					EmitReferenceDefinition(statement.References[index]);
 				}
 				
 				NewLine();
@@ -2129,22 +2129,22 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				Indent();
 				Append(Keywords.EndList);
 			}
-			EmitMetaData(AStatement.MetaData);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitCreateViewStatement(CreateViewStatement AStatement)
+		protected virtual void EmitCreateViewStatement(CreateViewStatement statement)
 		{
 			AppendFormat("{0} ", Keywords.Create);
-			if (AStatement.IsSession)
+			if (statement.IsSession)
 				AppendFormat("{0} ", Keywords.Session);
-			AppendFormat("{0} {1}", Keywords.View, AStatement.TableVarName);
+			AppendFormat("{0} {1}", Keywords.View, statement.TableVarName);
 			NewLine();
 			Indent();
 			Append(Keywords.BeginGroup);
 			IncreaseIndent();
 			NewLine();
 			Indent();
-			EmitExpression(AStatement.Expression);
+			EmitExpression(statement.Expression);
 			DecreaseIndent();
 			NewLine();
 			Indent();
@@ -2153,58 +2153,58 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			Indent();
 			if 
 				(
-					(AStatement.Keys.Count > 0) || 
-					(AStatement.Orders.Count > 0) || 
-					(AStatement.Constraints.Count > 0) || 
-					(AStatement.References.Count > 0)
+					(statement.Keys.Count > 0) || 
+					(statement.Orders.Count > 0) || 
+					(statement.Constraints.Count > 0) || 
+					(statement.References.Count > 0)
 				)
 			{
 				Append(Keywords.BeginList);
 				IncreaseIndent();
-				bool LFirst = true;
+				bool first = true;
 
-				for (int LIndex = 0; LIndex < AStatement.Keys.Count; LIndex++)
+				for (int index = 0; index < statement.Keys.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitKeyDefinition(AStatement.Keys[LIndex]);
+					EmitKeyDefinition(statement.Keys[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.Orders.Count; LIndex++)
+				for (int index = 0; index < statement.Orders.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitOrderDefinition(AStatement.Orders[LIndex]);
+					EmitOrderDefinition(statement.Orders[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.Constraints.Count; LIndex++)
+				for (int index = 0; index < statement.Constraints.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitCreateConstraintDefinition(AStatement.Constraints[LIndex]);
+					EmitCreateConstraintDefinition(statement.Constraints[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.References.Count; LIndex++)
+				for (int index = 0; index < statement.References.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitReferenceDefinition(AStatement.References[LIndex]);
+					EmitReferenceDefinition(statement.References[index]);
 				}
 
 				DecreaseIndent();
@@ -2212,125 +2212,125 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				Indent();
 				Append(Keywords.EndList);
 			}
-			EmitMetaData(AStatement.MetaData);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitCreateScalarTypeStatement(CreateScalarTypeStatement AStatement)
+		protected virtual void EmitCreateScalarTypeStatement(CreateScalarTypeStatement statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Create, Keywords.Type, AStatement.ScalarTypeName);
+			AppendFormat("{0} {1} {2}", Keywords.Create, Keywords.Type, statement.ScalarTypeName);
 
 			#if ALLOWSUBTYPES
 			if (AStatement.ParentScalarTypes.Count > 0)
 			{
 				AppendFormat(" {0} {1} ", Keywords.Is, Keywords.BeginList);
-				for (int LIndex = 0; LIndex < AStatement.ParentScalarTypes.Count; LIndex++)
+				for (int index = 0; index < AStatement.ParentScalarTypes.Count; index++)
 				{
-					if (LIndex > 0)
+					if (index > 0)
 						EmitListSeparator();
-					EmitScalarTypeNameDefinition(AStatement.ParentScalarTypes[LIndex]);
+					EmitScalarTypeNameDefinition(AStatement.ParentScalarTypes[index]);
 				}
 				AppendFormat(" {0}", Keywords.EndList);
 			}
 			#endif
 
-			if (AStatement.LikeScalarTypeName != String.Empty)
-				AppendFormat(" {0} {1}", Keywords.Like, AStatement.LikeScalarTypeName);
+			if (statement.LikeScalarTypeName != String.Empty)
+				AppendFormat(" {0} {1}", Keywords.Like, statement.LikeScalarTypeName);
 
 			if 
 				(
-					(AStatement.Default != null) || 
-					(AStatement.Constraints.Count > 0) || 
-					(AStatement.Representations.Count > 0) || 
-					(AStatement.Specials.Count > 0)
+					(statement.Default != null) || 
+					(statement.Constraints.Count > 0) || 
+					(statement.Representations.Count > 0) || 
+					(statement.Specials.Count > 0)
 				)
 			{
 				NewLine();
 				Indent();
 				Append(Keywords.BeginList);
 				IncreaseIndent();
-				bool LFirst = true;
-				if (AStatement.Default != null)
+				bool first = true;
+				if (statement.Default != null)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitDefaultDefinition(AStatement.Default);
+					EmitDefaultDefinition(statement.Default);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.Constraints.Count; LIndex++)
+				for (int index = 0; index < statement.Constraints.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitConstraintDefinition(AStatement.Constraints[LIndex]);
+					EmitConstraintDefinition(statement.Constraints[index]);
 				}
 
-				for (int LIndex = 0; LIndex < AStatement.Representations.Count; LIndex++)
+				for (int index = 0; index < statement.Representations.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitRepresentationDefinition(AStatement.Representations[LIndex]);
+					EmitRepresentationDefinition(statement.Representations[index]);
 				}
 
-				for (int LIndex = 0; LIndex < AStatement.Specials.Count; LIndex++)
+				for (int index = 0; index < statement.Specials.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitSpecialDefinition(AStatement.Specials[LIndex]);
+					EmitSpecialDefinition(statement.Specials[index]);
 				}
 				
 				DecreaseIndent();
 				NewLine();
 				Append(Keywords.EndList);
 			}
-			EmitClassDefinition(AStatement.ClassDefinition);
-			EmitMetaData(AStatement.MetaData);
+			EmitClassDefinition(statement.ClassDefinition);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitCreateOperatorStatementBase(Statement AStatement)
+		protected virtual void EmitCreateOperatorStatementBase(Statement statement)
 		{
-			if (AStatement is CreateOperatorStatement)
-				EmitCreateOperatorStatement((CreateOperatorStatement)AStatement);
-			else if (AStatement is CreateAggregateOperatorStatement)
-				EmitCreateAggregateOperatorStatement((CreateAggregateOperatorStatement)AStatement);
+			if (statement is CreateOperatorStatement)
+				EmitCreateOperatorStatement((CreateOperatorStatement)statement);
+			else if (statement is CreateAggregateOperatorStatement)
+				EmitCreateAggregateOperatorStatement((CreateAggregateOperatorStatement)statement);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 		
-		protected virtual void EmitCreateOperatorStatement(CreateOperatorStatement AStatement)
+		protected virtual void EmitCreateOperatorStatement(CreateOperatorStatement statement)
 		{
 			AppendFormat("{0} ", Keywords.Create);
-			if (AStatement.IsSession)
+			if (statement.IsSession)
 				AppendFormat("{0} ", Keywords.Session);
-			AppendFormat("{0} {1}{2}", Keywords.Operator, AStatement.OperatorName, Keywords.BeginGroup);
+			AppendFormat("{0} {1}{2}", Keywords.Operator, statement.OperatorName, Keywords.BeginGroup);
 
-			for (int LIndex = 0; LIndex < AStatement.FormalParameters.Count; LIndex++)
+			for (int index = 0; index < statement.FormalParameters.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitFormalParameter(AStatement.FormalParameters[LIndex]);
+				EmitFormalParameter(statement.FormalParameters[index]);
 			}
 			
 			Append(Keywords.EndGroup);
 
-			if (AStatement.ReturnType != null)
+			if (statement.ReturnType != null)
 			{
 				AppendFormat(" {0} ", Keywords.TypeSpecifier);
-				EmitTypeSpecifier(AStatement.ReturnType);
+				EmitTypeSpecifier(statement.ReturnType);
 			}
 			
 			#if VirtualSupport
@@ -2347,41 +2347,41 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				
 			NewLine();
 			Indent();
-			if (AStatement.Block.ClassDefinition != null)
-				EmitClassDefinition(AStatement.Block.ClassDefinition);
-			else if (AStatement.Block.Block != null)
+			if (statement.Block.ClassDefinition != null)
+				EmitClassDefinition(statement.Block.ClassDefinition);
+			else if (statement.Block.Block != null)
 			{
 				Append(Keywords.Begin);
 				IncreaseIndent();
-				EmitTerminatedStatement(AStatement.Block.Block);
+				EmitTerminatedStatement(statement.Block.Block);
 				DecreaseIndent();
 				NewLine();
 				Indent();
 				Append(Keywords.End);
 			}
-			EmitMetaData(AStatement.MetaData);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitCreateAggregateOperatorStatement(CreateAggregateOperatorStatement AStatement)
+		protected virtual void EmitCreateAggregateOperatorStatement(CreateAggregateOperatorStatement statement)
 		{
 			AppendFormat("{0} ", Keywords.Create);
-			if (AStatement.IsSession)
+			if (statement.IsSession)
 				AppendFormat("{0} ", Keywords.Session);
-			AppendFormat("{0} {1} {2}{3}", Keywords.Aggregate, Keywords.Operator, AStatement.OperatorName, Keywords.BeginGroup);
+			AppendFormat("{0} {1} {2}{3}", Keywords.Aggregate, Keywords.Operator, statement.OperatorName, Keywords.BeginGroup);
 
-			for (int LIndex = 0; LIndex < AStatement.FormalParameters.Count; LIndex++)
+			for (int index = 0; index < statement.FormalParameters.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitFormalParameter(AStatement.FormalParameters[LIndex]);
+				EmitFormalParameter(statement.FormalParameters[index]);
 			}
 			
 			Append(Keywords.EndGroup);
 
-			if (AStatement.ReturnType != null)
+			if (statement.ReturnType != null)
 			{
 				AppendFormat(" {0} ", Keywords.TypeSpecifier);
-				EmitTypeSpecifier(AStatement.ReturnType);
+				EmitTypeSpecifier(statement.ReturnType);
 			}
 			
 			#if VirtualSupport
@@ -2396,20 +2396,20 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				AppendFormat(" {0}", Keywords.Override);
 			#endif
 
-			if ((AStatement.Initialization.ClassDefinition != null) || (AStatement.Initialization.Block != null))
+			if ((statement.Initialization.ClassDefinition != null) || (statement.Initialization.Block != null))
 			{
 				NewLine();
 				Indent();
 				Append(Keywords.Initialization);
 				NewLine();
 				Indent();
-				if (AStatement.Initialization.ClassDefinition != null)
-					EmitClassDefinition(AStatement.Initialization.ClassDefinition);
+				if (statement.Initialization.ClassDefinition != null)
+					EmitClassDefinition(statement.Initialization.ClassDefinition);
 				else
 				{
 					Append(Keywords.Begin);
 					IncreaseIndent();
-					EmitTerminatedStatement(AStatement.Initialization.Block);
+					EmitTerminatedStatement(statement.Initialization.Block);
 					DecreaseIndent();
 					NewLine();
 					Indent();
@@ -2417,20 +2417,20 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				}
 			}
 
-			if ((AStatement.Aggregation.ClassDefinition != null) || (AStatement.Aggregation.Block != null))
+			if ((statement.Aggregation.ClassDefinition != null) || (statement.Aggregation.Block != null))
 			{
 				NewLine();
 				Indent();
 				Append(Keywords.Aggregation);
 				NewLine();
 				Indent();
-				if (AStatement.Aggregation.ClassDefinition != null)
-					EmitClassDefinition(AStatement.Aggregation.ClassDefinition);
+				if (statement.Aggregation.ClassDefinition != null)
+					EmitClassDefinition(statement.Aggregation.ClassDefinition);
 				else
 				{
 					Append(Keywords.Begin);
 					IncreaseIndent();
-					EmitTerminatedStatement(AStatement.Aggregation.Block);
+					EmitTerminatedStatement(statement.Aggregation.Block);
 					DecreaseIndent();
 					NewLine();
 					Indent();
@@ -2438,20 +2438,20 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				}
 			}
 
-			if ((AStatement.Finalization.ClassDefinition != null) || (AStatement.Finalization.Block != null))
+			if ((statement.Finalization.ClassDefinition != null) || (statement.Finalization.Block != null))
 			{
 				NewLine();
 				Indent();
 				Append(Keywords.Finalization);
 				NewLine();
 				Indent();
-				if (AStatement.Finalization.ClassDefinition != null)
-					EmitClassDefinition(AStatement.Finalization.ClassDefinition);
+				if (statement.Finalization.ClassDefinition != null)
+					EmitClassDefinition(statement.Finalization.ClassDefinition);
 				else
 				{
 					Append(Keywords.Begin);
 					IncreaseIndent();
-					EmitTerminatedStatement(AStatement.Finalization.Block);
+					EmitTerminatedStatement(statement.Finalization.Block);
 					DecreaseIndent();
 					NewLine();
 					Indent();
@@ -2459,46 +2459,46 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				}
 			}
 
-			EmitMetaData(AStatement.MetaData);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitCreateServerStatement(CreateServerStatement AStatement)
+		protected virtual void EmitCreateServerStatement(CreateServerStatement statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Create, Keywords.Server, AStatement.ServerName);
-			EmitMetaData(AStatement.MetaData);
+			AppendFormat("{0} {1} {2}", Keywords.Create, Keywords.Server, statement.ServerName);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitCreateDeviceStatement(CreateDeviceStatement AStatement)
+		protected virtual void EmitCreateDeviceStatement(CreateDeviceStatement statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Create, Keywords.Device, AStatement.DeviceName);
-			if ((AStatement.DeviceScalarTypeMaps.Count > 0) || (AStatement.DeviceOperatorMaps.Count > 0))
+			AppendFormat("{0} {1} {2}", Keywords.Create, Keywords.Device, statement.DeviceName);
+			if ((statement.DeviceScalarTypeMaps.Count > 0) || (statement.DeviceOperatorMaps.Count > 0))
 			{
-				bool LFirst = true;
+				bool first = true;
 				NewLine();
 				Indent();
 				Append(Keywords.BeginList);
 				IncreaseIndent();
 				
-				for (int LIndex = 0; LIndex < AStatement.DeviceScalarTypeMaps.Count; LIndex++)
+				for (int index = 0; index < statement.DeviceScalarTypeMaps.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitDeviceScalarTypeMap(AStatement.DeviceScalarTypeMaps[LIndex]);
+					EmitDeviceScalarTypeMap(statement.DeviceScalarTypeMaps[index]);
 				}
 
-				for (int LIndex = 0; LIndex < AStatement.DeviceOperatorMaps.Count; LIndex++)
+				for (int index = 0; index < statement.DeviceOperatorMaps.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitDeviceOperatorMap(AStatement.DeviceOperatorMaps[LIndex]);
+					EmitDeviceOperatorMap(statement.DeviceOperatorMaps[index]);
 				}
 
 				DecreaseIndent();
@@ -2509,273 +2509,273 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			
 			NewLine();
 			Indent();
-			EmitReconciliationSettings(AStatement.ReconciliationSettings, false);
-			EmitClassDefinition(AStatement.ClassDefinition);
-			EmitMetaData(AStatement.MetaData);
+			EmitReconciliationSettings(statement.ReconciliationSettings, false);
+			EmitClassDefinition(statement.ClassDefinition);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitReconciliationSettings(ReconciliationSettings AReconciliationSettings, bool AIsAlter)
+		protected virtual void EmitReconciliationSettings(ReconciliationSettings reconciliationSettings, bool isAlter)
 		{
-			if ((AReconciliationSettings != null) && (AReconciliationSettings.ReconcileModeSet || AReconciliationSettings.ReconcileMasterSet))
+			if ((reconciliationSettings != null) && (reconciliationSettings.ReconcileModeSet || reconciliationSettings.ReconcileMasterSet))
 			{
-				if (AIsAlter)
+				if (isAlter)
 					AppendFormat(" {0}", Keywords.Alter);
 				AppendFormat(" {0} {1} ", Keywords.Reconciliation, Keywords.BeginList);
-				bool LFirst = true;
-				if (AReconciliationSettings.ReconcileModeSet)
+				bool first = true;
+				if (reconciliationSettings.ReconcileModeSet)
 				{
 					AppendFormat("{0} {1} {2}", Keywords.Mode, Keywords.Equal, Keywords.BeginList);
-					bool LFirstMode = true;
-					if (AReconciliationSettings.ReconcileMode == ReconcileMode.None)
+					bool firstMode = true;
+					if (reconciliationSettings.ReconcileMode == ReconcileMode.None)
 						Append(ReconcileMode.None.ToString().ToLower());
 					else
 					{
-						if ((AReconciliationSettings.ReconcileMode & ReconcileMode.Startup) != 0)
+						if ((reconciliationSettings.ReconcileMode & ReconcileMode.Startup) != 0)
 						{
-							if (!LFirstMode)
+							if (!firstMode)
 								EmitListSeparator();
 							else
-								LFirstMode = false;
+								firstMode = false;
 							Append(ReconcileMode.Startup.ToString().ToLower());
 						}
 						
-						if ((AReconciliationSettings.ReconcileMode & ReconcileMode.Command) != 0)
+						if ((reconciliationSettings.ReconcileMode & ReconcileMode.Command) != 0)
 						{
-							if (!LFirstMode)
+							if (!firstMode)
 								EmitListSeparator();
 							else
-								LFirstMode = false;
+								firstMode = false;
 							Append(ReconcileMode.Command.ToString().ToLower());
 						}
 						
-						if ((AReconciliationSettings.ReconcileMode & ReconcileMode.Automatic) != 0)
+						if ((reconciliationSettings.ReconcileMode & ReconcileMode.Automatic) != 0)
 						{
-							if (!LFirstMode)
+							if (!firstMode)
 								EmitListSeparator();
 							else
-								LFirstMode = false;
+								firstMode = false;
 							Append(ReconcileMode.Automatic.ToString().ToLower());
 						}
 					}
 					Append(Keywords.EndList);
-					LFirst = false;
+					first = false;
 				}
 				
-				if (AReconciliationSettings.ReconcileMasterSet)
+				if (reconciliationSettings.ReconcileMasterSet)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 						
-					AppendFormat("{0} {1} {2}", Keywords.Master, Keywords.Equal, AReconciliationSettings.ReconcileMaster.ToString().ToLower());
+					AppendFormat("{0} {1} {2}", Keywords.Master, Keywords.Equal, reconciliationSettings.ReconcileMaster.ToString().ToLower());
 				}
 				
 				AppendFormat(" {0}", Keywords.EndList);
 			}
 		}
 		
-		protected virtual void EmitAlterTableVarStatement(Statement AStatement)
+		protected virtual void EmitAlterTableVarStatement(Statement statement)
 		{
-			if (AStatement is AlterTableStatement)
-				EmitAlterTableStatement((AlterTableStatement)AStatement);
-			else if (AStatement is AlterViewStatement)
-				EmitAlterViewStatement((AlterViewStatement)AStatement);
+			if (statement is AlterTableStatement)
+				EmitAlterTableStatement((AlterTableStatement)statement);
+			else if (statement is AlterViewStatement)
+				EmitAlterViewStatement((AlterViewStatement)statement);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 		
-		protected virtual void EmitAlterTableStatement(AlterTableStatement AStatement)
+		protected virtual void EmitAlterTableStatement(AlterTableStatement statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Table, AStatement.TableVarName);
+			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Table, statement.TableVarName);
 			if
 				(
-					(AStatement.CreateColumns.Count > 0) ||
-					(AStatement.AlterColumns.Count > 0) ||
-					(AStatement.DropColumns.Count > 0) ||
-					(AStatement.CreateKeys.Count > 0) ||
-					(AStatement.AlterKeys.Count > 0) ||
-					(AStatement.DropKeys.Count > 0) ||
-					(AStatement.CreateOrders.Count > 0) ||
-					(AStatement.AlterOrders.Count > 0) ||
-					(AStatement.DropOrders.Count > 0) ||
-					(AStatement.CreateConstraints.Count > 0) ||
-					(AStatement.AlterConstraints.Count > 0) ||
-					(AStatement.DropConstraints.Count > 0) ||
-					(AStatement.CreateReferences.Count > 0) ||
-					(AStatement.AlterReferences.Count > 0) ||
-					(AStatement.DropReferences.Count > 0)
+					(statement.CreateColumns.Count > 0) ||
+					(statement.AlterColumns.Count > 0) ||
+					(statement.DropColumns.Count > 0) ||
+					(statement.CreateKeys.Count > 0) ||
+					(statement.AlterKeys.Count > 0) ||
+					(statement.DropKeys.Count > 0) ||
+					(statement.CreateOrders.Count > 0) ||
+					(statement.AlterOrders.Count > 0) ||
+					(statement.DropOrders.Count > 0) ||
+					(statement.CreateConstraints.Count > 0) ||
+					(statement.AlterConstraints.Count > 0) ||
+					(statement.DropConstraints.Count > 0) ||
+					(statement.CreateReferences.Count > 0) ||
+					(statement.AlterReferences.Count > 0) ||
+					(statement.DropReferences.Count > 0)
 				)
 			{
 				NewLine();
 				Indent();
 				Append(Keywords.BeginList);
 				IncreaseIndent();
-				bool LFirst = true;
+				bool first = true;
 
-				for (int LIndex = 0; LIndex < AStatement.CreateColumns.Count; LIndex++)
+				for (int index = 0; index < statement.CreateColumns.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitCreateColumnDefinition(AStatement.CreateColumns[LIndex]);
+					EmitCreateColumnDefinition(statement.CreateColumns[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.AlterColumns.Count; LIndex++)
+				for (int index = 0; index < statement.AlterColumns.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitAlterColumnDefinition(AStatement.AlterColumns[LIndex]);
+					EmitAlterColumnDefinition(statement.AlterColumns[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.DropColumns.Count; LIndex++)
+				for (int index = 0; index < statement.DropColumns.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitDropColumnDefinition(AStatement.DropColumns[LIndex]);
+					EmitDropColumnDefinition(statement.DropColumns[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.CreateKeys.Count; LIndex++)
+				for (int index = 0; index < statement.CreateKeys.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitCreateKeyDefinition(AStatement.CreateKeys[LIndex]);
+					EmitCreateKeyDefinition(statement.CreateKeys[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.AlterKeys.Count; LIndex++)
+				for (int index = 0; index < statement.AlterKeys.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitAlterKeyDefinition(AStatement.AlterKeys[LIndex]);
+					EmitAlterKeyDefinition(statement.AlterKeys[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.DropKeys.Count; LIndex++)
+				for (int index = 0; index < statement.DropKeys.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitDropKeyDefinition(AStatement.DropKeys[LIndex]);
+					EmitDropKeyDefinition(statement.DropKeys[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.CreateOrders.Count; LIndex++)
+				for (int index = 0; index < statement.CreateOrders.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitCreateOrderDefinition(AStatement.CreateOrders[LIndex]);
+					EmitCreateOrderDefinition(statement.CreateOrders[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.AlterOrders.Count; LIndex++)
+				for (int index = 0; index < statement.AlterOrders.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitAlterOrderDefinition(AStatement.AlterOrders[LIndex]);
+					EmitAlterOrderDefinition(statement.AlterOrders[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.DropOrders.Count; LIndex++)
+				for (int index = 0; index < statement.DropOrders.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitDropOrderDefinition(AStatement.DropOrders[LIndex]);
+					EmitDropOrderDefinition(statement.DropOrders[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.CreateReferences.Count; LIndex++)
+				for (int index = 0; index < statement.CreateReferences.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitCreateReferenceDefinition(AStatement.CreateReferences[LIndex]);
+					EmitCreateReferenceDefinition(statement.CreateReferences[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.AlterReferences.Count; LIndex++)
+				for (int index = 0; index < statement.AlterReferences.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitAlterReferenceDefinition(AStatement.AlterReferences[LIndex]);
+					EmitAlterReferenceDefinition(statement.AlterReferences[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.DropReferences.Count; LIndex++)
+				for (int index = 0; index < statement.DropReferences.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitDropReferenceDefinition(AStatement.DropReferences[LIndex]);
+					EmitDropReferenceDefinition(statement.DropReferences[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.CreateConstraints.Count; LIndex++)
+				for (int index = 0; index < statement.CreateConstraints.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitCreateCreateConstraintDefinition(AStatement.CreateConstraints[LIndex]);
+					EmitCreateCreateConstraintDefinition(statement.CreateConstraints[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.AlterConstraints.Count; LIndex++)
+				for (int index = 0; index < statement.AlterConstraints.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitAlterConstraintDefinitionBase(AStatement.AlterConstraints[LIndex]);
+					EmitAlterConstraintDefinitionBase(statement.AlterConstraints[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.DropConstraints.Count; LIndex++)
+				for (int index = 0; index < statement.DropConstraints.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitDropConstraintDefinition(AStatement.DropConstraints[LIndex]);
+					EmitDropConstraintDefinition(statement.DropConstraints[index]);
 				}
 				
 				DecreaseIndent();
@@ -2783,164 +2783,164 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				Indent();
 				Append(Keywords.EndList);
 			}
-			EmitAlterMetaData(AStatement.AlterMetaData);
+			EmitAlterMetaData(statement.AlterMetaData);
 		}
 		
-		protected virtual void EmitAlterViewStatement(AlterViewStatement AStatement)
+		protected virtual void EmitAlterViewStatement(AlterViewStatement statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.View, AStatement.TableVarName);
+			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.View, statement.TableVarName);
 			if
 				(
-					(AStatement.CreateKeys.Count > 0) ||
-					(AStatement.AlterKeys.Count > 0) ||
-					(AStatement.DropKeys.Count > 0) ||
-					(AStatement.CreateOrders.Count > 0) ||
-					(AStatement.AlterOrders.Count > 0) ||
-					(AStatement.DropOrders.Count > 0) ||
-					(AStatement.CreateConstraints.Count > 0) ||
-					(AStatement.AlterConstraints.Count > 0) ||
-					(AStatement.DropConstraints.Count > 0) ||
-					(AStatement.CreateReferences.Count > 0) ||
-					(AStatement.AlterReferences.Count > 0) ||
-					(AStatement.DropReferences.Count > 0)
+					(statement.CreateKeys.Count > 0) ||
+					(statement.AlterKeys.Count > 0) ||
+					(statement.DropKeys.Count > 0) ||
+					(statement.CreateOrders.Count > 0) ||
+					(statement.AlterOrders.Count > 0) ||
+					(statement.DropOrders.Count > 0) ||
+					(statement.CreateConstraints.Count > 0) ||
+					(statement.AlterConstraints.Count > 0) ||
+					(statement.DropConstraints.Count > 0) ||
+					(statement.CreateReferences.Count > 0) ||
+					(statement.AlterReferences.Count > 0) ||
+					(statement.DropReferences.Count > 0)
 				)
 			{
 				NewLine();
 				Indent();
 				Append(Keywords.BeginList);
 				IncreaseIndent();
-				bool LFirst = true;
+				bool first = true;
 
-				for (int LIndex = 0; LIndex < AStatement.CreateKeys.Count; LIndex++)
+				for (int index = 0; index < statement.CreateKeys.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitCreateKeyDefinition(AStatement.CreateKeys[LIndex]);
+					EmitCreateKeyDefinition(statement.CreateKeys[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.AlterKeys.Count; LIndex++)
+				for (int index = 0; index < statement.AlterKeys.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitAlterKeyDefinition(AStatement.AlterKeys[LIndex]);
+					EmitAlterKeyDefinition(statement.AlterKeys[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.DropKeys.Count; LIndex++)
+				for (int index = 0; index < statement.DropKeys.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitDropKeyDefinition(AStatement.DropKeys[LIndex]);
+					EmitDropKeyDefinition(statement.DropKeys[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.CreateOrders.Count; LIndex++)
+				for (int index = 0; index < statement.CreateOrders.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitCreateOrderDefinition(AStatement.CreateOrders[LIndex]);
+					EmitCreateOrderDefinition(statement.CreateOrders[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.AlterOrders.Count; LIndex++)
+				for (int index = 0; index < statement.AlterOrders.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitAlterOrderDefinition(AStatement.AlterOrders[LIndex]);
+					EmitAlterOrderDefinition(statement.AlterOrders[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.DropOrders.Count; LIndex++)
+				for (int index = 0; index < statement.DropOrders.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitDropOrderDefinition(AStatement.DropOrders[LIndex]);
+					EmitDropOrderDefinition(statement.DropOrders[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.CreateReferences.Count; LIndex++)
+				for (int index = 0; index < statement.CreateReferences.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitCreateReferenceDefinition(AStatement.CreateReferences[LIndex]);
+					EmitCreateReferenceDefinition(statement.CreateReferences[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.AlterReferences.Count; LIndex++)
+				for (int index = 0; index < statement.AlterReferences.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitAlterReferenceDefinition(AStatement.AlterReferences[LIndex]);
+					EmitAlterReferenceDefinition(statement.AlterReferences[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.DropReferences.Count; LIndex++)
+				for (int index = 0; index < statement.DropReferences.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitDropReferenceDefinition(AStatement.DropReferences[LIndex]);
+					EmitDropReferenceDefinition(statement.DropReferences[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.CreateConstraints.Count; LIndex++)
+				for (int index = 0; index < statement.CreateConstraints.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitCreateCreateConstraintDefinition(AStatement.CreateConstraints[LIndex]);
+					EmitCreateCreateConstraintDefinition(statement.CreateConstraints[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.AlterConstraints.Count; LIndex++)
+				for (int index = 0; index < statement.AlterConstraints.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitAlterConstraintDefinitionBase(AStatement.AlterConstraints[LIndex]);
+					EmitAlterConstraintDefinitionBase(statement.AlterConstraints[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.DropConstraints.Count; LIndex++)
+				for (int index = 0; index < statement.DropConstraints.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitDropConstraintDefinition(AStatement.DropConstraints[LIndex]);
+					EmitDropConstraintDefinition(statement.DropConstraints[index]);
 				}
 				
 				DecreaseIndent();
@@ -2948,145 +2948,145 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				Indent();
 				Append(Keywords.EndList);
 			}
-			EmitAlterMetaData(AStatement.AlterMetaData);
+			EmitAlterMetaData(statement.AlterMetaData);
 		}
 		
-		protected virtual void EmitAlterScalarTypeStatement(AlterScalarTypeStatement AStatement)
+		protected virtual void EmitAlterScalarTypeStatement(AlterScalarTypeStatement statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Type, AStatement.ScalarTypeName);
+			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Type, statement.ScalarTypeName);
 			if
 				(
-					(AStatement.Default != null) ||
-					(AStatement.CreateRepresentations.Count > 0) ||
-					(AStatement.AlterRepresentations.Count > 0) ||
-					(AStatement.DropRepresentations.Count > 0) ||
-					(AStatement.CreateSpecials.Count > 0) ||
-					(AStatement.AlterSpecials.Count > 0) ||
-					(AStatement.DropSpecials.Count > 0) ||
-					(AStatement.CreateConstraints.Count > 0) ||
-					(AStatement.AlterConstraints.Count > 0) ||
-					(AStatement.DropConstraints.Count > 0)
+					(statement.Default != null) ||
+					(statement.CreateRepresentations.Count > 0) ||
+					(statement.AlterRepresentations.Count > 0) ||
+					(statement.DropRepresentations.Count > 0) ||
+					(statement.CreateSpecials.Count > 0) ||
+					(statement.AlterSpecials.Count > 0) ||
+					(statement.DropSpecials.Count > 0) ||
+					(statement.CreateConstraints.Count > 0) ||
+					(statement.AlterConstraints.Count > 0) ||
+					(statement.DropConstraints.Count > 0)
 				)
 			{
 				NewLine();
 				Indent();
 				Append(Keywords.BeginList);
 				IncreaseIndent();
-				bool LFirst = true;
+				bool first = true;
 				
-				if (AStatement.Default != null)
+				if (statement.Default != null)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
-					if (AStatement.Default is DefaultDefinition)
-						EmitCreateDefaultDefinition((DefaultDefinition)AStatement.Default);
-					else if (AStatement.Default is AlterDefaultDefinition)
-						EmitAlterDefaultDefinition((AlterDefaultDefinition)AStatement.Default);
-					else if (AStatement.Default is DropDefaultDefinition)
-						EmitDropDefaultDefinition((DropDefaultDefinition)AStatement.Default);
+						first = false;
+					if (statement.Default is DefaultDefinition)
+						EmitCreateDefaultDefinition((DefaultDefinition)statement.Default);
+					else if (statement.Default is AlterDefaultDefinition)
+						EmitAlterDefaultDefinition((AlterDefaultDefinition)statement.Default);
+					else if (statement.Default is DropDefaultDefinition)
+						EmitDropDefaultDefinition((DropDefaultDefinition)statement.Default);
 					else
-						throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.Default.GetType().Name);
+						throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.Default.GetType().Name);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.CreateRepresentations.Count; LIndex++)
+				for (int index = 0; index < statement.CreateRepresentations.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitCreateRepresentationDefinition(AStatement.CreateRepresentations[LIndex]);
+					EmitCreateRepresentationDefinition(statement.CreateRepresentations[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.AlterRepresentations.Count; LIndex++)
+				for (int index = 0; index < statement.AlterRepresentations.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitAlterRepresentationDefinition(AStatement.AlterRepresentations[LIndex]);
+					EmitAlterRepresentationDefinition(statement.AlterRepresentations[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.DropRepresentations.Count; LIndex++)
+				for (int index = 0; index < statement.DropRepresentations.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitDropRepresentationDefinition(AStatement.DropRepresentations[LIndex]);
+					EmitDropRepresentationDefinition(statement.DropRepresentations[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.CreateSpecials.Count; LIndex++)
+				for (int index = 0; index < statement.CreateSpecials.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitCreateSpecialDefinition(AStatement.CreateSpecials[LIndex]);
+					EmitCreateSpecialDefinition(statement.CreateSpecials[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.AlterSpecials.Count; LIndex++)
+				for (int index = 0; index < statement.AlterSpecials.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitAlterSpecialDefinition(AStatement.AlterSpecials[LIndex]);
+					EmitAlterSpecialDefinition(statement.AlterSpecials[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.DropSpecials.Count; LIndex++)
+				for (int index = 0; index < statement.DropSpecials.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitDropSpecialDefinition(AStatement.DropSpecials[LIndex]);
+					EmitDropSpecialDefinition(statement.DropSpecials[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.CreateConstraints.Count; LIndex++)
+				for (int index = 0; index < statement.CreateConstraints.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitCreateConstraintDefinition(AStatement.CreateConstraints[LIndex]);
+					EmitCreateConstraintDefinition(statement.CreateConstraints[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.AlterConstraints.Count; LIndex++)
+				for (int index = 0; index < statement.AlterConstraints.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitAlterConstraintDefinitionBase(AStatement.AlterConstraints[LIndex]);
+					EmitAlterConstraintDefinitionBase(statement.AlterConstraints[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.DropConstraints.Count; LIndex++)
+				for (int index = 0; index < statement.DropConstraints.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitDropConstraintDefinition(AStatement.DropConstraints[LIndex]);
+					EmitDropConstraintDefinition(statement.DropConstraints[index]);
 				}
 				
 				DecreaseIndent();
@@ -3094,60 +3094,60 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				Indent();
 				Append(Keywords.EndList);
 			}
-			EmitAlterClassDefinition(AStatement.AlterClassDefinition);
-			EmitAlterMetaData(AStatement.AlterMetaData);
+			EmitAlterClassDefinition(statement.AlterClassDefinition);
+			EmitAlterMetaData(statement.AlterMetaData);
 		}
 		
-		protected virtual void EmitAlterOperatorStatementBase(Statement AStatement)
+		protected virtual void EmitAlterOperatorStatementBase(Statement statement)
 		{
-			if (AStatement is AlterOperatorStatement)
-				EmitAlterOperatorStatement((AlterOperatorStatement)AStatement);
-			else if (AStatement is AlterAggregateOperatorStatement)
-				EmitAlterAggregateOperatorStatement((AlterAggregateOperatorStatement)AStatement);
+			if (statement is AlterOperatorStatement)
+				EmitAlterOperatorStatement((AlterOperatorStatement)statement);
+			else if (statement is AlterAggregateOperatorStatement)
+				EmitAlterAggregateOperatorStatement((AlterAggregateOperatorStatement)statement);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 		
-		protected virtual void EmitAlterOperatorStatement(AlterOperatorStatement AStatement)
+		protected virtual void EmitAlterOperatorStatement(AlterOperatorStatement statement)
 		{
 			AppendFormat("{0} {1} ", Keywords.Alter, Keywords.Operator);
-			EmitOperatorSpecifier(AStatement.OperatorSpecifier);
-			if (AStatement.Block.AlterClassDefinition != null)
-				EmitAlterClassDefinition(AStatement.Block.AlterClassDefinition);
-			else if (AStatement.Block.Block != null)
+			EmitOperatorSpecifier(statement.OperatorSpecifier);
+			if (statement.Block.AlterClassDefinition != null)
+				EmitAlterClassDefinition(statement.Block.AlterClassDefinition);
+			else if (statement.Block.Block != null)
 			{
 				NewLine();
 				Indent();
 				Append(Keywords.Begin);
 				IncreaseIndent();
-				EmitTerminatedStatement(AStatement.Block.Block);
+				EmitTerminatedStatement(statement.Block.Block);
 				DecreaseIndent();
 				NewLine();
 				Indent();
 				Append(Keywords.End);
 			}
-			EmitAlterMetaData(AStatement.AlterMetaData);
+			EmitAlterMetaData(statement.AlterMetaData);
 		}
 		
-		protected virtual void EmitAlterAggregateOperatorStatement(AlterAggregateOperatorStatement AStatement)
+		protected virtual void EmitAlterAggregateOperatorStatement(AlterAggregateOperatorStatement statement)
 		{
 			AppendFormat("{0} {1} {2} ", Keywords.Alter, Keywords.Aggregate, Keywords.Operator);
-			EmitOperatorSpecifier(AStatement.OperatorSpecifier);
+			EmitOperatorSpecifier(statement.OperatorSpecifier);
 
-			if ((AStatement.Initialization.AlterClassDefinition != null) || (AStatement.Initialization.Block != null))
+			if ((statement.Initialization.AlterClassDefinition != null) || (statement.Initialization.Block != null))
 			{
 				NewLine();
 				Indent();
 				Append(Keywords.Initialization);
 				NewLine();
 				Indent();
-				if (AStatement.Initialization.AlterClassDefinition != null)
-					EmitAlterClassDefinition(AStatement.Initialization.AlterClassDefinition);
-				else if (AStatement.Initialization.Block != null)
+				if (statement.Initialization.AlterClassDefinition != null)
+					EmitAlterClassDefinition(statement.Initialization.AlterClassDefinition);
+				else if (statement.Initialization.Block != null)
 				{
 					Append(Keywords.Begin);
 					IncreaseIndent();
-					EmitTerminatedStatement(AStatement.Initialization.Block);
+					EmitTerminatedStatement(statement.Initialization.Block);
 					DecreaseIndent();
 					NewLine();
 					Indent();
@@ -3155,20 +3155,20 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				}
 			}
 
-			if ((AStatement.Aggregation.AlterClassDefinition != null) || (AStatement.Aggregation.Block != null))
+			if ((statement.Aggregation.AlterClassDefinition != null) || (statement.Aggregation.Block != null))
 			{
 				NewLine();
 				Indent();
 				Append(Keywords.Aggregation);
 				NewLine();
 				Indent();
-				if (AStatement.Aggregation.AlterClassDefinition != null)
-					EmitAlterClassDefinition(AStatement.Aggregation.AlterClassDefinition);
-				else if (AStatement.Aggregation.Block != null)
+				if (statement.Aggregation.AlterClassDefinition != null)
+					EmitAlterClassDefinition(statement.Aggregation.AlterClassDefinition);
+				else if (statement.Aggregation.Block != null)
 				{
 					Append(Keywords.Begin);
 					IncreaseIndent();
-					EmitTerminatedStatement(AStatement.Aggregation.Block);
+					EmitTerminatedStatement(statement.Aggregation.Block);
 					DecreaseIndent();
 					NewLine();
 					Indent();
@@ -3176,20 +3176,20 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				}
 			}
 
-			if ((AStatement.Finalization.AlterClassDefinition != null) || (AStatement.Finalization.Block != null))
+			if ((statement.Finalization.AlterClassDefinition != null) || (statement.Finalization.Block != null))
 			{
 				NewLine();
 				Indent();
 				Append(Keywords.Finalization);
 				NewLine();
 				Indent();
-				if (AStatement.Finalization.AlterClassDefinition != null)
-					EmitAlterClassDefinition(AStatement.Finalization.AlterClassDefinition);
-				else if (AStatement.Finalization.Block != null)
+				if (statement.Finalization.AlterClassDefinition != null)
+					EmitAlterClassDefinition(statement.Finalization.AlterClassDefinition);
+				else if (statement.Finalization.Block != null)
 				{
 					Append(Keywords.Begin);
 					IncreaseIndent();
-					EmitTerminatedStatement(AStatement.Finalization.Block);
+					EmitTerminatedStatement(statement.Finalization.Block);
 					DecreaseIndent();
 					NewLine();
 					Indent();
@@ -3197,98 +3197,98 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				}
 			}
 
-			EmitAlterMetaData(AStatement.AlterMetaData);
+			EmitAlterMetaData(statement.AlterMetaData);
 		}
 		
-		protected virtual void EmitAlterServerStatement(AlterServerStatement AStatement)
+		protected virtual void EmitAlterServerStatement(AlterServerStatement statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Server, AStatement.ServerName);
-			EmitAlterMetaData(AStatement.AlterMetaData);
+			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Server, statement.ServerName);
+			EmitAlterMetaData(statement.AlterMetaData);
 		}
 		
-		protected virtual void EmitAlterDeviceStatement(AlterDeviceStatement AStatement)
+		protected virtual void EmitAlterDeviceStatement(AlterDeviceStatement statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Device, AStatement.DeviceName);
+			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Device, statement.DeviceName);
 			if
 				(
-					(AStatement.CreateDeviceScalarTypeMaps.Count > 0) ||
-					(AStatement.AlterDeviceScalarTypeMaps.Count > 0) ||
-					(AStatement.DropDeviceScalarTypeMaps.Count > 0) ||
-					(AStatement.CreateDeviceOperatorMaps.Count > 0) ||
-					(AStatement.AlterDeviceOperatorMaps.Count > 0) ||
-					(AStatement.DropDeviceOperatorMaps.Count > 0)
+					(statement.CreateDeviceScalarTypeMaps.Count > 0) ||
+					(statement.AlterDeviceScalarTypeMaps.Count > 0) ||
+					(statement.DropDeviceScalarTypeMaps.Count > 0) ||
+					(statement.CreateDeviceOperatorMaps.Count > 0) ||
+					(statement.AlterDeviceOperatorMaps.Count > 0) ||
+					(statement.DropDeviceOperatorMaps.Count > 0)
 				)
 			{
 				NewLine();
 				Indent();
 				Append(Keywords.BeginList);
 				IncreaseIndent();
-				bool LFirst = true;
+				bool first = true;
 				
-				for (int LIndex = 0; LIndex < AStatement.CreateDeviceScalarTypeMaps.Count; LIndex++)
+				for (int index = 0; index < statement.CreateDeviceScalarTypeMaps.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitCreateDeviceScalarTypeMap(AStatement.CreateDeviceScalarTypeMaps[LIndex]);
+					EmitCreateDeviceScalarTypeMap(statement.CreateDeviceScalarTypeMaps[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.AlterDeviceScalarTypeMaps.Count; LIndex++)
+				for (int index = 0; index < statement.AlterDeviceScalarTypeMaps.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitAlterDeviceScalarTypeMap(AStatement.AlterDeviceScalarTypeMaps[LIndex]);
+					EmitAlterDeviceScalarTypeMap(statement.AlterDeviceScalarTypeMaps[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.DropDeviceScalarTypeMaps.Count; LIndex++)
+				for (int index = 0; index < statement.DropDeviceScalarTypeMaps.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitDropDeviceScalarTypeMap(AStatement.DropDeviceScalarTypeMaps[LIndex]);
+					EmitDropDeviceScalarTypeMap(statement.DropDeviceScalarTypeMaps[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.CreateDeviceOperatorMaps.Count; LIndex++)
+				for (int index = 0; index < statement.CreateDeviceOperatorMaps.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitCreateDeviceOperatorMap(AStatement.CreateDeviceOperatorMaps[LIndex]);
+					EmitCreateDeviceOperatorMap(statement.CreateDeviceOperatorMaps[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.AlterDeviceOperatorMaps.Count; LIndex++)
+				for (int index = 0; index < statement.AlterDeviceOperatorMaps.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitAlterDeviceOperatorMap(AStatement.AlterDeviceOperatorMaps[LIndex]);
+					EmitAlterDeviceOperatorMap(statement.AlterDeviceOperatorMaps[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.DropDeviceOperatorMaps.Count; LIndex++)
+				for (int index = 0; index < statement.DropDeviceOperatorMaps.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitDropDeviceOperatorMap(AStatement.DropDeviceOperatorMaps[LIndex]);
+					EmitDropDeviceOperatorMap(statement.DropDeviceOperatorMaps[index]);
 				}
 				
 				DecreaseIndent();
@@ -3296,84 +3296,84 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				Indent();
 				Append(Keywords.EndList);
 			}
-			EmitReconciliationSettings(AStatement.ReconciliationSettings, true);
-			EmitAlterClassDefinition(AStatement.AlterClassDefinition);
-			EmitAlterMetaData(AStatement.AlterMetaData);
+			EmitReconciliationSettings(statement.ReconciliationSettings, true);
+			EmitAlterClassDefinition(statement.AlterClassDefinition);
+			EmitAlterMetaData(statement.AlterMetaData);
 		}
 		
-		protected virtual void EmitDropObjectStatement(Statement AStatement)
+		protected virtual void EmitDropObjectStatement(Statement statement)
 		{
-			if (AStatement is DropTableStatement)
-				EmitDropTableStatement((DropTableStatement)AStatement);
-			else if (AStatement is DropViewStatement)
-				EmitDropViewStatement((DropViewStatement)AStatement);
-			else if (AStatement is DropScalarTypeStatement)
-				EmitDropScalarTypeStatement((DropScalarTypeStatement)AStatement);
-			else if (AStatement is DropOperatorStatement)
-				EmitDropOperatorStatement((DropOperatorStatement)AStatement);
-			else if (AStatement is DropServerStatement)
-				EmitDropServerStatement((DropServerStatement)AStatement);
-			else if (AStatement is DropDeviceStatement)
-				EmitDropDeviceStatement((DropDeviceStatement)AStatement);
+			if (statement is DropTableStatement)
+				EmitDropTableStatement((DropTableStatement)statement);
+			else if (statement is DropViewStatement)
+				EmitDropViewStatement((DropViewStatement)statement);
+			else if (statement is DropScalarTypeStatement)
+				EmitDropScalarTypeStatement((DropScalarTypeStatement)statement);
+			else if (statement is DropOperatorStatement)
+				EmitDropOperatorStatement((DropOperatorStatement)statement);
+			else if (statement is DropServerStatement)
+				EmitDropServerStatement((DropServerStatement)statement);
+			else if (statement is DropDeviceStatement)
+				EmitDropDeviceStatement((DropDeviceStatement)statement);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 
-		protected virtual void EmitDropTableStatement(DropTableStatement AStatement)
+		protected virtual void EmitDropTableStatement(DropTableStatement statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Table, AStatement.ObjectName);
+			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Table, statement.ObjectName);
 		}
 		
-		protected virtual void EmitDropViewStatement(DropViewStatement AStatement)
+		protected virtual void EmitDropViewStatement(DropViewStatement statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.View, AStatement.ObjectName);
+			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.View, statement.ObjectName);
 		}
 		
-		protected virtual void EmitDropScalarTypeStatement(DropScalarTypeStatement AStatement)
+		protected virtual void EmitDropScalarTypeStatement(DropScalarTypeStatement statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Type, AStatement.ObjectName);
+			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Type, statement.ObjectName);
 		}
 		
-		protected virtual void EmitDropOperatorStatement(DropOperatorStatement AStatement)
+		protected virtual void EmitDropOperatorStatement(DropOperatorStatement statement)
 		{
-			AppendFormat("{0} {1} {2}{3}", Keywords.Drop, Keywords.Operator, AStatement.ObjectName, Keywords.BeginGroup);
-			for (int LIndex = 0; LIndex < AStatement.FormalParameterSpecifiers.Count; LIndex++)
+			AppendFormat("{0} {1} {2}{3}", Keywords.Drop, Keywords.Operator, statement.ObjectName, Keywords.BeginGroup);
+			for (int index = 0; index < statement.FormalParameterSpecifiers.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitFormalParameterSpecifier(AStatement.FormalParameterSpecifiers[LIndex]);
+				EmitFormalParameterSpecifier(statement.FormalParameterSpecifiers[index]);
 			}
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitDropServerStatement(DropServerStatement AStatement)
+		protected virtual void EmitDropServerStatement(DropServerStatement statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Server, AStatement.ObjectName);
+			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Server, statement.ObjectName);
 		}
 		
-		protected virtual void EmitDropDeviceStatement(DropDeviceStatement AStatement)
+		protected virtual void EmitDropDeviceStatement(DropDeviceStatement statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Device, AStatement.ObjectName);
+			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Device, statement.ObjectName);
 		}
 		
-		protected virtual void EmitScalarTypeNameDefinition(ScalarTypeNameDefinition AStatement)
+		protected virtual void EmitScalarTypeNameDefinition(ScalarTypeNameDefinition statement)
 		{
-			Append(AStatement.ScalarTypeName);
+			Append(statement.ScalarTypeName);
 		}
 		
-		protected virtual void EmitAccessorBlock(AccessorBlock AAccessorBlock)
+		protected virtual void EmitAccessorBlock(AccessorBlock accessorBlock)
 		{
-			if (AAccessorBlock.ClassDefinition != null)
-				EmitClassDefinition(AAccessorBlock.ClassDefinition);
-			else if (AAccessorBlock.Expression != null)
-				EmitExpression(AAccessorBlock.Expression);
-			else if (AAccessorBlock.Block != null)
+			if (accessorBlock.ClassDefinition != null)
+				EmitClassDefinition(accessorBlock.ClassDefinition);
+			else if (accessorBlock.Expression != null)
+				EmitExpression(accessorBlock.Expression);
+			else if (accessorBlock.Block != null)
 			{
 				NewLine();
 				Indent();
 				Append(Keywords.Begin);
 				IncreaseIndent();
-				EmitTerminatedStatement(AAccessorBlock.Block);
+				EmitTerminatedStatement(accessorBlock.Block);
 				DecreaseIndent();
 				NewLine();
 				Indent();
@@ -3381,19 +3381,19 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 		}
 		
-		protected virtual void EmitAlterAccessorBlock(AlterAccessorBlock AAccessorBlock)
+		protected virtual void EmitAlterAccessorBlock(AlterAccessorBlock accessorBlock)
 		{
-			if (AAccessorBlock.AlterClassDefinition != null)
-				EmitAlterClassDefinition(AAccessorBlock.AlterClassDefinition);
-			else if (AAccessorBlock.Expression != null)
-				EmitExpression(AAccessorBlock.Expression);
-			else if (AAccessorBlock.Block != null)
+			if (accessorBlock.AlterClassDefinition != null)
+				EmitAlterClassDefinition(accessorBlock.AlterClassDefinition);
+			else if (accessorBlock.Expression != null)
+				EmitExpression(accessorBlock.Expression);
+			else if (accessorBlock.Block != null)
 			{
 				NewLine();
 				Indent();
 				Append(Keywords.Begin);
 				IncreaseIndent();
-				EmitTerminatedStatement(AAccessorBlock.Block);
+				EmitTerminatedStatement(accessorBlock.Block);
 				DecreaseIndent();
 				NewLine();
 				Indent();
@@ -3401,59 +3401,59 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 		}
 		
-		protected virtual void EmitRepresentationDefinitionBase(RepresentationDefinitionBase AStatement)
+		protected virtual void EmitRepresentationDefinitionBase(RepresentationDefinitionBase statement)
 		{
-			if (AStatement is RepresentationDefinition)
-				EmitRepresentationDefinition((RepresentationDefinition)AStatement);
-			else if (AStatement is AlterRepresentationDefinition)
-				EmitAlterRepresentationDefinition((AlterRepresentationDefinition)AStatement);
-			else if (AStatement is DropRepresentationDefinition)
-				EmitDropRepresentationDefinition((DropRepresentationDefinition)AStatement);
+			if (statement is RepresentationDefinition)
+				EmitRepresentationDefinition((RepresentationDefinition)statement);
+			else if (statement is AlterRepresentationDefinition)
+				EmitAlterRepresentationDefinition((AlterRepresentationDefinition)statement);
+			else if (statement is DropRepresentationDefinition)
+				EmitDropRepresentationDefinition((DropRepresentationDefinition)statement);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 		
-		protected virtual void EmitRepresentationDefinition(RepresentationDefinition AStatement)
+		protected virtual void EmitRepresentationDefinition(RepresentationDefinition statement)
 		{
-			AppendFormat("{0} {1}", Keywords.Representation, AStatement.RepresentationName);
+			AppendFormat("{0} {1}", Keywords.Representation, statement.RepresentationName);
 			NewLine();
 			Indent();
 			Append(Keywords.BeginList);
 			IncreaseIndent();
-			for (int LIndex = 0; LIndex < AStatement.Properties.Count; LIndex++)
+			for (int index = 0; index < statement.Properties.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
 				NewLine();
 				Indent();
-				EmitPropertyDefinition(AStatement.Properties[LIndex]);
+				EmitPropertyDefinition(statement.Properties[index]);
 			}
 			DecreaseIndent();
 			NewLine();
 			Indent();
 			Append(Keywords.EndList);
-			if (AStatement.SelectorAccessorBlock != null)
+			if (statement.SelectorAccessorBlock != null)
 			{
 				AppendFormat("{0} ", Keywords.Selector);
-				EmitAccessorBlock(AStatement.SelectorAccessorBlock);
+				EmitAccessorBlock(statement.SelectorAccessorBlock);
 			}
-			EmitMetaData(AStatement.MetaData);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitCreateRepresentationDefinition(RepresentationDefinition AStatement)
+		protected virtual void EmitCreateRepresentationDefinition(RepresentationDefinition statement)
 		{
 			AppendFormat("{0} ", Keywords.Create);
-			EmitRepresentationDefinition(AStatement);
+			EmitRepresentationDefinition(statement);
 		}
 		
-		protected virtual void EmitAlterRepresentationDefinition(AlterRepresentationDefinition AStatement)
+		protected virtual void EmitAlterRepresentationDefinition(AlterRepresentationDefinition statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Representation, AStatement.RepresentationName);
+			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Representation, statement.RepresentationName);
 			if 
 				(
-					(AStatement.CreateProperties.Count > 0) ||
-					(AStatement.AlterProperties.Count > 0) ||
-					(AStatement.DropProperties.Count > 0)
+					(statement.CreateProperties.Count > 0) ||
+					(statement.AlterProperties.Count > 0) ||
+					(statement.DropProperties.Count > 0)
 				)
 			{
 				NewLine();
@@ -3461,31 +3461,31 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				Append(Keywords.BeginList);
 				IncreaseIndent();
 
-				for (int LIndex = 0; LIndex < AStatement.CreateProperties.Count; LIndex++)
+				for (int index = 0; index < statement.CreateProperties.Count; index++)
 				{
-					if (LIndex > 0)
+					if (index > 0)
 						EmitListSeparator();
 					NewLine();
 					Indent();
-					EmitCreatePropertyDefinition(AStatement.CreateProperties[LIndex]);
+					EmitCreatePropertyDefinition(statement.CreateProperties[index]);
 				}
 
-				for (int LIndex = 0; LIndex < AStatement.AlterProperties.Count; LIndex++)
+				for (int index = 0; index < statement.AlterProperties.Count; index++)
 				{
-					if (LIndex > 0)
+					if (index > 0)
 						EmitListSeparator();
 					NewLine();
 					Indent();
-					EmitAlterPropertyDefinition(AStatement.AlterProperties[LIndex]);
+					EmitAlterPropertyDefinition(statement.AlterProperties[index]);
 				}
 
-				for (int LIndex = 0; LIndex < AStatement.DropProperties.Count; LIndex++)
+				for (int index = 0; index < statement.DropProperties.Count; index++)
 				{
-					if (LIndex > 0)
+					if (index > 0)
 						EmitListSeparator();
 					NewLine();
 					Indent();
-					EmitDropPropertyDefinition(AStatement.DropProperties[LIndex]);
+					EmitDropPropertyDefinition(statement.DropProperties[index]);
 				}
 				
 				DecreaseIndent();
@@ -3493,195 +3493,195 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				Indent();
 				Append(Keywords.EndList);
 			}
-			if (AStatement.SelectorAccessorBlock != null)
+			if (statement.SelectorAccessorBlock != null)
 			{
 				AppendFormat("{0} {1} ", Keywords.Alter, Keywords.Selector);
-				EmitAlterAccessorBlock(AStatement.SelectorAccessorBlock);
+				EmitAlterAccessorBlock(statement.SelectorAccessorBlock);
 			}
-			EmitAlterMetaData(AStatement.AlterMetaData);
+			EmitAlterMetaData(statement.AlterMetaData);
 		}
 		
-		protected virtual void EmitDropRepresentationDefinition(DropRepresentationDefinition AStatement)
+		protected virtual void EmitDropRepresentationDefinition(DropRepresentationDefinition statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Representation, AStatement.RepresentationName);
+			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Representation, statement.RepresentationName);
 		}
 		
-		protected virtual void EmitPropertyDefinitionBase(PropertyDefinitionBase AStatement)
+		protected virtual void EmitPropertyDefinitionBase(PropertyDefinitionBase statement)
 		{
-			if (AStatement is PropertyDefinition)
-				EmitPropertyDefinition((PropertyDefinition)AStatement);
-			else if (AStatement is AlterPropertyDefinition)
-				EmitAlterPropertyDefinition((AlterPropertyDefinition)AStatement);
-			else if (AStatement is DropPropertyDefinition)
-				EmitDropPropertyDefinition((DropPropertyDefinition)AStatement);
+			if (statement is PropertyDefinition)
+				EmitPropertyDefinition((PropertyDefinition)statement);
+			else if (statement is AlterPropertyDefinition)
+				EmitAlterPropertyDefinition((AlterPropertyDefinition)statement);
+			else if (statement is DropPropertyDefinition)
+				EmitDropPropertyDefinition((DropPropertyDefinition)statement);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 		
-		protected virtual void EmitPropertyDefinition(PropertyDefinition AStatement)
+		protected virtual void EmitPropertyDefinition(PropertyDefinition statement)
 		{
-			AppendFormat("{0} {1} ", AStatement.PropertyName, Keywords.TypeSpecifier);
-			EmitTypeSpecifier(AStatement.PropertyType);
+			AppendFormat("{0} {1} ", statement.PropertyName, Keywords.TypeSpecifier);
+			EmitTypeSpecifier(statement.PropertyType);
 			IncreaseIndent();
 			
-			if (AStatement.ReadAccessorBlock != null)
+			if (statement.ReadAccessorBlock != null)
 			{
 				NewLine();
 				Indent();
 				AppendFormat("{0} ", Keywords.Read);
-				EmitAccessorBlock(AStatement.ReadAccessorBlock);
+				EmitAccessorBlock(statement.ReadAccessorBlock);
 			}
 			
-			if (AStatement.WriteAccessorBlock != null)
+			if (statement.WriteAccessorBlock != null)
 			{
 				NewLine();
 				Indent();
 				AppendFormat("{0} ", Keywords.Write);
-				EmitAccessorBlock(AStatement.WriteAccessorBlock);
+				EmitAccessorBlock(statement.WriteAccessorBlock);
 			}
 
-			if (AStatement.MetaData != null)
+			if (statement.MetaData != null)
 			{
 				NewLine();
 				Indent();
-				EmitMetaData(AStatement.MetaData);
+				EmitMetaData(statement.MetaData);
 			}
 
 			DecreaseIndent();
 		}
 		
-		protected virtual void EmitCreatePropertyDefinition(PropertyDefinition AStatement)
+		protected virtual void EmitCreatePropertyDefinition(PropertyDefinition statement)
 		{
 			AppendFormat("{0} ", Keywords.Create);
-			EmitPropertyDefinition(AStatement);
+			EmitPropertyDefinition(statement);
 		}
 		
-		protected virtual void EmitAlterPropertyDefinition(AlterPropertyDefinition AStatement)
+		protected virtual void EmitAlterPropertyDefinition(AlterPropertyDefinition statement)
 		{
-			AppendFormat("{0} {1}", Keywords.Alter, AStatement.PropertyName);
-			if (AStatement.PropertyType != null)
+			AppendFormat("{0} {1}", Keywords.Alter, statement.PropertyName);
+			if (statement.PropertyType != null)
 			{
 				AppendFormat(" {0} ", Keywords.TypeSpecifier);
-				EmitTypeSpecifier(AStatement.PropertyType);
+				EmitTypeSpecifier(statement.PropertyType);
 			}
 			
 			IncreaseIndent();
 			
-			if (AStatement.ReadAccessorBlock != null)
+			if (statement.ReadAccessorBlock != null)
 			{
 				NewLine();
 				Indent();
 				AppendFormat("{0} {1} ", Keywords.Alter, Keywords.Read);
-				EmitAlterAccessorBlock(AStatement.ReadAccessorBlock);
+				EmitAlterAccessorBlock(statement.ReadAccessorBlock);
 			}
 			
-			if (AStatement.WriteAccessorBlock != null)
+			if (statement.WriteAccessorBlock != null)
 			{
 				NewLine();
 				Indent();
 				AppendFormat("{0} {1} ", Keywords.Alter, Keywords.Write);
-				EmitAlterAccessorBlock(AStatement.WriteAccessorBlock);
+				EmitAlterAccessorBlock(statement.WriteAccessorBlock);
 			}
 			
-			if (AStatement.AlterMetaData != null)
+			if (statement.AlterMetaData != null)
 			{
 				NewLine();
 				Indent();
-				EmitAlterMetaData(AStatement.AlterMetaData);
+				EmitAlterMetaData(statement.AlterMetaData);
 			}
 			
 			DecreaseIndent();
 		}
 		
-		protected virtual void EmitDropPropertyDefinition(DropPropertyDefinition AStatement)
+		protected virtual void EmitDropPropertyDefinition(DropPropertyDefinition statement)
 		{
-			AppendFormat("{0} {1}", Keywords.Drop, AStatement.PropertyName);
+			AppendFormat("{0} {1}", Keywords.Drop, statement.PropertyName);
 		}
 		
-		protected virtual void EmitSpecialDefinition(SpecialDefinition AStatement)
+		protected virtual void EmitSpecialDefinition(SpecialDefinition statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Special, AStatement.Name, Keywords.BeginGroup);
-			EmitExpression(AStatement.Value);
+			AppendFormat("{0} {1} {2}", Keywords.Special, statement.Name, Keywords.BeginGroup);
+			EmitExpression(statement.Value);
 			AppendFormat("{0}", Keywords.EndGroup);
-			EmitMetaData(AStatement.MetaData);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitCreateSpecialDefinition(SpecialDefinition AStatement)
+		protected virtual void EmitCreateSpecialDefinition(SpecialDefinition statement)
 		{
 			AppendFormat("{0} ", Keywords.Create);
-			EmitSpecialDefinition(AStatement);
+			EmitSpecialDefinition(statement);
 		}
 		
-		protected virtual void EmitAlterSpecialDefinition(AlterSpecialDefinition AStatement)
+		protected virtual void EmitAlterSpecialDefinition(AlterSpecialDefinition statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Special, AStatement.Name);
-			if (AStatement.Value != null)
+			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Special, statement.Name);
+			if (statement.Value != null)
 			{
 				AppendFormat(" {0}", Keywords.BeginGroup);
-				EmitExpression(AStatement.Value);
+				EmitExpression(statement.Value);
 				AppendFormat("{0}", Keywords.EndGroup);
 			}
-			EmitAlterMetaData(AStatement.AlterMetaData);
+			EmitAlterMetaData(statement.AlterMetaData);
 		}
 		
-		protected virtual void EmitDropSpecialDefinition(DropSpecialDefinition AStatement)
+		protected virtual void EmitDropSpecialDefinition(DropSpecialDefinition statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Special, AStatement.Name);
+			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Special, statement.Name);
 		}
 		
-		protected virtual void EmitColumnDefinitionBase(ColumnDefinitionBase AStatement)
+		protected virtual void EmitColumnDefinitionBase(ColumnDefinitionBase statement)
 		{
-			if (AStatement is ColumnDefinition)
-				EmitColumnDefinition((ColumnDefinition)AStatement);
-			else if (AStatement is AlterColumnDefinition)
-				EmitAlterColumnDefinition((AlterColumnDefinition)AStatement);
-			else if (AStatement is DropColumnDefinition)
-				EmitDropColumnDefinition((DropColumnDefinition)AStatement);
-			else if (AStatement is KeyColumnDefinition)
-				EmitKeyColumnDefinition((KeyColumnDefinition)AStatement);
-			else if (AStatement is ReferenceColumnDefinition)
-				EmitReferenceColumnDefinition((ReferenceColumnDefinition)AStatement);
-			else if (AStatement is OrderColumnDefinition)
-				EmitOrderColumnDefinition((OrderColumnDefinition)AStatement);
+			if (statement is ColumnDefinition)
+				EmitColumnDefinition((ColumnDefinition)statement);
+			else if (statement is AlterColumnDefinition)
+				EmitAlterColumnDefinition((AlterColumnDefinition)statement);
+			else if (statement is DropColumnDefinition)
+				EmitDropColumnDefinition((DropColumnDefinition)statement);
+			else if (statement is KeyColumnDefinition)
+				EmitKeyColumnDefinition((KeyColumnDefinition)statement);
+			else if (statement is ReferenceColumnDefinition)
+				EmitReferenceColumnDefinition((ReferenceColumnDefinition)statement);
+			else if (statement is OrderColumnDefinition)
+				EmitOrderColumnDefinition((OrderColumnDefinition)statement);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 		
-		protected virtual void EmitColumnDefinition(ColumnDefinition AStatement)
+		protected virtual void EmitColumnDefinition(ColumnDefinition statement)
 		{
-			AppendFormat("{0} {1} ", AStatement.ColumnName, Keywords.TypeSpecifier);
-			EmitTypeSpecifier(AStatement.TypeSpecifier);
-			if (AStatement.IsNilable)
+			AppendFormat("{0} {1} ", statement.ColumnName, Keywords.TypeSpecifier);
+			EmitTypeSpecifier(statement.TypeSpecifier);
+			if (statement.IsNilable)
 				AppendFormat(" {0}", Keywords.Nil);
 			
-			if ((AStatement.Default != null) || (AStatement.Constraints.Count > 0))
+			if ((statement.Default != null) || (statement.Constraints.Count > 0))
 			{
 				NewLine();
 				Indent();
 				Append(Keywords.BeginList);
 				IncreaseIndent();
-				bool LFirst = true;
+				bool first = true;
 				
-				if (AStatement.Default != null)
+				if (statement.Default != null)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitDefaultDefinition(AStatement.Default);
+					EmitDefaultDefinition(statement.Default);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.Constraints.Count; LIndex++)
+				for (int index = 0; index < statement.Constraints.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitConstraintDefinition(AStatement.Constraints[LIndex]);
+					EmitConstraintDefinition(statement.Constraints[index]);
 				}
 				
 				DecreaseIndent();
@@ -3689,98 +3689,98 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				Indent();
 				Append(Keywords.EndList);
 			}
-			EmitMetaData(AStatement.MetaData);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitCreateColumnDefinition(ColumnDefinition AStatement)
+		protected virtual void EmitCreateColumnDefinition(ColumnDefinition statement)
 		{
 			AppendFormat("{0} {1} ", Keywords.Create, Keywords.Column);
-			EmitColumnDefinition(AStatement);
+			EmitColumnDefinition(statement);
 		}
 		
-		protected virtual void EmitAlterColumnDefinition(AlterColumnDefinition AStatement)
+		protected virtual void EmitAlterColumnDefinition(AlterColumnDefinition statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Column, AStatement.ColumnName);
-			if (AStatement.TypeSpecifier != null)
+			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Column, statement.ColumnName);
+			if (statement.TypeSpecifier != null)
 			{
 				AppendFormat(" {0} ", Keywords.TypeSpecifier);
-				EmitTypeSpecifier(AStatement.TypeSpecifier);
+				EmitTypeSpecifier(statement.TypeSpecifier);
 			}
 			
 			if 
 				(
-					(AStatement.ChangeNilable) ||
-					(AStatement.Default != null) ||
-					(AStatement.CreateConstraints.Count > 0) ||
-					(AStatement.AlterConstraints.Count > 0) ||
-					(AStatement.DropConstraints.Count > 0)
+					(statement.ChangeNilable) ||
+					(statement.Default != null) ||
+					(statement.CreateConstraints.Count > 0) ||
+					(statement.AlterConstraints.Count > 0) ||
+					(statement.DropConstraints.Count > 0)
 				)
 			{
 				NewLine();
 				Indent();
 				Append(Keywords.BeginList);
 				IncreaseIndent();
-				bool LFirst = true;
+				bool first = true;
 				
-				if (AStatement.ChangeNilable)
+				if (statement.ChangeNilable)
 				{
-					LFirst = false;
+					first = false;
 					NewLine();
 					Indent();
-					if (!AStatement.IsNilable)
+					if (!statement.IsNilable)
 						AppendFormat("{0} ", Keywords.Not);
 					Append(Keywords.Nil);
 				}
 
-				if (AStatement.Default != null)
+				if (statement.Default != null)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					if (AStatement.Default is DefaultDefinition)
-						EmitCreateDefaultDefinition((DefaultDefinition)AStatement.Default);
-					else if (AStatement.Default is AlterDefaultDefinition)
-						EmitAlterDefaultDefinition((AlterDefaultDefinition)AStatement.Default);
-					else if (AStatement.Default is DropDefaultDefinition)
-						EmitDropDefaultDefinition((DropDefaultDefinition)AStatement.Default);
+					if (statement.Default is DefaultDefinition)
+						EmitCreateDefaultDefinition((DefaultDefinition)statement.Default);
+					else if (statement.Default is AlterDefaultDefinition)
+						EmitAlterDefaultDefinition((AlterDefaultDefinition)statement.Default);
+					else if (statement.Default is DropDefaultDefinition)
+						EmitDropDefaultDefinition((DropDefaultDefinition)statement.Default);
 					else
-						throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.Default.GetType().Name);
+						throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.Default.GetType().Name);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.CreateConstraints.Count; LIndex++)
+				for (int index = 0; index < statement.CreateConstraints.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitCreateConstraintDefinition(AStatement.CreateConstraints[LIndex]);
+					EmitCreateConstraintDefinition(statement.CreateConstraints[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.AlterConstraints.Count; LIndex++)
+				for (int index = 0; index < statement.AlterConstraints.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitAlterConstraintDefinitionBase(AStatement.AlterConstraints[LIndex]);
+					EmitAlterConstraintDefinitionBase(statement.AlterConstraints[index]);
 				}
 				
-				for (int LIndex = 0; LIndex < AStatement.DropConstraints.Count; LIndex++)
+				for (int index = 0; index < statement.DropConstraints.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
+						first = false;
 					NewLine();
 					Indent();
-					EmitDropConstraintDefinition(AStatement.DropConstraints[LIndex]);
+					EmitDropConstraintDefinition(statement.DropConstraints[index]);
 				}
 
 				DecreaseIndent();
@@ -3789,886 +3789,886 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				Append(Keywords.EndList);
 			}
 			
-			EmitAlterMetaData(AStatement.AlterMetaData);
+			EmitAlterMetaData(statement.AlterMetaData);
 		}
 		
-		protected virtual void EmitDropColumnDefinition(DropColumnDefinition AStatement)
+		protected virtual void EmitDropColumnDefinition(DropColumnDefinition statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Column, AStatement.ColumnName);
+			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Column, statement.ColumnName);
 		}
 		
-		protected virtual void EmitKeyColumnDefinition(KeyColumnDefinition AStatement)
+		protected virtual void EmitKeyColumnDefinition(KeyColumnDefinition statement)
 		{
-			Append(AStatement.ColumnName);
+			Append(statement.ColumnName);
 		}
 		
-		protected virtual void EmitReferenceColumnDefinition(ReferenceColumnDefinition AStatement)
+		protected virtual void EmitReferenceColumnDefinition(ReferenceColumnDefinition statement)
 		{
-			Append(AStatement.ColumnName);
+			Append(statement.ColumnName);
 		}
 		
-		protected virtual void EmitOrderColumnDefinition(OrderColumnDefinition AStatement)
+		protected virtual void EmitOrderColumnDefinition(OrderColumnDefinition statement)
 		{
-			AppendFormat("{0} ", AStatement.ColumnName);
-			if (AStatement.Sort != null)
+			AppendFormat("{0} ", statement.ColumnName);
+			if (statement.Sort != null)
 			{
-				EmitSortDefinition(AStatement.Sort);
+				EmitSortDefinition(statement.Sort);
 				Append(" ");
 			}
-			AppendFormat("{0}", AStatement.Ascending ? Keywords.Asc : Keywords.Desc);
-			if (AStatement.IncludeNils)
+			AppendFormat("{0}", statement.Ascending ? Keywords.Asc : Keywords.Desc);
+			if (statement.IncludeNils)
 				AppendFormat(" {0} {1}", Keywords.Include, Keywords.Nil);
 		}
 		
-		protected virtual void EmitKeyDefinitionBase(KeyDefinitionBase AStatement)
+		protected virtual void EmitKeyDefinitionBase(KeyDefinitionBase statement)
 		{
-			if (AStatement is KeyDefinition)
-				EmitKeyDefinition((KeyDefinition)AStatement);
-			else if (AStatement is AlterKeyDefinition)
-				EmitAlterKeyDefinition((AlterKeyDefinition)AStatement);
-			else if (AStatement is DropKeyDefinition)
-				EmitDropKeyDefinition((DropKeyDefinition)AStatement);
+			if (statement is KeyDefinition)
+				EmitKeyDefinition((KeyDefinition)statement);
+			else if (statement is AlterKeyDefinition)
+				EmitAlterKeyDefinition((AlterKeyDefinition)statement);
+			else if (statement is DropKeyDefinition)
+				EmitDropKeyDefinition((DropKeyDefinition)statement);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 		
-		protected virtual void EmitKeyDefinition(KeyDefinition AStatement)
+		protected virtual void EmitKeyDefinition(KeyDefinition statement)
 		{
 			AppendFormat("{0} {1} ", Keywords.Key, Keywords.BeginList);
-			for (int LIndex = 0; LIndex < AStatement.Columns.Count; LIndex++)
+			for (int index = 0; index < statement.Columns.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitKeyColumnDefinition(AStatement.Columns[LIndex]);
+				EmitKeyColumnDefinition(statement.Columns[index]);
 			}
 			AppendFormat(" {0}", Keywords.EndList);
-			EmitMetaData(AStatement.MetaData);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitCreateKeyDefinition(KeyDefinition AStatement)
+		protected virtual void EmitCreateKeyDefinition(KeyDefinition statement)
 		{
 			AppendFormat("{0} ", Keywords.Create);
-			EmitKeyDefinition(AStatement);
+			EmitKeyDefinition(statement);
 		}
 		
-		protected virtual void EmitAlterKeyDefinition(AlterKeyDefinition AStatement)
+		protected virtual void EmitAlterKeyDefinition(AlterKeyDefinition statement)
 		{
 			AppendFormat("{0} {1} {2} ", Keywords.Alter, Keywords.Key, Keywords.BeginList);
-			for (int LIndex = 0; LIndex < AStatement.Columns.Count; LIndex++)
+			for (int index = 0; index < statement.Columns.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitKeyColumnDefinition(AStatement.Columns[LIndex]);
+				EmitKeyColumnDefinition(statement.Columns[index]);
 			}
 			AppendFormat(" {0}", Keywords.EndList);
-			EmitAlterMetaData(AStatement.AlterMetaData);
+			EmitAlterMetaData(statement.AlterMetaData);
 		}
 		
-		protected virtual void EmitDropKeyDefinition(DropKeyDefinition AStatement)
+		protected virtual void EmitDropKeyDefinition(DropKeyDefinition statement)
 		{
 			AppendFormat("{0} {1} {2} ", Keywords.Drop, Keywords.Key, Keywords.BeginList);
-			for (int LIndex = 0; LIndex < AStatement.Columns.Count; LIndex++)
+			for (int index = 0; index < statement.Columns.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitKeyColumnDefinition(AStatement.Columns[LIndex]);
+				EmitKeyColumnDefinition(statement.Columns[index]);
 			}
 			AppendFormat(" {0}", Keywords.EndList);
 		}
 		
-		protected virtual void EmitReferenceDefinitionBase(ReferenceDefinitionBase AStatement)
+		protected virtual void EmitReferenceDefinitionBase(ReferenceDefinitionBase statement)
 		{
-			if (AStatement is ReferenceDefinition)
-				EmitReferenceDefinition((ReferenceDefinition)AStatement);
-			else if (AStatement is AlterReferenceDefinition)
-				EmitAlterReferenceDefinition((AlterReferenceDefinition)AStatement);
-			else if (AStatement is DropReferenceDefinition)
-				EmitDropReferenceDefinition((DropReferenceDefinition)AStatement);
+			if (statement is ReferenceDefinition)
+				EmitReferenceDefinition((ReferenceDefinition)statement);
+			else if (statement is AlterReferenceDefinition)
+				EmitAlterReferenceDefinition((AlterReferenceDefinition)statement);
+			else if (statement is DropReferenceDefinition)
+				EmitDropReferenceDefinition((DropReferenceDefinition)statement);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 		
-		protected virtual void EmitReferenceDefinition(ReferenceDefinition AStatement)
+		protected virtual void EmitReferenceDefinition(ReferenceDefinition statement)
 		{
-			AppendFormat("{0} {1} {2} ", Keywords.Reference, AStatement.ReferenceName, Keywords.BeginList);
-			for (int LIndex = 0; LIndex < AStatement.Columns.Count; LIndex++)
+			AppendFormat("{0} {1} {2} ", Keywords.Reference, statement.ReferenceName, Keywords.BeginList);
+			for (int index = 0; index < statement.Columns.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitReferenceColumnDefinition(AStatement.Columns[LIndex]);
+				EmitReferenceColumnDefinition(statement.Columns[index]);
 			}
 			AppendFormat(" {0} ", Keywords.EndList);
-			EmitReferencesDefinition(AStatement.ReferencesDefinition);
-			EmitMetaData(AStatement.MetaData);
+			EmitReferencesDefinition(statement.ReferencesDefinition);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitCreateReferenceDefinition(ReferenceDefinition AStatement)
+		protected virtual void EmitCreateReferenceDefinition(ReferenceDefinition statement)
 		{
 			AppendFormat("{0} ", Keywords.Create);
-			EmitReferenceDefinition(AStatement);
+			EmitReferenceDefinition(statement);
 		}
 		
-		protected virtual void EmitCreateReferenceStatement(CreateReferenceStatement AStatement)
+		protected virtual void EmitCreateReferenceStatement(CreateReferenceStatement statement)
 		{
 			AppendFormat("{0} ", Keywords.Create);
-			if (AStatement.IsSession)
+			if (statement.IsSession)
 				AppendFormat("{0} ", Keywords.Session);
-			AppendFormat("{0} {1} {2} {3} ", Keywords.Reference, AStatement.ReferenceName, AStatement.TableVarName, Keywords.BeginList);
-			for (int LIndex = 0; LIndex < AStatement.Columns.Count; LIndex++)
+			AppendFormat("{0} {1} {2} {3} ", Keywords.Reference, statement.ReferenceName, statement.TableVarName, Keywords.BeginList);
+			for (int index = 0; index < statement.Columns.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitReferenceColumnDefinition(AStatement.Columns[LIndex]);
+				EmitReferenceColumnDefinition(statement.Columns[index]);
 			}
 			AppendFormat(" {0} ", Keywords.EndList);
-			EmitReferencesDefinition(AStatement.ReferencesDefinition);
-			EmitMetaData(AStatement.MetaData);
+			EmitReferencesDefinition(statement.ReferencesDefinition);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitAlterReferenceDefinition(AlterReferenceDefinition AStatement)
+		protected virtual void EmitAlterReferenceDefinition(AlterReferenceDefinition statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Reference, AStatement.ReferenceName);
-			EmitAlterMetaData(AStatement.AlterMetaData);
+			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Reference, statement.ReferenceName);
+			EmitAlterMetaData(statement.AlterMetaData);
 		}
 		
-		protected virtual void EmitAlterReferenceStatement(AlterReferenceStatement AStatement)
+		protected virtual void EmitAlterReferenceStatement(AlterReferenceStatement statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Reference, AStatement.ReferenceName);
-			EmitAlterMetaData(AStatement.AlterMetaData);
+			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Reference, statement.ReferenceName);
+			EmitAlterMetaData(statement.AlterMetaData);
 		}
 		
-		protected virtual void EmitDropReferenceDefinition(DropReferenceDefinition AStatement)
+		protected virtual void EmitDropReferenceDefinition(DropReferenceDefinition statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Reference, AStatement.ReferenceName);
+			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Reference, statement.ReferenceName);
 		}
 		
-		protected virtual void EmitDropReferenceStatement(DropReferenceStatement AStatement)
+		protected virtual void EmitDropReferenceStatement(DropReferenceStatement statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Reference, AStatement.ReferenceName);
+			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Reference, statement.ReferenceName);
 		}
 		
-		protected virtual void EmitReferencesDefinition(ReferencesDefinition AStatement)
+		protected virtual void EmitReferencesDefinition(ReferencesDefinition statement)
 		{
-			AppendFormat("{0} {1} {2} ", Keywords.References, AStatement.TableVarName, Keywords.BeginList);
-			for (int LIndex = 0; LIndex < AStatement.Columns.Count; LIndex++)
+			AppendFormat("{0} {1} {2} ", Keywords.References, statement.TableVarName, Keywords.BeginList);
+			for (int index = 0; index < statement.Columns.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitReferenceColumnDefinition(AStatement.Columns[LIndex]);
+				EmitReferenceColumnDefinition(statement.Columns[index]);
 			}
 			AppendFormat(" {0} ", Keywords.EndList);
 
-			switch (AStatement.UpdateReferenceAction)
+			switch (statement.UpdateReferenceAction)
 			{
 				case ReferenceAction.Require: AppendFormat(" {0} {1}", Keywords.Update, Keywords.Require); break;
 				case ReferenceAction.Cascade: AppendFormat(" {0} {1}", Keywords.Update, Keywords.Cascade); break;
 				case ReferenceAction.Clear: AppendFormat(" {0} {1}", Keywords.Update, Keywords.Clear); break;
 				case ReferenceAction.Set:
 					AppendFormat(" {0} {1} {2} ", Keywords.Update, Keywords.Set, Keywords.BeginList);
-					for (int LIndex = 0; LIndex < AStatement.UpdateReferenceExpressions.Count; LIndex++)
+					for (int index = 0; index < statement.UpdateReferenceExpressions.Count; index++)
 					{
-						if (LIndex > 0)
+						if (index > 0)
 							EmitListSeparator();
-						EmitExpression(AStatement.UpdateReferenceExpressions[LIndex]);
+						EmitExpression(statement.UpdateReferenceExpressions[index]);
 					}
 					AppendFormat(" {0}", Keywords.EndList);
 				break;
 			}
 
-			switch (AStatement.DeleteReferenceAction)
+			switch (statement.DeleteReferenceAction)
 			{
 				case ReferenceAction.Require: AppendFormat(" {0} {1}", Keywords.Delete, Keywords.Require); break;
 				case ReferenceAction.Cascade: AppendFormat(" {0} {1}", Keywords.Delete, Keywords.Cascade); break;
 				case ReferenceAction.Clear: AppendFormat(" {0} {1}", Keywords.Delete, Keywords.Clear); break;
 				case ReferenceAction.Set:
 					AppendFormat(" {0} {1} {2} ", Keywords.Delete, Keywords.Set, Keywords.BeginList);
-					for (int LIndex = 0; LIndex < AStatement.DeleteReferenceExpressions.Count; LIndex++)
+					for (int index = 0; index < statement.DeleteReferenceExpressions.Count; index++)
 					{
-						if (LIndex > 0)
+						if (index > 0)
 							EmitListSeparator();
-						EmitExpression(AStatement.DeleteReferenceExpressions[LIndex]);
+						EmitExpression(statement.DeleteReferenceExpressions[index]);
 					}
 					AppendFormat(" {0}", Keywords.EndList);
 				break;
 			}
 		}
 		
-		protected virtual void EmitOrderDefinitionBase(OrderDefinitionBase AStatement)
+		protected virtual void EmitOrderDefinitionBase(OrderDefinitionBase statement)
 		{
-			if (AStatement is OrderDefinition)
-				EmitOrderDefinition((OrderDefinition)AStatement);
-			else if (AStatement is AlterOrderDefinition)
-				EmitAlterOrderDefinition((AlterOrderDefinition)AStatement);
-			else if (AStatement is DropOrderDefinition)
-				EmitDropOrderDefinition((DropOrderDefinition)AStatement);
+			if (statement is OrderDefinition)
+				EmitOrderDefinition((OrderDefinition)statement);
+			else if (statement is AlterOrderDefinition)
+				EmitAlterOrderDefinition((AlterOrderDefinition)statement);
+			else if (statement is DropOrderDefinition)
+				EmitDropOrderDefinition((DropOrderDefinition)statement);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 		
-		protected virtual void EmitOrderDefinition(OrderDefinition AStatement)
+		protected virtual void EmitOrderDefinition(OrderDefinition statement)
 		{
 			AppendFormat("{0} {1} ", Keywords.Order, Keywords.BeginList);
-			for (int LIndex = 0; LIndex < AStatement.Columns.Count; LIndex++)
+			for (int index = 0; index < statement.Columns.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitOrderColumnDefinition(AStatement.Columns[LIndex]);
+				EmitOrderColumnDefinition(statement.Columns[index]);
 			}
 			AppendFormat(" {0}", Keywords.EndList);
-			EmitMetaData(AStatement.MetaData);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitCreateOrderDefinition(OrderDefinition AStatement)
+		protected virtual void EmitCreateOrderDefinition(OrderDefinition statement)
 		{
 			AppendFormat("{0} ", Keywords.Create);
-			EmitOrderDefinition(AStatement);
+			EmitOrderDefinition(statement);
 		}
 		
-		protected virtual void EmitAlterOrderDefinition(AlterOrderDefinition AStatement)
+		protected virtual void EmitAlterOrderDefinition(AlterOrderDefinition statement)
 		{
 			AppendFormat("{0} {1} {2} ", Keywords.Alter, Keywords.Order, Keywords.BeginList);
-			for (int LIndex = 0; LIndex < AStatement.Columns.Count; LIndex++)
+			for (int index = 0; index < statement.Columns.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitOrderColumnDefinition(AStatement.Columns[LIndex]);
+				EmitOrderColumnDefinition(statement.Columns[index]);
 			}
 			AppendFormat(" {0}", Keywords.EndList);
-			EmitAlterMetaData(AStatement.AlterMetaData);
+			EmitAlterMetaData(statement.AlterMetaData);
 		}
 		
-		protected virtual void EmitDropOrderDefinition(DropOrderDefinition AStatement)
+		protected virtual void EmitDropOrderDefinition(DropOrderDefinition statement)
 		{
 			AppendFormat("{0} {1} {2} ", Keywords.Drop, Keywords.Order, Keywords.BeginList);
-			for (int LIndex = 0; LIndex < AStatement.Columns.Count; LIndex++)
+			for (int index = 0; index < statement.Columns.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitOrderColumnDefinition(AStatement.Columns[LIndex]);
+				EmitOrderColumnDefinition(statement.Columns[index]);
 			}
 			AppendFormat(" {0}", Keywords.EndList);
 		}
 		
-		protected virtual void EmitConstraintDefinitionBase(ConstraintDefinitionBase AStatement)
+		protected virtual void EmitConstraintDefinitionBase(ConstraintDefinitionBase statement)
 		{
-			if (AStatement is ConstraintDefinition)
-				EmitConstraintDefinition((ConstraintDefinition)AStatement);
-			else if (AStatement is AlterConstraintDefinition)
-				EmitAlterConstraintDefinition((AlterConstraintDefinition)AStatement);
-			else if (AStatement is DropConstraintDefinition)
-				EmitDropConstraintDefinition((DropConstraintDefinition)AStatement);
+			if (statement is ConstraintDefinition)
+				EmitConstraintDefinition((ConstraintDefinition)statement);
+			else if (statement is AlterConstraintDefinition)
+				EmitAlterConstraintDefinition((AlterConstraintDefinition)statement);
+			else if (statement is DropConstraintDefinition)
+				EmitDropConstraintDefinition((DropConstraintDefinition)statement);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 		
-		protected virtual void EmitConstraintDefinition(ConstraintDefinition AStatement)
+		protected virtual void EmitConstraintDefinition(ConstraintDefinition statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Constraint, AStatement.ConstraintName, Keywords.BeginGroup);
-			EmitExpression(AStatement.Expression);
+			AppendFormat("{0} {1} {2}", Keywords.Constraint, statement.ConstraintName, Keywords.BeginGroup);
+			EmitExpression(statement.Expression);
 			AppendFormat("{0}", Keywords.EndGroup);
-			EmitMetaData(AStatement.MetaData);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitCreateConstraintDefinition(CreateConstraintDefinition AStatement)
+		protected virtual void EmitCreateConstraintDefinition(CreateConstraintDefinition statement)
 		{
-			if (AStatement is ConstraintDefinition)
-				EmitConstraintDefinition((ConstraintDefinition)AStatement);
+			if (statement is ConstraintDefinition)
+				EmitConstraintDefinition((ConstraintDefinition)statement);
 			else
-				EmitTransitionConstraintDefinition((TransitionConstraintDefinition)AStatement);
+				EmitTransitionConstraintDefinition((TransitionConstraintDefinition)statement);
 		}
 		
-		protected virtual void EmitTransitionConstraintDefinition(TransitionConstraintDefinition AStatement)
+		protected virtual void EmitTransitionConstraintDefinition(TransitionConstraintDefinition statement)
 		{
-			AppendFormat("{0} {1} {2} ", Keywords.Transition, Keywords.Constraint, AStatement.ConstraintName);
+			AppendFormat("{0} {1} {2} ", Keywords.Transition, Keywords.Constraint, statement.ConstraintName);
 			IncreaseIndent();
-			if (AStatement.OnInsertExpression != null)
+			if (statement.OnInsertExpression != null)
 			{
 				NewLine();
 				Indent();
 				AppendFormat("{0} {1} ", Keywords.On, Keywords.Insert);
-				EmitExpression(AStatement.OnInsertExpression);
+				EmitExpression(statement.OnInsertExpression);
 			}
-			if (AStatement.OnUpdateExpression != null)
+			if (statement.OnUpdateExpression != null)
 			{
 				NewLine();
 				Indent();
 				AppendFormat("{0} {1} ", Keywords.On, Keywords.Update);
-				EmitExpression(AStatement.OnUpdateExpression);
+				EmitExpression(statement.OnUpdateExpression);
 			}
-			if (AStatement.OnDeleteExpression != null)
+			if (statement.OnDeleteExpression != null)
 			{
 				NewLine();
 				Indent();
 				AppendFormat("{0} {1} ", Keywords.On, Keywords.Delete);
-				EmitExpression(AStatement.OnDeleteExpression);
+				EmitExpression(statement.OnDeleteExpression);
 			}
 			NewLine();
 			Indent();
-			EmitMetaData(AStatement.MetaData);
+			EmitMetaData(statement.MetaData);
 			DecreaseIndent();
 		}
 		
-		protected virtual void EmitCreateConstraintDefinition(ConstraintDefinition AStatement)
+		protected virtual void EmitCreateConstraintDefinition(ConstraintDefinition statement)
 		{
 			AppendFormat("{0} ", Keywords.Create);
-			EmitConstraintDefinition(AStatement);
+			EmitConstraintDefinition(statement);
 		}
 		
-		protected virtual void EmitCreateCreateConstraintDefinition(CreateConstraintDefinition AStatement)
+		protected virtual void EmitCreateCreateConstraintDefinition(CreateConstraintDefinition statement)
 		{
 			AppendFormat("{0} ", Keywords.Create);
-			EmitCreateConstraintDefinition(AStatement);
+			EmitCreateConstraintDefinition(statement);
 		}
 		
-		protected virtual void EmitCreateConstraintStatement(CreateConstraintStatement AStatement)
+		protected virtual void EmitCreateConstraintStatement(CreateConstraintStatement statement)
 		{
 			AppendFormat("{0} ", Keywords.Create);
-			if (AStatement.IsSession)
+			if (statement.IsSession)
 				AppendFormat("{0} ", Keywords.Session);
-			AppendFormat("{0} {1} {2}", Keywords.Constraint, AStatement.ConstraintName, Keywords.BeginGroup);
-			EmitExpression(AStatement.Expression);
+			AppendFormat("{0} {1} {2}", Keywords.Constraint, statement.ConstraintName, Keywords.BeginGroup);
+			EmitExpression(statement.Expression);
 			AppendFormat("{0}", Keywords.EndGroup);
-			EmitMetaData(AStatement.MetaData);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitAlterConstraintDefinitionBase(AlterConstraintDefinitionBase AStatement)
+		protected virtual void EmitAlterConstraintDefinitionBase(AlterConstraintDefinitionBase statement)
 		{
-			if (AStatement is AlterConstraintDefinition)
-				EmitAlterConstraintDefinition((AlterConstraintDefinition)AStatement);
+			if (statement is AlterConstraintDefinition)
+				EmitAlterConstraintDefinition((AlterConstraintDefinition)statement);
 			else
-				EmitAlterTransitionConstraintDefinition((AlterTransitionConstraintDefinition)AStatement);
+				EmitAlterTransitionConstraintDefinition((AlterTransitionConstraintDefinition)statement);
 		}
 		
-		protected virtual void EmitAlterConstraintDefinition(AlterConstraintDefinition AStatement)
+		protected virtual void EmitAlterConstraintDefinition(AlterConstraintDefinition statement)
 		{
 			AppendFormat("{0} ", Keywords.Alter);
-			AppendFormat("{0} {1}", Keywords.Constraint, AStatement.ConstraintName);
-			if (AStatement.Expression != null)
+			AppendFormat("{0} {1}", Keywords.Constraint, statement.ConstraintName);
+			if (statement.Expression != null)
 			{
 				AppendFormat(" {0}", Keywords.BeginGroup);
-				EmitExpression(AStatement.Expression);
+				EmitExpression(statement.Expression);
 				AppendFormat("{0}", Keywords.EndGroup);
 			}
-			EmitAlterMetaData(AStatement.AlterMetaData);
+			EmitAlterMetaData(statement.AlterMetaData);
 		}
 		
-		protected virtual void EmitAlterTransitionConstraintDefinitionItem(string ATransition, AlterTransitionConstraintDefinitionItemBase AItem)
+		protected virtual void EmitAlterTransitionConstraintDefinitionItem(string transition, AlterTransitionConstraintDefinitionItemBase item)
 		{
-			if (AItem is AlterTransitionConstraintDefinitionCreateItem)
+			if (item is AlterTransitionConstraintDefinitionCreateItem)
 			{
 				NewLine();
 				Indent();
-				AppendFormat("{0} {1} {2} ", Keywords.Create, Keywords.On, ATransition);
-				EmitExpression(((AlterTransitionConstraintDefinitionCreateItem)AItem).Expression);
+				AppendFormat("{0} {1} {2} ", Keywords.Create, Keywords.On, transition);
+				EmitExpression(((AlterTransitionConstraintDefinitionCreateItem)item).Expression);
 			}
-			else if (AItem is AlterTransitionConstraintDefinitionAlterItem)
+			else if (item is AlterTransitionConstraintDefinitionAlterItem)
 			{
 				NewLine();
 				Indent();
-				AppendFormat("{0} {1} {2} ", Keywords.Alter, Keywords.On, ATransition);
-				EmitExpression(((AlterTransitionConstraintDefinitionAlterItem)AItem).Expression);
+				AppendFormat("{0} {1} {2} ", Keywords.Alter, Keywords.On, transition);
+				EmitExpression(((AlterTransitionConstraintDefinitionAlterItem)item).Expression);
 			}
-			else if (AItem is AlterTransitionConstraintDefinitionDropItem)
+			else if (item is AlterTransitionConstraintDefinitionDropItem)
 			{
 				NewLine();
 				Indent();
-				AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.On, ATransition);
+				AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.On, transition);
 			}
 		}
 		
-		protected virtual void EmitAlterTransitionConstraintDefinition(AlterTransitionConstraintDefinition AStatement)
+		protected virtual void EmitAlterTransitionConstraintDefinition(AlterTransitionConstraintDefinition statement)
 		{
-			AppendFormat("{0} {1} {2} {3}", Keywords.Alter, Keywords.Transition, Keywords.Constraint, AStatement.ConstraintName);
+			AppendFormat("{0} {1} {2} {3}", Keywords.Alter, Keywords.Transition, Keywords.Constraint, statement.ConstraintName);
 			IncreaseIndent();
-			EmitAlterTransitionConstraintDefinitionItem(Keywords.Insert, AStatement.OnInsert);
-			EmitAlterTransitionConstraintDefinitionItem(Keywords.Update, AStatement.OnUpdate);
-			EmitAlterTransitionConstraintDefinitionItem(Keywords.Delete, AStatement.OnDelete);
-			if (AStatement.AlterMetaData != null)
+			EmitAlterTransitionConstraintDefinitionItem(Keywords.Insert, statement.OnInsert);
+			EmitAlterTransitionConstraintDefinitionItem(Keywords.Update, statement.OnUpdate);
+			EmitAlterTransitionConstraintDefinitionItem(Keywords.Delete, statement.OnDelete);
+			if (statement.AlterMetaData != null)
 			{
 				NewLine();
 				Indent();
-				EmitAlterMetaData(AStatement.AlterMetaData);
+				EmitAlterMetaData(statement.AlterMetaData);
 			}
 			DecreaseIndent();
 			NewLine();
 			Indent();
 		}
 		
-		protected virtual void EmitAlterConstraintStatement(AlterConstraintStatement AStatement)
+		protected virtual void EmitAlterConstraintStatement(AlterConstraintStatement statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Constraint, AStatement.ConstraintName);
-			if (AStatement.Expression != null)
+			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Constraint, statement.ConstraintName);
+			if (statement.Expression != null)
 			{
 				AppendFormat(" {0}", Keywords.BeginGroup);
-				EmitExpression(AStatement.Expression);
+				EmitExpression(statement.Expression);
 				AppendFormat("{0}", Keywords.EndGroup);
 			}
-			EmitAlterMetaData(AStatement.AlterMetaData);
+			EmitAlterMetaData(statement.AlterMetaData);
 		}
 		
-		protected virtual void EmitDropConstraintDefinition(DropConstraintDefinition AStatement)
+		protected virtual void EmitDropConstraintDefinition(DropConstraintDefinition statement)
 		{
 			AppendFormat("{0} ", Keywords.Drop);
-			if (AStatement.IsTransition)
+			if (statement.IsTransition)
 				AppendFormat("{0} ", Keywords.Transition);
-			AppendFormat("{0} {1}", Keywords.Constraint, AStatement.ConstraintName);
+			AppendFormat("{0} {1}", Keywords.Constraint, statement.ConstraintName);
 		}
 		
-		protected virtual void EmitDropConstraintStatement(DropConstraintStatement AStatement)
+		protected virtual void EmitDropConstraintStatement(DropConstraintStatement statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Constraint, AStatement.ConstraintName);
+			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Constraint, statement.ConstraintName);
 		}
 		
-		protected virtual void EmitAttachStatementBase(AttachStatementBase AStatement)
+		protected virtual void EmitAttachStatementBase(AttachStatementBase statement)
 		{
-			if (AStatement is AttachStatement)
-				EmitAttachStatement((AttachStatement)AStatement);
-			else if (AStatement is InvokeStatement)
-				EmitInvokeStatement((InvokeStatement)AStatement);
-			else if (AStatement is DetachStatement)
-				EmitDetachStatement((DetachStatement)AStatement);
+			if (statement is AttachStatement)
+				EmitAttachStatement((AttachStatement)statement);
+			else if (statement is InvokeStatement)
+				EmitInvokeStatement((InvokeStatement)statement);
+			else if (statement is DetachStatement)
+				EmitDetachStatement((DetachStatement)statement);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 		
-		protected virtual void EmitAttachStatement(AttachStatement AStatement)
+		protected virtual void EmitAttachStatement(AttachStatement statement)
 		{
-			AppendFormat("{0} {1} {2} ", Keywords.Attach, AStatement.OperatorName, Keywords.To);
-			EmitEventSourceSpecifier(AStatement.EventSourceSpecifier);
+			AppendFormat("{0} {1} {2} ", Keywords.Attach, statement.OperatorName, Keywords.To);
+			EmitEventSourceSpecifier(statement.EventSourceSpecifier);
 			Append(" ");
-			EmitEventSpecifier(AStatement.EventSpecifier);
+			EmitEventSpecifier(statement.EventSpecifier);
 			Append(" ");
-			if (AStatement.BeforeOperatorNames.Count > 0)
+			if (statement.BeforeOperatorNames.Count > 0)
 			{
 				AppendFormat("{0} {1} ", Keywords.Before, Keywords.BeginList);
-				for (int LIndex = 0; LIndex < AStatement.BeforeOperatorNames.Count; LIndex++)
+				for (int index = 0; index < statement.BeforeOperatorNames.Count; index++)
 				{
-					if (LIndex > 1)
+					if (index > 1)
 						EmitListSeparator();
-					Append(AStatement.BeforeOperatorNames[LIndex]);
+					Append(statement.BeforeOperatorNames[index]);
 				}
 				AppendFormat(" {0}", Keywords.EndList);
 			}
-			EmitMetaData(AStatement.MetaData);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitInvokeStatement(InvokeStatement AStatement)
+		protected virtual void EmitInvokeStatement(InvokeStatement statement)
 		{	
-			AppendFormat("{0} {1} {2} ", Keywords.Invoke, AStatement.OperatorName, Keywords.On);
-			EmitEventSourceSpecifier(AStatement.EventSourceSpecifier);
+			AppendFormat("{0} {1} {2} ", Keywords.Invoke, statement.OperatorName, Keywords.On);
+			EmitEventSourceSpecifier(statement.EventSourceSpecifier);
 			Append(" ");
-			EmitEventSpecifier(AStatement.EventSpecifier);
+			EmitEventSpecifier(statement.EventSpecifier);
 			AppendFormat("{0} {1} ", Keywords.Before, Keywords.BeginList);
-			for (int LIndex = 0; LIndex < AStatement.BeforeOperatorNames.Count; LIndex++)
+			for (int index = 0; index < statement.BeforeOperatorNames.Count; index++)
 			{
-				if (LIndex > 1)
+				if (index > 1)
 					EmitListSeparator();
-				Append(AStatement.BeforeOperatorNames[LIndex]);
+				Append(statement.BeforeOperatorNames[index]);
 			}
 			AppendFormat(" {0}", Keywords.EndList);
 		}
 		
-		protected virtual void EmitDetachStatement(DetachStatement AStatement)
+		protected virtual void EmitDetachStatement(DetachStatement statement)
 		{
-			AppendFormat("{0} {1} {2} ", Keywords.Detach, AStatement.OperatorName, Keywords.From);
-			EmitEventSourceSpecifier(AStatement.EventSourceSpecifier);
+			AppendFormat("{0} {1} {2} ", Keywords.Detach, statement.OperatorName, Keywords.From);
+			EmitEventSourceSpecifier(statement.EventSourceSpecifier);
 			Append(" ");
-			EmitEventSpecifier(AStatement.EventSpecifier);
+			EmitEventSpecifier(statement.EventSpecifier);
 		}
 		
-		protected virtual void EmitEventSourceSpecifier(EventSourceSpecifier AStatement)
+		protected virtual void EmitEventSourceSpecifier(EventSourceSpecifier statement)
 		{
-			if (AStatement is ObjectEventSourceSpecifier)
-				EmitObjectEventSourceSpecifier((ObjectEventSourceSpecifier)AStatement);
-			else if (AStatement is ColumnEventSourceSpecifier)
-				EmitColumnEventSourceSpecifier((ColumnEventSourceSpecifier)AStatement);
+			if (statement is ObjectEventSourceSpecifier)
+				EmitObjectEventSourceSpecifier((ObjectEventSourceSpecifier)statement);
+			else if (statement is ColumnEventSourceSpecifier)
+				EmitColumnEventSourceSpecifier((ColumnEventSourceSpecifier)statement);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 		
-		protected virtual void EmitObjectEventSourceSpecifier(ObjectEventSourceSpecifier AStatement)
+		protected virtual void EmitObjectEventSourceSpecifier(ObjectEventSourceSpecifier statement)
 		{
-			Append(AStatement.ObjectName);
+			Append(statement.ObjectName);
 		}
 		
-		protected virtual void EmitColumnEventSourceSpecifier(ColumnEventSourceSpecifier AStatement)
+		protected virtual void EmitColumnEventSourceSpecifier(ColumnEventSourceSpecifier statement)
 		{
-			AppendFormat("{0} {1} {2}", AStatement.ColumnName, Keywords.In, AStatement.TableVarName);
+			AppendFormat("{0} {1} {2}", statement.ColumnName, Keywords.In, statement.TableVarName);
 		}
 		
-		protected virtual void EmitEventSpecifier(EventSpecifier AStatement)
+		protected virtual void EmitEventSpecifier(EventSpecifier statement)
 		{
 			AppendFormat("{0} {1} ", Keywords.On, Keywords.BeginList);
-			bool LFirst = true;
-			if ((AStatement.EventType & EventType.BeforeInsert) != 0)
+			bool first = true;
+			if ((statement.EventType & EventType.BeforeInsert) != 0)
 			{
-				if (!LFirst)
+				if (!first)
 					EmitListSeparator();
 				else
-					LFirst = false;
+					first = false;
 				AppendFormat("{0} {1}", Keywords.Before, Keywords.Insert);
 			}
 
-			if ((AStatement.EventType & EventType.BeforeUpdate) != 0)
+			if ((statement.EventType & EventType.BeforeUpdate) != 0)
 			{
-				if (!LFirst)
+				if (!first)
 					EmitListSeparator();
 				else
-					LFirst = false;
+					first = false;
 				AppendFormat("{0} {1}", Keywords.Before, Keywords.Update);
 			}
 
-			if ((AStatement.EventType & EventType.BeforeDelete) != 0)
+			if ((statement.EventType & EventType.BeforeDelete) != 0)
 			{
-				if (!LFirst)
+				if (!first)
 					EmitListSeparator();
 				else
-					LFirst = false;
+					first = false;
 				AppendFormat("{0} {1}", Keywords.Before, Keywords.Delete);
 			}
 
-			if ((AStatement.EventType & EventType.AfterInsert) != 0)
+			if ((statement.EventType & EventType.AfterInsert) != 0)
 			{
-				if (!LFirst)
+				if (!first)
 					EmitListSeparator();
 				else
-					LFirst = false;
+					first = false;
 				AppendFormat("{0} {1}", Keywords.After, Keywords.Insert);
 			}
 
-			if ((AStatement.EventType & EventType.AfterUpdate) != 0)
+			if ((statement.EventType & EventType.AfterUpdate) != 0)
 			{
-				if (!LFirst)
+				if (!first)
 					EmitListSeparator();
 				else
-					LFirst = false;
+					first = false;
 				AppendFormat("{0} {1}", Keywords.After, Keywords.Update);
 			}
 
-			if ((AStatement.EventType & EventType.AfterDelete) != 0)
+			if ((statement.EventType & EventType.AfterDelete) != 0)
 			{
-				if (!LFirst)
+				if (!first)
 					EmitListSeparator();
 				else
-					LFirst = false;
+					first = false;
 				AppendFormat("{0} {1}", Keywords.After, Keywords.Delete);
 			}
 
-			if ((AStatement.EventType & EventType.Default) != 0)
+			if ((statement.EventType & EventType.Default) != 0)
 			{
-				if (!LFirst)
+				if (!first)
 					EmitListSeparator();
 				else
-					LFirst = false;
+					first = false;
 				Append(Keywords.Default);
 			}
 
-			if ((AStatement.EventType & EventType.Change) != 0)
+			if ((statement.EventType & EventType.Change) != 0)
 			{
-				if (!LFirst)
+				if (!first)
 					EmitListSeparator();
 				else
-					LFirst = false;
+					first = false;
 				Append(Keywords.Change);
 			}
 
-			if ((AStatement.EventType & EventType.Validate) != 0)
+			if ((statement.EventType & EventType.Validate) != 0)
 			{
-				if (!LFirst)
+				if (!first)
 					EmitListSeparator();
 				else
-					LFirst = false;
+					first = false;
 				Append(Keywords.Validate);
 			}
 			AppendFormat(" {0}", Keywords.EndList);
 		}
 		
-		protected virtual void EmitRightStatementBase(RightStatementBase AStatement)
+		protected virtual void EmitRightStatementBase(RightStatementBase statement)
 		{
-			if (AStatement is GrantStatement)
-				EmitGrantStatement((GrantStatement)AStatement);
-			else if (AStatement is RevokeStatement)
-				EmitRevokeStatement((RevokeStatement)AStatement);
-			else if (AStatement is RevertStatement)
-				EmitRevertStatement((RevertStatement)AStatement);
+			if (statement is GrantStatement)
+				EmitGrantStatement((GrantStatement)statement);
+			else if (statement is RevokeStatement)
+				EmitRevokeStatement((RevokeStatement)statement);
+			else if (statement is RevertStatement)
+				EmitRevertStatement((RevertStatement)statement);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 		
-		protected virtual void EmitGrantStatement(GrantStatement AStatement)
+		protected virtual void EmitGrantStatement(GrantStatement statement)
 		{
 			AppendFormat("{0} ", Keywords.Grant);
-			EmitRightSpecifier(AStatement);
-			if (AStatement.Target != null)
+			EmitRightSpecifier(statement);
+			if (statement.Target != null)
 			{
 				AppendFormat(" {0} ", Keywords.On);
-				EmitCatalogObjectSpecifier(AStatement.Target);
+				EmitCatalogObjectSpecifier(statement.Target);
 			}
 			AppendFormat(" {0} ", Keywords.To);
-			EmitSecuritySpecifier(AStatement);
+			EmitSecuritySpecifier(statement);
 		}
 		
-		protected virtual void EmitRevokeStatement(RevokeStatement AStatement)
+		protected virtual void EmitRevokeStatement(RevokeStatement statement)
 		{
 			AppendFormat("{0} ", Keywords.Revoke);
-			EmitRightSpecifier(AStatement);
-			if (AStatement.Target != null)
+			EmitRightSpecifier(statement);
+			if (statement.Target != null)
 			{
 				AppendFormat(" {0} ", Keywords.On);
-				EmitCatalogObjectSpecifier(AStatement.Target);
+				EmitCatalogObjectSpecifier(statement.Target);
 			}
 			AppendFormat(" {0} ", Keywords.From);
-			EmitSecuritySpecifier(AStatement);
+			EmitSecuritySpecifier(statement);
 		}
 		
-		protected virtual void EmitRevertStatement(RevertStatement AStatement)
+		protected virtual void EmitRevertStatement(RevertStatement statement)
 		{
 			AppendFormat("{0} ", Keywords.Revert);
-			EmitRightSpecifier(AStatement);
-			if (AStatement.Target != null)
+			EmitRightSpecifier(statement);
+			if (statement.Target != null)
 			{
 				AppendFormat(" {0} ", Keywords.On);
-				EmitCatalogObjectSpecifier(AStatement.Target);
+				EmitCatalogObjectSpecifier(statement.Target);
 			}
 			AppendFormat(" {0} ", Keywords.For);
-			EmitSecuritySpecifier(AStatement);
+			EmitSecuritySpecifier(statement);
 		}
 		
-		protected virtual void EmitRightSpecifier(RightStatementBase AStatement)
+		protected virtual void EmitRightSpecifier(RightStatementBase statement)
 		{
-			switch (AStatement.RightType)
+			switch (statement.RightType)
 			{
 				case RightSpecifierType.All : Append(Keywords.All); break;
 				case RightSpecifierType.Usage : Append(Keywords.Usage); break;
 				default:
 					AppendFormat("{0} ", Keywords.BeginList);
-					for (int LIndex = 0; LIndex < AStatement.Rights.Count; LIndex++)
+					for (int index = 0; index < statement.Rights.Count; index++)
 					{
-						if (LIndex > 0)
+						if (index > 0)
 							AppendFormat("{0} ", Keywords.ListSeparator);
-						Append(AStatement.Rights[LIndex].RightName);
+						Append(statement.Rights[index].RightName);
 					}
 					AppendFormat(" {0}", Keywords.EndList);
 				break;
 			}
 		}
 		
-		protected virtual void EmitCatalogObjectSpecifier(CatalogObjectSpecifier ASpecifier)
+		protected virtual void EmitCatalogObjectSpecifier(CatalogObjectSpecifier specifier)
 		{
-			if (ASpecifier.IsOperator)
-				EmitOperatorSpecifier(ASpecifier.ObjectName, ASpecifier.FormalParameterSpecifiers);
+			if (specifier.IsOperator)
+				EmitOperatorSpecifier(specifier.ObjectName, specifier.FormalParameterSpecifiers);
 			else
-				Append(ASpecifier.ObjectName);
+				Append(specifier.ObjectName);
 		}
 		
-		protected virtual void EmitSecuritySpecifier(RightStatementBase AStatement)
+		protected virtual void EmitSecuritySpecifier(RightStatementBase statement)
 		{
-			switch (AStatement.GranteeType)
+			switch (statement.GranteeType)
 			{
 				case GranteeType.User :
-					AppendFormat(@"{0} ""{1}""i", Keywords.User, AStatement.Grantee.Replace(@"""", @""""""));
+					AppendFormat(@"{0} ""{1}""i", Keywords.User, statement.Grantee.Replace(@"""", @""""""));
 				break;
 				
 				case GranteeType.Role :
-					AppendFormat(@"{0} {1}", Keywords.Role, AStatement.Grantee);
-					if (AStatement.IsInherited)
+					AppendFormat(@"{0} {1}", Keywords.Role, statement.Grantee);
+					if (statement.IsInherited)
 						AppendFormat(" {0}", Keywords.Inherited);
 				break;
 				
 				case GranteeType.Group :
-					AppendFormat(@"{0} ""{1}""i", Keywords.Group, AStatement.Grantee.Replace(@"""", @""""""));
-					if (AStatement.IsInherited)
+					AppendFormat(@"{0} ""{1}""i", Keywords.Group, statement.Grantee.Replace(@"""", @""""""));
+					if (statement.IsInherited)
 						AppendFormat(" {0}", Keywords.Inherited);
-					if (AStatement.ApplyRecursively)
+					if (statement.ApplyRecursively)
 						AppendFormat(" {0} {1}", Keywords.Apply, Keywords.Recursively);
-					if (AStatement.IncludeUsers)
+					if (statement.IncludeUsers)
 						AppendFormat(" {0} {1}", Keywords.Include, Keywords.Users);
 				break;
 			}
 		}
 		
-		protected virtual void EmitDefaultDefinitionBase(DefaultDefinitionBase AStatement)
+		protected virtual void EmitDefaultDefinitionBase(DefaultDefinitionBase statement)
 		{
-			if (AStatement is DefaultDefinition)
-				EmitDefaultDefinition((DefaultDefinition)AStatement);
-			else if (AStatement is AlterDefaultDefinition)
-				EmitAlterDefaultDefinition((AlterDefaultDefinition)AStatement);
-			else if (AStatement is DropDefaultDefinition)
-				EmitDropDefaultDefinition((DropDefaultDefinition)AStatement);
+			if (statement is DefaultDefinition)
+				EmitDefaultDefinition((DefaultDefinition)statement);
+			else if (statement is AlterDefaultDefinition)
+				EmitAlterDefaultDefinition((AlterDefaultDefinition)statement);
+			else if (statement is DropDefaultDefinition)
+				EmitDropDefaultDefinition((DropDefaultDefinition)statement);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 		
-		protected virtual void EmitSortDefinition(SortDefinition AStatement)
+		protected virtual void EmitSortDefinition(SortDefinition statement)
 		{
 			AppendFormat("{0} ", Keywords.Sort);
-			EmitExpression(AStatement.Expression);
+			EmitExpression(statement.Expression);
 		}
 		
-		protected virtual void EmitCreateSortStatement(CreateSortStatement AStatement)
+		protected virtual void EmitCreateSortStatement(CreateSortStatement statement)
 		{
-			AppendFormat("{0} {1} {2} {3} ", Keywords.Create, Keywords.Sort, AStatement.ScalarTypeName, Keywords.Using);
-			EmitExpression(AStatement.Expression);
-			EmitMetaData(AStatement.MetaData);
+			AppendFormat("{0} {1} {2} {3} ", Keywords.Create, Keywords.Sort, statement.ScalarTypeName, Keywords.Using);
+			EmitExpression(statement.Expression);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitAlterSortStatement(AlterSortStatement AStatement)
+		protected virtual void EmitAlterSortStatement(AlterSortStatement statement)
 		{
-			AppendFormat("{0} {1} {2} ", Keywords.Alter, Keywords.Sort, AStatement.ScalarTypeName);
-			if (AStatement.Expression != null)
+			AppendFormat("{0} {1} {2} ", Keywords.Alter, Keywords.Sort, statement.ScalarTypeName);
+			if (statement.Expression != null)
 			{
 				AppendFormat("{0} ", Keywords.Using);
-				EmitExpression(AStatement.Expression);
+				EmitExpression(statement.Expression);
 			}
-			EmitAlterMetaData(AStatement.AlterMetaData);
+			EmitAlterMetaData(statement.AlterMetaData);
 		}
 		
-		protected virtual void EmitDropSortStatement(DropSortStatement AStatement)
+		protected virtual void EmitDropSortStatement(DropSortStatement statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Sort, AStatement.ScalarTypeName);
+			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Sort, statement.ScalarTypeName);
 		}
 		
-		protected virtual void EmitCreateRoleStatement(CreateRoleStatement AStatement)
+		protected virtual void EmitCreateRoleStatement(CreateRoleStatement statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Create, Keywords.Role, AStatement.RoleName);
-			EmitMetaData(AStatement.MetaData);
+			AppendFormat("{0} {1} {2}", Keywords.Create, Keywords.Role, statement.RoleName);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitAlterRoleStatement(AlterRoleStatement AStatement)
+		protected virtual void EmitAlterRoleStatement(AlterRoleStatement statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Role, AStatement.RoleName);
-			EmitAlterMetaData(AStatement.AlterMetaData);
+			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Role, statement.RoleName);
+			EmitAlterMetaData(statement.AlterMetaData);
 		}
 		
-		protected virtual void EmitDropRoleStatement(DropRoleStatement AStatement)
+		protected virtual void EmitDropRoleStatement(DropRoleStatement statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Role, AStatement.RoleName);
+			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Role, statement.RoleName);
 		}
 		
-		protected virtual void EmitCreateRightStatement(CreateRightStatement AStatement)
+		protected virtual void EmitCreateRightStatement(CreateRightStatement statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Create, Keywords.Right, AStatement.RightName);
+			AppendFormat("{0} {1} {2}", Keywords.Create, Keywords.Right, statement.RightName);
 		}
 		
-		protected virtual void EmitDropRightStatement(DropRightStatement AStatement)
+		protected virtual void EmitDropRightStatement(DropRightStatement statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Right, AStatement.RightName);
+			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Right, statement.RightName);
 		}
 		
-		protected virtual void EmitCreateConversionStatement(CreateConversionStatement AStatement)
+		protected virtual void EmitCreateConversionStatement(CreateConversionStatement statement)
 		{
 			AppendFormat("{0} {1} ", Keywords.Create, Keywords.Conversion);
-			EmitTypeSpecifier(AStatement.SourceScalarTypeName);
+			EmitTypeSpecifier(statement.SourceScalarTypeName);
 			AppendFormat(" {0} ", Keywords.To);
-			EmitTypeSpecifier(AStatement.TargetScalarTypeName);
+			EmitTypeSpecifier(statement.TargetScalarTypeName);
 			AppendFormat(" {0} ", Keywords.Using);
-			EmitIdentifierExpression(AStatement.OperatorName);
-			AppendFormat(" {0}", AStatement.IsNarrowing ? Keywords.Narrowing : Keywords.Widening);
-			EmitMetaData(AStatement.MetaData);
+			EmitIdentifierExpression(statement.OperatorName);
+			AppendFormat(" {0}", statement.IsNarrowing ? Keywords.Narrowing : Keywords.Widening);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitDropConversionStatement(DropConversionStatement AStatement)
+		protected virtual void EmitDropConversionStatement(DropConversionStatement statement)
 		{
 			AppendFormat("{0} {1} ", Keywords.Drop, Keywords.Conversion);
-			EmitTypeSpecifier(AStatement.SourceScalarTypeName);
+			EmitTypeSpecifier(statement.SourceScalarTypeName);
 			AppendFormat(" {0} ", Keywords.To);
-			EmitTypeSpecifier(AStatement.TargetScalarTypeName);
+			EmitTypeSpecifier(statement.TargetScalarTypeName);
 		}
 		
-		protected virtual void EmitDefaultDefinition(DefaultDefinition AStatement)
+		protected virtual void EmitDefaultDefinition(DefaultDefinition statement)
 		{
 			AppendFormat("{0} {1}", Keywords.Default, Keywords.BeginGroup);
-			EmitExpression(AStatement.Expression);
+			EmitExpression(statement.Expression);
 			AppendFormat("{0}", Keywords.EndGroup);
-			EmitMetaData(AStatement.MetaData);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitCreateDefaultDefinition(DefaultDefinition AStatement)
+		protected virtual void EmitCreateDefaultDefinition(DefaultDefinition statement)
 		{
 			AppendFormat("{0} ", Keywords.Create);
-			EmitDefaultDefinition(AStatement);
+			EmitDefaultDefinition(statement);
 		}
 		
-		protected virtual void EmitAlterDefaultDefinition(AlterDefaultDefinition AStatement)
+		protected virtual void EmitAlterDefaultDefinition(AlterDefaultDefinition statement)
 		{
 			AppendFormat("{0} {1} ", Keywords.Alter, Keywords.Default);
-			if (AStatement.Expression != null)
+			if (statement.Expression != null)
 			{
 				AppendFormat(" {0}", Keywords.BeginGroup);
-				EmitExpression(AStatement.Expression);
+				EmitExpression(statement.Expression);
 				AppendFormat("{0}", Keywords.EndGroup);
 			}
-			EmitAlterMetaData(AStatement.AlterMetaData);
+			EmitAlterMetaData(statement.AlterMetaData);
 		}
 		
-		protected virtual void EmitDropDefaultDefinition(DropDefaultDefinition AStatement)
+		protected virtual void EmitDropDefaultDefinition(DropDefaultDefinition statement)
 		{
 			AppendFormat("{0} {1}", Keywords.Drop, Keywords.Default);
 		}
 		
-		protected virtual void EmitClassDefinition(ClassDefinition AStatement)
+		protected virtual void EmitClassDefinition(ClassDefinition statement)
 		{
-			if (AStatement != null)
+			if (statement != null)
 			{
-				AppendFormat(@" {0} ""{1}""", Keywords.Class, AStatement.ClassName.Replace(@"""", @""""""));
+				AppendFormat(@" {0} ""{1}""", Keywords.Class, statement.ClassName.Replace(@"""", @""""""));
 				
-				if (AStatement.Attributes.Count > 0)
+				if (statement.Attributes.Count > 0)
 				{
 					AppendFormat(" {0} {1} ", Keywords.Attributes, Keywords.BeginList);
-					for (int LIndex = 0; LIndex < AStatement.Attributes.Count; LIndex++)
+					for (int index = 0; index < statement.Attributes.Count; index++)
 					{
-						if (LIndex > 0)
+						if (index > 0)
 							EmitListSeparator();
-						EmitClassAttributeDefinition(AStatement.Attributes[LIndex]);
+						EmitClassAttributeDefinition(statement.Attributes[index]);
 					}
 					AppendFormat(" {0}", Keywords.EndList);
 				}
 			}
 		}
 		
-		protected virtual void EmitAlterClassDefinition(AlterClassDefinition AStatement)
+		protected virtual void EmitAlterClassDefinition(AlterClassDefinition statement)
 		{
-			if (AStatement != null)
+			if (statement != null)
 			{
 				AppendFormat(" {0} {1}", Keywords.Alter, Keywords.Class);
-				if (AStatement.ClassName != String.Empty)
-					AppendFormat(@" ""{0}""", AStatement.ClassName.Replace(@"""", @""""""));
+				if (statement.ClassName != String.Empty)
+					AppendFormat(@" ""{0}""", statement.ClassName.Replace(@"""", @""""""));
 				if 
 					(
-						(AStatement.CreateAttributes.Count > 0) || 
-						(AStatement.AlterAttributes.Count > 0) || 
-						(AStatement.DropAttributes.Count > 0)
+						(statement.CreateAttributes.Count > 0) || 
+						(statement.AlterAttributes.Count > 0) || 
+						(statement.DropAttributes.Count > 0)
 					)
 				{
 					AppendFormat(" {0} ", Keywords.BeginList);
-					bool LFirst = true;
-					foreach (ClassAttributeDefinition LAttribute in AStatement.CreateAttributes)
+					bool first = true;
+					foreach (ClassAttributeDefinition attribute in statement.CreateAttributes)
 					{
-						if (!LFirst)
+						if (!first)
 							EmitListSeparator();
 						else
-							LFirst = false;
+							first = false;
 						AppendFormat("{0} ", Keywords.Create);
-						EmitClassAttributeDefinition(LAttribute);
+						EmitClassAttributeDefinition(attribute);
 					}
 					
-					foreach (ClassAttributeDefinition LAttribute in AStatement.AlterAttributes)
+					foreach (ClassAttributeDefinition attribute in statement.AlterAttributes)
 					{
-						if (!LFirst)
+						if (!first)
 							EmitListSeparator();
 						else
-							LFirst = false;
+							first = false;
 						AppendFormat("{0} ", Keywords.Alter);
-						EmitClassAttributeDefinition(LAttribute);
+						EmitClassAttributeDefinition(attribute);
 					}
 					
-					foreach (ClassAttributeDefinition LAttribute in AStatement.DropAttributes)
+					foreach (ClassAttributeDefinition attribute in statement.DropAttributes)
 					{
-						if (!LFirst)
+						if (!first)
 							EmitListSeparator();
 						else
-							LFirst = false;
-						AppendFormat(@"{0} ""{1}""", new object[]{Keywords.Drop, LAttribute.AttributeName.Replace(@"""", @"""""")}); 
+							first = false;
+						AppendFormat(@"{0} ""{1}""", new object[]{Keywords.Drop, attribute.AttributeName.Replace(@"""", @"""""")}); 
 					}
 					
 					AppendFormat(" {0}", Keywords.EndList);
@@ -4676,248 +4676,248 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 		}
 		
-		protected virtual void EmitClassAttributeDefinition(ClassAttributeDefinition AStatement)
+		protected virtual void EmitClassAttributeDefinition(ClassAttributeDefinition statement)
 		{
-			AppendFormat(@"""{0}"" {1} ""{2}""", AStatement.AttributeName.Replace(@"""", @""""""), Keywords.Equal, AStatement.AttributeValue.Replace(@"""", @""""""));
+			AppendFormat(@"""{0}"" {1} ""{2}""", statement.AttributeName.Replace(@"""", @""""""), Keywords.Equal, statement.AttributeValue.Replace(@"""", @""""""));
 		}
 		
-		protected virtual void EmitNamedTypeSpecifier(NamedTypeSpecifier AStatement)
+		protected virtual void EmitNamedTypeSpecifier(NamedTypeSpecifier statement)
 		{
-			if (AStatement is FormalParameter)
-				EmitFormalParameter((FormalParameter)AStatement);
+			if (statement is FormalParameter)
+				EmitFormalParameter((FormalParameter)statement);
 			else
 			{
-				AppendFormat("{0} {1} ", AStatement.Identifier, Keywords.TypeSpecifier);
-				EmitTypeSpecifier(AStatement.TypeSpecifier);
+				AppendFormat("{0} {1} ", statement.Identifier, Keywords.TypeSpecifier);
+				EmitTypeSpecifier(statement.TypeSpecifier);
 			};
 		}
 		
-		protected virtual void EmitFormalParameter(FormalParameter AStatement)
+		protected virtual void EmitFormalParameter(FormalParameter statement)
 		{
-			switch (AStatement.Modifier)
+			switch (statement.Modifier)
 			{
 				case Modifier.Var: AppendFormat("{0} ", Keywords.Var); break;
 				case Modifier.Const: AppendFormat("{0} ", Keywords.Const); break;
 			}
-			AppendFormat("{0} {1} ", AStatement.Identifier, Keywords.TypeSpecifier);
-			EmitTypeSpecifier(AStatement.TypeSpecifier);
+			AppendFormat("{0} {1} ", statement.Identifier, Keywords.TypeSpecifier);
+			EmitTypeSpecifier(statement.TypeSpecifier);
 		}
 		
-		protected virtual void EmitFormalParameterSpecifier(FormalParameterSpecifier AStatement)
+		protected virtual void EmitFormalParameterSpecifier(FormalParameterSpecifier statement)
 		{
-			switch (AStatement.Modifier)
+			switch (statement.Modifier)
 			{
 				case Modifier.Var: AppendFormat("{0} ", Keywords.Var); break;
 				case Modifier.Const: AppendFormat("{0} ", Keywords.Const); break;
 			}
-			EmitTypeSpecifier(AStatement.TypeSpecifier);
+			EmitTypeSpecifier(statement.TypeSpecifier);
 		}
 		
-		protected void EmitOperatorSpecifier(OperatorSpecifier ASpecifier)
+		protected void EmitOperatorSpecifier(OperatorSpecifier specifier)
 		{
-			EmitOperatorSpecifier(ASpecifier.OperatorName, ASpecifier.FormalParameterSpecifiers);
+			EmitOperatorSpecifier(specifier.OperatorName, specifier.FormalParameterSpecifiers);
 		}
 		
-		protected virtual void EmitOperatorSpecifier(string AOperatorName, FormalParameterSpecifiers AFormalParameterSpecifiers)
+		protected virtual void EmitOperatorSpecifier(string operatorName, FormalParameterSpecifiers formalParameterSpecifiers)
 		{
-			AppendFormat("{0}{1}", AOperatorName, Keywords.BeginGroup);
-			for (int LIndex = 0; LIndex < AFormalParameterSpecifiers.Count; LIndex++)
+			AppendFormat("{0}{1}", operatorName, Keywords.BeginGroup);
+			for (int index = 0; index < formalParameterSpecifiers.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitFormalParameterSpecifier(AFormalParameterSpecifiers[LIndex]);
+				EmitFormalParameterSpecifier(formalParameterSpecifiers[index]);
 			}
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitTypeSpecifier(TypeSpecifier AStatement)
+		protected virtual void EmitTypeSpecifier(TypeSpecifier statement)
 		{
-			if (AStatement is GenericTypeSpecifier)
-				EmitGenericTypeSpecifier((GenericTypeSpecifier)AStatement);
-			else if (AStatement is ScalarTypeSpecifier)
-				EmitScalarTypeSpecifier((ScalarTypeSpecifier)AStatement);
-			else if (AStatement is RowTypeSpecifier)
-				EmitRowTypeSpecifier((RowTypeSpecifier)AStatement);
-			else if (AStatement is TableTypeSpecifier)
-				EmitTableTypeSpecifier((TableTypeSpecifier)AStatement);
-			else if (AStatement is ListTypeSpecifier)
-				EmitListTypeSpecifier((ListTypeSpecifier)AStatement);
-			else if (AStatement is CursorTypeSpecifier)
-				EmitCursorTypeSpecifier((CursorTypeSpecifier)AStatement);
-			else if (AStatement is TypeOfTypeSpecifier)
-				EmitTypeOfTypeSpecifier((TypeOfTypeSpecifier)AStatement);
+			if (statement is GenericTypeSpecifier)
+				EmitGenericTypeSpecifier((GenericTypeSpecifier)statement);
+			else if (statement is ScalarTypeSpecifier)
+				EmitScalarTypeSpecifier((ScalarTypeSpecifier)statement);
+			else if (statement is RowTypeSpecifier)
+				EmitRowTypeSpecifier((RowTypeSpecifier)statement);
+			else if (statement is TableTypeSpecifier)
+				EmitTableTypeSpecifier((TableTypeSpecifier)statement);
+			else if (statement is ListTypeSpecifier)
+				EmitListTypeSpecifier((ListTypeSpecifier)statement);
+			else if (statement is CursorTypeSpecifier)
+				EmitCursorTypeSpecifier((CursorTypeSpecifier)statement);
+			else if (statement is TypeOfTypeSpecifier)
+				EmitTypeOfTypeSpecifier((TypeOfTypeSpecifier)statement);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 		
-		protected virtual void EmitGenericTypeSpecifier(GenericTypeSpecifier AStatement)
+		protected virtual void EmitGenericTypeSpecifier(GenericTypeSpecifier statement)
 		{
 			Append(Keywords.Generic);
 		}
 		
-		protected virtual void EmitScalarTypeSpecifier(ScalarTypeSpecifier AStatement)
+		protected virtual void EmitScalarTypeSpecifier(ScalarTypeSpecifier statement)
 		{
-			if (AStatement.IsGeneric)
+			if (statement.IsGeneric)
 				AppendFormat("{0} {1}", Keywords.Generic, Keywords.Scalar);
 			else
-				Append(AStatement.ScalarTypeName);
+				Append(statement.ScalarTypeName);
 		}
 		
-		protected virtual void EmitRowTypeSpecifier(RowTypeSpecifier AStatement)
+		protected virtual void EmitRowTypeSpecifier(RowTypeSpecifier statement)
 		{
-			if (AStatement.IsGeneric)
+			if (statement.IsGeneric)
 				AppendFormat("{0} {1}", Keywords.Generic, Keywords.Row);
 			else
 			{
 				AppendFormat("{0} {1} ", Keywords.Row, Keywords.BeginList);
-				for (int LIndex = 0; LIndex < AStatement.Columns.Count; LIndex++)
+				for (int index = 0; index < statement.Columns.Count; index++)
 				{
-					if (LIndex > 0)
+					if (index > 0)
 						EmitListSeparator();
-					EmitNamedTypeSpecifier(AStatement.Columns[LIndex]);
+					EmitNamedTypeSpecifier(statement.Columns[index]);
 				}
 				AppendFormat(" {0}", Keywords.EndList);
 			}
 		}
 
-		protected virtual void EmitTableTypeSpecifier(TableTypeSpecifier AStatement)
+		protected virtual void EmitTableTypeSpecifier(TableTypeSpecifier statement)
 		{
-			if (AStatement.IsGeneric)
+			if (statement.IsGeneric)
 				AppendFormat("{0} {1}", Keywords.Generic, Keywords.Table);
 			else
 			{
-				bool LFirst = true;
+				bool first = true;
 				AppendFormat("{0} {1} ", Keywords.Table, Keywords.BeginList);
-				for (int LIndex = 0; LIndex < AStatement.Columns.Count; LIndex++)
+				for (int index = 0; index < statement.Columns.Count; index++)
 				{
-					if (!LFirst)
+					if (!first)
 						EmitListSeparator();
 					else
-						LFirst = false;
-					EmitNamedTypeSpecifier(AStatement.Columns[LIndex]);
+						first = false;
+					EmitNamedTypeSpecifier(statement.Columns[index]);
 				}
 
 				AppendFormat(" {0}", Keywords.EndList);
 			}
 		}
 
-		protected virtual void EmitListTypeSpecifier(ListTypeSpecifier AStatement)
+		protected virtual void EmitListTypeSpecifier(ListTypeSpecifier statement)
 		{
-			if (AStatement.IsGeneric)
+			if (statement.IsGeneric)
 				AppendFormat("{0}", Keywords.List);
 			else
 			{
 				AppendFormat("{0}{1}", Keywords.List, Keywords.BeginGroup);
-				EmitTypeSpecifier(AStatement.TypeSpecifier);
+				EmitTypeSpecifier(statement.TypeSpecifier);
 				Append(Keywords.EndGroup);
 			}
 		}
 		
-		protected virtual void EmitCursorTypeSpecifier(CursorTypeSpecifier AStatement)
+		protected virtual void EmitCursorTypeSpecifier(CursorTypeSpecifier statement)
 		{
-			if (AStatement.IsGeneric)
+			if (statement.IsGeneric)
 				AppendFormat("{0} {1}", Keywords.Generic, Keywords.Cursor);
 			else
 			{
 				AppendFormat("{0}{1}", Keywords.Cursor, Keywords.BeginGroup);
-				EmitTypeSpecifier(AStatement.TypeSpecifier);
+				EmitTypeSpecifier(statement.TypeSpecifier);
 				Append(Keywords.EndGroup);
 			}
 		}
 		
-		protected virtual void EmitTypeOfTypeSpecifier(TypeOfTypeSpecifier AStatement)
+		protected virtual void EmitTypeOfTypeSpecifier(TypeOfTypeSpecifier statement)
 		{
 			AppendFormat("{0}{1}", Keywords.TypeOf, Keywords.BeginGroup);
-			EmitExpression(AStatement.Expression);
+			EmitExpression(statement.Expression);
 			Append(Keywords.EndGroup);
 		}
 		
-		protected virtual void EmitDeviceMapItem(DeviceMapItem AStatement)
+		protected virtual void EmitDeviceMapItem(DeviceMapItem statement)
 		{
-			if (AStatement is DeviceScalarTypeMapBase)
-				EmitDeviceScalarTypeMapBase((DeviceScalarTypeMapBase)AStatement);
-			else if (AStatement is DeviceOperatorMapBase)
-				EmitDeviceOperatorMapBase((DeviceOperatorMapBase)AStatement);
+			if (statement is DeviceScalarTypeMapBase)
+				EmitDeviceScalarTypeMapBase((DeviceScalarTypeMapBase)statement);
+			else if (statement is DeviceOperatorMapBase)
+				EmitDeviceOperatorMapBase((DeviceOperatorMapBase)statement);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 		
-		protected virtual void EmitDeviceScalarTypeMapBase(DeviceScalarTypeMapBase AStatement)
+		protected virtual void EmitDeviceScalarTypeMapBase(DeviceScalarTypeMapBase statement)
 		{
-			if (AStatement is DeviceScalarTypeMap)
-				EmitDeviceScalarTypeMap((DeviceScalarTypeMap)AStatement);
-			else if (AStatement is AlterDeviceScalarTypeMap)
-				EmitAlterDeviceScalarTypeMap((AlterDeviceScalarTypeMap)AStatement);
-			else if (AStatement is DropDeviceScalarTypeMap)
-				EmitDropDeviceScalarTypeMap((DropDeviceScalarTypeMap)AStatement);
+			if (statement is DeviceScalarTypeMap)
+				EmitDeviceScalarTypeMap((DeviceScalarTypeMap)statement);
+			else if (statement is AlterDeviceScalarTypeMap)
+				EmitAlterDeviceScalarTypeMap((AlterDeviceScalarTypeMap)statement);
+			else if (statement is DropDeviceScalarTypeMap)
+				EmitDropDeviceScalarTypeMap((DropDeviceScalarTypeMap)statement);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 		
-		protected virtual void EmitDeviceScalarTypeMap(DeviceScalarTypeMap AStatement)
+		protected virtual void EmitDeviceScalarTypeMap(DeviceScalarTypeMap statement)
 		{
-			AppendFormat("{0} {1}", Keywords.Type, AStatement.ScalarTypeName);
-			EmitClassDefinition(AStatement.ClassDefinition);
-			EmitMetaData(AStatement.MetaData);
+			AppendFormat("{0} {1}", Keywords.Type, statement.ScalarTypeName);
+			EmitClassDefinition(statement.ClassDefinition);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitCreateDeviceScalarTypeMap(DeviceScalarTypeMap AStatement)
+		protected virtual void EmitCreateDeviceScalarTypeMap(DeviceScalarTypeMap statement)
 		{
 			AppendFormat("{0} ", Keywords.Create);
-			EmitDeviceScalarTypeMap(AStatement);
+			EmitDeviceScalarTypeMap(statement);
 		}
 		
-		protected virtual void EmitAlterDeviceScalarTypeMap(AlterDeviceScalarTypeMap AStatement)
+		protected virtual void EmitAlterDeviceScalarTypeMap(AlterDeviceScalarTypeMap statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Type, AStatement.ScalarTypeName);
-			EmitAlterClassDefinition(AStatement.AlterClassDefinition);
-			EmitAlterMetaData(AStatement.AlterMetaData);
+			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Type, statement.ScalarTypeName);
+			EmitAlterClassDefinition(statement.AlterClassDefinition);
+			EmitAlterMetaData(statement.AlterMetaData);
 		}
 		
-		protected virtual void EmitDropDeviceScalarTypeMap(DropDeviceScalarTypeMap AStatement)
+		protected virtual void EmitDropDeviceScalarTypeMap(DropDeviceScalarTypeMap statement)
 		{
-			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Type, AStatement.ScalarTypeName);
+			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Type, statement.ScalarTypeName);
 		}
 		
-		protected virtual void EmitDeviceOperatorMapBase(DeviceOperatorMapBase AStatement)
+		protected virtual void EmitDeviceOperatorMapBase(DeviceOperatorMapBase statement)
 		{
-			if (AStatement is DeviceOperatorMap)
-				EmitDeviceOperatorMap((DeviceOperatorMap)AStatement);
-			else if (AStatement is AlterDeviceOperatorMap)
-				EmitAlterDeviceOperatorMap((AlterDeviceOperatorMap)AStatement);
-			else if (AStatement is DropDeviceOperatorMap)
-				EmitDropDeviceOperatorMap((DropDeviceOperatorMap)AStatement);
+			if (statement is DeviceOperatorMap)
+				EmitDeviceOperatorMap((DeviceOperatorMap)statement);
+			else if (statement is AlterDeviceOperatorMap)
+				EmitAlterDeviceOperatorMap((AlterDeviceOperatorMap)statement);
+			else if (statement is DropDeviceOperatorMap)
+				EmitDropDeviceOperatorMap((DropDeviceOperatorMap)statement);
 			else
-				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
+				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, statement.GetType().Name);
 		}
 		
-		protected virtual void EmitDeviceOperatorMap(DeviceOperatorMap AStatement)
+		protected virtual void EmitDeviceOperatorMap(DeviceOperatorMap statement)
 		{
 			AppendFormat("{0} ", Keywords.Operator);
-			EmitOperatorSpecifier(AStatement.OperatorSpecifier);
-			if (AStatement.ClassDefinition != null)
-				EmitClassDefinition(AStatement.ClassDefinition);
-			EmitMetaData(AStatement.MetaData);
+			EmitOperatorSpecifier(statement.OperatorSpecifier);
+			if (statement.ClassDefinition != null)
+				EmitClassDefinition(statement.ClassDefinition);
+			EmitMetaData(statement.MetaData);
 		}
 		
-		protected virtual void EmitCreateDeviceOperatorMap(DeviceOperatorMap AStatement)
+		protected virtual void EmitCreateDeviceOperatorMap(DeviceOperatorMap statement)
 		{
 			AppendFormat("{0} ", Keywords.Create);
-			EmitDeviceOperatorMap(AStatement);
+			EmitDeviceOperatorMap(statement);
 		}
 		
-		protected virtual void EmitAlterDeviceOperatorMap(AlterDeviceOperatorMap AStatement)
+		protected virtual void EmitAlterDeviceOperatorMap(AlterDeviceOperatorMap statement)
 		{
 			AppendFormat("{0} {1} ", Keywords.Alter, Keywords.Operator);
-			EmitOperatorSpecifier(AStatement.OperatorSpecifier);
-			EmitAlterClassDefinition(AStatement.AlterClassDefinition);
-			EmitAlterMetaData(AStatement.AlterMetaData);
+			EmitOperatorSpecifier(statement.OperatorSpecifier);
+			EmitAlterClassDefinition(statement.AlterClassDefinition);
+			EmitAlterMetaData(statement.AlterMetaData);
 		}
 		
-		protected virtual void EmitDropDeviceOperatorMap(DropDeviceOperatorMap AStatement)
+		protected virtual void EmitDropDeviceOperatorMap(DropDeviceOperatorMap statement)
 		{
 			AppendFormat("{0} {1} ", Keywords.Drop, Keywords.Operator);
-			EmitOperatorSpecifier(AStatement.OperatorSpecifier);
+			EmitOperatorSpecifier(statement.OperatorSpecifier);
 		}
 	}
 }

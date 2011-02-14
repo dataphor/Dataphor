@@ -25,117 +25,117 @@ namespace Alphora.Dataphor.Frontend.Client
 	public class NodeTypeTable
 	{
 		// Do not localize
-		const string CNamespaceAttributeName = "name";
-		const string CAssemblyAttributeName = "assembly";
-		const string CNodeNameAttributeName = "name";
+		const string NamespaceAttributeName = "name";
+		const string AssemblyAttributeName = "assembly";
+		const string NodeNameAttributeName = "name";
 
 		/// <summary> Initializez the private FNodeTypes hashtable. </summary>
 		public NodeTypeTable()
 		{
-			FNodeTypes = new Dictionary<string, NodeTypeEntry>(64, StringComparer.OrdinalIgnoreCase);
+			_nodeTypes = new Dictionary<string, NodeTypeEntry>(64, StringComparer.OrdinalIgnoreCase);
 		}
 
-		private Dictionary<string, NodeTypeEntry> FNodeTypes;
+		private Dictionary<string, NodeTypeEntry> _nodeTypes;
 
-		public NodeTypeEntry this[string ANodeName]
+		public NodeTypeEntry this[string nodeName]
 		{
-			get { return FNodeTypes[ANodeName.ToLower()]; }
+			get { return _nodeTypes[nodeName.ToLower()]; }
 		}
 		
-		public bool TryGetValue(string ANodeName, out NodeTypeEntry AEntry)
+		public bool TryGetValue(string nodeName, out NodeTypeEntry entry)
 		{
-			return FNodeTypes.TryGetValue(ANodeName, out AEntry);
+			return _nodeTypes.TryGetValue(nodeName, out entry);
 		}
 		
-		public bool Contains(string ANodeName)
+		public bool Contains(string nodeName)
 		{
-			return FNodeTypes.ContainsKey(ANodeName);
+			return _nodeTypes.ContainsKey(nodeName);
 		}
 
 		public ICollection Keys 
 		{
-			get { return FNodeTypes.Keys; }
+			get { return _nodeTypes.Keys; }
 		}
 
 		public ICollection Entries
 		{
-			get { return FNodeTypes.Values; }
+			get { return _nodeTypes.Values; }
 		}
 
 		public int Count
 		{
-			get { return FNodeTypes.Count; }
+			get { return _nodeTypes.Count; }
 		}
 
 		public void Clear()
 		{
-			FNodeTypes.Clear();
+			_nodeTypes.Clear();
 		}
 
 		/// <summary> Loads the NodeTypeTable from a given stream. </summary>
-		/// <param name="ASource"> A stream containing an XML NodeTypeTable information. </param>
-		public void LoadFromStream(Stream ASource)
+		/// <param name="source"> A stream containing an XML NodeTypeTable information. </param>
+		public void LoadFromStream(Stream source)
 		{
-			XDocument LDocument = XDocument.Load(new StreamReader(ASource));
-			InternalLoad(LDocument);
+			XDocument document = XDocument.Load(new StreamReader(source));
+			InternalLoad(document);
 		}
 
 		/// <summary> Loads the NodeTypeTable from a given string. </summary>
-		public void LoadFromString(string ASource)
+		public void LoadFromString(string source)
 		{
-			XDocument LDocument = XDocument.Load(new StringReader(ASource));
-			InternalLoad(LDocument);
+			XDocument document = XDocument.Load(new StringReader(source));
+			InternalLoad(document);
 		}
 
-		private void InternalLoad(XDocument ADocument)
+		private void InternalLoad(XDocument document)
 		{
 			// TODO: Better XML validation on the NodeTypeTable load
-			NodeTypeEntry LNodeTypeEntry;
-			foreach (XElement LNode in ADocument.Root.Elements())
+			NodeTypeEntry nodeTypeEntry;
+			foreach (XElement node in document.Root.Elements())
 			{
-				LNodeTypeEntry = new NodeTypeEntry();
-				LNodeTypeEntry.Namespace = LNode.Attribute(CNamespaceAttributeName).Value;
-				LNodeTypeEntry.Assembly = LNode.Attribute(CAssemblyAttributeName).Value;
-				foreach (XElement LChild in LNode.Elements())
-					FNodeTypes.Add(LChild.Attribute(CNodeNameAttributeName).Value.ToLower(), LNodeTypeEntry);
+				nodeTypeEntry = new NodeTypeEntry();
+				nodeTypeEntry.Namespace = node.Attribute(NamespaceAttributeName).Value;
+				nodeTypeEntry.Assembly = node.Attribute(AssemblyAttributeName).Value;
+				foreach (XElement child in node.Elements())
+					_nodeTypes.Add(child.Attribute(NodeNameAttributeName).Value.ToLower(), nodeTypeEntry);
 			}
 
 		}
 
 		/// <summary> Reads the node type namespace information from the specified file. </summary>
-		/// <param name="AFileName"> A file name referencing a file which contains a valid XML node type document. </param>
-		public void LoadFromFile(string AFileName)
+		/// <param name="fileName"> A file name referencing a file which contains a valid XML node type document. </param>
+		public void LoadFromFile(string fileName)
 		{
 			try
 			{
-				using (FileStream LStream = new FileStream(AFileName, FileMode.Open, FileAccess.Read))
+				using (FileStream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
 				{
-					LoadFromStream(LStream);
+					LoadFromStream(stream);
 				}
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw new ClientException(ClientException.Codes.UnableToLoadTypeTable, LException, AFileName);
+				throw new ClientException(ClientException.Codes.UnableToLoadTypeTable, exception, fileName);
 			}
 		}
 
 		/// <summary> Searches thru the NodeTypeTable and returns a type for it. </summary>
-		public Type GetClassType(string AClassName)
+		public Type GetClassType(string className)
 		{
-			NodeTypeEntry LEntry;
-			if (!FNodeTypes.TryGetValue(AClassName, out LEntry))
+			NodeTypeEntry entry;
+			if (!_nodeTypes.TryGetValue(className, out entry))
 				return null;
 			else
-				return ReflectionUtility.GetType(LEntry.Namespace, AClassName, LEntry.Assembly);
+				return ReflectionUtility.GetType(entry.Namespace, className, entry.Assembly);
 		}
 
 		/// <summary> Creates an instance of the specified class using the NodeTypeTable. </summary>
-		public object CreateInstance(string AClassName)
+		public object CreateInstance(string className)
 		{
-			NodeTypeEntry LEntry;
-			if (!FNodeTypes.TryGetValue(AClassName, out LEntry))
-				throw new Exception(String.Format("CreateInstance: Class ({0}) not found in node type list.", AClassName));
-			return ReflectionUtility.CreateInstance(LEntry.Namespace, AClassName, LEntry.Assembly);
+			NodeTypeEntry entry;
+			if (!_nodeTypes.TryGetValue(className, out entry))
+				throw new Exception(String.Format("CreateInstance: Class ({0}) not found in node type list.", className));
+			return ReflectionUtility.CreateInstance(entry.Namespace, className, entry.Assembly);
 		}
 	}
 
@@ -143,7 +143,7 @@ namespace Alphora.Dataphor.Frontend.Client
 	public class Serializer : BOP.Serializer
     {
 		/// <remarks> Never write a namespace since they are retrieved from the NodeTypeTable </remarks>
-		protected override string GetElementNamespace(Type AType)
+		protected override string GetElementNamespace(Type type)
 		{
 			// We don't want namespaces in BOP XML, so we return empty.
 			return String.Empty;
@@ -153,29 +153,29 @@ namespace Alphora.Dataphor.Frontend.Client
 	/// <summary> A custom client serializer decendant that uses NodeTypeTable to get a namespace for each object deserialzed. </summary>
 	public class Deserializer : BOP.Deserializer
 	{
-		public Deserializer(NodeTypeTable ATable)
+		public Deserializer(NodeTypeTable table)
 		{
-			FTable = ATable;
+			_table = table;
 		}
 
-		private NodeTypeTable FTable;
+		private NodeTypeTable _table;
 
 		/// <remarks> Uses the NodeTypeType to find a type name for the element. </remarks>
-		protected override Type GetClassType(string AName, string ANamespace)
+		protected override Type GetClassType(string name, string namespaceValue)
 		{
-			if (ANamespace == String.Empty)
+			if (namespaceValue == String.Empty)
 			{
-				NodeTypeEntry LEntry;
-				if (FTable.TryGetValue(AName, out LEntry))
+				NodeTypeEntry entry;
+				if (_table.TryGetValue(name, out entry))
 					return 
 						ReflectionUtility.GetType
 						(
-							LEntry.Namespace, 
-							AName,
-							LEntry.Assembly
+							entry.Namespace, 
+							name,
+							entry.Assembly
 						);
 			}
-			return base.GetClassType(AName, ANamespace);
+			return base.GetClassType(name, namespaceValue);
 		}
 	}
     

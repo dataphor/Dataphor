@@ -16,58 +16,58 @@ namespace Alphora.Dataphor.DAE.Client
 {
 	public class ClientConnection : ClientObject, IRemoteServerConnection
 	{
-		public ClientConnection(ClientServer AClientServer, string AConnectionName, string AClientHostName, int AConnectionHandle)
+		public ClientConnection(ClientServer clientServer, string connectionName, string clientHostName, int connectionHandle)
 		{
-			FClientServer = AClientServer;
-			FConnectionName = AConnectionName;
-			FClientHostName = AClientHostName;
-			FConnectionHandle = AConnectionHandle;
+			_clientServer = clientServer;
+			_connectionName = connectionName;
+			_clientHostName = clientHostName;
+			_connectionHandle = connectionHandle;
 		}
 		
-		private ClientServer FClientServer;
-		public ClientServer ClientServer { get { return FClientServer; } }
+		private ClientServer _clientServer;
+		public ClientServer ClientServer { get { return _clientServer; } }
 		
 		private IClientDataphorService GetServiceInterface()
 		{
-			return FClientServer.GetServiceInterface();
+			return _clientServer.GetServiceInterface();
 		}
 		
-		private string FClientHostName;
-		public string ClientHostName { get { return FClientHostName; } }
+		private string _clientHostName;
+		public string ClientHostName { get { return _clientHostName; } }
 		
-		private int FConnectionHandle;
-		public int ConnectionHandle { get { return FConnectionHandle; } }
+		private int _connectionHandle;
+		public int ConnectionHandle { get { return _connectionHandle; } }
 		
 		#region IRemoteServerConnection Members
 
-		private string FConnectionName;
-		public string ConnectionName { get { return FConnectionName; } }
+		private string _connectionName;
+		public string ConnectionName { get { return _connectionName; } }
 
-		public IRemoteServerSession Connect(SessionInfo ASessionInfo)
+		public IRemoteServerSession Connect(SessionInfo sessionInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginConnect(FConnectionHandle, ASessionInfo, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return new ClientSession(this, ASessionInfo, GetServiceInterface().EndConnect(LResult));
+				IAsyncResult result = GetServiceInterface().BeginConnect(_connectionHandle, sessionInfo, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return new ClientSession(this, sessionInfo, GetServiceInterface().EndConnect(result));
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public void Disconnect(IRemoteServerSession ASession)
+		public void Disconnect(IRemoteServerSession session)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginDisconnect(((ClientSession)ASession).SessionHandle, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndDisconnect(LResult);
+				IAsyncResult result = GetServiceInterface().BeginDisconnect(((ClientSession)session).SessionHandle, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				GetServiceInterface().EndDisconnect(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
@@ -79,13 +79,13 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginPingConnection(FConnectionHandle, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndPingConnection(LResult);
+				IAsyncResult result = GetServiceInterface().BeginPingConnection(_connectionHandle, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				GetServiceInterface().EndPingConnection(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 

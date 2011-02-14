@@ -13,9 +13,9 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 	[DataContract]
 	public class NativeSessionHandle
 	{
-		public NativeSessionHandle(Guid AID)
+		public NativeSessionHandle(Guid iD)
 		{
-			ID = AID;
+			ID = iD;
 		}
 		
 		[DataMember]

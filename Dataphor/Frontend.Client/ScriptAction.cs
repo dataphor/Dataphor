@@ -18,7 +18,7 @@ namespace Alphora.Dataphor.Frontend.Client
 	/// <summary> Executes a client side script. </summary>
 	public class ScriptAction : Action, IScriptAction
 	{
-		public const string CCSharpTemplate = 
+		public const string SharpTemplate = 
 			@"
 				using System;
 				using {0};
@@ -35,7 +35,7 @@ namespace Alphora.Dataphor.Frontend.Client
 				}}
 			";
 
-		public const string CVBTemplate =
+		public const string VBTemplate =
 			@"
 				Imports System
 				Imports {0}
@@ -53,99 +53,99 @@ namespace Alphora.Dataphor.Frontend.Client
 				End Class
 			";
 
-		public const string CCompileUnitToken = "#unit";
-		public const string CEndCompileUnitToken = "#endunit";
-		public const string CClassToken = "#class";
-		public const string CEndClassToken = "#endclass";
+		public const string CompileUnitToken = "#unit";
+		public const string EndCompileUnitToken = "#endunit";
+		public const string ClassToken = "#class";
+		public const string EndClassToken = "#endclass";
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
 		// Language
-		private ScriptLanguages FLanguage = ScriptLanguages.CSharp;
+		private ScriptLanguages _language = ScriptLanguages.CSharp;
 		[DefaultValue(ScriptLanguages.CSharp)]
 		[Description("Specified the language for the script.")]
 		public ScriptLanguages Language
 		{
-			get { return FLanguage; }
+			get { return _language; }
 			set
 			{
-				if (FLanguage != value)
+				if (_language != value)
 				{
-					FLanguage = value;
+					_language = value;
 					InvalidateResults();
 				}
 			}
 		}
 
 		// Script
-		private string FScript = String.Empty;
+		private string _script = String.Empty;
 		[Editor(typeof(Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor), typeof(System.Drawing.Design.UITypeEditor))]
 		[Description(@"The script to execute.")]
 		public string Script
 		{
-			get { return FScript; }
+			get { return _script; }
 			set
 			{
-				if (FScript != value)
+				if (_script != value)
 				{
-					FScript = (value == null ? String.Empty : value);
+					_script = (value == null ? String.Empty : value);
 					InvalidateResults();
 				}
 			}
 		}
 
 		// CompileWithDebug
-		private bool FCompileWithDebug = false;
+		private bool _compileWithDebug = false;
 		[Description("When true, the script will be compiled with debug information.")]
 		[DefaultValue(false)]
 		public bool CompileWithDebug
 		{
-			get { return FCompileWithDebug; }
-			set { FCompileWithDebug = value; }
+			get { return _compileWithDebug; }
+			set { _compileWithDebug = value; }
 		}
 
-		private static void PreprocessScript(string AScript, out string AUnit, out string AClass, out string AExecute)
+		private static void PreprocessScript(string script, out string unit, out string classValue, out string execute)
 		{
 			// TODO: Put in lexor in for pre-processor (for comment/string support)
 
-			int LPos = AScript.IndexOf(CCompileUnitToken);
-			int LEndPos;
-			if (LPos >= 0)
+			int pos = script.IndexOf(CompileUnitToken);
+			int endPos;
+			if (pos >= 0)
 			{
-				LEndPos = AScript.IndexOf(CEndCompileUnitToken);
-				AUnit = AScript.Substring(LPos + 5, LEndPos - (LPos + 5));
-				AScript = AScript.Substring(0, LPos) + AScript.Substring(LEndPos + 8);
+				endPos = script.IndexOf(EndCompileUnitToken);
+				unit = script.Substring(pos + 5, endPos - (pos + 5));
+				script = script.Substring(0, pos) + script.Substring(endPos + 8);
 			}
 			else
-				AUnit = String.Empty;
+				unit = String.Empty;
 
-			LPos = AScript.IndexOf(CClassToken);
-			if (LPos >= 0)
+			pos = script.IndexOf(ClassToken);
+			if (pos >= 0)
 			{
-				LEndPos = AScript.IndexOf(CEndClassToken);
-				AClass = AScript.Substring(LPos + 6, LEndPos - (LPos + 6));
-				AScript = AScript.Substring(0, LPos) + AScript.Substring(LEndPos + 9);
+				endPos = script.IndexOf(EndClassToken);
+				classValue = script.Substring(pos + 6, endPos - (pos + 6));
+				script = script.Substring(0, pos) + script.Substring(endPos + 9);
 			}
 			else
-				AClass = String.Empty;
+				classValue = String.Empty;
 			
-			AExecute = AScript;
+			execute = script;
 		}
 		
-		private static object FAssemblyCacheLock = new Object();
-		private static Dictionary<string, CompilerResults> FAssemblyCache = new Dictionary<string, CompilerResults>(); // key - FSourceCode, value - FResults
+		private static object _assemblyCacheLock = new Object();
+		private static Dictionary<string, CompilerResults> _assemblyCache = new Dictionary<string, CompilerResults>(); // key - FSourceCode, value - FResults
 		
 		private CompilerResults FindCompilerResults()
 		{
-			if (FSourceCode == null)
+			if (_sourceCode == null)
 				BuildSourceCode();
 				
-			lock (FAssemblyCacheLock)
-				if (FAssemblyCache.ContainsKey(FSourceCode))
-					return FAssemblyCache[FSourceCode];
+			lock (_assemblyCacheLock)
+				if (_assemblyCache.ContainsKey(_sourceCode))
+					return _assemblyCache[_sourceCode];
 
 			return null;
 		}
@@ -156,191 +156,191 @@ namespace Alphora.Dataphor.Frontend.Client
 			return LName.Name + ".dll";
 		}
 		
-		private static string[] GetReferencedAssemblyNames(Assembly AAssembly)
+		private static string[] GetReferencedAssemblyNames(Assembly assembly)
 		{
-			AssemblyName[] LReferencedAssemblies = AAssembly.GetReferencedAssemblies();
-			string[] LResult = new string[LReferencedAssemblies.Length + 1];
-			for (int i = 0; i < LReferencedAssemblies.Length; i++)
-				LResult[i] = Assembly.Load(LReferencedAssemblies[i]).Location;
-			LResult[LResult.Length - 1] = AAssembly.Location;
-			return LResult;
+			AssemblyName[] referencedAssemblies = assembly.GetReferencedAssemblies();
+			string[] result = new string[referencedAssemblies.Length + 1];
+			for (int i = 0; i < referencedAssemblies.Length; i++)
+				result[i] = Assembly.Load(referencedAssemblies[i]).Location;
+			result[result.Length - 1] = assembly.Location;
+			return result;
 		}
 		
-		private void AddReferencedAssemblies(List<string> AAssemblies, Assembly AAssembly)
+		private void AddReferencedAssemblies(List<string> assemblies, Assembly assembly)
 		{
 			// Add all assemblies referenced by the ScriptAction itself
-			string[] LAssemblies = GetReferencedAssemblyNames(AAssembly);
-			for (int LIndex = 0; LIndex < LAssemblies.Length; LIndex++)
-				if (!AAssemblies.Contains(LAssemblies[LIndex]))
-					AAssemblies.Add(LAssemblies[LIndex]);
+			string[] localAssemblies = GetReferencedAssemblyNames(assembly);
+			for (int index = 0; index < localAssemblies.Length; index++)
+				if (!assemblies.Contains(localAssemblies[index]))
+					assemblies.Add(localAssemblies[index]);
 
 			// Add all assemblies in the node types table
-			string LAssemblyName;
-			foreach (NodeTypeEntry LEntry in HostNode.Session.NodeTypeTable.Entries)
+			string assemblyName;
+			foreach (NodeTypeEntry entry in HostNode.Session.NodeTypeTable.Entries)
 			{
-				LAssemblyName = Assembly.Load(LEntry.Assembly, null).Location;
-				if (!AAssemblies.Contains(LAssemblyName))
-					AAssemblies.Add(LAssemblyName);
+				assemblyName = Assembly.Load(entry.Assembly, null).Location;
+				if (!assemblies.Contains(assemblyName))
+					assemblies.Add(assemblyName);
 			}
 		}
 		
-		private string FSourceCode;
-		private List<string> FReferencedAssemblies;
-		private CompilerResults FResults;
+		private string _sourceCode;
+		private List<string> _referencedAssemblies;
+		private CompilerResults _results;
 
 		private void InvalidateResults()
 		{
-			FResults = null;
-			FReferencedAssemblies = null;
-			FSourceCode = null;
+			_results = null;
+			_referencedAssemblies = null;
+			_sourceCode = null;
 		}
 		
 		private void BuildSourceCode()
 		{
-			string LUnit;
-			string LClass;
-			string LExecute;
-			PreprocessScript(FScript, out LUnit, out LClass, out LExecute);
-			string LTemplate;
+			string unit;
+			string classValue;
+			string execute;
+			PreprocessScript(_script, out unit, out classValue, out execute);
+			string template;
 
-			switch (FLanguage)
+			switch (_language)
 			{
-				case ScriptLanguages.CSharp : LTemplate = CCSharpTemplate; break;
-				case ScriptLanguages.VisualBasic : LTemplate = CVBTemplate; break;
-				default : throw new ClientException(ClientException.Codes.UnsupportedScriptLanguage, FLanguage);
+				case ScriptLanguages.CSharp : template = SharpTemplate; break;
+				case ScriptLanguages.VisualBasic : template = VBTemplate; break;
+				default : throw new ClientException(ClientException.Codes.UnsupportedScriptLanguage, _language);
 			}
 
-			FReferencedAssemblies = new List<string>();
-			AddReferencedAssemblies(FReferencedAssemblies, typeof(ScriptAction).Assembly);
-			FSourceCode = String.Format
+			_referencedAssemblies = new List<string>();
+			AddReferencedAssemblies(_referencedAssemblies, typeof(ScriptAction).Assembly);
+			_sourceCode = String.Format
 			(
-				LTemplate,
+				template,
 				GetType().Namespace,
-				LUnit,
+				unit,
 				typeof(ScriptBase).FullName,
-				BuildNodeReferences(FReferencedAssemblies),
-				LClass,
-				LExecute
+				BuildNodeReferences(_referencedAssemblies),
+				classValue,
+				execute
 			);
 		}
 		
 		private Assembly GetCompiledAssembly()
 		{
-			if (FResults == null)
+			if (_results == null)
 			{
-				FResults = FindCompilerResults();
-				if (FResults == null)
+				_results = FindCompilerResults();
+				if (_results == null)
 				{
-					CompilerParameters LParameters = new CompilerParameters();
-					foreach (string LString in FReferencedAssemblies)
-						LParameters.ReferencedAssemblies.Add(LString);
-					LParameters.GenerateExecutable = false;
-					LParameters.GenerateInMemory = true;
-					LParameters.IncludeDebugInformation = FCompileWithDebug;
+					CompilerParameters parameters = new CompilerParameters();
+					foreach (string stringValue in _referencedAssemblies)
+						parameters.ReferencedAssemblies.Add(stringValue);
+					parameters.GenerateExecutable = false;
+					parameters.GenerateInMemory = true;
+					parameters.IncludeDebugInformation = _compileWithDebug;
 					//CompilerParameters LParameters = new CompilerParameters(LReferencedAssembliesArray, GetTempAssemblyFileName(), FCompileWithDebug);
 	
-					CodeDomProvider LProvider;
-					switch (FLanguage)
+					CodeDomProvider provider;
+					switch (_language)
 					{
-						case ScriptLanguages.CSharp : LProvider = new CSharpCodeProvider(); break;
-						case ScriptLanguages.VisualBasic : LProvider = new VBCodeProvider(); break;
-						default : throw new ClientException(ClientException.Codes.UnsupportedScriptLanguage, FLanguage);
+						case ScriptLanguages.CSharp : provider = new CSharpCodeProvider(); break;
+						case ScriptLanguages.VisualBasic : provider = new VBCodeProvider(); break;
+						default : throw new ClientException(ClientException.Codes.UnsupportedScriptLanguage, _language);
 					}
 
-					FResults = LProvider.CompileAssemblyFromSource(LParameters, FSourceCode);
-					lock (FAssemblyCacheLock)
-						if (!FAssemblyCache.ContainsKey(FSourceCode))
-							FAssemblyCache.Add(FSourceCode, FResults);
+					_results = provider.CompileAssemblyFromSource(parameters, _sourceCode);
+					lock (_assemblyCacheLock)
+						if (!_assemblyCache.ContainsKey(_sourceCode))
+							_assemblyCache.Add(_sourceCode, _results);
 				}
 			}
 
-			if (FResults.NativeCompilerReturnValue != 0)
-				lock (FAssemblyCacheLock)	// Error enumeration is not concurrent, must lock
+			if (_results.NativeCompilerReturnValue != 0)
+				lock (_assemblyCacheLock)	// Error enumeration is not concurrent, must lock
 				{
-					StringBuilder LErrors = new StringBuilder();
-					foreach (CompilerError LError in FResults.Errors)
-						LErrors.AppendFormat
+					StringBuilder errors = new StringBuilder();
+					foreach (CompilerError error in _results.Errors)
+						errors.AppendFormat
 						(
 							"{0} {1} at line ({2}) column ({3}): {4}\r\n",
-							(LError.IsWarning ? "Warning" : "Error"),
-							LError.ErrorNumber,
-							LError.Line,
-							LError.Column,
-							LError.ErrorText
+							(error.IsWarning ? "Warning" : "Error"),
+							error.ErrorNumber,
+							error.Line,
+							error.Column,
+							error.ErrorText
 						);
-					LErrors.AppendFormat("Script:\r\n{0}\r\n----------End Script----------\r\n", EmbedErrorAnnotatedSourceScript(FSourceCode, FResults));
-					throw new ClientException(ClientException.Codes.ScriptCompilerError, LErrors.ToString());
+					errors.AppendFormat("Script:\r\n{0}\r\n----------End Script----------\r\n", EmbedErrorAnnotatedSourceScript(_sourceCode, _results));
+					throw new ClientException(ClientException.Codes.ScriptCompilerError, errors.ToString());
 				}
 
-			return FResults.CompiledAssembly;
+			return _results.CompiledAssembly;
 		}
 
 		/// <summary> Emits the given source code with the given set of error messages annotated within. </summary>
-		private static string EmbedErrorAnnotatedSourceScript(string ASourceCode, CompilerResults AResults)
+		private static string EmbedErrorAnnotatedSourceScript(string sourceCode, CompilerResults results)
 		{
-			var LResult = new StringBuilder(ASourceCode.Length);
-			var LPos = 0;
-			var LLine = 1;																	 
+			var result = new StringBuilder(sourceCode.Length);
+			var pos = 0;
+			var line = 1;																	 
 			while (true)
 			{
-				var LMatch = ASourceCode.IndexOf("\n", LPos);
-				if (LMatch >= 0)
+				var match = sourceCode.IndexOf("\n", pos);
+				if (match >= 0)
 				{
-					var LSourceLine = ASourceCode.Substring(LPos, LMatch - LPos + 1);
-					LResult.Append(LSourceLine);
-					foreach (CompilerError LError in AResults.Errors)
-						if (LError.Line == LLine)
+					var sourceLine = sourceCode.Substring(pos, match - pos + 1);
+					result.Append(sourceLine);
+					foreach (CompilerError error in results.Errors)
+						if (error.Line == line)
 						{
-							LResult.Append(GenerateSpaces(LSourceLine, LError.Column - 1));
-							LResult.AppendFormat("^{0}\r\n", LError.ErrorNumber);
+							result.Append(GenerateSpaces(sourceLine, error.Column - 1));
+							result.AppendFormat("^{0}\r\n", error.ErrorNumber);
 						}
-					LPos = LMatch + 1;
-					LLine++;
+					pos = match + 1;
+					line++;
 				}
 				else
 					break;
 			}
-			return LResult.ToString();
+			return result.ToString();
 		}
 
 		/// <summary> Generate a given number of leading whitespace characters, using a given string as preference for those characters. </summary>
 		/// <remarks> This ensures that the resulting string has tabs where the source line had them. </remarks>
-		private static string GenerateSpaces(string ASource, int ACount)
+		private static string GenerateSpaces(string source, int count)
 		{
-			var LSpaces = new StringBuilder(ACount);
-			for (int i = 0; i < ACount; i++)
-				if (ASource.Length > i && ASource[i] == '\t')
-					LSpaces.Append('\t');
+			var spaces = new StringBuilder(count);
+			for (int i = 0; i < count; i++)
+				if (source.Length > i && source[i] == '\t')
+					spaces.Append('\t');
 				else
-					LSpaces.Append(' ');
-			return LSpaces.ToString();
+					spaces.Append(' ');
+			return spaces.ToString();
 		}
 		
-		private ScriptBase CreateScript(Assembly AAssembly)
+		private ScriptBase CreateScript(Assembly assembly)
 		{
-			return (ScriptBase)Activator.CreateInstance(AAssembly.GetType("Script", true, false), new object[]{this});
+			return (ScriptBase)Activator.CreateInstance(assembly.GetType("Script", true, false), new object[]{this});
 		}
 		
-		private string GetValidName(string AName)
+		private string GetValidName(string name)
 		{
-			return AName.Replace(".", "_");
+			return name.Replace(".", "_");
 		}
 		
-		private bool IsValidName(string AName)
+		private bool IsValidName(string name)
 		{
-			if ((AName == null) || (AName == String.Empty) || (AName == "Action") || (AName == "Host") || (AName == "Interface") || (AName == "Form"))
+			if ((name == null) || (name == String.Empty) || (name == "Action") || (name == "Host") || (name == "Interface") || (name == "Form"))
 				return false;
 
-			for (int LIndex = 0; LIndex < AName.Length; LIndex++)
+			for (int index = 0; index < name.Length; index++)
 				if 
 					(
 						(
-							(LIndex == 0) && 
-							!(Char.IsLetter(AName[LIndex]) || (AName[LIndex] == '_'))
+							(index == 0) && 
+							!(Char.IsLetter(name[index]) || (name[index] == '_'))
 						) || 
 						(
-							(LIndex != 0) && 
-							!(Char.IsLetterOrDigit(AName[LIndex]) || (AName[LIndex] == '_') || (AName[LIndex] == '.'))
+							(index != 0) && 
+							!(Char.IsLetterOrDigit(name[index]) || (name[index] == '_') || (name[index] == '.'))
 						)
 					)
 					return false;
@@ -348,75 +348,75 @@ namespace Alphora.Dataphor.Frontend.Client
 			return true;
 		}
 		
-		private void SetNodeReferences(ScriptBase AScript)
+		private void SetNodeReferences(ScriptBase script)
 		{
-			SetNodeReferences(AScript, HostNode);
+			SetNodeReferences(script, HostNode);
 		}
 		
-		private void SetNodeReferences(ScriptBase AScript, INode ANode)
+		private void SetNodeReferences(ScriptBase script, INode node)
 		{
-			foreach (INode LNode in ANode.Children)
+			foreach (INode localNode in node.Children)
 			{
-				if (IsValidName(LNode.Name))
-					SetNodeReference(AScript, LNode);
-				SetNodeReferences(AScript, LNode);
+				if (IsValidName(localNode.Name))
+					SetNodeReference(script, localNode);
+				SetNodeReferences(script, localNode);
 			}
 		}
 		
-		private void SetNodeReference(ScriptBase AScript, INode ANode)
+		private void SetNodeReference(ScriptBase script, INode node)
 		{
-			FieldInfo LField = AScript.GetType().GetField(GetValidName(ANode.Name), BindingFlags.Instance | BindingFlags.Public);
-			if (LField != null)
-				LField.SetValue(AScript, ANode);
+			FieldInfo field = script.GetType().GetField(GetValidName(node.Name), BindingFlags.Instance | BindingFlags.Public);
+			if (field != null)
+				field.SetValue(script, node);
 		}
 		
-		private string BuildNodeReferences(List<string> AAssemblies)
+		private string BuildNodeReferences(List<string> assemblies)
 		{
-			StringBuilder LScript = new StringBuilder();
-			BuildNodeReferences(AAssemblies, LScript, HostNode);
-			return LScript.ToString();
+			StringBuilder script = new StringBuilder();
+			BuildNodeReferences(assemblies, script, HostNode);
+			return script.ToString();
 		}
 		
-		private void BuildNodeReferences(List<string> AAssemblies, StringBuilder AScript, INode ANode)
+		private void BuildNodeReferences(List<string> assemblies, StringBuilder script, INode node)
 		{
-			foreach (INode LNode in ANode.Children)
+			foreach (INode localNode in node.Children)
 			{
-				if (IsValidName(LNode.Name))
-					BuildNodeReference(AAssemblies, AScript, LNode);
-				BuildNodeReferences(AAssemblies, AScript, LNode);
+				if (IsValidName(localNode.Name))
+					BuildNodeReference(assemblies, script, localNode);
+				BuildNodeReferences(assemblies, script, localNode);
 			}
 		}
 		
-		private void BuildNodeReference(List<string> AAssemblies, StringBuilder AScript, INode ANode)
+		private void BuildNodeReference(List<string> assemblies, StringBuilder script, INode node)
 		{
-			AddReferencedAssemblies(AAssemblies, ANode.GetType().Assembly);
-			switch (FLanguage)
+			AddReferencedAssemblies(assemblies, node.GetType().Assembly);
+			switch (_language)
 			{
-				case ScriptLanguages.CSharp : AScript.AppendFormat("public {0} {1};\r\n", ANode.GetType().FullName, GetValidName(ANode.Name)); break;
-				case ScriptLanguages.VisualBasic : AScript.AppendFormat("Public {0} As {1}\r\n", GetValidName(ANode.Name), ANode.GetType().FullName); break;
-				default : throw new ClientException(ClientException.Codes.UnsupportedScriptLanguage, FLanguage);
+				case ScriptLanguages.CSharp : script.AppendFormat("public {0} {1};\r\n", node.GetType().FullName, GetValidName(node.Name)); break;
+				case ScriptLanguages.VisualBasic : script.AppendFormat("Public {0} As {1}\r\n", GetValidName(node.Name), node.GetType().FullName); break;
+				default : throw new ClientException(ClientException.Codes.UnsupportedScriptLanguage, _language);
 			}
 		}
 		
-		protected override void InternalExecute(INode ASender, EventParams AParams)
+		protected override void InternalExecute(INode sender, EventParams paramsValue)
 		{
-			if (FScript != String.Empty)
+			if (_script != String.Empty)
 			{
-				Assembly LAssembly = GetCompiledAssembly();
-				ScriptBase LScript = CreateScript(LAssembly);
+				Assembly assembly = GetCompiledAssembly();
+				ScriptBase script = CreateScript(assembly);
 				
 				try
 				{
-					SetNodeReferences(LScript);
-					LScript.Execute(ASender, AParams);
+					SetNodeReferences(script);
+					script.Execute(sender, paramsValue);
 				}
 				catch (AbortException)
 				{
 					throw;
 				}
-				catch (Exception LException)
+				catch (Exception exception)
 				{
-					throw new ClientException(ClientException.Codes.ScriptExecutionError, LException, Name);
+					throw new ClientException(ClientException.Codes.ScriptExecutionError, exception, Name);
 				}
 			}
 		}
@@ -427,26 +427,26 @@ namespace Alphora.Dataphor.Frontend.Client
 	/// <summary> Internal class from which executed scripts descend. </summary>
 	public abstract class ScriptBase
 	{
-		public ScriptBase(IAction AAction)
+		public ScriptBase(IAction action)
 		{
-			FAction = AAction;
-			FHost = AAction.HostNode;
-			FForm = FAction.FindParent(typeof(IFormInterface)) as IFormInterface;
-			FInterface = FAction.FindParent(typeof(IInterface)) as IInterface;
+			_action = action;
+			_host = action.HostNode;
+			_form = _action.FindParent(typeof(IFormInterface)) as IFormInterface;
+			_interface = _action.FindParent(typeof(IInterface)) as IInterface;
 		}
 
-		private IAction FAction;
-		public IAction Action { get { return FAction; } }
+		private IAction _action;
+		public IAction Action { get { return _action; } }
 		
-		private IHost FHost;
-		public IHost Host { get { return FHost; } }
+		private IHost _host;
+		public IHost Host { get { return _host; } }
 		
-		private IFormInterface FForm;
-		public IFormInterface Form { get { return FForm; } }
+		private IFormInterface _form;
+		public IFormInterface Form { get { return _form; } }
 		
-		private IInterface FInterface;
-		public IInterface Interface { get { return FInterface; } }
+		private IInterface _interface;
+		public IInterface Interface { get { return _interface; } }
 
-		public abstract void Execute(INode ASender, EventParams AParams);
+		public abstract void Execute(INode sender, EventParams paramsValue);
 	}
 }

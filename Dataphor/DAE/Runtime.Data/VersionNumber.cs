@@ -293,10 +293,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	
 	public class VersionNumberConverter : TypeConverter
 	{
-		public override object ConvertFrom(ITypeDescriptorContext AContext, System.Globalization.CultureInfo ACulture, object AValue)
+		public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object tempValue)
 		{
-			if (AValue is string)
-				return VersionNumber.Parse((string)AValue);
+			if (tempValue is string)
+				return VersionNumber.Parse((string)tempValue);
 			else
 				return null;
 		}
@@ -306,19 +306,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     {
 		public VersionNumberConveyor() : base() {}
 		
-		public override int GetSize(object AValue)
+		public override int GetSize(object tempValue)
 		{
 			return VersionNumber.CSizeOf;
 		}
 
-		public override object Read(byte[] ABuffer, int AOffset)
+		public override object Read(byte[] buffer, int offset)
 		{
-			return VersionNumber.Read(ABuffer, AOffset);
+			return VersionNumber.Read(buffer, offset);
 		}
 
-		public override void Write(object AValue, byte[] ABuffer, int AOffset)
+		public override void Write(object tempValue, byte[] buffer, int offset)
 		{
-			((VersionNumber)AValue).Write(ABuffer, AOffset);
+			((VersionNumber)tempValue).Write(buffer, offset);
 		}
     }
     
@@ -328,21 +328,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator VersionNumber(AMajor : Integer, AMinor : Integer, ARevision : Integer, ABuild : Integer) : VersionNumber;
 	public class VersionNumberSelectorNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			for (int LIndex = 0; LIndex < AArguments.Length; LIndex++)
-				if (AArguments[LIndex] == null)
+			for (int index = 0; index < arguments.Length; index++)
+				if (arguments[index] == null)
 					return null;
 			#endif
 
 			return 
 				new VersionNumber
 				(
-					(int)AArguments[0], 
-					AArguments.Length > 1 ? (int)AArguments[1] : -1,
-					AArguments.Length > 2 ? (int)AArguments[2] : -1,
-					AArguments.Length > 3 ? (int)AArguments[3] : -1
+					(int)arguments[0], 
+					arguments.Length > 1 ? (int)arguments[1] : -1,
+					arguments.Length > 2 ? (int)arguments[2] : -1,
+					arguments.Length > 3 ? (int)arguments[3] : -1
 				);
 		}
 	}
@@ -350,192 +350,192 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator VersionNumber.ReadMajor(AValue : VersionNumber) : Integer;
 	public class VersionNumberMajorReadAccessorNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null)
+			if (arguments[0] == null)
 				return null;
 			#endif
 			
-			return ((VersionNumber)AArguments[0]).Major;
+			return ((VersionNumber)arguments[0]).Major;
 		}
 	}
 	
 	// operator VersionNumber.WriteMajor(AValue : VersionNumber, AMajor : Integer) : VersionNumber;
 	public class VersionNumberMajorWriteAccessorNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null || AArguments[1] == null)
+			if (arguments[0] == null || arguments[1] == null)
 				return null;
 			#endif
 			
-			VersionNumber LValue = (VersionNumber)AArguments[0];
-			return new VersionNumber((int)AArguments[1], LValue.Minor, LValue.Revision, LValue.Build);
+			VersionNumber tempValue = (VersionNumber)arguments[0];
+			return new VersionNumber((int)arguments[1], tempValue.Minor, tempValue.Revision, tempValue.Build);
 		}
 	}
 
 	// operator VersionNumber.ReadMinor(AValue : VersionNumber) : Integer;
 	public class VersionNumberMinorReadAccessorNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null)
+			if (arguments[0] == null)
 				return null;
 			#endif
 			
-			return ((VersionNumber)AArguments[0]).Minor;
+			return ((VersionNumber)arguments[0]).Minor;
 		}
 	}
 	
 	// operator VersionNumber.WriteMinor(AValue : VersionNumber, AMinor : Integer) : VersionNumber;
 	public class VersionNumberMinorWriteAccessorNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null || AArguments[1] == null)
+			if (arguments[0] == null || arguments[1] == null)
 				return null;
 			#endif
 			
-			VersionNumber LValue = (VersionNumber)AArguments[0];
-			return new VersionNumber(LValue.Major, (int)AArguments[1], LValue.Revision, LValue.Build);
+			VersionNumber tempValue = (VersionNumber)arguments[0];
+			return new VersionNumber(tempValue.Major, (int)arguments[1], tempValue.Revision, tempValue.Build);
 		}
 	}
 
 	// operator VersionNumber.ReadRevision(AValue : VersionNumber) : Integer;
 	public class VersionNumberRevisionReadAccessorNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null)
+			if (arguments[0] == null)
 				return null;
 			#endif
 			
-			return ((VersionNumber)AArguments[0]).Revision;
+			return ((VersionNumber)arguments[0]).Revision;
 		}
 	}
 	
 	// operator VersionNumber.WriteRevision(AValue : VersionNumber, ARevision : Integer) : VersionNumber;
 	public class VersionNumberRevisionWriteAccessorNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null || AArguments[1] == null)
+			if (arguments[0] == null || arguments[1] == null)
 				return null;
 			#endif
 			
-			VersionNumber LValue = (VersionNumber)AArguments[0];
-			return new VersionNumber(LValue.Major, LValue.Minor, (int)AArguments[1], LValue.Build);
+			VersionNumber tempValue = (VersionNumber)arguments[0];
+			return new VersionNumber(tempValue.Major, tempValue.Minor, (int)arguments[1], tempValue.Build);
 		}
 	}
 
 	// operator VersionNumber.ReadBuild(AValue : VersionNumber) : Integer;
 	public class VersionNumberBuildReadAccessorNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null)
+			if (arguments[0] == null)
 				return null;
 			#endif
 			
-			return ((VersionNumber)AArguments[0]).Build;
+			return ((VersionNumber)arguments[0]).Build;
 		}
 	}
 	
 	// operator VersionNumber.WriteBuild(AValue : VersionNumber, ABuild : Integer) : VersionNumber;
 	public class VersionNumberBuildWriteAccessorNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null || AArguments[1] == null)
+			if (arguments[0] == null || arguments[1] == null)
 				return null;
 			#endif
 			
-			VersionNumber LValue = (VersionNumber)AArguments[0];
-			return new VersionNumber(LValue.Major, LValue.Minor, LValue.Revision, (int)AArguments[1]);
+			VersionNumber tempValue = (VersionNumber)arguments[0];
+			return new VersionNumber(tempValue.Major, tempValue.Minor, tempValue.Revision, (int)arguments[1]);
 		}
 	}
 	
     // VersionNumberAsStringSelectorNode
     public class VersionNumberAsStringSelectorNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null)
+			if (arguments[0] == null)
 				return null;
 			#endif
 			
-			return VersionNumber.Parse((string)AArguments[0]);
+			return VersionNumber.Parse((string)arguments[0]);
 		}
     }
     
     // VersionNumberAsStringReadAccessorNode
     public class VersionNumberAsStringReadAccessorNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null)
+			if (arguments[0] == null)
 				return null;
 			#endif
 			
-			return ((VersionNumber)AArguments[0]).ToString();
+			return ((VersionNumber)arguments[0]).ToString();
 		}
     }
     
     // VersionNumberAsStringWriteAccessorNode
     public class VersionNumberAsStringWriteAccessorNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[1] == null)
+			if (arguments[1] == null)
 				return null;
 			#endif
 			
-			return VersionNumber.Parse((string)AArguments[1]);
+			return VersionNumber.Parse((string)arguments[1]);
 		}
     }   
 
 	// operator iCompare(ALeftValue : VersionNumber, ARightValue : VersionNumber) : Integer
 	public class VersionNumberCompareNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null || AArguments[1] == null)
+			if (arguments[0] == null || arguments[1] == null)
 				return null;
 			#endif
 			
-			return VersionNumber.Compare((VersionNumber)AArguments[0], (VersionNumber)AArguments[1]);
+			return VersionNumber.Compare((VersionNumber)arguments[0], (VersionNumber)arguments[1]);
 		}
 	}
 
 	// operator Max(ALeftValue : VersionNumber, ARightValue : VersionNumber) : VersionNumber
 	public class VersionNumberMaxNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			if (AArguments[0] == null)
-				if (AArguments[1] == null)
+			if (arguments[0] == null)
+				if (arguments[1] == null)
 					return null;
 				else
-					return AArguments[1];
-			else if (AArguments[1] == null)
-				return AArguments[0];
+					return arguments[1];
+			else if (arguments[1] == null)
+				return arguments[0];
 			else
 			{
-				VersionNumber LValue = (VersionNumber)AArguments[0];
-				VersionNumber RValue = (VersionNumber)AArguments[1];
-				return LValue > RValue ? LValue : RValue;
+				VersionNumber tempValue = (VersionNumber)arguments[0];
+				VersionNumber RValue = (VersionNumber)arguments[1];
+				return tempValue > RValue ? tempValue : RValue;
 			}
 		}
 	}
@@ -543,20 +543,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator Min(ALeftValue : VersionNumber, ARightValue : VersionNumber) : VersionNumber
 	public class VersionNumberMinNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			if (AArguments[0] == null)
-				if (AArguments[1] == null)
+			if (arguments[0] == null)
+				if (arguments[1] == null)
 					return null;
 				else
-					return AArguments[1];
-			else if (AArguments[1] == null)
-				return AArguments[0];
+					return arguments[1];
+			else if (arguments[1] == null)
+				return arguments[0];
 			else
 			{
-				VersionNumber LValue = (VersionNumber)AArguments[0];
-				VersionNumber RValue = (VersionNumber)AArguments[1];
-				return LValue < RValue ? LValue : RValue;
+				VersionNumber tempValue = (VersionNumber)arguments[0];
+				VersionNumber RValue = (VersionNumber)arguments[1];
+				return tempValue < RValue ? tempValue : RValue;
 			}
 		}
 	}
@@ -564,98 +564,98 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// create operator iEqual(const ALeftValue : VersionNumber, const ARightValue : VersionNumber) : Boolean
 	public class VersionNumberEqualNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null || AArguments[1] == null)
+			if (arguments[0] == null || arguments[1] == null)
 				return null;
 			#endif
 			
-			return (VersionNumber)AArguments[0] == (VersionNumber)AArguments[1];
+			return (VersionNumber)arguments[0] == (VersionNumber)arguments[1];
 		}
 	}
 
 	// create operator iNotEqual(const ALeftValue : VersionNumber, const ARightValue : VersionNumber) : Boolean
 	public class VersionNumberNotEqualNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null || AArguments[1] == null)
+			if (arguments[0] == null || arguments[1] == null)
 				return null;
 			#endif
 			
-			return (VersionNumber)AArguments[0] != (VersionNumber)AArguments[1];
+			return (VersionNumber)arguments[0] != (VersionNumber)arguments[1];
 		}
 	}
 
 	// create operator iLess(const ALeftValue : VersionNumber, const ARightValue : VersionNumber) : Boolean
 	public class VersionNumberLessNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null || AArguments[1] == null)
+			if (arguments[0] == null || arguments[1] == null)
 				return null;
 			#endif
 			
-			return (VersionNumber)AArguments[0] < (VersionNumber)AArguments[1];
+			return (VersionNumber)arguments[0] < (VersionNumber)arguments[1];
 		}
 	}
 
 	// create operator iInclusiveLess(const ALeftValue : VersionNumber, const ARightValue : VersionNumber) : Boolean
 	public class VersionNumberInclusiveLessNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null || AArguments[1] == null)
+			if (arguments[0] == null || arguments[1] == null)
 				return null;
 			#endif
 			
-			return (VersionNumber)AArguments[0] <= (VersionNumber)AArguments[1];
+			return (VersionNumber)arguments[0] <= (VersionNumber)arguments[1];
 		}
 	}
 
 	// create operator iGreater(const ALeftValue : VersionNumber, const ARightValue : VersionNumber) : Boolean
 	public class VersionNumberGreaterNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null || AArguments[1] == null)
+			if (arguments[0] == null || arguments[1] == null)
 				return null;
 			#endif
 			
-			return (VersionNumber)AArguments[0] > (VersionNumber)AArguments[1];
+			return (VersionNumber)arguments[0] > (VersionNumber)arguments[1];
 		}
 	}
 
 	// create operator iInclusiveGreater(const ALeftValue : VersionNumber, const ARightValue : VersionNumber) : Boolean
 	public class VersionNumberInclusiveGreaterNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null || AArguments[1] == null)
+			if (arguments[0] == null || arguments[1] == null)
 				return null;
 			#endif
 			
-			return (VersionNumber)AArguments[0] >= (VersionNumber)AArguments[1];
+			return (VersionNumber)arguments[0] >= (VersionNumber)arguments[1];
 		}
 	}
 
 	// operator Compatible(const ASource : VersionNumber, const ATarget : VersionNumber) : Boolean
 	public class VersionNumberCompatibleNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null || AArguments[1] == null)
+			if (arguments[0] == null || arguments[1] == null)
 				return null;
 			#endif
 			
-			return VersionNumber.Compatible((VersionNumber)AArguments[0], (VersionNumber)AArguments[1]);
+			return VersionNumber.Compatible((VersionNumber)arguments[0], (VersionNumber)arguments[1]);
 		}
 	}
 	
@@ -663,14 +663,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator ToIString(const AVersionNumber : VersionNumber) : IString;
 	public class VersionNumberToStringNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null)
+			if (arguments[0] == null)
 				return null;
 			#endif
 			
-			return ((VersionNumber)AArguments[0]).ToString();
+			return ((VersionNumber)arguments[0]).ToString();
 		}
 	}
 	
@@ -678,14 +678,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator ToVersionNumber(const AString : IString) : VersionNumber;
 	public class StringToVersionNumberNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null)
+			if (arguments[0] == null)
 				return null;
 			#endif
 			
-			return VersionNumber.Parse((string)AArguments[0]);
+			return VersionNumber.Parse((string)arguments[0]);
 		}
 	}
 }

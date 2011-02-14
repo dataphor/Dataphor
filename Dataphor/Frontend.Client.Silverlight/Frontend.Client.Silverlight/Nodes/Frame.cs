@@ -11,65 +11,65 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 	{
 		public Frame() {}
 
-		public Frame([PublishSource("SourceLinkType")] SourceLinkType ASourceLinkType): base()
+		public Frame([PublishSource("SourceLinkType")] SourceLinkType sourceLinkType): base()
 		{
-			SourceLinkType = ASourceLinkType;
+			SourceLinkType = sourceLinkType;
 		}
 	
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			BeforeCloseEmbedded = null;
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
 		// this link must be set first when deserializing.
 		// which is why it is set in the constructor
-		private SourceLinkType FSourceLinkType;
+		private SourceLinkType _sourceLinkType;
 		[DefaultValue(SourceLinkType.None)]
 		public SourceLinkType SourceLinkType
 		{
-			get { return FSourceLinkType; }
+			get { return _sourceLinkType; }
 			set
 			{
-				if (FSourceLinkType != value)
+				if (_sourceLinkType != value)
 				{
-					if (FSourceLink != null)
-						FSourceLink.Dispose();
-					FSourceLinkType = value;
-					if (FSourceLinkType == SourceLinkType.None)
-						FSourceLink = null;
+					if (_sourceLink != null)
+						_sourceLink.Dispose();
+					_sourceLinkType = value;
+					if (_sourceLinkType == SourceLinkType.None)
+						_sourceLink = null;
 					else 
 					{
-						if (FSourceLinkType == SourceLinkType.Surrogate)
-							FSourceLink = new SurrogateSourceLink(this);
-						else if (FSourceLinkType == SourceLinkType.Detail)
-							FSourceLink = new DetailSourceLink(this);
-						if (FFrameInterfaceNode != null)
-							FSourceLink.TargetSource = FFrameInterfaceNode.MainSource;
+						if (_sourceLinkType == SourceLinkType.Surrogate)
+							_sourceLink = new SurrogateSourceLink(this);
+						else if (_sourceLinkType == SourceLinkType.Detail)
+							_sourceLink = new DetailSourceLink(this);
+						if (_frameInterfaceNode != null)
+							_sourceLink.TargetSource = _frameInterfaceNode.MainSource;
 					}
 				}
 			}
 		}
 
-		private SourceLink FSourceLink;
+		private SourceLink _sourceLink;
 		public SourceLink SourceLink
 		{
-			get { return FSourceLink; }
-			set { FSourceLink = value; }
+			get { return _sourceLink; }
+			set { _sourceLink = value; }
 		}
 
 		// Document
 
-		private string FDocument = String.Empty;
+		private string _document = String.Empty;
 		[DefaultValue("")]
 		public string Document
 		{
-			get { return FDocument; }
+			get { return _document; }
 			set
 			{
-				if (FDocument != value)
+				if (_document != value)
 				{
-					FDocument = value;
+					_document = value;
 					UpdateFrameInterface(true);
 				}
 			}
@@ -77,47 +77,47 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		// PostBeforeClosingEmbedded
 
-		private bool FPostBeforeClosingEmbedded;
+		private bool _postBeforeClosingEmbedded;
 		[DefaultValue(false)]
 		public bool PostBeforeClosingEmbedded
 		{
-			get { return FPostBeforeClosingEmbedded; }
-			set { FPostBeforeClosingEmbedded = value; }
+			get { return _postBeforeClosingEmbedded; }
+			set { _postBeforeClosingEmbedded = value; }
 		}
 
 		// BeforeCloseEmbedded
 
-		private IAction FBeforeCloseEmbedded;
+		private IAction _beforeCloseEmbedded;
 		public IAction BeforeCloseEmbedded
 		{
-			get { return FBeforeCloseEmbedded; }
+			get { return _beforeCloseEmbedded; }
 			set
 			{
-				if (FBeforeCloseEmbedded != value)
+				if (_beforeCloseEmbedded != value)
 				{
-					if (FBeforeCloseEmbedded != null)
-						FBeforeCloseEmbedded.Disposed -= new EventHandler(BeforeCloseEmbeddedActionDisposed);
-					FBeforeCloseEmbedded = value;
-					if (FBeforeCloseEmbedded != null)
-						FBeforeCloseEmbedded.Disposed += new EventHandler(BeforeCloseEmbeddedActionDisposed);
+					if (_beforeCloseEmbedded != null)
+						_beforeCloseEmbedded.Disposed -= new EventHandler(BeforeCloseEmbeddedActionDisposed);
+					_beforeCloseEmbedded = value;
+					if (_beforeCloseEmbedded != null)
+						_beforeCloseEmbedded.Disposed += new EventHandler(BeforeCloseEmbeddedActionDisposed);
 				}
 			}
 		}
 
-		private void BeforeCloseEmbeddedActionDisposed(object ASender, EventArgs AArgs)
+		private void BeforeCloseEmbeddedActionDisposed(object sender, EventArgs args)
 		{
 			BeforeCloseEmbedded = null;
 		}
 
 		// FrameInterface
 
-		private FrameInterface FFrameInterfaceNode;
+		private FrameInterface _frameInterfaceNode;
 		public IFrameInterface FrameInterfaceNode
 		{
-			get { return FFrameInterfaceNode; }
+			get { return _frameInterfaceNode; }
 		}
 
-		protected virtual void UpdateFrameInterface(bool AForce)
+		protected virtual void UpdateFrameInterface(bool force)
 		{
 			ResetFrameInterfaceNode(Active);
 		}
@@ -127,40 +127,40 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			return Document != String.Empty;
 		}
 
-		protected void ResetFrameInterfaceNode(bool ABuild)
+		protected void ResetFrameInterfaceNode(bool build)
 		{
 			// Clean up the old frame if there is one
-			if (FFrameInterfaceNode != null)
+			if (_frameInterfaceNode != null)
 				EnsureFrameInterfaceClosed();
-			if (ABuild && ShouldLoad())
+			if (build && ShouldLoad())
 				LoadFrameInterface();
 		}
 
 		private void LoadFrameInterface()
 		{
-			IHost LHost = HostNode.Session.CreateHost();
+			IHost host = HostNode.Session.CreateHost();
 			try
 			{
-				FFrameInterfaceNode = new FrameInterface(this);
+				_frameInterfaceNode = new FrameInterface(this);
 				try
 				{
-					LHost.Load(FDocument, FFrameInterfaceNode);
-					if (FSourceLink != null)
-						FSourceLink.TargetSource = FFrameInterfaceNode.MainSource;
-					LHost.Open(!Active);
+					host.Load(_document, _frameInterfaceNode);
+					if (_sourceLink != null)
+						_sourceLink.TargetSource = _frameInterfaceNode.MainSource;
+					host.Open(!Active);
 					if (Active)
 						BroadcastEvent(new FormShownEvent());
 				}
 				catch
 				{
-					FFrameInterfaceNode.Dispose();
-					FFrameInterfaceNode = null;
+					_frameInterfaceNode.Dispose();
+					_frameInterfaceNode = null;
 					throw;
 				}
 			}
 			catch
 			{
-				LHost.Dispose();
+				host.Dispose();
 				throw;
 			}
 		}
@@ -168,42 +168,42 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		private void EnsureFrameInterfaceClosed()
 		{
 			// Optionally post the data changes
-			if (FPostBeforeClosingEmbedded)
-				FFrameInterfaceNode.PostChanges();
+			if (_postBeforeClosingEmbedded)
+				_frameInterfaceNode.PostChanges();
 
 			// Invoke the before close embedded handler
-			if (FBeforeCloseEmbedded != null)
-				FBeforeCloseEmbedded.Execute(this, new EventParams("AInterface", FFrameInterfaceNode));
+			if (_beforeCloseEmbedded != null)
+				_beforeCloseEmbedded.Execute(this, new EventParams("AInterface", _frameInterfaceNode));
 
 			try
 			{
-				FFrameInterfaceNode.HostNode.BroadcastEvent(new DisableSourceEvent());
-				if (FSourceLink != null)
-					FSourceLink.TargetSource = null;
+				_frameInterfaceNode.HostNode.BroadcastEvent(new DisableSourceEvent());
+				if (_sourceLink != null)
+					_sourceLink.TargetSource = null;
 			}
 			finally
 			{
 				try
 				{
-					FFrameInterfaceNode.HostNode.Dispose();
+					_frameInterfaceNode.HostNode.Dispose();
 				}
 				finally
 				{
-					FFrameInterfaceNode = null;
+					_frameInterfaceNode = null;
 				}
 			}
 		}
 
 		// MenuText
 
-		private string FMenuText = String.Empty;
+		private string _menuText = String.Empty;
 		[DefaultValue("")]
 		public string MenuText
 		{
-			get { return FMenuText; }
+			get { return _menuText; }
 			set
 			{
-				FMenuText = value;
+				_menuText = value;
 			}
 		}
 
@@ -217,8 +217,8 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		internal protected override void AfterActivate()
 		{
-			if (FFrameInterfaceNode != null)
-				FFrameInterfaceNode.HostNode.AfterOpen();
+			if (_frameInterfaceNode != null)
+				_frameInterfaceNode.HostNode.AfterOpen();
 			base.AfterActivate();
 		}
 
@@ -234,10 +234,10 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			}
 		}
 
-		public override void BroadcastEvent(NodeEvent AEvent)
+		public override void BroadcastEvent(NodeEvent eventValue)
 		{
 			if (FrameInterfaceNode != null)
-				FrameInterfaceNode.BroadcastEvent(AEvent);
+				FrameInterfaceNode.BroadcastEvent(eventValue);
 		}
 	}
 }

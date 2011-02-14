@@ -22,27 +22,27 @@ namespace Alphora.Dataphor.DAE.Store
 {
 	public class SQLStoreCursor : System.Object, IDisposable
 	{
-		protected internal SQLStoreCursor(SQLStoreConnection AConnection, string ATableName, SQLIndex AIndex, bool AIsUpdatable) : base()
+		protected internal SQLStoreCursor(SQLStoreConnection connection, string tableName, SQLIndex index, bool isUpdatable) : base()
 		{
-			FConnection = AConnection;
-			FTableName = ATableName;
-			FIndex = AIndex;
-			FKey = new List<string>(AIndex.Columns.Count);
-			for (int LIndex = 0; LIndex < AIndex.Columns.Count; LIndex++)
-				FKey.Add(AIndex.Columns[LIndex].Name);
-			FIsUpdatable = AIsUpdatable;
-			FCursorName = FIndex.Name + AIsUpdatable.ToString();
+			_connection = connection;
+			_tableName = tableName;
+			_index = index;
+			_key = new List<string>(index.Columns.Count);
+			for (int localIndex = 0; localIndex < index.Columns.Count; localIndex++)
+				_key.Add(index.Columns[localIndex].Name);
+			_isUpdatable = isUpdatable;
+			_cursorName = _index.Name + isUpdatable.ToString();
 		}
 		
-		protected internal SQLStoreCursor(SQLStoreConnection AConnection, string ATableName, List<string> AColumns, SQLIndex AIndex, bool AIsUpdatable)
-			: this(AConnection, ATableName, AIndex, AIsUpdatable)
+		protected internal SQLStoreCursor(SQLStoreConnection connection, string tableName, List<string> columns, SQLIndex index, bool isUpdatable)
+			: this(connection, tableName, index, isUpdatable)
 		{
-			if (AColumns != null)
+			if (columns != null)
 			{
-				FColumns = AColumns;
-				FKeyIndexes = new List<int>();
-				for (int LIndex = 0; LIndex < FKey.Count; LIndex++)
-					FKeyIndexes.Add(FColumns.IndexOf(FKey[LIndex]));
+				_columns = columns;
+				_keyIndexes = new List<int>();
+				for (int localIndex = 0; localIndex < _key.Count; localIndex++)
+					_keyIndexes.Add(_columns.IndexOf(_key[localIndex]));
 			}
 		}
 		
@@ -62,101 +62,101 @@ namespace Alphora.Dataphor.DAE.Store
 			{
 				DisposeReader();
 				
-				FConnection = null;
+				_connection = null;
 			}
 		}
 
 		#endregion
 		
-		private SQLStoreConnection FConnection;
-		public SQLStoreConnection Connection { get { return FConnection; } }
+		private SQLStoreConnection _connection;
+		public SQLStoreConnection Connection { get { return _connection; } }
 		
-		private SQLCommand FReaderCommand;
+		private SQLCommand _readerCommand;
 		
-		private SQLCursor FReader;
-		protected SQLCursor Reader { get { return FReader; } }
+		private SQLCursor _reader;
+		protected SQLCursor Reader { get { return _reader; } }
 		
-		private string FTableName;
-		public string TableName { get { return FTableName; } }
+		private string _tableName;
+		public string TableName { get { return _tableName; } }
 		
-		private SQLIndex FIndex;
-		public SQLIndex Index { get { return FIndex; } }
+		private SQLIndex _index;
+		public SQLIndex Index { get { return _index; } }
 		
-		public string IndexName { get { return FIndex.Name; } }
+		public string IndexName { get { return _index.Name; } }
 		
-		private bool FIsUpdatable;
-		public bool IsUpdatable { get { return FIsUpdatable; } }
+		private bool _isUpdatable;
+		public bool IsUpdatable { get { return _isUpdatable; } }
 
-		private string FCursorName;
-		public string CursorName { get { return FCursorName; } }
+		private string _cursorName;
+		public string CursorName { get { return _cursorName; } }
 
-		private List<String> FColumns;
-		private List<String> FKey;
-		private List<int> FKeyIndexes;
-		private object[] FCurrentRow;
-		private object[] FEditingRow;
-		private object[] FStartValues;
-		private object[] FEndValues;
-		private bool FIsOnRow;
-		private bool FIsOnSimulatedCrack;
+		private List<String> _columns;
+		private List<String> _key;
+		private List<int> _keyIndexes;
+		private object[] _currentRow;
+		private object[] _editingRow;
+		private object[] _startValues;
+		private object[] _endValues;
+		private bool _isOnRow;
+		private bool _isOnSimulatedCrack;
 		
 		private void DisposeReader()
 		{
-			if (FReader != null)
+			if (_reader != null)
 			{
-				FReader.Dispose();
-				FReader = null;
+				_reader.Dispose();
+				_reader = null;
 			}
 
-			if (FReaderCommand != null)
+			if (_readerCommand != null)
 			{
-				FReaderCommand.Dispose();
-				FReaderCommand = null;
+				_readerCommand.Dispose();
+				_readerCommand = null;
 			}
 		}
 		
-		private void CreateReader(object[] AOrigin, bool AForward, bool AInclusive)
+		private void CreateReader(object[] origin, bool forward, bool inclusive)
 		{
-			FReader = InternalCreateReader(AOrigin, AForward, AInclusive);
-			FOrigin = AOrigin;
-			FForward = AForward;
-			FInclusive = AInclusive;
-			if (FColumns == null)
+			_reader = InternalCreateReader(origin, forward, inclusive);
+			_origin = origin;
+			_forward = forward;
+			_inclusive = inclusive;
+			if (_columns == null)
 			{
-				FColumns = new List<string>();
-				for (int LIndex = 0; LIndex < FReader.ColumnCount; LIndex++)
-					FColumns.Add(FReader.GetColumnName(LIndex));
-				FKeyIndexes = new List<int>();
-				for (int LIndex = 0; LIndex < FKey.Count; LIndex++)
-					FKeyIndexes.Add(FColumns.IndexOf(FKey[LIndex]));
+				_columns = new List<string>();
+				for (int index = 0; index < _reader.ColumnCount; index++)
+					_columns.Add(_reader.GetColumnName(index));
+				_keyIndexes = new List<int>();
+				for (int index = 0; index < _key.Count; index++)
+					_keyIndexes.Add(_columns.IndexOf(_key[index]));
 			}
 		}
 		
-		protected virtual SQLCursor InternalCreateReader(object[] AOrigin, bool AForward, bool AInclusive)
+		protected virtual SQLCursor InternalCreateReader(object[] origin, bool forward, bool inclusive)
 		{
-			return FConnection.ExecuteReader(GetReaderStatement(FTableName, FIndex.Columns, AOrigin, AForward, AInclusive), out FReaderCommand);
+			return _connection.ExecuteReader(GetReaderStatement(_tableName, _index.Columns, origin, forward, inclusive), out _readerCommand);
 		}
 		
-		private object[] FOrigin;
-		private bool FForward;
-		private bool FInclusive;
-		private List<object[]> FBuffer;
-		private bool FBufferForward;
-		private int FBufferIndex;
+		private object[] _origin;
+		private bool _forward;
+		private bool _inclusive;
+		private List<object[]> _buffer;
+		private bool _bufferForward;
+		private int _bufferIndex;
 		
 		protected void EnsureReader()
 		{
-			if (FReader == null)
+			if (_reader == null)
 				EnsureReader(null, true, true);
 		}
 		
-		protected virtual void EnsureReader(object[] AOrigin, bool AForward, bool AInclusive)
+		protected virtual void EnsureReader(object[] origin, bool forward, bool inclusive)
 		{
-			if (((FOrigin == null) != (AOrigin == null)) || (CompareKeys(FOrigin, AOrigin) != 0) || (FForward != AForward) || (FInclusive != AInclusive))
+			if (((_origin == null) != (origin == null)) || (CompareKeys(_origin, origin) != 0) || (_forward != forward) || (_inclusive != inclusive))
 				DisposeReader();
 				
-			if (FReader == null)
-				CreateReader(AOrigin, AForward, AInclusive);
+			if (_reader == null)
+				CreateReader(origin, forward, inclusive);
 		}
 		
 		#region Ranged Reader Statement Generation
@@ -189,58 +189,58 @@ namespace Alphora.Dataphor.DAE.Store
 						[and] current order column is not null
 		*/
 		
-		protected virtual string GetReaderStatement(string ATableName, SQLIndexColumns AIndexColumns, object[] AOrigin, bool AForward, bool AInclusive)
+		protected virtual string GetReaderStatement(string tableName, SQLIndexColumns indexColumns, object[] origin, bool forward, bool inclusive)
 		{
-			StringBuilder LStatement = new StringBuilder();
+			StringBuilder statement = new StringBuilder();
 			
-			LStatement.AppendFormat("select * from {0}", ATableName);
+			statement.AppendFormat("select * from {0}", tableName);
 
-			for (int LIndex = AIndexColumns.Count - 1; LIndex >= 0; LIndex--)
+			for (int index = indexColumns.Count - 1; index >= 0; index--)
 			{
-				if ((AOrigin != null) && (LIndex < AOrigin.Length))
+				if ((origin != null) && (index < origin.Length))
 				{
-					if (LIndex == AOrigin.Length - 1)
-						LStatement.AppendFormat(" where ");
+					if (index == origin.Length - 1)
+						statement.AppendFormat(" where ");
 					else
-						LStatement.Append(" or ");
+						statement.Append(" or ");
 					
-					LStatement.Append("(");
+					statement.Append("(");
 
-					for (int LOriginIndex = 0; LOriginIndex < LIndex; LOriginIndex++)
+					for (int originIndex = 0; originIndex < index; originIndex++)
 					{
-						if (LOriginIndex > 0)
-							LStatement.Append(" and ");
+						if (originIndex > 0)
+							statement.Append(" and ");
 							
-						LStatement.AppendFormat("({0} = {1})", AIndexColumns[LOriginIndex].Name, FConnection.NativeToLiteralValue(AOrigin[LOriginIndex]));
+						statement.AppendFormat("({0} = {1})", indexColumns[originIndex].Name, _connection.NativeToLiteralValue(origin[originIndex]));
 					}
 					
-					if (LIndex > 0)
-						LStatement.Append(" and ");
+					if (index > 0)
+						statement.Append(" and ");
 						
-					LStatement.AppendFormat
+					statement.AppendFormat
 					(
 						"({0} {1} {2})", 
-						AIndexColumns[LIndex].Name, 
-						(AIndexColumns[LIndex].Ascending == AForward)
-							? (((LIndex == (AOrigin.Length - 1)) && AInclusive) ? ">=" : ">")
-							: (((LIndex == (AOrigin.Length - 1)) && AInclusive) ? "<=" : "<"),
-						FConnection.NativeToLiteralValue(AOrigin[LIndex])
+						indexColumns[index].Name, 
+						(indexColumns[index].Ascending == forward)
+							? (((index == (origin.Length - 1)) && inclusive) ? ">=" : ">")
+							: (((index == (origin.Length - 1)) && inclusive) ? "<=" : "<"),
+						_connection.NativeToLiteralValue(origin[index])
 					);
 					
-					LStatement.Append(")");
+					statement.Append(")");
 				}
 			}
 			
-			LStatement.AppendFormat(" order by ");
+			statement.AppendFormat(" order by ");
 			
-			for (int LIndex = 0; LIndex < AIndexColumns.Count; LIndex++)
+			for (int index = 0; index < indexColumns.Count; index++)
 			{
-				if (LIndex > 0)
-					LStatement.Append(", ");
-				LStatement.AppendFormat("{0} {1}", AIndexColumns[LIndex].Name, AIndexColumns[LIndex].Ascending == AForward ? "asc" : "desc");
+				if (index > 0)
+					statement.Append(", ");
+				statement.AppendFormat("{0} {1}", indexColumns[index].Name, indexColumns[index].Ascending == forward ? "asc" : "desc");
 			}
 			
-			return LStatement.ToString();
+			return statement.ToString();
 		}
 		
 		#endregion
@@ -249,55 +249,55 @@ namespace Alphora.Dataphor.DAE.Store
 		
 		private void ClearBuffer()
 		{
-			if (!FIndex.IsUnique)
+			if (!_index.IsUnique)
 			{
-				if (FBuffer == null)
-					FBuffer = new List<object[]>();
+				if (_buffer == null)
+					_buffer = new List<object[]>();
 				else
-					FBuffer.Clear();
-				FBufferForward = true;
-				FBufferIndex = -1;
+					_buffer.Clear();
+				_bufferForward = true;
+				_bufferIndex = -1;
 			}
 		}
 		
 		#endregion
 		
-		public void SetRange(object[] AStartValues, object[] AEndValues)
+		public void SetRange(object[] startValues, object[] endValues)
 		{
-			FCurrentRow = null;
-			FStartValues = AStartValues;
-			FEndValues = AEndValues;
+			_currentRow = null;
+			_startValues = startValues;
+			_endValues = endValues;
 			
-			if (FStartValues != null)
-				FIsOnSimulatedCrack = InternalSeek(AStartValues);
+			if (_startValues != null)
+				_isOnSimulatedCrack = InternalSeek(startValues);
 			else
-				FIsOnSimulatedCrack = InternalFirst();
+				_isOnSimulatedCrack = InternalFirst();
 			
-			FIsOnRow = false;
+			_isOnRow = false;
 		}
 		
 		/// <summary>Returns true if ALeftValue is less than ARightValue, false otherwise.</summary>
-		private bool IsLessThan(object ALeftValue, object ARightValue)
+		private bool IsLessThan(object leftValue, object rightValue)
 		{
-			if (ALeftValue is int)
-				return (int)ALeftValue < (int)ARightValue;
+			if (leftValue is int)
+				return (int)leftValue < (int)rightValue;
 				
-			if (ALeftValue is string)
-				return String.Compare((string)ALeftValue, (string)ARightValue, true) < 0;
+			if (leftValue is string)
+				return String.Compare((string)leftValue, (string)rightValue, true) < 0;
 				
-			if (ALeftValue is bool)
-				return !(bool)ALeftValue && (bool)ARightValue;
+			if (leftValue is bool)
+				return !(bool)leftValue && (bool)rightValue;
 				
 			return false;
 		}
 		
-		private int CompareKeyValues(object ALeftValue, object ARightValue)
+		private int CompareKeyValues(object leftValue, object rightValue)
 		{
-			if (ALeftValue is string)
-				return String.Compare((string)ALeftValue, (string)ARightValue, true);
+			if (leftValue is string)
+				return String.Compare((string)leftValue, (string)rightValue, true);
 				
-			if (ALeftValue is IComparable)
-				return ((IComparable)ALeftValue).CompareTo(ARightValue);
+			if (leftValue is IComparable)
+				return ((IComparable)leftValue).CompareTo(rightValue);
 				
 			Error.Fail("Storage keys not comaparable");
 
@@ -306,127 +306,127 @@ namespace Alphora.Dataphor.DAE.Store
 		
 		/// <summary>Returns -1 if ALeftKey is less than ARightKey, 1 if ALeftKey is greater than ARightKey, and 0 if ALeftKey is equal to ARightKey.</summary>
 		/// <remarks>The values of ALeftKey and ARightKey are expected to be native, not store, values.</remarks>
-		private int CompareKeys(object[] ALeftKey, object[] ARightKey)
+		private int CompareKeys(object[] leftKey, object[] rightKey)
 		{
-			if ((ALeftKey == null) && (ARightKey == null))
+			if ((leftKey == null) && (rightKey == null))
 				return 0;
 				
-			if (ALeftKey == null)
+			if (leftKey == null)
 				return -1;
 				
-			if (ARightKey == null)
+			if (rightKey == null)
 				return 1;
 				
-			int LResult = 0;
-			for (int LIndex = 0; LIndex < (ALeftKey.Length >= ARightKey.Length ? ALeftKey.Length : ARightKey.Length); LIndex++)
+			int result = 0;
+			for (int index = 0; index < (leftKey.Length >= rightKey.Length ? leftKey.Length : rightKey.Length); index++)
 			{
-				if ((LIndex >= ALeftKey.Length) || (ALeftKey[LIndex] == null))
+				if ((index >= leftKey.Length) || (leftKey[index] == null))
 					return -1;
-				else if ((LIndex >= ARightKey.Length) || (ARightKey[LIndex] == null))
+				else if ((index >= rightKey.Length) || (rightKey[index] == null))
 					return 1;
 				else
 				{
-					LResult = CompareKeyValues(ALeftKey[LIndex], ARightKey[LIndex]);
-					if (LResult != 0)
-						return LResult;
+					result = CompareKeyValues(leftKey[index], rightKey[index]);
+					if (result != 0)
+						return result;
 				}
 			}
-			return LResult;
+			return result;
 		}
 		
 		/// <summary>Returns -1 if the key values for the current row are less than ACompareKey, 1 if the key values for the current row are greater than ACompareKey, and 0 is the key values for the current row are equal to ACompareKey.</summary>
 		/// <remarks>The values of ACompareKey are expected to be native, not store, values.</remarks>
-		private int CompareKeys(object[] ACompareKey)
+		private int CompareKeys(object[] compareKey)
 		{
-			if (!FIsOnRow && (ACompareKey == null))
+			if (!_isOnRow && (compareKey == null))
 				return 0;
 				
-			if (!FIsOnRow)
+			if (!_isOnRow)
 				return -1;
 				
-			if (ACompareKey == null)
+			if (compareKey == null)
 				return 1;
 				
-			int LResult = 0;
-			object LIndexValue;
-			for (int LIndex = 0; LIndex < ACompareKey.Length; LIndex++)
+			int result = 0;
+			object indexValue;
+			for (int index = 0; index < compareKey.Length; index++)
 			{
-				LIndexValue = InternalGetValue(FKeyIndexes[LIndex]);
-				if (LIndexValue == null)
+				indexValue = InternalGetValue(_keyIndexes[index]);
+				if (indexValue == null)
 					return -1;
-				else if ((LIndex >= ACompareKey.Length) || (ACompareKey[LIndex] == null))
+				else if ((index >= compareKey.Length) || (compareKey[index] == null))
 					return 1;
 				else
 				{
-					LResult = CompareKeyValues(LIndexValue, ACompareKey[LIndex]);
-					if (LResult != 0)
-						return LResult;
+					result = CompareKeyValues(indexValue, compareKey[index]);
+					if (result != 0)
+						return result;
 				}
 			}
-			return LResult;
+			return result;
 		}
 		
-		private object[] RowToKey(object[] ARow)
+		private object[] RowToKey(object[] row)
 		{
-			object[] LKey = new object[FKey.Count];
-			for (int LIndex = 0; LIndex < FKey.Count; LIndex++)
-				LKey[LIndex] = ARow[FKeyIndexes[LIndex]];
-			return LKey;
+			object[] key = new object[_key.Count];
+			for (int index = 0; index < _key.Count; index++)
+				key[index] = row[_keyIndexes[index]];
+			return key;
 		}
 		
 		/// <summary>
 		/// Returns -1 if the key values of the left row are less than the key values of the right row, 1 if they are greater, and 0 if they are equal.
 		/// </summary>
 		/// <remarks>The values of ALeftRow and ARightRow are expected to be native, not store, values.</remarks>
-		private int CompareRows(object[] ALeftRow, object[] ARightRow)
+		private int CompareRows(object[] leftRow, object[] rightRow)
 		{
-			return CompareKeys(RowToKey(ALeftRow), RowToKey(ARightRow));
+			return CompareKeys(RowToKey(leftRow), RowToKey(rightRow));
 		}
 		
 		private void CheckIsOnRow()
 		{
-			if (!FIsOnRow)
+			if (!_isOnRow)
 				throw new StoreException(StoreException.Codes.CursorHasNoCurrentRow, ErrorSeverity.System);
 		}
 		
-		protected virtual object InternalGetValue(int AIndex)
+		protected virtual object InternalGetValue(int index)
 		{
-			if (FEditingRow != null)
-				return FEditingRow[AIndex];					
+			if (_editingRow != null)
+				return _editingRow[index];					
 				
-			if ((FBuffer != null) && (FBufferIndex >= 0) && (FBufferIndex < FBuffer.Count))
-				return FBuffer[FBufferIndex][AIndex];
+			if ((_buffer != null) && (_bufferIndex >= 0) && (_bufferIndex < _buffer.Count))
+				return _buffer[_bufferIndex][index];
 				
-			return StoreToNativeValue(FReader[AIndex]);
+			return StoreToNativeValue(_reader[index]);
 		}
 		
-		protected virtual void InternalSetValue(int AIndex, object AValue)
+		protected virtual void InternalSetValue(int index, object tempValue)
 		{
-			if (FEditingRow == null)
-				FEditingRow = InternalSelect();
+			if (_editingRow == null)
+				_editingRow = InternalSelect();
 				
-			FEditingRow[AIndex] = AValue;
+			_editingRow[index] = tempValue;
 		}
 		
-		public object this[int AIndex]
+		public object this[int index]
 		{
 			get 
 			{
 				CheckIsOnRow();
 
 				#if SQLSTORETIMING
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
 				#endif
 
-					return InternalGetValue(AIndex);
+					return InternalGetValue(index);
 
 				#if SQLSTORETIMING
 				}
 				finally
 				{
-					Connection.Store.Counters.Add(new SQLStoreCounter("GetValue", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+					Connection.Store.Counters.Add(new SQLStoreCounter("GetValue", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 				}
 				#endif
 			}
@@ -435,35 +435,35 @@ namespace Alphora.Dataphor.DAE.Store
 				CheckIsOnRow();
 				
 				// Save a copy of the current row before any edits if we are in a nested transaction
-				if ((FCurrentRow == null) && (FConnection.TransactionCount > 1))
-					FCurrentRow = Select();
+				if ((_currentRow == null) && (_connection.TransactionCount > 1))
+					_currentRow = Select();
 					
 				#if SQLSTORETIMING
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				#endif
 				
-				InternalSetValue(AIndex, value);
+				InternalSetValue(index, value);
 
 				#if SQLSTORETIMING
-				Connection.Store.Counters.Add(new SQLStoreCounter("SetValue", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+				Connection.Store.Counters.Add(new SQLStoreCounter("SetValue", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 				#endif
 			}
 		}
 		
 		protected virtual object[] InternalSelect()
 		{
-			object[] LRow = new object[FColumns.Count];
-			for (int LIndex = 0; LIndex < LRow.Length; LIndex++)
-				LRow[LIndex] = InternalGetValue(LIndex);
+			object[] row = new object[_columns.Count];
+			for (int index = 0; index < row.Length; index++)
+				row[index] = InternalGetValue(index);
 
-			return LRow;
+			return row;
 		}
 		
 		public object[] Select()
 		{
 			CheckIsOnRow();
 			#if SQLSTORETIMING
-			long LStartTicks = TimingUtility.CurrentTicks;
+			long startTicks = TimingUtility.CurrentTicks;
 			try
 			{
 			#endif
@@ -474,72 +474,72 @@ namespace Alphora.Dataphor.DAE.Store
 			}
 			finally
 			{
-				Connection.Store.Counters.Add(new SQLStoreCounter("Select", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+				Connection.Store.Counters.Add(new SQLStoreCounter("Select", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 			}
 			#endif
 		}
 		
 		public object[] SelectKey()
 		{
-			if (!FIsOnRow)
+			if (!_isOnRow)
 				return null;
 				
-			object[] LKey = new object[FKey.Count];
-			for (int LIndex = 0; LIndex < LKey.Length; LIndex++)
-				LKey[LIndex] = InternalGetValue(FKeyIndexes[LIndex]);
+			object[] key = new object[_key.Count];
+			for (int index = 0; index < key.Length; index++)
+				key[index] = InternalGetValue(_keyIndexes[index]);
 				
-			return LKey;
+			return key;
 		}
 		
 		protected virtual object[] InternalReadRow()
 		{
-			object[] LRow = new object[FReader.ColumnCount];
-			for (int LIndex = 0; LIndex < FReader.ColumnCount; LIndex++)
-				LRow[LIndex] = StoreToNativeValue(FReader[LIndex]);
+			object[] row = new object[_reader.ColumnCount];
+			for (int index = 0; index < _reader.ColumnCount; index++)
+				row[index] = StoreToNativeValue(_reader[index]);
 				
-			return LRow;
+			return row;
 		}
 		
 		protected virtual bool InternalNext()
 		{
-			FEditingRow = null;
+			_editingRow = null;
 			
-			if ((FBuffer != null) && ((FBufferForward && (FBufferIndex < FBuffer.Count - 1)) || (!FBufferForward && (FBufferIndex > 0))))
+			if ((_buffer != null) && ((_bufferForward && (_bufferIndex < _buffer.Count - 1)) || (!_bufferForward && (_bufferIndex > 0))))
 			{
-				if (FBufferForward)
-					FBufferIndex++;
+				if (_bufferForward)
+					_bufferIndex++;
 				else
-					FBufferIndex--;
+					_bufferIndex--;
 				return true;
 			}
 			
-			if ((FReader == null) || !FForward)
-				EnsureReader(FIsOnRow ? SelectKey() : FStartValues, true, !FIsOnRow);
+			if ((_reader == null) || !_forward)
+				EnsureReader(_isOnRow ? SelectKey() : _startValues, true, !_isOnRow);
 			
-			if ((FBuffer == null) && !FIndex.IsUnique)
+			if ((_buffer == null) && !_index.IsUnique)
 			{
-				FBuffer = new List<object[]>();
-				FBufferForward = true;
-				FBufferIndex = -1;
+				_buffer = new List<object[]>();
+				_bufferForward = true;
+				_bufferIndex = -1;
 			}
 			
-			if (FReader.Next())
+			if (_reader.Next())
 			{
-				if (!FIndex.IsUnique)
+				if (!_index.IsUnique)
 				{
-					object[] LRow = InternalReadRow();
-					if ((FBuffer != null) && (FBufferIndex >= 0) && (FBufferIndex < FBuffer.Count))
-						if (CompareRows(FBuffer[FBufferIndex], LRow) != 0)
+					object[] row = InternalReadRow();
+					if ((_buffer != null) && (_bufferIndex >= 0) && (_bufferIndex < _buffer.Count))
+						if (CompareRows(_buffer[_bufferIndex], row) != 0)
 						{
-							FBuffer.Clear();
-							FBufferForward = true;
-							FBufferIndex = -1;
+							_buffer.Clear();
+							_bufferForward = true;
+							_bufferIndex = -1;
 						}
 
-					if (FBufferForward)
-						FBuffer.Insert(++FBufferIndex, LRow);
+					if (_bufferForward)
+						_buffer.Insert(++_bufferIndex, row);
 					else
-						FBuffer.Insert(FBufferIndex, LRow);
+						_buffer.Insert(_bufferIndex, row);
 				}
 
 				return true;
@@ -550,113 +550,113 @@ namespace Alphora.Dataphor.DAE.Store
 		
 		public bool Next()
 		{
-			FCurrentRow = null;
+			_currentRow = null;
 	
 			#if SQLSTORETIMING
-			long LStartTicks = TimingUtility.CurrentTicks;
+			long startTicks = TimingUtility.CurrentTicks;
 			try
 			{
 			#endif
 
-				if (FIsOnSimulatedCrack)
+				if (_isOnSimulatedCrack)
 				{
-					FIsOnSimulatedCrack = false;
-					FIsOnRow = true;
+					_isOnSimulatedCrack = false;
+					_isOnRow = true;
 				}
 				else
-					FIsOnRow = InternalNext();
+					_isOnRow = InternalNext();
 
 			#if SQLSTORETIMING
 			}
 			finally
 			{
-				Connection.Store.Counters.Add(new SQLStoreCounter("Next", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+				Connection.Store.Counters.Add(new SQLStoreCounter("Next", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 			}
 			#endif
 
-			if ((FIsOnRow) && (FEndValues != null) && ((CompareKeys(FEndValues) > 0) || (CompareKeys(FStartValues) < 0)))
-				FIsOnRow = false;
+			if ((_isOnRow) && (_endValues != null) && ((CompareKeys(_endValues) > 0) || (CompareKeys(_startValues) < 0)))
+				_isOnRow = false;
 
-			return FIsOnRow;
+			return _isOnRow;
 		}
 		
 		protected virtual bool InternalLast()
 		{
-			FEditingRow = null;			
+			_editingRow = null;			
 			DisposeReader();
 			EnsureReader(null, false, true);
-			if (!FIndex.IsUnique)
+			if (!_index.IsUnique)
 			{
-				if (FBuffer == null)
-					FBuffer = new List<object[]>();
+				if (_buffer == null)
+					_buffer = new List<object[]>();
 				else
-					FBuffer.Clear();
-				FBufferForward = false;
-				FBufferIndex = FBuffer.Count;
+					_buffer.Clear();
+				_bufferForward = false;
+				_bufferIndex = _buffer.Count;
 			}
 			return false;
 		}
 		
 		public void Last()
 		{
-			FCurrentRow = null;
+			_currentRow = null;
 
 			#if SQLSTORETIMING
-			long LStartTicks = TimingUtility.CurrentTicks;
+			long startTicks = TimingUtility.CurrentTicks;
 			#endif
 
-			if (FEndValues != null)
-				FIsOnSimulatedCrack = InternalSeek(FEndValues);
+			if (_endValues != null)
+				_isOnSimulatedCrack = InternalSeek(_endValues);
 			else
-				FIsOnSimulatedCrack = InternalLast();
+				_isOnSimulatedCrack = InternalLast();
 
 			#if SQLSTORETIMING
-			Connection.Store.Counters.Add(new SQLStoreCounter("Last", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			Connection.Store.Counters.Add(new SQLStoreCounter("Last", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 			#endif
 			
-			FIsOnRow = false;
+			_isOnRow = false;
 		}
 		
 		protected virtual bool InternalPrior()
 		{
-			FEditingRow = null;
+			_editingRow = null;
 			
-			if ((FBuffer != null) && ((FBufferForward && (FBufferIndex > 0)) || (!FBufferForward && (FBufferIndex < FBuffer.Count))))
+			if ((_buffer != null) && ((_bufferForward && (_bufferIndex > 0)) || (!_bufferForward && (_bufferIndex < _buffer.Count))))
 			{
-				if (FBufferForward)
-					FBufferIndex--;
+				if (_bufferForward)
+					_bufferIndex--;
 				else
-					FBufferIndex++;
+					_bufferIndex++;
 				return true;
 			}
 			
-			if ((FReader == null) || FForward)
-				EnsureReader(FIsOnRow ? SelectKey() : FEndValues, false, !FIsOnRow);
+			if ((_reader == null) || _forward)
+				EnsureReader(_isOnRow ? SelectKey() : _endValues, false, !_isOnRow);
 			
-			if (!FIndex.IsUnique && (FBuffer == null))
+			if (!_index.IsUnique && (_buffer == null))
 			{
-				FBuffer = new List<object[]>();
-				FBufferForward = false;
-				FBufferIndex = FBuffer.Count;
+				_buffer = new List<object[]>();
+				_bufferForward = false;
+				_bufferIndex = _buffer.Count;
 			}
 			
-			if (FReader.Next())
+			if (_reader.Next())
 			{
-				if (!FIndex.IsUnique)
+				if (!_index.IsUnique)
 				{
-					object[] LRow = InternalReadRow();
-					if ((FBuffer != null) && (FBufferIndex >= 0) && (FBufferIndex < FBuffer.Count))
-						if (CompareRows(FBuffer[FBufferIndex], LRow) != 0)
+					object[] row = InternalReadRow();
+					if ((_buffer != null) && (_bufferIndex >= 0) && (_bufferIndex < _buffer.Count))
+						if (CompareRows(_buffer[_bufferIndex], row) != 0)
 						{
-							FBuffer.Clear();
-							FBufferForward = false;
-							FBufferIndex = FBuffer.Count;
+							_buffer.Clear();
+							_bufferForward = false;
+							_bufferIndex = _buffer.Count;
 						}
 
-					if (FBufferForward)
-						FBuffer.Insert(FBufferIndex, LRow);
+					if (_bufferForward)
+						_buffer.Insert(_bufferIndex, row);
 					else
-						FBuffer.Insert(++FBufferIndex, LRow);
+						_buffer.Insert(++_bufferIndex, row);
 				}
 				
 				return true;
@@ -667,113 +667,113 @@ namespace Alphora.Dataphor.DAE.Store
 		
 		public bool Prior()
 		{
-			FCurrentRow = null;
+			_currentRow = null;
 
 			#if SQLSTORETIMING
-			long LStartTicks = TimingUtility.CurrentTicks;
+			long startTicks = TimingUtility.CurrentTicks;
 			try
 			{
 			#endif
 
-				if (FIsOnSimulatedCrack)
+				if (_isOnSimulatedCrack)
 				{	
-					FIsOnSimulatedCrack = false;
-					FIsOnRow = true;
+					_isOnSimulatedCrack = false;
+					_isOnRow = true;
 				}
 				else
-					FIsOnRow = InternalPrior();
+					_isOnRow = InternalPrior();
 				
 			#if SQLSTORETIMING
 			}
 			finally
 			{
-				Connection.Store.Counters.Add(new SQLStoreCounter("Prior", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+				Connection.Store.Counters.Add(new SQLStoreCounter("Prior", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 			}
 			#endif
 
-			if (FIsOnRow && (FStartValues != null) && ((CompareKeys(FStartValues) < 0) || (CompareKeys(FEndValues) > 0)))
-				FIsOnRow = false;
+			if (_isOnRow && (_startValues != null) && ((CompareKeys(_startValues) < 0) || (CompareKeys(_endValues) > 0)))
+				_isOnRow = false;
 
-			return FIsOnRow;
+			return _isOnRow;
 		}
 
 		protected virtual bool InternalFirst()
 		{
 			#if SQLSTORETIMING
-			long LStartTicks = TimingUtility.CurrentTicks;
+			long startTicks = TimingUtility.CurrentTicks;
 			#endif
 			
-			FEditingRow = null;
+			_editingRow = null;
 			DisposeReader();
 			EnsureReader(null, true, true);
 			ClearBuffer();
 			return false;
 
 			#if SQLSTORETIMING
-			Connection.Store.Counters.Add(new SQLStoreCounter("First", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			Connection.Store.Counters.Add(new SQLStoreCounter("First", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 			#endif
 		}
 		
 		public void First()
 		{
-			FCurrentRow = null;
+			_currentRow = null;
 
-			if (FStartValues != null)
-				FIsOnSimulatedCrack = InternalSeek(FStartValues);
+			if (_startValues != null)
+				_isOnSimulatedCrack = InternalSeek(_startValues);
 			else
-				FIsOnSimulatedCrack = InternalFirst();
+				_isOnSimulatedCrack = InternalFirst();
 			
-			FIsOnRow = false;
+			_isOnRow = false;
 		}
 		
-		public virtual object NativeToStoreValue(object AValue)
+		public virtual object NativeToStoreValue(object tempValue)
 		{			
-			return AValue;
+			return tempValue;
 		}
 
-		public virtual object StoreToNativeValue(object AValue)
+		public virtual object StoreToNativeValue(object tempValue)
 		{			
-			if (AValue is DBNull)
+			if (tempValue is DBNull)
 				return null;
-			return AValue;
+			return tempValue;
 		}
 		
-		protected virtual bool InternalInsert(object[] ARow)
+		protected virtual bool InternalInsert(object[] row)
 		{
 			DisposeReader();
-			Connection.PerformInsert(FTableName, FColumns, FKey, ARow);
+			Connection.PerformInsert(_tableName, _columns, _key, row);
 			//EnsureReader(RowToKey(ARow), true, true);
 			ClearBuffer();
 			return false;
 		}
 		
-		public void Insert(object[] ARow)
+		public void Insert(object[] row)
 		{
 			//EnsureReader();
 
 			#if SQLSTORETIMING
-			long LStartTicks = TimingUtility.CurrentTicks;
-			Connection.Store.Counters.Add(new SQLStoreCounter("CreateRecord", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
-			LStartTicks = TimingUtility.CurrentTicks;
+			long startTicks = TimingUtility.CurrentTicks;
+			Connection.Store.Counters.Add(new SQLStoreCounter("CreateRecord", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
+			startTicks = TimingUtility.CurrentTicks;
 			#endif
 			
-			FIsOnRow = InternalInsert(ARow);
+			_isOnRow = InternalInsert(row);
 
 			#if SQLSTORETIMING
-			Connection.Store.Counters.Add(new SQLStoreCounter("Insert", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			Connection.Store.Counters.Add(new SQLStoreCounter("Insert", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 			#endif
 
-			if (FConnection.TransactionCount > 1)
-				FConnection.LogInsert(FTableName, FColumns, FKey, ARow);
+			if (_connection.TransactionCount > 1)
+				_connection.LogInsert(_tableName, _columns, _key, row);
 		}
 		
 		protected virtual bool InternalUpdate()
 		{
-			if (FCurrentRow == null)
-				FCurrentRow = InternalSelect();
+			if (_currentRow == null)
+				_currentRow = InternalSelect();
 			
 			DisposeReader();
-			Connection.PerformUpdate(FTableName, FColumns, FKey, FCurrentRow, FEditingRow);
+			Connection.PerformUpdate(_tableName, _columns, _key, _currentRow, _editingRow);
 			//EnsureReader(RowToKey(FEditingRow), true, true);
 			ClearBuffer();
 			
@@ -784,42 +784,42 @@ namespace Alphora.Dataphor.DAE.Store
 		{
 			CheckIsOnRow();
 			
-			object[] LNewRow = null;
-			if (FConnection.TransactionCount > 1)
+			object[] newRow = null;
+			if (_connection.TransactionCount > 1)
 			{
-				if (FCurrentRow == null)
-					FCurrentRow = InternalSelect();
+				if (_currentRow == null)
+					_currentRow = InternalSelect();
 					
 				if (Connection.Store.SupportsUpdatableCursor)
-					LNewRow = InternalSelect();
+					newRow = InternalSelect();
 				else
-					LNewRow = FEditingRow;
+					newRow = _editingRow;
 			}
 
 			#if SQLSTORETIMING
-			long LStartTicks = TimingUtility.CurrentTicks;
+			long startTicks = TimingUtility.CurrentTicks;
 			#endif
 			
-			FIsOnRow = InternalUpdate();
+			_isOnRow = InternalUpdate();
 
 			#if SQLSTORETIMING
-			Connection.Store.Counters.Add(new SQLStoreCounter("Update", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			Connection.Store.Counters.Add(new SQLStoreCounter("Update", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 			#endif
 			
-			if (FConnection.TransactionCount > 1)
-				FConnection.LogUpdate(FTableName, FColumns, FKey, FCurrentRow, LNewRow);
+			if (_connection.TransactionCount > 1)
+				_connection.LogUpdate(_tableName, _columns, _key, _currentRow, newRow);
 
-			FCurrentRow = null;
-			FEditingRow = null;
+			_currentRow = null;
+			_editingRow = null;
 		}
 		
 		protected virtual bool InternalDelete()
 		{
-			if (FCurrentRow == null)
-				FCurrentRow = InternalSelect();
+			if (_currentRow == null)
+				_currentRow = InternalSelect();
 			
 			DisposeReader();
-			Connection.PerformDelete(FTableName, FColumns, FKey, FCurrentRow);
+			Connection.PerformDelete(_tableName, _columns, _key, _currentRow);
 			//EnsureReader(RowToKey(FCurrentRow), true, true);
 			ClearBuffer();
 			
@@ -830,93 +830,93 @@ namespace Alphora.Dataphor.DAE.Store
 		{
 			CheckIsOnRow();
 			
-			if ((FCurrentRow == null) && (FConnection.TransactionCount > 1))
-				FCurrentRow = InternalSelect();
+			if ((_currentRow == null) && (_connection.TransactionCount > 1))
+				_currentRow = InternalSelect();
 				
 			#if SQLSTORETIMING
-			long LStartTicks = TimingUtility.CurrentTicks;
+			long startTicks = TimingUtility.CurrentTicks;
 			#endif
 			
-			FIsOnRow = InternalDelete();
+			_isOnRow = InternalDelete();
 
 			#if SQLSTORETIMING
-			Connection.Store.Counters.Add(new SQLStoreCounter("Delete", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			Connection.Store.Counters.Add(new SQLStoreCounter("Delete", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 			#endif
 
-			if (FConnection.TransactionCount > 1)
-				FConnection.LogDelete(FTableName, FColumns, FKey, FCurrentRow);
+			if (_connection.TransactionCount > 1)
+				_connection.LogDelete(_tableName, _columns, _key, _currentRow);
 
-			FCurrentRow = null;
-			FEditingRow = null;
+			_currentRow = null;
+			_editingRow = null;
 		}
 		
-		protected virtual bool InternalSeek(object[] AKey)
+		protected virtual bool InternalSeek(object[] key)
 		{
 			#if SQLSTORETIMING
-			long LStartTicks = TimingUtility.CurrentTicks;
+			long startTicks = TimingUtility.CurrentTicks;
 			try
 			{
 			#endif
-				FEditingRow = null;
+				_editingRow = null;
 				ClearBuffer();
 				
-				object[] LKey = new object[AKey.Length];
-				for (int LIndex = 0; LIndex < LKey.Length; LIndex++)
-					LKey[LIndex] = NativeToStoreValue(AKey[LIndex]);
-				EnsureReader(AKey, true, true);
+				object[] localKey = new object[key.Length];
+				for (int index = 0; index < localKey.Length; index++)
+					localKey[index] = NativeToStoreValue(key[index]);
+				EnsureReader(key, true, true);
 				return false;
 			#if SQLSTORETIMING
 			}
 			finally
 			{
-				Connection.Store.Counters.Add(new SQLStoreCounter("Seek", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+				Connection.Store.Counters.Add(new SQLStoreCounter("Seek", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 			}
 			#endif
 		}
 		
-		public bool FindKey(object[] AKey)
+		public bool FindKey(object[] key)
 		{
-			FCurrentRow = null;
-			FIsOnSimulatedCrack = false;
+			_currentRow = null;
+			_isOnSimulatedCrack = false;
 			
-			if ((FStartValues != null) && ((CompareKeys(FStartValues, AKey) < 0) || (CompareKeys(FEndValues, AKey) > 0)))
+			if ((_startValues != null) && ((CompareKeys(_startValues, key) < 0) || (CompareKeys(_endValues, key) > 0)))
 				return false;
 				
-			if (InternalSeek(AKey))
+			if (InternalSeek(key))
 			{
-				FIsOnRow = true;
-				return FIsOnRow;
+				_isOnRow = true;
+				return _isOnRow;
 			}
 			
-			FIsOnRow = InternalNext();
-			return FIsOnRow && (CompareKeys(AKey) == 0);
+			_isOnRow = InternalNext();
+			return _isOnRow && (CompareKeys(key) == 0);
 		}
 		
-		public void FindNearest(object[] AKey)
+		public void FindNearest(object[] key)
 		{
-			FCurrentRow = null;
-			FIsOnSimulatedCrack = false;
+			_currentRow = null;
+			_isOnSimulatedCrack = false;
 
-			if (FStartValues != null)
+			if (_startValues != null)
 			{
-				if (CompareKeys(FStartValues, AKey) < 0)
+				if (CompareKeys(_startValues, key) < 0)
 				{
-					FIsOnRow = InternalSeek(FStartValues);
-					if (!FIsOnRow)
-						FIsOnRow = InternalNext();
+					_isOnRow = InternalSeek(_startValues);
+					if (!_isOnRow)
+						_isOnRow = InternalNext();
 				}
-				else if (CompareKeys(FEndValues, AKey) > 0)
+				else if (CompareKeys(_endValues, key) > 0)
 				{
-					FIsOnRow = InternalSeek(FEndValues);
-					if (!FIsOnRow)
-						FIsOnRow = InternalPrior();
+					_isOnRow = InternalSeek(_endValues);
+					if (!_isOnRow)
+						_isOnRow = InternalPrior();
 				}
 			}
 			else
 			{
-				FIsOnRow = InternalSeek(AKey);
-				if (!FIsOnRow)
-					FIsOnRow = InternalNext();
+				_isOnRow = InternalSeek(key);
+				if (!_isOnRow)
+					_isOnRow = InternalNext();
 			}
 		}
 	}

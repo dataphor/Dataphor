@@ -23,33 +23,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public sealed class BooleanUtility
 	{
-		public static object Not(object AValue)
+		public static object Not(object tempValue)
 		{
 			#if NILPROPOGATION
-			if (AValue == null)
+			if (tempValue == null)
 				return null;
 			else
 			#endif
-				return !((bool)AValue);
+				return !((bool)tempValue);
 		}
 
-		public static object And(object ALeftValue, object ARightValue)
+		public static object And(object leftValue, object rightValue)
 		{
 			#if NILPROPOGATION
-			if ((ALeftValue == null))
+			if ((leftValue == null))
 			{
-				if ((ARightValue != null) && !(bool)ARightValue)
+				if ((rightValue != null) && !(bool)rightValue)
 					return false;
 				else
 					return null;
 			}
 			else
 			{
-				if ((bool)ALeftValue)
-					if (ARightValue == null)
+				if ((bool)leftValue)
+					if (rightValue == null)
 						return null;
 					else
-						return (bool)ARightValue;
+						return (bool)rightValue;
 				else
 					return false;
 			}
@@ -58,44 +58,44 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 		}
 		
-		public static object Or(object ALeftValue, object ARightValue)
+		public static object Or(object leftValue, object rightValue)
 		{
 			#if NILPROPOGATION
-			if (ALeftValue == null)
+			if (leftValue == null)
 			{
-				if ((ARightValue != null) && (bool)ARightValue)
+				if ((rightValue != null) && (bool)rightValue)
 					return true;
 				else
 					return null;
 			}
 			else
 			{
-				if ((bool)ALeftValue)
+				if ((bool)leftValue)
 					return true;
-				else if (ARightValue == null)
+				else if (rightValue == null)
 					return null;
 				else
-					return (bool)ARightValue;
+					return (bool)rightValue;
 			}
 			#else
 			return new Scalar(AProcess, ADataType, ALeftValue.AsBoolean || ARightValue.AsBoolean);
 			#endif
 		}
 
-		public static object Xor(object ALeftValue, object ARightValue)
+		public static object Xor(object leftValue, object rightValue)
 		{
 			return 
 				Or
 				(
 					And
 					(
-						ALeftValue, 
-						Not(ARightValue)
+						leftValue, 
+						Not(rightValue)
 					), 
 					And
 					(
-						Not(ALeftValue), 
-						ARightValue
+						Not(leftValue), 
+						rightValue
 					)
 				);
 		}		
@@ -104,9 +104,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks>operator System.iNot(System.Boolean) : System.Boolean</remarks>    
     public class BooleanNotNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument)
+		public override object InternalExecute(Program program, object argument)
 		{
-			return BooleanUtility.Not(AArgument);
+			return BooleanUtility.Not(argument);
 		}
     }
 
@@ -116,27 +116,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// </remarks>
     public class BooleanAndNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			return BooleanUtility.And(AArgument1, AArgument2);
+			return BooleanUtility.And(argument1, argument2);
 		}
     }
 
     /// <remarks>operator System.iOr(System.Boolean, System.Boolean) : System.Boolean</remarks>
     public class BooleanOrNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			return BooleanUtility.Or(AArgument1, AArgument2);
+			return BooleanUtility.Or(argument1, argument2);
 		}
     }
 
     /// <remarks>operator System.iXor(System.Boolean, System.Boolean) : System.Boolean</remarks>
     public class BooleanXorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			return BooleanUtility.Xor(AArgument1, AArgument2);
+			return BooleanUtility.Xor(argument1, argument2);
 		}
     }
 }

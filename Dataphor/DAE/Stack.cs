@@ -11,121 +11,121 @@ namespace Alphora.Dataphor.DAE
 {
 	public class Stack<T> : Object
 	{
-		public const int CInitialCapacity = 0;
-		public const int CDefaultMaxStackDepth = 32767;
+		public const int InitialCapacity = 0;
+		public const int DefaultMaxStackDepth = 32767;
 		
-		public Stack() : this(CDefaultMaxStackDepth, StackWindowList.CDefaultMaxCallDepth) { }
-		public Stack(int AMaxStackDepth, int AMaxCallDepth) : base()
+		public Stack() : this(DefaultMaxStackDepth, StackWindowList.DefaultMaxCallDepth) { }
+		public Stack(int maxStackDepth, int maxCallDepth) : base()
 		{
-			FMaxStackDepth = AMaxStackDepth;
-			FWindows = new StackWindowList(AMaxCallDepth);
+			_maxStackDepth = maxStackDepth;
+			_windows = new StackWindowList(maxCallDepth);
 		}
 		
-		protected int FCount;
-		public int Count { get { return (AllowExtraWindowAccess ? FCount : (FCount - Base)); } }
-		public int FrameCount { get { return FCount - FWindows.CurrentStackWindow.FrameBase; } }
+		protected int _count;
+		public int Count { get { return (AllowExtraWindowAccess ? _count : (_count - Base)); } }
+		public int FrameCount { get { return _count - _windows.CurrentStackWindow.FrameBase; } }
 		
-		private int FMaxStackDepth;
+		private int _maxStackDepth;
 		public int MaxStackDepth
 		{
-			get { return FMaxStackDepth; }
+			get { return _maxStackDepth; }
 			set
 			{
-				if (value < FCount)
-					throw new BaseException(BaseException.Codes.StackDepthExceedsNewSetting, FCount, value);
+				if (value < _count)
+					throw new BaseException(BaseException.Codes.StackDepthExceedsNewSetting, _count, value);
 
-				FMaxStackDepth = value;
+				_maxStackDepth = value;
 			}
 		}
 		
 		public int MaxCallDepth
 		{
-			get { return FWindows.MaxCallDepth; }
-			set { FWindows.MaxCallDepth = value; }
+			get { return _windows.MaxCallDepth; }
+			set { _windows.MaxCallDepth = value; }
 		}
 		
-		public int CallDepth { get { return FWindows.Count; } }
+		public int CallDepth { get { return _windows.Count; } }
 		
-		protected T[] FStack = new T[CInitialCapacity];
-		protected StackWindowList FWindows;
-		protected int Base { get { return FWindows.CurrentStackWindow.Base; } }
+		protected T[] _stack = new T[InitialCapacity];
+		protected StackWindowList _windows;
+		protected int Base { get { return _windows.CurrentStackWindow.Base; } }
 
-        private void EnsureCapacity(int ARequiredCapacity)
+        private void EnsureCapacity(int requiredCapacity)
         {
-			if (FStack.Length <= ARequiredCapacity)
+			if (_stack.Length <= requiredCapacity)
 			{
-				T[] FNewStack = new T[Math.Max(FStack.Length, 1) * 2];
-				for (int LIndex = 0; LIndex < FStack.Length; LIndex++)
-					FNewStack[LIndex] = FStack[LIndex];
-				FStack = FNewStack;
+				T[] FNewStack = new T[Math.Max(_stack.Length, 1) * 2];
+				for (int index = 0; index < _stack.Length; index++)
+					FNewStack[index] = _stack[index];
+				_stack = FNewStack;
 			}
         }
         
-		public void Push(T AItem)
+		public void Push(T item)
 		{
-			if (FCount >= MaxStackDepth)
+			if (_count >= MaxStackDepth)
 				throw new BaseException(BaseException.Codes.StackOverflow, MaxStackDepth);
-			EnsureCapacity(FCount);
-			FStack[FCount] = AItem;
-			FCount++;
+			EnsureCapacity(_count);
+			_stack[_count] = item;
+			_count++;
 		}
 		
 		public T Pop()
 		{
 			#if DEBUG
-			if (FCount <= Base)
+			if (_count <= Base)
 				throw new BaseException(BaseException.Codes.StackEmpty);
 			#endif
 
-			FCount--;
-			T LResult = FStack[FCount];
-			FStack[FCount] = default(T);
-			return LResult;
+			_count--;
+			T result = _stack[_count];
+			_stack[_count] = default(T);
+			return result;
 		}
 		
-		private int FExtraWindowAccess = 0;
+		private int _extraWindowAccess = 0;
 		
 		public bool AllowExtraWindowAccess
 		{
-			get { return FExtraWindowAccess > 0; }
-			set { if (value) FExtraWindowAccess++; else FExtraWindowAccess--; }
+			get { return _extraWindowAccess > 0; }
+			set { if (value) _extraWindowAccess++; else _extraWindowAccess--; }
 		}
 		
-		public bool InRowContext { get { return FWindows.CurrentStackWindow.FrameRowBase >= 0; } }
+		public bool InRowContext { get { return _windows.CurrentStackWindow.FrameRowBase >= 0; } }
 		
-		public T Peek(int AOffset)
+		public T Peek(int offset)
 		{
 			#if DEBUG 
-			int LIndex = FCount - 1 - AOffset;
-			if ((LIndex >= FCount) || (!AllowExtraWindowAccess && (LIndex < Base)))
-				throw new BaseException(BaseException.Codes.InvalidStackIndex, AOffset.ToString());
-			return FStack[LIndex];
+			int index = _count - 1 - offset;
+			if ((index >= _count) || (!AllowExtraWindowAccess && (index < Base)))
+				throw new BaseException(BaseException.Codes.InvalidStackIndex, offset.ToString());
+			return _stack[index];
 			#else
 			return FStack[FCount - 1 - AOffset]; // same code as the indexer, duplicated for performance
 			#endif
 		}
 		
-		public void Poke(int AOffset, T AItem)
+		public void Poke(int offset, T item)
 		{
 			#if DEBUG 
-			int LIndex = FCount - 1 - AOffset;
-			if ((LIndex >= FCount) || (!AllowExtraWindowAccess && (LIndex < Base)))
-				throw new BaseException(BaseException.Codes.InvalidStackIndex, AOffset.ToString());
-			FStack[LIndex] = AItem;
+			int index = _count - 1 - offset;
+			if ((index >= _count) || (!AllowExtraWindowAccess && (index < Base)))
+				throw new BaseException(BaseException.Codes.InvalidStackIndex, offset.ToString());
+			_stack[index] = item;
 			#else
 			FStack[FCount - 1 - AOffset] = AItem; // same code as the indexer, duplicated for performance
 			#endif
 		}
 		
-		public T this[int AIndex] 
+		public T this[int index] 
 		{ 
 			get 
 			{ 
 				#if DEBUG 
-				int LIndex = FCount - 1 - AIndex;
-				if ((LIndex >= FCount) || (!AllowExtraWindowAccess && (LIndex < Base)))
-					throw new BaseException(BaseException.Codes.InvalidStackIndex, AIndex.ToString());
-				return FStack[LIndex];
+				int localIndex = _count - 1 - index;
+				if ((localIndex >= _count) || (!AllowExtraWindowAccess && (localIndex < Base)))
+					throw new BaseException(BaseException.Codes.InvalidStackIndex, index.ToString());
+				return _stack[localIndex];
 				#else
 				return FStack[FCount - 1 - AIndex]; 
 				#endif
@@ -133,69 +133,69 @@ namespace Alphora.Dataphor.DAE
 			set
 			{
 				#if DEBUG 
-				int LIndex = FCount - 1 - AIndex;
-				if ((LIndex >= FCount) || (!AllowExtraWindowAccess && (LIndex < Base)))
-					throw new BaseException(BaseException.Codes.InvalidStackIndex, AIndex.ToString());
-				FStack[LIndex] = value;
+				int localIndex = _count - 1 - index;
+				if ((localIndex >= _count) || (!AllowExtraWindowAccess && (localIndex < Base)))
+					throw new BaseException(BaseException.Codes.InvalidStackIndex, index.ToString());
+				_stack[localIndex] = value;
 				#else
 				FStack[FCount - 1 - AIndex] = value; 
 				#endif
 			}
 		} // same code as peek and poke, duplicated for performance
 		
-		public virtual void PushWindow(int ACount)
+		public virtual void PushWindow(int count)
 		{
-			FWindows.Push(new StackWindow(FCount - ACount));
+			_windows.Push(new StackWindow(_count - count));
 		}
 		
 		public void PopWindow()
 		{
-			int LBase = FWindows.Pop().Base;
-			for (int LIndex = LBase; LIndex < FCount; LIndex++)
-				FStack[LIndex] = default(T);
-			FCount = LBase;
+			int baseValue = _windows.Pop().Base;
+			for (int index = baseValue; index < _count; index++)
+				_stack[index] = default(T);
+			_count = baseValue;
 		}
 
 		public void PushFrame()
 		{
-			FWindows.CurrentStackWindow.PushFrame(FCount);
+			_windows.CurrentStackWindow.PushFrame(_count);
 		}
 		
-		public void PushFrame(bool ARowContext)
+		public void PushFrame(bool rowContext)
 		{
-			FWindows.CurrentStackWindow.PushFrame(FCount, ARowContext);
+			_windows.CurrentStackWindow.PushFrame(_count, rowContext);
 		}
 		
 		public void PopFrame()
 		{
-			int LBase = FWindows.CurrentStackWindow.PopFrame();
-			for (int LIndex = LBase; LIndex < FCount; LIndex++)
-				FStack[LIndex] = default(T);
-			FCount = LBase;
+			int baseValue = _windows.CurrentStackWindow.PopFrame();
+			for (int index = baseValue; index < _count; index++)
+				_stack[index] = default(T);
+			_count = baseValue;
 		}
 		
 		public StackWindow CurrentStackWindow
 		{
 			get
 			{
-				return FWindows.CurrentStackWindow;
+				return _windows.CurrentStackWindow;
 			}
 		}
 		
 		public List<StackWindow> GetCallStack()
 		{
-			return FWindows.GetCallStack();
+			return _windows.GetCallStack();
 		}
 		
-		public object[] GetStack(int AWindowIndex)
+		public object[] GetStack(int windowIndex)
 		{
-			int LBase = FWindows[AWindowIndex].Base;
-			int LCeiling = AWindowIndex == 0 ? FCount : FWindows[AWindowIndex - 1].Base;
+			int baseValue = _windows[windowIndex].Base;
+			int ceiling = windowIndex == 0 ? _count : _windows[windowIndex - 1].Base;
 			
-			object[] LResult = new object[LCeiling - LBase];
-			for (int LIndex = LBase; LIndex < LCeiling; LIndex++)
-				LResult[LResult.Length - 1 - (LIndex - LBase)] = FStack[LIndex];
-			return LResult;
+			object[] result = new object[ceiling - baseValue];
+			for (int index = baseValue; index < ceiling; index++)
+				result[result.Length - 1 - (index - baseValue)] = _stack[index];
+			return result;
 		}
 	}
 }

@@ -14,58 +14,58 @@ namespace Alphora.Dataphor.DAE.Server
 	/// <summary> Serializes and Deserializes the "Started" property last. </summary>
 	public class PropertyLastSerializer : CodeDomSerializer
 	{
-		public const string CDefaultPropertyName = "Started";
+		public const string DefaultPropertyName = "Started";
 
-		private string FPropertyName = CDefaultPropertyName;
+		private string _propertyName = DefaultPropertyName;
 		public string PropertyName
 		{
-			get { return FPropertyName; }
-			set { FPropertyName = value; }
+			get { return _propertyName; }
+			set { _propertyName = value; }
 		}
 
-		public override object Deserialize(IDesignerSerializationManager AManager, object ACodeObject)
+		public override object Deserialize(IDesignerSerializationManager manager, object codeObject)
 		{
-			CodeDomSerializer LbaseSerializer = (CodeDomSerializer)AManager.GetSerializer(typeof(System.ComponentModel.Component), typeof(CodeDomSerializer));
-			if (ACodeObject is CodeStatementCollection) 
+			CodeDomSerializer LbaseSerializer = (CodeDomSerializer)manager.GetSerializer(typeof(System.ComponentModel.Component), typeof(CodeDomSerializer));
+			if (codeObject is CodeStatementCollection) 
 			{
-				CodeStatementCollection LStatements = (CodeStatementCollection)ACodeObject;
-				CodeStatement LAssignPropertyStatement = GetPropertyAssignStatement(LStatements, PropertyName);
-				if (LAssignPropertyStatement != null)
+				CodeStatementCollection statements = (CodeStatementCollection)codeObject;
+				CodeStatement assignPropertyStatement = GetPropertyAssignStatement(statements, PropertyName);
+				if (assignPropertyStatement != null)
 				{
-					LStatements.Remove(LAssignPropertyStatement);
-					LStatements.Insert(LStatements.Count, LAssignPropertyStatement);
+					statements.Remove(assignPropertyStatement);
+					statements.Insert(statements.Count, assignPropertyStatement);
 				}
 			}
-			return LbaseSerializer.Deserialize(AManager, ACodeObject);
+			return LbaseSerializer.Deserialize(manager, codeObject);
 		}
 
-		public override object Serialize(IDesignerSerializationManager AManager, object AValue)
+		public override object Serialize(IDesignerSerializationManager manager, object tempValue)
 		{
-			CodeDomSerializer LbaseSerializer = (CodeDomSerializer)AManager.GetSerializer(typeof(System.ComponentModel.Component), typeof(CodeDomSerializer));
-			object LCodeObject = LbaseSerializer.Serialize(AManager, AValue);
-			if (LCodeObject is CodeStatementCollection) 
+			CodeDomSerializer LbaseSerializer = (CodeDomSerializer)manager.GetSerializer(typeof(System.ComponentModel.Component), typeof(CodeDomSerializer));
+			object codeObject = LbaseSerializer.Serialize(manager, tempValue);
+			if (codeObject is CodeStatementCollection) 
 			{
-				CodeStatementCollection LStatements = (CodeStatementCollection)LCodeObject;
-				CodeStatement LAssignPropertyStatement = GetPropertyAssignStatement(LStatements, PropertyName);
-				if (LAssignPropertyStatement != null)
+				CodeStatementCollection statements = (CodeStatementCollection)codeObject;
+				CodeStatement assignPropertyStatement = GetPropertyAssignStatement(statements, PropertyName);
+				if (assignPropertyStatement != null)
 				{
-					LStatements.Remove(LAssignPropertyStatement);
-					LStatements.Insert(LStatements.Count, LAssignPropertyStatement);
+					statements.Remove(assignPropertyStatement);
+					statements.Insert(statements.Count, assignPropertyStatement);
 				}
 			}
-			return LCodeObject;
+			return codeObject;
 		}
 
-		protected CodeStatement GetPropertyAssignStatement(CodeStatementCollection AStatements, string APropertyName)
+		protected CodeStatement GetPropertyAssignStatement(CodeStatementCollection statements, string propertyName)
 		{
-			foreach (CodeStatement LStatement in AStatements)
+			foreach (CodeStatement statement in statements)
 			{
-				if (LStatement is CodeAssignStatement)
-					if (((CodeAssignStatement)LStatement).Left is CodePropertyReferenceExpression)
+				if (statement is CodeAssignStatement)
+					if (((CodeAssignStatement)statement).Left is CodePropertyReferenceExpression)
 					{
-						CodePropertyReferenceExpression LExpression = (CodePropertyReferenceExpression)((CodeAssignStatement)LStatement).Left;
-						if (LExpression.PropertyName == APropertyName)
-							return LStatement;
+						CodePropertyReferenceExpression expression = (CodePropertyReferenceExpression)((CodeAssignStatement)statement).Left;
+						if (expression.PropertyName == propertyName)
+							return statement;
 					}
 			}
 			return null;

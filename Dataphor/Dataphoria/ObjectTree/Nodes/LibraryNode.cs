@@ -26,17 +26,17 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			SelectedImageIndex = ImageIndex;
 		}
 		
-		private MenuItem FAttachMenuItem;
-		private MenuItem FAttachLibrariesMenuItem;
+		private MenuItem _attachMenuItem;
+		private MenuItem _attachLibrariesMenuItem;
 
 		protected override ContextMenu GetContextMenu()
 		{
-			ContextMenu LMenu = base.GetContextMenu();
-			FAttachMenuItem = new MenuItem(Strings.ObjectTree_AttachMenuText, new EventHandler(AttachClicked));
-			LMenu.MenuItems.Add(1, FAttachMenuItem);
-			FAttachLibrariesMenuItem = new MenuItem(Strings.ObjectTree_AttachLibrariesMenuText, new EventHandler(AttachLibrariesClicked));
-			LMenu.MenuItems.Add(2, FAttachLibrariesMenuItem);
-			return LMenu;
+			ContextMenu menu = base.GetContextMenu();
+			_attachMenuItem = new MenuItem(Strings.ObjectTree_AttachMenuText, new EventHandler(AttachClicked));
+			menu.MenuItems.Add(1, _attachMenuItem);
+			_attachLibrariesMenuItem = new MenuItem(Strings.ObjectTree_AttachLibrariesMenuText, new EventHandler(AttachLibrariesClicked));
+			menu.MenuItems.Add(2, _attachLibrariesMenuItem);
+			return menu;
 		}
 
 		protected override string GetChildExpression()
@@ -52,53 +52,53 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 				";
 		}
 		
-		protected void AttachClicked(object ASender, EventArgs AArgs)
+		protected void AttachClicked(object sender, EventArgs args)
 		{
-			Frontend.Client.Windows.IWindowsFormInterface LForm = Dataphoria.FrontendSession.LoadForm(null, "Derive('System.AttachLibrary', 'Add', '', '', false)", new Frontend.Client.FormInterfaceHandler(SetInsertOpenState));
+			Frontend.Client.Windows.IWindowsFormInterface form = Dataphoria.FrontendSession.LoadForm(null, "Derive('System.AttachLibrary', 'Add', '', '', false)", new Frontend.Client.FormInterfaceHandler(SetInsertOpenState));
 			try
 			{
-				if (LForm.ShowModal(Frontend.Client.FormMode.Insert) != DialogResult.OK)
+				if (form.ShowModal(Frontend.Client.FormMode.Insert) != DialogResult.OK)
 					throw new AbortException();
-				BaseNode LNode = CreateChildNode(LForm.MainSource.DataView.ActiveRow);
-				AddNode(LNode);
-				TreeView.SelectedNode = LNode;
+				BaseNode node = CreateChildNode(form.MainSource.DataView.ActiveRow);
+				AddNode(node);
+				TreeView.SelectedNode = node;
 			}
 			finally
 			{
-				LForm.HostNode.Dispose();
+				form.HostNode.Dispose();
 			}
 		}
 
-		protected void AttachLibrariesClicked(object ASender, EventArgs AArgs)
+		protected void AttachLibrariesClicked(object sender, EventArgs args)
 		{
-			Frontend.Client.Windows.IWindowsFormInterface LForm = Dataphoria.FrontendSession.LoadForm(null, "Derive('System.AttachLibraries', 'Add', '', '', false)", new Frontend.Client.FormInterfaceHandler(SetInsertOpenState));
+			Frontend.Client.Windows.IWindowsFormInterface form = Dataphoria.FrontendSession.LoadForm(null, "Derive('System.AttachLibraries', 'Add', '', '', false)", new Frontend.Client.FormInterfaceHandler(SetInsertOpenState));
 			try
 			{
-				if (LForm.ShowModal(Frontend.Client.FormMode.Insert) != DialogResult.OK)
+				if (form.ShowModal(Frontend.Client.FormMode.Insert) != DialogResult.OK)
 					throw new AbortException();
 			}
 			finally
 			{
-				LForm.HostNode.Dispose();
+				form.HostNode.Dispose();
 			}
 
 			Refresh();
 		}
 
-		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row ARow)
+		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row row)
 		{
-			LibraryNode LNode = new LibraryNode(this, (string)ARow["Main.Name"]);
-			if (ARow.DataType.Columns.ContainsName("Main.IsLoaded"))
-				UpdateNode(LNode, ARow);
-			return LNode;
+			LibraryNode node = new LibraryNode(this, (string)row["Main.Name"]);
+			if (row.DataType.Columns.ContainsName("Main.IsLoaded"))
+				UpdateNode(node, row);
+			return node;
 		}
 
-		private void UpdateNode(LibraryNode ANode, DAE.Runtime.Data.Row ARow)
+		private void UpdateNode(LibraryNode node, DAE.Runtime.Data.Row row)
 		{
-			ANode.Registered = (bool)ARow["Main.IsLoaded"];
-			ANode.CanLoad = true; //(bool)ARow["Main.CanLoad"];
-			ANode.IsSuspect = (bool)ARow["Main.IsSuspect"];
-			ANode.UpgradeRequired = (bool)ARow["Main.UpgradeRequired"];
+			node.Registered = (bool)row["Main.IsLoaded"];
+			node.CanLoad = true; //(bool)ARow["Main.CanLoad"];
+			node.IsSuspect = (bool)row["Main.IsSuspect"];
+			node.UpgradeRequired = (bool)row["Main.UpgradeRequired"];
 		}
 
 		protected override string AddDocument()
@@ -110,18 +110,18 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 		{
             Dataphoria.Execute(GetChildExpression(), GetParams(), ARow =>
                                                                       {
-                                                                          var LNode = FindByKey(ARow) as LibraryNode;
-                                                                          if (LNode != null)
-                                                                              UpdateNode(LNode, ARow); 
+                                                                          var node = FindByKey(ARow) as LibraryNode;
+                                                                          if (node != null)
+                                                                              UpdateNode(node, ARow); 
                                                                       });           
 		}
 		
 		public void RefreshCurrent()
 		{
-			string LCurrentLibrary = Dataphoria.GetCurrentLibraryName();
-			foreach (LibraryNode LNode in Nodes)
+			string currentLibrary = Dataphoria.GetCurrentLibraryName();
+			foreach (LibraryNode node in Nodes)
 			{
-				LNode.Current = LNode.LibraryName == LCurrentLibrary;
+				node.Current = node.LibraryName == currentLibrary;
 			}
 		}
 
@@ -142,9 +142,9 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 	public class LibraryNode : EditableItemNode
 	{
-		public LibraryNode(LibraryListNode ANode, string ALibraryName) : base()
+		public LibraryNode(LibraryListNode node, string libraryName) : base()
 		{
-			FLibraryName = ALibraryName;
+			_libraryName = libraryName;
 			UpdateText();
 			UpdateImageIndex();
 		}
@@ -154,63 +154,63 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			get { return BuildMode.OnExpand; }
 		}
 
-		public override bool IsEqual(DAE.Runtime.Data.Row ARow)
+		public override bool IsEqual(DAE.Runtime.Data.Row row)
 		{
-			return ((string)ARow["Main.Name"] == FLibraryName);
+			return ((string)row["Main.Name"] == _libraryName);
 		}
 
 		public override string GetFilter()
 		{
-			return String.Format("Main.Name = '{0}'", FLibraryName);
+			return String.Format("Main.Name = '{0}'", _libraryName);
 		}
 
-		private string FLibraryName;
-		public string LibraryName { get { return FLibraryName; } }
+		private string _libraryName;
+		public string LibraryName { get { return _libraryName; } }
 		
-		private bool FCanLoad = true;
+		private bool _canLoad = true;
 		public bool CanLoad
 		{
-			get { return FCanLoad; }
-			set { FCanLoad = value; }
+			get { return _canLoad; }
+			set { _canLoad = value; }
 		}
 		
-		private bool FUpgradeRequired;
+		private bool _upgradeRequired;
 		public bool UpgradeRequired
 		{
-			get { return FUpgradeRequired; }
+			get { return _upgradeRequired; }
 			set 
 			{ 
-				if (FUpgradeRequired != value)
+				if (_upgradeRequired != value)
 				{
-					FUpgradeRequired = value; 
+					_upgradeRequired = value; 
 					UpdateImageIndex();
 				}
 			}
 		}
 
-		private bool FIsSuspect;
+		private bool _isSuspect;
 		public bool IsSuspect
 		{
-			get { return FIsSuspect; }
+			get { return _isSuspect; }
 			set
 			{
-				if (FIsSuspect = value)
+				if (_isSuspect = value)
 				{
-					FIsSuspect = value;
+					_isSuspect = value;
 					UpdateImageIndex();
 				}
 			}
 		}
 		
-		private bool FRegistered;
+		private bool _registered;
 		public bool Registered
 		{
-			get { return FRegistered; }
+			get { return _registered; }
 			set
 			{
-				if (FRegistered != value)
+				if (_registered != value)
 				{
-					FRegistered = value;
+					_registered = value;
 					UpdateImageIndex();
 					UpdateText();
 					Refresh();
@@ -218,15 +218,15 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			}
 		}
 
-		private bool FCurrent;
+		private bool _current;
 		public bool Current
 		{
-			get { return FCurrent; }
+			get { return _current; }
 			set
 			{
-				if (FCurrent != value)
+				if (_current != value)
 				{
-					FCurrent = value;
+					_current = value;
 					UpdateImageIndex();
 					UpdateText();
 				}
@@ -235,14 +235,14 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 		
 		private void UpdateImageIndex()
 		{
-			if (FRegistered)
-				if (FCurrent)
-					if (FUpgradeRequired)
+			if (_registered)
+				if (_current)
+					if (_upgradeRequired)
 						ImageIndex = 28;
 					else
 						ImageIndex = 25;
 				else
-					if (FUpgradeRequired)
+					if (_upgradeRequired)
 						ImageIndex = 27;
 					else
 						ImageIndex = 24;
@@ -256,110 +256,110 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		protected override void UpdateText()
 		{
-			if (FCurrent)
+			if (_current)
 			{
 				NodeFont = new Font(TreeView.Font, FontStyle.Bold);
 				// HACK: add trailing spaces to work around bold cut off bug (tried setting the TreeView's font to no avail)
-				int LBlankCount;
-				using (Graphics LGraphics = TreeView.CreateGraphics())
+				int blankCount;
+				using (Graphics graphics = TreeView.CreateGraphics())
 				{
-					LBlankCount = 
+					blankCount = 
 						(int)Math.Ceiling
 						(
 							(
-								LGraphics.MeasureString(FLibraryName, NodeFont).Width - 
-								LGraphics.MeasureString(FLibraryName, TreeView.Font).Width
+								graphics.MeasureString(_libraryName, NodeFont).Width - 
+								graphics.MeasureString(_libraryName, TreeView.Font).Width
 							) / 
-							LGraphics.MeasureString(" ", NodeFont).Width
+							graphics.MeasureString(" ", NodeFont).Width
 						) + 3;
 				}
-				System.Text.StringBuilder LBuilder = new System.Text.StringBuilder(FLibraryName, FLibraryName.Length + LBlankCount);
-				while (LBlankCount > 0)
+				System.Text.StringBuilder builder = new System.Text.StringBuilder(_libraryName, _libraryName.Length + blankCount);
+				while (blankCount > 0)
 				{
-					LBuilder.Append(' ');
-					LBlankCount--;
+					builder.Append(' ');
+					blankCount--;
 				}
-				Text = LBuilder.ToString();
+				Text = builder.ToString();
 			}
 			else
 			{
 				NodeFont = null;
-				Text = FLibraryName;
+				Text = _libraryName;
 			}
 		}
 
-		private MenuItem FDetachMenuItem;		
-		private MenuItem FLoadMenuItem;
-		private MenuItem FRegisterMenuItem;
-		private MenuItem FSetAsCurrentMenuItem;
-		private MenuItem FUpgradeLibraryMenuItem;
+		private MenuItem _detachMenuItem;		
+		private MenuItem _loadMenuItem;
+		private MenuItem _registerMenuItem;
+		private MenuItem _setAsCurrentMenuItem;
+		private MenuItem _upgradeLibraryMenuItem;
 		//private MenuItem FScriptChangesMenuItem;
 		
 		protected override ContextMenu GetContextMenu()
 		{
-			ContextMenu LMenu = base.GetContextMenu();
+			ContextMenu menu = base.GetContextMenu();
 			
-			LMenu.MenuItems.Add(new MenuItem("-"));	
+			menu.MenuItems.Add(new MenuItem("-"));	
 
-			FRegisterMenuItem = new MenuItem(Strings.ObjectTree_RegisterMenuText, new EventHandler(RegisterToggleClicked));
-			LMenu.MenuItems.Add(FRegisterMenuItem);
+			_registerMenuItem = new MenuItem(Strings.ObjectTree_RegisterMenuText, new EventHandler(RegisterToggleClicked));
+			menu.MenuItems.Add(_registerMenuItem);
 			
-			FLoadMenuItem = new MenuItem(Strings.ObjectTree_LoadMenuText, new EventHandler(LoadToggleClicked));
-			LMenu.MenuItems.Add(FLoadMenuItem);
+			_loadMenuItem = new MenuItem(Strings.ObjectTree_LoadMenuText, new EventHandler(LoadToggleClicked));
+			menu.MenuItems.Add(_loadMenuItem);
 			
-			FDetachMenuItem = new MenuItem(Strings.ObjectTree_DetachMenuText, new EventHandler(DetachClicked));
-			LMenu.MenuItems.Add(FDetachMenuItem);
+			_detachMenuItem = new MenuItem(Strings.ObjectTree_DetachMenuText, new EventHandler(DetachClicked));
+			menu.MenuItems.Add(_detachMenuItem);
 
-			FSetAsCurrentMenuItem = new MenuItem(Strings.ObjectTree_SetAsCurrentMenuText, new EventHandler(SetAsCurrentClicked));
-			FSetAsCurrentMenuItem.DefaultItem = true;
-			LMenu.MenuItems.Add(FSetAsCurrentMenuItem);
+			_setAsCurrentMenuItem = new MenuItem(Strings.ObjectTree_SetAsCurrentMenuText, new EventHandler(SetAsCurrentClicked));
+			_setAsCurrentMenuItem.DefaultItem = true;
+			menu.MenuItems.Add(_setAsCurrentMenuItem);
 
-			LMenu.MenuItems.Add(new MenuItem(Strings.ObjectTree_OpenRegisterScriptMenuText, new EventHandler(OpenRegisterScriptClicked)));
-			LMenu.MenuItems.Add(new MenuItem("-"));	
-			LMenu.MenuItems.Add(new MenuItem(Strings.ObjectTree_UpgradesMenuText, new EventHandler(UpgradesClicked)));
+			menu.MenuItems.Add(new MenuItem(Strings.ObjectTree_OpenRegisterScriptMenuText, new EventHandler(OpenRegisterScriptClicked)));
+			menu.MenuItems.Add(new MenuItem("-"));	
+			menu.MenuItems.Add(new MenuItem(Strings.ObjectTree_UpgradesMenuText, new EventHandler(UpgradesClicked)));
 			
-			FUpgradeLibraryMenuItem = new MenuItem(Strings.ObjectTree_UpgradeLibraryMenuText, new EventHandler(UpgradeLibraryClicked));
-			LMenu.MenuItems.Add(FUpgradeLibraryMenuItem);
+			_upgradeLibraryMenuItem = new MenuItem(Strings.ObjectTree_UpgradeLibraryMenuText, new EventHandler(UpgradeLibraryClicked));
+			menu.MenuItems.Add(_upgradeLibraryMenuItem);
 
 			//FScriptChangesMenuItem = new MenuItem(Strings.Get("ObjectTree.ScriptChangesText"), new EventHandler(ScriptChangesClicked));
 			//LMenu.MenuItems.Add(FScriptChangesMenuItem);
 
-			return LMenu;
+			return menu;
 		}
 
-		protected override void UpdateContextMenu(ContextMenu AMenu)
+		protected override void UpdateContextMenu(ContextMenu menu)
 		{
-			FSetAsCurrentMenuItem.Enabled = Registered && !Current;
-			FRegisterMenuItem.Text = Registered ? Strings.ObjectTree_UnregisterMenuText : Strings.ObjectTree_RegisterMenuText;
-			FLoadMenuItem.Text = Registered ? Strings.ObjectTree_UnloadMenuText : Strings.ObjectTree_LoadMenuText;
-			FDetachMenuItem.Enabled = !Registered;
-			FRegisterMenuItem.Enabled = !((LibraryName == "System") || (LibraryName == "General") || (LibraryName == "Frontend") || (LibraryName == "SimpleDevice"));
-			FLoadMenuItem.Enabled = FRegisterMenuItem.Enabled && (Registered || CanLoad);
-			FUpgradeLibraryMenuItem.Enabled = Registered && UpgradeRequired;
+			_setAsCurrentMenuItem.Enabled = Registered && !Current;
+			_registerMenuItem.Text = Registered ? Strings.ObjectTree_UnregisterMenuText : Strings.ObjectTree_RegisterMenuText;
+			_loadMenuItem.Text = Registered ? Strings.ObjectTree_UnloadMenuText : Strings.ObjectTree_LoadMenuText;
+			_detachMenuItem.Enabled = !Registered;
+			_registerMenuItem.Enabled = !((LibraryName == "System") || (LibraryName == "General") || (LibraryName == "Frontend") || (LibraryName == "SimpleDevice"));
+			_loadMenuItem.Enabled = _registerMenuItem.Enabled && (Registered || CanLoad);
+			_upgradeLibraryMenuItem.Enabled = Registered && UpgradeRequired;
 			//FScriptChangesMenuItem.Enabled = Registered;
 		}
 		
-		private void DetachClicked(object ASender, EventArgs AArgs)
+		private void DetachClicked(object sender, EventArgs args)
 		{
-			using (Frontend.Client.Windows.IWindowsFormInterface LForm = (Frontend.Client.Windows.IWindowsFormInterface)Dataphoria.FrontendSession.CreateForm())
+			using (Frontend.Client.Windows.IWindowsFormInterface form = (Frontend.Client.Windows.IWindowsFormInterface)Dataphoria.FrontendSession.CreateForm())
 			{
-				Dataphoria.FrontendSession.CreateHost().Load(".Frontend.Derive('.System.DetachLibrary', 'Delete', false)", LForm);
-				LForm.MainSource.Filter = GetFilter();
-				LForm.HostNode.Open();
-				if (LForm.ShowModal(Frontend.Client.FormMode.Delete) != DialogResult.OK)
+				Dataphoria.FrontendSession.CreateHost().Load(".Frontend.Derive('.System.DetachLibrary', 'Delete', false)", form);
+				form.MainSource.Filter = GetFilter();
+				form.HostNode.Open();
+				if (form.ShowModal(Frontend.Client.FormMode.Delete) != DialogResult.OK)
 					throw new AbortException();
 			}
 			Remove();
 		}
 
-		private void RegisterToggleClicked(object ASender, EventArgs AArgs)
+		private void RegisterToggleClicked(object sender, EventArgs args)
 		{
 			Dataphoria.Warnings.ClearErrors(Dataphoria);
 			if (!Registered)
 			{
 				try
 				{
-					DAE.IServerCursor LCursor = 
+					DAE.IServerCursor cursor = 
 						Dataphoria.OpenCursor
 						(
 							String.Format
@@ -372,39 +372,39 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 											where not exists (System.LoadedLibraries where Name = Library_Name) 
 											order by {{ Level desc }};
 								", 
-								FLibraryName
+								_libraryName
 							)
 						);
 					try
 					{
-						using (DAE.Runtime.Data.Row LRow = LCursor.Plan.RequestRow())
+						using (DAE.Runtime.Data.Row row = cursor.Plan.RequestRow())
 						{
-							while (LCursor.Next())
+							while (cursor.Next())
 							{
-								LCursor.Select(LRow);
+								cursor.Select(row);
 								try
 								{
-									Dataphoria.ExecuteScript(String.Format("RegisterLibrary('{0}');", (string)LRow["Library_Name"]));
+									Dataphoria.ExecuteScript(String.Format("RegisterLibrary('{0}');", (string)row["Library_Name"]));
 								}
-								catch (Exception LException)
+								catch (Exception exception)
 								{
-									Dataphoria.Warnings.AppendError(Dataphoria, LException, false);
+									Dataphoria.Warnings.AppendError(Dataphoria, exception, false);
 								}
 							}
 						}
 					}
 					finally
 					{
-						Dataphoria.CloseCursor(LCursor);
+						Dataphoria.CloseCursor(cursor);
 					}
 					
 					try
 					{
-						Dataphoria.ExecuteScript(String.Format("RegisterLibrary(\"{0}\");", FLibraryName));
+						Dataphoria.ExecuteScript(String.Format("RegisterLibrary(\"{0}\");", _libraryName));
 					}
-					catch (Exception LException)
+					catch (Exception exception)
 					{
-						Dataphoria.Warnings.AppendError(Dataphoria, LException, false);
+						Dataphoria.Warnings.AppendError(Dataphoria, exception, false);
 					}
 				}
 				finally
@@ -417,35 +417,35 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			{
 				try
 				{
-					using (Frontend.Client.Windows.IWindowsFormInterface LForm = (Frontend.Client.Windows.IWindowsFormInterface)Dataphoria.FrontendSession.CreateForm())
+					using (Frontend.Client.Windows.IWindowsFormInterface form = (Frontend.Client.Windows.IWindowsFormInterface)Dataphoria.FrontendSession.CreateForm())
 					{
-						Dataphoria.FrontendSession.CreateHost().Load(".Frontend.Form('Frontend', 'UnregisterLibrary')", LForm);
-						LForm.MainSource.Filter = GetFilter();
-						LForm.HostNode.Open();
-						if (LForm.ShowModal(Frontend.Client.FormMode.Query) != DialogResult.OK)
+						Dataphoria.FrontendSession.CreateHost().Load(".Frontend.Form('Frontend', 'UnregisterLibrary')", form);
+						form.MainSource.Filter = GetFilter();
+						form.HostNode.Open();
+						if (form.ShowModal(Frontend.Client.FormMode.Query) != DialogResult.OK)
 							throw new AbortException();
-						DAE.Client.DataView LView = ((Frontend.Client.ISource)LForm.FindNode("Dependencies")).DataView;
-						LView.First();
-						foreach (DAE.Runtime.Data.Row LRow in LView)
+						DAE.Client.DataView view = ((Frontend.Client.ISource)form.FindNode("Dependencies")).DataView;
+						view.First();
+						foreach (DAE.Runtime.Data.Row row in view)
 						{
 							try
 							{
-								Dataphoria.ExecuteScript(String.Format("UnregisterLibrary(\"{0}\");", (string)LRow["Library_Name"]));
+								Dataphoria.ExecuteScript(String.Format("UnregisterLibrary(\"{0}\");", (string)row["Library_Name"]));
 							}
-							catch (Exception LException)
+							catch (Exception exception)
 							{
-								Dataphoria.Warnings.AppendError(Dataphoria, LException, false);
+								Dataphoria.Warnings.AppendError(Dataphoria, exception, false);
 							}
 						}
 					}
 
 					try
 					{
-						Dataphoria.ExecuteScript(String.Format("UnregisterLibrary(\"{0}\");", FLibraryName));
+						Dataphoria.ExecuteScript(String.Format("UnregisterLibrary(\"{0}\");", _libraryName));
 					}
-					catch (Exception LException)
+					catch (Exception exception)
 					{
-						Dataphoria.Warnings.AppendError(Dataphoria, LException, false);
+						Dataphoria.Warnings.AppendError(Dataphoria, exception, false);
 					}
 				}
 				finally
@@ -456,14 +456,14 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			}
 		}
 
-		private void LoadToggleClicked(object ASender, EventArgs AArgs)
+		private void LoadToggleClicked(object sender, EventArgs args)
 		{
 			Dataphoria.Warnings.ClearErrors(Dataphoria);
 			if (!Registered)
 			{
 				try
 				{
-					DAE.IServerCursor LCursor = 
+					DAE.IServerCursor cursor = 
 						Dataphoria.OpenCursor
 						(
 							String.Format
@@ -476,39 +476,39 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 											where not exists (System.LoadedLibraries where Name = Library_Name) 
 											order by {{ Level desc }};
 								", 
-								FLibraryName
+								_libraryName
 							)
 						);
 					try
 					{
-						using (DAE.Runtime.Data.Row LRow = LCursor.Plan.RequestRow())
+						using (DAE.Runtime.Data.Row row = cursor.Plan.RequestRow())
 						{
-							while (LCursor.Next())
+							while (cursor.Next())
 							{
-								LCursor.Select(LRow);
+								cursor.Select(row);
 								try
 								{
-									Dataphoria.ExecuteScript(String.Format("RegisterLibrary('{0}', false);", (string)LRow["Library_Name"]));
+									Dataphoria.ExecuteScript(String.Format("RegisterLibrary('{0}', false);", (string)row["Library_Name"]));
 								}
-								catch (Exception LException)
+								catch (Exception exception)
 								{
-									Dataphoria.Warnings.AppendError(Dataphoria, LException, false);
+									Dataphoria.Warnings.AppendError(Dataphoria, exception, false);
 								}
 							}
 						}
 					}
 					finally
 					{
-						Dataphoria.CloseCursor(LCursor);
+						Dataphoria.CloseCursor(cursor);
 					}
 	
 					try
 					{				
-						Dataphoria.ExecuteScript(String.Format("RegisterLibrary('{0}', false);", FLibraryName));
+						Dataphoria.ExecuteScript(String.Format("RegisterLibrary('{0}', false);", _libraryName));
 					}
-					catch (Exception LException)
+					catch (Exception exception)
 					{
-						Dataphoria.Warnings.AppendError(Dataphoria, LException, false);
+						Dataphoria.Warnings.AppendError(Dataphoria, exception, false);
 					}
 				}
 				finally
@@ -521,37 +521,37 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			{
 				try
 				{
-					using (Frontend.Client.Windows.IWindowsFormInterface LForm = (Frontend.Client.Windows.IWindowsFormInterface)Dataphoria.FrontendSession.CreateForm())
+					using (Frontend.Client.Windows.IWindowsFormInterface form = (Frontend.Client.Windows.IWindowsFormInterface)Dataphoria.FrontendSession.CreateForm())
 					{
-						Dataphoria.FrontendSession.CreateHost().Load(".Frontend.Form('Frontend', 'UnloadLibrary')", LForm);
-						LForm.MainSource.Filter = GetFilter();
-						LForm.HostNode.Open();
-						if (LForm.ShowModal(Frontend.Client.FormMode.Query) != DialogResult.OK)
+						Dataphoria.FrontendSession.CreateHost().Load(".Frontend.Form('Frontend', 'UnloadLibrary')", form);
+						form.MainSource.Filter = GetFilter();
+						form.HostNode.Open();
+						if (form.ShowModal(Frontend.Client.FormMode.Query) != DialogResult.OK)
 							throw new AbortException();
-						DAE.Client.DataView LView = ((Frontend.Client.ISource)LForm.FindNode("Dependencies")).DataView;
-						LView.First();
-						foreach (DAE.Runtime.Data.Row LRow in LView)
+						DAE.Client.DataView view = ((Frontend.Client.ISource)form.FindNode("Dependencies")).DataView;
+						view.First();
+						foreach (DAE.Runtime.Data.Row row in view)
 						{
 							try
 							{
-								Dataphoria.ExecuteScript(String.Format("UnregisterLibrary('{0}', false);", (string)LRow["Library_Name"]));
+								Dataphoria.ExecuteScript(String.Format("UnregisterLibrary('{0}', false);", (string)row["Library_Name"]));
 							}
-							catch (Exception LException)
+							catch (Exception exception)
 							{
-								Dataphoria.Warnings.AppendError(Dataphoria, LException, false);
+								Dataphoria.Warnings.AppendError(Dataphoria, exception, false);
 							}
 						}
 					}
 
 					try
 					{
-						Dataphoria.ExecuteScript(String.Format("UnregisterLibrary('{0}', false);", FLibraryName));
+						Dataphoria.ExecuteScript(String.Format("UnregisterLibrary('{0}', false);", _libraryName));
 					}
-					catch (Exception LException)
+					catch (Exception exception)
 					{
-						Dataphoria.Warnings.AppendError(Dataphoria, LException, false);
+						Dataphoria.Warnings.AppendError(Dataphoria, exception, false);
 					}
-					FCanLoad = true;
+					_canLoad = true;
 				}
 				finally
 				{
@@ -561,11 +561,11 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			}
 		}
 
-		private void SetAsCurrentClicked(object ASender, EventArgs AArgs)
+		private void SetAsCurrentClicked(object sender, EventArgs args)
 		{
 			if (Registered && !Current)
 			{
-				Dataphoria.ExecuteScript(String.Format("System.SetLibrary('{0}');", FLibraryName));
+				Dataphoria.ExecuteScript(String.Format("System.SetLibrary('{0}');", _libraryName));
 				((LibraryListNode)Parent).RefreshCurrent();
 			}
 		}		
@@ -578,26 +578,26 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 				((LibraryListNode)Parent).RefreshRegistered();
 		}
 
-		private void OpenRegisterScriptClicked(object ASender, EventArgs AArgs)
+		private void OpenRegisterScriptClicked(object sender, EventArgs args)
 		{
-			DesignerInfo LInfo = Dataphoria.GetDefaultDesigner("d4");
-			DocumentDesignBuffer LBuffer = new DocumentDesignBuffer(Dataphoria, LibraryName, "Register");
-			Dataphoria.OpenDesigner(LInfo, LBuffer);
+			DesignerInfo info = Dataphoria.GetDefaultDesigner("d4");
+			DocumentDesignBuffer buffer = new DocumentDesignBuffer(Dataphoria, LibraryName, "Register");
+			Dataphoria.OpenDesigner(info, buffer);
 		}
 
-		private void ScriptChangesClicked(object ASender, EventArgs AArgs)
+		private void ScriptChangesClicked(object sender, EventArgs args)
 		{
-			string LCatalogDirectory = FolderUtility.GetDirectory(String.Empty);
+			string catalogDirectory = FolderUtility.GetDirectory(String.Empty);
 
-			using (Frontend.Client.Windows.StatusForm LStatusForm = new Frontend.Client.Windows.StatusForm(Strings.ComparingSchema))
+			using (Frontend.Client.Windows.StatusForm statusForm = new Frontend.Client.Windows.StatusForm(Strings.ComparingSchema))
 			{
-				Dataphoria.EvaluateAndEdit(String.Format(".System.ScriptLibraryChanges('{0}', '{1}')", LCatalogDirectory.Replace("'", "''"), LibraryName), "d4");
+				Dataphoria.EvaluateAndEdit(String.Format(".System.ScriptLibraryChanges('{0}', '{1}')", catalogDirectory.Replace("'", "''"), LibraryName), "d4");
 			}
 		}
 		
-		private void UpgradesClicked(object ASender, EventArgs AArgs)
+		private void UpgradesClicked(object sender, EventArgs args)
 		{
-			IWindowsFormInterface LForm =
+			IWindowsFormInterface form =
 				Dataphoria.FrontendSession.LoadForm
 				(
 					null,
@@ -606,64 +606,64 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 				);
 			try
 			{
-				LForm.HostNode.Open();
-				Frontend.Client.ISource LSource = (Frontend.Client.ISource)LForm.FindNode("Libraries");
-				using (DAE.Runtime.Data.Row LRow = new DAE.Runtime.Data.Row(LSource.DataView.Process.ValueManager, LSource.DataView.TableType.RowType))
+				form.HostNode.Open();
+				Frontend.Client.ISource source = (Frontend.Client.ISource)form.FindNode("Libraries");
+				using (DAE.Runtime.Data.Row row = new DAE.Runtime.Data.Row(source.DataView.Process.ValueManager, source.DataView.TableType.RowType))
 				{
-					LRow["Name"] = LibraryName;
-					LSource.DataView.FindKey(LRow);
+					row["Name"] = LibraryName;
+					source.DataView.FindKey(row);
 				}
-				LForm.ShowModal(Frontend.Client.FormMode.None);
+				form.ShowModal(Frontend.Client.FormMode.None);
 			}
 			finally
 			{
-				LForm.HostNode.Dispose();
+				form.HostNode.Dispose();
 			}
 		}
 		
-		private void UpgradeLibraryClicked(object ASender, EventArgs AArgs)
+		private void UpgradeLibraryClicked(object sender, EventArgs args)
 		{
 			Dataphoria.ExecuteScript(String.Format(".System.UpgradeLibrary('{0}');", LibraryName));
 			UpgradeRequired = false;
 			MessageBox.Show(Strings.UpgradeLibrarySuccess);
 		}
 
-		private RootSchemaNode FRootSchemaNode;
+		private RootSchemaNode _rootSchemaNode;
 
-		private DocumentListNode FDocumentListNode;
-		public DocumentListNode DocumentListNode { get { return FDocumentListNode; } }
+		private DocumentListNode _documentListNode;
+		public DocumentListNode DocumentListNode { get { return _documentListNode; } }
 
 		protected override void InternalReconcileChildren()
 		{
 			// Schema
-			if (Registered != (FRootSchemaNode != null))
+			if (Registered != (_rootSchemaNode != null))
 				if (Registered)
 				{
-					FRootSchemaNode = new RootSchemaNode(FLibraryName);
-					InsertBaseNode(0, FRootSchemaNode);
+					_rootSchemaNode = new RootSchemaNode(_libraryName);
+					InsertBaseNode(0, _rootSchemaNode);
 				}
 				else
 				{
-					Nodes.Remove(FRootSchemaNode);
-					FRootSchemaNode = null;
+					Nodes.Remove(_rootSchemaNode);
+					_rootSchemaNode = null;
 				}
 
 			// Documents
-			if ((FDocumentListNode == null) && (FLibraryName != "System"))
+			if ((_documentListNode == null) && (_libraryName != "System"))
 			{
-				FDocumentListNode = new DocumentListNode(FLibraryName);
-				AddBaseNode(FDocumentListNode);
+				_documentListNode = new DocumentListNode(_libraryName);
+				AddBaseNode(_documentListNode);
 			}
 		}
 
-		protected override void PrepareEditForm(Frontend.Client.Windows.IWindowsFormInterface AForm)
+		protected override void PrepareEditForm(Frontend.Client.Windows.IWindowsFormInterface form)
 		{
-			base.PrepareEditForm(AForm);
+			base.PrepareEditForm(form);
 			if (Registered)
 			{
-				Frontend.Client.ITextBox LTextBox = ((Frontend.Client.ITextBox)AForm.FindNode("MainColumnMain.Name"));
-				LTextBox.ReadOnly = true;
-				LTextBox.Title = LTextBox.Title + Strings.LibraryNode_CannotEditWhileRegistered;
+				Frontend.Client.ITextBox textBox = ((Frontend.Client.ITextBox)form.FindNode("MainColumnMain.Name"));
+				textBox.ReadOnly = true;
+				textBox.Title = textBox.Title + Strings.LibraryNode_CannotEditWhileRegistered;
 			}
 		}
 
@@ -672,18 +672,18 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			return "Main.Name";
 		}
 
-		protected override void NameChanged(string ANewName)
+		protected override void NameChanged(string newName)
 		{
-			FLibraryName = ANewName;
+			_libraryName = newName;
 			// Refresh children so that they get the new library name (the lib name is cached in these nodes)
 			if (Built)
 			{
 				Nodes.Clear();
-				FDocumentListNode = null;
-				FRootSchemaNode = null;
+				_documentListNode = null;
+				_rootSchemaNode = null;
 				Refresh();
 			}
-			base.NameChanged(ANewName);
+			base.NameChanged(newName);
 		}
 
 		protected override string EditDocument()
@@ -704,44 +704,44 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 	public class RootSchemaNode : DataNode
 	{
-		public RootSchemaNode(string ALibraryName)
+		public RootSchemaNode(string libraryName)
 		{
 			Text = Strings.ObjectTree_SchemaNodeText;
-			FLibraryName = ALibraryName;
+			_libraryName = libraryName;
 			ImageIndex = 15;
 			SelectedImageIndex = ImageIndex;
 		}
 		
 		protected override ContextMenu GetContextMenu()
 		{
-			ContextMenu LMenu = new ContextMenu();
-			LMenu.MenuItems.Add(new MenuItem(Strings.ObjectTree_EmitCreateScriptMenuText, new EventHandler(EmitCreateLibraryScriptClicked)));
-			LMenu.MenuItems.Add(new MenuItem(Strings.ObjectTree_EmitDropScriptMenuText, new EventHandler(EmitDropLibraryScriptClicked)));
-			return LMenu;
+			ContextMenu menu = new ContextMenu();
+			menu.MenuItems.Add(new MenuItem(Strings.ObjectTree_EmitCreateScriptMenuText, new EventHandler(EmitCreateLibraryScriptClicked)));
+			menu.MenuItems.Add(new MenuItem(Strings.ObjectTree_EmitDropScriptMenuText, new EventHandler(EmitDropLibraryScriptClicked)));
+			return menu;
 		}
 
-		private string FLibraryName;
-		public string LibraryName { get { return FLibraryName; } }
+		private string _libraryName;
+		public string LibraryName { get { return _libraryName; } }
 		
 		protected override void InternalReconcileChildren()
 		{
 			Nodes.Clear();
-			AddBaseNode(new ScalarTypeListNode(FLibraryName));
-			AddBaseNode(new TableListNode(FLibraryName));
-			AddBaseNode(new ViewListNode(FLibraryName));
-			AddBaseNode(new OperatorListNode(FLibraryName));
-			AddBaseNode(new ConstraintListNode(FLibraryName));
-			AddBaseNode(new ReferenceListNode(FLibraryName));
-			AddBaseNode(new DeviceListNode(FLibraryName));
-			AddBaseNode(new RoleListNode(FLibraryName));
+			AddBaseNode(new ScalarTypeListNode(_libraryName));
+			AddBaseNode(new TableListNode(_libraryName));
+			AddBaseNode(new ViewListNode(_libraryName));
+			AddBaseNode(new OperatorListNode(_libraryName));
+			AddBaseNode(new ConstraintListNode(_libraryName));
+			AddBaseNode(new ReferenceListNode(_libraryName));
+			AddBaseNode(new DeviceListNode(_libraryName));
+			AddBaseNode(new RoleListNode(_libraryName));
 		}
 
-		private void EmitCreateLibraryScriptClicked(object ASender, EventArgs AArgs)
+		private void EmitCreateLibraryScriptClicked(object sender, EventArgs args)
 		{
 			Dataphoria.EvaluateAndEdit(String.Format("ScriptLibrary('{0}')", LibraryName), "d4");
 		}
 
-		private void EmitDropLibraryScriptClicked(object ASender, EventArgs AArgs)
+		private void EmitDropLibraryScriptClicked(object sender, EventArgs args)
 		{
 			Dataphoria.EvaluateAndEdit(String.Format("ScriptDropLibrary('{0}')", LibraryName), "d4");
 		}

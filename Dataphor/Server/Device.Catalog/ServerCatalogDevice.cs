@@ -32,15 +32,15 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 {
 	public class ServerCatalogDevice : CatalogDevice
 	{
-		public ServerCatalogDevice(int AID, string AName) : base(AID, AName) { }
+		public ServerCatalogDevice(int iD, string name) : base(iD, name) { }
 		
-		private CatalogStore FStore;
+		private CatalogStore _store;
 		internal CatalogStore Store
 		{
 			get
 			{
-				Error.AssertFail(FStore != null, "Server is configured as a repository and has no catalog store.");
-				return FStore;
+				Error.AssertFail(_store != null, "Server is configured as a repository and has no catalog store.");
+				return _store;
 			}
 		}
 		
@@ -54,126 +54,126 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		public int MaxStoreConnections
 		{
-			get { return FStore.MaxConnections; }
-			set { FStore.MaxConnections = value; }
+			get { return _store.MaxConnections; }
+			set { _store.MaxConnections = value; }
 		}
 
-		protected override DeviceSession InternalConnect(ServerProcess AServerProcess, DeviceSessionInfo ADeviceSessionInfo)
+		protected override DeviceSession InternalConnect(ServerProcess serverProcess, DeviceSessionInfo deviceSessionInfo)
 		{
-			return new ServerCatalogDeviceSession(this, AServerProcess, ADeviceSessionInfo);
+			return new ServerCatalogDeviceSession(this, serverProcess, deviceSessionInfo);
 		}
 
-		protected override void InternalStart(ServerProcess AProcess)
+		protected override void InternalStart(ServerProcess process)
 		{
-			base.InternalStart(AProcess);
-			if (!AProcess.ServerSession.Server.IsEngine)
+			base.InternalStart(process);
+			if (!process.ServerSession.Server.IsEngine)
 			{
-				FStore = new CatalogStore();
-				FStore.StoreClassName = ((Server.Server)AProcess.ServerSession.Server).GetCatalogStoreClassName();
-				FStore.StoreConnectionString = ((Server.Server)AProcess.ServerSession.Server).GetCatalogStoreConnectionString();
-				FStore.Initialize(AProcess.ServerSession.Server);
+				_store = new CatalogStore();
+				_store.StoreClassName = ((Server.Server)process.ServerSession.Server).GetCatalogStoreClassName();
+				_store.StoreConnectionString = ((Server.Server)process.ServerSession.Server).GetCatalogStoreConnectionString();
+				_store.Initialize(process.ServerSession.Server);
 			}
 		}
 
-		protected override DevicePlanNode InternalPrepare(DevicePlan ADevicePlan, PlanNode APlanNode)
+		protected override DevicePlanNode InternalPrepare(DevicePlan devicePlan, PlanNode planNode)
 		{
-			CatalogDevicePlan LDevicePlan = (CatalogDevicePlan)ADevicePlan;
-			CatalogDevicePlanNode LDevicePlanNode = new CatalogDevicePlanNode(APlanNode);
-			TranslatePlanNode(LDevicePlan, LDevicePlanNode, APlanNode);
-			if (APlanNode is TableNode)
-				TranslateOrder(LDevicePlan, LDevicePlanNode, (TableNode)APlanNode);
+			CatalogDevicePlan localDevicePlan = (CatalogDevicePlan)devicePlan;
+			CatalogDevicePlanNode devicePlanNode = new CatalogDevicePlanNode(planNode);
+			TranslatePlanNode(localDevicePlan, devicePlanNode, planNode);
+			if (planNode is TableNode)
+				TranslateOrder(localDevicePlan, devicePlanNode, (TableNode)planNode);
 			
-			if (LDevicePlan.IsSupported)
+			if (localDevicePlan.IsSupported)
 			{
-				LDevicePlan.IsStorePlan = true;
-				return LDevicePlanNode;
+				localDevicePlan.IsStorePlan = true;
+				return devicePlanNode;
 			}
 			else
-				return base.InternalPrepare(ADevicePlan, APlanNode);
+				return base.InternalPrepare(devicePlan, planNode);
 		}
 		
-		protected override DevicePlan CreateDevicePlan(Plan APlan, PlanNode APlanNode)
+		protected override DevicePlan CreateDevicePlan(Plan plan, PlanNode planNode)
 		{
-			var LDevicePlan = base.CreateDevicePlan(APlan, APlanNode);
-			if (APlanNode.DeviceNode is CatalogDevicePlanNode)
-				((CatalogDevicePlan)LDevicePlan).IsStorePlan = true;
-			return LDevicePlan;
+			var devicePlan = base.CreateDevicePlan(plan, planNode);
+			if (planNode.DeviceNode is CatalogDevicePlanNode)
+				((CatalogDevicePlan)devicePlan).IsStorePlan = true;
+			return devicePlan;
 		}
 		
-		private void PopulateServerSettings(Program AProgram, NativeTable ANativeTable, Row ARow)
+		private void PopulateServerSettings(Program program, NativeTable nativeTable, Row row)
 		{
-			DAE.Server.Server LServer = (DAE.Server.Server)AProgram.ServerProcess.ServerSession.Server;
-			ARow[0] = LServer.Name;
-			ARow[1] = GetType().Assembly.GetName().Version.ToString();
-			ARow[2] = LServer.LogErrors;
-			ARow[3] = LServer.Catalog.TimeStamp;
-			ARow[4] = LServer.CacheTimeStamp;
-			ARow[5] = LServer.PlanCacheTimeStamp;
-			ARow[6] = LServer.DerivationTimeStamp;
-			ARow[7] = LServer.InstanceDirectory;
-			ARow[8] = LServer.LibraryDirectory;
-			ARow[9] = LServer.IsEngine;
-			ARow[10] = LServer.MaxConcurrentProcesses;
-			ARow[11] = LServer.ProcessWaitTimeout;
-			ARow[12] = LServer.ProcessTerminationTimeout;
-			ARow[13] = LServer.PlanCache.Size;
-			ANativeTable.Insert(AProgram.ValueManager, ARow);
+			DAE.Server.Server server = (DAE.Server.Server)program.ServerProcess.ServerSession.Server;
+			row[0] = server.Name;
+			row[1] = GetType().Assembly.GetName().Version.ToString();
+			row[2] = server.LogErrors;
+			row[3] = server.Catalog.TimeStamp;
+			row[4] = server.CacheTimeStamp;
+			row[5] = server.PlanCacheTimeStamp;
+			row[6] = server.DerivationTimeStamp;
+			row[7] = server.InstanceDirectory;
+			row[8] = server.LibraryDirectory;
+			row[9] = server.IsEngine;
+			row[10] = server.MaxConcurrentProcesses;
+			row[11] = server.ProcessWaitTimeout;
+			row[12] = server.ProcessTerminationTimeout;
+			row[13] = server.PlanCache.Size;
+			nativeTable.Insert(program.ValueManager, row);
 		}
 
-		private void PopulateLoadedLibraries(Program AProgram, NativeTable ANativeTable, Row ARow)
+		private void PopulateLoadedLibraries(Program program, NativeTable nativeTable, Row row)
 		{
-			List<string> LLibraryNames = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SelectLoadedLibraries();
-			for (int LIndex = 0; LIndex < LLibraryNames.Count; LIndex++)
+			List<string> libraryNames = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).SelectLoadedLibraries();
+			for (int index = 0; index < libraryNames.Count; index++)
 			{
-				ARow[0] = LLibraryNames[LIndex];
-				ANativeTable.Insert(AProgram.ValueManager, ARow);
+				row[0] = libraryNames[index];
+				nativeTable.Insert(program.ValueManager, row);
 			}
 		}
 		
-		private void PopulateLibraryOwners(Program AProgram, NativeTable ANativeTable, Row ARow)
+		private void PopulateLibraryOwners(Program program, NativeTable nativeTable, Row row)
 		{
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SelectLibraryOwners(AProgram, ANativeTable, ARow);
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).SelectLibraryOwners(program, nativeTable, row);
 		}
 
-		private void PopulateLibraryVersions(Program AProgram, NativeTable ANativeTable, Row ARow)
+		private void PopulateLibraryVersions(Program program, NativeTable nativeTable, Row row)
 		{
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SelectLibraryVersions(AProgram, ANativeTable, ARow);
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).SelectLibraryVersions(program, nativeTable, row);
 		}
 
-		protected override void InternalPopulateTableVar(Program AProgram, CatalogHeader AHeader, Row ARow)
+		protected override void InternalPopulateTableVar(Program program, CatalogHeader header, Row row)
 		{
-			switch (AHeader.TableVar.Name)
+			switch (header.TableVar.Name)
 			{
-				case "System.ServerSettings" : PopulateServerSettings(AProgram, AHeader.NativeTable, ARow); break;
-				case "System.LibraryOwners" : PopulateLibraryOwners(AProgram, AHeader.NativeTable, ARow); break;
-				case "System.LibraryVersions" : PopulateLibraryVersions(AProgram, AHeader.NativeTable, ARow); break;
-				case "System.LoadedLibraries" : PopulateLoadedLibraries(AProgram, AHeader.NativeTable, ARow); break;
-				default: base.InternalPopulateTableVar(AProgram, AHeader, ARow); break;
+				case "System.ServerSettings" : PopulateServerSettings(program, header.NativeTable, row); break;
+				case "System.LibraryOwners" : PopulateLibraryOwners(program, header.NativeTable, row); break;
+				case "System.LibraryVersions" : PopulateLibraryVersions(program, header.NativeTable, row); break;
+				case "System.LoadedLibraries" : PopulateLoadedLibraries(program, header.NativeTable, row); break;
+				default: base.InternalPopulateTableVar(program, header, row); break;
 			}
 		}
 
-		protected void TranslateOrderNode(CatalogDevicePlan ADevicePlan, CatalogDevicePlanNode ADevicePlanNode, OrderNode AOrderNode)
+		protected void TranslateOrderNode(CatalogDevicePlan devicePlan, CatalogDevicePlanNode devicePlanNode, OrderNode orderNode)
 		{
-			TranslatePlanNode(ADevicePlan, ADevicePlanNode, AOrderNode.SourceNode);
-			if (ADevicePlan.IsSupported)
+			TranslatePlanNode(devicePlan, devicePlanNode, orderNode.SourceNode);
+			if (devicePlan.IsSupported)
 			{
-				AOrderNode.CursorType = AOrderNode.SourceNode.CursorType;
-				AOrderNode.RequestedCursorType = AOrderNode.SourceNode.RequestedCursorType;
-				AOrderNode.CursorCapabilities = AOrderNode.SourceNode.CursorCapabilities;
-				AOrderNode.CursorIsolation = AOrderNode.SourceNode.CursorIsolation;
+				orderNode.CursorType = orderNode.SourceNode.CursorType;
+				orderNode.RequestedCursorType = orderNode.SourceNode.RequestedCursorType;
+				orderNode.CursorCapabilities = orderNode.SourceNode.CursorCapabilities;
+				orderNode.CursorIsolation = orderNode.SourceNode.CursorIsolation;
 			}
 		}
 		
-		protected void GetViewDefinition(string ATableVarName, StringBuilder AStatement, StringBuilder AWhereCondition)
+		protected void GetViewDefinition(string tableVarName, StringBuilder statement, StringBuilder whereCondition)
 		{
-			switch (ATableVarName)
+			switch (tableVarName)
 			{
 				case "Users" :
-					AStatement.Append("select ID, Name from DAEUsers");
+					statement.Append("select ID, Name from DAEUsers");
 				break;
 					
 				case "Operators" :
-					AStatement.Append
+					statement.Append
 					(
 						@"
 select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, J.IsSystem, J.IsGenerated, O.OperatorName, O.Signature, O.Locator, O.Line, O.LinePos
@@ -185,7 +185,7 @@ select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, J.IsSystem, J.IsGenerated,
 				break;
 					
 				case "ScalarTypes" :
-					AStatement.Append
+					statement.Append
 					(
 						@"
 select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, O.IsSystem, O.IsGenerated
@@ -193,11 +193,11 @@ select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, O.IsSystem, O.IsGenerated
 		join DAECatalogObjects C on O.ID = C.ID
 						"
 					);
-					AWhereCondition.Append("O.Type = 'ScalarType'");
+					whereCondition.Append("O.Type = 'ScalarType'");
 				break;
 				
 				case "Sorts" :
-					AStatement.Append
+					statement.Append
 					(
 						@"
 select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, O.IsSystem, O.IsGenerated
@@ -205,11 +205,11 @@ select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, O.IsSystem, O.IsGenerated
 		join DAECatalogObjects C on O.ID = C.ID
 						"
 					);
-					AWhereCondition.Append("O.Type = 'Sort'");
+					whereCondition.Append("O.Type = 'Sort'");
 				break;
 					
 				case "TableVars" :
-					AStatement.Append
+					statement.Append
 					(
 						@"
 select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, O.IsSystem, O.IsGenerated
@@ -217,11 +217,11 @@ select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, O.IsSystem, O.IsGenerated
 		join DAECatalogObjects C on O.ID = C.ID
 						"
 					);
-					AWhereCondition.Append("O.Type in ('BaseTableVar', 'DerivedTableVar')");
+					whereCondition.Append("O.Type in ('BaseTableVar', 'DerivedTableVar')");
 				break;
 					
 				case "BaseTableVars" :
-					AStatement.Append
+					statement.Append
 					(
 						@"
 select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, O.IsSystem, O.IsGenerated
@@ -229,11 +229,11 @@ select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, O.IsSystem, O.IsGenerated
 		join DAECatalogObjects C on O.ID = C.ID
 						"
 					);
-					AWhereCondition.Append("O.Type = 'BaseTableVar'");
+					whereCondition.Append("O.Type = 'BaseTableVar'");
 				break;
 					
 				case "DerivedTableVars" :
-					AStatement.Append
+					statement.Append
 					(
 						@"
 select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, O.IsSystem, O.IsGenerated
@@ -241,11 +241,11 @@ select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, O.IsSystem, O.IsGenerated
 		join DAECatalogObjects C on O.ID = C.ID
 						"
 					);
-					AWhereCondition.Append("O.Type = 'DerivedTableVar'");
+					whereCondition.Append("O.Type = 'DerivedTableVar'");
 				break;
 					
 				case "References" :
-					AStatement.Append
+					statement.Append
 					(
 						@"
 select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, O.IsSystem, O.IsGenerated
@@ -253,11 +253,11 @@ select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, O.IsSystem, O.IsGenerated
 		join DAECatalogObjects C on O.ID = C.ID
 						"
 					);
-					AWhereCondition.Append("O.Type = 'Reference'");
+					whereCondition.Append("O.Type = 'Reference'");
 				break;
 					
 				case "CatalogConstraints" :
-					AStatement.Append
+					statement.Append
 					(
 						@"
 select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, O.IsSystem, O.IsGenerated
@@ -265,11 +265,11 @@ select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, O.IsSystem, O.IsGenerated
 		join DAECatalogObjects C on O.ID = C.ID
 						"
 					);
-					AWhereCondition.Append("O.Type = 'CatalogConstraint'");
+					whereCondition.Append("O.Type = 'CatalogConstraint'");
 				break;
 					
 				case "Roles" :
-					AStatement.Append
+					statement.Append
 					(
 						@"
 select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, O.IsSystem, O.IsGenerated
@@ -277,11 +277,11 @@ select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, O.IsSystem, O.IsGenerated
 		join DAEObjects O on C.ID = O.ID
 						"
 					);
-					AWhereCondition.Append("O.Type = 'Role'");
+					whereCondition.Append("O.Type = 'Role'");
 				break;
 					
 				case "UserRoles" :
-					AStatement.Append
+					statement.Append
 					(
 						@"
 select UR.User_ID, R.Name Role_Name
@@ -292,7 +292,7 @@ select UR.User_ID, R.Name Role_Name
 				break;
 					
 				case "RoleRightAssignments" :
-					AStatement.Append
+					statement.Append
 					(
 						@"
 select O.Name Role_Name, A.Right_Name, A.IsGranted
@@ -303,7 +303,7 @@ select O.Name Role_Name, A.Right_Name, A.IsGranted
 				break;
 					
 				case "Devices" :
-					AStatement.Append
+					statement.Append
 					(
 						@"
 select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, O.IsSystem, O.IsGenerated, D.ReconciliationMaster, D.ReconciliationMode
@@ -315,7 +315,7 @@ select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, O.IsSystem, O.IsGenerated,
 				break;
 					
 				case "DeviceUsers" :
-					AStatement.Append
+					statement.Append
 					(
 						@"
 select DU.User_ID, C.Name Device_Name, DU.UserID, DU.ConnectionParameters
@@ -326,7 +326,7 @@ select DU.User_ID, C.Name Device_Name, DU.UserID, DU.ConnectionParameters
 				break;
 					
 				case "DeviceScalarTypes" :
-					AStatement.Append
+					statement.Append
 					(
 						@"
 select O.Name, D.Name Device_Name, S.Name ScalarType_Name
@@ -337,11 +337,11 @@ select O.Name, D.Name Device_Name, S.Name ScalarType_Name
 			join DAEObjects SO on S.ID = SO.ID
 						"
 					);
-					AWhereCondition.Append("SO.Type = 'ScalarType'");
+					whereCondition.Append("SO.Type = 'ScalarType'");
 				break;
 					
 				case "DeviceOperators" :
-					AStatement.Append
+					statement.Append
 					(
 						@"
 select O.Name, D.Name Device_Name, S.Name Operator_Name
@@ -352,43 +352,43 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 			join DAEObjects SO on S.ID = SO.ID
 						"
 					);
-					AWhereCondition.Append("SO.Type in ('Operator', 'AggregateOperator')");
+					whereCondition.Append("SO.Type in ('Operator', 'AggregateOperator')");
 				break;
 				
 				default :
-					Error.Fail("Could not build view definition for catalog store table '{0}'.", ATableVarName);
+					Error.Fail("Could not build view definition for catalog store table '{0}'.", tableVarName);
 				break;
 			}
 		}
 		
-		protected void TranslateBaseTableVarNode(CatalogDevicePlan ADevicePlan, CatalogDevicePlanNode ADevicePlanNode, BaseTableVarNode ABaseTableVarNode)
+		protected void TranslateBaseTableVarNode(CatalogDevicePlan devicePlan, CatalogDevicePlanNode devicePlanNode, BaseTableVarNode baseTableVarNode)
 		{
-			Tag LTag = MetaData.GetTag(ABaseTableVarNode.TableVar.MetaData, "Catalog.CacheLevel");
-			if (LTag != Tag.None)
+			Tag tag = MetaData.GetTag(baseTableVarNode.TableVar.MetaData, "Catalog.CacheLevel");
+			if (tag != Tag.None)
 			{
-				if ((LTag.Value == "StoreTable") || (LTag.Value == "StoreView"))
+				if ((tag.Value == "StoreTable") || (tag.Value == "StoreView"))
 				{
-					ADevicePlan.TableContext = ABaseTableVarNode.TableVar;
-					ABaseTableVarNode.CursorType = CursorType.Dynamic;
-					ABaseTableVarNode.RequestedCursorType = ADevicePlan.Plan.CursorContext.CursorType;
-					ABaseTableVarNode.CursorCapabilities = CursorCapability.Navigable | (ADevicePlan.Plan.CursorContext.CursorCapabilities & CursorCapability.Updateable);
-					ABaseTableVarNode.CursorIsolation = ADevicePlan.Plan.CursorContext.CursorIsolation;
-					ABaseTableVarNode.Order = Compiler.OrderFromKey(ADevicePlan.Plan, Compiler.FindClusteringKey(ADevicePlan.Plan, ABaseTableVarNode.TableVar));
-					if (LTag.Value == "StoreTable")
-						ADevicePlanNode.Statement.AppendFormat("select * from DAE{0}", Schema.Object.Unqualify(ABaseTableVarNode.TableVar.Name));
+					devicePlan.TableContext = baseTableVarNode.TableVar;
+					baseTableVarNode.CursorType = CursorType.Dynamic;
+					baseTableVarNode.RequestedCursorType = devicePlan.Plan.CursorContext.CursorType;
+					baseTableVarNode.CursorCapabilities = CursorCapability.Navigable | (devicePlan.Plan.CursorContext.CursorCapabilities & CursorCapability.Updateable);
+					baseTableVarNode.CursorIsolation = devicePlan.Plan.CursorContext.CursorIsolation;
+					baseTableVarNode.Order = Compiler.OrderFromKey(devicePlan.Plan, Compiler.FindClusteringKey(devicePlan.Plan, baseTableVarNode.TableVar));
+					if (tag.Value == "StoreTable")
+						devicePlanNode.Statement.AppendFormat("select * from DAE{0}", Schema.Object.Unqualify(baseTableVarNode.TableVar.Name));
 					else
-						GetViewDefinition(Schema.Object.Unqualify(ABaseTableVarNode.TableVar.Name), ADevicePlanNode.Statement, ADevicePlanNode.WhereCondition);
+						GetViewDefinition(Schema.Object.Unqualify(baseTableVarNode.TableVar.Name), devicePlanNode.Statement, devicePlanNode.WhereCondition);
 				}
 				else
-					ADevicePlan.IsSupported = false;
+					devicePlan.IsSupported = false;
 			}
 			else
-				ADevicePlan.IsSupported = false;
+				devicePlan.IsSupported = false;
 		}
 		
-		protected string GetInstructionKeyword(string AInstruction)
+		protected string GetInstructionKeyword(string instruction)
 		{
-			switch (AInstruction)
+			switch (instruction)
 			{
 				case Instructions.And: return "and";
 				case Instructions.Equal: return "=";
@@ -400,48 +400,48 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 				case Instructions.Like: return "like";
 			}
 			
-			Error.Fail("Unknown instruction '{0}' encountered in catalog device.", AInstruction);
+			Error.Fail("Unknown instruction '{0}' encountered in catalog device.", instruction);
 			return String.Empty;
 		}
 		
-		protected void TranslateScalarParameter(CatalogDevicePlan ADevicePlan, CatalogDevicePlanNode ADevicePlanNode, PlanNode APlanNode)
+		protected void TranslateScalarParameter(CatalogDevicePlan devicePlan, CatalogDevicePlanNode devicePlanNode, PlanNode planNode)
 		{
-			SQLType LType = null;
-			switch (APlanNode.DataType.Name)
+			SQLType type = null;
+			switch (planNode.DataType.Name)
 			{
 				case "System.String" :
 				case "System.Name" :
 				case "System.UserID" :
-					LType = new SQLStringType(200);
+					type = new SQLStringType(200);
 				break;
 				
 				case "System.Integer" :
-					LType = new SQLIntegerType(4);
+					type = new SQLIntegerType(4);
 				break;
 				
 				case "System.Boolean" :
-					LType = new SQLIntegerType(1);
+					type = new SQLIntegerType(1);
 				break;
 			}
 			
-			if (LType != null)
+			if (type != null)
 			{
-				string LParameterName = String.Format("P{0}", ADevicePlanNode.PlanParameters.Count + 1);
-				ADevicePlanNode.PlanParameters.Add(new CatalogPlanParameter(new SQLParameter(LParameterName, LType, null), APlanNode));
-				ADevicePlanNode.WhereCondition.AppendFormat("@{0}", LParameterName);
+				string parameterName = String.Format("P{0}", devicePlanNode.PlanParameters.Count + 1);
+				devicePlanNode.PlanParameters.Add(new CatalogPlanParameter(new SQLParameter(parameterName, type, null), planNode));
+				devicePlanNode.WhereCondition.AppendFormat("@{0}", parameterName);
 			}
 			else
-				ADevicePlan.IsSupported = false;
+				devicePlan.IsSupported = false;
 		}
 
-		protected void TranslateExpression(CatalogDevicePlan ADevicePlan, CatalogDevicePlanNode ADevicePlanNode, PlanNode APlanNode)
+		protected void TranslateExpression(CatalogDevicePlan devicePlan, CatalogDevicePlanNode devicePlanNode, PlanNode planNode)
 		{
-			InstructionNodeBase LInstructionNode = APlanNode as InstructionNodeBase;
-			if (LInstructionNode != null)
+			InstructionNodeBase instructionNode = planNode as InstructionNodeBase;
+			if (instructionNode != null)
 			{
-				if ((LInstructionNode.DataType != null) && (LInstructionNode.Operator != null))
+				if ((instructionNode.DataType != null) && (instructionNode.Operator != null))
 				{
-					switch (Schema.Object.Unqualify(LInstructionNode.Operator.OperatorName))
+					switch (Schema.Object.Unqualify(instructionNode.Operator.OperatorName))
 					{
 						case Instructions.And:
 						case Instructions.Equal:
@@ -451,104 +451,104 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 						case Instructions.Less:
 						case Instructions.InclusiveLess:
 						case Instructions.Like:
-							TranslateExpression(ADevicePlan, ADevicePlanNode, LInstructionNode.Nodes[0]);
-							ADevicePlanNode.WhereCondition.AppendFormat(" {0} ", GetInstructionKeyword(Schema.Object.Unqualify(LInstructionNode.Operator.OperatorName)));
-							TranslateExpression(ADevicePlan, ADevicePlanNode, LInstructionNode.Nodes[1]);
+							TranslateExpression(devicePlan, devicePlanNode, instructionNode.Nodes[0]);
+							devicePlanNode.WhereCondition.AppendFormat(" {0} ", GetInstructionKeyword(Schema.Object.Unqualify(instructionNode.Operator.OperatorName)));
+							TranslateExpression(devicePlan, devicePlanNode, instructionNode.Nodes[1]);
 						return;
 						
-						case "ReadValue" : TranslateExpression(ADevicePlan, ADevicePlanNode, LInstructionNode.Nodes[0]); return;
+						case "ReadValue" : TranslateExpression(devicePlan, devicePlanNode, instructionNode.Nodes[0]); return;
 						
-						default: ADevicePlan.IsSupported = false; return;
+						default: devicePlan.IsSupported = false; return;
 					}
 				}
 			}
 			
-			ValueNode LValueNode = APlanNode as ValueNode;
-			if (LValueNode != null)
+			ValueNode valueNode = planNode as ValueNode;
+			if (valueNode != null)
 			{
-				TranslateScalarParameter(ADevicePlan, ADevicePlanNode, APlanNode);
+				TranslateScalarParameter(devicePlan, devicePlanNode, planNode);
 				return;
 			}
 			
-			StackReferenceNode LStackReferenceNode = APlanNode as StackReferenceNode;
-			if (LStackReferenceNode != null)
+			StackReferenceNode stackReferenceNode = planNode as StackReferenceNode;
+			if (stackReferenceNode != null)
 			{
-				TranslateScalarParameter(ADevicePlan, ADevicePlanNode, new StackReferenceNode(LStackReferenceNode.DataType, LStackReferenceNode.Location - 1));
+				TranslateScalarParameter(devicePlan, devicePlanNode, new StackReferenceNode(stackReferenceNode.DataType, stackReferenceNode.Location - 1));
 				return;
 			}
 			
-			StackColumnReferenceNode LStackColumnReferenceNode = APlanNode as StackColumnReferenceNode;
-			if (LStackColumnReferenceNode != null)
+			StackColumnReferenceNode stackColumnReferenceNode = planNode as StackColumnReferenceNode;
+			if (stackColumnReferenceNode != null)
 			{
-				if (LStackColumnReferenceNode.Location == 0)
-					if (ADevicePlan.TableContext != null)
-						ADevicePlanNode.WhereCondition.Append(Schema.Object.EnsureUnrooted(MetaData.GetTag(ADevicePlan.TableContext.Columns[LStackColumnReferenceNode.Identifier].MetaData, "Storage.Name", LStackColumnReferenceNode.Identifier)));
+				if (stackColumnReferenceNode.Location == 0)
+					if (devicePlan.TableContext != null)
+						devicePlanNode.WhereCondition.Append(Schema.Object.EnsureUnrooted(MetaData.GetTag(devicePlan.TableContext.Columns[stackColumnReferenceNode.Identifier].MetaData, "Storage.Name", stackColumnReferenceNode.Identifier)));
 					else
-						ADevicePlanNode.WhereCondition.Append(Schema.Object.EnsureUnrooted(LStackColumnReferenceNode.Identifier));
+						devicePlanNode.WhereCondition.Append(Schema.Object.EnsureUnrooted(stackColumnReferenceNode.Identifier));
 				else
-					TranslateScalarParameter(ADevicePlan, ADevicePlanNode, new StackColumnReferenceNode(LStackColumnReferenceNode.Identifier, LStackColumnReferenceNode.DataType, LStackColumnReferenceNode.Location - 1));
+					TranslateScalarParameter(devicePlan, devicePlanNode, new StackColumnReferenceNode(stackColumnReferenceNode.Identifier, stackColumnReferenceNode.DataType, stackColumnReferenceNode.Location - 1));
 
 				return;
 			}
 			
-			ADevicePlan.IsSupported = false;
+			devicePlan.IsSupported = false;
 		}
 		
-		protected void TranslateRestrictNode(CatalogDevicePlan ADevicePlan, CatalogDevicePlanNode ADevicePlanNode, RestrictNode ARestrictNode)
+		protected void TranslateRestrictNode(CatalogDevicePlan devicePlan, CatalogDevicePlanNode devicePlanNode, RestrictNode restrictNode)
 		{
-			if ((ARestrictNode.SourceNode is BaseTableVarNode) && (ARestrictNode.Nodes[1] is InstructionNodeBase))
+			if ((restrictNode.SourceNode is BaseTableVarNode) && (restrictNode.Nodes[1] is InstructionNodeBase))
 			{
-				TranslateBaseTableVarNode(ADevicePlan, ADevicePlanNode, (BaseTableVarNode)ARestrictNode.SourceNode);
-				if (ADevicePlan.IsSupported)
+				TranslateBaseTableVarNode(devicePlan, devicePlanNode, (BaseTableVarNode)restrictNode.SourceNode);
+				if (devicePlan.IsSupported)
 				{
-					if (ADevicePlanNode.WhereCondition.Length > 0)
+					if (devicePlanNode.WhereCondition.Length > 0)
 					{
-						ADevicePlanNode.WhereCondition.Insert(0, "(");
-						ADevicePlanNode.WhereCondition.AppendFormat(") and ");
+						devicePlanNode.WhereCondition.Insert(0, "(");
+						devicePlanNode.WhereCondition.AppendFormat(") and ");
 					}
-					TranslateExpression(ADevicePlan, ADevicePlanNode, ARestrictNode.Nodes[1]);
+					TranslateExpression(devicePlan, devicePlanNode, restrictNode.Nodes[1]);
 
-					if (ADevicePlan.IsSupported)
+					if (devicePlan.IsSupported)
 					{
-						ARestrictNode.CursorType = ARestrictNode.SourceNode.CursorType;
-						ARestrictNode.RequestedCursorType = ARestrictNode.SourceNode.RequestedCursorType;
-						ARestrictNode.CursorCapabilities = ARestrictNode.SourceNode.CursorCapabilities;
-						ARestrictNode.CursorIsolation = ARestrictNode.SourceNode.CursorIsolation;
-						ARestrictNode.Order = ARestrictNode.SourceNode.Order;
+						restrictNode.CursorType = restrictNode.SourceNode.CursorType;
+						restrictNode.RequestedCursorType = restrictNode.SourceNode.RequestedCursorType;
+						restrictNode.CursorCapabilities = restrictNode.SourceNode.CursorCapabilities;
+						restrictNode.CursorIsolation = restrictNode.SourceNode.CursorIsolation;
+						restrictNode.Order = restrictNode.SourceNode.Order;
 					}
 				}
 			}
 			else
-				ADevicePlan.IsSupported = false;
+				devicePlan.IsSupported = false;
 		}
 		
-		protected void TranslatePlanNode(CatalogDevicePlan ADevicePlan, CatalogDevicePlanNode ADevicePlanNode, PlanNode APlanNode)
+		protected void TranslatePlanNode(CatalogDevicePlan devicePlan, CatalogDevicePlanNode devicePlanNode, PlanNode planNode)
 		{
-			if (APlanNode is BaseTableVarNode) TranslateBaseTableVarNode(ADevicePlan, ADevicePlanNode, (BaseTableVarNode)APlanNode);
-			else if (APlanNode is RestrictNode) TranslateRestrictNode(ADevicePlan, ADevicePlanNode, (RestrictNode)APlanNode);
-			else if (APlanNode is OrderNode) TranslateOrderNode(ADevicePlan, ADevicePlanNode, (OrderNode)APlanNode);
-			else ADevicePlan.IsSupported = false;
+			if (planNode is BaseTableVarNode) TranslateBaseTableVarNode(devicePlan, devicePlanNode, (BaseTableVarNode)planNode);
+			else if (planNode is RestrictNode) TranslateRestrictNode(devicePlan, devicePlanNode, (RestrictNode)planNode);
+			else if (planNode is OrderNode) TranslateOrderNode(devicePlan, devicePlanNode, (OrderNode)planNode);
+			else devicePlan.IsSupported = false;
 		}
 		
-		protected void TranslateOrder(CatalogDevicePlan ADevicePlan, CatalogDevicePlanNode ADevicePlanNode, TableNode ATableNode)
+		protected void TranslateOrder(CatalogDevicePlan devicePlan, CatalogDevicePlanNode devicePlanNode, TableNode tableNode)
 		{
-			if (ADevicePlanNode.WhereCondition.Length > 0)
-				ADevicePlanNode.Statement.AppendFormat(" where {0}", ADevicePlanNode.WhereCondition.ToString());
+			if (devicePlanNode.WhereCondition.Length > 0)
+				devicePlanNode.Statement.AppendFormat(" where {0}", devicePlanNode.WhereCondition.ToString());
 				
-			if ((ATableNode.Order != null) && (ATableNode.Order.Columns.Count > 0))
+			if ((tableNode.Order != null) && (tableNode.Order.Columns.Count > 0))
 			{
-				ADevicePlanNode.Statement.AppendFormat(" order by ");
-				for (int LIndex = 0; LIndex < ATableNode.Order.Columns.Count; LIndex++)
+				devicePlanNode.Statement.AppendFormat(" order by ");
+				for (int index = 0; index < tableNode.Order.Columns.Count; index++)
 				{
-					OrderColumn LOrderColumn = ATableNode.Order.Columns[LIndex];
-					if (LIndex > 0)
-						ADevicePlanNode.Statement.Append(", ");
-					if (ADevicePlan.TableContext != null)
-						ADevicePlanNode.Statement.Append(Schema.Object.EnsureUnrooted(MetaData.GetTag(ADevicePlan.TableContext.Columns[LOrderColumn.Column.Name].MetaData, "Storage.Name", LOrderColumn.Column.Name)));
+					OrderColumn orderColumn = tableNode.Order.Columns[index];
+					if (index > 0)
+						devicePlanNode.Statement.Append(", ");
+					if (devicePlan.TableContext != null)
+						devicePlanNode.Statement.Append(Schema.Object.EnsureUnrooted(MetaData.GetTag(devicePlan.TableContext.Columns[orderColumn.Column.Name].MetaData, "Storage.Name", orderColumn.Column.Name)));
 					else
-						ADevicePlanNode.Statement.Append(Schema.Object.EnsureUnrooted(LOrderColumn.Column.Name));
-					if (!LOrderColumn.Ascending)
-						ADevicePlanNode.Statement.Append(" desc");
+						devicePlanNode.Statement.Append(Schema.Object.EnsureUnrooted(orderColumn.Column.Name));
+					if (!orderColumn.Ascending)
+						devicePlanNode.Statement.Append(" desc");
 				}
 			}
 		}

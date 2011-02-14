@@ -440,7 +440,7 @@ namespace Alphora.Dataphor.Common.Tests
 				while (TestEntry < FTestCache.Size)
 				{
 					IncrementTestEntry();
-					LPreCutoffCount = (int)(TestEntry * FixedSizeCache<string, string>.CDefaultCutoff);
+					LPreCutoffCount = (int)(TestEntry * FixedSizeCache<string, string>.DefaultCutoff);
 					Assert.AreEqual(LPreCutoffCount, PreCutoffCount());
 
 					LHead = GetHead();
@@ -506,7 +506,7 @@ namespace Alphora.Dataphor.Common.Tests
 				FixedSizeCache<string, string>.Entry LEntry = GetPrior(GetHead());
 				Assert.AreNotEqual(GetHead(), LEntry);
 				int LLocation = GetLocation(LEntry);
-				for (int i = (FTestCache.Size - GetLastAccess(LEntry)); i < FixedSizeCache<string, string>.CDefaultCorrelatedReferencePeriod; i++)
+				for (int i = (FTestCache.Size - GetLastAccess(LEntry)); i < FixedSizeCache<string, string>.DefaultCorrelatedReferencePeriod; i++)
 				{
 					FTestCache.Reference(LEntry.Key, LEntry.Value);
 					Assert.AreEqual(LLocation, GetLocation(LEntry));

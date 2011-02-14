@@ -14,60 +14,60 @@ namespace Alphora.Dataphor.DAE.Language
     public class LanguageModifier : System.Object
     {
 		// constructor
-		public LanguageModifier(string AName, string AValue) : base()
+		public LanguageModifier(string name, string tempValue) : base()
 		{
-			FName = AName == null ? String.Empty : AName;
-			FValue = AValue == null ? String.Empty : AValue;
+			_name = name == null ? String.Empty : name;
+			_value = tempValue == null ? String.Empty : tempValue;
 		}
 		
 		// Name
-		protected string FName;
-		public string Name { get { return FName; } }
+		protected string _name;
+		public string Name { get { return _name; } }
 		
 		// Value
-		protected string FValue = String.Empty;
+		protected string _value = String.Empty;
 		public string Value
 		{
-			get { return FValue; }
-			set { FValue = value == null ? String.Empty : value; }
+			get { return _value; }
+			set { _value = value == null ? String.Empty : value; }
 		}
 
 		public int Line = -1;
 		public int LinePos = -1;
 		
-		public override bool Equals(object AObject)
+		public override bool Equals(object objectValue)
 		{
-			return (AObject is LanguageModifier) && Schema.Object.NamesEqual(FName, ((LanguageModifier)AObject).Name);
+			return (objectValue is LanguageModifier) && Schema.Object.NamesEqual(_name, ((LanguageModifier)objectValue).Name);
 		}
 		
 		public override int GetHashCode()
 		{
-			return FName.GetHashCode();
+			return _name.GetHashCode();
 		}
 		
 		public LanguageModifier Copy()
 		{
-			return new LanguageModifier(FName, FValue);
+			return new LanguageModifier(_name, _value);
 		}
     }
     
 	public class LanguageModifiers : List
     {		
-		protected override void Validate(object AItem)
+		protected override void Validate(object item)
 		{
-			LanguageModifier LLanguageModifier = AItem as LanguageModifier;
-			if (LLanguageModifier == null)
+			LanguageModifier languageModifier = item as LanguageModifier;
+			if (languageModifier == null)
 				throw new LanguageException(LanguageException.Codes.InvalidContainer, "LanguageModifier");
-			if (IndexOfName(LLanguageModifier.Name) >= 0)
-				throw new LanguageException(LanguageException.Codes.DuplicateLanguageModifierName, LLanguageModifier.Name);
+			if (IndexOfName(languageModifier.Name) >= 0)
+				throw new LanguageException(LanguageException.Codes.DuplicateLanguageModifierName, languageModifier.Name);
 
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		
-		public new LanguageModifier this[int AIndex]
+		public new LanguageModifier this[int index]
 		{
-			get { return (LanguageModifier)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (LanguageModifier)base[index]; }
+			set { base[index] = value; }
 		}
 		
 		public LanguageModifierEnumerator GetEnumerator()
@@ -77,95 +77,95 @@ namespace Alphora.Dataphor.DAE.Language
 		
 		public class LanguageModifierEnumerator : IEnumerator
 		{
-			public LanguageModifierEnumerator(LanguageModifiers ALanguageModifiers) : base()
+			public LanguageModifierEnumerator(LanguageModifiers languageModifiers) : base()
 			{
-				FLanguageModifiers = ALanguageModifiers;
+				_languageModifiers = languageModifiers;
 			}
 			
-			private LanguageModifiers FLanguageModifiers;
-			private int FCurrent = -1;
+			private LanguageModifiers _languageModifiers;
+			private int _current = -1;
 			
-			public LanguageModifier Current { get { return FLanguageModifiers[FCurrent]; } }
+			public LanguageModifier Current { get { return _languageModifiers[_current]; } }
 			
 			object IEnumerator.Current { get { return Current; } }
 			
 			public bool MoveNext()
 			{
-				FCurrent++;
-				return FCurrent < FLanguageModifiers.Count;
+				_current++;
+				return _current < _languageModifiers.Count;
 			}
 			
 			public void Reset()
 			{
-				FCurrent = -1;
+				_current = -1;
 			}
 		}
 		
-		public LanguageModifier this[string AName]
+		public LanguageModifier this[string name]
 		{
 			get
 			{
-				int LIndex = IndexOf(AName);
-				if (LIndex >= 0)
-					return this[LIndex];
+				int index = IndexOf(name);
+				if (index >= 0)
+					return this[index];
 				else
-					throw new LanguageException(LanguageException.Codes.LanguageModifierNotFound, AName);
+					throw new LanguageException(LanguageException.Codes.LanguageModifierNotFound, name);
 			}
 			set
 			{
-				int LIndex = IndexOf(AName);
-				if (LIndex >= 0)
-					this[LIndex] = value;
+				int index = IndexOf(name);
+				if (index >= 0)
+					this[index] = value;
 				else
-					throw new LanguageException(LanguageException.Codes.LanguageModifierNotFound, AName);
+					throw new LanguageException(LanguageException.Codes.LanguageModifierNotFound, name);
 			}
 		}
 		
-		public int IndexOfName(string AName)
+		public int IndexOfName(string name)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (String.Equals(this[LIndex].Name, AName, StringComparison.OrdinalIgnoreCase))
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if (String.Equals(this[index].Name, name, StringComparison.OrdinalIgnoreCase))
+					return index;
 			return -1;
 		}
 		
-		public int IndexOf(string AName)
+		public int IndexOf(string name)
 		{
-			int LLanguageModifierIndex = -1;
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (Schema.Object.NamesEqual(this[LIndex].Name, AName))
+			int languageModifierIndex = -1;
+			for (int index = 0; index < Count; index++)
+				if (Schema.Object.NamesEqual(this[index].Name, name))
 				{
-					if (LLanguageModifierIndex >= 0)
-						throw new LanguageException(LanguageException.Codes.AmbiguousModifierReference, AName);
-					LLanguageModifierIndex = LIndex;
+					if (languageModifierIndex >= 0)
+						throw new LanguageException(LanguageException.Codes.AmbiguousModifierReference, name);
+					languageModifierIndex = index;
 				}
-			return LLanguageModifierIndex;
+			return languageModifierIndex;
 		}
 		
-		public bool Contains(string AName)
+		public bool Contains(string name)
 		{
-			return IndexOf(AName) >= 0;
+			return IndexOf(name) >= 0;
 		}
 		
-		public void AddOrUpdate(string AName, string AValue)
+		public void AddOrUpdate(string name, string tempValue)
 		{
-			int LLanguageModifierIndex = IndexOf(AName);
-			if (LLanguageModifierIndex < 0)
-				Add(new LanguageModifier(AName, AValue));
+			int languageModifierIndex = IndexOf(name);
+			if (languageModifierIndex < 0)
+				Add(new LanguageModifier(name, tempValue));
 			else
-				this[LLanguageModifierIndex].Value = AValue;
+				this[languageModifierIndex].Value = tempValue;
 		}
 		
-		public static string GetModifier(LanguageModifiers AModifiers, string AModifierName, string ADefaultValue)
+		public static string GetModifier(LanguageModifiers modifiers, string modifierName, string defaultValue)
 		{
-			if (AModifiers != null)
+			if (modifiers != null)
 			{
-				int LModifierIndex = AModifiers.IndexOf(AModifierName);
-				if (LModifierIndex >= 0)
-					return AModifiers[LModifierIndex].Value;
+				int modifierIndex = modifiers.IndexOf(modifierName);
+				if (modifierIndex >= 0)
+					return modifiers[modifierIndex].Value;
 			}
 
-			return ADefaultValue;
+			return defaultValue;
 		}
 	}
 }

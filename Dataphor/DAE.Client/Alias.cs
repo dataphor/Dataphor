@@ -29,7 +29,7 @@ namespace Alphora.Dataphor.DAE.Client
 	{
 		public ServerAlias()
 		{
-			FName = Strings.Get("CDefaultAliasName");
+			_name = Strings.Get("CDefaultAliasName");
 		}
 
 		// SessionInfo
@@ -38,24 +38,24 @@ namespace Alphora.Dataphor.DAE.Client
 		private class SessionInfoConverter : TypeConverter
 		{
 			#if !SILVERLIGHT
-			public override bool GetPropertiesSupported(ITypeDescriptorContext AContext)
+			public override bool GetPropertiesSupported(ITypeDescriptorContext context)
 			{
 				return true;
 			}
 
-			public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext AContext, object AInstance, Attribute[] AAttributes)
+			public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object instance, Attribute[] attributes)
 			{
-				PropertyDescriptorCollection LCollection = TypeDescriptor.GetProperties(AInstance, AAttributes);
-				PropertyDescriptor[] LFiltered = new PropertyDescriptor[LCollection.Count - 1];
-				int LCollectionIndex = 0;
-				for (int i = 0; i < LFiltered.Length; i++)
+				PropertyDescriptorCollection collection = TypeDescriptor.GetProperties(instance, attributes);
+				PropertyDescriptor[] filtered = new PropertyDescriptor[collection.Count - 1];
+				int collectionIndex = 0;
+				for (int i = 0; i < filtered.Length; i++)
 				{
-					if (LCollection[LCollectionIndex].Name == "Password")
-						LCollectionIndex++;
-					LFiltered[i] = LCollection[LCollectionIndex];
-					LCollectionIndex++;
+					if (collection[collectionIndex].Name == "Password")
+						collectionIndex++;
+					filtered[i] = collection[collectionIndex];
+					collectionIndex++;
 				}
-				return new PropertyDescriptorCollection(LFiltered);
+				return new PropertyDescriptorCollection(filtered);
 			}
 			#endif
 		}
@@ -65,14 +65,14 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 		}
 
-		private SessionInfo FSessionInfo = new InternalSessionInfo();
+		private SessionInfo _sessionInfo = new InternalSessionInfo();
 		[Publish(PublishMethod.Inline)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
 		[System.ComponentModel.TypeConverter(typeof(SessionInfoConverter))]
 		[Description("Contextual information for server session initialization")]
 		public SessionInfo SessionInfo
 		{
-			get { return FSessionInfo; }
+			get { return _sessionInfo; }
 		}
 
 		// OnNameChanged
@@ -81,7 +81,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		// Name
 
-		private string FName;
+		private string _name;
 		/// <summary> The name of the server alias. </summary>
 		/// <remarks>
 		/// This name uniquely identifies this alias, and allows clients
@@ -91,61 +91,61 @@ namespace Alphora.Dataphor.DAE.Client
 		/// </remarks>
 		public string Name
 		{
-			get { return FName; }
+			get { return _name; }
 			set 
 			{
-				if (value != FName)
+				if (value != _name)
 				{
 					if (OnNameChanging != null)
-						OnNameChanging(this, FName, value);
-					FName = value; 
+						OnNameChanging(this, _name, value);
+					_name = value; 
 				}
 			}
 		}
 		
-		private string FInstanceName;
+		private string _instanceName;
 		/// <summary>
 		/// The name of the instance. If this is not specified, the name of the alias is assumed to be the name of the instance.
 		/// </summary>
 		public string InstanceName
 		{
-			get { return FInstanceName; }
-			set { FInstanceName = value; }
+			get { return _instanceName; }
+			set { _instanceName = value; }
 		}
 
 		// IsUserAlias
 		
-		private bool FIsUserAlias = true;
+		private bool _isUserAlias = true;
 		/// <summary> Determines whether or not this is a user-specified alias. </summary>
 		[DefaultValue(true)]
 		public bool IsUserAlias 
 		{ 
-			get { return FIsUserAlias; } 
-			set { FIsUserAlias = value; } 
+			get { return _isUserAlias; } 
+			set { _isUserAlias = value; } 
 		}
 	}
 	
 	/// <summary> A ServerAlias descendent that models an out-of-process connection to a Dataphor Server. </summary>
 	public class ConnectionAlias : ServerAlias
 	{
-		public const string CDefaultHostName = "localhost";
+		public const string DefaultHostName = "localhost";
 
-		private string FHostName = CDefaultHostName;
+		private string _hostName = DefaultHostName;
 		/// <summary> The host name or IP address of the server to connect. </summary>
 		/// <remarks>
 		/// This is the computer name or IP address of the machine on which the Dataphor Server is running.
 		/// The default value of 'localhost' can be used if the Dataphor Server is running in another
 		/// application or service on the same machine as the client.
 		/// </remarks>
-		[DefaultValue(CDefaultHostName)]
+		[DefaultValue(DefaultHostName)]
 		[Description("The host name or IP address of the server.")]
 		public string HostName
 		{
-			get { return FHostName; }
-			set { FHostName = value; }
+			get { return _hostName; }
+			set { _hostName = value; }
 		}
 		
-		private int FOverridePortNumber;
+		private int _overridePortNumber;
 		/// <summary>
 		/// Allows the port number for the connection to be explicitly specified.
 		/// </summary>
@@ -157,11 +157,11 @@ namespace Alphora.Dataphor.DAE.Client
 		[Description("If specified, a uri is constructed with this port number, rather than attempting to use listener services to connect.")]
 		public int OverridePortNumber
 		{
-			get { return FOverridePortNumber; }
-			set { FOverridePortNumber = value; }
+			get { return _overridePortNumber; }
+			set { _overridePortNumber = value; }
 		}
 		
-		private ConnectionSecurityMode FSecurityMode;
+		private ConnectionSecurityMode _securityMode;
 		/// <summary>
 		/// Determines the security mode of the connection.
 		/// </summary>
@@ -174,11 +174,11 @@ namespace Alphora.Dataphor.DAE.Client
 		[Description("Determines the security mode of the connection.")]
 		public ConnectionSecurityMode SecurityMode
 		{
-			get { return FSecurityMode; }
-			set { FSecurityMode = value; }
+			get { return _securityMode; }
+			set { _securityMode = value; }
 		}
 		
-		private int FOverrideListenerPortNumber;
+		private int _overrideListenerPortNumber;
 		/// <summary>
 		/// Allows the port number for the listener to be explicitly specified.
 		/// </summary>
@@ -186,11 +186,11 @@ namespace Alphora.Dataphor.DAE.Client
 		[Description("If specified, a uri for the listener is constructed with this port number, rather than using the default listener port to connect.")]
 		public int OverrideListenerPortNumber
 		{
-			get { return FOverrideListenerPortNumber; }
-			set { FOverrideListenerPortNumber = value; }
+			get { return _overrideListenerPortNumber; }
+			set { _overrideListenerPortNumber = value; }
 		}
 		
-		private ConnectionSecurityMode FListenerSecurityMode;
+		private ConnectionSecurityMode _listenerSecurityMode;
 		/// <summary>
 		/// Determines the security mode of the listener connection.
 		/// </summary>
@@ -202,11 +202,11 @@ namespace Alphora.Dataphor.DAE.Client
 		[Description("Determines the security mode of the listener connection.")]
 		public ConnectionSecurityMode ListenerSecurityMode
 		{
-			get { return FListenerSecurityMode; }
-			set { FListenerSecurityMode = value; }
+			get { return _listenerSecurityMode; }
+			set { _listenerSecurityMode = value; }
 		}
 		
-		private bool FClientSideLoggingEnabled;
+		private bool _clientSideLoggingEnabled;
 		/// <summary> Whether or not to perform client-side logging. </summary>
 		/// <remarks>
 		/// This property determines whether or not client-side logging will be enabled for this connection.
@@ -217,13 +217,13 @@ namespace Alphora.Dataphor.DAE.Client
 		[Description("Whether or not to perform client-side logging.")]
 		public bool ClientSideLoggingEnabled
 		{
-			get { return FClientSideLoggingEnabled; }
-			set { FClientSideLoggingEnabled = value; }
+			get { return _clientSideLoggingEnabled; }
+			set { _clientSideLoggingEnabled = value; }
 		}
 
 		public override string ToString()
 		{
-			return String.Format("{0} ({1} on {2})", Name, InstanceName ?? Name, FHostName.ToString());
+			return String.Format("{0} ({1} on {2})", Name, InstanceName ?? Name, _hostName.ToString());
 		}
 	}
 
@@ -241,11 +241,11 @@ namespace Alphora.Dataphor.DAE.Client
 	/// </remarks>
 	public class InProcessAlias : ServerAlias
 	{
-		private bool FIsEmbedded;
+		private bool _isEmbedded;
 		public bool IsEmbedded
 		{
-			get { return FIsEmbedded; }
-			set { FIsEmbedded = value; }
+			get { return _isEmbedded; }
+			set { _isEmbedded = value; }
 		}
 		
 		public override string ToString()

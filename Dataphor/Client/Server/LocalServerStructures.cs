@@ -20,50 +20,50 @@ namespace Alphora.Dataphor.DAE.Server
 
     public class LocalBookmark : System.Object
     {
-		public LocalBookmark(Guid ABookmark)
+		public LocalBookmark(Guid bookmark)
 		{
-			FBookmark = ABookmark;
+			_bookmark = bookmark;
 			ReferenceCount = 1;
 		}
 		
-		private Guid FBookmark;
-		public Guid Bookmark { get { return FBookmark; } }
+		private Guid _bookmark;
+		public Guid Bookmark { get { return _bookmark; } }
 		
 		public int ReferenceCount;
     }
     
     public class LocalBookmarks : Dictionary<Guid, LocalBookmark>
     {
-		public void Add(LocalBookmark ABookmark)
+		public void Add(LocalBookmark bookmark)
 		{
-			Add(ABookmark.Bookmark, ABookmark);
+			Add(bookmark.Bookmark, bookmark);
 		}
     }
     
     public class LocalRow : Disposable
     {
-		public LocalRow(Row ARow, Guid ABookmark)
+		public LocalRow(Row row, Guid bookmark)
 		{
-			FRow = ARow;
-			FBookmark = ABookmark;
+			_row = row;
+			_bookmark = bookmark;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (FRow != null)
+			if (_row != null)
 			{
-				FRow.Dispose();
-				FRow = null;
+				_row.Dispose();
+				_row = null;
 			}
 			
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 		
-		protected Row FRow;
-		public Row Row { get { return FRow; } }
+		protected Row _row;
+		public Row Row { get { return _row; } }
 
-		protected Guid FBookmark;
-		public Guid Bookmark { get { return FBookmark; } }
+		protected Guid _bookmark;
+		public Guid Bookmark { get { return _bookmark; } }
     }
 
 	#if USETYPEDLIST

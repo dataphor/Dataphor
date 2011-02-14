@@ -18,10 +18,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	/// <summary> Shows error details. </summary>
 	public class ExceptionForm : System.Windows.Forms.Form
 	{
-		private System.Windows.Forms.TextBox FExceptionMessage;
-		private System.Windows.Forms.Button FCloseButton;
-		private System.Windows.Forms.Button FDetailButton;
-		private System.Windows.Forms.PictureBox FStopImage;
+		private System.Windows.Forms.TextBox _exceptionMessage;
+		private System.Windows.Forms.Button _closeButton;
+		private System.Windows.Forms.Button _detailButton;
+		private System.Windows.Forms.PictureBox _stopImage;
 		private System.ComponentModel.Container components = null;
 
 		public ExceptionForm()
@@ -31,11 +31,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			//
 			InitializeComponent();
 
-			((Bitmap)FStopImage.Image).MakeTransparent();
+			((Bitmap)_stopImage.Image).MakeTransparent();
 
-			FWorking = Screen.FromPoint(Control.MousePosition).WorkingArea;
+			_working = Screen.FromPoint(Control.MousePosition).WorkingArea;
 #if DEBUG
-			FExpanded = true;
+			_expanded = true;
 #else
 			FExpanded = false;
 #endif
@@ -64,92 +64,92 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private void InitializeComponent()
 		{
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ExceptionForm));
-			this.FExceptionMessage = new System.Windows.Forms.TextBox();
-			this.FCloseButton = new System.Windows.Forms.Button();
-			this.FDetailButton = new System.Windows.Forms.Button();
-			this.FStopImage = new System.Windows.Forms.PictureBox();
-			((System.ComponentModel.ISupportInitialize)(this.FStopImage)).BeginInit();
+			this._exceptionMessage = new System.Windows.Forms.TextBox();
+			this._closeButton = new System.Windows.Forms.Button();
+			this._detailButton = new System.Windows.Forms.Button();
+			this._stopImage = new System.Windows.Forms.PictureBox();
+			((System.ComponentModel.ISupportInitialize)(this._stopImage)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// FExceptionMessage
 			// 
-			this.FExceptionMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+			this._exceptionMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
 						| System.Windows.Forms.AnchorStyles.Left)
 						| System.Windows.Forms.AnchorStyles.Right)));
-			this.FExceptionMessage.Location = new System.Drawing.Point(50, 8);
-			this.FExceptionMessage.MaxLength = 0;
-			this.FExceptionMessage.Multiline = true;
-			this.FExceptionMessage.Name = "FExceptionMessage";
-			this.FExceptionMessage.ReadOnly = true;
-			this.FExceptionMessage.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-			this.FExceptionMessage.Size = new System.Drawing.Size(229, 33);
-			this.FExceptionMessage.TabIndex = 2;
-			this.FExceptionMessage.TabStop = false;
+			this._exceptionMessage.Location = new System.Drawing.Point(50, 8);
+			this._exceptionMessage.MaxLength = 0;
+			this._exceptionMessage.Multiline = true;
+			this._exceptionMessage.Name = "FExceptionMessage";
+			this._exceptionMessage.ReadOnly = true;
+			this._exceptionMessage.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+			this._exceptionMessage.Size = new System.Drawing.Size(229, 33);
+			this._exceptionMessage.TabIndex = 2;
+			this._exceptionMessage.TabStop = false;
 			// 
 			// FCloseButton
 			// 
-			this.FCloseButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.FCloseButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.FCloseButton.Location = new System.Drawing.Point(94, 49);
-			this.FCloseButton.Name = "FCloseButton";
-			this.FCloseButton.Size = new System.Drawing.Size(88, 24);
-			this.FCloseButton.TabIndex = 0;
-			this.FCloseButton.Text = "&Close";
-			this.FCloseButton.Click += new System.EventHandler(this.Ok_Click);
+			this._closeButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this._closeButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this._closeButton.Location = new System.Drawing.Point(94, 49);
+			this._closeButton.Name = "FCloseButton";
+			this._closeButton.Size = new System.Drawing.Size(88, 24);
+			this._closeButton.TabIndex = 0;
+			this._closeButton.Text = "&Close";
+			this._closeButton.Click += new System.EventHandler(this.Ok_Click);
 			// 
 			// FDetailButton
 			// 
-			this.FDetailButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.FDetailButton.Location = new System.Drawing.Point(190, 49);
-			this.FDetailButton.Name = "FDetailButton";
-			this.FDetailButton.Size = new System.Drawing.Size(88, 24);
-			this.FDetailButton.TabIndex = 1;
-			this.FDetailButton.Text = "&Details >>";
-			this.FDetailButton.Click += new System.EventHandler(this.detailButton_Click);
+			this._detailButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this._detailButton.Location = new System.Drawing.Point(190, 49);
+			this._detailButton.Name = "FDetailButton";
+			this._detailButton.Size = new System.Drawing.Size(88, 24);
+			this._detailButton.TabIndex = 1;
+			this._detailButton.Text = "&Details >>";
+			this._detailButton.Click += new System.EventHandler(this.detailButton_Click);
 			// 
 			// FStopImage
 			// 
-			this.FStopImage.Image = ((System.Drawing.Image)(resources.GetObject("FStopImage.Image")));
-			this.FStopImage.Location = new System.Drawing.Point(10, 10);
-			this.FStopImage.Name = "FStopImage";
-			this.FStopImage.Size = new System.Drawing.Size(32, 32);
-			this.FStopImage.TabIndex = 3;
-			this.FStopImage.TabStop = false;
+			this._stopImage.Image = ((System.Drawing.Image)(resources.GetObject("FStopImage.Image")));
+			this._stopImage.Location = new System.Drawing.Point(10, 10);
+			this._stopImage.Name = "FStopImage";
+			this._stopImage.Size = new System.Drawing.Size(32, 32);
+			this._stopImage.TabIndex = 3;
+			this._stopImage.TabStop = false;
 			// 
 			// ExceptionForm
 			// 
-			this.AcceptButton = this.FCloseButton;
-			this.CancelButton = this.FCloseButton;
+			this.AcceptButton = this._closeButton;
+			this.CancelButton = this._closeButton;
 			this.ClientSize = new System.Drawing.Size(288, 81);
 			this.ControlBox = false;
-			this.Controls.Add(this.FStopImage);
-			this.Controls.Add(this.FDetailButton);
-			this.Controls.Add(this.FCloseButton);
-			this.Controls.Add(this.FExceptionMessage);
+			this.Controls.Add(this._stopImage);
+			this.Controls.Add(this._detailButton);
+			this.Controls.Add(this._closeButton);
+			this.Controls.Add(this._exceptionMessage);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "ExceptionForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Exception";
-			((System.ComponentModel.ISupportInitialize)(this.FStopImage)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this._stopImage)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
 		}
 		#endregion
 
-		private Rectangle FWorking;
+		private Rectangle _working;
 
-		private bool FExpanded;
+		private bool _expanded;
 		public bool Expanded
 		{
-			get { return FExpanded; }
+			get { return _expanded; }
 			set
 			{
-				if (FExpanded != value)
+				if (_expanded != value)
 				{
-					FExpanded = value;
+					_expanded = value;
 					UpdateExpanded();
 				}
 			}
@@ -157,26 +157,26 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void UpdateExpanded()
 		{
-			if (FExpanded)
+			if (_expanded)
 			{
-				FDetailButton.Text = Strings.CLessDetails;
-				FExceptionMessage.WordWrap = false;
+				_detailButton.Text = Strings.CLessDetails;
+				_exceptionMessage.WordWrap = false;
 			}
 			else
 			{
-				FDetailButton.Text = Strings.CMoreDetails;
-				FExceptionMessage.WordWrap = true;
+				_detailButton.Text = Strings.CMoreDetails;
+				_exceptionMessage.WordWrap = true;
 			}
 			
-			if (FException != null)
+			if (_exception != null)
 			{
-				if (FExpanded)
-					FExceptionMessage.Text = ExceptionUtility.DetailedDescription(FException);
+				if (_expanded)
+					_exceptionMessage.Text = ExceptionUtility.DetailedDescription(_exception);
 				else
-					FExceptionMessage.Text = ExceptionUtility.BriefDescription(FException);
+					_exceptionMessage.Text = ExceptionUtility.BriefDescription(_exception);
 			}
 			else
-				FExceptionMessage.Text = String.Empty;
+				_exceptionMessage.Text = String.Empty;
 			UpdateSize();
 		}
 
@@ -184,56 +184,56 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			if (this.IsHandleCreated)
 			{
-				Size LOverhead = Size - FExceptionMessage.DisplayRectangle.Size;
-				Rectangle LWorking = FWorking;
-				LWorking.Size = LWorking.Size - LOverhead;	// Convert working to inner size
-				LWorking.Width -= System.Windows.Forms.SystemInformation.VerticalScrollBarWidth;
-				LWorking.Height -= System.Windows.Forms.SystemInformation.HorizontalScrollBarHeight;
-				Size LSize;
-				using (System.Drawing.Graphics LGraphics = FExceptionMessage.CreateGraphics())
+				Size overhead = Size - _exceptionMessage.DisplayRectangle.Size;
+				Rectangle working = _working;
+				working.Size = working.Size - overhead;	// Convert working to inner size
+				working.Width -= System.Windows.Forms.SystemInformation.VerticalScrollBarWidth;
+				working.Height -= System.Windows.Forms.SystemInformation.HorizontalScrollBarHeight;
+				Size size;
+				using (System.Drawing.Graphics graphics = _exceptionMessage.CreateGraphics())
 				{
-					if (FExceptionMessage.WordWrap)
-						LSize = Size.Ceiling(LGraphics.MeasureString(FExceptionMessage.Text, FExceptionMessage.Font, LWorking.Width));
+					if (_exceptionMessage.WordWrap)
+						size = Size.Ceiling(graphics.MeasureString(_exceptionMessage.Text, _exceptionMessage.Font, working.Width));
 					else
-						LSize = Size.Ceiling(LGraphics.MeasureString(FExceptionMessage.Text, FExceptionMessage.Font));
+						size = Size.Ceiling(graphics.MeasureString(_exceptionMessage.Text, _exceptionMessage.Font));
 				}
-				ScrollBars LScrollBars = ScrollBars.None;
-				if (LSize.Height > LWorking.Height)
+				ScrollBars scrollBars = ScrollBars.None;
+				if (size.Height > working.Height)
 				{
-					LSize.Height = LWorking.Height;
-					LScrollBars |= ScrollBars.Vertical;
+					size.Height = working.Height;
+					scrollBars |= ScrollBars.Vertical;
 				}
-				if (LSize.Width > LWorking.Width)
+				if (size.Width > working.Width)
 				{
-					LSize.Width = LWorking.Width;
-					LScrollBars |= ScrollBars.Horizontal;
+					size.Width = working.Width;
+					scrollBars |= ScrollBars.Horizontal;
 				}
-				FExceptionMessage.ScrollBars = LScrollBars;
-				Element.ConstrainMin(ref LSize, new Size(220, 26));
-				LSize += LOverhead;
+				_exceptionMessage.ScrollBars = scrollBars;
+				Element.ConstrainMin(ref size, new Size(220, 26));
+				size += overhead;
 				this.Bounds = 
 					new Rectangle
 					(
 						new Point
 						(
-							((FWorking.Width / 2) - (LSize.Width / 2)) + FWorking.Left, 
-							((FWorking.Height / 2) - (LSize.Height / 2)) + FWorking.Top
+							((_working.Width / 2) - (size.Width / 2)) + _working.Left, 
+							((_working.Height / 2) - (size.Height / 2)) + _working.Top
 						),
-						LSize
+						size
 					);
 			}
 		}
 
-		private Exception FException;
+		private Exception _exception;
 		public Exception Exception
 		{
-			get { return FException; }
+			get { return _exception; }
 			set
 			{
-				FException = value;
+				_exception = value;
 				UpdateExpanded();
-				if (FException != null)
-					Text = FException.GetType().ToString();
+				if (_exception != null)
+					Text = _exception.GetType().ToString();
 				else
 					Text = Strings.ExceptionTitle;
 			}
@@ -249,9 +249,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			Expanded = !Expanded;
 		}
 
-		protected override void OnLoad(EventArgs AArgs)
+		protected override void OnLoad(EventArgs args)
 		{
-			base.OnLoad(AArgs);
+			base.OnLoad(args);
 			UpdateSize();
 		}
 

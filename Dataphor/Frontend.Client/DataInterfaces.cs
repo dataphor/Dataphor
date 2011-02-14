@@ -575,10 +575,10 @@ namespace Alphora.Dataphor.Frontend.Client
 	public class ViewActionEvent : NodeEvent
 	{
 		/// <summary> Constructs a new ViewActionEvent object. </summary>
-		/// <param name="AAction"> The type of action this event will perform. </param>
-		public ViewActionEvent(SourceActions AAction) : base()
+		/// <param name="action"> The type of action this event will perform. </param>
+		public ViewActionEvent(SourceActions action) : base()
 		{
-			Action = AAction;
+			Action = action;
 		}
 
 		/// <summary> The type of action this event will perform. </summary>

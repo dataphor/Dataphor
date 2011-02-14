@@ -15,23 +15,23 @@ namespace Alphora.Dataphor.DAE.Streams
 {
 	public class StreamHeader
 	{
-		public StreamHeader(StreamID AStreamID, IStreamProvider AProvider) : base()
+		public StreamHeader(StreamID streamID, IStreamProvider provider) : base()
 		{
-			FStreamID = AStreamID;
-			FProvider = AProvider;
+			_streamID = streamID;
+			_provider = provider;
 			#if LOCKSTREAMS
 			FLockID = new LockID(this, AStreamID.ToString());
 			#endif
 		}
 		
-		private StreamID FStreamID;
-		public StreamID StreamID { get { return FStreamID; } }
+		private StreamID _streamID;
+		public StreamID StreamID { get { return _streamID; } }
 		
-		private IStreamProvider FProvider;
+		private IStreamProvider _provider;
 		public IStreamProvider Provider 
 		{ 
-			get { return FProvider; }
-			set { FProvider = value; }
+			get { return _provider; }
+			set { _provider = value; }
 		}
 
 		#if LOCKSTREAMS
@@ -39,44 +39,44 @@ namespace Alphora.Dataphor.DAE.Streams
 		public LockID LockID { get { return FLockID; } }
 		#endif
 		
-		private StreamIDList FReferences;
+		private StreamIDList _references;
 		public StreamIDList References
 		{
 			get
 			{
-				if (FReferences == null)
-					FReferences = new StreamIDList();
-				return FReferences;
+				if (_references == null)
+					_references = new StreamIDList();
+				return _references;
 			}
 		}
 		
-		private ServerStream FStream;
+		private ServerStream _stream;
 		public ServerStream Stream
 		{
-			get { return FStream; }
-			set { FStream = value; }
+			get { return _stream; }
+			set { _stream = value; }
 		}
 		
-		private int FStreamCount;
+		private int _streamCount;
 		public int StreamCount
 		{
-			get { return FStreamCount; }
-			set { FStreamCount = value; }
+			get { return _streamCount; }
+			set { _streamCount = value; }
 		}
 		
 		public override int GetHashCode()
 		{
-			return FStreamID.GetHashCode();
+			return _streamID.GetHashCode();
 		}
 		
-		public override bool Equals(object AObject)
+		public override bool Equals(object objectValue)
 		{
-			return (AObject is StreamHeader) && (((StreamHeader)AObject).StreamID == FStreamID);
+			return (objectValue is StreamHeader) && (((StreamHeader)objectValue).StreamID == _streamID);
 		}
 
 		public override string ToString()
 		{
-			return String.Format("StreamHeader (StreamID: {0}, Count: {1})", FStreamID, FStreamCount);
+			return String.Format("StreamHeader (StreamID: {0}, Count: {1})", _streamID, _streamCount);
 		}
 	}
 	
@@ -84,17 +84,17 @@ namespace Alphora.Dataphor.DAE.Streams
 	{
 		public StreamHeaders() : base(){}
 		
-		public void Add(StreamHeader AStreamHeader)
+		public void Add(StreamHeader streamHeader)
 		{
-			Add(AStreamHeader.StreamID, AStreamHeader);
+			Add(streamHeader.StreamID, streamHeader);
 		}
 	}
 	
 	public class StreamEvent : System.Object
 	{
-		public StreamEvent(StreamID AStreamID) : base()
+		public StreamEvent(StreamID streamID) : base()
 		{	
-			StreamID = AStreamID;
+			StreamID = streamID;
 		}
 		
 		public StreamID StreamID;
@@ -106,7 +106,7 @@ namespace Alphora.Dataphor.DAE.Streams
 	
 	public class RegisterStreamEvent : StreamEvent
 	{
-		public RegisterStreamEvent(StreamID AStreamID) : base(AStreamID) {}
+		public RegisterStreamEvent(StreamID streamID) : base(streamID) {}
 		
 		public override string ToString()
 		{
@@ -116,7 +116,7 @@ namespace Alphora.Dataphor.DAE.Streams
 	
 	public class AllocateStreamEvent : StreamEvent
 	{
-		public AllocateStreamEvent(StreamID AStreamID) : base(AStreamID) {}
+		public AllocateStreamEvent(StreamID streamID) : base(streamID) {}
 		
 		public override string ToString()
 		{
@@ -126,9 +126,9 @@ namespace Alphora.Dataphor.DAE.Streams
 	
 	public class ReferenceStreamEvent : StreamEvent
 	{
-		public ReferenceStreamEvent(StreamID AStreamID, StreamID AReferencedStreamID) : base(AStreamID)
+		public ReferenceStreamEvent(StreamID streamID, StreamID referencedStreamID) : base(streamID)
 		{
-			ReferencedStreamID = AReferencedStreamID;
+			ReferencedStreamID = referencedStreamID;
 		}
 		
 		public StreamID ReferencedStreamID;
@@ -154,110 +154,110 @@ namespace Alphora.Dataphor.DAE.Streams
 	public class StreamEvents : BaseList<StreamEvent>
 	{
 	#endif
-		public void Open(StreamID AStreamID)
+		public void Open(StreamID streamID)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (this[LIndex].StreamID == AStreamID)
+			for (int index = 0; index < Count; index++)
+				if (this[index].StreamID == streamID)
 				{
-					this[LIndex].OpenCount++;
+					this[index].OpenCount++;
 					break;
 				}
 		}
 		
-		public void Close(StreamID AStreamID)
+		public void Close(StreamID streamID)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (this[LIndex].StreamID == AStreamID)
+			for (int index = 0; index < Count; index++)
+				if (this[index].StreamID == streamID)
 				{
-					this[LIndex].OpenCount--;
+					this[index].OpenCount--;
 					break;
 				}
 		}
 		
-		public void Deallocate(StreamID AStreamID)
+		public void Deallocate(StreamID streamID)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (this[LIndex].StreamID == AStreamID)
+			for (int index = 0; index < Count; index++)
+				if (this[index].StreamID == streamID)
 				{
-					this[LIndex].Deallocated = true;
+					this[index].Deallocated = true;
 					break;
 				}
 		}
 		
 		public override string ToString()
 		{
-			StringBuilder LResults = new StringBuilder();
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				LResults.AppendFormat("{0}\r\n", this[LIndex].ToString());
-			return LResults.ToString();
+			StringBuilder results = new StringBuilder();
+			for (int index = 0; index < Count; index++)
+				results.AppendFormat("{0}\r\n", this[index].ToString());
+			return results.ToString();
 		}
 	}
 	
 	public class ServerStreamManager : StreamManager
 	{
-		public ServerStreamManager(IServer AServer) : base()
+		public ServerStreamManager(IServer server) : base()
 		{
 			#if UseFileStreamProvider
 			FDefaultProvider = new FileStreamProvider();
 			#else
-			FDefaultProvider = new MemoryStreamProvider();
+			_defaultProvider = new MemoryStreamProvider();
 			#endif
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (FDefaultProvider != null)
+			if (_defaultProvider != null)
 			{
-				FDefaultProvider.Dispose();
-				FDefaultProvider = null;
+				_defaultProvider.Dispose();
+				_defaultProvider = null;
 			}
 			
-			FHeaders = null;
+			_headers = null;
 
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
 		#if UseFileStreamProvider		
 		private FileStreamProvider FDefaultProvider;
 		#else
-		private MemoryStreamProvider FDefaultProvider;
+		private MemoryStreamProvider _defaultProvider;
 		#endif
-		private StreamHeaders FHeaders = new StreamHeaders();
-		private Dictionary<StreamID, StreamID> FReferencingHeaders = new Dictionary<StreamID, StreamID>(); // <stream id key> references <stream id value>
-		private UInt64 FNextStreamID = 1; // must be 1 so that no stream could ever be 0 (the Null stream)
+		private StreamHeaders _headers = new StreamHeaders();
+		private Dictionary<StreamID, StreamID> _referencingHeaders = new Dictionary<StreamID, StreamID>(); // <stream id key> references <stream id value>
+		private UInt64 _nextStreamID = 1; // must be 1 so that no stream could ever be 0 (the Null stream)
 		
-		private StreamEvents FStreamEvents;
-		public StreamEvents StreamEvents { get { return FStreamEvents; } }
+		private StreamEvents _streamEvents;
+		public StreamEvents StreamEvents { get { return _streamEvents; } }
 		
-		private List<string> FStreamOpens;
-		public List<string> StreamOpens { get { return FStreamOpens; } }
+		private List<string> _streamOpens;
+		public List<string> StreamOpens { get { return _streamOpens; } }
 		
 		public string StreamOpensAsString()
 		{
-			StringBuilder LBuilder = new StringBuilder();
-			foreach (String LString in FStreamOpens)
-				LBuilder.AppendFormat("{0}\r\n", LString);
-			return LBuilder.ToString();
+			StringBuilder builder = new StringBuilder();
+			foreach (String stringValue in _streamOpens)
+				builder.AppendFormat("{0}\r\n", stringValue);
+			return builder.ToString();
 		}
 		
-		private bool FStreamTracingEnabled;
+		private bool _streamTracingEnabled;
 		public bool StreamTracingEnabled
 		{
-			get { return FStreamTracingEnabled; }
+			get { return _streamTracingEnabled; }
 			set
 			{
-				if (FStreamTracingEnabled != value)
+				if (_streamTracingEnabled != value)
 				{
-					FStreamTracingEnabled = value;
-					if (FStreamTracingEnabled)
+					_streamTracingEnabled = value;
+					if (_streamTracingEnabled)
 					{
-						FStreamEvents = new StreamEvents();
-						FStreamOpens = new List<string>();
+						_streamEvents = new StreamEvents();
+						_streamOpens = new List<string>();
 					}
 					else
 					{
-						FStreamEvents = null;
-						FStreamOpens = null;
+						_streamEvents = null;
+						_streamOpens = null;
 					}
 				}
 			}
@@ -265,57 +265,57 @@ namespace Alphora.Dataphor.DAE.Streams
 		
 		private StreamID InternalGetNextStreamID()
 		{
-			StreamID LStreamID = new StreamID(FNextStreamID);
-			FNextStreamID++;
-			return LStreamID;
+			StreamID streamID = new StreamID(_nextStreamID);
+			_nextStreamID++;
+			return streamID;
 		}
 		
-		private StreamHeader GetStreamHeader(StreamID AStreamID)
+		private StreamHeader GetStreamHeader(StreamID streamID)
 		{
-			StreamHeader LHeader;
-			if (!FHeaders.TryGetValue(AStreamID, out LHeader))
-				throw new StreamsException(StreamsException.Codes.StreamIDNotFound, AStreamID.ToString());
-			return LHeader;
+			StreamHeader header;
+			if (!_headers.TryGetValue(streamID, out header))
+				throw new StreamsException(StreamsException.Codes.StreamIDNotFound, streamID.ToString());
+			return header;
 		}
 		
 		public int Count()
 		{
 			lock (this)
 			{
-				return FHeaders.Count;
+				return _headers.Count;
 			}
 		}
 		
-		private void InternalRegister(StreamID AStreamID, IStreamProvider AProvider)
+		private void InternalRegister(StreamID streamID, IStreamProvider provider)
 		{
-			FHeaders.Add(new StreamHeader(AStreamID, AProvider));
+			_headers.Add(new StreamHeader(streamID, provider));
 		}
 		
-		public StreamID Register(IStreamProvider AProvider)
+		public StreamID Register(IStreamProvider provider)
 		{
 			lock (this)
 			{
-				StreamID LStreamID = InternalGetNextStreamID();
-				InternalRegister(LStreamID, AProvider);
+				StreamID streamID = InternalGetNextStreamID();
+				InternalRegister(streamID, provider);
 				if (StreamTracingEnabled)
-					StreamEvents.Add(new RegisterStreamEvent(LStreamID));
-				return LStreamID;
+					StreamEvents.Add(new RegisterStreamEvent(streamID));
+				return streamID;
 			}
 		}
 		
-		private void InternalUnregister(StreamID AStreamID)
+		private void InternalUnregister(StreamID streamID)
 		{
-			StreamHeader LHeader = GetStreamHeader(AStreamID);
-			FHeaders.Remove(AStreamID);
+			StreamHeader header = GetStreamHeader(streamID);
+			_headers.Remove(streamID);
 		}
 		
-		public void Unregister(StreamID AStreamID)
+		public void Unregister(StreamID streamID)
 		{
 			lock (this)
 			{
 				if (StreamTracingEnabled)
-					StreamEvents.Deallocate(AStreamID);
-				InternalUnregister(AStreamID);
+					StreamEvents.Deallocate(streamID);
+				InternalUnregister(streamID);
 			}
 		}
 		
@@ -323,233 +323,233 @@ namespace Alphora.Dataphor.DAE.Streams
 		{
 			lock (this)
 			{
-				StreamID LStreamID = InternalGetNextStreamID();
+				StreamID streamID = InternalGetNextStreamID();
 				if (StreamTracingEnabled)
-					StreamEvents.Add(new AllocateStreamEvent(LStreamID));
-				FDefaultProvider.Create(LStreamID);
-				InternalRegister(LStreamID, FDefaultProvider);
-				return LStreamID;
+					StreamEvents.Add(new AllocateStreamEvent(streamID));
+				_defaultProvider.Create(streamID);
+				InternalRegister(streamID, _defaultProvider);
+				return streamID;
 			}
 		}
 		
-		public override StreamID Reference(StreamID AStreamID)
+		public override StreamID Reference(StreamID streamID)
 		{
 			lock (this)
 			{
-				StreamID LStreamID = InternalGetNextStreamID();
-				StreamHeader LHeader = GetStreamHeader(AStreamID);
+				StreamID localStreamID = InternalGetNextStreamID();
+				StreamHeader header = GetStreamHeader(streamID);
 				if (StreamTracingEnabled)
-					StreamEvents.Add(new ReferenceStreamEvent(LStreamID, LHeader.StreamID));
-				LHeader.References.Add(LStreamID);
-				FReferencingHeaders.Add(LStreamID, AStreamID);
-				InternalRegister(LStreamID, FDefaultProvider);
-				return LStreamID;
+					StreamEvents.Add(new ReferenceStreamEvent(localStreamID, header.StreamID));
+				header.References.Add(localStreamID);
+				_referencingHeaders.Add(localStreamID, streamID);
+				InternalRegister(localStreamID, _defaultProvider);
+				return localStreamID;
 			}
 		}
 		
-		protected void InternalCopy(StreamHeader ASourceStreamHeader, StreamHeader ATargetStreamHeader)
+		protected void InternalCopy(StreamHeader sourceStreamHeader, StreamHeader targetStreamHeader)
 		{
-			Stream LSourceStream = InternalOpen(ASourceStreamHeader, true);
+			Stream sourceStream = InternalOpen(sourceStreamHeader, true);
 			try
 			{
-				Stream LTargetStream = ATargetStreamHeader.Provider.Open(ATargetStreamHeader.StreamID);
+				Stream targetStream = targetStreamHeader.Provider.Open(targetStreamHeader.StreamID);
 				try
 				{
-					LTargetStream.Position = 0;
-					StreamUtility.CopyStream(LSourceStream, LTargetStream);
+					targetStream.Position = 0;
+					StreamUtility.CopyStream(sourceStream, targetStream);
 				}
 				finally
 				{
-					ATargetStreamHeader.Provider.Close(ATargetStreamHeader.StreamID);
+					targetStreamHeader.Provider.Close(targetStreamHeader.StreamID);
 				}
 			}
 			finally
 			{
-				LSourceStream.Close();
-				InternalClose(ASourceStreamHeader);
+				sourceStream.Close();
+				InternalClose(sourceStreamHeader);
 			}
 		}
 		
-		public override void Deallocate(StreamID AStreamID)
+		public override void Deallocate(StreamID streamID)
 		{
 			lock (this)
 			{
-				StreamHeader LHeader = GetStreamHeader(AStreamID);
+				StreamHeader header = GetStreamHeader(streamID);
 				if (StreamTracingEnabled)
-					StreamEvents.Deallocate(AStreamID);
+					StreamEvents.Deallocate(streamID);
 					
-				FHeaders.Remove(AStreamID);
+				_headers.Remove(streamID);
 
-				StreamID LSourceStreamID;;
-				if (!FReferencingHeaders.TryGetValue(AStreamID, out LSourceStreamID))
+				StreamID sourceStreamID;;
+				if (!_referencingHeaders.TryGetValue(streamID, out sourceStreamID))
 				{
 					// if this stream is a referenced stream
-					if (LHeader.References.Count > 0)
+					if (header.References.Count > 0)
 					{
 						// select a referencing stream to be the new source stream
-						StreamID LNewStreamID = LHeader.References[0];
-						StreamHeader LNewHeader = GetStreamHeader(LNewStreamID);
+						StreamID newStreamID = header.References[0];
+						StreamHeader newHeader = GetStreamHeader(newStreamID);
 
 						// reassign the stream id for the stream in the provider (from this stream to the new source stream id)
-						LHeader.Provider.Reassign(LHeader.StreamID, LNewStreamID);
+						header.Provider.Reassign(header.StreamID, newStreamID);
 
 						// change the provider in the header for the new source stream id
-						LNewHeader.Provider = LHeader.Provider;
-						if (LNewHeader.Stream != null)
-							LNewHeader.Stream.SourceStream = LNewHeader.Provider.Open(LNewStreamID); // TODO: Shouldn't this close the old stream?
+						newHeader.Provider = header.Provider;
+						if (newHeader.Stream != null)
+							newHeader.Stream.SourceStream = newHeader.Provider.Open(newStreamID); // TODO: Shouldn't this close the old stream?
 						
 						// dereference the new header
-						FReferencingHeaders.Remove(LNewStreamID);
-						LHeader.References.RemoveAt(0);
+						_referencingHeaders.Remove(newStreamID);
+						header.References.RemoveAt(0);
 
 						// move all references to this stream to the new source stream
-						MoveReferences(LHeader, LNewHeader);
+						MoveReferences(header, newHeader);
 					}
 					else
 						// destroy this stream
-						LHeader.Provider.Destroy(AStreamID);
+						header.Provider.Destroy(streamID);
 				}
 				else
 				{
 					// if this stream is a reference stream
-					StreamHeader LSourceHeader = GetStreamHeader(LSourceStreamID);
+					StreamHeader sourceHeader = GetStreamHeader(sourceStreamID);
 
 					// move all references to this stream to the source stream
-					MoveReferences(LHeader, LSourceHeader);
+					MoveReferences(header, sourceHeader);
 
 					// dereference the source stream
-					LSourceHeader.References.Remove(AStreamID);
-					FReferencingHeaders.Remove(AStreamID);
+					sourceHeader.References.Remove(streamID);
+					_referencingHeaders.Remove(streamID);
 				}
 			}
 		}
 
-		public bool IsLocked(StreamID AStreamID)
+		public bool IsLocked(StreamID streamID)
 		{
 			return false;
 		}
 		
-		public void Change(ServerStream AStream)
+		public void Change(ServerStream stream)
 		{
 			lock (this)
 			{
-				StreamHeader LHeader = GetStreamHeader(AStream.StreamID);
+				StreamHeader header = GetStreamHeader(stream.StreamID);
 				
 				// if this stream is a reference stream
-				StreamID LSourceStreamID;
-				if (FReferencingHeaders.TryGetValue(AStream.StreamID, out LSourceStreamID))
+				StreamID sourceStreamID;
+				if (_referencingHeaders.TryGetValue(stream.StreamID, out sourceStreamID))
 				{
-					StreamHeader LSourceHeader = GetStreamHeader(LSourceStreamID);
+					StreamHeader sourceHeader = GetStreamHeader(sourceStreamID);
 
 					// dereference the source stream
-					FReferencingHeaders.Remove(AStream.StreamID);
-					LSourceHeader.References.Remove(AStream.StreamID);
+					_referencingHeaders.Remove(stream.StreamID);
+					sourceHeader.References.Remove(stream.StreamID);
 
 					// copy the data from the source stream into this stream
-					FDefaultProvider.Create(AStream.StreamID);
-					InternalCopy(LSourceHeader, LHeader);
-					LHeader.Stream.SourceStream = FDefaultProvider.Open(AStream.StreamID);
+					_defaultProvider.Create(stream.StreamID);
+					InternalCopy(sourceHeader, header);
+					header.Stream.SourceStream = _defaultProvider.Open(stream.StreamID);
 
 					// move all references to this stream to the source stream
-					MoveReferences(LHeader, LSourceHeader);
+					MoveReferences(header, sourceHeader);
 				}
 			}
 		}
 		
-		protected void MoveReferences(StreamHeader AFromHeader, StreamHeader AToHeader)
+		protected void MoveReferences(StreamHeader fromHeader, StreamHeader toHeader)
 		{
-			for (int LIndex = AFromHeader.References.Count - 1; LIndex >= 0; LIndex--)
+			for (int index = fromHeader.References.Count - 1; index >= 0; index--)
 			{
-				StreamID LStreamID = AFromHeader.References[LIndex];
+				StreamID streamID = fromHeader.References[index];
 				
 				// Remove the reference to the from header
-				AFromHeader.References.RemoveAt(LIndex);
-				FReferencingHeaders.Remove(LStreamID);
+				fromHeader.References.RemoveAt(index);
+				_referencingHeaders.Remove(streamID);
 				
 				// Add the reference to the to header
-				AToHeader.References.Add(LStreamID);
-				FReferencingHeaders.Add(LStreamID, AToHeader.StreamID);
+				toHeader.References.Add(streamID);
+				_referencingHeaders.Add(streamID, toHeader.StreamID);
 
 				// Make sure the referencing header has the right stream
-				StreamHeader LReferenceHeader = GetStreamHeader(LStreamID);
-				if (LReferenceHeader.Stream != null)
-					LReferenceHeader.Stream.SourceStream = AToHeader.Provider.Open(AToHeader.StreamID); // TODO: Shouldn't this close the old stream?
+				StreamHeader referenceHeader = GetStreamHeader(streamID);
+				if (referenceHeader.Stream != null)
+					referenceHeader.Stream.SourceStream = toHeader.Provider.Open(toHeader.StreamID); // TODO: Shouldn't this close the old stream?
 			}
 		}
 		
-		protected Stream InternalOpen(StreamHeader AHeader, bool ACover)
+		protected Stream InternalOpen(StreamHeader header, bool cover)
 		{
-			if (AHeader.Stream == null)
+			if (header.Stream == null)
 			{
-				StreamID LSourceStreamID;
-				if (FReferencingHeaders.TryGetValue(AHeader.StreamID, out LSourceStreamID))
-					AHeader.Stream = new ServerStream(this, AHeader.StreamID, InternalOpen(GetStreamHeader(LSourceStreamID), true));
+				StreamID sourceStreamID;
+				if (_referencingHeaders.TryGetValue(header.StreamID, out sourceStreamID))
+					header.Stream = new ServerStream(this, header.StreamID, InternalOpen(GetStreamHeader(sourceStreamID), true));
 				else
-					AHeader.Stream = new ServerStream(this, AHeader.StreamID, AHeader.Provider.Open(AHeader.StreamID));
+					header.Stream = new ServerStream(this, header.StreamID, header.Provider.Open(header.StreamID));
 			}
-			AHeader.StreamCount++;
-			if (ACover)
-				return new CoverStream(AHeader.Stream);
-			return AHeader.Stream;
+			header.StreamCount++;
+			if (cover)
+				return new CoverStream(header.Stream);
+			return header.Stream;
 		}
 		
 		#if DEBUG
-		private int FOpenCount;
+		private int _openCount;
 		#endif
-		public override Stream Open(int AOwnerID, StreamID AStreamID, LockMode AMode)
+		public override Stream Open(int ownerID, StreamID streamID, LockMode mode)
 		{
 			lock (this)
 			{
 				#if DEBUG
-				FOpenCount++;
+				_openCount++;
 				#endif
-				if (FStreamTracingEnabled)
+				if (_streamTracingEnabled)
 				{
-					StreamEvents.Open(AStreamID);
-					StreamOpens.Add(String.Format("Open {0}", AStreamID.Value.ToString()));
+					StreamEvents.Open(streamID);
+					StreamOpens.Add(String.Format("Open {0}", streamID.Value.ToString()));
 				}
-				StreamHeader LHeader = GetStreamHeader(AStreamID);
-				return new ManagedStream(this, AOwnerID, AStreamID, InternalOpen(LHeader, false));
+				StreamHeader header = GetStreamHeader(streamID);
+				return new ManagedStream(this, ownerID, streamID, InternalOpen(header, false));
 			}
 		}
 		
-		protected void InternalClose(StreamHeader AHeader)
+		protected void InternalClose(StreamHeader header)
 		{
-			AHeader.StreamCount--;
-			if (AHeader.StreamCount == 0)
+			header.StreamCount--;
+			if (header.StreamCount == 0)
 			{
-				StreamID LSourceStreamID;
-				if (FReferencingHeaders.TryGetValue(AHeader.StreamID, out LSourceStreamID))
+				StreamID sourceStreamID;
+				if (_referencingHeaders.TryGetValue(header.StreamID, out sourceStreamID))
 				{
-					Stream LSourceStream = AHeader.Stream.SourceStream;
-					AHeader.Stream.SourceStream = null;
-					LSourceStream.Close();
-					InternalClose(GetStreamHeader(LSourceStreamID));
+					Stream sourceStream = header.Stream.SourceStream;
+					header.Stream.SourceStream = null;
+					sourceStream.Close();
+					InternalClose(GetStreamHeader(sourceStreamID));
 				}
 				else
-					AHeader.Provider.Close(AHeader.StreamID);
-				AHeader.Stream.Close();
-				AHeader.Stream = null;
+					header.Provider.Close(header.StreamID);
+				header.Stream.Close();
+				header.Stream = null;
 			}
 		}
 		
 		#if DEBUG
-		private int FCloseCount;
+		private int _closeCount;
 		#endif
-		public override void Close(int AOwnerID, StreamID AStreamID)
+		public override void Close(int ownerID, StreamID streamID)
 		{
 			lock (this)
 			{
 				#if DEBUG
-				FCloseCount++;
+				_closeCount++;
 				#endif
-				if (FStreamTracingEnabled)
+				if (_streamTracingEnabled)
 				{
-					StreamEvents.Close(AStreamID);
-					StreamOpens.Add(String.Format("Close {0}", AStreamID.Value.ToString()));
+					StreamEvents.Close(streamID);
+					StreamOpens.Add(String.Format("Close {0}", streamID.Value.ToString()));
 				}
-				StreamHeader LHeader = GetStreamHeader(AStreamID);
-				InternalClose(LHeader);
+				StreamHeader header = GetStreamHeader(streamID);
+				InternalClose(header);
 			}
 		}
 	}

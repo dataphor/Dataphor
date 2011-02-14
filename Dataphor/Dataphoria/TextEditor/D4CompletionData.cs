@@ -10,53 +10,53 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
     class D4CompletionData : ICompletionData
     {
         
-        public D4CompletionData(string AText, int AImageIndex)
+        public D4CompletionData(string text, int imageIndex)
 		{
-			FText        = AText;
-			FImageIndex  = AImageIndex;
+			_text        = text;
+			_imageIndex  = imageIndex;
 		}
 
-        public D4CompletionData(string AText, string ADescription, int AImageIndex)
+        public D4CompletionData(string text, string description, int imageIndex)
 		{
-			FText        = AText;
-			FDescription = ADescription;
-			FImageIndex  = AImageIndex;
+			_text        = text;
+			_description = description;
+			_imageIndex  = imageIndex;
 		}
         
         #region Implementation of ICompletionData
 
-        public virtual bool InsertAction(TextArea ATextArea, char AChar)
+        public virtual bool InsertAction(TextArea textArea, char charValue)
         {
-            ATextArea.InsertString(FText);
+            textArea.InsertString(_text);
             return false;
         }
 
-        private int FImageIndex;
+        private int _imageIndex;
         public int ImageIndex
         {
-            get { return FImageIndex; }
-            set { FImageIndex = value; }
+            get { return _imageIndex; }
+            set { _imageIndex = value; }
         }
 
-        private string FText;
+        private string _text;
         public string Text
         {
-            get { return FText; }
-            set { FText = value; }
+            get { return _text; }
+            set { _text = value; }
         }
 
-        private string FDescription;
+        private string _description;
         public string Description
         {
-            get { return FDescription; }
-            set { FDescription = value; }
+            get { return _description; }
+            set { _description = value; }
         }
 
-        private double FPriority;
+        private double _priority;
         public double Priority
         {
-            get { return FPriority; }
-            set { FPriority = value; }
+            get { return _priority; }
+            set { _priority = value; }
         }
 
         #endregion

@@ -26,7 +26,7 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		#endif
 
-		protected virtual void Dispose(bool ADisposing)
+		protected virtual void Dispose(bool disposing)
 		{
 			#if USEFINALIZER
 			System.GC.SuppressFinalize(this);
@@ -63,7 +63,7 @@ namespace Alphora.Dataphor.DAE.Server
 			Dispose(true);
 		}
 
-		protected virtual void Dispose(bool ADisposing)
+		protected virtual void Dispose(bool disposing)
 		{
 			DoDispose();
 		}

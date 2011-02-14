@@ -17,50 +17,50 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		}
 		
 		/// <remarks> This method is invoked on the main thread. </remarks>
-		public void InsertChild(int AIndex, FrameworkElement AChild)
+		public void InsertChild(int index, FrameworkElement child)
 		{
-			ContentControl.Content = AChild;
+			ContentControl.Content = child;
 		}
 
 		/// <remarks> This method is invoked on the main thread. </remarks>
-		public void RemoveChild(FrameworkElement AChild)
+		public void RemoveChild(FrameworkElement child)
 		{
 			ContentControl.Content = null;
 		}
 
 		// RootElement
 
-		private ISilverlightElement FRootElement;
+		private ISilverlightElement _rootElement;
 		
 		protected ISilverlightElement RootElement
 		{
-			get { return FRootElement; }
+			get { return _rootElement; }
 		}
 
-		public override bool IsValidChild(Type AChildType)
+		public override bool IsValidChild(Type childType)
 		{
-			if (typeof(ISilverlightElement).IsAssignableFrom(AChildType))
-				return FRootElement == null;
-			return base.IsValidChild(AChildType);
+			if (typeof(ISilverlightElement).IsAssignableFrom(childType))
+				return _rootElement == null;
+			return base.IsValidChild(childType);
 		}
 
-		protected internal override void InvalidChildError(INode AChild) 
+		protected internal override void InvalidChildError(INode child) 
 		{
 			throw new ClientException(ClientException.Codes.UseSingleElementNode);
 		}
 
-		protected internal override void AddChild(INode AChild)
+		protected internal override void AddChild(INode child)
 		{
-			base.AddChild(AChild);
-			if (AChild is ISilverlightElement)
-				FRootElement = (ISilverlightElement)AChild;
+			base.AddChild(child);
+			if (child is ISilverlightElement)
+				_rootElement = (ISilverlightElement)child;
 		}
 		
-		protected internal override void RemoveChild(INode AChild)
+		protected internal override void RemoveChild(INode child)
 		{
-			base.RemoveChild(AChild);
-			if (AChild == FRootElement)
-				FRootElement = null;
+			base.RemoveChild(child);
+			if (child == _rootElement)
+				_rootElement = null;
 		}
 
 		// Element

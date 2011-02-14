@@ -142,27 +142,27 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 	public class FocusChangedEvent : NodeEvent
 	{
-		public FocusChangedEvent(IWindowsElement ANode)
+		public FocusChangedEvent(IWindowsElement node)
 		{
-			FNode = ANode;
+			_node = node;
 		}
 
-		private IWindowsElement FNode;
-		public IWindowsElement Node { get { return FNode; } }
+		private IWindowsElement _node;
+		public IWindowsElement Node { get { return _node; } }
 	}
 
 	public class AdvanceFocusEvent : NodeEvent
 	{
-		public AdvanceFocusEvent(bool AForward)
+		public AdvanceFocusEvent(bool forward)
 		{
-			FForward = AForward;
+			_forward = forward;
 		}
 
-		private bool FForward;
+		private bool _forward;
 		public bool Forward
 		{
-			get { return FForward; }
-			set { FForward = value; }
+			get { return _forward; }
+			set { _forward = value; }
 		}
 	}
 

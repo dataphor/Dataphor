@@ -13,15 +13,15 @@ namespace Alphora.Dataphor.DAE.Connection.MySQL
 
 	class DAERegister
 	{
-		protected const string CD4ClassDefinitionNameSpace = "MySQLConnection";
+		protected const string D4ClassDefinitionNameSpace = "MySQLConnection";
 
 		public static SettingsList GetClasses()
 		{
-			SettingsList LClasses = new SettingsList();
+			SettingsList classes = new SettingsList();
 			
-			LClasses.Add(new SettingsItem(String.Format("{0}.{1}", CD4ClassDefinitionNameSpace, "MySQLConnection"), typeof(MySQLConnection).AssemblyQualifiedName));
+			classes.Add(new SettingsItem(String.Format("{0}.{1}", D4ClassDefinitionNameSpace, "MySQLConnection"), typeof(MySQLConnection).AssemblyQualifiedName));
 			
-			return LClasses;
+			return classes;
 		}
 	}
 }

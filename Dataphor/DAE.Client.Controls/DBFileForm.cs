@@ -39,17 +39,17 @@ namespace Alphora.Dataphor.DAE.Client.Controls
         private System.Windows.Forms.Button InternalAcceptButton;
         private System.Windows.Forms.Button InternalCancelButton;
 
-        private FieldDataLink FContentLink;
-        private FieldDataLink FNameLink;
-        private FieldDataLink FExtensionLink;
-        private bool FSaveOnExit;
+        private FieldDataLink _contentLink;
+        private FieldDataLink _nameLink;
+        private FieldDataLink _extensionLink;
+        private bool _saveOnExit;
 
-		public DBFileForm(FieldDataLink AContentLink, FieldDataLink ANameLink, FieldDataLink AExtensionLink) 
+		public DBFileForm(FieldDataLink contentLink, FieldDataLink nameLink, FieldDataLink extensionLink) 
         {            
-            FContentLink = AContentLink;
-            FNameLink = ANameLink;
-            FExtensionLink = AExtensionLink;
-            FSaveOnExit = !AContentLink.ReadOnly;
+            _contentLink = contentLink;
+            _nameLink = nameLink;
+            _extensionLink = extensionLink;
+            _saveOnExit = !contentLink.ReadOnly;
             //
             // Required for Windows Form Designer support
             //
@@ -63,7 +63,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		{
 			if (disposing)
 			{
-                if (FFileOpened && !FFileProcessed)
+                if (_fileOpened && !_fileProcessed)
                     ProcessFile();
 				//if (components != null)
 				//{
@@ -158,58 +158,58 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		}
 		#endregion			       
 
-        public const int CDefaultPollInterval = 500;
-        private int FPollInterval = CDefaultPollInterval;
+        public const int DefaultPollInterval = 500;
+        private int _pollInterval = DefaultPollInterval;
         public int PollInterval
         {
-            get { return FPollInterval; }
-            set { FPollInterval = value; }
+            get { return _pollInterval; }
+            set { _pollInterval = value; }
         }
 
-        public const int CDefaultWaitForProcessInterval = 4000;
-        private int FWaitForProcessInterval = CDefaultWaitForProcessInterval;
+        public const int DefaultWaitForProcessInterval = 4000;
+        private int _waitForProcessInterval = DefaultWaitForProcessInterval;
         public int WaitForProcessInterval
         {
-            get { return FWaitForProcessInterval; }
-            set { FWaitForProcessInterval = value; }
+            get { return _waitForProcessInterval; }
+            set { _waitForProcessInterval = value; }
         }
 
-        private bool FAutoRenameOnOpen = true;
+        private bool _autoRenameOnOpen = true;
         public bool AutoRenameOnOpen
         {
-            get { return FAutoRenameOnOpen; }
-            set { FAutoRenameOnOpen = value; }
+            get { return _autoRenameOnOpen; }
+            set { _autoRenameOnOpen = value; }
         }
 
         public void OpenFile()
         {
-            if (FFileOpened)
+            if (_fileOpened)
                 throw new InvalidOperationException("File already open.");            
 
-            if ((FExtensionLink.DataField == null) || !FExtensionLink.DataField.HasValue() || (FExtensionLink.DataField.AsString == String.Empty))
+            if ((_extensionLink.DataField == null) || !_extensionLink.DataField.HasValue() || (_extensionLink.DataField.AsString == String.Empty))
                 // Without an extension, we cannot auto-create the file, we must prompt for the name of the file
-                FFileName = PromptForSaveName();
+                _fileName = PromptForSaveName();
             else
-                FFileName = GetTempFileName();
+                _fileName = GetTempFileName();
 
             try
             {
                 InternalSaveToFile();
-                FFileOpened = true;
+                _fileOpened = true;
             }
             catch (IOException)
             {
-                bool LWriteable = false;
-                string LText = Strings.Get("DBFileForm.CannotWriteText", FFileName);
-                string LCaption = Strings.Get("DBFileForm.CannotWriteCaption");
-                while (!LWriteable)
+                bool writeable = false;
+                string text = Strings.Get("DBFileForm.CannotWriteText", _fileName);
+                string caption = Strings.Get("DBFileForm.CannotWriteCaption");
+                while (!writeable)
                 {
-                    if (MessageBox.Show(LText, LCaption, MessageBoxButtons.RetryCancel, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1) == DialogResult.Retry)
+                    if (MessageBox.Show(text, caption, MessageBoxButtons.RetryCancel, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1) == DialogResult.Retry)
                     {
                         try
                         {
                             InternalSaveToFile();
-                            LWriteable = true;
+                            writeable = true;
                         }
                         catch (IOException) { } //LWriteable is already false, no need to do anything
                     }
@@ -220,66 +220,66 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
             
             if (ReadOnly)
-                FileUtility.EnsureReadOnly(FFileName);
+                FileUtility.EnsureReadOnly(_fileName);
             else              
                 Show(); //have to Show before the process or window will be on top of process          
             
             try
             {              
-                ProcessStartInfo LInfo = new ProcessStartInfo(FFileName);
-                FProcess = Process.Start(LInfo);               
+                ProcessStartInfo info = new ProcessStartInfo(_fileName);
+                _process = Process.Start(info);               
                 // Process.Start may or may not return a process.  ShellExecute does not return a process if it uses 
                 //  DDE to an existing process (e.g. Word) to open the file.  As a result, we must use
                 //  other stategies such as waiting for file availablility and prompting the user to continue.
 
                 // TODO: Look into using AssocQueryString to get the associated file and forcing a create process, or look into DDE apis to find termination point
             }
-            catch (Exception LException)
+            catch (Exception exception)
             {
                 // If the process start fails, prompt the user whether to delete the file
-                if (MessageBox.Show(Strings.Get("DBFileForm.ProcessStartFailedText", FFileName, LException.Message), Strings.Get("DBFileForm.ProcessStartFailedCaption"), MessageBoxButtons.YesNo, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
+                if (MessageBox.Show(Strings.Get("DBFileForm.ProcessStartFailedText", _fileName, exception.Message), Strings.Get("DBFileForm.ProcessStartFailedCaption"), MessageBoxButtons.YesNo, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
                 {
-                    FileUtility.EnsureWriteable(FFileName);
-                    File.Delete(FFileName);
+                    FileUtility.EnsureWriteable(_fileName);
+                    File.Delete(_fileName);
                 }
                 throw new AbortException();
             }
 
             try
             {
-                if (FProcess != null)
-                    FProcess.EnableRaisingEvents = true;
+                if (_process != null)
+                    _process.EnableRaisingEvents = true;
 
-                Thread LFilePoller = ReadOnly ? new Thread(new ThreadStart(PollFileReadOnly)) : new Thread(new ThreadStart(PollFile));                
-                LFilePoller.IsBackground = true;
-                LFilePoller.Start();       
+                Thread filePoller = ReadOnly ? new Thread(new ThreadStart(PollFileReadOnly)) : new Thread(new ThreadStart(PollFile));                
+                filePoller.IsBackground = true;
+                filePoller.Start();       
             }
             catch
             {
-                if (FProcess != null)
-                    FProcess.Dispose();
+                if (_process != null)
+                    _process.Dispose();
                 throw;
             }  
         }
        
-        private bool FFileOpened = false;
+        private bool _fileOpened = false;
         public bool FileOpened
         {
-            get { return FFileOpened; }
+            get { return _fileOpened; }
         }
 
         private void PollFile()
         {
-            Thread.Sleep(FWaitForProcessInterval);           
-            bool LInitialPoll = true;
+            Thread.Sleep(_waitForProcessInterval);           
+            bool initialPoll = true;
             while (true)
             {                    
-                lock (FFilePollerLock)
+                lock (_filePollerLock)
                 {
-                    if (FFileProcessed)
+                    if (_fileProcessed)
                         return;                                   
                     //we waited the delay and the process stuck around: attach to the process; when the process exits save (if applicable) and delete the temp file
-                    if ((FProcess != null) && (!FProcess.HasExited))
+                    if ((_process != null) && (!_process.HasExited))
                     {
                         ProcessFileAttached();                      
                         return;
@@ -287,19 +287,19 @@ namespace Alphora.Dataphor.DAE.Client.Controls
                     else if (!FileInUse)
                     {
                         //the temp file has been released (it was locked and now isn't): save the file and delete the temp file
-                        if (!LInitialPoll)
+                        if (!initialPoll)
                             ProcessFileUnlocked();
                         //we waited the delay, read-only is false, we don't have a valid process, and the temp file is not locked: the user will have to choose how to process 
                         else
                             UserInputRequired();                            
                         return;
                     }
-                    else if (LInitialPoll)
+                    else if (initialPoll)
                         ShowFileLockedInstructions();
                 }
 
-                LInitialPoll = false;
-                Thread.Sleep(FPollInterval); 
+                initialPoll = false;
+                Thread.Sleep(_pollInterval); 
             }
         }
 
@@ -307,12 +307,12 @@ namespace Alphora.Dataphor.DAE.Client.Controls
         {
 			try
 			{
-				Thread.Sleep(FWaitForProcessInterval);
+				Thread.Sleep(_waitForProcessInterval);
 				while (true)
 				{
-					lock (FFilePollerLock)
+					lock (_filePollerLock)
 					{
-						if (FFileProcessed)
+						if (_fileProcessed)
 							return;
 						//we waited at least the delay; the temp file is not locked: delete it and end
 						if (!FileInUse)
@@ -322,7 +322,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 						}
 					}
 					//the temp file is locked: wait for the process to release it
-					Thread.Sleep(FPollInterval);    
+					Thread.Sleep(_pollInterval);    
 				}
 			}
 			catch
@@ -331,35 +331,35 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
         }
                 
-        private object FFilePollerLock = new object();
-        private bool FFileProcessed = false;
-        public bool FileProcessed { get { return FFileProcessed; } }
-        private string FFileName;
-        public string FileName { get { return FFileName; } }
+        private object _filePollerLock = new object();
+        private bool _fileProcessed = false;
+        public bool FileProcessed { get { return _fileProcessed; } }
+        private string _fileName;
+        public string FileName { get { return _fileName; } }
 
-        public const long CDefaultMaximumContentLength = 30000000;	// about 30meg
-        private long FMaximumContentLength = DBFileForm.CDefaultMaximumContentLength;
+        public const long DefaultMaximumContentLength = 30000000;	// about 30meg
+        private long _maximumContentLength = DBFileForm.DefaultMaximumContentLength;
         public long MaximumContentLength
         {
-            get { return FMaximumContentLength; }
-            set { FMaximumContentLength = Math.Max(0, value); }
+            get { return _maximumContentLength; }
+            set { _maximumContentLength = Math.Max(0, value); }
         }
 
-        private Process FProcess;      
+        private Process _process;      
 
         private DataField DataField
         {
-            get { return FContentLink == null ? null : FContentLink.DataField; }
+            get { return _contentLink == null ? null : _contentLink.DataField; }
         }
 
         private DataSet DataSet
         {
-            get { return FContentLink == null ? null : FContentLink.DataSet; }
+            get { return _contentLink == null ? null : _contentLink.DataSet; }
         }
 
         private bool ReadOnly
         {
-            get { return FContentLink == null ? true : FContentLink.ReadOnly; }
+            get { return _contentLink == null ? true : _contentLink.ReadOnly; }
         }
 
         private bool FileInUse
@@ -368,7 +368,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
             {
                 try
                 {
-                    using (FileStream LStream = File.Open(FFileName, FileMode.Open, FileAccess.Read, FileShare.None))
+                    using (FileStream stream = File.Open(_fileName, FileMode.Open, FileAccess.Read, FileShare.None))
                         return false;
                 }
                 catch { return true; }
@@ -377,24 +377,24 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
         private bool InternalFileWriteable
         {
-            get { return FileWriteable(FFileName); }
+            get { return FileWriteable(_fileName); }
         }
             
-        private bool FileWriteable(string AFileName)
+        private bool FileWriteable(string fileName)
         {           
             try
             {
-                using (FileStream LStream = new FileInfo(AFileName).OpenWrite())
+                using (FileStream stream = new FileInfo(fileName).OpenWrite())
                     return true;
             }
             catch { return false; }           
         }
         
-        private bool FileReadable(string AFileName)
+        private bool FileReadable(string fileName)
         {
             try
             {
-                using (FileStream LStream = new FileInfo(AFileName).OpenRead())
+                using (FileStream stream = new FileInfo(fileName).OpenRead())
                     return true;
             }
             catch { return false; }           
@@ -403,7 +403,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
         private void ProcessFileAttached()
         {
             ShowFileAttachedInstructions();
-            FProcess.Exited += new EventHandler(ProcessLoadFile);
+            _process.Exited += new EventHandler(ProcessLoadFile);
         }
 
         private void ProcessFileUnlocked()
@@ -415,18 +415,18 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
         private void ProcessLoadFile()
         {            
-            if (FSaveOnExit && !InternalContentIdenticalToFile)
+            if (_saveOnExit && !InternalContentIdenticalToFile)
                 InternalLoadFromFile();
             ProcessFile();            
         }
 
-        private void ProcessLoadFile(object ASender, EventArgs AArgs)
+        private void ProcessLoadFile(object sender, EventArgs args)
         {
-            lock (FFilePollerLock)
+            lock (_filePollerLock)
             {
                 if (Visible)
                     Hide();
-                if (!FFileProcessed)
+                if (!_fileProcessed)
                     ProcessLoadFile();
             }
         }
@@ -435,79 +435,79 @@ namespace Alphora.Dataphor.DAE.Client.Controls
         {            
             try
             {
-                FileUtility.EnsureWriteable(FFileName);
-                File.Delete(FFileName);
+                FileUtility.EnsureWriteable(_fileName);
+                File.Delete(_fileName);
             }
             catch { } //We could not delete temporary file, do nothing
-            FFileProcessed = true;
+            _fileProcessed = true;
         }
 
         private string GetTempFileName()
         {
-            string LBaseFileName = String.Empty;           
-            if ((FNameLink.DataField != null) && FNameLink.DataField.HasValue())
-                LBaseFileName = FNameLink.DataField.AsString;
+            string baseFileName = String.Empty;           
+            if ((_nameLink.DataField != null) && _nameLink.DataField.HasValue())
+                baseFileName = _nameLink.DataField.AsString;
 
-            string LExtension = FExtensionLink.DataField.AsString != String.Empty ? "." + FExtensionLink.DataField.AsString : "";
+            string extension = _extensionLink.DataField.AsString != String.Empty ? "." + _extensionLink.DataField.AsString : "";
 
-            string LTempDirectory = Path.Combine(Path.GetTempPath(), CTempSubDirectory);
-            Directory.CreateDirectory(LTempDirectory);
+            string tempDirectory = Path.Combine(Path.GetTempPath(), TempSubDirectory);
+            Directory.CreateDirectory(tempDirectory);
 
-            string LFileName = String.Empty;
-            if (LBaseFileName == String.Empty)
+            string fileName = String.Empty;
+            if (baseFileName == String.Empty)
             {
                 // Create an auto-generated file name
-                LFileName = Path.Combine(LTempDirectory, CBaseFileName) + LExtension;
+                fileName = Path.Combine(tempDirectory, BaseFileName) + extension;
                 int i = 2;
-                while (File.Exists(LFileName))
+                while (File.Exists(fileName))
                 {
-                    LFileName = Path.Combine(LTempDirectory, CBaseFileName + i.ToString()) + LExtension;
+                    fileName = Path.Combine(tempDirectory, BaseFileName + i.ToString()) + extension;
                     i++;
                 };
             }
             else
             {
                 // Use the file name referenced by the NameColumnName of this control
-                LFileName = Path.Combine(LTempDirectory, LBaseFileName) + LExtension;
-                if (File.Exists(LFileName))
+                fileName = Path.Combine(tempDirectory, baseFileName) + extension;
+                if (File.Exists(fileName))
                 {
-                    if (FAutoRenameOnOpen)
+                    if (_autoRenameOnOpen)
                     {
                         int i = 2;
                         do 
                         {
-                            LFileName = Path.Combine(LTempDirectory, LBaseFileName + "(" + i.ToString() + ")") + LExtension;
+                            fileName = Path.Combine(tempDirectory, baseFileName + "(" + i.ToString() + ")") + extension;
                             i++;
-                        } while (File.Exists(LFileName));
+                        } while (File.Exists(fileName));
                     }
                     else
                     {
-                        if (!FileWriteable(LFileName))
+                        if (!FileWriteable(fileName))
                         {
-                            DialogResult LDialogResult = DialogResult.Retry;
-                            string LText = Strings.Get("DBFileForm.FileNameLockedText", LFileName);
-                            string LCaption = Strings.Get("DBFileForm.FileNameLockedCaption");
+                            DialogResult dialogResult = DialogResult.Retry;
+                            string text = Strings.Get("DBFileForm.FileNameLockedText", fileName);
+                            string caption = Strings.Get("DBFileForm.FileNameLockedCaption");
                             do
                             {
-                                LDialogResult = MessageBox.Show(LText, LCaption, MessageBoxButtons.AbortRetryIgnore);
-                                switch (LDialogResult)
+                                dialogResult = MessageBox.Show(text, caption, MessageBoxButtons.AbortRetryIgnore);
+                                switch (dialogResult)
                                 {
                                     case DialogResult.Ignore:
-                                        LFileName = PromptForSaveName();
+                                        fileName = PromptForSaveName();
                                         break;
                                     case DialogResult.Abort:
                                         throw new AbortException();
                                     //default to Retry and do nothing
                                 }
-                            } while (File.Exists(LFileName) && !FileWriteable(LFileName));
+                            } while (File.Exists(fileName) && !FileWriteable(fileName));
                         }
-                        else if (!ContentIdenticalToFile(LFileName))
+                        else if (!ContentIdenticalToFile(fileName))
                         {
-                            DialogResult LResult = MessageBox.Show(Strings.Get("DBFileForm.OverwriteBoxText", LFileName), Strings.Get("DBFileForm.OverwriteBoxCaption"), MessageBoxButtons.YesNoCancel);
-                            switch (LResult)
+                            DialogResult result = MessageBox.Show(Strings.Get("DBFileForm.OverwriteBoxText", fileName), Strings.Get("DBFileForm.OverwriteBoxCaption"), MessageBoxButtons.YesNoCancel);
+                            switch (result)
                             {
                                 case DialogResult.No:
-                                    LFileName = PromptForSaveName();
+                                    fileName = PromptForSaveName();
                                     break;
                                 case DialogResult.Cancel:
                                     throw new AbortException();
@@ -516,67 +516,67 @@ namespace Alphora.Dataphor.DAE.Client.Controls
                     }
                 }
             }
-            return LFileName;
+            return fileName;
         }
 
-        public const string CTempSubDirectory = @"File";
-        public const string CBaseFileName = @"File";
+        public const string TempSubDirectory = @"File";
+        public const string BaseFileName = @"File";
         
         private bool InternalContentIdenticalToFile
         {
-            get { return ContentIdenticalToFile(FFileName); }
+            get { return ContentIdenticalToFile(_fileName); }
         }
         
-        private bool ContentIdenticalToFile(string AFileName)
+        private bool ContentIdenticalToFile(string fileName)
         {
             //if ContentIdenticalToFile can't read the file, consider true
-            if (!FileReadable(AFileName))
+            if (!FileReadable(fileName))
                 return false;
-            using (FileStream LFileStream = new FileStream(AFileName, FileMode.Open, FileAccess.Read))
-            using (Stream LStream = DataField.Value.OpenStream())
-                return StreamUtility.StreamsEqual(LStream, LFileStream);
+            using (FileStream fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+            using (Stream stream = DataField.Value.OpenStream())
+                return StreamUtility.StreamsEqual(stream, fileStream);
         }
 
-        private bool FUserInputRequired;
+        private bool _userInputRequired;
         private void UserInputRequired()
         {
-            FUserInputRequired = true;
+            _userInputRequired = true;
             ShowUserInputRequiredInstructions();
         }        
         
         private void ShowUserInputRequiredInstructions()
         {             
-            string LCaption = Strings.Get("DBFileForm.UserInputRequiredInstructionsCaption");
-            string LText = Strings.Get("DBFileForm.UserInputRequiredInstructionsText");
-            ShowInstructions(LCaption, LText, true);                    
+            string caption = Strings.Get("DBFileForm.UserInputRequiredInstructionsCaption");
+            string text = Strings.Get("DBFileForm.UserInputRequiredInstructionsText");
+            ShowInstructions(caption, text, true);                    
         }
 
         private void ShowFileAttachedInstructions()
         {
-            string LCaption = Strings.Get("DBFileForm.FileAttachedInstructionsCaption", FProcess.MainWindowTitle);
-            string LText = Strings.Get("DBFileForm.FileAttachedInstructionsText");
-            ShowInstructions(LCaption, LText, false);            
+            string caption = Strings.Get("DBFileForm.FileAttachedInstructionsCaption", _process.MainWindowTitle);
+            string text = Strings.Get("DBFileForm.FileAttachedInstructionsText");
+            ShowInstructions(caption, text, false);            
         }
 
         private void ShowFileLockedInstructions()
         {
-            string LCaption = Strings.Get("DBFileForm.FileLockedInstructionsCaption");
-            string LText = Strings.Get("DBFileForm.FileLockedInstructionsText");
-            ShowInstructions(LCaption, LText, false);
+            string caption = Strings.Get("DBFileForm.FileLockedInstructionsCaption");
+            string text = Strings.Get("DBFileForm.FileLockedInstructionsText");
+            ShowInstructions(caption, text, false);
         }
 
         private delegate void InvokeInstructionsDelegate(string ACaption, string AText, bool AShowCancelButton);
-        private void ShowInstructions(string ACaption, string AText, bool AShowCancelButton)
+        private void ShowInstructions(string caption, string text, bool showCancelButton)
         {
             if (InvokeRequired)
             {
-                Invoke(new InvokeInstructionsDelegate(ShowInstructions), new object[] { ACaption, AText, AShowCancelButton });
+                Invoke(new InvokeInstructionsDelegate(ShowInstructions), new object[] { caption, text, showCancelButton });
                 return;
             }
             
-            Text = ACaption;
-            MessageTextBox.Text = AText;
-            InternalCancelButton.Visible = AShowCancelButton;
+            Text = caption;
+            MessageTextBox.Text = text;
+            InternalCancelButton.Visible = showCancelButton;
             InternalAcceptButton.Visible = true;
             if (!Visible)
                 Show();   
@@ -584,17 +584,17 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
         private void AcceptButton_Click(object sender, EventArgs e)
         {
-            lock (FFilePollerLock)
+            lock (_filePollerLock)
             {
                 Hide();
-                if (!FFileProcessed && FUserInputRequired)
+                if (!_fileProcessed && _userInputRequired)
                     ProcessUserInputRequired();
             }
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
         {
-            lock (FFilePollerLock)
+            lock (_filePollerLock)
             {
                 Hide();
                 ProcessFile();
@@ -603,16 +603,16 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
         private void ProcessUserInputRequired()
         {              
-            if (FSaveOnExit && !InternalFileWriteable)
+            if (_saveOnExit && !InternalFileWriteable)
             {
-                string LText = Strings.Get("DBFileForm.FileLockedText", FFileName);
-                string LCaption = Strings.Get("DBFileForm.FileLockedCaption");
+                string text = Strings.Get("DBFileForm.FileLockedText", _fileName);
+                string caption = Strings.Get("DBFileForm.FileLockedCaption");
                 do
                 {
-                    FSaveOnExit = MessageBox.Show(LText, LCaption, MessageBoxButtons.OKCancel) == DialogResult.OK;                    
-                } while (FSaveOnExit && !InternalFileWriteable);
+                    _saveOnExit = MessageBox.Show(text, caption, MessageBoxButtons.OKCancel) == DialogResult.OK;                    
+                } while (_saveOnExit && !InternalFileWriteable);
             }
-            if (FSaveOnExit)
+            if (_saveOnExit)
                 ProcessLoadFile();
             else
                 ProcessFile();           
@@ -621,47 +621,47 @@ namespace Alphora.Dataphor.DAE.Client.Controls
         /// <summary> Loads the associated field contents from the specified file. </summary>       
         public void LoadFromFile() 
         {
-            FFileName = String.Empty;
+            _fileName = String.Empty;
             InternalLoadFromFile();
         }
 
         private void InternalLoadFromFile()
         {
-            if (String.IsNullOrEmpty(FFileName))
-                FFileName = PromptForLoadName();
-            using (FileStream LFileStream = new FileStream(FFileName, FileMode.Open, FileAccess.Read))
+            if (String.IsNullOrEmpty(_fileName))
+                _fileName = PromptForLoadName();
+            using (FileStream fileStream = new FileStream(_fileName, FileMode.Open, FileAccess.Read))
             {
-                if (LFileStream.Length > FMaximumContentLength)
-                    throw new ControlsException(ControlsException.Codes.MaximumContentLengthExceeded, LFileStream.Length, FMaximumContentLength);
-                using (DAE.Runtime.Data.Scalar LNewValue = new DAE.Runtime.Data.Scalar(DataSet.Process.ValueManager, DataSet.Process.DataTypes.SystemBinary))
+                if (fileStream.Length > _maximumContentLength)
+                    throw new ControlsException(ControlsException.Codes.MaximumContentLengthExceeded, fileStream.Length, _maximumContentLength);
+                using (DAE.Runtime.Data.Scalar newValue = new DAE.Runtime.Data.Scalar(DataSet.Process.ValueManager, DataSet.Process.DataTypes.SystemBinary))
                 {
-                    using (Stream LStream = LNewValue.OpenStream())
-                        StreamUtility.CopyStream(LFileStream, LStream);
-                    DataField.Value = LNewValue;
+                    using (Stream stream = newValue.OpenStream())
+                        StreamUtility.CopyStream(fileStream, stream);
+                    DataField.Value = newValue;
                 }
             }
         }
 
         private string PromptForLoadName()
         {
-            using (OpenFileDialog LDialog = new OpenFileDialog())
+            using (OpenFileDialog dialog = new OpenFileDialog())
             {
-                PrepareFileDialog(LDialog);
+                PrepareFileDialog(dialog);
 
-                LDialog.RestoreDirectory = false;
-                LDialog.Title = Strings.Get("DBFileForm.LoadFileCaption");
-                LDialog.Multiselect = false;
-                LDialog.CheckFileExists = true;
+                dialog.RestoreDirectory = false;
+                dialog.Title = Strings.Get("DBFileForm.LoadFileCaption");
+                dialog.Multiselect = false;
+                dialog.CheckFileExists = true;
 
                 // TODO: Call back here so that InitialDirectory can be recalled
 
-                DialogResult LResult = LDialog.ShowDialog();
-                if (LResult != DialogResult.OK)
+                DialogResult result = dialog.ShowDialog();
+                if (result != DialogResult.OK)
                     throw new AbortException();
 
                 // TODO: Call back here so that InitialDirectory can be stored
 
-                return LDialog.FileName;
+                return dialog.FileName;
             }
         }
 
@@ -669,88 +669,88 @@ namespace Alphora.Dataphor.DAE.Client.Controls
         /// <remarks> A null reference exception will occur if this method is invoked on a nil column. </remarks>
         public void SaveToFile()
         {
-            FFileName = String.Empty;
+            _fileName = String.Empty;
             InternalSaveToFile();
         }
 
         internal void InternalSaveToFile()
         {
-            if (String.IsNullOrEmpty(FFileName))
-                FFileName = PromptForSaveName();
+            if (String.IsNullOrEmpty(_fileName))
+                _fileName = PromptForSaveName();
             // The file must be writable to overwrite
-            if (File.Exists(FFileName))
-                FileUtility.EnsureWriteable(FFileName);
+            if (File.Exists(_fileName))
+                FileUtility.EnsureWriteable(_fileName);
 
             // Write/rewrite the file
-            using (FileStream LFileStream = new FileStream(FFileName, FileMode.Create, FileAccess.Write))
+            using (FileStream fileStream = new FileStream(_fileName, FileMode.Create, FileAccess.Write))
                 if (((Schema.ScalarType)DataField.DataType).NativeType == typeof(byte[]))
-                    using (Stream LStream = DataField.Value.OpenStream())
-                        StreamUtility.CopyStream(LStream, LFileStream);
+                    using (Stream stream = DataField.Value.OpenStream())
+                        StreamUtility.CopyStream(stream, fileStream);
                 else
-                    using (StreamWriter LStreamWriter = new StreamWriter(LFileStream))
-                        LStreamWriter.Write(DataField.Value.AsString);  
+                    using (StreamWriter streamWriter = new StreamWriter(fileStream))
+                        streamWriter.Write(DataField.Value.AsString);  
         }
 
         private string PromptForSaveName()
         {
-            using (SaveFileDialog LDialog = new SaveFileDialog())
+            using (SaveFileDialog dialog = new SaveFileDialog())
             {
-                PrepareFileDialog(LDialog);
+                PrepareFileDialog(dialog);
 
-                LDialog.RestoreDirectory = false;
-                LDialog.Title = Strings.Get("DBFileForm.SaveFileCaption");
-                LDialog.CheckPathExists = true;
-                LDialog.OverwritePrompt = true;
+                dialog.RestoreDirectory = false;
+                dialog.Title = Strings.Get("DBFileForm.SaveFileCaption");
+                dialog.CheckPathExists = true;
+                dialog.OverwritePrompt = true;
 
                 // TODO: Call back here so that InitialDirectory can be recalled
 
-                DialogResult LResult = LDialog.ShowDialog();
-                if (LResult != DialogResult.OK)
+                DialogResult result = dialog.ShowDialog();
+                if (result != DialogResult.OK)
                     throw new AbortException();
 
                 // TODO: Call back here so that InitialDirectory can be stored
 
-                return LDialog.FileName;
+                return dialog.FileName;
             }
         }
 
-        private void PrepareFileDialog(FileDialog ADialog)
+        private void PrepareFileDialog(FileDialog dialog)
         {
-            string LExtension = String.Empty;
-            if ((FExtensionLink.DataField != null) && FExtensionLink.DataField.HasValue() && !FExtensionLink.DataField.IsNil)
-                LExtension = FExtensionLink.DataField.AsString;
+            string extension = String.Empty;
+            if ((_extensionLink.DataField != null) && _extensionLink.DataField.HasValue() && !_extensionLink.DataField.IsNil)
+                extension = _extensionLink.DataField.AsString;
 
-            if (LExtension != String.Empty)
+            if (extension != String.Empty)
             {
-                ADialog.DefaultExt = LExtension;
-                ADialog.AddExtension = true;
+                dialog.DefaultExt = extension;
+                dialog.AddExtension = true;
 
                 // Prepare filter
-                ADialog.Filter = String.Format("{0} (*.{1})|*.{1}|{2}", Strings.Get("DBFileForm.UnknownFileDescription", LExtension), LExtension, Strings.Get("DBFileForm.AllFileFilter"));
-                ADialog.FilterIndex = 0;
+                dialog.Filter = String.Format("{0} (*.{1})|*.{1}|{2}", Strings.Get("DBFileForm.UnknownFileDescription", extension), extension, Strings.Get("DBFileForm.AllFileFilter"));
+                dialog.FilterIndex = 0;
 
                 // Set default filename
-                if ((FNameLink.DataField != null) && FNameLink.DataField.HasValue() && !FNameLink.DataField.IsNil && (FNameLink.DataField.AsString != String.Empty))
-                    ADialog.FileName = FNameLink.DataField.AsString + "." + LExtension;
+                if ((_nameLink.DataField != null) && _nameLink.DataField.HasValue() && !_nameLink.DataField.IsNil && (_nameLink.DataField.AsString != String.Empty))
+                    dialog.FileName = _nameLink.DataField.AsString + "." + extension;
             }
             else
             {
                 // Prepare filter
-                ADialog.Filter = Strings.Get("DBFileForm.AllFileFilter");
-                ADialog.FilterIndex = 0;
+                dialog.Filter = Strings.Get("DBFileForm.AllFileFilter");
+                dialog.FilterIndex = 0;
 
-                ADialog.AddExtension = false;
+                dialog.AddExtension = false;
             }
         }       
 
         /// <summary> Stops the monitoring of any files initiated by a call to Open</summary>
         public void CloseFile()
         {
-            lock (FFilePollerLock)
+            lock (_filePollerLock)
             {
                 if (Visible)
                     Hide(); 
-                if (!FFileProcessed)
+                if (!_fileProcessed)
                     ProcessFile();
             }
         }
@@ -758,44 +758,44 @@ namespace Alphora.Dataphor.DAE.Client.Controls
         /// <summary> Allows the user to save a copy of the temp file, when the link to the control has been lost. </summary>	
         public void RecoverFile()
         {
-            lock (FFilePollerLock)
+            lock (_filePollerLock)
             {
                 if (Visible)
                     Hide();
-                if (!FFileProcessed)
+                if (!_fileProcessed)
                 {
-                    if (FSaveOnExit)
+                    if (_saveOnExit)
                     {
-                        string LText = Strings.Get("DBFileForm.ClosingText");
-                        string LCaption = Strings.Get("DBFileForm.ClosingCaption");
-                        if (MessageBox.Show(LText, LCaption, MessageBoxButtons.OKCancel) == DialogResult.OK)
+                        string text = Strings.Get("DBFileForm.ClosingText");
+                        string caption = Strings.Get("DBFileForm.ClosingCaption");
+                        if (MessageBox.Show(text, caption, MessageBoxButtons.OKCancel) == DialogResult.OK)
                         {
-                            string LTargetFileName;
-                            using (SaveFileDialog LDialog = new SaveFileDialog())
+                            string targetFileName;
+                            using (SaveFileDialog dialog = new SaveFileDialog())
                             {
-                                string LExtension = Path.GetExtension(FFileName);
-                                if (!String.IsNullOrEmpty(LExtension))
+                                string extension = Path.GetExtension(_fileName);
+                                if (!String.IsNullOrEmpty(extension))
                                 {
-                                    LDialog.DefaultExt = LExtension;
-                                    LDialog.AddExtension = true;
+                                    dialog.DefaultExt = extension;
+                                    dialog.AddExtension = true;
                                 }
                                 else
-                                    LDialog.AddExtension = false;
+                                    dialog.AddExtension = false;
 
-                                LDialog.FileName = Path.GetFileName(FFileName);
+                                dialog.FileName = Path.GetFileName(_fileName);
 
-                                LDialog.RestoreDirectory = false;
-                                LDialog.Title = Strings.Get("DBFileForm.SaveFileTitle");
-                                LDialog.CheckPathExists = true;
-                                LDialog.OverwritePrompt = true;
+                                dialog.RestoreDirectory = false;
+                                dialog.Title = Strings.Get("DBFileForm.SaveFileTitle");
+                                dialog.CheckPathExists = true;
+                                dialog.OverwritePrompt = true;
 
-                                if (LDialog.ShowDialog() != DialogResult.OK)
+                                if (dialog.ShowDialog() != DialogResult.OK)
                                     throw new AbortException();
 
-                                LTargetFileName = LDialog.FileName;
+                                targetFileName = dialog.FileName;
 
                             }
-                            File.Copy(FFileName, LTargetFileName, true);
+                            File.Copy(_fileName, targetFileName, true);
                         }
                     }
                     ProcessFile();

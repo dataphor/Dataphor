@@ -30,24 +30,24 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		private void Page_Load(object sender, System.EventArgs e)
 		{
-			FWebSession = (Web.Session)Session["WebSession"];
-			if (FWebSession == null)
+			_webSession = (Web.Session)Session["WebSession"];
+			if (_webSession == null)
 				Response.Redirect((string)Session["ConnectPage"]);
 
 			Response.Buffer = true;
 			Response.CacheControl = "no-cache";
 
-			FWebSession.ProcessRequest(Context);
+			_webSession.ProcessRequest(Context);
 
-			if (FWebSession.Forms.IsEmpty())
+			if (_webSession.Forms.IsEmpty())
 			{
-				FWebSession.Dispose();
-				FWebSession = null;
+				_webSession.Dispose();
+				_webSession = null;
 				Session.Remove("WebSession");
-				string LDestination = (string)Session["CompletedPage"];
-				if ((LDestination == null) || (LDestination == String.Empty))
-					LDestination = (string)Session["ConnectPage"];
-				Response.Redirect(LDestination);
+				string destination = (string)Session["CompletedPage"];
+				if ((destination == null) || (destination == String.Empty))
+					destination = (string)Session["ConnectPage"];
+				Response.Redirect(destination);
 			}
 		}
 
@@ -73,23 +73,23 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// WebSession
 
-		private Web.Session FWebSession;
-		public Web.Session WebSession { get { return FWebSession; } }
+		private Web.Session _webSession;
+		public Web.Session WebSession { get { return _webSession; } }
 
 		public void WriteBodyAttributes()
 		{
 			if (!WebSession.Forms.IsEmpty())
 			{
-				string LImageID = ((IWebFormInterface)WebSession.Forms.GetTopmostForm()).BackgroundImageID;
-				if (LImageID != String.Empty)
-					Response.Write(@" background='ViewImage.aspx?ImageID=" + LImageID + "'");
+				string imageID = ((IWebFormInterface)WebSession.Forms.GetTopmostForm()).BackgroundImageID;
+				if (imageID != String.Empty)
+					Response.Write(@" background='ViewImage.aspx?ImageID=" + imageID + "'");
 			}
 
 			// handle repositioning of page to same scroll position after submit
 			Response.Write(@" onscroll=""document.getElementById('ScrollPosition').value = MainBody.scrollTop;""");
-			string LPosition = Request.Form["ScrollPosition"];
-			if ((LPosition != null) && (LPosition != String.Empty))
-				Response.Write(String.Format(@" onload=""MainBody.scrollTop={0};""", Convert.ToInt32(LPosition)));
+			string position = Request.Form["ScrollPosition"];
+			if ((position != null) && (position != String.Empty))
+				Response.Write(String.Format(@" onload=""MainBody.scrollTop={0};""", Convert.ToInt32(position)));
 		}
 	}
 }

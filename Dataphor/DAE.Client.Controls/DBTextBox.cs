@@ -25,49 +25,49 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 	{
 		public DBTextBox() : base()
 		{
-			FLink = new FieldDataLink();
-			FLink.OnFieldChanged += new DataLinkFieldHandler(FieldChanged);
-			FLink.OnUpdateReadOnly += new EventHandler(UpdateReadOnly);
-			FLink.OnSaveRequested += new DataLinkHandler(SaveRequested);
-			FLink.OnFocusControl += new DataLinkFieldHandler(FocusControl);
-			FDisableWhenReadOnly = false;
-			FAutoUpdateInterval = 200;
-			FAutoUpdateTimer = new System.Windows.Forms.Timer();
-			FAutoUpdateTimer.Interval = FAutoUpdateInterval;
-			FAutoUpdateTimer.Tick += new EventHandler(AutoUpdateElapsed);
-			FAutoUpdateTimer.Enabled = false;
+			_link = new FieldDataLink();
+			_link.OnFieldChanged += new DataLinkFieldHandler(FieldChanged);
+			_link.OnUpdateReadOnly += new EventHandler(UpdateReadOnly);
+			_link.OnSaveRequested += new DataLinkHandler(SaveRequested);
+			_link.OnFocusControl += new DataLinkFieldHandler(FocusControl);
+			_disableWhenReadOnly = false;
+			_autoUpdateInterval = 200;
+			_autoUpdateTimer = new System.Windows.Forms.Timer();
+			_autoUpdateTimer.Interval = _autoUpdateInterval;
+			_autoUpdateTimer.Tick += new EventHandler(AutoUpdateElapsed);
+			_autoUpdateTimer.Enabled = false;
 			UpdateReadOnly(this, EventArgs.Empty);
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 			try
 			{
-				FAutoUpdateTimer.Tick -= new EventHandler(AutoUpdateElapsed);
-				FAutoUpdateTimer.Dispose();
-				FAutoUpdateTimer = null;
+				_autoUpdateTimer.Tick -= new EventHandler(AutoUpdateElapsed);
+				_autoUpdateTimer.Dispose();
+				_autoUpdateTimer = null;
 			}
 			finally
 			{
-				if (FLink != null)
+				if (_link != null)
 				{
-					FLink.OnFieldChanged -= new DataLinkFieldHandler(FieldChanged);
-					FLink.OnUpdateReadOnly -= new EventHandler(UpdateReadOnly);
-					FLink.OnSaveRequested -= new DataLinkHandler(SaveRequested);
-					FLink.OnFocusControl -= new DataLinkFieldHandler(FocusControl);
-					FLink.Dispose();
-					FLink = null;
+					_link.OnFieldChanged -= new DataLinkFieldHandler(FieldChanged);
+					_link.OnUpdateReadOnly -= new EventHandler(UpdateReadOnly);
+					_link.OnSaveRequested -= new DataLinkHandler(SaveRequested);
+					_link.OnFocusControl -= new DataLinkFieldHandler(FocusControl);
+					_link.Dispose();
+					_link = null;
 				}
 			}
 		}
 
-		private FieldDataLink FLink;
+		private FieldDataLink _link;
 		/// <summary> Links this control to a DataField in a DataView. </summary>
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBTextBox.dxd"/>
 		internal protected FieldDataLink Link
 		{
-			get { return FLink; }
+			get { return _link; }
 		}
 
 		/// <summary> Gets or sets a value indicating whether to allow the user to modify the Text. </summary>
@@ -76,39 +76,39 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Category("Behavior")]
 		public new bool ReadOnly 
 		{
-			get { return FLink.ReadOnly; }
-			set { FLink.ReadOnly = value; }
+			get { return _link.ReadOnly; }
+			set { _link.ReadOnly = value; }
 		}
 		
-		private System.Windows.Forms.Timer FAutoUpdateTimer;
+		private System.Windows.Forms.Timer _autoUpdateTimer;
 
-		private bool FAutoUpdate;
+		private bool _autoUpdate;
 		/// <summary> Determines if the control should automatically update the DataField's value on a given interval. </summary>
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBTextBox.dxd"/>
 		[DefaultValue(false)]
 		[Category("Behavior")]
 		public bool AutoUpdate
 		{
-			get { return FAutoUpdate; }
+			get { return _autoUpdate; }
 			set
 			{
-				if (FAutoUpdate != value)
-					FAutoUpdate = value;
+				if (_autoUpdate != value)
+					_autoUpdate = value;
 			}
 		}
 		
-		private int FAutoUpdateInterval;
+		private int _autoUpdateInterval;
 		/// <summary> Determines the amount of time to wait before updating a DataField's value. </summary>
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBTextBox.dxd"/>
 		[DefaultValue(200)]
 		[Category("Behavior")]
 		public int AutoUpdateInterval
 		{
-			get { return FAutoUpdateInterval; }
+			get { return _autoUpdateInterval; }
 			set
 			{
-				if (FAutoUpdateInterval != value)
-					FAutoUpdateInterval = value;
+				if (_autoUpdateInterval != value)
+					_autoUpdateInterval = value;
 			}
 		}
 
@@ -119,8 +119,8 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Editor(typeof(Alphora.Dataphor.DAE.Client.Design.ColumnNameEditor), typeof(System.Drawing.Design.UITypeEditor))]
 		public string ColumnName
 		{
-			get { return FLink.ColumnName; }
-			set { FLink.ColumnName = value; }
+			get { return _link.ColumnName; }
+			set { _link.ColumnName = value; }
 		}
 
 		/// <summary> Gets or sets a value indicating the DataSource the control is linked to. </summary>
@@ -131,8 +131,8 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Description("The DataSource for this control")]
 		public DataSource Source
 		{
-			get { return FLink.Source; }
-			set { FLink.Source = value; }
+			get { return _link.Source; }
+			set { _link.Source = value; }
 		}
 
 		/// <summary> Gets the DataField this control links to. </summary>
@@ -140,7 +140,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Browsable(false)]
 		public DataField DataField
 		{
-			get { return FLink == null ? null : FLink.DataField; }
+			get { return _link == null ? null : _link.DataField; }
 		}
 
 		/// <summary> Determines how the DataFields value is updated and retrieved. </summary>
@@ -158,7 +158,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			set { DataField.AsString = value; }
 		}
 
-		private bool FDisableWhenReadOnly;
+		private bool _disableWhenReadOnly;
 		/// <summary> Gets or sets a value indicating whether the control is disabled when it's read-only.</summary>
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBTextBox.dxd"/>
 		[DefaultValue(false)]
@@ -166,26 +166,26 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Description("When ReadOnly is true, disable the control?")]
 		public bool DisableWhenReadOnly
 		{
-			get { return FDisableWhenReadOnly; }
+			get { return _disableWhenReadOnly; }
 			set
 			{
-				if (FDisableWhenReadOnly != value)
+				if (_disableWhenReadOnly != value)
 				{
-					FDisableWhenReadOnly = value;
-					base.Enabled = !(ReadOnly && FDisableWhenReadOnly);
+					_disableWhenReadOnly = value;
+					base.Enabled = !(ReadOnly && _disableWhenReadOnly);
 					UpdateReadOnly(this, EventArgs.Empty);
 				}
 			}
 		}
 		
-		private bool FNilIfBlank = true;
+		private bool _nilIfBlank = true;
 		[DefaultValue(true)]
 		[Category("Behavior")]
 		[Description("When true, a '' value entered is considered nil")]
 		public bool NilIfBlank
 		{
-			get { return FNilIfBlank; }
-			set { FNilIfBlank = value; }
+			get { return _nilIfBlank; }
+			set { _nilIfBlank = value; }
 		}
 		
 		[DefaultValue(false)]
@@ -197,38 +197,38 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		private bool InternalGetReadOnly()
 		{
-			return FLink.ReadOnly || !FLink.Active;
+			return _link.ReadOnly || !_link.Active;
 		}
 
-		private void UpdateReadOnly(object ASender, EventArgs AArgs)
+		private void UpdateReadOnly(object sender, EventArgs args)
 		{
 			if (!DesignMode)
 			{
 				base.ReadOnly = InternalGetReadOnly();
-				if (FDisableWhenReadOnly)
+				if (_disableWhenReadOnly)
 					base.Enabled = !InternalGetReadOnly();
 				InternalUpdateBackColor();
 			}
 		}
 
-		private bool FHasValue;
-		public override bool HasValue {	get { return FHasValue; } }
-		private void SetHasValue(bool AValue)
+		private bool _hasValue;
+		public override bool HasValue {	get { return _hasValue; } }
+		private void SetHasValue(bool value)
 		{
-			FHasValue = AValue;
+			_hasValue = value;
 			UpdateBackColor();
 		}
 
 		/// <summary> Update the background color of the control if the link is active. </summary>
 		protected override void InternalUpdateBackColor()
 		{
-			if (!FLink.Active)
+			if (!_link.Active)
 				BackColor = ReadOnlyBackColor;
 			else
 				base.InternalUpdateBackColor();
 		}
 
-		private bool FRequestSaveOnChange;
+		private bool _requestSaveOnChange;
 		/// <summary> Gets or sets a value indicating whether the control should request a save on every change.</summary>
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBTextBox.dxd"/>
 		[DefaultValue(false)]
@@ -236,40 +236,40 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Description("Save on every change?")]			
 		public bool RequestSaveOnChange
 		{
-			get { return FRequestSaveOnChange; }
-			set { FRequestSaveOnChange = value; }
+			get { return _requestSaveOnChange; }
+			set { _requestSaveOnChange = value; }
 		}
 			
 		/// <summary> Called when the AutoUpdateTimer has elapsed. </summary>
-		/// <param name="ASender"> The object whose delegate is called. </param>
-		/// <param name="AArgs"> An EventArgs that contains data related to this event. </param>
+		/// <param name="sender"> The object whose delegate is called. </param>
+		/// <param name="args"> An EventArgs that contains data related to this event. </param>
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBTextBox.dxd"/>
-		protected virtual void AutoUpdateElapsed(object ASender, EventArgs AArgs)
+		protected virtual void AutoUpdateElapsed(object sender, EventArgs args)
 		{
-			FAutoUpdateTimer.Stop();
-			FLink.SaveRequested();
+			_autoUpdateTimer.Stop();
+			_link.SaveRequested();
 		}
 		
 		protected virtual void InternalAutoUpdate()
 		{
-			if (FAutoUpdate)
+			if (_autoUpdate)
 			{
-				if (FAutoUpdateInterval <= 0)
-					FLink.SaveRequested();
+				if (_autoUpdateInterval <= 0)
+					_link.SaveRequested();
 				else
 				{
-					FAutoUpdateTimer.Interval = FAutoUpdateInterval;
-					FAutoUpdateTimer.Start();
+					_autoUpdateTimer.Interval = _autoUpdateInterval;
+					_autoUpdateTimer.Start();
 				}
 			};
 		}
 		
-		private bool FSetting;
-		protected override void OnTextChanged(EventArgs AArgs)
+		private bool _setting;
+		protected override void OnTextChanged(EventArgs args)
 		{
-			base.OnTextChanged(AArgs);
+			base.OnTextChanged(args);
 			SetHasValue((base.Text != String.Empty) || !NilIfBlank);
-			if (!FSetting)
+			if (!_setting)
 			{
 				EnsureEdit();
 				InternalAutoUpdate();
@@ -277,29 +277,29 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		}
 
 		/// <summary> Directly sets the value of the text property without updating the DataField's value. </summary>
-		/// <param name="AValue">The value to assign to the Text property. </param>
-		internal protected void InternalSetText(string AValue)
+		/// <param name="value">The value to assign to the Text property. </param>
+		internal protected void InternalSetText(string value)
 		{
-			FSetting = true;
+			_setting = true;
 			try
 			{
-				base.Text = AValue;
+				base.Text = value;
 			}
 			finally
 			{
-				FSetting = false;
+				_setting = false;
 			}
 		}
 
-		private void FieldChanged(DataLink ADataLink, DataSet ADataSet, DataField AField)
+		private void FieldChanged(DataLink dataLink, DataSet dataSet, DataField field)
 		{
 			InternalSetText(FieldValue);
 			SetHasValue((DataField != null) && DataField.HasValue());
 		}
 
-		private void SaveRequested(DataLink ALink, DataSet ADataSet)
+		private void SaveRequested(DataLink link, DataSet dataSet)
 		{
-			if (FLink.DataField != null)
+			if (_link.DataField != null)
 			{
 				if (!HasValue)
 					DataField.ClearValue();
@@ -310,7 +310,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		private void EnsureEdit()
 		{
-			if (!FLink.Edit())
+			if (!_link.Edit())
 				throw new ControlsException(ControlsException.Codes.InvalidViewState);
 		}
 
@@ -325,44 +325,44 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				{
 					EnsureEdit();
 					base.Text = value;
-					FLink.SaveRequested();
+					_link.SaveRequested();
 				}
 			}
 		}
 
 		protected void Reset()
 		{
-			FLink.Reset();
+			_link.Reset();
 			SelectAll();
 		}
 
-		protected override bool IsInputKey(Keys AKeyData)
+		protected override bool IsInputKey(Keys keyData)
 		{
-			switch (AKeyData) 
+			switch (keyData) 
 			{
 				case Keys.Escape:
-					if (FLink.Modified)
+					if (_link.Modified)
 						return true;
 					break;
 			}
-			return base.IsInputKey(AKeyData);
+			return base.IsInputKey(keyData);
 		}
 
-		protected override void OnKeyDown(KeyEventArgs AArgs)
+		protected override void OnKeyDown(KeyEventArgs args)
 		{
-			switch (AArgs.KeyData)
+			switch (args.KeyData)
 			{
 				case Keys.Escape:
 					Reset();
-					AArgs.Handled = true;
+					args.Handled = true;
 					break;
 			}
-			base.OnKeyDown(AArgs);
+			base.OnKeyDown(args);
 		}
 
-		protected override bool ProcessDialogKey(Keys AKey)
+		protected override bool ProcessDialogKey(Keys key)
 		{
-			switch (AKey)
+			switch (key)
 			{
 				case Keys.Control | Keys.Back:
 					if (HasValue && !ReadOnly)
@@ -385,7 +385,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 						System.Media.SystemSounds.Beep.Play();
 					return true;
 			}
-			return base.ProcessDialogKey(AKey);
+			return base.ProcessDialogKey(key);
 		}
 
 		private void UpdateFieldValue()
@@ -394,7 +394,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			{
 				try
 				{
-					FLink.SaveRequested();
+					_link.SaveRequested();
 				}
 				catch
 				{	  					
@@ -412,10 +412,10 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			InternalSetText(FieldValue);
 		}
 		
-		protected override void OnGotFocus(EventArgs AEventArgs)
+		protected override void OnGotFocus(EventArgs eventArgs)
 		{
-			base.OnGotFocus(AEventArgs);
-			if (!FLink.Modified)
+			base.OnGotFocus(eventArgs);
+			if (!_link.Modified)
 			{
 				FormatChanged();
 				// HACK: Sometimes the textbox text isn't selected
@@ -423,23 +423,23 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 
-		protected override void OnLeave(EventArgs AEventArgs)
+		protected override void OnLeave(EventArgs eventArgs)
 		{
 			if (!Disposing && !IsDisposed)
 				UpdateFieldValue();
-			base.OnLeave(AEventArgs);
+			base.OnLeave(eventArgs);
 		}
 
-		protected override void OnLostFocus(EventArgs AArgs)
+		protected override void OnLostFocus(EventArgs args)
 		{
-			base.OnLostFocus(AArgs);
-			if (!Disposing && !IsDisposed && !FLink.Modified)
+			base.OnLostFocus(args);
+			if (!Disposing && !IsDisposed && !_link.Modified)
 				FormatChanged();
 		}
 
-		private void FocusControl(DataLink ALink, DataSet ADataSet, DataField AField)
+		private void FocusControl(DataLink link, DataSet dataSet, DataField field)
 		{
-			if (AField == DataField)
+			if (field == DataField)
 				Focus();
 		}
 	}
@@ -458,48 +458,48 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 	{
 		public RangeTypeConverter(){}
 
-		public override object CreateInstance(ITypeDescriptorContext AContext, IDictionary APropertyValues)
+		public override object CreateInstance(ITypeDescriptorContext context, IDictionary propertyValues)
 		{
-			return new Range((int)APropertyValues["Minimum"], (int)APropertyValues["Maximum"]);
+			return new Range((int)propertyValues["Minimum"], (int)propertyValues["Maximum"]);
 		}
 
-		public override bool GetCreateInstanceSupported(ITypeDescriptorContext AContext)
+		public override bool GetCreateInstanceSupported(ITypeDescriptorContext context)
 		{
 			return true;
 		}
 
-		public override bool GetPropertiesSupported(ITypeDescriptorContext AContext)
+		public override bool GetPropertiesSupported(ITypeDescriptorContext context)
 		{
 			return true;
 		}
 
 		public override PropertyDescriptorCollection GetProperties
 			(
-			ITypeDescriptorContext AContext,
-			object AValue,
-			Attribute[] AAttributes
+			ITypeDescriptorContext context,
+			object value,
+			Attribute[] attributes
 			)
 		{
-			if (AValue is Range)
-				return TypeDescriptor.GetProperties(AValue, AAttributes);
-			return base.GetProperties(AContext, AValue, AAttributes);
+			if (value is Range)
+				return TypeDescriptor.GetProperties(value, attributes);
+			return base.GetProperties(context, value, attributes);
 		}
 
-		public override bool CanConvertTo(ITypeDescriptorContext AContext, Type ADestinationType)
+		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
 		{
-			return ADestinationType == typeof(InstanceDescriptor) ? true : base.CanConvertTo(AContext, ADestinationType);
+			return destinationType == typeof(InstanceDescriptor) ? true : base.CanConvertTo(context, destinationType);
 		}
 
-		public override bool CanConvertFrom(ITypeDescriptorContext AContext, Type ASourceType)
+		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
-			return ASourceType == typeof(string) ? true : base.CanConvertFrom(AContext, ASourceType);
+			return sourceType == typeof(string) ? true : base.CanConvertFrom(context, sourceType);
 		}
 
-		protected virtual InstanceDescriptor GetInstanceDescriptor(Range ARange)
+		protected virtual InstanceDescriptor GetInstanceDescriptor(Range range)
 		{
-			ConstructorInfo LInfo;
-			Type LType = ARange.GetType();
-			LInfo = LType.GetConstructor
+			ConstructorInfo info;
+			Type type = range.GetType();
+			info = type.GetConstructor
 				(
 				new Type[] 
 						{
@@ -509,42 +509,42 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				);
 			return new InstanceDescriptor
 				(
-				LInfo,
+				info,
 				new object[]
 						{
-							ARange.Minimum,
-							ARange.Maximum
+							range.Minimum,
+							range.Maximum
 						}
 				);
 
 		}
 
-		public override object ConvertTo(ITypeDescriptorContext AContext, System.Globalization.CultureInfo ACulture, object AValue, Type ADestinationType)
+		public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
 		{
-			if ((ADestinationType == typeof(string)) && (AValue is Range))
-				return ((Range)AValue).Minimum.ToString() + ACulture.TextInfo.ListSeparator + ((Range)AValue).Maximum.ToString();
+			if ((destinationType == typeof(string)) && (value is Range))
+				return ((Range)value).Minimum.ToString() + culture.TextInfo.ListSeparator + ((Range)value).Maximum.ToString();
 			if 
 				(
-				(AValue is Range) &&
-				(ADestinationType == typeof(InstanceDescriptor))
+				(value is Range) &&
+				(destinationType == typeof(InstanceDescriptor))
 				)
-				return GetInstanceDescriptor((Range)AValue);	
-			return base.ConvertTo(AContext, ACulture, AValue, ADestinationType);
+				return GetInstanceDescriptor((Range)value);	
+			return base.ConvertTo(context, culture, value, destinationType);
 		}
 
-		public override object ConvertFrom(ITypeDescriptorContext AContext, CultureInfo AInfo, object AValue)
+		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo info, object value)
 		{
-			if (AValue is string)
+			if (value is string)
 			{
-				string LValue = (string)AValue;
-				string[] LMaxMin = LValue.Split(AInfo.TextInfo.ListSeparator.ToCharArray());
-				if (LMaxMin.Length < 2)
-					throw new Exception("String to Range conversion must be in the format Minimum " + AInfo.TextInfo.ListSeparator + "Maximum");
-				return new Range(Convert.ToInt32(LMaxMin[0].Trim()), Convert.ToInt32(LMaxMin[1].Trim()));
+				string localValue = (string)value;
+				string[] maxMin = localValue.Split(info.TextInfo.ListSeparator.ToCharArray());
+				if (maxMin.Length < 2)
+					throw new Exception("String to Range conversion must be in the format Minimum " + info.TextInfo.ListSeparator + "Maximum");
+				return new Range(Convert.ToInt32(maxMin[0].Trim()), Convert.ToInt32(maxMin[1].Trim()));
 			}
-			if (AValue is Range)
-				return new Range(((Range)AValue).Minimum, ((Range)AValue).Maximum);
-			return base.ConvertFrom(AContext, AInfo, AValue);
+			if (value is Range)
+				return new Range(((Range)value).Minimum, ((Range)value).Maximum);
+			return base.ConvertFrom(context, info, value);
 		}
 	}
 
@@ -614,28 +614,28 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 	[ToolboxItem(false)]
 	public class WidthRange : Object
 	{
-		public WidthRange(Control AControl)
+		public WidthRange(Control control)
 		{
-			FControl = AControl;
-			FSaveSize = FControl.Size;
-			FRange = new Range(FControl.Width, FControl.Width);
-			FControl.SizeChanged += new EventHandler(ControlSizeChanged);
-			FControl.HandleCreated += new EventHandler(ControlHandleCreated);
+			_control = control;
+			_saveSize = _control.Size;
+			_range = new Range(_control.Width, _control.Width);
+			_control.SizeChanged += new EventHandler(ControlSizeChanged);
+			_control.HandleCreated += new EventHandler(ControlHandleCreated);
 		}
 
-		private System.Windows.Forms.Control FControl;
+		private System.Windows.Forms.Control _control;
 
-		private bool ShouldSerializeRange() { return FRange.Length != 0; }
+		private bool ShouldSerializeRange() { return _range.Length != 0; }
 
-		private Range FRange;
+		private Range _range;
 		public Range Range
 		{
-			get { return FRange; }
+			get { return _range; }
 			set
 			{
-				if (FRange != value)
+				if (_range != value)
 				{
-					FRange = value;
+					_range = value;
 					RangeChanged();
 				}
 			}
@@ -654,46 +654,46 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		public event InternalSetWidthEventHandler OnInternalSetWidth;
 
-		protected virtual void InternalSetWidth(int ANewWidth, ref bool AHandled, EventArgs AArgs)
+		protected virtual void InternalSetWidth(int newWidth, ref bool handled, EventArgs args)
 		{
 			if (OnInternalSetWidth != null)
-				OnInternalSetWidth(this, ANewWidth, ref AHandled, AArgs);
+				OnInternalSetWidth(this, newWidth, ref handled, args);
 		}
 
 		public event MeasureWidthEventHandler OnMeasureWidth;
 
-		protected virtual void MeasureWidth(ref int ANewWidth)
+		protected virtual void MeasureWidth(ref int newWidth)
 		{
 			if (OnMeasureWidth != null)
-				OnMeasureWidth(this, ref ANewWidth, EventArgs.Empty);
+				OnMeasureWidth(this, ref newWidth, EventArgs.Empty);
 		}
 
-		protected bool FInUpdateWidth;
+		protected bool _inUpdateWidth;
 		public void UpdateWidth()
 		{
-			FInUpdateWidth = true;
+			_inUpdateWidth = true;
 			try
 			{
 				if
 					(
-					FControl.IsHandleCreated &&
-					(FRange.Length != 0) &&
+					_control.IsHandleCreated &&
+					(_range.Length != 0) &&
 					(
-					(FControl.Dock == DockStyle.None) ||
-					(FControl.Dock == DockStyle.Left) ||
-					(FControl.Dock == DockStyle.Right)
+					(_control.Dock == DockStyle.None) ||
+					(_control.Dock == DockStyle.Left) ||
+					(_control.Dock == DockStyle.Right)
 					)
 					)
 				{
-					int LNewWidth = FControl.Width;
-					MeasureWidth(ref LNewWidth);
-					if (LNewWidth != FControl.Width)
+					int newWidth = _control.Width;
+					MeasureWidth(ref newWidth);
+					if (newWidth != _control.Width)
 					{
-						bool LHandled = false;
-						InternalSetWidth(LNewWidth, ref LHandled, EventArgs.Empty);
+						bool handled = false;
+						InternalSetWidth(newWidth, ref handled, EventArgs.Empty);
 						//Only change width if not already handled
-						if (!LHandled)
-							FControl.Width = LNewWidth;
+						if (!handled)
+							_control.Width = newWidth;
 					}
 				}
 				if (OnUpdateWidth != null)
@@ -701,34 +701,34 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 			finally
 			{
-				FInUpdateWidth = false;
+				_inUpdateWidth = false;
 			}
 		}
 
-		private Size FSaveSize;
-		private void ControlSizeChanged(object ASender, EventArgs AArgs)
+		private Size _saveSize;
+		private void ControlSizeChanged(object sender, EventArgs args)
 		{
-			if (!FInUpdateWidth)
+			if (!_inUpdateWidth)
 			{
-				int LNewMin = FRange.Minimum;
-				int LNewMax = FRange.Maximum;
-				if (FRange.Minimum == FSaveSize.Width)
-					LNewMin = FControl.Width;
-				if (FRange.Maximum == FSaveSize.Width)
-					LNewMax = FControl.Width;
-				Range = new Range(LNewMin, LNewMax);
+				int newMin = _range.Minimum;
+				int newMax = _range.Maximum;
+				if (_range.Minimum == _saveSize.Width)
+					newMin = _control.Width;
+				if (_range.Maximum == _saveSize.Width)
+					newMax = _control.Width;
+				Range = new Range(newMin, newMax);
 			}
-			FSaveSize = FControl.Size;
+			_saveSize = _control.Size;
 		}
 
-		private void ControlHandleCreated(object ASender, EventArgs AArgs)
+		private void ControlHandleCreated(object sender, EventArgs args)
 		{
 			UpdateWidth();
 		}
 
 		public override string ToString()
 		{
-			return FRange.ToString();
+			return _range.ToString();
 		}
 	}
 
@@ -742,12 +742,12 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		public ExtendedTextBox() : base()
 		{
 			CausesValidation = false;
-			FValueBackColor = BackColor;
-			FReadOnlyBackColor = SystemColors.InactiveBorder;
-			FWidthRange = new WidthRange(this);
-			FWidthRange.OnUpdateWidth += new EventHandler(WidthRangeUpdate);
-			FWidthRange.OnInternalSetWidth += new InternalSetWidthEventHandler(InternalSetWidth);
-			FWidthRange.OnMeasureWidth += new MeasureWidthEventHandler(MeasureWidth);
+			_valueBackColor = BackColor;
+			_readOnlyBackColor = SystemColors.InactiveBorder;
+			_widthRange = new WidthRange(this);
+			_widthRange.OnUpdateWidth += new EventHandler(WidthRangeUpdate);
+			_widthRange.OnInternalSetWidth += new InternalSetWidthEventHandler(InternalSetWidth);
+			_widthRange.OnMeasureWidth += new MeasureWidthEventHandler(MeasureWidth);
 		}
 
 		/// <summary> Determines whether the TextBox has a value. </summary>
@@ -755,85 +755,85 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Browsable(false)]
 		public abstract bool HasValue { get; }
 
-		private Color FNoValueBackColor = ControlColor.NoValueBackColor;
+		private Color _noValueBackColor = ControlColor.NoValueBackColor;
 		/// <summary> Gets or sets the background color of the control when it holds no value. </summary>
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBTextBox.dxd"/>
 		[Category("Colors")]
 		[Description("Background color of the control when it has no value.")]
 		public Color NoValueBackColor
 		{
-			get { return FNoValueBackColor; }
+			get { return _noValueBackColor; }
 			set
 			{
-				if (FNoValueBackColor != value)
+				if (_noValueBackColor != value)
 				{
-					FNoValueBackColor = value;
+					_noValueBackColor = value;
 					UpdateBackColor();
 				}
 			}
 		}
 
-		private Color FNoValueReadOnlyBackColor = ControlColor.NoValueReadOnlyBackColor;
+		private Color _noValueReadOnlyBackColor = ControlColor.NoValueReadOnlyBackColor;
 		/// <summary> Gets or sets the background color of the TextBox when it holds no value and it's value is ReadOnly. </summary>
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBTextBox.dxd"/>
 		[Category("Colors")]
 		[Description("Background color of the control when it has no value and ReadOnly.")]
 		public Color NoValueReadOnlyBackColor
 		{
-			get { return FNoValueReadOnlyBackColor; }
+			get { return _noValueReadOnlyBackColor; }
 			set
 			{
-				if (FNoValueReadOnlyBackColor != value)
+				if (_noValueReadOnlyBackColor != value)
 				{
-					FNoValueReadOnlyBackColor = value;
+					_noValueReadOnlyBackColor = value;
 					UpdateBackColor();
 				}
 			}
 		}
 
-		protected override bool IsInputKey(Keys AKey)
+		protected override bool IsInputKey(Keys key)
 		{
 			if 
 			(
 				!Multiline
 					&&
 					(
-						(AKey == Keys.Up) 
-							|| (AKey == Keys.Down) 
-							|| (AKey == Keys.PageUp)
-							|| (AKey == Keys.PageDown)
-							|| (AKey == (Keys.Control | Keys.Home))
-							|| (AKey == (Keys.Control | Keys.End))
+						(key == Keys.Up) 
+							|| (key == Keys.Down) 
+							|| (key == Keys.PageUp)
+							|| (key == Keys.PageDown)
+							|| (key == (Keys.Control | Keys.Home))
+							|| (key == (Keys.Control | Keys.End))
 					)
 			)
 				return false;
 			else
-				return base.IsInputKey(AKey);
+				return base.IsInputKey(key);
 		}
 
-		protected override bool ProcessCmdKey(ref Message AMessage, Keys AKey)
+		protected override bool ProcessCmdKey(ref Message message, Keys key)
 		{
-			if (AKey == (Keys.Control | Keys.A))
+			if (key == (Keys.Control | Keys.A))
 			{
 				SelectAll();
 				return true;
 			}
 			else
-				return base.ProcessCmdKey(ref AMessage, AKey);
+				return base.ProcessCmdKey(ref message, key);
 		}
 
-		private Color FValueBackColor;
+		private Color _valueBackColor;
 		/// <summary> Gets the background color that is used when the TextBox holds a value. </summary>
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBTextBox.dxd"/>
-		protected Color ValueBackColor { get { return FValueBackColor; } }
+		protected Color ValueBackColor { get { return _valueBackColor; } }
 
-		private Color FReadOnlyBackColor;
-		protected Color ReadOnlyBackColor { get { return FReadOnlyBackColor; } }
+		private Color _readOnlyBackColor;
+		protected Color ReadOnlyBackColor { get { return _readOnlyBackColor; } }
 
-		private bool FUpdatingBackColor;
+		private bool _updatingBackColor;
 		/// <summary> Determines if the BackColor is being updated by a change in the HasValue state. </summary>
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBTextBox.dxd"/>
-		protected bool UpdatingBackColor { get { return FUpdatingBackColor; } }
+		protected bool UpdatingBackColor { get { return _updatingBackColor; } }
 
 		/// <summary> Changes the background color of the control based on the HasValue and ReadOnly states. </summary>
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBTextBox.dxd"/>
@@ -851,9 +851,9 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				else 
 				{
 					if (!ReadOnly)
-						BackColor = FValueBackColor; //Default BackColor
+						BackColor = _valueBackColor; //Default BackColor
 					else
-						BackColor = FReadOnlyBackColor;
+						BackColor = _readOnlyBackColor;
 				}
 					
 			}
@@ -863,77 +863,77 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBTextBox.dxd"/>
 		protected void UpdateBackColor()
 		{
-			FUpdatingBackColor = true;
+			_updatingBackColor = true;
 			try
 			{
 				InternalUpdateBackColor();
 			}
 			finally
 			{
-				FUpdatingBackColor = false;
+				_updatingBackColor = false;
 			}
 		}
 
-		protected override void OnReadOnlyChanged(EventArgs AArgs)
+		protected override void OnReadOnlyChanged(EventArgs args)
 		{
-			base.OnReadOnlyChanged(AArgs);
+			base.OnReadOnlyChanged(args);
 			UpdateBackColor();
 		}
 
-		protected override void OnBackColorChanged(EventArgs AArgs)
+		protected override void OnBackColorChanged(EventArgs args)
 		{
-			base.OnBackColorChanged(AArgs);
+			base.OnBackColorChanged(args);
 			if (!UpdatingBackColor)
-				FValueBackColor = BackColor;
+				_valueBackColor = BackColor;
 		}
 
 		//Width Range
 
-		private WidthRange FWidthRange;
+		private WidthRange _widthRange;
 		[Category("Layout")]
 		[DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Content)]
 		public WidthRange WidthRange
 		{
-			get { return FWidthRange; }
+			get { return _widthRange; }
 		}
 
-		private void MeasureWidth(object ASender, ref int ANewWidth, EventArgs AArgs)
+		private void MeasureWidth(object sender, ref int newWidth, EventArgs args)
 		{
-			StringFormat LFormat = StringFormat.GenericTypographic;
-			LFormat.FormatFlags |= StringFormatFlags.MeasureTrailingSpaces | StringFormatFlags.NoWrap;
-			Size LSize;
-			using (Graphics LGraphics = CreateGraphics())
+			StringFormat format = StringFormat.GenericTypographic;
+			format.FormatFlags |= StringFormatFlags.MeasureTrailingSpaces | StringFormatFlags.NoWrap;
+			Size size;
+			using (Graphics graphics = CreateGraphics())
 			{
-				LSize = Size.Round(LGraphics.MeasureString(Text + 'W', Font, FWidthRange.Range.Maximum, LFormat));
+				size = Size.Round(graphics.MeasureString(Text + 'W', Font, _widthRange.Range.Maximum, format));
 			}
-			if (LSize.Width > Width)
-				ANewWidth = LSize.Width <= FWidthRange.Range.Maximum ? LSize.Width : FWidthRange.Range.Maximum;
-			else if (LSize.Width < Width)
-				ANewWidth = LSize.Width >= FWidthRange.Range.Minimum ? LSize.Width : FWidthRange.Range.Minimum;
+			if (size.Width > Width)
+				newWidth = size.Width <= _widthRange.Range.Maximum ? size.Width : _widthRange.Range.Maximum;
+			else if (size.Width < Width)
+				newWidth = size.Width >= _widthRange.Range.Minimum ? size.Width : _widthRange.Range.Minimum;
 			else
-				ANewWidth = Width;
+				newWidth = Width;
 		}
 
-		protected override void OnTextChanged(EventArgs AArgs)
+		protected override void OnTextChanged(EventArgs args)
 		{
-			base.OnTextChanged(AArgs);
-			FWidthRange.UpdateWidth();
+			base.OnTextChanged(args);
+			_widthRange.UpdateWidth();
 		}
 
-		private void WidthRangeUpdate(object ASender, EventArgs AArgs)
+		private void WidthRangeUpdate(object sender, EventArgs args)
 		{
 			//Hack to fix TextBox control not scrolling ...
 			//Ensures that as much of the text as possible shows in the client area.
-			if (IsHandleCreated && (FWidthRange.Range.Length != 0))
+			if (IsHandleCreated && (_widthRange.Range.Length != 0))
 			{
-				int LSaveStart = SelectionStart;
+				int saveStart = SelectionStart;
 				try
 				{
 					SelectionStart = 0;
 				}
 				finally
 				{
-					SelectionStart = LSaveStart;
+					SelectionStart = saveStart;
 				}
 			}
 		}
@@ -941,15 +941,15 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		public event InternalSetWidthEventHandler OnInternalSetWidth;
 		protected virtual void InternalSetWidth
 			(
-			object ASender,
-			int ANewWidth,
-			ref bool AHandled,
-			EventArgs AArgs
+			object sender,
+			int newWidth,
+			ref bool handled,
+			EventArgs args
 			)
 		{
-			AHandled = DesignMode;
+			handled = DesignMode;
 			if (OnInternalSetWidth != null) 
-				OnInternalSetWidth(this, ANewWidth, ref AHandled, AArgs);
+				OnInternalSetWidth(this, newWidth, ref handled, args);
 		}
 
 	}

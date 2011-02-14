@@ -28,55 +28,55 @@ namespace Alphora.Dataphor.DAE.Client
 	public class AliasManager
 	{
 		// Do not localize
-		public const string CAliasConfigurationFileName = "Aliases.config";
+		public const string AliasConfigurationFileName = "Aliases.config";
 
-		private static string FDefaultAliasName;		
+		private static string _defaultAliasName;		
 		public static string DefaultAliasName
 		{
 			get 
 			{ 
 				CheckLoaded();
-				return FDefaultAliasName; 
+				return _defaultAliasName; 
 			}
 			set 
 			{ 
 				CheckLoaded();
-				FDefaultAliasName = value; 
+				_defaultAliasName = value; 
 			}
 		}
 
-		private static AliasList FAliases;
+		private static AliasList _aliases;
 		public static AliasList Aliases 
 		{ 
 			get 
 			{ 
 				CheckLoaded();
-				return FAliases; 
+				return _aliases; 
 			} 
 		}
 		
-		private static AliasList FOverriddenAliases;
+		private static AliasList _overriddenAliases;
 		
-		private static DateTime FMachineConfigurationFileDate;
+		private static DateTime _machineConfigurationFileDate;
 		
 		private static string GetMachineAliasConfigurationFileName()
 		{
-			return Path.Combine(PathUtility.CommonAppDataPath(String.Empty, VersionModifier.MajorSpecific), CAliasConfigurationFileName);
+			return Path.Combine(PathUtility.CommonAppDataPath(String.Empty, VersionModifier.MajorSpecific), AliasConfigurationFileName);
 		}
 		
 		private static AliasConfiguration LoadMachineAliasConfiguration()
 		{
-			var LFileName = GetMachineAliasConfigurationFileName();
-			if (File.Exists(LFileName))
-				FMachineConfigurationFileDate = File.GetLastWriteTimeUtc(LFileName);
+			var fileName = GetMachineAliasConfigurationFileName();
+			if (File.Exists(fileName))
+				_machineConfigurationFileDate = File.GetLastWriteTimeUtc(fileName);
 			else
-				FMachineConfigurationFileDate = default(DateTime);
-			return AliasConfiguration.Load(LFileName);
+				_machineConfigurationFileDate = default(DateTime);
+			return AliasConfiguration.Load(fileName);
 		}
 		
 		private static string GetUserAliasConfigurationFileName()
 		{
-			return Path.Combine(PathUtility.UserAppDataPath(String.Empty, VersionModifier.MajorSpecific), CAliasConfigurationFileName);
+			return Path.Combine(PathUtility.UserAppDataPath(String.Empty, VersionModifier.MajorSpecific), AliasConfigurationFileName);
 		}
 		
 		private static AliasConfiguration LoadUserAliasConfiguration()
@@ -84,23 +84,23 @@ namespace Alphora.Dataphor.DAE.Client
 			return AliasConfiguration.Load(GetUserAliasConfigurationFileName());
 		}
 		
-		private static void SaveUserAliasConfiguration(AliasConfiguration AConfiguration)
+		private static void SaveUserAliasConfiguration(AliasConfiguration configuration)
 		{
-			AConfiguration.Save(GetUserAliasConfigurationFileName());
+			configuration.Save(GetUserAliasConfigurationFileName());
 		}
 		
-		private static void SaveMachineAliasConfiguration(AliasConfiguration AConfiguration)
+		private static void SaveMachineAliasConfiguration(AliasConfiguration configuration)
 		{
-			var LFileName = GetMachineAliasConfigurationFileName();
+			var fileName = GetMachineAliasConfigurationFileName();
 			if 
 			(
-				FMachineConfigurationFileDate == default(DateTime) 
-					|| !File.Exists(LFileName)
-					|| (File.GetLastWriteTimeUtc(LFileName) <= FMachineConfigurationFileDate)
+				_machineConfigurationFileDate == default(DateTime) 
+					|| !File.Exists(fileName)
+					|| (File.GetLastWriteTimeUtc(fileName) <= _machineConfigurationFileDate)
 			)
 				try
 				{
-					AConfiguration.Save(LFileName);
+					configuration.Save(fileName);
 				}
 				catch (UnauthorizedAccessException)
 				{
@@ -113,30 +113,30 @@ namespace Alphora.Dataphor.DAE.Client
 			Reset();
 
 			// Load Machine Aliases
-			AliasConfiguration LMachineConfiguration = LoadMachineAliasConfiguration();
-			foreach (ServerAlias LAlias in LMachineConfiguration.Aliases.Values)
-				FAliases.Add(LAlias);
+			AliasConfiguration machineConfiguration = LoadMachineAliasConfiguration();
+			foreach (ServerAlias alias in machineConfiguration.Aliases.Values)
+				_aliases.Add(alias);
 			
 			// Load User Aliases
-			AliasConfiguration LUserConfiguration = LoadUserAliasConfiguration();
-			foreach (ServerAlias LAlias in LUserConfiguration.Aliases.Values)
+			AliasConfiguration userConfiguration = LoadUserAliasConfiguration();
+			foreach (ServerAlias alias in userConfiguration.Aliases.Values)
 			{
-				ServerAlias LMachineAlias = FAliases[LAlias.Name];
-				if (LMachineAlias != null)
+				ServerAlias machineAlias = _aliases[alias.Name];
+				if (machineAlias != null)
 				{
-					FOverriddenAliases.Add(LMachineAlias);
-					FAliases.Remove(LAlias.Name);
+					_overriddenAliases.Add(machineAlias);
+					_aliases.Remove(alias.Name);
 				}
 				
-				FAliases.Add(LAlias);
+				_aliases.Add(alias);
 			}
 
-			FDefaultAliasName = LUserConfiguration.DefaultAliasName;
+			_defaultAliasName = userConfiguration.DefaultAliasName;
 		}
 		
 		private static void CheckLoaded()
 		{
-			if (FAliases == null)
+			if (_aliases == null)
 				throw new ClientException(ClientException.Codes.AliasConfigurationNotLoaded);
 		}
 		
@@ -144,56 +144,56 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			CheckLoaded();
 			
-			AliasConfiguration LUserConfiguration = new AliasConfiguration();
-			AliasConfiguration LMachineConfiguration = new AliasConfiguration();
+			AliasConfiguration userConfiguration = new AliasConfiguration();
+			AliasConfiguration machineConfiguration = new AliasConfiguration();
 			
-			LUserConfiguration.DefaultAliasName = FDefaultAliasName;
-			foreach (ServerAlias LAlias in FAliases.Values)
-				if (LAlias.IsUserAlias)
-					LUserConfiguration.Aliases.Add(LAlias);
+			userConfiguration.DefaultAliasName = _defaultAliasName;
+			foreach (ServerAlias alias in _aliases.Values)
+				if (alias.IsUserAlias)
+					userConfiguration.Aliases.Add(alias);
 				else
-					LMachineConfiguration.Aliases.Add(LAlias);
+					machineConfiguration.Aliases.Add(alias);
 			
-			foreach (ServerAlias LAlias in FOverriddenAliases.Values)
-				if (!LMachineConfiguration.Aliases.ContainsKey(LAlias.Name))
-					LMachineConfiguration.Aliases.Add(LAlias);
+			foreach (ServerAlias alias in _overriddenAliases.Values)
+				if (!machineConfiguration.Aliases.ContainsKey(alias.Name))
+					machineConfiguration.Aliases.Add(alias);
 
-			SaveUserAliasConfiguration(LUserConfiguration);
-			SaveMachineAliasConfiguration(LMachineConfiguration);
+			SaveUserAliasConfiguration(userConfiguration);
+			SaveMachineAliasConfiguration(machineConfiguration);
 		}
 
 		private static void Reset()
 		{
-			FDefaultAliasName = String.Empty;
-			FAliases = new AliasList();
-			FMachineConfigurationFileDate = default(DateTime);
-			FOverriddenAliases = new AliasList();
+			_defaultAliasName = String.Empty;
+			_aliases = new AliasList();
+			_machineConfigurationFileDate = default(DateTime);
+			_overriddenAliases = new AliasList();
 		}
 		
-		public static ServerAlias GetAlias(string AAliasName)
+		public static ServerAlias GetAlias(string aliasName)
 		{
-			if (FAliases == null)
+			if (_aliases == null)
 				Load();
-			return Aliases.GetAlias(AAliasName);
+			return Aliases.GetAlias(aliasName);
 		}
 		
 		public static AliasConfiguration LoadConfiguration()
 		{
-			AliasConfiguration LConfiguration = new AliasConfiguration();
+			AliasConfiguration configuration = new AliasConfiguration();
 			Load();
-			LConfiguration.DefaultAliasName = FDefaultAliasName;
-			foreach (ServerAlias LAlias in FAliases.Values)
-				LConfiguration.Aliases.Add(LAlias);
-			return LConfiguration;
+			configuration.DefaultAliasName = _defaultAliasName;
+			foreach (ServerAlias alias in _aliases.Values)
+				configuration.Aliases.Add(alias);
+			return configuration;
 		}
 		
-		public static void SaveConfiguration(AliasConfiguration AConfiguration)
+		public static void SaveConfiguration(AliasConfiguration configuration)
 		{
 			CheckLoaded();
-			FAliases.Clear();
-			foreach (ServerAlias LAlias in AConfiguration.Aliases.Values)
-				FAliases.Add(LAlias);
-			FDefaultAliasName = AConfiguration.DefaultAliasName;
+			_aliases.Clear();
+			foreach (ServerAlias alias in configuration.Aliases.Values)
+				_aliases.Add(alias);
+			_defaultAliasName = configuration.DefaultAliasName;
 			Save();
 		}
 	}
@@ -202,38 +202,38 @@ namespace Alphora.Dataphor.DAE.Client
 	[PublishDefaultList("Aliases")]
 	public class AliasConfiguration
 	{
-		private string FDefaultAliasName = String.Empty;
+		private string _defaultAliasName = String.Empty;
 		[DefaultValue("")]
 		public string DefaultAliasName
 		{
-			get { return FDefaultAliasName; }
-			set { FDefaultAliasName = value; }
+			get { return _defaultAliasName; }
+			set { _defaultAliasName = value; }
 		}
 
-		private AliasList FAliases = new AliasList();
+		private AliasList _aliases = new AliasList();
 		public AliasList Aliases
 		{
-			get { return FAliases; }
+			get { return _aliases; }
 		}
 		
 		/// <summary> Loads a new alias configuration. </summary>
 		/// <remarks> Creates a default alias configuration if the file doesn't exist. </remarks>
-		public static AliasConfiguration Load(string AFileName)
+		public static AliasConfiguration Load(string fileName)
 		{
-			AliasConfiguration LConfiguration = new AliasConfiguration();
-			if (File.Exists(AFileName))
-				using (Stream LStream = File.OpenRead(AFileName))
+			AliasConfiguration configuration = new AliasConfiguration();
+			if (File.Exists(fileName))
+				using (Stream stream = File.OpenRead(fileName))
 				{
-					new Deserializer().Deserialize(LStream, LConfiguration);
+					new Deserializer().Deserialize(stream, configuration);
 				}
-			return LConfiguration;
+			return configuration;
 		}
 		
-		public void Save(string AFileName)
+		public void Save(string fileName)
 		{
-			using (Stream LStream = new FileStream(AFileName, FileMode.Create, FileAccess.Write))
+			using (Stream stream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
 			{
-				new Serializer().Serialize(LStream, this);
+				new Serializer().Serialize(stream, this);
 			}
 		}
 
@@ -243,7 +243,7 @@ namespace Alphora.Dataphor.DAE.Client
 		// NOTE: deserializer will write it, allowing both versions to work together.
 		private class Serializer : BOP.Serializer
 		{
-			protected override string GetElementNamespace(Type AType)
+			protected override string GetElementNamespace(Type type)
 			{
 				return "Alphora.Dataphor.DAE.Client,Alphora.Dataphor.DAE.Client";
 			}
@@ -251,15 +251,15 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		private class Deserializer : BOP.Deserializer
 		{
-			protected override Type GetClassType(string AName, string ANamespace)
+			protected override Type GetClassType(string name, string namespaceValue)
 			{
-				if (String.Compare(AName, "AliasConfiguration", true) == 0)
+				if (String.Compare(name, "AliasConfiguration", true) == 0)
 					return typeof(AliasConfiguration);
-				if (String.Compare(AName, "ConnectionAlias", true) == 0)
+				if (String.Compare(name, "ConnectionAlias", true) == 0)
 					return typeof(ConnectionAlias);
-				if (String.Compare(AName, "InProcessAlias", true) == 0)
+				if (String.Compare(name, "InProcessAlias", true) == 0)
 					return typeof(InProcessAlias);
-				return base.GetClassType(AName, ANamespace);
+				return base.GetClassType(name, namespaceValue);
 			}
 		}
 	}
@@ -270,39 +270,39 @@ namespace Alphora.Dataphor.DAE.Client
 	{
 		public AliasList() : base(StringComparer.OrdinalIgnoreCase) {}
 
-		public override int Add(object AValue)
+		public override int Add(object value)
 		{
-			ServerAlias LAlias = (ServerAlias)AValue;
-			Add(LAlias.Name, LAlias);
-			return IndexOf(LAlias.Name);
+			ServerAlias alias = (ServerAlias)value;
+			Add(alias.Name, alias);
+			return IndexOf(alias.Name);
 		}
 		
-		public new ServerAlias this[string AAliasName]
+		public new ServerAlias this[string aliasName]
 		{
 			get
 			{
-				ServerAlias LAlias = null;
-				TryGetValue(AAliasName, out LAlias);
-				return LAlias;
+				ServerAlias alias = null;
+				TryGetValue(aliasName, out alias);
+				return alias;
 			}
 			set
 			{
-				base[AAliasName] = value;
+				base[aliasName] = value;
 			}
 		}
 
-		public ServerAlias GetAlias(string AAliasName)
+		public ServerAlias GetAlias(string aliasName)
 		{
-			ServerAlias LAlias;
-			if (!TryGetValue(AAliasName, out LAlias))
-				throw new ClientException(ClientException.Codes.AliasNotFound, AAliasName);
+			ServerAlias alias;
+			if (!TryGetValue(aliasName, out alias))
+				throw new ClientException(ClientException.Codes.AliasNotFound, aliasName);
 			else
-				return LAlias;
+				return alias;
 		}
 		
-		public bool HasAlias(string AAliasName)
+		public bool HasAlias(string aliasName)
 		{
-			return ContainsKey(AAliasName);
+			return ContainsKey(aliasName);
 		}
 	}
 }

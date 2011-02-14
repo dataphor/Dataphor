@@ -53,70 +53,70 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ToString(System.Generic) : System.String </remarks>
 	public class ObjectToStringNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return AArgument1.ToString();
+				return argument1.ToString();
 		}
 	}
 	
 	/// <remarks> operator BooleanToString(System.Boolean) : System.String </remarks>
 	public class BooleanToStringNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return (bool)AArgument1 ? Keywords.True : Keywords.False;
+				return (bool)argument1 ? Keywords.True : Keywords.False;
 		}
 	}
 	
 	/// <remarks> operator StringToBoolean(System.String) : System.Boolean </remarks>
 	public class StringToBooleanNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return Convert.ToBoolean((string)AArgument1);
+				return Convert.ToBoolean((string)argument1);
 		}
 	}
 	
 	/// <remarks> operator ByteToString(System.Byte) : System.String </remarks>
 	public class ByteToStringNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return ((byte)AArgument1).ToString();
+				return ((byte)argument1).ToString();
 		}
 	}
 	
 	/// <remarks> operator StringToByte(System.String) : System.Byte </remarks>
 	public class StringToByteNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return Convert.ToByte((string)AArgument1);
+				return Convert.ToByte((string)argument1);
 		}
 	}
 	
@@ -153,28 +153,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ShortToString(System.Short) : System.String </remarks>
 	public class ShortToStringNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return ((short)AArgument1).ToString();
+				return ((short)argument1).ToString();
 		}
 	}
 	
 	/// <remarks> operator StringToShort(System.String) : System.Short </remarks>
 	public class StringToShortNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return Convert.ToInt16((string)AArgument1);
+				return Convert.ToInt16((string)argument1);
 		}
 	}
 	
@@ -211,28 +211,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator IntegerToString(System.Integer) : System.String </remarks>
 	public class IntegerToStringNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return ((int)AArgument1).ToString();
+				return ((int)argument1).ToString();
 		}
 	}
 	
 	/// <remarks> operator StringToInteger(System.String) : System.Integer </remarks>
 	public class StringToIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return Convert.ToInt32((string)AArgument1);
+				return Convert.ToInt32((string)argument1);
 		}
 	}
 	
@@ -269,28 +269,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator LongToString(System.Long) : System.String </remarks>
 	public class LongToStringNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return ((long)AArgument1).ToString();
+				return ((long)argument1).ToString();
 		}
 	}
 	
 	/// <remarks> operator StringToLong(System.String) : System.Long </remarks>
 	public class StringToLongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return Convert.ToInt64((string)AArgument1);
+				return Convert.ToInt64((string)argument1);
 		}
 	}
 	
@@ -327,56 +327,56 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator ToString(AGuid : Guid) : string </remarks>
     public class GuidToStringNode : UnaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return ((Guid)AArgument1).ToString();
+				return ((Guid)argument1).ToString();
 		}
     }
 
     /// <remarks> operator ToGuid(AString : string) : Guid </remarks>
 	public class StringToGuidNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return new Guid((string)AArgument1);
+				return new Guid((string)argument1);
 		}
 	}
 
 	/// <remarks> operator ByteToBoolean(System.Byte) : System.Boolean </remarks>
 	public class ByteToBooleanNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return (byte)AArgument1 == 0 ? false : true;
+				return (byte)argument1 == 0 ? false : true;
 		}
 	}
 	
 	/// <remarks> operator BooleanToByte(System.Boolean) : System.Byte </remarks>
 	public class BooleanToByteNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return (byte)((bool)AArgument1 ? 1 : 0);
+				return (byte)((bool)argument1 ? 1 : 0);
 		}
 	}
 	
@@ -413,28 +413,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ShortToBoolean(System.Short) : System.Boolean </remarks>
 	public class ShortToBooleanNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return (short)AArgument1 == 0 ? false : true;
+				return (short)argument1 == 0 ? false : true;
 		}
 	}
 	
 	/// <remarks> operator BooleanToShort(System.Boolean) : System.Short </remarks>
 	public class BooleanToShortNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return (short)((bool)AArgument1 ? 1 : 0);
+				return (short)((bool)argument1 ? 1 : 0);
 		}
 	}
 	
@@ -471,28 +471,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator IntegerToBoolean(System.Integer) : System.Boolean </remarks>
 	public class IntegerToBooleanNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return (int)AArgument1 == 0 ? false : true;
+				return (int)argument1 == 0 ? false : true;
 		}
 	}
 	
 	/// <remarks> operator BooleanToInteger(System.Boolean) : System.Integer </remarks>
 	public class BooleanToIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return (bool)AArgument1 ? 1 : 0;
+				return (bool)argument1 ? 1 : 0;
 		}
 	}
 	
@@ -529,28 +529,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator LongToBoolean(System.Long) : System.Boolean </remarks>
 	public class LongToBooleanNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return (long)AArgument1 == 0 ? false : true;
+				return (long)argument1 == 0 ? false : true;
 		}
 	}
 	
 	/// <remarks> operator BooleanToLong(System.Boolean) : System.Long </remarks>
 	public class BooleanToLongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return (long)((bool)AArgument1 ? 1 : 0);
+				return (long)((bool)argument1 ? 1 : 0);
 		}
 	}
 	
@@ -617,32 +617,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ByteToShort(System.Byte) : System.Short </remarks>
 	public class ByteToShortNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return (short)(byte)AArgument1;
+				return (short)(byte)argument1;
 		}
 	}
 	
 	/// <remarks> operator ShortToByte(System.Short) : System.Byte </remarks>
 	public class ShortToByteNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
 			{
-				short LValue = (short)AArgument1;
-				if ((LValue < Byte.MinValue) || (LValue > Byte.MaxValue))
-					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, String.Format(" The value ({0}) is outside the range of System.Byte values", LValue.ToString()));
-				return (byte)LValue;
+				short tempValue = (short)argument1;
+				if ((tempValue < Byte.MinValue) || (tempValue > Byte.MaxValue))
+					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, String.Format(" The value ({0}) is outside the range of System.Byte values", tempValue.ToString()));
+				return (byte)tempValue;
 			}			
 		}
 	}
@@ -680,32 +680,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ByteToInteger(System.Byte) : System.Integer </remarks>
 	public class ByteToIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return (int)(byte)AArgument1;
+				return (int)(byte)argument1;
 		}
 	}
 	
 	/// <remarks> operator IntegerToByte(System.Integer) : System.Byte </remarks>
 	public class IntegerToByteNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
 			{
-				int LValue = (int)AArgument1;
-				if ((LValue < Byte.MinValue) || (LValue > Byte.MaxValue))
-					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, String.Format(" The value ({0}) is outside the range of System.Byte values", LValue.ToString()));
-				return (byte)LValue;
+				int tempValue = (int)argument1;
+				if ((tempValue < Byte.MinValue) || (tempValue > Byte.MaxValue))
+					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, String.Format(" The value ({0}) is outside the range of System.Byte values", tempValue.ToString()));
+				return (byte)tempValue;
 			}
 		}
 	}
@@ -743,32 +743,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ByteToLong(System.Byte) : System.Long </remarks>
 	public class ByteToLongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return (long)(byte)AArgument1;
+				return (long)(byte)argument1;
 		}
 	}
 	
 	/// <remarks> operator LongToByte(System.Long) : System.Byte </remarks>
 	public class LongToByteNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
 			{
-				long LValue = (long)AArgument1;
-				if ((LValue < Byte.MinValue) || (LValue > Byte.MaxValue))
-					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, String.Format(" The value ({0}) is outside the range of System.Byte values", LValue.ToString()));
-				return (byte)LValue;
+				long tempValue = (long)argument1;
+				if ((tempValue < Byte.MinValue) || (tempValue > Byte.MaxValue))
+					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, String.Format(" The value ({0}) is outside the range of System.Byte values", tempValue.ToString()));
+				return (byte)tempValue;
 			}
 		}
 	}
@@ -1006,32 +1006,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ShortToInteger(System.Short) : System.Integer </remarks>
 	public class ShortToIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return (int)(short)AArgument1;
+				return (int)(short)argument1;
 		}
 	}
 	
 	/// <remarks> operator IntegerToShort(System.Integer) : System.Short </remarks>
 	public class IntegerToShortNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
 			{
-				int LValue = (int)AArgument1;
-				if ((LValue < Int16.MinValue) || (LValue > Int16.MaxValue))
-					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, String.Format(" The value ({0}) is outside the range of System.Short values", LValue.ToString()));
-				return (short)LValue;
+				int tempValue = (int)argument1;
+				if ((tempValue < Int16.MinValue) || (tempValue > Int16.MaxValue))
+					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, String.Format(" The value ({0}) is outside the range of System.Short values", tempValue.ToString()));
+				return (short)tempValue;
 			}
 		}
 	}
@@ -1069,32 +1069,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ShortToLong(System.Short) : System.Long </remarks>
 	public class ShortToLongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return (long)(short)AArgument1;
+				return (long)(short)argument1;
 		}
 	}
 	
 	/// <remarks> operator LongToShort(System.Long) : System.Short </remarks>
 	public class LongToShortNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
 			{
-				long LValue = (long)AArgument1;
-				if ((LValue < Int16.MinValue) || (LValue > Int16.MaxValue))
-					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, String.Format(" The value ({0}) is outside the range of System.Short values", LValue.ToString()));
-				return (short)LValue;
+				long tempValue = (long)argument1;
+				if ((tempValue < Int16.MinValue) || (tempValue > Int16.MaxValue))
+					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, String.Format(" The value ({0}) is outside the range of System.Short values", tempValue.ToString()));
+				return (short)tempValue;
 			}
 		}
 	}
@@ -1272,32 +1272,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator IntegerToLong(System.Integer) : System.Long </remarks>
 	public class IntegerToLongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return (long)(int)AArgument1;
+				return (long)(int)argument1;
 		}
 	}
 	
 	/// <remarks> operator LongToInteger(System.Long) : System.Integer </remarks>
 	public class LongToIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
 			{
-				long LValue = (long)AArgument1;
-				if ((LValue < Int32.MinValue) || (LValue > Int32.MaxValue))
-					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, String.Format(" The value ({0}) is outside the range of System.Integer values", LValue.ToString()));
-				return (int)LValue;
+				long tempValue = (long)argument1;
+				if ((tempValue < Int32.MinValue) || (tempValue > Int32.MaxValue))
+					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, String.Format(" The value ({0}) is outside the range of System.Integer values", tempValue.ToString()));
+				return (int)tempValue;
 			}
 		}
 	}
@@ -1457,74 +1457,74 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator DecimalToString(System.Decimal) : System.String </remarks>
 	public class DecimalToStringNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return ((decimal)AArgument1).ToString("0.#############################");
+				return ((decimal)argument1).ToString("0.#############################");
 		}
 	}
 	
 	/// <remarks> operator MoneyToString(System.Decimal) : System.String </remarks>
 	public class MoneyToStringNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return ((decimal)AArgument1).ToString("C");
+				return ((decimal)argument1).ToString("C");
 		}
 	}
 	
 	/// <remarks> operator StringToDecimal(System.String) : System.Decimal </remarks>
 	public class StringToDecimalNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return Convert.ToDecimal((string)AArgument1);
+				return Convert.ToDecimal((string)argument1);
 		}
 	}
 	
 	/// <remarks> operator StringToMoney(System.String) : System.Decimal </remarks>
 	public class StringToMoneyNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return Decimal.Parse((string)AArgument1, System.Globalization.NumberStyles.Currency);
+				return Decimal.Parse((string)argument1, System.Globalization.NumberStyles.Currency);
 		}
 	}
 	
 	/// <remarks> operator DecimalToInteger(System.Decimal) : System.Integer </remarks>
 	public class DecimalToIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
 			{
-				decimal LValue = (decimal)AArgument1;
-				if ((LValue < Int32.MinValue) || (LValue > Int32.MaxValue))
-					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, String.Format(" The value ({0}) is outside the range of System.Integer values", LValue.ToString()));
-				return Convert.ToInt32(LValue);
+				decimal tempValue = (decimal)argument1;
+				if ((tempValue < Int32.MinValue) || (tempValue > Int32.MaxValue))
+					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, String.Format(" The value ({0}) is outside the range of System.Integer values", tempValue.ToString()));
+				return Convert.ToInt32(tempValue);
 			}
 		}
 	}
@@ -1532,14 +1532,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator IntegerToDecimal(System.Integer) : System.Decimal </remarks>
 	public class IntegerToDecimalNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return Convert.ToDecimal((int)AArgument1);
+				return Convert.ToDecimal((int)argument1);
 		}
 	}
 	
@@ -1565,14 +1565,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 	public class DecimalToMoneyNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return (decimal)AArgument1;
+				return (decimal)argument1;
 		}
 	}
 
@@ -1609,18 +1609,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator DecimalToLong(System.Decimal) : System.Long </remarks>
 	public class DecimalToLongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
 			{
-				decimal LValue = (decimal)AArgument1;
-				if ((LValue < Int64.MinValue) || (LValue > Int64.MaxValue))
-					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, String.Format(@" The value ({0}) is outside the range of System.Long", LValue.ToString()));
-				return Convert.ToInt64(LValue);
+				decimal tempValue = (decimal)argument1;
+				if ((tempValue < Int64.MinValue) || (tempValue > Int64.MaxValue))
+					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, String.Format(@" The value ({0}) is outside the range of System.Long", tempValue.ToString()));
+				return Convert.ToInt64(tempValue);
 			}
 		}
 	}
@@ -1628,14 +1628,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator LongToDecimal(System.Long) : System.Decimal </remarks>
 	public class LongToDecimalNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return Convert.ToDecimal((long)AArgument1);
+				return Convert.ToDecimal((long)argument1);
 		}
 	}
 	
@@ -1672,28 +1672,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator System.TimeSpan(System.DateTime) : System.TimeSpan; </remarks>
 	public class DateTimeToTimeSpanNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return new TimeSpan(((DateTime)AArgument1).Ticks);
+				return new TimeSpan(((DateTime)argument1).Ticks);
 		}
 	}
 	
 	/// <remarks> operator System.DateTime(System.TimeSpan) : System.DateTime; </remarks>
 	public class TimeSpanToDateTimeNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return new DateTime(((TimeSpan)AArgument1).Ticks);
+				return new DateTime(((TimeSpan)argument1).Ticks);
 		}
 	}
 	

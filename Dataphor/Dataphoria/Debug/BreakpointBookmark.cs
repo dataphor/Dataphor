@@ -9,12 +9,12 @@ namespace Alphora.Dataphor.Dataphoria
 {
 	public class BreakpointBookmark : DebugBookmark
 	{
-		public BreakpointBookmark(IDocument ADocument, TextLocation ALocation, DebugLocator ALocator)
-			: base(ADocument, ALocation, ALocator)
+		public BreakpointBookmark(IDocument document, TextLocation location, DebugLocator locator)
+			: base(document, location, locator)
 		{
 		}
 
-		static readonly Color CMarkerColor = Color.FromArgb(180, 38, 38);
+		static readonly Color MarkerColor = Color.FromArgb(180, 38, 38);
 
 		public override void Draw(IconBarMargin margin, Graphics g, Point p)
 		{
@@ -24,9 +24,9 @@ namespace Alphora.Dataphor.Dataphoria
 		protected override TextMarker CreateMarker()
 		{
 			LineSegment ALineSeg = Document.GetLineSegment(LineNumber);
-			TextMarker LMarker = new TextMarker(ALineSeg.Offset, ALineSeg.Length, TextMarkerType.SolidBlock, CMarkerColor, Color.White);
-			Document.MarkerStrategy.InsertMarker(0, LMarker);
-			return LMarker;
+			TextMarker marker = new TextMarker(ALineSeg.Offset, ALineSeg.Length, TextMarkerType.SolidBlock, MarkerColor, Color.White);
+			Document.MarkerStrategy.InsertMarker(0, marker);
+			return marker;
 		}
 	}
 }

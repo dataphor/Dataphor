@@ -43,208 +43,208 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 	{
 		public DropHighlightDrawFilter(TreeView LTree)
 		{
-			FTree = LTree;
-			FTree.OnPrePaintItem += new PaintTreeItemEventHandler(TreePrePaintItem);
-			FTree.OnPostPaintItem += new PaintTreeItemEventHandler(TreePostPaintItem);
-			FDropHighlightNode = null;
-			FDropLinePosition = DropLinePosition.None;
-			FDropHighlightBackColor = System.Drawing.SystemColors.Highlight;
-			FDropHighlightForeColor = System.Drawing.SystemColors.HighlightText;
-			FDropLineColor = System.Drawing.SystemColors.ControlText;
-			FDropLineWidth = 2;
+			_tree = LTree;
+			_tree.OnPrePaintItem += new PaintTreeItemEventHandler(TreePrePaintItem);
+			_tree.OnPostPaintItem += new PaintTreeItemEventHandler(TreePostPaintItem);
+			_dropHighlightNode = null;
+			_dropLinePosition = DropLinePosition.None;
+			_dropHighlightBackColor = System.Drawing.SystemColors.Highlight;
+			_dropHighlightForeColor = System.Drawing.SystemColors.HighlightText;
+			_dropLineColor = System.Drawing.SystemColors.ControlText;
+			_dropLineWidth = 2;
 		} 
 
-		private TreeView FTree;
+		private TreeView _tree;
 		public TreeView Tree
 		{
-			get { return FTree; }
+			get { return _tree; }
 		}
 
-		private QueryAllowedPositionsHandler FQueryAllowedPositions;
+		private QueryAllowedPositionsHandler _queryAllowedPositions;
 		public QueryAllowedPositionsHandler QueryAllowedPositions
 		{
-			get { return FQueryAllowedPositions; }
-			set { FQueryAllowedPositions = value; }
+			get { return _queryAllowedPositions; }
+			set { _queryAllowedPositions = value; }
 		}
 
-		private TreeNode FDropHighlightNode;
+		private TreeNode _dropHighlightNode;
 		public TreeNode DropHighlightNode
 		{
-			get { return FDropHighlightNode; }
+			get { return _dropHighlightNode; }
 		}
 
-		private DropLinePosition FDropLinePosition;
+		private DropLinePosition _dropLinePosition;
 		public DropLinePosition DropLinePosition
 		{
-			get { return FDropLinePosition; }
+			get { return _dropLinePosition; }
 		}
 
-		private DropOperation FDropOperation;
+		private DropOperation _dropOperation;
 		public DropOperation DropOperation
 		{
-			get { return FDropOperation; }
+			get { return _dropOperation; }
 		}
 
-		private int FDropLineWidth;
+		private int _dropLineWidth;
 		public int DropLineWidth
 		{
-			get { return FDropLineWidth; }
-			set { FDropLineWidth = value; }
+			get { return _dropLineWidth; }
+			set { _dropLineWidth = value; }
 		}
 
-		private System.Drawing.Color FDropHighlightBackColor; 
+		private System.Drawing.Color _dropHighlightBackColor; 
 		/// <remarks> This only affect the node when it is being dropped On. Not Above or Below. </remarks>
 		public System.Drawing.Color DropHighlightBackColor
 		{
-			get { return FDropHighlightBackColor; }
-			set { FDropHighlightBackColor = value; }
+			get { return _dropHighlightBackColor; }
+			set { _dropHighlightBackColor = value; }
 		}
 
-		private System.Drawing.Color  FDropHighlightForeColor;
+		private System.Drawing.Color  _dropHighlightForeColor;
 		/// <remarks> This only affect the node when it is being dropped On. Not Above or Below. </remarks>
 		public System.Drawing.Color  DropHighlightForeColor
 		{
-			get { return FDropHighlightForeColor; }
-			set { FDropHighlightForeColor = value; }
+			get { return _dropHighlightForeColor; }
+			set { _dropHighlightForeColor = value; }
 		}
 
-		private System.Drawing.Color FDropLineColor;
+		private System.Drawing.Color _dropLineColor;
 		public System.Drawing.Color DropLineColor
 		{
-			get { return FDropLineColor; }
-			set { FDropLineColor = value; }
+			get { return _dropLineColor; }
+			set { _dropLineColor = value; }
 		}
 
 		private void PositionChanged()
 		{
-			FTree.Invalidate();
+			_tree.Invalidate();
 		}
 
 		public void ClearDropHighlight()
 		{
-			FDropOperation = DropOperation.None;
+			_dropOperation = DropOperation.None;
 			SetDropHighlightNode(null, DropLinePosition.None);
 		}
 
 		/// <summary> Call this proc every time the DragOver event of the Tree fires. </summary>
 		/// <remarks> The point passed in is in Tree coords. </remarks>
-		public void SetDropHighlight(System.Drawing.Point APointInTreeCoords, object ASource, DropOperation ARequestedOperation)
+		public void SetDropHighlight(System.Drawing.Point pointInTreeCoords, object source, DropOperation requestedOperation)
 		{
-			TreeNode LTargetNode = FTree.GetNodeAt(APointInTreeCoords.X, APointInTreeCoords.Y);
-			if (LTargetNode != null)
+			TreeNode targetNode = _tree.GetNodeAt(pointInTreeCoords.X, pointInTreeCoords.Y);
+			if (targetNode != null)
 			{
-				Rectangle LTargetNodeBounds = LTargetNode.Bounds;
+				Rectangle targetNodeBounds = targetNode.Bounds;
 
 				// Determine the allowed positions
-				QueryAllowedPositionsEventArgs LPositionsArgs = new QueryAllowedPositionsEventArgs();
-				LPositionsArgs.TargetNode = LTargetNode;
-				LPositionsArgs.Source = ASource;
-				LPositionsArgs.AllowedMovePositions = DropLinePosition.None;
-				LPositionsArgs.AllowedCopyPositions = DropLinePosition.None;
+				QueryAllowedPositionsEventArgs positionsArgs = new QueryAllowedPositionsEventArgs();
+				positionsArgs.TargetNode = targetNode;
+				positionsArgs.Source = source;
+				positionsArgs.AllowedMovePositions = DropLinePosition.None;
+				positionsArgs.AllowedCopyPositions = DropLinePosition.None;
 				if (QueryAllowedPositions != null)
-					QueryAllowedPositions(this, LPositionsArgs);
+					QueryAllowedPositions(this, positionsArgs);
 
 				// Determine the distance from edge offset based on the allowed positions
-				int LDistanceFromEdge;
-				if (((LPositionsArgs.AllowedMovePositions | LPositionsArgs.AllowedCopyPositions) & (DropLinePosition.AboveNode | DropLinePosition.BelowNode)) != 0)
-					if (((LPositionsArgs.AllowedMovePositions | LPositionsArgs.AllowedCopyPositions) & DropLinePosition.OnNode) != 0)
-						LDistanceFromEdge = LTargetNodeBounds.Height / 3;
+				int distanceFromEdge;
+				if (((positionsArgs.AllowedMovePositions | positionsArgs.AllowedCopyPositions) & (DropLinePosition.AboveNode | DropLinePosition.BelowNode)) != 0)
+					if (((positionsArgs.AllowedMovePositions | positionsArgs.AllowedCopyPositions) & DropLinePosition.OnNode) != 0)
+						distanceFromEdge = targetNodeBounds.Height / 3;
 					else
-						LDistanceFromEdge = LTargetNodeBounds.Height / 2;
+						distanceFromEdge = targetNodeBounds.Height / 2;
 				else
-					LDistanceFromEdge = 0;
+					distanceFromEdge = 0;
  
-				DropLinePosition LNewDropLinePosition;
+				DropLinePosition newDropLinePosition;
 
-				if (APointInTreeCoords.Y < (LTargetNodeBounds.Top + LDistanceFromEdge))
-					LNewDropLinePosition = DropLinePosition.AboveNode;
+				if (pointInTreeCoords.Y < (targetNodeBounds.Top + distanceFromEdge))
+					newDropLinePosition = DropLinePosition.AboveNode;
 				else
 				{
-					if (APointInTreeCoords.Y > (LTargetNodeBounds.Bottom - LDistanceFromEdge))
-						LNewDropLinePosition = DropLinePosition.BelowNode;
+					if (pointInTreeCoords.Y > (targetNodeBounds.Bottom - distanceFromEdge))
+						newDropLinePosition = DropLinePosition.BelowNode;
 					else
-						LNewDropLinePosition = DropLinePosition.OnNode;
+						newDropLinePosition = DropLinePosition.OnNode;
 				}
 
-				FDropOperation = DropOperation.None;
-				if (((ARequestedOperation & DropOperation.Move) != 0) && ((LNewDropLinePosition & LPositionsArgs.AllowedMovePositions) != 0))
-					FDropOperation |= DropOperation.Move;
-				if (((ARequestedOperation & DropOperation.Copy) != 0) && ((LNewDropLinePosition & LPositionsArgs.AllowedCopyPositions) != 0))
-					FDropOperation |= DropOperation.Copy;
-				if (FDropOperation != DropOperation.None)
+				_dropOperation = DropOperation.None;
+				if (((requestedOperation & DropOperation.Move) != 0) && ((newDropLinePosition & positionsArgs.AllowedMovePositions) != 0))
+					_dropOperation |= DropOperation.Move;
+				if (((requestedOperation & DropOperation.Copy) != 0) && ((newDropLinePosition & positionsArgs.AllowedCopyPositions) != 0))
+					_dropOperation |= DropOperation.Copy;
+				if (_dropOperation != DropOperation.None)
 				{
-					SetDropHighlightNode(LTargetNode, LNewDropLinePosition);
+					SetDropHighlightNode(targetNode, newDropLinePosition);
 					return;
 				}
 			}
 			ClearDropHighlight();
 		}
 
-		private void SetDropHighlightNode(TreeNode ANode, DropLinePosition ADropLinePosition)
+		private void SetDropHighlightNode(TreeNode node, DropLinePosition dropLinePosition)
 		{
-			bool LIsPositionChanged = false;
+			bool isPositionChanged = false;
 
-			LIsPositionChanged = 
+			isPositionChanged = 
 				!
 				(
-					Object.ReferenceEquals(FDropHighlightNode, ANode) && 
-					(FDropLinePosition == ADropLinePosition)
+					Object.ReferenceEquals(_dropHighlightNode, node) && 
+					(_dropLinePosition == dropLinePosition)
 				);
 
 			//Set both properties without calling PositionChanged
-			FDropHighlightNode = ANode;
-			FDropLinePosition = ADropLinePosition;
+			_dropHighlightNode = node;
+			_dropLinePosition = dropLinePosition;
 
-			if (LIsPositionChanged)
+			if (isPositionChanged)
 				PositionChanged();
 		}
 
-		private void TreePrePaintItem(object ASender, PaintTreeItemEventArgs AArgs)
+		private void TreePrePaintItem(object sender, PaintTreeItemEventArgs args)
 		{
-			if ((FDropHighlightNode != null) && (FDropLinePosition == DropLinePosition.OnNode))
+			if ((_dropHighlightNode != null) && (_dropLinePosition == DropLinePosition.OnNode))
 			{
-				if (AArgs.Node.Equals(FDropHighlightNode))
+				if (args.Node.Equals(_dropHighlightNode))
 				{
-					AArgs.BackColor = FDropHighlightBackColor;
-					AArgs.ForeColor = FDropHighlightForeColor;
+					args.BackColor = _dropHighlightBackColor;
+					args.ForeColor = _dropHighlightForeColor;
 				}
 			}
 		}
 
-		private void TreePostPaintItem(object ASender, PaintTreeItemEventArgs AArgs)
+		private void TreePostPaintItem(object sender, PaintTreeItemEventArgs args)
 		{
-			if ((FDropHighlightNode != null) && (FDropHighlightNode == AArgs.Node) && (FDropLinePosition != DropLinePosition.None))
+			if ((_dropHighlightNode != null) && (_dropHighlightNode == args.Node) && (_dropLinePosition != DropLinePosition.None))
 			{
-				using (System.Drawing.Pen LPen = new System.Drawing.Pen(FDropLineColor, FDropLineWidth))
+				using (System.Drawing.Pen pen = new System.Drawing.Pen(_dropLineColor, _dropLineWidth))
 				{
-					int LLeftEdge = AArgs.Node.Bounds.Left - 4;
-					if (AArgs.Node.ImageIndex >= 0)
-						LLeftEdge -= 20;
+					int leftEdge = args.Node.Bounds.Left - 4;
+					if (args.Node.ImageIndex >= 0)
+						leftEdge -= 20;
 
-					System.Windows.Forms.TreeView LTree = AArgs.Node.TreeView; 
-					int LRightEdge = LTree.DisplayRectangle.Right - 4;
+					System.Windows.Forms.TreeView tree = args.Node.TreeView; 
+					int rightEdge = tree.DisplayRectangle.Right - 4;
 
-					int LLineVPosition;
+					int lineVPosition;
 
-					if ((FDropLinePosition & DropLinePosition.AboveNode) == DropLinePosition.AboveNode)
+					if ((_dropLinePosition & DropLinePosition.AboveNode) == DropLinePosition.AboveNode)
 					{
-						LLineVPosition = FDropHighlightNode.Bounds.Top;
-						AArgs.Graphics.DrawLine(LPen, LLeftEdge, LLineVPosition, LRightEdge, LLineVPosition);
-						LPen.Width = 1;
-						AArgs.Graphics.DrawLine(LPen, LLeftEdge, LLineVPosition - 3, LLeftEdge, LLineVPosition + 2);
-						AArgs.Graphics.DrawLine(LPen, LLeftEdge + 1, LLineVPosition - 2, LLeftEdge + 1, LLineVPosition + 1);
-						AArgs.Graphics.DrawLine(LPen, LRightEdge, LLineVPosition - 3, LRightEdge, LLineVPosition + 2);
-						AArgs.Graphics.DrawLine(LPen, LRightEdge - 1, LLineVPosition - 2, LRightEdge - 1, LLineVPosition + 1);
+						lineVPosition = _dropHighlightNode.Bounds.Top;
+						args.Graphics.DrawLine(pen, leftEdge, lineVPosition, rightEdge, lineVPosition);
+						pen.Width = 1;
+						args.Graphics.DrawLine(pen, leftEdge, lineVPosition - 3, leftEdge, lineVPosition + 2);
+						args.Graphics.DrawLine(pen, leftEdge + 1, lineVPosition - 2, leftEdge + 1, lineVPosition + 1);
+						args.Graphics.DrawLine(pen, rightEdge, lineVPosition - 3, rightEdge, lineVPosition + 2);
+						args.Graphics.DrawLine(pen, rightEdge - 1, lineVPosition - 2, rightEdge - 1, lineVPosition + 1);
 					}
-					if ((FDropLinePosition & DropLinePosition.BelowNode) == DropLinePosition.BelowNode)
+					if ((_dropLinePosition & DropLinePosition.BelowNode) == DropLinePosition.BelowNode)
 					{
-						LLineVPosition = FDropHighlightNode.Bounds.Bottom;
-						AArgs.Graphics.DrawLine(LPen, LLeftEdge, LLineVPosition, LRightEdge, LLineVPosition);
-						LPen.Width = 1;
-						AArgs.Graphics.DrawLine(LPen, LLeftEdge, LLineVPosition - 3, LLeftEdge, LLineVPosition + 2);
-						AArgs.Graphics.DrawLine(LPen, LLeftEdge + 1, LLineVPosition - 2, LLeftEdge + 1, LLineVPosition + 1);
-						AArgs.Graphics.DrawLine(LPen, LRightEdge, LLineVPosition - 3, LRightEdge, LLineVPosition + 2);
-						AArgs.Graphics.DrawLine(LPen, LRightEdge - 1, LLineVPosition - 2, LRightEdge - 1, LLineVPosition + 1);
+						lineVPosition = _dropHighlightNode.Bounds.Bottom;
+						args.Graphics.DrawLine(pen, leftEdge, lineVPosition, rightEdge, lineVPosition);
+						pen.Width = 1;
+						args.Graphics.DrawLine(pen, leftEdge, lineVPosition - 3, leftEdge, lineVPosition + 2);
+						args.Graphics.DrawLine(pen, leftEdge + 1, lineVPosition - 2, leftEdge + 1, lineVPosition + 1);
+						args.Graphics.DrawLine(pen, rightEdge, lineVPosition - 3, rightEdge, lineVPosition + 2);
+						args.Graphics.DrawLine(pen, rightEdge - 1, lineVPosition - 2, rightEdge - 1, lineVPosition + 1);
 					}
 				}
 			}

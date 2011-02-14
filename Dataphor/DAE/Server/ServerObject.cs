@@ -14,7 +14,7 @@ namespace Alphora.Dataphor.DAE.Server
 {
 	public class ServerObject : IDisposableNotify
 	{
-		protected virtual void Dispose(bool ADisposing)
+		protected virtual void Dispose(bool disposing)
 		{
 			#if USEFINALIZER
 			GC.SuppressFinalize(this);
@@ -54,7 +54,7 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		#endif
         
-		protected virtual void Dispose(bool ADisposing)
+		protected virtual void Dispose(bool disposing)
 		{
 			DoDispose();
 		}
@@ -77,36 +77,36 @@ namespace Alphora.Dataphor.DAE.Server
 
 	public class ServerChildObjects : Disposable, IList
 	{
-		private const int CDefaultInitialCapacity = 8;
-		private const int CDefaultRolloverCount = 20;
+		private const int DefaultInitialCapacity = 8;
+		private const int DefaultRolloverCount = 20;
 		        
-		private ServerChildObject[] FItems;
-		private int FCount;
-		private bool FIsOwner = true;
+		private ServerChildObject[] _items;
+		private int _count;
+		private bool _isOwner = true;
 		
 		public ServerChildObjects() : base()
 		{
-			FItems = new ServerChildObject[CDefaultInitialCapacity];
+			_items = new ServerChildObject[DefaultInitialCapacity];
 		}
 		
-		public ServerChildObjects(bool AIsOwner)
+		public ServerChildObjects(bool isOwner)
 		{
-			FItems = new ServerChildObject[CDefaultInitialCapacity];
-			FIsOwner = AIsOwner;
+			_items = new ServerChildObject[DefaultInitialCapacity];
+			_isOwner = isOwner;
 		}
 		
-		public ServerChildObjects(int AInitialCapacity) : base()
+		public ServerChildObjects(int initialCapacity) : base()
 		{
-			FItems = new ServerChildObject[AInitialCapacity];
+			_items = new ServerChildObject[initialCapacity];
 		}
 		
-		public ServerChildObjects(int AInitialCapacity, bool AIsOwner) : base()
+		public ServerChildObjects(int initialCapacity, bool isOwner) : base()
 		{
-			FItems = new ServerChildObject[AInitialCapacity];
-			FIsOwner = AIsOwner;
+			_items = new ServerChildObject[initialCapacity];
+			_isOwner = isOwner;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
@@ -114,110 +114,110 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 			finally
 			{
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 		
-		public ServerChildObject this[int AIndex] 
+		public ServerChildObject this[int index] 
 		{ 
 			get
 			{ 
-				return FItems[AIndex];
+				return _items[index];
 			} 
 			set
 			{ 
 				lock (this)
 				{
-					InternalRemoveAt(AIndex);
-					InternalInsert(AIndex, value);
+					InternalRemoveAt(index);
+					InternalInsert(index, value);
 				}
 			} 
 		}
 		
-		protected int InternalIndexOf(ServerChildObject AItem)
+		protected int InternalIndexOf(ServerChildObject item)
 		{
-			for (int LIndex = 0; LIndex < FCount; LIndex++)
-				if (FItems[LIndex] == AItem)
-					return LIndex;
+			for (int index = 0; index < _count; index++)
+				if (_items[index] == item)
+					return index;
 			return -1;
 		}
 		
-		public int IndexOf(ServerChildObject AItem)
+		public int IndexOf(ServerChildObject item)
 		{
 			lock (this)
 			{
-				return InternalIndexOf(AItem);
+				return InternalIndexOf(item);
 			}
 		}
 		
-		public bool Contains(ServerChildObject AItem)
+		public bool Contains(ServerChildObject item)
 		{
-			return IndexOf(AItem) >= 0;
+			return IndexOf(item) >= 0;
 		}
 		
-		public int Add(object AItem)
+		public int Add(object item)
 		{
 			lock (this)
 			{
-				int LIndex = FCount;
-				InternalInsert(LIndex, AItem);
-				return LIndex;
+				int index = _count;
+				InternalInsert(index, item);
+				return index;
 			}
 		}
 		
-		public void AddRange(ICollection ACollection)
+		public void AddRange(ICollection collection)
 		{
-			foreach (object AObject in ACollection)
+			foreach (object AObject in collection)
 				Add(AObject);
 		}
 		
-		private void InternalInsert(int AIndex, object AItem)
+		private void InternalInsert(int index, object item)
 		{
-			ServerChildObject LObject;
-			if (AItem is ServerChildObject)
-				LObject = (ServerChildObject)AItem;
+			ServerChildObject objectValue;
+			if (item is ServerChildObject)
+				objectValue = (ServerChildObject)item;
 			else
 				throw new ServerException(ServerException.Codes.ObjectContainer);
 				
-			Validate(LObject);
+			Validate(objectValue);
 				
-			if (FCount >= FItems.Length)
+			if (_count >= _items.Length)
 				Capacity *= 2;
-			for (int LIndex = FCount - 1; LIndex >= AIndex; LIndex--)
-				FItems[LIndex + 1] = FItems[LIndex];
-			FItems[AIndex] = LObject;
-			FCount++;
+			for (int localIndex = _count - 1; localIndex >= index; localIndex--)
+				_items[localIndex + 1] = _items[localIndex];
+			_items[index] = objectValue;
+			_count++;
 
-			Adding(LObject, AIndex);
+			Adding(objectValue, index);
 		}
 		
-		public void Insert(int AIndex, object AItem)
+		public void Insert(int index, object item)
 		{
 			lock (this)
 			{
-				InternalInsert(AIndex, AItem);
+				InternalInsert(index, item);
 			}
 		}
 		
-		private void InternalSetCapacity(int AValue)
+		private void InternalSetCapacity(int tempValue)
 		{
-			if (FItems.Length != AValue)
+			if (_items.Length != tempValue)
 			{
-				ServerChildObject[] LNewItems = new ServerChildObject[AValue];
-				for (int LIndex = 0; LIndex < ((FCount > AValue) ? AValue : FCount); LIndex++)
-					LNewItems[LIndex] = FItems[LIndex];
+				ServerChildObject[] newItems = new ServerChildObject[tempValue];
+				for (int index = 0; index < ((_count > tempValue) ? tempValue : _count); index++)
+					newItems[index] = _items[index];
 
-				if (FCount > AValue)						
-					for (int LIndex = FCount - 1; LIndex > AValue; LIndex--)
-						InternalRemoveAt(LIndex);
+				if (_count > tempValue)						
+					for (int index = _count - 1; index > tempValue; index--)
+						InternalRemoveAt(index);
 						
-				FItems = LNewItems;
+				_items = newItems;
 			}
 		}
 		
 		public int Capacity
 		{
-			get { return FItems.Length; }
+			get { return _items.Length; }
 			set
 			{
 				lock (this)
@@ -227,29 +227,29 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		private void InternalRemoveAt(int AIndex)
+		private void InternalRemoveAt(int index)
 		{
-			Removing(FItems[AIndex], AIndex);
+			Removing(_items[index], index);
 
-			FCount--;			
-			for (int LIndex = AIndex; LIndex < FCount; LIndex++)
-				FItems[LIndex] = FItems[LIndex + 1];
-			FItems[FCount] = null; // This clear must occur or the reference is still live 
+			_count--;			
+			for (int localIndex = index; localIndex < _count; localIndex++)
+				_items[localIndex] = _items[localIndex + 1];
+			_items[_count] = null; // This clear must occur or the reference is still live 
 		}
 		
-		public void RemoveAt(int AIndex)
+		public void RemoveAt(int index)
 		{
 			lock (this)
 			{
-				InternalRemoveAt(AIndex);
+				InternalRemoveAt(index);
 			}
 		}
 		
-		public void Remove(ServerChildObject AValue)
+		public void Remove(ServerChildObject tempValue)
 		{
 			lock (this)
 			{
-				InternalRemoveAt(InternalIndexOf(AValue));
+				InternalRemoveAt(InternalIndexOf(tempValue));
 			}
 		}
 		
@@ -257,63 +257,63 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			lock (this)
 			{
-				while (FCount > 0)
-					InternalRemoveAt(FCount - 1);
+				while (_count > 0)
+					InternalRemoveAt(_count - 1);
 			}
 		}
 		
-		protected bool FDisowning;
+		protected bool _disowning;
 		
-		public ServerChildObject Disown(ServerChildObject AValue)
+		public ServerChildObject Disown(ServerChildObject tempValue)
 		{
 			lock (this)
 			{
-				FDisowning = true;
+				_disowning = true;
 				try
 				{
-					InternalRemoveAt(InternalIndexOf(AValue));
-					return AValue;
+					InternalRemoveAt(InternalIndexOf(tempValue));
+					return tempValue;
 				}
 				finally
 				{
-					FDisowning = false;
+					_disowning = false;
 				}
 			}
 		}
 
-		public ServerChildObject SafeDisown(ServerChildObject AValue)
+		public ServerChildObject SafeDisown(ServerChildObject tempValue)
 		{
 			lock (this)
 			{
-				FDisowning = true;
+				_disowning = true;
 				try
 				{
-					int LIndex = InternalIndexOf(AValue);
-					if (LIndex >= 0)
-						InternalRemoveAt(LIndex);
-					return AValue;
+					int index = InternalIndexOf(tempValue);
+					if (index >= 0)
+						InternalRemoveAt(index);
+					return tempValue;
 				}
 				finally
 				{
-					FDisowning = false;
+					_disowning = false;
 				}
 			}
 		}
 
-		public ServerChildObject DisownAt(int AIndex)
+		public ServerChildObject DisownAt(int index)
 		{
 			lock (this)
 			{
-				ServerChildObject LValue = FItems[AIndex];
-				FDisowning = true;
+				ServerChildObject tempValue = _items[index];
+				_disowning = true;
 				try
 				{
-					InternalRemoveAt(AIndex);
-					return LValue;
+					InternalRemoveAt(index);
+					return tempValue;
 				}
 				finally
 				{
-					FDisowning = false;
+					_disowning = false;
 				}
 			}
 		}
@@ -322,60 +322,60 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			lock (this)
 			{
-				FDisowning = true;
+				_disowning = true;
 				try
 				{
-					while (FCount > 0)
-						InternalRemoveAt(FCount - 1);
+					while (_count > 0)
+						InternalRemoveAt(_count - 1);
 				}
 				finally
 				{
-					FDisowning = false;
+					_disowning = false;
 				}
 			}
 		}
 
-		protected virtual void ObjectDispose(object ASender, EventArgs AArgs)
+		protected virtual void ObjectDispose(object sender, EventArgs args)
 		{
-			Disown((ServerChildObject)ASender);
+			Disown((ServerChildObject)sender);
 		}
 		
-		protected virtual void Validate(ServerChildObject AObject)
+		protected virtual void Validate(ServerChildObject objectValue)
 		{
 		}
 		
-		protected virtual void Adding(ServerChildObject AObject, int AIndex)
+		protected virtual void Adding(ServerChildObject objectValue, int index)
 		{
-			AObject.Disposed += new EventHandler(ObjectDispose);
+			objectValue.Disposed += new EventHandler(ObjectDispose);
 		}
 		
-		protected virtual void Removing(ServerChildObject AObject, int AIndex)
+		protected virtual void Removing(ServerChildObject objectValue, int index)
 		{
-			AObject.Disposed -= new EventHandler(ObjectDispose);
+			objectValue.Disposed -= new EventHandler(ObjectDispose);
 
-			if (FIsOwner && !FDisowning)
-				AObject.Dispose();
+			if (_isOwner && !_disowning)
+				objectValue.Dispose();
 		}
 
 		// IList
-		object IList.this[int AIndex] { get { return this[AIndex]; } set { this[AIndex] = (ServerChildObject)value; } }
-		int IList.IndexOf(object AItem) { return (AItem is ServerChildObject) ? IndexOf((ServerChildObject)AItem) : -1; }
-		bool IList.Contains(object AItem) { return (AItem is ServerChildObject) ? Contains((ServerChildObject)AItem) : false; }
-		void IList.Remove(object AItem) { RemoveAt(IndexOf((ServerChildObject)AItem)); }
+		object IList.this[int index] { get { return this[index]; } set { this[index] = (ServerChildObject)value; } }
+		int IList.IndexOf(object item) { return (item is ServerChildObject) ? IndexOf((ServerChildObject)item) : -1; }
+		bool IList.Contains(object item) { return (item is ServerChildObject) ? Contains((ServerChildObject)item) : false; }
+		void IList.Remove(object item) { RemoveAt(IndexOf((ServerChildObject)item)); }
 		bool IList.IsFixedSize { get { return false; } }
 		bool IList.IsReadOnly { get { return false; } }
 		
 		// ICollection
-		public int Count { get { return FCount; } }
+		public int Count { get { return _count; } }
 		public bool IsSynchronized { get { return true; } }
 		public object SyncRoot { get { return this; } }
-		public void CopyTo(Array AArray, int AIndex)
+		public void CopyTo(Array array, int index)
 		{
 			lock (this)
 			{
-				IList LArray = (IList)AArray;
-				for (int LIndex = 0; LIndex < Count; LIndex++)
-					LArray[AIndex + LIndex] = this[LIndex];
+				IList localArray = (IList)array;
+				for (int localIndex = 0; localIndex < Count; localIndex++)
+					localArray[index + localIndex] = this[localIndex];
 			}
 		}
 
@@ -392,27 +392,27 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public class ServerChildObjectEnumerator : IEnumerator
 		{
-			public ServerChildObjectEnumerator(ServerChildObjects AObjects) : base()
+			public ServerChildObjectEnumerator(ServerChildObjects objects) : base()
 			{
-				FObjects = AObjects;
+				_objects = objects;
 			}
 			
-			private ServerChildObjects FObjects;
-			private int FCurrent =  -1;
+			private ServerChildObjects _objects;
+			private int _current =  -1;
 
-			public ServerChildObject Current { get { return FObjects[FCurrent]; } }
+			public ServerChildObject Current { get { return _objects[_current]; } }
 			
 			object IEnumerator.Current { get { return Current; } }
 			
 			public bool MoveNext()
 			{
-				FCurrent++;
-				return (FCurrent < FObjects.Count);
+				_current++;
+				return (_current < _objects.Count);
 			}
 			
 			public void Reset()
 			{
-				FCurrent = -1;
+				_current = -1;
 			}
 		}
 	}

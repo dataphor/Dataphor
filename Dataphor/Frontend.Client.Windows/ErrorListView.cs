@@ -16,14 +16,14 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	public class ErrorListView : System.Windows.Forms.UserControl
 	{
 		private System.Windows.Forms.ColumnHeader descriptionColumnHeader;
-		private System.Windows.Forms.ListView FErrorListView;
+		private System.Windows.Forms.ListView _errorListView;
 		private System.Windows.Forms.ColumnHeader iconColumnHeader;
 		private System.Windows.Forms.ColumnHeader classColumnHeader;
 		private System.Windows.Forms.ImageList imageList;
 		private System.Windows.Forms.Splitter detailSplitter;
-		private System.Windows.Forms.TextBox FErrorDetailBox;
-		private ContextMenuStrip FContextMenu;
-		private ToolStripMenuItem FClearErrorsMenuItem;
+		private System.Windows.Forms.TextBox _errorDetailBox;
+		private ContextMenuStrip _contextMenu;
+		private ToolStripMenuItem _clearErrorsMenuItem;
 		private System.ComponentModel.IContainer components;
 
 		public ErrorListView()
@@ -53,15 +53,15 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ErrorListView));
 			this.descriptionColumnHeader = new System.Windows.Forms.ColumnHeader();
-			this.FErrorListView = new System.Windows.Forms.ListView();
+			this._errorListView = new System.Windows.Forms.ListView();
 			this.iconColumnHeader = new System.Windows.Forms.ColumnHeader();
 			this.classColumnHeader = new System.Windows.Forms.ColumnHeader();
 			this.imageList = new System.Windows.Forms.ImageList(this.components);
 			this.detailSplitter = new System.Windows.Forms.Splitter();
-			this.FErrorDetailBox = new System.Windows.Forms.TextBox();
-			this.FContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-			this.FClearErrorsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.FContextMenu.SuspendLayout();
+			this._errorDetailBox = new System.Windows.Forms.TextBox();
+			this._contextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+			this._clearErrorsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this._contextMenu.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// descriptionColumnHeader
@@ -71,25 +71,25 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			// 
 			// FErrorListView
 			// 
-			this.FErrorListView.AllowColumnReorder = true;
-			this.FErrorListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+			this._errorListView.AllowColumnReorder = true;
+			this._errorListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.iconColumnHeader,
             this.descriptionColumnHeader,
             this.classColumnHeader});
-			this.FErrorListView.ContextMenuStrip = this.FContextMenu;
-			this.FErrorListView.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.FErrorListView.FullRowSelect = true;
-			this.FErrorListView.GridLines = true;
-			this.FErrorListView.Location = new System.Drawing.Point(0, 0);
-			this.FErrorListView.MultiSelect = false;
-			this.FErrorListView.Name = "FErrorListView";
-			this.FErrorListView.Size = new System.Drawing.Size(512, 165);
-			this.FErrorListView.SmallImageList = this.imageList;
-			this.FErrorListView.TabIndex = 0;
-			this.FErrorListView.UseCompatibleStateImageBehavior = false;
-			this.FErrorListView.View = System.Windows.Forms.View.Details;
-			this.FErrorListView.SelectedIndexChanged += new System.EventHandler(this.FErrorListView_SelectedIndexChanged);
-			this.FErrorListView.DoubleClick += new System.EventHandler(this.FErrorListView_DoubleClick);
+			this._errorListView.ContextMenuStrip = this._contextMenu;
+			this._errorListView.Dock = System.Windows.Forms.DockStyle.Fill;
+			this._errorListView.FullRowSelect = true;
+			this._errorListView.GridLines = true;
+			this._errorListView.Location = new System.Drawing.Point(0, 0);
+			this._errorListView.MultiSelect = false;
+			this._errorListView.Name = "FErrorListView";
+			this._errorListView.Size = new System.Drawing.Size(512, 165);
+			this._errorListView.SmallImageList = this.imageList;
+			this._errorListView.TabIndex = 0;
+			this._errorListView.UseCompatibleStateImageBehavior = false;
+			this._errorListView.View = System.Windows.Forms.View.Details;
+			this._errorListView.SelectedIndexChanged += new System.EventHandler(this.FErrorListView_SelectedIndexChanged);
+			this._errorListView.DoubleClick += new System.EventHandler(this.FErrorListView_DoubleClick);
 			// 
 			// iconColumnHeader
 			// 
@@ -119,146 +119,146 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			// 
 			// FErrorDetailBox
 			// 
-			this.FErrorDetailBox.BackColor = System.Drawing.SystemColors.Control;
-			this.FErrorDetailBox.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.FErrorDetailBox.Location = new System.Drawing.Point(0, 168);
-			this.FErrorDetailBox.Multiline = true;
-			this.FErrorDetailBox.Name = "FErrorDetailBox";
-			this.FErrorDetailBox.ReadOnly = true;
-			this.FErrorDetailBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-			this.FErrorDetailBox.Size = new System.Drawing.Size(512, 88);
-			this.FErrorDetailBox.TabIndex = 1;
-			this.FErrorDetailBox.WordWrap = false;
+			this._errorDetailBox.BackColor = System.Drawing.SystemColors.Control;
+			this._errorDetailBox.Dock = System.Windows.Forms.DockStyle.Bottom;
+			this._errorDetailBox.Location = new System.Drawing.Point(0, 168);
+			this._errorDetailBox.Multiline = true;
+			this._errorDetailBox.Name = "FErrorDetailBox";
+			this._errorDetailBox.ReadOnly = true;
+			this._errorDetailBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+			this._errorDetailBox.Size = new System.Drawing.Size(512, 88);
+			this._errorDetailBox.TabIndex = 1;
+			this._errorDetailBox.WordWrap = false;
 			// 
 			// FContextMenu
 			// 
-			this.FContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.FClearErrorsMenuItem});
-			this.FContextMenu.Name = "contextMenuStrip1";
-			this.FContextMenu.Size = new System.Drawing.Size(190, 26);
-			this.FContextMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.FContextMenu_ItemClicked);
+			this._contextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this._clearErrorsMenuItem});
+			this._contextMenu.Name = "contextMenuStrip1";
+			this._contextMenu.Size = new System.Drawing.Size(190, 26);
+			this._contextMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.FContextMenu_ItemClicked);
 			// 
 			// FClearErrorsMenuItem
 			// 
-			this.FClearErrorsMenuItem.Name = "FClearErrorsMenuItem";
-			this.FClearErrorsMenuItem.Size = new System.Drawing.Size(189, 22);
-			this.FClearErrorsMenuItem.Text = "Clear Errors/Warnings";
+			this._clearErrorsMenuItem.Name = "FClearErrorsMenuItem";
+			this._clearErrorsMenuItem.Size = new System.Drawing.Size(189, 22);
+			this._clearErrorsMenuItem.Text = "Clear Errors/Warnings";
 			// 
 			// ErrorListView
 			// 
-			this.Controls.Add(this.FErrorListView);
+			this.Controls.Add(this._errorListView);
 			this.Controls.Add(this.detailSplitter);
-			this.Controls.Add(this.FErrorDetailBox);
+			this.Controls.Add(this._errorDetailBox);
 			this.Name = "ErrorListView";
 			this.Size = new System.Drawing.Size(512, 256);
-			this.FContextMenu.ResumeLayout(false);
+			this._contextMenu.ResumeLayout(false);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
 		}
 		#endregion
 
-		private Hashtable FErrorSources = new Hashtable();
+		private Hashtable _errorSources = new Hashtable();
 
 		public void ClearErrors()
 		{
-			if (FErrorListView.Items.Count > 0)
+			if (_errorListView.Items.Count > 0)
 			{
-				FErrorListView.Items.Clear();
-				foreach (DictionaryEntry LItem in FErrorSources)
-					((IErrorSource)LItem.Key).Disposed -= new EventHandler(ErrorSourceDisposed);
-				FErrorSources.Clear();
-				FErrorDetailBox.Text = String.Empty;
+				_errorListView.Items.Clear();
+				foreach (DictionaryEntry item in _errorSources)
+					((IErrorSource)item.Key).Disposed -= new EventHandler(ErrorSourceDisposed);
+				_errorSources.Clear();
+				_errorDetailBox.Text = String.Empty;
 			}
 		}
 
-		public void ClearErrors(IErrorSource ASource)
+		public void ClearErrors(IErrorSource source)
 		{
-			bool LChanged = false;
-			FErrorListView.BeginUpdate();
+			bool changed = false;
+			_errorListView.BeginUpdate();
 			try
 			{
-				for (int i = FErrorListView.Items.Count - 1; i >= 0; i--)
+				for (int i = _errorListView.Items.Count - 1; i >= 0; i--)
 				{
-					if (Object.ReferenceEquals(((ErrorItem)FErrorListView.Items[i].Tag).Source, ASource))
+					if (Object.ReferenceEquals(((ErrorItem)_errorListView.Items[i].Tag).Source, source))
 					{
-						FErrorListView.Items.RemoveAt(i);
-						LChanged = true;
+						_errorListView.Items.RemoveAt(i);
+						changed = true;
 					}
 				}
 			}
 			finally
 			{
-				FErrorListView.EndUpdate();
+				_errorListView.EndUpdate();
 			}
 			
-			if (LChanged)
+			if (changed)
 			{
-				ASource.Disposed -= new EventHandler(ErrorSourceDisposed);
-				FErrorSources.Remove(ASource);
+				source.Disposed -= new EventHandler(ErrorSourceDisposed);
+				_errorSources.Remove(source);
 			}
 		}
 
-		public void AppendErrors(IErrorSource ASource, ErrorList AList)
+		public void AppendErrors(IErrorSource source, ErrorList list)
 		{
-			AppendErrors(ASource, AList, true);
+			AppendErrors(source, list, true);
 		}
 
-		public void AppendErrors(IErrorSource ASource, ErrorList AList, bool AWarning)
+		public void AppendErrors(IErrorSource source, ErrorList list, bool warning)
 		{
-			if ((AList != null) && (AList.Count > 0))
+			if ((list != null) && (list.Count > 0))
 			{
-				FErrorListView.BeginUpdate();
+				_errorListView.BeginUpdate();
 				try
 				{
-					for (int i = AList.Count - 1; i >= 0; i--)
-						InternalAppendError(ASource, AList[i], AWarning);
+					for (int i = list.Count - 1; i >= 0; i--)
+						InternalAppendError(source, list[i], warning);
 				}
 				finally
 				{
-					FErrorListView.EndUpdate();
+					_errorListView.EndUpdate();
 				}
-				ErrorsAdded(AWarning);
+				ErrorsAdded(warning);
 			}
 		}
 
-		public void AppendError(IErrorSource ASource, Exception AException, bool AWarning)
+		public void AppendError(IErrorSource source, Exception exception, bool warning)
 		{
-			InternalAppendError(ASource, AException, AWarning);
-			ErrorsAdded(AWarning);
+			InternalAppendError(source, exception, warning);
+			ErrorsAdded(warning);
 		}
 
-		private void InternalAppendError(IErrorSource ASource, Exception AException, bool AWarning)
+		private void InternalAppendError(IErrorSource source, Exception exception, bool warning)
 		{
-			if (AException != null)
+			if (exception != null)
 			{
-				ListViewItem LItem = new ListViewItem();
+				ListViewItem item = new ListViewItem();
 				
-				LItem.Tag = new ErrorItem(AException, ASource);
-				LItem.ImageIndex = (AWarning ? 0 : 1);
+				item.Tag = new ErrorItem(exception, source);
+				item.ImageIndex = (warning ? 0 : 1);
 				// if this is a DataphorException add the exception code to the description
-				DataphorException LException = AException as DataphorException;
-				LItem.SubItems.Add(String.Format("{0}{1}", LException != null ? String.Format("({0}:{1}) ", LException.Severity.ToString(), LException.Code.ToString()) : "", ExceptionUtility.BriefDescription(AException)));
-				LItem.SubItems.Add(AException.GetType().ToString());
-				FErrorListView.Items.Insert(0, LItem);
-				if ((ASource != null) && (FErrorSources[ASource] == null))
+				DataphorException localException = exception as DataphorException;
+				item.SubItems.Add(String.Format("{0}{1}", localException != null ? String.Format("({0}:{1}) ", localException.Severity.ToString(), localException.Code.ToString()) : "", ExceptionUtility.BriefDescription(exception)));
+				item.SubItems.Add(exception.GetType().ToString());
+				_errorListView.Items.Insert(0, item);
+				if ((source != null) && (_errorSources[source] == null))
 				{
-					FErrorSources.Add(ASource, ASource);
-					ASource.Disposed += new EventHandler(ErrorSourceDisposed);
+					_errorSources.Add(source, source);
+					source.Disposed += new EventHandler(ErrorSourceDisposed);
 				}
 			}
 		}
 
-		private void ErrorSourceDisposed(object ASender, EventArgs AArgs)
+		private void ErrorSourceDisposed(object sender, EventArgs args)
 		{
-			ClearErrors((IErrorSource)ASender);
+			ClearErrors((IErrorSource)sender);
 		}
 
-		private void ErrorsAdded(bool AWarning)
+		private void ErrorsAdded(bool warning)
 		{
-			if (FErrorListView.Items.Count > 0)
-				FErrorListView.Items[0].Selected = true;
-			if (AWarning)
+			if (_errorListView.Items.Count > 0)
+				_errorListView.Items[0].Selected = true;
+			if (warning)
 			{
 				if (OnWarningsAdded != null)
 					OnWarningsAdded(this, EventArgs.Empty);
@@ -275,15 +275,15 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void FErrorListView_SelectedIndexChanged(object sender, System.EventArgs e)
 		{
-			if (FErrorListView.SelectedItems.Count > 0)
+			if (_errorListView.SelectedItems.Count > 0)
 			{
-				ErrorItem LItem = (ErrorItem)FErrorListView.SelectedItems[0].Tag;
-				FErrorDetailBox.Text = ExceptionUtility.DetailedDescription(LItem.Exception);
-				if (LItem.Source != null)
-					LItem.Source.ErrorHighlighted(LItem.Exception);
+				ErrorItem item = (ErrorItem)_errorListView.SelectedItems[0].Tag;
+				_errorDetailBox.Text = ExceptionUtility.DetailedDescription(item.Exception);
+				if (item.Source != null)
+					item.Source.ErrorHighlighted(item.Exception);
 			}
 			else
-				FErrorDetailBox.Text = String.Empty;
+				_errorDetailBox.Text = String.Empty;
 		}
 
 		private void FErrorListView_DoubleClick(object sender, System.EventArgs e)
@@ -291,25 +291,25 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			ItemSelected();
 		}
 
-		protected override bool ProcessDialogKey(Keys AKey)
+		protected override bool ProcessDialogKey(Keys key)
 		{
-			if (AKey == Keys.Enter)
+			if (key == Keys.Enter)
 			{
 				ItemSelected();
 				return true;
 			}
 			else
-				return base.ProcessDialogKey(AKey);
+				return base.ProcessDialogKey(key);
 		}
 
 
 		private void ItemSelected()
 		{
-			if (FErrorListView.SelectedItems.Count > 0)
+			if (_errorListView.SelectedItems.Count > 0)
 			{
-				ErrorItem LItem = (ErrorItem)FErrorListView.SelectedItems[0].Tag;
-				if (LItem.Source != null)
-					LItem.Source.ErrorSelected(LItem.Exception);
+				ErrorItem item = (ErrorItem)_errorListView.SelectedItems[0].Tag;
+				if (item.Source != null)
+					item.Source.ErrorSelected(item.Exception);
 			}
 		}
 
@@ -318,8 +318,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			get
 			{
-				if (FErrorListView.SelectedItems.Count > 0)
-					return ((ErrorItem)FErrorListView.SelectedItems[0].Tag).Exception;
+				if (_errorListView.SelectedItems.Count > 0)
+					return ((ErrorItem)_errorListView.SelectedItems[0].Tag).Exception;
 				return null;
 			}
 		}
@@ -336,9 +336,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			public IErrorSource Source;
 		}
 
-		private void FContextMenu_ItemClicked(object ASender, ToolStripItemClickedEventArgs AArgs)
+		private void FContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs args)
 		{
-			if (AArgs.ClickedItem.Name == "FClearErrorsMenuItem")
+			if (args.ClickedItem.Name == "FClearErrorsMenuItem")
 				ClearErrors();
 		}
 	}

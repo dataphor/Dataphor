@@ -22,32 +22,32 @@ namespace Alphora.Dataphor.Dataphoria
 			HideSelection = false;
 		}
 
-		protected override void OnAfterSelect(TreeViewEventArgs AArgs)
+		protected override void OnAfterSelect(TreeViewEventArgs args)
 		{
-			base.OnAfterSelect(AArgs);
-			if (AArgs.Node != null)
-				ContextMenu = ((BaseNode)AArgs.Node).ContextMenu;
+			base.OnAfterSelect(args);
+			if (args.Node != null)
+				ContextMenu = ((BaseNode)args.Node).ContextMenu;
 			else
 				ContextMenu = null;
 		}
 
-		protected override void OnMouseDown(MouseEventArgs AArgs)
+		protected override void OnMouseDown(MouseEventArgs args)
 		{
-			base.OnMouseDown(AArgs);
-			TreeNode LNode = GetNodeAt(AArgs.X, AArgs.Y);
-			if (LNode != null)
-				SelectedNode = LNode;
+			base.OnMouseDown(args);
+			TreeNode node = GetNodeAt(args.X, args.Y);
+			if (node != null)
+				SelectedNode = node;
 		}
 
 		private bool ExecuteDefaultMenuItem()
 		{
 			if (ContextMenu != null)
 			{
-				foreach (MenuItem LItem in ContextMenu.MenuItems)
+				foreach (MenuItem item in ContextMenu.MenuItems)
 				{
-					if (LItem.DefaultItem && LItem.Enabled)
+					if (item.DefaultItem && item.Enabled)
 					{
-						LItem.PerformClick();
+						item.PerformClick();
 						return true;
 					}
 				}
@@ -55,81 +55,81 @@ namespace Alphora.Dataphor.Dataphoria
 			return false;
 		}
 
-		public BaseNode GetNodeAtScreen(Point APoint)
+		public BaseNode GetNodeAtScreen(Point point)
 		{
-			APoint = PointToClient(APoint);
-			return (BaseNode)GetNodeAt(APoint.X, APoint.Y);
+			point = PointToClient(point);
+			return (BaseNode)GetNodeAt(point.X, point.Y);
 		}
 
-		protected override void OnDoubleClick(EventArgs AArgs)
+		protected override void OnDoubleClick(EventArgs args)
 		{
-			TreeNode LNode = GetNodeAtScreen(Control.MousePosition);
-			if (LNode != null)
+			TreeNode node = GetNodeAtScreen(Control.MousePosition);
+			if (node != null)
 				ExecuteDefaultMenuItem();
 			else
-				base.OnDoubleClick(AArgs);
+				base.OnDoubleClick(args);
 		}
 
-		protected override bool ProcessDialogKey(Keys AKey)
+		protected override bool ProcessDialogKey(Keys key)
 		{
-			if (AKey == Keys.Enter)
-				return ExecuteDefaultMenuItem() || base.ProcessDialogKey(AKey);
+			if (key == Keys.Enter)
+				return ExecuteDefaultMenuItem() || base.ProcessDialogKey(key);
 			else
-				return base.ProcessDialogKey(AKey);
+				return base.ProcessDialogKey(key);
 		}
 
-		public static void ProcessMode(BaseNode ANode)
+		public static void ProcessMode(BaseNode node)
 		{
-			switch (ANode.BuildMode)
+			switch (node.BuildMode)
 			{
 				case BuildMode.OnDisplay :
-					ANode.Build();
+					node.Build();
 					break;
 				case BuildMode.OnExpand :
-					if (!ANode.Built)
-						ANode.Nodes.Add(new TreeNode());	// HACK: to show an expansion indicator, a child node must be present
+					if (!node.Built)
+						node.Nodes.Add(new TreeNode());	// HACK: to show an expansion indicator, a child node must be present
 					break;
 			}
 		}
 
-		protected override void OnBeforeExpand(TreeViewCancelEventArgs AArgs)
+		protected override void OnBeforeExpand(TreeViewCancelEventArgs args)
 		{
-			BaseNode LNode = (BaseNode)AArgs.Node;
-			LNode.Build();
-			foreach (BaseNode LChildNode in LNode.Nodes)
-				ProcessMode(LChildNode);
+			BaseNode node = (BaseNode)args.Node;
+			node.Build();
+			foreach (BaseNode childNode in node.Nodes)
+				ProcessMode(childNode);
 		}
 
-		public void AddBaseNode(BaseNode ANode)
+		public void AddBaseNode(BaseNode node)
 		{
-			Nodes.Add(ANode);
-			ProcessMode(ANode);
+			Nodes.Add(node);
+			ProcessMode(node);
 		}
 
-		public void InsertBaseNode(int AIndex, BaseNode ANode)
+		public void InsertBaseNode(int index, BaseNode node)
 		{
-			Nodes.Insert(AIndex, ANode);
-			ProcessMode(ANode);
+			Nodes.Insert(index, node);
+			ProcessMode(node);
 		}
 	}
 
 	public class BaseNode : TreeNode
 	{
-		private ContextMenu FContextMenu;
+		private ContextMenu _contextMenu;
 		public override ContextMenu ContextMenu
 		{
 			get 
 			{ 
-				if (FContextMenu == null)
+				if (_contextMenu == null)
 				{
-					FContextMenu = GetContextMenu();
-					if (FContextMenu != null)
+					_contextMenu = GetContextMenu();
+					if (_contextMenu != null)
 					{
-						FContextMenu.Popup += new EventHandler(ContextMenuPopup);
-						UpdateContextMenu(FContextMenu);
+						_contextMenu.Popup += new EventHandler(ContextMenuPopup);
+						UpdateContextMenu(_contextMenu);
 					}
 				}
-				return FContextMenu; 
+				return _contextMenu; 
 			}
 		}
 
@@ -138,12 +138,12 @@ namespace Alphora.Dataphor.Dataphoria
 			return null;
 		}
 
-		private void ContextMenuPopup(object ASender, EventArgs AArgs)
+		private void ContextMenuPopup(object sender, EventArgs args)
 		{
-			UpdateContextMenu((ContextMenu)ASender);
+			UpdateContextMenu((ContextMenu)sender);
 		}
 
-		protected virtual void UpdateContextMenu(ContextMenu AMenu)
+		protected virtual void UpdateContextMenu(ContextMenu menu)
 		{
 			// nothing
 		}
@@ -175,43 +175,43 @@ namespace Alphora.Dataphor.Dataphoria
 		/// <summary> Builds or refreshes (unconditionally) the child nodes. </summary>
 		public void ReconcileChildren()
 		{
-			if (!FBuilt)
+			if (!_built)
 				Build();
 			else
 				InternalReconcileChildren();
 		}
 		
-		private bool FBuilt;
+		private bool _built;
 		/// <summary> Indicates that the node has built its children. </summary>
 		public bool Built
 		{
-			get { return FBuilt; }
+			get { return _built; }
 		}
 
 		/// <summary> Builds the node's children if they are not already built. </summary>
 		public void Build()
 		{
-			if (!FBuilt)
+			if (!_built)
 			{
 				if (BuildMode == BuildMode.OnExpand)
 					Nodes.Clear();
 				InternalReconcileChildren();
-				FBuilt = true;
+				_built = true;
 			}
 		}
 
-		public void AddBaseNode(BaseNode ANode)
+		public void AddBaseNode(BaseNode node)
 		{
-			Nodes.Add(ANode);
+			Nodes.Add(node);
 			if (IsExpanded)
-				BaseTree.ProcessMode(ANode);
+				BaseTree.ProcessMode(node);
 		}
 
-		public void InsertBaseNode(int AIndex, BaseNode ANode)
+		public void InsertBaseNode(int index, BaseNode node)
 		{
-			Nodes.Insert(AIndex, ANode);
+			Nodes.Insert(index, node);
 			if (IsExpanded)
-				BaseTree.ProcessMode(ANode);
+				BaseTree.ProcessMode(node);
 		}
 	}
 

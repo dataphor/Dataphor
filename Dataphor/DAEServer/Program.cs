@@ -13,25 +13,25 @@ namespace DAEServer
 
 	public class Program
 	{
-		private static string GetInstanceName(string[] AArgs)
+		private static string GetInstanceName(string[] args)
 		{
-			for (int i = 0; i < AArgs.Length - 1; i++)
-				if ((AArgs[i].ToLower() == "-name") || (AArgs[i].ToLower() == "-n"))
-					return AArgs[i + 1];
+			for (int i = 0; i < args.Length - 1; i++)
+				if ((args[i].ToLower() == "-name") || (args[i].ToLower() == "-n"))
+					return args[i + 1];
 					
 			return null;
 		}
 		
-		static void Main(string[] AArgs)
+		static void Main(string[] args)
 		{
-			string LInstanceName = GetInstanceName(AArgs);
-			if (LInstanceName == null)
-				LInstanceName = Engine.CDefaultServerName;
+			string instanceName = GetInstanceName(args);
+			if (instanceName == null)
+				instanceName = Engine.DefaultServerName;
 				
 			Console.WriteLine("Server starting...");
-			DataphorServiceHost LHost = new DataphorServiceHost();
-			LHost.InstanceName = LInstanceName;
-			LHost.Start();
+			DataphorServiceHost host = new DataphorServiceHost();
+			host.InstanceName = instanceName;
+			host.Start();
 			try
 			{
 				Console.WriteLine("Server started.");
@@ -40,7 +40,7 @@ namespace DAEServer
 			finally
 			{
 				Console.WriteLine("Server stopping...");
-				LHost.Stop();
+				host.Stop();
 			}
 		}
 	}

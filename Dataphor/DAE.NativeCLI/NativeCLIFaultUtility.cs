@@ -10,24 +10,24 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 {
 	public static class NativeCLIFaultUtility
 	{
-		public static NativeCLIFault ExceptionToFault(NativeCLIException AException)
+		public static NativeCLIFault ExceptionToFault(NativeCLIException exception)
 		{
-			NativeCLIFault LFault = new NativeCLIFault();
+			NativeCLIFault fault = new NativeCLIFault();
 			
-			LFault.Code = AException.Code;
-			LFault.Severity = AException.Severity;
-			LFault.Message = AException.Message;
-			LFault.Details = AException.Details;
-			LFault.ServerContext = AException.ServerContext;
-			if (AException.InnerException != null)
-				LFault.InnerFault = ExceptionToFault((NativeCLIException)AException.InnerException);
+			fault.Code = exception.Code;
+			fault.Severity = exception.Severity;
+			fault.Message = exception.Message;
+			fault.Details = exception.Details;
+			fault.ServerContext = exception.ServerContext;
+			if (exception.InnerException != null)
+				fault.InnerFault = ExceptionToFault((NativeCLIException)exception.InnerException);
 				
-			return LFault;
+			return fault;
 		}
 		
-		public static NativeCLIException FaultToException(NativeCLIFault AFault)
+		public static NativeCLIException FaultToException(NativeCLIFault fault)
 		{
-			return new NativeCLIException(AFault.Message, AFault.Code, AFault.Severity, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
+			return new NativeCLIException(fault.Message, fault.Code, fault.Severity, fault.Details, fault.ServerContext, fault.InnerFault == null ? null : FaultToException(fault.InnerFault));
 		}
 	}
 }

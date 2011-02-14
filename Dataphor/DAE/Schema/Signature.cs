@@ -96,48 +96,48 @@ namespace Alphora.Dataphor.DAE.Schema
 
 	public class Signature
     {
-		public Signature(SignatureElement[] ASignature)
+		public Signature(SignatureElement[] signature)
 		{
-			FSignature = new SignatureElement[ASignature.Length];
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				FSignature[LIndex] = ASignature[LIndex];
+			_signature = new SignatureElement[signature.Length];
+			for (int index = 0; index < Count; index++)
+				_signature[index] = signature[index];
 		}
 
-		public Signature(Operands AOperands)
+		public Signature(Operands operands)
 		{
-			FSignature = new SignatureElement[AOperands.Count];
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				FSignature[LIndex] = new SignatureElement(AOperands[LIndex].DataType, AOperands[LIndex].Modifier);
+			_signature = new SignatureElement[operands.Count];
+			for (int index = 0; index < Count; index++)
+				_signature[index] = new SignatureElement(operands[index].DataType, operands[index].Modifier);
 		}
 
-		public Signature(Signature ASignature)
+		public Signature(Signature signature)
 		{
-			FSignature = new SignatureElement[ASignature.Count];
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				FSignature[LIndex] = ASignature[LIndex];
+			_signature = new SignatureElement[signature.Count];
+			for (int index = 0; index < Count; index++)
+				_signature[index] = signature[index];
 		}
 
-		private SignatureElement[] FSignature;
+		private SignatureElement[] _signature;
 
 		public int Count
 		{
-			get { return FSignature.Length; }
+			get { return _signature.Length; }
 		}
 
-		public SignatureElement this[int AIndex]
+		public SignatureElement this[int index]
 		{
-			get { return FSignature[AIndex]; }
+			get { return _signature[index]; }
 		}
 
-		public override bool Equals(object AValue)
+		public override bool Equals(object tempValue)
 		{
-			if (AValue is Signature)
+			if (tempValue is Signature)
 			{
-				Signature LSignature = (Signature)AValue;
-				if (LSignature.Count == Count)
+				Signature signature = (Signature)tempValue;
+				if (signature.Count == Count)
 				{
-					for (int LIndex = 0; LIndex < Count; LIndex++)
-						if (!(this[LIndex].Equals(LSignature[LIndex])))
+					for (int index = 0; index < Count; index++)
+						if (!(this[index].Equals(signature[index])))
 							return false;
 					return true;
 				}
@@ -147,18 +147,18 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		public override int GetHashCode()
 		{
-			int LHashCode = 0;
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				LHashCode ^= this[LIndex].GetHashCode();
-			return LHashCode;
+			int hashCode = 0;
+			for (int index = 0; index < Count; index++)
+				hashCode ^= this[index].GetHashCode();
+			return hashCode;
 		}
 
-		public bool Is(Signature ASignature)
+		public bool Is(Signature signature)
 		{
-			if (ASignature.Count == Count)
+			if (signature.Count == Count)
 			{
-				for (int LIndex = 0; LIndex < Count; LIndex++)
-					if (!(this[LIndex].Is(ASignature[LIndex])))
+				for (int index = 0; index < Count; index++)
+					if (!(this[index].Is(signature[index])))
 						return false;
 				return true;
 			}
@@ -167,27 +167,27 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public bool HasNonScalarElements()
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (!((this[LIndex].DataType is Schema.IScalarType) || (this[LIndex].DataType is Schema.IGenericType)))
+			for (int index = 0; index < Count; index++)
+				if (!((this[index].DataType is Schema.IScalarType) || (this[index].DataType is Schema.IGenericType)))
 					return true;
 			return false; 
 		}
 
 		public override string ToString()
 		{
-			StringBuilder LString = new StringBuilder();
-			LString.Append(Keywords.BeginGroup);
-			for (int LIndex = 0; LIndex < Count; LIndex++)
+			StringBuilder stringValue = new StringBuilder();
+			stringValue.Append(Keywords.BeginGroup);
+			for (int index = 0; index < Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 				{
-					LString.Append(Keywords.ListSeparator);
-					LString.Append(" ");
+					stringValue.Append(Keywords.ListSeparator);
+					stringValue.Append(" ");
 				}
-				LString.Append(this[LIndex].ToString());
+				stringValue.Append(this[index].ToString());
 			}
-			LString.Append(Keywords.EndGroup);
-			return LString.ToString();
+			stringValue.Append(Keywords.EndGroup);
+			return stringValue.ToString();
 		}
     }
 }

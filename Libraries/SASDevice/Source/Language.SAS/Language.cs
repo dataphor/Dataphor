@@ -13,7 +13,7 @@ namespace Alphora.Dataphor.DAE.Language.SAS
 	public class OuterJoinFieldExpression : SQL.QualifiedFieldExpression
 	{
 		public OuterJoinFieldExpression() : base(){}
-		public OuterJoinFieldExpression(string AFieldName) : base(AFieldName){}
-		public OuterJoinFieldExpression(string AFieldName, string ATableAlias) : base(AFieldName, ATableAlias){}
+		public OuterJoinFieldExpression(string fieldName) : base(fieldName){}
+		public OuterJoinFieldExpression(string fieldName, string tableAlias) : base(fieldName, tableAlias){}
 	}
 }

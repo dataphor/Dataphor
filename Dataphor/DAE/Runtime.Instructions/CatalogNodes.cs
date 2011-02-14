@@ -27,53 +27,53 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator ObjectExists(const ASpecifier : String) : Boolean
 	public class ObjectExistsNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				if (Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemString))
-					return AProgram.ResolveCatalogObjectSpecifier((string)AArgument1, false) != null;
+				if (Operator.Operands[0].DataType.Is(program.DataTypes.SystemString))
+					return program.ResolveCatalogObjectSpecifier((string)argument1, false) != null;
 				else
-					return AProgram.ResolveCatalogIdentifier((string)AArgument1, false) != null;
+					return program.ResolveCatalogIdentifier((string)argument1, false) != null;
 		}
 	}
 	
 	// operator System.NameFromGuid(const AID : System.Guid) : System.Name
 	public class SystemNameFromGuidNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return Schema.Object.NameFromGuid((Guid)AArgument1);
+				return Schema.Object.NameFromGuid((Guid)argument1);
 		}
 	}
 	
     public class SystemNameSelectorNode : UnaryInstructionNode
     {
-		public static void CheckValidName(string AValue)
+		public static void CheckValidName(string tempValue)
 		{
-			if (!Parser.IsValidQualifiedIdentifier(AValue))
-				throw new ParserException(ParserException.Codes.InvalidIdentifier, AValue);
+			if (!Parser.IsValidQualifiedIdentifier(tempValue))
+				throw new ParserException(ParserException.Codes.InvalidIdentifier, tempValue);
 		}
 		
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
 			{
-				string LArgument = (string)AArgument1;
-				CheckValidName(LArgument);
-				return LArgument;
+				string argument = (string)argument1;
+				CheckValidName(argument);
+				return argument;
 			}
 		}
     }
@@ -82,39 +82,39 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public SystemNameReadAccessorNode() : base()
 		{
-			FIsOrderPreserving = true;
+			_isOrderPreserving = true;
 		}
 		
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
 			#endif
-				return AArgument1;
+				return argument1;
 		}
 		
-		public override void DetermineCharacteristics(Plan APlan)
+		public override void DetermineCharacteristics(Plan plan)
 		{
-			base.DetermineCharacteristics(APlan);
-			FIsOrderPreserving = true;
+			base.DetermineCharacteristics(plan);
+			_isOrderPreserving = true;
 		}
     }
     
     public class SystemNameWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument2 == null)
+			if (argument2 == null)
 				return null;
 			else
 			#endif
 			{
-				string LArgument = (string)AArgument2;
-				SystemNameSelectorNode.CheckValidName(LArgument);
-				return LArgument;
+				string argument = (string)argument2;
+				SystemNameSelectorNode.CheckValidName(argument);
+				return argument;
 			}
 		}
     }

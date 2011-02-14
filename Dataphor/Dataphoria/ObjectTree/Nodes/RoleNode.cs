@@ -12,7 +12,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 {
 	public class RoleListNode : SchemaListNode
 	{
-		public RoleListNode(string ALibraryName) : base (ALibraryName)
+		public RoleListNode(string libraryName) : base (libraryName)
 		{
 			Text = Strings.ObjectTree_RolesNodeText;
 			ImageIndex = 4;
@@ -21,22 +21,22 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 		
 		protected override string GetChildExpression()
 		{
-			return ".System.Roles " + CSchemaListFilter + " over { Name }";
+			return ".System.Roles " + SchemaListFilter + " over { Name }";
 		}
 		
-		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row ARow)
+		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row row)
 		{
-			return new RoleNode(this, (string)ARow["Name"]);
+			return new RoleNode(this, (string)row["Name"]);
 		}
 		
 	}
 
 	public class RoleNode : SchemaItemNode
 	{
-		public RoleNode(RoleListNode ANode, string ARoleName) : base()
+		public RoleNode(RoleListNode node, string roleName) : base()
 		{
-			ParentSchemaList = ANode;
-			ObjectName = ARoleName;
+			ParentSchemaList = node;
+			ObjectName = roleName;
 			ImageIndex = 4;
 			SelectedImageIndex = ImageIndex;
 		}

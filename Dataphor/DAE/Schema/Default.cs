@@ -28,121 +28,121 @@ namespace Alphora.Dataphor.DAE.Schema
 	public abstract class Default : Object
     {
 		// constructor
-		public Default(int AID, string AName) : base(AID, AName) {}
+		public Default(int iD, string name) : base(iD, name) {}
 
 		public override bool IsPersistent { get { return true; } }
 
 		// Expression
-		private PlanNode FNode;
+		private PlanNode _node;
 		public PlanNode Node
 		{
-			get { return FNode; }
-			set { FNode = value; }
+			get { return _node; }
+			set { _node = value; }
 		}
 		
-		public DefaultDefinition EmitDefinition(EmitMode AMode)
+		public DefaultDefinition EmitDefinition(EmitMode mode)
 		{
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 				SaveObjectID();
 			else
 				RemoveObjectID();
 
-			DefaultDefinition LStatement = new DefaultDefinition();
-			LStatement.MetaData = MetaData == null ? null : MetaData.Copy();
-			LStatement.Expression = (Expression)Node.EmitStatement(AMode);
-			return LStatement;
+			DefaultDefinition statement = new DefaultDefinition();
+			statement.MetaData = MetaData == null ? null : MetaData.Copy();
+			statement.Expression = (Expression)Node.EmitStatement(mode);
+			return statement;
 		}
     }
     
     public class ScalarTypeDefault : Default
     {
-		public ScalarTypeDefault(int AID, string AName) : base(AID, AName) {}
+		public ScalarTypeDefault(int iD, string name) : base(iD, name) {}
 		
-		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.ScalarTypeDefault"), FScalarType.DisplayName); } }
+		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.ScalarTypeDefault"), _scalarType.DisplayName); } }
 
-		public override int CatalogObjectID { get { return FScalarType == null ? -1 : FScalarType.ID; } }
+		public override int CatalogObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
 
-		public override int ParentObjectID { get { return FScalarType == null ? -1 : FScalarType.ID; } }
+		public override int ParentObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
 
 		[Reference]
-		internal ScalarType FScalarType;
+		internal ScalarType _scalarType;
 		public ScalarType ScalarType 
 		{ 
-			get { return FScalarType; } 
+			get { return _scalarType; } 
 			set
 			{
-				if (FScalarType != null)
-					FScalarType.Default = null;
+				if (_scalarType != null)
+					_scalarType.Default = null;
 				if (value != null)
 					value.Default = this;	
 			}
 		}
 
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			AlterScalarTypeStatement LStatement = new AlterScalarTypeStatement();
-			LStatement.ScalarTypeName = Schema.Object.EnsureRooted(FScalarType.Name);
-			LStatement.Default = EmitDefinition(AMode);
-			return LStatement;
+			AlterScalarTypeStatement statement = new AlterScalarTypeStatement();
+			statement.ScalarTypeName = Schema.Object.EnsureRooted(_scalarType.Name);
+			statement.Default = EmitDefinition(mode);
+			return statement;
 		}
 
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			AlterScalarTypeStatement LStatement = new AlterScalarTypeStatement();
-			LStatement.ScalarTypeName = Schema.Object.EnsureRooted(FScalarType.Name);
-			LStatement.Default = new D4.DropDefaultDefinition();
-			return LStatement;
+			AlterScalarTypeStatement statement = new AlterScalarTypeStatement();
+			statement.ScalarTypeName = Schema.Object.EnsureRooted(_scalarType.Name);
+			statement.Default = new D4.DropDefaultDefinition();
+			return statement;
 		}
     }
     
     public class TableVarColumnDefault : Default
     {
-		public TableVarColumnDefault(int AID, string AName) : base(AID, AName) {}
+		public TableVarColumnDefault(int iD, string name) : base(iD, name) {}
 		
-		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.TableVarColumnDefault"), FTableVarColumn.DisplayName, FTableVarColumn.TableVar.DisplayName); } }
+		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.TableVarColumnDefault"), _tableVarColumn.DisplayName, _tableVarColumn.TableVar.DisplayName); } }
 
-		public override int CatalogObjectID { get { return FTableVarColumn == null ? -1 : FTableVarColumn.CatalogObjectID; } }
+		public override int CatalogObjectID { get { return _tableVarColumn == null ? -1 : _tableVarColumn.CatalogObjectID; } }
 
-		public override int ParentObjectID { get { return FTableVarColumn == null ? -1 : FTableVarColumn.ID; } }
+		public override int ParentObjectID { get { return _tableVarColumn == null ? -1 : _tableVarColumn.ID; } }
 		
-		public override bool IsATObject { get { return FTableVarColumn == null ? false : FTableVarColumn.IsATObject; } }
+		public override bool IsATObject { get { return _tableVarColumn == null ? false : _tableVarColumn.IsATObject; } }
 
 		[Reference]
-		internal TableVarColumn FTableVarColumn;
+		internal TableVarColumn _tableVarColumn;
 		public TableVarColumn TableVarColumn
 		{
-			get { return FTableVarColumn; }
+			get { return _tableVarColumn; }
 			set
 			{
-				if (FTableVarColumn != null)
-					FTableVarColumn.Default = null;
+				if (_tableVarColumn != null)
+					_tableVarColumn.Default = null;
 				if (value != null)
 					value.Default = this;
 			}
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			AlterTableStatement LStatement = new AlterTableStatement();
-			LStatement.TableVarName = Schema.Object.EnsureRooted(FTableVarColumn.TableVar.Name);
-			AlterColumnDefinition LDefinition = new AlterColumnDefinition();
-			LDefinition.ColumnName = FTableVarColumn.Name;
-			LDefinition.Default = EmitDefinition(AMode);
-			LStatement.AlterColumns.Add(LDefinition);
-			return LStatement;
+			AlterTableStatement statement = new AlterTableStatement();
+			statement.TableVarName = Schema.Object.EnsureRooted(_tableVarColumn.TableVar.Name);
+			AlterColumnDefinition definition = new AlterColumnDefinition();
+			definition.ColumnName = _tableVarColumn.Name;
+			definition.Default = EmitDefinition(mode);
+			statement.AlterColumns.Add(definition);
+			return statement;
 		}
 
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			if (FTableVarColumn.TableVar is BaseTableVar)
+			if (_tableVarColumn.TableVar is BaseTableVar)
 			{
-				AlterTableStatement LStatement = new AlterTableStatement();
-				LStatement.TableVarName = Schema.Object.EnsureRooted(FTableVarColumn.TableVar.Name);
-				AlterColumnDefinition LDefinition = new D4.AlterColumnDefinition();
-				LDefinition.ColumnName = FTableVarColumn.Name;
-				LDefinition.Default = new DropDefaultDefinition();
-				LStatement.AlterColumns.Add(LDefinition);
-				return LStatement;
+				AlterTableStatement statement = new AlterTableStatement();
+				statement.TableVarName = Schema.Object.EnsureRooted(_tableVarColumn.TableVar.Name);
+				AlterColumnDefinition definition = new D4.AlterColumnDefinition();
+				definition.ColumnName = _tableVarColumn.Name;
+				definition.Default = new DropDefaultDefinition();
+				statement.AlterColumns.Add(definition);
+				return statement;
 			}
 			else
 				return new Block();

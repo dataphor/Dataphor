@@ -19,64 +19,64 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator GetDebuggers() : table { Session_ID : Integer, BreakOnStart : Boolean, BreakOnException : Boolean, IsPaused : Boolean }
 	public class DebugGetDebuggersNode : TableNode
 	{
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
 
-			DataType.Columns.Add(new Schema.Column("Session_ID", APlan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("BreakOnStart", APlan.DataTypes.SystemBoolean));
-			DataType.Columns.Add(new Schema.Column("BreakOnException", APlan.DataTypes.SystemBoolean));
-			DataType.Columns.Add(new Schema.Column("IsPaused", APlan.DataTypes.SystemBoolean));
-			foreach (Schema.Column LColumn in DataType.Columns)
-				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
+			DataType.Columns.Add(new Schema.Column("Session_ID", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("BreakOnStart", plan.DataTypes.SystemBoolean));
+			DataType.Columns.Add(new Schema.Column("BreakOnException", plan.DataTypes.SystemBoolean));
+			DataType.Columns.Add(new Schema.Column("IsPaused", plan.DataTypes.SystemBoolean));
+			foreach (Schema.Column column in DataType.Columns)
+				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Session_ID"] }));
 
-			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = Compiler.FindClusteringOrder(APlan, TableVar);
+			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
+			Order = Compiler.FindClusteringOrder(plan, TableVar);
 
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			LocalTable LResult = new LocalTable(this, AProgram);
+			LocalTable result = new LocalTable(this, program);
 			try
 			{
-				LResult.Open();
+				result.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
+				Row row = new Row(program.ValueManager, result.DataType.RowType);
 				try
 				{
-					LRow.ValuesOwned = false;
+					row.ValuesOwned = false;
 
-					foreach (Debugger LDebugger in AProgram.ServerProcess.ServerSession.Server.GetDebuggers())
+					foreach (Debugger debugger in program.ServerProcess.ServerSession.Server.GetDebuggers())
 					{
-						LRow[0] = LDebugger.Session.SessionID;
-						LRow[1] = LDebugger.BreakOnStart;
-						LRow[2] = LDebugger.BreakOnException;
-						LRow[3] = LDebugger.IsPaused;
-						LResult.Insert(LRow);
+						row[0] = debugger.Session.SessionID;
+						row[1] = debugger.BreakOnStart;
+						row[2] = debugger.BreakOnException;
+						row[3] = debugger.IsPaused;
+						result.Insert(row);
 					}
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 
-				LResult.First();
+				result.First();
 
-				return LResult;
+				return result;
 			}
 			catch
 			{
-				LResult.Dispose();
+				result.Dispose();
 				throw;
 			}
 		}
@@ -85,9 +85,9 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator Debug.SetBreakOnStart(ABreakOnStart : Boolean)
 	public class DebugSetBreakOnStartNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
- 			 AProgram.ServerProcess.ServerSession.CheckedDebugger.BreakOnStart = (bool)AArgument1;
+ 			 program.ServerProcess.ServerSession.CheckedDebugger.BreakOnStart = (bool)argument1;
  			 return null;
 		}
 	}
@@ -95,9 +95,9 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator Debug.SetBreakOnException(ABreakOnException : Boolean)
 	public class DebugSetBreakOnExceptionNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
-			AProgram.ServerProcess.ServerSession.CheckedDebugger.BreakOnException = (bool)AArgument1;
+			program.ServerProcess.ServerSession.CheckedDebugger.BreakOnException = (bool)argument1;
 			return null;
 		}
 	}
@@ -105,59 +105,59 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator Debug.GetSessions() : table { Session_ID : Integer }
 	public class DebugGetSessionsNode : TableNode
 	{
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
 
-			DataType.Columns.Add(new Schema.Column("Session_ID", APlan.DataTypes.SystemInteger));
-			foreach (Schema.Column LColumn in DataType.Columns)
-				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
+			DataType.Columns.Add(new Schema.Column("Session_ID", plan.DataTypes.SystemInteger));
+			foreach (Schema.Column column in DataType.Columns)
+				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Session_ID"] }));
 
-			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = Compiler.FindClusteringOrder(APlan, TableVar);
+			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
+			Order = Compiler.FindClusteringOrder(plan, TableVar);
 
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			LocalTable LResult = new LocalTable(this, AProgram);
+			LocalTable result = new LocalTable(this, program);
 			try
 			{
-				LResult.Open();
+				result.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
+				Row row = new Row(program.ValueManager, result.DataType.RowType);
 				try
 				{
-					LRow.ValuesOwned = false;
+					row.ValuesOwned = false;
 
-					if (AProgram.ServerProcess.ServerSession.Debugger != null)
-						foreach (DebugSessionInfo LSession in AProgram.ServerProcess.ServerSession.CheckedDebugger.GetSessions())
+					if (program.ServerProcess.ServerSession.Debugger != null)
+						foreach (DebugSessionInfo session in program.ServerProcess.ServerSession.CheckedDebugger.GetSessions())
 						{
-							LRow[0] = LSession.SessionID;
-							LResult.Insert(LRow);
+							row[0] = session.SessionID;
+							result.Insert(row);
 						}
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 
-				LResult.First();
+				result.First();
 
-				return LResult;
+				return result;
 			}
 			catch
 			{
-				LResult.Dispose();
+				result.Dispose();
 				throw;
 			}
 		}
@@ -166,83 +166,83 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator Debug.GetProcesses() : table { Process_ID : Integer, IsPaused : Boolean, Locator : String, Line : Integer, LinePos : Integer, DidBreak : Boolean, Error : Error }
 	public class DebugGetProcessesNode : TableNode
 	{
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
 
-			DataType.Columns.Add(new Schema.Column("Process_ID", APlan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("IsPaused", APlan.DataTypes.SystemBoolean));
-			DataType.Columns.Add(new Schema.Column("Locator", APlan.DataTypes.SystemString));
-			DataType.Columns.Add(new Schema.Column("Line", APlan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("LinePos", APlan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("DidBreak", APlan.DataTypes.SystemBoolean));
-			DataType.Columns.Add(new Schema.Column("Error", APlan.DataTypes.SystemError));
-			foreach (Schema.Column LColumn in DataType.Columns)
-				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
+			DataType.Columns.Add(new Schema.Column("Process_ID", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("IsPaused", plan.DataTypes.SystemBoolean));
+			DataType.Columns.Add(new Schema.Column("Locator", plan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Line", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("LinePos", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("DidBreak", plan.DataTypes.SystemBoolean));
+			DataType.Columns.Add(new Schema.Column("Error", plan.DataTypes.SystemError));
+			foreach (Schema.Column column in DataType.Columns)
+				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Process_ID"] }));
 
-			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = Compiler.FindClusteringOrder(APlan, TableVar);
+			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
+			Order = Compiler.FindClusteringOrder(plan, TableVar);
 
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			LocalTable LResult = new LocalTable(this, AProgram);
+			LocalTable result = new LocalTable(this, program);
 			try
 			{
-				LResult.Open();
+				result.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
+				Row row = new Row(program.ValueManager, result.DataType.RowType);
 				try
 				{
-					LRow.ValuesOwned = false;
+					row.ValuesOwned = false;
 					
-					if (AProgram.ServerProcess.ServerSession.Debugger != null)
-						foreach (DebugProcessInfo LProcess in AProgram.ServerProcess.ServerSession.CheckedDebugger.GetProcesses())
+					if (program.ServerProcess.ServerSession.Debugger != null)
+						foreach (DebugProcessInfo process in program.ServerProcess.ServerSession.CheckedDebugger.GetProcesses())
 						{
-							LRow[0] = LProcess.ProcessID;
-							LRow[1] = LProcess.IsPaused;
-							if (LProcess.Location != null)
+							row[0] = process.ProcessID;
+							row[1] = process.IsPaused;
+							if (process.Location != null)
 							{
-								LRow[2] = LProcess.Location.Locator;
-								LRow[3] = LProcess.Location.Line;
-								LRow[4] = LProcess.Location.LinePos;
-								LRow[5] = LProcess.DidBreak;
-								LRow[6] = LProcess.Error;
+								row[2] = process.Location.Locator;
+								row[3] = process.Location.Line;
+								row[4] = process.Location.LinePos;
+								row[5] = process.DidBreak;
+								row[6] = process.Error;
 							}
 							else
 							{
-								LRow[2] = null;
-								LRow[3] = null;
-								LRow[4] = null;
-								LRow[5] = null;
-								LRow[6] = null;
+								row[2] = null;
+								row[3] = null;
+								row[4] = null;
+								row[5] = null;
+								row[6] = null;
 							}
 
-							LResult.Insert(LRow);
+							result.Insert(row);
 						}
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 
-				LResult.First();
+				result.First();
 
-				return LResult;
+				return result;
 			}
 			catch
 			{
-				LResult.Dispose();
+				result.Dispose();
 				throw;
 			}
 		}
@@ -251,9 +251,9 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator AttachProcess(AProcessID : Integer)
 	public class DebugAttachProcessNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
-			AProgram.ServerProcess.ServerSession.CheckedDebugger.Attach(AProgram.ServerProcess.ServerSession.Server.GetProcess((int)AArgument1));
+			program.ServerProcess.ServerSession.CheckedDebugger.Attach(program.ServerProcess.ServerSession.Server.GetProcess((int)argument1));
 			return null;
 		}
 	}
@@ -262,9 +262,9 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator DetachProcess(AProcessID : Integer) 
 	public class DebugDetachProcessNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
-			AProgram.ServerProcess.ServerSession.CheckedDebugger.Detach(AProgram.ServerProcess.ServerSession.Server.GetProcess((int)AArgument1));
+			program.ServerProcess.ServerSession.CheckedDebugger.Detach(program.ServerProcess.ServerSession.Server.GetProcess((int)argument1));
 			return null;
 		}
 	}
@@ -272,9 +272,9 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator AttachSession(ASessionID : Integer)
 	public class DebugAttachSessionNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
-			AProgram.ServerProcess.ServerSession.CheckedDebugger.AttachSession(AProgram.ServerProcess.ServerSession.Server.GetSession((int)AArgument1));
+			program.ServerProcess.ServerSession.CheckedDebugger.AttachSession(program.ServerProcess.ServerSession.Server.GetSession((int)argument1));
 			return null;
 		}
 	}
@@ -282,9 +282,9 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator DetachSession(ASessionID : Integer)
 	public class DebugDetachSessionNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
-			AProgram.ServerProcess.ServerSession.CheckedDebugger.DetachSession(AProgram.ServerProcess.ServerSession.Server.GetSession((int)AArgument1));
+			program.ServerProcess.ServerSession.CheckedDebugger.DetachSession(program.ServerProcess.ServerSession.Server.GetSession((int)argument1));
 			return null;
 		}
 	}
@@ -292,76 +292,76 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator GetCallStack(AProcessID : Integer) : table { Index : Integer, Description : String, Locator : String, Line : Integer, LinePos : Integer, Location : String, Statement : String }
 	public class DebugGetCallStackNode : TableNode
 	{
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
 
-			DataType.Columns.Add(new Schema.Column("Index", APlan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("Description", APlan.DataTypes.SystemString));
-			DataType.Columns.Add(new Schema.Column("Locator", APlan.DataTypes.SystemString));
-			DataType.Columns.Add(new Schema.Column("Line", APlan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("LinePos", APlan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("Location", APlan.DataTypes.SystemString));
-			DataType.Columns.Add(new Schema.Column("Statement", APlan.DataTypes.SystemString));
-			foreach (Schema.Column LColumn in DataType.Columns)
-				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
+			DataType.Columns.Add(new Schema.Column("Index", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Description", plan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Locator", plan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Line", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("LinePos", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Location", plan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Statement", plan.DataTypes.SystemString));
+			foreach (Schema.Column column in DataType.Columns)
+				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Index"] }));
 
-			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = Compiler.FindClusteringOrder(APlan, TableVar);
+			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
+			Order = Compiler.FindClusteringOrder(plan, TableVar);
 
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			int LProcessID = (int)Nodes[0].Execute(AProgram);
+			int processID = (int)Nodes[0].Execute(program);
 
-			LocalTable LResult = new LocalTable(this, AProgram);
+			LocalTable result = new LocalTable(this, program);
 			try
 			{
-				LResult.Open();
+				result.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
+				Row row = new Row(program.ValueManager, result.DataType.RowType);
 				try
 				{
-					LRow.ValuesOwned = false;
+					row.ValuesOwned = false;
 
-					var LDebugger = AProgram.ServerProcess.ServerSession.CheckedDebugger;
-					if (LDebugger != null)
+					var debugger = program.ServerProcess.ServerSession.CheckedDebugger;
+					if (debugger != null)
 					{
-						foreach (CallStackEntry LEntry in LDebugger.GetCallStack(LProcessID))
+						foreach (CallStackEntry entry in debugger.GetCallStack(processID))
 						{
-							LRow[0] = LEntry.Index;
-							LRow[1] = LEntry.Description;
-							LRow[2] = LEntry.Locator.Locator;
-							LRow[3] = LEntry.Locator.Line;
-							LRow[4] = LEntry.Locator.LinePos;
-							LRow[5] = LEntry.Location;
-							LRow[6] = LEntry.Statement;
-							LResult.Insert(LRow);
+							row[0] = entry.Index;
+							row[1] = entry.Description;
+							row[2] = entry.Locator.Locator;
+							row[3] = entry.Locator.Line;
+							row[4] = entry.Locator.LinePos;
+							row[5] = entry.Location;
+							row[6] = entry.Statement;
+							result.Insert(row);
 						}
 					}
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 
-				LResult.First();
+				result.First();
 
-				return LResult;
+				return result;
 			}
 			catch
 			{
-				LResult.Dispose();
+				result.Dispose();
 				throw;
 			}
 		}
@@ -370,67 +370,67 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator GetStack(AProcessID : Integer, AWindowIndex : Integer) : table { Index : Integer, Name : Name, Type : String, Value : String }
 	public class DebugGetStackNode : TableNode
 	{
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
 
-			DataType.Columns.Add(new Schema.Column("Index", APlan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("Name", APlan.DataTypes.SystemName));
-			DataType.Columns.Add(new Schema.Column("Type", APlan.DataTypes.SystemString));
-			DataType.Columns.Add(new Schema.Column("Value", APlan.DataTypes.SystemString));
-			foreach (Schema.Column LColumn in DataType.Columns)
-				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
+			DataType.Columns.Add(new Schema.Column("Index", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Name", plan.DataTypes.SystemName));
+			DataType.Columns.Add(new Schema.Column("Type", plan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Value", plan.DataTypes.SystemString));
+			foreach (Schema.Column column in DataType.Columns)
+				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Index"] }));
 
-			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = Compiler.FindClusteringOrder(APlan, TableVar);
+			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
+			Order = Compiler.FindClusteringOrder(plan, TableVar);
 
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			int LProcessID = (int)Nodes[0].Execute(AProgram);
-			int LWindowIndex = (int)Nodes[1].Execute(AProgram);
+			int processID = (int)Nodes[0].Execute(program);
+			int windowIndex = (int)Nodes[1].Execute(program);
 
-			LocalTable LResult = new LocalTable(this, AProgram);
+			LocalTable result = new LocalTable(this, program);
 			try
 			{
-				LResult.Open();
+				result.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
+				Row row = new Row(program.ValueManager, result.DataType.RowType);
 				try
 				{
-					LRow.ValuesOwned = false;
+					row.ValuesOwned = false;
 
-					foreach (StackEntry LEntry in AProgram.ServerProcess.ServerSession.CheckedDebugger.GetStack(LProcessID, LWindowIndex))
+					foreach (StackEntry entry in program.ServerProcess.ServerSession.CheckedDebugger.GetStack(processID, windowIndex))
 					{
-						LRow[0] = LEntry.Index;
-						LRow[1] = LEntry.Name;
-						LRow[2] = LEntry.Type;
-						LRow[3] = LEntry.Value;
-						LResult.Insert(LRow);
+						row[0] = entry.Index;
+						row[1] = entry.Name;
+						row[2] = entry.Type;
+						row[3] = entry.Value;
+						result.Insert(row);
 					}
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 
-				LResult.First();
+				result.First();
 
-				return LResult;
+				return result;
 			}
 			catch
 			{
-				LResult.Dispose();
+				result.Dispose();
 				throw;
 			}
 		}
@@ -439,20 +439,20 @@ namespace Alphora.Dataphor.DAE.Debug
 	//* Operator: GetSource(ALocator : String) : String
 	public class DebugGetSourceNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 				
-			string LLocator = (string)AArgument1;
+			string locator = (string)argument1;
 
-			if (DebugLocator.IsProgramLocator(LLocator))
-				return AProgram.ServerProcess.ServerSession.CheckedDebugger.GetProgram(DebugLocator.GetProgramID(LLocator)).Source;
+			if (DebugLocator.IsProgramLocator(locator))
+				return program.ServerProcess.ServerSession.CheckedDebugger.GetProgram(DebugLocator.GetProgramID(locator)).Source;
 
-			if (DebugLocator.IsOperatorLocator(LLocator))
-				return new D4TextEmitter().Emit(((Schema.Operator)AProgram.ResolveCatalogObjectSpecifier(DebugLocator.GetOperatorSpecifier(LLocator), true)).EmitStatement(EmitMode.ForCopy));
+			if (DebugLocator.IsOperatorLocator(locator))
+				return new D4TextEmitter().Emit(((Schema.Operator)program.ResolveCatalogObjectSpecifier(DebugLocator.GetOperatorSpecifier(locator), true)).EmitStatement(EmitMode.ForCopy));
 				
-			throw new ServerException(ServerException.Codes.InvalidDebugLocator, LLocator);
+			throw new ServerException(ServerException.Codes.InvalidDebugLocator, locator);
 		}
 	}
 		
@@ -530,66 +530,66 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator Debug.GetBreakpoints() : table { Locator : String, Line : Integer, LinePos : Integer }
 	public class DebugGetBreakpointsNode : TableNode
 	{
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
 
-			DataType.Columns.Add(new Schema.Column("Locator", APlan.DataTypes.SystemString));
-			DataType.Columns.Add(new Schema.Column("Line", APlan.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("LinePos", APlan.DataTypes.SystemInteger));
-			foreach (Schema.Column LColumn in DataType.Columns)
-				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
+			DataType.Columns.Add(new Schema.Column("Locator", plan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Line", plan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("LinePos", plan.DataTypes.SystemInteger));
+			foreach (Schema.Column column in DataType.Columns)
+				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 				
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Locator"], TableVar.Columns["Line"], TableVar.Columns["LinePos"] }));
 
-			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = Compiler.FindClusteringOrder(APlan, TableVar);
+			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
+			Order = Compiler.FindClusteringOrder(plan, TableVar);
 
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			LocalTable LResult = new LocalTable(this, AProgram);
+			LocalTable result = new LocalTable(this, program);
 			try
 			{
-				LResult.Open();
+				result.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
+				Row row = new Row(program.ValueManager, result.DataType.RowType);
 				try
 				{
-					LRow.ValuesOwned = false;
+					row.ValuesOwned = false;
 
-					var LDebugger = AProgram.ServerProcess.ServerSession.CheckedDebugger;
-					if (LDebugger != null)
+					var debugger = program.ServerProcess.ServerSession.CheckedDebugger;
+					if (debugger != null)
 					{
-						foreach (Breakpoint LEntry in LDebugger.Breakpoints)
+						foreach (Breakpoint entry in debugger.Breakpoints)
 						{
-							LRow[0] = LEntry.Locator;
-							LRow[1] = LEntry.Line;
-							LRow[2] = LEntry.LinePos;
-							LResult.Insert(LRow);
+							row[0] = entry.Locator;
+							row[1] = entry.Line;
+							row[2] = entry.LinePos;
+							result.Insert(row);
 						}
 					}
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 
-				LResult.First();
+				result.First();
 
-				return LResult;
+				return result;
 			}
 			catch
 			{
-				LResult.Dispose();
+				result.Dispose();
 				throw;
 			}
 		}
@@ -598,18 +598,18 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator Debug.ToggleBreakpoint(ALocator : String, ALine : Integer, ALinePos : Integer) : Bool
 	public class DebugToggleBreakpointNode : TernaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2, object AArgument3)
+		public override object InternalExecute(Program program, object argument1, object argument2, object argument3)
 		{
- 			return AProgram.ServerProcess.ServerSession.CheckedDebugger.ToggleBreakpoint((string)AArgument1, (int)AArgument2, AArgument3 == null ? -1 : (int)AArgument3);
+ 			return program.ServerProcess.ServerSession.CheckedDebugger.ToggleBreakpoint((string)argument1, (int)argument2, argument3 == null ? -1 : (int)argument3);
 		}
 	}
 	
 	// operator Debug.Start()
 	public class DebugStartNode : NilaryInstructionNode
 	{
-		public override object NilaryInternalExecute(Program AProgram)
+		public override object NilaryInternalExecute(Program program)
 		{
-			AProgram.ServerProcess.ServerSession.StartDebugger();
+			program.ServerProcess.ServerSession.StartDebugger();
 			return null;
 		}
 	}
@@ -617,9 +617,9 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator Debug.Stop()
 	public class DebugStopNode : NilaryInstructionNode
 	{
-		public override object NilaryInternalExecute(Program AProgram)
+		public override object NilaryInternalExecute(Program program)
 		{
- 			AProgram.ServerProcess.ServerSession.StopDebugger();
+ 			program.ServerProcess.ServerSession.StopDebugger();
  			return null;
 		}
 	}
@@ -627,9 +627,9 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator Debug.WaitForPause()
 	public class DebugWaitForPauseNode : NilaryInstructionNode
 	{
-		public override object NilaryInternalExecute(Program AProgram)
+		public override object NilaryInternalExecute(Program program)
 		{
-			AProgram.ServerProcess.ServerSession.CheckedDebugger.WaitForPause(AProgram, this);
+			program.ServerProcess.ServerSession.CheckedDebugger.WaitForPause(program, this);
 			return null;
 		}
 	}
@@ -637,9 +637,9 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator Debug.Pause()
 	public class DebugPauseNode : NilaryInstructionNode
 	{
-		public override object NilaryInternalExecute(Program AProgram)
+		public override object NilaryInternalExecute(Program program)
 		{
-			AProgram.ServerProcess.ServerSession.CheckedDebugger.Pause();
+			program.ServerProcess.ServerSession.CheckedDebugger.Pause();
 			return null;
  		}
 	}
@@ -647,9 +647,9 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator Debug.Run()
 	public class DebugRunNode : NilaryInstructionNode
 	{
-		public override object NilaryInternalExecute(Program AProgram)
+		public override object NilaryInternalExecute(Program program)
 		{
- 			AProgram.ServerProcess.ServerSession.CheckedDebugger.Run();
+ 			program.ServerProcess.ServerSession.CheckedDebugger.Run();
  			return null;
  		}
 	}
@@ -673,9 +673,9 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator Debug.StepOver(AProcessID : Integer) 
 	public class DebugStepOverNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
- 			AProgram.ServerProcess.ServerSession.CheckedDebugger.StepOver((int)AArgument1);
+ 			program.ServerProcess.ServerSession.CheckedDebugger.StepOver((int)argument1);
  			return null;
 		}
 	}
@@ -683,9 +683,9 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator Debug.StepInto(AProcessID : Integer) 
 	public class DebugStepIntoNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
-			AProgram.ServerProcess.ServerSession.CheckedDebugger.StepInto((int)AArgument1);
+			program.ServerProcess.ServerSession.CheckedDebugger.StepInto((int)argument1);
 			return null;
 		}
 	}

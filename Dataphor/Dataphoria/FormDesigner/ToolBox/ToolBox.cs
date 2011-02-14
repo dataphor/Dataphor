@@ -16,9 +16,9 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
     public partial class ToolBox : UserControl, IErrorSource
     {
         //GroupBar.GroupBarItems->GroupBarItem
-        private NavigationPane FPaletteGroupBar;
+        private NavigationPane _paletteGroupBar;
         //GroupView.GroupViewItem->GroupViewItem
-        private ListView FPointerGroupView;
+        private ListView _pointerGroupView;
         
 
 
@@ -30,29 +30,29 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
 
         #region IErrorSource Members
 
-        public void ErrorHighlighted(Exception AException)
+        public void ErrorHighlighted(Exception exception)
         {
         }
 
-        public void ErrorSelected(Exception AException)
+        public void ErrorSelected(Exception exception)
         {
             throw new NotImplementedException();
         }
 
         #endregion
 
-        private EventHandler<StatusEventArgs> FStatusChanged;
+        private EventHandler<StatusEventArgs> _statusChanged;
         
-        private void SetStatus(string ADescription)
+        private void SetStatus(string description)
         {
-            EventHandler<StatusEventArgs> LChanged = FStatusChanged;
-            if (LChanged != null) LChanged(this, new StatusEventArgs(ADescription));
+            EventHandler<StatusEventArgs> changed = _statusChanged;
+            if (changed != null) changed(this, new StatusEventArgs(description));
         }
 
         public event EventHandler<StatusEventArgs> StatusChanged
         {
-            add { FStatusChanged += value; }
-            remove { FStatusChanged -= value; }
+            add { _statusChanged += value; }
+            remove { _statusChanged -= value; }
         }        
 
 
@@ -61,20 +61,20 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
             // 
             // FPaletteGroupBar
             // 
-            FPaletteGroupBar = new NavigationPane();
-            FPaletteGroupBar.AllowDrop = true;
-            FPaletteGroupBar.BackColor = SystemColors.Control;
+            _paletteGroupBar = new NavigationPane();
+            _paletteGroupBar.AllowDrop = true;
+            _paletteGroupBar.BackColor = SystemColors.Control;
             //FPaletteGroupBar.BorderStyle = BorderStyle.FixedSingle;
-            FPaletteGroupBar.Dock = DockStyle.Fill;
-            FPaletteGroupBar.Location = new Point(0, 24);
-            FPaletteGroupBar.Name = "FPaletteGroupBar";
+            _paletteGroupBar.Dock = DockStyle.Fill;
+            _paletteGroupBar.Location = new Point(0, 24);
+            _paletteGroupBar.Name = "FPaletteGroupBar";
             //FPaletteGroupBar.SelectedItem = 0;
-            FPaletteGroupBar.Size = new Size(163, 163);
-            FPaletteGroupBar.TabIndex = 1;
+            _paletteGroupBar.Size = new Size(163, 163);
+            _paletteGroupBar.TabIndex = 1;
             // 
             // FPointerGroupView
             // 
-            FPointerGroupView = new ListView
+            _pointerGroupView = new ListView
                                     {
                                         BorderStyle = BorderStyle.None,
                                         //ButtonView = true,
@@ -82,45 +82,45 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
                                         Dock = DockStyle.Top
                                     };
             
-            FPointerGroupView.Items.AddRange(new[]
+            _pointerGroupView.Items.AddRange(new[]
                                                           {
                                                               new ListViewItem("Pointer", 0)
                                                           });
             
             //FPointerGroupView.IntegratedScrolling = true;
             //FPointerGroupView.ItemYSpacing = 2;
-            FPointerGroupView.LargeImageList = null;
-            FPointerGroupView.Location = new Point(0, 0);
-            FPointerGroupView.Name = "FPointerGroupView";
+            _pointerGroupView.LargeImageList = null;
+            _pointerGroupView.Location = new Point(0, 0);
+            _pointerGroupView.Name = "FPointerGroupView";
             //FPointerGroupView.SelectedItem = 0;
-            FPointerGroupView.Items[0].Selected = true;
-            FPointerGroupView.MultiSelect = false;
+            _pointerGroupView.Items[0].Selected = true;
+            _pointerGroupView.MultiSelect = false;
             
-            FPointerGroupView.Size = new Size(163, 24);
-            FPointerGroupView.SmallImageList = FPointerImageList;
+            _pointerGroupView.Size = new Size(163, 24);
+            _pointerGroupView.SmallImageList = FPointerImageList;
             //FPointerGroupView.SmallImageView = true;
-            FPointerGroupView.TabIndex = 0;
-            FPointerGroupView.Text = "groupView2";
+            _pointerGroupView.TabIndex = 0;
+            _pointerGroupView.Text = "groupView2";
             //FPointerGroupView.GroupViewItemSelected += FPointerGroupView_GroupViewItemSelected;
-            FPointerGroupView.ItemSelectionChanged+=FPointerGroupView_ItemSelectionChanged;
+            _pointerGroupView.ItemSelectionChanged+=FPointerGroupView_ItemSelectionChanged;
 
-            Controls.Add(FPaletteGroupBar);
-            Controls.Add(FPointerGroupView);
+            Controls.Add(_paletteGroupBar);
+            Controls.Add(_pointerGroupView);
         }
 
         
 
         internal void ClearPalette()
         {
-            FPaletteGroupBar.NavigationPages.Clear();
+            _paletteGroupBar.NavigationPages.Clear();
         }
 
-        private ListView EnsureCategory(string ACategoryName)
+        private ListView EnsureCategory(string categoryName)
         {
-            NavigationPanePage LItem = FindPaletteBarItem(ACategoryName);
-            if (LItem == null)
+            NavigationPanePage item = FindPaletteBarItem(categoryName);
+            if (item == null)
             {
-                var LView = new ListView
+                var view = new ListView
                                 {
                                     BorderStyle = BorderStyle.None,
                                     View = View.List,                                    
@@ -133,72 +133,72 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
                                 };
                 //LView.GroupViewItemSelected += new EventHandler(CategoryGroupViewItemSelected);
                 //LView.Columns.Add(new ColumnHeader());
-                LView.ItemSelectionChanged += LView_ItemSelectionChanged;
+                view.ItemSelectionChanged += LView_ItemSelectionChanged;
 
-                LItem = new NavigationPanePage();
+                item = new NavigationPanePage();
                 //LItem.Client = LView;
-                LItem.Controls.Add(LView);
-                LItem.Text = ACategoryName;
+                item.Controls.Add(view);
+                item.Text = categoryName;
                 //HACK: It is very important to set the Name of the NavigationPanePage or the NavigationPane will get confused
-                LItem.Name = "NavigationPanePage" + FPaletteGroupBar.NavigationPages.Count;
-                FPaletteGroupBar.NavigationPages.Add(LItem);
+                item.Name = "NavigationPanePage" + _paletteGroupBar.NavigationPages.Count;
+                _paletteGroupBar.NavigationPages.Add(item);
             }
-            return (ListView)LItem.Controls[0];
+            return (ListView)item.Controls[0];
         }
 
        
 
         internal void LoadPalette()
         {
-            PaletteItem LItem;
-            Type LType;
+            PaletteItem item;
+            Type type;
 
-            foreach (String LName in FrontendSession.NodeTypeTable.Keys)
+            foreach (String name in FrontendSession.NodeTypeTable.Keys)
             {
-                LType = FrontendSession.NodeTypeTable.GetClassType(LName);
+                type = FrontendSession.NodeTypeTable.GetClassType(name);
 
-                if (IsTypeListed(LType))
+                if (IsTypeListed(type))
                 {
-                    LItem = new PaletteItem
+                    item = new PaletteItem
                                 {
-                                    ClassName = LType.Name,
-                                    Text = LType.Name,
-                                    Description = GetDescription(LType),
-                                    ImageIndex = GetDesignerImage(LType)
+                                    ClassName = type.Name,
+                                    Text = type.Name,
+                                    Description = GetDescription(type),
+                                    ImageIndex = GetDesignerImage(type)
                                 };
-                    ListView LCategory = EnsureCategory(GetDesignerCategory(LType));
-                    LCategory.Items.Add(LItem);
+                    ListView category = EnsureCategory(GetDesignerCategory(type));
+                    category.Items.Add(item);
                 }
             }
         }
 
-        public void SelectPaletteItem(PaletteItem AItem, bool AIsMultiDrop)
+        public void SelectPaletteItem(PaletteItem item, bool isMultiDrop)
         {
-            if (AItem != FSelectedPaletteItem)
+            if (item != _selectedPaletteItem)
             {
-                FIsMultiDrop = AIsMultiDrop && (AItem != null);
+                _isMultiDrop = isMultiDrop && (item != null);
 
-                if (FSelectedPaletteItem != null)
+                if (_selectedPaletteItem != null)
                 {
                     //FSelectedPaletteItem.ListView.ButtonView = false;
                    // FSelectedPaletteItem.ListView.SelectedTextColor = Color.Navy;                    
                 }
 
-                FSelectedPaletteItem = AItem;
+                _selectedPaletteItem = item;
 
-                if (FSelectedPaletteItem != null)
+                if (_selectedPaletteItem != null)
                 {
                     //FSelectedPaletteItem.ListView.ButtonView = true;
                     //FSelectedPaletteItem.ListView.SelectedItem =
                     //    FSelectedPaletteItem.ListView.GroupViewItems.IndexOf(FSelectedPaletteItem);
 
-                    FSelectedPaletteItem.Selected = true;
+                    _selectedPaletteItem.Selected = true;
 
                    // if (FIsMultiDrop)
                    //     FSelectedPaletteItem.ListView.SelectedTextColor = Color.Blue;*/
 
-                    NodesTree.PaletteItem = FSelectedPaletteItem;
-                    SetStatus(FSelectedPaletteItem.Description);
+                    NodesTree.PaletteItem = _selectedPaletteItem;
+                    SetStatus(_selectedPaletteItem.Description);
                     //FPointerGroupView.ButtonView = false;
                 }
                 else
@@ -219,29 +219,29 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
                 SelectPaletteItem(null, false);
         }
 
-        private NavigationPanePage FindPaletteBarItem(string AText)
+        private NavigationPanePage FindPaletteBarItem(string text)
         {
-            foreach (NavigationPanePage LItem in FPaletteGroupBar.NavigationPages)
+            foreach (NavigationPanePage item in _paletteGroupBar.NavigationPages)
             {
-                if (String.Compare(LItem.Text, AText, true) == 0)
-                    return LItem;
+                if (String.Compare(item.Text, text, true) == 0)
+                    return item;
             }
             return null;
         }
 
-        protected override bool ProcessDialogKey(Keys AKey)
+        protected override bool ProcessDialogKey(Keys key)
         {
             if
                 (
-                ((AKey & Keys.Modifiers) == Keys.None) &&
-                ((AKey & Keys.KeyCode) == Keys.Escape) &&
-                (FSelectedPaletteItem != null)
+                ((key & Keys.Modifiers) == Keys.None) &&
+                ((key & Keys.KeyCode) == Keys.Escape) &&
+                (_selectedPaletteItem != null)
                 )
             {
                 SelectPaletteItem(null, false);
                 return true;
             }
-            return base.ProcessDialogKey(AKey);
+            return base.ProcessDialogKey(key);
         }
 
         /*private void FPointerGroupView_GroupViewItemSelected(object ASender, EventArgs AArgs)
@@ -249,7 +249,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
             SelectPaletteItem(null, false);
         }*/
 
-        private void FPointerGroupView_ItemSelectionChanged(object ASender, ListViewItemSelectionChangedEventArgs AE)
+        private void FPointerGroupView_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
         {
             
             SelectPaletteItem(null, false);
@@ -265,113 +265,113 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
                 );
         }*/
 
-        void LView_ItemSelectionChanged(object ASender, ListViewItemSelectionChangedEventArgs AArgs)
+        void LView_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs args)
         {
-            var LView = (ListView)ASender;
+            var view = (ListView)sender;
             /*SelectPaletteItem((PaletteItem)LView.GroupViewItems[LView.SelectedItem],
                 ModifierKeys == Keys.Shift);*/
 
-            var LSelectedItem = (PaletteItem) AArgs.Item;
-            SelectPaletteItem(LSelectedItem,ModifierKeys == Keys.Shift);
+            var selectedItem = (PaletteItem) args.Item;
+            SelectPaletteItem(selectedItem,ModifierKeys == Keys.Shift);
         }
 
         #region Palette
 
         private readonly Hashtable FImageIndex = new Hashtable();
-        private bool FIsMultiDrop;
-        private PaletteItem FSelectedPaletteItem;
+        private bool _isMultiDrop;
+        private PaletteItem _selectedPaletteItem;
 
         [Browsable(false)]
         public PaletteItem SelectedPaletteItem
         {
-            get { return FSelectedPaletteItem; }
+            get { return _selectedPaletteItem; }
         }
 
         [Browsable(false)]
         public bool IsMultiDrop
         {
-            get { return FIsMultiDrop; }
+            get { return _isMultiDrop; }
         }
         
 
 
-        private bool IsTypeListed(Type AType)
+        private bool IsTypeListed(Type type)
         {
-            var LListIn =
-                (ListInDesignerAttribute) ReflectionUtility.GetAttribute(AType, typeof (ListInDesignerAttribute));
-            if (LListIn != null)
-                return LListIn.IsListed;
+            var listIn =
+                (ListInDesignerAttribute) ReflectionUtility.GetAttribute(type, typeof (ListInDesignerAttribute));
+            if (listIn != null)
+                return listIn.IsListed;
             return true;
         }
 
-        private string GetDescription(Type AType)
+        private string GetDescription(Type type)
         {
-            var LDescription =
-                (DescriptionAttribute) ReflectionUtility.GetAttribute(AType, typeof (DescriptionAttribute));
-            if (LDescription != null)
-                return LDescription.Description;
+            var description =
+                (DescriptionAttribute) ReflectionUtility.GetAttribute(type, typeof (DescriptionAttribute));
+            if (description != null)
+                return description.Description;
             return String.Empty;
         }
 
-        private string GetDesignerCategory(Type AType)
+        private string GetDesignerCategory(Type type)
         {
-            var LCategory =
-                (DesignerCategoryAttribute) ReflectionUtility.GetAttribute(AType, typeof (DesignerCategoryAttribute));
-            if (LCategory != null)
-                return LCategory.Category;
+            var category =
+                (DesignerCategoryAttribute) ReflectionUtility.GetAttribute(type, typeof (DesignerCategoryAttribute));
+            if (category != null)
+                return category.Category;
             return Strings.UnspecifiedCategory;
         }
 
-        private Image LoadImage(string AImageExpression)
+        private Image LoadImage(string imageExpression)
         {
             try
             {
-                using (DataValue LImageData = FrontendSession.Pipe.RequestDocument(AImageExpression))
+                using (DataValue imageData = FrontendSession.Pipe.RequestDocument(imageExpression))
                 {
-                    var LStreamCopy = new MemoryStream();
-                    Stream LStream = LImageData.OpenStream();
+                    var streamCopy = new MemoryStream();
+                    Stream stream = imageData.OpenStream();
                     try
                     {
-                        StreamUtility.CopyStream(LStream, LStreamCopy);
+                        StreamUtility.CopyStream(stream, streamCopy);
                     }
                     finally
                     {
-                        LStream.Close();
+                        stream.Close();
                     }
-                    return Image.FromStream(LStreamCopy);
+                    return Image.FromStream(streamCopy);
                 }
             }
-            catch (Exception LException)
+            catch (Exception exception)
             {
-                Program.DataphoriaInstance.Warnings.AppendError(this, LException, true);
+                Program.DataphoriaInstance.Warnings.AppendError(this, exception, true);
                 // Don't rethrow
             }
             return null;
         }
 
-        public int GetDesignerImage(Type AType)
+        public int GetDesignerImage(Type type)
         {
-            var LImageAttribute =
-                (DesignerImageAttribute) ReflectionUtility.GetAttribute(AType, typeof (DesignerImageAttribute));
-            if (LImageAttribute != null)
+            var imageAttribute =
+                (DesignerImageAttribute) ReflectionUtility.GetAttribute(type, typeof (DesignerImageAttribute));
+            if (imageAttribute != null)
             {
-                object LIndexResult = FImageIndex[LImageAttribute.ImageExpression];
-                if (LIndexResult == null)
+                object indexResult = FImageIndex[imageAttribute.ImageExpression];
+                if (indexResult == null)
                 {
-                    Image LImage = LoadImage(LImageAttribute.ImageExpression);
-                    if (LImage != null)
+                    Image image = LoadImage(imageAttribute.ImageExpression);
+                    if (image != null)
                     {
-                        if (LImage is Bitmap)
-                            ((Bitmap) LImage).MakeTransparent();
-                        FNodesImageList.Images.Add(LImage);
-                        int LIndex = FNodesImageList.Images.Count - 1;
-                        FImageIndex.Add(LImageAttribute.ImageExpression, LIndex);
-                        return LIndex;                        
+                        if (image is Bitmap)
+                            ((Bitmap) image).MakeTransparent();
+                        FNodesImageList.Images.Add(image);
+                        int index = FNodesImageList.Images.Count - 1;
+                        FImageIndex.Add(imageAttribute.ImageExpression, index);
+                        return index;                        
                     }
-                    FImageIndex.Add(LImageAttribute.ImageExpression, 0);
+                    FImageIndex.Add(imageAttribute.ImageExpression, 0);
                 }
                 else
-                    return (int) LIndexResult;
+                    return (int) indexResult;
             }
             return 0; // Zero is the reserved index for the default image
         }

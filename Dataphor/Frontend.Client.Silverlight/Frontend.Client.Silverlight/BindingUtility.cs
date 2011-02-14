@@ -11,21 +11,21 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		/// tree rooted by the given object. </summary>
 		/// <remarks> Because TextBox controls do not update their binding until focus exits, is is 
 		/// sometimes necessary to force binding updates before acting upon the data bound to by the form. </remarks>
-		public static void UpdateTextBoxBindingSources(DependencyObject AObject)
+		public static void UpdateTextBoxBindingSources(DependencyObject objectValue)
 		{
-			var LCount = VisualTreeHelper.GetChildrenCount(AObject);
-			for (int i = 0; i < LCount; i++)
+			var count = VisualTreeHelper.GetChildrenCount(objectValue);
+			for (int i = 0; i < count; i++)
 			{
-				var LChild = VisualTreeHelper.GetChild(AObject, i);
-				var LTextBox = LChild as TextBox;
-				if (LTextBox != null)
+				var child = VisualTreeHelper.GetChild(objectValue, i);
+				var textBox = child as TextBox;
+				if (textBox != null)
 				{
-					var LBindingExpression = LTextBox.GetBindingExpression(TextBox.TextProperty);
-					if (LBindingExpression != null)
-						LBindingExpression.UpdateSource();
+					var bindingExpression = textBox.GetBindingExpression(TextBox.TextProperty);
+					if (bindingExpression != null)
+						bindingExpression.UpdateSource();
 				}
 				else
-					UpdateTextBoxBindingSources(LChild);
+					UpdateTextBoxBindingSources(child);
 			}
 		}
 	}

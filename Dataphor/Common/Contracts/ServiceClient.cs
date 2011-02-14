@@ -13,16 +13,16 @@ namespace Alphora.Dataphor.DAE.Contracts
 {
 	public abstract class ServiceClient<T> : IDisposable
 	{
-		public ServiceClient(Binding ABinding, EndpointAddress AEndpointAddress)
+		public ServiceClient(Binding binding, EndpointAddress endpointAddress)
 		{
-			FChannelFactory = new ChannelFactory<T>(ABinding, AEndpointAddress);
+			_channelFactory = new ChannelFactory<T>(binding, endpointAddress);
 		}
 		
-		public ServiceClient(string AEndpointURI) 
+		public ServiceClient(string endpointURI) 
 			: this
 			(
-				DataphorServiceUtility.GetBinding(new Uri(AEndpointURI).Scheme == Uri.UriSchemeHttps), 
-				new EndpointAddress(AEndpointURI)
+				DataphorServiceUtility.GetBinding(new Uri(endpointURI).Scheme == Uri.UriSchemeHttps), 
+				new EndpointAddress(endpointURI)
 			)
 		{
 		}
@@ -33,71 +33,71 @@ namespace Alphora.Dataphor.DAE.Contracts
 		{
 			InternalDispose();
 			
-			if (FChannel != null)
+			if (_channel != null)
 			{
 				CloseChannel();
 				SetChannel(default(T));
 			}
 			
-			if (FChannelFactory != null)
+			if (_channelFactory != null)
 			{
 				CloseChannelFactory();
-				FChannelFactory = null;
+				_channelFactory = null;
 			}
 		}
 
-		private ChannelFactory<T> FChannelFactory;
-		private T FChannel;
+		private ChannelFactory<T> _channelFactory;
+		private T _channel;
 
-		private bool IsChannelFaulted(T AChannel)
+		private bool IsChannelFaulted(T channel)
 		{
-			return ((ICommunicationObject)AChannel).State == CommunicationState.Faulted;
+			return ((ICommunicationObject)channel).State == CommunicationState.Faulted;
 		}
 		
-		private bool IsChannelValid(T AChannel)
+		private bool IsChannelValid(T channel)
 		{
-			return ((ICommunicationObject)AChannel).State == CommunicationState.Opened;
+			return ((ICommunicationObject)channel).State == CommunicationState.Opened;
 		}
 		
-		private void SetChannel(T AChannel)
+		private void SetChannel(T channel)
 		{
-			if (FChannel != null)
-				((ICommunicationObject)FChannel).Faulted -= new EventHandler(ChannelFaulted);
-			FChannel = AChannel;
-			if (FChannel != null)
-				((ICommunicationObject)FChannel).Faulted += new EventHandler(ChannelFaulted);
+			if (_channel != null)
+				((ICommunicationObject)_channel).Faulted -= new EventHandler(ChannelFaulted);
+			_channel = channel;
+			if (_channel != null)
+				((ICommunicationObject)_channel).Faulted += new EventHandler(ChannelFaulted);
 		}
 		
-		private void ChannelFaulted(object ASender, EventArgs AArgs)
+		private void ChannelFaulted(object sender, EventArgs args)
 		{
-			((ICommunicationObject)ASender).Faulted -= new EventHandler(ChannelFaulted);
-			if (Object.ReferenceEquals(FChannel, ASender))
-				FChannel = default(T);
+			((ICommunicationObject)sender).Faulted -= new EventHandler(ChannelFaulted);
+			if (Object.ReferenceEquals(_channel, sender))
+				_channel = default(T);
 		}
 		
 		private void CloseChannel()
 		{
-			ICommunicationObject LChannel = FChannel as ICommunicationObject;
-			if (LChannel != null)
-				if (LChannel.State == CommunicationState.Opened)
-					LChannel.Close();
+			ICommunicationObject channel = _channel as ICommunicationObject;
+			if (channel != null)
+				if (channel.State == CommunicationState.Opened)
+					channel.Close();
 				else
-					LChannel.Abort();
+					channel.Abort();
 		}
 		
 		private void CloseChannelFactory()
 		{
-			if (FChannelFactory.State == CommunicationState.Opened)
-				FChannelFactory.Close();
+			if (_channelFactory.State == CommunicationState.Opened)
+				_channelFactory.Close();
 			else
-				FChannelFactory.Abort();
+				_channelFactory.Abort();
 		}
 		
 		protected T GetInterface()
 		{
-			if ((FChannel == null) || !IsChannelValid(FChannel))
-				SetChannel(FChannelFactory.CreateChannel());
-			return FChannel;
+			if ((_channel == null) || !IsChannelValid(_channel))
+				SetChannel(_channelFactory.CreateChannel());
+			return _channel;
 		}
 	}
 }

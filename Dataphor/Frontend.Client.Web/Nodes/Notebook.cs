@@ -15,7 +15,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 {
 	public class Notebook : ContainerElement, INotebook
 	{
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
@@ -24,38 +24,38 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			}
 			finally
 			{
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 
 		// Title
 
-		protected string FTitle = String.Empty;
+		protected string _title = String.Empty;
 		[DefaultValue("")]
 		public string Title
 		{
-			get	{ return FTitle; }
-			set { FTitle = (value == null ? String.Empty : value); }
+			get	{ return _title; }
+			set { _title = (value == null ? String.Empty : value); }
 		}
 
 		// ActivePage
 
-		private IBaseNotebookPage FActivePage;
+		private IBaseNotebookPage _activePage;
 		
 		public IBaseNotebookPage ActivePage
 		{
-			get { return FActivePage; }
+			get { return _activePage; }
 			set
 			{
-				if (FActivePage != value)
+				if (_activePage != value)
 				{
-					if ((FActivePage != null) && Active)
-						((IWebNotebookPage)FActivePage).Unselected();
-					FActivePage = value;
+					if ((_activePage != null) && Active)
+						((IWebNotebookPage)_activePage).Unselected();
+					_activePage = value;
 					if (Active)
 					{
-						if (FActivePage != null)
-							((IWebNotebookPage)FActivePage).Selected();
+						if (_activePage != null)
+							((IWebNotebookPage)_activePage).Selected();
 						if (OnActivePageChange != null)
 							OnActivePageChange.Execute();
 					}
@@ -65,21 +65,21 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// OnActivePageChange
 
-		private IAction FOnActivePageChange;
+		private IAction _onActivePageChange;
 		public IAction OnActivePageChange
 		{
-			get { return FOnActivePageChange; }
+			get { return _onActivePageChange; }
 			set
 			{
-				if (FOnActivePageChange != null)
-					FOnActivePageChange.Disposed -= new EventHandler(OnActivePageChangeDisposed);
-				FOnActivePageChange = value;
-				if (FOnActivePageChange != null)
-					FOnActivePageChange.Disposed += new EventHandler(OnActivePageChangeDisposed);
+				if (_onActivePageChange != null)
+					_onActivePageChange.Disposed -= new EventHandler(OnActivePageChangeDisposed);
+				_onActivePageChange = value;
+				if (_onActivePageChange != null)
+					_onActivePageChange.Disposed += new EventHandler(OnActivePageChangeDisposed);
 			}
 		}
 
-		private void OnActivePageChangeDisposed(object ASender, EventArgs AArgs)
+		private void OnActivePageChangeDisposed(object sender, EventArgs args)
 		{
 			OnActivePageChange = null;
 		}
@@ -91,104 +91,104 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			base.Activate();
 
 			// if no explicit active page, then activate the first
-			if ((FActivePage == null) && (Children.Count != 0))
-				FActivePage = (IBaseNotebookPage)Children[0];
+			if ((_activePage == null) && (Children.Count != 0))
+				_activePage = (IBaseNotebookPage)Children[0];
 			
-			if (FActivePage != null)
-				((IWebNotebookPage)FActivePage).Selected();
+			if (_activePage != null)
+				((IWebNotebookPage)_activePage).Selected();
 		}
 
-		public override bool IsValidChild(Type AChildType)
+		public override bool IsValidChild(Type childType)
 		{
-			if (typeof(IWebNotebookPage).IsAssignableFrom(AChildType))
+			if (typeof(IWebNotebookPage).IsAssignableFrom(childType))
 				return true;
-			return base.IsValidChild(AChildType);
+			return base.IsValidChild(childType);
 		}
 
 		// Element
 
-		protected override void InternalRender(HtmlTextWriter AWriter)
+		protected override void InternalRender(HtmlTextWriter writer)
 		{
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "notebook");
-			if (FTitle != String.Empty)
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Title, FTitle);
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "3");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Border, "0");
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Table);
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "notebook");
+			if (_title != String.Empty)
+				writer.AddAttribute(HtmlTextWriterAttribute.Title, _title);
+			writer.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "3");
+			writer.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
+			writer.AddAttribute(HtmlTextWriterAttribute.Border, "0");
+			writer.RenderBeginTag(HtmlTextWriterTag.Table);
 
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
+			writer.RenderBeginTag(HtmlTextWriterTag.Tr);
 
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "notebooktabspacer");
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-			Session.RenderDummyImage(AWriter, "1", "1");
-			AWriter.RenderEndTag();
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "notebooktabspacer");
+			writer.RenderBeginTag(HtmlTextWriterTag.Td);
+			Session.RenderDummyImage(writer, "1", "1");
+			writer.RenderEndTag();
 
-			int LVisiblePageCount = 0;
-			foreach (IWebNotebookPage LPage in Children)
+			int visiblePageCount = 0;
+			foreach (IWebNotebookPage page in Children)
 			{
-				if (LPage.Visible)
+				if (page.Visible)
 				{
-					if (LPage == FActivePage)
-						AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "notebooktabactive");
+					if (page == _activePage)
+						writer.AddAttribute(HtmlTextWriterAttribute.Class, "notebooktabactive");
 					else
 					{
-						AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "notebooktab");
-						AWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, Session.GetActionLink(Session.Get(this).Context, LPage.ID));
+						writer.AddAttribute(HtmlTextWriterAttribute.Class, "notebooktab");
+						writer.AddAttribute(HtmlTextWriterAttribute.Onclick, Session.GetActionLink(Session.Get(this).Context, page.ID));
 					}
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
-					AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
+					writer.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
+					writer.RenderBeginTag(HtmlTextWriterTag.Td);
 
-					AWriter.Write(HttpUtility.HtmlEncode(GetPageTitle(LPage)));
+					writer.Write(HttpUtility.HtmlEncode(GetPageTitle(page)));
 
-					AWriter.RenderEndTag();
+					writer.RenderEndTag();
 
-					LVisiblePageCount++;
+					visiblePageCount++;
 				}
 			}
 
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "notebooktabspacerright");
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-			Session.RenderDummyImage(AWriter, "1", "1");
-			AWriter.RenderEndTag();
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "notebooktabspacerright");
+			writer.RenderBeginTag(HtmlTextWriterTag.Td);
+			Session.RenderDummyImage(writer, "1", "1");
+			writer.RenderEndTag();
 
-			AWriter.RenderEndTag();	// TR
+			writer.RenderEndTag();	// TR
 
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
+			writer.RenderBeginTag(HtmlTextWriterTag.Tr);
 
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "notebooktabcontents");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Colspan, (LVisiblePageCount + 2).ToString());
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-			if (FActivePage != null)
-				((IWebNotebookPage)FActivePage).Render(AWriter);
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "notebooktabcontents");
+			writer.AddAttribute(HtmlTextWriterAttribute.Colspan, (visiblePageCount + 2).ToString());
+			writer.RenderBeginTag(HtmlTextWriterTag.Td);
+			if (_activePage != null)
+				((IWebNotebookPage)_activePage).Render(writer);
 			else
-				Session.RenderDummyImage(AWriter, "1", "1");
-			AWriter.RenderEndTag();
+				Session.RenderDummyImage(writer, "1", "1");
+			writer.RenderEndTag();
 
-			AWriter.RenderEndTag();	// TR
-			AWriter.RenderEndTag();	// TABLE
+			writer.RenderEndTag();	// TR
+			writer.RenderEndTag();	// TABLE
 		}
 
-		protected virtual string GetPageTitle(IWebNotebookPage APage)
+		protected virtual string GetPageTitle(IWebNotebookPage page)
 		{
-			if (APage.Title != String.Empty)
-				return APage.Title;
+			if (page.Title != String.Empty)
+				return page.Title;
 			else
 				return Strings.Get("UntitledPage");
 		}
 
 		// IWebHandler
 
-		public override bool ProcessRequest(HttpContext AContext)
+		public override bool ProcessRequest(HttpContext context)
 		{
-			if (base.ProcessRequest(AContext))
+			if (base.ProcessRequest(context))
 				return true;
 			else
 			{
-				foreach (IWebElement LPage in Children)
-					if (Session.IsActionLink(AContext, LPage.ID))
+				foreach (IWebElement page in Children)
+					if (Session.IsActionLink(context, page.ID))
 					{
-						ActivePage = (IBaseNotebookPage)LPage;
+						ActivePage = (IBaseNotebookPage)page;
 						return true;
 					}
 				return false;
@@ -200,11 +200,11 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		// Title
 
-		protected string FTitle = String.Empty;
+		protected string _title = String.Empty;
 		public string Title
 		{
-			get { return FTitle; }
-			set { FTitle = value; }
+			get { return _title; }
+			set { _title = value; }
 		}
 
 		public virtual void Selected() {}
@@ -216,26 +216,26 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		public NotebookFramePage() {}
 
-		public NotebookFramePage([PublishSource("SourceLinkType")] SourceLinkType ASourceLinkType): base(ASourceLinkType) {}
+		public NotebookFramePage([PublishSource("SourceLinkType")] SourceLinkType sourceLinkType): base(sourceLinkType) {}
 			
 		// Title
 
-		protected string FTitle = String.Empty;
+		protected string _title = String.Empty;
 		public string Title
 		{
-			get { return FTitle; }
-			set { FTitle = value; }
+			get { return _title; }
+			set { _title = value; }
 		}
 
 		// LoadAsSelected
 
 		// TODO: Have LoadAsSelected function in the Web Client (otherwise may cause problem with code that expects LoadAsSelected behavior)
-		private bool FLoadAsSelected = true;
+		private bool _loadAsSelected = true;
 		[DefaultValue(true)]
 		public bool LoadAsSelected
 		{
-			get { return FLoadAsSelected; }
-			set { FLoadAsSelected = value; }
+			get { return _loadAsSelected; }
+			set { _loadAsSelected = value; }
 		}
 
 		// IWebNodebookPage

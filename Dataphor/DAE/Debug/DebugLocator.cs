@@ -20,56 +20,56 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// <summary>
 		/// Constructs a new DebugLocator instance.
 		/// </summary>
-		/// <param name="ALocator">The locator reference.</param>
-		/// <param name="ALine">The line number (1-based) at which the locator begins.</param>
-		/// <param name="ALinePos">The character position (1-based) at which the locator begins.</param>
-		public DebugLocator(string ALocator, int ALine, int ALinePos) : base()
+		/// <param name="locator">The locator reference.</param>
+		/// <param name="line">The line number (1-based) at which the locator begins.</param>
+		/// <param name="linePos">The character position (1-based) at which the locator begins.</param>
+		public DebugLocator(string locator, int line, int linePos) : base()
 		{
-			FLocator = ALocator;
-			FLine = ALine;
-			FLinePos = ALinePos;
+			_locator = locator;
+			_line = line;
+			_linePos = linePos;
 		}
 		
 		/// <summary>
 		/// Constructs a new DebugLocator based on a source locator and current line information.
 		/// </summary>
-		/// <param name="ALocator">The source locator.</param>
-		/// <param name="ALine">The current line number (1-based)</param>
-		/// <param name="ALinePos">The current line position (1-based)</param>
-		public DebugLocator(DebugLocator ALocator, int ALine, int ALinePos) : base()
+		/// <param name="locator">The source locator.</param>
+		/// <param name="line">The current line number (1-based)</param>
+		/// <param name="linePos">The current line position (1-based)</param>
+		public DebugLocator(DebugLocator locator, int line, int linePos) : base()
 		{
-			FLocator = ALocator.Locator;
-			FLine = Math.Max(ALocator.Line - 1, 0) + ALine;
-			FLinePos = ALocator.Line == ALine ? Math.Max(ALocator.LinePos - 1, 0) + ALinePos : ALinePos;
+			_locator = locator.Locator;
+			_line = Math.Max(locator.Line - 1, 0) + line;
+			_linePos = locator.Line == line ? Math.Max(locator.LinePos - 1, 0) + linePos : linePos;
 		}
 		
 		[DataMember]
-		internal string FLocator;
+		internal string _locator;
 		/// <summary>
 		/// Gets the locator reference for this instance.
 		/// </summary>
-		public string Locator { get { return FLocator; } }
+		public string Locator { get { return _locator; } }
 		
 		[DataMember]
-		internal int FLine;
+		internal int _line;
 		/// <summary>
 		/// Gets the line number (1-based) at which the locator begins.
 		/// </summary>
-		public int Line { get { return FLine; } }
+		public int Line { get { return _line; } }
 		
 		[DataMember]
-		internal int FLinePos;
+		internal int _linePos;
 		/// <summary>
 		/// Gets the character position (1-based) at which the locator begins.
 		/// </summary>
-		public int LinePos { get { return FLinePos; } }
+		public int LinePos { get { return _linePos; } }
 
 		/// <summary>
 		/// Returns a string representation of the locator.
 		/// </summary>
 		public override string ToString()
 		{
-			return String.Format("{0}@{1}:{2}", FLocator, FLine, FLinePos);
+			return String.Format("{0}@{1}:{2}", _locator, _line, _linePos);
 		}
 		
 		/// <summary>
@@ -77,75 +77,75 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// </summary>
 		/// <remarks>
 		/// If the string is not a valid encoding of a debug locator, an ArgumentException is thrown.</remarks>
-		public static DebugLocator Parse(string AValue)
+		public static DebugLocator Parse(string tempValue)
 		{
-			int LIndexOfAt = AValue.LastIndexOf("@");
-			int LIndexOfColon = AValue.LastIndexOf(":");
-			if ((LIndexOfAt < 0) || (LIndexOfColon < 0))
+			int indexOfAt = tempValue.LastIndexOf("@");
+			int indexOfColon = tempValue.LastIndexOf(":");
+			if ((indexOfAt < 0) || (indexOfColon < 0))
 				throw new ArgumentException("Invalid locator string");
 				
 			return 
 				new DebugLocator
 				(
-					AValue.Substring(0, LIndexOfAt),
-					Int32.Parse(AValue.Substring(LIndexOfAt + 1, LIndexOfColon - LIndexOfAt - 1)),
-					Int32.Parse(AValue.Substring(LIndexOfColon + 1, AValue.Length - LIndexOfColon - 1))
+					tempValue.Substring(0, indexOfAt),
+					Int32.Parse(tempValue.Substring(indexOfAt + 1, indexOfColon - indexOfAt - 1)),
+					Int32.Parse(tempValue.Substring(indexOfColon + 1, tempValue.Length - indexOfColon - 1))
 				);
 		}
 		
 		/// <summary>
 		/// Program locator string used to indicate that a locator is a reference to dynamic or ad-hoc execution
 		/// </summary>
-		public const string CProgramLocator = "program";
+		public const string ProgramLocatorPrefix = "program";
 		
 		/// <summary>
 		/// Operator locator string used to indicate that a locator is a reference to an operator created by a dynamic or ad-hoc execution
 		/// </summary>
-		public const string COperatorLocator = "operator";
+		public const string OperatorLocatorPrefix = "operator";
 		
-		public static string ProgramLocator(Guid APlanID)
+		public static string ProgramLocator(Guid planID)
 		{
-			return String.Format("{0}:{1}", CProgramLocator, APlanID.ToString());
+			return String.Format("{0}:{1}", ProgramLocatorPrefix, planID.ToString());
 		}
 		
 		/// <summary>
 		/// Returns true if the locator is a program locator
 		/// </summary>
-		public static bool IsProgramLocator(string ALocator)
+		public static bool IsProgramLocator(string locator)
 		{
-			return ALocator.StartsWith(CProgramLocator + ":");
+			return locator.StartsWith(ProgramLocatorPrefix + ":");
 		}
 		
 		/// <summary>
 		/// Returns the program id encoded in the given program locator.
 		/// </summary>
-		public static Guid GetProgramID(string AProgramLocator)
+		public static Guid GetProgramID(string programLocator)
 		{
-			return new Guid(AProgramLocator.Substring(AProgramLocator.IndexOf(':') + 1));
+			return new Guid(programLocator.Substring(programLocator.IndexOf(':') + 1));
 		}
 		
 		/// <summary>
 		/// Constructs an operator locator string based on an operator specifier.
 		/// </summary>
-		public static string OperatorLocator(string AOperatorSpecifier)
+		public static string OperatorLocator(string operatorSpecifier)
 		{
-			return String.Format("{0}:{1}", COperatorLocator, AOperatorSpecifier);
+			return String.Format("{0}:{1}", OperatorLocatorPrefix, operatorSpecifier);
 		}
 		
 		/// <summary>
 		/// Returns true if the locator is an operator locator
 		/// </summary>
-		public static bool IsOperatorLocator(string ALocator)
+		public static bool IsOperatorLocator(string locator)
 		{
-			return ALocator.StartsWith(COperatorLocator + ":");
+			return locator.StartsWith(OperatorLocatorPrefix + ":");
 		}
 
 		/// <summary>
 		/// Returns the operator specifier encoded in the given operator locator.
 		/// </summary>
-		public static string GetOperatorSpecifier(string AOperatorLocator)
+		public static string GetOperatorSpecifier(string operatorLocator)
 		{
-			return AOperatorLocator.Substring(AOperatorLocator.IndexOf(':') + 1);
+			return operatorLocator.Substring(operatorLocator.IndexOf(':') + 1);
 		}
 		
 		/// <summary>
@@ -153,29 +153,29 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// </summary>
 		//public static DebugLocator Dynamic = new DebugLocator("DYNAMIC", 1, 1);
 
-		public override bool Equals(object AOther)
+		public override bool Equals(object other)
 		{
-			DebugLocator LOther = AOther as DebugLocator;
-			if (LOther != null && LOther.FLocator == this.FLocator && LOther.FLine == this.FLine && LOther.FLinePos == this.FLinePos)
+			DebugLocator localOther = other as DebugLocator;
+			if (localOther != null && localOther._locator == this._locator && localOther._line == this._line && localOther._linePos == this._linePos)
 				return true;
 			else
-				return base.Equals(AOther);
+				return base.Equals(other);
 		}
 
 		public override int GetHashCode()
 		{
-			return (FLocator == null ? 0 : FLocator.GetHashCode()) ^ FLine.GetHashCode() ^ FLinePos.GetHashCode();
+			return (_locator == null ? 0 : _locator.GetHashCode()) ^ _line.GetHashCode() ^ _linePos.GetHashCode();
 		}
 		
-		public static bool operator ==(DebugLocator ALeft, DebugLocator ARight)
+		public static bool operator ==(DebugLocator left, DebugLocator right)
 		{
-			return (Object.ReferenceEquals(ALeft, null) && Object.ReferenceEquals(ARight, null)) 
-				|| (!Object.ReferenceEquals(ALeft, null) && ALeft.Equals(ARight));
+			return (Object.ReferenceEquals(left, null) && Object.ReferenceEquals(right, null)) 
+				|| (!Object.ReferenceEquals(left, null) && left.Equals(right));
 		}
 
-		public static bool operator !=(DebugLocator ALeft, DebugLocator ARight)
+		public static bool operator !=(DebugLocator left, DebugLocator right)
 		{
-			return !(ALeft == ARight);
+			return !(left == right);
 		}
 	}
 }

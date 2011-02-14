@@ -26,9 +26,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator CreateRight(const ARightName : System.Name, const AUserID : System.String);</remarks>
     public class SystemCreateRightNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			CreateRightNode.CreateRight(AProgram, (string)AArguments[0], (AArguments.Length == 2) ? (string)AArguments[1] : AProgram.Plan.User.ID);
+			CreateRightNode.CreateRight(program, (string)arguments[0], (arguments.Length == 2) ? (string)arguments[1] : program.Plan.User.ID);
 			return null;
 		}
     }
@@ -36,9 +36,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator DropRight(const ARightName : String); </remarks>
     public class SystemDropRightNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			DropRightNode.DropRight(AProgram, (string)AArguments[0]);
+			DropRightNode.DropRight(program, (string)arguments[0]);
 			return null;
 		}
     }
@@ -46,16 +46,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator RightExists(ARightName : string) : boolean; </remarks>
     public class SystemRightExistsNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			return ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).RightExists((string)AArguments[0]);
+			return ((ServerCatalogDeviceSession)program.CatalogDeviceSession).RightExists((string)arguments[0]);
 		}
     }
 
     /// <remarks>operator CreateGroup(const AGroupName : String, const AParentGroupName : String); </remarks>
     public class SystemCreateGroupNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			// Deprecated, stubbed for backwards compatibility
 			return null;
@@ -65,12 +65,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator CreateRole(const ARoleName : Name);    
     public class SystemCreateRoleNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.Role LRole = new Schema.Role(Schema.Object.Qualify((string)AArguments[0], AProgram.Plan.CurrentLibrary.Name));
-			LRole.Owner = AProgram.Plan.User;
-			LRole.Library = AProgram.Plan.CurrentLibrary;
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).InsertRole(LRole);
+			Schema.Role role = new Schema.Role(Schema.Object.Qualify((string)arguments[0], program.Plan.CurrentLibrary.Name));
+			role.Owner = program.Plan.User;
+			role.Library = program.Plan.CurrentLibrary;
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).InsertRole(role);
 			return null;
 		}
     }
@@ -78,14 +78,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // operator DropRole(const ARoleName : Name);
     public class SystemDropRoleNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[0], true) as Schema.Role;
-			if (LRole == null)
+			Schema.Role role = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[0], true) as Schema.Role;
+			if (role == null)
 				throw new CompilerException(CompilerException.Codes.RoleIdentifierExpected);
 				
-			AProgram.Plan.CheckRight(LRole.GetRight(Schema.RightNames.Drop));
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).DeleteRole(LRole);
+			program.Plan.CheckRight(role.GetRight(Schema.RightNames.Drop));
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).DeleteRole(role);
 			return null;
 		}
     }
@@ -93,12 +93,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator RoleExists(ARoleName : string) : boolean; </remarks>
     public class SystemRoleExistsNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			lock (AProgram.Catalog)
+			lock (program.Catalog)
 			{
-				Schema.Object LObject = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[0], false);
-				return LObject is Schema.Role;
+				Schema.Object objectValue = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[0], false);
+				return objectValue is Schema.Role;
 			}
 		}
     }
@@ -106,25 +106,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks>operator RoleHasRight(ARoleName : String, ARightName : Name) : System.Boolean; </remarks>
     public class SystemRoleHasRightNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[0], true) as Schema.Role;
-			return ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).RoleHasRight(LRole, (string)AArguments[1]);
+			Schema.Role role = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[0], true) as Schema.Role;
+			return ((ServerCatalogDeviceSession)program.CatalogDeviceSession).RoleHasRight(role, (string)arguments[1]);
 		}
     }
 
     /// <remarks>operator CreateUser(AUserID : String, AUserName : String, APassword : String); </remarks>
     public class SystemCreateUserNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			AProgram.Plan.CheckRight(Schema.RightNames.CreateUser);
-			string LUserID = (string)AArguments[0];
-			if (((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).UserExists(LUserID))
-				throw new Schema.SchemaException(Schema.SchemaException.Codes.DuplicateUserID, LUserID);
-			Schema.User LUser = new Schema.User(LUserID, (string)AArguments[1], Schema.SecurityUtility.EncryptPassword((string)AArguments[2]));
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).InsertUser(LUser);
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).InsertUserRole(LUser.ID, AProgram.ServerProcess.ServerSession.Server.UserRole.ID);
+			program.Plan.CheckRight(Schema.RightNames.CreateUser);
+			string userID = (string)arguments[0];
+			if (((ServerCatalogDeviceSession)program.CatalogDeviceSession).UserExists(userID))
+				throw new Schema.SchemaException(Schema.SchemaException.Codes.DuplicateUserID, userID);
+			Schema.User user = new Schema.User(userID, (string)arguments[1], Schema.SecurityUtility.EncryptPassword((string)arguments[2]));
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).InsertUser(user);
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).InsertUserRole(user.ID, program.ServerProcess.ServerSession.Server.UserRole.ID);
 			return null;
 		}
     }
@@ -133,15 +133,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator CreateUserWithEncryptedPassword(AUserID : string, AUserName : string, AEncryptedPassword : string, AGroupName : String); </remarks> // Deprecated
     public class SystemCreateUserWithEncryptedPasswordNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			AProgram.Plan.CheckRight(Schema.RightNames.CreateUser);
-			string LUserID = (string)AArguments[0];
-			if (((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).UserExists(LUserID))
-				throw new Schema.SchemaException(Schema.SchemaException.Codes.DuplicateUserID, LUserID);
-			Schema.User LUser = new Schema.User(LUserID, (string)AArguments[1], (string)AArguments[2]);
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).InsertUser(LUser);
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).InsertUserRole(LUser.ID, AProgram.ServerProcess.ServerSession.Server.UserRole.ID);
+			program.Plan.CheckRight(Schema.RightNames.CreateUser);
+			string userID = (string)arguments[0];
+			if (((ServerCatalogDeviceSession)program.CatalogDeviceSession).UserExists(userID))
+				throw new Schema.SchemaException(Schema.SchemaException.Codes.DuplicateUserID, userID);
+			Schema.User user = new Schema.User(userID, (string)arguments[1], (string)arguments[2]);
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).InsertUser(user);
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).InsertUserRole(user.ID, program.ServerProcess.ServerSession.Server.UserRole.ID);
 			return null;
 		}
     }
@@ -149,11 +149,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator SetPassword(AUserID : string, APassword : string); </remarks>
     public class SystemSetPasswordNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			string LUserID = (string)AArguments[0];
-			AProgram.Plan.CheckAuthorized(LUserID);
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetUserPassword(LUserID, Schema.SecurityUtility.EncryptPassword((string)AArguments[1]));
+			string userID = (string)arguments[0];
+			program.Plan.CheckAuthorized(userID);
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).SetUserPassword(userID, Schema.SecurityUtility.EncryptPassword((string)arguments[1]));
 			return null;
 		}
     }
@@ -161,11 +161,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator SetEncryptedPassword(AUserID : string, AEncryptedPassword : string); </remarks>
     public class SystemSetEncryptedPasswordNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			string LUserID = (string)AArguments[0];
-			AProgram.Plan.CheckAuthorized(LUserID);
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetUserPassword(LUserID, (string)AArguments[1]);
+			string userID = (string)arguments[0];
+			program.Plan.CheckAuthorized(userID);
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).SetUserPassword(userID, (string)arguments[1]);
 			return null;
 		}
     }
@@ -173,13 +173,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator ChangePassword(AOldPassword : string, ANewPassword : string); </remarks>
     public class SystemChangePasswordNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.User LUser = AProgram.ServerProcess.ServerSession.User;
-			if (String.Compare((string)AArguments[0], Schema.SecurityUtility.DecryptPassword(LUser.Password), true) != 0)
+			Schema.User user = program.ServerProcess.ServerSession.User;
+			if (String.Compare((string)arguments[0], Schema.SecurityUtility.DecryptPassword(user.Password), true) != 0)
 				throw new ServerException(ServerException.Codes.InvalidPassword);
 
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetUserPassword(LUser.ID, Schema.SecurityUtility.EncryptPassword((string)AArguments[1]));
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).SetUserPassword(user.ID, Schema.SecurityUtility.EncryptPassword((string)arguments[1]));
 			return null;
 		}
     }
@@ -187,12 +187,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator SetUserName(AUserID : string, AUserName : string); </remarks>
     public class SystemSetUserNameNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			string LUserID = (string)AArguments[0];
-			if (String.Compare(AProgram.ServerProcess.ServerSession.User.ID, LUserID, true) != 0)
-				AProgram.Plan.CheckAuthorized(LUserID);
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetUserName(LUserID, (string)AArguments[1]);
+			string userID = (string)arguments[0];
+			if (String.Compare(program.ServerProcess.ServerSession.User.ID, userID, true) != 0)
+				program.Plan.CheckAuthorized(userID);
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).SetUserName(userID, (string)arguments[1]);
 			return null;
 		}
     }
@@ -200,26 +200,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator DropUser(AUserID : string); </remarks>
     public class SystemDropUserNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.User LUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveUser((string)AArguments[0]);
+			Schema.User user = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).ResolveUser((string)arguments[0]);
 			
-			if ((String.Compare(LUser.ID, Server.Engine.CSystemUserID, true) == 0) || (String.Compare(LUser.ID, Server.Engine.CAdminUserID, true) == 0))
+			if ((String.Compare(user.ID, Server.Engine.SystemUserID, true) == 0) || (String.Compare(user.ID, Server.Engine.AdminUserID, true) == 0))
 				throw new ServerException(ServerException.Codes.CannotDropSystemUsers);
 			else
-				AProgram.Plan.CheckRight(Schema.RightNames.DropUser);
+				program.Plan.CheckRight(Schema.RightNames.DropUser);
 				
-			if (((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).UserOwnsObjects(LUser.ID))
-				throw new ServerException(ServerException.Codes.UserOwnsObjects, LUser.ID);
+			if (((ServerCatalogDeviceSession)program.CatalogDeviceSession).UserOwnsObjects(user.ID))
+				throw new ServerException(ServerException.Codes.UserOwnsObjects, user.ID);
 
-			if (((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).UserOwnsRights(LUser.ID))
-				throw new ServerException(ServerException.Codes.UserOwnsRights, LUser.ID);
+			if (((ServerCatalogDeviceSession)program.CatalogDeviceSession).UserOwnsRights(user.ID))
+				throw new ServerException(ServerException.Codes.UserOwnsRights, user.ID);
 				
-			foreach (ServerSession LSession in AProgram.ServerProcess.ServerSession.Server.Sessions)
-				if (String.Compare(LSession.User.ID, LUser.ID, true) == 0)
-					throw new ServerException(ServerException.Codes.UserHasOpenSessions, LUser.ID);
+			foreach (ServerSession session in program.ServerProcess.ServerSession.Server.Sessions)
+				if (String.Compare(session.User.ID, user.ID, true) == 0)
+					throw new ServerException(ServerException.Codes.UserHasOpenSessions, user.ID);
 
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).DeleteUser(LUser);
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).DeleteUser(user);
 			
 			return null;
 		}
@@ -228,25 +228,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator UserExists(AUserID : string) : boolean; </remarks>
     public class SystemUserExistsNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			return ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).UserExists((string)AArguments[0]);
+			return ((ServerCatalogDeviceSession)program.CatalogDeviceSession).UserExists((string)arguments[0]);
 		}
     }
     
     // operator AddUserToRole
     public class SystemAddUserToRoleNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.User LUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveUser((string)AArguments[0]);
-			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[1], true) as Schema.Role;
-			if (LRole == null)
+			Schema.User user = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).ResolveUser((string)arguments[0]);
+			Schema.Role role = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[1], true) as Schema.Role;
+			if (role == null)
 				throw new CompilerException(CompilerException.Codes.RoleIdentifierExpected);
 				
-			AProgram.Plan.CheckAuthorized(LUser.ID);
-			AProgram.Plan.CheckRight(LRole.GetRight(Schema.RightNames.Alter));
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).InsertUserRole(LUser.ID, LRole.ID);
+			program.Plan.CheckAuthorized(user.ID);
+			program.Plan.CheckRight(role.GetRight(Schema.RightNames.Alter));
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).InsertUserRole(user.ID, role.ID);
 			return null;
 		}
     }
@@ -254,16 +254,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // operator RemoveUserFromRole
     public class SystemRemoveUserFromRoleNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.User LUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveUser((string)AArguments[0]);
-			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[1], true) as Schema.Role;
-			if (LRole == null)
+			Schema.User user = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).ResolveUser((string)arguments[0]);
+			Schema.Role role = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[1], true) as Schema.Role;
+			if (role == null)
 				throw new CompilerException(CompilerException.Codes.RoleIdentifierExpected);
 				
-			AProgram.Plan.CheckAuthorized(LUser.ID);
-			AProgram.Plan.CheckRight(LRole.GetRight(Schema.RightNames.Alter));
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).DeleteUserRole(LUser.ID, LRole.ID);
+			program.Plan.CheckAuthorized(user.ID);
+			program.Plan.CheckRight(role.GetRight(Schema.RightNames.Alter));
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).DeleteUserRole(user.ID, role.ID);
 			return null;
 		}
 	}
@@ -272,7 +272,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // operator AddGroupToRole(const AGroupName : String, const ARoleName : Name, const AInherited : Boolean);
     public class SystemAddGroupToRoleNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			// Deprecated, stubbed for backwards compatibility
 			return null;
@@ -282,19 +282,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator GrantRightToRole(ARightName : String, ARoleName : Name); </remarks>
     public class SystemGrantRightToRoleNode : InstructionNode
     {
-		public static void GrantRight(Program AProgram, string ARightName, Schema.Role ARole)
+		public static void GrantRight(Program program, string rightName, Schema.Role role)
 		{
-			AProgram.Plan.CheckRight(ARole.GetRight(Schema.RightNames.Alter));
-			AProgram.Plan.CheckRight(ARightName);
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).GrantRightToRole(ARightName, ARole.ID);
+			program.Plan.CheckRight(role.GetRight(Schema.RightNames.Alter));
+			program.Plan.CheckRight(rightName);
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).GrantRightToRole(rightName, role.ID);
 		}
 		
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[1], true) as Schema.Role;
-			if (LRole == null)
+			Schema.Role role = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[1], true) as Schema.Role;
+			if (role == null)
 				throw new CompilerException(CompilerException.Codes.RoleIdentifierExpected);
-			GrantRight(AProgram, (string)AArguments[0], LRole);
+			GrantRight(program, (string)arguments[0], role);
 			return null;
 		}
     }
@@ -302,11 +302,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator SafeGrantRightToRole(ARightName : String, ARoleName : Name); </remarks>
     public class SystemSafeGrantRightToRoleNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[1], false) as Schema.Role;
-			if (LRole != null)
-				SystemGrantRightToRoleNode.GrantRight(AProgram, (string)AArguments[0], LRole);
+			Schema.Role role = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[1], false) as Schema.Role;
+			if (role != null)
+				SystemGrantRightToRoleNode.GrantRight(program, (string)arguments[0], role);
 			return null;
 		}
     }
@@ -314,7 +314,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks>operator SafeGrantRightToGroup(ARightName : String, AGroupName : String, AInherited : Boolean, AApplyRecursively : Boolean, AIncludeUsers : Boolean); </remarks>
     public class SystemSafeGrantRightToGroupNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			// Deprecated, stubbed for backwards compatibility
 			return null;
@@ -326,17 +326,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     ///	</remarks>
     public class SystemGrantRightToUserNode : InstructionNode
     {
-		public static void GrantRight(Program AProgram, Schema.User AUser, string ARightName)
+		public static void GrantRight(Program program, Schema.User user, string rightName)
 		{
-			AProgram.Plan.CheckAuthorized(AUser.ID);
-			AProgram.Plan.CheckRight(ARightName);
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).GrantRightToUser(ARightName, AUser.ID);
+			program.Plan.CheckAuthorized(user.ID);
+			program.Plan.CheckRight(rightName);
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).GrantRightToUser(rightName, user.ID);
 		}
 		
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.User LUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveUser((string)AArguments[1]);
-			GrantRight(AProgram, LUser, (string)AArguments[0]);
+			Schema.User user = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).ResolveUser((string)arguments[1]);
+			GrantRight(program, user, (string)arguments[0]);
 			return null;
 		}
     }
@@ -346,11 +346,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     ///	</remarks>
     public class SystemSafeGrantRightToUserNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.User LUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveUser((string)AArguments[1], false);
-			if (LUser != null)
-				SystemGrantRightToUserNode.GrantRight(AProgram, LUser, (string)AArguments[0]);
+			Schema.User user = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).ResolveUser((string)arguments[1], false);
+			if (user != null)
+				SystemGrantRightToUserNode.GrantRight(program, user, (string)arguments[0]);
 			return null;
 		}
     }
@@ -360,19 +360,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     ///	</remarks>
     public class SystemRevokeRightFromRoleNode : InstructionNode
     {
-		public static void RevokeRight(Program AProgram, string ARightName, Schema.Role ARole)
+		public static void RevokeRight(Program program, string rightName, Schema.Role role)
 		{
-			AProgram.Plan.CheckRight(ARole.GetRight(Schema.RightNames.Alter));
-			AProgram.Plan.CheckRight(ARightName);
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).RevokeRightFromRole(ARightName, ARole.ID);
+			program.Plan.CheckRight(role.GetRight(Schema.RightNames.Alter));
+			program.Plan.CheckRight(rightName);
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).RevokeRightFromRole(rightName, role.ID);
 		}
 
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[1], true) as Schema.Role;
-			if (LRole == null)
+			Schema.Role role = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[1], true) as Schema.Role;
+			if (role == null)
 				throw new CompilerException(CompilerException.Codes.RoleIdentifierExpected);
-			RevokeRight(AProgram, (string)AArguments[0], LRole);
+			RevokeRight(program, (string)arguments[0], role);
 			return null;
 		}
     }
@@ -382,11 +382,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     ///	</remarks>
     public class SystemSafeRevokeRightFromRoleNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[1], false) as Schema.Role;
-			if (LRole != null)
-				SystemRevokeRightFromRoleNode.RevokeRight(AProgram, (string)AArguments[0], LRole);
+			Schema.Role role = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[1], false) as Schema.Role;
+			if (role != null)
+				SystemRevokeRightFromRoleNode.RevokeRight(program, (string)arguments[0], role);
 			return null;
 		}
     }
@@ -396,17 +396,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     ///	</remarks>
     public class SystemRevokeRightFromUserNode : InstructionNode
     {
-		public static void RevokeRight(Program AProgram, string ARightName, Schema.User AUser)
+		public static void RevokeRight(Program program, string rightName, Schema.User user)
 		{
-			AProgram.Plan.CheckAuthorized(AUser.ID);
-			AProgram.Plan.CheckRight(ARightName);
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).RevokeRightFromUser(ARightName, AUser.ID);
+			program.Plan.CheckAuthorized(user.ID);
+			program.Plan.CheckRight(rightName);
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).RevokeRightFromUser(rightName, user.ID);
 		}
 		
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.User LUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveUser((string)AArguments[1]);
-			RevokeRight(AProgram, (string)AArguments[0], LUser);
+			Schema.User user = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).ResolveUser((string)arguments[1]);
+			RevokeRight(program, (string)arguments[0], user);
 			return null;
 		}
     }
@@ -416,11 +416,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     ///	</remarks>
     public class SystemSafeRevokeRightFromUserNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.User LUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveUser((string)AArguments[1], false);
-			if (LUser != null)
-				SystemRevokeRightFromUserNode.RevokeRight(AProgram, (string)AArguments[0], LUser);
+			Schema.User user = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).ResolveUser((string)arguments[1], false);
+			if (user != null)
+				SystemRevokeRightFromUserNode.RevokeRight(program, (string)arguments[0], user);
 			return null;
 		}
     }
@@ -428,16 +428,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator RevertRightForRole(ARightName : Name, ARoleName : Name);</remarks>
     public class SystemRevertRightForRoleNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			string LRightName = (string)AArguments[0];
-			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[1], true) as Schema.Role;
-			if (LRole == null)
+			string rightName = (string)arguments[0];
+			Schema.Role role = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[1], true) as Schema.Role;
+			if (role == null)
 				throw new CompilerException(CompilerException.Codes.RoleIdentifierExpected);
 
-			AProgram.Plan.CheckRight(LRole.GetRight(Schema.RightNames.Alter));
-			AProgram.Plan.CheckRight(LRightName);
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).RevertRightForRole(LRightName, LRole.ID);
+			program.Plan.CheckRight(role.GetRight(Schema.RightNames.Alter));
+			program.Plan.CheckRight(rightName);
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).RevertRightForRole(rightName, role.ID);
 			return null;
 		}
     }
@@ -445,13 +445,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator RevertRightForUser(ARightName : String, AUserID : String);</remarks>
     public class SystemRevertRightForUserNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			string LRightName = (string)AArguments[0];
-			Schema.User LUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveUser((string)AArguments[1]);
-			AProgram.Plan.CheckAuthorized(LUser.ID);
-			AProgram.Plan.CheckRight(LRightName);
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).RevertRightForUser(LRightName, LUser.ID);
+			string rightName = (string)arguments[0];
+			Schema.User user = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).ResolveUser((string)arguments[1]);
+			program.Plan.CheckAuthorized(user.ID);
+			program.Plan.CheckRight(rightName);
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).RevertRightForUser(rightName, user.ID);
 			return null;
 		}
     }
@@ -459,59 +459,59 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator SetObjectOwner(AObjectName : Name, AUserID : String); </remarks>
     public class SystemSetObjectOwnerNode : InstructionNode
     {
-		private void ChangeObjectOwner(Program AProgram, Schema.CatalogObject AObject, Schema.User AUser)
+		private void ChangeObjectOwner(Program program, Schema.CatalogObject objectValue, Schema.User user)
 		{
-			AObject.Owner = AUser;
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetCatalogObjectOwner(AObject.ID, AUser.ID);
+			objectValue.Owner = user;
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).SetCatalogObjectOwner(objectValue.ID, user.ID);
 
-			if (AObject is Schema.ScalarType)
+			if (objectValue is Schema.ScalarType)
 			{
-				Schema.ScalarType LScalarType = (Schema.ScalarType)AObject;
+				Schema.ScalarType scalarType = (Schema.ScalarType)objectValue;
 				
-				if (LScalarType.EqualityOperator != null)
-					ChangeObjectOwner(AProgram, LScalarType.EqualityOperator, AUser);
+				if (scalarType.EqualityOperator != null)
+					ChangeObjectOwner(program, scalarType.EqualityOperator, user);
 					
-				if (LScalarType.ComparisonOperator != null)
-					ChangeObjectOwner(AProgram, LScalarType.ComparisonOperator, AUser);
+				if (scalarType.ComparisonOperator != null)
+					ChangeObjectOwner(program, scalarType.ComparisonOperator, user);
 				
-				if (LScalarType.IsSpecialOperator != null)
-					ChangeObjectOwner(AProgram, LScalarType.IsSpecialOperator, AUser);
+				if (scalarType.IsSpecialOperator != null)
+					ChangeObjectOwner(program, scalarType.IsSpecialOperator, user);
 					
-				foreach (Schema.Special LSpecial in LScalarType.Specials)
+				foreach (Schema.Special special in scalarType.Specials)
 				{
-					ChangeObjectOwner(AProgram, LSpecial.Selector, AUser);
-					ChangeObjectOwner(AProgram, LSpecial.Comparer, AUser);
+					ChangeObjectOwner(program, special.Selector, user);
+					ChangeObjectOwner(program, special.Comparer, user);
 				}
 				
 				#if USETYPEINHERITANCE	
-				foreach (Schema.Operator LOperator in LScalarType.ExplicitCastOperators)
-					ChangeObjectOwner(AProgram, LOperator, AUser);
+				foreach (Schema.Operator operatorValue in scalarType.ExplicitCastOperators)
+					ChangeObjectOwner(AProgram, operatorValue, AUser);
 				#endif
 					
-				foreach (Schema.Representation LRepresentation in LScalarType.Representations)
+				foreach (Schema.Representation representation in scalarType.Representations)
 				{
-					ChangeObjectOwner(AProgram, LRepresentation.Selector, AUser);
-					foreach (Schema.Property LProperty in LRepresentation.Properties)
+					ChangeObjectOwner(program, representation.Selector, user);
+					foreach (Schema.Property property in representation.Properties)
 					{
-						ChangeObjectOwner(AProgram, LProperty.ReadAccessor, AUser);
-						ChangeObjectOwner(AProgram, LProperty.WriteAccessor, AUser);
+						ChangeObjectOwner(program, property.ReadAccessor, user);
+						ChangeObjectOwner(program, property.WriteAccessor, user);
 					}
 				}
 			}
 		}
 		
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.CatalogObject LObject = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[0], false) as Schema.CatalogObject;
-			if (LObject == null) 
-				throw new Schema.SchemaException(Schema.SchemaException.Codes.CatalogObjectExpected, LObject.Name);
+			Schema.CatalogObject objectValue = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[0], false) as Schema.CatalogObject;
+			if (objectValue == null) 
+				throw new Schema.SchemaException(Schema.SchemaException.Codes.CatalogObjectExpected, objectValue.Name);
 
-			Schema.User LUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveUser((string)AArguments[1]);
-			if (AProgram.Plan.User.ID != LUser.ID)
-				AProgram.Plan.CheckAuthorized(LUser.ID);
-			if (!LObject.IsOwner(AProgram.Plan.User))
-				throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, AProgram.Plan.User.ID);
-			ChangeObjectOwner(AProgram, LObject, LUser);
+			Schema.User user = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).ResolveUser((string)arguments[1]);
+			if (program.Plan.User.ID != user.ID)
+				program.Plan.CheckAuthorized(user.ID);
+			if (!objectValue.IsOwner(program.Plan.User))
+				throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, program.Plan.User.ID);
+			ChangeObjectOwner(program, objectValue, user);
 
 			return null;
 		}
@@ -520,20 +520,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks>operator SetRightOwner(ARightName : Name, AUserID : String); </remarks>
     public class SystemSetRightOwnerNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			string LRightName = (string)AArguments[0];
-			Schema.Right LRight = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveRight(LRightName);
-			Schema.User LUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveUser((string)AArguments[1]);
-			if (LRight.IsGenerated)
-				throw new ServerException(ServerException.Codes.CannotDropGeneratedRight, LRight.Name);
+			string rightName = (string)arguments[0];
+			Schema.Right right = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).ResolveRight(rightName);
+			Schema.User user = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).ResolveUser((string)arguments[1]);
+			if (right.IsGenerated)
+				throw new ServerException(ServerException.Codes.CannotDropGeneratedRight, right.Name);
 				
-			if (AProgram.Plan.User.ID != LUser.ID)
-				AProgram.Plan.CheckAuthorized(LUser.ID);
-			if (!LRight.IsOwner(AProgram.Plan.User.ID))
-				throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, AProgram.Plan.User.ID);
+			if (program.Plan.User.ID != user.ID)
+				program.Plan.CheckAuthorized(user.ID);
+			if (!right.IsOwner(program.Plan.User.ID))
+				throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, program.Plan.User.ID);
 
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetRightOwner(LRightName, LUser.ID);
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).SetRightOwner(rightName, user.ID);
 			return null;
 		}
     }
@@ -541,10 +541,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks>operator UserHasRight(AUserID : String, ARightName : Name) : System.Boolean; </remarks>
     public class SystemUserHasRightNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.User LUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveUser((string)AArguments[0]);
-			return ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).UserHasRight(LUser.ID, (string)AArguments[1]);
+			Schema.User user = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).ResolveUser((string)arguments[0]);
+			return ((ServerCatalogDeviceSession)program.CatalogDeviceSession).UserHasRight(user.ID, (string)arguments[1]);
 		}
     }
 
@@ -552,25 +552,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks>operator CreateDeviceUser(AUserID : string, ADeviceName : System.Name, ADeviceUserID : string, ADevicePassword : string, AConnectionString : string); </remarks>
 	public class SystemCreateDeviceUserNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.User LUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveUser((string)AArguments[0]);
-			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[1], true) as Schema.Device;
-			if (LDevice == null)
+			Schema.User user = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).ResolveUser((string)arguments[0]);
+			Schema.Device device = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[1], true) as Schema.Device;
+			if (device == null)
 				throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected);
-			if (LUser.IsSystemUser())
-				AProgram.Plan.CheckRight(Schema.RightNames.MaintainSystemDeviceUsers);
-			if (LUser.ID != AProgram.Plan.User.ID)
-				AProgram.Plan.CheckAuthorized(LUser.ID);
-			AProgram.Plan.CheckRight(LDevice.GetRight(Schema.RightNames.MaintainUsers));
-			if (((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).DeviceUserExists(LDevice, LUser))
-				throw new Schema.SchemaException(Schema.SchemaException.Codes.DuplicateDeviceUser, LUser.ID, LDevice.Name);
+			if (user.IsSystemUser())
+				program.Plan.CheckRight(Schema.RightNames.MaintainSystemDeviceUsers);
+			if (user.ID != program.Plan.User.ID)
+				program.Plan.CheckAuthorized(user.ID);
+			program.Plan.CheckRight(device.GetRight(Schema.RightNames.MaintainUsers));
+			if (((ServerCatalogDeviceSession)program.CatalogDeviceSession).DeviceUserExists(device, user))
+				throw new Schema.SchemaException(Schema.SchemaException.Codes.DuplicateDeviceUser, user.ID, device.Name);
 				
-			Schema.DeviceUser LDeviceUser = new Schema.DeviceUser(LUser, LDevice, (string)AArguments[2], Schema.SecurityUtility.EncryptPassword((string)AArguments[3]));
-			if ((AArguments.Length == 5) && (AArguments[4] != null))
-				LDeviceUser.ConnectionParameters = (string)AArguments[4];				
+			Schema.DeviceUser deviceUser = new Schema.DeviceUser(user, device, (string)arguments[2], Schema.SecurityUtility.EncryptPassword((string)arguments[3]));
+			if ((arguments.Length == 5) && (arguments[4] != null))
+				deviceUser.ConnectionParameters = (string)arguments[4];				
 			
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).InsertDeviceUser(LDeviceUser);	
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).InsertDeviceUser(deviceUser);	
 			return null;
 		}
 	}
@@ -579,25 +579,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks>operator CreateDeviceUserWithEncryptedPassword(AUserID : String, ADeviceName : System.Name, ADeviceUserID : String, ADevicePassword : String, AConnectionString : String); </remarks>
 	public class SystemCreateDeviceUserWithEncryptedPasswordNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.User LUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveUser((string)AArguments[0]);
-			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[1], true) as Schema.Device;
-			if (LDevice == null)
+			Schema.User user = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).ResolveUser((string)arguments[0]);
+			Schema.Device device = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[1], true) as Schema.Device;
+			if (device == null)
 				throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected);
-			if (LUser.IsSystemUser())
-				AProgram.Plan.CheckRight(Schema.RightNames.MaintainSystemDeviceUsers);
-			if (LUser.ID != AProgram.Plan.User.ID)
-				AProgram.Plan.CheckAuthorized(LUser.ID);
-			AProgram.Plan.CheckRight(LDevice.GetRight(Schema.RightNames.MaintainUsers));
-			if (((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).DeviceUserExists(LDevice, LUser))
-				throw new Schema.SchemaException(Schema.SchemaException.Codes.DuplicateDeviceUser, LUser.ID, LDevice.Name);
+			if (user.IsSystemUser())
+				program.Plan.CheckRight(Schema.RightNames.MaintainSystemDeviceUsers);
+			if (user.ID != program.Plan.User.ID)
+				program.Plan.CheckAuthorized(user.ID);
+			program.Plan.CheckRight(device.GetRight(Schema.RightNames.MaintainUsers));
+			if (((ServerCatalogDeviceSession)program.CatalogDeviceSession).DeviceUserExists(device, user))
+				throw new Schema.SchemaException(Schema.SchemaException.Codes.DuplicateDeviceUser, user.ID, device.Name);
 
-			Schema.DeviceUser LDeviceUser = new Schema.DeviceUser(LUser, LDevice, (string)AArguments[2], (string)AArguments[3]);
-			if ((AArguments.Length == 5) && (AArguments[4] != null))
-				LDeviceUser.ConnectionParameters = (string)AArguments[4];
+			Schema.DeviceUser deviceUser = new Schema.DeviceUser(user, device, (string)arguments[2], (string)arguments[3]);
+			if ((arguments.Length == 5) && (arguments[4] != null))
+				deviceUser.ConnectionParameters = (string)arguments[4];
 
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).InsertDeviceUser(LDeviceUser);
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).InsertDeviceUser(deviceUser);
 			return null;
 		}
 	}
@@ -605,19 +605,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator SetDeviceUserID(AUserID : string, ADeviceName : System.Name, ADeviceUserID : string); </remarks>
     public class SystemSetDeviceUserIDNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.User LUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveUser((string)AArguments[0]);
-			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[1], true) as Schema.Device;
-			if (LDevice == null)
+			Schema.User user = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).ResolveUser((string)arguments[0]);
+			Schema.Device device = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[1], true) as Schema.Device;
+			if (device == null)
 				throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected);
-			if (LUser.IsSystemUser())
-				AProgram.Plan.CheckRight(Schema.RightNames.MaintainSystemDeviceUsers);
-			if (LUser.ID != AProgram.Plan.User.ID)
-				AProgram.Plan.CheckAuthorized(LUser.ID);
-			AProgram.Plan.CheckRight(LDevice.GetRight(Schema.RightNames.MaintainUsers));
-			Schema.DeviceUser LDeviceUser = AProgram.CatalogDeviceSession.ResolveDeviceUser(LDevice, LUser);
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetDeviceUserID(LDeviceUser, (string)AArguments[2]);
+			if (user.IsSystemUser())
+				program.Plan.CheckRight(Schema.RightNames.MaintainSystemDeviceUsers);
+			if (user.ID != program.Plan.User.ID)
+				program.Plan.CheckAuthorized(user.ID);
+			program.Plan.CheckRight(device.GetRight(Schema.RightNames.MaintainUsers));
+			Schema.DeviceUser deviceUser = program.CatalogDeviceSession.ResolveDeviceUser(device, user);
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).SetDeviceUserID(deviceUser, (string)arguments[2]);
 			//LDeviceUser.DeviceUserID = (string)AArguments[2];
 			//((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).UpdateDeviceUser(LDeviceUser);
 			return null;
@@ -627,19 +627,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator SetDeviceUserConnectionParameters(AUserID : string, ADeviceName : System.Name, AConnectionParameters : String); </remarks>
     public class SystemSetDeviceUserConnectionParametersNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.User LUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveUser((string)AArguments[0]);
-			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[1], true) as Schema.Device;
-			if (LDevice == null)
+			Schema.User user = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).ResolveUser((string)arguments[0]);
+			Schema.Device device = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[1], true) as Schema.Device;
+			if (device == null)
 				throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected);
-			if (LUser.IsSystemUser())
-				AProgram.Plan.CheckRight(Schema.RightNames.MaintainSystemDeviceUsers);
-			if (LUser.ID != AProgram.Plan.User.ID)
-				AProgram.Plan.CheckAuthorized(LUser.ID);
-			AProgram.Plan.CheckRight(LDevice.GetRight(Schema.RightNames.MaintainUsers));
-			Schema.DeviceUser LDeviceUser = AProgram.CatalogDeviceSession.ResolveDeviceUser(LDevice, LUser);
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetDeviceUserConnectionParameters(LDeviceUser, (string)AArguments[2]);
+			if (user.IsSystemUser())
+				program.Plan.CheckRight(Schema.RightNames.MaintainSystemDeviceUsers);
+			if (user.ID != program.Plan.User.ID)
+				program.Plan.CheckAuthorized(user.ID);
+			program.Plan.CheckRight(device.GetRight(Schema.RightNames.MaintainUsers));
+			Schema.DeviceUser deviceUser = program.CatalogDeviceSession.ResolveDeviceUser(device, user);
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).SetDeviceUserConnectionParameters(deviceUser, (string)arguments[2]);
 			//LDeviceUser.ConnectionParameters = (string)AArguments[2];
 			//((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).UpdateDeviceUser(LDeviceUser);
 			return null;
@@ -649,19 +649,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator SetDeviceUserPassword(AUserID : string, ADeviceName : System.Name, ADevicePassword : string); </remarks>
     public class SystemSetDeviceUserPasswordNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.User LUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveUser((string)AArguments[0]);
-			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[1], true) as Schema.Device;
-			if (LDevice == null)
+			Schema.User user = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).ResolveUser((string)arguments[0]);
+			Schema.Device device = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[1], true) as Schema.Device;
+			if (device == null)
 				throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected);
-			if (LUser.IsSystemUser())
-				AProgram.Plan.CheckRight(Schema.RightNames.MaintainSystemDeviceUsers);
-			if (LUser.ID != AProgram.Plan.User.ID)
-				AProgram.Plan.CheckAuthorized(LUser.ID);
-			AProgram.Plan.CheckRight(LDevice.GetRight(Schema.RightNames.MaintainUsers));
-			Schema.DeviceUser LDeviceUser = AProgram.CatalogDeviceSession.ResolveDeviceUser(LDevice, LUser);
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetDeviceUserPassword(LDeviceUser, Schema.SecurityUtility.EncryptPassword((string)AArguments[2]));
+			if (user.IsSystemUser())
+				program.Plan.CheckRight(Schema.RightNames.MaintainSystemDeviceUsers);
+			if (user.ID != program.Plan.User.ID)
+				program.Plan.CheckAuthorized(user.ID);
+			program.Plan.CheckRight(device.GetRight(Schema.RightNames.MaintainUsers));
+			Schema.DeviceUser deviceUser = program.CatalogDeviceSession.ResolveDeviceUser(device, user);
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).SetDeviceUserPassword(deviceUser, Schema.SecurityUtility.EncryptPassword((string)arguments[2]));
 			//LDeviceUser.DevicePassword = Schema.SecurityUtility.EncryptPassword((string)AArguments[2]);
 			//((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).UpdateDeviceUser(LDeviceUser);
 			return null;
@@ -671,19 +671,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator ChangeDeviceUserPasswordNode(ADeviceName : System.Name, AOldPassword : string, ANewPassword : string); </remarks>
     public class SystemChangeDeviceUserPasswordNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[0], true) as Schema.Device;
-			if (LDevice == null)
+			Schema.Device device = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[0], true) as Schema.Device;
+			if (device == null)
 				throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected);
-			Schema.User LUser = AProgram.ServerProcess.ServerSession.User;
-			if (LUser.ID != AProgram.Plan.User.ID)
-				throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, AProgram.Plan.User.ID);
+			Schema.User user = program.ServerProcess.ServerSession.User;
+			if (user.ID != program.Plan.User.ID)
+				throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, program.Plan.User.ID);
 				
-			Schema.DeviceUser LDeviceUser = AProgram.CatalogDeviceSession.ResolveDeviceUser(LDevice, LUser);
-			if (String.Compare((string)AArguments[1], Schema.SecurityUtility.DecryptPassword(LDeviceUser.DevicePassword), true) != 0)
+			Schema.DeviceUser deviceUser = program.CatalogDeviceSession.ResolveDeviceUser(device, user);
+			if (String.Compare((string)arguments[1], Schema.SecurityUtility.DecryptPassword(deviceUser.DevicePassword), true) != 0)
 				throw new ServerException(ServerException.Codes.InvalidPassword);
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).SetDeviceUserPassword(LDeviceUser, Schema.SecurityUtility.EncryptPassword((string)AArguments[2]));
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).SetDeviceUserPassword(deviceUser, Schema.SecurityUtility.EncryptPassword((string)arguments[2]));
 			//LDeviceUser.DevicePassword = Schema.SecurityUtility.EncryptPassword((string)AArguments[2]);
 			//((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).UpdateDeviceUser(LDeviceUser);
 			return null;
@@ -693,19 +693,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator DropDeviceUser(AUserID : string, ADeviceName : System.Name); </remarks>
     public class SystemDropDeviceUserNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.User LUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveUser((string)AArguments[0]);
-			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[1], true) as Schema.Device;
-			if (LDevice == null)
+			Schema.User user = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).ResolveUser((string)arguments[0]);
+			Schema.Device device = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[1], true) as Schema.Device;
+			if (device == null)
 				throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected);
-			if (LUser.IsSystemUser())
-				AProgram.Plan.CheckRight(Schema.RightNames.MaintainSystemDeviceUsers);
-			if (LUser.ID != AProgram.Plan.User.ID)
-				AProgram.Plan.CheckAuthorized(LUser.ID);
-			AProgram.Plan.CheckRight(LDevice.GetRight(Schema.RightNames.MaintainUsers));
-			Schema.DeviceUser LDeviceUser = AProgram.CatalogDeviceSession.ResolveDeviceUser(LDevice, LUser);
-			((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).DeleteDeviceUser(LDeviceUser);
+			if (user.IsSystemUser())
+				program.Plan.CheckRight(Schema.RightNames.MaintainSystemDeviceUsers);
+			if (user.ID != program.Plan.User.ID)
+				program.Plan.CheckAuthorized(user.ID);
+			program.Plan.CheckRight(device.GetRight(Schema.RightNames.MaintainUsers));
+			Schema.DeviceUser deviceUser = program.CatalogDeviceSession.ResolveDeviceUser(device, user);
+			((ServerCatalogDeviceSession)program.CatalogDeviceSession).DeleteDeviceUser(deviceUser);
 			return null;
 		}
     }
@@ -713,14 +713,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator DeviceUserExists(AUserID : string, ADeviceName : System.Name) : boolean; </remarks>
     public class SystemDeviceUserExistsNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			Schema.User LUser = ((ServerCatalogDeviceSession)AProgram.CatalogDeviceSession).ResolveUser((string)AArguments[0]);
-			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArguments[1], true) as Schema.Device;
-			if (LDevice == null)
+			Schema.User user = ((ServerCatalogDeviceSession)program.CatalogDeviceSession).ResolveUser((string)arguments[0]);
+			Schema.Device device = Compiler.ResolveCatalogIdentifier(program.Plan, (string)arguments[1], true) as Schema.Device;
+			if (device == null)
 				throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected);
-			Schema.DeviceUser LDeviceUser = AProgram.CatalogDeviceSession.ResolveDeviceUser(LDevice, LUser, false);
-			return LDeviceUser != null;
+			Schema.DeviceUser deviceUser = program.CatalogDeviceSession.ResolveDeviceUser(device, user, false);
+			return deviceUser != null;
 		}
     }
 }

@@ -11,103 +11,103 @@ namespace Alphora.Dataphor.Frontend.Client
 {
 	public class SetPropertyAction : Action, ISetPropertyAction, INodeReference, ISourceReference
 	{
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 			Node = null;
 			Source = null;
 		}
 
 		// Node
 
-		private INode FNode;
+		private INode _node;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("The target node that will be set.")]
 		public INode Node
 		{
-			get { return FNode; }
+			get { return _node; }
 			set
 			{
-				if (FNode != null)
-					FNode.Disposed -= new EventHandler(NodeDisposed);
-				FNode = value;
-				if (FNode != null)
-					FNode.Disposed += new EventHandler(NodeDisposed);
+				if (_node != null)
+					_node.Disposed -= new EventHandler(NodeDisposed);
+				_node = value;
+				if (_node != null)
+					_node.Disposed += new EventHandler(NodeDisposed);
 			}
 		}
 
-		private void NodeDisposed(object ASender, EventArgs AArgs)
+		private void NodeDisposed(object sender, EventArgs args)
 		{
 			Node = null;
 		}
 
 		// MemberName
 
-		private string FMemberName = String.Empty;
+		private string _memberName = String.Empty;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.MemberNameConverter,Alphora.Dataphor.Frontend.Client")]
 		[DefaultValue("")]
 		[Description("The target member to set.")]
 		public string MemberName
 		{
-			get { return FMemberName; }
-			set { FMemberName = value; }
+			get { return _memberName; }
+			set { _memberName = value; }
 		}
 
 		// Value
 
-		private string FValue = String.Empty;
+		private string _value = String.Empty;
 		[DefaultValue("")]
 		[Description("The value to set the target member to.")]
 		public string Value
 		{
-			get { return FValue; }
-			set { FValue = value; }
+			get { return _value; }
+			set { _value = value; }
 		}
 
 		// Source
 
-		private ISource FSource;
+		private ISource _source;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("The source where the value will be retrieved from.")]
 		public ISource Source
 		{
-			get { return FSource; }
+			get { return _source; }
 			set
 			{
-				if (FSource != value)
+				if (_source != value)
 				{
-					if (FSource != null) 
+					if (_source != null) 
 					{
-						FSource.Disposed -= new EventHandler(SourceDisposed);
+						_source.Disposed -= new EventHandler(SourceDisposed);
 					}
-					FSource = value;
-					if (FSource != null) 
+					_source = value;
+					if (_source != null) 
 					{
-						FSource.Disposed += new EventHandler(SourceDisposed);
+						_source.Disposed += new EventHandler(SourceDisposed);
 					}
 				}
 			}
 		}
 
-		protected virtual void SourceDisposed(object ASender, EventArgs AArgs)
+		protected virtual void SourceDisposed(object sender, EventArgs args)
 		{
 			Source = null;
 		}
 
 		// ColumnName
 
-		private string FColumnName = String.Empty;
+		private string _columnName = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.ColumnNameConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("The name of the column in the data source this element is associated with.")]
 		public string ColumnName
 		{
-			get { return FColumnName; }
+			get { return _columnName; }
 			set
 			{
-				if (FColumnName != value)
+				if (_columnName != value)
 				{
-					FColumnName = value;
+					_columnName = value;
 				}
 			}
 		}
@@ -116,23 +116,23 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		public override bool GetEnabled()
 		{
-			return base.GetEnabled() && (FNode != null) && (FMemberName != String.Empty) 
+			return base.GetEnabled() && (_node != null) && (_memberName != String.Empty) 
 				&& 
 				(
-					(FSource == null)
-						|| ((FSource.DataView != null) && FSource.DataView.Active && !FSource.DataView.IsEmpty())
+					(_source == null)
+						|| ((_source.DataView != null) && _source.DataView.Active && !_source.DataView.IsEmpty())
 				);
 		}
 
 		/// <summary> Sets the target member to value. </summary>
-		protected override void InternalExecute(INode ASender, EventParams AParams)
+		protected override void InternalExecute(INode sender, EventParams paramsValue)
 		{
-			string LValue;
-			if (FSource == null)
-				LValue = FValue;
+			string value;
+			if (_source == null)
+				value = _value;
 			else
-				LValue = FSource.DataView.Fields[FColumnName].AsString;
-			ReflectionUtility.SetInstanceMember(FNode, FMemberName, LValue);
+				value = _source.DataView.Fields[_columnName].AsString;
+			ReflectionUtility.SetInstanceMember(_node, _memberName, value);
 		}
 	}
 }

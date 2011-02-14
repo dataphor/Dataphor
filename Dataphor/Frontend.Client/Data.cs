@@ -26,43 +26,43 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <summary>  Creates DataSource and DataLink objects and hooks the event handlers of the DataLink. </summary>
 		public Source() : base()
 		{
-			FCursorType = DAE.CursorType.Dynamic;
-			FRequestedIsolation = DAE.CursorIsolation.Browse;
-			FRequestedCapabilities = DAE.CursorCapability.Navigable | DAE.CursorCapability.BackwardsNavigable | DAE.CursorCapability.Bookmarkable | DAE.CursorCapability.Searchable | DAE.CursorCapability.Updateable;
-			FDataSource = new DataSource();
+			_cursorType = DAE.CursorType.Dynamic;
+			_requestedIsolation = DAE.CursorIsolation.Browse;
+			_requestedCapabilities = DAE.CursorCapability.Navigable | DAE.CursorCapability.BackwardsNavigable | DAE.CursorCapability.Bookmarkable | DAE.CursorCapability.Searchable | DAE.CursorCapability.Updateable;
+			_dataSource = new DataSource();
 			try
 			{
-				FDataLink = new DataLink();
+				_dataLink = new DataLink();
 				try
 				{
-					FDataLink.Source = FDataSource;
-					FDataLink.OnActiveChanged += new DataLinkHandler(ActiveChangedAction);
-					FDataLink.OnStateChanged += new DataLinkHandler(StateChangedAction);
-					FDataLink.OnDataChanged += new DataLinkHandler(DataChangedAction);
-					FDataLink.OnRowChanging += new DataLinkFieldHandler(RowChangingAction);
-					FDataLink.OnRowChanged += new DataLinkFieldHandler(RowChangedAction);
+					_dataLink.Source = _dataSource;
+					_dataLink.OnActiveChanged += new DataLinkHandler(ActiveChangedAction);
+					_dataLink.OnStateChanged += new DataLinkHandler(StateChangedAction);
+					_dataLink.OnDataChanged += new DataLinkHandler(DataChangedAction);
+					_dataLink.OnRowChanging += new DataLinkFieldHandler(RowChangingAction);
+					_dataLink.OnRowChanged += new DataLinkFieldHandler(RowChangedAction);
 				}
 				catch
 				{
-					FDataLink.Dispose();
-					FDataLink = null;
+					_dataLink.Dispose();
+					_dataLink = null;
 					throw;
 				}
 			}
 			catch
 			{
-				FDataSource.Dispose();
-				FDataSource = null;
+				_dataSource.Dispose();
+				_dataSource = null;
 				throw;
 			}
 		}
 
 		/// <remarks> Removes the DataSource and DataLink objects and unhooks the event handlers of the DataLink. </remarks>
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 				Surrogate = null;
 				Master = null;
 				OnChange = null;
@@ -90,24 +90,24 @@ namespace Alphora.Dataphor.Frontend.Client
 			{
 				try
 				{
-					if (FDataLink != null)
+					if (_dataLink != null)
 					{
-						FDataLink.OnActiveChanged -= new DataLinkHandler(ActiveChangedAction);
-						FDataLink.OnStateChanged -= new DataLinkHandler(StateChangedAction);
-						FDataLink.OnDataChanged -= new DataLinkHandler(DataChangedAction);
-						FDataLink.OnRowChanging -= new DataLinkFieldHandler(RowChangingAction);
-						FDataLink.OnRowChanged -= new DataLinkFieldHandler(RowChangedAction);
-						FDataLink.Source = null;
-						FDataLink.Dispose();
-						FDataLink = null;
+						_dataLink.OnActiveChanged -= new DataLinkHandler(ActiveChangedAction);
+						_dataLink.OnStateChanged -= new DataLinkHandler(StateChangedAction);
+						_dataLink.OnDataChanged -= new DataLinkHandler(DataChangedAction);
+						_dataLink.OnRowChanging -= new DataLinkFieldHandler(RowChangingAction);
+						_dataLink.OnRowChanged -= new DataLinkFieldHandler(RowChangedAction);
+						_dataLink.Source = null;
+						_dataLink.Dispose();
+						_dataLink = null;
 					}
 				}
 				finally
 				{
-					if (FDataSource != null)
+					if (_dataSource != null)
 					{
-						FDataSource.Dispose();
-						FDataSource = null;
+						_dataSource.Dispose();
+						_dataSource = null;
 					}
 				}
 			}
@@ -115,53 +115,53 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		public event DataLinkHandler ActiveChanged
 		{
-			add { FDataLink.OnActiveChanged += value; }
-			remove { FDataLink.OnActiveChanged -= value; }
+			add { _dataLink.OnActiveChanged += value; }
+			remove { _dataLink.OnActiveChanged -= value; }
 		}
 		
 		public event DataLinkHandler StateChanged
 		{
-			add { FDataLink.OnStateChanged += value; }
-			remove { FDataLink.OnStateChanged -= value; }
+			add { _dataLink.OnStateChanged += value; }
+			remove { _dataLink.OnStateChanged -= value; }
 		}
 
 		public event DataLinkHandler DataChanged
 		{
-			add { FDataLink.OnDataChanged += value; }
-			remove { FDataLink.OnDataChanged -= value; }
+			add { _dataLink.OnDataChanged += value; }
+			remove { _dataLink.OnDataChanged -= value; }
 		}
 		
 		public event DataLinkFieldHandler RowChanging
 		{
-			add { FDataLink.OnRowChanging += value; }
-			remove { FDataLink.OnRowChanging -= value; }
+			add { _dataLink.OnRowChanging += value; }
+			remove { _dataLink.OnRowChanging -= value; }
 		}
 		
 		public event DataLinkFieldHandler RowChanged
 		{
-			add { FDataLink.OnRowChanged += value; }
-			remove { FDataLink.OnRowChanged -= value; }
+			add { _dataLink.OnRowChanged += value; }
+			remove { _dataLink.OnRowChanged -= value; }
 		}
 		
 		public event DataLinkHandler Default
 		{
-			add { FDataLink.OnDefault += value; }
-			remove { FDataLink.OnDefault -= value; }
+			add { _dataLink.OnDefault += value; }
+			remove { _dataLink.OnDefault -= value; }
 		}
 		
 		// CursorType
 		
-		private DAE.CursorType FCursorType = DAE.CursorType.Dynamic;
+		private DAE.CursorType _cursorType = DAE.CursorType.Dynamic;
 		[DefaultValue(DAE.CursorType.Dynamic)]
 		[Description("Determines the behavior of the cursor with respect to updates made after the cursor is opened.  If the cursor type is dynamic, updates made through the cursor will be visible.  If the cursor type is static, updates will not be visible.")]
 		public DAE.CursorType CursorType
 		{
-			get { return FCursorType; }
+			get { return _cursorType; }
 			set 
 			{ 
-				if (FCursorType != value)
+				if (_cursorType != value)
 				{
-					FCursorType = value;
+					_cursorType = value;
 					if (Active && Enabled)
 						InternalUpdateView();
 				}
@@ -170,17 +170,17 @@ namespace Alphora.Dataphor.Frontend.Client
 		
 		// IsolationLevel
 
-		private DAE.IsolationLevel FIsolationLevel = DAE.IsolationLevel.Browse;
+		private DAE.IsolationLevel _isolationLevel = DAE.IsolationLevel.Browse;
 		[DefaultValue(DAE.IsolationLevel.Browse)]
 		[Description("The isolation level for transactions performed by this view.")]
 		public DAE.IsolationLevel IsolationLevel
 		{
-			get { return FIsolationLevel; }
+			get { return _isolationLevel; }
 			set 
 			{ 
-				if (FIsolationLevel != value)
+				if (_isolationLevel != value)
 				{
-					FIsolationLevel = value; 
+					_isolationLevel = value; 
 					if (Active && Enabled)
 						InternalUpdateView();
 				}
@@ -189,17 +189,17 @@ namespace Alphora.Dataphor.Frontend.Client
 		
 		// RequestedIsolation
 
-		private DAE.CursorIsolation FRequestedIsolation;
+		private DAE.CursorIsolation _requestedIsolation;
 		[DefaultValue(DAE.CursorIsolation.Browse)]
 		[Description("The requested relative isolation of the cursor.  This will be used in conjunction with the isolation level of the transaction to determine the actual isolation of the cursor.")]
 		public DAE.CursorIsolation RequestedIsolation
 		{
-			get { return FRequestedIsolation; }
+			get { return _requestedIsolation; }
 			set 
 			{ 
-				if (FRequestedIsolation != value)
+				if (_requestedIsolation != value)
 				{
-					FRequestedIsolation = value; 
+					_requestedIsolation = value; 
 					if (Active && Enabled)
 						InternalUpdateView();
 				}
@@ -208,7 +208,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		// RequestedCapabilities
 
-		private DAE.CursorCapability FRequestedCapabilities;
+		private DAE.CursorCapability _requestedCapabilities;
 		[
 			DefaultValue
 			(
@@ -222,12 +222,12 @@ namespace Alphora.Dataphor.Frontend.Client
 		[Description("Determines the requested behavior of the cursor")]
 		public DAE.CursorCapability RequestedCapabilities
 		{
-			get { return FRequestedCapabilities; }
+			get { return _requestedCapabilities; }
 			set 
 			{ 
-				if (FRequestedCapabilities != value)
+				if (_requestedCapabilities != value)
 				{
-					FRequestedCapabilities = value; 
+					_requestedCapabilities = value; 
 					if (Active && Enabled)
 						InternalUpdateView();
 				}
@@ -236,19 +236,19 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		// Expression
 
-		private string FExpression = String.Empty;
+		private string _expression = String.Empty;
 		[DefaultValue("")]
 		[Description("The expression to be used to select the data set.")]
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string Expression
 		{
-			get { return FExpression; }
+			get { return _expression; }
 			set
 			{
-				if (FExpression != value)
+				if (_expression != value)
 				{
-					FExpression = ( value == null ? String.Empty : value );
+					_expression = ( value == null ? String.Empty : value );
 					if (Active && Enabled)
 						InternalUpdateView();
 				}
@@ -257,101 +257,101 @@ namespace Alphora.Dataphor.Frontend.Client
 		
 		// InsertStatement
 		
-		private string FInsertStatement = String.Empty;
+		private string _insertStatement = String.Empty;
 		[DefaultValue("")]
 		[Description("A single statement of D4 to be used to override the default insert behavior of the source.  The new columns are accessible as parameters by their names, qualified by 'New.'.")]
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string InsertStatement
 		{
-			get { return FInsertStatement; }
+			get { return _insertStatement; }
 			set
 			{
-				if (FInsertStatement != value)
+				if (_insertStatement != value)
 				{
-					FInsertStatement = value == null ? String.Empty : value;
-					if (FDataView != null)
-						FDataView.InsertStatement = FInsertStatement;
+					_insertStatement = value == null ? String.Empty : value;
+					if (_dataView != null)
+						_dataView.InsertStatement = _insertStatement;
 				}
 			}
 		}
 		
 		// UpdateStatement
 
-		private string FUpdateStatement = String.Empty;
+		private string _updateStatement = String.Empty;
 		[DefaultValue("")]
 		[Description("A single statement of D4 to be used to override the default update behavior of the source.  The new and old columns are accessible as parameters by their names, qualified by 'New.' and 'Old.'.")]
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string UpdateStatement
 		{
-			get { return FUpdateStatement; }
+			get { return _updateStatement; }
 			set
 			{
-				if (FUpdateStatement != value)
+				if (_updateStatement != value)
 				{
-					FUpdateStatement = value == null ? String.Empty : value;
-					if (FDataView != null)
-						FDataView.UpdateStatement = FUpdateStatement;
+					_updateStatement = value == null ? String.Empty : value;
+					if (_dataView != null)
+						_dataView.UpdateStatement = _updateStatement;
 				}
 			}
 		}
 		
 		// DeleteStatement
 
-		private string FDeleteStatement = String.Empty;
+		private string _deleteStatement = String.Empty;
 		[DefaultValue("")]
 		[Description("A single statement of D4 to be used to override the default delete behavior of the source.  The old columns are accessible as parameters by their names, qualified by 'Old.'.")]
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string DeleteStatement
 		{
-			get { return FDeleteStatement; }
+			get { return _deleteStatement; }
 			set
 			{
-				if (FDeleteStatement != value)
+				if (_deleteStatement != value)
 				{
-					FDeleteStatement = value == null ? String.Empty : value;
-					if (FDataView != null)
-						FDataView.DeleteStatement = FDeleteStatement;
+					_deleteStatement = value == null ? String.Empty : value;
+					if (_dataView != null)
+						_dataView.DeleteStatement = _deleteStatement;
 				}
 			}
 		}
 		
 		// Filter
 
-		private string FFilter = String.Empty;
+		private string _filter = String.Empty;
 		[DefaultValue("")]
 		[Description("The filter expression to apply to the data source.")]
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string Filter
 		{
-			get { return FFilter; }
+			get { return _filter; }
 			set
 			{
-				if (FFilter != value)
+				if (_filter != value)
 				{
-					FFilter = value == null ? String.Empty : value;
-					if (FDataView != null) // don't call UpdateDataview because we want to ignore the filter if we are surrogate (just like we ignore the expression).
-						FDataView.Filter = FFilter;
+					_filter = value == null ? String.Empty : value;
+					if (_dataView != null) // don't call UpdateDataview because we want to ignore the filter if we are surrogate (just like we ignore the expression).
+						_dataView.Filter = _filter;
 				}
 			}
 		}
 
 		// Enabled
 
-		private bool FEnabled = true;
+		private bool _enabled = true;
 		[DefaultValue(true)]
 		[Description("Represents the state of the data source.")]
 		public bool Enabled
 		{
-			get { return FEnabled; }
+			get { return _enabled; }
 			set 
 			{ 
-				if (FEnabled != value) 
+				if (_enabled != value) 
 				{
-					FEnabled = value; 
+					_enabled = value; 
 					if (Active)
 						InternalUpdateView();
 				}
@@ -360,727 +360,727 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		// OnChange
 
-		protected IAction FOnChange;
+		protected IAction _onChange;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed when a different row in the dataset is selected.")]
 		public IAction OnChange
 		{
-			get { return FOnChange; }
+			get { return _onChange; }
 			set
 			{
-				if (FOnChange != value)
+				if (_onChange != value)
 				{
-					if (FOnChange != null)
-						FOnChange.Disposed -= new EventHandler(ChangeActionDisposed);
-					FOnChange = value;
-					if (FOnChange != null)
-						FOnChange.Disposed += new EventHandler(ChangeActionDisposed);
+					if (_onChange != null)
+						_onChange.Disposed -= new EventHandler(ChangeActionDisposed);
+					_onChange = value;
+					if (_onChange != null)
+						_onChange.Disposed += new EventHandler(ChangeActionDisposed);
 				}
 			}
 		}
 		
-		protected void ChangeActionDisposed(object ASender, EventArgs AArgs)
+		protected void ChangeActionDisposed(object sender, EventArgs args)
 		{
 			OnChange = null;
 		}
 
-		protected void DataChangedAction(DataLink ALink, DataSet ADataSet)
+		protected void DataChangedAction(DataLink link, DataSet dataSet)
 		{
-			if (Active && (FOnChange != null))
-				FOnChange.Execute(this, new EventParams());
+			if (Active && (_onChange != null))
+				_onChange.Execute(this, new EventParams());
 		}
 			
 		// OnRowChanging
 
-		protected IAction FOnRowChanging;
+		protected IAction _onRowChanging;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed when a field in the current row in the dataset is changing.")]
 		public IAction OnRowChanging
 		{
-			get { return FOnRowChanging; }
+			get { return _onRowChanging; }
 			set
 			{
-				if (FOnRowChanging != value)
+				if (_onRowChanging != value)
 				{
-					if (FOnRowChanging != null)
-						FOnRowChanging.Disposed -= new EventHandler(RowChangingActionDisposed);
-					FOnRowChanging = value;
-					if (FOnRowChanging != null)
-						FOnRowChanging.Disposed += new EventHandler(RowChangingActionDisposed);
+					if (_onRowChanging != null)
+						_onRowChanging.Disposed -= new EventHandler(RowChangingActionDisposed);
+					_onRowChanging = value;
+					if (_onRowChanging != null)
+						_onRowChanging.Disposed += new EventHandler(RowChangingActionDisposed);
 				}
 			}
 		}
 		
-		protected void RowChangingActionDisposed(object ASender, EventArgs AArgs)
+		protected void RowChangingActionDisposed(object sender, EventArgs args)
 		{
 			OnRowChanging = null;
 		}
 
-		protected void RowChangingAction(DataLink ALink, DataSet ADataSet, DataField AField)
+		protected void RowChangingAction(DataLink link, DataSet dataSet, DataField field)
 		{
-			if (Active && (FOnRowChanging != null))
-				FOnRowChanging.Execute(this, new EventParams("AField", AField));
+			if (Active && (_onRowChanging != null))
+				_onRowChanging.Execute(this, new EventParams("AField", field));
 		}
 			
 		// OnRowChange
 
-		protected IAction FOnRowChange;
+		protected IAction _onRowChange;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed when a field in the current row in the dataset is changed.")]
 		public IAction OnRowChange
 		{
-			get { return FOnRowChange; }
+			get { return _onRowChange; }
 			set
 			{
-				if (FOnRowChange != value)
+				if (_onRowChange != value)
 				{
-					if (FOnRowChange != null)
-						FOnRowChange.Disposed -= new EventHandler(RowChangeActionDisposed);
-					FOnRowChange = value;
-					if (FOnRowChange != null)
-						FOnRowChange.Disposed += new EventHandler(RowChangeActionDisposed);
+					if (_onRowChange != null)
+						_onRowChange.Disposed -= new EventHandler(RowChangeActionDisposed);
+					_onRowChange = value;
+					if (_onRowChange != null)
+						_onRowChange.Disposed += new EventHandler(RowChangeActionDisposed);
 				}
 			}
 		}
 		
-		protected void RowChangeActionDisposed(object ASender, EventArgs AArgs)
+		protected void RowChangeActionDisposed(object sender, EventArgs args)
 		{
 			OnRowChange = null;
 		}
 
-		protected void RowChangedAction(DataLink ALink, DataSet ADataSet, DataField AField)
+		protected void RowChangedAction(DataLink link, DataSet dataSet, DataField field)
 		{
-			if (Active && (FOnRowChange != null))
-				FOnRowChange.Execute(this, new EventParams("AField", AField));
+			if (Active && (_onRowChange != null))
+				_onRowChange.Execute(this, new EventParams("AField", field));
 		}
 			
 		// OnActiveChange
 
-		protected IAction FOnActiveChange;
+		protected IAction _onActiveChange;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed when the dataset's active property changes.")]
 		public IAction OnActiveChange
 		{
-			get { return FOnActiveChange; }
+			get { return _onActiveChange; }
 			set
 			{
-				if (FOnActiveChange != value)
+				if (_onActiveChange != value)
 				{
-					if (FOnActiveChange != null)
-						FOnActiveChange.Disposed += new EventHandler(ActiveChangedActionDisposed);
-					FOnActiveChange = value;
-					if (FOnActiveChange != null)
-						FOnActiveChange.Disposed -= new EventHandler(ActiveChangedActionDisposed);
+					if (_onActiveChange != null)
+						_onActiveChange.Disposed += new EventHandler(ActiveChangedActionDisposed);
+					_onActiveChange = value;
+					if (_onActiveChange != null)
+						_onActiveChange.Disposed -= new EventHandler(ActiveChangedActionDisposed);
 				}
 			}
 		}
 		
-		protected void ActiveChangedActionDisposed(object ASender, EventArgs AArgs)
+		protected void ActiveChangedActionDisposed(object sender, EventArgs args)
 		{
 			OnActiveChange = null;
 		}
 
-		protected void ActiveChangedAction(DataLink ALink, DataSet ADataSet)
+		protected void ActiveChangedAction(DataLink link, DataSet dataSet)
 		{
-			if (Active && (FOnActiveChange != null))
-				FOnActiveChange.Execute(this, new EventParams());
+			if (Active && (_onActiveChange != null))
+				_onActiveChange.Execute(this, new EventParams());
 		}
 			
 		// OnStateChange
 
-		protected IAction FOnStateChange;
+		protected IAction _onStateChange;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed when a the dataset's state changes.")]
 		public IAction OnStateChange
 		{
-			get { return FOnStateChange; }
+			get { return _onStateChange; }
 			set
 			{
-				if (FOnStateChange != value)
+				if (_onStateChange != value)
 				{
-					if (FOnStateChange != null)
-						FOnStateChange.Disposed -= new EventHandler(StateChangedActionDisposed);
-					FOnStateChange = value;
-					if (FOnStateChange != null)
-						FOnStateChange.Disposed += new EventHandler(StateChangedActionDisposed);
+					if (_onStateChange != null)
+						_onStateChange.Disposed -= new EventHandler(StateChangedActionDisposed);
+					_onStateChange = value;
+					if (_onStateChange != null)
+						_onStateChange.Disposed += new EventHandler(StateChangedActionDisposed);
 				}
 			}
 		}
 		
-		protected void StateChangedActionDisposed(object ASender, EventArgs AArgs)
+		protected void StateChangedActionDisposed(object sender, EventArgs args)
 		{
 			OnStateChange = null;
 		}
 
-		protected void StateChangedAction(DataLink ALink, DataSet ADataSet)
+		protected void StateChangedAction(DataLink link, DataSet dataSet)
 		{
-			if (Active && (FOnStateChange != null))
-				FOnStateChange.Execute(this, new EventParams());
+			if (Active && (_onStateChange != null))
+				_onStateChange.Execute(this, new EventParams());
 		}
 			
 		// OnDefault
 
-		protected IAction FOnDefault;
+		protected IAction _onDefault;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed to allow for setting of default values for a new row. Values set during this action will not set the modified of the source.")]
 		public IAction OnDefault
 		{
-			get { return FOnDefault; }
+			get { return _onDefault; }
 			set
 			{
-				if (FOnDefault != value)
+				if (_onDefault != value)
 				{
-					if (FOnDefault != null)
-						FOnDefault.Disposed -= new EventHandler(DefaultActionDisposed);
-					FOnDefault = value;
-					if (FOnDefault != null)
-						FOnDefault.Disposed += new EventHandler(DefaultActionDisposed);
+					if (_onDefault != null)
+						_onDefault.Disposed -= new EventHandler(DefaultActionDisposed);
+					_onDefault = value;
+					if (_onDefault != null)
+						_onDefault.Disposed += new EventHandler(DefaultActionDisposed);
 				}
 			}
 		}
 		
-		protected void DefaultActionDisposed(object ASender, EventArgs AArgs)
+		protected void DefaultActionDisposed(object sender, EventArgs args)
 		{
 			OnDefault = null;
 		}
 
-		protected void DefaultAction(object ASender, EventArgs AArgs)
+		protected void DefaultAction(object sender, EventArgs args)
 		{
-			if (Active && (FOnDefault != null))
-				FOnDefault.Execute(this, new EventParams());
+			if (Active && (_onDefault != null))
+				_onDefault.Execute(this, new EventParams());
 		}
 			
 		// OnValidate
 
-		protected IAction FOnValidate;
+		protected IAction _onValidate;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed before the data set posts the current row.  An exception here will prevent the dataset from posting.")]
 		public IAction OnValidate
 		{
-			get { return FOnValidate; }
+			get { return _onValidate; }
 			set
 			{
-				if (FOnValidate != value)
+				if (_onValidate != value)
 				{
-					if (FOnValidate != null)
-						FOnValidate.Disposed -= new EventHandler(ValidatedActionDisposed);
-					FOnValidate = value;
-					if (FOnValidate != null)
-						FOnValidate.Disposed += new EventHandler(ValidatedActionDisposed);
+					if (_onValidate != null)
+						_onValidate.Disposed -= new EventHandler(ValidatedActionDisposed);
+					_onValidate = value;
+					if (_onValidate != null)
+						_onValidate.Disposed += new EventHandler(ValidatedActionDisposed);
 				}
 			}
 		}
 		
-		protected void ValidatedActionDisposed(object ASender, EventArgs AArgs)
+		protected void ValidatedActionDisposed(object sender, EventArgs args)
 		{
 			OnValidate = null;
 		}
 
-		protected void ValidatedAction(object ASender, EventArgs AArgs)
+		protected void ValidatedAction(object sender, EventArgs args)
 		{
-			if (Active && (FOnValidate != null))
-				FOnValidate.Execute(this, new EventParams());
+			if (Active && (_onValidate != null))
+				_onValidate.Execute(this, new EventParams());
 		}
 			
 		// BeforeOpen
 
-		protected IAction FBeforeOpen;
+		protected IAction _beforeOpen;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed before the data set opens.")]
 		public IAction BeforeOpen
 		{
-			get { return FBeforeOpen; }
+			get { return _beforeOpen; }
 			set
 			{
-				if (FBeforeOpen != value)
+				if (_beforeOpen != value)
 				{
-					if (FBeforeOpen != null)
-						FBeforeOpen.Disposed -= new EventHandler(BeforeOpenActionDisposed);
-					FBeforeOpen = value;
-					if (FBeforeOpen != null)
-						FBeforeOpen.Disposed += new EventHandler(BeforeOpenActionDisposed);
+					if (_beforeOpen != null)
+						_beforeOpen.Disposed -= new EventHandler(BeforeOpenActionDisposed);
+					_beforeOpen = value;
+					if (_beforeOpen != null)
+						_beforeOpen.Disposed += new EventHandler(BeforeOpenActionDisposed);
 				}
 			}
 		}
 		
-		protected void BeforeOpenActionDisposed(object ASender, EventArgs AArgs)
+		protected void BeforeOpenActionDisposed(object sender, EventArgs args)
 		{
 			BeforeOpen = null;
 		}
 
-		protected void BeforeOpenAction(object ASender, EventArgs AArgs)
+		protected void BeforeOpenAction(object sender, EventArgs args)
 		{
-			if (Active && (FBeforeOpen != null))
-				FBeforeOpen.Execute(this, new EventParams());
+			if (Active && (_beforeOpen != null))
+				_beforeOpen.Execute(this, new EventParams());
 		}
 			
 		// AfterOpen
 
-		protected IAction FAfterOpen;
+		protected IAction _afterOpen;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed after the data set opens.")]
 		public IAction AfterOpen
 		{
-			get { return FAfterOpen; }
+			get { return _afterOpen; }
 			set
 			{
-				if (FAfterOpen != value)
+				if (_afterOpen != value)
 				{
-					if (FAfterOpen != null)
-						FAfterOpen.Disposed -= new EventHandler(AfterOpenActionDisposed);
-					FAfterOpen = value;
-					if (FAfterOpen != null)
-						FAfterOpen.Disposed += new EventHandler(AfterOpenActionDisposed);
+					if (_afterOpen != null)
+						_afterOpen.Disposed -= new EventHandler(AfterOpenActionDisposed);
+					_afterOpen = value;
+					if (_afterOpen != null)
+						_afterOpen.Disposed += new EventHandler(AfterOpenActionDisposed);
 				}
 			}
 		}
 		
-		protected void AfterOpenActionDisposed(object ASender, EventArgs AArgs)
+		protected void AfterOpenActionDisposed(object sender, EventArgs args)
 		{
 			AfterOpen = null;
 		}
 
-		protected void AfterOpenAction(object ASender, EventArgs AArgs)
+		protected void AfterOpenAction(object sender, EventArgs args)
 		{
-			if (Active && (FAfterOpen != null))
-				FAfterOpen.Execute(this, new EventParams());
+			if (Active && (_afterOpen != null))
+				_afterOpen.Execute(this, new EventParams());
 		}
 			
 		// BeforeClose
 
-		protected IAction FBeforeClose;
+		protected IAction _beforeClose;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed before the data set closes.")]
 		public IAction BeforeClose
 		{
-			get { return FBeforeClose; }
+			get { return _beforeClose; }
 			set
 			{
-				if (FBeforeClose != value)
+				if (_beforeClose != value)
 				{
-					if (FBeforeClose != null)
-						FBeforeClose.Disposed -= new EventHandler(BeforeCloseActionDisposed);
-					FBeforeClose = value;
-					if (FBeforeClose != null)
-						FBeforeClose.Disposed += new EventHandler(BeforeCloseActionDisposed);
+					if (_beforeClose != null)
+						_beforeClose.Disposed -= new EventHandler(BeforeCloseActionDisposed);
+					_beforeClose = value;
+					if (_beforeClose != null)
+						_beforeClose.Disposed += new EventHandler(BeforeCloseActionDisposed);
 				}
 			}
 		}
 		
-		protected void BeforeCloseActionDisposed(object ASender, EventArgs AArgs)
+		protected void BeforeCloseActionDisposed(object sender, EventArgs args)
 		{
 			BeforeClose = null;
 		}
 
-		protected void BeforeCloseAction(object ASender, EventArgs AArgs)
+		protected void BeforeCloseAction(object sender, EventArgs args)
 		{
-			if (Active && (FBeforeClose != null))
-				FBeforeClose.Execute(this, new EventParams());
+			if (Active && (_beforeClose != null))
+				_beforeClose.Execute(this, new EventParams());
 		}
 			
 		// AfterClose
 
-		protected IAction FAfterClose;
+		protected IAction _afterClose;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed after the data set closes.")]
 		public IAction AfterClose
 		{
-			get { return FAfterClose; }
+			get { return _afterClose; }
 			set
 			{
-				if (FAfterClose != value)
+				if (_afterClose != value)
 				{
-					if (FAfterClose != null)
-						FAfterClose.Disposed -= new EventHandler(AfterCloseActionDisposed);
-					FAfterClose = value;
-					if (FAfterClose != null)
-						FAfterClose.Disposed += new EventHandler(AfterCloseActionDisposed);
+					if (_afterClose != null)
+						_afterClose.Disposed -= new EventHandler(AfterCloseActionDisposed);
+					_afterClose = value;
+					if (_afterClose != null)
+						_afterClose.Disposed += new EventHandler(AfterCloseActionDisposed);
 				}
 			}
 		}
 		
-		protected void AfterCloseActionDisposed(object ASender, EventArgs AArgs)
+		protected void AfterCloseActionDisposed(object sender, EventArgs args)
 		{
 			AfterClose = null;
 		}
 
-		protected void AfterCloseAction(object ASender, EventArgs AArgs)
+		protected void AfterCloseAction(object sender, EventArgs args)
 		{
-			if (Active && (FAfterClose != null))
-				FAfterClose.Execute(this, new EventParams());
+			if (Active && (_afterClose != null))
+				_afterClose.Execute(this, new EventParams());
 		}
 			
 		// BeforeInsert
 
-		protected IAction FBeforeInsert;
+		protected IAction _beforeInsert;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed before the data set enters insert state.")]
 		public IAction BeforeInsert
 		{
-			get { return FBeforeInsert; }
+			get { return _beforeInsert; }
 			set
 			{
-				if (FBeforeInsert != value)
+				if (_beforeInsert != value)
 				{
-					if (FBeforeInsert != null)
-						FBeforeInsert.Disposed -= new EventHandler(BeforeInsertActionDisposed);
-					FBeforeInsert = value;
-					if (FBeforeInsert != null)
-						FBeforeInsert.Disposed += new EventHandler(BeforeInsertActionDisposed);
+					if (_beforeInsert != null)
+						_beforeInsert.Disposed -= new EventHandler(BeforeInsertActionDisposed);
+					_beforeInsert = value;
+					if (_beforeInsert != null)
+						_beforeInsert.Disposed += new EventHandler(BeforeInsertActionDisposed);
 				}
 			}
 		}
 		
-		protected void BeforeInsertActionDisposed(object ASender, EventArgs AArgs)
+		protected void BeforeInsertActionDisposed(object sender, EventArgs args)
 		{
 			BeforeInsert = null;
 		}
 
-		protected void BeforeInsertAction(object ASender, EventArgs AArgs)
+		protected void BeforeInsertAction(object sender, EventArgs args)
 		{
-			if (Active && (FBeforeInsert != null))
-				FBeforeInsert.Execute(this, new EventParams());
+			if (Active && (_beforeInsert != null))
+				_beforeInsert.Execute(this, new EventParams());
 		}
 			
 		// AfterInsert
 
-		protected IAction FAfterInsert;
+		protected IAction _afterInsert;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed after the data set enters insert state.")]
 		public IAction AfterInsert
 		{
-			get { return FAfterInsert; }
+			get { return _afterInsert; }
 			set
 			{
-				if (FAfterInsert != value)
+				if (_afterInsert != value)
 				{
-					if (FAfterInsert != null)
-						FAfterInsert.Disposed -= new EventHandler(AfterInsertActionDisposed);
-					FAfterInsert = value;
-					if (FAfterInsert != null)
-						FAfterInsert.Disposed += new EventHandler(AfterInsertActionDisposed);
+					if (_afterInsert != null)
+						_afterInsert.Disposed -= new EventHandler(AfterInsertActionDisposed);
+					_afterInsert = value;
+					if (_afterInsert != null)
+						_afterInsert.Disposed += new EventHandler(AfterInsertActionDisposed);
 				}
 			}
 		}
 		
-		protected void AfterInsertActionDisposed(object ASender, EventArgs AArgs)
+		protected void AfterInsertActionDisposed(object sender, EventArgs args)
 		{
 			AfterInsert = null;
 		}
 
-		protected void AfterInsertAction(object ASender, EventArgs AArgs)
+		protected void AfterInsertAction(object sender, EventArgs args)
 		{
-			if (Active && (FAfterInsert != null))
-				FAfterInsert.Execute(this, new EventParams());
+			if (Active && (_afterInsert != null))
+				_afterInsert.Execute(this, new EventParams());
 		}
 			
 		// BeforeEdit
 
-		protected IAction FBeforeEdit;
+		protected IAction _beforeEdit;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed before the data set enters edit state.")]
 		public IAction BeforeEdit
 		{
-			get { return FBeforeEdit; }
+			get { return _beforeEdit; }
 			set
 			{
-				if (FBeforeEdit != value)
+				if (_beforeEdit != value)
 				{
-					if (FBeforeEdit != null)
-						FBeforeEdit.Disposed -= new EventHandler(BeforeEditActionDisposed);
-					FBeforeEdit = value;
-					if (FBeforeEdit != null)
-						FBeforeEdit.Disposed += new EventHandler(BeforeEditActionDisposed);
+					if (_beforeEdit != null)
+						_beforeEdit.Disposed -= new EventHandler(BeforeEditActionDisposed);
+					_beforeEdit = value;
+					if (_beforeEdit != null)
+						_beforeEdit.Disposed += new EventHandler(BeforeEditActionDisposed);
 				}
 			}
 		}
 		
-		protected void BeforeEditActionDisposed(object ASender, EventArgs AArgs)
+		protected void BeforeEditActionDisposed(object sender, EventArgs args)
 		{
 			BeforeEdit = null;
 		}
 
-		protected void BeforeEditAction(object ASender, EventArgs AArgs)
+		protected void BeforeEditAction(object sender, EventArgs args)
 		{
-			if (Active && (FBeforeEdit != null))
-				FBeforeEdit.Execute(this, new EventParams());
+			if (Active && (_beforeEdit != null))
+				_beforeEdit.Execute(this, new EventParams());
 		}
 			
 		// AfterEdit
 
-		protected IAction FAfterEdit;
+		protected IAction _afterEdit;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed after the data set enters edit state.")]
 		public IAction AfterEdit
 		{
-			get { return FAfterEdit; }
+			get { return _afterEdit; }
 			set
 			{
-				if (FAfterEdit != value)
+				if (_afterEdit != value)
 				{
-					if (FAfterEdit != null)
-						FAfterEdit.Disposed -= new EventHandler(AfterEditActionDisposed);
-					FAfterEdit = value;
-					if (FAfterEdit != null)
-						FAfterEdit.Disposed += new EventHandler(AfterEditActionDisposed);
+					if (_afterEdit != null)
+						_afterEdit.Disposed -= new EventHandler(AfterEditActionDisposed);
+					_afterEdit = value;
+					if (_afterEdit != null)
+						_afterEdit.Disposed += new EventHandler(AfterEditActionDisposed);
 				}
 			}
 		}
 		
-		protected void AfterEditActionDisposed(object ASender, EventArgs AArgs)
+		protected void AfterEditActionDisposed(object sender, EventArgs args)
 		{
 			AfterEdit = null;
 		}
 
-		protected void AfterEditAction(object ASender, EventArgs AArgs)
+		protected void AfterEditAction(object sender, EventArgs args)
 		{
-			if (Active && (FAfterEdit != null))
-				FAfterEdit.Execute(this, new EventParams());
+			if (Active && (_afterEdit != null))
+				_afterEdit.Execute(this, new EventParams());
 		}
 			
 		// BeforeDelete
 
-		protected IAction FBeforeDelete;
+		protected IAction _beforeDelete;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed before a row in the data set is deleted.")]
 		public IAction BeforeDelete
 		{
-			get { return FBeforeDelete; }
+			get { return _beforeDelete; }
 			set
 			{
-				if (FBeforeDelete != value)
+				if (_beforeDelete != value)
 				{
-					if (FBeforeDelete != null)
-						FBeforeDelete.Disposed -= new EventHandler(BeforeDeleteActionDisposed);
-					FBeforeDelete = value;
-					if (FBeforeDelete != null)
-						FBeforeDelete.Disposed += new EventHandler(BeforeDeleteActionDisposed);
+					if (_beforeDelete != null)
+						_beforeDelete.Disposed -= new EventHandler(BeforeDeleteActionDisposed);
+					_beforeDelete = value;
+					if (_beforeDelete != null)
+						_beforeDelete.Disposed += new EventHandler(BeforeDeleteActionDisposed);
 				}
 			}
 		}
 		
-		protected void BeforeDeleteActionDisposed(object ASender, EventArgs AArgs)
+		protected void BeforeDeleteActionDisposed(object sender, EventArgs args)
 		{
 			BeforeDelete = null;
 		}
 
-		protected void BeforeDeleteAction(object ASender, EventArgs AArgs)
+		protected void BeforeDeleteAction(object sender, EventArgs args)
 		{
-			if (Active && (FBeforeDelete != null))
-				FBeforeDelete.Execute(this, new EventParams());
+			if (Active && (_beforeDelete != null))
+				_beforeDelete.Execute(this, new EventParams());
 		}
 			
 		// AfterDelete
 
-		protected IAction FAfterDelete;
+		protected IAction _afterDelete;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed after a row in the data set is deleted.")]
 		public IAction AfterDelete
 		{
-			get { return FAfterDelete; }
+			get { return _afterDelete; }
 			set
 			{
-				if (FAfterDelete != value)
+				if (_afterDelete != value)
 				{
-					if (FAfterDelete != null)
-						FAfterDelete.Disposed -= new EventHandler(AfterDeleteActionDisposed);
-					FAfterDelete = value;
-					if (FAfterDelete != null)
-						FAfterDelete.Disposed += new EventHandler(AfterDeleteActionDisposed);
+					if (_afterDelete != null)
+						_afterDelete.Disposed -= new EventHandler(AfterDeleteActionDisposed);
+					_afterDelete = value;
+					if (_afterDelete != null)
+						_afterDelete.Disposed += new EventHandler(AfterDeleteActionDisposed);
 				}
 			}
 		}
 		
-		protected void AfterDeleteActionDisposed(object ASender, EventArgs AArgs)
+		protected void AfterDeleteActionDisposed(object sender, EventArgs args)
 		{
 			AfterDelete = null;
 		}
 
-		protected void AfterDeleteAction(object ASender, EventArgs AArgs)
+		protected void AfterDeleteAction(object sender, EventArgs args)
 		{
-			if (Active && (FAfterDelete != null))
-				FAfterDelete.Execute(this, new EventParams());
+			if (Active && (_afterDelete != null))
+				_afterDelete.Execute(this, new EventParams());
 		}
 			
 		// BeforePost
 
-		protected IAction FBeforePost;
+		protected IAction _beforePost;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed before the data set is posted.")]
 		public IAction BeforePost
 		{
-			get { return FBeforePost; }
+			get { return _beforePost; }
 			set
 			{
-				if (FBeforePost != value)
+				if (_beforePost != value)
 				{
-					if (FBeforePost != null)
-						FBeforePost.Disposed -= new EventHandler(BeforePostActionDisposed);
-					FBeforePost = value;
-					if (FBeforePost != null)
-						FBeforePost.Disposed += new EventHandler(BeforePostActionDisposed);
+					if (_beforePost != null)
+						_beforePost.Disposed -= new EventHandler(BeforePostActionDisposed);
+					_beforePost = value;
+					if (_beforePost != null)
+						_beforePost.Disposed += new EventHandler(BeforePostActionDisposed);
 				}
 			}
 		}
 		
-		protected void BeforePostActionDisposed(object ASender, EventArgs AArgs)
+		protected void BeforePostActionDisposed(object sender, EventArgs args)
 		{
 			BeforePost = null;
 		}
 
-		protected void BeforePostAction(object ASender, EventArgs AArgs)
+		protected void BeforePostAction(object sender, EventArgs args)
 		{
-			if (Active && (FBeforePost != null))
-				FBeforePost.Execute(this, new EventParams());
+			if (Active && (_beforePost != null))
+				_beforePost.Execute(this, new EventParams());
 		}
 			
 		// AfterPost
 
-		protected IAction FAfterPost;
+		protected IAction _afterPost;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed after the data set is posted.")]
 		public IAction AfterPost
 		{
-			get { return FAfterPost; }
+			get { return _afterPost; }
 			set
 			{
-				if (FAfterPost != value)
+				if (_afterPost != value)
 				{
-					if (FAfterPost != null)
-						FAfterPost.Disposed -= new EventHandler(AfterPostActionDisposed);
-					FAfterPost = value;
-					if (FAfterPost != null)
-						FAfterPost.Disposed += new EventHandler(AfterPostActionDisposed);
+					if (_afterPost != null)
+						_afterPost.Disposed -= new EventHandler(AfterPostActionDisposed);
+					_afterPost = value;
+					if (_afterPost != null)
+						_afterPost.Disposed += new EventHandler(AfterPostActionDisposed);
 				}
 			}
 		}
 		
-		protected void AfterPostActionDisposed(object ASender, EventArgs AArgs)
+		protected void AfterPostActionDisposed(object sender, EventArgs args)
 		{
 			AfterPost = null;
 		}
 
-		protected void AfterPostAction(object ASender, EventArgs AArgs)
+		protected void AfterPostAction(object sender, EventArgs args)
 		{
-			if (Active && (FAfterPost != null))
-				FAfterPost.Execute(this, new EventParams());
+			if (Active && (_afterPost != null))
+				_afterPost.Execute(this, new EventParams());
 		}
 			
 		// BeforeCancel
 
-		protected IAction FBeforeCancel;
+		protected IAction _beforeCancel;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed before the data set is canceled.")]
 		public IAction BeforeCancel
 		{
-			get { return FBeforeCancel; }
+			get { return _beforeCancel; }
 			set
 			{
-				if (FBeforeCancel != value)
+				if (_beforeCancel != value)
 				{
-					if (FBeforeCancel != null)
-						FBeforeCancel.Disposed -= new EventHandler(BeforeCancelActionDisposed);
-					FBeforeCancel = value;
-					if (FBeforeCancel != null)
-						FBeforeCancel.Disposed += new EventHandler(BeforeCancelActionDisposed);
+					if (_beforeCancel != null)
+						_beforeCancel.Disposed -= new EventHandler(BeforeCancelActionDisposed);
+					_beforeCancel = value;
+					if (_beforeCancel != null)
+						_beforeCancel.Disposed += new EventHandler(BeforeCancelActionDisposed);
 				}
 			}
 		}
 		
-		protected void BeforeCancelActionDisposed(object ASender, EventArgs AArgs)
+		protected void BeforeCancelActionDisposed(object sender, EventArgs args)
 		{
 			BeforeCancel = null;
 		}
 
-		protected void BeforeCancelAction(object ASender, EventArgs AArgs)
+		protected void BeforeCancelAction(object sender, EventArgs args)
 		{
-			if (Active && (FBeforeCancel != null))
-				FBeforeCancel.Execute(this, new EventParams());
+			if (Active && (_beforeCancel != null))
+				_beforeCancel.Execute(this, new EventParams());
 		}
 			
 		// AfterCancel
 
-		protected IAction FAfterCancel;
+		protected IAction _afterCancel;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action that will be executed after the data set is canceled.")]
 		public IAction AfterCancel
 		{
-			get { return FAfterCancel; }
+			get { return _afterCancel; }
 			set
 			{
-				if (FAfterCancel != value)
+				if (_afterCancel != value)
 				{
-					if (FAfterCancel != null)
-						FAfterCancel.Disposed -= new EventHandler(AfterCancelActionDisposed);
-					FAfterCancel = value;
-					if (FAfterCancel != null)
-						FAfterCancel.Disposed += new EventHandler(AfterCancelActionDisposed);
+					if (_afterCancel != null)
+						_afterCancel.Disposed -= new EventHandler(AfterCancelActionDisposed);
+					_afterCancel = value;
+					if (_afterCancel != null)
+						_afterCancel.Disposed += new EventHandler(AfterCancelActionDisposed);
 				}
 			}
 		}
 		
-		protected void AfterCancelActionDisposed(object ASender, EventArgs AArgs)
+		protected void AfterCancelActionDisposed(object sender, EventArgs args)
 		{
 			AfterCancel = null;
 		}
 
-		protected void AfterCancelAction(object ASender, EventArgs AArgs)
+		protected void AfterCancelAction(object sender, EventArgs args)
 		{
-			if (Active && (FAfterCancel != null))
-				FAfterCancel.Execute(this, new EventParams());
+			if (Active && (_afterCancel != null))
+				_afterCancel.Execute(this, new EventParams());
 		}
 			
 		// DataLink
 
-		private DataLink FDataLink;
+		private DataLink _dataLink;
 
 		// DataSource
 
-		private DataSource FDataSource;
+		private DataSource _dataSource;
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
 		public DataSource DataSource
 		{
-			get { return FDataSource; }
+			get { return _dataSource; }
 		}
 
 		// DataView
 
-		private DataView FDataView;
+		private DataView _dataView;
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
 		public DataView DataView
 		{
-			get { return (DataView)FDataSource.DataSet; }
+			get { return (DataView)_dataSource.DataSet; }
 		}
 
 		private void ClearDataView()
 		{
 			try
 			{
-				if ((FDataView != null) && (FSurrogate == null))
+				if ((_dataView != null) && (_surrogate == null))
 				{
 					//try
 					//{
-						FDataView.OnErrors -= new ErrorsOccurredHandler(ErrorsOccurred);
-						FDataView.OnValidate -= new EventHandler(ValidatedAction);
-						FDataView.OnDefault -= new EventHandler(DefaultAction);
-						FDataView.BeforeOpen -= new EventHandler(BeforeOpenAction);
-						FDataView.AfterOpen -= new EventHandler(AfterOpenAction);
-						FDataView.BeforeClose -= new EventHandler(BeforeCloseAction);
-						FDataView.AfterClose -= new EventHandler(AfterCloseAction);
-						FDataView.BeforeInsert -= new EventHandler(BeforeInsertAction);
-						FDataView.AfterInsert -= new EventHandler(AfterInsertAction);
-						FDataView.BeforeEdit -= new EventHandler(BeforeEditAction);
-						FDataView.AfterEdit -= new EventHandler(AfterEditAction);
-						FDataView.BeforeDelete -= new EventHandler(BeforeDeleteAction);
-						FDataView.AfterDelete -= new EventHandler(AfterDeleteAction);
-						FDataView.BeforePost -= new EventHandler(BeforePostAction);
-						FDataView.AfterPost -= new EventHandler(AfterPostAction);
-						FDataView.BeforeCancel -= new EventHandler(BeforeCancelAction);
-						FDataView.AfterCancel -= new EventHandler(AfterCancelAction);
-						FDataView.Dispose();
-						FDataView = null;
+						_dataView.OnErrors -= new ErrorsOccurredHandler(ErrorsOccurred);
+						_dataView.OnValidate -= new EventHandler(ValidatedAction);
+						_dataView.OnDefault -= new EventHandler(DefaultAction);
+						_dataView.BeforeOpen -= new EventHandler(BeforeOpenAction);
+						_dataView.AfterOpen -= new EventHandler(AfterOpenAction);
+						_dataView.BeforeClose -= new EventHandler(BeforeCloseAction);
+						_dataView.AfterClose -= new EventHandler(AfterCloseAction);
+						_dataView.BeforeInsert -= new EventHandler(BeforeInsertAction);
+						_dataView.AfterInsert -= new EventHandler(AfterInsertAction);
+						_dataView.BeforeEdit -= new EventHandler(BeforeEditAction);
+						_dataView.AfterEdit -= new EventHandler(AfterEditAction);
+						_dataView.BeforeDelete -= new EventHandler(BeforeDeleteAction);
+						_dataView.AfterDelete -= new EventHandler(AfterDeleteAction);
+						_dataView.BeforePost -= new EventHandler(BeforePostAction);
+						_dataView.AfterPost -= new EventHandler(AfterPostAction);
+						_dataView.BeforeCancel -= new EventHandler(BeforeCancelAction);
+						_dataView.AfterCancel -= new EventHandler(AfterCancelAction);
+						_dataView.Dispose();
+						_dataView = null;
 					//}  
 					//finally
 					//{
@@ -1096,34 +1096,34 @@ namespace Alphora.Dataphor.Frontend.Client
 		
 		protected virtual DataView CreateDataView()
 		{
-			DataView LResult = new DataView();
+			DataView result = new DataView();
 			try
 			{
-				LResult.Session = HostNode.Session.DataSession;
-				LResult.BeginScript = FBeginScript;
-				LResult.EndScript = FEndScript;
-				LResult.UseBrowse = FUseBrowse;
-				LResult.UseApplicationTransactions = FUseApplicationTransactions;
-				LResult.ShouldEnlist = FShouldEnlist;
-				LResult.CursorType = FCursorType;
-				LResult.IsolationLevel = FIsolationLevel;
-				LResult.RequestedIsolation = FRequestedIsolation;
-				LResult.RequestedCapabilities = FRequestedCapabilities;
-				LResult.IsReadOnly = FIsReadOnly;
-				LResult.IsWriteOnly = FIsWriteOnly;
-				LResult.RefreshAfterPost = FRefreshAfterPost;
-				LResult.Expression = FExpression;
-				LResult.InsertStatement = FInsertStatement;
-				LResult.UpdateStatement = FUpdateStatement;
-				LResult.DeleteStatement = FDeleteStatement;
-				LResult.Filter = FFilter;
-				LResult.OnErrors += new ErrorsOccurredHandler(ErrorsOccurred);
+				result.Session = HostNode.Session.DataSession;
+				result.BeginScript = _beginScript;
+				result.EndScript = _endScript;
+				result.UseBrowse = _useBrowse;
+				result.UseApplicationTransactions = _useApplicationTransactions;
+				result.ShouldEnlist = _shouldEnlist;
+				result.CursorType = _cursorType;
+				result.IsolationLevel = _isolationLevel;
+				result.RequestedIsolation = _requestedIsolation;
+				result.RequestedCapabilities = _requestedCapabilities;
+				result.IsReadOnly = _isReadOnly;
+				result.IsWriteOnly = _isWriteOnly;
+				result.RefreshAfterPost = _refreshAfterPost;
+				result.Expression = _expression;
+				result.InsertStatement = _insertStatement;
+				result.UpdateStatement = _updateStatement;
+				result.DeleteStatement = _deleteStatement;
+				result.Filter = _filter;
+				result.OnErrors += new ErrorsOccurredHandler(ErrorsOccurred);
 				
-				return LResult;
+				return result;
 			}
 			catch
 			{
-				LResult.Dispose();
+				result.Dispose();
 				throw;
 			}
 		}
@@ -1136,33 +1136,33 @@ namespace Alphora.Dataphor.Frontend.Client
 
 			if (Enabled)
 			{
-				if ((FSurrogate != null) && FSurrogate.Enabled)
-					DataSource.DataSet = FSurrogate.DataView;
+				if ((_surrogate != null) && _surrogate.Enabled)
+					DataSource.DataSet = _surrogate.DataView;
 				else
 				{
-					FDataView = CreateDataView();
-					FDataView.OnValidate += new EventHandler(ValidatedAction);
-					FDataView.OnDefault += new EventHandler(DefaultAction);
-					FDataView.BeforeOpen += new EventHandler(BeforeOpenAction);
-					FDataView.AfterOpen += new EventHandler(AfterOpenAction);
-					FDataView.BeforeClose += new EventHandler(BeforeCloseAction);
-					FDataView.AfterClose += new EventHandler(AfterCloseAction);
-					FDataView.BeforeInsert += new EventHandler(BeforeInsertAction);
-					FDataView.AfterInsert += new EventHandler(AfterInsertAction);
-					FDataView.BeforeEdit += new EventHandler(BeforeEditAction);
-					FDataView.AfterEdit += new EventHandler(AfterEditAction);
-					FDataView.BeforeDelete += new EventHandler(BeforeDeleteAction);
-					FDataView.AfterDelete += new EventHandler(AfterDeleteAction);
-					FDataView.BeforePost += new EventHandler(BeforePostAction);
-					FDataView.AfterPost += new EventHandler(AfterPostAction);
-					FDataView.BeforeCancel += new EventHandler(BeforeCancelAction);
-					FDataView.AfterCancel += new EventHandler(AfterCancelAction);
-					DataSource.DataSet = FDataView;
+					_dataView = CreateDataView();
+					_dataView.OnValidate += new EventHandler(ValidatedAction);
+					_dataView.OnDefault += new EventHandler(DefaultAction);
+					_dataView.BeforeOpen += new EventHandler(BeforeOpenAction);
+					_dataView.AfterOpen += new EventHandler(AfterOpenAction);
+					_dataView.BeforeClose += new EventHandler(BeforeCloseAction);
+					_dataView.AfterClose += new EventHandler(AfterCloseAction);
+					_dataView.BeforeInsert += new EventHandler(BeforeInsertAction);
+					_dataView.AfterInsert += new EventHandler(AfterInsertAction);
+					_dataView.BeforeEdit += new EventHandler(BeforeEditAction);
+					_dataView.AfterEdit += new EventHandler(AfterEditAction);
+					_dataView.BeforeDelete += new EventHandler(BeforeDeleteAction);
+					_dataView.AfterDelete += new EventHandler(AfterDeleteAction);
+					_dataView.BeforePost += new EventHandler(BeforePostAction);
+					_dataView.AfterPost += new EventHandler(AfterPostAction);
+					_dataView.BeforeCancel += new EventHandler(BeforeCancelAction);
+					_dataView.AfterCancel += new EventHandler(AfterCancelAction);
+					DataSource.DataSet = _dataView;
 					InternalUpdateMaster();
 					InternalUpdateParams();
 					try 
 					{
-						FDataView.Open(FOpenState);
+						_dataView.Open(_openState);
 					}
 					catch
 					{
@@ -1178,126 +1178,126 @@ namespace Alphora.Dataphor.Frontend.Client
 		}
 
 		// Error Handling
-		private void ErrorsOccurred(DataSet ADataSet, CompilerMessages AMessages)
+		private void ErrorsOccurred(DataSet dataSet, CompilerMessages messages)
 		{
 			ErrorList AErrors = new ErrorList();
-			AErrors.AddRange(AMessages);
+			AErrors.AddRange(messages);
 			HostNode.Session.ReportErrors(HostNode, AErrors);
 		}
 
-		private bool FUseBrowse = true;
+		private bool _useBrowse = true;
 		[DefaultValue(true)]
 		[Description("Indicates whether the view will use a browse clause by default to request data.")]
 		public bool UseBrowse
 		{
-			get { return FUseBrowse; }
+			get { return _useBrowse; }
 			set 
 			{ 
-				if (FUseBrowse != value)
+				if (_useBrowse != value)
 				{
-					FUseBrowse = value;
+					_useBrowse = value;
 					if (Active)
 						InternalUpdateView();
 				}
 			}
 		}
 		
-		private bool FUseApplicationTransactions = true;
+		private bool _useApplicationTransactions = true;
 		[DefaultValue(true)]
 		[Description("Indicates whether the view will use application transactions to manipulate data.")]
 		public bool UseApplicationTransactions
 		{
-			get { return FUseApplicationTransactions; }
+			get { return _useApplicationTransactions; }
 			set
 			{
-				if (FUseApplicationTransactions != value)
+				if (_useApplicationTransactions != value)
 				{
-					FUseApplicationTransactions = value;
+					_useApplicationTransactions = value;
 					if (Active)
 						InternalUpdateView();
 				}
 			}
 		}
 		
-		private EnlistMode FShouldEnlist = EnlistMode.Default;
+		private EnlistMode _shouldEnlist = EnlistMode.Default;
 		[DefaultValue(EnlistMode.Default)]
 		[Description("Indicates whether the source should enlist in the application transaction of its master source.")]
 		public EnlistMode ShouldEnlist
 		{
-			get { return FShouldEnlist; }
+			get { return _shouldEnlist; }
 			set
 			{
-				if (FShouldEnlist != value)
+				if (_shouldEnlist != value)
 				{
-					FShouldEnlist = value;
+					_shouldEnlist = value;
 					if (Active)
 						InternalUpdateView();
 				}
 			}
 		}
 		
-		private bool FIsReadOnly = false;
+		private bool _isReadOnly = false;
 		[DefaultValue(false)]
 		[Description("Indicates whether the data in the view will be updateable.")]
 		public bool IsReadOnly
 		{
-			get { return FIsReadOnly; }
+			get { return _isReadOnly; }
 			set
 			{
-				if (FIsReadOnly != value)
+				if (_isReadOnly != value)
 				{
-					FIsReadOnly = value;
+					_isReadOnly = value;
 					if (Active)
 						InternalUpdateView();
 				}
 			}
 		}
 		
-		private bool FIsWriteOnly = false;
+		private bool _isWriteOnly = false;
 		[DefaultValue(false)]
 		[Description("Indicates whether the view will be used solely for inserting data.")]
 		public bool IsWriteOnly
 		{
-			get { return FIsWriteOnly; }
+			get { return _isWriteOnly; }
 			set
 			{
-				if (FIsWriteOnly != value)
+				if (_isWriteOnly != value)
 				{
-					FIsWriteOnly = value;
+					_isWriteOnly = value;
 					if (Active)
 						InternalUpdateView();
 				}
 			}
 		}
 		
-		private DataSetState FOpenState = DataSetState.Browse;
+		private DataSetState _openState = DataSetState.Browse;
 		[DefaultValue(DataSetState.Browse)]
 		[Description("Indicates the open state for the view.")]
 		public DataSetState OpenState
 		{
-			get { return FOpenState; }
+			get { return _openState; }
 			set
 			{
-				if (FOpenState != value)
+				if (_openState != value)
 				{
-					FOpenState = value;
+					_openState = value;
 					if (Active)
 						InternalUpdateView();
 				}
 			}
 		}
 		
-		private bool FRefreshAfterPost = false;
+		private bool _refreshAfterPost = false;
 		[DefaultValue(false)]
 		[Description("Indicates whether or not the view will be refreshed after a call to post.")]
 		public bool RefreshAfterPost
 		{
-			get { return FRefreshAfterPost; }
+			get { return _refreshAfterPost; }
 			set
 			{
-				if (FRefreshAfterPost != value)
+				if (_refreshAfterPost != value)
 				{
-					FRefreshAfterPost = value;
+					_refreshAfterPost = value;
 					if (Active)
 						InternalUpdateView();
 				}
@@ -1306,53 +1306,53 @@ namespace Alphora.Dataphor.Frontend.Client
 		
 		// BeginScript
 
-		private string FBeginScript = String.Empty;
+		private string _beginScript = String.Empty;
 		[DefaultValue("")]
 		[Description("A script that will be executed when the source is activated (before opening the expression).")]
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string BeginScript
 		{
-			get { return FBeginScript; }
-			set { FBeginScript = value == null ? String.Empty : value; }
+			get { return _beginScript; }
+			set { _beginScript = value == null ? String.Empty : value; }
 		}
 
 		// EndScript
 
-		private string FEndScript = String.Empty;
+		private string _endScript = String.Empty;
 		[DefaultValue("")]
 		[Description("A script that will be executed when the source is deactivated.")]
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string EndScript
 		{
-			get { return FEndScript; }
-			set { FEndScript = value == null ? String.Empty : value; }
+			get { return _endScript; }
+			set { _endScript = value == null ? String.Empty : value; }
 		}
 
 		// Surrogate
 
-		private ISource FSurrogate;
+		private ISource _surrogate;
 		/// <remarks> Links and unlinks when Activate and Deactivate is called. </remarks>
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
 		public ISource Surrogate
 		{
-			get { return FSurrogate; }
+			get { return _surrogate; }
 			set
 			{
-				if (FSurrogate != value)
+				if (_surrogate != value)
 				{
-					if (FSurrogate != null) 
+					if (_surrogate != null) 
 					{
-						FSurrogate.Disposed -= new EventHandler(SurrogateDisposed);
-						FSurrogate.OnUpdateView += new EventHandler(SurrogateUpdateView);
+						_surrogate.Disposed -= new EventHandler(SurrogateDisposed);
+						_surrogate.OnUpdateView += new EventHandler(SurrogateUpdateView);
 					}
-					FSurrogate = value;
-					if (FSurrogate != null)
+					_surrogate = value;
+					if (_surrogate != null)
 					{
-						FSurrogate.Disposed += new EventHandler(SurrogateDisposed);
-						FSurrogate.OnUpdateView += new EventHandler(SurrogateUpdateView);
+						_surrogate.Disposed += new EventHandler(SurrogateDisposed);
+						_surrogate.OnUpdateView += new EventHandler(SurrogateUpdateView);
 					}
 					ClearDataView();
 					if (Active)
@@ -1361,12 +1361,12 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 		}
 
-		private void SurrogateDisposed(object ASender, EventArgs AArgs)
+		private void SurrogateDisposed(object sender, EventArgs args)
 		{
 			Surrogate = null;
 		}
 
-		private void SurrogateUpdateView(object ASender, EventArgs AArgs)
+		private void SurrogateUpdateView(object sender, EventArgs args)
 		{
 			if (Active)
 				InternalUpdateView();
@@ -1374,76 +1374,76 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		// Master/Detail
 
-		private string FMasterKeyNames = String.Empty;
+		private string _masterKeyNames = String.Empty;
 		[DefaultValue("")]
 		[Description("The key column(s) in the master source to use for the master-detail relationship.")]
 		public string MasterKeyNames
 		{
-			get { return FMasterKeyNames; }
+			get { return _masterKeyNames; }
 			set
 			{
-				if (FMasterKeyNames != value)
+				if (_masterKeyNames != value)
 				{
-					FMasterKeyNames = value;
+					_masterKeyNames = value;
 					UpdateMaster();
 				}
 			}
 		}
 
-		private string FDetailKeyNames = String.Empty;
+		private string _detailKeyNames = String.Empty;
 		[DefaultValue("")]
 		[Description("The key column(s) in this source to use as the detail key for a master-detail relationship.")]
 		public string DetailKeyNames
 		{
-			get { return FDetailKeyNames; }
+			get { return _detailKeyNames; }
 			set
 			{
-				if (FDetailKeyNames != value)
+				if (_detailKeyNames != value)
 				{
-					FDetailKeyNames = value;
+					_detailKeyNames = value;
 					UpdateMaster();
 				}
 			}
 		}
 
-		private ISource FMaster;
+		private ISource _master;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("When set, this source will be filtered and will re-query as the master source navigates.")]
 		public ISource Master
 		{
-			get { return FMaster; }
+			get { return _master; }
 			set
 			{
-				if (FMaster != value)
+				if (_master != value)
 				{
-					if (FMaster != null)
-						FMaster.Disposed -= new EventHandler(MasterDisposed);
-					FMaster = value;
-					if (FMaster != null)
-						FMaster.Disposed += new EventHandler(MasterDisposed);
+					if (_master != null)
+						_master.Disposed -= new EventHandler(MasterDisposed);
+					_master = value;
+					if (_master != null)
+						_master.Disposed += new EventHandler(MasterDisposed);
 					UpdateMaster();
 				}
 			}
 		}
 		
-		private void MasterDisposed(object ASender, EventArgs AArgs)
+		private void MasterDisposed(object sender, EventArgs args)
 		{
 			Master = null;
 		}
 
 		private void InternalUpdateMaster()
 		{
-			if (FDataView != null)
+			if (_dataView != null)
 			{
 				if (Master != null)
 				{
-					FDataView.MasterKeyNames = MasterKeyNames;
-					FDataView.DetailKeyNames = DetailKeyNames;
-					FDataView.MasterSource = Master.DataSource;
-					FDataView.WriteWhereClause = WriteWhereClause;
+					_dataView.MasterKeyNames = MasterKeyNames;
+					_dataView.DetailKeyNames = DetailKeyNames;
+					_dataView.MasterSource = Master.DataSource;
+					_dataView.WriteWhereClause = WriteWhereClause;
 				}
 				else
-					FDataView.MasterSource = null;
+					_dataView.MasterSource = null;
 			}
 		}
 
@@ -1454,17 +1454,17 @@ namespace Alphora.Dataphor.Frontend.Client
 				InternalUpdateMaster();
 		}
 		
-		private bool FWriteWhereClause = true;
+		private bool _writeWhereClause = true;
 		[DefaultValue(true)]
 		[Description("Determines whether the data view will automatically produce the where clause necessary to limit the result set by the master source.  If false, the expression must contain the necessary restrictions.  Current master data view values are available as AMaster<detail column name (with qualifiers replaced with underscores)> parameters within the expression.")]
 		public bool WriteWhereClause
 		{
-			get { return FWriteWhereClause; }
+			get { return _writeWhereClause; }
 			set
 			{
-				if (FWriteWhereClause != value)
+				if (_writeWhereClause != value)
 				{
-					FWriteWhereClause = value;
+					_writeWhereClause = value;
 					UpdateMaster();
 				}
 			}
@@ -1472,59 +1472,59 @@ namespace Alphora.Dataphor.Frontend.Client
 		
 		// Parameters
 		
-		private DataParams FParams;
+		private DataParams _params;
 		public DataParams Params
 		{
-			get { return FParams; }
+			get { return _params; }
 			set 
 			{ 
-				FParams = value; 
+				_params = value; 
 				UpdateParams();
 			}
 		}
 		
-		private DataSetParamGroup FParamsParamGroup;
+		private DataSetParamGroup _paramsParamGroup;
 		
-		private List<DataSetParamGroup> FArgumentParamGroups = new List<DataSetParamGroup>();
+		private List<DataSetParamGroup> _argumentParamGroups = new List<DataSetParamGroup>();
 
 		private void InternalUpdateParams()
 		{
-			if (FDataView != null)
+			if (_dataView != null)
 			{
 				// Remove the old argument param groups
-				foreach (var LGroup in FArgumentParamGroups)
+				foreach (var group in _argumentParamGroups)
 				{
-					if (FDataView.ParamGroups.Contains(LGroup))
-						FDataView.ParamGroups.Remove(LGroup);
+					if (_dataView.ParamGroups.Contains(group))
+						_dataView.ParamGroups.Remove(group);
 				}
-				FArgumentParamGroups.Clear();
+				_argumentParamGroups.Clear();
 				
 				// Add new argument param groups
-				BaseArgument.CollectDataSetParamGroup(this, FArgumentParamGroups);
-				foreach (var LGroup in FArgumentParamGroups)
-					FDataView.ParamGroups.Add(LGroup);
+				BaseArgument.CollectDataSetParamGroup(this, _argumentParamGroups);
+				foreach (var group in _argumentParamGroups)
+					_dataView.ParamGroups.Add(group);
 				
-				if (FParams != null)
+				if (_params != null)
 				{
-					if (FParamsParamGroup != null)
+					if (_paramsParamGroup != null)
 					{
-						DataView.ParamGroups.SafeRemove(FParamsParamGroup);
-						FParamsParamGroup = null;
+						DataView.ParamGroups.SafeRemove(_paramsParamGroup);
+						_paramsParamGroup = null;
 					}
 					
-					DataSetParamGroup LParamGroup = new DataSetParamGroup();
-					foreach (DataParam LParam in FParams)
+					DataSetParamGroup paramGroup = new DataSetParamGroup();
+					foreach (DataParam param in _params)
 					{
-						DataSetParam LDataSetParam = new DataSetParam();
-						LDataSetParam.Name = LParam.Name;
-						LDataSetParam.Modifier = LParam.Modifier;
-						LDataSetParam.DataType = LParam.DataType;
-						LDataSetParam.Value = LParam.Value;
-						LParamGroup.Params.Add(LDataSetParam);
+						DataSetParam dataSetParam = new DataSetParam();
+						dataSetParam.Name = param.Name;
+						dataSetParam.Modifier = param.Modifier;
+						dataSetParam.DataType = param.DataType;
+						dataSetParam.Value = param.Value;
+						paramGroup.Params.Add(dataSetParam);
 					}
 
-					FDataView.ParamGroups.Add(LParamGroup);
-					FParamsParamGroup = LParamGroup;
+					_dataView.ParamGroups.Add(paramGroup);
+					_paramsParamGroup = paramGroup;
 				}
 			}
 		}
@@ -1599,22 +1599,22 @@ namespace Alphora.Dataphor.Frontend.Client
 		public DataSetState State { get { return DataView == null ? DataSetState.Inactive : DataView.State; } }
 		
 		[Browsable(false)]
-		public DataField this[string AColumnName] 
+		public DataField this[string columnName] 
 		{ 
 			get 
 			{ 
 				CheckEnabled();
-				return DataView[AColumnName]; 
+				return DataView[columnName]; 
 			} 
 		}
 		
 		[Browsable(false)]
-		public DataField this[int AColumnIndex] 
+		public DataField this[int columnIndex] 
 		{ 
 			get 
 			{ 
 				CheckEnabled();
-				return DataView[AColumnIndex]; 
+				return DataView[columnIndex]; 
 			} 
 		}
 		
@@ -1678,16 +1678,16 @@ namespace Alphora.Dataphor.Frontend.Client
 			return DataView.GetKey();
 		}
 		
-		public bool FindKey(Row AKey)
+		public bool FindKey(Row key)
 		{
 			CheckEnabled();
-			return DataView.FindKey(AKey);
+			return DataView.FindKey(key);
 		}
 		
-		public void FindNearest(Row AKey)
+		public void FindNearest(Row key)
 		{
 			CheckEnabled();
-			DataView.FindNearest(AKey);
+			DataView.FindNearest(key);
 		}
 		
 		public void Refresh()
@@ -1744,11 +1744,11 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		// Node
 
-		public override bool IsValidChild(Type AChildType)
+		public override bool IsValidChild(Type childType)
 		{
-			if (typeof(ISourceChild).IsAssignableFrom(AChildType) || typeof(IBaseArgument).IsAssignableFrom(AChildType))
+			if (typeof(ISourceChild).IsAssignableFrom(childType) || typeof(IBaseArgument).IsAssignableFrom(childType))
 				return true;
-			return base.IsValidChild(AChildType);
+			return base.IsValidChild(childType);
 		}
 		
 		protected internal override void ChildrenChanged()
@@ -1758,7 +1758,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		protected override void Activate()
 		{
-			if (FExpression == String.Empty) 
+			if (_expression == String.Empty) 
 				Enabled = false;
 			try
 			{
@@ -1784,14 +1784,14 @@ namespace Alphora.Dataphor.Frontend.Client
 		}
 
 		/// <remarks> Handles ViewActionEvents. </remarks>
-		public override void HandleEvent(NodeEvent AEvent)
+		public override void HandleEvent(NodeEvent eventValue)
 		{
-			if (AEvent is ViewActionEvent)
+			if (eventValue is ViewActionEvent)
 			{
 				if (DataView == null)
 					return;
 
-				switch (((ViewActionEvent)AEvent).Action)
+				switch (((ViewActionEvent)eventValue).Action)
 				{
 					case SourceActions.First :
 						DataView.First();
@@ -1849,7 +1849,7 @@ namespace Alphora.Dataphor.Frontend.Client
                         break;
 				}
 			}
-			base.HandleEvent(AEvent);
+			base.HandleEvent(eventValue);
 		}
 
 		protected internal override void BeforeDeactivate()
@@ -1875,83 +1875,83 @@ namespace Alphora.Dataphor.Frontend.Client
 	[TypeConverter("System.ComponentModel.ExpandableObjectConverter,System")]
 	public abstract class SourceLink: Node
 	{
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 			UnlinkSource();
 			Source = null;
 		}
 
-		public SourceLink(INode AParent)
+		public SourceLink(INode parent)
 		{
-			FParent = AParent;
+			_parent = parent;
 		}
 
-		private INode FParent;
+		private INode _parent;
 
 		public override IHost HostNode
 		{
-			get { return FParent.HostNode; }
+			get { return _parent.HostNode; }
 		}
 
 		// Source
 
-		private ISource FSource;
+		private ISource _source;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("Specified the source node the element will be attached to.")]
 		public ISource Source
 		{
-			get { return FSource; }
+			get { return _source; }
 			set
 			{
-				if (FSource != value)
+				if (_source != value)
 				{
 					UnlinkSource();
-					ISource LTemp = FSource;
-					if (FSource != null)
+					ISource temp = _source;
+					if (_source != null)
 					{
-						FSource.Disposed -= new EventHandler(SourceDisposed);
-						FSource.DataChanged -= new DataLinkHandler(SourceDataChanged);
-						FSource.StateChanged -= new DataLinkHandler(SourceDataChanged);
+						_source.Disposed -= new EventHandler(SourceDisposed);
+						_source.DataChanged -= new DataLinkHandler(SourceDataChanged);
+						_source.StateChanged -= new DataLinkHandler(SourceDataChanged);
 					}
-					FSource = value;
+					_source = value;
 					LinkSource();
-					if (FSource != null)
+					if (_source != null)
 					{
-						FSource.Disposed += new EventHandler(SourceDisposed);
-						FSource.DataChanged += new DataLinkHandler(SourceDataChanged);
-						FSource.StateChanged += new DataLinkHandler(SourceDataChanged);
+						_source.Disposed += new EventHandler(SourceDisposed);
+						_source.DataChanged += new DataLinkHandler(SourceDataChanged);
+						_source.StateChanged += new DataLinkHandler(SourceDataChanged);
 					}
 				}
 			}
 		}
 		
-		private ISource FTargetSource;
+		private ISource _targetSource;
 		[Browsable(false)]
 		public ISource TargetSource
 		{
-			get { return FTargetSource; }
+			get { return _targetSource; }
 			set
 			{
-				if (FTargetSource != value)
+				if (_targetSource != value)
 				{
 					UnlinkSource();
-					if (FTargetSource != null) 
-						FTargetSource.Disposed -= new EventHandler(TargetSourceDisposed);
-					FTargetSource = value;
+					if (_targetSource != null) 
+						_targetSource.Disposed -= new EventHandler(TargetSourceDisposed);
+					_targetSource = value;
 					LinkSource();
-					if (FTargetSource != null) 
-						FTargetSource.Disposed += new EventHandler(TargetSourceDisposed);
+					if (_targetSource != null) 
+						_targetSource.Disposed += new EventHandler(TargetSourceDisposed);
 				}
 			}
 		}
 
-		protected virtual void TargetSourceDisposed(object ASender, EventArgs AArgs)
+		protected virtual void TargetSourceDisposed(object sender, EventArgs args)
 		{
 			UnlinkSource();
 		}
 		
-		protected virtual void SourceDisposed(object ASender, EventArgs AArgs)
+		protected virtual void SourceDisposed(object sender, EventArgs args)
 		{
 			UnlinkSource();
 			Source = null;
@@ -1959,7 +1959,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		public event EventHandler OnSourceDataChanged;
 
-		private void SourceDataChanged(DataLink ALink, DataSet ADataSet)
+		private void SourceDataChanged(DataLink link, DataSet dataSet)
 		{
 			if (OnSourceDataChanged != null)
 				OnSourceDataChanged(this, null);
@@ -1971,7 +1971,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 	public class SurrogateSourceLink: SourceLink
 	{
-		public SurrogateSourceLink(INode AParent): base(AParent) {}
+		public SurrogateSourceLink(INode parent): base(parent) {}
 			
 		public override void LinkSource()
 		{
@@ -1988,22 +1988,22 @@ namespace Alphora.Dataphor.Frontend.Client
 
 	public class DetailSourceLink: SourceLink
 	{
-		public DetailSourceLink(INode AParent): base(AParent) {}
+		public DetailSourceLink(INode parent): base(parent) {}
 
 		public override void LinkSource()
 		{
 			if (TargetSource != null && Source != null)
 			{
-				if (FAttachMaster && Source.Master != null)
+				if (_attachMaster && Source.Master != null)
 				{
 					TargetSource.MasterKeyNames = Source.MasterKeyNames;
 					TargetSource.DetailKeyNames = Source.DetailKeyNames;
 					TargetSource.Master = Source.Master;
 				}
-				else if (FMasterKeyNames != String.Empty)
+				else if (_masterKeyNames != String.Empty)
 				{
-					TargetSource.MasterKeyNames = FMasterKeyNames;
-					TargetSource.DetailKeyNames = FDetailKeyNames;
+					TargetSource.MasterKeyNames = _masterKeyNames;
+					TargetSource.DetailKeyNames = _detailKeyNames;
 					TargetSource.Master = Source;
 				}
 			}
@@ -2017,46 +2017,46 @@ namespace Alphora.Dataphor.Frontend.Client
 		
 		// MasterKeyNames
 
-		private string FMasterKeyNames = String.Empty;
+		private string _masterKeyNames = String.Empty;
 		[DefaultValue("")]
 		[Description("The column names which form the key of the master in the master/detail releationship.")]
 		public string MasterKeyNames
 		{
-			get { return FMasterKeyNames; }
-			set { FMasterKeyNames = value; }
+			get { return _masterKeyNames; }
+			set { _masterKeyNames = value; }
 		}
 
 		// DetailKeyNames
 
-		private string FDetailKeyNames = String.Empty;
+		private string _detailKeyNames = String.Empty;
 		[DefaultValue("")]
 		[Description("The column names which form the key of the detail in the master/detail releationship.")]
 		public string DetailKeyNames
 		{
-			get { return FDetailKeyNames; }
-			set { FDetailKeyNames = value; }
+			get { return _detailKeyNames; }
+			set { _detailKeyNames = value; }
 		}
 
 		// AttachMaster
 
-		private bool FAttachMaster = false;
+		private bool _attachMaster = false;
 		[DefaultValue(false)]
 		[Description("When set to true, if this nodes Source property has a master, then the master will be attached to rather than the Source.")]
 		public bool AttachMaster
 		{
-			get { return FAttachMaster; }
-			set { FAttachMaster = value; }
+			get { return _attachMaster; }
+			set { _attachMaster = value; }
 		}
 	}
 
 	/// <summary> Disables any ISource nodes. </summary>
 	public class DisableSourceEvent : NodeEvent
 	{
-		public override void Handle(INode ANode)
+		public override void Handle(INode node)
 		{
-			ISource LSource = ANode as ISource;
-			if (LSource != null)
-				LSource.Enabled = false;
+			ISource source = node as ISource;
+			if (source != null)
+				source.Enabled = false;
 		}
 	}
 }

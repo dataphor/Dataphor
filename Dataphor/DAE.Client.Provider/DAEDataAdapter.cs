@@ -19,11 +19,11 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 	{
 		public DAERowUpdatingEventArgs
 		(
-			DataRow ARow,
-			IDbCommand ACommand,
-			StatementType AStatementType,
-			DataTableMapping ATableMapping
-		) : base(ARow, ACommand, AStatementType, ATableMapping)
+			DataRow row,
+			IDbCommand command,
+			StatementType statementType,
+			DataTableMapping tableMapping
+		) : base(row, command, statementType, tableMapping)
 		{}
 
 		new public DAECommand Command
@@ -37,11 +37,11 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 	{
 		public DAERowUpdatedEventArgs
 		(
-			DataRow ARow,
-			IDbCommand ACommand,
-			StatementType AStatementType,
-			DataTableMapping ATableMapping
-		) : base(ARow, ACommand, AStatementType, ATableMapping)
+			DataRow row,
+			IDbCommand command,
+			StatementType statementType,
+			DataTableMapping tableMapping
+		) : base(row, command, statementType, tableMapping)
 		{}
 		public new DAECommand Command { get { return (DAECommand)base.Command; } }
 	}
@@ -60,47 +60,47 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 	[ToolboxBitmap(typeof(Alphora.Dataphor.DAE.Client.Provider.DAEDataAdapter),"Icons.DAEDataAdapter.bmp")]
 	public class DAEDataAdapter : DbDataAdapter, IDbDataAdapter
 	{
-		public const string CDefaultTableName = "Table";
+		public const string DefaultTableName = "Table";
 
 		/// <summary> Initializes a new instance of the DAEDataAdapter class. </summary>
 		public DAEDataAdapter() : base() {}
 
 		/// <summary> Initializes a new instance of the DAEDataAdapter class and adds itself to the container. </summary>
-		/// <param name="AContainer"> The container to add this component to. </param>
-		public DAEDataAdapter(IContainer AContainer)
+		/// <param name="container"> The container to add this component to. </param>
+		public DAEDataAdapter(IContainer container)
 		{
-			if (AContainer != null)
-				AContainer.Add(this);
+			if (container != null)
+				container.Add(this);
 		}
 
 		/// <summary>
 		/// Initializes a new instance of the DAEDataAdapter class with the 
 		/// specified D4 select statement.
 		/// </summary>
-		/// <param name="ASelectCommand">D4 select statement.</param>
-		public DAEDataAdapter(DAECommand ASelectCommand)
+		/// <param name="selectCommand">D4 select statement.</param>
+		public DAEDataAdapter(DAECommand selectCommand)
 		{
-			SelectCommand = ASelectCommand;
+			SelectCommand = selectCommand;
 		}
 
 		/// <summary>
 		/// Initializes a new instance of the DAEDataAdapter class with an D4 select statement and a connection string.
 		/// </summary>
-		/// <param name="ASelectCommandText">D4 select statement.</param>
-		/// <param name="ASelectConnectionString"></param>
-		public DAEDataAdapter(string ASelectCommandText, string ASelectConnectionString)
+		/// <param name="selectCommandText">D4 select statement.</param>
+		/// <param name="selectConnectionString"></param>
+		public DAEDataAdapter(string selectCommandText, string selectConnectionString)
 		{
-			SelectCommand = new DAECommand(ASelectCommandText, new DAEConnection(ASelectConnectionString));
+			SelectCommand = new DAECommand(selectCommandText, new DAEConnection(selectConnectionString));
 		}
 		
 		/// <summary>
 		/// Initializes a new instance of the DAEDataAdapter class with an D4 select statement and a DAEConnection object.
 		/// </summary>
-		/// <param name="ASelectCommandText">D4 select statement.</param>
-		/// <param name="AConnection">The DAE connection</param>
-		public DAEDataAdapter(string ASelectCommandText, DAEConnection AConnection)
+		/// <param name="selectCommandText">D4 select statement.</param>
+		/// <param name="connection">The DAE connection</param>
+		public DAEDataAdapter(string selectCommandText, DAEConnection connection)
 		{
-			SelectCommand = new DAECommand(ASelectCommandText, AConnection);
+			SelectCommand = new DAECommand(selectCommandText, connection);
 		}
 
 		public override IDataParameter[] GetFillParameters()
@@ -132,41 +132,41 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 				((DAECommand)DeleteCommand).DataAdapterInUpdate = false;
 		}
 
-		protected override int Update(DataRow[] ADataRows, DataTableMapping ATableMapping)
+		protected override int Update(DataRow[] dataRows, DataTableMapping tableMapping)
 		{
-			int LRowsAffected = 0;
+			int rowsAffected = 0;
 			BeginDataUpdate();
 			try
 			{
-				LRowsAffected = base.Update(ADataRows, ATableMapping);
+				rowsAffected = base.Update(dataRows, tableMapping);
 			}
 			finally
 			{
 				EndDataUpdate();
 			}
-			return LRowsAffected;
+			return rowsAffected;
 		}
 
 		protected override RowUpdatingEventArgs CreateRowUpdatingEvent
 		(
-			DataRow ARow, 
-			IDbCommand ACommand, 
-			StatementType AStatementType,
-			DataTableMapping ATableMapping
+			DataRow row, 
+			IDbCommand command, 
+			StatementType statementType,
+			DataTableMapping tableMapping
 		)
 		{
-			return new DAERowUpdatingEventArgs(ARow, ACommand, AStatementType, ATableMapping);
+			return new DAERowUpdatingEventArgs(row, command, statementType, tableMapping);
 		}
 
 		protected override RowUpdatedEventArgs CreateRowUpdatedEvent
 		(
-			DataRow ARow,
-			IDbCommand ACommand,
-			StatementType AStatementType,
-			DataTableMapping ATableMapping
+			DataRow row,
+			IDbCommand command,
+			StatementType statementType,
+			DataTableMapping tableMapping
 		)
 		{
-			return new DAERowUpdatedEventArgs(ARow, ACommand, AStatementType, ATableMapping);
+			return new DAERowUpdatedEventArgs(row, command, statementType, tableMapping);
 		}
 
 		/*
@@ -191,56 +191,56 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 		}
 
 		/// <summary> Raises the RowUpdating event. </summary>
-		protected override void OnRowUpdating(RowUpdatingEventArgs AArgs)
+		protected override void OnRowUpdating(RowUpdatingEventArgs args)
 		{
-			DAERowUpdatingEventHandler LHandler = (DAERowUpdatingEventHandler) Events[EventRowUpdating];
-			if ((LHandler != null) && (AArgs is DAERowUpdatingEventArgs)) 
-				LHandler(this, (DAERowUpdatingEventArgs)AArgs);
+			DAERowUpdatingEventHandler handler = (DAERowUpdatingEventHandler) Events[EventRowUpdating];
+			if ((handler != null) && (args is DAERowUpdatingEventArgs)) 
+				handler(this, (DAERowUpdatingEventArgs)args);
 		}
 
 		/// <summary> Raises the RowUpdated event. </summary>
-		protected override void OnRowUpdated(RowUpdatedEventArgs AArgs)
+		protected override void OnRowUpdated(RowUpdatedEventArgs args)
 		{
-			DAERowUpdatedEventHandler LHandler = (DAERowUpdatedEventHandler) Events[EventRowUpdated];
-			if ((LHandler != null) && (AArgs is DAERowUpdatedEventArgs)) 
-				LHandler(this, (DAERowUpdatedEventArgs)AArgs);
+			DAERowUpdatedEventHandler handler = (DAERowUpdatedEventHandler) Events[EventRowUpdated];
+			if ((handler != null) && (args is DAERowUpdatedEventArgs)) 
+				handler(this, (DAERowUpdatedEventArgs)args);
 		}
 
 		protected override DataTable[] FillSchema
 		(
-			System.Data.DataSet ADataSet,
-			SchemaType ASchemaType,
-			IDbCommand ACommand,
-			string ASrcTable,
-			CommandBehavior ABehavior
+			System.Data.DataSet dataSet,
+			SchemaType schemaType,
+			IDbCommand command,
+			string srcTable,
+			CommandBehavior behavior
 		)
 		{
-			DataTable[] LTables = base.FillSchema(ADataSet, ASchemaType, ACommand, ASrcTable, ABehavior);
-			IServerExpressionPlan LPlan = ((DAECommand)ACommand).FPlan as IServerExpressionPlan;
-			if (LPlan != null)
+			DataTable[] tables = base.FillSchema(dataSet, schemaType, command, srcTable, behavior);
+			IServerExpressionPlan plan = ((DAECommand)command)._plan as IServerExpressionPlan;
+			if (plan != null)
 			{
-				Schema.Key LMinimumKey = LPlan.TableVar.Keys.MinimumKey(true);
-				foreach (DataTable LTable in LTables)
+				Schema.Key minimumKey = plan.TableVar.Keys.MinimumKey(true);
+				foreach (DataTable table in tables)
 				{
-					bool LIsPrimary;
-					LTable.Constraints.Clear();
-					foreach(Schema.Key LKey in LPlan.TableVar.Keys)
+					bool isPrimary;
+					table.Constraints.Clear();
+					foreach(Schema.Key key in plan.TableVar.Keys)
 					{
-						LIsPrimary = LKey == LMinimumKey;
-						LTable.Constraints.Add(LKey.Name, GetDataColumns(LTable, LKey), LIsPrimary);
+						isPrimary = key == minimumKey;
+						table.Constraints.Add(key.Name, GetDataColumns(table, key), isPrimary);
 					}
 				}
 			}
-			return LTables;
+			return tables;
 		}
 
-		private System.Data.DataColumn[] GetDataColumns(DataTable ATable, Schema.Key AKey)
+		private System.Data.DataColumn[] GetDataColumns(DataTable table, Schema.Key key)
 		{
-			System.Data.DataColumn[] LDataColumns = new System.Data.DataColumn[AKey.Columns.Count];
+			System.Data.DataColumn[] dataColumns = new System.Data.DataColumn[key.Columns.Count];
 			int i = 0;
-			foreach (DAE.Schema.TableVarColumn LColumn in AKey.Columns)
-				LDataColumns[i++] = ATable.Columns[LColumn.Name];
-			return LDataColumns;
+			foreach (DAE.Schema.TableVarColumn column in key.Columns)
+				dataColumns[i++] = table.Columns[column.Name];
+			return dataColumns;
 		}
 	}
 }

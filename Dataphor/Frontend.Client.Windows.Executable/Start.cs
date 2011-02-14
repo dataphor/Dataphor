@@ -15,15 +15,15 @@ namespace Alphora.Dataphor.Frontend.Client.Windows.Executable
 {
 	public class Start
 	{
-		public const string CAliasParameter = @"-alias";
-		public const string CApplicationParameter = @"-application";
-		public const string CUserParameter = @"-user";
-		public const string CApplicationListExpression = @"Applications over {ID, Description}";
-		public const string CApplicationListOrder = @"order {Description}";
+		public const string AliasParameter = @"-alias";
+		public const string ApplicationParameter = @"-application";
+		public const string UserParameter = @"-user";
+		public const string ApplicationListExpression = @"Applications over {ID, Description}";
+		public const string ApplicationListOrder = @"order {Description}";
 
 		/// <summary> The main entry point for the application. </summary>
 		[STAThread]
-		public static void Main(string[] AArgs)
+		public static void Main(string[] args)
 		{
 			WinForms.Application.SetUnhandledExceptionMode(WinForms.UnhandledExceptionMode.CatchException, true);
 			WinForms.Application.EnableVisualStyles();
@@ -32,91 +32,91 @@ namespace Alphora.Dataphor.Frontend.Client.Windows.Executable
 			try
 			{
 				// Parse the command line
-				string LAlias = String.Empty;
-				string LApplicationID = String.Empty;
-				string LUserID = String.Empty;
+				string alias = String.Empty;
+				string applicationID = String.Empty;
+				string userID = String.Empty;
 				int i = 0;
-				while (i < AArgs.Length)
+				while (i < args.Length)
 				{
-					switch (AArgs[i].ToLower())
+					switch (args[i].ToLower())
 					{
-						case CAliasParameter :
-							LAlias = AArgs[i + 1];
+						case AliasParameter :
+							alias = args[i + 1];
 							i++;
 							break;
-						case CApplicationParameter :
-							LApplicationID = AArgs[i + 1];
+						case ApplicationParameter :
+							applicationID = args[i + 1];
 							i++;
 							break;
-						case CUserParameter :
-							LUserID = AArgs[i + 1];
+						case UserParameter :
+							userID = args[i + 1];
 							i++;
 							break;
 						default :
-							throw new ClientException(ClientException.Codes.InvalidCommandLine, AArgs[i]);
+							throw new ClientException(ClientException.Codes.InvalidCommandLine, args[i]);
 					}
 					i++;
 				}
 
-				AliasConfiguration LConfiguration;
-				if (LAlias == String.Empty)
-					LConfiguration = ServerConnectForm.Execute();
+				AliasConfiguration configuration;
+				if (alias == String.Empty)
+					configuration = ServerConnectForm.Execute();
 				else
 				{
-					LConfiguration = AliasManager.LoadConfiguration();
-					LConfiguration.DefaultAliasName = LAlias;
+					configuration = AliasManager.LoadConfiguration();
+					configuration.DefaultAliasName = alias;
 				}
 
-				if (LUserID != String.Empty)
-					LConfiguration.Aliases[LConfiguration.DefaultAliasName].SessionInfo.UserID = LUserID;
+				if (userID != String.Empty)
+					configuration.Aliases[configuration.DefaultAliasName].SessionInfo.UserID = userID;
 
-				using (DataSession LDataSession = new DataSession())
+				using (DataSession dataSession = new DataSession())
 				{
-					LDataSession.Alias = LConfiguration.Aliases[LConfiguration.DefaultAliasName];
-					LDataSession.SessionInfo.Environment = "WindowsClient";
-					LDataSession.Active = true;
+					dataSession.Alias = configuration.Aliases[configuration.DefaultAliasName];
+					dataSession.SessionInfo.Environment = "WindowsClient";
+					dataSession.Active = true;
 					
-					if (LApplicationID == String.Empty)
+					if (applicationID == String.Empty)
 					{
-						using (DAE.Client.DataView LView = new DAE.Client.DataView())
+						using (DAE.Client.DataView view = new DAE.Client.DataView())
 						{
-							LView.Session = LDataSession;
-							LView.Expression = CApplicationListExpression;
-							LView.OrderString = CApplicationListOrder;
-							LView.IsReadOnly = true;
-							LView.Open();
+							view.Session = dataSession;
+							view.Expression = ApplicationListExpression;
+							view.OrderString = ApplicationListOrder;
+							view.IsReadOnly = true;
+							view.Open();
 							
 							// Count the number of applications
-							System.Collections.IEnumerator LEnum = LView.GetEnumerator();	 // use explicit enumerator to avoid foreach unused var warning
-							int LCount = 0;
-							while (LEnum.MoveNext())
-								LCount++;
+							System.Collections.IEnumerator enumValue = view.GetEnumerator();	 // use explicit enumerator to avoid foreach unused var warning
+							int count = 0;
+							while (enumValue.MoveNext())
+								count++;
 
 							// Prompt the user for the application if there is not exactly one row
-							if (LCount != 1)
-								ApplicationListForm.Execute(LView);
+							if (count != 1)
+								ApplicationListForm.Execute(view);
 
-							LApplicationID = LView.Fields["ID"].AsString;
+							applicationID = view.Fields["ID"].AsString;
 						}
 					}
 
-					Session LSession = new Session(LDataSession, false); // Pass false because the DataSession will be disposed by the using block
-					LSession.Start(LSession.SetApplication(LApplicationID)); // This call will dispose the session.
+					Session session = new Session(dataSession, false); // Pass false because the DataSession will be disposed by the using block
+					session.Start(session.SetApplication(applicationID)); // This call will dispose the session.
 				}
 			}
 			catch (AbortException)
 			{
 				// Do nothing (ignore abort)
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				Windows.Session.HandleException(LException);
+				Windows.Session.HandleException(exception);
 			}
 		}
 
-		protected static void ThreadException(object ASender, ThreadExceptionEventArgs AArgs)
+		protected static void ThreadException(object sender, ThreadExceptionEventArgs args)
 		{
-			Windows.Session.HandleException(AArgs.Exception);
+			Windows.Session.HandleException(args.Exception);
 		}
 	}
 }

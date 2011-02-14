@@ -9,16 +9,16 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 	/// <remarks> The parameter can be set to a bool value to invert the affect of the converter (false = Visible). </remarks>
 	public class BooleanToVisibilityConverter : IValueConverter
 	{
-		public object Convert(object AValue, Type ATargetType, object AParameter, CultureInfo ACulture)
+		public object Convert(object tempValue, Type targetType, object parameter, CultureInfo culture)
 		{
-			if (ATargetType != typeof(Visibility))
+			if (targetType != typeof(Visibility))
 				throw new InvalidOperationException("The target of the BooleanToVisiblityConverter must be of type Visibility.");
 
-			bool LIsInverted = false;
-			if (AParameter != null)
-				LIsInverted = System.Convert.ToBoolean(AParameter);
+			bool isInverted = false;
+			if (parameter != null)
+				isInverted = System.Convert.ToBoolean(parameter);
 
-			return ((bool)AValue ^ LIsInverted) ? Visibility.Collapsed : Visibility.Visible;
+			return ((bool)tempValue ^ isInverted) ? Visibility.Collapsed : Visibility.Visible;
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

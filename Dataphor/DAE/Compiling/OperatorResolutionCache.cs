@@ -15,76 +15,76 @@ namespace Alphora.Dataphor.DAE.Compiling
 	
 	public class OperatorResolutionCache : System.Object
 	{
-		private Dictionary<OperatorBindingContext, OperatorBindingContext> FResolutions = new Dictionary<OperatorBindingContext, OperatorBindingContext>();
+		private Dictionary<OperatorBindingContext, OperatorBindingContext> _resolutions = new Dictionary<OperatorBindingContext, OperatorBindingContext>();
 
-		public OperatorBindingContext this[OperatorBindingContext AContext]
+		public OperatorBindingContext this[OperatorBindingContext context]
 		{
 			get
 			{
-				OperatorBindingContext LContext = null;
-				FResolutions.TryGetValue(AContext, out LContext);
-				return LContext;
+				OperatorBindingContext localContext = null;
+				_resolutions.TryGetValue(context, out localContext);
+				return localContext;
 			}
 		}		
 		
-		public void Add(OperatorBindingContext AContext)
+		public void Add(OperatorBindingContext context)
 		{
-			if (!FResolutions.ContainsKey(AContext))
-				FResolutions.Add(AContext, AContext);
+			if (!_resolutions.ContainsKey(context))
+				_resolutions.Add(context, context);
 		}
 		
 		public void Clear()
 		{
-			FResolutions.Clear();
+			_resolutions.Clear();
 		}
 		
 		/// <summary>Removes cached resolutions for this operator, if any.</summary>
-		public void Clear(Operator AOperator)
+		public void Clear(Operator operatorValue)
 		{
-			List<OperatorBindingContext> LResolutions = new List<OperatorBindingContext>();
-			foreach (KeyValuePair<OperatorBindingContext, OperatorBindingContext> LEntry in FResolutions)
-				if (LEntry.Value.Operator == AOperator)
-					LResolutions.Add(LEntry.Value);
+			List<OperatorBindingContext> resolutions = new List<OperatorBindingContext>();
+			foreach (KeyValuePair<OperatorBindingContext, OperatorBindingContext> entry in _resolutions)
+				if (entry.Value.Operator == operatorValue)
+					resolutions.Add(entry.Value);
 			
-			foreach (OperatorBindingContext LContext in LResolutions)
-				FResolutions.Remove(LContext);
+			foreach (OperatorBindingContext context in resolutions)
+				_resolutions.Remove(context);
 		}
 		
 		/// <summary>Removes cached resolutions for the given operator name, if any.</summary>
-		public void Clear(string AOperatorName)
+		public void Clear(string operatorName)
 		{
-			string LUnqualifiedName = Schema.Object.Unqualify(AOperatorName);
-			List<OperatorBindingContext> LResolutions = new List<OperatorBindingContext>();
-			foreach (KeyValuePair<OperatorBindingContext, OperatorBindingContext> LEntry in FResolutions)
-				if (Schema.Object.NamesEqual(Schema.Object.EnsureUnrooted(LEntry.Value.OperatorName), LUnqualifiedName))
-					LResolutions.Add(LEntry.Value);
+			string unqualifiedName = Schema.Object.Unqualify(operatorName);
+			List<OperatorBindingContext> resolutions = new List<OperatorBindingContext>();
+			foreach (KeyValuePair<OperatorBindingContext, OperatorBindingContext> entry in _resolutions)
+				if (Schema.Object.NamesEqual(Schema.Object.EnsureUnrooted(entry.Value.OperatorName), unqualifiedName))
+					resolutions.Add(entry.Value);
 					
-			foreach (OperatorBindingContext LContext in LResolutions)
-				FResolutions.Remove(LContext);
+			foreach (OperatorBindingContext context in resolutions)
+				_resolutions.Remove(context);
 		}
 		
 		/// <summary>Removes cached resolutions involving conversions referencing the given scalar type, if any.</summary>
-		public void Clear(Schema.ScalarType ASourceType, Schema.ScalarType ATargetType)
+		public void Clear(Schema.ScalarType sourceType, Schema.ScalarType targetType)
 		{
-			List<OperatorBindingContext> LResolutions = new List<OperatorBindingContext>();
-			foreach (KeyValuePair<OperatorBindingContext, OperatorBindingContext> LEntry in FResolutions)
+			List<OperatorBindingContext> resolutions = new List<OperatorBindingContext>();
+			foreach (KeyValuePair<OperatorBindingContext, OperatorBindingContext> entry in _resolutions)
 			{
-				foreach (OperatorMatch LMatch in LEntry.Value.Matches)
-					foreach (ConversionContext LConversionContext in LMatch.ConversionContexts)
+				foreach (OperatorMatch match in entry.Value.Matches)
+					foreach (ConversionContext conversionContext in match.ConversionContexts)
 					{
-						ScalarConversionContext LScalarConversionContext = LConversionContext as ScalarConversionContext;
-						if (LScalarConversionContext != null)
+						ScalarConversionContext scalarConversionContext = conversionContext as ScalarConversionContext;
+						if (scalarConversionContext != null)
 						{
-							if (!LScalarConversionContext.CanConvert && LConversionContext.SourceType.Equals(ASourceType) || LConversionContext.TargetType.Equals(ASourceType) || LConversionContext.SourceType.Equals(ATargetType) || LConversionContext.TargetType.Equals(ATargetType))
+							if (!scalarConversionContext.CanConvert && conversionContext.SourceType.Equals(sourceType) || conversionContext.TargetType.Equals(sourceType) || conversionContext.SourceType.Equals(targetType) || conversionContext.TargetType.Equals(targetType))
 							{
-								LResolutions.Add(LEntry.Value);
+								resolutions.Add(entry.Value);
 								goto Continue;
 							}
 							
-							foreach (Schema.ScalarConversionPath LPath in LScalarConversionContext.Paths)
-								if (LPath.Contains(ASourceType) || LPath.Contains(ATargetType))
+							foreach (Schema.ScalarConversionPath path in scalarConversionContext.Paths)
+								if (path.Contains(sourceType) || path.Contains(targetType))
 								{
-									LResolutions.Add(LEntry.Value);
+									resolutions.Add(entry.Value);
 									goto Continue;
 								}
 						}
@@ -93,25 +93,25 @@ namespace Alphora.Dataphor.DAE.Compiling
 				Continue: continue;
 			}
 			
-			foreach (OperatorBindingContext LRemoveContext in LResolutions)
-				FResolutions.Remove(LRemoveContext);
+			foreach (OperatorBindingContext removeContext in resolutions)
+				_resolutions.Remove(removeContext);
 		}
 		
 		/// <summary>Removes cached resolutions involving conversion paths using the given conversion, if any.</summary>
-		public void Clear(Schema.Conversion AConversion)
+		public void Clear(Schema.Conversion conversion)
 		{
-			List<OperatorBindingContext> LResolutions = new List<OperatorBindingContext>();
-			foreach (KeyValuePair<OperatorBindingContext, OperatorBindingContext> LEntry in FResolutions)
+			List<OperatorBindingContext> resolutions = new List<OperatorBindingContext>();
+			foreach (KeyValuePair<OperatorBindingContext, OperatorBindingContext> entry in _resolutions)
 			{
-				foreach (OperatorMatch LMatch in LEntry.Value.Matches)
-					foreach (ConversionContext LConversionContext in LMatch.ConversionContexts)
+				foreach (OperatorMatch match in entry.Value.Matches)
+					foreach (ConversionContext conversionContext in match.ConversionContexts)
 					{
-						ScalarConversionContext LScalarConversionContext = LConversionContext as ScalarConversionContext;
-						if (LScalarConversionContext != null)
-							foreach (Schema.ScalarConversionPath LPath in LScalarConversionContext.Paths)
-								if (LPath.Contains(AConversion))
+						ScalarConversionContext scalarConversionContext = conversionContext as ScalarConversionContext;
+						if (scalarConversionContext != null)
+							foreach (Schema.ScalarConversionPath path in scalarConversionContext.Paths)
+								if (path.Contains(conversion))
 								{
-									LResolutions.Add(LEntry.Value);
+									resolutions.Add(entry.Value);
 									goto Continue;
 								}
 					}
@@ -119,20 +119,20 @@ namespace Alphora.Dataphor.DAE.Compiling
 				Continue: continue;
 			}
 			
-			foreach (OperatorBindingContext LRemoveContext in LResolutions)
-				FResolutions.Remove(LRemoveContext);
+			foreach (OperatorBindingContext removeContext in resolutions)
+				_resolutions.Remove(removeContext);
 		}
 		
 		/// <summary>Removes cached resolutions involving the given name resolution path, if any.</summary>
-		public void Clear(Schema.NameResolutionPath AResolutionPath)
+		public void Clear(Schema.NameResolutionPath resolutionPath)
 		{
-			List<OperatorBindingContext> LResolutions = new List<OperatorBindingContext>();
-			foreach (KeyValuePair<OperatorBindingContext, OperatorBindingContext> LEntry in FResolutions)
-				if (LEntry.Value.ResolutionPath == AResolutionPath)
-					LResolutions.Add(LEntry.Value);
+			List<OperatorBindingContext> resolutions = new List<OperatorBindingContext>();
+			foreach (KeyValuePair<OperatorBindingContext, OperatorBindingContext> entry in _resolutions)
+				if (entry.Value.ResolutionPath == resolutionPath)
+					resolutions.Add(entry.Value);
 					
-			foreach (OperatorBindingContext LContext in LResolutions)
-				FResolutions.Remove(LContext);
+			foreach (OperatorBindingContext context in resolutions)
+				_resolutions.Remove(context);
 		}
 	}
 }

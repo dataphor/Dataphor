@@ -26,197 +26,197 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator FileReference(const AName : Name, const AIsAssembly : Boolean, const AEnvironments : list(String)) : FileReference
 	public class FileReferenceNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null || AArguments[1] == null || (AArguments.Length >= 3 && AArguments[2] == null)) 
+			if (arguments[0] == null || arguments[1] == null || (arguments.Length >= 3 && arguments[2] == null)) 
 				return null;
 			#endif
-			if (AArguments.Length == 2)
-				return new Schema.FileReference((string)AArguments[0], (bool)AArguments[1]);
+			if (arguments.Length == 2)
+				return new Schema.FileReference((string)arguments[0], (bool)arguments[1]);
 			
-			return new Schema.FileReference((string)AArguments[0], (bool)AArguments[1], ((ListValue)AArguments[2]).ToList<string>());
+			return new Schema.FileReference((string)arguments[0], (bool)arguments[1], ((ListValue)arguments[2]).ToList<string>());
 		}
 	}
 	
 	// operator FileReferenceReadName(const AValue : FileReference) : String
 	public class FileReferenceReadNameNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null)
+			if (arguments[0] == null)
 				return null;
 			#endif
-			return ((Schema.FileReference)AArguments[0]).FileName;
+			return ((Schema.FileReference)arguments[0]).FileName;
 		}
 	}
 	
 	// operator FileReferenceWriteName(const AValue : FileReference, const AName : String) : FileReference
 	public class FileReferenceWriteNameNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null || AArguments[1] == null)
+			if (arguments[0] == null || arguments[1] == null)
 				return null;
 			#endif
-			Schema.FileReference LFile = (Schema.FileReference)AArguments[0];
-			LFile.FileName = (string)AArguments[1];
-			return LFile;
+			Schema.FileReference file = (Schema.FileReference)arguments[0];
+			file.FileName = (string)arguments[1];
+			return file;
 		}
 	}
 	
 	// operator FileReferenceReadIsAssembly(const AValue : FileReference) : Boolean
 	public class FileReferenceReadIsAssemblyNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null)
+			if (arguments[0] == null)
 				return null;
 			#endif
-			return ((Schema.FileReference)AArguments[0]).IsAssembly;
+			return ((Schema.FileReference)arguments[0]).IsAssembly;
 		}
 	}
 	
 	// operator FileReferenceWriteIsAssembly(const AValue : FileReference, const AIsAssembly : Boolean) : FileReference
 	public class FileReferenceWriteIsAssemblyNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null || AArguments[1] == null)
+			if (arguments[0] == null || arguments[1] == null)
 				return null;
 			#endif
-			Schema.FileReference LFile = (Schema.FileReference)AArguments[0];
-			LFile.IsAssembly = (bool)AArguments[1];
-			return LFile;
+			Schema.FileReference file = (Schema.FileReference)arguments[0];
+			file.IsAssembly = (bool)arguments[1];
+			return file;
 		}
 	}
 	
 	// operator FileReferenceReadEnvironments(const AValue : FileReference) : Boolean
 	public class FileReferenceReadEnvironmentsNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null)
+			if (arguments[0] == null)
 				return null;
 			#endif
-			return new ListValue(AProgram.ValueManager, (Schema.IListType)FDataType, ((Schema.FileReference)AArguments[0]).Environments);
+			return new ListValue(program.ValueManager, (Schema.IListType)_dataType, ((Schema.FileReference)arguments[0]).Environments);
 		}
 	}
 	
 	// operator FileReferenceWriteEnvironments(const AValue : FileReference, list(String) AEnvironments : Boolean) : FileReference
 	public class FileReferenceWriteEnvironmentsNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null || AArguments[1] == null)
+			if (arguments[0] == null || arguments[1] == null)
 				return null;
 			#endif
-			Schema.FileReference LFile = (Schema.FileReference)AArguments[0];
-			LFile.Environments.Clear();
-			LFile.Environments.AddRange(((ListValue)AArguments[1]).ToList<string>());
-			return LFile;
+			Schema.FileReference file = (Schema.FileReference)arguments[0];
+			file.Environments.Clear();
+			file.Environments.AddRange(((ListValue)arguments[1]).ToList<string>());
+			return file;
 		}
 	}
 	
 	// operator .iEqual(const ALeftValue : FileReference, const ARightValue : FileReference) : Boolean
 	public class FileReferenceEqualNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0] == null) || (AArguments[1] == null))
+			if ((arguments[0] == null) || (arguments[1] == null))
 				return null;
 			#endif
-			return ((Schema.FileReference)AArguments[0]).Equals((Schema.FileReference)AArguments[1]);
+			return ((Schema.FileReference)arguments[0]).Equals((Schema.FileReference)arguments[1]);
 		}
 	}
 	
 	// operator LibraryReference(const AName : Name, const AVersion : VersionNumber) : LibraryReference
 	public class LibraryReferenceNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null || AArguments[1] == null)
+			if (arguments[0] == null || arguments[1] == null)
 				return null;
 			#endif
-			return new Schema.LibraryReference((string)AArguments[0], (VersionNumber)AArguments[1]);
+			return new Schema.LibraryReference((string)arguments[0], (VersionNumber)arguments[1]);
 		}
 	}
 	
 	// operator LibraryReferenceReadName(const AValue : LibraryReference) : Name
 	public class LibraryReferenceReadNameNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null)
+			if (arguments[0] == null)
 				return null;
 			#endif
-			return ((Schema.LibraryReference)AArguments[0]).Name;
+			return ((Schema.LibraryReference)arguments[0]).Name;
 		}
 	}
 	
 	// operator LibraryReferenceWriteName(const AValue : LibraryReference, const AName : Name) : LibraryReference
 	public class LibraryReferenceWriteNameNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null || AArguments[1] == null)
+			if (arguments[0] == null || arguments[1] == null)
 				return null;
 			#endif
-			Schema.LibraryReference LLibrary = (Schema.LibraryReference)AArguments[0];
-			LLibrary.Name = (string)AArguments[1];
-			return LLibrary;
+			Schema.LibraryReference library = (Schema.LibraryReference)arguments[0];
+			library.Name = (string)arguments[1];
+			return library;
 		}
 	}
 	
 	// operator LibraryReferenceReadVersion(const AValue : LibraryReference) : VersionNumber
 	public class LibraryReferenceReadVersionNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null)
+			if (arguments[0] == null)
 				return null;
 			#endif
-			Schema.LibraryReference LReference = (Schema.LibraryReference)AArguments[0];
-			return LReference.Version;
+			Schema.LibraryReference reference = (Schema.LibraryReference)arguments[0];
+			return reference.Version;
 		}
 	}
 	
 	// operator LibraryReferenceWriteVersion(const AValue : LibraryReference, const AVersion : VersionNumber) : LibraryReference
 	public class LibraryReferenceWriteVersionNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null || AArguments[1] == null)
+			if (arguments[0] == null || arguments[1] == null)
 				return null;
 			#endif
-			Schema.LibraryReference LLibrary = (Schema.LibraryReference)AArguments[0];
-			LLibrary.Version = (VersionNumber)AArguments[1];
-			return LLibrary;
+			Schema.LibraryReference library = (Schema.LibraryReference)arguments[0];
+			library.Version = (VersionNumber)arguments[1];
+			return library;
 		}
 	}
 	
 	// operator iCompare(const ALeftValue : LibraryReference, const ARightValue : LibraryReference)
 	public class LibraryReferenceCompareNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0] == null) || (AArguments[1] == null))
+			if ((arguments[0] == null) || (arguments[1] == null))
 				return null;
 			#endif
-			return Schema.LibraryReference.Compare((Schema.LibraryReference)AArguments[0], (Schema.LibraryReference)AArguments[1]);
+			return Schema.LibraryReference.Compare((Schema.LibraryReference)arguments[0], (Schema.LibraryReference)arguments[1]);
 		}
 	}
 	
@@ -227,282 +227,282 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator LibraryDescriptor(const AName : Name, const AVersion : VersionNumber, const ADefaultDeviceName : String, const AFiles : list(FileReference), const ARequisites : list(LibraryReference), const ADirectory : String);
 	public class SystemLibraryDescriptorNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null)
+			if (arguments[0] == null)
 				return null;
 			#endif
-			Schema.Library LLibrary = new Schema.Library(Schema.Object.EnsureUnrooted((string)AArguments[0]));
-			if (AArguments.Length >= 2)
+			Schema.Library library = new Schema.Library(Schema.Object.EnsureUnrooted((string)arguments[0]));
+			if (arguments.Length >= 2)
 			{
 				#if NILPROPOGATION
-				if (AArguments[1] == null)
+				if (arguments[1] == null)
 					return null;
 				#endif
-				LLibrary.Version = (VersionNumber)AArguments[1];
+				library.Version = (VersionNumber)arguments[1];
 			}
 			else
-				LLibrary.Version = new VersionNumber(-1, -1, -1, -1);
+				library.Version = new VersionNumber(-1, -1, -1, -1);
 				
-			if (AArguments.Length >= 3)
+			if (arguments.Length >= 3)
 			{
 				#if NILPROPOGATION
-				if (AArguments[2] == null)
+				if (arguments[2] == null)
 					return null;
 				#endif
-				LLibrary.DefaultDeviceName = (string)AArguments[2];
+				library.DefaultDeviceName = (string)arguments[2];
 			}
 
-			if (AArguments.Length >= 4)
+			if (arguments.Length >= 4)
 			{
 				#if NILPROPOGATION
-				if (AArguments[3] == null || AArguments[4] == null)
+				if (arguments[3] == null || arguments[4] == null)
 					return null;
 				#endif
-				ListValue LFiles = (ListValue)AArguments[3];
-				ListValue LRequisites = (ListValue)AArguments[4];
+				ListValue files = (ListValue)arguments[3];
+				ListValue requisites = (ListValue)arguments[4];
 
-				for (int LIndex = 0; LIndex < LFiles.Count(); LIndex++)
-					LLibrary.Files.Add((Schema.FileReference)LFiles[LIndex]);
+				for (int index = 0; index < files.Count(); index++)
+					library.Files.Add((Schema.FileReference)files[index]);
 
-				for (int LIndex = 0; LIndex < LRequisites.Count(); LIndex++)
-					LLibrary.Libraries.Add((Schema.LibraryReference)LRequisites[LIndex]);
+				for (int index = 0; index < requisites.Count(); index++)
+					library.Libraries.Add((Schema.LibraryReference)requisites[index]);
 			}
 			
-			if (AArguments.Length >= 6)
+			if (arguments.Length >= 6)
 			{
 				#if NILPROPOGATION
-				if (AArguments[5] == null)
+				if (arguments[5] == null)
 					return null;
 				#endif
-				LLibrary.Directory = (string)AArguments[5];
+				library.Directory = (string)arguments[5];
 			}
 
-			return LLibrary;
+			return library;
 		}
 	}
 	
 	// operator LibraryDescriptorReadName(const AValue : LibraryDescriptor) : Name;
 	public class SystemLibraryDescriptorReadNameNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null)
+			if (arguments[0] == null)
 				return null;
 			#endif
-			return ((Schema.Library)AArguments[0]).Name;
+			return ((Schema.Library)arguments[0]).Name;
 		}
 	}
 	
 	// operator LibraryDescriptorWriteName(const AValue : LibraryDescriptor, const AName : Name) : LibraryDescriptor;
 	public class SystemLibraryDescriptorWriteNameNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0] == null) || AArguments[1] == null)
+			if ((arguments[0] == null) || arguments[1] == null)
 				return null;
 			#endif
-			Schema.Library LLibrary = (Schema.Library)AArguments[0];
-			LLibrary.Name = Schema.Object.EnsureUnrooted((string)AArguments[1]);
-			return LLibrary;
+			Schema.Library library = (Schema.Library)arguments[0];
+			library.Name = Schema.Object.EnsureUnrooted((string)arguments[1]);
+			return library;
 		}
 	}
 	
 	// operator LibraryDescriptorReadDirectory(const AValue : LibraryDescriptor) : String;
 	public class SystemLibraryDescriptorReadDirectoryNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null)
+			if (arguments[0] == null)
 				return null;
 			#endif
-			return ((Schema.Library)AArguments[0]).Directory;
+			return ((Schema.Library)arguments[0]).Directory;
 		}
 	}
 	
 	// operator LibraryDescriptorWriteDirectory(const AValue : LibraryDescriptor, const ADirectory : String) : LibraryDescriptor;
 	public class SystemLibraryDescriptorWriteDirectoryNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0] == null) || AArguments[1] == null)
+			if ((arguments[0] == null) || arguments[1] == null)
 				return null;
 			#endif
-			Schema.Library LLibrary = (Schema.Library)AArguments[0];
-			if (AArguments[1] == null)
-				LLibrary.Directory = null;
+			Schema.Library library = (Schema.Library)arguments[0];
+			if (arguments[1] == null)
+				library.Directory = null;
 			else
-				LLibrary.Directory = (string)AArguments[1];
-			return LLibrary;
+				library.Directory = (string)arguments[1];
+			return library;
 		}
 	}
 	
 	// operator LibraryDescriptorReadDefaultDeviceName(const AValue : LibraryDescriptor) : DefaultDeviceName;
 	public class SystemLibraryDescriptorReadDefaultDeviceNameNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0] == null))
+			if ((arguments[0] == null))
 				return null;
 			#endif
-			return ((Schema.Library)AArguments[0]).DefaultDeviceName;
+			return ((Schema.Library)arguments[0]).DefaultDeviceName;
 		}
 	}
 	
 	// operator LibraryDescriptorWriteDefaultDeviceName(const AValue : LibraryDescriptor, const ADefaultDeviceName : DefaultDeviceName) : LibraryDescriptor;
 	public class SystemLibraryDescriptorWriteDefaultDeviceNameNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0] == null) || AArguments[1] == null)
+			if ((arguments[0] == null) || arguments[1] == null)
 				return null;
 			#endif
-			Schema.Library LLibrary = (Schema.Library)AArguments[0];
-			LLibrary.DefaultDeviceName = (string)AArguments[1];
-			return LLibrary;
+			Schema.Library library = (Schema.Library)arguments[0];
+			library.DefaultDeviceName = (string)arguments[1];
+			return library;
 		}
 	}
 	
 	// operator LibraryDescriptorReadVersion(const AValue : LibraryDescriptor) : VersionNumber;
 	public class SystemLibraryDescriptorReadVersionNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null)
+			if (arguments[0] == null)
 				return null;
 			#endif
-			return ((Schema.Library)AArguments[0]).Version;
+			return ((Schema.Library)arguments[0]).Version;
 		}
 	}
 	
 	// operator LibraryDescriptorWriteVersion(const AValue : LibraryDescriptor, const AVersion : VersionNumber) : LibraryDescriptor;
 	public class SystemLibraryDescriptorWriteVersionNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null || AArguments[1] == null)
+			if (arguments[0] == null || arguments[1] == null)
 				return null;
 			#endif
-			Schema.Library LLibrary = (Schema.Library)AArguments[0];
-			LLibrary.Version = (VersionNumber)AArguments[1];
-			return LLibrary;
+			Schema.Library library = (Schema.Library)arguments[0];
+			library.Version = (VersionNumber)arguments[1];
+			return library;
 		}
 	}
 	
 	// operator LibraryDescriptorReadFiles(const AValue : LibraryDescriptor) : list(FileReference);
 	public class SystemLibraryDescriptorReadFilesNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0] == null))
+			if ((arguments[0] == null))
 				return null;
 			#endif
-			Schema.Library LLibrary = (Schema.Library)AArguments[0];
-			ListValue LFiles = new ListValue(AProgram.ValueManager, (Schema.IListType)FDataType);
-			foreach (Schema.FileReference LFileReference in LLibrary.Files)
-				LFiles.Add(LFileReference.Clone());
-			return LFiles;
+			Schema.Library library = (Schema.Library)arguments[0];
+			ListValue files = new ListValue(program.ValueManager, (Schema.IListType)_dataType);
+			foreach (Schema.FileReference fileReference in library.Files)
+				files.Add(fileReference.Clone());
+			return files;
 		}
 	}
 	
 	// operator LibraryDescriptorWriteFiles(const AValue : LibraryDescriptor, const AFiles : list(FileReference)) : LibraryDescriptor;
 	public class SystemLibraryDescriptorWriteFilesNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0] == null) || AArguments[1] == null)
+			if ((arguments[0] == null) || arguments[1] == null)
 				return null;
 			#endif
-			Schema.Library LLibrary = (Schema.Library)AArguments[0];
-			ListValue LFiles = (ListValue)AArguments[1];
-			LLibrary.Files.Clear();
-			for (int LIndex = 0; LIndex < LFiles.Count(); LIndex++)
-				LLibrary.Files.Add((Schema.FileReference)((Schema.FileReference)LFiles[LIndex]).Clone());
-			return LLibrary;
+			Schema.Library library = (Schema.Library)arguments[0];
+			ListValue files = (ListValue)arguments[1];
+			library.Files.Clear();
+			for (int index = 0; index < files.Count(); index++)
+				library.Files.Add((Schema.FileReference)((Schema.FileReference)files[index]).Clone());
+			return library;
 		}
 	}
 	
 	// operator LibraryDescriptorReadRequisites(const AValue : LibraryDescriptor) : list(LibraryReference);
 	public class SystemLibraryDescriptorReadRequisitesNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0] == null))
+			if ((arguments[0] == null))
 				return null;
 			#endif
-			Schema.Library LLibrary = (Schema.Library)AArguments[0];
-			ListValue LRequisites = new ListValue(AProgram.ValueManager, (Schema.IListType)FDataType);
-			foreach (Schema.LibraryReference LReference in LLibrary.Libraries)
-				LRequisites.Add(LReference.Clone());
-			return LRequisites;
+			Schema.Library library = (Schema.Library)arguments[0];
+			ListValue requisites = new ListValue(program.ValueManager, (Schema.IListType)_dataType);
+			foreach (Schema.LibraryReference reference in library.Libraries)
+				requisites.Add(reference.Clone());
+			return requisites;
 		}
 	}
 	
 	// operator LibraryDescriptorWriteRequisites(const AValue : LibraryDescriptor, const ARequisites : list(String)) : LibraryDescriptor;
 	public class SystemLibraryDescriptorWriteRequisitesNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0] == null) || AArguments[1] == null)
+			if ((arguments[0] == null) || arguments[1] == null)
 				return null;
 			#endif
-			Schema.Library LLibrary = (Schema.Library)AArguments[0];
-			ListValue LRequisites = (ListValue)AArguments[1];
-			LLibrary.Libraries.Clear();
-			for (int LIndex = 0; LIndex < LRequisites.Count(); LIndex++)
-				LLibrary.Libraries.Add((Schema.LibraryReference)((Schema.LibraryReference)LRequisites[LIndex]).Clone());
-			return LLibrary;
+			Schema.Library library = (Schema.Library)arguments[0];
+			ListValue requisites = (ListValue)arguments[1];
+			library.Libraries.Clear();
+			for (int index = 0; index < requisites.Count(); index++)
+				library.Libraries.Add((Schema.LibraryReference)((Schema.LibraryReference)requisites[index]).Clone());
+			return library;
 		}
 	}
 
     // operator iEqual(const ALeftValue : LibraryDescriptor, const ARightValue : LibraryDescriptor) : Boolean;
     public class SystemLibraryDescriptorEqualNode : InstructionNode
     {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0] == null) || (AArguments[1] == null))
+			if ((arguments[0] == null) || (arguments[1] == null))
 				return null;
 			#endif
-			Schema.Library LLeftLibrary = (Schema.Library)AArguments[0];
-			Schema.Library LRightLibrary = (Schema.Library)AArguments[1];
-			bool LLibrariesEqual = 
-				(LLeftLibrary.Name == LRightLibrary.Name) && 
-				(LLeftLibrary.Directory == LRightLibrary.Directory) &&
-				(LLeftLibrary.Files.Count == LRightLibrary.Files.Count) &&
-				(LLeftLibrary.Libraries.Count == LRightLibrary.Libraries.Count);
+			Schema.Library leftLibrary = (Schema.Library)arguments[0];
+			Schema.Library rightLibrary = (Schema.Library)arguments[1];
+			bool librariesEqual = 
+				(leftLibrary.Name == rightLibrary.Name) && 
+				(leftLibrary.Directory == rightLibrary.Directory) &&
+				(leftLibrary.Files.Count == rightLibrary.Files.Count) &&
+				(leftLibrary.Libraries.Count == rightLibrary.Libraries.Count);
 				
-			if (LLibrariesEqual)
+			if (librariesEqual)
 			{
-				for (int LIndex = 0; LIndex < LLeftLibrary.Files.Count; LIndex++)
-					if (!(LLeftLibrary.Files[LIndex].Equals(LRightLibrary.Files[LIndex])))
+				for (int index = 0; index < leftLibrary.Files.Count; index++)
+					if (!(leftLibrary.Files[index].Equals(rightLibrary.Files[index])))
 					{
-						LLibrariesEqual = false;
+						librariesEqual = false;
 						break;
 					}
 					
-				for (int LIndex = 0; LIndex < LLeftLibrary.Libraries.Count; LIndex++)
-					if (!(LLeftLibrary.Libraries[LIndex].Equals(LRightLibrary.Libraries[LIndex])))
+				for (int index = 0; index < leftLibrary.Libraries.Count; index++)
+					if (!(leftLibrary.Libraries[index].Equals(rightLibrary.Libraries[index])))
 					{
-						LLibrariesEqual = false;
+						librariesEqual = false;
 						break;
 					}
 			}
 			
-			return LLibrariesEqual;
+			return librariesEqual;
 		}
     }
 }

@@ -15,34 +15,34 @@ namespace Alphora.Dataphor.DAE.Schema
 {
     public abstract class EventHandler : CatalogObject
     {
-		public EventHandler(string AName) : base(AName) {}
-		public EventHandler(int AID, string AName) : base(AID, AName) {}
+		public EventHandler(string name) : base(name) {}
+		public EventHandler(int iD, string name) : base(iD, name) {}
 		
 		// Operator
 		[Reference]
-		protected Operator FOperator;
+		protected Operator _operator;
 		public Operator Operator 
 		{
-			get { return FOperator; } 
-			set { FOperator = value; } 
+			get { return _operator; } 
+			set { _operator = value; } 
 		}
 		
 		// ATHandlerName
-		private string FATHandlerName = null;
+		private string _aTHandlerName = null;
 		public string ATHandlerName
 		{
-			get { return FATHandlerName; }
-			set { FATHandlerName = value; }
+			get { return _aTHandlerName; }
+			set { _aTHandlerName = value; }
 		}
 		
-		public override bool IsATObject { get { return FATHandlerName != null; } }
+		public override bool IsATObject { get { return _aTHandlerName != null; } }
 		
 		// EventType
-		protected EventType FEventType;
+		protected EventType _eventType;
 		public EventType EventType
 		{
-			get { return FEventType; }
-			set { FEventType = value; }
+			get { return _eventType; }
+			set { _eventType = value; }
 		}
 		
 		// IsDeferred
@@ -56,7 +56,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			get 
 			{
-				switch (FEventType)
+				switch (_eventType)
 				{
 					case EventType.AfterInsert :
 					case EventType.AfterUpdate :
@@ -67,7 +67,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 			set 
 			{
-				switch (FEventType)
+				switch (_eventType)
 				{
 					case EventType.AfterInsert :
 					case EventType.AfterUpdate :
@@ -92,7 +92,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			get 
 			{ 
-				switch (FEventType)
+				switch (_eventType)
 				{
 					case EventType.AfterInsert :
 					case EventType.AfterUpdate :
@@ -110,47 +110,47 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		// PlanNode
-		protected PlanNode FPlanNode;
+		protected PlanNode _planNode;
 		public PlanNode PlanNode
 		{
-			get { return FPlanNode; }
-			set { FPlanNode = value; }
+			get { return _planNode; }
+			set { _planNode = value; }
 		}
 		
-		public Statement EmitScalarTypeHandler(ScalarType AScalarType, EmitMode AMode)
+		public Statement EmitScalarTypeHandler(ScalarType scalarType, EmitMode mode)
 		{
-			AttachStatement LStatement = new AttachStatement();
-			LStatement.MetaData = MetaData;
-			LStatement.OperatorName = FOperator.OperatorName;
-			LStatement.EventSourceSpecifier = new ObjectEventSourceSpecifier(AScalarType.Name);
-			LStatement.EventSpecifier = new EventSpecifier();
-			LStatement.EventSpecifier.EventType = FEventType;
-			return LStatement;
+			AttachStatement statement = new AttachStatement();
+			statement.MetaData = MetaData;
+			statement.OperatorName = _operator.OperatorName;
+			statement.EventSourceSpecifier = new ObjectEventSourceSpecifier(scalarType.Name);
+			statement.EventSpecifier = new EventSpecifier();
+			statement.EventSpecifier.EventType = _eventType;
+			return statement;
 		}
 		
-		public Statement EmitTableVarHandler(TableVar ATableVar, EmitMode AMode)
+		public Statement EmitTableVarHandler(TableVar tableVar, EmitMode mode)
 		{
-			AttachStatement LStatement = new AttachStatement();
-			LStatement.MetaData = MetaData;
-			LStatement.OperatorName = FOperator.OperatorName;
-			LStatement.EventSourceSpecifier = new ObjectEventSourceSpecifier(ATableVar.Name);
-			LStatement.EventSpecifier = new EventSpecifier();
-			LStatement.EventSpecifier.EventType = FEventType;
-			return LStatement;
+			AttachStatement statement = new AttachStatement();
+			statement.MetaData = MetaData;
+			statement.OperatorName = _operator.OperatorName;
+			statement.EventSourceSpecifier = new ObjectEventSourceSpecifier(tableVar.Name);
+			statement.EventSpecifier = new EventSpecifier();
+			statement.EventSpecifier.EventType = _eventType;
+			return statement;
 		}
 		
-		public Statement EmitColumnHandler(TableVar ATableVar, TableVarColumn AColumn, EmitMode AMode)
+		public Statement EmitColumnHandler(TableVar tableVar, TableVarColumn column, EmitMode mode)
 		{
-			AttachStatement LStatement = new AttachStatement();
-			LStatement.MetaData = MetaData;
-			LStatement.OperatorName = FOperator.OperatorName;
-			LStatement.EventSourceSpecifier = new ColumnEventSourceSpecifier(ATableVar.Name, AColumn.Name);
-			LStatement.EventSpecifier = new EventSpecifier();
-			LStatement.EventSpecifier.EventType = FEventType;
-			return LStatement;
+			AttachStatement statement = new AttachStatement();
+			statement.MetaData = MetaData;
+			statement.OperatorName = _operator.OperatorName;
+			statement.EventSourceSpecifier = new ColumnEventSourceSpecifier(tableVar.Name, column.Name);
+			statement.EventSpecifier = new EventSpecifier();
+			statement.EventSpecifier.EventType = _eventType;
+			return statement;
 		}
 		
-		public override void DetermineRemotable(CatalogDeviceSession ASession)
+		public override void DetermineRemotable(CatalogDeviceSession session)
 		{
 			#if TRIGGERSREMOTABLE
 			base.DetermineRemotable(ACatalog);
@@ -162,17 +162,17 @@ namespace Alphora.Dataphor.DAE.Schema
     
     public class ScalarTypeEventHandler : EventHandler
     {
-		public ScalarTypeEventHandler(int AID, string AName) : base(AID, AName) {}
+		public ScalarTypeEventHandler(int iD, string name) : base(iD, name) {}
 		
 		[Reference]
-		internal ScalarType FScalarType;
+		internal ScalarType _scalarType;
 		public ScalarType ScalarType
 		{
-			get { return FScalarType; }
+			get { return _scalarType; }
 			set
 			{
-				if (FScalarType != null)
-					FScalarType.EventHandlers.Remove(this);
+				if (_scalarType != null)
+					_scalarType.EventHandlers.Remove(this);
 				if (value != null)
 					value.EventHandlers.Add(this);
 			}
@@ -183,7 +183,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			get
 			{
 				// Operator "{0}" attached to event "{1}" of scalar type "{2}"
-				return String.Format(Strings.Get("SchemaObjectDescription.ScalarTypeEventHandler", Operator.OperatorName, EventType.ToString(), FScalarType.DisplayName));
+				return String.Format(Strings.Get("SchemaObjectDescription.ScalarTypeEventHandler", Operator.OperatorName, EventType.ToString(), _scalarType.DisplayName));
 			}
 		}
 
@@ -191,46 +191,46 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		//public override int ParentObjectID { get { return FScalarType == null ? -1 : FScalarType.ID; } }
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 				SaveObjectID();
 			else
 				RemoveObjectID();
 
-			AttachStatement LStatement = new AttachStatement();
-			LStatement.OperatorName = Schema.Object.EnsureRooted(FOperator.OperatorName);
-			LStatement.EventSourceSpecifier = new ObjectEventSourceSpecifier(Schema.Object.EnsureRooted(FScalarType.Name));
-			LStatement.EventSpecifier = new EventSpecifier();
-			LStatement.EventSpecifier.EventType = FEventType;
-			LStatement.MetaData = MetaData == null ? null : MetaData.Copy();
-			return LStatement;
+			AttachStatement statement = new AttachStatement();
+			statement.OperatorName = Schema.Object.EnsureRooted(_operator.OperatorName);
+			statement.EventSourceSpecifier = new ObjectEventSourceSpecifier(Schema.Object.EnsureRooted(_scalarType.Name));
+			statement.EventSpecifier = new EventSpecifier();
+			statement.EventSpecifier.EventType = _eventType;
+			statement.MetaData = MetaData == null ? null : MetaData.Copy();
+			return statement;
 		}
 		
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			DetachStatement LStatement = new DetachStatement();
-			LStatement.OperatorName = Schema.Object.EnsureRooted(FOperator.OperatorName);
-			LStatement.EventSourceSpecifier = new ObjectEventSourceSpecifier(Schema.Object.EnsureRooted(FScalarType.Name));
-			LStatement.EventSpecifier = new EventSpecifier();
-			LStatement.EventSpecifier.EventType = FEventType;
-			return LStatement;
+			DetachStatement statement = new DetachStatement();
+			statement.OperatorName = Schema.Object.EnsureRooted(_operator.OperatorName);
+			statement.EventSourceSpecifier = new ObjectEventSourceSpecifier(Schema.Object.EnsureRooted(_scalarType.Name));
+			statement.EventSpecifier = new EventSpecifier();
+			statement.EventSpecifier.EventType = _eventType;
+			return statement;
 		}
     }
     
     public class TableVarColumnEventHandler : EventHandler
     {
-		public TableVarColumnEventHandler(int AID, string AName) : base(AID, AName) {}
+		public TableVarColumnEventHandler(int iD, string name) : base(iD, name) {}
 		
 		[Reference]
-		internal TableVarColumn FTableVarColumn;
+		internal TableVarColumn _tableVarColumn;
 		public TableVarColumn TableVarColumn
 		{
-			get { return FTableVarColumn; }
+			get { return _tableVarColumn; }
 			set
 			{
-				if (FTableVarColumn != null)
-					FTableVarColumn.EventHandlers.Remove(this);
+				if (_tableVarColumn != null)
+					_tableVarColumn.EventHandlers.Remove(this);
 				if (value != null)
 					value.EventHandlers.Add(this);
 			}
@@ -241,7 +241,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			get
 			{
 				// Operator "{0}" attached to event "{1}" of column "{2}" in table "{3}"
-				return String.Format(Strings.Get("SchemaObjectDescription.TableVarColumnEventHandler", Operator.OperatorName, EventType.ToString(), FTableVarColumn.DisplayName, FTableVarColumn.TableVar.DisplayName));
+				return String.Format(Strings.Get("SchemaObjectDescription.TableVarColumnEventHandler", Operator.OperatorName, EventType.ToString(), _tableVarColumn.DisplayName, _tableVarColumn.TableVar.DisplayName));
 			}
 		}
 
@@ -249,47 +249,47 @@ namespace Alphora.Dataphor.DAE.Schema
 
  		//public override int ParentObjectID { get { return FTableVarColumn == null ? -1 : FTableVarColumn.ID; } }
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 				SaveObjectID();
 			else
 				RemoveObjectID();
 
-			AttachStatement LStatement = new AttachStatement();
-			LStatement.OperatorName = Schema.Object.EnsureRooted(FOperator.OperatorName);
-			LStatement.EventSourceSpecifier = new ColumnEventSourceSpecifier(Schema.Object.EnsureRooted(FTableVarColumn.TableVar.Name), FTableVarColumn.Name);
-			LStatement.EventSpecifier = new EventSpecifier();
-			LStatement.EventSpecifier.EventType = FEventType;
-			LStatement.MetaData = MetaData == null ? null : MetaData.Copy();
-			return LStatement;
+			AttachStatement statement = new AttachStatement();
+			statement.OperatorName = Schema.Object.EnsureRooted(_operator.OperatorName);
+			statement.EventSourceSpecifier = new ColumnEventSourceSpecifier(Schema.Object.EnsureRooted(_tableVarColumn.TableVar.Name), _tableVarColumn.Name);
+			statement.EventSpecifier = new EventSpecifier();
+			statement.EventSpecifier.EventType = _eventType;
+			statement.MetaData = MetaData == null ? null : MetaData.Copy();
+			return statement;
 		}
 		
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			DetachStatement LStatement = new DetachStatement();
-			LStatement.OperatorName = Schema.Object.EnsureRooted(FOperator.OperatorName);
-			LStatement.EventSourceSpecifier = new ColumnEventSourceSpecifier(Schema.Object.EnsureRooted(FTableVarColumn.TableVar.Name), FTableVarColumn.Name);
-			LStatement.EventSpecifier = new EventSpecifier();
-			LStatement.EventSpecifier.EventType = FEventType;
-			return LStatement;
+			DetachStatement statement = new DetachStatement();
+			statement.OperatorName = Schema.Object.EnsureRooted(_operator.OperatorName);
+			statement.EventSourceSpecifier = new ColumnEventSourceSpecifier(Schema.Object.EnsureRooted(_tableVarColumn.TableVar.Name), _tableVarColumn.Name);
+			statement.EventSpecifier = new EventSpecifier();
+			statement.EventSpecifier.EventType = _eventType;
+			return statement;
 		}
     }
     
     public class TableVarEventHandler : EventHandler
     {
-		public TableVarEventHandler(string AName) : base(AName) {}
-		public TableVarEventHandler(int AID, string AName) : base(AID, AName) {}
+		public TableVarEventHandler(string name) : base(name) {}
+		public TableVarEventHandler(int iD, string name) : base(iD, name) {}
 		
 		[Reference]
-		internal TableVar FTableVar;
+		internal TableVar _tableVar;
 		public TableVar TableVar
 		{
-			get { return FTableVar; }
+			get { return _tableVar; }
 			set
 			{
-				if (FTableVar != null)
-					FTableVar.EventHandlers.Remove(this);
+				if (_tableVar != null)
+					_tableVar.EventHandlers.Remove(this);
 				if (value != null)
 					value.EventHandlers.Add(this);
 			}
@@ -300,7 +300,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			get
 			{
 				// Operator "{0}" attached to event "{1}" of table "{2}"
-				return String.Format(Strings.Get("SchemaObjectDescription.TableVarEventHandler", Operator.OperatorName, EventType.ToString(), FTableVar.DisplayName));
+				return String.Format(Strings.Get("SchemaObjectDescription.TableVarEventHandler", Operator.OperatorName, EventType.ToString(), _tableVar.DisplayName));
 			}
 		}
 
@@ -308,30 +308,30 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		//public override int ParentObjectID { get { return FTableVar == null ? -1 : FTableVar.ID; } }
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 				SaveObjectID();
 			else
 				RemoveObjectID();
 
-			AttachStatement LStatement = new AttachStatement();
-			LStatement.OperatorName = Schema.Object.EnsureRooted(FOperator.OperatorName);
-			LStatement.EventSourceSpecifier = new ObjectEventSourceSpecifier(Schema.Object.EnsureRooted(FTableVar.Name));
-			LStatement.EventSpecifier = new EventSpecifier();
-			LStatement.EventSpecifier.EventType = FEventType;
-			LStatement.MetaData = MetaData == null ? null : MetaData.Copy();
-			return LStatement;
+			AttachStatement statement = new AttachStatement();
+			statement.OperatorName = Schema.Object.EnsureRooted(_operator.OperatorName);
+			statement.EventSourceSpecifier = new ObjectEventSourceSpecifier(Schema.Object.EnsureRooted(_tableVar.Name));
+			statement.EventSpecifier = new EventSpecifier();
+			statement.EventSpecifier.EventType = _eventType;
+			statement.MetaData = MetaData == null ? null : MetaData.Copy();
+			return statement;
 		}
 
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			DetachStatement LStatement = new DetachStatement();
-			LStatement.OperatorName = Schema.Object.EnsureRooted(FOperator.OperatorName);
-			LStatement.EventSourceSpecifier = new ObjectEventSourceSpecifier(Schema.Object.EnsureRooted(FTableVar.Name));
-			LStatement.EventSpecifier = new EventSpecifier();
-			LStatement.EventSpecifier.EventType = FEventType;
-			return LStatement;
+			DetachStatement statement = new DetachStatement();
+			statement.OperatorName = Schema.Object.EnsureRooted(_operator.OperatorName);
+			statement.EventSourceSpecifier = new ObjectEventSourceSpecifier(Schema.Object.EnsureRooted(_tableVar.Name));
+			statement.EventSpecifier = new EventSpecifier();
+			statement.EventSpecifier.EventType = _eventType;
+			return statement;
 		}
     }
     
@@ -339,215 +339,215 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class EventHandlers : Objects
     {
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object AItem)
+		protected override void Validate(Object item)
 		{
-			if (!(AItem is EventHandler))
+			if (!(item is EventHandler))
 				throw new SchemaException(SchemaException.Codes.EventHandlerContainer);
-			if (IndexOf((EventHandler)AItem) >= 0)
-				throw new SchemaException(SchemaException.Codes.DuplicateEventHandler, ((EventHandler)AItem).Operator.Name, ((EventHandler)AItem).EventType.ToString());
-			base.Validate(AItem);
+			if (IndexOf((EventHandler)item) >= 0)
+				throw new SchemaException(SchemaException.Codes.DuplicateEventHandler, ((EventHandler)item).Operator.Name, ((EventHandler)item).EventType.ToString());
+			base.Validate(item);
 		}
 		#endif
 		
-		protected override void Adding(Object AItem, int AIndex)
+		protected override void Adding(Object item, int index)
 		{
-			base.Adding(AItem, AIndex);
-			EventHandler LHandler = (EventHandler)AItem;
-			int LCount;
-			if (FHasHandlers.TryGetValue(LHandler.EventType, out LCount))
-				FHasHandlers[LHandler.EventType] = LCount + 1;
+			base.Adding(item, index);
+			EventHandler handler = (EventHandler)item;
+			int count;
+			if (_hasHandlers.TryGetValue(handler.EventType, out count))
+				_hasHandlers[handler.EventType] = count + 1;
 			else
-				FHasHandlers.Add(LHandler.EventType, 1);
+				_hasHandlers.Add(handler.EventType, 1);
 		}
 		
-		protected override void Removing(Object AItem, int AIndex)
+		protected override void Removing(Object item, int index)
 		{
-			base.Removing(AItem, AIndex);
-			EventHandler LHandler = (EventHandler)AItem;
-			int LCount;
-			if (FHasHandlers.TryGetValue(LHandler.EventType, out LCount) && LCount == 1)
-				FHasHandlers.Remove(LHandler.EventType);
+			base.Removing(item, index);
+			EventHandler handler = (EventHandler)item;
+			int count;
+			if (_hasHandlers.TryGetValue(handler.EventType, out count) && count == 1)
+				_hasHandlers.Remove(handler.EventType);
 			else
-				FHasHandlers[LHandler.EventType] = LCount - 1;
+				_hasHandlers[handler.EventType] = count - 1;
 		}
 
-		private Dictionary<EventType, int> FHasHandlers = new Dictionary<EventType, int>(); // key - EventType, value - integer count of events of that type
+		private Dictionary<EventType, int> _hasHandlers = new Dictionary<EventType, int>(); // key - EventType, value - integer count of events of that type
 
-		public bool HasHandlers(EventType AEventType)
+		public bool HasHandlers(EventType eventType)
 		{
-			int LCount;
-			return FHasHandlers.TryGetValue(AEventType, out LCount) && LCount > 0;
+			int count;
+			return _hasHandlers.TryGetValue(eventType, out count) && count > 0;
 		}
 
-		public new EventHandler this[int AIndex]
+		public new EventHandler this[int index]
 		{
-			get { return (EventHandler)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (EventHandler)base[index]; }
+			set { base[index] = value; }
 		}
 
-		public new EventHandler this[string AName]
+		public new EventHandler this[string name]
 		{
-			get { return (EventHandler)base[AName]; }
-			set { base[AName] = value; }
+			get { return (EventHandler)base[name]; }
+			set { base[name] = value; }
 		}
 		
-		public EventHandler this[Operator AOperator, EventType AEventType]
+		public EventHandler this[Operator operatorValue, EventType eventType]
 		{
-			get { return this[IndexOf(AOperator, AEventType)]; }
+			get { return this[IndexOf(operatorValue, eventType)]; }
 		}
 		
-		public int IndexOf(Operator AOperator, EventType AEventType)
+		public int IndexOf(Operator operatorValue, EventType eventType)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if ((this[LIndex].Operator == AOperator) && (this[LIndex].EventType == AEventType))
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if ((this[index].Operator == operatorValue) && (this[index].EventType == eventType))
+					return index;
 			return -1;
 		}
 		
-		public int IndexOf(string AOperatorName, EventType AEventType)
+		public int IndexOf(string operatorName, EventType eventType)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
+			for (int index = 0; index < Count; index++)
 				if 
 				(
 					(
-						Schema.Object.NamesEqual(this[LIndex].Operator.OperatorName, AOperatorName) 
-							|| ((this[LIndex].Operator.SessionObjectName != null) && Schema.Object.NamesEqual(this[LIndex].Operator.SessionObjectName, AOperatorName))
+						Schema.Object.NamesEqual(this[index].Operator.OperatorName, operatorName) 
+							|| ((this[index].Operator.SessionObjectName != null) && Schema.Object.NamesEqual(this[index].Operator.SessionObjectName, operatorName))
 					) 
-						&& (this[LIndex].EventType == AEventType)
+						&& (this[index].EventType == eventType)
 				)
-					return LIndex;
+					return index;
 			return -1;
 		}
 		
-		public void Add(EventHandler AHandler, List<string> ABeforeOperatorNames)
+		public void Add(EventHandler handler, List<string> beforeOperatorNames)
 		{
-			int LTargetIndex = Count;
-			foreach (string LOperatorName in ABeforeOperatorNames)
+			int targetIndex = Count;
+			foreach (string operatorName in beforeOperatorNames)
 			{
-				int LIndex = IndexOf(LOperatorName, AHandler.EventType);
-				if ((LIndex >= 0) && (LIndex < LTargetIndex))
-					LTargetIndex = LIndex;
+				int index = IndexOf(operatorName, handler.EventType);
+				if ((index >= 0) && (index < targetIndex))
+					targetIndex = index;
 			}
-			Insert(LTargetIndex, AHandler);
+			Insert(targetIndex, handler);
 		}
 		
-		public void MoveBefore(EventHandler AHandler, List<string> ABeforeOperatorNames)
+		public void MoveBefore(EventHandler handler, List<string> beforeOperatorNames)
 		{
-			int LCurrentIndex = IndexOf(AHandler);
-			int LTargetIndex = LCurrentIndex;
-			foreach (string LOperatorName in ABeforeOperatorNames)
+			int currentIndex = IndexOf(handler);
+			int targetIndex = currentIndex;
+			foreach (string operatorName in beforeOperatorNames)
 			{
-				int LIndex = IndexOf(LOperatorName, AHandler.EventType);
-				if ((LIndex >= 0) && (LIndex < LTargetIndex))
-					LTargetIndex = LIndex;
+				int index = IndexOf(operatorName, handler.EventType);
+				if ((index >= 0) && (index < targetIndex))
+					targetIndex = index;
 			}
 
-			if (LCurrentIndex != LTargetIndex)
+			if (currentIndex != targetIndex)
 			{	
-				RemoveAt(LCurrentIndex);
-				Insert(LTargetIndex, AHandler);
+				RemoveAt(currentIndex);
+				Insert(targetIndex, handler);
 			}
 		}
     }
     
     public class ScalarTypeEventHandlers : EventHandlers
     {
-		public ScalarTypeEventHandlers(ScalarType AScalarType) : base()
+		public ScalarTypeEventHandlers(ScalarType scalarType) : base()
 		{
-			FScalarType = AScalarType;
+			_scalarType = scalarType;
 		}
 		
 		[Reference]
-		private ScalarType FScalarType;
-		public ScalarType ScalarType { get { return FScalarType; } }
+		private ScalarType _scalarType;
+		public ScalarType ScalarType { get { return _scalarType; } }
 		
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object AItem)
+		protected override void Validate(Object item)
 		{
-			if (!(AItem is ScalarTypeEventHandler))
+			if (!(item is ScalarTypeEventHandler))
 				throw new SchemaException(SchemaException.Codes.InvalidContainer, "ScalarTypeEventHandler");
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		#endif
 		
-		protected override void Adding(Object AItem, int AIndex)
+		protected override void Adding(Object item, int index)
 		{
-			base.Adding(AItem, AIndex);
-			((ScalarTypeEventHandler)AItem).FScalarType = FScalarType;
+			base.Adding(item, index);
+			((ScalarTypeEventHandler)item)._scalarType = _scalarType;
 		}
 		
-		protected override void Removing(Object AItem, int AIndex)
+		protected override void Removing(Object item, int index)
 		{
-			((ScalarTypeEventHandler)AItem).FScalarType = null;
-			base.Removing(AItem, AIndex);
+			((ScalarTypeEventHandler)item)._scalarType = null;
+			base.Removing(item, index);
 		}
     }
 
     public class TableVarColumnEventHandlers : EventHandlers
     {
-		public TableVarColumnEventHandlers(TableVarColumn ATableVarColumn) : base()
+		public TableVarColumnEventHandlers(TableVarColumn tableVarColumn) : base()
 		{
-			FTableVarColumn = ATableVarColumn;
+			_tableVarColumn = tableVarColumn;
 		}
 		
 		[Reference]
-		private TableVarColumn FTableVarColumn;
-		public TableVarColumn TableVarColumn { get { return FTableVarColumn; } }
+		private TableVarColumn _tableVarColumn;
+		public TableVarColumn TableVarColumn { get { return _tableVarColumn; } }
 		
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object AItem)
+		protected override void Validate(Object item)
 		{
-			if (!(AItem is TableVarColumnEventHandler))
+			if (!(item is TableVarColumnEventHandler))
 				throw new SchemaException(SchemaException.Codes.InvalidContainer, "TableVarColumnEventHandler");
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		#endif
 		
-		protected override void Adding(Object AItem, int AIndex)
+		protected override void Adding(Object item, int index)
 		{
-			base.Adding(AItem, AIndex);
-			((TableVarColumnEventHandler)AItem).FTableVarColumn = FTableVarColumn;
-			FTableVarColumn.EventHandlersAdding(this, AItem);
+			base.Adding(item, index);
+			((TableVarColumnEventHandler)item)._tableVarColumn = _tableVarColumn;
+			_tableVarColumn.EventHandlersAdding(this, item);
 		}
 		
-		protected override void Removing(Object AItem, int AIndex)
+		protected override void Removing(Object item, int index)
 		{
-			FTableVarColumn.EventHandlersRemoving(this, AItem);
-			((TableVarColumnEventHandler)AItem).FTableVarColumn = null;
-			base.Removing(AItem, AIndex);
+			_tableVarColumn.EventHandlersRemoving(this, item);
+			((TableVarColumnEventHandler)item)._tableVarColumn = null;
+			base.Removing(item, index);
 		}
     }
 
     public class TableVarEventHandlers : EventHandlers
     {
-		public TableVarEventHandlers(TableVar ATableVar) : base()
+		public TableVarEventHandlers(TableVar tableVar) : base()
 		{
-			FTableVar = ATableVar;
+			_tableVar = tableVar;
 		}
 		
 		[Reference]
-		private TableVar FTableVar;
-		public TableVar TableVar { get { return FTableVar; } }
+		private TableVar _tableVar;
+		public TableVar TableVar { get { return _tableVar; } }
 		
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object AItem)
+		protected override void Validate(Object item)
 		{
-			if (!(AItem is TableVarEventHandler))
+			if (!(item is TableVarEventHandler))
 				throw new SchemaException(SchemaException.Codes.InvalidContainer, "TableVarEventHandler");
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		#endif
 		
-		protected override void Adding(Object AItem, int AIndex)
+		protected override void Adding(Object item, int index)
 		{
-			base.Adding(AItem, AIndex);
-			((TableVarEventHandler)AItem).FTableVar = FTableVar;
+			base.Adding(item, index);
+			((TableVarEventHandler)item)._tableVar = _tableVar;
 		}
 		
-		protected override void Removing(Object AItem, int AIndex)
+		protected override void Removing(Object item, int index)
 		{
-			((TableVarEventHandler)AItem).FTableVar = null;
-			base.Removing(AItem, AIndex);
+			((TableVarEventHandler)item)._tableVar = null;
+			base.Removing(item, index);
 		}
     }
 }

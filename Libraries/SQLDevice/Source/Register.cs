@@ -15,34 +15,34 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 	class DAERegister
 	{
-		protected const string CD4ClassDefinitionNameSpace = "SQLDevice";
+		protected const string D4ClassDefinitionNameSpace = "SQLDevice";
 
 		public static SettingsList GetClasses()
 		{
-			SettingsList LClasses = new SettingsList();
+			SettingsList classes = new SettingsList();
 			
-			Type[] LTypes = typeof(DAERegister).Assembly.GetTypes();
+			Type[] types = typeof(DAERegister).Assembly.GetTypes();
 
-			foreach (Type LType in LTypes)
+			foreach (Type type in types)
 			{
 				// Node
-				if (LType.IsSubclassOf(typeof(InstructionNodeBase)))
-					LClasses.Add(new SettingsItem(String.Format("{0}.{1}", CD4ClassDefinitionNameSpace, Schema.Object.Unqualify(LType.Name)), LType.AssemblyQualifiedName));
+				if (type.IsSubclassOf(typeof(InstructionNodeBase)))
+					classes.Add(new SettingsItem(String.Format("{0}.{1}", D4ClassDefinitionNameSpace, Schema.Object.Unqualify(type.Name)), type.AssemblyQualifiedName));
 				
 				// Conveyor
-				if (LType.IsSubclassOf(typeof(Conveyor)))
-					LClasses.Add(new SettingsItem(String.Format("{0}.{1}", CD4ClassDefinitionNameSpace, Schema.Object.Unqualify(LType.Name)), LType.AssemblyQualifiedName));
+				if (type.IsSubclassOf(typeof(Conveyor)))
+					classes.Add(new SettingsItem(String.Format("{0}.{1}", D4ClassDefinitionNameSpace, Schema.Object.Unqualify(type.Name)), type.AssemblyQualifiedName));
 				
 				// DeviceOperator
-				if (LType.IsSubclassOf(typeof(Schema.DeviceOperator)))
-					LClasses.Add(new SettingsItem(String.Format("{0}.{1}", CD4ClassDefinitionNameSpace, Schema.Object.Unqualify(LType.Name)), LType.AssemblyQualifiedName));
+				if (type.IsSubclassOf(typeof(Schema.DeviceOperator)))
+					classes.Add(new SettingsItem(String.Format("{0}.{1}", D4ClassDefinitionNameSpace, Schema.Object.Unqualify(type.Name)), type.AssemblyQualifiedName));
 					
 				// DeviceScalarType
-				if (LType.IsSubclassOf(typeof(Schema.DeviceScalarType)))
-					LClasses.Add(new SettingsItem(String.Format("{0}.{1}", CD4ClassDefinitionNameSpace, Schema.Object.Unqualify(LType.Name)), LType.AssemblyQualifiedName));
+				if (type.IsSubclassOf(typeof(Schema.DeviceScalarType)))
+					classes.Add(new SettingsItem(String.Format("{0}.{1}", D4ClassDefinitionNameSpace, Schema.Object.Unqualify(type.Name)), type.AssemblyQualifiedName));
 			}
 			
-			return LClasses;
+			return classes;
 		}
 	}
 }

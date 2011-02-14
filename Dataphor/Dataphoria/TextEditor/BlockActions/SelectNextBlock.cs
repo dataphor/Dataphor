@@ -5,38 +5,38 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor.BlockActions
 {
     public class SelectNextBlock : BaseBlockAction
     {
-        public override void Execute(TextArea ATextArea)
+        public override void Execute(TextArea textArea)
         {
-            if (ATextArea.Document.TextLength > 0)
+            if (textArea.Document.TextLength > 0)
             {
-                int LCurrentOffset = ATextArea.Caret.Offset;
-                int LEndOffset = GetNextBlockOffset(ATextArea);
+                int currentOffset = textArea.Caret.Offset;
+                int endOffset = GetNextBlockOffset(textArea);
 
                 // Move the caret
-                ATextArea.Caret.Position = ATextArea.Document.OffsetToPosition(LEndOffset);
-                ATextArea.SetDesiredColumn();
+                textArea.Caret.Position = textArea.Document.OffsetToPosition(endOffset);
+                textArea.SetDesiredColumn();
 
                 // Set or extend the selection
-                ATextArea.AutoClearSelection = false;
-                if (ATextArea.SelectionManager.HasSomethingSelected)
+                textArea.AutoClearSelection = false;
+                if (textArea.SelectionManager.HasSomethingSelected)
                 {
                     // Extend the selection
-                    ATextArea.SelectionManager.ExtendSelection
+                    textArea.SelectionManager.ExtendSelection
                         (
-                        ATextArea.Document.OffsetToPosition(LCurrentOffset),
-                        ATextArea.Document.OffsetToPosition(LEndOffset)
+                        textArea.Document.OffsetToPosition(currentOffset),
+                        textArea.Document.OffsetToPosition(endOffset)
                         );
                 }
                 else
                 {
                     // Select from the current position to the end of the block
-                    ATextArea.SelectionManager.SetSelection
+                    textArea.SelectionManager.SetSelection
                         (
                         new DefaultSelection
                             (
-                            ATextArea.Document,
-                            ATextArea.Document.OffsetToPosition(LCurrentOffset),
-                            ATextArea.Document.OffsetToPosition(LEndOffset)
+                            textArea.Document,
+                            textArea.Document.OffsetToPosition(currentOffset),
+                            textArea.Document.OffsetToPosition(endOffset)
                             )
                         );
                 }

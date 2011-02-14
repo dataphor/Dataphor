@@ -16,11 +16,11 @@ namespace Alphora.Dataphor.DAE.Connection.DB2
 
 	public class DB2Connection : DotNetConnection
 	{
-		public DB2Connection(string AConnection) : base(AConnection) {}
+		public DB2Connection(string connection) : base(connection) {}
 		
-		protected override IDbConnection CreateDbConnection(string AConnectionString)
+		protected override IDbConnection CreateDbConnection(string connectionString)
 		{
-			return new IBM.DB2Connection(AConnectionString);
+			return new IBM.DB2Connection(connectionString);
 		}
 		
 		protected override SQLCommand InternalCreateCommand()
@@ -28,127 +28,127 @@ namespace Alphora.Dataphor.DAE.Connection.DB2
 			return new DB2Command(this, CreateDbCommand());
 		}
 		
-		protected override Exception InternalWrapException(Exception AException, string AStatement)
+		protected override Exception InternalWrapException(Exception exception, string statement)
 		{
-			IBM.DB2Exception LException = AException as IBM.DB2Exception;
+			IBM.DB2Exception localException = exception as IBM.DB2Exception;
 			if 
 			(
-				(LException != null) && 
+				(localException != null) && 
 				(
-					(AStatement == "begin transaction") ||
-					(AStatement == "commit transaction") || 
-					(AStatement == "rollback transaction")
+					(statement == "begin transaction") ||
+					(statement == "commit transaction") || 
+					(statement == "rollback transaction")
 				) && 
-				(LException.Errors.Count == 1) && 
-				(LException.Errors[0].SQLState == "HY011")
+				(localException.Errors.Count == 1) && 
+				(localException.Errors[0].SQLState == "HY011")
 			)
 			{
-				if (AStatement != "begin transaction")
+				if (statement != "begin transaction")
 				{
-					FTransaction = null; // reset the transaction pointer because it was not cleared when the exception was thrown
+					_transaction = null; // reset the transaction pointer because it was not cleared when the exception was thrown
 					// clear the connection's internal pointer as well
-					if (FConnection != null)
-						FConnection.GetType().GetField("ad", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(FConnection, null);
+					if (_connection != null)
+						_connection.GetType().GetField("ad", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(_connection, null);
 				}
 				return null;
 			}
 				
-			return base.InternalWrapException(AException, AStatement);
+			return base.InternalWrapException(exception, statement);
 		}
 	}
 	
 	public class DB2Command : DotNetCommand
 	{
-		public DB2Command(DB2Connection AConnection, IDbCommand ACommand) : base(AConnection, ACommand) 
+		public DB2Command(DB2Connection connection, IDbCommand command) : base(connection, command) 
 		{
-			FUseOrdinalBinding = true;
+			_useOrdinalBinding = true;
 		}
 		
 		protected override void PrepareParameters()
 		{
 			// Prepare parameters
-			SQLParameter LParameter;
-			for (int LIndex = 0; LIndex < FParameterIndexes.Length; LIndex++)
+			SQLParameter parameter;
+			for (int index = 0; index < _parameterIndexes.Length; index++)
 			{
-				LParameter = Parameters[FParameterIndexes[LIndex]];
-				IBM.DB2Parameter LDB2Parameter = (IBM.DB2Parameter)FCommand.CreateParameter();
-				LDB2Parameter.ParameterName = String.Format("@{0}{1}", LParameter.Name, LIndex.ToString());
-				switch (LParameter.Direction)
+				parameter = Parameters[_parameterIndexes[index]];
+				IBM.DB2Parameter dB2Parameter = (IBM.DB2Parameter)_command.CreateParameter();
+				dB2Parameter.ParameterName = String.Format("@{0}{1}", parameter.Name, index.ToString());
+				switch (parameter.Direction)
 				{
-					case SQLDirection.Out : LDB2Parameter.Direction = System.Data.ParameterDirection.Output; break;
-					case SQLDirection.InOut : LDB2Parameter.Direction = System.Data.ParameterDirection.InputOutput; break;
-					case SQLDirection.Result : LDB2Parameter.Direction = System.Data.ParameterDirection.ReturnValue; break;
-					default : LDB2Parameter.Direction = System.Data.ParameterDirection.Input; break;
+					case SQLDirection.Out : dB2Parameter.Direction = System.Data.ParameterDirection.Output; break;
+					case SQLDirection.InOut : dB2Parameter.Direction = System.Data.ParameterDirection.InputOutput; break;
+					case SQLDirection.Result : dB2Parameter.Direction = System.Data.ParameterDirection.ReturnValue; break;
+					default : dB2Parameter.Direction = System.Data.ParameterDirection.Input; break;
 				}
 
-				if (LParameter.Type is SQLStringType)
+				if (parameter.Type is SQLStringType)
 				{
-					LDB2Parameter.DB2Type = IBM.DB2Type.VarChar;
-					LDB2Parameter.Size = ((SQLStringType)LParameter.Type).Length;
+					dB2Parameter.DB2Type = IBM.DB2Type.VarChar;
+					dB2Parameter.Size = ((SQLStringType)parameter.Type).Length;
 				}
-				else if (LParameter.Type is SQLBooleanType)
+				else if (parameter.Type is SQLBooleanType)
 				{
-					LDB2Parameter.DB2Type = IBM.DB2Type.Integer;
+					dB2Parameter.DB2Type = IBM.DB2Type.Integer;
 				}
-				else if (LParameter.Type is SQLIntegerType)
+				else if (parameter.Type is SQLIntegerType)
 				{
-					switch (((SQLIntegerType)LParameter.Type).ByteCount)
+					switch (((SQLIntegerType)parameter.Type).ByteCount)
 					{
-						case 1 : LDB2Parameter.DB2Type = IBM.DB2Type.Integer; break;
-						case 2 : LDB2Parameter.DB2Type = IBM.DB2Type.SmallInt; break;
-						case 8 : LDB2Parameter.DB2Type = IBM.DB2Type.BigInt; break;
-						default : LDB2Parameter.DB2Type = IBM.DB2Type.Integer; break;
+						case 1 : dB2Parameter.DB2Type = IBM.DB2Type.Integer; break;
+						case 2 : dB2Parameter.DB2Type = IBM.DB2Type.SmallInt; break;
+						case 8 : dB2Parameter.DB2Type = IBM.DB2Type.BigInt; break;
+						default : dB2Parameter.DB2Type = IBM.DB2Type.Integer; break;
 					}
 				}
-				else if (LParameter.Type is SQLNumericType)
+				else if (parameter.Type is SQLNumericType)
 				{
-					SQLNumericType LType = (SQLNumericType)LParameter.Type;
-					LDB2Parameter.DB2Type = IBM.DB2Type.Decimal; // could not be decimal because of issue with DB2/400
-					LDB2Parameter.Scale = LType.Scale;
-					LDB2Parameter.Precision = LType.Precision;
+					SQLNumericType type = (SQLNumericType)parameter.Type;
+					dB2Parameter.DB2Type = IBM.DB2Type.Decimal; // could not be decimal because of issue with DB2/400
+					dB2Parameter.Scale = type.Scale;
+					dB2Parameter.Precision = type.Precision;
 				}
-				else if (LParameter.Type is SQLFloatType)
+				else if (parameter.Type is SQLFloatType)
 				{
-					SQLFloatType LType = (SQLFloatType)LParameter.Type;
-					if (LType.Width == 1)
-						LDB2Parameter.DB2Type = IBM.DB2Type.Real;
+					SQLFloatType type = (SQLFloatType)parameter.Type;
+					if (type.Width == 1)
+						dB2Parameter.DB2Type = IBM.DB2Type.Real;
 					else
-						LDB2Parameter.DB2Type = IBM.DB2Type.Double;
+						dB2Parameter.DB2Type = IBM.DB2Type.Double;
 				}
-				else if (LParameter.Type is SQLBinaryType)
+				else if (parameter.Type is SQLBinaryType)
 				{
-					LDB2Parameter.DB2Type = IBM.DB2Type.Blob;
+					dB2Parameter.DB2Type = IBM.DB2Type.Blob;
 				}
-				else if (LParameter.Type is SQLTextType)
+				else if (parameter.Type is SQLTextType)
 				{
-					LDB2Parameter.DB2Type = IBM.DB2Type.Clob;
+					dB2Parameter.DB2Type = IBM.DB2Type.Clob;
 				}
-				else if (LParameter.Type is SQLDateTimeType)
+				else if (parameter.Type is SQLDateTimeType)
 				{
-					LDB2Parameter.DB2Type = IBM.DB2Type.Timestamp;
+					dB2Parameter.DB2Type = IBM.DB2Type.Timestamp;
 				}
-				else if (LParameter.Type is SQLDateType)
+				else if (parameter.Type is SQLDateType)
 				{
-					LDB2Parameter.DB2Type = IBM.DB2Type.Date;
+					dB2Parameter.DB2Type = IBM.DB2Type.Date;
 				}
-				else if (LParameter.Type is SQLTimeType)
+				else if (parameter.Type is SQLTimeType)
 				{
-					LDB2Parameter.DB2Type = IBM.DB2Type.Time;
+					dB2Parameter.DB2Type = IBM.DB2Type.Time;
 				}
-				else if (LParameter.Type is SQLGuidType)
+				else if (parameter.Type is SQLGuidType)
 				{
-					LDB2Parameter.DB2Type = IBM.DB2Type.Char;
-					LDB2Parameter.Size = 24;
+					dB2Parameter.DB2Type = IBM.DB2Type.Char;
+					dB2Parameter.Size = 24;
 				}
-				else if (LParameter.Type is SQLMoneyType)
+				else if (parameter.Type is SQLMoneyType)
 				{
-					LDB2Parameter.DB2Type = IBM.DB2Type.Decimal;
-					LDB2Parameter.Scale = 28;
-					LDB2Parameter.Precision = 8;
+					dB2Parameter.DB2Type = IBM.DB2Type.Decimal;
+					dB2Parameter.Scale = 28;
+					dB2Parameter.Precision = 8;
 				}
 				else
-					throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, LParameter.Type.GetType().Name);
-				FCommand.Parameters.Add(LDB2Parameter);
+					throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, parameter.Type.GetType().Name);
+				_command.Parameters.Add(dB2Parameter);
 			}
 		}
 	}

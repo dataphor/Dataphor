@@ -11,7 +11,7 @@ namespace Alphora.Dataphor.Dataphoria
 {
 	internal class NativeMethods
 	{
-		public const string CDLLUSER32 = "user32.dll";
+		public const string DLLUSER32 = "user32.dll";
 
 		public static int WM_MOUSEWHEEL = 0x020A;
 		public static int WM_CLOSE = 0x0010;
@@ -23,7 +23,7 @@ namespace Alphora.Dataphor.Dataphoria
 		public static int OCM__BASE	= (NativeMethods.WM_USER + 0x1C00);
 		public static int OCM_NOTIFY = (OCM__BASE + NativeMethods.WM_NOTIFY);
 
-		[DllImport(CDLLUSER32, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
-		public static extern int RegisterWindowMessage(string ASpecifier);
+		[DllImport(DLLUSER32, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
+		public static extern int RegisterWindowMessage(string specifier);
 	}
 }

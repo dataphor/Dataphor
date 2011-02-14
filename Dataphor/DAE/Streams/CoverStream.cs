@@ -14,52 +14,52 @@ namespace Alphora.Dataphor.DAE.Streams
 	/// <remarks> Provides a stream class which exposes a subset of another stream </remarks>
 	public class CoverStream : StreamBase, IRemoteStream
 	{
-		public CoverStream(Stream ASource)
+		public CoverStream(Stream source)
 		{
-			FSource = ASource;
-			if (FSource == null)
+			_source = source;
+			if (_source == null)
 				throw new StreamsException(StreamsException.Codes.CoverStreamSourceNull);
 		}
 		
-		public CoverStream(Stream ASource, bool AShouldClose)
+		public CoverStream(Stream source, bool shouldClose)
 		{
-			FSource = ASource;
-			if (FSource == null)
+			_source = source;
+			if (_source == null)
 				throw new StreamsException(StreamsException.Codes.CoverStreamSourceNull);
-			FShouldClose = AShouldClose;
+			_shouldClose = shouldClose;
 		}
 		
-		public CoverStream(Stream ASource, long AOffset, long ACount)
+		public CoverStream(Stream source, long offset, long count)
 		{
-			FSource = ASource;
-			if (FSource == null)
+			_source = source;
+			if (_source == null)
 				throw new StreamsException(StreamsException.Codes.CoverStreamSourceNull);
 
-			if (AOffset < 0)
+			if (offset < 0)
 				throw new StreamsException(StreamsException.Codes.OffsetMustBeNonNegative);
 
-			FOffset = AOffset;
-			FCount = ACount;
+			_offset = offset;
+			_count = count;
 		}
 		
-		private bool FShouldClose;
+		private bool _shouldClose;
 		public bool ShouldClose
 		{
-			get { return FShouldClose; }
-			set { FShouldClose = value; }
+			get { return _shouldClose; }
+			set { _shouldClose = value; }
 		}
 		
 		public override void Close()
 		{
-			if ((FSource != null) && FShouldClose)
-				FSource.Close();
-			FSource = null;
+			if ((_source != null) && _shouldClose)
+				_source.Close();
+			_source = null;
 			base.Close();
 		}
 
-		private Stream FSource;
-		private long FOffset;
-		private long FCount;
+		private Stream _source;
+		private long _offset;
+		private long _count;
 		
 		public override long Length
 		{
@@ -69,23 +69,23 @@ namespace Alphora.Dataphor.DAE.Streams
 				lock (FSource)
 				{
 				#endif
-					return FCount == 0 ? FSource.Length : FCount;
+					return _count == 0 ? _source.Length : _count;
 				#if USECONCURRENTCOVERSTREAM
 				}
 				#endif
 			}
 		}
 		
-		public override void SetLength(long ALength)
+		public override void SetLength(long length)
 		{
-			if (FCount == 0)
+			if (_count == 0)
 			{
 				#if USECONCURRENTCOVERSTREAM
 				lock (FSource)
 				{
 				#endif
-					FSource.SetLength(ALength);
-					FPosition = FSource.Position;
+					_source.SetLength(length);
+					_position = _source.Position;
 				#if USECONCURRENTCOVERSTREAM
 				}
 				#endif
@@ -96,43 +96,43 @@ namespace Alphora.Dataphor.DAE.Streams
 			}
 		}
 		
-		private long FPosition;
+		private long _position;
 		public override long Position
 		{
 			get
 			{
-				return FPosition;
+				return _position;
 			}
 			set
 			{
-				long LLength = Length;
-				FPosition = value > LLength ? LLength : value;
+				long length = Length;
+				_position = value > length ? length : value;
 			}
 		}
 		
-		public override int Read(byte[] ABuffer, int AOffset, int ACount)
+		public override int Read(byte[] buffer, int offset, int count)
 		{
-			long LLength = Length;
-			if (ACount + FPosition > LLength)
-				ACount = (int)(LLength - FPosition); // This cast is safe because LLength - Position < ACount <= int.MaxValue
+			long length = Length;
+			if (count + _position > length)
+				count = (int)(length - _position); // This cast is safe because LLength - Position < ACount <= int.MaxValue
 			
-			int LCount = 0;
+			int localCount = 0;
 			#if USECONCURRENTCOVERSTREAM
 			lock (FSource)
 			{
 			#endif
-				FSource.Position = FOffset + FPosition;
-				LCount = FSource.Read(ABuffer, AOffset, ACount);
+				_source.Position = _offset + _position;
+				localCount = _source.Read(buffer, offset, count);
 			#if USECONCURRENTCOVERSTREAM
 			}
 			#endif
-			FPosition += LCount;
-			return LCount;
+			_position += localCount;
+			return localCount;
 		}
 		
 		public override int ReadByte()
 		{
-			if (FPosition == Length)
+			if (_position == Length)
 				return -1;
 			else
 			{
@@ -140,58 +140,58 @@ namespace Alphora.Dataphor.DAE.Streams
 				lock (FSource)
 				{
 				#endif
-					FSource.Position = FOffset + FPosition;
-					FPosition++;
-					return FSource.ReadByte();
+					_source.Position = _offset + _position;
+					_position++;
+					return _source.ReadByte();
 				#if USECONCURRENTCOVERSTREAM
 				}
 				#endif
 			}
 		}
 		
-		public override void Write(byte[] ABuffer, int AOffset, int ACount)
+		public override void Write(byte[] buffer, int offset, int count)
 		{
-			long LLength = Length;
-			if ((FCount != 0) && (ACount + FPosition > LLength))
-				ACount = (int)(LLength - FPosition); // This cast is safe because FCount - Position < ACount <= int.MaxValue
+			long length = Length;
+			if ((_count != 0) && (count + _position > length))
+				count = (int)(length - _position); // This cast is safe because FCount - Position < ACount <= int.MaxValue
 			
 			#if USECONCURRENTCOVERSTREAM
 			lock (FSource)
 			{
 			#endif
-				FSource.Position = FOffset + FPosition;
-				FSource.Write(ABuffer, AOffset, ACount);
+				_source.Position = _offset + _position;
+				_source.Write(buffer, offset, count);
 			#if USECONCURRENTCOVERSTREAM
 			}
 			#endif
-			FPosition += ACount;
+			_position += count;
 		}
 		
-		public override void WriteByte(byte AValue)
+		public override void WriteByte(byte tempValue)
 		{
-			if ((FCount != 0) && (FPosition == Length))
+			if ((_count != 0) && (_position == Length))
 				throw new EndOfStreamException();
 	
 			#if USECONCURRENTCOVERSTREAM
 			lock (FSource)
 			{				
 			#endif
-				FSource.Position = FOffset + FPosition;
-				FSource.WriteByte(AValue);
+				_source.Position = _offset + _position;
+				_source.WriteByte(tempValue);
 			#if USECONCURRENTCOVERSTREAM
 			}
 			#endif
-			FPosition++;
+			_position++;
 		}
 
-		void IRemoteStream.Write([In] byte[] ABuffer, int AOffset, int ACount)
+		void IRemoteStream.Write([In] byte[] buffer, int offset, int count)
 		{
-			Write(ABuffer, AOffset, ACount);
+			Write(buffer, offset, count);
 		}
 
-		int IRemoteStream.Read([Out] byte[] ABuffer, int AOffset, int ACount)
+		int IRemoteStream.Read([Out] byte[] buffer, int offset, int count)
 		{
-			return Read(ABuffer, AOffset, ACount);
+			return Read(buffer, offset, count);
 		}
 	}
 }

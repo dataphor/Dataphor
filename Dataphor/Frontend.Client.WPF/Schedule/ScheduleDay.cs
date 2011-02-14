@@ -52,9 +52,9 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(GranularityProperty, value); }
 		}
 
-		private static object CoerceGranularity(DependencyObject ASender, object AValue)
+		private static object CoerceGranularity(DependencyObject sender, object tempValue)
 		{
-			return Math.Max(1, Math.Min(60, (int)AValue));
+			return Math.Max(1, Math.Min(60, (int)tempValue));
 		}
 		
 		// Header
@@ -93,11 +93,11 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(GroupIDProperty, value); }
 		}
 
-		private static void ViewAffectingPropertyChanged(DependencyObject ASender, DependencyPropertyChangedEventArgs AArgs)
+		private static void ViewAffectingPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
 		{
-			var LDay = (ScheduleDay)ASender;
-			LDay.UpdateAppointmentView();
-			LDay.UpdateShiftView();
+			var day = (ScheduleDay)sender;
+			day.UpdateAppointmentView();
+			day.UpdateShiftView();
 		}
 
 		// AppointmentDateMemberPath
@@ -112,9 +112,9 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(AppointmentDateMemberPathProperty, value); }
 		}
 
-		private static void AppointmentViewAffectingPropertyChanged(DependencyObject ASender, DependencyPropertyChangedEventArgs AArgs)
+		private static void AppointmentViewAffectingPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
 		{
-			((ScheduleDay)ASender).UpdateAppointmentView();
+			((ScheduleDay)sender).UpdateAppointmentView();
 		}
 
 		// AppointmentGroupIDMemberPath
@@ -141,9 +141,9 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(AppointmentSourceProperty, value); }
 		}
 
-		private static void OnAppointmentSourceChanged(DependencyObject ASender, DependencyPropertyChangedEventArgs AArgs)
+		private static void OnAppointmentSourceChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
 		{
-			((ScheduleDay)ASender).UpdateAppointmentView();
+			((ScheduleDay)sender).UpdateAppointmentView();
 		}
 
 		// AppointmentViewSource
@@ -152,32 +152,32 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		{
 			if (AppointmentSource != null && !String.IsNullOrEmpty(AppointmentDateMemberPath) && Date != DateTime.MinValue && (String.IsNullOrEmpty(AppointmentGroupIDMemberPath) || GroupID != null))
 			{
-				var LSource = new CollectionViewSource();
-				LSource.Filter += new FilterEventHandler(AppointmentViewFilter);
-				LSource.Source = AppointmentSource;
-				ItemsSource = LSource.View;
+				var source = new CollectionViewSource();
+				source.Filter += new FilterEventHandler(AppointmentViewFilter);
+				source.Source = AppointmentSource;
+				ItemsSource = source.View;
 				UpdateSelection();
 			}
 			else
 				ItemsSource = null;
 		}
 
-		private void AppointmentViewFilter(object sender, FilterEventArgs AArgs)
+		private void AppointmentViewFilter(object sender, FilterEventArgs args)
 		{
-			if (AArgs.Item != null)
+			if (args.Item != null)
 			{
-				var LType = AArgs.Item.GetType();
-				var LDate = (DateTime)LType.GetProperty(AppointmentDateMemberPath).GetValue(AArgs.Item, new object[] {});
-				AArgs.Accepted = LDate == Date;
+				var type = args.Item.GetType();
+				var date = (DateTime)type.GetProperty(AppointmentDateMemberPath).GetValue(args.Item, new object[] {});
+				args.Accepted = date == Date;
 				
 				if (!String.IsNullOrEmpty(AppointmentGroupIDMemberPath))
 				{
-					var LGroupID = LType.GetProperty(AppointmentGroupIDMemberPath).GetValue(AArgs.Item, new object[] { });
-					AArgs.Accepted = AArgs.Accepted && LGroupID.Equals(GroupID);
+					var groupID = type.GetProperty(AppointmentGroupIDMemberPath).GetValue(args.Item, new object[] { });
+					args.Accepted = args.Accepted && groupID.Equals(GroupID);
 				}
 			}
 			else
-				AArgs.Accepted = true;
+				args.Accepted = true;
 		}
 
 		// SelectedAppointment
@@ -237,9 +237,9 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(ShiftDateMemberPathProperty, value); }
 		}
 
-		private static void ShiftViewAffectingPropertyChanged(DependencyObject ASender, DependencyPropertyChangedEventArgs AArgs)
+		private static void ShiftViewAffectingPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
 		{
-			((ScheduleDay)ASender).UpdateShiftView();
+			((ScheduleDay)sender).UpdateShiftView();
 		}
 
 		// ShiftGroupIDMemberPath
@@ -290,9 +290,9 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 			set { SetValue(ShiftSourceProperty, value); }
 		}
 
-		private static void OnShiftSourceChanged(DependencyObject ASender, DependencyPropertyChangedEventArgs AArgs)
+		private static void OnShiftSourceChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
 		{
-			((ScheduleDay)ASender).UpdateShiftView();
+			((ScheduleDay)sender).UpdateShiftView();
 		}
 
 		// ShiftView
@@ -313,32 +313,32 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		{
 			if (ShiftSource != null && !String.IsNullOrEmpty(ShiftDateMemberPath) && Date != DateTime.MinValue && (String.IsNullOrEmpty(ShiftGroupIDMemberPath) || GroupID != null))
 			{
-				var LSource = new CollectionViewSource();
-				LSource.Filter += new FilterEventHandler(ShiftViewFilter);
-				LSource.Source = ShiftSource;
-				ShiftView = LSource.View;
+				var source = new CollectionViewSource();
+				source.Filter += new FilterEventHandler(ShiftViewFilter);
+				source.Source = ShiftSource;
+				ShiftView = source.View;
 				UpdateSelection();
 			}
 			else
 				ShiftView = null;
 		}
 
-		private void ShiftViewFilter(object sender, FilterEventArgs AArgs)
+		private void ShiftViewFilter(object sender, FilterEventArgs args)
 		{
-			if (AArgs.Item != null)
+			if (args.Item != null)
 			{
-				var LType = AArgs.Item.GetType();
-				var LDate = (DateTime)LType.GetProperty(ShiftDateMemberPath).GetValue(AArgs.Item, new object[] { });
-				AArgs.Accepted = LDate == Date;
+				var type = args.Item.GetType();
+				var date = (DateTime)type.GetProperty(ShiftDateMemberPath).GetValue(args.Item, new object[] { });
+				args.Accepted = date == Date;
 				
 				if (!String.IsNullOrEmpty(ShiftGroupIDMemberPath))
 				{
-					var LGroupID = LType.GetProperty(ShiftGroupIDMemberPath).GetValue(AArgs.Item, new object[] { });
-					AArgs.Accepted = AArgs.Accepted & LGroupID.Equals(GroupID);
+					var groupID = type.GetProperty(ShiftGroupIDMemberPath).GetValue(args.Item, new object[] { });
+					args.Accepted = args.Accepted & groupID.Equals(GroupID);
 				}
 			}
 			else
-				AArgs.Accepted = true;
+				args.Accepted = true;
 		}
 
 		// HighlightedTime

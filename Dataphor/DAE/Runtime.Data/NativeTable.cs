@@ -17,23 +17,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 {
 	public class NativeTable : System.Object
 	{
-		public const int CDefaultFanout = 100;
-		public const int CDefaultCapacity = 100;
+		public const int DefaultFanout = 100;
+		public const int DefaultCapacity = 100;
 
-		public NativeTable(IValueManager AManager, Schema.TableVar ATableVar) : base()
+		public NativeTable(IValueManager manager, Schema.TableVar tableVar) : base()
 		{
-			TableVar = ATableVar;
-			FFanout = CDefaultFanout;
-			FCapacity = CDefaultCapacity;
-			Create(AManager);
+			TableVar = tableVar;
+			_fanout = DefaultFanout;
+			_capacity = DefaultCapacity;
+			Create(manager);
 		}
 		
-		public NativeTable(IValueManager AManager, Schema.TableVar ATableVar, int AFanout, int ACapacity) : base()
+		public NativeTable(IValueManager manager, Schema.TableVar tableVar, int fanout, int capacity) : base()
 		{
-			TableVar = ATableVar;
-			FFanout = AFanout;
-			FCapacity = ACapacity;
-			Create(AManager);
+			TableVar = tableVar;
+			_fanout = fanout;
+			_capacity = capacity;
+			Create(manager);
 		}
 		
 		public Schema.TableVar TableVar;
@@ -46,81 +46,81 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public NativeRowTreeList NonClusteredIndexes = new NativeRowTreeList();
 
-		private int FFanout;
-		public int Fanout { get { return FFanout; } }
+		private int _fanout;
+		public int Fanout { get { return _fanout; } }
 
-		private int FCapacity;
-		public int Capacity { get { return FCapacity; } }
+		private int _capacity;
+		public int Capacity { get { return _capacity; } }
 		
-		private int FRowCount = 0;
-		public int RowCount { get { return FRowCount; } }
+		private int _rowCount = 0;
+		public int RowCount { get { return _rowCount; } }
 		
 		#if USEINTERNALID
-		public const string CInternalIDColumnName = @"__InternalID";
+		public const string InternalIDColumnName = @"__InternalID";
 
-		private Schema.TableVarColumn FInternalIDColumn;
+		private Schema.TableVarColumn _internalIDColumn;
 		#endif
 		
 		// TODO: Compile row types for each index, saving column indexes to prevent the need for lookup during insert, update, and delete.		
-		private void Create(IValueManager AManager)
+		private void Create(IValueManager manager)
 		{
 			TableType = TableVar.DataType;
 			RowType = TableType.RowType;
 
-			Schema.RowType LKeyRowType;
-			Schema.RowType LDataRowType;
+			Schema.RowType keyRowType;
+			Schema.RowType dataRowType;
 
 			// Create the indexes required to store data as described by the given table variable
 			// Determine Fanout, Capacity, Clustering Key
-			Schema.Order LClusteringKey = AManager.FindClusteringOrder(TableVar);
-			LKeyRowType = new Schema.RowType(LClusteringKey.Columns);
-			LDataRowType = new Schema.RowType();
-			foreach (Schema.Column LColumn in TableVar.DataType.Columns)
-				if (!LClusteringKey.Columns.Contains(LColumn.Name))
-					LDataRowType.Columns.Add(new Schema.Column(LColumn.Name, LColumn.DataType));
+			Schema.Order clusteringKey = manager.FindClusteringOrder(TableVar);
+			keyRowType = new Schema.RowType(clusteringKey.Columns);
+			dataRowType = new Schema.RowType();
+			foreach (Schema.Column column in TableVar.DataType.Columns)
+				if (!clusteringKey.Columns.Contains(column.Name))
+					dataRowType.Columns.Add(new Schema.Column(column.Name, column.DataType));
 				
 			// Add an internal identifier for uniqueness of keys in nonunique indexes
 			#if USEINTERNALID
-			FInternalIDColumn = new Schema.TableVarColumn(new Schema.Column(CInternalIDColumnName, AManager.DataTypes.SystemGuid), Schema.TableVarColumnType.InternalID);
-			LDataRowType.Columns.Add(FInternalIDColumn.Column);
+			_internalIDColumn = new Schema.TableVarColumn(new Schema.Column(InternalIDColumnName, manager.DataTypes.SystemGuid), Schema.TableVarColumnType.InternalID);
+			dataRowType.Columns.Add(_internalIDColumn.Column);
 			#endif
 					
 			// Create the Clustered index
 			ClusteredIndex = 
 				new NativeRowTree
 				(
-					LClusteringKey,
-					LKeyRowType,
-					LDataRowType,
-					FFanout,
-					FCapacity,
+					clusteringKey,
+					keyRowType,
+					dataRowType,
+					_fanout,
+					_capacity,
 					true
 				);
 
 			// DataLength and DataColumns for all non clustered indexes is the key length and columns of the clustered key				
-			LDataRowType = LKeyRowType;
+			dataRowType = keyRowType;
 				
 			// Create non clustered indexes for each key and order (unique sets)
-			Schema.Order LKey;
-			foreach (Schema.Key LNonClusteredKey in TableVar.Keys)
-				if (!LNonClusteredKey.IsSparse && LNonClusteredKey.Enforced)
+			Schema.Order key;
+			foreach (Schema.Key nonClusteredKey in TableVar.Keys)
+				if (!nonClusteredKey.IsSparse && nonClusteredKey.Enforced)
 				{
-					if (!AManager.OrderIncludesKey(ClusteredIndex.Key, LNonClusteredKey))
+					if (!manager.OrderIncludesKey(ClusteredIndex.Key, nonClusteredKey))
 					{
-						LKey = AManager.OrderFromKey(LNonClusteredKey);
-						if (!NonClusteredIndexes.Contains(LKey))
+						key = manager.OrderFromKey(nonClusteredKey);
+						if (!NonClusteredIndexes.Contains(key))
 						{
-							LKeyRowType = new Schema.RowType(LKey.Columns);
+							keyRowType = new Schema.RowType(key.Columns);
 								
 							NonClusteredIndexes.Add
 							(
 								new NativeRowTree
 								(
-									LKey,
-									LKeyRowType,
-									LDataRowType,
-									FFanout,
-									FCapacity,
+									key,
+									keyRowType,
+									dataRowType,
+									_fanout,
+									_capacity,
 									false
 								)
 							);						
@@ -130,58 +130,58 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				else
 				{
 					// This is a potentially non-unique index, so add a GUID to ensure uniqueness of the key in the BTree
-					LKey = AManager.OrderFromKey(LNonClusteredKey);
+					key = manager.OrderFromKey(nonClusteredKey);
 					#if USEINTERNALID
-					Schema.OrderColumn LUniqueColumn = new Schema.OrderColumn(FInternalIDColumn, LKey.IsAscending);
-					LUniqueColumn.Sort = AManager.GetUniqueSort(LUniqueColumn.Column.DataType);
-					LKey.Columns.Add(LUniqueColumn);
+					Schema.OrderColumn uniqueColumn = new Schema.OrderColumn(_internalIDColumn, key.IsAscending);
+					uniqueColumn.Sort = manager.GetUniqueSort(uniqueColumn.Column.DataType);
+					key.Columns.Add(uniqueColumn);
 					#endif
 
-					if (!NonClusteredIndexes.Contains(LKey))
+					if (!NonClusteredIndexes.Contains(key))
 					{
-						LKeyRowType = new Schema.RowType(LKey.Columns);
+						keyRowType = new Schema.RowType(key.Columns);
 										  
 						NonClusteredIndexes.Add
 						(
 							new NativeRowTree
 							(
-								LKey,
-								LKeyRowType,
-								LDataRowType,
-								FFanout,
-								FCapacity,
+								key,
+								keyRowType,
+								dataRowType,
+								_fanout,
+								_capacity,
 								false
 							)
 						);
 					}
 				}
 
-			foreach (Schema.Order LOrder in TableVar.Orders)
+			foreach (Schema.Order order in TableVar.Orders)
 			{
 				// This is a potentially non-unique index, so add a GUID to ensure uniqueness of the key in the BTree
-				LKey = new Schema.Order(LOrder);
+				key = new Schema.Order(order);
 				#if USEINTERNALID
-				if (!AManager.OrderIncludesOrder(LKey, LClusteringKey))
+				if (!manager.OrderIncludesOrder(key, clusteringKey))
 				{
-					Schema.OrderColumn LUniqueColumn = new Schema.OrderColumn(FInternalIDColumn, LOrder.IsAscending);
-					LUniqueColumn.Sort = AManager.GetUniqueSort(LUniqueColumn.Column.DataType);
-					LKey.Columns.Add(LUniqueColumn);
+					Schema.OrderColumn uniqueColumn = new Schema.OrderColumn(_internalIDColumn, order.IsAscending);
+					uniqueColumn.Sort = manager.GetUniqueSort(uniqueColumn.Column.DataType);
+					key.Columns.Add(uniqueColumn);
 				}
 				#endif
 
-				if (!NonClusteredIndexes.Contains(LKey))
+				if (!NonClusteredIndexes.Contains(key))
 				{
-					LKeyRowType = new Schema.RowType(LKey.Columns);
+					keyRowType = new Schema.RowType(key.Columns);
 									  
 					NonClusteredIndexes.Add
 					(
 						new NativeRowTree
 						(
-							LKey,
-							LKeyRowType,
-							LDataRowType,
-							FFanout,
-							FCapacity,
+							key,
+							keyRowType,
+							dataRowType,
+							_fanout,
+							_capacity,
 							false
 						)
 					);
@@ -189,331 +189,331 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 		
-		public void Drop(IValueManager AManager)
+		public void Drop(IValueManager manager)
 		{
-			for (int LIndex = NonClusteredIndexes.Count - 1; LIndex >= 0; LIndex--)
+			for (int index = NonClusteredIndexes.Count - 1; index >= 0; index--)
 			{
-				NonClusteredIndexes[LIndex].Drop(AManager);
-				NonClusteredIndexes.RemoveAt(LIndex);
+				NonClusteredIndexes[index].Drop(manager);
+				NonClusteredIndexes.RemoveAt(index);
 			}
 			
-			ClusteredIndex.Drop(AManager);
+			ClusteredIndex.Drop(manager);
 			
-			FRowCount = 0;
+			_rowCount = 0;
 		}
 		
 		#if USEINTERNALID
-		private void IndexInsert(IValueManager AManager, NativeRowTree AIndex, Row ARow, Guid AInternalID)
+		private void IndexInsert(IValueManager manager, NativeRowTree index, Row row, Guid internalID)
 		#else
 		private void IndexInsert(IValueManager AManager, NativeRowTree AIndex, Row ARow)
 		#endif
 		{
-			int LColumnIndex;
-			Row LKey = new Row(AManager, AIndex.KeyRowType);
+			int columnIndex;
+			Row key = new Row(manager, index.KeyRowType);
 			try
 			{
-				Row LData = new Row(AManager, AIndex.DataRowType);
+				Row data = new Row(manager, index.DataRowType);
 				try
 				{
-					LKey.ValuesOwned = false;
-					LData.ValuesOwned = false;
+					key.ValuesOwned = false;
+					data.ValuesOwned = false;
 
-					for (int LIndex = 0; LIndex < LKey.DataType.Columns.Count; LIndex++)
+					for (int localIndex = 0; localIndex < key.DataType.Columns.Count; localIndex++)
 					{
 						#if USEINTERNALID
-						if (LKey.DataType.Columns[LIndex].Name == CInternalIDColumnName)
-							LKey[LIndex] = AInternalID;
+						if (key.DataType.Columns[localIndex].Name == InternalIDColumnName)
+							key[localIndex] = internalID;
 						else
 						#endif
 						{
-							LColumnIndex = ARow.DataType.Columns.GetIndexOfColumn(LKey.DataType.Columns[LIndex].Name);
-							if (ARow.HasValue(LColumnIndex))
-								LKey[LIndex] = ARow.GetNativeValue(LColumnIndex);
+							columnIndex = row.DataType.Columns.GetIndexOfColumn(key.DataType.Columns[localIndex].Name);
+							if (row.HasValue(columnIndex))
+								key[localIndex] = row.GetNativeValue(columnIndex);
 							else
-								LKey.ClearValue(LIndex);
+								key.ClearValue(localIndex);
 						}
 					}
 
-					for (int LIndex = 0; LIndex < LData.DataType.Columns.Count; LIndex++)
+					for (int localIndex = 0; localIndex < data.DataType.Columns.Count; localIndex++)
 					{
 						#if USEINTERNALID
-						if (LData.DataType.Columns[LIndex].Name == CInternalIDColumnName)
-							LData[LIndex] = AInternalID;
+						if (data.DataType.Columns[localIndex].Name == InternalIDColumnName)
+							data[localIndex] = internalID;
 						else
 						#endif
 						{
-							LColumnIndex = ARow.DataType.Columns.GetIndexOfColumn(LData.DataType.Columns[LIndex].Name);
-							if (ARow.HasValue(LColumnIndex))
-								LData[LIndex] = ARow.GetNativeValue(LColumnIndex);
+							columnIndex = row.DataType.Columns.GetIndexOfColumn(data.DataType.Columns[localIndex].Name);
+							if (row.HasValue(columnIndex))
+								data[localIndex] = row.GetNativeValue(columnIndex);
 							else
-								LData.ClearValue(LIndex);
+								data.ClearValue(localIndex);
 						}
 					}
 
-					AIndex.Insert(AManager, (NativeRow)LKey.AsNative, (NativeRow)LData.AsNative);
+					index.Insert(manager, (NativeRow)key.AsNative, (NativeRow)data.AsNative);
 				}
 				finally
 				{
-					LData.Dispose();
+					data.Dispose();
 				}
 			}
 			finally
 			{
-				LKey.Dispose();
+				key.Dispose();
 			}
 		}
 		
 		/// <summary>Inserts the given row into all the indexes of the table value.</summary>
-		/// <param name="ARow">The given row must conform to the structure of the table value.</param>
-		public void Insert(IValueManager AManager, Row ARow)
+		/// <param name="row">The given row must conform to the structure of the table value.</param>
+		public void Insert(IValueManager manager, Row row)
 		{
 			// Insert the row into all indexes
 			#if USEINTERNALID
-			Guid LInternalID = Guid.NewGuid();
-			IndexInsert(AManager, ClusteredIndex, ARow, LInternalID);
-			foreach (NativeRowTree LIndex in NonClusteredIndexes)
-				IndexInsert(AManager, LIndex, ARow, LInternalID);
+			Guid internalID = Guid.NewGuid();
+			IndexInsert(manager, ClusteredIndex, row, internalID);
+			foreach (NativeRowTree index in NonClusteredIndexes)
+				IndexInsert(manager, index, row, internalID);
 			#else
 			IndexInsert(AManager, ClusteredIndex, ARow);
-			foreach (NativeRowTree LIndex in NonClusteredIndexes)
-				IndexInsert(AManager, LIndex, ARow);
+			foreach (NativeRowTree index in NonClusteredIndexes)
+				IndexInsert(AManager, index, ARow);
 			#endif
 			
-			FRowCount++;
+			_rowCount++;
 		}
 		
-		private Row GetIndexData(IValueManager AManager, Schema.RowType ARowType, Row[] ASourceRows)
+		private Row GetIndexData(IValueManager manager, Schema.RowType rowType, Row[] sourceRows)
 		{
-			Row LRow = new Row(AManager, ARowType);
+			Row row = new Row(manager, rowType);
 			try
 			{
-				int LColumnIndex;
-				bool LFound;
-				for (int LIndex = 0; LIndex < LRow.DataType.Columns.Count; LIndex++)
+				int columnIndex;
+				bool found;
+				for (int index = 0; index < row.DataType.Columns.Count; index++)
 				{
-					LFound = false;
-					foreach (Row LSourceRow in ASourceRows)
+					found = false;
+					foreach (Row sourceRow in sourceRows)
 					{
-						LColumnIndex = LSourceRow.DataType.Columns.IndexOfName(LRow.DataType.Columns[LIndex].Name);
-						if (LColumnIndex >= 0)
+						columnIndex = sourceRow.DataType.Columns.IndexOfName(row.DataType.Columns[index].Name);
+						if (columnIndex >= 0)
 						{
-							if (LSourceRow.HasValue(LColumnIndex))
-								LRow[LIndex] = LSourceRow.GetNativeValue(LColumnIndex);
+							if (sourceRow.HasValue(columnIndex))
+								row[index] = sourceRow.GetNativeValue(columnIndex);
 							else
-								LRow.ClearValue(LIndex);
-							LFound = true;
+								row.ClearValue(index);
+							found = true;
 							break;
 						}
 					}
-					if (LFound)
+					if (found)
 						continue;
 					
 					throw new RuntimeException(RuntimeException.Codes.UnableToConstructIndexKey);
 				}
-				return LRow;
+				return row;
 			}
 			catch
 			{
-				LRow.Dispose();
+				row.Dispose();
 				throw;
 			}
 		}
 		
-		private bool GetIsIndexAffected(Schema.RowType ARowType, Row ARow)
+		private bool GetIsIndexAffected(Schema.RowType rowType, Row row)
 		{
-			foreach (Schema.Column LColumn in ARowType.Columns)
-				if (ARow.DataType.Columns.ContainsName(LColumn.Name))
+			foreach (Schema.Column column in rowType.Columns)
+				if (row.DataType.Columns.ContainsName(column.Name))
 					return true;
 			return false;
 		}
 		
-		public bool HasRow(IValueManager AManager, Row ARow)
+		public bool HasRow(IValueManager manager, Row row)
 		{
-			Row LKey = GetIndexData(AManager, ClusteredIndex.KeyRowType, new Row[]{ARow});
+			Row key = GetIndexData(manager, ClusteredIndex.KeyRowType, new Row[]{row});
 			try
 			{
-				using (RowTreeSearchPath LSearchPath = new RowTreeSearchPath())
+				using (RowTreeSearchPath searchPath = new RowTreeSearchPath())
 				{
-					int LEntryNumber;
-					return ClusteredIndex.FindKey(AManager, ClusteredIndex.KeyRowType, (NativeRow)LKey.AsNative, LSearchPath, out LEntryNumber);
+					int entryNumber;
+					return ClusteredIndex.FindKey(manager, ClusteredIndex.KeyRowType, (NativeRow)key.AsNative, searchPath, out entryNumber);
 				}
 			}
 			finally
 			{
-				LKey.Dispose();
+				key.Dispose();
 			}
 		}
 		
-		public void Update(IValueManager AManager, Row AOldRow, Row ANewRow)
+		public void Update(IValueManager manager, Row oldRow, Row newRow)
 		{
 			// AOldRow must have at least the columns of the clustered index key
-			Row LOldClusteredKey = GetIndexData(AManager, ClusteredIndex.KeyRowType, new Row[]{AOldRow});
+			Row oldClusteredKey = GetIndexData(manager, ClusteredIndex.KeyRowType, new Row[]{oldRow});
 			try
 			{
-				bool LIsClusteredIndexKeyAffected = GetIsIndexAffected(ClusteredIndex.KeyRowType, ANewRow);
-				bool LIsClusteredIndexDataAffected = GetIsIndexAffected(ClusteredIndex.DataRowType, ANewRow);
+				bool isClusteredIndexKeyAffected = GetIsIndexAffected(ClusteredIndex.KeyRowType, newRow);
+				bool isClusteredIndexDataAffected = GetIsIndexAffected(ClusteredIndex.DataRowType, newRow);
 
-				Row LNewClusteredKey = null;
-				Row LNewClusteredData = null;
+				Row newClusteredKey = null;
+				Row newClusteredData = null;
 				try
 				{					
 					// Update the row in each index
-					using (RowTreeSearchPath LSearchPath = new RowTreeSearchPath())
+					using (RowTreeSearchPath searchPath = new RowTreeSearchPath())
 					{
-						int LEntryNumber;
-						bool LResult = ClusteredIndex.FindKey(AManager, ClusteredIndex.KeyRowType, (NativeRow)LOldClusteredKey.AsNative, LSearchPath, out LEntryNumber);
-						if (!LResult)
+						int entryNumber;
+						bool result = ClusteredIndex.FindKey(manager, ClusteredIndex.KeyRowType, (NativeRow)oldClusteredKey.AsNative, searchPath, out entryNumber);
+						if (!result)
 							throw new IndexException(IndexException.Codes.KeyNotFound);
 							
-						Row LOldClusteredData = new Row(AManager, ClusteredIndex.DataRowType, LSearchPath.DataNode.DataNode.Rows[LEntryNumber]);
+						Row oldClusteredData = new Row(manager, ClusteredIndex.DataRowType, searchPath.DataNode.DataNode.Rows[entryNumber]);
 						try
 						{
-							bool LIsIndexAffected;
-							foreach (NativeRowTree LTree in NonClusteredIndexes)
+							bool isIndexAffected;
+							foreach (NativeRowTree tree in NonClusteredIndexes)
 							{
-								LIsIndexAffected = GetIsIndexAffected(LTree.KeyRowType, ANewRow);
+								isIndexAffected = GetIsIndexAffected(tree.KeyRowType, newRow);
 								
-								if (LIsClusteredIndexKeyAffected || LIsIndexAffected)
+								if (isClusteredIndexKeyAffected || isIndexAffected)
 								{
-									Row LOldIndexKey = GetIndexData(AManager, LTree.KeyRowType, new Row[]{LOldClusteredKey, LOldClusteredData});
+									Row oldIndexKey = GetIndexData(manager, tree.KeyRowType, new Row[]{oldClusteredKey, oldClusteredData});
 									try
 									{
-										Row LNewIndexKey = null;
-										Row LNewIndexData = null;
+										Row newIndexKey = null;
+										Row newIndexData = null;
 										try
 										{
-											if (LIsIndexAffected)
-												LNewIndexKey = GetIndexData(AManager, LTree.KeyRowType, new Row[]{ANewRow, LOldClusteredKey, LOldClusteredData});
+											if (isIndexAffected)
+												newIndexKey = GetIndexData(manager, tree.KeyRowType, new Row[]{newRow, oldClusteredKey, oldClusteredData});
 												
-											if (LIsClusteredIndexKeyAffected)
-												LNewIndexData = GetIndexData(AManager, LTree.DataRowType, new Row[]{ANewRow, LOldClusteredKey, LOldClusteredData});
+											if (isClusteredIndexKeyAffected)
+												newIndexData = GetIndexData(manager, tree.DataRowType, new Row[]{newRow, oldClusteredKey, oldClusteredData});
 												
-											if (LIsIndexAffected && LIsClusteredIndexKeyAffected)
+											if (isIndexAffected && isClusteredIndexKeyAffected)
 											{
-												LTree.Update(AManager, (NativeRow)LOldIndexKey.AsNative, (NativeRow)LNewIndexKey.AsNative, (NativeRow)LNewIndexData.AsNative);
-												LNewIndexKey.ValuesOwned = false;
-												LNewIndexData.ValuesOwned = false;
+												tree.Update(manager, (NativeRow)oldIndexKey.AsNative, (NativeRow)newIndexKey.AsNative, (NativeRow)newIndexData.AsNative);
+												newIndexKey.ValuesOwned = false;
+												newIndexData.ValuesOwned = false;
 											}
-											else if (LIsIndexAffected)
+											else if (isIndexAffected)
 											{
-												LTree.Update(AManager, (NativeRow)LOldIndexKey.AsNative, (NativeRow)LNewIndexKey.AsNative);
-												LNewIndexKey.ValuesOwned = false;
+												tree.Update(manager, (NativeRow)oldIndexKey.AsNative, (NativeRow)newIndexKey.AsNative);
+												newIndexKey.ValuesOwned = false;
 											}
-											else if (LIsClusteredIndexKeyAffected)
+											else if (isClusteredIndexKeyAffected)
 											{
-												LTree.Update(AManager, (NativeRow)LOldIndexKey.AsNative, (NativeRow)LOldIndexKey.AsNative, (NativeRow)LNewIndexData.AsNative);
-												LNewIndexData.ValuesOwned = false;
+												tree.Update(manager, (NativeRow)oldIndexKey.AsNative, (NativeRow)oldIndexKey.AsNative, (NativeRow)newIndexData.AsNative);
+												newIndexData.ValuesOwned = false;
 											}
 										}
 										finally
 										{
-											if (LNewIndexKey != null)
-												LNewIndexKey.Dispose();
+											if (newIndexKey != null)
+												newIndexKey.Dispose();
 												
-											if (LNewIndexData != null)
-												LNewIndexData.Dispose();
+											if (newIndexData != null)
+												newIndexData.Dispose();
 										}
 									}
 									finally
 									{
-										LOldIndexKey.Dispose();
+										oldIndexKey.Dispose();
 									}
 								}
 							}
 							
-							if (LIsClusteredIndexKeyAffected)
-								LNewClusteredKey = GetIndexData(AManager, ClusteredIndex.KeyRowType, new Row[]{ANewRow, LOldClusteredKey, LOldClusteredData});
+							if (isClusteredIndexKeyAffected)
+								newClusteredKey = GetIndexData(manager, ClusteredIndex.KeyRowType, new Row[]{newRow, oldClusteredKey, oldClusteredData});
 								
-							if (LIsClusteredIndexDataAffected)
-								LNewClusteredData = GetIndexData(AManager, ClusteredIndex.DataRowType, new Row[]{ANewRow, LOldClusteredData});
+							if (isClusteredIndexDataAffected)
+								newClusteredData = GetIndexData(manager, ClusteredIndex.DataRowType, new Row[]{newRow, oldClusteredData});
 						}
 						finally
 						{
-							LOldClusteredData.Dispose();
+							oldClusteredData.Dispose();
 						}
 					}
 
-					if (LIsClusteredIndexKeyAffected && LIsClusteredIndexDataAffected)
+					if (isClusteredIndexKeyAffected && isClusteredIndexDataAffected)
 					{
-						ClusteredIndex.Update(AManager, (NativeRow)LOldClusteredKey.AsNative, (NativeRow)LNewClusteredKey.AsNative, (NativeRow)LNewClusteredData.AsNative);
-						LNewClusteredKey.ValuesOwned = false;
-						LNewClusteredData.ValuesOwned = false;
+						ClusteredIndex.Update(manager, (NativeRow)oldClusteredKey.AsNative, (NativeRow)newClusteredKey.AsNative, (NativeRow)newClusteredData.AsNative);
+						newClusteredKey.ValuesOwned = false;
+						newClusteredData.ValuesOwned = false;
 					}				
-					else if (LIsClusteredIndexKeyAffected)
+					else if (isClusteredIndexKeyAffected)
 					{
-						ClusteredIndex.Update(AManager, (NativeRow)LOldClusteredKey.AsNative, (NativeRow)LNewClusteredKey.AsNative);
-						LNewClusteredKey.ValuesOwned = false;
+						ClusteredIndex.Update(manager, (NativeRow)oldClusteredKey.AsNative, (NativeRow)newClusteredKey.AsNative);
+						newClusteredKey.ValuesOwned = false;
 					}
-					else if (LIsClusteredIndexDataAffected)
+					else if (isClusteredIndexDataAffected)
 					{
-						ClusteredIndex.Update(AManager, (NativeRow)LOldClusteredKey.AsNative, (NativeRow)LOldClusteredKey.AsNative, (NativeRow)LNewClusteredData.AsNative);
-						LNewClusteredData.ValuesOwned = false;
+						ClusteredIndex.Update(manager, (NativeRow)oldClusteredKey.AsNative, (NativeRow)oldClusteredKey.AsNative, (NativeRow)newClusteredData.AsNative);
+						newClusteredData.ValuesOwned = false;
 					}
 				}
 				finally
 				{
-					if (LNewClusteredKey != null)
-						LNewClusteredKey.Dispose();
+					if (newClusteredKey != null)
+						newClusteredKey.Dispose();
 						
-					if (LNewClusteredData != null)
-						LNewClusteredData.Dispose();
+					if (newClusteredData != null)
+						newClusteredData.Dispose();
 				}
 			}
 			finally
 			{
-				LOldClusteredKey.Dispose();
+				oldClusteredKey.Dispose();
 			}
 		}
 
-		public void Delete(IValueManager AManager, Row ARow)
+		public void Delete(IValueManager manager, Row row)
 		{
 			// Delete the row from all indexes
-			Row LClusteredKey = GetIndexData(AManager, ClusteredIndex.KeyRowType, new Row[]{ARow});
+			Row clusteredKey = GetIndexData(manager, ClusteredIndex.KeyRowType, new Row[]{row});
 			try
 			{
-				using (RowTreeSearchPath LSearchPath = new RowTreeSearchPath())
+				using (RowTreeSearchPath searchPath = new RowTreeSearchPath())
 				{
-					int LEntryNumber;
-					bool LResult = ClusteredIndex.FindKey(AManager, ClusteredIndex.KeyRowType, (NativeRow)LClusteredKey.AsNative, LSearchPath, out LEntryNumber);
-					if (!LResult)
+					int entryNumber;
+					bool result = ClusteredIndex.FindKey(manager, ClusteredIndex.KeyRowType, (NativeRow)clusteredKey.AsNative, searchPath, out entryNumber);
+					if (!result)
 						throw new IndexException(IndexException.Codes.KeyNotFound);
 						
-					Row LClusteredData = new Row(AManager, ClusteredIndex.DataRowType, LSearchPath.DataNode.DataNode.Rows[LEntryNumber]);
+					Row clusteredData = new Row(manager, ClusteredIndex.DataRowType, searchPath.DataNode.DataNode.Rows[entryNumber]);
 					try
 					{
-						foreach (NativeRowTree LBufferIndex in NonClusteredIndexes)
+						foreach (NativeRowTree bufferIndex in NonClusteredIndexes)
 						{
-							Row LKey = GetIndexData(AManager, LBufferIndex.KeyRowType, new Row[]{LClusteredKey, LClusteredData});
+							Row key = GetIndexData(manager, bufferIndex.KeyRowType, new Row[]{clusteredKey, clusteredData});
 							try
 							{
-								LBufferIndex.Delete(AManager, (NativeRow)LKey.AsNative);
+								bufferIndex.Delete(manager, (NativeRow)key.AsNative);
 							}
 							finally
 							{
-								LKey.Dispose();
+								key.Dispose();
 							}
 						}
 					}
 					finally
 					{
-						LClusteredData.Dispose();
+						clusteredData.Dispose();
 					}
 				}
 
-				ClusteredIndex.Delete(AManager, (NativeRow)LClusteredKey.AsNative);
+				ClusteredIndex.Delete(manager, (NativeRow)clusteredKey.AsNative);
 			}
 			finally
 			{	
-				LClusteredKey.Dispose();
+				clusteredKey.Dispose();
 			}
 			
-			FRowCount--;
+			_rowCount--;
 		}
 		
-		public void Truncate(IValueManager AManager)
+		public void Truncate(IValueManager manager)
 		{
-			Drop(AManager);
-			Create(AManager);
+			Drop(manager);
+			Create(manager);
 		}
 	}
 
@@ -521,38 +521,38 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	{
 		public NativeTables() : base(){}
 		
-		public new NativeTable this[int AIndex]
+		public new NativeTable this[int index]
 		{
-			get { lock (this) { return (NativeTable)base[AIndex]; } } 
-			set { lock (this) { base[AIndex] = value; } }
+			get { lock (this) { return (NativeTable)base[index]; } } 
+			set { lock (this) { base[index] = value; } }
 		}
 
-		public int IndexOf(Schema.TableVar ATableVar)
+		public int IndexOf(Schema.TableVar tableVar)
 		{
 			lock (this)
 			{
-				for (int LIndex = 0; LIndex < Count; LIndex++)
-					if (this[LIndex].TableVar == ATableVar)
-						return LIndex;
+				for (int index = 0; index < Count; index++)
+					if (this[index].TableVar == tableVar)
+						return index;
 				return -1;
 			}
 		}
 		
-		public bool Contains(Schema.TableVar ATableVar)
+		public bool Contains(Schema.TableVar tableVar)
 		{
-			return IndexOf(ATableVar) >= 0;
+			return IndexOf(tableVar) >= 0;
 		}
 		
-		public NativeTable this[Schema.TableVar ATableVar]
+		public NativeTable this[Schema.TableVar tableVar]
 		{
 			get
 			{
 				lock (this)
 				{
-					int LIndex = IndexOf(ATableVar);
-					if (LIndex < 0)
-						throw new RuntimeException(RuntimeException.Codes.NativeTableNotFound, ATableVar.DisplayName);
-					return this[LIndex];
+					int index = IndexOf(tableVar);
+					if (index < 0)
+						throw new RuntimeException(RuntimeException.Codes.NativeTableNotFound, tableVar.DisplayName);
+					return this[index];
 				}
 			}
 		}

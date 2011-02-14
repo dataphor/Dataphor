@@ -5,7 +5,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 {
 	public class CopyAction : Action, ICopyAction
 	{
-		protected override void InternalExecute(INode ASender, EventParams AParams)
+		protected override void InternalExecute(INode sender, EventParams paramsValue)
 		{
 			// TODO: Implement
 		}
@@ -26,7 +26,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 	public class PasteAction : Action, IPasteAction
 	{
-		protected override void InternalExecute(INode ASender, EventParams AParams)
+		protected override void InternalExecute(INode sender, EventParams paramsValue)
 		{
 			// TODO: Implement
 		}

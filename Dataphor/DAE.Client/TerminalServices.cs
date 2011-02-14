@@ -28,18 +28,18 @@ namespace Alphora.Dataphor.DAE.Client
 				#else
 				if (InTerminalSession)
 				{
-					IntPtr LBuffer;
-					uint LSize;
-					if (!WTSQuerySessionInformation(IntPtr.Zero, WTS_CURRENT_SESSION, WTS_INFO_CLASS.WTSClientName, out LBuffer, out LSize))
+					IntPtr buffer;
+					uint size;
+					if (!WTSQuerySessionInformation(IntPtr.Zero, WTS_CURRENT_SESSION, WTS_INFO_CLASS.WTSClientName, out buffer, out size))
 						return System.Environment.MachineName;
 					else
 						try
 						{
-							return Marshal.PtrToStringAnsi(LBuffer);
+							return Marshal.PtrToStringAnsi(buffer);
 						}
 						finally
 						{
-							WTSFreeMemory(LBuffer);
+							WTSFreeMemory(buffer);
 						}
 				}
 				else

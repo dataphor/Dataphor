@@ -14,113 +14,113 @@ namespace Alphora.Dataphor.DAE.Language.DB2
 	
 	public class DB2TextEmitter : SQLTextEmitter
 	{		
-		public const string CUDB = "UDB";
-		public const string CISeries = "iSeries";
+		public const string UDB = "UDB";
+		public const string ISeries = "iSeries";
 		
 		// Product
-		private string FProduct;
+		private string _product;
 		public string Product
 		{
-			get { return FProduct; }
-			set { FProduct = value; }
+			get { return _product; }
+			set { _product = value; }
 		}
 		
-		protected override string GetTableOperatorKeyword(TableOperator ATableOperator)
+		protected override string GetTableOperatorKeyword(TableOperator tableOperator)
 		{
-			switch (ATableOperator)
+			switch (tableOperator)
 			{
 				case TableOperator.Union: return SQL.Keywords.Union;
 				case TableOperator.Intersect: return SQL.Keywords.Intersect;
 				case TableOperator.Difference: return SQL.Keywords.Except;
-				default: throw new LanguageException(LanguageException.Codes.UnknownInstruction, ATableOperator.ToString());
+				default: throw new LanguageException(LanguageException.Codes.UnknownInstruction, tableOperator.ToString());
 			}
 		}
 		
-		protected override void EmitColumnDefinition(ColumnDefinition AColumn)
+		protected override void EmitColumnDefinition(ColumnDefinition column)
 		{
-			EmitIdentifier(AColumn.ColumnName);
-			AppendFormat(" {0}", AColumn.DomainName);
-			if (!AColumn.IsNullable)
+			EmitIdentifier(column.ColumnName);
+			AppendFormat(" {0}", column.DomainName);
+			if (!column.IsNullable)
 				AppendFormat(" {0} {1}", SQL.Keywords.Not, SQL.Keywords.Null);
 		}
 
-		protected override void EmitTableSpecifier(TableSpecifier ATableSpecifier)
+		protected override void EmitTableSpecifier(TableSpecifier tableSpecifier)
 		{
-			if (ATableSpecifier.TableExpression is TableExpression)
-				EmitTableExpression((TableExpression)ATableSpecifier.TableExpression);
+			if (tableSpecifier.TableExpression is TableExpression)
+				EmitTableExpression((TableExpression)tableSpecifier.TableExpression);
 			else
 			{
-				if (FProduct == CUDB)
+				if (_product == UDB)
 					AppendFormat("{0} ", SQL.Keywords.Table);
-				EmitSubQueryExpression(ATableSpecifier.TableExpression);
+				EmitSubQueryExpression(tableSpecifier.TableExpression);
 			}	
-			if (ATableSpecifier.TableAlias != String.Empty)
+			if (tableSpecifier.TableAlias != String.Empty)
 			{
 				AppendFormat(" {0} ", SQL.Keywords.As);
-				EmitIdentifier(ATableSpecifier.TableAlias);
+				EmitIdentifier(tableSpecifier.TableAlias);
 			}
 		}
 			
-		protected override void EmitCreateIndexStatement(CreateIndexStatement AStatement)
+		protected override void EmitCreateIndexStatement(CreateIndexStatement statement)
 		{   
 			Indent();
 			AppendFormat("{0} ", SQL.Keywords.Create);
-			if (AStatement.IsUnique)
+			if (statement.IsUnique)
 				AppendFormat("{0} ", SQL.Keywords.Unique);
 			
 			AppendFormat("{0} ", SQL.Keywords.Index);
-			if (AStatement.IndexSchema != String.Empty)
+			if (statement.IndexSchema != String.Empty)
 			{
-				EmitIdentifier(AStatement.IndexSchema);
+				EmitIdentifier(statement.IndexSchema);
 				Append(SQL.Keywords.Qualifier);
 			}
-			EmitIdentifier(AStatement.IndexName);
+			EmitIdentifier(statement.IndexName);
 			AppendFormat(" {0} ", SQL.Keywords.On);
-			if (AStatement.TableSchema != String.Empty)
+			if (statement.TableSchema != String.Empty)
 			{
-				EmitIdentifier(AStatement.TableSchema);
+				EmitIdentifier(statement.TableSchema);
 				Append(SQL.Keywords.Qualifier);
 			}
-			EmitIdentifier(AStatement.TableName);
+			EmitIdentifier(statement.TableName);
 			Append(SQL.Keywords.BeginGroup);
-			for (int LIndex = 0; LIndex < AStatement.Columns.Count; LIndex++)
+			for (int index = 0; index < statement.Columns.Count; index++)
 			{
-				if (LIndex > 0)
+				if (index > 0)
 					EmitListSeparator();
-				EmitOrderColumnDefinition(AStatement.Columns[LIndex]);
+				EmitOrderColumnDefinition(statement.Columns[index]);
 			}
 			Append(SQL.Keywords.EndGroup);
-			if ((FProduct == CUDB) && AStatement.IsClustered)
+			if ((_product == UDB) && statement.IsClustered)
 					AppendFormat("{0} ", DB2.Keywords.Cluster);			
 		}
 		
-		protected override void EmitBinaryExpression(BinaryExpression AExpression)
+		protected override void EmitBinaryExpression(BinaryExpression expression)
 		{
-			if (AExpression.Instruction == "iMod")
+			if (expression.Instruction == "iMod")
 			{
 				Append("Mod(");
-				EmitExpression(AExpression.LeftExpression);
+				EmitExpression(expression.LeftExpression);
 				Append(", ");
-				EmitExpression(AExpression.RightExpression);
+				EmitExpression(expression.RightExpression);
 				Append(")");
 			}
 			else
-				base.EmitBinaryExpression (AExpression);
+				base.EmitBinaryExpression (expression);
 		}
 		
-		protected override void EmitJoinClause(JoinClause AClause)
+		protected override void EmitJoinClause(JoinClause clause)
 		{			
-			if (AClause.JoinType == JoinType.Cross)
+			if (clause.JoinType == JoinType.Cross)
 			{
 				NewLine();
 				Indent();				
 				AppendFormat("{0} {1} ", Alphora.Dataphor.DAE.Language.SQL.Keywords.Inner, Alphora.Dataphor.DAE.Language.SQL.Keywords.Join);
-				EmitTableSpecifier(AClause.FromClause.TableSpecifier);
+				EmitTableSpecifier(clause.FromClause.TableSpecifier);
 				AppendFormat(" {0} 1 = 1", Alphora.Dataphor.DAE.Language.SQL.Keywords.On);
 			}
 			else
 			{
-				base.EmitJoinClause(AClause);
+				base.EmitJoinClause(clause);
 			}
 		}
 	}

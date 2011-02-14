@@ -23,32 +23,32 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			SetStyle(ControlStyles.SupportsTransparentBackColor, true);
 			SetStyle(ControlStyles.UserPaint, true);
 			CausesValidation = false;
-			FLink = new FieldDataLink();
-			FLink.OnFieldChanged += new DataLinkFieldHandler(FieldChanged);
+			_link = new FieldDataLink();
+			_link.OnFieldChanged += new DataLinkFieldHandler(FieldChanged);
 			AutoSize = false;
-			FWidthRange = new WidthRange(this);
-			FWidthRange.OnInternalSetWidth += new InternalSetWidthEventHandler(InternalSetWidth);
-			FWidthRange.OnMeasureWidth += new MeasureWidthEventHandler(MeasureWidth);
+			_widthRange = new WidthRange(this);
+			_widthRange.OnInternalSetWidth += new InternalSetWidthEventHandler(InternalSetWidth);
+			_widthRange.OnMeasureWidth += new MeasureWidthEventHandler(MeasureWidth);
 			ForeColor = Color.Navy;
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			if (!IsDisposed)
 			{
-				FLink.OnFieldChanged -= new DataLinkFieldHandler(FieldChanged);
-				FLink.Dispose();
-				FLink = null;
+				_link.OnFieldChanged -= new DataLinkFieldHandler(FieldChanged);
+				_link.Dispose();
+				_link = null;
 			}
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
-		private FieldDataLink FLink;
+		private FieldDataLink _link;
 		/// <summary> Links this control to a view's DataField. </summary>
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBText.dxd"/>
 		protected FieldDataLink Link
 		{
-			get { return FLink; }
+			get { return _link; }
 		}
 
 		/// <summary> Gets or sets a value indicating the DataSource the text is linked to. </summary>
@@ -59,11 +59,11 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Description("The DataSource for this control")]
 		public DataSource Source
 		{
-			get { return FLink.Source; }
+			get { return _link.Source; }
 			set
 			{
-				if (FLink.Source != value)
-					FLink.Source = value;
+				if (_link.Source != value)
+					_link.Source = value;
 			}
 		}
 
@@ -74,8 +74,8 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Editor(typeof(Alphora.Dataphor.DAE.Client.Design.ColumnNameEditor), typeof(System.Drawing.Design.UITypeEditor))]
 		public string ColumnName
 		{
-			get { return FLink.ColumnName; }
-			set { FLink.ColumnName = value; }
+			get { return _link.ColumnName; }
+			set { _link.ColumnName = value; }
 		}
 
 		/// <summary> Gets the DataField the text represents. </summary>
@@ -83,7 +83,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Browsable(false)]
 		public DataField DataField
 		{
-			get { return FLink.DataField; }
+			get { return _link.DataField; }
 		}
 
 		/// <summary> Gets a string that represents the field value. </summary>
@@ -93,7 +93,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			get { return ((DataField == null) || (!DataField.HasValue())) ? String.Empty : DataField.AsDisplayString; }
 		}
 
-		private void FieldChanged(DataLink ALink, DataSet ADataSet, DataField AField)
+		private void FieldChanged(DataLink link, DataSet dataSet, DataField field)
 		{
 			base.Text = FieldValue;
 		}
@@ -104,49 +104,49 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		//Width Range
 
-		private WidthRange FWidthRange;
+		private WidthRange _widthRange;
 		[Category("Layout")]
 		[DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Content)]
 		public WidthRange WidthRange
 		{
-			get { return FWidthRange; }
+			get { return _widthRange; }
 		}
 
-		private void MeasureWidth(object ASender, ref int ANewWidth, EventArgs AArgs)
+		private void MeasureWidth(object sender, ref int newWidth, EventArgs args)
 		{
-			StringFormat LFormat = StringFormat.GenericTypographic;
-			LFormat.FormatFlags |= StringFormatFlags.MeasureTrailingSpaces | StringFormatFlags.NoWrap;
-			Size LSize;
-			using (Graphics LGraphics = CreateGraphics())
+			StringFormat format = StringFormat.GenericTypographic;
+			format.FormatFlags |= StringFormatFlags.MeasureTrailingSpaces | StringFormatFlags.NoWrap;
+			Size size;
+			using (Graphics graphics = CreateGraphics())
 			{
-				LSize = Size.Round(LGraphics.MeasureString(Text + 'W', Font, FWidthRange.Range.Maximum, LFormat));
+				size = Size.Round(graphics.MeasureString(Text + 'W', Font, _widthRange.Range.Maximum, format));
 			}
-			if (LSize.Width > Width)
-				ANewWidth = LSize.Width <= FWidthRange.Range.Maximum ? LSize.Width : FWidthRange.Range.Maximum;
-			else if (LSize.Width < Width)
-				ANewWidth = LSize.Width >= FWidthRange.Range.Minimum ? LSize.Width : FWidthRange.Range.Minimum;
+			if (size.Width > Width)
+				newWidth = size.Width <= _widthRange.Range.Maximum ? size.Width : _widthRange.Range.Maximum;
+			else if (size.Width < Width)
+				newWidth = size.Width >= _widthRange.Range.Minimum ? size.Width : _widthRange.Range.Minimum;
 			else
-				ANewWidth = Width;
+				newWidth = Width;
 		}
 
-		protected override void OnTextChanged(EventArgs AArgs)
+		protected override void OnTextChanged(EventArgs args)
 		{
-			base.OnTextChanged(AArgs);
-			FWidthRange.UpdateWidth();
+			base.OnTextChanged(args);
+			_widthRange.UpdateWidth();
 		}
 
 		public event InternalSetWidthEventHandler OnInternalSetWidth;
 		protected virtual void InternalSetWidth
 			(
-			object ASender,
-			int ANewWidth,
-			ref bool AHandled,
-			EventArgs AArgs
+			object sender,
+			int newWidth,
+			ref bool handled,
+			EventArgs args
 			)
 		{
-			AHandled = DesignMode;
+			handled = DesignMode;
 			if (OnInternalSetWidth != null) 
-				OnInternalSetWidth(this, ANewWidth, ref AHandled, AArgs);
+				OnInternalSetWidth(this, newWidth, ref handled, args);
 		}
 		
 	}

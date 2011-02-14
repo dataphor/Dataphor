@@ -47,7 +47,7 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 			InitializeComponent();
 
 			// Don't know why this is all messed up, but I'll put it here.
-			this.Icon = new Icon(this.GetType().Assembly.GetManifestResourceStream(Alphora.Dataphor.DAE.Service.ConfigurationUtility.MainForm.CWindowIconName));;
+			this.Icon = new Icon(this.GetType().Assembly.GetManifestResourceStream(Alphora.Dataphor.DAE.Service.ConfigurationUtility.MainForm.WindowIconName));;
 		}
 
 		public int Port
@@ -328,21 +328,21 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 
 		private void CatalogBrowse_Click(object sender, System.EventArgs e)
 		{
-			CatalogDirectoryTextBox.Text = GetDirectory(MainForm.CCatalogBrowseTitle, CatalogDirectoryTextBox.Text);
+			CatalogDirectoryTextBox.Text = GetDirectory(MainForm.CatalogBrowseTitle, CatalogDirectoryTextBox.Text);
 		}
 
-		private string GetDirectory(string ADescription, string ADirectory)
+		private string GetDirectory(string description, string directory)
 		{
-			FolderBrowserDialog LBrowser = new FolderBrowserDialog();
-			LBrowser.Description = "Select directory";
-			if (ADirectory != String.Empty)
-				LBrowser.SelectedPath = ADirectory;
+			FolderBrowserDialog browser = new FolderBrowserDialog();
+			browser.Description = "Select directory";
+			if (directory != String.Empty)
+				browser.SelectedPath = directory;
 			else
-				LBrowser.RootFolder = Environment.SpecialFolder.MyComputer;
-			LBrowser.ShowNewFolderButton = true;
-			if (LBrowser.ShowDialog(this) != DialogResult.OK)
+				browser.RootFolder = Environment.SpecialFolder.MyComputer;
+			browser.ShowNewFolderButton = true;
+			if (browser.ShowDialog(this) != DialogResult.OK)
 				throw new AbortException();
-			return LBrowser.SelectedPath;
+			return browser.SelectedPath;
 		}
 
 /*
@@ -367,20 +367,20 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 */
 
 		// This makes sure that you can't enter anything but 0-9 in the port #
-		private void PortNumber_OnKeyPress(object sender, System.Windows.Forms.KeyPressEventArgs AArgs)
+		private void PortNumber_OnKeyPress(object sender, System.Windows.Forms.KeyPressEventArgs args)
 		{
-			if (AArgs.KeyChar > 32)
+			if (args.KeyChar > 32)
 			{
-				if ((AArgs.KeyChar < '0') || (AArgs.KeyChar > '9'))
-					AArgs.Handled = true;
+				if ((args.KeyChar < '0') || (args.KeyChar > '9'))
+					args.Handled = true;
 			}
 
-			base.OnKeyPress(AArgs);
+			base.OnKeyPress(args);
 		}
 
 		private void button1_Click(object sender, System.EventArgs e)
 		{
-			txtLibraryDirectory.Text = GetDirectory(MainForm.CCatalogBrowseTitle, txtLibraryDirectory.Text);
+			txtLibraryDirectory.Text = GetDirectory(MainForm.CatalogBrowseTitle, txtLibraryDirectory.Text);
 		}
 	}
 }

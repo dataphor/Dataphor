@@ -24,7 +24,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			this.IsEnabledChanged += new DependencyPropertyChangedEventHandler(OnEnabledChanged);
 		}
 		
-		protected virtual void OnEnabledChanged(object ASender, DependencyPropertyChangedEventArgs AArgs)
+		protected virtual void OnEnabledChanged(object sender, DependencyPropertyChangedEventArgs args)
 		{
 			UpdateVisualStates(true);
 		}
@@ -42,57 +42,57 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			UpdateVisualStates(true);
 		}
 
-		protected override void PrepareContainerForItemOverride(DependencyObject AElement, object AItem)
+		protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
 		{
- 			base.PrepareContainerForItemOverride(AElement, AItem);
- 			var LMenuItem = AElement as MenuItem;
- 			if (LMenuItem != null)
+ 			base.PrepareContainerForItemOverride(element, item);
+ 			var menuItem = element as MenuItem;
+ 			if (menuItem != null)
  			{
- 				LMenuItem.Highlighted += SubMenuItemHighlighted;
-				LMenuItem.ItemClicked += SubMenuItemItemClicked;
-				LMenuItem.Clicked += SubMenuItemClicked;
+ 				menuItem.Highlighted += SubMenuItemHighlighted;
+				menuItem.ItemClicked += SubMenuItemItemClicked;
+				menuItem.Clicked += SubMenuItemClicked;
  			}
 		}
 
-		protected override void ClearContainerForItemOverride(DependencyObject AElement, object AItem)
+		protected override void ClearContainerForItemOverride(DependencyObject element, object item)
 		{
- 			base.ClearContainerForItemOverride(AElement, AItem);
- 			var LMenuItem = AElement as MenuItem;
- 			if (LMenuItem != null)
+ 			base.ClearContainerForItemOverride(element, item);
+ 			var menuItem = element as MenuItem;
+ 			if (menuItem != null)
  			{
- 				LMenuItem.Highlighted -= SubMenuItemHighlighted;
-				LMenuItem.ItemClicked -= SubMenuItemItemClicked;
-				LMenuItem.Clicked -= SubMenuItemClicked;
+ 				menuItem.Highlighted -= SubMenuItemHighlighted;
+				menuItem.ItemClicked -= SubMenuItemItemClicked;
+				menuItem.Clicked -= SubMenuItemClicked;
 			}
 		}
 		
 		public event MenuItemClickedHandler ItemClicked;
 		
-		private void SubMenuItemItemClicked(MenuItem ASender)
+		private void SubMenuItemItemClicked(MenuItem sender)
 		{
-			OnItemClicked(ASender);
+			OnItemClicked(sender);
 		}
 
-		private void SubMenuItemClicked(MenuItem ASender)
+		private void SubMenuItemClicked(MenuItem sender)
 		{
-			OnItemClicked(ASender);
+			OnItemClicked(sender);
 		}
 
-		protected virtual void OnItemClicked(MenuItem ASender)
+		protected virtual void OnItemClicked(MenuItem sender)
 		{
 			if (ItemClicked != null)
-				ItemClicked(ASender);
+				ItemClicked(sender);
 		}
 		
-		private void UpdateItemsExpansion(MenuItem AActive)
+		private void UpdateItemsExpansion(MenuItem active)
 		{
-			foreach (MenuItem LItem in Items)
-				LItem.IsExpanded = LItem.Items.Count > 0 && Object.ReferenceEquals(LItem, AActive);
+			foreach (MenuItem item in Items)
+				item.IsExpanded = item.Items.Count > 0 && Object.ReferenceEquals(item, active);
 		}
 		
-		private void SubMenuItemHighlighted(object ASender, RoutedEventArgs AArgs)
+		private void SubMenuItemHighlighted(object sender, RoutedEventArgs args)
 		{
-			UpdateItemsExpansion((MenuItem)ASender);
+			UpdateItemsExpansion((MenuItem)sender);
 		}
 		
 		public static readonly DependencyProperty IsExpandedProperty =
@@ -115,18 +115,18 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			// Ensure that no sub-menus are expanded if this menu is no longer expanded
 			if (!IsExpanded)
 			{
-				foreach (MenuItem LItem in Items)
-					LItem.IsExpanded = false;
+				foreach (MenuItem item in Items)
+					item.IsExpanded = false;
 			}
 			UpdateVisualStates(true);
 		}
 
-		private Popup FSubMenuPopup;
+		private Popup _subMenuPopup;
 		
 		public Popup SubMenuPopup
 		{
-			get { return FSubMenuPopup; }
-			set { FSubMenuPopup = value; }
+			get { return _subMenuPopup; }
+			set { _subMenuPopup = value; }
 		}
 
 		public static readonly DependencyProperty IsHighlightedProperty =
@@ -156,37 +156,37 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		private void UpdateHighlighted()
 		{
-			IsHighlighted = FIsFocused || FIsMouseOver;
+			IsHighlighted = _isFocused || _isMouseOver;
 		}
 		
-		private bool FIsFocused;
-		private bool FIsMouseOver;
+		private bool _isFocused;
+		private bool _isMouseOver;
 
 		protected override void OnGotFocus(RoutedEventArgs e)
 		{
 			base.OnGotFocus(e);
-			FIsFocused = true;
+			_isFocused = true;
 			UpdateHighlighted();
 		}
 
 		protected override void OnLostFocus(RoutedEventArgs e)
 		{
 			base.OnLostFocus(e);
-			FIsFocused = false;
+			_isFocused = false;
 			UpdateHighlighted();
 		}
 
 		protected override void OnMouseEnter(System.Windows.Input.MouseEventArgs e)
 		{
 			base.OnMouseEnter(e);
-			FIsMouseOver = true;
+			_isMouseOver = true;
 			UpdateHighlighted();
 		}
 
 		protected override void OnMouseLeave(System.Windows.Input.MouseEventArgs e)
 		{
 			base.OnMouseLeave(e);
-			FIsMouseOver = false;
+			_isMouseOver = false;
 			UpdateHighlighted();
 		}
 
@@ -250,26 +250,26 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		{
 		}
 		
-		private void UpdateVisualStates(bool AUseTransitions)
+		private void UpdateVisualStates(bool useTransitions)
 		{
 			if (!IsEnabled)
-				VisualStateManager.GoToState(this, "Disabled", AUseTransitions);
+				VisualStateManager.GoToState(this, "Disabled", useTransitions);
 			else if (IsPressed)
-				VisualStateManager.GoToState(this, "Pressed", AUseTransitions);
+				VisualStateManager.GoToState(this, "Pressed", useTransitions);
 			else if (IsHighlighted)				
-				VisualStateManager.GoToState(this, "Highlighted", AUseTransitions);
+				VisualStateManager.GoToState(this, "Highlighted", useTransitions);
 			else
-				VisualStateManager.GoToState(this, "Normal", AUseTransitions);
+				VisualStateManager.GoToState(this, "Normal", useTransitions);
 				
 			if (IsExpanded)
-				VisualStateManager.GoToState(this, "Expanded", AUseTransitions);
+				VisualStateManager.GoToState(this, "Expanded", useTransitions);
 			else
-				VisualStateManager.GoToState(this, "Collapsed", AUseTransitions);
+				VisualStateManager.GoToState(this, "Collapsed", useTransitions);
 				
 			if (Items.Count > 0)
-				VisualStateManager.GoToState(this, "HasItems", AUseTransitions);
+				VisualStateManager.GoToState(this, "HasItems", useTransitions);
 			else
-				VisualStateManager.GoToState(this, "NoItems", AUseTransitions);
+				VisualStateManager.GoToState(this, "NoItems", useTransitions);
 		}
 
 		internal bool IsStyleSetFromItemsContainer { get; set; }

@@ -17,19 +17,19 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 {
 	public abstract class Element : Node, IWebElement, IWebHandler
 	{
-		public const int CDefaultMarginLeft = 2;
-		public const int CDefaultMarginRight = 2;
-		public const int CDefaultMarginTop = 2;
-		public const int CDefaultMarginBottom = 2;
+		public const int DefaultMarginLeft = 2;
+		public const int DefaultMarginRight = 2;
+		public const int DefaultMarginTop = 2;
+		public const int DefaultMarginBottom = 2;
 
 		public Element()
 		{
-			FMarginLeft = GetDefaultMarginLeft();
-			FMarginRight = GetDefaultMarginRight();
-			FMarginTop = GetDefaultMarginTop();
-			FMarginBottom = GetDefaultMarginBottom();
-			FTabStop = GetDefaultTabStop();
-			FHelpID = Session.GenerateID();
+			_marginLeft = GetDefaultMarginLeft();
+			_marginRight = GetDefaultMarginRight();
+			_marginTop = GetDefaultMarginTop();
+			_marginBottom = GetDefaultMarginBottom();
+			_tabStop = GetDefaultTabStop();
+			_helpID = Session.GenerateID();
 		}
 
 		// TODO: Implement styles in web client
@@ -38,127 +38,127 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		
 		// MarginLeft
 		
-		private int FMarginLeft;
+		private int _marginLeft;
 		[DefaultValueMember("GetDefaultMarginLeft")]
 		public int MarginLeft
 		{
-			get { return FMarginLeft; }
-			set { FMarginLeft = value; }
+			get { return _marginLeft; }
+			set { _marginLeft = value; }
 		}
 
 		public virtual int GetDefaultMarginLeft()
 		{
-			return CDefaultMarginLeft;
+			return DefaultMarginLeft;
 		}
 		
 		// MarginRight
 		
-		private int FMarginRight;
+		private int _marginRight;
 		[DefaultValueMember("GetDefaultMarginRight")]
 		public int MarginRight
 		{
-			get { return FMarginRight; }
-			set { FMarginRight = value; }
+			get { return _marginRight; }
+			set { _marginRight = value; }
 		}
 
 		public virtual int GetDefaultMarginRight()
 		{
-			return CDefaultMarginRight;
+			return DefaultMarginRight;
 		}
 		
 		// MarginTop
 		
-		private int FMarginTop;
+		private int _marginTop;
 		[DefaultValueMember("GetDefaultMarginTop")]
 		public int MarginTop
 		{
-			get { return FMarginTop; }
-			set { FMarginTop = value; }
+			get { return _marginTop; }
+			set { _marginTop = value; }
 		}
 
 		public virtual int GetDefaultMarginTop()
 		{
-			return CDefaultMarginTop;
+			return DefaultMarginTop;
 		}
 		
 		// MarginBottom
 		
-		private int FMarginBottom;
+		private int _marginBottom;
 		[DefaultValueMember("GetDefaultMarginBottom")]
 		public int MarginBottom
 		{
-			get { return FMarginBottom; }
-			set { FMarginBottom = value; }
+			get { return _marginBottom; }
+			set { _marginBottom = value; }
 		}
 
 		public virtual int GetDefaultMarginBottom()
 		{
-			return CDefaultMarginBottom;
+			return DefaultMarginBottom;
 		}
 		
 		// Hint
 
-		private string FHint = String.Empty;
+		private string _hint = String.Empty;
 		[DefaultValue("")]
-		public string Hint { get { return FHint; } set { FHint = value; } }
+		public string Hint { get { return _hint; } set { _hint = value; } }
 
 		/// <summary> Gets the actual hint to use for this node. </summary>
 		public virtual string GetHint()
 		{
-			return FHint;
+			return _hint;
 		}
 		
 		// Help
 
 		// TODO: Support for context help in the web
 
-		private string FHelpKeyword = String.Empty;
+		private string _helpKeyword = String.Empty;
 		[DefaultValue("")]
 		public string HelpKeyword 
 		{ 
-			get { return FHelpKeyword; }
-			set { FHelpKeyword = (value == null ? String.Empty : value); }
+			get { return _helpKeyword; }
+			set { _helpKeyword = (value == null ? String.Empty : value); }
 		}
 		
-		private HelpKeywordBehavior FHelpKeywordBehavior = HelpKeywordBehavior.KeywordIndex;
+		private HelpKeywordBehavior _helpKeywordBehavior = HelpKeywordBehavior.KeywordIndex;
 		[DefaultValue(HelpKeywordBehavior.KeywordIndex)]
 		public HelpKeywordBehavior HelpKeywordBehavior
 		{
-			get { return FHelpKeywordBehavior; }
-			set { FHelpKeywordBehavior = value; }
+			get { return _helpKeywordBehavior; }
+			set { _helpKeywordBehavior = value; }
 		}
 
-		private string FHelpString = String.Empty;
+		private string _helpString = String.Empty;
 		[DefaultValue("")]
 		public string HelpString
 		{ 
-			get { return FHelpString; }
-			set { FHelpString = (value == null ? String.Empty : value); }
+			get { return _helpString; }
+			set { _helpString = (value == null ? String.Empty : value); }
 		}
 
-		private string FHelpID;
-		private bool FRenderHelp = false;
+		private string _helpID;
+		private bool _renderHelp = false;
 
-		public virtual void RenderHelp(HtmlTextWriter AWriter)
+		public virtual void RenderHelp(HtmlTextWriter writer)
 		{
-			if (FRenderHelp)
+			if (_renderHelp)
 			{
-				AWriter.Write("<br>");
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "elementhelp");
-				AWriter.RenderBeginTag(HtmlTextWriterTag.Font);
-				AWriter.Write(HttpUtility.HtmlEncode(FHelpString));
-				AWriter.RenderEndTag();
-				FRenderHelp = false;
+				writer.Write("<br>");
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "elementhelp");
+				writer.RenderBeginTag(HtmlTextWriterTag.Font);
+				writer.Write(HttpUtility.HtmlEncode(_helpString));
+				writer.RenderEndTag();
+				_renderHelp = false;
 			}
 			else
 			{
-				if (FHelpString != String.Empty)
+				if (_helpString != String.Empty)
 				{
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Type, "image");
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Name, FHelpID);
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Src, @"images\help.gif");
-					AWriter.RenderBeginTag(HtmlTextWriterTag.Input);
-					AWriter.RenderEndTag();
+					writer.AddAttribute(HtmlTextWriterAttribute.Type, "image");
+					writer.AddAttribute(HtmlTextWriterAttribute.Name, _helpID);
+					writer.AddAttribute(HtmlTextWriterAttribute.Src, @"images\help.gif");
+					writer.RenderBeginTag(HtmlTextWriterTag.Input);
+					writer.RenderEndTag();
 				}
 			}
 		}
@@ -167,12 +167,12 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// TODO: TabStop support in the web (there is support for TabIndex, but there doesn't seem to be support for Tab Stop toggle)
 
-		private bool FTabStop;
+		private bool _tabStop;
 		[DefaultValueMember("GetDefaultTabStop")]
 		public bool TabStop
 		{
-			get { return FTabStop; }
-			set { FTabStop = value; }
+			get { return _tabStop; }
+			set { _tabStop = value; }
 		}
 
 		protected virtual bool GetDefaultTabStop()
@@ -182,72 +182,72 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		public virtual bool GetTabStop()
 		{
-			return FTabStop;
+			return _tabStop;
 		}
 
 		// Visible
 
-		private bool FVisible = true;
+		private bool _visible = true;
 		[DefaultValue(true)]
-		public bool Visible { get { return FVisible; } set { FVisible = value; } }
+		public bool Visible { get { return _visible; } set { _visible = value; } }
 
 		public virtual bool GetVisible()
 		{
-			return FVisible;
+			return _visible;
 		}
 
 		// ErrorMessage
 
-		private string FErrorMessage;
+		private string _errorMessage;
 		/// <summary> Constraint violation or other field level errors to be shown at next field rendering. </summary>
-		public string ErrorMessage { get { return FErrorMessage; } set { FErrorMessage = value; } }
+		public string ErrorMessage { get { return _errorMessage; } set { _errorMessage = value; } }
 
-		protected virtual void RenderErrorMessage(HtmlTextWriter AWriter)
+		protected virtual void RenderErrorMessage(HtmlTextWriter writer)
 		{
-			if (FErrorMessage != null)
+			if (_errorMessage != null)
 			{
-				AWriter.Write("<br>");
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "elementerror");
-				AWriter.RenderBeginTag(HtmlTextWriterTag.Font);
-				AWriter.Write(HttpUtility.HtmlEncode(FErrorMessage));
-				AWriter.RenderEndTag();
-				FErrorMessage = null;
+				writer.Write("<br>");
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "elementerror");
+				writer.RenderBeginTag(HtmlTextWriterTag.Font);
+				writer.Write(HttpUtility.HtmlEncode(_errorMessage));
+				writer.RenderEndTag();
+				_errorMessage = null;
 			}
 		}
 
 		// Element exceptions
 
-		public virtual void HandleElementException(Exception AException)
+		public virtual void HandleElementException(Exception exception)
 		{
-			if (FErrorMessage == null)
-				FErrorMessage = AException.Message;
+			if (_errorMessage == null)
+				_errorMessage = exception.Message;
 			else
-				FErrorMessage = FErrorMessage + "\r\n" + AException.Message;
+				_errorMessage = _errorMessage + "\r\n" + exception.Message;
 		}
 
 		// IWebElement
 
-		public virtual void Render(HtmlTextWriter AWriter)
+		public virtual void Render(HtmlTextWriter writer)
 		{
 			if (GetVisible())
 			{
-				InternalRender(AWriter);
-				RenderHelp(AWriter);
-				RenderErrorMessage(AWriter);
+				InternalRender(writer);
+				RenderHelp(writer);
+				RenderErrorMessage(writer);
 			}
 		}
 
-		public virtual bool ProcessRequest(HttpContext AContext)
+		public virtual bool ProcessRequest(HttpContext context)
 		{
-			if (AContext.Request.Form[FHelpID + ".x"] != null)
+			if (context.Request.Form[_helpID + ".x"] != null)
 			{
-				FRenderHelp = true;
+				_renderHelp = true;
 				return true;
 			}
 			else
 				return false;
 		}
 
-		protected abstract void InternalRender(HtmlTextWriter AWriter);
+		protected abstract void InternalRender(HtmlTextWriter writer);
 	}
 }

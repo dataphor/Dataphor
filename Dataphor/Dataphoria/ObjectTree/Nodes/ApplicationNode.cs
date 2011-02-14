@@ -24,9 +24,9 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			return ".Frontend.Applications rename Main";
 		}
 		
-		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row ARow)
+		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row row)
 		{
-			return new ApplicationNode(this, (string)ARow["Main.ID"], (string)ARow["Main.Description"]);
+			return new ApplicationNode(this, (string)row["Main.ID"], (string)row["Main.Description"]);
 		}
 		
 		protected override string AddDocument()
@@ -34,116 +34,116 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			return ".Frontend.Derive('Frontend.Applications', 'Add')";
 		}
 
-		public ApplicationNode FindByID(string AID)
+		public ApplicationNode FindByID(string iD)
 		{
-			ApplicationNode LApplicationNode;
-			foreach (TreeNode LNode in Nodes)
+			ApplicationNode applicationNode;
+			foreach (TreeNode node in Nodes)
 			{
-				LApplicationNode = LNode as ApplicationNode;
-				if ((LApplicationNode != null) && (LApplicationNode.ID == AID))
-					return LApplicationNode;
+				applicationNode = node as ApplicationNode;
+				if ((applicationNode != null) && (applicationNode.ID == iD))
+					return applicationNode;
 			}
 			return null;
 		}
 
-		public override void DragDrop(DragEventArgs AArgs)
+		public override void DragDrop(DragEventArgs args)
 		{
-			Frontend.Client.Windows.IWindowsFormInterface LForm = Dataphoria.FrontendSession.LoadForm(null, AddDocument(), new Frontend.Client.FormInterfaceHandler(SetInsertOpenState));
+			Frontend.Client.Windows.IWindowsFormInterface form = Dataphoria.FrontendSession.LoadForm(null, AddDocument(), new Frontend.Client.FormInterfaceHandler(SetInsertOpenState));
 			try
 			{
-				DocumentData LDocument = AArgs.Data as DocumentData;
-				Frontend.Client.ISource LLibrariesSource = ((Frontend.Client.IFrame)LForm.FindNode("Frontend.ApplicationLibraries_ApplicationsFrame")).FrameInterfaceNode.MainSource;
-				if (LDocument != null)
+				DocumentData document = args.Data as DocumentData;
+				Frontend.Client.ISource librariesSource = ((Frontend.Client.IFrame)form.FindNode("Frontend.ApplicationLibraries_ApplicationsFrame")).FrameInterfaceNode.MainSource;
+				if (document != null)
 				{
-					LForm.MainSource["Main.ID"].AsString = LDocument.Node.DocumentName;
-					LForm.MainSource["Main.Description"].AsString = LDocument.Node.DocumentName;
-					LForm.MainSource["Main.StartDocument"].AsString = String.Format(".Frontend.Form('{0}', '{1}')", LDocument.Node.LibraryName.Replace("'", "''"), LDocument.Node.DocumentName.Replace("'", "''"));
-					LLibrariesSource.Insert();
-					LLibrariesSource["Main.Library_Name"].AsString = LDocument.Node.LibraryName;
-					LLibrariesSource.Post();
+					form.MainSource["Main.ID"].AsString = document.Node.DocumentName;
+					form.MainSource["Main.Description"].AsString = document.Node.DocumentName;
+					form.MainSource["Main.StartDocument"].AsString = String.Format(".Frontend.Form('{0}', '{1}')", document.Node.LibraryName.Replace("'", "''"), document.Node.DocumentName.Replace("'", "''"));
+					librariesSource.Insert();
+					librariesSource["Main.Library_Name"].AsString = document.Node.LibraryName;
+					librariesSource.Post();
 				}
 				else
 				{
-					TableData LTable = AArgs.Data as TableData;
-					if (LTable != null)
+					TableData table = args.Data as TableData;
+					if (table != null)
 					{
-						LForm.MainSource["Main.ID"].AsString = LTable.Node.ObjectName;
-						LForm.MainSource["Main.Description"].AsString = LTable.Node.ObjectName;
-						LForm.MainSource["Main.StartDocument"].AsString = String.Format(".Frontend.Derive('{0}')", LTable.Node.ObjectName.Replace("'", "''"));
-						LLibrariesSource.Insert();
-						LLibrariesSource["Main.Library_Name"].AsString = ((SchemaListNode)LTable.Node.Parent).LibraryName;
-						LLibrariesSource.Post();
+						form.MainSource["Main.ID"].AsString = table.Node.ObjectName;
+						form.MainSource["Main.Description"].AsString = table.Node.ObjectName;
+						form.MainSource["Main.StartDocument"].AsString = String.Format(".Frontend.Derive('{0}')", table.Node.ObjectName.Replace("'", "''"));
+						librariesSource.Insert();
+						librariesSource["Main.Library_Name"].AsString = ((SchemaListNode)table.Node.Parent).LibraryName;
+						librariesSource.Post();
 					}
 				}
-				if (LForm.ShowModal(Frontend.Client.FormMode.Insert) != DialogResult.OK)
+				if (form.ShowModal(Frontend.Client.FormMode.Insert) != DialogResult.OK)
 					throw new AbortException();
-				BaseNode LNode = CreateChildNode(LForm.MainSource.DataView.ActiveRow);
-				AddNode(LNode);
-				TreeView.SelectedNode = LNode;
+				BaseNode node = CreateChildNode(form.MainSource.DataView.ActiveRow);
+				AddNode(node);
+				TreeView.SelectedNode = node;
 			}
 			finally
 			{
-				LForm.HostNode.Dispose();
+				form.HostNode.Dispose();
 			}
 		}
 
-		public override void DragOver(DragEventArgs AArgs)
+		public override void DragOver(DragEventArgs args)
 		{
-			base.DragOver(AArgs);
-			DocumentData LDocument = AArgs.Data as DocumentData;
+			base.DragOver(args);
+			DocumentData document = args.Data as DocumentData;
 			if 
 			(
 				(
-					(LDocument != null) && 
+					(document != null) && 
 					(
-						(LDocument.Node.DocumentType == "dfd") || 
-						(LDocument.Node.DocumentType == "dfdx")
+						(document.Node.DocumentType == "dfd") || 
+						(document.Node.DocumentType == "dfdx")
 					)
 				) ||
-				(AArgs.Data is TableData)
+				(args.Data is TableData)
 			)
 			{
 				TreeView.SelectedNode = this;
-				AArgs.Effect = DragDropEffects.Link;
+				args.Effect = DragDropEffects.Link;
 			}
 		}
 	}
 
 	public class ApplicationNode : EditableItemNode
 	{
-		public ApplicationNode(ApplicationListNode AListNode, string AApplicationID, string AApplicationDescription) : base()
+		public ApplicationNode(ApplicationListNode listNode, string applicationID, string applicationDescription) : base()
 		{
-			FID = AApplicationID;
-			Text = AApplicationDescription;
+			_iD = applicationID;
+			Text = applicationDescription;
 			ImageIndex = 5;
 			SelectedImageIndex = ImageIndex;
 		}
 
 		protected override ContextMenu GetContextMenu()
 		{
-			ContextMenu LMenu = base.GetContextMenu();
-			LMenu.MenuItems.Add(0, new MenuItem("-"));
+			ContextMenu menu = base.GetContextMenu();
+			menu.MenuItems.Add(0, new MenuItem("-"));
 
-			MenuItem LStartMenuItem = new MenuItem(Strings.ObjectTree_StartMenuText, new EventHandler(StartClicked));
-			LStartMenuItem.DefaultItem = true;
-			LMenu.MenuItems.Add(0, LStartMenuItem);
+			MenuItem startMenuItem = new MenuItem(Strings.ObjectTree_StartMenuText, new EventHandler(StartClicked));
+			startMenuItem.DefaultItem = true;
+			menu.MenuItems.Add(0, startMenuItem);
 
-			LMenu.MenuItems.Add(1, new MenuItem(Strings.ObjectTree_EmitCreateScriptMenuText, new EventHandler(EmitCreateScriptClicked)));
+			menu.MenuItems.Add(1, new MenuItem(Strings.ObjectTree_EmitCreateScriptMenuText, new EventHandler(EmitCreateScriptClicked)));
 
-			return LMenu;
+			return menu;
 		}
 
-		private string FID;
-		public string ID { get { return FID; } set { FID = value; } }
+		private string _iD;
+		public string ID { get { return _iD; } set { _iD = value; } }
 
-		public override bool IsEqual(DAE.Runtime.Data.Row ARow)
+		public override bool IsEqual(DAE.Runtime.Data.Row row)
 		{
-			return ((string)ARow["Main.ID"] == FID);
+			return ((string)row["Main.ID"] == _iD);
 		}
 
 		public override string GetFilter()
 		{
-			return String.Format("Main.ID = '{0}'", FID);
+			return String.Format("Main.ID = '{0}'", _iD);
 		}
 
 		protected override string EditDocument()
@@ -161,30 +161,30 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			return ".Frontend.Derive('Frontend.Applications', 'View', false)";
 		}
 
-		protected override void NameChanged(string ANewName)
+		protected override void NameChanged(string newName)
 		{
-			Text = ANewName;
-			base.NameChanged(ANewName);
+			Text = newName;
+			base.NameChanged(newName);
 		}
 
-		private void StartClicked(object ASender, EventArgs AArgs)
+		private void StartClicked(object sender, EventArgs args)
 		{
-			Frontend.Client.Windows.Session LSession = Dataphoria.GetLiveDesignableFrontendSession();
+			Frontend.Client.Windows.Session session = Dataphoria.GetLiveDesignableFrontendSession();
 			try
 			{
-				LSession.StartCallback(LSession.SetApplication(FID), null);
+				session.StartCallback(session.SetApplication(_iD), null);
 			}
 			catch
 			{
-				LSession.Dispose();
+				session.Dispose();
 				throw;
 			}
 			Dataphoria.RefreshLibraries();
 		}
 
-		private void EmitCreateScriptClicked(object ASender, EventArgs AArgs)
+		private void EmitCreateScriptClicked(object sender, EventArgs args)
 		{
-			Dataphoria.EvaluateAndEdit(String.Format(".Frontend.ScriptApplication('{0}')", FID), "d4");
+			Dataphoria.EvaluateAndEdit(String.Format(".Frontend.ScriptApplication('{0}')", _iD), "d4");
 		}
 	}
 }

@@ -19,147 +19,147 @@ namespace Alphora.Dataphor.DAE.Connection
 	public abstract class SQLConnection : Disposable
 	{
 		protected abstract SQLCommand InternalCreateCommand();
-		public SQLCommand CreateCommand(bool AIsCursor)
+		public SQLCommand CreateCommand(bool isCursor)
 		{
-			SQLCommand LCommand = InternalCreateCommand();
-			if (FDefaultCommandTimeout >= 0)
-				LCommand.CommandTimeout = FDefaultCommandTimeout;
-			if (AIsCursor)
-				LCommand.UseParameters = FDefaultUseParametersForCursors;
-			LCommand.ShouldNormalizeWhitespace = FDefaultShouldNormalizeWhitespace;
-			return LCommand;
+			SQLCommand command = InternalCreateCommand();
+			if (_defaultCommandTimeout >= 0)
+				command.CommandTimeout = _defaultCommandTimeout;
+			if (isCursor)
+				command.UseParameters = _defaultUseParametersForCursors;
+			command.ShouldNormalizeWhitespace = _defaultShouldNormalizeWhitespace;
+			return command;
 		}
 		
-		protected bool FSupportsMARS;
-		public bool SupportsMARS { get { return FSupportsMARS; } }
+		protected bool _supportsMARS;
+		public bool SupportsMARS { get { return _supportsMARS; } }
 
-		private SQLConnectionState FState;
-		public SQLConnectionState State { get { return FState; } }
-		protected void SetState(SQLConnectionState AState)
+		private SQLConnectionState _state;
+		public SQLConnectionState State { get { return _state; } }
+		protected void SetState(SQLConnectionState state)
 		{
-			FState = AState;
+			_state = state;
 		}
 		
-		private List<SQLCommand> FActiveCommands = new List<SQLCommand>();
-		private SQLCommand FActiveCommand;
-		public SQLCommand ActiveCommand { get { return FActiveCommand; } }
-		internal void SetActiveCommand(SQLCommand ACommand)
+		private List<SQLCommand> _activeCommands = new List<SQLCommand>();
+		private SQLCommand _activeCommand;
+		public SQLCommand ActiveCommand { get { return _activeCommand; } }
+		internal void SetActiveCommand(SQLCommand command)
 		{
-			if ((ACommand != null) && (FActiveCommand != null) && !FSupportsMARS)
+			if ((command != null) && (_activeCommand != null) && !_supportsMARS)
 				throw new ConnectionException(ConnectionException.Codes.ConnectionBusy);
-			if ((FActiveCommand != null) && FActiveCommands.Contains(FActiveCommand))
-				FActiveCommands.Remove(FActiveCommand);
-			FActiveCommand = ACommand;
-			if ((FActiveCommand != null) && !FActiveCommands.Contains(FActiveCommand))
-				FActiveCommands.Add(FActiveCommand);
-			if (FActiveCommands.Count > 0)
-				FState = SQLConnectionState.Executing;
+			if ((_activeCommand != null) && _activeCommands.Contains(_activeCommand))
+				_activeCommands.Remove(_activeCommand);
+			_activeCommand = command;
+			if ((_activeCommand != null) && !_activeCommands.Contains(_activeCommand))
+				_activeCommands.Add(_activeCommand);
+			if (_activeCommands.Count > 0)
+				_state = SQLConnectionState.Executing;
 			else
-				FState = SQLConnectionState.Idle;
+				_state = SQLConnectionState.Idle;
 		}
 		
-		private List<SQLCursor> FActiveCursors = new List<SQLCursor>();
-		private SQLCursor FActiveCursor;
-		public SQLCursor ActiveCursor { get { return FActiveCursor; } }
-		internal void SetActiveCursor(SQLCursor ACursor)
+		private List<SQLCursor> _activeCursors = new List<SQLCursor>();
+		private SQLCursor _activeCursor;
+		public SQLCursor ActiveCursor { get { return _activeCursor; } }
+		internal void SetActiveCursor(SQLCursor cursor)
 		{
-			if ((ACursor != null) && (FActiveCursor != null) && !FSupportsMARS)
+			if ((cursor != null) && (_activeCursor != null) && !_supportsMARS)
 				throw new ConnectionException(ConnectionException.Codes.ConnectionBusy);
-			if ((FActiveCursor != null) && FActiveCursors.Contains(FActiveCursor))
-				FActiveCursors.Remove(FActiveCursor);
-			FActiveCursor = ACursor;
-			if ((FActiveCursor != null) && !FActiveCursors.Contains(FActiveCursor))
-				FActiveCursors.Add(FActiveCursor);
-			if (FActiveCursors.Count > 0)
-				FState = SQLConnectionState.Reading;
-			else if (FActiveCommands.Count > 0)
-				FState = SQLConnectionState.Executing;
+			if ((_activeCursor != null) && _activeCursors.Contains(_activeCursor))
+				_activeCursors.Remove(_activeCursor);
+			_activeCursor = cursor;
+			if ((_activeCursor != null) && !_activeCursors.Contains(_activeCursor))
+				_activeCursors.Add(_activeCursor);
+			if (_activeCursors.Count > 0)
+				_state = SQLConnectionState.Reading;
+			else if (_activeCommands.Count > 0)
+				_state = SQLConnectionState.Executing;
 			else
-				FState = SQLConnectionState.Idle;
+				_state = SQLConnectionState.Idle;
 		}
 		
-		public void Execute(string AStatement, SQLParameters AParameters)
+		public void Execute(string statement, SQLParameters parameters)
 		{
 			CheckConnectionValid();
-			using (SQLCommand LCommand = CreateCommand(false))
+			using (SQLCommand command = CreateCommand(false))
 			{
-				LCommand.Statement = AStatement;
-				LCommand.Parameters.AddRange(AParameters);
-				LCommand.Execute();
+				command.Statement = statement;
+				command.Parameters.AddRange(parameters);
+				command.Execute();
 			}
 		}
 		
-		public void Execute(string AStatement)
+		public void Execute(string statement)
 		{
-			Execute(AStatement, new SQLParameters());
+			Execute(statement, new SQLParameters());
 		}
 		
-		public SQLCursor Open(string AStatement, SQLParameters AParameters, SQLCursorType ACursorType, SQLIsolationLevel ACursorIsolationLevel, SQLCommandBehavior ABehavior)
+		public SQLCursor Open(string statement, SQLParameters parameters, SQLCursorType cursorType, SQLIsolationLevel cursorIsolationLevel, SQLCommandBehavior behavior)
 		{
 			CheckConnectionValid();
-			SQLCommand LCommand = CreateCommand(true);
+			SQLCommand command = CreateCommand(true);
 			try
 			{
-				LCommand.Statement = AStatement;
-				LCommand.Parameters.AddRange(AParameters);
-				LCommand.CommandBehavior = ABehavior;
-				return LCommand.Open(ACursorType, ACursorIsolationLevel);
+				command.Statement = statement;
+				command.Parameters.AddRange(parameters);
+				command.CommandBehavior = behavior;
+				return command.Open(cursorType, cursorIsolationLevel);
 			}
 			catch
 			{
-				LCommand.Dispose();
+				command.Dispose();
 				throw;
 			}
 		}
 		
-		public SQLCursor Open(string AStatement)
+		public SQLCursor Open(string statement)
 		{
-			return Open(AStatement, new SQLParameters(), SQLCursorType.Dynamic, SQLIsolationLevel.ReadUncommitted, SQLCommandBehavior.Default);
+			return Open(statement, new SQLParameters(), SQLCursorType.Dynamic, SQLIsolationLevel.ReadUncommitted, SQLCommandBehavior.Default);
 		}
 		
-		public void Close(SQLCursor ACursor)
+		public void Close(SQLCursor cursor)
 		{
-			SQLCommand LCommand = ACursor.Command;
+			SQLCommand command = cursor.Command;
 			try
 			{
-				ACursor.Command.Close(ACursor);
+				cursor.Command.Close(cursor);
 			}
 			finally
 			{
-				LCommand.Dispose();
+				command.Dispose();
 			}
 		}
 
-		private bool FInTransaction;
-		public bool InTransaction { get { return FInTransaction; } }
+		private bool _inTransaction;
+		public bool InTransaction { get { return _inTransaction; } }
 
 		protected void CheckNotInTransaction()
 		{
-			if (FInTransaction)
+			if (_inTransaction)
 				throw new ConnectionException(ConnectionException.Codes.TransactionInProgress);
 		}
 		
 		protected void CheckInTransaction()
 		{
-			if (!FInTransaction)
+			if (!_inTransaction)
 				throw new ConnectionException(ConnectionException.Codes.NoTransactionInProgress);
 		}
 		
-		protected abstract void InternalBeginTransaction(SQLIsolationLevel AIsolationLevel);
-		public void BeginTransaction(SQLIsolationLevel AIsolationLevel)
+		protected abstract void InternalBeginTransaction(SQLIsolationLevel isolationLevel);
+		public void BeginTransaction(SQLIsolationLevel isolationLevel)
 		{
 			CheckConnectionValid();
 			CheckNotInTransaction();
 			try
 			{
-				InternalBeginTransaction(AIsolationLevel);
+				InternalBeginTransaction(isolationLevel);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{							
-				WrapException(LException, "begin transaction", false);
+				WrapException(exception, "begin transaction", false);
 			}
-			FInTransaction = true;
-			FTransactionFailure = false;
+			_inTransaction = true;
+			_transactionFailure = false;
 		}
 
 		protected abstract void InternalCommitTransaction();
@@ -171,11 +171,11 @@ namespace Alphora.Dataphor.DAE.Connection
 			{
 				InternalCommitTransaction();
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				WrapException(LException, "commit transaction", false);
+				WrapException(exception, "commit transaction", false);
 			}
-			FInTransaction = false;
+			_inTransaction = false;
 		}
 
 		protected abstract void InternalRollbackTransaction();
@@ -187,67 +187,67 @@ namespace Alphora.Dataphor.DAE.Connection
 			{
 				InternalRollbackTransaction();
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				WrapException(LException, "rollback transaction", false);
+				WrapException(exception, "rollback transaction", false);
 			}
-			FInTransaction = false;
+			_inTransaction = false;
 		}
 
-		public const int CDefaultCommandTimeout = -1;
-		private int FDefaultCommandTimeout = CDefaultCommandTimeout;
+		public const int DefaultDefaultCommandTimeout = -1;
+		private int _defaultCommandTimeout = DefaultDefaultCommandTimeout;
 		/// <summary>The amount of time to wait before timing out when waiting for a command to execute, expressed in seconds.</summary>
 		/// <remarks>The default value for this property is 30 seconds. A value of 0 indicates an infinite timeout.</remarks>
 		public int DefaultCommandTimeout
 		{
-			get { return FDefaultCommandTimeout; }
-			set { FDefaultCommandTimeout = value; }
+			get { return _defaultCommandTimeout; }
+			set { _defaultCommandTimeout = value; }
 		}
 		
-		private bool FDefaultUseParametersForCursors = true;
+		private bool _defaultUseParametersForCursors = true;
 		public bool DefaultUseParametersForCursors
 		{
-			get { return FDefaultUseParametersForCursors; }
-			set { FDefaultUseParametersForCursors = value; }
+			get { return _defaultUseParametersForCursors; }
+			set { _defaultUseParametersForCursors = value; }
 		}
 		
-		private bool FDefaultShouldNormalizeWhitespace = true;
+		private bool _defaultShouldNormalizeWhitespace = true;
 		public bool DefaultShouldNormalizeWhitespace
 		{
-			get { return FDefaultShouldNormalizeWhitespace; }
-			set { FDefaultShouldNormalizeWhitespace = value; }
+			get { return _defaultShouldNormalizeWhitespace; }
+			set { _defaultShouldNormalizeWhitespace = value; }
 		}
 
-		protected virtual Exception InternalWrapException(Exception AException, string AStatement)
+		protected virtual Exception InternalWrapException(Exception exception, string statement)
 		{
-			return new ConnectionException(ConnectionException.Codes.SQLException, ErrorSeverity.Application, AException, AStatement);
+			return new ConnectionException(ConnectionException.Codes.SQLException, ErrorSeverity.Application, exception, statement);
 		}
 
-		public void WrapException(Exception AException, string AStatement, bool AMustThrow)
+		public void WrapException(Exception exception, string statement, bool mustThrow)
 		{
             if (!IsConnectionValid())
 			{
 				if (InTransaction)
-					FTransactionFailure = true;
+					_transactionFailure = true;
 				
-				FState = SQLConnectionState.Closed;
+				_state = SQLConnectionState.Closed;
 			}
 			else
 			{
-				if (InTransaction && IsTransactionFailure(AException))
-					FTransactionFailure = true;
+				if (InTransaction && IsTransactionFailure(exception))
+					_transactionFailure = true;
 			}
 			
-			Exception LException = InternalWrapException(AException, AStatement);
-			if (LException != null)
-				throw LException;
+			Exception localException = InternalWrapException(exception, statement);
+			if (localException != null)
+				throw localException;
 				
-			if (AMustThrow)
-				throw AException;
+			if (mustThrow)
+				throw exception;
 		}
 
 		/// <summary>Indicates whether the given exception indicates a transaction failure such as a deadlock or rollback on the target system.</summary>		
-		protected virtual bool IsTransactionFailure(Exception AException)
+		protected virtual bool IsTransactionFailure(Exception exception)
 		{
 			return false;
 		}
@@ -260,17 +260,17 @@ namespace Alphora.Dataphor.DAE.Connection
 			if (!IsConnectionValid())
 			{
 				if (InTransaction)
-					FTransactionFailure = true;
+					_transactionFailure = true;
 				
-				FState = SQLConnectionState.Closed;
+				_state = SQLConnectionState.Closed;
 				
 				throw new ConnectionException(ConnectionException.Codes.ConnectionClosed);
 			}
 		}
 
-		protected bool FTransactionFailure;		
+		protected bool _transactionFailure;		
 		/// <summary>Indicates that the currently active transaction has been rolled back by the target system due to a deadlock, or connection failure.</summary>
-		public bool TransactionFailure { get { return FTransactionFailure; } }
+		public bool TransactionFailure { get { return _transactionFailure; } }
 		
 /*
 		public void CleanupConnectionState(bool AShouldThrow)

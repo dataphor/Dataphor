@@ -23,7 +23,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	[DesignerCategory("Data Controls")]
 	public class TextBox : AlignedElement, ITextBox
 	{
-		public const char CPasswordChar = '*';
+		public const char PasswordChar = '*';
 
 		// TextBoxControl
 
@@ -32,48 +32,48 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			get { return (DAE.Client.Controls.DBTextBox)Control; }
 		}
 		
-		private int FRowHeight;
+		private int _rowHeight;
 
 		private void InternalUpdateTextBox()
 		{
-			DAE.Client.Controls.DBTextBox LControl = TextBoxControl;
+			DAE.Client.Controls.DBTextBox control = TextBoxControl;
 			if (IsPassword)
-				LControl.PasswordChar = CPasswordChar;
+				control.PasswordChar = PasswordChar;
 			else
-				LControl.PasswordChar = (char)0;
-			LControl.WordWrap = FWordWrap;
-			LControl.Multiline = FHeight > 1;
-			LControl.AcceptsReturn = !LControl.Multiline || FAcceptsReturn;
-			LControl.AcceptsTab = !LControl.Multiline || FAcceptsTabs;
-			LControl.NilIfBlank = FNilIfBlank;
-			LControl.AutoUpdate = FAutoUpdate;
-			LControl.AutoUpdateInterval = FAutoUpdateInterval;
-			if (LControl.Multiline)
-				if (FWordWrap)
-					LControl.ScrollBars = WinForms.ScrollBars.Vertical;
+				control.PasswordChar = (char)0;
+			control.WordWrap = _wordWrap;
+			control.Multiline = _height > 1;
+			control.AcceptsReturn = !control.Multiline || _acceptsReturn;
+			control.AcceptsTab = !control.Multiline || _acceptsTabs;
+			control.NilIfBlank = _nilIfBlank;
+			control.AutoUpdate = _autoUpdate;
+			control.AutoUpdateInterval = _autoUpdateInterval;
+			if (control.Multiline)
+				if (_wordWrap)
+					control.ScrollBars = WinForms.ScrollBars.Vertical;
 				else
-					LControl.ScrollBars = WinForms.ScrollBars.Both;
+					control.ScrollBars = WinForms.ScrollBars.Both;
 			else
-				LControl.ScrollBars = WinForms.ScrollBars.None;
-			if (FMaxLength >= 0)
-				LControl.MaxLength = FMaxLength;
+				control.ScrollBars = WinForms.ScrollBars.None;
+			if (_maxLength >= 0)
+				control.MaxLength = _maxLength;
 			else
-				LControl.MaxLength = 32767;
+				control.MaxLength = 32767;
 		}
 		
    		// IsPassword
 
-		private bool FIsPassword;
+		private bool _isPassword;
 		[DefaultValue(false)]
 		[Description("When set to true a password masking character will be displayed in the textbox instead of actual characters.")]
 		public bool IsPassword
 		{
-			get { return FIsPassword; }
+			get { return _isPassword; }
 			set
 			{
-				if (FIsPassword != value)
+				if (_isPassword != value)
 				{
-					FIsPassword = value;
+					_isPassword = value;
 					if (Active)
 						InternalUpdateTextBox();
 				}
@@ -82,17 +82,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// WordWrap
 
-		private bool FWordWrap;
+		private bool _wordWrap;
 		[DefaultValue(false)]
 		[Description("When set to true, line breaks will be inserted into the entered text.  This is only cosmetic and will not affect the actual data.")]
 		public bool WordWrap
 		{
-			get { return FWordWrap; }
+			get { return _wordWrap; }
 			set
 			{
-				if (FWordWrap != value)
+				if (_wordWrap != value)
 				{
-					FWordWrap = value;
+					_wordWrap = value;
 					if (Active)
 						InternalUpdateTextBox();
 				}
@@ -101,19 +101,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// Height
 
-		private int FHeight = 1;
+		private int _height = 1;
 		[DefaultValue(1)]
 		[Description("The height in lines of the text box.")]
 		public int Height
 		{
-			get { return FHeight; }
+			get { return _height; }
 			set
 			{
-				if (FHeight != value)
+				if (_height != value)
 				{
 					if (value < 1)
 						throw new ClientException(ClientException.Codes.HeightMinimum);
-					FHeight = value;
+					_height = value;
 					if (Active)
 					{
 						InternalUpdateTextBox();
@@ -125,17 +125,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		// MaxLength
 		
-		private int FMaxLength = -1;
+		private int _maxLength = -1;
 		[DefaultValue(-1)]
 		[Description("The maximum number of characters that can be entered into the text box.  -1 = underlying control's default, 0 = underlying control's maximum, or a positive number up to the underlying control's maximum.")]
 		public int MaxLength
 		{
-			get { return FMaxLength; }
+			get { return _maxLength; }
 			set
 			{
-				if (FMaxLength != value)
+				if (_maxLength != value)
 				{
-					FMaxLength = value;
+					_maxLength = value;
 					if (Active)
 					{
 						InternalUpdateTextBox();
@@ -147,17 +147,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// AcceptsReturn
 
-		private bool FAcceptsReturn = true;
+		private bool _acceptsReturn = true;
 		[DefaultValue(true)]
 		[Description("When true and the textbox height is > 1, the textbox will accept carrage return characters.")]
 		public bool AcceptsReturn
 		{
-			get { return FAcceptsReturn; }
+			get { return _acceptsReturn; }
 			set
 			{
-				if (FAcceptsReturn != value)
+				if (_acceptsReturn != value)
 				{
-					FAcceptsReturn = value;
+					_acceptsReturn = value;
 					if (Active)
 						InternalUpdateTextBox();
 				}
@@ -166,17 +166,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// AcceptsTabs
 
-		private bool FAcceptsTabs = false;
+		private bool _acceptsTabs = false;
 		[DefaultValue(false)]
 		[Description("When true and the textbox height is > 1, the textbox will accept tab characters.")]
 		public bool AcceptsTabs
 		{
-			get { return FAcceptsTabs; }
+			get { return _acceptsTabs; }
 			set
 			{
-				if (FAcceptsTabs != value)
+				if (_acceptsTabs != value)
 				{
-					FAcceptsTabs = value;
+					_acceptsTabs = value;
 					if (Active)
 						InternalUpdateTextBox();
 				}
@@ -185,34 +185,34 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		// NilIfBlank
 
-		private bool FNilIfBlank = true;
+		private bool _nilIfBlank = true;
 		[DefaultValue(true)]
 		[Description("When true, setting the contents of the control to '' (blank), will clear (set to nil) the data field.")]
 		public bool NilIfBlank
 		{
-			get { return FNilIfBlank; }
+			get { return _nilIfBlank; }
 			set 
 			{ 
-				if (FNilIfBlank != value)
+				if (_nilIfBlank != value)
 				{
-					FNilIfBlank = value; 
+					_nilIfBlank = value; 
 					if (Active)
 						InternalUpdateTextBox();
 				}
 			}
 		}
 		
-		private bool FAutoUpdate;
+		private bool _autoUpdate;
 		[DefaultValue(false)]
 		[Description("Determines whether or not the control will automatically update the underlying data value.")]
 		public bool AutoUpdate
 		{
-			get { return FAutoUpdate; }
+			get { return _autoUpdate; }
 			set
 			{
-				if (FAutoUpdate != value)
+				if (_autoUpdate != value)
 				{
-					FAutoUpdate = value; 
+					_autoUpdate = value; 
 					if (Active)
 						InternalUpdateTextBox();
 				}
@@ -221,17 +221,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		// AutoUpdateInterval
 		
-		private int FAutoUpdateInterval = 200;
+		private int _autoUpdateInterval = 200;
 		[DefaultValue(200)]
 		[Description("Specifies the amount of time to wait before updating the underlying data value.")]
 		public int AutoUpdateInterval
 		{
-			get { return FAutoUpdateInterval; }
+			get { return _autoUpdateInterval; }
 			set
 			{
-				if (FAutoUpdateInterval != value)
+				if (_autoUpdateInterval != value)
 				{
-					FAutoUpdateInterval = value; 
+					_autoUpdateInterval = value; 
 					if (Active)
 						InternalUpdateTextBox();
 				}
@@ -249,7 +249,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			TextBoxControl.NoValueBackColor = ((Session)HostNode.Session).Theme.NoValueBackColor;
 			TextBoxControl.NoValueReadOnlyBackColor = ((Session)HostNode.Session).Theme.NoValueReadOnlyBackColor;
-			FRowHeight = Control.Font.Height + 1;
+			_rowHeight = Control.Font.Height + 1;
 			InternalUpdateTextBox();
 			base.InitializeControl();
 		}
@@ -258,29 +258,29 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected override bool EnforceMaxHeight()
 		{
-			return (FHeight == 1);
+			return (_height == 1);
 		}
 
 		protected override int GetControlNaturalHeight()
 		{
 			// Can't seem to rely on the control's DisplayRectangle to always include the scrollbar size so we must manually accomidate
-			int LResult = (SystemInformation.Border3DSize.Height * 2) + (FRowHeight * FHeight);
+			int result = (SystemInformation.Border3DSize.Height * 2) + (_rowHeight * _height);
 			if ((TextBoxControl.ScrollBars & ScrollBars.Horizontal) != 0)
-				LResult += SystemInformation.HorizontalScrollBarHeight;
-			return LResult;
+				result += SystemInformation.HorizontalScrollBarHeight;
+			return result;
 		}
 		
 		protected override int GetControlMinHeight()
 		{
-			int LResult = (SystemInformation.Border3DSize.Height * 2) + FRowHeight;
+			int result = (SystemInformation.Border3DSize.Height * 2) + _rowHeight;
 			if ((TextBoxControl.ScrollBars & ScrollBars.Horizontal) != 0)
-				LResult += SystemInformation.HorizontalScrollBarHeight;
-			return LResult;
+				result += SystemInformation.HorizontalScrollBarHeight;
+			return result;
 		}
 
 		protected override int GetControlMaxHeight()
 		{
-			if (FHeight == 1)
+			if (_height == 1)
 				return base.GetControlMaxHeight();
 			else
 				return WinForms.Screen.FromControl(Control).WorkingArea.Height;
@@ -295,21 +295,21 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// ControlElement
 
-		protected override void LayoutControl(Rectangle ABounds)
+		protected override void LayoutControl(Rectangle bounds)
 		{
-			Control.Location = ABounds.Location;
-			Control.Height = ABounds.Height;
-			if (FHeight == 1)
+			Control.Location = bounds.Location;
+			Control.Height = bounds.Height;
+			if (_height == 1)
 			{
 				// Only range the width if it is a single line textbox
-				DAE.Client.Controls.Range LRange = new DAE.Client.Controls.Range(Math.Min(ABounds.Width, GetControlNaturalWidth()), ABounds.Width);
-				Control.Width = Math.Min(LRange.Maximum, Math.Max(LRange.Minimum, Control.Width));
-				((DAE.Client.Controls.IWidthRange)Control).WidthRange.Range = LRange;
+				DAE.Client.Controls.Range range = new DAE.Client.Controls.Range(Math.Min(bounds.Width, GetControlNaturalWidth()), bounds.Width);
+				Control.Width = Math.Min(range.Maximum, Math.Max(range.Minimum, Control.Width));
+				((DAE.Client.Controls.IWidthRange)Control).WidthRange.Range = range;
 			}
 			else
 			{
-				((DAE.Client.Controls.IWidthRange)Control).WidthRange.Range = new DAE.Client.Controls.Range(ABounds.Width, ABounds.Width);
-				Control.Width = ABounds.Width;
+				((DAE.Client.Controls.IWidthRange)Control).WidthRange.Range = new DAE.Client.Controls.Range(bounds.Width, bounds.Width);
+				Control.Width = bounds.Width;
 			}
 		}
 	}
@@ -327,17 +327,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// SmallIncrement
 
-		private int FSmallIncrement = 1;
+		private int _smallIncrement = 1;
 		[DefaultValue(1)]
 		[Description("The increment of the control when spinning slow.  Does not restrict possible values.")]
 		public int SmallIncrement
 		{
-			get { return FSmallIncrement; }
+			get { return _smallIncrement; }
 			set
 			{
-				if (FSmallIncrement != value)
+				if (_smallIncrement != value)
 				{
-					FSmallIncrement = value;
+					_smallIncrement = value;
 					if (Active)
 						InternalUpdateTextBox();
 				}
@@ -346,17 +346,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// LargeIncrement
 
-		private int FLargeIncrement = 10;
+		private int _largeIncrement = 10;
 		[DefaultValue(10)]
 		[Description("The increment of the control when spinning fast.  Does not restrict possible values.")]
 		public int LargeIncrement
 		{
-			get { return FLargeIncrement; }
+			get { return _largeIncrement; }
 			set
 			{
-				if (FLargeIncrement != value)
+				if (_largeIncrement != value)
 				{
-					FLargeIncrement = value;
+					_largeIncrement = value;
 					if (Active)
 						InternalUpdateTextBox();
 				}
@@ -365,16 +365,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// MinimumValue
 
-		private decimal FMinimumValue = Decimal.MinValue;
+		private decimal _minimumValue = Decimal.MinValue;
 		[DefaultValueMember("DefaultMinimumValue")]
 		public decimal MinimumValue
 		{
-			get { return FMinimumValue; }
+			get { return _minimumValue; }
 			set 
 			{ 
-				if (FMinimumValue != value)
+				if (_minimumValue != value)
 				{
-					FMinimumValue = value;
+					_minimumValue = value;
 					if (Active)
 						InternalUpdateTextBox();
 				}
@@ -388,16 +388,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// MaximumValue
 
-		private decimal FMaximumValue = Decimal.MaxValue;
+		private decimal _maximumValue = Decimal.MaxValue;
 		[DefaultValueMember("DefaultMaximumValue")]
 		public decimal MaximumValue
 		{
-			get { return FMaximumValue; }
+			get { return _maximumValue; }
 			set 
 			{ 
-				if (FMaximumValue != value)
+				if (_maximumValue != value)
 				{
-					FMaximumValue = value;
+					_maximumValue = value;
 					if (Active)
 						InternalUpdateTextBox();
 				}
@@ -411,34 +411,34 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// NilIfBlank
 
-		private bool FNilIfBlank = true;
+		private bool _nilIfBlank = true;
 		[DefaultValue(true)]
 		[Description("When true, setting the contents of the control to '' (blank), will clear (set to nil) the data field.")]
 		public bool NilIfBlank
 		{
-			get { return FNilIfBlank; }
+			get { return _nilIfBlank; }
 			set 
 			{ 
-				if (FNilIfBlank != value)
+				if (_nilIfBlank != value)
 				{
-					FNilIfBlank = value; 
+					_nilIfBlank = value; 
 					if (Active)
 						InternalUpdateTextBox();
 				}
 			}
 		}
 		
-		private bool FAutoUpdate;
+		private bool _autoUpdate;
 		[DefaultValue(false)]
 		[Description("Determines whether or not the control will automatically update the underlying data value.")]
 		public bool AutoUpdate
 		{
-			get { return FAutoUpdate; }
+			get { return _autoUpdate; }
 			set
 			{
-				if (FAutoUpdate != value)
+				if (_autoUpdate != value)
 				{
-					FAutoUpdate = value; 
+					_autoUpdate = value; 
 					if (Active)
 						InternalUpdateTextBox();
 				}
@@ -447,17 +447,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			   		
 		// AutoUpdateInterval
 		
-		private int FAutoUpdateInterval = 200;
+		private int _autoUpdateInterval = 200;
 		[DefaultValue(200)]
 		[Description("Specifies the amount of time to wait before updating the underlying data value.")]
 		public int AutoUpdateInterval
 		{
-			get { return FAutoUpdateInterval; }
+			get { return _autoUpdateInterval; }
 			set
 			{
-				if (FAutoUpdateInterval != value)
+				if (_autoUpdateInterval != value)
 				{
-					FAutoUpdateInterval = value; 
+					_autoUpdateInterval = value; 
 					if (Active)
 						InternalUpdateTextBox();
 				}
@@ -466,14 +466,14 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void InternalUpdateTextBox()
 		{
-			DAE.Client.Controls.NumericScrollBox LControl = NumericControl;
-			LControl.SmallIncrement = FSmallIncrement;
-			LControl.LargeIncrement = FLargeIncrement;
-			LControl.MinimumValue = FMinimumValue;
-			LControl.MaximumValue = FMaximumValue;
-			LControl.TextBox.NilIfBlank = FNilIfBlank;
-			LControl.TextBox.AutoUpdate = FAutoUpdate;
-			LControl.TextBox.AutoUpdateInterval = FAutoUpdateInterval;
+			DAE.Client.Controls.NumericScrollBox control = NumericControl;
+			control.SmallIncrement = _smallIncrement;
+			control.LargeIncrement = _largeIncrement;
+			control.MinimumValue = _minimumValue;
+			control.MaximumValue = _maximumValue;
+			control.TextBox.NilIfBlank = _nilIfBlank;
+			control.TextBox.AutoUpdate = _autoUpdate;
+			control.TextBox.AutoUpdateInterval = _autoUpdateInterval;
 		}
 
 		// DataColumnElement
@@ -538,16 +538,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			NumericControl.TextBox.TabStop = GetTabStop();
 		}
 
-		protected override void LayoutControl(Rectangle ABounds)
+		protected override void LayoutControl(Rectangle bounds)
 		{
-			Control.Location = ABounds.Location;
-			int LTextBoxWidth = ABounds.Width - (NumericControl.Width - NumericControl.DisplayRectangle.Width);
-			DAE.Client.Controls.Range LRange = new DAE.Client.Controls.Range(Math.Min(LTextBoxWidth, base.GetControlNaturalWidth()), LTextBoxWidth);
-			NumericControl.TextBox.WidthRange.Range = LRange;
-			if (NumericControl.TextBox.Width > LRange.Maximum)
-				NumericControl.TextBox.Width = LRange.Maximum;
-			if (NumericControl.TextBox.Width < LRange.Minimum)
-				NumericControl.TextBox.Width = LRange.Minimum;
+			Control.Location = bounds.Location;
+			int textBoxWidth = bounds.Width - (NumericControl.Width - NumericControl.DisplayRectangle.Width);
+			DAE.Client.Controls.Range range = new DAE.Client.Controls.Range(Math.Min(textBoxWidth, base.GetControlNaturalWidth()), textBoxWidth);
+			NumericControl.TextBox.WidthRange.Range = range;
+			if (NumericControl.TextBox.Width > range.Maximum)
+				NumericControl.TextBox.Width = range.Maximum;
+			if (NumericControl.TextBox.Width < range.Minimum)
+				NumericControl.TextBox.Width = range.Minimum;
 		}
 
 		// DataElement
@@ -564,34 +564,34 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	{
 		// NilIfBlank
 
-		private bool FNilIfBlank = true;
+		private bool _nilIfBlank = true;
 		[DefaultValue(true)]
 		[Description("When true, setting the contents of the control to '' (blank), will clear (set to nil) the data field.")]
 		public bool NilIfBlank
 		{
-			get { return FNilIfBlank; }
+			get { return _nilIfBlank; }
 			set 
 			{ 
-				if (FNilIfBlank != value)
+				if (_nilIfBlank != value)
 				{
-					FNilIfBlank = value; 
+					_nilIfBlank = value; 
 					if (Active)
 						InternalUpdateTextBox();
 				}
 			}
 		}
 		
-		private bool FAutoUpdate;
+		private bool _autoUpdate;
 		[DefaultValue(false)]
 		[Description("Determines whether or not the control will automatically update the underlying data value.")]
 		public bool AutoUpdate
 		{
-			get { return FAutoUpdate; }
+			get { return _autoUpdate; }
 			set
 			{
-				if (FAutoUpdate != value)
+				if (_autoUpdate != value)
 				{
-					FAutoUpdate = value; 
+					_autoUpdate = value; 
 					if (Active)
 						InternalUpdateTextBox();
 				}
@@ -600,24 +600,24 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			   		
 		// AutoUpdateInterval
 		
-		private int FAutoUpdateInterval = 200;
+		private int _autoUpdateInterval = 200;
 		[DefaultValue(200)]
 		[Description("Specifies the amount of time to wait before updating the underlying data value.")]
 		public int AutoUpdateInterval
 		{
-			get { return FAutoUpdateInterval; }
+			get { return _autoUpdateInterval; }
 			set
 			{
-				if (FAutoUpdateInterval != value)
+				if (_autoUpdateInterval != value)
 				{
-					FAutoUpdateInterval = value; 
+					_autoUpdateInterval = value; 
 					if (Active)
 						InternalUpdateTextBox();
 				}
 			}
 		}
 
-        private bool FHideDate = false;
+        private bool _hideDate = false;
         /// <summary> Do not display the date part. </summary>
         /// <remarks> Will display an empty string if then time part is not displayed. </remarks>
         [DefaultValue(false)]
@@ -628,19 +628,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             get
             {
                 if (DateLookupControl == null)
-                    return FHideDate;
+                    return _hideDate;
                 return DateLookupControl.TextBox.HideDate;
             }
             set
             {
                 if (DateLookupControl == null)
-                    FHideDate= value;
+                    _hideDate= value;
                 else
                     DateLookupControl.TextBox.HideDate = value;
             }
         }
 
-        private bool FHideTime = true;
+        private bool _hideTime = true;
         /// <summary> Do not display the time part. </summary>
         /// <remarks> Will display an empty string if the date part is not displayed. </remarks>
         [DefaultValue(true)]
@@ -651,13 +651,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             get 
             {
                 if (DateLookupControl == null)
-                    return FHideTime;
+                    return _hideTime;
                 return DateLookupControl.TextBox.HideTime; 
             }
             set 
             {
                 if (DateLookupControl == null)
-                    FHideTime = value;
+                    _hideTime = value;
                 else
                     DateLookupControl.TextBox.HideTime = value; 
             }
@@ -665,9 +665,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		protected virtual void InternalUpdateTextBox()
 		{
-			DateLookupControl.TextBox.NilIfBlank = FNilIfBlank;
-			DateLookupControl.TextBox.AutoUpdate = FAutoUpdate;
-			DateLookupControl.TextBox.AutoUpdateInterval = FAutoUpdateInterval;
+			DateLookupControl.TextBox.NilIfBlank = _nilIfBlank;
+			DateLookupControl.TextBox.AutoUpdate = _autoUpdate;
+			DateLookupControl.TextBox.AutoUpdateInterval = _autoUpdateInterval;
 		}
 
 		// LookupEditControl
@@ -710,10 +710,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected override WinForms.Control CreateControl()
 		{
-            DAE.Client.Controls.DateLookup LDateLookup = new DAE.Client.Controls.DateLookup();
-            LDateLookup.TextBox.HideDate = FHideDate;
-            LDateLookup.TextBox.HideTime = FHideTime;
-            return LDateLookup;
+            DAE.Client.Controls.DateLookup dateLookup = new DAE.Client.Controls.DateLookup();
+            dateLookup.TextBox.HideDate = _hideDate;
+            dateLookup.TextBox.HideTime = _hideTime;
+            return dateLookup;
 		}
 
 		protected override void InitializeControl()
@@ -740,16 +740,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			DateLookupControl.TextBox.TabStop = GetTabStop();
 		}
 
-		protected override void LayoutControl(Rectangle ABounds)
+		protected override void LayoutControl(Rectangle bounds)
 		{
-			Control.Location = ABounds.Location;
-			int LTextBoxWidth = ABounds.Width - (Control.Width - Control.DisplayRectangle.Width);
-			DAE.Client.Controls.Range LRange = new DAE.Client.Controls.Range(Math.Min(LTextBoxWidth, base.GetControlNaturalWidth()), LTextBoxWidth);
-			DateLookupControl.TextBox.WidthRange.Range = LRange;
-			if (DateLookupControl.TextBox.Width > LRange.Maximum)
-				DateLookupControl.TextBox.Width = LRange.Maximum;
-			if (DateLookupControl.TextBox.Width < LRange.Minimum)
-				DateLookupControl.TextBox.Width = LRange.Minimum;
+			Control.Location = bounds.Location;
+			int textBoxWidth = bounds.Width - (Control.Width - Control.DisplayRectangle.Width);
+			DAE.Client.Controls.Range range = new DAE.Client.Controls.Range(Math.Min(textBoxWidth, base.GetControlNaturalWidth()), textBoxWidth);
+			DateLookupControl.TextBox.WidthRange.Range = range;
+			if (DateLookupControl.TextBox.Width > range.Maximum)
+				DateLookupControl.TextBox.Width = range.Maximum;
+			if (DateLookupControl.TextBox.Width < range.Minimum)
+				DateLookupControl.TextBox.Width = range.Minimum;
 		}
 
 		// DataElement

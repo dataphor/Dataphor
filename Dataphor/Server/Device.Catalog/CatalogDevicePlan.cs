@@ -17,17 +17,17 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 {
 	public class CatalogPlanParameter  : System.Object
 	{
-		public CatalogPlanParameter(SQLParameter ASQLParameter, PlanNode APlanNode) : base()
+		public CatalogPlanParameter(SQLParameter sQLParameter, PlanNode planNode) : base()
 		{	
-			FSQLParameter = ASQLParameter;
-			FPlanNode = APlanNode; 
+			_sQLParameter = sQLParameter;
+			_planNode = planNode; 
 		}
 		
-		private SQLParameter FSQLParameter;
-		public SQLParameter SQLParameter { get { return FSQLParameter; } }
+		private SQLParameter _sQLParameter;
+		public SQLParameter SQLParameter { get { return _sQLParameter; } }
 
-		private PlanNode FPlanNode;
-		public PlanNode PlanNode { get { return FPlanNode; } }
+		private PlanNode _planNode;
+		public PlanNode PlanNode { get { return _planNode; } }
 	}
 
 	#if USETYPEDLIST
@@ -48,23 +48,23 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 	
 	public class CatalogDevicePlanNode : DevicePlanNode
 	{
-		public CatalogDevicePlanNode(PlanNode APlanNode) : base(APlanNode) {}
+		public CatalogDevicePlanNode(PlanNode planNode) : base(planNode) {}
 		
 		public StringBuilder Statement = new StringBuilder();
 		
 		public StringBuilder WhereCondition = new StringBuilder();
 
 		// Parameters
-		private CatalogPlanParameters FPlanParameters = new CatalogPlanParameters();
-		public CatalogPlanParameters PlanParameters { get { return FPlanParameters; } }
+		private CatalogPlanParameters _planParameters = new CatalogPlanParameters();
+		public CatalogPlanParameters PlanParameters { get { return _planParameters; } }
 	}
 
 	/// <summary>Stub class to indicate the device does support a given operator. Not actually used to implement the translation.</summary>
 	public class CatalogDeviceOperator : DeviceOperator
 	{
-		public CatalogDeviceOperator(int AID, string AName) : base(AID, AName) {}
+		public CatalogDeviceOperator(int iD, string name) : base(iD, name) {}
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
 			throw new Exception("The method or operation is not implemented.");
 		}

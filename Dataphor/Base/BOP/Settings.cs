@@ -16,65 +16,65 @@ namespace Alphora.Dataphor.BOP
 	{
 		public Settings() {}
 
-		public Settings(string AFileName)
+		public Settings(string fileName)
 		{
-			LoadSettings(AFileName);
+			LoadSettings(fileName);
 		}
 
-		private SettingsList FList = new SettingsList();
+		private SettingsList _list = new SettingsList();
 		[Publish(PublishMethod.List)]
-		public SettingsList List { get { return FList; } }
+		public SettingsList List { get { return _list; } }
 
 		public void ClearSettings()
 		{
-			FList.Clear();
+			_list.Clear();
 		}
 
 		/// <summary> Accesses the raw string configuration items by name. </summary>
-		public string this[string ASettingName]
+		public string this[string settingName]
 		{
-			get { return FList[ASettingName]; }
-			set { FList[ASettingName] = value; }
+			get { return _list[settingName]; }
+			set { _list[settingName] = value; }
 		}
 
 		/// <summary> Reads a setting value from the configuration settings. </summary>
-		/// <param name="ASettingName"> Name of the value to find. </param>
-		/// <param name="AType"> The type to convert the value to. </param>
-		/// <param name="ADefault"> If the value is not found or it is empty, this default value is returned. </param>
+		/// <param name="settingName"> Name of the value to find. </param>
+		/// <param name="type"> The type to convert the value to. </param>
+		/// <param name="defaultValue"> If the value is not found or it is empty, this default value is returned. </param>
 		/// <returns> The setting, converted to the specified type. </returns>
-		public object GetSetting(string ASettingName, Type AType, object ADefault)
+		public object GetSetting(string settingName, Type type, object defaultValue)
 		{
-			string LValue = FList[ASettingName];
-			if (LValue != String.Empty)
-				return ReflectionUtility.StringToValue(LValue, AType);
+			string tempValue = _list[settingName];
+			if (tempValue != String.Empty)
+				return ReflectionUtility.StringToValue(tempValue, type);
 			else
-				return ADefault;
+				return defaultValue;
 		}
 
 		/// <summary> Writes a setting value into the configuration settings </summary>
-		/// <param name="ASettingName"> Name of the value to find. </param>
-		/// <param name="AValue"> The value to convert and write. </param>
-		public void SetSetting(string ASettingName, object AValue)
+		/// <param name="settingName"> Name of the value to find. </param>
+		/// <param name="tempValue"> The value to convert and write. </param>
+		public void SetSetting(string settingName, object tempValue)
 		{
-			FList[ASettingName] = ReflectionUtility.ValueToString(AValue, AValue.GetType());
+			_list[settingName] = ReflectionUtility.ValueToString(tempValue, tempValue.GetType());
 		}
 
 		/// <summary> Loads the configuration settings from file if the file exists. </summary>
 		/// <remarks> Fatal errors will throw an exception.  Non-fatal errors will be reported in the ErrorList result. </remarks>
 		/// <returns> An ErrorList collection of exceptions that occurred during loading.  Null if no errors. </returns>
-		public ErrorList AttemptLoadSettings(string AFileName)
+		public ErrorList AttemptLoadSettings(string fileName)
 		{
 			// Read the settings for the configuration file if the file exists
-			if (File.Exists(AFileName))
-				using (FileStream LStream = new FileStream(AFileName, FileMode.Open, FileAccess.Read))
+			if (File.Exists(fileName))
+				using (FileStream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
 				{
 					// If the file doesn't have any data, don't deserialize it
-					if (LStream.Length > 0)
+					if (stream.Length > 0)
 					{
-						Deserializer LDeserializer = new Deserializer();
-						LDeserializer.Deserialize(LStream, this);
-						if (LDeserializer.Errors.Count > 0)
-							return LDeserializer.Errors;
+						Deserializer deserializer = new Deserializer();
+						deserializer.Deserialize(stream, this);
+						if (deserializer.Errors.Count > 0)
+							return deserializer.Errors;
 					}
 				}
 			return null;
@@ -82,20 +82,20 @@ namespace Alphora.Dataphor.BOP
 
 		/// <summary> Loads the configuration settings from file if the file exists. </summary>
 		/// <remarks> Throws on any error </remarks>
-		public void LoadSettings(string AFileName)
+		public void LoadSettings(string fileName)
 		{
-			ErrorList LErrors = AttemptLoadSettings(AFileName);
-			if ((LErrors != null) && (LErrors.Count > 0))
-				throw LErrors[0];	// Arbitrary... perhaps instead this could be a special exception class that had a list of exceptions
+			ErrorList errors = AttemptLoadSettings(fileName);
+			if ((errors != null) && (errors.Count > 0))
+				throw errors[0];	// Arbitrary... perhaps instead this could be a special exception class that had a list of exceptions
 		}
 
 		/// <summary> Saves the current configuration settings.</summary>
-		public void SaveSettings(string AFileName)
+		public void SaveSettings(string fileName)
 		{
 			// Persist the setting to the configuration file
-			using (FileStream LStream = new FileStream(AFileName, FileMode.Create, FileAccess.Write))
+			using (FileStream stream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
 			{
-				(new Serializer()).Serialize(LStream, this);
+				(new Serializer()).Serialize(stream, this);
 			}
 		}
 	}
@@ -106,33 +106,33 @@ namespace Alphora.Dataphor.BOP
 	{
 		public SettingsList() : base(StringComparer.OrdinalIgnoreCase) { }
 
-		public new string this[string AKey]
+		public new string this[string key]
 		{
 			get 
 			{ 
-				SettingsItem LItem;
-				if (TryGetValue(AKey, out LItem))
-					return LItem.Value;
+				SettingsItem item;
+				if (TryGetValue(key, out item))
+					return item.Value;
 				else
 					return String.Empty;
 			}
 			set
 			{
-				SettingsItem LItem;
-				if (!TryGetValue(AKey, out LItem))
+				SettingsItem item;
+				if (!TryGetValue(key, out item))
 				{
-					LItem = new SettingsItem(AKey);
-					base.Add(AKey, LItem);
+					item = new SettingsItem(key);
+					base.Add(key, item);
 				}
-				LItem.Value = value;
+				item.Value = value;
 			}
 		}
 
-		public override int Add(object AValue)
+		public override int Add(object tempValue)
 		{
-			SettingsItem LItem = (SettingsItem)AValue;
-			base.Add(LItem.Name, LItem);
-			return IndexOf(LItem);
+			SettingsItem item = (SettingsItem)tempValue;
+			base.Add(item.Name, item);
+			return IndexOf(item);
 		}
 	}
 
@@ -141,30 +141,30 @@ namespace Alphora.Dataphor.BOP
 	[PublishDefaultConstructor("System.String")]
 	public class SettingsItem
 	{
-		public SettingsItem([PublishSource("Name")] string AName)
+		public SettingsItem([PublishSource("Name")] string name)
 		{
-			FName = AName;
+			_name = name;
 		}
 		
-		public SettingsItem(string AName, string AValue) : base()
+		public SettingsItem(string name, string tempValue) : base()
 		{
-			FName = AName;
-			FValue = AValue;
+			_name = name;
+			_value = tempValue;
 		}
 
-		private string FName = String.Empty;
+		private string _name = String.Empty;
 		[Publish(PublishMethod.Value)]
 		public string Name
 		{
-			get { return FName; }
+			get { return _name; }
 		}
 
-		private string FValue = String.Empty;
+		private string _value = String.Empty;
 		[Publish(PublishMethod.Value)]
 		public string Value
 		{
-			get { return FValue; }
-			set { FValue = value; }
+			get { return _value; }
+			set { _value = value; }
 		}
 	}
 }

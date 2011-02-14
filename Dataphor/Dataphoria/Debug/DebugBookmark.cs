@@ -9,10 +9,10 @@ namespace Alphora.Dataphor.Dataphoria
 {
 	public abstract class DebugBookmark : Bookmark
 	{
-		public DebugBookmark(IDocument ADocument, TextLocation ALocation, DebugLocator ALocator)
-			: base(ADocument, ALocation)
+		public DebugBookmark(IDocument document, TextLocation location, DebugLocator locator)
+			: base(document, location)
 		{
-			FLocator = ALocator;
+			_locator = locator;
 			SetMarker();
 		}
 
@@ -21,15 +21,15 @@ namespace Alphora.Dataphor.Dataphoria
 			get { return false; }
 		}
 
-		private DebugLocator FLocator;
+		private DebugLocator _locator;
 		
 		public DebugLocator Locator
 		{
-			get { return FLocator; }
+			get { return _locator; }
 		}
 		
-		TextMarker FOldMarker;
-		IDocument FOldDocument;
+		TextMarker _oldMarker;
+		IDocument _oldDocument;
 
 		protected abstract TextMarker CreateMarker();
 
@@ -38,12 +38,12 @@ namespace Alphora.Dataphor.Dataphoria
 			RemoveMarker();
 			if (Document != null)
 			{
-				TextMarker LMarker = CreateMarker();
+				TextMarker marker = CreateMarker();
 				Document.RequestUpdate(new TextAreaUpdate(TextAreaUpdateType.SingleLine, LineNumber));
 				Document.CommitUpdate();
-				FOldMarker = LMarker;
+				_oldMarker = marker;
 			}
-			FOldDocument = Document;
+			_oldDocument = Document;
 		}
 
 		protected override void OnDocumentChanged(EventArgs e)
@@ -54,25 +54,25 @@ namespace Alphora.Dataphor.Dataphoria
 
 		public void RemoveMarker()
 		{
-			if (FOldDocument != null)
+			if (_oldDocument != null)
 			{
-				int LFrom = SafeGetLineNumberForOffset(FOldDocument, FOldMarker.Offset);
-				int LTo = SafeGetLineNumberForOffset(FOldDocument, FOldMarker.Offset + FOldMarker.Length);
-				FOldDocument.MarkerStrategy.RemoveMarker(FOldMarker);
-				FOldDocument.RequestUpdate(new TextAreaUpdate(TextAreaUpdateType.LinesBetween, LFrom, LTo));
-				FOldDocument.CommitUpdate();
+				int from = SafeGetLineNumberForOffset(_oldDocument, _oldMarker.Offset);
+				int to = SafeGetLineNumberForOffset(_oldDocument, _oldMarker.Offset + _oldMarker.Length);
+				_oldDocument.MarkerStrategy.RemoveMarker(_oldMarker);
+				_oldDocument.RequestUpdate(new TextAreaUpdate(TextAreaUpdateType.LinesBetween, from, to));
+				_oldDocument.CommitUpdate();
 			}
-			FOldDocument = null;
-			FOldMarker = null;
+			_oldDocument = null;
+			_oldMarker = null;
 		}
 
-		static int SafeGetLineNumberForOffset(IDocument ADocument, int AOffset)
+		static int SafeGetLineNumberForOffset(IDocument document, int offset)
 		{
-			if (AOffset <= 0)
+			if (offset <= 0)
 				return 0;
-			if (AOffset >= ADocument.TextLength)
-				return ADocument.TotalNumberOfLines;
-			return ADocument.GetLineNumberForOffset(AOffset);
+			if (offset >= document.TextLength)
+				return document.TotalNumberOfLines;
+			return document.GetLineNumberForOffset(offset);
 		}
 	}
 }

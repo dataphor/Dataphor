@@ -16,134 +16,134 @@ namespace Alphora.Dataphor.DAE.Connection
 {
 	public abstract class SQLCommand : Disposable
 	{
-		protected SQLCommand(SQLConnection AConnection) : base()
+		protected SQLCommand(SQLConnection connection) : base()
 		{
-			FConnection = AConnection;
+			_connection = connection;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
-				if (FActiveCursor != null)
-					Close(FActiveCursor);
+				if (_activeCursor != null)
+					Close(_activeCursor);
 			}
 			finally
 			{
-				FConnection = null;
-				base.Dispose(ADisposing);
+				_connection = null;
+				base.Dispose(disposing);
 			}
 		}
 		
-		private SQLConnection FConnection;
-		public SQLConnection Connection { get { return FConnection; } }
+		private SQLConnection _connection;
+		public SQLConnection Connection { get { return _connection; } }
 		
-		private SQLCursor FActiveCursor;
-		public SQLCursor ActiveCursor { get { return FActiveCursor; } }
-		internal void SetActiveCursor(SQLCursor ACursor)
+		private SQLCursor _activeCursor;
+		public SQLCursor ActiveCursor { get { return _activeCursor; } }
+		internal void SetActiveCursor(SQLCursor cursor)
 		{
-			if (ACursor != null)
+			if (cursor != null)
 			{
-				FConnection.SetActiveCommand(this);
-				FConnection.SetActiveCursor(ACursor);
+				_connection.SetActiveCommand(this);
+				_connection.SetActiveCursor(cursor);
 			}
 			else
 			{
-				FConnection.SetActiveCursor(null);
-				FConnection.SetActiveCommand(null);
+				_connection.SetActiveCursor(null);
+				_connection.SetActiveCommand(null);
 			}
-			FActiveCursor = ACursor;
+			_activeCursor = cursor;
 		}
 		
-		private string FStatement;
+		private string _statement;
 		public string Statement
 		{
-			get { return FStatement; }
+			get { return _statement; }
 			set 
 			{ 
-				if (FStatement != value)
+				if (_statement != value)
 				{
 					Unprepare();
-					FStatement = value;
+					_statement = value;
 				}
 			}
 		}
 		
-		public const int CDefaultCommandTimeout = -1;
-		private int FCommandTimeout = CDefaultCommandTimeout;
+		public const int DefaultCommandTimeout = -1;
+		private int _commandTimeout = DefaultCommandTimeout;
 		/// <summary>The amount of time to wait before timing out when waiting for a command to execute, expressed in seconds.</summary>
 		/// <remarks>The default value for this property is 30 seconds. A value of 0 indicates an infinite timeout.</remarks>
 		public int CommandTimeout
 		{
-			get { return FCommandTimeout; }
-			set { FCommandTimeout = value; }
+			get { return _commandTimeout; }
+			set { _commandTimeout = value; }
 		}
 		
-		private SQLCommandType FCommandType = SQLCommandType.Statement;
+		private SQLCommandType _commandType = SQLCommandType.Statement;
 		public SQLCommandType CommandType
 		{
-			get { return FCommandType; }
-			set { FCommandType = value; }
+			get { return _commandType; }
+			set { _commandType = value; }
 		}
 		
-		private SQLCommandBehavior FCommandBehavior = SQLCommandBehavior.Default;
+		private SQLCommandBehavior _commandBehavior = SQLCommandBehavior.Default;
 		public SQLCommandBehavior CommandBehavior
 		{
-			get { return FCommandBehavior; }
-			set { FCommandBehavior = value; }
+			get { return _commandBehavior; }
+			set { _commandBehavior = value; }
 		}
 		
-		private SQLLockType FLockType = SQLLockType.ReadOnly;
+		private SQLLockType _lockType = SQLLockType.ReadOnly;
 		public SQLLockType LockType
 		{
-			get { return FLockType; }
-			set { FLockType = value; }
+			get { return _lockType; }
+			set { _lockType = value; }
 		}
 		
-		private SQLParameters FParameters = new SQLParameters();
-		public SQLParameters Parameters { get { return FParameters; } }
+		private SQLParameters _parameters = new SQLParameters();
+		public SQLParameters Parameters { get { return _parameters; } }
 		
 		protected abstract void InternalPrepare();
 		public void Prepare()
 		{
-			if (!FPrepared)
+			if (!_prepared)
 			{
 				try
 				{
 					InternalPrepare();
 				}
-				catch (Exception LException)
+				catch (Exception exception)
 				{
-					FConnection.WrapException(LException, "prepare", false);
+					_connection.WrapException(exception, "prepare", false);
 				}
-				FPrepared = true;
+				_prepared = true;
 			}
 		}
 		
 		protected abstract void InternalUnprepare();
 		public void Unprepare()
 		{
-			if (FPrepared)
+			if (_prepared)
 			{
 				try
 				{
 					InternalUnprepare();
 				}
-				catch (Exception LException)
+				catch (Exception exception)
 				{
-					FConnection.WrapException(LException, "unprepare", false);
+					_connection.WrapException(exception, "unprepare", false);
 				}
-				FPrepared = false;
+				_prepared = false;
 			}
 		}
 		
-		protected bool FPrepared;
+		protected bool _prepared;
 		public bool Prepared
 		{
-			get { return FPrepared; }
+			get { return _prepared; }
 			set
 			{
-				if (FPrepared != value)
+				if (_prepared != value)
 				{
 					if (value)
 						Prepare();
@@ -159,166 +159,166 @@ namespace Alphora.Dataphor.DAE.Connection
 			Prepare();
 			try
 			{
-				FConnection.SetActiveCommand(this);
+				_connection.SetActiveCommand(this);
 				try
 				{
 					InternalExecute();
 				}
 				finally
 				{
-					FConnection.SetActiveCommand(null);
+					_connection.SetActiveCommand(null);
 				}
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				FConnection.WrapException(LException, Statement, false);
+				_connection.WrapException(exception, Statement, false);
 			}
 		}
 		
 		public object Evaluate()
 		{
-			SQLCursor LCursor = Open(SQLCursorType.Dynamic, SQLIsolationLevel.Serializable);
+			SQLCursor cursor = Open(SQLCursorType.Dynamic, SQLIsolationLevel.Serializable);
 			try
 			{
-				if (LCursor.Next())
-					return LCursor[0];
+				if (cursor.Next())
+					return cursor[0];
 				return null;
 			}
 			finally
 			{
-				Close(LCursor);
+				Close(cursor);
 			}
 		}
 		
-		protected abstract SQLCursor InternalOpen(SQLCursorType ACursorType, SQLIsolationLevel ACursorIsolationLevel);
-		public SQLCursor Open(SQLCursorType ACursorType, SQLIsolationLevel ACursorIsolationLevel)
+		protected abstract SQLCursor InternalOpen(SQLCursorType cursorType, SQLIsolationLevel cursorIsolationLevel);
+		public SQLCursor Open(SQLCursorType cursorType, SQLIsolationLevel cursorIsolationLevel)
 		{
 			Prepare();
 			try
 			{
-				return InternalOpen(ACursorType, ACursorIsolationLevel);
+				return InternalOpen(cursorType, cursorIsolationLevel);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				FConnection.WrapException(LException, Statement, true);
+				_connection.WrapException(exception, Statement, true);
 				throw;
 			}
 		}
 		
 		protected internal abstract void InternalClose();
-		public void Close(SQLCursor ACursor)
+		public void Close(SQLCursor cursor)
 		{
-			ACursor.Dispose();
+			cursor.Dispose();
 		}
 
 		// maps the parameters in the order they appear in the statement to the order they appear in the parameters list
 		// if ordinal binding is not used, this mapping is a wash (i.e. N=N)
-		protected int[] FParameterIndexes;
+		protected int[] _parameterIndexes;
 		
-		private bool IsValidIdentifierCharacter(char AChar)
+		private bool IsValidIdentifierCharacter(char charValue)
 		{
-			return (AChar == '_') || Char.IsLetterOrDigit(AChar);
+			return (charValue == '_') || Char.IsLetterOrDigit(charValue);
 		}
 
-		protected string FParameterDelimiter = "@";
+		protected string _parameterDelimiter = "@";
 
 		// True if the prepared statement should use a ? placeholder for ordinal binding of parameters
 		// False if the prepared statement should use @<param name> placeholders for name binding of parameters
-		protected bool FUseOrdinalBinding = false;
+		protected bool _useOrdinalBinding = false;
 		
 		// True if the prepared statement should use parameterization and parameter markers to pass parameter values
 		// False if the prepared statement should use parameter literals to pass parameter values
-		protected bool FUseParameters = true;
+		protected bool _useParameters = true;
 		public bool UseParameters
 		{
-			get { return FUseParameters; }
-			set { FUseParameters = value; }
+			get { return _useParameters; }
+			set { _useParameters = value; }
 		}
 
-		private SQLCursorLocation FCursorLocation = SQLCursorLocation.Automatic;
+		private SQLCursorLocation _cursorLocation = SQLCursorLocation.Automatic;
 		public SQLCursorLocation CursorLocation
 		{
-			get { return FCursorLocation; }
-			set { FCursorLocation = value; }
+			get { return _cursorLocation; }
+			set { _cursorLocation = value; }
 		}
 		
-		private bool FShouldNormalizeWhitespace = true;
+		private bool _shouldNormalizeWhitespace = true;
 		public bool ShouldNormalizeWhitespace
 		{
-			get { return FShouldNormalizeWhitespace; }
-			set { FShouldNormalizeWhitespace = value; }
+			get { return _shouldNormalizeWhitespace; }
+			set { _shouldNormalizeWhitespace = value; }
 		}
 		
 		/// <summary> Normalize whitespace, determine the parameter indexes, and change parameter formats/names as necessary. </summary>
-		protected virtual string PrepareStatement(string AStatement)
+		protected virtual string PrepareStatement(string statement)
 		{
-			List<int> LParameterIndexes = new List<int>();
-			StringBuilder LResult = new StringBuilder(AStatement.Length + 10);
-			StringBuilder LParameterName = null;
-			bool LInParameter = false;
-			bool LInString = false;
-			for (int LIndex = 0; LIndex < AStatement.Length; LIndex++)
+			List<int> parameterIndexes = new List<int>();
+			StringBuilder result = new StringBuilder(statement.Length + 10);
+			StringBuilder parameterName = null;
+			bool inParameter = false;
+			bool inString = false;
+			for (int index = 0; index < statement.Length; index++)
 			{
-				if (LInParameter && !IsValidIdentifierCharacter(AStatement[LIndex]))
-					FinishParameter(LParameterIndexes, LResult, LParameterName, ref LInParameter);
+				if (inParameter && !IsValidIdentifierCharacter(statement[index]))
+					FinishParameter(parameterIndexes, result, parameterName, ref inParameter);
 					
-				switch (AStatement[LIndex])
+				switch (statement[index])
 				{
 					case '@' :
-						if (!LInString)
+						if (!inString)
 						{
-							LParameterName = new StringBuilder();
-							LInParameter = true;
+							parameterName = new StringBuilder();
+							inParameter = true;
 						}
 						break;
 					
 					case '\'' :
-						LInString = !LInString;
+						inString = !inString;
 						break;
 				}
 					
-				if (!LInParameter)
-					LResult.Append((Char.IsWhiteSpace(AStatement[LIndex]) && !LInString && FShouldNormalizeWhitespace) ? ' ' : AStatement[LIndex]);
+				if (!inParameter)
+					result.Append((Char.IsWhiteSpace(statement[index]) && !inString && _shouldNormalizeWhitespace) ? ' ' : statement[index]);
 				else
-					LParameterName.Append(AStatement[LIndex]);
+					parameterName.Append(statement[index]);
 			}
 			
-			if (LInParameter)
-				FinishParameter(LParameterIndexes, LResult, LParameterName, ref LInParameter);
+			if (inParameter)
+				FinishParameter(parameterIndexes, result, parameterName, ref inParameter);
 
-			if (FUseParameters)
+			if (_useParameters)
 			{
-				FParameterIndexes = new int[LParameterIndexes.Count];
-				for (int LIndex = 0; LIndex < LParameterIndexes.Count; LIndex++)
-					FParameterIndexes[LIndex] = (int)LParameterIndexes[LIndex];
+				_parameterIndexes = new int[parameterIndexes.Count];
+				for (int index = 0; index < parameterIndexes.Count; index++)
+					_parameterIndexes[index] = (int)parameterIndexes[index];
 			}
 			else
-				FParameterIndexes = new int[0];
+				_parameterIndexes = new int[0];
 
-			return LResult.ToString();
+			return result.ToString();
 		}
 
 		private void FinishParameter(List<int> LParameterIndexes, StringBuilder LResult, StringBuilder LParameterName, ref bool LInParameter)
 		{
-			string LParameterNameString = LParameterName.ToString().Substring(1);
-			int LParameterIndex = Parameters.IndexOf(LParameterNameString);
-			if (LParameterIndex >= 0)
+			string parameterNameString = LParameterName.ToString().Substring(1);
+			int parameterIndex = Parameters.IndexOf(parameterNameString);
+			if (parameterIndex >= 0)
 			{
-				SQLParameter LParameter = Parameters[LParameterIndex];
-				if (FUseParameters)
+				SQLParameter parameter = Parameters[parameterIndex];
+				if (_useParameters)
 				{
-					if (FUseOrdinalBinding || !LParameterIndexes.Contains(LParameterIndex))
-						LParameterIndexes.Add(LParameterIndex);
-					if (LParameter.Marker == null)
-						if (FUseOrdinalBinding)
+					if (_useOrdinalBinding || !LParameterIndexes.Contains(parameterIndex))
+						LParameterIndexes.Add(parameterIndex);
+					if (parameter.Marker == null)
+						if (_useOrdinalBinding)
 							LResult.Append("?");
 						else
-							LResult.Append(FParameterDelimiter + ConvertParameterName(LParameterNameString));
+							LResult.Append(_parameterDelimiter + ConvertParameterName(parameterNameString));
 					else
-						LResult.Append(LParameter.Marker);
+						LResult.Append(parameter.Marker);
 				}
 				else
-					LResult.Append(LParameter.Literal);
+					LResult.Append(parameter.Literal);
 			}
 			else
 				LResult.Append(LParameterName.ToString());
@@ -326,9 +326,9 @@ namespace Alphora.Dataphor.DAE.Connection
 		}
 
 		/// <summary> Allows descendant commands to change the parameter names used in statements. </summary>
-		protected virtual string ConvertParameterName(string AParameterName)
+		protected virtual string ConvertParameterName(string parameterName)
 		{
-			return AParameterName;
+			return parameterName;
 		}
 	}
 }

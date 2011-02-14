@@ -25,32 +25,32 @@ namespace Alphora.Dataphor.DAE.Client
 	public abstract class DAEDataSet : DataSet
 	{
 		// Do not localize
-		public const string CParamNamespace = "AMaster";
+		public const string ParamNamespace = "AMaster";
 
 		public DAEDataSet()
 		{
-			FParamGroups = new DataSetParamGroups();
-			FParamGroups.OnParamChanged += new ParamChangedHandler(DataSetParamChanged);
-			FParamGroups.OnParamStructureChanged += new ParamStructureChangedHandler(DataSetParamStructureChanged);
-			FCursorType = CursorType.Dynamic;
-			FRequestedIsolation = CursorIsolation.Browse;
-			FRequestedCapabilities = CursorCapability.Navigable | CursorCapability.BackwardsNavigable | CursorCapability.Bookmarkable | CursorCapability.Searchable | CursorCapability.Updateable;
+			_paramGroups = new DataSetParamGroups();
+			_paramGroups.OnParamChanged += new ParamChangedHandler(DataSetParamChanged);
+			_paramGroups.OnParamStructureChanged += new ParamStructureChangedHandler(DataSetParamStructureChanged);
+			_cursorType = CursorType.Dynamic;
+			_requestedIsolation = CursorIsolation.Browse;
+			_requestedCapabilities = CursorCapability.Navigable | CursorCapability.BackwardsNavigable | CursorCapability.Bookmarkable | CursorCapability.Searchable | CursorCapability.Updateable;
 		}
 
-		protected override void InternalDispose(bool ADisposing)
+		protected override void InternalDispose(bool disposing)
 		{
 			try
 			{
-				base.InternalDispose(ADisposing);
+				base.InternalDispose(disposing);
 			}
 			finally
 			{
-				if (FParamGroups != null)
+				if (_paramGroups != null)
 				{
-					FParamGroups.OnParamStructureChanged -= new ParamStructureChangedHandler(DataSetParamStructureChanged);
-					FParamGroups.OnParamChanged -= new ParamChangedHandler(DataSetParamChanged);
-					FParamGroups.Dispose();
-					FParamGroups = null;
+					_paramGroups.OnParamStructureChanged -= new ParamStructureChangedHandler(DataSetParamStructureChanged);
+					_paramGroups.OnParamChanged -= new ParamChangedHandler(DataSetParamChanged);
+					_paramGroups.Dispose();
+					_paramGroups = null;
 				}
 
 				Session = null;
@@ -59,13 +59,13 @@ namespace Alphora.Dataphor.DAE.Client
 
 		#region Session
 
-		private bool ContainerContainsSession(DataSession ASession)
+		private bool ContainerContainsSession(DataSession session)
 		{
 			#if !SILVERLIGHT
-			if ((ASession == null) || (Container == null))
+			if ((session == null) || (Container == null))
 				return false;
-			foreach (Component LComponent in Container.Components)
-				if (LComponent == ASession)
+			foreach (Component component in Container.Components)
+				if (component == session)
 					return true;
 			#endif
 			return false;
@@ -73,38 +73,38 @@ namespace Alphora.Dataphor.DAE.Client
 
 		protected bool ShouldSerializeSession()
 		{
-			return ContainerContainsSession(FSession);
+			return ContainerContainsSession(_session);
 		}
 
 		protected bool ShouldSerializeSessionName()
 		{
-			return !ContainerContainsSession(FSession);
+			return !ContainerContainsSession(_session);
 		}
 		
 		// Session
-		private DataSession FSession;
+		private DataSession _session;
 		/// <summary> Attached to a DataSession object for connection to a Server. </summary>
 		[Category("Data")]
 		[Description("Connection to a Server.")]
 		[RefreshProperties(RefreshProperties.Repaint)]
 		public DataSession Session
 		{
-			get { return FSession; }
+			get { return _session; }
 			set
 			{
-				if (FSession != value)
+				if (_session != value)
 				{
 					Close();
-					if (FSession != null)
+					if (_session != null)
 					{
-						FSession.OnClosing -= new EventHandler(SessionClosing);
-						FSession.Disposed -= new EventHandler(SessionDisposed);
+						_session.OnClosing -= new EventHandler(SessionClosing);
+						_session.Disposed -= new EventHandler(SessionDisposed);
 					}
-					FSession = value;
-					if (FSession != null)
+					_session = value;
+					if (_session != null)
 					{
-						FSession.OnClosing += new EventHandler(SessionClosing);
-						FSession.Disposed += new EventHandler(SessionDisposed);
+						_session.OnClosing += new EventHandler(SessionClosing);
+						_session.Disposed += new EventHandler(SessionDisposed);
 					}
 				}
 			}
@@ -113,8 +113,8 @@ namespace Alphora.Dataphor.DAE.Client
 		public override void EndInit()
 		{
 			// This call ensures that the session is set active prior to the dataset, no matter the order of the EndInit calls
-			if (FSession != null)
-				FSession.DataSetEndInit();
+			if (_session != null)
+				_session.DataSetEndInit();
 			base.EndInit();
 		}
 
@@ -124,7 +124,7 @@ namespace Alphora.Dataphor.DAE.Client
 		[Editor("Alphora.Dataphor.DAE.Client.Design.SessionEditor,Alphora.Dataphor.DAE.Client", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		public string SessionName
 		{
-			get { return FSession != null ? FSession.SessionName : string.Empty; }
+			get { return _session != null ? _session.SessionName : string.Empty; }
 			set
 			{
 				if (SessionName != value)
@@ -137,19 +137,19 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 		
-		private void SessionDisposed(object ASender, EventArgs AArgs)
+		private void SessionDisposed(object sender, EventArgs args)
 		{
 			Session = null;
 		}
 
-		private void SessionClosing(object ASender, EventArgs AArgs)
+		private void SessionClosing(object sender, EventArgs args)
 		{
 			Close();
 		}
 
 		protected void CheckSession()
 		{
-			if (FSession == null)
+			if (_session == null)
 				throw new ClientException(ClientException.Codes.SessionMissing);
 		}
 		
@@ -158,46 +158,46 @@ namespace Alphora.Dataphor.DAE.Client
 		#region Process
 
 		// Process
-		protected IServerProcess FProcess;
+		protected IServerProcess _process;
 
 		protected override IServerProcess InternalGetProcess()
 		{
-			return FProcess;
+			return _process;
 		}
 		
 		// IsolationLevel
-		protected IsolationLevel FIsolationLevel = IsolationLevel.Browse;
+		protected IsolationLevel _isolationLevel = IsolationLevel.Browse;
 		[Category("Behavior")]
 		[DefaultValue(IsolationLevel.Browse)]
 		[Description("The isolation level for transactions performed by this dataset.")]
 		public IsolationLevel IsolationLevel
 		{
-			get { return FIsolationLevel; }
+			get { return _isolationLevel; }
 			set 
 			{ 
-				FIsolationLevel = value; 
-				if (FProcess != null)
-					FProcess.ProcessInfo.DefaultIsolationLevel = FIsolationLevel;
+				_isolationLevel = value; 
+				if (_process != null)
+					_process.ProcessInfo.DefaultIsolationLevel = _isolationLevel;
 			}
 		}
 		
 		// RequestedIsolation
-		protected CursorIsolation FRequestedIsolation;
+		protected CursorIsolation _requestedIsolation;
 		[Category("Behavior")]
 		[DefaultValue(CursorIsolation.Browse)]
 		[Description("The requested relative isolation of the cursor.  This will be used in conjunction with the isolation level of the transaction to determine the actual isolation of the cursor.")]
 		public CursorIsolation RequestedIsolation
 		{
-			get { return FRequestedIsolation; }
+			get { return _requestedIsolation; }
 			set 
 			{ 
 				CheckState(DataSetState.Inactive);
-				FRequestedIsolation = value; 
+				_requestedIsolation = value; 
 			}
 		}
 
 		// Capabilities
-		protected CursorCapability FRequestedCapabilities;
+		protected CursorCapability _requestedCapabilities;
 		[Category("Behavior")]
 		[
 			DefaultValue
@@ -212,12 +212,12 @@ namespace Alphora.Dataphor.DAE.Client
 		[Description("Determines the requested behavior of the cursor")]
 		public CursorCapability RequestedCapabilities
 		{
-			get { return FRequestedCapabilities; }
+			get { return _requestedCapabilities; }
 			set 
 			{ 
 				CheckState(DataSetState.Inactive);
-				FRequestedCapabilities = value; 
-				if ((FRequestedCapabilities & CursorCapability.Updateable) != 0)
+				_requestedCapabilities = value; 
+				if ((_requestedCapabilities & CursorCapability.Updateable) != 0)
 					InternalIsReadOnly = false;
 				else
 					InternalIsReadOnly = true;
@@ -230,41 +230,41 @@ namespace Alphora.Dataphor.DAE.Client
 			set 
 			{ 
 				if (value)
-					FRequestedCapabilities &= ~CursorCapability.Updateable;
+					_requestedCapabilities &= ~CursorCapability.Updateable;
 				else
-					FRequestedCapabilities |= CursorCapability.Updateable;
+					_requestedCapabilities |= CursorCapability.Updateable;
 				base.InternalIsReadOnly = value; 
 			}
 		}
 
 		private void StartProcess()
 		{
-			ProcessInfo LProcessInfo = new ProcessInfo(FSession.SessionInfo);
-			LProcessInfo.DefaultIsolationLevel = FIsolationLevel;
-			LProcessInfo.FetchAtOpen = ShouldFetchAtOpen();
-			FProcess = FSession.ServerSession.StartProcess(LProcessInfo);
-			FCursor = new DAECursor(FProcess);
-			FCursor.OnErrors += new CursorErrorsOccurredHandler(CursorOnErrors);
+			ProcessInfo processInfo = new ProcessInfo(_session.SessionInfo);
+			processInfo.DefaultIsolationLevel = _isolationLevel;
+			processInfo.FetchAtOpen = ShouldFetchAtOpen();
+			_process = _session.ServerSession.StartProcess(processInfo);
+			_cursor = new DAECursor(_process);
+			_cursor.OnErrors += new CursorErrorsOccurredHandler(CursorOnErrors);
 		}
 		
 		internal delegate void StopProcessHandler(IServerProcess AProcess);
 		
 		private void StopProcess()
 		{
-			if (FProcess != null)
+			if (_process != null)
 			{
-				if (FCursor != null)
+				if (_cursor != null)
 				{
-					FCursor.OnErrors -= new CursorErrorsOccurredHandler(CursorOnErrors);
-					FCursor.Dispose();
-					FCursor = null;
+					_cursor.OnErrors -= new CursorErrorsOccurredHandler(CursorOnErrors);
+					_cursor.Dispose();
+					_cursor = null;
 				}
 				#if USEASYNCSTOPPROCESS
 				new StopProcessHandler(FSession.ServerSession.StopProcess).BeginInvoke(FProcess, null, null);
 				#else
-				FSession.ServerSession.StopProcess(FProcess);
+				_session.ServerSession.StopProcess(_process);
 				#endif
-				FProcess = null;
+				_process = null;
 			}
 		}
 		
@@ -273,43 +273,43 @@ namespace Alphora.Dataphor.DAE.Client
 		#region Cursor
 
 		// Cursor
-		protected DAECursor FCursor;
+		protected DAECursor _cursor;
 		
 		protected override Schema.TableVar InternalGetTableVar()
 		{
-			return FCursor.TableVar;
+			return _cursor.TableVar;
 		}
 		
 		protected virtual DAECursor GetEditCursor()
 		{
-			return FCursor;
+			return _cursor;
 		}
 		
 		protected abstract string InternalGetExpression();
 
 		private void PrepareExpression()
 		{
-			FCursor.Expression = InternalGetExpression();
+			_cursor.Expression = InternalGetExpression();
 		}
 		
 		// CursorType
-		protected CursorType FCursorType = CursorType.Dynamic;
+		protected CursorType _cursorType = CursorType.Dynamic;
 		[Category("Behavior")]
 		[DefaultValue(CursorType.Dynamic)]
 		[Description("Determines the behavior of the cursor with respect to updates made after the cursor is opened.")]
 		public CursorType CursorType
 		{
-			get { return FCursorType; }
+			get { return _cursorType; }
 			set 
 			{ 
 				CheckState(DataSetState.Inactive);
-				FCursorType = value; 
+				_cursorType = value; 
 			}
 		}
 		
-		protected void CursorOnErrors(DAECursor ACursor, CompilerMessages AMessages)
+		protected void CursorOnErrors(DAECursor cursor, CompilerMessages messages)
 		{
-			ReportErrors(AMessages);
+			ReportErrors(messages);
 		}
 
 		protected virtual void OpenCursor()
@@ -317,8 +317,8 @@ namespace Alphora.Dataphor.DAE.Client
 			try
 			{
 				SetParamValues();
-				FCursor.ShouldOpen = ShouldOpenCursor();
-				FCursor.Open();
+				_cursor.ShouldOpen = ShouldOpenCursor();
+				_cursor.Open();
 				GetParamValues();
 			}
 			catch
@@ -330,50 +330,50 @@ namespace Alphora.Dataphor.DAE.Client
 
 		protected virtual void CloseCursor()
 		{
-			FCursor.Close();
+			_cursor.Close();
 		}
 
 		private void PrepareCursor()
 		{
-			FCursor.Prepare();
+			_cursor.Prepare();
 		}
 		
 		private void UnprepareCursor()
 		{
-			FCursor.Unprepare();
+			_cursor.Unprepare();
 		}
 
 		#endregion
 
 		#region Parameters
 
-		public DataSetParamGroups FParamGroups;
+		public DataSetParamGroups _paramGroups;
 		/// <summary> A collection of parameter groups. </summary>
 		/// <remarks> All parameters from all groups are used to parameterize the expression. </remarks>
 		[Category("Data")]
 		[Description("Parameter Groups")]
-		public DataSetParamGroups ParamGroups { get { return FParamGroups; } }
+		public DataSetParamGroups ParamGroups { get { return _paramGroups; } }
 		
-		private void DataSetParamChanged(object ASender)
+		private void DataSetParamChanged(object sender)
 		{
 			if (Active)
 				CursorSetChanged(null, false);
 		}
 		
-		private void DataSetParamStructureChanged(object ASender)
+		private void DataSetParamStructureChanged(object sender)
 		{
 			if (Active)
 				CursorSetChanged(null, true);
 		}
 
-		protected static string GetParameterName(string AColumnName)
+		protected static string GetParameterName(string columnName)
 		{
-			return CParamNamespace + AColumnName.Replace(".", "_");
+			return ParamNamespace + columnName.Replace(".", "_");
 		}
 
-		protected override void InternalCursorSetChanged(Row ARow, bool AReprepare)
+		protected override void InternalCursorSetChanged(Row row, bool reprepare)
 		{
-			if (AReprepare)
+			if (reprepare)
 			{
 				InternalClose();
 				InternalOpen();
@@ -387,53 +387,53 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		protected virtual void InternalPrepareParams()
 		{
-			foreach (DataSetParamGroup LGroup in FParamGroups)
-				foreach (DataSetParam LParam in LGroup.Params)
-					if (LGroup.Source != null)
-						FCursor.Params.Add(new MasterDataSetDataParam(LParam.Name, LGroup.Source.DataSet.TableType.Columns[LParam.ColumnName].DataType, LParam.Modifier, LParam.ColumnName, LGroup.Source, false));
+			foreach (DataSetParamGroup group in _paramGroups)
+				foreach (DataSetParam param in group.Params)
+					if (group.Source != null)
+						_cursor.Params.Add(new MasterDataSetDataParam(param.Name, group.Source.DataSet.TableType.Columns[param.ColumnName].DataType, param.Modifier, param.ColumnName, group.Source, false));
 					else
-						FCursor.Params.Add(new SourceDataSetDataParam(LParam));
+						_cursor.Params.Add(new SourceDataSetDataParam(param));
 		}
 		
 		private void PrepareParams()
 		{
-			FCursor.Params.Clear();
+			_cursor.Params.Clear();
 			try
 			{
 				InternalPrepareParams();
 			}
 			catch
 			{
-				FCursor.Params.Clear();
+				_cursor.Params.Clear();
 				throw;
 			}
 		}
 		
 		private void UnprepareParams()
 		{
-			FCursor.Params.Clear();
+			_cursor.Params.Clear();
 		}
 
 		protected virtual void SetParamValues()
 		{
-			foreach (DataSetDataParam LParam in FCursor.Params)
-				LParam.Bind(Process);
+			foreach (DataSetDataParam param in _cursor.Params)
+				param.Bind(Process);
 		}
 		
 		private void GetParamValues()
 		{
-			foreach (DataSetDataParam LParam in FCursor.Params)
-				if (LParam is SourceDataSetDataParam)
-					if (LParam.Modifier == Modifier.Var)
-						((SourceDataSetDataParam)LParam).SourceParam.Value = LParam.Value;
+			foreach (DataSetDataParam param in _cursor.Params)
+				if (param is SourceDataSetDataParam)
+					if (param.Modifier == Modifier.Var)
+						((SourceDataSetDataParam)param).SourceParam.Value = param.Value;
 		}
 		
 		/// <summary> Populates a given a (non null) DataParams collection with the actual params used by the DataSet. </summary>
-		public void GetAllParams(DAE.Runtime.DataParams AParams)
+		public void GetAllParams(DAE.Runtime.DataParams paramsValue)
 		{
 			CheckActive();
-			foreach (DataSetDataParam LParam in FCursor.Params)
-				AParams.Add(LParam);
+			foreach (DataSetDataParam param in _cursor.Params)
+				paramsValue.Add(param);
 		}
 
 		/// <summary> Returns the list of the actual params used by the DataSet. </summary>
@@ -441,7 +441,7 @@ namespace Alphora.Dataphor.DAE.Client
 		[Browsable(false)]
 		public DAE.Runtime.DataParams AllParams
 		{
-			get { return FCursor.Params; }
+			get { return _cursor.Params; }
 		}
 		
 		#endregion
@@ -494,122 +494,122 @@ namespace Alphora.Dataphor.DAE.Client
 
 		protected override void InternalReset()
 		{
-			FCursor.Reset();
+			_cursor.Reset();
 		}
 
-		protected override void InternalRefresh(Row ARow)
+		protected override void InternalRefresh(Row row)
 		{
-			FCursor.Refresh(ARow);
+			_cursor.Refresh(row);
 		}
 
 		protected override void InternalFirst()
 		{
-			FCursor.First();
+			_cursor.First();
 		}
 
 		protected override void InternalLast()
 		{
-			FCursor.Last();
+			_cursor.Last();
 		}
 		
 		protected override bool InternalNext()
 		{
-			return FCursor.Next();
+			return _cursor.Next();
 		}
 		
 		protected override bool InternalPrior()
 		{
-			return FCursor.Prior();
+			return _cursor.Prior();
 		}
 
-		protected override void InternalSelect(Row ARow)
+		protected override void InternalSelect(Row row)
 		{
-			FCursor.Select(ARow);
+			_cursor.Select(row);
 		}
 		
 		protected override bool InternalGetBOF()
 		{
-			return FCursor.BOF();
+			return _cursor.BOF();
 		}
 
 		protected override bool InternalGetEOF()
 		{
-			return FCursor.EOF();
+			return _cursor.EOF();
 		}
 
 		protected override Guid InternalGetBookmark()
 		{
-			return FCursor.GetBookmark();
+			return _cursor.GetBookmark();
 		}
 
-		protected override bool InternalGotoBookmark(Guid ABookmark, bool AForward)
+		protected override bool InternalGotoBookmark(Guid bookmark, bool forward)
 		{
-			return FCursor.GotoBookmark(ABookmark, AForward);
+			return _cursor.GotoBookmark(bookmark, forward);
 		}
 
-		protected override void InternalDisposeBookmark(Guid ABookmark)
+		protected override void InternalDisposeBookmark(Guid bookmark)
 		{
-			FCursor.DisposeBookmark(ABookmark);
+			_cursor.DisposeBookmark(bookmark);
 		}
 
-		protected override void InternalDisposeBookmarks(Guid[] ABookmarks)
+		protected override void InternalDisposeBookmarks(Guid[] bookmarks)
 		{
-			FCursor.DisposeBookmarks(ABookmarks);
+			_cursor.DisposeBookmarks(bookmarks);
 		}
 
 		protected override Row InternalGetKey()
 		{
-			return FCursor.GetKey();
+			return _cursor.GetKey();
 		}
 
-		protected override bool InternalFindKey(Row AKey)
+		protected override bool InternalFindKey(Row key)
 		{
-			return FCursor.FindKey(AKey);
+			return _cursor.FindKey(key);
 		}
 
-		protected override void InternalFindNearest(Row AKey)
+		protected override void InternalFindNearest(Row key)
 		{
-			FCursor.FindNearest(AKey);
+			_cursor.FindNearest(key);
 		}
 		
-		protected virtual void InternalInsert(Row ARow)
+		protected virtual void InternalInsert(Row row)
 		{
-			GetEditCursor().Insert(ARow, FValueFlags);
+			GetEditCursor().Insert(row, _valueFlags);
 		}
 		
-		protected virtual void InternalUpdate(Row ARow)
+		protected virtual void InternalUpdate(Row row)
 		{
-			GetEditCursor().Update(ARow, FValueFlags);
+			GetEditCursor().Update(row, _valueFlags);
 		}
 		
 		protected virtual void BeginTransaction()
 		{
-			FProcess.BeginTransaction(FIsolationLevel);
+			_process.BeginTransaction(_isolationLevel);
 		}
 		
 		protected virtual void PrepareTransaction()
 		{
-			FProcess.PrepareTransaction();
+			_process.PrepareTransaction();
 		}
 		
 		protected virtual void CommitTransaction()
 		{
-			FProcess.CommitTransaction();
+			_process.CommitTransaction();
 		}
 		
-		protected override void InternalPost(Row ARow)
+		protected override void InternalPost(Row row)
 		{
 			// TODO: Test to ensure Optimistic concurrency check.
-			bool LUpdateSucceeded = false;
+			bool updateSucceeded = false;
 			BeginTransaction();
 			try
 			{
 				if (State == DataSetState.Insert)
-					InternalInsert(ARow);
+					InternalInsert(row);
 				else
-					InternalUpdate(ARow);
+					InternalUpdate(row);
 									
-				LUpdateSucceeded = true;
+				updateSucceeded = true;
 				
 				PrepareTransaction();
 				CommitTransaction();
@@ -618,14 +618,14 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				try
 				{
-					if (FProcess.InTransaction)
-						FProcess.RollbackTransaction();
-					if ((State == DataSetState.Edit) && LUpdateSucceeded)
-						GetEditCursor().Refresh(FOriginalRow);
+					if (_process.InTransaction)
+						_process.RollbackTransaction();
+					if ((State == DataSetState.Edit) && updateSucceeded)
+						GetEditCursor().Refresh(_originalRow);
 				}
-				catch (Exception LRollbackException)
+				catch (Exception rollbackException)
 				{
-					throw new DAE.Server.ServerException(DAE.Server.ServerException.Codes.RollbackError, E, LRollbackException.ToString());
+					throw new DAE.Server.ServerException(DAE.Server.ServerException.Codes.RollbackError, E, rollbackException.ToString());
 				}
 				throw;
 			}
@@ -633,7 +633,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		protected override void InternalDelete()
 		{
-			FCursor.Delete();
+			_cursor.Delete();
 		}
 		
 		#endregion
@@ -644,82 +644,82 @@ namespace Alphora.Dataphor.DAE.Client
 
 		protected class DAECursor : Disposable
 		{
-			public DAECursor(IServerProcess AProcess) : base()
+			public DAECursor(IServerProcess process) : base()
 			{
-				FProcess = AProcess;
-				FParams = new Runtime.DataParams();
+				_process = process;
+				_params = new Runtime.DataParams();
 			}
 
-			protected override void Dispose(bool ADisposing)
+			protected override void Dispose(bool disposing)
 			{
 				Close();
 				Unprepare();
-				FProcess = null;
-				base.Dispose(ADisposing);
+				_process = null;
+				base.Dispose(disposing);
 			}
 
-			private string FExpression;
+			private string _expression;
 			public string Expression
 			{
-				get { return FExpression; }
-				set { FExpression = value; }
+				get { return _expression; }
+				set { _expression = value; }
 			}
 
-			private Runtime.DataParams FParams;
-			public Runtime.DataParams Params { get { return FParams; } }
+			private Runtime.DataParams _params;
+			public Runtime.DataParams Params { get { return _params; } }
 
-			private IServerProcess FProcess;
-			public IServerProcess Process { get { return FProcess; } }
+			private IServerProcess _process;
+			public IServerProcess Process { get { return _process; } }
 			
-			private IServerExpressionPlan FPlan;
+			private IServerExpressionPlan _plan;
 			public IServerExpressionPlan Plan 
 			{ 
 				get 
 				{ 
 					InternalPrepare();
-					return FPlan; 
+					return _plan; 
 				} 
 			}
 			
-			private Schema.TableVar FTableVar;
+			private Schema.TableVar _tableVar;
 			public Schema.TableVar TableVar
 			{
 				get
 				{
-					if (FTableVar == null)
+					if (_tableVar == null)
 						InternalPrepare();
-					return FTableVar;
+					return _tableVar;
 				}
 			}
 			
 			public event CursorErrorsOccurredHandler OnErrors;
-			private void ErrorsOccurred(CompilerMessages AErrors)
+			private void ErrorsOccurred(CompilerMessages errors)
 			{
 				if (OnErrors != null)
-					OnErrors(this, AErrors);
+					OnErrors(this, errors);
 			}
 			
-			private IServerCursor FCursor;
+			private IServerCursor _cursor;
 			
 			/// <summary>Update cursor used to invoke updates and proposables if ShouldOpen is false.</summary>
-			private IServerCursor FUpdateCursor;
+			private IServerCursor _updateCursor;
 			
 			private void EnsureUpdateCursor()
 			{
-				if (FUpdateCursor == null)
-					FUpdateCursor = Plan.Open(FParams);
+				if (_updateCursor == null)
+					_updateCursor = Plan.Open(_params);
 			}
 			
 			private void CloseUpdateCursor()
 			{
-				if (FUpdateCursor != null)
+				if (_updateCursor != null)
 				{
-					FPlan.Close(FUpdateCursor);
-					FUpdateCursor = null;
+					_plan.Close(_updateCursor);
+					_updateCursor = null;
 				}
 			}
 			
-			private bool FShouldOpen = true;
+			private bool _shouldOpen = true;
 			/// <summary>Indicates whether or not opening the underlying cursor is necessary.</summary>
 			/// <remarks>
 			///	This option is used as an optimization to prevent the opening of a known incorrect or invalid result set.
@@ -730,27 +730,27 @@ namespace Alphora.Dataphor.DAE.Client
 			/// </remarks>
 			public bool ShouldOpen 
 			{ 
-				get { return FShouldOpen; } 
-				set { FShouldOpen = value; } 
+				get { return _shouldOpen; } 
+				set { _shouldOpen = value; } 
 			}
 			
 			private void InternalPrepare()
 			{
-				if (FPlan == null)
+				if (_plan == null)
 				{
-					FPlan = FProcess.PrepareExpression(FExpression, FParams);
+					_plan = _process.PrepareExpression(_expression, _params);
 					try
 					{
-						ErrorsOccurred(FPlan.Messages);
+						ErrorsOccurred(_plan.Messages);
 
-						if (!(FPlan.DataType is Schema.ITableType))
-							throw new ClientException(ClientException.Codes.InvalidResultType, FPlan.DataType == null ? "<invalid expression>" : FPlan.DataType.Name);
+						if (!(_plan.DataType is Schema.ITableType))
+							throw new ClientException(ClientException.Codes.InvalidResultType, _plan.DataType == null ? "<invalid expression>" : _plan.DataType.Name);
 							
-						FTableVar = FPlan.TableVar;
+						_tableVar = _plan.TableVar;
 					}
 					catch
 					{
-						FPlan = null;
+						_plan = null;
 						throw;
 					}
 				}
@@ -763,28 +763,28 @@ namespace Alphora.Dataphor.DAE.Client
 
 			public void Unprepare()
 			{
-				if (FPlan != null)
+				if (_plan != null)
 				{
-					if (FCursor != null)
+					if (_cursor != null)
 					{
 						try
 						{
-							FProcess.CloseCursor(FCursor);
+							_process.CloseCursor(_cursor);
 						}
 						finally
 						{
-							FCursor = null;
+							_cursor = null;
 						}
 					}
 					else
 					{
 						try
 						{
-							FProcess.UnprepareExpression(FPlan);
+							_process.UnprepareExpression(_plan);
 						}
 						finally
 						{
-							FPlan = null;
+							_plan = null;
 						}
 					}
 				}
@@ -792,28 +792,28 @@ namespace Alphora.Dataphor.DAE.Client
 
 			public void Open()
 			{
-				if (FShouldOpen && (FCursor == null))
+				if (_shouldOpen && (_cursor == null))
 				{
-					if (FPlan == null)
+					if (_plan == null)
 					{
 						try
 						{
-							FCursor = FProcess.OpenCursor(FExpression, FParams);
+							_cursor = _process.OpenCursor(_expression, _params);
 						}
-						catch (Exception LException)
+						catch (Exception exception)
 						{
-							CompilerMessages LMessages = new CompilerMessages();
-							LMessages.Add(LException);
-							ErrorsOccurred(LMessages);
-							throw LException;
+							CompilerMessages messages = new CompilerMessages();
+							messages.Add(exception);
+							ErrorsOccurred(messages);
+							throw exception;
 						}
 						
-						FPlan = FCursor.Plan;
-						FTableVar = FPlan.TableVar;
-						ErrorsOccurred(FPlan.Messages);
+						_plan = _cursor.Plan;
+						_tableVar = _plan.TableVar;
+						ErrorsOccurred(_plan.Messages);
                     }
 					else
-						FCursor = FPlan.Open(FParams);
+						_cursor = _plan.Open(_params);
 				}
 			}
 
@@ -821,17 +821,17 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				CloseUpdateCursor();
 
-				if (FCursor != null)
+				if (_cursor != null)
 				{
-					if (FPlan != null)
+					if (_plan != null)
 					{
 						try
 						{
-							FPlan.Close(FCursor);
+							_plan.Close(_cursor);
 						}
 						finally
 						{
-							FCursor = null;
+							_cursor = null;
 						}
 					}
 				}
@@ -839,215 +839,215 @@ namespace Alphora.Dataphor.DAE.Client
 			
 			public void Reset()
 			{
-				if (FCursor != null)
-					FCursor.Reset();
+				if (_cursor != null)
+					_cursor.Reset();
 			}
 			
 			public bool Next()
 			{
-				if (FCursor != null)
-					return FCursor.Next();
+				if (_cursor != null)
+					return _cursor.Next();
 				else
 					return false;
 			}
 			
 			public void Last()
 			{
-				if (FCursor != null)
-					FCursor.Last();
+				if (_cursor != null)
+					_cursor.Last();
 			}
 			
 			public bool BOF()
 			{
-				if (FCursor != null)
-					return FCursor.BOF();
+				if (_cursor != null)
+					return _cursor.BOF();
 				else
 					return true;
 			}
 			
 			public bool EOF()
 			{
-				if (FCursor != null)
-					return FCursor.EOF();
+				if (_cursor != null)
+					return _cursor.EOF();
 				else
 					return true;
 			}
 			
 			public bool IsEmpty()
 			{
-				if (FCursor != null)
-					return FCursor.IsEmpty();
+				if (_cursor != null)
+					return _cursor.IsEmpty();
 				else
 					return true;
 			}
 			
 			public Row Select()
 			{
-				if (FCursor != null)
-					return FCursor.Select();
+				if (_cursor != null)
+					return _cursor.Select();
 				else
 					return null;
 			}
 			
-			public void Select(Row ARow)
+			public void Select(Row row)
 			{
-				if (FCursor != null)
-					FCursor.Select(ARow);
+				if (_cursor != null)
+					_cursor.Select(row);
 			}
 			
 			public void First()
 			{
-				if (FCursor != null)
-					FCursor.First();
+				if (_cursor != null)
+					_cursor.First();
 			}
 			
 			public bool Prior()
 			{
-				if (FCursor != null)
-					return FCursor.Prior();
+				if (_cursor != null)
+					return _cursor.Prior();
 				else
 					return false;
 			}
 			
 			public Guid GetBookmark()
 			{
-				if (FCursor != null)
-					return FCursor.GetBookmark();
+				if (_cursor != null)
+					return _cursor.GetBookmark();
 				else
 					return Guid.Empty;
 			}
 
-			public bool GotoBookmark(Guid ABookmark, bool AForward)
+			public bool GotoBookmark(Guid bookmark, bool forward)
 			{
-				if (FCursor != null)
-					return FCursor.GotoBookmark(ABookmark, AForward);
+				if (_cursor != null)
+					return _cursor.GotoBookmark(bookmark, forward);
 				else
 					return false;
 			}
 			
-			public int CompareBookmarks(Guid ABookmark1, Guid ABookmark2)
+			public int CompareBookmarks(Guid bookmark1, Guid bookmark2)
 			{
-				if (FCursor != null)
-					return FCursor.CompareBookmarks(ABookmark1, ABookmark2);
+				if (_cursor != null)
+					return _cursor.CompareBookmarks(bookmark1, bookmark2);
 				else
 					return -1;
 			}
 			
-			public void DisposeBookmark(Guid ABookmark)
+			public void DisposeBookmark(Guid bookmark)
 			{
-				if (FCursor != null)
-					FCursor.DisposeBookmark(ABookmark);
+				if (_cursor != null)
+					_cursor.DisposeBookmark(bookmark);
 			}
 			
-			public void DisposeBookmarks(Guid[] ABookmarks)
+			public void DisposeBookmarks(Guid[] bookmarks)
 			{
-				if (FCursor != null)
-					FCursor.DisposeBookmarks(ABookmarks);
+				if (_cursor != null)
+					_cursor.DisposeBookmarks(bookmarks);
 			}
 			
 			public Schema.Order Order 
 			{ 
 				get 
 				{ 
-					if (FCursor != null)
-						return FCursor.Order;
+					if (_cursor != null)
+						return _cursor.Order;
 					
 					InternalPrepare();
-					return FPlan.Order;
+					return _plan.Order;
 				} 
 			}
 			
 			public Row GetKey()
 			{
-				if (FCursor != null)
-					return FCursor.GetKey();
+				if (_cursor != null)
+					return _cursor.GetKey();
 				else
 					return null;
 			}
 			
-			public bool FindKey(Row AKey)
+			public bool FindKey(Row key)
 			{
-				if (FCursor != null)
-					return FCursor.FindKey(AKey);
+				if (_cursor != null)
+					return _cursor.FindKey(key);
 				else
 					return false;
 			}
 			
-			public void FindNearest(Row AKey)
+			public void FindNearest(Row key)
 			{
-				if (FCursor != null)
-					FCursor.FindNearest(AKey);
+				if (_cursor != null)
+					_cursor.FindNearest(key);
 			}
 			
-			public bool Refresh(Row ARow)
+			public bool Refresh(Row row)
 			{
-				if (FCursor != null)
-					return FCursor.Refresh(ARow);
+				if (_cursor != null)
+					return _cursor.Refresh(row);
 				else
 					return false;
 			}
 			
-			public void Insert(Row ARow, BitArray AValueFlags)
+			public void Insert(Row row, BitArray valueFlags)
 			{
-				if (FCursor != null)
-					FCursor.Insert(ARow, AValueFlags);
+				if (_cursor != null)
+					_cursor.Insert(row, valueFlags);
 				else
 				{
 					EnsureUpdateCursor();
-					FUpdateCursor.Insert(ARow, AValueFlags);
+					_updateCursor.Insert(row, valueFlags);
 				}
 			}
 			
-			public void Update(Row ARow, BitArray AValueFlags)
+			public void Update(Row row, BitArray valueFlags)
 			{
-				if (FCursor != null)
-					FCursor.Update(ARow, AValueFlags);
+				if (_cursor != null)
+					_cursor.Update(row, valueFlags);
 			}
 			
 			public void Delete()
 			{
-				if (FCursor != null)
-					FCursor.Delete();
+				if (_cursor != null)
+					_cursor.Delete();
 			}
 			
 			public int RowCount()
 			{
-				if (FCursor != null)
-					return FCursor.RowCount();
+				if (_cursor != null)
+					return _cursor.RowCount();
 				else
 					return 0;
 			}
 			
-			public bool Default(Row ARow, string AColumnName)
+			public bool Default(Row row, string columnName)
 			{
-				if (FCursor != null)
-					return FCursor.Default(ARow, AColumnName);
+				if (_cursor != null)
+					return _cursor.Default(row, columnName);
 				else
 				{
 					EnsureUpdateCursor();
-					return FUpdateCursor.Default(ARow, AColumnName);
+					return _updateCursor.Default(row, columnName);
 				}
 			}
 			
-			public bool Change(Row AOldRow, Row ANewRow, string AColumnName)
+			public bool Change(Row oldRow, Row newRow, string columnName)
 			{
-				if (FCursor != null)
-					return FCursor.Change(AOldRow, ANewRow, AColumnName);
+				if (_cursor != null)
+					return _cursor.Change(oldRow, newRow, columnName);
 				else
 				{
 					EnsureUpdateCursor();
-					return FUpdateCursor.Change(AOldRow, ANewRow, AColumnName);
+					return _updateCursor.Change(oldRow, newRow, columnName);
 				}
 			}
 			
-			public bool Validate(Row AOldRow, Row ANewRow, string AColumnName)
+			public bool Validate(Row oldRow, Row newRow, string columnName)
 			{
-				if (FCursor != null)
-					return FCursor.Validate(AOldRow, ANewRow, AColumnName);
+				if (_cursor != null)
+					return _cursor.Validate(oldRow, newRow, columnName);
 				else
 				{
 					EnsureUpdateCursor();
-					return FUpdateCursor.Validate(AOldRow, ANewRow, AColumnName);
+					return _updateCursor.Validate(oldRow, newRow, columnName);
 				}
 			}
 		}
@@ -1060,71 +1060,71 @@ namespace Alphora.Dataphor.DAE.Client
 	
 	public class DataSetParam : object
 	{
-		private string FName;
+		private string _name;
 		public string Name
 		{
-			get { return FName; }
+			get { return _name; }
 			set 
 			{ 
-				if (FName != value)
+				if (_name != value)
 				{
-					FName = value == null ? String.Empty : value;
+					_name = value == null ? String.Empty : value;
 					ParamStructureChanged();
 				}
 			}
 		}
 		
-		private string FColumnName;
+		private string _columnName;
 		public string ColumnName
 		{
-			get { return FColumnName; }
+			get { return _columnName; }
 			set
 			{
-				if (FColumnName != value)
+				if (_columnName != value)
 				{
-					FColumnName = value == null ? String.Empty : value;
+					_columnName = value == null ? String.Empty : value;
 					ParamChanged();
 				}
 			}
 		}
 		
-		private Schema.IDataType FDataType;
+		private Schema.IDataType _dataType;
 		public Schema.IDataType DataType
 		{
-			get { return FDataType; }
+			get { return _dataType; }
 			set 
 			{ 
-				if (FDataType != value)
+				if (_dataType != value)
 				{
-					FDataType = value; 
+					_dataType = value; 
 					ParamStructureChanged();
 				}
 			}
 		}
 		
-		private Modifier FModifier;
+		private Modifier _modifier;
 		public Modifier Modifier
 		{
-			get { return FModifier; }
+			get { return _modifier; }
 			set
 			{
-				if (FModifier != value)
+				if (_modifier != value)
 				{
-					FModifier = value;
+					_modifier = value;
 					ParamStructureChanged();
 				}
 			}
 		}
 		
-		private object FValue;
+		private object _value;
 		public object Value
 		{
-			get { return FValue; }
+			get { return _value; }
 			set
 			{
-				if (FValue != value)
+				if (_value != value)
 				{
-					FValue = value;
+					_value = value;
 					ParamChanged();
 				}
 			}
@@ -1172,45 +1172,45 @@ namespace Alphora.Dataphor.DAE.Client
 	#else
 	public class DataSetParams : ValidatingBaseList<DataSetParam>
 	{
-		protected override void Adding(DataSetParam AValue, int AIndex)
+		protected override void Adding(DataSetParam value, int index)
 		{
 			//base.Adding(AValue, AIndex);
-			AValue.OnParamChanged += new ParamChangedHandler(DataSetParamChanged);
-			AValue.OnParamStructureChanged += new ParamStructureChangedHandler(DataSetParamStructureChanged);
+			value.OnParamChanged += new ParamChangedHandler(DataSetParamChanged);
+			value.OnParamStructureChanged += new ParamStructureChangedHandler(DataSetParamStructureChanged);
 			DataSetParamStructureChanged(null);
 		}
 		
-		protected override void Removing(DataSetParam AValue, int AIndex)
+		protected override void Removing(DataSetParam value, int index)
 		{
-			AValue.OnParamStructureChanged -= new ParamStructureChangedHandler(DataSetParamStructureChanged);
-			AValue.OnParamChanged -= new ParamChangedHandler(DataSetParamChanged);
+			value.OnParamStructureChanged -= new ParamStructureChangedHandler(DataSetParamStructureChanged);
+			value.OnParamChanged -= new ParamChangedHandler(DataSetParamChanged);
 			DataSetParamStructureChanged(null);
 			//base.Removing(AValue, AIndex);
 		}
 	#endif
 		
-		private void DataSetParamChanged(object ASender)
+		private void DataSetParamChanged(object sender)
 		{
-			ParamChanged(ASender);
+			ParamChanged(sender);
 		}
 		
-		private void DataSetParamStructureChanged(object ASender)
+		private void DataSetParamStructureChanged(object sender)
 		{
-			ParamStructureChanged(ASender);
+			ParamStructureChanged(sender);
 		}
 		
 		public event ParamStructureChangedHandler OnParamStructureChanged;
-		private void ParamStructureChanged(object ASender)
+		private void ParamStructureChanged(object sender)
 		{
 			if (OnParamStructureChanged != null)
-				OnParamStructureChanged(ASender);
+				OnParamStructureChanged(sender);
 		}
 		
 		public event ParamChangedHandler OnParamChanged;
-		private void ParamChanged(object ASender)
+		private void ParamChanged(object sender)
 		{
 			if (OnParamChanged != null)
-				OnParamChanged(ASender);
+				OnParamChanged(sender);
 		}
 	}
 
@@ -1218,79 +1218,79 @@ namespace Alphora.Dataphor.DAE.Client
 	{
 		public DataSetParamGroup() : base()
 		{
-			FMasterLink = new DataLink();
-			FMasterLink.OnRowChanged += new DataLinkFieldHandler(MasterRowChanged);
-			FMasterLink.OnDataChanged += new DataLinkHandler(MasterDataChanged);
-			FMasterLink.OnActiveChanged += new DataLinkHandler(MasterActiveChanged);
+			_masterLink = new DataLink();
+			_masterLink.OnRowChanged += new DataLinkFieldHandler(MasterRowChanged);
+			_masterLink.OnDataChanged += new DataLinkHandler(MasterDataChanged);
+			_masterLink.OnActiveChanged += new DataLinkHandler(MasterActiveChanged);
 			
-			FParams = new DataSetParams();
-			FParams.OnParamChanged += new ParamChangedHandler(DataSetParamChanged);
-			FParams.OnParamStructureChanged += new ParamStructureChangedHandler(DataSetParamStructureChanged);
+			_params = new DataSetParams();
+			_params.OnParamChanged += new ParamChangedHandler(DataSetParamChanged);
+			_params.OnParamStructureChanged += new ParamStructureChangedHandler(DataSetParamStructureChanged);
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (FParams != null)
+			if (_params != null)
 			{
-				FParams.OnParamStructureChanged -= new ParamStructureChangedHandler(DataSetParamStructureChanged);
-				FParams.OnParamChanged -= new ParamChangedHandler(DataSetParamChanged);
-				FParams = null;
+				_params.OnParamStructureChanged -= new ParamStructureChangedHandler(DataSetParamStructureChanged);
+				_params.OnParamChanged -= new ParamChangedHandler(DataSetParamChanged);
+				_params = null;
 			}
 			
-			if (FMasterLink != null)
+			if (_masterLink != null)
 			{
-				FMasterLink.OnRowChanged -= new DataLinkFieldHandler(MasterRowChanged);
-				FMasterLink.OnDataChanged -= new DataLinkHandler(MasterDataChanged);
-				FMasterLink.OnActiveChanged -= new DataLinkHandler(MasterActiveChanged);
-				FMasterLink.Dispose();
-				FMasterLink = null;
+				_masterLink.OnRowChanged -= new DataLinkFieldHandler(MasterRowChanged);
+				_masterLink.OnDataChanged -= new DataLinkHandler(MasterDataChanged);
+				_masterLink.OnActiveChanged -= new DataLinkHandler(MasterActiveChanged);
+				_masterLink.Dispose();
+				_masterLink = null;
 			}
 
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
-		private DataSetParams FParams;
-		public DataSetParams Params { get { return FParams; } }
+		private DataSetParams _params;
+		public DataSetParams Params { get { return _params; } }
 		
 		// DataSource
-		private DataLink FMasterLink;
+		private DataLink _masterLink;
 		[DefaultValue(null)]
 		[Category("Behavior")]
 		[Description("Parameter data source")]
 		public DataSource Source
 		{
-			get { return FMasterLink.Source; }
+			get { return _masterLink.Source; }
 			set
 			{
-				if (FMasterLink.Source != value)
+				if (_masterLink.Source != value)
 				{
-					FMasterLink.Source = value;
+					_masterLink.Source = value;
 					ParamChanged();
 				}
 			}
 		}
 
-		private void MasterActiveChanged(DataLink ALink, DataSet ADataSet)
+		private void MasterActiveChanged(DataLink link, DataSet dataSet)
 		{
 			ParamChanged();
 		}
 
-		private void MasterRowChanged(DataLink ALink, DataSet ADataSet, DataField AField)
+		private void MasterRowChanged(DataLink link, DataSet dataSet, DataField field)
 		{
 			ParamChanged();
 		}
 		
-		private void MasterDataChanged(DataLink ALink, DataSet ADataSet)
+		private void MasterDataChanged(DataLink link, DataSet dataSet)
 		{
 			ParamChanged();
 		}
 
-		private void DataSetParamStructureChanged(object ASender)
+		private void DataSetParamStructureChanged(object sender)
 		{
 			ParamStructureChanged();
 		}
 		
-		private void DataSetParamChanged(object ASender)
+		private void DataSetParamChanged(object sender)
 		{
 			ParamChanged();
 		}
@@ -1340,69 +1340,69 @@ namespace Alphora.Dataphor.DAE.Client
 	#else
 	public class DataSetParamGroups : DisposableList<DataSetParamGroup>
 	{
-		protected override void Adding(DataSetParamGroup AValue, int AIndex)
+		protected override void Adding(DataSetParamGroup value, int index)
 		{
 			//base.Adding(AValue, AIndex);
-			AValue.OnParamChanged += new ParamChangedHandler(DataSetParamChanged);
-			AValue.OnParamStructureChanged += new ParamStructureChangedHandler(DataSetParamStructureChanged);
+			value.OnParamChanged += new ParamChangedHandler(DataSetParamChanged);
+			value.OnParamStructureChanged += new ParamStructureChangedHandler(DataSetParamStructureChanged);
 			DataSetParamStructureChanged(null);
 		}
 		
-		protected override void Removing(DataSetParamGroup AValue, int AIndex)
+		protected override void Removing(DataSetParamGroup value, int index)
 		{
-			AValue.OnParamStructureChanged -= new ParamStructureChangedHandler(DataSetParamStructureChanged);
-			AValue.OnParamChanged -= new ParamChangedHandler(DataSetParamChanged);
+			value.OnParamStructureChanged -= new ParamStructureChangedHandler(DataSetParamStructureChanged);
+			value.OnParamChanged -= new ParamChangedHandler(DataSetParamChanged);
 			DataSetParamStructureChanged(null);
 			//base.Removing(AValue, AIndex);
 		}
 	#endif
 		
-		private void DataSetParamChanged(object ASender)
+		private void DataSetParamChanged(object sender)
 		{
-			ParamChanged(ASender);
+			ParamChanged(sender);
 		}
 		
-		private void DataSetParamStructureChanged(object ASender)
+		private void DataSetParamStructureChanged(object sender)
 		{
-			ParamStructureChanged(ASender);
+			ParamStructureChanged(sender);
 		}
 		
 		public event ParamStructureChangedHandler OnParamStructureChanged;
-		protected virtual void ParamStructureChanged(object ASender)
+		protected virtual void ParamStructureChanged(object sender)
 		{
 			if (OnParamStructureChanged != null)
-				OnParamStructureChanged(ASender);
+				OnParamStructureChanged(sender);
 		}
 		
 		public event ParamChangedHandler OnParamChanged;
-		protected virtual void ParamChanged(object ASender)
+		protected virtual void ParamChanged(object sender)
 		{
 			if (OnParamChanged != null)
-				OnParamChanged(ASender);
+				OnParamChanged(sender);
 		}
 	}
 
 	internal abstract class DataSetDataParam : Runtime.DataParam
 	{
-		public DataSetDataParam(string AName, Schema.IDataType ADataType, Modifier AModifier) : base(AName, ADataType, AModifier) {}
+		public DataSetDataParam(string name, Schema.IDataType dataType, Modifier modifier) : base(name, dataType, modifier) {}
 		
-		public abstract void Bind(IServerProcess AProcess);
+		public abstract void Bind(IServerProcess process);
 	}
 	
 	internal class MasterDataSetDataParam : DataSetDataParam
 	{
-		public MasterDataSetDataParam(string AName, Schema.IDataType ADataType, Modifier AModifier, string AColumnName, DataSource ASource, bool AIsMaster) : base(AName, ADataType, AModifier)
+		public MasterDataSetDataParam(string name, Schema.IDataType dataType, Modifier modifier, string columnName, DataSource source, bool isMaster) : base(name, dataType, modifier)
 		{
-			ColumnName = AColumnName;
-			Source = ASource;
-			IsMaster = AIsMaster;
+			ColumnName = columnName;
+			Source = source;
+			IsMaster = isMaster;
 		}
 		
 		private string ColumnName;
 		public DataSource Source;
 		public bool IsMaster; // true if this parameter is part of a master/detail relationship
 		
-		public override void Bind(IServerProcess AProcess)
+		public override void Bind(IServerProcess process)
 		{
 			if (!Source.DataSet.IsEmpty() && Source.DataSet.Fields[ColumnName].HasValue())
 				Value = Source.DataSet.Fields[ColumnName].AsNative;
@@ -1413,14 +1413,14 @@ namespace Alphora.Dataphor.DAE.Client
 	
 	internal class SourceDataSetDataParam : DataSetDataParam
 	{
-		public SourceDataSetDataParam(DataSetParam ASourceParam) : base(ASourceParam.Name, ASourceParam.DataType, ASourceParam.Modifier) 
+		public SourceDataSetDataParam(DataSetParam sourceParam) : base(sourceParam.Name, sourceParam.DataType, sourceParam.Modifier) 
 		{
-			SourceParam = ASourceParam;
+			SourceParam = sourceParam;
 		}
 		
 		public DataSetParam SourceParam;
 		
-		public override void Bind(IServerProcess AProcess)
+		public override void Bind(IServerProcess process)
 		{
 			Value = SourceParam.Value;
 		}

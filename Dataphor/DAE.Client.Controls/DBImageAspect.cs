@@ -22,63 +22,63 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 	{
 		public ExtendedImageAspect() : base()
 		{
-			FValueBackColor = BackColor;
+			_valueBackColor = BackColor;
 		}
 
 		/// <summary> Determines whether the control has a value. </summary>
 		/// <returns> True if the control holds a valid value otherwise false. </returns>
 		public abstract bool HasValue { get; }
 
-		private Color FNoValueBackColor = ControlColor.NoValueBackColor;
+		private Color _noValueBackColor = ControlColor.NoValueBackColor;
 		[Category("Colors")]
 		[Description("Background color of the control when it has no value.")]
 		public Color NoValueBackColor
 		{
-			get { return FNoValueBackColor; }
+			get { return _noValueBackColor; }
 			set
 			{
-				if (FNoValueBackColor != value)
+				if (_noValueBackColor != value)
 				{
-					FNoValueBackColor = value;
+					_noValueBackColor = value;
 					UpdateBackColor();
 				}
 			}
 		}
 
-		private Color FValueBackColor;
-		protected Color ValueBackColor { get { return FValueBackColor; } }
+		private Color _valueBackColor;
+		protected Color ValueBackColor { get { return _valueBackColor; } }
 
-		private bool FUpdatingBackColor;
+		private bool _updatingBackColor;
 		protected bool UpdatingBackColor
 		{
-			get { return FUpdatingBackColor; }
+			get { return _updatingBackColor; }
 		}
 
 		protected virtual void InternalUpdateBackColor()
 		{
 			if (!DesignMode)
-				BackColor = HasValue ? FValueBackColor : NoValueBackColor;
+				BackColor = HasValue ? _valueBackColor : NoValueBackColor;
 		}
 
 		/// <summary> Updates the <c>BackColor</c> based on whether or not the <c>DataField</c> has a value. </summary>
 		protected void UpdateBackColor()
 		{
-			FUpdatingBackColor = true;
+			_updatingBackColor = true;
 			try
 			{
 				InternalUpdateBackColor();
 			}
 			finally
 			{
-				FUpdatingBackColor = false;
+				_updatingBackColor = false;
 			}
 		}
 
-		protected override void OnBackColorChanged(EventArgs AArgs)
+		protected override void OnBackColorChanged(EventArgs args)
 		{
-			base.OnBackColorChanged(AArgs);
+			base.OnBackColorChanged(args);
 			if (!UpdatingBackColor)
-				FValueBackColor = BackColor;
+				_valueBackColor = BackColor;
 		}
 
 	}
@@ -90,48 +90,48 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 	[ToolboxBitmap(typeof(Alphora.Dataphor.DAE.Client.Controls.DBImageAspect),"Icons.DBImageAspect.bmp")]
 	public class DBImageAspect : ExtendedImageAspect, IDataSourceReference, IColumnNameReference, IReadOnly
 	{
-		public const int CDefaultDelay = 1000;
+		public const int DefaultDelay = 1000;
 		public DBImageAspect()
 		{
-			FDelayTimer = new System.Windows.Forms.Timer();
-			FDelayTimer.Interval = CDefaultDelay;
-			FDelayTimer.Enabled = false;
-			FDelayTimer.Tick += new EventHandler(DelayTimerTick);
-			FLink = new FieldDataLink();
-			FLink.OnFieldChanged += new DataLinkFieldHandler(FieldChanged);
-			FLink.OnUpdateReadOnly += new EventHandler(UpdateReadOnly);
-			FLink.OnSaveRequested += new DataLinkHandler(SaveRequested);
-			FLink.OnFocusControl += new DataLinkFieldHandler(FocusControl);
+			_delayTimer = new System.Windows.Forms.Timer();
+			_delayTimer.Interval = DefaultDelay;
+			_delayTimer.Enabled = false;
+			_delayTimer.Tick += new EventHandler(DelayTimerTick);
+			_link = new FieldDataLink();
+			_link.OnFieldChanged += new DataLinkFieldHandler(FieldChanged);
+			_link.OnUpdateReadOnly += new EventHandler(UpdateReadOnly);
+			_link.OnSaveRequested += new DataLinkHandler(SaveRequested);
+			_link.OnFocusControl += new DataLinkFieldHandler(FocusControl);
 			UpdateReadOnly(this, EventArgs.Empty);
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			if (!IsDisposed)
 			{
-				FDelayTimer.Tick -= new EventHandler(DelayTimerTick);
-				FDelayTimer.Dispose();
-				FDelayTimer = null;
-				FLink.OnFieldChanged -= new DataLinkFieldHandler(FieldChanged);
-				FLink.OnUpdateReadOnly -= new EventHandler(UpdateReadOnly);
-				FLink.OnSaveRequested -= new DataLinkHandler(SaveRequested);
-				FLink.Dispose();
-				FLink = null;
+				_delayTimer.Tick -= new EventHandler(DelayTimerTick);
+				_delayTimer.Dispose();
+				_delayTimer = null;
+				_link.OnFieldChanged -= new DataLinkFieldHandler(FieldChanged);
+				_link.OnUpdateReadOnly -= new EventHandler(UpdateReadOnly);
+				_link.OnSaveRequested -= new DataLinkHandler(SaveRequested);
+				_link.Dispose();
+				_link = null;
 			}
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
-		private FieldDataLink FLink;
-		protected FieldDataLink Link { get { return FLink; } }
+		private FieldDataLink _link;
+		protected FieldDataLink Link { get { return _link; } }
 
 		[DefaultValue(false)]
 		[Category("Behavior")]
 		public override bool ReadOnly 
 		{
-			get { return FLink.ReadOnly || base.ReadOnly; }
+			get { return _link.ReadOnly || base.ReadOnly; }
 			set
 			{
-				FLink.ReadOnly = value;
+				_link.ReadOnly = value;
 				base.ReadOnly = value;
 			}
 		}
@@ -141,8 +141,8 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Editor(typeof(Alphora.Dataphor.DAE.Client.Design.ColumnNameEditor), typeof(System.Drawing.Design.UITypeEditor))]
 		public string ColumnName
 		{
-			get { return FLink.ColumnName; }
-			set { FLink.ColumnName = value; }
+			get { return _link.ColumnName; }
+			set { _link.ColumnName = value; }
 		}
 
 		[Category("Data")]
@@ -150,47 +150,47 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[RefreshProperties(RefreshProperties.All)]
 		public DataSource Source
 		{
-			get { return FLink.Source; }
-			set { FLink.Source = value;	}
+			get { return _link.Source; }
+			set { _link.Source = value;	}
 		}
 
-		private bool FAutoDisplay = true;
+		private bool _autoDisplay = true;
 		[DefaultValue(true)]
 		[Category("Behavior")]
 		[Description("When false LoadImage should be called at runtime, else the control loads the image.")]
 		public bool AutoDisplay
 		{
-			get { return FAutoDisplay; }
-			set { FAutoDisplay = value;	}
+			get { return _autoDisplay; }
+			set { _autoDisplay = value;	}
 		}
 
-		private System.Windows.Forms.Timer FDelayTimer;
+		private System.Windows.Forms.Timer _delayTimer;
 		protected System.Windows.Forms.Timer DelayTimer
 		{
-			get { return FDelayTimer; }
+			get { return _delayTimer; }
 		}
 
-		[DefaultValue(CDefaultDelay)]
+		[DefaultValue(DefaultDelay)]
 		[Category("Behavior")]
 		[Description("Milliseconds to delay before loading the image.")]
 		public int DisplayDelay
 		{
-			get { return FDelayTimer.Interval; }
+			get { return _delayTimer.Interval; }
 			set
 			{
-				if (FDelayTimer.Interval != value)
+				if (_delayTimer.Interval != value)
 				{
-					bool LSaveEnabled = FDelayTimer.Enabled;
-					FDelayTimer.Enabled = false;
-					FDelayTimer.Interval = value;
-					if (FDelayTimer.Interval > 0)
-						FDelayTimer.Enabled = LSaveEnabled;
+					bool saveEnabled = _delayTimer.Enabled;
+					_delayTimer.Enabled = false;
+					_delayTimer.Interval = value;
+					if (_delayTimer.Interval > 0)
+						_delayTimer.Enabled = saveEnabled;
 				}
 			}
 		}
 		
 		[Browsable(false)]
-		public DataField DataField { get { return FLink.DataField; } }
+		public DataField DataField { get { return _link.DataField; } }
 
 		/// <summary> Controls the internal getting and setting of the DataField's value. </summary>
 		protected virtual Image FieldValue
@@ -199,11 +199,11 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			{ 
 				if ((DataField != null) && DataField.HasValue())
 				{
-					using (Stream LStream = DataField.Value.OpenStream())
+					using (Stream stream = DataField.Value.OpenStream())
 					{
-						MemoryStream LCopyStream = new MemoryStream();
-						StreamUtility.CopyStream(LStream, LCopyStream);
-						return Image.FromStream(LCopyStream);
+						MemoryStream copyStream = new MemoryStream();
+						StreamUtility.CopyStream(stream, copyStream);
+						return Image.FromStream(copyStream);
 					}
 				}
 				return null;
@@ -212,13 +212,13 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			{
 				if (value != null)
 				{
-					using (DAE.Runtime.Data.Scalar LNewValue = new DAE.Runtime.Data.Scalar(Link.DataSet.Process.ValueManager, Link.DataSet.Process.DataTypes.SystemGraphic))
+					using (DAE.Runtime.Data.Scalar newValue = new DAE.Runtime.Data.Scalar(Link.DataSet.Process.ValueManager, Link.DataSet.Process.DataTypes.SystemGraphic))
 					{
-						using (Stream LStream = LNewValue.OpenStream())
+						using (Stream stream = newValue.OpenStream())
 						{
-							value.Save(LStream, value.RawFormat);
+							value.Save(stream, value.RawFormat);
 						}
-						DataField.Value = LNewValue;
+						DataField.Value = newValue;
 					}
 				}
 				else
@@ -228,7 +228,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		private void EnsureEdit()
 		{
-			if (!FLink.Edit())
+			if (!_link.Edit())
 				throw new ControlsException(ControlsException.Codes.InvalidViewState);
 		}
 
@@ -243,7 +243,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				{
 					EnsureEdit();
 					base.Image = value;
-					FLink.SaveRequested();
+					_link.SaveRequested();
 				}
 			}
 		}
@@ -256,34 +256,34 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			set { base.Enabled = value; }
 		}
 
-		protected virtual void UpdateReadOnly(object ASender, EventArgs AArgs)
+		protected virtual void UpdateReadOnly(object sender, EventArgs args)
 		{
 			if (!DesignMode)
 			{
-				base.ReadOnly = !FLink.Active || FLink.ReadOnly;
-				base.Enabled = FLink.Active && !FLink.ReadOnly;
+				base.ReadOnly = !_link.Active || _link.ReadOnly;
+				base.Enabled = _link.Active && !_link.ReadOnly;
 			}
 		}
 
-		private bool FHaveValue;
-		public override bool HasValue {	get { return FHaveValue; } }
-		private void SetHaveValue(bool AValue)
+		private bool _haveValue;
+		public override bool HasValue {	get { return _haveValue; } }
+		private void SetHaveValue(bool value)
 		{
-			FHaveValue = AValue;
+			_haveValue = value;
 			UpdateBackColor();
 		}
 
 		protected override void InternalUpdateBackColor()
 		{
-			if (!FLink.Active)
+			if (!_link.Active)
 				BackColor = ValueBackColor;
 			else
 				base.InternalUpdateBackColor();
 		}
 
-		protected override void OnImageChanged(EventArgs AArgs)
+		protected override void OnImageChanged(EventArgs args)
 		{
-			base.OnImageChanged(AArgs);
+			base.OnImageChanged(args);
 			SetHaveValue(DataField != null);
 		}
 
@@ -294,44 +294,44 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			SetHaveValue((DataField != null) && DataField.HasValue());
 		}
 
-		private void DelayTimerTick(object ASender, EventArgs AArgs)
+		private void DelayTimerTick(object sender, EventArgs args)
 		{
-			FDelayTimer.Enabled = false;
+			_delayTimer.Enabled = false;
 			LoadImage();
 		}
 
-		protected virtual void FieldChanged(DataLink ALink, DataSet ADataSet, DataField AField)
+		protected virtual void FieldChanged(DataLink link, DataSet dataSet, DataField field)
 		{
-			FDelayTimer.Enabled = false;
-			if (FAutoDisplay && !FLink.Modified)
+			_delayTimer.Enabled = false;
+			if (_autoDisplay && !_link.Modified)
 			{
-				if (FDelayTimer.Interval > 0)
-					FDelayTimer.Enabled = true;
+				if (_delayTimer.Interval > 0)
+					_delayTimer.Enabled = true;
 				else
 					LoadImage();
 			}
 		}
 
-		protected virtual void SaveRequested(DataLink ALink, DataSet ADataSet)
+		protected virtual void SaveRequested(DataLink link, DataSet dataSet)
 		{
-			if (FLink.DataField != null)
+			if (_link.DataField != null)
 				FieldValue = Image;
 		}
 
 		protected void Reset()
 		{
-			FLink.Reset();
+			_link.Reset();
 		}
 		
-		protected override void OnLeave(EventArgs AEventArgs)
+		protected override void OnLeave(EventArgs eventArgs)
 		{
-			base.OnLeave(AEventArgs);
+			base.OnLeave(eventArgs);
 			if (!Disposing)
 			{
 				try
 				{
-					if (FLink != null)
-						FLink.SaveRequested();
+					if (_link != null)
+						_link.SaveRequested();
 				}
 				catch
 				{
@@ -341,57 +341,57 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 
-		protected override bool IsInputKey(Keys AKeyData)
+		protected override bool IsInputKey(Keys keyData)
 		{
-			switch (AKeyData) 
+			switch (keyData) 
 			{
 				case Keys.Escape:					
-					if (FLink.Modified)
+					if (_link.Modified)
 						return true;
 					break;
 			}
-			return base.IsInputKey(AKeyData);
+			return base.IsInputKey(keyData);
 		}
 
 		public event RequestImageHandler OnImageRequested;
-		private void CaptureClicked(object ASender, EventArgs AArgs)
+		private void CaptureClicked(object sender, EventArgs args)
 		{
 			if (OnImageRequested != null)
 			{
-				FLink.Edit();
+				_link.Edit();
 				OnImageRequested();
 			}
 		}   
 		
-		protected override void OnKeyDown(KeyEventArgs AArgs)
+		protected override void OnKeyDown(KeyEventArgs args)
 		{
-			switch (AArgs.KeyData)
+			switch (args.KeyData)
 			{
 				case System.Windows.Forms.Keys.Escape :
-					if (FLink.Modified)
+					if (_link.Modified)
 					{
 						Reset();
-						AArgs.Handled = true;
+						args.Handled = true;
 					}
 					break;
 				case Keys.Delete:
-					FLink.Edit();
+					_link.Edit();
 					Image = null;
-					AArgs.Handled = true;
+					args.Handled = true;
 					break;
 				case Keys.Control | Keys.H :
 				case Keys.Control | Keys.V :
 				case Keys.Control | Keys.X :
-					FLink.Edit();
+					_link.Edit();
 					break;
 			}
-			base.OnKeyDown(AArgs);
+			base.OnKeyDown(args);
 		}
 
 		const int WM_CONTEXTMENU = 0x007B;
-		protected override void WndProc(ref Message AMessage)
+		protected override void WndProc(ref Message message)
 		{
-			switch (AMessage.Msg)
+			switch (message.Msg)
 			{
 				case NativeMethods.WM_CUT:
 				case NativeMethods.WM_PASTE:
@@ -399,19 +399,19 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 					EnsureEdit();
 					break;
 				case NativeMethods.WM_CLEAR:
-					FLink.Edit();
+					_link.Edit();
 					Image = null;                  
 					break;   					
 				case NativeMethods.WM_CONTEXTMENU:
 					BuildContextMenu();
 					break;
 			}                         
-			base.WndProc(ref AMessage);	
+			base.WndProc(ref message);	
 		}
 
-		private void FocusControl(DataLink ALink, DataSet ADataSet, DataField AField)
+		private void FocusControl(DataLink link, DataSet dataSet, DataField field)
 		{
-			if (AField == DataField)
+			if (field == DataField)
 				Focus();
 		}
 
@@ -433,100 +433,100 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		private void SendWndProc(int NativeMethod)
 		{             
-			Message LMessage = new Message();
-			LMessage.Msg = NativeMethod;
-			WndProc(ref LMessage);
+			Message message = new Message();
+			message.Msg = NativeMethod;
+			WndProc(ref message);
 		}
 
-		protected void PasteClicked(object ASender, EventArgs AArgs)
+		protected void PasteClicked(object sender, EventArgs args)
 		{
 			SendWndProc(NativeMethods.WM_PASTE);
 		}
 
-		protected void CopyClicked(object ASender, EventArgs AArgs)
+		protected void CopyClicked(object sender, EventArgs args)
 		{
 			SendWndProc(NativeMethods.WM_COPY);
 		}
 
-		protected void ClearClicked(object ASender, EventArgs AArgs)
+		protected void ClearClicked(object sender, EventArgs args)
 		{
 			SendWndProc(NativeMethods.WM_CLEAR);
 		}
 
-		protected void LoadClicked(object sender, EventArgs AArgs)
+		protected void LoadClicked(object sender, EventArgs args)
 		{               
-			OpenFileDialog LOpenFileDialog = new OpenFileDialog();
-			LOpenFileDialog.Filter = Strings.Get("DBImageAspect.OpenFileDialog.Filter"); 
-			if (LOpenFileDialog.ShowDialog() == DialogResult.OK)
+			OpenFileDialog openFileDialog = new OpenFileDialog();
+			openFileDialog.Filter = Strings.Get("DBImageAspect.OpenFileDialog.Filter"); 
+			if (openFileDialog.ShowDialog() == DialogResult.OK)
 			{
-				using (FileStream LImageFile = new FileStream(LOpenFileDialog.FileName, FileMode.Open, FileAccess.Read))
+				using (FileStream imageFile = new FileStream(openFileDialog.FileName, FileMode.Open, FileAccess.Read))
 				{
-					MemoryStream LCopy = new MemoryStream();
-					StreamUtility.CopyStream(LImageFile, LCopy);
-					LCopy.Position = 0;
-					Image = System.Drawing.Image.FromStream(LCopy);
+					MemoryStream copy = new MemoryStream();
+					StreamUtility.CopyStream(imageFile, copy);
+					copy.Position = 0;
+					Image = System.Drawing.Image.FromStream(copy);
 				}
 			}                                                           
 		}
 
-		protected void SaveAsClicked(object sender, EventArgs AArgs)
+		protected void SaveAsClicked(object sender, EventArgs args)
 		{
-			SaveFileDialog LSaveFileDialog = new SaveFileDialog();
-			LSaveFileDialog.Filter = Strings.Get("DBImageAspect.SaveFileDialog.Filter");
-			if (LSaveFileDialog.ShowDialog() == DialogResult.OK)
+			SaveFileDialog saveFileDialog = new SaveFileDialog();
+			saveFileDialog.Filter = Strings.Get("DBImageAspect.SaveFileDialog.Filter");
+			if (saveFileDialog.ShowDialog() == DialogResult.OK)
 			{
-				Image.Save(LSaveFileDialog.FileName);
+				Image.Save(saveFileDialog.FileName);
 			} 
 		}
 
 		protected virtual void InternalBuildContextMenu()
 		{
-			DBImageAspectMenuItem LItem;
+			DBImageAspectMenuItem item;
 
 			// Capture...
-			LItem = new DBImageAspectMenuItem(this, false, true);
-			LItem.Text = Strings.Get("DBImageAspect.Menu.CaptureText");
-			LItem.Click += new EventHandler(CaptureClicked);
-			LItem.DefaultItem = true;
-			ContextMenu.MenuItems.Add(LItem);
+			item = new DBImageAspectMenuItem(this, false, true);
+			item.Text = Strings.Get("DBImageAspect.Menu.CaptureText");
+			item.Click += new EventHandler(CaptureClicked);
+			item.DefaultItem = true;
+			ContextMenu.MenuItems.Add(item);
 
 			// -
 			ContextMenu.MenuItems.Add(new MenuItem("-"));
 
 			//  Load...
-			LItem = new DBImageAspectMenuItem(this, false, true);
-			LItem.Text = Strings.Get("DBImageAspect.Menu.LoadText");
-			LItem.Click += new EventHandler(LoadClicked);	 			
-			ContextMenu.MenuItems.Add(LItem); 
+			item = new DBImageAspectMenuItem(this, false, true);
+			item.Text = Strings.Get("DBImageAspect.Menu.LoadText");
+			item.Click += new EventHandler(LoadClicked);	 			
+			ContextMenu.MenuItems.Add(item); 
 		   
 			// Save As...
-			LItem = new DBImageAspectMenuItem(this, true, false);
-			LItem.Text = Strings.Get("DBImageAspect.Menu.SaveAsText");
-			LItem.Click += new EventHandler(SaveAsClicked);
-			ContextMenu.MenuItems.Add(LItem);
+			item = new DBImageAspectMenuItem(this, true, false);
+			item.Text = Strings.Get("DBImageAspect.Menu.SaveAsText");
+			item.Click += new EventHandler(SaveAsClicked);
+			ContextMenu.MenuItems.Add(item);
 
 			// -
 			ContextMenu.MenuItems.Add(new MenuItem("-"));   
 					
 			// Copy
-			LItem = new DBImageAspectMenuItem(this, true, false);
-			LItem.Text = Strings.Get("DBImageAspect.Menu.CopyText");
-			LItem.Click += new EventHandler(CopyClicked);
-			LItem.Shortcut = Shortcut.CtrlC;
-			ContextMenu.MenuItems.Add(LItem);
+			item = new DBImageAspectMenuItem(this, true, false);
+			item.Text = Strings.Get("DBImageAspect.Menu.CopyText");
+			item.Click += new EventHandler(CopyClicked);
+			item.Shortcut = Shortcut.CtrlC;
+			ContextMenu.MenuItems.Add(item);
 
 			// Paste
-			LItem = new DBImageAspectMenuItem(this, false, true);
-			LItem.Text = Strings.Get("DBImageAspect.Menu.PasteText");
-			LItem.Click += new EventHandler(PasteClicked);
-			LItem.Shortcut = Shortcut.CtrlV;
-			ContextMenu.MenuItems.Add(LItem);
+			item = new DBImageAspectMenuItem(this, false, true);
+			item.Text = Strings.Get("DBImageAspect.Menu.PasteText");
+			item.Click += new EventHandler(PasteClicked);
+			item.Shortcut = Shortcut.CtrlV;
+			ContextMenu.MenuItems.Add(item);
 
 			// Clear
-			LItem = new DBImageAspectMenuItem(this, true, false);
-			LItem.Text = Strings.Get("DBImageAspect.Menu.ClearText");
-			LItem.Click += new EventHandler(ClearClicked);
-			ContextMenu.MenuItems.Add(LItem);
+			item = new DBImageAspectMenuItem(this, true, false);
+			item.Text = Strings.Get("DBImageAspect.Menu.ClearText");
+			item.Click += new EventHandler(ClearClicked);
+			ContextMenu.MenuItems.Add(item);
 
 			if (OnBuildContextMenu != null)
 				OnBuildContextMenu(this, EventArgs.Empty);
@@ -538,11 +538,11 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		{
 			if (ContextMenu != null)
 			{
-				foreach (MenuItem LItem in ContextMenu.MenuItems)
+				foreach (MenuItem item in ContextMenu.MenuItems)
 				{
-					DBImageAspectMenuItem LFileItem = LItem as DBImageAspectMenuItem;
-					if (LFileItem != null)
-						LFileItem.UpdateEnabled();
+					DBImageAspectMenuItem fileItem = item as DBImageAspectMenuItem;
+					if (fileItem != null)
+						fileItem.UpdateEnabled();
 				}
 
 				if (OnUpdateMenuItems != null)
@@ -555,36 +555,36 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 	public class DBImageAspectMenuItem : MenuItem
 	{
-		public DBImageAspectMenuItem(DBImageAspect AFileControl, bool AReadsData, bool AWritesData)
+		public DBImageAspectMenuItem(DBImageAspect fileControl, bool readsData, bool writesData)
 		{
-			FFileControl = AFileControl;
-			FReadsData = AReadsData;
-			FWritesData = AWritesData;
+			_fileControl = fileControl;
+			_readsData = readsData;
+			_writesData = writesData;
 		}
 
-		private DBImageAspect FFileControl;
+		private DBImageAspect _fileControl;
 		public DBImageAspect FileControl
 		{
-			get { return FFileControl; }
+			get { return _fileControl; }
 		}
 
-		private bool FReadsData;
+		private bool _readsData;
 		public bool ReadsData
 		{
-			get { return FReadsData; }
+			get { return _readsData; }
 		}
 
-		private bool FWritesData;
+		private bool _writesData;
 		public bool WritesData
 		{
-			get { return FWritesData; }
+			get { return _writesData; }
 		}
 
 		internal protected virtual void UpdateEnabled()
 		{
 			Enabled =
-				(!FWritesData || !FFileControl.ReadOnly)
-					&& (!FReadsData || FFileControl.HasValue);
+				(!_writesData || !_fileControl.ReadOnly)
+					&& (!_readsData || _fileControl.HasValue);
 		}
 	}
 }

@@ -13,14 +13,14 @@ namespace Alphora.Dataphor.Frontend.Client
 	{
 		// URL
 
-		string FURL = String.Empty;
+		string _uRL = String.Empty;
 		
 		[DefaultValue("")]
 		[Description("A URL pointing to the web page to be loaded.")]
 		public string URL
 		{
-			get	{ return FURL; }
-			set	{ FURL = (new Uri(value)).AbsoluteUri;	}
+			get	{ return _uRL; }
+			set	{ _uRL = (new Uri(value)).AbsoluteUri;	}
 		}
 	}
 }

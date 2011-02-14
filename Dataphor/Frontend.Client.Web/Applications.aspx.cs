@@ -28,25 +28,25 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	
 		private void Page_Load(object sender, System.EventArgs e)
 		{
-			FWebSession = (Web.Session)Session["WebSession"];
-			if (FWebSession == null)
+			_webSession = (Web.Session)Session["WebSession"];
+			if (_webSession == null)
 				Response.Redirect((string)Session["ConnectPage"]);
 
 			// Look for an explicitly specified application ID
-			string LApplicationID = Request.QueryString["ApplicationID"];
+			string applicationID = Request.QueryString["ApplicationID"];
 
 			// Look to see if there is only one application to choose from
-			if ((LApplicationID == null) || (LApplicationID == String.Empty))
+			if ((applicationID == null) || (applicationID == String.Empty))
 			{
-				DAE.Runtime.Data.DataValue LID = FWebSession.Evaluate("if Count(Applications) = 1 then Applications[].ID else String(nil)");
-				if ((LID != null) && !LID.IsNil)
-					LApplicationID = ((DAE.Runtime.Data.Scalar)LID).AsString;
+				DAE.Runtime.Data.DataValue iD = _webSession.Evaluate("if Count(Applications) = 1 then Applications[].ID else String(nil)");
+				if ((iD != null) && !iD.IsNil)
+					applicationID = ((DAE.Runtime.Data.Scalar)iD).AsString;
 			}
 
 			// If found, skip this form and redirect to the main form
-			if ((LApplicationID != null) && (LApplicationID != String.Empty))
+			if ((applicationID != null) && (applicationID != String.Empty))
 			{
-				FWebSession.SetApplication(LApplicationID);
+				_webSession.SetApplication(applicationID);
 				Response.Redirect((string)Session["DefaultPage"]);
 			}
 		}
@@ -74,60 +74,60 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// WebSession
 
-		private Web.Session FWebSession;
+		private Web.Session _webSession;
 		
 		public Web.Session WebSession
 		{
-			get { return FWebSession; }
+			get { return _webSession; }
 		}
 
 		public void WriteApplications()
 		{
-			HtmlTextWriter LWriter = new HtmlTextWriter(Response.Output);
+			HtmlTextWriter writer = new HtmlTextWriter(Response.Output);
 			try
 			{
 				// TODO: Paging
-				Alphora.Dataphor.DAE.IServerExpressionPlan LPlan = WebSession.Pipe.Process.PrepareExpression("Frontend.Applications", null);
+				Alphora.Dataphor.DAE.IServerExpressionPlan plan = WebSession.Pipe.Process.PrepareExpression("Frontend.Applications", null);
 				try
 				{
-					Alphora.Dataphor.DAE.IServerCursor LCursor = LPlan.Open(null);
+					Alphora.Dataphor.DAE.IServerCursor cursor = plan.Open(null);
 					try
 					{
-						using (Alphora.Dataphor.DAE.Runtime.Data.Row LRow = new Alphora.Dataphor.DAE.Runtime.Data.Row(WebSession.Pipe.Process.ValueManager, ((Alphora.Dataphor.DAE.Schema.TableType)LPlan.DataType).CreateRowType()))
+						using (Alphora.Dataphor.DAE.Runtime.Data.Row row = new Alphora.Dataphor.DAE.Runtime.Data.Row(WebSession.Pipe.Process.ValueManager, ((Alphora.Dataphor.DAE.Schema.TableType)plan.DataType).CreateRowType()))
 						{
-							while (LCursor.Next())
+							while (cursor.Next())
 							{
-								LCursor.Select(LRow);
+								cursor.Select(row);
 
-								LWriter.AddAttribute(HtmlTextWriterAttribute.Class, "gridrow");
-								LWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, String.Format("Submit('Applications.aspx?ApplicationID={0}',event)", HttpUtility.UrlEncode((string)LRow["ID"]).Replace("'", @"\'")), true);
-								LWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
+								writer.AddAttribute(HtmlTextWriterAttribute.Class, "gridrow");
+								writer.AddAttribute(HtmlTextWriterAttribute.Onclick, String.Format("Submit('Applications.aspx?ApplicationID={0}',event)", HttpUtility.UrlEncode((string)row["ID"]).Replace("'", @"\'")), true);
+								writer.RenderBeginTag(HtmlTextWriterTag.Tr);
 
-								LWriter.AddAttribute(HtmlTextWriterAttribute.Class, "gridcell");
-								LWriter.AddAttribute("onmouseover", "this.className = 'gridcellover'");
-								LWriter.AddAttribute("onmouseleave", "this.className = 'gridcell'");
-								LWriter.RenderBeginTag(HtmlTextWriterTag.Td);
+								writer.AddAttribute(HtmlTextWriterAttribute.Class, "gridcell");
+								writer.AddAttribute("onmouseover", "this.className = 'gridcellover'");
+								writer.AddAttribute("onmouseleave", "this.className = 'gridcell'");
+								writer.RenderBeginTag(HtmlTextWriterTag.Td);
 
-								LWriter.Write(HttpUtility.HtmlEncode((string)LRow["Description"]));
+								writer.Write(HttpUtility.HtmlEncode((string)row["Description"]));
 
-								LWriter.RenderEndTag();
-								LWriter.RenderEndTag();
+								writer.RenderEndTag();
+								writer.RenderEndTag();
 							}
 						}
 					}
 					finally
 					{
-						LPlan.Close(LCursor);
+						plan.Close(cursor);
 					}
 				}
 				finally
 				{
-					WebSession.Pipe.Process.UnprepareExpression(LPlan);
+					WebSession.Pipe.Process.UnprepareExpression(plan);
 				}
 			}
 			finally
 			{
-				LWriter.Close();
+				writer.Close();
 			}
 		}
 	}

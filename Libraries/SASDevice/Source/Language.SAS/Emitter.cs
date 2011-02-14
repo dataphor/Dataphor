@@ -19,49 +19,49 @@ namespace Alphora.Dataphor.DAE.Language.SAS
 			UseStatementTerminator = false;
 		}
 
-		protected override void EmitExpression(Expression AExpression)
+		protected override void EmitExpression(Expression expression)
 		{
-			if (AExpression is OuterJoinFieldExpression)
+			if (expression is OuterJoinFieldExpression)
 			{
-				EmitQualifiedFieldExpression((QualifiedFieldExpression)AExpression);
+				EmitQualifiedFieldExpression((QualifiedFieldExpression)expression);
 				Append("(+)");
 			}
 			else
-				base.EmitExpression(AExpression);
+				base.EmitExpression(expression);
 		}
 		
-		protected override void EmitAlterTableStatement(AlterTableStatement AStatement)
+		protected override void EmitAlterTableStatement(AlterTableStatement statement)
 		{
 			Indent();
 			AppendFormat("{0} {1} ", Keywords.Alter, Keywords.Table);
-			EmitIdentifier(AStatement.TableName);
+			EmitIdentifier(statement.TableName);
 			
-			for (int LIndex = 0; LIndex < AStatement.AddColumns.Count; LIndex++)
+			for (int index = 0; index < statement.AddColumns.Count; index++)
 			{
 				AppendFormat(" {0} {1}", Keywords.Add, Keywords.BeginGroup);
-				EmitColumnDefinition(AStatement.AddColumns[LIndex]);
+				EmitColumnDefinition(statement.AddColumns[index]);
 				Append(Keywords.EndGroup);
 			}
 			
-			for (int LIndex = 0; LIndex < AStatement.DropColumns.Count; LIndex++)
+			for (int index = 0; index < statement.DropColumns.Count; index++)
 			{
 				AppendFormat(" {0} {1}", Keywords.Drop, Keywords.BeginGroup);
-				EmitIdentifier(AStatement.DropColumns[LIndex].ColumnName);
+				EmitIdentifier(statement.DropColumns[index].ColumnName);
 				Append(Keywords.EndGroup);
 			}
 		}
 
-		protected override void EmitTableSpecifier(TableSpecifier ATableSpecifier)
+		protected override void EmitTableSpecifier(TableSpecifier tableSpecifier)
 		{
-			if (ATableSpecifier.TableExpression is TableExpression)
-				EmitTableExpression((TableExpression)ATableSpecifier.TableExpression);
+			if (tableSpecifier.TableExpression is TableExpression)
+				EmitTableExpression((TableExpression)tableSpecifier.TableExpression);
 			else
-				EmitSubQueryExpression(ATableSpecifier.TableExpression);
+				EmitSubQueryExpression(tableSpecifier.TableExpression);
 				
-			if (ATableSpecifier.TableAlias != String.Empty)
+			if (tableSpecifier.TableAlias != String.Empty)
 			{
 				Append(" ");
-				EmitIdentifier(ATableSpecifier.TableAlias);
+				EmitIdentifier(tableSpecifier.TableAlias);
 			}
 		}
 	}

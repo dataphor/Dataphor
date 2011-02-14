@@ -25,166 +25,166 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
     public abstract class BaseOrderNode : UnaryTableNode
     {
-		protected Schema.Order FRequestedOrder;
+		protected Schema.Order _requestedOrder;
 		public Schema.Order RequestedOrder
 		{
-			get { return FRequestedOrder; }
-			set { FRequestedOrder = value; }
+			get { return _requestedOrder; }
+			set { _requestedOrder = value; }
 		}
 		
-		protected CursorCapability FRequestedCapabilities;
+		protected CursorCapability _requestedCapabilities;
 		public CursorCapability RequestedCapabilities
 		{
-			get { return FRequestedCapabilities; }
-			set { FRequestedCapabilities = value; }
+			get { return _requestedCapabilities; }
+			set { _requestedCapabilities = value; }
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			return Nodes[0].EmitStatement(AMode);
+			return Nodes[0].EmitStatement(mode);
 		}
 		
-		public override void InferPopulateNode(Plan APlan)
+		public override void InferPopulateNode(Plan plan)
 		{
 			if (SourceNode.PopulateNode != null)
-				FPopulateNode = SourceNode.PopulateNode;
+				_populateNode = SourceNode.PopulateNode;
 		}
 		
-		protected bool FIsAccelerator;
+		protected bool _isAccelerator;
 		public bool IsAccelerator
 		{
-			get { return FIsAccelerator; }
-			set { FIsAccelerator = value; }
+			get { return _isAccelerator; }
+			set { _isAccelerator = value; }
 		}
 		
-		public override void DetermineDataType(Plan APlan)		 
+		public override void DetermineDataType(Plan plan)		 
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
-			FTableVar.InheritMetaData(SourceTableVar.MetaData);
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
+			_tableVar.InheritMetaData(SourceTableVar.MetaData);
 
 			CopyTableVarColumns(SourceTableVar.Columns);
 			
-			DetermineRemotable(APlan);
+			DetermineRemotable(plan);
 
 			CopyKeys(SourceTableVar.Keys);
 			CopyOrders(SourceTableVar.Orders);
 			#if UseReferenceDerivation
-			CopySourceReferences(APlan, SourceTableVar.SourceReferences);
-			CopyTargetReferences(APlan, SourceTableVar.TargetReferences);
+			CopySourceReferences(plan, SourceTableVar.SourceReferences);
+			CopyTargetReferences(plan, SourceTableVar.TargetReferences);
 			#endif
 			
-			DetermineOrder(APlan);
+			DetermineOrder(plan);
 			
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 		
-		public virtual void DetermineOrder(Plan APlan)
+		public virtual void DetermineOrder(Plan plan)
 		{
 			// Set up the order columns
-			Order = new Schema.Order(FRequestedOrder.MetaData);
+			Order = new Schema.Order(_requestedOrder.MetaData);
 			Order.IsInherited = false;
 
-			Schema.OrderColumn LNewColumn;			
-			Schema.OrderColumn LColumn;
-			for (int LIndex = 0; LIndex < FRequestedOrder.Columns.Count; LIndex++)
+			Schema.OrderColumn newColumn;			
+			Schema.OrderColumn column;
+			for (int index = 0; index < _requestedOrder.Columns.Count; index++)
 			{
-				LColumn = FRequestedOrder.Columns[LIndex];
-				LNewColumn = new Schema.OrderColumn(TableVar.Columns[LColumn.Column], LColumn.Ascending, LColumn.IncludeNils);
-				LNewColumn.Sort = LColumn.Sort;
-				LNewColumn.IsDefaultSort = LColumn.IsDefaultSort;
-				Error.AssertWarn(LNewColumn.Sort != null, "Sort is null");
-				if (LNewColumn.Sort.HasDependencies())
-					APlan.AttachDependencies(LNewColumn.Sort.Dependencies);
-				Order.Columns.Add(LNewColumn);
+				column = _requestedOrder.Columns[index];
+				newColumn = new Schema.OrderColumn(TableVar.Columns[column.Column], column.Ascending, column.IncludeNils);
+				newColumn.Sort = column.Sort;
+				newColumn.IsDefaultSort = column.IsDefaultSort;
+				Error.AssertWarn(newColumn.Sort != null, "Sort is null");
+				if (newColumn.Sort.HasDependencies())
+					plan.AttachDependencies(newColumn.Sort.Dependencies);
+				Order.Columns.Add(newColumn);
 			}
 			
-			Compiler.EnsureOrderUnique(APlan, TableVar, Order);
+			Compiler.EnsureOrderUnique(plan, TableVar, Order);
 		}
     }
     
 	// operator iOrder(presentation{}) : presentation{}    
     public class OrderNode : BaseOrderNode
     {
-		protected int FSequenceColumnIndex = -1;
-		public int SequenceColumnIndex { get { return FSequenceColumnIndex; } }
+		protected int _sequenceColumnIndex = -1;
+		public int SequenceColumnIndex { get { return _sequenceColumnIndex; } }
 		
-		protected IncludeColumnExpression FSequenceColumn;
+		protected IncludeColumnExpression _sequenceColumn;
 		public IncludeColumnExpression SequenceColumn
 		{
-			get { return FSequenceColumn; }
-			set { FSequenceColumn = value; }
+			get { return _sequenceColumn; }
+			set { _sequenceColumn = value; }
 		}
 		
 		// physical access path used by the order node when device supported
-		protected Schema.Order FPhysicalOrder;
+		protected Schema.Order _physicalOrder;
 		public Schema.Order PhysicalOrder 
 		{ 
-			get { return FPhysicalOrder; } 
-			set { FPhysicalOrder = value; } 
+			get { return _physicalOrder; } 
+			set { _physicalOrder = value; } 
 		}
 		
 		// direction of the physical access path usage
-		protected ScanDirection FScanDirection;
+		protected ScanDirection _scanDirection;
 		public ScanDirection ScanDirection 
 		{ 
-			get { return FScanDirection; } 
-			set { FScanDirection = value; } 
+			get { return _scanDirection; } 
+			set { _scanDirection = value; } 
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			base.DetermineDataType(APlan);
+			base.DetermineDataType(plan);
 
-			if (FSequenceColumn != null)
+			if (_sequenceColumn != null)
 			{
-				Schema.TableVarColumn LColumn =
+				Schema.TableVarColumn column =
 					Compiler.CompileIncludeColumnExpression
 					(
-						APlan,
-						FSequenceColumn,
+						plan,
+						_sequenceColumn,
 						Keywords.Sequence,
-						APlan.DataTypes.SystemInteger,
+						plan.DataTypes.SystemInteger,
 						Schema.TableVarColumnType.Sequence
 					);
-				DataType.Columns.Add(LColumn.Column);
-				TableVar.Columns.Add(LColumn);
-				FSequenceColumnIndex = TableVar.Columns.Count - 1;
+				DataType.Columns.Add(column.Column);
+				TableVar.Columns.Add(column);
+				_sequenceColumnIndex = TableVar.Columns.Count - 1;
 
-				Schema.Key LSequenceKey = new Schema.Key();
-				LSequenceKey.IsInherited = true;
-				LSequenceKey.Columns.Add(LColumn);
-				TableVar.Keys.Add(LSequenceKey);
+				Schema.Key sequenceKey = new Schema.Key();
+				sequenceKey.IsInherited = true;
+				sequenceKey.Columns.Add(column);
+				TableVar.Keys.Add(sequenceKey);
 			}
 		}
 		
-		public override void DetermineCursorBehavior(Plan APlan)
+		public override void DetermineCursorBehavior(Plan plan)
 		{
-			FRequestedCursorType = APlan.CursorContext.CursorType;
-			FCursorIsolation = APlan.CursorContext.CursorIsolation;
+			_requestedCursorType = plan.CursorContext.CursorType;
+			_cursorIsolation = plan.CursorContext.CursorIsolation;
 
 			if (ShouldExecute())
 			{
-				FCursorType = CursorType.Static;
-				FCursorCapabilities = 
+				_cursorType = CursorType.Static;
+				_cursorCapabilities = 
 					CursorCapability.Navigable | 
 					CursorCapability.BackwardsNavigable |
 					CursorCapability.Bookmarkable |
 					CursorCapability.Searchable |
 					CursorCapability.Countable |
 					(
-						(APlan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
+						(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
 						(SourceNode.CursorCapabilities & CursorCapability.Updateable)
 					);
 			}
 			else
 			{
-				FCursorType = SourceNode.CursorType;
-				FCursorCapabilities = SourceNode.CursorCapabilities;
+				_cursorType = SourceNode.CursorType;
+				_cursorCapabilities = SourceNode.CursorCapabilities;
 			}
 		}
 		
@@ -195,62 +195,62 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return (SourceNode.Order == null) || !Order.Equivalent(SourceNode.Order) || ((SourceNode.CursorCapabilities & RequestedCapabilities) != RequestedCapabilities);
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
 			if (ShouldExecute())
 			{
-				OrderTable LTable = new OrderTable(this, AProgram);
+				OrderTable table = new OrderTable(this, program);
 				try
 				{
-					LTable.Open();
-					return LTable;
+					table.Open();
+					return table;
 				}
 				catch
 				{
-					LTable.Dispose();
+					table.Dispose();
 					throw;
 				}
 			}
 			
-			return SourceNode.Execute(AProgram);
+			return SourceNode.Execute(program);
 		}
 		
-		public override void JoinApplicationTransaction(Program AProgram, Row ARow)
+		public override void JoinApplicationTransaction(Program program, Row row)
 		{
-			if (FSequenceColumnIndex >= 0)
+			if (_sequenceColumnIndex >= 0)
 			{
 				// Exclude any columns from AKey which were included by this node
-				Schema.RowType LRowType = new Schema.RowType();
-				foreach (Schema.Column LColumn in ARow.DataType.Columns)
-					if (SourceNode.DataType.Columns.ContainsName(LColumn.Name))
-						LRowType.Columns.Add(LColumn.Copy());
+				Schema.RowType rowType = new Schema.RowType();
+				foreach (Schema.Column column in row.DataType.Columns)
+					if (SourceNode.DataType.Columns.ContainsName(column.Name))
+						rowType.Columns.Add(column.Copy());
 
-				Row LRow = new Row(AProgram.ValueManager, LRowType);
+				Row localRow = new Row(program.ValueManager, rowType);
 				try
 				{
-					ARow.CopyTo(LRow);
-					SourceNode.JoinApplicationTransaction(AProgram, LRow);
+					row.CopyTo(localRow);
+					SourceNode.JoinApplicationTransaction(program, localRow);
 				}
 				finally
 				{
-					LRow.Dispose();
+					localRow.Dispose();
 				}
 			}
 			else
-				base.JoinApplicationTransaction(AProgram, ARow);
+				base.JoinApplicationTransaction(program, row);
 		}
 
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
 			if (IsAccelerator)
-				return Nodes[0].EmitStatement(AMode);
+				return Nodes[0].EmitStatement(mode);
 			else
 			{
-				OrderExpression LOrderExpression = new OrderExpression();
-				LOrderExpression.Expression = (Expression)Nodes[0].EmitStatement(AMode);
-				for (int LIndex = 0; LIndex < RequestedOrder.Columns.Count; LIndex++)
-					LOrderExpression.Columns.Add(RequestedOrder.Columns[LIndex].EmitStatement(AMode));
-				return LOrderExpression;
+				OrderExpression orderExpression = new OrderExpression();
+				orderExpression.Expression = (Expression)Nodes[0].EmitStatement(mode);
+				for (int index = 0; index < RequestedOrder.Columns.Count; index++)
+					orderExpression.Columns.Add(RequestedOrder.Columns[index].EmitStatement(mode));
+				return orderExpression;
 			}
 		}
     }
@@ -259,34 +259,34 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator iCopy(const AValue : presentation) : presentation
     public class CopyNode : BaseOrderNode // Internal node used to materialize an intermediate result set, used to ensure static cursors and certain cursor capabilities like countable
     {
-		public override void DetermineCursorBehavior(Plan APlan)
+		public override void DetermineCursorBehavior(Plan plan)
 		{
-			FCursorType = CursorType.Static;
-			FRequestedCursorType = APlan.CursorContext.CursorType;
-			FCursorCapabilities = 
+			_cursorType = CursorType.Static;
+			_requestedCursorType = plan.CursorContext.CursorType;
+			_cursorCapabilities = 
 				CursorCapability.Navigable | 
 				CursorCapability.BackwardsNavigable |
 				CursorCapability.Bookmarkable |
 				CursorCapability.Searchable |
 				CursorCapability.Countable |
 				(
-					(APlan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
+					(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
 					(SourceNode.CursorCapabilities & CursorCapability.Updateable)
 				);
-			FCursorIsolation = APlan.CursorContext.CursorIsolation;
+			_cursorIsolation = plan.CursorContext.CursorIsolation;
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			CopyTable LTable = new CopyTable(this, AProgram);
+			CopyTable table = new CopyTable(this, program);
 			try
 			{
-				LTable.Open();
-				return LTable;
+				table.Open();
+				return table;
 			}
 			catch
 			{
-				LTable.Dispose();
+				table.Dispose();
 				throw;
 			}
 		}
@@ -295,54 +295,54 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	public class BrowseVariant
 	{
 		public BrowseVariant() : base(){}
-		public BrowseVariant(PlanNode ANode, int AOriginIndex, bool AForward, bool AInclusive) : base()
+		public BrowseVariant(PlanNode node, int originIndex, bool forward, bool inclusive) : base()
 		{
-			FNode = ANode;
-			FOriginIndex = AOriginIndex;
-			FForward = AForward;
-			FInclusive = AInclusive;
+			_node = node;
+			_originIndex = originIndex;
+			_forward = forward;
+			_inclusive = inclusive;
 		}
 		
-		private PlanNode FNode;
-		public PlanNode Node { get { return FNode; } set { FNode = value; } }
+		private PlanNode _node;
+		public PlanNode Node { get { return _node; } set { _node = value; } }
 		
-		private int FOriginIndex = -1;
-		public int OriginIndex { get { return FOriginIndex; } set { FOriginIndex = value; } }
+		private int _originIndex = -1;
+		public int OriginIndex { get { return _originIndex; } set { _originIndex = value; } }
 		
-		private bool FForward;
-		public bool Forward { get { return FForward; } set { FForward = value; } }
+		private bool _forward;
+		public bool Forward { get { return _forward; } set { _forward = value; } }
 		
-		private bool FInclusive;
-		public bool Inclusive { get { return FInclusive; } set { FInclusive = value; } }
+		private bool _inclusive;
+		public bool Inclusive { get { return _inclusive; } set { _inclusive = value; } }
 	}
 	
 	public class BrowseVariants : List
 	{		
-		public new BrowseVariant this[int AIndex]
+		public new BrowseVariant this[int index]
 		{
-			get { return (BrowseVariant)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (BrowseVariant)base[index]; }
+			set { base[index] = value; }
 		}
 		
-		public BrowseVariant this[int AOriginIndex, bool AForward, bool AInclusive]
+		public BrowseVariant this[int originIndex, bool forward, bool inclusive]
 		{
 			get
 			{
-				int LIndex = IndexOf(AOriginIndex, AForward, AInclusive);
-				if (LIndex >= 0)
-					return this[LIndex];
-				throw new RuntimeException(RuntimeException.Codes.BrowseVariantNotFound, AOriginIndex.ToString(), AForward.ToString(), AInclusive.ToString());
+				int index = IndexOf(originIndex, forward, inclusive);
+				if (index >= 0)
+					return this[index];
+				throw new RuntimeException(RuntimeException.Codes.BrowseVariantNotFound, originIndex.ToString(), forward.ToString(), inclusive.ToString());
 			}
 		}
 		
-		public int IndexOf(int AOriginIndex, bool AForward, bool AInclusive)
+		public int IndexOf(int originIndex, bool forward, bool inclusive)
 		{
-			BrowseVariant LBrowseVariant;
-			for (int LIndex = 0; LIndex < Count; LIndex++)
+			BrowseVariant browseVariant;
+			for (int index = 0; index < Count; index++)
 			{
-				LBrowseVariant = this[LIndex];
-				if ((LBrowseVariant.OriginIndex == AOriginIndex) && (LBrowseVariant.Forward == AForward) && (LBrowseVariant.Inclusive == AInclusive))
-					return LIndex;
+				browseVariant = this[index];
+				if ((browseVariant.OriginIndex == originIndex) && (browseVariant.Forward == forward) && (browseVariant.Inclusive == inclusive))
+					return index;
 			}
 			return -1;
 		}
@@ -355,34 +355,34 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IgnoreUnsupported = true;
 		}
 		
-		public override void DetermineCursorBehavior(Plan APlan)
+		public override void DetermineCursorBehavior(Plan plan)
 		{
-			FCursorType = SourceNode.CursorType;
-			FRequestedCursorType = APlan.CursorContext.CursorType;
-			FCursorCapabilities = 
+			_cursorType = SourceNode.CursorType;
+			_requestedCursorType = plan.CursorContext.CursorType;
+			_cursorCapabilities = 
 				CursorCapability.Navigable | 
 				CursorCapability.BackwardsNavigable |
 				CursorCapability.Bookmarkable |
 				CursorCapability.Searchable |
 				(
-					(APlan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
+					(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
 					(SourceNode.CursorCapabilities & CursorCapability.Updateable)
 				);
-			FCursorIsolation = APlan.CursorContext.CursorIsolation;
+			_cursorIsolation = plan.CursorContext.CursorIsolation;
 		}
 		
-		public override void DetermineDevice(Plan APlan)
+		public override void DetermineDevice(Plan plan)
 		{
-			base.DetermineDevice(APlan);
-			if ((FCursorCapabilities & CursorCapability.Updateable) == 0)
-				FSymbols = Compiler.SnapshotSymbols(APlan);
+			base.DetermineDevice(plan);
+			if ((_cursorCapabilities & CursorCapability.Updateable) == 0)
+				_symbols = Compiler.SnapshotSymbols(plan);
 		}
 		
-		public override void BindToProcess(Plan APlan)
+		public override void BindToProcess(Plan plan)
 		{
-			foreach (BrowseVariant LVariant in FBrowseVariants)
-				LVariant.Node.BindToProcess(APlan);
-			base.BindToProcess(APlan);
+			foreach (BrowseVariant variant in _browseVariants)
+				variant.Node.BindToProcess(plan);
+			base.BindToProcess(plan);
 		}
 		
 		/*
@@ -413,109 +413,109 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						[and] current order column is not null
 		*/
 		
-		protected PlanNode EmitBrowseColumnNode(Plan APlan, Schema.OrderColumn AColumn, string AInstruction)
+		protected PlanNode EmitBrowseColumnNode(Plan plan, Schema.OrderColumn column, string instruction)
 		{
-			PlanNode LNode = 
+			PlanNode node = 
 				Compiler.EmitBinaryNode
 				(
-					APlan, 
-					Compiler.EmitIdentifierNode(APlan, AColumn.Column.Name), 
-					AInstruction, 
-					Compiler.EmitIdentifierNode(APlan, Schema.Object.Qualify(AColumn.Column.Name, Keywords.Origin))
+					plan, 
+					Compiler.EmitIdentifierNode(plan, column.Column.Name), 
+					instruction, 
+					Compiler.EmitIdentifierNode(plan, Schema.Object.Qualify(column.Column.Name, Keywords.Origin))
 				);
 				
-			if (AColumn.Column.IsNilable && AColumn.IncludeNils)
+			if (column.Column.IsNilable && column.IncludeNils)
 			{
-				switch (AInstruction)
+				switch (instruction)
 				{
 					case Instructions.Equal :
-						LNode =
+						node =
 							Compiler.EmitBinaryNode
 							(
-								APlan,
+								plan,
 								Compiler.EmitBinaryNode
 								(
-									APlan,
-									EmitBrowseNilNode(APlan, AColumn.Column, true),
+									plan,
+									EmitBrowseNilNode(plan, column.Column, true),
 									Instructions.And,
-									EmitOriginNilNode(APlan, AColumn.Column, true)
+									EmitOriginNilNode(plan, column.Column, true)
 								),
 								Instructions.Or,
-								LNode
+								node
 							);
 					break;
 					
 					case Instructions.InclusiveGreater :
-						LNode =
+						node =
 							Compiler.EmitBinaryNode
 							(
-								APlan,
-								EmitOriginNilNode(APlan, AColumn.Column, true),
+								plan,
+								EmitOriginNilNode(plan, column.Column, true),
 								Instructions.Or,
-								LNode
+								node
 							);
 					break;
 					
 					case Instructions.Greater :
-						LNode =
+						node =
 							Compiler.EmitBinaryNode
 							(
-								APlan,
+								plan,
 								Compiler.EmitBinaryNode
 								(
-									APlan,
-									EmitOriginNilNode(APlan, AColumn.Column, true),
+									plan,
+									EmitOriginNilNode(plan, column.Column, true),
 									Instructions.And,
-									EmitBrowseNilNode(APlan, AColumn.Column, false)
+									EmitBrowseNilNode(plan, column.Column, false)
 								),
 								Instructions.Or,
-								LNode
+								node
 							);
 					break;
 					
 					case Instructions.InclusiveLess :
-						LNode =
+						node =
 							Compiler.EmitBinaryNode
 							(
-								APlan,
-								EmitBrowseNilNode(APlan, AColumn.Column, true),
+								plan,
+								EmitBrowseNilNode(plan, column.Column, true),
 								Instructions.Or,
-								LNode
+								node
 							);
 					break;
 
 					case Instructions.Less :
-						LNode =
+						node =
 							Compiler.EmitBinaryNode
 							(
-								APlan,
+								plan,
 								Compiler.EmitBinaryNode
 								(
-									APlan,
-									EmitBrowseNilNode(APlan, AColumn.Column, true),
+									plan,
+									EmitBrowseNilNode(plan, column.Column, true),
 									Instructions.And,
-									EmitOriginNilNode(APlan, AColumn.Column, false)
+									EmitOriginNilNode(plan, column.Column, false)
 								),
 								Instructions.Or,
-								LNode
+								node
 							);
 					break;
 				}
 			}
 			
-			return LNode;
+			return node;
 		}
 
-		protected PlanNode EmitBrowseNilNode(Plan APlan, Schema.TableVarColumn AColumn, bool AIsNil)
+		protected PlanNode EmitBrowseNilNode(Plan plan, Schema.TableVarColumn column, bool isNil)
 		{
-			if (AIsNil)
+			if (isNil)
 			{
 				return 
 					Compiler.EmitCallNode
 					(
-						APlan, 
+						plan, 
 						"IsNil",
-						new PlanNode[]{Compiler.EmitIdentifierNode(APlan, AColumn.Name)}
+						new PlanNode[]{Compiler.EmitIdentifierNode(plan, column.Name)}
 					);
 			}
 			else
@@ -523,308 +523,308 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return 
 					Compiler.EmitUnaryNode
 					(
-						APlan,
+						plan,
 						Instructions.Not,
-						EmitBrowseNilNode(APlan, AColumn, true)
+						EmitBrowseNilNode(plan, column, true)
 					);
 			}
 		}
 		
-		protected PlanNode EmitOriginNilNode(Plan APlan, Schema.TableVarColumn AColumn, bool AIsNil)
+		protected PlanNode EmitOriginNilNode(Plan plan, Schema.TableVarColumn column, bool isNil)
 		{
-			if (AIsNil)
+			if (isNil)
 				return
 					Compiler.EmitCallNode
 					(
-						APlan, 
+						plan, 
 						"IsNil", 
-						new PlanNode[]{Compiler.EmitIdentifierNode(APlan, Schema.Object.Qualify(AColumn.Name, Keywords.Origin))}
+						new PlanNode[]{Compiler.EmitIdentifierNode(plan, Schema.Object.Qualify(column.Name, Keywords.Origin))}
 					);
 			else
 				return
 					Compiler.EmitUnaryNode
 					(
-						APlan,
+						plan,
 						Instructions.Not,
-						EmitOriginNilNode(APlan, AColumn, true)
+						EmitOriginNilNode(plan, column, true)
 					);
 		}
         
 		protected PlanNode EmitBrowseComparisonNode
 		(
-			Plan APlan,
-			Schema.Order AOrder, 
-			bool AForward, 
-			bool AInclusive, 
-			int AOriginIndex
+			Plan plan,
+			Schema.Order order, 
+			bool forward, 
+			bool inclusive, 
+			int originIndex
 		)
 		{
-			PlanNode LNode = null;
-			Schema.OrderColumn LOriginColumn = AOrder.Columns[AOriginIndex];
-			if (LOriginColumn.Ascending != AForward)
+			PlanNode node = null;
+			Schema.OrderColumn originColumn = order.Columns[originIndex];
+			if (originColumn.Ascending != forward)
 			{
-				if (AInclusive && (AOriginIndex == AOrder.Columns.Count - 1))
-					LNode = EmitBrowseColumnNode(APlan, LOriginColumn, Instructions.InclusiveLess);
+				if (inclusive && (originIndex == order.Columns.Count - 1))
+					node = EmitBrowseColumnNode(plan, originColumn, Instructions.InclusiveLess);
 				else
-					LNode = EmitBrowseColumnNode(APlan, LOriginColumn, Instructions.Less);
+					node = EmitBrowseColumnNode(plan, originColumn, Instructions.Less);
 			}
 			else
 			{
-				if (AInclusive && (AOriginIndex == AOrder.Columns.Count - 1))
-					LNode = EmitBrowseColumnNode(APlan, LOriginColumn, Instructions.InclusiveGreater);
+				if (inclusive && (originIndex == order.Columns.Count - 1))
+					node = EmitBrowseColumnNode(plan, originColumn, Instructions.InclusiveGreater);
 				else
-					LNode = EmitBrowseColumnNode(APlan, LOriginColumn, Instructions.Greater);
+					node = EmitBrowseColumnNode(plan, originColumn, Instructions.Greater);
 			}
-			return LNode;
+			return node;
 		}
         
 		protected PlanNode EmitBrowseOriginNode
 		(
-			Plan APlan,
-			Schema.Order AOrder, 
-			bool AForward, 
-			bool AInclusive, 
-			int AOriginIndex
+			Plan plan,
+			Schema.Order order, 
+			bool forward, 
+			bool inclusive, 
+			int originIndex
 		)
 		{
-			PlanNode LNode = null;
-			for (int LIndex = 0; LIndex < AOriginIndex; LIndex++)
+			PlanNode node = null;
+			for (int index = 0; index < originIndex; index++)
 			{
-				PlanNode LEqualNode = EmitBrowseColumnNode(APlan, AOrder.Columns[LIndex], Instructions.Equal);
+				PlanNode equalNode = EmitBrowseColumnNode(plan, order.Columns[index], Instructions.Equal);
 						
-				LNode = Compiler.AppendNode(APlan, LNode, Instructions.And, LEqualNode);
+				node = Compiler.AppendNode(plan, node, Instructions.And, equalNode);
 			}
 			
-			LNode = 
+			node = 
 				Compiler.AppendNode
 				(
-					APlan, 
-					LNode, 
+					plan, 
+					node, 
 					Instructions.And, 
-					EmitBrowseComparisonNode(APlan, AOrder, AForward, AInclusive, AOriginIndex)
+					EmitBrowseComparisonNode(plan, order, forward, inclusive, originIndex)
 				);
 			
-			for (int LIndex = AOriginIndex + 1; LIndex < AOrder.Columns.Count; LIndex++)
-				if (AOrder.Columns[LIndex].Column.IsNilable && !AOrder.Columns[LIndex].IncludeNils)
-					LNode = 
+			for (int index = originIndex + 1; index < order.Columns.Count; index++)
+				if (order.Columns[index].Column.IsNilable && !order.Columns[index].IncludeNils)
+					node = 
 						Compiler.AppendNode
 						(
-							APlan, 
-							LNode, 
+							plan, 
+							node, 
 							Instructions.And, 
-							EmitBrowseNilNode(APlan, AOrder.Columns[LIndex].Column, false)
+							EmitBrowseNilNode(plan, order.Columns[index].Column, false)
 						);
-			return LNode;
+			return node;
 		}
         
 		protected PlanNode EmitBrowseConditionNode
 		(
-			Plan APlan,
-			Schema.Order AOrder, 
-			Schema.IRowType AOrigin, 
-			bool AForward, 
-			bool AInclusive
+			Plan plan,
+			Schema.Order order, 
+			Schema.IRowType origin, 
+			bool forward, 
+			bool inclusive
 		)
 		{
-			PlanNode LNode = null;
-			for (int LOrderIndex = AOrder.Columns.Count - 1; LOrderIndex >= 0; LOrderIndex--)
+			PlanNode node = null;
+			for (int orderIndex = order.Columns.Count - 1; orderIndex >= 0; orderIndex--)
 			{
-				if ((AOrigin != null) && (LOrderIndex < AOrigin.Columns.Count))
-					LNode = 
+				if ((origin != null) && (orderIndex < origin.Columns.Count))
+					node = 
 						Compiler.AppendNode
 						(
-							APlan, 
-							LNode, 
+							plan, 
+							node, 
 							Instructions.Or, 
-							EmitBrowseOriginNode(APlan, AOrder, AForward, AInclusive, LOrderIndex)
+							EmitBrowseOriginNode(plan, order, forward, inclusive, orderIndex)
 						);
 				else
 					#if USEINCLUDENILSWITHBROWSE
-					if (AOrder.Columns[LOrderIndex].Column.IsNilable && !AOrder.Columns[LOrderIndex].IncludeNils)
+					if (order.Columns[orderIndex].Column.IsNilable && !order.Columns[orderIndex].IncludeNils)
 					#endif
 					{
-						LNode = 
+						node = 
 							Compiler.AppendNode
 							(
-								APlan, 
-								LNode, 
+								plan, 
+								node, 
 								Instructions.And, 
-								EmitBrowseNilNode(APlan, AOrder.Columns[LOrderIndex].Column, false)
+								EmitBrowseNilNode(plan, order.Columns[orderIndex].Column, false)
 							);
 					}
 			}
 
-			if (LNode == null)
-				LNode = new ValueNode(APlan.DataTypes.SystemBoolean, AInclusive);
+			if (node == null)
+				node = new ValueNode(plan.DataTypes.SystemBoolean, inclusive);
 
-			return LNode;
+			return node;
 		}
 		
-		protected BrowseVariants FBrowseVariants = new BrowseVariants();
-		public BrowseVariants BrowseVariants { get { return FBrowseVariants; } }
+		protected BrowseVariants _browseVariants = new BrowseVariants();
+		public BrowseVariants BrowseVariants { get { return _browseVariants; } }
 		
-		protected PlanNode EmitBrowseVariantNode(Plan APlan, int AOriginIndex, bool AForward, bool AInclusive)
+		protected PlanNode EmitBrowseVariantNode(Plan plan, int originIndex, bool forward, bool inclusive)
 		{
-			Schema.Order LOriginOrder = new Schema.Order();
-			for (int LIndex = 0; LIndex <= AOriginIndex; LIndex++)
-				LOriginOrder.Columns.Add(new Schema.OrderColumn(Order.Columns[LIndex].Column, Order.Columns[LIndex].Ascending, Order.Columns[LIndex].IncludeNils));
-			Schema.IRowType LOrigin = new Schema.RowType(LOriginOrder.Columns, Keywords.Origin);
-			APlan.PushCursorContext(new CursorContext(CursorType, CursorCapabilities & ~(CursorCapability.BackwardsNavigable | CursorCapability.Bookmarkable | CursorCapability.Searchable | CursorCapability.Countable), CursorIsolation));
+			Schema.Order originOrder = new Schema.Order();
+			for (int index = 0; index <= originIndex; index++)
+				originOrder.Columns.Add(new Schema.OrderColumn(Order.Columns[index].Column, Order.Columns[index].Ascending, Order.Columns[index].IncludeNils));
+			Schema.IRowType origin = new Schema.RowType(originOrder.Columns, Keywords.Origin);
+			plan.PushCursorContext(new CursorContext(CursorType, CursorCapabilities & ~(CursorCapability.BackwardsNavigable | CursorCapability.Bookmarkable | CursorCapability.Searchable | CursorCapability.Countable), CursorIsolation));
 			try
 			{
-				APlan.EnterRowContext();
+				plan.EnterRowContext();
 				try
 				{
-					APlan.Symbols.Push(new Symbol(String.Empty, LOrigin));
+					plan.Symbols.Push(new Symbol(String.Empty, origin));
 					try
 					{
-						PlanNode LResultNode;
-						PlanNode LSourceNode = GetSourceNode(APlan);
-						APlan.Symbols.Push(new Symbol(String.Empty, DataType.RowType));
+						PlanNode resultNode;
+						PlanNode sourceNode = GetSourceNode(plan);
+						plan.Symbols.Push(new Symbol(String.Empty, DataType.RowType));
 						try
 						{
-							LResultNode =
+							resultNode =
 								Compiler.EmitOrderNode
 								(
-									APlan,
+									plan,
 									Compiler.EmitRestrictNode
 									(
-										APlan,
-										LSourceNode,
+										plan,
+										sourceNode,
 										EmitBrowseConditionNode
 										(
-											APlan,
-											AOriginIndex < 0 ? Order : LOriginOrder,
-											AOriginIndex < 0 ? null : LOrigin,
-											AForward,
-											AInclusive
+											plan,
+											originIndex < 0 ? Order : originOrder,
+											originIndex < 0 ? null : origin,
+											forward,
+											inclusive
 										)
 									),
-									new Schema.Order(Order, !AForward),
+									new Schema.Order(Order, !forward),
 									true
 								);
 						}
 						finally
 						{
-							APlan.Symbols.Pop();
+							plan.Symbols.Pop();
 						}
 
-						LResultNode = Compiler.OptimizeNode(APlan, LResultNode);
-						LResultNode = Compiler.BindNode(APlan, LResultNode);
-						return LResultNode;
+						resultNode = Compiler.OptimizeNode(plan, resultNode);
+						resultNode = Compiler.BindNode(plan, resultNode);
+						return resultNode;
 					}
 					finally
 					{
-						APlan.Symbols.Pop();
+						plan.Symbols.Pop();
 					}
 				}
 				finally
 				{
-					APlan.ExitRowContext();
+					plan.ExitRowContext();
 				}
 			}
 			finally
 			{
-				APlan.PopCursorContext();
+				plan.PopCursorContext();
 			}
 		}
 		
-		private Expression FSourceExpression;
+		private Expression _sourceExpression;
 		private void EnsureSourceExpression()
 		{
-			if (FSourceExpression == null)
-				FSourceExpression = (Expression)SourceNode.EmitStatement(EmitMode.ForCopy);
+			if (_sourceExpression == null)
+				_sourceExpression = (Expression)SourceNode.EmitStatement(EmitMode.ForCopy);
 		}
 		
-		private PlanNode FSourceNode;		
-		private PlanNode GetSourceNode(Plan APlan)
+		private PlanNode _sourceNode;		
+		private PlanNode GetSourceNode(Plan plan)
 		{
-			if (FSourceNode == null)
-				FSourceNode = Compiler.CompileExpression(APlan, FSourceExpression);
-			return FSourceNode;
+			if (_sourceNode == null)
+				_sourceNode = Compiler.CompileExpression(plan, _sourceExpression);
+			return _sourceNode;
 		}
 		
-		public bool HasBrowseVariant(int AOriginIndex, bool AForward, bool AInclusive)
+		public bool HasBrowseVariant(int originIndex, bool forward, bool inclusive)
 		{
-			return FBrowseVariants.IndexOf(AOriginIndex, AForward, AInclusive) >= 0;
+			return _browseVariants.IndexOf(originIndex, forward, inclusive) >= 0;
 		}
 		
-		public void CompileBrowseVariant(Program AProgram, int AOriginIndex, bool AForward, bool AInclusive)
+		public void CompileBrowseVariant(Program program, int originIndex, bool forward, bool inclusive)
 		{
-			Plan LPlan = new Plan(AProgram.ServerProcess);
+			Plan plan = new Plan(program.ServerProcess);
 			try
 			{
-				LPlan.PushATCreationContext();
+				plan.PushATCreationContext();
 				try
 				{
-					PushSymbols(LPlan, FSymbols);
+					PushSymbols(plan, _symbols);
 					try
 					{
 						EnsureSourceExpression();
-						FBrowseVariants.Add
+						_browseVariants.Add
 						(
 							new BrowseVariant
 							(
 								EmitBrowseVariantNode
 								(
-									LPlan, 
-									AOriginIndex, 
-									AForward, 
-									AInclusive
+									plan, 
+									originIndex, 
+									forward, 
+									inclusive
 								), 
-								AOriginIndex, 
-								AForward, 
-								AInclusive
+								originIndex, 
+								forward, 
+								inclusive
 							)
 						);
 					}
 					finally
 					{
-						PopSymbols(LPlan, FSymbols);
+						PopSymbols(plan, _symbols);
 					}
 				}
 				finally
 				{
-					LPlan.PopATCreationContext();
+					plan.PopATCreationContext();
 				}
 			}
 			finally
 			{
-				LPlan.Dispose();
+				plan.Dispose();
 			}
 		}
 		
-		public PlanNode GetBrowseVariantNode(Plan APlan, int AOriginIndex, bool AForward, bool AInclusive)
+		public PlanNode GetBrowseVariantNode(Plan plan, int originIndex, bool forward, bool inclusive)
 		{
-			return FBrowseVariants[AOriginIndex, AForward, AInclusive].Node;
+			return _browseVariants[originIndex, forward, inclusive].Node;
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			BrowseTable LTable = new BrowseTable(this, AProgram);
+			BrowseTable table = new BrowseTable(this, program);
 			try
 			{
-				LTable.Open();
-				return LTable;
+				table.Open();
+				return table;
 			}
 			catch
 			{
-				LTable.Dispose();
+				table.Dispose();
 				throw;
 			}
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
 			if (IsAccelerator)
-				return Nodes[0].EmitStatement(AMode);
+				return Nodes[0].EmitStatement(mode);
 			else
 			{
-				BrowseExpression LBrowseExpression = new BrowseExpression();
-				LBrowseExpression.Expression = (Expression)Nodes[0].EmitStatement(AMode);
-				for (int LIndex = 0; LIndex < RequestedOrder.Columns.Count; LIndex++)
-					LBrowseExpression.Columns.Add(RequestedOrder.Columns[LIndex].EmitStatement(AMode));
-				return LBrowseExpression;
+				BrowseExpression browseExpression = new BrowseExpression();
+				browseExpression.Expression = (Expression)Nodes[0].EmitStatement(mode);
+				for (int index = 0; index < RequestedOrder.Columns.Count; index++)
+					browseExpression.Columns.Add(RequestedOrder.Columns[index].EmitStatement(mode));
+				return browseExpression;
 			}
 		}
 	}

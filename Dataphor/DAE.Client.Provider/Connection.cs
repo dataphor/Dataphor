@@ -23,33 +23,33 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 	{
 		public DAEConnection() { }
 
-		public DAEConnection(IContainer AContainer)
+		public DAEConnection(IContainer container)
 		{
-			if (AContainer != null)
-				AContainer.Add(this);
+			if (container != null)
+				container.Add(this);
 		}
 
-		public DAEConnection(ServerAlias AAlias)
+		public DAEConnection(ServerAlias alias)
 		{
-			Alias = AAlias;
+			Alias = alias;
 		}
 		
-		public DAEConnection(string AAliasName)
+		public DAEConnection(string aliasName)
 		{
-			ConnectionString = AAliasName;
+			ConnectionString = aliasName;
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			Close();
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
 		[Category("Connection")]
 		[DefaultValue(false)]
 		public bool Active
 		{
-			get { return FServer != null; }
+			get { return _server != null; }
 			set 
 			{
 				if (value)
@@ -59,43 +59,43 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			}
 		}
 
-		private ServerConnection FConnection;
+		private ServerConnection _connection;
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
-		public ServerConnection Connection { get { return FConnection; } }
+		public ServerConnection Connection { get { return _connection; } }
 
-		private IServer FServer;
+		private IServer _server;
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
-		public IServer Server { get { return FServer; } }
+		public IServer Server { get { return _server; } }
 
-		private IServerSession FSession;
+		private IServerSession _session;
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
-		public IServerSession Session { get { return FSession; } }
+		public IServerSession Session { get { return _session; } }
 
-		private IServerProcess FServerProcess;
+		private IServerProcess _serverProcess;
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
-		public IServerProcess ServerProcess { get { return FServerProcess; } }
+		public IServerProcess ServerProcess { get { return _serverProcess; } }
 
 		private void CheckNotConnected()
 		{
-			if (FServer != null)
+			if (_server != null)
 				throw new ProviderException(ProviderException.Codes.ConnectionConnected);
 		}
 
-		private int FConnectionTimeout = 30;
+		private int _connectionTimeout = 30;
 		public override int ConnectionTimeout 
 		{
-			get { return FConnectionTimeout; }
+			get { return _connectionTimeout; }
 		}
-		public void SetConnectionTimeout(int AValue)
+		public void SetConnectionTimeout(int value)
 		{
-			FConnectionTimeout = AValue;
+			_connectionTimeout = value;
 		}
 
-		private string FConnectionString = String.Empty;
+		private string _connectionString = String.Empty;
 		/// <summary> The name of the alias to use to establish a connection to a Dataphor Server. </summary>
 		/// <remarks>
 		/// If an alias name is provided, an AliasManager will be used to retrieve the alias settings.
@@ -106,19 +106,19 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 		[Description("The name of the alias to use to establish a connection to a Dataphor Server.")]
 		public override string ConnectionString
 		{
-			get { return FConnectionString; }
+			get { return _connectionString; }
 			set
 			{
 				CheckNotConnected();
-				if (FConnectionString != value)
+				if (_connectionString != value)
 				{
-					FAlias = AliasManager.GetAlias(value);
-					FConnectionString = value;
+					_alias = AliasManager.GetAlias(value);
+					_connectionString = value;
 				}
 			}
 		}
 
-		private ServerAlias FAlias;
+		private ServerAlias _alias;
 		/// <summary>The alias used to establish a connection to a Dataphor Server.</summary>
 		/// <remarks>
 		/// If an AliasName is provided, it will be used to lookup the alias, and the value of this 
@@ -128,14 +128,14 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public ServerAlias Alias
 		{
-			get { return FAlias; }
+			get { return _alias; }
 			set
 			{
 				CheckNotConnected();
-				if (FAlias != value)
+				if (_alias != value)
 				{
-					FAlias = value;
-					FConnectionString = String.Empty;
+					_alias = value;
+					_connectionString = String.Empty;
 				}
 			}
 		}
@@ -145,29 +145,29 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 		{
 			get 
 			{
-				if (FSession != null)
-					return FSession.SessionInfo.DefaultLibraryName;
+				if (_session != null)
+					return _session.SessionInfo.DefaultLibraryName;
 				else
 					return String.Empty;
 			}
 		}
 
-		public override void ChangeDatabase(string ADatabaseName)
+		public override void ChangeDatabase(string databaseName)
 		{
 			// Unimplemented - use the SessionInfo's namespace information
 		}
 
-		private string FDataSource = String.Empty;
-		public override string DataSource { get { return FDataSource; } }
+		private string _dataSource = String.Empty;
+		public override string DataSource { get { return _dataSource; } }
 
-		private string FServerVersion = String.Empty;
-		public override string ServerVersion { get { return FServerVersion; } }
+		private string _serverVersion = String.Empty;
+		public override string ServerVersion { get { return _serverVersion; } }
 
 		public override ConnectionState State
 		{
 			get
 			{
-				if (FServer != null)
+				if (_server != null)
 					return ConnectionState.Open;
 				else
 					return ConnectionState.Closed;
@@ -176,35 +176,35 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 
 		private void CheckCanStartTransaction()
 		{
-			if (FServer == null)
+			if (_server == null)
 				throw new ProviderException(ProviderException.Codes.BeginTransactionFailed);
 		}
 
 		[Browsable(false)]
 		public bool InTransaction
 		{
-			get { return (FServerProcess != null) && FServerProcess.InTransaction; }
+			get { return (_serverProcess != null) && _serverProcess.InTransaction; }
 		}
 
 		/// <summary> Depth of transactions. </summary>
 		[Browsable(false)]
 		public int TransactionCount
 		{
-			get { return FServerProcess != null ? FServerProcess.TransactionCount : 0; }
+			get { return _serverProcess != null ? _serverProcess.TransactionCount : 0; }
 		}
 		
 		// TODO: Map isolation levels
-		private System.Data.IsolationLevel FDefaultIsolationLevel = System.Data.IsolationLevel.ReadCommitted;
+		private System.Data.IsolationLevel _defaultIsolationLevel = System.Data.IsolationLevel.ReadCommitted;
 		public System.Data.IsolationLevel DefaultIsolationLevel
 		{
-			get { return FDefaultIsolationLevel; }
-			set { FDefaultIsolationLevel = value; }
+			get { return _defaultIsolationLevel; }
+			set { _defaultIsolationLevel = value; }
 		}
 
-		protected override DbTransaction BeginDbTransaction(System.Data.IsolationLevel ALevel)
+		protected override DbTransaction BeginDbTransaction(System.Data.IsolationLevel level)
 		{
 			CheckCanStartTransaction();
-			return new DAETransaction(this, ALevel);
+			return new DAETransaction(this, level);
 		}
 
 		protected override DbCommand CreateDbCommand()
@@ -229,46 +229,46 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 		}
 
 		/// <summary> True when the server, session, and process are given as part of opening. </summary>
-		private bool FForeignServer;
+		private bool _foreignServer;
 
 		public override void Open()
 		{
-			if (FServer == null)
+			if (_server == null)
 			{
-				FForeignServer = false;
+				_foreignServer = false;
 				OnBeforeOpen();
-				if (FAlias == null)
+				if (_alias == null)
 					throw new ProviderException(ProviderException.Codes.NoAliasSpecified);
-				FConnection = new ServerConnection(FAlias, true);
-				FServer = FConnection.Server;
+				_connection = new ServerConnection(_alias, true);
+				_server = _connection.Server;
 				try
 				{
-					FAlias.SessionInfo.Environment = "ADO.NET";
-					FSession = FServer.Connect(FAlias.SessionInfo);
-					FServerProcess = FSession.StartProcess(new ProcessInfo(FAlias.SessionInfo));
+					_alias.SessionInfo.Environment = "ADO.NET";
+					_session = _server.Connect(_alias.SessionInfo);
+					_serverProcess = _session.StartProcess(new ProcessInfo(_alias.SessionInfo));
 				}
 				catch
 				{
-					FServer = null;
-					FSession = null;
-					FServerProcess = null;
-					FConnection.Dispose();
-					FConnection = null;
+					_server = null;
+					_session = null;
+					_serverProcess = null;
+					_connection.Dispose();
+					_connection = null;
 					throw;
 				}
 				OnAfterOpen();
 			}
 		}
 
-		public void Open(IServer AServer, IServerSession ASession, IServerProcess AProcess)
+		public void Open(IServer server, IServerSession session, IServerProcess process)
 		{
-			if (FServer == null)
+			if (_server == null)
 			{
-				FForeignServer = true;
+				_foreignServer = true;
 				OnBeforeOpen();
-				FServer = AServer;
-				FSession = ASession;
-				FServerProcess = AProcess;
+				_server = server;
+				_session = session;
+				_serverProcess = process;
 				OnAfterOpen();
 			}
 		}
@@ -291,9 +291,9 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 
 		public override void Close()
 		{
-			if (FServer != null)
+			if (_server != null)
 			{
-				if (FForeignServer)
+				if (_foreignServer)
 				{
 					try
 					{
@@ -301,9 +301,9 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 					}
 					finally
 					{
-						FSession = null;
-						FServer = null;
-						FServerProcess = null;
+						_session = null;
+						_server = null;
+						_serverProcess = null;
 					}
 					OnAfterClose();
 				}
@@ -323,33 +323,33 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 									}
 									finally
 									{
-										if (FServerProcess != null)
-											FSession.StopProcess(FServerProcess);
+										if (_serverProcess != null)
+											_session.StopProcess(_serverProcess);
 									}
 								}
 								finally
 								{
-									FServerProcess = null;
-									if (FSession != null)
-										FServer.Disconnect(FSession);
+									_serverProcess = null;
+									if (_session != null)
+										_server.Disconnect(_session);
 								}
 							}
 							finally
 							{
-								FSession = null;
+								_session = null;
 								//DAE.Server.ServerFactory.Disconnect(FServer);
 							}
 						}
 						finally
 						{
-							FServer = null;
-							if (FConnection != null)
-								FConnection.Dispose();
+							_server = null;
+							if (_connection != null)
+								_connection.Dispose();
 						}
 					}
 					finally
 					{
-						FConnection = null;
+						_connection = null;
 					}
 					OnAfterClose();
 				}
@@ -358,12 +358,12 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 
 		public virtual object Clone()
 		{
-			DAEConnection LNewConnection = new DAEConnection();
-			LNewConnection.ConnectionString = FConnectionString;
-			LNewConnection.SetConnectionTimeout(FConnectionTimeout);
-			LNewConnection.Alias = FAlias;
-			LNewConnection.Active = Active;
-			return LNewConnection;
+			DAEConnection newConnection = new DAEConnection();
+			newConnection.ConnectionString = _connectionString;
+			newConnection.SetConnectionTimeout(_connectionTimeout);
+			newConnection.Alias = _alias;
+			newConnection.Active = Active;
+			return newConnection;
 		}
 	}
 }

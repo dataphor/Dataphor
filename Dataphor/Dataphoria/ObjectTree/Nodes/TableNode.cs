@@ -12,7 +12,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 {
 	public class TableListNode : SchemaListNode
 	{
-		public TableListNode(string ALibraryName) : base (ALibraryName)
+		public TableListNode(string libraryName) : base (libraryName)
 		{
 			Text = Strings.ObjectTree_TableListNodeText;
 			ImageIndex = 13;
@@ -21,18 +21,18 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		protected override string GetChildExpression()
 		{
-			return ".System.BaseTableVars " + CSchemaListFilter + " over { Name }";
+			return ".System.BaseTableVars " + SchemaListFilter + " over { Name }";
 		}
 		
-		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row ARow)
+		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row row)
 		{
-			return new TableNode(this, (string)ARow["Name"]);
+			return new TableNode(this, (string)row["Name"]);
 		}
 	}
 
 	public class TableNode : BaseTableNode
 	{
-		public TableNode(SchemaListNode AParent, string AName) : base(AParent, AName)
+		public TableNode(SchemaListNode parent, string name) : base(parent, name)
 		{
 			ImageIndex = 14;
 			SelectedImageIndex = 14;
@@ -46,59 +46,59 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 	public abstract class BaseTableNode : SchemaItemNode
 	{
-		public BaseTableNode(SchemaListNode AParent, string AName) : base()
+		public BaseTableNode(SchemaListNode parent, string name) : base()
 		{
-			ParentSchemaList = AParent;
-			ObjectName = AName;
+			ParentSchemaList = parent;
+			ObjectName = name;
 		}
 
 		protected override ContextMenu GetContextMenu()
 		{
-			ContextMenu LMenu = base.GetContextMenu();
-			LMenu.MenuItems.Add(0, new MenuItem("-"));
-			MenuItem LBrowseMenuItem = new MenuItem(Strings.ObjectTree_BrowseMenuText, new EventHandler(BrowseClicked));
-			LBrowseMenuItem.DefaultItem = true;
-			LMenu.MenuItems.Add(0, LBrowseMenuItem);
-			LMenu.MenuItems.Add(1, new MenuItem(Strings.ObjectTree_DeriveMenuText, new EventHandler(DeriveClicked)));
-			return LMenu;
+			ContextMenu menu = base.GetContextMenu();
+			menu.MenuItems.Add(0, new MenuItem("-"));
+			MenuItem browseMenuItem = new MenuItem(Strings.ObjectTree_BrowseMenuText, new EventHandler(BrowseClicked));
+			browseMenuItem.DefaultItem = true;
+			menu.MenuItems.Add(0, browseMenuItem);
+			menu.MenuItems.Add(1, new MenuItem(Strings.ObjectTree_DeriveMenuText, new EventHandler(DeriveClicked)));
+			return menu;
 		}
 
-		protected void BrowseClicked(object ASender, EventArgs AArgs)
+		protected void BrowseClicked(object sender, EventArgs args)
 		{
-			Frontend.Client.Windows.Session LSession = Dataphoria.GetLiveDesignableFrontendSession();
+			Frontend.Client.Windows.Session session = Dataphoria.GetLiveDesignableFrontendSession();
 			try
 			{
-				LSession.SetFormDesigner();
-				LSession.StartCallback(String.Format(".Frontend.Derive('{0}', 'Browse')", ObjectName), null);
+				session.SetFormDesigner();
+				session.StartCallback(String.Format(".Frontend.Derive('{0}', 'Browse')", ObjectName), null);
 			}
 			catch
 			{
-				LSession.Dispose();
+				session.Dispose();
 				throw;
 			}
 		}
 
-		protected void DeriveClicked(object ASender, EventArgs AArgs)
+		protected void DeriveClicked(object sender, EventArgs args)
 		{
-			Frontend.Client.Windows.Session LSession = Dataphoria.GetLiveDesignableFrontendSession();
+			Frontend.Client.Windows.Session session = Dataphoria.GetLiveDesignableFrontendSession();
 			try
 			{
-				LSession.SetFormDesigner();
-				Frontend.Client.Windows.IWindowsFormInterface LForm = LSession.LoadForm(null, ".Frontend.Form('.Frontend', 'DerivedFormLauncher')");
+				session.SetFormDesigner();
+				Frontend.Client.Windows.IWindowsFormInterface form = session.LoadForm(null, ".Frontend.Form('.Frontend', 'DerivedFormLauncher')");
 				try
 				{
-					((Frontend.Client.ISource)LForm.FindNode("Main")).DataView.Fields["Query"].AsString = ObjectName;
-					LForm.Show();
+					((Frontend.Client.ISource)form.FindNode("Main")).DataView.Fields["Query"].AsString = ObjectName;
+					form.Show();
 				}
 				catch
 				{
-					LForm.HostNode.Dispose();
+					form.HostNode.Dispose();
 					throw;
 				}
 			}
 			catch
 			{
-				LSession.Dispose();
+				session.Dispose();
 				throw;
 			}
 		}
@@ -111,15 +111,15 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 	public class TableData : DataObject
 	{
-		public TableData(BaseTableNode ANode) : base()
+		public TableData(BaseTableNode node) : base()
 		{
-			FNode = ANode;
+			_node = node;
 		}
 
-		private BaseTableNode FNode;
+		private BaseTableNode _node;
 		public BaseTableNode Node
 		{
-			get { return FNode; }
+			get { return _node; }
 		}
 	}
 }

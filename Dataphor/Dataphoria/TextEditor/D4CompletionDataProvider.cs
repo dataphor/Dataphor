@@ -14,19 +14,19 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 {
     public partial class D4CompletionDataProvider : Component,  ICompletionDataProvider
     {
-        private IDataphoria FDataphoria;
+        private IDataphoria _dataphoria;
        
-        public D4CompletionDataProvider(IDataphoria ADataphoria)
+        public D4CompletionDataProvider(IDataphoria dataphoria)
         {
             InitializeComponent();
-            FDataphoria = ADataphoria;
+            _dataphoria = dataphoria;
         }
 
-        public D4CompletionDataProvider(IContainer AContainer, IDataphoria ADataphoria)
+        public D4CompletionDataProvider(IContainer container, IDataphoria dataphoria)
         {            
-            AContainer.Add(this);
+            container.Add(this);
             InitializeComponent();
-            FDataphoria = ADataphoria;
+            _dataphoria = dataphoria;
         }
 
         #region Implementation of ICompletionDataProvider
@@ -44,120 +44,120 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             return CompletionDataProviderKeyResult.InsertionKey;                        
         }
 
-        public bool InsertAction(ICompletionData AData, TextArea ATextArea, int AInsertionOffset, char AKey)
+        public bool InsertAction(ICompletionData data, TextArea textArea, int insertionOffset, char key)
         {
-            ATextArea.Caret.Position = ATextArea.Document.OffsetToPosition(AInsertionOffset);
-            return AData.InsertAction(ATextArea, AKey);
+            textArea.Caret.Position = textArea.Document.OffsetToPosition(insertionOffset);
+            return data.InsertAction(textArea, key);
         }
 
-        public ICompletionData[] GenerateCompletionData(string AFileName, TextArea ATextArea, char ACharTyped)
+        public ICompletionData[] GenerateCompletionData(string fileName, TextArea textArea, char charTyped)
         {
             
-            var LCompletionList = new HashSet<ICompletionData>();
-            if (ACharTyped == ' ')
+            var completionList = new HashSet<ICompletionData>();
+            if (charTyped == ' ')
             {
-                var LCurrentLibrary = this.FDataphoria.GetCurrentLibraryName();
-                int LImageIndexTables = 14;                
-                int LImageIndexSystemTables = 32;                                
-                int LImageIndexGeneratedTables = 36;
-                int LImageIndexTablesCurrentLib = 41;
+                var currentLibrary = this._dataphoria.GetCurrentLibraryName();
+                int imageIndexTables = 14;                
+                int imageIndexSystemTables = 32;                                
+                int imageIndexGeneratedTables = 36;
+                int imageIndexTablesCurrentLib = 41;
                 
-                int LImageIndexViews = 30;
-                int LImageIndexSystemViews = 34;
-                int LImageIndexGeneratedViews = 38;
-                int LImageIndexViewsCurrentLib = 42;
+                int imageIndexViews = 30;
+                int imageIndexSystemViews = 34;
+                int imageIndexGeneratedViews = 38;
+                int imageIndexViewsCurrentLib = 42;
 
-                int LImageIndexOperator = 12;
-                int LImageIndexOperatorSystem = 39;
-                int LImageIndexOperatorGenerated = 40;
-                int LImageIndexOperatorCurrentLib = 43;
+                int imageIndexOperator = 12;
+                int imageIndexOperatorSystem = 39;
+                int imageIndexOperatorGenerated = 40;
+                int imageIndexOperatorCurrentLib = 43;
 
-                var LQueryTables = ".System.BaseTableVars";
-                AddTableVarToCompletionList(LQueryTables, LCompletionList, ARow=>
+                var queryTables = ".System.BaseTableVars";
+                AddTableVarToCompletionList(queryTables, completionList, ARow=>
                                                                                {
                                                                                    if ((bool)ARow["IsSystem"])
                                                                                    {
                                                                                        if ((bool)ARow["IsGenerated"])
                                                                                        {
-                                                                                           return LImageIndexGeneratedTables;
+                                                                                           return imageIndexGeneratedTables;
                                                                                        }  
-                                                                                       return LImageIndexSystemTables;
+                                                                                       return imageIndexSystemTables;
                                                                                    }
-                                                                                   if (LCurrentLibrary == (string)ARow["Library_Name"])
+                                                                                   if (currentLibrary == (string)ARow["Library_Name"])
                                                                                    {
-                                                                                       return LImageIndexTablesCurrentLib;
+                                                                                       return imageIndexTablesCurrentLib;
                                                                                    }
-                                                                                   return LImageIndexTables;                                                                                   
+                                                                                   return imageIndexTables;                                                                                   
                                                                                });
-                var LQueryViews = ".System.DerivedTableVars";
-                AddTableVarToCompletionList(LQueryViews, LCompletionList, ARow =>
+                var queryViews = ".System.DerivedTableVars";
+                AddTableVarToCompletionList(queryViews, completionList, ARow =>
                                                                               {
                                                                                   if ((bool)ARow["IsSystem"])
                                                                                   {
                                                                                       if ((bool)ARow["IsGenerated"])
                                                                                       {
-                                                                                          return LImageIndexGeneratedViews;
+                                                                                          return imageIndexGeneratedViews;
                                                                                       }  
-                                                                                      return LImageIndexSystemViews; 
+                                                                                      return imageIndexSystemViews; 
                                                                                   }
-                                                                                  if (LCurrentLibrary == (string)ARow["Library_Name"])
+                                                                                  if (currentLibrary == (string)ARow["Library_Name"])
                                                                                   {
-                                                                                      return LImageIndexViewsCurrentLib;
+                                                                                      return imageIndexViewsCurrentLib;
                                                                                   }
-                                                                                  return LImageIndexViews;
+                                                                                  return imageIndexViews;
                                                                                       
                                                                                   
                                                                               });
-                var LQueryOperators = ".System.Operators";
-                AddToOperatorToCompletionList(LQueryOperators, LCompletionList, ARow =>
+                var queryOperators = ".System.Operators";
+                AddToOperatorToCompletionList(queryOperators, completionList, ARow =>
                                                                               {
                                                                                   if ((bool)ARow["IsSystem"])
                                                                                   {
                                                                                       if ((bool)ARow["IsGenerated"])
                                                                                       {
-                                                                                          return LImageIndexOperatorGenerated;
+                                                                                          return imageIndexOperatorGenerated;
                                                                                       }
-                                                                                      return LImageIndexOperatorSystem;
+                                                                                      return imageIndexOperatorSystem;
                                                                                   }
-                                                                                  if (LCurrentLibrary == (string)ARow["Library_Name"])
+                                                                                  if (currentLibrary == (string)ARow["Library_Name"])
                                                                                   {
-                                                                                      return LImageIndexOperatorCurrentLib;
+                                                                                      return imageIndexOperatorCurrentLib;
                                                                                   }                                                                                  
-                                                                                  return LImageIndexOperator;
+                                                                                  return imageIndexOperator;
                                                                               });                
                                                          
             }
-            return LCompletionList.ToArray();
+            return completionList.ToArray();
         }
 
-        private void AddTableVarToCompletionList(string AQuery, HashSet<ICompletionData> ACompletionList, Func<Row,int> AGetImageIndex)
+        private void AddTableVarToCompletionList(string query, HashSet<ICompletionData> completionList, Func<Row,int> getImageIndex)
         {
-            FDataphoria.Execute(AQuery, null, ARow =>
+            _dataphoria.Execute(query, null, ARow =>
             {
-                var LName = (string)ARow["Name"];
-                var LLibraryAndTableName = LName.Split('.');
-                var LLibraryName = LLibraryAndTableName[0];
-                LName = LLibraryAndTableName[1];
-                int LImageIndex = AGetImageIndex(ARow);
-                var LCompletionData = new D4CompletionData(LName, LName + " at " + LLibraryName,
-                                                      LImageIndex);
-                ACompletionList.Add(LCompletionData);
+                var name = (string)ARow["Name"];
+                var libraryAndTableName = name.Split('.');
+                var libraryName = libraryAndTableName[0];
+                name = libraryAndTableName[1];
+                int imageIndex = getImageIndex(ARow);
+                var completionData = new D4CompletionData(name, name + " at " + libraryName,
+                                                      imageIndex);
+                completionList.Add(completionData);
             });
         }
 
-        private void AddToOperatorToCompletionList(string AQuery, HashSet<ICompletionData> ACompletionList, Func<Row, int> AGetImageIndex)
+        private void AddToOperatorToCompletionList(string query, HashSet<ICompletionData> completionList, Func<Row, int> getImageIndex)
         {
-            FDataphoria.Execute(AQuery, null, ARow =>
+            _dataphoria.Execute(query, null, ARow =>
             {
-                var LName = (string)ARow["OperatorName"];
-                var LDisplayName = (string)ARow["OperatorName"] + ARow["Signature"];                
-                var LIndexOfFirstDot = LName.IndexOf('.');
-                var LLibraryName = LName.Substring(0, LIndexOfFirstDot);
-                LName = LName.Substring(LIndexOfFirstDot+1);
-                int LImageIndex = AGetImageIndex(ARow);
-                var LCompletionData = new D4CompletionData(LName, LDisplayName + " at " + LLibraryName,
-                                                      LImageIndex);
-                ACompletionList.Add(LCompletionData);
+                var name = (string)ARow["OperatorName"];
+                var displayName = (string)ARow["OperatorName"] + ARow["Signature"];                
+                var indexOfFirstDot = name.IndexOf('.');
+                var libraryName = name.Substring(0, indexOfFirstDot);
+                name = name.Substring(indexOfFirstDot+1);
+                int imageIndex = getImageIndex(ARow);
+                var completionData = new D4CompletionData(name, displayName + " at " + libraryName,
+                                                      imageIndex);
+                completionList.Add(completionData);
             });
         }
 

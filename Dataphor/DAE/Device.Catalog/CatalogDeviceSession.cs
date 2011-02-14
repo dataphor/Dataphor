@@ -28,50 +28,50 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 {
 	public class CatalogDeviceSession : MemoryDeviceSession
 	{		
-		protected internal CatalogDeviceSession(Schema.Device ADevice, ServerProcess AServerProcess, DeviceSessionInfo ADeviceSessionInfo) : base(ADevice, AServerProcess, ADeviceSessionInfo){}
+		protected internal CatalogDeviceSession(Schema.Device device, ServerProcess serverProcess, DeviceSessionInfo deviceSessionInfo) : base(device, serverProcess, deviceSessionInfo){}
 		
 		public Schema.Catalog Catalog { get { return ((Server.Engine)ServerProcess.ServerSession.Server).Catalog; } }
 
 		#region Execute
 		
-		protected override object InternalExecute(Program AProgram, Schema.DevicePlan ADevicePlan)
+		protected override object InternalExecute(Program program, Schema.DevicePlan devicePlan)
 		{
-			if ((ADevicePlan.Node is BaseTableVarNode) || (ADevicePlan.Node is OrderNode))
+			if ((devicePlan.Node is BaseTableVarNode) || (devicePlan.Node is OrderNode))
 			{
-				Schema.TableVar LTableVar = null;
-				if (ADevicePlan.Node is BaseTableVarNode)
-					LTableVar = ((BaseTableVarNode)ADevicePlan.Node).TableVar;
-				else if (ADevicePlan.Node is OrderNode)
-					LTableVar = ((BaseTableVarNode)ADevicePlan.Node.Nodes[0]).TableVar;
-				if (LTableVar != null)
+				Schema.TableVar tableVar = null;
+				if (devicePlan.Node is BaseTableVarNode)
+					tableVar = ((BaseTableVarNode)devicePlan.Node).TableVar;
+				else if (devicePlan.Node is OrderNode)
+					tableVar = ((BaseTableVarNode)devicePlan.Node.Nodes[0]).TableVar;
+				if (tableVar != null)
 				{
 					lock (Device.Headers)
 					{
-						CatalogHeader LHeader = Device.Headers[LTableVar];
-						if ((LHeader.CacheLevel == CatalogCacheLevel.None) || ((LHeader.CacheLevel == CatalogCacheLevel.Normal) && (Catalog.TimeStamp > LHeader.TimeStamp)) || ((LHeader.CacheLevel == CatalogCacheLevel.Maintained) && !LHeader.Cached))
+						CatalogHeader header = Device.Headers[tableVar];
+						if ((header.CacheLevel == CatalogCacheLevel.None) || ((header.CacheLevel == CatalogCacheLevel.Normal) && (Catalog.TimeStamp > header.TimeStamp)) || ((header.CacheLevel == CatalogCacheLevel.Maintained) && !header.Cached))
 						{
-							Device.PopulateTableVar(AProgram, LHeader);
-							if ((LHeader.CacheLevel == CatalogCacheLevel.Maintained) && !LHeader.Cached)
-								LHeader.Cached = true;
+							Device.PopulateTableVar(program, header);
+							if ((header.CacheLevel == CatalogCacheLevel.Maintained) && !header.Cached)
+								header.Cached = true;
 						}
 					}
 				}
 			}
-			object LResult = base.InternalExecute(AProgram, ADevicePlan);
-			if (ADevicePlan.Node is CreateTableNode)
+			object result = base.InternalExecute(program, devicePlan);
+			if (devicePlan.Node is CreateTableNode)
 			{
-				Schema.TableVar LTableVar = ((CreateTableNode)ADevicePlan.Node).Table;
-				CatalogCacheLevel LCacheLevel = (CatalogCacheLevel)Enum.Parse(typeof(CatalogCacheLevel), MetaData.GetTag(LTableVar.MetaData, "Catalog.CacheLevel", "Normal"), true);
-				if (!((LCacheLevel == CatalogCacheLevel.StoreTable) || (LCacheLevel == CatalogCacheLevel.StoreView)))
+				Schema.TableVar tableVar = ((CreateTableNode)devicePlan.Node).Table;
+				CatalogCacheLevel cacheLevel = (CatalogCacheLevel)Enum.Parse(typeof(CatalogCacheLevel), MetaData.GetTag(tableVar.MetaData, "Catalog.CacheLevel", "Normal"), true);
+				if (!((cacheLevel == CatalogCacheLevel.StoreTable) || (cacheLevel == CatalogCacheLevel.StoreView)))
 				{
 					lock (Device.Headers)
 					{
-						CatalogHeader LHeader = new CatalogHeader(LTableVar, Device.Tables[LTableVar], Int64.MinValue, LCacheLevel);
-						Device.Headers.Add(LHeader);
+						CatalogHeader header = new CatalogHeader(tableVar, Device.Tables[tableVar], Int64.MinValue, cacheLevel);
+						Device.Headers.Add(header);
 					}
 				}
 			}
-			return LResult;
+			return result;
 		}
 
 		#endregion
@@ -81,7 +81,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		#if LOGDDLINSTRUCTIONS
 		protected abstract class DDLInstruction 
 		{
-			public virtual void Undo(CatalogDeviceSession ASession) {}
+			public virtual void Undo(CatalogDeviceSession session) {}
 		}
 
 		protected class DDLInstructionLog : List<DDLInstruction> {}
@@ -90,1134 +90,1134 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		protected class SetUserNameInstruction : DDLInstruction
 		{
-			public SetUserNameInstruction(Schema.User AUser, string AOriginalName) : base()
+			public SetUserNameInstruction(Schema.User user, string originalName) : base()
 			{
-				FUser = AUser;
-				FOriginalName = AOriginalName;
+				_user = user;
+				_originalName = originalName;
 			}
 			
-			private Schema.User FUser;
-			private string FOriginalName;
+			private Schema.User _user;
+			private string _originalName;
 			
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FUser.Name = FOriginalName;
+				_user.Name = _originalName;
 			}
 		}
 		
 		protected class SetUserPasswordInstruction : DDLInstruction
 		{
-			public SetUserPasswordInstruction(Schema.User AUser, string AOriginalPassword) : base()
+			public SetUserPasswordInstruction(Schema.User user, string originalPassword) : base()
 			{
-				FUser = AUser;
-				FOriginalPassword = AOriginalPassword;
+				_user = user;
+				_originalPassword = originalPassword;
 			}
 			
-			private Schema.User FUser;
-			private string FOriginalPassword;
+			private Schema.User _user;
+			private string _originalPassword;
 			
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FUser.Password = FOriginalPassword;
+				_user.Password = _originalPassword;
 			}
 		}
 		
 		protected class SetDeviceUserIDInstruction : DDLInstruction
 		{
-			public SetDeviceUserIDInstruction(Schema.DeviceUser ADeviceUser, string AOriginalUserID) : base()
+			public SetDeviceUserIDInstruction(Schema.DeviceUser deviceUser, string originalUserID) : base()
 			{
-				FDeviceUser = ADeviceUser;
-				FOriginalUserID = AOriginalUserID;
+				_deviceUser = deviceUser;
+				_originalUserID = originalUserID;
 			}
 			
-			private Schema.DeviceUser FDeviceUser;
-			private string FOriginalUserID;
+			private Schema.DeviceUser _deviceUser;
+			private string _originalUserID;
 			
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FDeviceUser.DeviceUserID = FOriginalUserID;
+				_deviceUser.DeviceUserID = _originalUserID;
 			}
 		}
 		
 		protected class SetDeviceUserPasswordInstruction : DDLInstruction
 		{
-			public SetDeviceUserPasswordInstruction(Schema.DeviceUser ADeviceUser, string AOriginalPassword) : base()
+			public SetDeviceUserPasswordInstruction(Schema.DeviceUser deviceUser, string originalPassword) : base()
 			{
-				FDeviceUser = ADeviceUser;
-				FOriginalPassword = AOriginalPassword;
+				_deviceUser = deviceUser;
+				_originalPassword = originalPassword;
 			}
 			
-			private Schema.DeviceUser FDeviceUser;
-			private string FOriginalPassword;
+			private Schema.DeviceUser _deviceUser;
+			private string _originalPassword;
 			
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FDeviceUser.DevicePassword = FOriginalPassword;
+				_deviceUser.DevicePassword = _originalPassword;
 			}
 		}
 		
 		protected class SetDeviceUserConnectionParametersInstruction : DDLInstruction
 		{
-			public SetDeviceUserConnectionParametersInstruction(Schema.DeviceUser ADeviceUser, string AOriginalConnectionParameters) : base()
+			public SetDeviceUserConnectionParametersInstruction(Schema.DeviceUser deviceUser, string originalConnectionParameters) : base()
 			{
-				FDeviceUser = ADeviceUser;
-				FOriginalConnectionParameters = AOriginalConnectionParameters;
+				_deviceUser = deviceUser;
+				_originalConnectionParameters = originalConnectionParameters;
 			}
 			
-			private Schema.DeviceUser FDeviceUser;
-			private string FOriginalConnectionParameters;
+			private Schema.DeviceUser _deviceUser;
+			private string _originalConnectionParameters;
 			
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FDeviceUser.ConnectionParameters = FOriginalConnectionParameters;
+				_deviceUser.ConnectionParameters = _originalConnectionParameters;
 			}
 		}
 		
 		protected class InsertLoadedLibraryInstruction : DDLInstruction
 		{
-			public InsertLoadedLibraryInstruction(Schema.LoadedLibrary ALoadedLibrary) : base()
+			public InsertLoadedLibraryInstruction(Schema.LoadedLibrary loadedLibrary) : base()
 			{
-				FLoadedLibrary = ALoadedLibrary;
+				_loadedLibrary = loadedLibrary;
 			}
 			
-			private Schema.LoadedLibrary FLoadedLibrary;
+			private Schema.LoadedLibrary _loadedLibrary;
 			
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.ClearLoadedLibrary(FLoadedLibrary);
+				session.ClearLoadedLibrary(_loadedLibrary);
 			}
 		}
 		
 		protected class DeleteLoadedLibraryInstruction : DDLInstruction
 		{
-			public DeleteLoadedLibraryInstruction(Schema.LoadedLibrary ALoadedLibrary) : base()
+			public DeleteLoadedLibraryInstruction(Schema.LoadedLibrary loadedLibrary) : base()
 			{
-				FLoadedLibrary = ALoadedLibrary;
+				_loadedLibrary = loadedLibrary;
 			}
 			
-			private Schema.LoadedLibrary FLoadedLibrary;
+			private Schema.LoadedLibrary _loadedLibrary;
 			
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.CacheLoadedLibrary(FLoadedLibrary);
+				session.CacheLoadedLibrary(_loadedLibrary);
 			}
 		}
 		
 		protected class RegisterAssemblyInstruction : DDLInstruction
 		{
-			public RegisterAssemblyInstruction(Schema.LoadedLibrary ALoadedLibrary, Assembly AAssembly) : base()
+			public RegisterAssemblyInstruction(Schema.LoadedLibrary loadedLibrary, Assembly assembly) : base()
 			{
-				FLoadedLibrary = ALoadedLibrary;
-				FAssembly = AAssembly;
+				_loadedLibrary = loadedLibrary;
+				_assembly = assembly;
 			}
 			
-			private Schema.LoadedLibrary FLoadedLibrary;
-			private Assembly FAssembly;
+			private Schema.LoadedLibrary _loadedLibrary;
+			private Assembly _assembly;
 			
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.InternalUnregisterAssembly(FLoadedLibrary, FAssembly);
+				session.InternalUnregisterAssembly(_loadedLibrary, _assembly);
 			}
 		}
 		
 		protected class UnregisterAssemblyInstruction : DDLInstruction
 		{
-			public UnregisterAssemblyInstruction(Schema.LoadedLibrary ALoadedLibrary, Assembly AAssembly) : base()
+			public UnregisterAssemblyInstruction(Schema.LoadedLibrary loadedLibrary, Assembly assembly) : base()
 			{
-				FLoadedLibrary = ALoadedLibrary;
-				FAssembly = AAssembly;
+				_loadedLibrary = loadedLibrary;
+				_assembly = assembly;
 			}
 			
-			private Schema.LoadedLibrary FLoadedLibrary;
-			private Assembly FAssembly;
+			private Schema.LoadedLibrary _loadedLibrary;
+			private Assembly _assembly;
 			
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.InternalRegisterAssembly(FLoadedLibrary, FAssembly);
+				session.InternalRegisterAssembly(_loadedLibrary, _assembly);
 			}
 		}
 		
 		protected class CreateCatalogObjectInstruction : DDLInstruction
 		{
-			public CreateCatalogObjectInstruction(Schema.CatalogObject ACatalogObject) : base()
+			public CreateCatalogObjectInstruction(Schema.CatalogObject catalogObject) : base()
 			{
-				FCatalogObject = ACatalogObject;
+				_catalogObject = catalogObject;
 			}
 			
-			private Schema.CatalogObject FCatalogObject;
+			private Schema.CatalogObject _catalogObject;
 			
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.ClearCatalogObject(FCatalogObject);
+				session.ClearCatalogObject(_catalogObject);
 			}
 		}
 		
 		protected class DropCatalogObjectInstruction : DDLInstruction
 		{
-			public DropCatalogObjectInstruction(Schema.CatalogObject ACatalogObject) : base()
+			public DropCatalogObjectInstruction(Schema.CatalogObject catalogObject) : base()
 			{
-				FCatalogObject = ACatalogObject;
+				_catalogObject = catalogObject;
 			}
 			
-			private Schema.CatalogObject FCatalogObject;
+			private Schema.CatalogObject _catalogObject;
 			
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.CacheCatalogObject(FCatalogObject);
+				session.CacheCatalogObject(_catalogObject);
 			}
 		}
 		
 		protected class AddDependenciesInstruction : DDLInstruction
 		{
-			public AddDependenciesInstruction(Schema.Object AObject) : base()
+			public AddDependenciesInstruction(Schema.Object objectValue) : base()
 			{
-				FObject = AObject;
+				_object = objectValue;
 			}
 			
-			private Schema.Object FObject;
+			private Schema.Object _object;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FObject.Dependencies.Clear();
+				_object.Dependencies.Clear();
 			}
 		}
 		
 		protected class RemoveDependenciesInstruction : DDLInstruction
 		{
-			public RemoveDependenciesInstruction(Schema.Object AObject, Schema.ObjectList AOriginalDependencies) : base()
+			public RemoveDependenciesInstruction(Schema.Object objectValue, Schema.ObjectList originalDependencies) : base()
 			{
-				FObject = AObject;
-				FOriginalDependencies = AOriginalDependencies;
+				_object = objectValue;
+				_originalDependencies = originalDependencies;
 			}
 			
-			private Schema.Object FObject;
-			private Schema.ObjectList FOriginalDependencies;
+			private Schema.Object _object;
+			private Schema.ObjectList _originalDependencies;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FObject.AddDependencies(FOriginalDependencies);
-				FObject.DetermineRemotable(ASession);
+				_object.AddDependencies(_originalDependencies);
+				_object.DetermineRemotable(session);
 			}
 		}
 		
 		protected class CreateDeviceTableInstruction : DDLInstruction
 		{
-			public CreateDeviceTableInstruction(Schema.BaseTableVar ABaseTableVar) : base()
+			public CreateDeviceTableInstruction(Schema.BaseTableVar baseTableVar) : base()
 			{
-				FBaseTableVar = ABaseTableVar;
+				_baseTableVar = baseTableVar;
 			}
 			
-			private Schema.BaseTableVar FBaseTableVar;
+			private Schema.BaseTableVar _baseTableVar;
 			
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.DropDeviceTable(FBaseTableVar);
+				session.DropDeviceTable(_baseTableVar);
 			}
 		}
 		
 		protected class DropDeviceTableInstruction : DDLInstruction
 		{
-			public DropDeviceTableInstruction(Schema.BaseTableVar ABaseTableVar) : base()
+			public DropDeviceTableInstruction(Schema.BaseTableVar baseTableVar) : base()
 			{
-				FBaseTableVar = ABaseTableVar;
+				_baseTableVar = baseTableVar;
 			}
 			
-			private Schema.BaseTableVar FBaseTableVar;
+			private Schema.BaseTableVar _baseTableVar;
 			
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.CreateDeviceTable(FBaseTableVar);
+				session.CreateDeviceTable(_baseTableVar);
 			}
 		}
 		
 		protected class CreateSessionObjectInstruction : DDLInstruction
 		{
-			public CreateSessionObjectInstruction(Schema.CatalogObject ASessionObject)
+			public CreateSessionObjectInstruction(Schema.CatalogObject sessionObject)
 			{
-				FSessionObject = ASessionObject;
+				_sessionObject = sessionObject;
 			}
 			
-			private Schema.CatalogObject FSessionObject;
+			private Schema.CatalogObject _sessionObject;
 			
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.DropSessionObject(FSessionObject);
+				session.DropSessionObject(_sessionObject);
 			}
 		}
 		
 		protected class DropSessionObjectInstruction : DDLInstruction
 		{
-			public DropSessionObjectInstruction(Schema.CatalogObject ASessionObject)
+			public DropSessionObjectInstruction(Schema.CatalogObject sessionObject)
 			{
-				FSessionObject = ASessionObject;
+				_sessionObject = sessionObject;
 			}
 			
-			private Schema.CatalogObject FSessionObject;
+			private Schema.CatalogObject _sessionObject;
 			
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.CreateSessionObject(FSessionObject);
+				session.CreateSessionObject(_sessionObject);
 			}
 		}
 		
 		protected class CreateSessionOperatorInstruction : DDLInstruction
 		{
-			public CreateSessionOperatorInstruction(Schema.Operator ASessionOperator)
+			public CreateSessionOperatorInstruction(Schema.Operator sessionOperator)
 			{
-				FSessionOperator = ASessionOperator;
+				_sessionOperator = sessionOperator;
 			}
 			
-			private Schema.Operator FSessionOperator;
+			private Schema.Operator _sessionOperator;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.DropSessionOperator(FSessionOperator);
+				session.DropSessionOperator(_sessionOperator);
 			}
 		}
 		
 		protected class DropSessionOperatorInstruction : DDLInstruction
 		{
-			public DropSessionOperatorInstruction(Schema.Operator ASessionOperator)
+			public DropSessionOperatorInstruction(Schema.Operator sessionOperator)
 			{
-				FSessionOperator = ASessionOperator;
+				_sessionOperator = sessionOperator;
 			}
 			
-			private Schema.Operator FSessionOperator;
+			private Schema.Operator _sessionOperator;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.CreateSessionOperator(FSessionOperator);
+				session.CreateSessionOperator(_sessionOperator);
 			}
 		}
 		
 		protected class AddImplicitConversionInstruction : DDLInstruction
 		{
-			public AddImplicitConversionInstruction(Schema.Conversion AConversion) : base()
+			public AddImplicitConversionInstruction(Schema.Conversion conversion) : base()
 			{
-				FConversion = AConversion;
+				_conversion = conversion;
 			}
 			
-			private Schema.Conversion FConversion;
+			private Schema.Conversion _conversion;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.RemoveImplicitConversion(FConversion);
+				session.RemoveImplicitConversion(_conversion);
 			}
 		}
 		
 		protected class RemoveImplicitConversionInstruction : DDLInstruction
 		{
-			public RemoveImplicitConversionInstruction(Schema.Conversion AConversion) : base()
+			public RemoveImplicitConversionInstruction(Schema.Conversion conversion) : base()
 			{
-				FConversion = AConversion;
+				_conversion = conversion;
 			}
 			
-			private Schema.Conversion FConversion;
+			private Schema.Conversion _conversion;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.AddImplicitConversion(FConversion);
+				session.AddImplicitConversion(_conversion);
 			}
 		}
 		
 		protected class SetScalarTypeSortInstruction : DDLInstruction
 		{
-			public SetScalarTypeSortInstruction(Schema.ScalarType AScalarType, Schema.Sort AOriginalSort, bool AIsUnique)
+			public SetScalarTypeSortInstruction(Schema.ScalarType scalarType, Schema.Sort originalSort, bool isUnique)
 			{
-				FScalarType = AScalarType;
-				FOriginalSort = AOriginalSort;
-				FIsUnique = AIsUnique;
+				_scalarType = scalarType;
+				_originalSort = originalSort;
+				_isUnique = isUnique;
 			}
 			
-			private Schema.ScalarType FScalarType;
-			private Schema.Sort FOriginalSort;
-			private bool FIsUnique;
+			private Schema.ScalarType _scalarType;
+			private Schema.Sort _originalSort;
+			private bool _isUnique;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.SetScalarTypeSort(FScalarType, FOriginalSort, FIsUnique);
+				session.SetScalarTypeSort(_scalarType, _originalSort, _isUnique);
 			}
 		}
 		
 		protected class ClearScalarTypeEqualityOperatorInstruction : DDLInstruction
 		{
-			public ClearScalarTypeEqualityOperatorInstruction(Schema.ScalarType AScalarType, Schema.Operator AOriginalEqualityOperator)
+			public ClearScalarTypeEqualityOperatorInstruction(Schema.ScalarType scalarType, Schema.Operator originalEqualityOperator)
 			{
-				FScalarType = AScalarType;
-				FOriginalEqualityOperator = AOriginalEqualityOperator;
+				_scalarType = scalarType;
+				_originalEqualityOperator = originalEqualityOperator;
 			}
 			
-			private Schema.ScalarType FScalarType;
-			private Schema.Operator FOriginalEqualityOperator;
+			private Schema.ScalarType _scalarType;
+			private Schema.Operator _originalEqualityOperator;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FScalarType.EqualityOperator = FOriginalEqualityOperator;
+				_scalarType.EqualityOperator = _originalEqualityOperator;
 			}
 		}
 		
 		protected class ClearScalarTypeComparisonOperatorInstruction : DDLInstruction
 		{
-			public ClearScalarTypeComparisonOperatorInstruction(Schema.ScalarType AScalarType, Schema.Operator AOriginalComparisonOperator)
+			public ClearScalarTypeComparisonOperatorInstruction(Schema.ScalarType scalarType, Schema.Operator originalComparisonOperator)
 			{
-				FScalarType = AScalarType;
-				FOriginalComparisonOperator = AOriginalComparisonOperator;
+				_scalarType = scalarType;
+				_originalComparisonOperator = originalComparisonOperator;
 			}
 			
-			private Schema.ScalarType FScalarType;
-			private Schema.Operator FOriginalComparisonOperator;
+			private Schema.ScalarType _scalarType;
+			private Schema.Operator _originalComparisonOperator;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FScalarType.ComparisonOperator = FOriginalComparisonOperator;
+				_scalarType.ComparisonOperator = _originalComparisonOperator;
 			}
 		}
 		
 		protected class ClearScalarTypeIsSpecialOperatorInstruction : DDLInstruction
 		{
-			public ClearScalarTypeIsSpecialOperatorInstruction(Schema.ScalarType AScalarType, Schema.Operator AOriginalIsSpecialOperator)
+			public ClearScalarTypeIsSpecialOperatorInstruction(Schema.ScalarType scalarType, Schema.Operator originalIsSpecialOperator)
 			{
-				FScalarType = AScalarType;
-				FOriginalIsSpecialOperator = AOriginalIsSpecialOperator;
+				_scalarType = scalarType;
+				_originalIsSpecialOperator = originalIsSpecialOperator;
 			}
 			
-			private Schema.ScalarType FScalarType;
-			private Schema.Operator FOriginalIsSpecialOperator;
+			private Schema.ScalarType _scalarType;
+			private Schema.Operator _originalIsSpecialOperator;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FScalarType.IsSpecialOperator = FOriginalIsSpecialOperator;
+				_scalarType.IsSpecialOperator = _originalIsSpecialOperator;
 			}
 		}
 		
 		protected class ClearRepresentationSelectorInstruction : DDLInstruction
 		{
-			public ClearRepresentationSelectorInstruction(Schema.Representation ARepresentation, Schema.Operator AOriginalSelector)
+			public ClearRepresentationSelectorInstruction(Schema.Representation representation, Schema.Operator originalSelector)
 			{
-				FRepresentation = ARepresentation;
-				FOriginalSelector = AOriginalSelector;
+				_representation = representation;
+				_originalSelector = originalSelector;
 			}
 			
-			private Schema.Representation FRepresentation;
-			private Schema.Operator FOriginalSelector;
+			private Schema.Representation _representation;
+			private Schema.Operator _originalSelector;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FRepresentation.Selector = FOriginalSelector;
+				_representation.Selector = _originalSelector;
 			}
 		}
 		
 		protected class ClearPropertyReadAccessorInstruction : DDLInstruction
 		{
-			public ClearPropertyReadAccessorInstruction(Schema.Property AProperty, Schema.Operator AOriginalReadAccessor)
+			public ClearPropertyReadAccessorInstruction(Schema.Property property, Schema.Operator originalReadAccessor)
 			{
-				FProperty = AProperty;
-				FOriginalReadAccessor = AOriginalReadAccessor;
+				_property = property;
+				_originalReadAccessor = originalReadAccessor;
 			}
 			
-			private Schema.Property FProperty;
-			private Schema.Operator FOriginalReadAccessor;
+			private Schema.Property _property;
+			private Schema.Operator _originalReadAccessor;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FProperty.ReadAccessor = FOriginalReadAccessor;
+				_property.ReadAccessor = _originalReadAccessor;
 			}
 		}
 		
 		protected class ClearPropertyWriteAccessorInstruction : DDLInstruction
 		{
-			public ClearPropertyWriteAccessorInstruction(Schema.Property AProperty, Schema.Operator AOriginalWriteAccessor)
+			public ClearPropertyWriteAccessorInstruction(Schema.Property property, Schema.Operator originalWriteAccessor)
 			{
-				FProperty = AProperty;
-				FOriginalWriteAccessor = AOriginalWriteAccessor;
+				_property = property;
+				_originalWriteAccessor = originalWriteAccessor;
 			}
 			
-			private Schema.Property FProperty;
-			private Schema.Operator FOriginalWriteAccessor;
+			private Schema.Property _property;
+			private Schema.Operator _originalWriteAccessor;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FProperty.WriteAccessor = FOriginalWriteAccessor;
+				_property.WriteAccessor = _originalWriteAccessor;
 			}
 		}
 		
 		protected class ClearSpecialSelectorInstruction : DDLInstruction
 		{
-			public ClearSpecialSelectorInstruction(Schema.Special ASpecial, Schema.Operator AOriginalSelector)
+			public ClearSpecialSelectorInstruction(Schema.Special special, Schema.Operator originalSelector)
 			{
-				FSpecial = ASpecial;
-				FOriginalSelector = AOriginalSelector;
+				_special = special;
+				_originalSelector = originalSelector;
 			}
 			
-			private Schema.Special FSpecial;
-			private Schema.Operator FOriginalSelector;
+			private Schema.Special _special;
+			private Schema.Operator _originalSelector;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FSpecial.Selector = FOriginalSelector;
+				_special.Selector = _originalSelector;
 			}
 		}
 		
 		protected class ClearSpecialComparerInstruction : DDLInstruction
 		{
-			public ClearSpecialComparerInstruction(Schema.Special ASpecial, Schema.Operator AOriginalComparer)
+			public ClearSpecialComparerInstruction(Schema.Special special, Schema.Operator originalComparer)
 			{
-				FSpecial = ASpecial;
-				FOriginalComparer = AOriginalComparer;
+				_special = special;
+				_originalComparer = originalComparer;
 			}
 			
-			private Schema.Special FSpecial;
-			private Schema.Operator FOriginalComparer;
+			private Schema.Special _special;
+			private Schema.Operator _originalComparer;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FSpecial.Comparer = FOriginalComparer;
+				_special.Comparer = _originalComparer;
 			}
 		}
 		
 		protected class AlterMetaDataInstruction : DDLInstruction
 		{
-			public AlterMetaDataInstruction(Schema.Object AObject, MetaData AOriginalMetaData)
+			public AlterMetaDataInstruction(Schema.Object objectValue, MetaData originalMetaData)
 			{
-				FObject = AObject;
-				FOriginalMetaData = AOriginalMetaData;
+				_object = objectValue;
+				_originalMetaData = originalMetaData;
 			}
 			
-			private Schema.Object FObject;
-			private MetaData FOriginalMetaData;
+			private Schema.Object _object;
+			private MetaData _originalMetaData;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FObject.MetaData = FOriginalMetaData;
+				_object.MetaData = _originalMetaData;
 			}
 		}
 		
 		protected class AlterClassDefinitionInstruction : DDLInstruction
 		{
-			public AlterClassDefinitionInstruction(ClassDefinition AClassDefinition, AlterClassDefinition AAlterClassDefinition, ClassDefinition AOriginalClassDefinition, object AInstance)
+			public AlterClassDefinitionInstruction(ClassDefinition classDefinition, AlterClassDefinition alterClassDefinition, ClassDefinition originalClassDefinition, object instance)
 			{
-				FClassDefinition = AClassDefinition;
-				FAlterClassDefinition = AAlterClassDefinition;
-				FOriginalClassDefinition = AOriginalClassDefinition;
-				FInstance = AInstance;
+				_classDefinition = classDefinition;
+				_alterClassDefinition = alterClassDefinition;
+				_originalClassDefinition = originalClassDefinition;
+				_instance = instance;
 			}
 			
-			private ClassDefinition FClassDefinition;
-			private AlterClassDefinition FAlterClassDefinition;
-			private ClassDefinition FOriginalClassDefinition;
-			private object FInstance;
+			private ClassDefinition _classDefinition;
+			private AlterClassDefinition _alterClassDefinition;
+			private ClassDefinition _originalClassDefinition;
+			private object _instance;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				AlterClassDefinition LUndoClassDefinition = new AlterClassDefinition();
-				LUndoClassDefinition.ClassName = FAlterClassDefinition.ClassName == String.Empty ? String.Empty : FOriginalClassDefinition.ClassName;
+				AlterClassDefinition undoClassDefinition = new AlterClassDefinition();
+				undoClassDefinition.ClassName = _alterClassDefinition.ClassName == String.Empty ? String.Empty : _originalClassDefinition.ClassName;
 				
-				foreach (ClassAttributeDefinition LAttributeDefinition in FAlterClassDefinition.DropAttributes)
-					LUndoClassDefinition.CreateAttributes.Add(new ClassAttributeDefinition(LAttributeDefinition.AttributeName, FOriginalClassDefinition.Attributes[LAttributeDefinition.AttributeName].AttributeValue));
+				foreach (ClassAttributeDefinition attributeDefinition in _alterClassDefinition.DropAttributes)
+					undoClassDefinition.CreateAttributes.Add(new ClassAttributeDefinition(attributeDefinition.AttributeName, _originalClassDefinition.Attributes[attributeDefinition.AttributeName].AttributeValue));
 					
-				foreach (ClassAttributeDefinition LAttributeDefinition in FAlterClassDefinition.AlterAttributes)
-					LUndoClassDefinition.AlterAttributes.Add(new ClassAttributeDefinition(LAttributeDefinition.AttributeName, FOriginalClassDefinition.Attributes[LAttributeDefinition.AttributeName].AttributeValue));
+				foreach (ClassAttributeDefinition attributeDefinition in _alterClassDefinition.AlterAttributes)
+					undoClassDefinition.AlterAttributes.Add(new ClassAttributeDefinition(attributeDefinition.AttributeName, _originalClassDefinition.Attributes[attributeDefinition.AttributeName].AttributeValue));
 					
-				foreach (ClassAttributeDefinition LAttributeDefinition in FAlterClassDefinition.CreateAttributes)
-					LUndoClassDefinition.DropAttributes.Add(new ClassAttributeDefinition(LAttributeDefinition.AttributeName, String.Empty));
+				foreach (ClassAttributeDefinition attributeDefinition in _alterClassDefinition.CreateAttributes)
+					undoClassDefinition.DropAttributes.Add(new ClassAttributeDefinition(attributeDefinition.AttributeName, String.Empty));
 				
-				AlterNode.AlterClassDefinition(FClassDefinition, LUndoClassDefinition, FInstance);
+				AlterNode.AlterClassDefinition(_classDefinition, undoClassDefinition, _instance);
 			}
 		}
 		
 		protected class AttachCatalogConstraintInstruction : DDLInstruction
 		{
-			public AttachCatalogConstraintInstruction(Schema.CatalogConstraint ACatalogConstraint)
+			public AttachCatalogConstraintInstruction(Schema.CatalogConstraint catalogConstraint)
 			{
-				FCatalogConstraint = ACatalogConstraint;
+				_catalogConstraint = catalogConstraint;
 			}
 			
-			private Schema.CatalogConstraint FCatalogConstraint;
+			private Schema.CatalogConstraint _catalogConstraint;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				CreateConstraintNode.DetachConstraint(FCatalogConstraint, FCatalogConstraint.Node);
+				CreateConstraintNode.DetachConstraint(_catalogConstraint, _catalogConstraint.Node);
 			}
 		}
 		
 		protected class DetachCatalogConstraintInstruction : DDLInstruction
 		{
-			public DetachCatalogConstraintInstruction(Schema.CatalogConstraint ACatalogConstraint)
+			public DetachCatalogConstraintInstruction(Schema.CatalogConstraint catalogConstraint)
 			{
-				FCatalogConstraint = ACatalogConstraint;
+				_catalogConstraint = catalogConstraint;
 			}
 			
-			private Schema.CatalogConstraint FCatalogConstraint;
+			private Schema.CatalogConstraint _catalogConstraint;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				CreateConstraintNode.AttachConstraint(FCatalogConstraint, FCatalogConstraint.Node);
+				CreateConstraintNode.AttachConstraint(_catalogConstraint, _catalogConstraint.Node);
 			}
 		}
 		
 		protected class SetCatalogConstraintNodeInstruction : DDLInstruction
 		{
-			public SetCatalogConstraintNodeInstruction(Schema.CatalogConstraint ACatalogConstraint, PlanNode AOriginalNode)
+			public SetCatalogConstraintNodeInstruction(Schema.CatalogConstraint catalogConstraint, PlanNode originalNode)
 			{
-				FCatalogConstraint = ACatalogConstraint;
-				FOriginalNode = AOriginalNode;
+				_catalogConstraint = catalogConstraint;
+				_originalNode = originalNode;
 			}
 
-			private Schema.CatalogConstraint FCatalogConstraint;
-			private PlanNode FOriginalNode;
+			private Schema.CatalogConstraint _catalogConstraint;
+			private PlanNode _originalNode;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FCatalogConstraint.Node = FOriginalNode;
+				_catalogConstraint.Node = _originalNode;
 			}
 		}
 		
 		protected class AttachKeyInstruction : DDLInstruction
 		{
-			public AttachKeyInstruction(Schema.TableVar ATableVar, Schema.Key AKey)
+			public AttachKeyInstruction(Schema.TableVar tableVar, Schema.Key key)
 			{
-				FTableVar = ATableVar;
-				FKey = AKey;
+				_tableVar = tableVar;
+				_key = key;
 			}
 			
-			private Schema.TableVar FTableVar;
-			private Schema.Key FKey;
+			private Schema.TableVar _tableVar;
+			private Schema.Key _key;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.DetachKey(FTableVar, FKey);
+				session.DetachKey(_tableVar, _key);
 			}
 		}
 		
 		protected class DetachKeyInstruction : DDLInstruction
 		{
-			public DetachKeyInstruction(Schema.TableVar ATableVar, Schema.Key AKey)
+			public DetachKeyInstruction(Schema.TableVar tableVar, Schema.Key key)
 			{
-				FTableVar = ATableVar;
-				FKey = AKey;
+				_tableVar = tableVar;
+				_key = key;
 			}
 			
-			private Schema.TableVar FTableVar;
-			private Schema.Key FKey;
+			private Schema.TableVar _tableVar;
+			private Schema.Key _key;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.AttachKey(FTableVar, FKey);
+				session.AttachKey(_tableVar, _key);
 			}
 		}
 		
 		protected class AttachOrderInstruction : DDLInstruction
 		{
-			public AttachOrderInstruction(Schema.TableVar ATableVar, Schema.Order AOrder)
+			public AttachOrderInstruction(Schema.TableVar tableVar, Schema.Order order)
 			{
-				FTableVar = ATableVar;
-				FOrder = AOrder;
+				_tableVar = tableVar;
+				_order = order;
 			}
 			
-			private Schema.TableVar FTableVar;
-			private Schema.Order FOrder;
+			private Schema.TableVar _tableVar;
+			private Schema.Order _order;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.DetachOrder(FTableVar, FOrder);
+				session.DetachOrder(_tableVar, _order);
 			}
 		}
 		
 		protected class DetachOrderInstruction : DDLInstruction
 		{
-			public DetachOrderInstruction(Schema.TableVar ATableVar, Schema.Order AOrder)
+			public DetachOrderInstruction(Schema.TableVar tableVar, Schema.Order order)
 			{
-				FTableVar = ATableVar;
-				FOrder = AOrder;
+				_tableVar = tableVar;
+				_order = order;
 			}
 			
-			private Schema.TableVar FTableVar;
-			private Schema.Order FOrder;
+			private Schema.TableVar _tableVar;
+			private Schema.Order _order;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.AttachOrder(FTableVar, FOrder);
+				session.AttachOrder(_tableVar, _order);
 			}
 		}
 		
 		protected class AttachTableVarConstraintInstruction : DDLInstruction
 		{
-			public AttachTableVarConstraintInstruction(Schema.TableVar ATableVar, Schema.TableVarConstraint ATableVarConstraint)
+			public AttachTableVarConstraintInstruction(Schema.TableVar tableVar, Schema.TableVarConstraint tableVarConstraint)
 			{
-				FTableVar = ATableVar;
-				FTableVarConstraint = ATableVarConstraint;
+				_tableVar = tableVar;
+				_tableVarConstraint = tableVarConstraint;
 			}
 			
-			private Schema.TableVar FTableVar;
-			private Schema.TableVarConstraint FTableVarConstraint;
+			private Schema.TableVar _tableVar;
+			private Schema.TableVarConstraint _tableVarConstraint;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.DetachTableVarConstraint(FTableVar, FTableVarConstraint);
+				session.DetachTableVarConstraint(_tableVar, _tableVarConstraint);
 			}
 		}
 		
 		protected class DetachTableVarConstraintInstruction : DDLInstruction
 		{
-			public DetachTableVarConstraintInstruction(Schema.TableVar ATableVar, Schema.TableVarConstraint ATableVarConstraint)
+			public DetachTableVarConstraintInstruction(Schema.TableVar tableVar, Schema.TableVarConstraint tableVarConstraint)
 			{
-				FTableVar = ATableVar;
-				FTableVarConstraint = ATableVarConstraint;
+				_tableVar = tableVar;
+				_tableVarConstraint = tableVarConstraint;
 			}
 			
-			private Schema.TableVar FTableVar;
-			private Schema.TableVarConstraint FTableVarConstraint;
+			private Schema.TableVar _tableVar;
+			private Schema.TableVarConstraint _tableVarConstraint;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.AttachTableVarConstraint(FTableVar, FTableVarConstraint);
+				session.AttachTableVarConstraint(_tableVar, _tableVarConstraint);
 			}
 		}
 		
 		protected class AttachTableVarColumnInstruction : DDLInstruction
 		{
-			public AttachTableVarColumnInstruction(Schema.BaseTableVar ATableVar, Schema.TableVarColumn ATableVarColumn)
+			public AttachTableVarColumnInstruction(Schema.BaseTableVar tableVar, Schema.TableVarColumn tableVarColumn)
 			{
-				FTableVar = ATableVar;
-				FTableVarColumn = ATableVarColumn;
+				_tableVar = tableVar;
+				_tableVarColumn = tableVarColumn;
 			}
 			
-			private Schema.BaseTableVar FTableVar;
-			private Schema.TableVarColumn FTableVarColumn;
+			private Schema.BaseTableVar _tableVar;
+			private Schema.TableVarColumn _tableVarColumn;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.DetachTableVarColumn(FTableVar, FTableVarColumn);
+				session.DetachTableVarColumn(_tableVar, _tableVarColumn);
 			}
 		}
 		
 		protected class DetachTableVarColumnInstruction : DDLInstruction
 		{
-			public DetachTableVarColumnInstruction(Schema.BaseTableVar ATableVar, Schema.TableVarColumn ATableVarColumn)
+			public DetachTableVarColumnInstruction(Schema.BaseTableVar tableVar, Schema.TableVarColumn tableVarColumn)
 			{
-				FTableVar = ATableVar;
-				FTableVarColumn = ATableVarColumn;
+				_tableVar = tableVar;
+				_tableVarColumn = tableVarColumn;
 			}
 			
-			private Schema.BaseTableVar FTableVar;
-			private Schema.TableVarColumn FTableVarColumn;
+			private Schema.BaseTableVar _tableVar;
+			private Schema.TableVarColumn _tableVarColumn;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.AttachTableVarColumn(FTableVar, FTableVarColumn);
+				session.AttachTableVarColumn(_tableVar, _tableVarColumn);
 			}
 		}
 		
 		protected class AttachScalarTypeConstraintInstruction : DDLInstruction
 		{
-			public AttachScalarTypeConstraintInstruction(Schema.ScalarType AScalarType, Schema.ScalarTypeConstraint AScalarTypeConstraint)
+			public AttachScalarTypeConstraintInstruction(Schema.ScalarType scalarType, Schema.ScalarTypeConstraint scalarTypeConstraint)
 			{
-				FScalarType = AScalarType;
-				FScalarTypeConstraint = AScalarTypeConstraint;
+				_scalarType = scalarType;
+				_scalarTypeConstraint = scalarTypeConstraint;
 			}
 			
-			private Schema.ScalarType FScalarType;
-			private Schema.ScalarTypeConstraint FScalarTypeConstraint;
+			private Schema.ScalarType _scalarType;
+			private Schema.ScalarTypeConstraint _scalarTypeConstraint;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.DetachScalarTypeConstraint(FScalarType, FScalarTypeConstraint);
+				session.DetachScalarTypeConstraint(_scalarType, _scalarTypeConstraint);
 			}
 		}
 		
 		protected class DetachScalarTypeConstraintInstruction : DDLInstruction
 		{
-			public DetachScalarTypeConstraintInstruction(Schema.ScalarType AScalarType, Schema.ScalarTypeConstraint AScalarTypeConstraint)
+			public DetachScalarTypeConstraintInstruction(Schema.ScalarType scalarType, Schema.ScalarTypeConstraint scalarTypeConstraint)
 			{
-				FScalarType = AScalarType;
-				FScalarTypeConstraint = AScalarTypeConstraint;
+				_scalarType = scalarType;
+				_scalarTypeConstraint = scalarTypeConstraint;
 			}
 			
-			private Schema.ScalarType FScalarType;
-			private Schema.ScalarTypeConstraint FScalarTypeConstraint;
+			private Schema.ScalarType _scalarType;
+			private Schema.ScalarTypeConstraint _scalarTypeConstraint;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.AttachScalarTypeConstraint(FScalarType, FScalarTypeConstraint);
+				session.AttachScalarTypeConstraint(_scalarType, _scalarTypeConstraint);
 			}
 		}
 		
 		protected class AttachTableVarColumnConstraintInstruction : DDLInstruction
 		{
-			public AttachTableVarColumnConstraintInstruction(Schema.TableVarColumn ATableVarColumn, Schema.TableVarColumnConstraint ATableVarColumnConstraint)
+			public AttachTableVarColumnConstraintInstruction(Schema.TableVarColumn tableVarColumn, Schema.TableVarColumnConstraint tableVarColumnConstraint)
 			{
-				FTableVarColumn = ATableVarColumn;
-				FTableVarColumnConstraint = ATableVarColumnConstraint;
+				_tableVarColumn = tableVarColumn;
+				_tableVarColumnConstraint = tableVarColumnConstraint;
 			}
 			
-			private Schema.TableVarColumn FTableVarColumn;
-			private Schema.TableVarColumnConstraint FTableVarColumnConstraint;
+			private Schema.TableVarColumn _tableVarColumn;
+			private Schema.TableVarColumnConstraint _tableVarColumnConstraint;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.DetachTableVarColumnConstraint(FTableVarColumn, FTableVarColumnConstraint);
+				session.DetachTableVarColumnConstraint(_tableVarColumn, _tableVarColumnConstraint);
 			}
 		}
 		
 		protected class DetachTableVarColumnConstraintInstruction : DDLInstruction
 		{
-			public DetachTableVarColumnConstraintInstruction(Schema.TableVarColumn ATableVarColumn, Schema.TableVarColumnConstraint ATableVarColumnConstraint)
+			public DetachTableVarColumnConstraintInstruction(Schema.TableVarColumn tableVarColumn, Schema.TableVarColumnConstraint tableVarColumnConstraint)
 			{
-				FTableVarColumn = ATableVarColumn;
-				FTableVarColumnConstraint = ATableVarColumnConstraint;
+				_tableVarColumn = tableVarColumn;
+				_tableVarColumnConstraint = tableVarColumnConstraint;
 			}
 			
-			private Schema.TableVarColumn FTableVarColumn;
-			private Schema.TableVarColumnConstraint FTableVarColumnConstraint;
+			private Schema.TableVarColumn _tableVarColumn;
+			private Schema.TableVarColumnConstraint _tableVarColumnConstraint;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.AttachTableVarColumnConstraint(FTableVarColumn, FTableVarColumnConstraint);
+				session.AttachTableVarColumnConstraint(_tableVarColumn, _tableVarColumnConstraint);
 			}
 		}
 		
 		protected class AttachSpecialInstruction : DDLInstruction
 		{
-			public AttachSpecialInstruction(Schema.ScalarType AScalarType, Schema.Special ASpecial)
+			public AttachSpecialInstruction(Schema.ScalarType scalarType, Schema.Special special)
 			{
-				FScalarType = AScalarType;
-				FSpecial = ASpecial;
+				_scalarType = scalarType;
+				_special = special;
 			}
 			
-			private Schema.ScalarType FScalarType;
-			private Schema.Special FSpecial;
+			private Schema.ScalarType _scalarType;
+			private Schema.Special _special;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.DetachSpecial(FScalarType, FSpecial);
+				session.DetachSpecial(_scalarType, _special);
 			}
 		}
 		
 		protected class DetachSpecialInstruction : DDLInstruction
 		{
-			public DetachSpecialInstruction(Schema.ScalarType AScalarType, Schema.Special ASpecial)
+			public DetachSpecialInstruction(Schema.ScalarType scalarType, Schema.Special special)
 			{
-				FScalarType = AScalarType;
-				FSpecial = ASpecial;
+				_scalarType = scalarType;
+				_special = special;
 			}
 			
-			private Schema.ScalarType FScalarType;
-			private Schema.Special FSpecial;
+			private Schema.ScalarType _scalarType;
+			private Schema.Special _special;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.AttachSpecial(FScalarType, FSpecial);
+				session.AttachSpecial(_scalarType, _special);
 			}
 		}
 		
 		protected class AttachRepresentationInstruction : DDLInstruction
 		{
-			public AttachRepresentationInstruction(Schema.ScalarType AScalarType, Schema.Representation ARepresentation)
+			public AttachRepresentationInstruction(Schema.ScalarType scalarType, Schema.Representation representation)
 			{
-				FScalarType = AScalarType;
-				FRepresentation = ARepresentation;
+				_scalarType = scalarType;
+				_representation = representation;
 			}
 			
-			private Schema.ScalarType FScalarType;
-			private Schema.Representation FRepresentation;
+			private Schema.ScalarType _scalarType;
+			private Schema.Representation _representation;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.DetachRepresentation(FScalarType, FRepresentation);
+				session.DetachRepresentation(_scalarType, _representation);
 			}
 		}
 		
 		protected class DetachRepresentationInstruction : DDLInstruction
 		{
-			public DetachRepresentationInstruction(Schema.ScalarType AScalarType, Schema.Representation ARepresentation)
+			public DetachRepresentationInstruction(Schema.ScalarType scalarType, Schema.Representation representation)
 			{
-				FScalarType = AScalarType;
-				FRepresentation = ARepresentation;
+				_scalarType = scalarType;
+				_representation = representation;
 			}
 			
-			private Schema.ScalarType FScalarType;
-			private Schema.Representation FRepresentation;
+			private Schema.ScalarType _scalarType;
+			private Schema.Representation _representation;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.AttachRepresentation(FScalarType, FRepresentation);
+				session.AttachRepresentation(_scalarType, _representation);
 			}
 		}
 		
 		protected class AttachPropertyInstruction : DDLInstruction
 		{
-			public AttachPropertyInstruction(Schema.Representation ARepresentation, Schema.Property AProperty)
+			public AttachPropertyInstruction(Schema.Representation representation, Schema.Property property)
 			{
-				FRepresentation = ARepresentation;
-				FProperty = AProperty;
+				_representation = representation;
+				_property = property;
 			}
 			
-			private Schema.Representation FRepresentation;
-			private Schema.Property FProperty;
+			private Schema.Representation _representation;
+			private Schema.Property _property;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.DetachProperty(FRepresentation, FProperty);
+				session.DetachProperty(_representation, _property);
 			}
 		}
 		
 		protected class DetachPropertyInstruction : DDLInstruction
 		{
-			public DetachPropertyInstruction(Schema.Representation ARepresentation, Schema.Property AProperty)
+			public DetachPropertyInstruction(Schema.Representation representation, Schema.Property property)
 			{
-				FRepresentation = ARepresentation;
-				FProperty = AProperty;
+				_representation = representation;
+				_property = property;
 			}
 			
-			private Schema.Representation FRepresentation;
-			private Schema.Property FProperty;
+			private Schema.Representation _representation;
+			private Schema.Property _property;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.AttachProperty(FRepresentation, FProperty);
+				session.AttachProperty(_representation, _property);
 			}
 		}
 		
 		protected class SetScalarTypeDefaultInstruction : DDLInstruction
 		{
-			public SetScalarTypeDefaultInstruction(Schema.ScalarType AScalarType, Schema.ScalarTypeDefault AOriginalDefault)
+			public SetScalarTypeDefaultInstruction(Schema.ScalarType scalarType, Schema.ScalarTypeDefault originalDefault)
 			{
-				FScalarType = AScalarType;
-				FOriginalDefault = AOriginalDefault;
+				_scalarType = scalarType;
+				_originalDefault = originalDefault;
 			}
 
-			private Schema.ScalarType FScalarType;
-			private Schema.ScalarTypeDefault FOriginalDefault;
+			private Schema.ScalarType _scalarType;
+			private Schema.ScalarTypeDefault _originalDefault;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FScalarType.Default = FOriginalDefault;
+				_scalarType.Default = _originalDefault;
 			}
 		}
 		
 		protected class SetTableVarColumnDefaultInstruction : DDLInstruction
 		{
-			public SetTableVarColumnDefaultInstruction(Schema.TableVarColumn ATableVarColumn, Schema.TableVarColumnDefault AOriginalDefault)
+			public SetTableVarColumnDefaultInstruction(Schema.TableVarColumn tableVarColumn, Schema.TableVarColumnDefault originalDefault)
 			{
-				FTableVarColumn = ATableVarColumn;
-				FOriginalDefault = AOriginalDefault;
+				_tableVarColumn = tableVarColumn;
+				_originalDefault = originalDefault;
 			}
 
-			private Schema.TableVarColumn FTableVarColumn;
-			private Schema.TableVarColumnDefault FOriginalDefault;
+			private Schema.TableVarColumn _tableVarColumn;
+			private Schema.TableVarColumnDefault _originalDefault;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FTableVarColumn.Default = FOriginalDefault;
+				_tableVarColumn.Default = _originalDefault;
 			}
 		}
 		
 		protected class SetTableVarColumnIsNilableInstruction : DDLInstruction
 		{
-			public SetTableVarColumnIsNilableInstruction(Schema.TableVarColumn ATableVarColumn, bool AOriginalIsNilable)
+			public SetTableVarColumnIsNilableInstruction(Schema.TableVarColumn tableVarColumn, bool originalIsNilable)
 			{
-				FTableVarColumn = ATableVarColumn;
-				FOriginalIsNilable = AOriginalIsNilable;
+				_tableVarColumn = tableVarColumn;
+				_originalIsNilable = originalIsNilable;
 			}
 
-			private Schema.TableVarColumn FTableVarColumn;
-			private bool FOriginalIsNilable;
+			private Schema.TableVarColumn _tableVarColumn;
+			private bool _originalIsNilable;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FTableVarColumn.IsNilable = FOriginalIsNilable;
+				_tableVarColumn.IsNilable = _originalIsNilable;
 			}
 		}
 		
 		protected class SetScalarTypeIsSpecialOperatorInstruction : DDLInstruction
 		{
-			public SetScalarTypeIsSpecialOperatorInstruction(Schema.ScalarType AScalarType, Schema.Operator AOriginalOperator)
+			public SetScalarTypeIsSpecialOperatorInstruction(Schema.ScalarType scalarType, Schema.Operator originalOperator)
 			{
-				FScalarType = AScalarType;
-				FOriginalOperator = AOriginalOperator;
+				_scalarType = scalarType;
+				_originalOperator = originalOperator;
 			}
 
-			private Schema.ScalarType FScalarType;
-			private Schema.Operator FOriginalOperator;
+			private Schema.ScalarType _scalarType;
+			private Schema.Operator _originalOperator;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FScalarType.IsSpecialOperator = FOriginalOperator;
+				_scalarType.IsSpecialOperator = _originalOperator;
 			}
 		}
 		
 		protected class SetOperatorBlockNodeInstruction : DDLInstruction
 		{
-			public SetOperatorBlockNodeInstruction(Schema.OperatorBlock AOperatorBlock, PlanNode AOriginalNode)
+			public SetOperatorBlockNodeInstruction(Schema.OperatorBlock operatorBlock, PlanNode originalNode)
 			{
-				FOperatorBlock = AOperatorBlock;
-				FOriginalNode = AOriginalNode;
+				_operatorBlock = operatorBlock;
+				_originalNode = originalNode;
 			}
 
-			private Schema.OperatorBlock FOperatorBlock;
-			private PlanNode FOriginalNode;
+			private Schema.OperatorBlock _operatorBlock;
+			private PlanNode _originalNode;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FOperatorBlock.BlockNode = FOriginalNode;
+				_operatorBlock.BlockNode = _originalNode;
 			}
 		}
 		
 		protected class AttachReferenceInstruction : DDLInstruction
 		{
-			public AttachReferenceInstruction(Schema.Reference AReference)
+			public AttachReferenceInstruction(Schema.Reference reference)
 			{
-				FReference = AReference;
+				_reference = reference;
 			}
 			
-			private Schema.Reference FReference;
+			private Schema.Reference _reference;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.DetachReference(FReference);
+				session.DetachReference(_reference);
 			}
 		}
 		
 		protected class DetachReferenceInstruction : DDLInstruction
 		{
-			public DetachReferenceInstruction(Schema.Reference AReference)
+			public DetachReferenceInstruction(Schema.Reference reference)
 			{
-				FReference = AReference;
+				_reference = reference;
 			}
 			
-			private Schema.Reference FReference;
+			private Schema.Reference _reference;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.AttachReference(FReference);
+				session.AttachReference(_reference);
 			}
 		}
 		
 		protected class AttachDeviceScalarTypeInstruction : DDLInstruction
 		{
-			public AttachDeviceScalarTypeInstruction(Schema.DeviceScalarType ADeviceScalarType)
+			public AttachDeviceScalarTypeInstruction(Schema.DeviceScalarType deviceScalarType)
 			{
-				FDeviceScalarType = ADeviceScalarType;
+				_deviceScalarType = deviceScalarType;
 			}
 			
-			private Schema.DeviceScalarType FDeviceScalarType;
+			private Schema.DeviceScalarType _deviceScalarType;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.DetachDeviceScalarType(FDeviceScalarType);
+				session.DetachDeviceScalarType(_deviceScalarType);
 			}
 		}
 		
 		protected class DetachDeviceScalarTypeInstruction : DDLInstruction
 		{
-			public DetachDeviceScalarTypeInstruction(Schema.DeviceScalarType ADeviceScalarType)
+			public DetachDeviceScalarTypeInstruction(Schema.DeviceScalarType deviceScalarType)
 			{
-				FDeviceScalarType = ADeviceScalarType;
+				_deviceScalarType = deviceScalarType;
 			}
 			
-			private Schema.DeviceScalarType FDeviceScalarType;
+			private Schema.DeviceScalarType _deviceScalarType;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.AttachDeviceScalarType(FDeviceScalarType);
+				session.AttachDeviceScalarType(_deviceScalarType);
 			}
 		}
 		
 		protected class AttachDeviceOperatorInstruction : DDLInstruction
 		{
-			public AttachDeviceOperatorInstruction(Schema.DeviceOperator ADeviceOperator)
+			public AttachDeviceOperatorInstruction(Schema.DeviceOperator deviceOperator)
 			{
-				FDeviceOperator = ADeviceOperator;
+				_deviceOperator = deviceOperator;
 			}
 			
-			private Schema.DeviceOperator FDeviceOperator;
+			private Schema.DeviceOperator _deviceOperator;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.DetachDeviceOperator(FDeviceOperator);
+				session.DetachDeviceOperator(_deviceOperator);
 			}
 		}
 		
 		protected class DetachDeviceOperatorInstruction : DDLInstruction
 		{
-			public DetachDeviceOperatorInstruction(Schema.DeviceOperator ADeviceOperator)
+			public DetachDeviceOperatorInstruction(Schema.DeviceOperator deviceOperator)
 			{
-				FDeviceOperator = ADeviceOperator;
+				_deviceOperator = deviceOperator;
 			}
 			
-			private Schema.DeviceOperator FDeviceOperator;
+			private Schema.DeviceOperator _deviceOperator;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.AttachDeviceOperator(FDeviceOperator);
+				session.AttachDeviceOperator(_deviceOperator);
 			}
 		}
 		
 		protected class AttachTableMapInstruction : DDLInstruction
 		{
-			public AttachTableMapInstruction(ApplicationTransactionDevice ADevice, TableMap ATableMap)
+			public AttachTableMapInstruction(ApplicationTransactionDevice device, TableMap tableMap)
 			{
-				FDevice = ADevice;
-				FTableMap = ATableMap;
+				_device = device;
+				_tableMap = tableMap;
 			}
 			
-			private ApplicationTransactionDevice FDevice;
-			private TableMap FTableMap;
+			private ApplicationTransactionDevice _device;
+			private TableMap _tableMap;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.DetachTableMap(FDevice, FTableMap);
+				session.DetachTableMap(_device, _tableMap);
 			}
 		}
 		
 		protected class DetachTableMapInstruction : DDLInstruction
 		{
-			public DetachTableMapInstruction(ApplicationTransactionDevice ADevice, TableMap ATableMap)
+			public DetachTableMapInstruction(ApplicationTransactionDevice device, TableMap tableMap)
 			{
-				FDevice = ADevice;
-				FTableMap = ATableMap;
+				_device = device;
+				_tableMap = tableMap;
 			}
 			
-			private ApplicationTransactionDevice FDevice;
-			private TableMap FTableMap;
+			private ApplicationTransactionDevice _device;
+			private TableMap _tableMap;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.AttachTableMap(FDevice, FTableMap);
+				session.AttachTableMap(_device, _tableMap);
 			}
 		}
 		
 		protected class AttachOperatorMapInstruction : DDLInstruction
 		{
-			public AttachOperatorMapInstruction(ApplicationTransaction.OperatorMap AOperatorMap, Schema.Operator AOperator)
+			public AttachOperatorMapInstruction(ApplicationTransaction.OperatorMap operatorMap, Schema.Operator operatorValue)
 			{
-				FOperatorMap = AOperatorMap;
-				FOperator = AOperator;
+				_operatorMap = operatorMap;
+				_operator = operatorValue;
 			}
 			
-			private ApplicationTransaction.OperatorMap FOperatorMap;
-			private Schema.Operator FOperator;
+			private ApplicationTransaction.OperatorMap _operatorMap;
+			private Schema.Operator _operator;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.DetachOperatorMap(FOperatorMap, FOperator);
+				session.DetachOperatorMap(_operatorMap, _operator);
 			}
 		}
 		
 		protected class DetachOperatorMapInstruction : DDLInstruction
 		{
-			public DetachOperatorMapInstruction(ApplicationTransaction.OperatorMap AOperatorMap, Schema.Operator AOperator)
+			public DetachOperatorMapInstruction(ApplicationTransaction.OperatorMap operatorMap, Schema.Operator operatorValue)
 			{
-				FOperatorMap = AOperatorMap;
-				FOperator = AOperator;
+				_operatorMap = operatorMap;
+				_operator = operatorValue;
 			}
 			
-			private ApplicationTransaction.OperatorMap FOperatorMap;
-			private Schema.Operator FOperator;
+			private ApplicationTransaction.OperatorMap _operatorMap;
+			private Schema.Operator _operator;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.AttachOperatorMap(FOperatorMap, FOperator);
+				session.AttachOperatorMap(_operatorMap, _operator);
 			}
 		}
 		
@@ -1259,132 +1259,132 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		protected class SetDeviceReconcileModeInstruction : DDLInstruction
 		{
-			public SetDeviceReconcileModeInstruction(Schema.Device ADevice, ReconcileMode AOriginalReconcileMode)
+			public SetDeviceReconcileModeInstruction(Schema.Device device, ReconcileMode originalReconcileMode)
 			{
-				FDevice = ADevice;
-				FOriginalReconcileMode = AOriginalReconcileMode;
+				_device = device;
+				_originalReconcileMode = originalReconcileMode;
 			}
 			
-			private Schema.Device FDevice;
-			private ReconcileMode FOriginalReconcileMode;
+			private Schema.Device _device;
+			private ReconcileMode _originalReconcileMode;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FDevice.ReconcileMode = FOriginalReconcileMode;
+				_device.ReconcileMode = _originalReconcileMode;
 			}
 		}
 		
 		protected class SetDeviceReconcileMasterInstruction : DDLInstruction
 		{
-			public SetDeviceReconcileMasterInstruction(Schema.Device ADevice, ReconcileMaster AOriginalReconcileMaster)
+			public SetDeviceReconcileMasterInstruction(Schema.Device device, ReconcileMaster originalReconcileMaster)
 			{
-				FDevice = ADevice;
-				FOriginalReconcileMaster = AOriginalReconcileMaster;
+				_device = device;
+				_originalReconcileMaster = originalReconcileMaster;
 			}
 			
-			private Schema.Device FDevice;
-			private ReconcileMaster FOriginalReconcileMaster;
+			private Schema.Device _device;
+			private ReconcileMaster _originalReconcileMaster;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				FDevice.ReconcileMaster = FOriginalReconcileMaster;
+				_device.ReconcileMaster = _originalReconcileMaster;
 			}
 		}
 
 		protected class StartDeviceInstruction : DDLInstruction
 		{
-			public StartDeviceInstruction(Schema.Device ADevice) : base()
+			public StartDeviceInstruction(Schema.Device device) : base()
 			{
-				FDevice = ADevice;
+				_device = device;
 			}
 			
-			private Schema.Device FDevice;
+			private Schema.Device _device;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.StopDevice(FDevice, true);
+				session.StopDevice(_device, true);
 			}
 		}
 		
 		protected class RegisterDeviceInstruction : DDLInstruction
 		{
-			public RegisterDeviceInstruction(Schema.Device ADevice) : base()
+			public RegisterDeviceInstruction(Schema.Device device) : base()
 			{
-				FDevice = ADevice;
+				_device = device;
 			}
 			
-			private Schema.Device FDevice;
+			private Schema.Device _device;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.UnregisterDevice(FDevice);
+				session.UnregisterDevice(_device);
 			}
 		}
 		
 		protected class AttachEventHandlerInstruction : DDLInstruction
 		{
-			public AttachEventHandlerInstruction(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, List<string> ABeforeOperatorNames)
+			public AttachEventHandlerInstruction(Schema.EventHandler eventHandler, Schema.Object eventSource, int eventSourceColumnIndex, List<string> beforeOperatorNames)
 			{
-				FEventHandler = AEventHandler;
-				FEventSource = AEventSource;
-				FEventSourceColumnIndex = AEventSourceColumnIndex;
-				FBeforeOperatorNames = ABeforeOperatorNames;
+				_eventHandler = eventHandler;
+				_eventSource = eventSource;
+				_eventSourceColumnIndex = eventSourceColumnIndex;
+				_beforeOperatorNames = beforeOperatorNames;
 			}
 			
-			private Schema.EventHandler FEventHandler;
-			private Schema.Object FEventSource;
-			private int FEventSourceColumnIndex;
-			private List<string> FBeforeOperatorNames;
+			private Schema.EventHandler _eventHandler;
+			private Schema.Object _eventSource;
+			private int _eventSourceColumnIndex;
+			private List<string> _beforeOperatorNames;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.DetachEventHandler(FEventHandler, FEventSource, FEventSourceColumnIndex);
+				session.DetachEventHandler(_eventHandler, _eventSource, _eventSourceColumnIndex);
 			}
 		}
 		
 		protected class MoveEventHandlerInstruction : DDLInstruction
 		{
-			public MoveEventHandlerInstruction(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, List<string> ABeforeOperatorNames)
+			public MoveEventHandlerInstruction(Schema.EventHandler eventHandler, Schema.Object eventSource, int eventSourceColumnIndex, List<string> beforeOperatorNames)
 			{
-				FEventHandler = AEventHandler;
-				FEventSource = AEventSource;
-				FEventSourceColumnIndex = AEventSourceColumnIndex;
-				FBeforeOperatorNames = ABeforeOperatorNames;
+				_eventHandler = eventHandler;
+				_eventSource = eventSource;
+				_eventSourceColumnIndex = eventSourceColumnIndex;
+				_beforeOperatorNames = beforeOperatorNames;
 			}
 			
-			private Schema.EventHandler FEventHandler;
-			private Schema.Object FEventSource;
-			private int FEventSourceColumnIndex;
-			private List<string> FBeforeOperatorNames;
+			private Schema.EventHandler _eventHandler;
+			private Schema.Object _eventSource;
+			private int _eventSourceColumnIndex;
+			private List<string> _beforeOperatorNames;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.MoveEventHandler(FEventHandler, FEventSource, FEventSourceColumnIndex, FBeforeOperatorNames);
+				session.MoveEventHandler(_eventHandler, _eventSource, _eventSourceColumnIndex, _beforeOperatorNames);
 			}
 		}
 		
 		protected class DetachEventHandlerInstruction : DDLInstruction
 		{
-			public DetachEventHandlerInstruction(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, List<string> ABeforeOperatorNames)
+			public DetachEventHandlerInstruction(Schema.EventHandler eventHandler, Schema.Object eventSource, int eventSourceColumnIndex, List<string> beforeOperatorNames)
 			{
-				FEventHandler = AEventHandler;
-				FEventSource = AEventSource;
-				FEventSourceColumnIndex = AEventSourceColumnIndex;
-				FBeforeOperatorNames = ABeforeOperatorNames;
+				_eventHandler = eventHandler;
+				_eventSource = eventSource;
+				_eventSourceColumnIndex = eventSourceColumnIndex;
+				_beforeOperatorNames = beforeOperatorNames;
 			}
 			
-			private Schema.EventHandler FEventHandler;
-			private Schema.Object FEventSource;
-			private int FEventSourceColumnIndex;
-			private List<string> FBeforeOperatorNames;
+			private Schema.EventHandler _eventHandler;
+			private Schema.Object _eventSource;
+			private int _eventSourceColumnIndex;
+			private List<string> _beforeOperatorNames;
 
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.AttachEventHandler(FEventHandler, FEventSource, FEventSourceColumnIndex, FBeforeOperatorNames);
+				session.AttachEventHandler(_eventHandler, _eventSource, _eventSourceColumnIndex, _beforeOperatorNames);
 			}
 		}
 		
-		protected DDLInstructionLog FInstructions = new DDLInstructionLog();
+		protected DDLInstructionLog _instructions = new DDLInstructionLog();
 		
 		#endif
 		
@@ -1392,12 +1392,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		#region Transactions
 		
-		protected override void InternalBeginTransaction(IsolationLevel AIsolationLevel)
+		protected override void InternalBeginTransaction(IsolationLevel isolationLevel)
 		{
-			base.InternalBeginTransaction(AIsolationLevel);
+			base.InternalBeginTransaction(isolationLevel);
 
 			#if LOGDDLINSTRUCTIONS
-			FInstructions.Add(new BeginTransactionInstruction());
+			_instructions.Add(new BeginTransactionInstruction());
 			#endif
 		}
 
@@ -1411,10 +1411,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			base.InternalCommitTransaction();
 
 			#if LOGDDLINSTRUCTIONS
-			for (int LIndex = FInstructions.Count - 1; LIndex >= 0; LIndex--)
-				if (FInstructions[LIndex] is BeginTransactionInstruction)
+			for (int index = _instructions.Count - 1; index >= 0; index--)
+				if (_instructions[index] is BeginTransactionInstruction)
 				{
-					FInstructions.RemoveAt(LIndex);
+					_instructions.RemoveAt(index);
 					break;
 				}
 			#endif
@@ -1436,23 +1436,23 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			try
 			{
 				#if LOGDDLINSTRUCTIONS
-				for (int LIndex = FInstructions.Count - 1; LIndex >= 0; LIndex--)
+				for (int index = _instructions.Count - 1; index >= 0; index--)
 				{
-					DDLInstruction LInstruction = FInstructions[LIndex];
-					FInstructions.RemoveAt(LIndex);
-					if (LInstruction is BeginTransactionInstruction)
+					DDLInstruction instruction = _instructions[index];
+					_instructions.RemoveAt(index);
+					if (instruction is BeginTransactionInstruction)
 						break;
 					else
 					{
 						try
 						{
-							LInstruction.Undo(this);
+							instruction.Undo(this);
 						}
-						catch (Exception LException)
+						catch (Exception exception)
 						{
 							// Log the exception and continue, not really much that can be done, should try to undo as many operations as possible
 							// In at least one case, the error may be safely ignored anyway (storage object does not exist because it has already been rolled back by the device transaction rollback)
-							ServerProcess.ServerSession.Server.LogError(new ServerException(ServerException.Codes.RollbackError, ErrorSeverity.System, LException, LException.ToString()));
+							ServerProcess.ServerSession.Server.LogError(new ServerException(ServerException.Codes.RollbackError, ErrorSeverity.System, exception, exception.ToString()));
 						}
 					}
 				}
@@ -1475,32 +1475,32 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region Object Selection
 
-		public virtual List<int> SelectOperatorHandlers(int AOperatorID)
+		public virtual List<int> SelectOperatorHandlers(int operatorID)
 		{
 			return new List<int>();
 		}
 
-		public virtual List<int> SelectObjectHandlers(int ASourceObjectID)
+		public virtual List<int> SelectObjectHandlers(int sourceObjectID)
 		{
 			return new List<int>();
 		}
 
-		public virtual Schema.DependentObjectHeaders SelectObjectDependents(int AObjectID, bool ARecursive)
+		public virtual Schema.DependentObjectHeaders SelectObjectDependents(int objectID, bool recursive)
 		{
 			return new Schema.DependentObjectHeaders();
 		}
 
-		public virtual Schema.DependentObjectHeaders SelectObjectDependencies(int AObjectID, bool ARecursive)
+		public virtual Schema.DependentObjectHeaders SelectObjectDependencies(int objectID, bool recursive)
 		{
 			throw new NotSupportedException();
 		}
 
-		public virtual Schema.CatalogObjectHeaders SelectLibraryCatalogObjects(string ALibraryName)
+		public virtual Schema.CatalogObjectHeaders SelectLibraryCatalogObjects(string libraryName)
 		{
 			throw new NotSupportedException();
 		}
 		
-		public virtual Schema.CatalogObjectHeaders SelectGeneratedObjects(int AObjectID)
+		public virtual Schema.CatalogObjectHeaders SelectGeneratedObjects(int objectID)
 		{
 			throw new NotSupportedException();
 		}
@@ -1509,34 +1509,34 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		#region Updates
 				
-		protected override void InternalInsertRow(Program AProgram, Schema.TableVar ATableVar, Row ARow, BitArray AValueFlags)
+		protected override void InternalInsertRow(Program program, Schema.TableVar tableVar, Row row, BitArray valueFlags)
 		{
-			switch (ATableVar.Name)
+			switch (tableVar.Name)
 			{
 				case "System.TableDum" : break;
 				case "System.TableDee" : break;
 			}
-			base.InternalInsertRow(AProgram, ATableVar, ARow, AValueFlags);
+			base.InternalInsertRow(program, tableVar, row, valueFlags);
 		}
 		
-		protected override void InternalUpdateRow(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+		protected override void InternalUpdateRow(Program program, Schema.TableVar tableVar, Row oldRow, Row newRow, BitArray valueFlags)
 		{
-			switch (ATableVar.Name)
+			switch (tableVar.Name)
 			{
 				case "System.TableDee" : break;
 				case "System.TableDum" : break;
 			}
-			base.InternalUpdateRow(AProgram, ATableVar, AOldRow, ANewRow, AValueFlags);
+			base.InternalUpdateRow(program, tableVar, oldRow, newRow, valueFlags);
 		}
 		
-		protected override void InternalDeleteRow(Program AProgram, Schema.TableVar ATableVar, Row ARow)
+		protected override void InternalDeleteRow(Program program, Schema.TableVar tableVar, Row row)
 		{
-			switch (ATableVar.Name)
+			switch (tableVar.Name)
 			{
 				case "System.TableDee" : break;
 				case "System.TableDum" : break;
 			}
-			base.InternalDeleteRow(AProgram, ATableVar, ARow);
+			base.InternalDeleteRow(program, tableVar, row);
 		}
 		
 		#endregion
@@ -1544,28 +1544,28 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		#region Resolution
 		
 		/// <summary>Resolves the given name and returns the catalog object, if an unambiguous match is found. Otherwise, returns null.</summary>
-		public virtual Schema.CatalogObject ResolveName(string AName, NameResolutionPath APath, List<string> ANames)
+		public virtual Schema.CatalogObject ResolveName(string name, NameResolutionPath path, List<string> names)
 		{
-			int LIndex = Catalog.ResolveName(AName, APath, ANames);
-			return LIndex >= 0 ? (Schema.CatalogObject)Catalog[LIndex] : null;
+			int index = Catalog.ResolveName(name, path, names);
+			return index >= 0 ? (Schema.CatalogObject)Catalog[index] : null;
 		}
 
 		/// <summary>Ensures that any potential match with the given operator name is in the cache so that operator resolution can occur.</summary>
-		public void ResolveOperatorName(string AOperatorName)
+		public void ResolveOperatorName(string operatorName)
 		{
 			if (!ServerProcess.ServerSession.Server.IsEngine)
 			{
-				Schema.CatalogObjectHeaders LHeaders = CachedResolveOperatorName(AOperatorName);
+				Schema.CatalogObjectHeaders headers = CachedResolveOperatorName(operatorName);
 				
 				// Only resolve operators in loaded libraries
-				for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
-					if ((LHeaders[LIndex].LibraryName == String.Empty) || Catalog.LoadedLibraries.Contains(LHeaders[LIndex].LibraryName))
-						ResolveCatalogObject(LHeaders[LIndex].ID);
+				for (int index = 0; index < headers.Count; index++)
+					if ((headers[index].LibraryName == String.Empty) || Catalog.LoadedLibraries.Contains(headers[index].LibraryName))
+						ResolveCatalogObject(headers[index].ID);
 			}
 		}
 		
 		/// <summary>Resolves the catalog object with the given id. If the object is not found, an error is raised.</summary>
-		public virtual Schema.CatalogObject ResolveCatalogObject(int AObjectID)
+		public virtual Schema.CatalogObject ResolveCatalogObject(int objectID)
 		{
 			// TODO: Catalog deserialization concurrency
 			// Right now, use the same lock as the user's cache to ensure no deadlocks can occur during deserialization.
@@ -1574,121 +1574,121 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			lock (Catalog)
 			{
 				// Lookup the object in the catalog index
-				string LObjectName;
-				if (Device.CatalogIndex.TryGetValue(AObjectID, out LObjectName))
-					return (Schema.CatalogObject)Catalog[LObjectName];
+				string objectName;
+				if (Device.CatalogIndex.TryGetValue(objectID, out objectName))
+					return (Schema.CatalogObject)Catalog[objectName];
 				else
 					return null;
 			}
 		}
 		
-		public virtual Schema.ObjectHeader GetObjectHeader(int AObjectID)
+		public virtual Schema.ObjectHeader GetObjectHeader(int objectID)
 		{
 			throw new NotSupportedException();
 		}
 
-		public Schema.Object ResolveObject(int AObjectID)
+		public Schema.Object ResolveObject(int objectID)
 		{
-			Schema.ObjectHeader LHeader = GetObjectHeader(AObjectID);
-			if (LHeader.CatalogObjectID == -1)
-				return ResolveCatalogObject(AObjectID);
+			Schema.ObjectHeader header = GetObjectHeader(objectID);
+			if (header.CatalogObjectID == -1)
+				return ResolveCatalogObject(objectID);
 				
-			Schema.CatalogObject LCatalogObject = ResolveCatalogObject(LHeader.CatalogObjectID);
-			return LCatalogObject.GetObjectFromHeader(LHeader);
+			Schema.CatalogObject catalogObject = ResolveCatalogObject(header.CatalogObjectID);
+			return catalogObject.GetObjectFromHeader(header);
 		}
 		
 		#endregion
 
 		#region Cache
 		
-		protected virtual Schema.CatalogObjectHeaders CachedResolveOperatorName(string AName)
+		protected virtual Schema.CatalogObjectHeaders CachedResolveOperatorName(string name)
 		{
-			return Device.OperatorNameCache.Resolve(AName);
+			return Device.OperatorNameCache.Resolve(name);
 		}
 
 		/// <summary>Returns the cached object for the given object id, if it exists and is in the cache, null otherwise.</summary>
-		public Schema.CatalogObject ResolveCachedCatalogObject(int AObjectID)
+		public Schema.CatalogObject ResolveCachedCatalogObject(int objectID)
 		{
-			return ResolveCachedCatalogObject(AObjectID, false);
+			return ResolveCachedCatalogObject(objectID, false);
 		}
 		
 		/// <summary>Returns the cached object for the given object id, if it exists and is in the cache. An error is thrown if the object is not in the cache and AMustResolve is true, otherwise null is returned.</summary>
-		public Schema.CatalogObject ResolveCachedCatalogObject(int AObjectID, bool AMustResolve)
+		public Schema.CatalogObject ResolveCachedCatalogObject(int objectID, bool mustResolve)
 		{
 			lock (Catalog)
 			{
-				string LObjectName;
-				if (Device.CatalogIndex.TryGetValue(AObjectID, out LObjectName))
-					return (Schema.CatalogObject)Catalog[LObjectName];
+				string objectName;
+				if (Device.CatalogIndex.TryGetValue(objectID, out objectName))
+					return (Schema.CatalogObject)Catalog[objectName];
 					
-				if (AMustResolve)
-					throw new Schema.SchemaException(Schema.SchemaException.Codes.ObjectNotCached, AObjectID);
+				if (mustResolve)
+					throw new Schema.SchemaException(Schema.SchemaException.Codes.ObjectNotCached, objectID);
 
 				return null;
 			}
 		}
 		
 		/// <summary>Returns the cached object with the given name, if it exists and is in the cache, null otherwise.</summary>
-		public Schema.CatalogObject ResolveCachedCatalogObject(string AName)
+		public Schema.CatalogObject ResolveCachedCatalogObject(string name)
 		{
-			return ResolveCachedCatalogObject(AName, false);
+			return ResolveCachedCatalogObject(name, false);
 		}
 		
 		/// <summary>Returns the cached object with the given name, if it exists and is in the cache. An error is thrown if the object is not in the cache and AMustResolve is true, otherwise null is returned.</summary>
-		public Schema.CatalogObject ResolveCachedCatalogObject(string AName, bool AMustResolve)
+		public Schema.CatalogObject ResolveCachedCatalogObject(string name, bool mustResolve)
 		{
 			lock (Catalog)
 			{
-				int LIndex = Catalog.IndexOf(AName);
-				if (LIndex >= 0)
-					return (Schema.CatalogObject)Catalog[LIndex];
+				int index = Catalog.IndexOf(name);
+				if (index >= 0)
+					return (Schema.CatalogObject)Catalog[index];
 				
-				if (AMustResolve)
-					throw new Schema.SchemaException(Schema.SchemaException.Codes.ObjectNotFound, AName);	
+				if (mustResolve)
+					throw new Schema.SchemaException(Schema.SchemaException.Codes.ObjectNotFound, name);	
 				
 				return null;
 			}
 		}
 		
-		public void ClearCachedCatalogObject(Schema.CatalogObject AObject)
+		public void ClearCachedCatalogObject(Schema.CatalogObject objectValue)
 		{
-			Schema.Objects LObjects = new Schema.Objects();
-			LObjects.Add(AObject);
-			ClearCachedCatalogObjects(LObjects);
+			Schema.Objects objects = new Schema.Objects();
+			objects.Add(objectValue);
+			ClearCachedCatalogObjects(objects);
 		}
 		
-		public void ClearCachedCatalogObjects(Schema.Objects AObjects)
+		public void ClearCachedCatalogObjects(Schema.Objects objects)
 		{
-			string[] LObjects = new string[AObjects.Count];
-			for (int LIndex = 0; LIndex < AObjects.Count; LIndex++)
-				LObjects[LIndex] = AObjects[LIndex].Name;
+			string[] localObjects = new string[objects.Count];
+			for (int index = 0; index < objects.Count; index++)
+				localObjects[index] = objects[index].Name;
 
 			// Push a loading context so that the drops only occur in the cache, not the store
 			ServerProcess.PushLoadingContext(new LoadingContext(ServerProcess.ServerSession.Server.SystemUser, String.Empty));
 			try
 			{
-				Plan LPlan = new Plan(ServerProcess);
+				Plan plan = new Plan(ServerProcess);
 				try
 				{
-					LPlan.PushSecurityContext(new SecurityContext(ServerProcess.ServerSession.Server.SystemUser));
+					plan.PushSecurityContext(new SecurityContext(ServerProcess.ServerSession.Server.SystemUser));
 					try
 					{
-						Block LBlock = (Block)LPlan.Catalog.EmitDropStatement(this, LObjects, String.Empty, true, true, true, true);
-						Program LProgram = new Program(ServerProcess);
-						foreach (Statement LStatement in LBlock.Statements)
+						Block block = (Block)plan.Catalog.EmitDropStatement(this, localObjects, String.Empty, true, true, true, true);
+						Program program = new Program(ServerProcess);
+						foreach (Statement statement in block.Statements)
 						{
-							LProgram.Code = Compiler.Bind(LPlan, Compiler.Compile(LPlan, LStatement));
-							LProgram.Execute(null);
+							program.Code = Compiler.Bind(plan, Compiler.Compile(plan, statement));
+							program.Execute(null);
 						}
 					}
 					finally
 					{
-						LPlan.PopSecurityContext();
+						plan.PopSecurityContext();
 					}
 				}
 				finally
 				{
-					LPlan.Dispose();
+					plan.Dispose();
 				}
 			}
 /*
@@ -1706,42 +1706,42 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		}
 		
 		/// <summary>Adds the given object to the catalog cache.</summary>
-		public void CacheCatalogObject(Schema.CatalogObject AObject)
+		public void CacheCatalogObject(Schema.CatalogObject objectValue)
 		{
 			lock (Catalog)
 			{
 				// if the object is already in the cache (by name), then it must be there as a result of some error
 				// and the best course of action in a production scenario is to just replace it with the new object
 				#if !DEBUG
-				int LIndex = Catalog.IndexOfName(AObject.Name);
-				if (LIndex >= 0)
-					ClearCatalogObject((Schema.CatalogObject)Catalog[LIndex]);
+				int index = Catalog.IndexOfName(AObject.Name);
+				if (index >= 0)
+					ClearCatalogObject((Schema.CatalogObject)Catalog[index]);
 				#endif
 
 				// Add the object to the catalog cache
-				Catalog.Add(AObject);
+				Catalog.Add(objectValue);
 				
 				// Add the object to the cache index
-				Device.CatalogIndex.Add(AObject.ID, Schema.Object.EnsureRooted(AObject.Name));
+				Device.CatalogIndex.Add(objectValue.ID, Schema.Object.EnsureRooted(objectValue.Name));
 			}
 		}
 		
 		/// <summary>Removes the given object from the catalog cache.</summary>
-		private void ClearCatalogObject(Schema.CatalogObject AObject)
+		private void ClearCatalogObject(Schema.CatalogObject objectValue)
 		{
 			lock (Catalog)
 			{
 				// Remove the object from the cache index
-				Device.CatalogIndex.Remove(AObject.ID);
+				Device.CatalogIndex.Remove(objectValue.ID);
 				
 				// Remove the object from the cache
-				Catalog.SafeRemove(AObject);
+				Catalog.SafeRemove(objectValue);
 				
 				// Clear the name resolution cache
-				Device.NameCache.Clear(AObject.Name);
+				Device.NameCache.Clear(objectValue.Name);
 				
 				// Clear the operator name resolution cache
-				Device.OperatorNameCache.Clear(AObject.Name);
+				Device.OperatorNameCache.Clear(objectValue.Name);
 			}
 		}
 		
@@ -1750,16 +1750,16 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		#region Catalog object
 		
 		/// <summary>Returns true if the given object is not an A/T object.</summary>
-		public bool ShouldSerializeCatalogObject(Schema.CatalogObject AObject)
+		public bool ShouldSerializeCatalogObject(Schema.CatalogObject objectValue)
 		{
-			return !AObject.IsATObject;
+			return !objectValue.IsATObject;
 		}
 		
 		/// <summary>Inserts the given object into the catalog cache. If this is not a repository, also inserts the object into the catalog store.</summary>
-		public virtual void InsertCatalogObject(Schema.CatalogObject AObject)
+		public virtual void InsertCatalogObject(Schema.CatalogObject objectValue)
 		{
 			// Cache the object
-			CacheCatalogObject(AObject);
+			CacheCatalogObject(objectValue);
 			
 			// If we are not deserializing
 			if (!ServerProcess.InLoadingContext())
@@ -1767,38 +1767,38 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				#if LOGDDLINSTRUCTIONS
 				// Log the DDL instruction
 				if (ServerProcess.InTransaction)
-					FInstructions.Add(new CreateCatalogObjectInstruction(AObject));
+					_instructions.Add(new CreateCatalogObjectInstruction(objectValue));
 				#endif
 
-				InternalInsertCatalogObject(AObject);
+				InternalInsertCatalogObject(objectValue);
 			}
 		}
 
-		protected virtual void InternalInsertCatalogObject(Schema.CatalogObject AObject)
+		protected virtual void InternalInsertCatalogObject(Schema.CatalogObject objectValue)
 		{
 			// virtual
 		}
 		
 		/// <summary>Updates the given object in the catalog cache. If this is not a repository, also updates the object in the catalog store.</summary>
-		public void UpdateCatalogObject(Schema.CatalogObject AObject)
+		public void UpdateCatalogObject(Schema.CatalogObject objectValue)
 		{
 			// If we are not deserializing
 			if (!ServerProcess.InLoadingContext())
-				InternalUpdateCatalogObject(AObject);
+				InternalUpdateCatalogObject(objectValue);
 		}
 
-		protected virtual void InternalUpdateCatalogObject(Schema.CatalogObject AObject)
+		protected virtual void InternalUpdateCatalogObject(Schema.CatalogObject objectValue)
 		{
 			// virtual
 		}
 		
 		/// <summary>Deletes the given object in the catalog cache. If this is not a repository, also deletes the object in the catalog store.</summary>
-		public void DeleteCatalogObject(Schema.CatalogObject AObject)
+		public void DeleteCatalogObject(Schema.CatalogObject objectValue)
 		{
 			lock (Catalog)
 			{
 				// Remove the object from the catalog cache
-				ClearCatalogObject(AObject);
+				ClearCatalogObject(objectValue);
 			}
 			
 			// If we are not deserializing
@@ -1807,19 +1807,19 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				#if LOGDDLINSTRUCTIONS
 				// Log the DDL instruction
 				if (ServerProcess.InTransaction)
-					FInstructions.Add(new DropCatalogObjectInstruction(AObject));
+					_instructions.Add(new DropCatalogObjectInstruction(objectValue));
 				#endif
 
-				InternalDeleteCatalogObject(AObject);
+				InternalDeleteCatalogObject(objectValue);
 			}
 		}
 
-		protected virtual void InternalDeleteCatalogObject(Schema.CatalogObject AObject)
+		protected virtual void InternalDeleteCatalogObject(Schema.CatalogObject objectValue)
 		{
 			// virtual
 		}
 
-		public virtual bool CatalogObjectExists(string AObjectName)
+		public virtual bool CatalogObjectExists(string objectName)
 		{
 			return false;
 		}
@@ -1828,50 +1828,50 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region Loaded library
 		
-		private void CacheLoadedLibrary(Schema.LoadedLibrary ALoadedLibrary)
+		private void CacheLoadedLibrary(Schema.LoadedLibrary loadedLibrary)
 		{
-			Catalog.LoadedLibraries.Add(ALoadedLibrary);
+			Catalog.LoadedLibraries.Add(loadedLibrary);
 		}
 		
-		private void ClearLoadedLibrary(Schema.LoadedLibrary ALoadedLibrary)
+		private void ClearLoadedLibrary(Schema.LoadedLibrary loadedLibrary)
 		{
-			Catalog.LoadedLibraries.Remove(ALoadedLibrary);
+			Catalog.LoadedLibraries.Remove(loadedLibrary);
 		}
 		
-		public void InsertLoadedLibrary(Schema.LoadedLibrary ALoadedLibrary)
+		public void InsertLoadedLibrary(Schema.LoadedLibrary loadedLibrary)
 		{
 			Catalog.UpdateTimeStamp();
 			
-			CacheLoadedLibrary(ALoadedLibrary);
+			CacheLoadedLibrary(loadedLibrary);
 			
 			#if LOGDDLINSTRUCTIONS
 			if (ServerProcess.InTransaction)
-				FInstructions.Add(new InsertLoadedLibraryInstruction(ALoadedLibrary));
+				_instructions.Add(new InsertLoadedLibraryInstruction(loadedLibrary));
 			#endif
 
-			InternalInsertLoadedLibrary(ALoadedLibrary);
+			InternalInsertLoadedLibrary(loadedLibrary);
 		}
 
-		protected virtual void InternalInsertLoadedLibrary(Schema.LoadedLibrary ALoadedLibrary)
+		protected virtual void InternalInsertLoadedLibrary(Schema.LoadedLibrary loadedLibrary)
 		{
 			// virtual
 		}
 
-		public void DeleteLoadedLibrary(Schema.LoadedLibrary ALoadedLibrary)
+		public void DeleteLoadedLibrary(Schema.LoadedLibrary loadedLibrary)
 		{
 			Catalog.UpdateTimeStamp();
 			
-			ClearLoadedLibrary(ALoadedLibrary);
+			ClearLoadedLibrary(loadedLibrary);
 
 			#if LOGDDLINSTRUCTIONS
 			if (ServerProcess.InTransaction)
-				FInstructions.Add(new DeleteLoadedLibraryInstruction(ALoadedLibrary));
+				_instructions.Add(new DeleteLoadedLibraryInstruction(loadedLibrary));
 			#endif
 			
-			InternalDeleteLoadedLibrary(ALoadedLibrary);
+			InternalDeleteLoadedLibrary(loadedLibrary);
 		}
 
-		protected virtual void InternalDeleteLoadedLibrary(Schema.LoadedLibrary ALoadedLibrary)
+		protected virtual void InternalDeleteLoadedLibrary(Schema.LoadedLibrary loadedLibrary)
 		{
 			// virtual
 		}
@@ -1881,30 +1881,30 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			// virtual
 		}
 		
-		public bool IsLoadedLibrary(string ALibraryName)
+		public bool IsLoadedLibrary(string libraryName)
 		{
-			return ResolveLoadedLibrary(ALibraryName, false) != null;
+			return ResolveLoadedLibrary(libraryName, false) != null;
 		}
 		
-		public Schema.LoadedLibrary ResolveLoadedLibrary(string ALibraryName)
+		public Schema.LoadedLibrary ResolveLoadedLibrary(string libraryName)
 		{
-			return ResolveLoadedLibrary(ALibraryName, true);
+			return ResolveLoadedLibrary(libraryName, true);
 		}
 		
-		public Schema.LoadedLibrary ResolveLoadedLibrary(string ALibraryName, bool AMustResolve)
+		public Schema.LoadedLibrary ResolveLoadedLibrary(string libraryName, bool mustResolve)
 		{
-			Schema.Library LLibrary = Catalog.Libraries[ALibraryName];
-			int LIndex = Catalog.LoadedLibraries.IndexOfName(LLibrary.Name);
+			Schema.Library library = Catalog.Libraries[libraryName];
+			int index = Catalog.LoadedLibraries.IndexOfName(library.Name);
 			
-			if (LIndex >= 0)
-				return Catalog.LoadedLibraries[LIndex];
+			if (index >= 0)
+				return Catalog.LoadedLibraries[index];
 				
-			var LResult = InternalResolveLoadedLibrary(LLibrary);
-			if (LResult != null)
-				return LResult;
+			var result = InternalResolveLoadedLibrary(library);
+			if (result != null)
+				return result;
 			
-			if (AMustResolve)
-				throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryNotRegistered, LLibrary.Name);
+			if (mustResolve)
+				throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryNotRegistered, library.Name);
 				
 			return null;
 		}
@@ -1918,51 +1918,51 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		#region Assembly registration
 		
-		private SettingsList InternalRegisterAssembly(Schema.LoadedLibrary ALoadedLibrary, Assembly AAssembly)
+		private SettingsList InternalRegisterAssembly(Schema.LoadedLibrary loadedLibrary, Assembly assembly)
 		{
-			SettingsList LClasses = Catalog.ClassLoader.RegisterAssembly(ALoadedLibrary, AAssembly);
-			ALoadedLibrary.Assemblies.Add(AAssembly);
-			return LClasses;
+			SettingsList classes = Catalog.ClassLoader.RegisterAssembly(loadedLibrary, assembly);
+			loadedLibrary.Assemblies.Add(assembly);
+			return classes;
 		}
 		
-		public void RegisterAssembly(Schema.LoadedLibrary ALoadedLibrary, Assembly AAssembly)
+		public void RegisterAssembly(Schema.LoadedLibrary loadedLibrary, Assembly assembly)
 		{
-			SettingsList LClasses = InternalRegisterAssembly(ALoadedLibrary, AAssembly);
+			SettingsList classes = InternalRegisterAssembly(loadedLibrary, assembly);
 
 			if (!ServerProcess.InLoadingContext())
-				InsertRegisteredClasses(ALoadedLibrary, LClasses);
+				InsertRegisteredClasses(loadedLibrary, classes);
 
 			#if LOGDDLINSTRUCTIONS
 			if (ServerProcess.InTransaction)
-				FInstructions.Add(new RegisterAssemblyInstruction(ALoadedLibrary, AAssembly));
+				_instructions.Add(new RegisterAssemblyInstruction(loadedLibrary, assembly));
 			#endif
 		}
 
-		private SettingsList InternalUnregisterAssembly(Schema.LoadedLibrary ALoadedLibrary, Assembly AAssembly)
+		private SettingsList InternalUnregisterAssembly(Schema.LoadedLibrary loadedLibrary, Assembly assembly)
 		{
-			SettingsList LClasses = Catalog.ClassLoader.UnregisterAssembly(ALoadedLibrary, AAssembly);
-			ALoadedLibrary.Assemblies.Remove(AAssembly);
-			return LClasses;
+			SettingsList classes = Catalog.ClassLoader.UnregisterAssembly(loadedLibrary, assembly);
+			loadedLibrary.Assemblies.Remove(assembly);
+			return classes;
 		}
 
-		public void UnregisterAssembly(Schema.LoadedLibrary ALoadedLibrary, Assembly AAssembly)
+		public void UnregisterAssembly(Schema.LoadedLibrary loadedLibrary, Assembly assembly)
 		{
-			SettingsList LClasses = InternalUnregisterAssembly(ALoadedLibrary, AAssembly);
+			SettingsList classes = InternalUnregisterAssembly(loadedLibrary, assembly);
 			
 			if (!ServerProcess.InLoadingContext())
-				DeleteRegisteredClasses(ALoadedLibrary, LClasses);
+				DeleteRegisteredClasses(loadedLibrary, classes);
 
 			#if LOGDDLINSTRUCTIONS
 			if (ServerProcess.InTransaction)
-				FInstructions.Add(new UnregisterAssemblyInstruction(ALoadedLibrary, AAssembly));
+				_instructions.Add(new UnregisterAssemblyInstruction(loadedLibrary, assembly));
 			#endif
 		}
 		
-		protected virtual void InsertRegisteredClasses(Schema.LoadedLibrary ALoadedLibrary, SettingsList ARegisteredClasses)
+		protected virtual void InsertRegisteredClasses(Schema.LoadedLibrary loadedLibrary, SettingsList registeredClasses)
 		{
 		}
 		
-		protected virtual void DeleteRegisteredClasses(Schema.LoadedLibrary ALoadedLibrary, SettingsList ARegisteredClasses)
+		protected virtual void DeleteRegisteredClasses(Schema.LoadedLibrary loadedLibrary, SettingsList registeredClasses)
 		{
 		}
 
@@ -1970,79 +1970,79 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		#region Session objects
 				
-		private void CreateSessionObject(Schema.CatalogObject ASessionObject)
+		private void CreateSessionObject(Schema.CatalogObject sessionObject)
 		{
 			lock (ServerProcess.ServerSession.SessionObjects)
 			{
-				ServerProcess.ServerSession.SessionObjects.Add(new Schema.SessionObject(ASessionObject.SessionObjectName, ASessionObject.Name));
+				ServerProcess.ServerSession.SessionObjects.Add(new Schema.SessionObject(sessionObject.SessionObjectName, sessionObject.Name));
 			}
 		}
 		
-		private void DropSessionObject(Schema.CatalogObject ASessionObject)
+		private void DropSessionObject(Schema.CatalogObject sessionObject)
 		{
-			ServerProcess.ServerSession.Server.DropSessionObject(ASessionObject);
+			ServerProcess.ServerSession.Server.DropSessionObject(sessionObject);
 		}
 		
-		private void CreateSessionOperator(Schema.Operator ASessionOperator)
+		private void CreateSessionOperator(Schema.Operator sessionOperator)
 		{
 			lock (ServerProcess.ServerSession.SessionOperators)
 			{
-				if (!ServerProcess.ServerSession.SessionOperators.ContainsName(ASessionOperator.SessionObjectName))
-					ServerProcess.ServerSession.SessionOperators.Add(new Schema.SessionObject(ASessionOperator.SessionObjectName, ASessionOperator.OperatorName));
+				if (!ServerProcess.ServerSession.SessionOperators.ContainsName(sessionOperator.SessionObjectName))
+					ServerProcess.ServerSession.SessionOperators.Add(new Schema.SessionObject(sessionOperator.SessionObjectName, sessionOperator.OperatorName));
 			}
 		}
 		
-		private void DropSessionOperator(Schema.Operator ASessionOperator)
+		private void DropSessionOperator(Schema.Operator sessionOperator)
 		{
-			ServerProcess.ServerSession.Server.DropSessionOperator(ASessionOperator);
+			ServerProcess.ServerSession.Server.DropSessionOperator(sessionOperator);
 		}
 		
 		#endregion
 		
 		#region Table
 		
-		public void CreateTable(Schema.BaseTableVar ATable)
+		public void CreateTable(Schema.BaseTableVar table)
 		{
-			InsertCatalogObject(ATable);
+			InsertCatalogObject(table);
 			
-			if (ATable.SessionObjectName != null)
+			if (table.SessionObjectName != null)
 			{
-				CreateSessionObject(ATable);
+				CreateSessionObject(table);
 				#if LOGDDLINSTRUCTIONS
 				if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-					FInstructions.Add(new CreateSessionObjectInstruction(ATable));
+					_instructions.Add(new CreateSessionObjectInstruction(table));
 				#endif
 			}
 			
 			if (!ServerProcess.ServerSession.Server.IsEngine && ServerProcess.IsReconciliationEnabled())
 			{
-				CreateDeviceTable(ATable);
+				CreateDeviceTable(table);
 				#if LOGDDLINSTRUCTIONS
 				if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-					FInstructions.Add(new CreateDeviceTableInstruction(ATable));
+					_instructions.Add(new CreateDeviceTableInstruction(table));
 				#endif
 			}
 		}
 		
-		public void DropTable(Schema.BaseTableVar ATable)
+		public void DropTable(Schema.BaseTableVar table)
 		{
-			DeleteCatalogObject(ATable);
+			DeleteCatalogObject(table);
 			
-			if (ATable.SessionObjectName != null)
+			if (table.SessionObjectName != null)
 			{
-				DropSessionObject(ATable);
+				DropSessionObject(table);
 				#if LOGDDLINSTRUCTIONS
 				if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-					FInstructions.Add(new DropSessionObjectInstruction(ATable));
+					_instructions.Add(new DropSessionObjectInstruction(table));
 				#endif
 			}
 			
 			if (!ServerProcess.ServerSession.Server.IsEngine && ServerProcess.IsReconciliationEnabled())
 			{
-				DropDeviceTable(ATable);
+				DropDeviceTable(table);
 				#if LOGDDLINSTRUCTIONS
 				if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-					FInstructions.Add(new DropDeviceTableInstruction(ATable));
+					_instructions.Add(new DropDeviceTableInstruction(table));
 				#endif
 			}
 		}
@@ -2051,80 +2051,80 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region View
 		
-		public void CreateView(Schema.DerivedTableVar AView)
+		public void CreateView(Schema.DerivedTableVar view)
 		{
-			InsertCatalogObject(AView);
+			InsertCatalogObject(view);
 			
-			if (AView.SessionObjectName != null)
+			if (view.SessionObjectName != null)
 			{
-				CreateSessionObject(AView);
+				CreateSessionObject(view);
 				#if LOGDDLINSTRUCTIONS
 				if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-					FInstructions.Add(new CreateSessionObjectInstruction(AView));
+					_instructions.Add(new CreateSessionObjectInstruction(view));
 				#endif
 			}
 		}
 		
-		public void DropView(Schema.DerivedTableVar AView)
+		public void DropView(Schema.DerivedTableVar view)
 		{
-			DeleteCatalogObject(AView);
+			DeleteCatalogObject(view);
 			
-			if (AView.SessionObjectName != null)
+			if (view.SessionObjectName != null)
 			{
-				DropSessionObject(AView);
+				DropSessionObject(view);
 				#if LOGDDLINSTRUCTIONS
 				if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-					FInstructions.Add(new DropSessionObjectInstruction(AView));
+					_instructions.Add(new DropSessionObjectInstruction(view));
 				#endif
 			}
 		}
 		
-		public void MarkViewForRecompile(int AObjectID)
+		public void MarkViewForRecompile(int objectID)
 		{
-			string LObjectName;
-			if (Device.CatalogIndex.TryGetValue(AObjectID, out LObjectName))
-				((Schema.DerivedTableVar)Catalog[LObjectName]).ShouldReinferReferences = true;
+			string objectName;
+			if (Device.CatalogIndex.TryGetValue(objectID, out objectName))
+				((Schema.DerivedTableVar)Catalog[objectName]).ShouldReinferReferences = true;
 		}
 
 		#endregion
 		
 		#region Conversions
 		
-		private void AddImplicitConversion(Schema.Conversion AConversion)
+		private void AddImplicitConversion(Schema.Conversion conversion)
 		{
 			lock (Catalog)
 			{
-				AConversion.SourceScalarType.ImplicitConversions.Add(AConversion);
+				conversion.SourceScalarType.ImplicitConversions.Add(conversion);
 			}
 		}
 		
-		private void RemoveImplicitConversion(Schema.Conversion AConversion)
+		private void RemoveImplicitConversion(Schema.Conversion conversion)
 		{
 			lock (Catalog)
 			{
-				AConversion.SourceScalarType.ImplicitConversions.SafeRemove(AConversion);
+				conversion.SourceScalarType.ImplicitConversions.SafeRemove(conversion);
 			}
 		}
 		
-		public void CreateConversion(Schema.Conversion AConversion)
+		public void CreateConversion(Schema.Conversion conversion)
 		{
-			InsertCatalogObject(AConversion);
+			InsertCatalogObject(conversion);
 			
-			AddImplicitConversion(AConversion);
+			AddImplicitConversion(conversion);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new AddImplicitConversionInstruction(AConversion));
+				_instructions.Add(new AddImplicitConversionInstruction(conversion));
 			#endif
 		}
 		
-		public void DropConversion(Schema.Conversion AConversion)
+		public void DropConversion(Schema.Conversion conversion)
 		{
-			DeleteCatalogObject(AConversion);
+			DeleteCatalogObject(conversion);
 			
-			RemoveImplicitConversion(AConversion);
+			RemoveImplicitConversion(conversion);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new RemoveImplicitConversionInstruction(AConversion));
+				_instructions.Add(new RemoveImplicitConversionInstruction(conversion));
 			#endif
 		}
 		
@@ -2132,42 +2132,42 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region Sort
 		
-		private void SetScalarTypeSort(Schema.ScalarType AScalarType, Schema.Sort ASort, bool AIsUnique)
+		private void SetScalarTypeSort(Schema.ScalarType scalarType, Schema.Sort sort, bool isUnique)
 		{
-			if (AIsUnique)
-				AScalarType.UniqueSort = ASort;
+			if (isUnique)
+				scalarType.UniqueSort = sort;
 			else
-				AScalarType.Sort = ASort;
+				scalarType.Sort = sort;
 		}
 		
-		public void CreateSort(Schema.Sort ASort)
+		public void CreateSort(Schema.Sort sort)
 		{
-			InsertCatalogObject(ASort);
+			InsertCatalogObject(sort);
 		}
 		
-		public void DropSort(Schema.Sort ASort)
+		public void DropSort(Schema.Sort sort)
 		{
-			DeleteCatalogObject(ASort);
+			DeleteCatalogObject(sort);
 		}
 
-		public void AttachSort(Schema.ScalarType AScalarType, Schema.Sort ASort, bool AIsUnique)
+		public void AttachSort(Schema.ScalarType scalarType, Schema.Sort sort, bool isUnique)
 		{
 			#if LOGDDLINSTRUCTIONS
-			Schema.Sort LOriginalSort = AIsUnique ? AScalarType.UniqueSort : AScalarType.Sort;
+			Schema.Sort originalSort = isUnique ? scalarType.UniqueSort : scalarType.Sort;
 			#endif
-			SetScalarTypeSort(AScalarType, ASort, AIsUnique);
+			SetScalarTypeSort(scalarType, sort, isUnique);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new SetScalarTypeSortInstruction(AScalarType, LOriginalSort, AIsUnique));
+				_instructions.Add(new SetScalarTypeSortInstruction(scalarType, originalSort, isUnique));
 			#endif
 		}
 		
-		public void DetachSort(Schema.ScalarType AScalarType, Schema.Sort ASort, bool AIsUnique)
+		public void DetachSort(Schema.ScalarType scalarType, Schema.Sort sort, bool isUnique)
 		{
-			SetScalarTypeSort(AScalarType, null, AIsUnique);
+			SetScalarTypeSort(scalarType, null, isUnique);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new SetScalarTypeSortInstruction(AScalarType, ASort, AIsUnique));
+				_instructions.Add(new SetScalarTypeSortInstruction(scalarType, sort, isUnique));
 			#endif
 		}
 		
@@ -2175,25 +2175,25 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region Metadata
 		
-		public void AlterMetaData(Schema.Object AObject, AlterMetaData AAlterMetaData)
+		public void AlterMetaData(Schema.Object objectValue, AlterMetaData alterMetaData)
 		{
-			if (AAlterMetaData != null)
+			if (alterMetaData != null)
 			{
 				#if LOGDDLINSTRUCTIONS
 				if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
 				{
-					MetaData LMetaData = null;
-					if (AObject.MetaData != null)
+					MetaData metaData = null;
+					if (objectValue.MetaData != null)
 					{
-						LMetaData = new MetaData();
-						LMetaData.Merge(AObject.MetaData);
+						metaData = new MetaData();
+						metaData.Merge(objectValue.MetaData);
 					}
 
-					FInstructions.Add(new AlterMetaDataInstruction(AObject, LMetaData));
+					_instructions.Add(new AlterMetaDataInstruction(objectValue, metaData));
 				}
 				#endif
 				
-				AlterNode.AlterMetaData(AObject, AAlterMetaData);
+				AlterNode.AlterMetaData(objectValue, alterMetaData);
 			}
 		}
 		
@@ -2201,78 +2201,78 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region Scalar type
 		
-		public void CreateScalarType(Schema.ScalarType AScalarType)
+		public void CreateScalarType(Schema.ScalarType scalarType)
 		{
-			InsertCatalogObject(AScalarType);
+			InsertCatalogObject(scalarType);
 		}
 		
-		public void DropScalarType(Schema.ScalarType AScalarType)
+		public void DropScalarType(Schema.ScalarType scalarType)
 		{
-			DeleteCatalogObject(AScalarType);
+			DeleteCatalogObject(scalarType);
 		}
 		
 		#endregion
 		
 		#region Operator
 		
-		public void CreateOperator(Schema.Operator AOperator)
+		public void CreateOperator(Schema.Operator operatorValue)
 		{	
-			InsertCatalogObject(AOperator);
+			InsertCatalogObject(operatorValue);
 			
-			if (AOperator.SessionObjectName != null)
+			if (operatorValue.SessionObjectName != null)
 			{
-				CreateSessionOperator(AOperator);
+				CreateSessionOperator(operatorValue);
 				#if LOGDDLINSTRUCTIONS
 				if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-					FInstructions.Add(new CreateSessionOperatorInstruction(AOperator));
+					_instructions.Add(new CreateSessionOperatorInstruction(operatorValue));
 				#endif
 			}
 		}
 		
-		public void AlterOperator(Schema.Operator AOldOperator, Schema.Operator ANewOperator)
+		public void AlterOperator(Schema.Operator oldOperator, Schema.Operator newOperator)
 		{
 			#if LOGDDLINSTRUCTIONS
-			ObjectList LOriginalDependencies = new ObjectList();
-			AOldOperator.Dependencies.CopyTo(LOriginalDependencies);
+			ObjectList originalDependencies = new ObjectList();
+			oldOperator.Dependencies.CopyTo(originalDependencies);
 			#endif
-			AOldOperator.Dependencies.Clear();
+			oldOperator.Dependencies.Clear();
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new RemoveDependenciesInstruction(AOldOperator, LOriginalDependencies));
+				_instructions.Add(new RemoveDependenciesInstruction(oldOperator, originalDependencies));
 			#endif
 				
-			AOldOperator.AddDependencies(ANewOperator.Dependencies);
+			oldOperator.AddDependencies(newOperator.Dependencies);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new AddDependenciesInstruction(AOldOperator));
+				_instructions.Add(new AddDependenciesInstruction(oldOperator));
 			#endif
-			AOldOperator.DetermineRemotable(this);
+			oldOperator.DetermineRemotable(this);
 			
-			AlterOperatorBlockNode(AOldOperator.Block, ANewOperator.Block.BlockNode);
+			AlterOperatorBlockNode(oldOperator.Block, newOperator.Block.BlockNode);
 		}
 		
-		public void AlterOperatorBlockNode(Schema.OperatorBlock AOperatorBlock, PlanNode ANewNode)
+		public void AlterOperatorBlockNode(Schema.OperatorBlock operatorBlock, PlanNode newNode)
 		{
 			#if LOGDDLINSTRUCTIONS
-			PlanNode LOriginalNode = AOperatorBlock.BlockNode;
+			PlanNode originalNode = operatorBlock.BlockNode;
 			#endif
-			AOperatorBlock.BlockNode = ANewNode;
+			operatorBlock.BlockNode = newNode;
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new SetOperatorBlockNodeInstruction(AOperatorBlock, LOriginalNode));
+				_instructions.Add(new SetOperatorBlockNodeInstruction(operatorBlock, originalNode));
 			#endif
 		}
 
-		public void DropOperator(Schema.Operator AOperator)
+		public void DropOperator(Schema.Operator operatorValue)
 		{
-			DeleteCatalogObject(AOperator);
+			DeleteCatalogObject(operatorValue);
 			
-			if (AOperator.SessionObjectName != null)
+			if (operatorValue.SessionObjectName != null)
 			{
-				DropSessionOperator(AOperator);
+				DropSessionOperator(operatorValue);
 				#if LOGDDLINSTRUCTIONS
 				if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-					FInstructions.Add(new DropSessionOperatorInstruction(AOperator));
+					_instructions.Add(new DropSessionOperatorInstruction(operatorValue));
 				#endif
 			}
 		}
@@ -2281,94 +2281,94 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region Constraint
 		
-		public void CreateConstraint(Schema.CatalogConstraint AConstraint)
+		public void CreateConstraint(Schema.CatalogConstraint constraint)
 		{
-			InsertCatalogObject(AConstraint);
+			InsertCatalogObject(constraint);
 			
-			if (!ServerProcess.ServerSession.Server.IsEngine && AConstraint.Enforced)
+			if (!ServerProcess.ServerSession.Server.IsEngine && constraint.Enforced)
 			{
-				CreateConstraintNode.AttachConstraint(AConstraint, AConstraint.Node);
+				CreateConstraintNode.AttachConstraint(constraint, constraint.Node);
 				#if LOGDDLINSTRUCTIONS
 				if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-					FInstructions.Add(new AttachCatalogConstraintInstruction(AConstraint));
+					_instructions.Add(new AttachCatalogConstraintInstruction(constraint));
 				#endif
 			}
 				
-			if (AConstraint.SessionObjectName != null)
+			if (constraint.SessionObjectName != null)
 			{
-				CreateSessionObject(AConstraint);
+				CreateSessionObject(constraint);
 				#if LOGDDLINSTRUCTIONS
 				if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-					FInstructions.Add(new CreateSessionObjectInstruction(AConstraint));
+					_instructions.Add(new CreateSessionObjectInstruction(constraint));
 				#endif
 			}
 		}
 
-		public void AlterConstraint(Schema.CatalogConstraint AOldConstraint, Schema.CatalogConstraint ANewConstraint)
+		public void AlterConstraint(Schema.CatalogConstraint oldConstraint, Schema.CatalogConstraint newConstraint)
 		{
-			if (!ServerProcess.ServerSession.Server.IsEngine && AOldConstraint.Enforced)
+			if (!ServerProcess.ServerSession.Server.IsEngine && oldConstraint.Enforced)
 			{
-				CreateConstraintNode.DetachConstraint(AOldConstraint, AOldConstraint.Node);
+				CreateConstraintNode.DetachConstraint(oldConstraint, oldConstraint.Node);
 				#if LOGDDLINSTRUCTIONS
 				if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-					FInstructions.Add(new DetachCatalogConstraintInstruction(AOldConstraint));
+					_instructions.Add(new DetachCatalogConstraintInstruction(oldConstraint));
 				#endif
 			}
 			
 			#if LOGDDLINSTRUCTIONS
-			ObjectList LOriginalDependencies = new ObjectList();
-			AOldConstraint.Dependencies.CopyTo(LOriginalDependencies);
+			ObjectList originalDependencies = new ObjectList();
+			oldConstraint.Dependencies.CopyTo(originalDependencies);
 			#endif
-			AOldConstraint.Dependencies.Clear();
+			oldConstraint.Dependencies.Clear();
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new RemoveDependenciesInstruction(AOldConstraint, LOriginalDependencies));
+				_instructions.Add(new RemoveDependenciesInstruction(oldConstraint, originalDependencies));
 			#endif
 				
-			AOldConstraint.AddDependencies(ANewConstraint.Dependencies);
+			oldConstraint.AddDependencies(newConstraint.Dependencies);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new AddDependenciesInstruction(AOldConstraint));
+				_instructions.Add(new AddDependenciesInstruction(oldConstraint));
 			#endif
 
 			#if LOGDDLINSTRUCTIONS
-			PlanNode LOriginalNode = AOldConstraint.Node;
+			PlanNode originalNode = oldConstraint.Node;
 			#endif
-			AOldConstraint.Node = ANewConstraint.Node;
+			oldConstraint.Node = newConstraint.Node;
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new SetCatalogConstraintNodeInstruction(AOldConstraint, LOriginalNode));
+				_instructions.Add(new SetCatalogConstraintNodeInstruction(oldConstraint, originalNode));
 			#endif
 
-			if (!ServerProcess.ServerSession.Server.IsEngine && AOldConstraint.Enforced)
+			if (!ServerProcess.ServerSession.Server.IsEngine && oldConstraint.Enforced)
 			{
-				CreateConstraintNode.AttachConstraint(AOldConstraint, AOldConstraint.Node);
+				CreateConstraintNode.AttachConstraint(oldConstraint, oldConstraint.Node);
 				#if LOGDDLINSTRUCTIONS
 				if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-					FInstructions.Add(new AttachCatalogConstraintInstruction(AOldConstraint));
+					_instructions.Add(new AttachCatalogConstraintInstruction(oldConstraint));
 				#endif
 			}
 		}
 		
-		public void DropConstraint(Schema.CatalogConstraint AConstraint)
+		public void DropConstraint(Schema.CatalogConstraint constraint)
 		{
-			DeleteCatalogObject(AConstraint);
+			DeleteCatalogObject(constraint);
 
-			if (!ServerProcess.ServerSession.Server.IsEngine && AConstraint.Enforced)
+			if (!ServerProcess.ServerSession.Server.IsEngine && constraint.Enforced)
 			{
-				CreateConstraintNode.DetachConstraint(AConstraint, AConstraint.Node);
+				CreateConstraintNode.DetachConstraint(constraint, constraint.Node);
 				#if LOGDDLINSTRUCTIONS
 				if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-					FInstructions.Add(new DetachCatalogConstraintInstruction(AConstraint));
+					_instructions.Add(new DetachCatalogConstraintInstruction(constraint));
 				#endif
 			}
 
-			if (AConstraint.SessionObjectName != null)
+			if (constraint.SessionObjectName != null)
 			{
-				DropSessionObject(AConstraint);
+				DropSessionObject(constraint);
 				#if LOGDDLINSTRUCTIONS
 				if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-					FInstructions.Add(new DropSessionObjectInstruction(AConstraint));
+					_instructions.Add(new DropSessionObjectInstruction(constraint));
 				#endif
 			}
 		}
@@ -2377,137 +2377,137 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region Reference
 		
-		private void AttachReference(Schema.Reference AReference)
+		private void AttachReference(Schema.Reference reference)
 		{
-			if (!ServerProcess.ServerSession.Server.IsEngine && AReference.Enforced)
+			if (!ServerProcess.ServerSession.Server.IsEngine && reference.Enforced)
 			{
-				if ((AReference.SourceTable is Schema.BaseTableVar) && (AReference.TargetTable is Schema.BaseTableVar))
+				if ((reference.SourceTable is Schema.BaseTableVar) && (reference.TargetTable is Schema.BaseTableVar))
 				{
-					AReference.SourceTable.Constraints.Add(AReference.SourceConstraint);
-					AReference.SourceTable.InsertConstraints.Add(AReference.SourceConstraint);
-					AReference.SourceTable.UpdateConstraints.Add(AReference.SourceConstraint);
-					if ((AReference.UpdateReferenceAction == ReferenceAction.Require) || (AReference.DeleteReferenceAction == ReferenceAction.Require))
+					reference.SourceTable.Constraints.Add(reference.SourceConstraint);
+					reference.SourceTable.InsertConstraints.Add(reference.SourceConstraint);
+					reference.SourceTable.UpdateConstraints.Add(reference.SourceConstraint);
+					if ((reference.UpdateReferenceAction == ReferenceAction.Require) || (reference.DeleteReferenceAction == ReferenceAction.Require))
 					{
-						AReference.TargetTable.Constraints.Add(AReference.TargetConstraint);
-						if (AReference.UpdateReferenceAction == ReferenceAction.Require)
-							AReference.TargetTable.UpdateConstraints.Add(AReference.TargetConstraint);
-						if (AReference.DeleteReferenceAction == ReferenceAction.Require)
+						reference.TargetTable.Constraints.Add(reference.TargetConstraint);
+						if (reference.UpdateReferenceAction == ReferenceAction.Require)
+							reference.TargetTable.UpdateConstraints.Add(reference.TargetConstraint);
+						if (reference.DeleteReferenceAction == ReferenceAction.Require)
 						{
-							AReference.TargetTable.DeleteConstraints.Add(AReference.TargetConstraint);
+							reference.TargetTable.DeleteConstraints.Add(reference.TargetConstraint);
 						}
 					}
 				}
 				else
 				{
 					// This constraint is added only in the cache (never persisted)
-					CreateConstraintNode.AttachConstraint(AReference.CatalogConstraint, AReference.CatalogConstraint.Node);
+					CreateConstraintNode.AttachConstraint(reference.CatalogConstraint, reference.CatalogConstraint.Node);
 				}
 				
-				if ((AReference.UpdateReferenceAction == ReferenceAction.Cascade) || (AReference.UpdateReferenceAction == ReferenceAction.Clear) || (AReference.UpdateReferenceAction == ReferenceAction.Set))
+				if ((reference.UpdateReferenceAction == ReferenceAction.Cascade) || (reference.UpdateReferenceAction == ReferenceAction.Clear) || (reference.UpdateReferenceAction == ReferenceAction.Set))
 				{
 					// This object is added only in the cache (never persisted)
-					AReference.TargetTable.EventHandlers.Add(AReference.UpdateHandler);
+					reference.TargetTable.EventHandlers.Add(reference.UpdateHandler);
 				}
 					
-				if ((AReference.DeleteReferenceAction == ReferenceAction.Cascade) || (AReference.DeleteReferenceAction == ReferenceAction.Clear) || (AReference.DeleteReferenceAction == ReferenceAction.Set))
+				if ((reference.DeleteReferenceAction == ReferenceAction.Cascade) || (reference.DeleteReferenceAction == ReferenceAction.Clear) || (reference.DeleteReferenceAction == ReferenceAction.Set))
 				{
 					// This object is added only in the cache (never persisted)
-					AReference.TargetTable.EventHandlers.Add(AReference.DeleteHandler);
+					reference.TargetTable.EventHandlers.Add(reference.DeleteHandler);
 				}
 			}
 					
-			AReference.SourceTable.SourceReferences.AddInCreationOrder(AReference);
-			AReference.TargetTable.TargetReferences.AddInCreationOrder(AReference);
+			reference.SourceTable.SourceReferences.AddInCreationOrder(reference);
+			reference.TargetTable.TargetReferences.AddInCreationOrder(reference);
 			
-			AReference.SourceTable.SetShouldReinferReferences(this);
-			AReference.TargetTable.SetShouldReinferReferences(this);
+			reference.SourceTable.SetShouldReinferReferences(this);
+			reference.TargetTable.SetShouldReinferReferences(this);
 		}
 		
-		private void DetachReference(Schema.Reference AReference)
+		private void DetachReference(Schema.Reference reference)
 		{
-			if ((AReference.SourceTable is Schema.BaseTableVar) && (AReference.TargetTable is Schema.BaseTableVar))
+			if ((reference.SourceTable is Schema.BaseTableVar) && (reference.TargetTable is Schema.BaseTableVar))
 			{
-				if (AReference.SourceConstraint != null)
+				if (reference.SourceConstraint != null)
 				{
-					AReference.SourceTable.InsertConstraints.SafeRemove(AReference.SourceConstraint);
-					AReference.SourceTable.UpdateConstraints.SafeRemove(AReference.SourceConstraint);
-					AReference.SourceTable.Constraints.SafeRemove(AReference.SourceConstraint);
+					reference.SourceTable.InsertConstraints.SafeRemove(reference.SourceConstraint);
+					reference.SourceTable.UpdateConstraints.SafeRemove(reference.SourceConstraint);
+					reference.SourceTable.Constraints.SafeRemove(reference.SourceConstraint);
 				}
 				
-				if (AReference.TargetConstraint != null)
+				if (reference.TargetConstraint != null)
 				{
-					if ((AReference.UpdateReferenceAction == ReferenceAction.Require) || (AReference.DeleteReferenceAction == ReferenceAction.Require))
+					if ((reference.UpdateReferenceAction == ReferenceAction.Require) || (reference.DeleteReferenceAction == ReferenceAction.Require))
 					{
-						if (AReference.UpdateReferenceAction == ReferenceAction.Require)
-							AReference.TargetTable.UpdateConstraints.SafeRemove(AReference.TargetConstraint);
-						if (AReference.DeleteReferenceAction == ReferenceAction.Require)
-							AReference.TargetTable.DeleteConstraints.SafeRemove(AReference.TargetConstraint);				
-						AReference.TargetTable.Constraints.SafeRemove(AReference.TargetConstraint);
+						if (reference.UpdateReferenceAction == ReferenceAction.Require)
+							reference.TargetTable.UpdateConstraints.SafeRemove(reference.TargetConstraint);
+						if (reference.DeleteReferenceAction == ReferenceAction.Require)
+							reference.TargetTable.DeleteConstraints.SafeRemove(reference.TargetConstraint);				
+						reference.TargetTable.Constraints.SafeRemove(reference.TargetConstraint);
 					}
 				}
 			}
 			else
 			{
-				if (AReference.CatalogConstraint != null)
+				if (reference.CatalogConstraint != null)
 				{
-					CreateConstraintNode.DetachConstraint(AReference.CatalogConstraint, AReference.CatalogConstraint.Node);
-					ServerProcess.ServerSession.Server.RemoveCatalogConstraintCheck(AReference.CatalogConstraint);
+					CreateConstraintNode.DetachConstraint(reference.CatalogConstraint, reference.CatalogConstraint.Node);
+					ServerProcess.ServerSession.Server.RemoveCatalogConstraintCheck(reference.CatalogConstraint);
 				}
 			}
 			
-			if (((AReference.UpdateReferenceAction == ReferenceAction.Cascade) || (AReference.UpdateReferenceAction == ReferenceAction.Clear) || (AReference.UpdateReferenceAction == ReferenceAction.Set)) && (AReference.UpdateHandler != null))
+			if (((reference.UpdateReferenceAction == ReferenceAction.Cascade) || (reference.UpdateReferenceAction == ReferenceAction.Clear) || (reference.UpdateReferenceAction == ReferenceAction.Set)) && (reference.UpdateHandler != null))
 			{
-				AReference.TargetTable.EventHandlers.SafeRemove(AReference.UpdateHandler);
+				reference.TargetTable.EventHandlers.SafeRemove(reference.UpdateHandler);
 			}
 				
-			if (((AReference.DeleteReferenceAction == ReferenceAction.Cascade) || (AReference.DeleteReferenceAction == ReferenceAction.Clear) || (AReference.DeleteReferenceAction == ReferenceAction.Set)) && (AReference.DeleteHandler != null))
+			if (((reference.DeleteReferenceAction == ReferenceAction.Cascade) || (reference.DeleteReferenceAction == ReferenceAction.Clear) || (reference.DeleteReferenceAction == ReferenceAction.Set)) && (reference.DeleteHandler != null))
 			{
-				AReference.TargetTable.EventHandlers.SafeRemove(AReference.DeleteHandler);
+				reference.TargetTable.EventHandlers.SafeRemove(reference.DeleteHandler);
 			}
 				
-			AReference.SourceTable.SourceReferences.SafeRemove(AReference);
-			AReference.TargetTable.TargetReferences.SafeRemove(AReference);
+			reference.SourceTable.SourceReferences.SafeRemove(reference);
+			reference.TargetTable.TargetReferences.SafeRemove(reference);
 			
-			AReference.SourceTable.SetShouldReinferReferences(this);	
-			AReference.TargetTable.SetShouldReinferReferences(this);	
+			reference.SourceTable.SetShouldReinferReferences(this);	
+			reference.TargetTable.SetShouldReinferReferences(this);	
 		}
 		
-		public void CreateReference(Schema.Reference AReference)
+		public void CreateReference(Schema.Reference reference)
 		{
-			InsertCatalogObject(AReference);
+			InsertCatalogObject(reference);
 
-			AttachReference(AReference);
+			AttachReference(reference);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new AttachReferenceInstruction(AReference));
+				_instructions.Add(new AttachReferenceInstruction(reference));
 			#endif
 
-			if (AReference.SessionObjectName != null)
+			if (reference.SessionObjectName != null)
 			{
-				CreateSessionObject(AReference);
+				CreateSessionObject(reference);
 				#if LOGDDLINSTRUCTIONS
 				if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-					FInstructions.Add(new CreateSessionObjectInstruction(AReference));
+					_instructions.Add(new CreateSessionObjectInstruction(reference));
 				#endif
 			}
 		}
 		
-		public void DropReference(Schema.Reference AReference)
+		public void DropReference(Schema.Reference reference)
 		{
-			DeleteCatalogObject(AReference);
+			DeleteCatalogObject(reference);
 			
-			DetachReference(AReference);
+			DetachReference(reference);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new DetachReferenceInstruction(AReference));
+				_instructions.Add(new DetachReferenceInstruction(reference));
 			#endif
 			
-			if (AReference.SessionObjectName != null)
+			if (reference.SessionObjectName != null)
 			{
-				DropSessionObject(AReference);
+				DropSessionObject(reference);
 				#if LOGDDLINSTRUCTIONS
 				if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-					FInstructions.Add(new DropSessionObjectInstruction(AReference));
+					_instructions.Add(new DropSessionObjectInstruction(reference));
 				#endif
 			}
 		}
@@ -2516,111 +2516,111 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region Event handler
 		
-		private void AttachEventHandler(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, List<string> ABeforeOperatorNames)
+		private void AttachEventHandler(Schema.EventHandler eventHandler, Schema.Object eventSource, int eventSourceColumnIndex, List<string> beforeOperatorNames)
 		{
-			Schema.TableVar LTableVar = AEventSource as Schema.TableVar;
-			if (LTableVar != null)
+			Schema.TableVar tableVar = eventSource as Schema.TableVar;
+			if (tableVar != null)
 			{
-				if (AEventSourceColumnIndex >= 0)
-					LTableVar.Columns[AEventSourceColumnIndex].EventHandlers.Add(AEventHandler, ABeforeOperatorNames);
+				if (eventSourceColumnIndex >= 0)
+					tableVar.Columns[eventSourceColumnIndex].EventHandlers.Add(eventHandler, beforeOperatorNames);
 				else
-					LTableVar.EventHandlers.Add(AEventHandler, ABeforeOperatorNames);
-				LTableVar.DetermineRemotable(this);
+					tableVar.EventHandlers.Add(eventHandler, beforeOperatorNames);
+				tableVar.DetermineRemotable(this);
 			}
 			else
-				((Schema.ScalarType)AEventSource).EventHandlers.Add(AEventHandler);
+				((Schema.ScalarType)eventSource).EventHandlers.Add(eventHandler);
 		}
 
-		private void MoveEventHandler(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, List<string> ABeforeOperatorNames)
+		private void MoveEventHandler(Schema.EventHandler eventHandler, Schema.Object eventSource, int eventSourceColumnIndex, List<string> beforeOperatorNames)
 		{
-			Schema.TableVar LTableVar = AEventSource as Schema.TableVar;
-			if (LTableVar != null)
+			Schema.TableVar tableVar = eventSource as Schema.TableVar;
+			if (tableVar != null)
 			{
-				if (AEventSourceColumnIndex >= 0)
-					LTableVar.Columns[AEventSourceColumnIndex].EventHandlers.MoveBefore(AEventHandler, ABeforeOperatorNames);
+				if (eventSourceColumnIndex >= 0)
+					tableVar.Columns[eventSourceColumnIndex].EventHandlers.MoveBefore(eventHandler, beforeOperatorNames);
 				else
-					LTableVar.EventHandlers.MoveBefore(AEventHandler, ABeforeOperatorNames);
-				LTableVar.DetermineRemotable(this);
+					tableVar.EventHandlers.MoveBefore(eventHandler, beforeOperatorNames);
+				tableVar.DetermineRemotable(this);
 			}
 			else
-				((Schema.ScalarType)AEventSource).EventHandlers.MoveBefore(AEventHandler, ABeforeOperatorNames);
+				((Schema.ScalarType)eventSource).EventHandlers.MoveBefore(eventHandler, beforeOperatorNames);
 		}
 
-		private void DetachEventHandler(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex)
+		private void DetachEventHandler(Schema.EventHandler eventHandler, Schema.Object eventSource, int eventSourceColumnIndex)
 		{
-			Schema.TableVar LTableVar = AEventSource as Schema.TableVar;
-			if (LTableVar != null)
+			Schema.TableVar tableVar = eventSource as Schema.TableVar;
+			if (tableVar != null)
 			{
-				if (AEventSourceColumnIndex >= 0)
-					LTableVar.Columns[AEventSourceColumnIndex].EventHandlers.SafeRemove(AEventHandler);
+				if (eventSourceColumnIndex >= 0)
+					tableVar.Columns[eventSourceColumnIndex].EventHandlers.SafeRemove(eventHandler);
 				else
-					LTableVar.EventHandlers.SafeRemove(AEventHandler);
-				LTableVar.DetermineRemotable(this);
+					tableVar.EventHandlers.SafeRemove(eventHandler);
+				tableVar.DetermineRemotable(this);
 			}
 			else
-				((Schema.ScalarType)AEventSource).EventHandlers.SafeRemove(AEventHandler);
+				((Schema.ScalarType)eventSource).EventHandlers.SafeRemove(eventHandler);
 		}
 
-		private List<string> GetEventHandlerBeforeOperatorNames(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex)
+		private List<string> GetEventHandlerBeforeOperatorNames(Schema.EventHandler eventHandler, Schema.Object eventSource, int eventSourceColumnIndex)
 		{
-			List<string> LResult = new List<string>();
-			EventHandlers LHandlers = null;
-			Schema.TableVar LTableVar = AEventSource as Schema.TableVar;
-			if (LTableVar != null)
+			List<string> result = new List<string>();
+			EventHandlers handlers = null;
+			Schema.TableVar tableVar = eventSource as Schema.TableVar;
+			if (tableVar != null)
 			{
-				if (AEventSourceColumnIndex >= 0)
-					LHandlers = LTableVar.Columns[AEventSourceColumnIndex].EventHandlers;
+				if (eventSourceColumnIndex >= 0)
+					handlers = tableVar.Columns[eventSourceColumnIndex].EventHandlers;
 				else
-					LHandlers = LTableVar.EventHandlers;
+					handlers = tableVar.EventHandlers;
 			}
 			else
-				LHandlers = ((Schema.ScalarType)AEventSource).EventHandlers;
+				handlers = ((Schema.ScalarType)eventSource).EventHandlers;
 				
-			if (LHandlers != null)
+			if (handlers != null)
 			{
-				int LHandlerIndex = LHandlers.IndexOfName(AEventHandler.Name);
-				for (int LIndex = LHandlerIndex; LIndex >= 0; LIndex--)
-					LResult.Add(LHandlers[LIndex].Name);
+				int handlerIndex = handlers.IndexOfName(eventHandler.Name);
+				for (int index = handlerIndex; index >= 0; index--)
+					result.Add(handlers[index].Name);
 			}
 			
-			return LResult;
+			return result;
 		}
 
-		public void CreateEventHandler(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, List<string> ABeforeOperatorNames)
+		public void CreateEventHandler(Schema.EventHandler eventHandler, Schema.Object eventSource, int eventSourceColumnIndex, List<string> beforeOperatorNames)
 		{
-			AttachEventHandler(AEventHandler, AEventSource, AEventSourceColumnIndex, ABeforeOperatorNames);
+			AttachEventHandler(eventHandler, eventSource, eventSourceColumnIndex, beforeOperatorNames);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new AttachEventHandlerInstruction(AEventHandler, AEventSource, AEventSourceColumnIndex, ABeforeOperatorNames));
+				_instructions.Add(new AttachEventHandlerInstruction(eventHandler, eventSource, eventSourceColumnIndex, beforeOperatorNames));
 			#endif
 
 			// Note the event handlers must be attached first, otherwise properties on the event handler will not be set properly (CatalogObjectID, ParentObjectID, etc.,.)
-			InsertCatalogObject(AEventHandler);
+			InsertCatalogObject(eventHandler);
 		}
 
-		public void AlterEventHandler(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, List<string> ABeforeOperatorNames)
+		public void AlterEventHandler(Schema.EventHandler eventHandler, Schema.Object eventSource, int eventSourceColumnIndex, List<string> beforeOperatorNames)
 		{
 			#if LOGDDLINSTRUCTIONS
-			List<string> LBeforeOperatorNames = GetEventHandlerBeforeOperatorNames(AEventHandler, AEventSource, AEventSourceColumnIndex);
+			List<string> localBeforeOperatorNames = GetEventHandlerBeforeOperatorNames(eventHandler, eventSource, eventSourceColumnIndex);
 			#endif
-			MoveEventHandler(AEventHandler, AEventSource, AEventSourceColumnIndex, ABeforeOperatorNames);
+			MoveEventHandler(eventHandler, eventSource, eventSourceColumnIndex, beforeOperatorNames);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new MoveEventHandlerInstruction(AEventHandler, AEventSource, AEventSourceColumnIndex, LBeforeOperatorNames));
+				_instructions.Add(new MoveEventHandlerInstruction(eventHandler, eventSource, eventSourceColumnIndex, localBeforeOperatorNames));
 			#endif
 		}
 		
-		public void DropEventHandler(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex)
+		public void DropEventHandler(Schema.EventHandler eventHandler, Schema.Object eventSource, int eventSourceColumnIndex)
 		{
-			DeleteCatalogObject(AEventHandler);
+			DeleteCatalogObject(eventHandler);
 			
 			#if LOGDDLINSTRUCTIONS
-			List<string> LBeforeOperatorNames = GetEventHandlerBeforeOperatorNames(AEventHandler, AEventSource, AEventSourceColumnIndex);
+			List<string> beforeOperatorNames = GetEventHandlerBeforeOperatorNames(eventHandler, eventSource, eventSourceColumnIndex);
 			#endif
-			DetachEventHandler(AEventHandler, AEventSource, AEventSourceColumnIndex);
+			DetachEventHandler(eventHandler, eventSource, eventSourceColumnIndex);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new DetachEventHandlerInstruction(AEventHandler, AEventSource, AEventSourceColumnIndex, LBeforeOperatorNames));
+				_instructions.Add(new DetachEventHandlerInstruction(eventHandler, eventSource, eventSourceColumnIndex, beforeOperatorNames));
 			#endif
 		}
 		
@@ -2628,20 +2628,20 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region Class definitions
 		
-		public void AlterClassDefinition(ClassDefinition AClassDefinition, AlterClassDefinition AAlterClassDefinition)
+		public void AlterClassDefinition(ClassDefinition classDefinition, AlterClassDefinition alterClassDefinition)
 		{
-			AlterClassDefinition(AClassDefinition, AAlterClassDefinition, null);
+			AlterClassDefinition(classDefinition, alterClassDefinition, null);
 		}
 
-		public void AlterClassDefinition(ClassDefinition AClassDefinition, AlterClassDefinition AAlterClassDefinition, object AInstance)
+		public void AlterClassDefinition(ClassDefinition classDefinition, AlterClassDefinition alterClassDefinition, object instance)
 		{
-			if (AAlterClassDefinition != null)
+			if (alterClassDefinition != null)
 			{
-				ClassDefinition LOriginalClassDefinition = AClassDefinition.Clone() as ClassDefinition;
-				AlterNode.AlterClassDefinition(AClassDefinition, AAlterClassDefinition, AInstance);
+				ClassDefinition originalClassDefinition = classDefinition.Clone() as ClassDefinition;
+				AlterNode.AlterClassDefinition(classDefinition, alterClassDefinition, instance);
 				#if LOGDDLINSTRUCTIONS
 				if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-					FInstructions.Add(new AlterClassDefinitionInstruction(AClassDefinition, AAlterClassDefinition, LOriginalClassDefinition, AInstance));
+					_instructions.Add(new AlterClassDefinitionInstruction(classDefinition, alterClassDefinition, originalClassDefinition, instance));
 				#endif
 			}
 		}
@@ -2650,40 +2650,40 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region Key
 		
-		private void AttachKey(TableVar ATableVar, Key AKey)
+		private void AttachKey(TableVar tableVar, Key key)
 		{
-			ATableVar.Keys.Add(AKey);
-			if (!ATableVar.Constraints.Contains(AKey.Constraint))
-				ATableVar.Constraints.Add(AKey.Constraint);
-			if (!ATableVar.InsertConstraints.Contains(AKey.Constraint))
-				ATableVar.InsertConstraints.Add(AKey.Constraint);
-			if (!ATableVar.UpdateConstraints.Contains(AKey.Constraint))
-				ATableVar.UpdateConstraints.Add(AKey.Constraint);
+			tableVar.Keys.Add(key);
+			if (!tableVar.Constraints.Contains(key.Constraint))
+				tableVar.Constraints.Add(key.Constraint);
+			if (!tableVar.InsertConstraints.Contains(key.Constraint))
+				tableVar.InsertConstraints.Add(key.Constraint);
+			if (!tableVar.UpdateConstraints.Contains(key.Constraint))
+				tableVar.UpdateConstraints.Add(key.Constraint);
 		}
 
-		private void DetachKey(TableVar ATableVar, Key AKey)
+		private void DetachKey(TableVar tableVar, Key key)
 		{
-			ATableVar.Keys.SafeRemove(AKey);
-			ATableVar.Constraints.SafeRemove(AKey.Constraint);
-			ATableVar.InsertConstraints.SafeRemove(AKey.Constraint);
-			ATableVar.UpdateConstraints.SafeRemove(AKey.Constraint);
+			tableVar.Keys.SafeRemove(key);
+			tableVar.Constraints.SafeRemove(key.Constraint);
+			tableVar.InsertConstraints.SafeRemove(key.Constraint);
+			tableVar.UpdateConstraints.SafeRemove(key.Constraint);
 		}
 
-		public void CreateKey(TableVar ATableVar, Key AKey)
+		public void CreateKey(TableVar tableVar, Key key)
 		{
-			AttachKey(ATableVar, AKey);
+			AttachKey(tableVar, key);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new AttachKeyInstruction(ATableVar, AKey));
+				_instructions.Add(new AttachKeyInstruction(tableVar, key));
 			#endif
 		}
 
-		public void DropKey(TableVar ATableVar, Key AKey)
+		public void DropKey(TableVar tableVar, Key key)
 		{
-			DetachKey(ATableVar, AKey);
+			DetachKey(tableVar, key);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new DetachKeyInstruction(ATableVar, AKey));
+				_instructions.Add(new DetachKeyInstruction(tableVar, key));
 			#endif
 		}
 
@@ -2691,31 +2691,31 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region Order
 		
-		private void AttachOrder(TableVar ATableVar, Order AOrder)
+		private void AttachOrder(TableVar tableVar, Order order)
 		{
-			ATableVar.Orders.Add(AOrder);
+			tableVar.Orders.Add(order);
 		}
 
-		private void DetachOrder(TableVar ATableVar, Order AOrder)
+		private void DetachOrder(TableVar tableVar, Order order)
 		{
-			ATableVar.Orders.SafeRemove(AOrder);
+			tableVar.Orders.SafeRemove(order);
 		}
 
-		public void CreateOrder(TableVar ATableVar, Order AOrder)
+		public void CreateOrder(TableVar tableVar, Order order)
 		{
-			AttachOrder(ATableVar, AOrder);
+			AttachOrder(tableVar, order);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new AttachOrderInstruction(ATableVar, AOrder));
+				_instructions.Add(new AttachOrderInstruction(tableVar, order));
 			#endif
 		}
 
-		public void DropOrder(TableVar ATableVar, Order AOrder)
+		public void DropOrder(TableVar tableVar, Order order)
 		{
-			DetachOrder(ATableVar, AOrder);
+			DetachOrder(tableVar, order);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new DetachOrderInstruction(ATableVar, AOrder));
+				_instructions.Add(new DetachOrderInstruction(tableVar, order));
 			#endif
 		}
 		
@@ -2723,55 +2723,55 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region TableVar column
 		
-		private void AttachTableVarColumn(Schema.BaseTableVar ATable, Schema.TableVarColumn AColumn)
+		private void AttachTableVarColumn(Schema.BaseTableVar table, Schema.TableVarColumn column)
 		{
-			ATable.DataType.Columns.Add(AColumn.Column);
-			ATable.Columns.Add(AColumn);
-			ATable.DataType.ResetRowType();
+			table.DataType.Columns.Add(column.Column);
+			table.Columns.Add(column);
+			table.DataType.ResetRowType();
 		}
 
-		private void DetachTableVarColumn(Schema.BaseTableVar ATable, Schema.TableVarColumn AColumn)
+		private void DetachTableVarColumn(Schema.BaseTableVar table, Schema.TableVarColumn column)
 		{
-			ATable.DataType.Columns.SafeRemove(AColumn.Column);
-			ATable.Columns.SafeRemove(AColumn);
-			ATable.DataType.ResetRowType();
+			table.DataType.Columns.SafeRemove(column.Column);
+			table.Columns.SafeRemove(column);
+			table.DataType.ResetRowType();
 		}
 
-		public void CreateTableVarColumn(Schema.BaseTableVar ATable, Schema.TableVarColumn AColumn)
+		public void CreateTableVarColumn(Schema.BaseTableVar table, Schema.TableVarColumn column)
 		{
-			AttachTableVarColumn(ATable, AColumn);
+			AttachTableVarColumn(table, column);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new AttachTableVarColumnInstruction(ATable, AColumn));
+				_instructions.Add(new AttachTableVarColumnInstruction(table, column));
 			#endif
 		}
 
-		public void DropTableVarColumn(Schema.BaseTableVar ATable, Schema.TableVarColumn AColumn)
+		public void DropTableVarColumn(Schema.BaseTableVar table, Schema.TableVarColumn column)
 		{
-			DetachTableVarColumn(ATable, AColumn);
+			DetachTableVarColumn(table, column);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new DetachTableVarColumnInstruction(ATable, AColumn));
+				_instructions.Add(new DetachTableVarColumnInstruction(table, column));
 			#endif
 		}
 
-		public void SetTableVarColumnDefault(Schema.TableVarColumn LColumn, Schema.TableVarColumnDefault ADefault)
+		public void SetTableVarColumnDefault(Schema.TableVarColumn LColumn, Schema.TableVarColumnDefault defaultValue)
 		{
-			TableVarColumnDefault LOriginalDefault = LColumn.Default;
-			LColumn.Default = ADefault;
+			TableVarColumnDefault originalDefault = LColumn.Default;
+			LColumn.Default = defaultValue;
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new SetTableVarColumnDefaultInstruction(LColumn, LOriginalDefault));
+				_instructions.Add(new SetTableVarColumnDefaultInstruction(LColumn, originalDefault));
 			#endif
 		}
 
-		public void SetTableVarColumnIsNilable(TableVarColumn LColumn, bool AIsNilable)
+		public void SetTableVarColumnIsNilable(TableVarColumn LColumn, bool isNilable)
 		{
-			bool LOriginalIsNilable = LColumn.IsNilable;
-			LColumn.IsNilable = AIsNilable;
+			bool originalIsNilable = LColumn.IsNilable;
+			LColumn.IsNilable = isNilable;
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new SetTableVarColumnIsNilableInstruction(LColumn, LOriginalIsNilable));
+				_instructions.Add(new SetTableVarColumnIsNilableInstruction(LColumn, originalIsNilable));
 			#endif
 		}
 		
@@ -2779,55 +2779,55 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		#region TableVar constraint
 		
-		private void AttachTableVarConstraint(Schema.TableVar ATableVar, Schema.TableVarConstraint AConstraint)
+		private void AttachTableVarConstraint(Schema.TableVar tableVar, Schema.TableVarConstraint constraint)
 		{
-			ATableVar.Constraints.Add(AConstraint);
-			if (AConstraint is Schema.RowConstraint)
-				ATableVar.RowConstraints.Add(AConstraint);
+			tableVar.Constraints.Add(constraint);
+			if (constraint is Schema.RowConstraint)
+				tableVar.RowConstraints.Add(constraint);
 			else
 			{
-				Schema.TransitionConstraint LTransitionConstraint = (Schema.TransitionConstraint)AConstraint;
-				if (LTransitionConstraint.OnInsertNode != null)
-					ATableVar.InsertConstraints.Add(LTransitionConstraint);
-				if (LTransitionConstraint.OnUpdateNode != null)
-					ATableVar.UpdateConstraints.Add(LTransitionConstraint);
-				if (LTransitionConstraint.OnDeleteNode != null)
-					ATableVar.DeleteConstraints.Add(LTransitionConstraint);
+				Schema.TransitionConstraint transitionConstraint = (Schema.TransitionConstraint)constraint;
+				if (transitionConstraint.OnInsertNode != null)
+					tableVar.InsertConstraints.Add(transitionConstraint);
+				if (transitionConstraint.OnUpdateNode != null)
+					tableVar.UpdateConstraints.Add(transitionConstraint);
+				if (transitionConstraint.OnDeleteNode != null)
+					tableVar.DeleteConstraints.Add(transitionConstraint);
 			}
 		}
 
-		private void DetachTableVarConstraint(Schema.TableVar ATableVar, Schema.TableVarConstraint AConstraint)
+		private void DetachTableVarConstraint(Schema.TableVar tableVar, Schema.TableVarConstraint constraint)
 		{
-			ATableVar.Constraints.SafeRemove(AConstraint);
-			if (AConstraint is Schema.RowConstraint)
-				ATableVar.RowConstraints.SafeRemove(AConstraint);
+			tableVar.Constraints.SafeRemove(constraint);
+			if (constraint is Schema.RowConstraint)
+				tableVar.RowConstraints.SafeRemove(constraint);
 			else
 			{
-				Schema.TransitionConstraint LTransitionConstraint = (Schema.TransitionConstraint)AConstraint;
-				if (LTransitionConstraint.OnInsertNode != null)
-					ATableVar.InsertConstraints.SafeRemove(LTransitionConstraint);
-				if (LTransitionConstraint.OnUpdateNode != null)
-					ATableVar.UpdateConstraints.SafeRemove(LTransitionConstraint);
-				if (LTransitionConstraint.OnDeleteNode != null)
-					ATableVar.DeleteConstraints.SafeRemove(LTransitionConstraint);
+				Schema.TransitionConstraint transitionConstraint = (Schema.TransitionConstraint)constraint;
+				if (transitionConstraint.OnInsertNode != null)
+					tableVar.InsertConstraints.SafeRemove(transitionConstraint);
+				if (transitionConstraint.OnUpdateNode != null)
+					tableVar.UpdateConstraints.SafeRemove(transitionConstraint);
+				if (transitionConstraint.OnDeleteNode != null)
+					tableVar.DeleteConstraints.SafeRemove(transitionConstraint);
 			}
 		}
 		
-		public void CreateTableVarConstraint(Schema.TableVar ATableVar, Schema.TableVarConstraint AConstraint)
+		public void CreateTableVarConstraint(Schema.TableVar tableVar, Schema.TableVarConstraint constraint)
 		{
-			AttachTableVarConstraint(ATableVar, AConstraint);
+			AttachTableVarConstraint(tableVar, constraint);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new AttachTableVarConstraintInstruction(ATableVar, AConstraint));
+				_instructions.Add(new AttachTableVarConstraintInstruction(tableVar, constraint));
 			#endif
 		}
 		
-		public void DropTableVarConstraint(Schema.TableVar ATableVar, Schema.TableVarConstraint AConstraint)
+		public void DropTableVarConstraint(Schema.TableVar tableVar, Schema.TableVarConstraint constraint)
 		{
-			DetachTableVarConstraint(ATableVar, AConstraint);
+			DetachTableVarConstraint(tableVar, constraint);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new DetachTableVarConstraintInstruction(ATableVar, AConstraint));
+				_instructions.Add(new DetachTableVarConstraintInstruction(tableVar, constraint));
 			#endif
 		}
 		
@@ -2835,31 +2835,31 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region TableVar column constraint
 		
-		private void AttachTableVarColumnConstraint(Schema.TableVarColumn ATableVarColumn, Schema.TableVarColumnConstraint AConstraint)
+		private void AttachTableVarColumnConstraint(Schema.TableVarColumn tableVarColumn, Schema.TableVarColumnConstraint constraint)
 		{
-			ATableVarColumn.Constraints.Add(AConstraint);
+			tableVarColumn.Constraints.Add(constraint);
 		}
 
-		private void DetachTableVarColumnConstraint(Schema.TableVarColumn ATableVarColumn, Schema.TableVarColumnConstraint AConstraint)
+		private void DetachTableVarColumnConstraint(Schema.TableVarColumn tableVarColumn, Schema.TableVarColumnConstraint constraint)
 		{
-			ATableVarColumn.Constraints.SafeRemove(AConstraint);
+			tableVarColumn.Constraints.SafeRemove(constraint);
 		}
 		
-		public void CreateTableVarColumnConstraint(TableVarColumn AColumn, TableVarColumnConstraint AConstraint)
+		public void CreateTableVarColumnConstraint(TableVarColumn column, TableVarColumnConstraint constraint)
 		{
-			AttachTableVarColumnConstraint(AColumn, AConstraint);
+			AttachTableVarColumnConstraint(column, constraint);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new AttachTableVarColumnConstraintInstruction(AColumn, AConstraint));
+				_instructions.Add(new AttachTableVarColumnConstraintInstruction(column, constraint));
 			#endif
 		}
 
-		public void DropTableVarColumnConstraint(TableVarColumn AColumn, TableVarColumnConstraint AConstraint)
+		public void DropTableVarColumnConstraint(TableVarColumn column, TableVarColumnConstraint constraint)
 		{
-			DetachTableVarColumnConstraint(AColumn, AConstraint);
+			DetachTableVarColumnConstraint(column, constraint);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new DetachTableVarColumnConstraintInstruction(AColumn, AConstraint));
+				_instructions.Add(new DetachTableVarColumnConstraintInstruction(column, constraint));
 			#endif
 		}
 
@@ -2867,137 +2867,137 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region Scalar type
 		
-		private void AttachScalarTypeConstraint(Schema.ScalarType AScalarType, Schema.ScalarTypeConstraint AConstraint)
+		private void AttachScalarTypeConstraint(Schema.ScalarType scalarType, Schema.ScalarTypeConstraint constraint)
 		{
-			AScalarType.Constraints.Add(AConstraint);
+			scalarType.Constraints.Add(constraint);
 		}
 
-		private void DetachScalarTypeConstraint(Schema.ScalarType AScalarType, Schema.ScalarTypeConstraint AConstraint)
+		private void DetachScalarTypeConstraint(Schema.ScalarType scalarType, Schema.ScalarTypeConstraint constraint)
 		{
-			AScalarType.Constraints.SafeRemove(AConstraint);
+			scalarType.Constraints.SafeRemove(constraint);
 		}
 		
-		public void CreateScalarTypeConstraint(ScalarType AScalarType, ScalarTypeConstraint AConstraint)
+		public void CreateScalarTypeConstraint(ScalarType scalarType, ScalarTypeConstraint constraint)
 		{
-			AttachScalarTypeConstraint(AScalarType, AConstraint);
+			AttachScalarTypeConstraint(scalarType, constraint);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new AttachScalarTypeConstraintInstruction(AScalarType, AConstraint));
+				_instructions.Add(new AttachScalarTypeConstraintInstruction(scalarType, constraint));
 			#endif
 		}
 
-		public void DropScalarTypeConstraint(ScalarType AScalarType, ScalarTypeConstraint AConstraint)
+		public void DropScalarTypeConstraint(ScalarType scalarType, ScalarTypeConstraint constraint)
 		{
-			DetachScalarTypeConstraint(AScalarType, AConstraint);
+			DetachScalarTypeConstraint(scalarType, constraint);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new DetachScalarTypeConstraintInstruction(AScalarType, AConstraint));
+				_instructions.Add(new DetachScalarTypeConstraintInstruction(scalarType, constraint));
 			#endif
 		}
 
-		public void SetScalarTypeDefault(Schema.ScalarType AScalarType, Schema.ScalarTypeDefault ADefault)
+		public void SetScalarTypeDefault(Schema.ScalarType scalarType, Schema.ScalarTypeDefault defaultValue)
 		{
-			Schema.ScalarTypeDefault LOriginalDefault = AScalarType.Default;
-			AScalarType.Default = ADefault;
+			Schema.ScalarTypeDefault originalDefault = scalarType.Default;
+			scalarType.Default = defaultValue;
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new SetScalarTypeDefaultInstruction(AScalarType, LOriginalDefault));
+				_instructions.Add(new SetScalarTypeDefaultInstruction(scalarType, originalDefault));
 			#endif
 		}
 
-		public void SetScalarTypeIsSpecialOperator(Schema.ScalarType AScalarType, Schema.Operator AOperator)
+		public void SetScalarTypeIsSpecialOperator(Schema.ScalarType scalarType, Schema.Operator operatorValue)
 		{
-			Schema.Operator LOriginalOperator = AScalarType.IsSpecialOperator;
-			AScalarType.IsSpecialOperator = AOperator;
+			Schema.Operator originalOperator = scalarType.IsSpecialOperator;
+			scalarType.IsSpecialOperator = operatorValue;
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new SetScalarTypeIsSpecialOperatorInstruction(AScalarType, LOriginalOperator));
+				_instructions.Add(new SetScalarTypeIsSpecialOperatorInstruction(scalarType, originalOperator));
 			#endif
 		}
 
-		private void AttachSpecial(Schema.ScalarType AScalarType, Schema.Special ASpecial)
+		private void AttachSpecial(Schema.ScalarType scalarType, Schema.Special special)
 		{
-			AScalarType.Specials.Add(ASpecial);
+			scalarType.Specials.Add(special);
 		}
 
-		private void DetachSpecial(Schema.ScalarType AScalarType, Schema.Special ASpecial)
+		private void DetachSpecial(Schema.ScalarType scalarType, Schema.Special special)
 		{
-			AScalarType.Specials.SafeRemove(ASpecial);
+			scalarType.Specials.SafeRemove(special);
 		}
 		
-		public void CreateSpecial(ScalarType AScalarType, Special ASpecial)
+		public void CreateSpecial(ScalarType scalarType, Special special)
 		{
-			AttachSpecial(AScalarType, ASpecial);
+			AttachSpecial(scalarType, special);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new AttachSpecialInstruction(AScalarType, ASpecial));
+				_instructions.Add(new AttachSpecialInstruction(scalarType, special));
 			#endif
 		}
 
-		public void DropSpecial(ScalarType AScalarType, Special ASpecial)
+		public void DropSpecial(ScalarType scalarType, Special special)
 		{
-			DetachSpecial(AScalarType, ASpecial);
+			DetachSpecial(scalarType, special);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new DetachSpecialInstruction(AScalarType, ASpecial));
+				_instructions.Add(new DetachSpecialInstruction(scalarType, special));
 			#endif
 		}
 
-		private void AttachRepresentation(Schema.ScalarType AScalarType, Schema.Representation ARepresentation)
+		private void AttachRepresentation(Schema.ScalarType scalarType, Schema.Representation representation)
 		{
-			if (!AScalarType.Representations.Contains(ARepresentation))
-				AScalarType.Representations.Add(ARepresentation);
+			if (!scalarType.Representations.Contains(representation))
+				scalarType.Representations.Add(representation);
 		}
 
-		private void DetachRepresentation(Schema.ScalarType AScalarType, Schema.Representation ARepresentation)
+		private void DetachRepresentation(Schema.ScalarType scalarType, Schema.Representation representation)
 		{
-			AScalarType.Representations.SafeRemove(ARepresentation);
+			scalarType.Representations.SafeRemove(representation);
 		}
 		
-		public void CreateRepresentation(ScalarType AScalarType, Representation ARepresentation)
+		public void CreateRepresentation(ScalarType scalarType, Representation representation)
 		{
-			AttachRepresentation(AScalarType, ARepresentation);
+			AttachRepresentation(scalarType, representation);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new AttachRepresentationInstruction(AScalarType, ARepresentation));
+				_instructions.Add(new AttachRepresentationInstruction(scalarType, representation));
 			#endif	
 		}
 
-		public void DropRepresentation(ScalarType AScalarType, Representation ARepresentation)
+		public void DropRepresentation(ScalarType scalarType, Representation representation)
 		{
-			DetachRepresentation(AScalarType, ARepresentation);
+			DetachRepresentation(scalarType, representation);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new DetachRepresentationInstruction(AScalarType, ARepresentation));
+				_instructions.Add(new DetachRepresentationInstruction(scalarType, representation));
 			#endif
 		}
 
-		private void AttachProperty(Schema.Representation ARepresentation, Schema.Property AProperty)
+		private void AttachProperty(Schema.Representation representation, Schema.Property property)
 		{
-			if (!ARepresentation.Properties.Contains(AProperty))
-				ARepresentation.Properties.Add(AProperty);
+			if (!representation.Properties.Contains(property))
+				representation.Properties.Add(property);
 		}
 
-		private void DetachProperty(Schema.Representation ARepresentation, Schema.Property AProperty)
+		private void DetachProperty(Schema.Representation representation, Schema.Property property)
 		{
-			ARepresentation.Properties.SafeRemove(AProperty);
+			representation.Properties.SafeRemove(property);
 		}
 		
-		public void CreateProperty(Schema.Representation ARepresentation, Schema.Property AProperty)
+		public void CreateProperty(Schema.Representation representation, Schema.Property property)
 		{
-			AttachProperty(ARepresentation, AProperty);
+			AttachProperty(representation, property);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new AttachPropertyInstruction(ARepresentation, AProperty));
+				_instructions.Add(new AttachPropertyInstruction(representation, property));
 			#endif
 		}
 
-		public void DropProperty(Schema.Representation ARepresentation, Schema.Property AProperty)
+		public void DropProperty(Schema.Representation representation, Schema.Property property)
 		{
-			DetachProperty(ARepresentation, AProperty);
+			DetachProperty(representation, property);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new DetachPropertyInstruction(ARepresentation, AProperty));
+				_instructions.Add(new DetachPropertyInstruction(representation, property));
 			#endif
 		}
 
@@ -3007,121 +3007,121 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		public new CatalogDevice Device { get { return (CatalogDevice)base.Device; } }
 
-		public void CreateDevice(Schema.Device ADevice)
+		public void CreateDevice(Schema.Device device)
 		{
-			InsertCatalogObject(ADevice);
+			InsertCatalogObject(device);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
 			{
-				FInstructions.Add(new StartDeviceInstruction(ADevice));
+				_instructions.Add(new StartDeviceInstruction(device));
 			}
 			#endif
 		}
 		
-		public void StartDevice(Schema.Device ADevice)
+		public void StartDevice(Schema.Device device)
 		{
-			ADevice.Start(ServerProcess);
+			device.Start(ServerProcess);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new StartDeviceInstruction(ADevice));
+				_instructions.Add(new StartDeviceInstruction(device));
 			#endif
 		}
 		
-		public void RegisterDevice(Schema.Device ADevice)
+		public void RegisterDevice(Schema.Device device)
 		{
-			if (!ADevice.Registered)
+			if (!device.Registered)
 			{
-				ADevice.Register(ServerProcess);
-				UpdateCatalogObject(ADevice);
+				device.Register(ServerProcess);
+				UpdateCatalogObject(device);
 				#if LOGDDLINSTRUCTIONS
 				if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-					FInstructions.Add(new RegisterDeviceInstruction(ADevice));
+					_instructions.Add(new RegisterDeviceInstruction(device));
 				#endif
 			}
 		}
 		
-		public void UnregisterDevice(Schema.Device ADevice)
+		public void UnregisterDevice(Schema.Device device)
 		{
-			ADevice.ClearRegistered();
+			device.ClearRegistered();
 		}
 		
-		public void StopDevice(Schema.Device ADevice)
+		public void StopDevice(Schema.Device device)
 		{
-			StopDevice(ADevice, false);
+			StopDevice(device, false);
 		}
 		
-		private List<Schema.Device> FDeferredDeviceStops;
-		private void AddDeferredDeviceStop(Schema.Device ADevice)
+		private List<Schema.Device> _deferredDeviceStops;
+		private void AddDeferredDeviceStop(Schema.Device device)
 		{
-			if (FDeferredDeviceStops == null)
-				FDeferredDeviceStops = new List<Schema.Device>();
-			FDeferredDeviceStops.Add(ADevice);
+			if (_deferredDeviceStops == null)
+				_deferredDeviceStops = new List<Schema.Device>();
+			_deferredDeviceStops.Add(device);
 		}
 		
 		private void ExecuteDeferredDeviceStops()
 		{
-			if (FDeferredDeviceStops != null)
+			if (_deferredDeviceStops != null)
 			{
-				while (FDeferredDeviceStops.Count > 0)
+				while (_deferredDeviceStops.Count > 0)
 				{
-					InternalStopDevice(FDeferredDeviceStops[0]);
-					FDeferredDeviceStops.RemoveAt(0);
+					InternalStopDevice(_deferredDeviceStops[0]);
+					_deferredDeviceStops.RemoveAt(0);
 				}
 				
-				FDeferredDeviceStops = null;
+				_deferredDeviceStops = null;
 			}
 		}
 		
 		private void ClearDeferredDeviceStops()
 		{
-			if (FDeferredDeviceStops != null)
-				FDeferredDeviceStops = null;
+			if (_deferredDeviceStops != null)
+				_deferredDeviceStops = null;
 		}
 		
-		private void InternalStopDevice(Schema.Device ADevice)
+		private void InternalStopDevice(Schema.Device device)
 		{
-			if (ADevice.Running)
+			if (device.Running)
 			{
-				if (ADevice.Sessions.Count > 0)
-					for (int LIndex = ADevice.Sessions.Count - 1; LIndex >= 0; LIndex--)
-						ADevice.Sessions.Dispose();
+				if (device.Sessions.Count > 0)
+					for (int index = device.Sessions.Count - 1; index >= 0; index--)
+						device.Sessions.Dispose();
 				// TODO: implement checking and error handling for in use device sessions on this device
 				//throw new RuntimeException(RuntimeException.Codes.DeviceInUse, ADevice.Name);
 
-				ADevice.Stop(ServerProcess);					
+				device.Stop(ServerProcess);					
 			}
 		}
 		
-		private void StopDevice(Schema.Device ADevice, bool AIsUndo)
+		private void StopDevice(Schema.Device device, bool isUndo)
 		{
-			if ((ServerProcess.InTransaction) && !AIsUndo)
-				AddDeferredDeviceStop(ADevice);
+			if ((ServerProcess.InTransaction) && !isUndo)
+				AddDeferredDeviceStop(device);
 			else
-				InternalStopDevice(ADevice);
+				InternalStopDevice(device);
 		}
 		
-		public void DropDevice(Schema.Device ADevice)
+		public void DropDevice(Schema.Device device)
 		{
-			DeleteCatalogObject(ADevice);
+			DeleteCatalogObject(device);
 		}
 
-		public void SetDeviceReconcileMode(Schema.Device ADevice, ReconcileMode AReconcileMode)
+		public void SetDeviceReconcileMode(Schema.Device device, ReconcileMode reconcileMode)
 		{
-			ReconcileMode LOriginalReconcileMode = ADevice.ReconcileMode;
-			ADevice.ReconcileMode = AReconcileMode;
+			ReconcileMode originalReconcileMode = device.ReconcileMode;
+			device.ReconcileMode = reconcileMode;
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new SetDeviceReconcileModeInstruction(ADevice, LOriginalReconcileMode));
+				_instructions.Add(new SetDeviceReconcileModeInstruction(device, originalReconcileMode));
 			#endif
 		}
 
-		public void SetDeviceReconcileMaster(Schema.Device ADevice, ReconcileMaster AReconcileMaster)
+		public void SetDeviceReconcileMaster(Schema.Device device, ReconcileMaster reconcileMaster)
 		{
-			ReconcileMaster LOriginalReconcileMaster = ADevice.ReconcileMaster;
-			ADevice.ReconcileMaster = AReconcileMaster;
+			ReconcileMaster originalReconcileMaster = device.ReconcileMaster;
+			device.ReconcileMaster = reconcileMaster;
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new SetDeviceReconcileMasterInstruction(ADevice, LOriginalReconcileMaster));
+				_instructions.Add(new SetDeviceReconcileMasterInstruction(device, originalReconcileMaster));
 			#endif
 		}
 		
@@ -3129,61 +3129,61 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region Device user
 		
-		public virtual Schema.DeviceUser ResolveDeviceUser(Schema.Device ADevice, Schema.User AUser, bool AMustResolve)
+		public virtual Schema.DeviceUser ResolveDeviceUser(Schema.Device device, Schema.User user, bool mustResolve)
 		{
-			lock (ADevice.Users)
+			lock (device.Users)
 			{
-				Schema.DeviceUser LDeviceUser;
-				if (!ADevice.Users.TryGetValue(AUser.ID, out LDeviceUser) && AMustResolve)
-					throw new Schema.SchemaException(Schema.SchemaException.Codes.DeviceUserNotFound, AUser.ID);
+				Schema.DeviceUser deviceUser;
+				if (!device.Users.TryGetValue(user.ID, out deviceUser) && mustResolve)
+					throw new Schema.SchemaException(Schema.SchemaException.Codes.DeviceUserNotFound, user.ID);
 
-				return LDeviceUser;
+				return deviceUser;
 			}
 		}
 
-		public Schema.DeviceUser ResolveDeviceUser(Schema.Device ADevice, Schema.User AUser)
+		public Schema.DeviceUser ResolveDeviceUser(Schema.Device device, Schema.User user)
 		{
-			return ResolveDeviceUser(ADevice, AUser, true);
+			return ResolveDeviceUser(device, user, true);
 		}
 
-		public bool DeviceUserExists(Schema.Device ADevice, Schema.User AUser)
+		public bool DeviceUserExists(Schema.Device device, Schema.User user)
 		{
-			return ResolveDeviceUser(ADevice, AUser, false) != null;
+			return ResolveDeviceUser(device, user, false) != null;
 		}
 
 		#endregion
 		
 		#region Device scalar type
 		
-		private void AttachDeviceScalarType(Schema.DeviceScalarType ADeviceScalarType)
+		private void AttachDeviceScalarType(Schema.DeviceScalarType deviceScalarType)
 		{
-			ADeviceScalarType.Device.AddDeviceScalarType(ADeviceScalarType);
+			deviceScalarType.Device.AddDeviceScalarType(deviceScalarType);
 		}
 		
-		private void DetachDeviceScalarType(Schema.DeviceScalarType ADeviceScalarType)
+		private void DetachDeviceScalarType(Schema.DeviceScalarType deviceScalarType)
 		{
-			ADeviceScalarType.Device.RemoveDeviceScalarType(ADeviceScalarType);
+			deviceScalarType.Device.RemoveDeviceScalarType(deviceScalarType);
 		}
 
-		public void CreateDeviceScalarType(DeviceScalarType ADeviceScalarType)
+		public void CreateDeviceScalarType(DeviceScalarType deviceScalarType)
 		{
-			InsertCatalogObject(ADeviceScalarType);
+			InsertCatalogObject(deviceScalarType);
 			
-			AttachDeviceScalarType(ADeviceScalarType);
+			AttachDeviceScalarType(deviceScalarType);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new AttachDeviceScalarTypeInstruction(ADeviceScalarType));
+				_instructions.Add(new AttachDeviceScalarTypeInstruction(deviceScalarType));
 			#endif
 		}
 
-		public void DropDeviceScalarType(DeviceScalarType ADeviceScalarType)
+		public void DropDeviceScalarType(DeviceScalarType deviceScalarType)
 		{
-			DeleteCatalogObject(ADeviceScalarType);
+			DeleteCatalogObject(deviceScalarType);
 			
-			DetachDeviceScalarType(ADeviceScalarType);
+			DetachDeviceScalarType(deviceScalarType);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new DetachDeviceScalarTypeInstruction(ADeviceScalarType));
+				_instructions.Add(new DetachDeviceScalarTypeInstruction(deviceScalarType));
 			#endif
 		}
 
@@ -3191,59 +3191,59 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region Device table
 		
-		private void CreateDeviceTable(Schema.BaseTableVar ATable)
+		private void CreateDeviceTable(Schema.BaseTableVar table)
 		{
-			Program LProgram = new Program(ServerProcess);
-			LProgram.Start(null);
+			Program program = new Program(ServerProcess);
+			program.Start(null);
 			try
 			{
-				LProgram.DeviceExecute(ATable.Device, new CreateTableNode(ATable));
+				program.DeviceExecute(table.Device, new CreateTableNode(table));
 			}
 			finally
 			{
-				LProgram.Stop(null);
+				program.Stop(null);
 			}
 		}
 		
-		private void DropDeviceTable(Schema.BaseTableVar ATable)
+		private void DropDeviceTable(Schema.BaseTableVar table)
 		{
-			Program LProgram = new Program(ServerProcess);
-			LProgram.Start(null);
+			Program program = new Program(ServerProcess);
+			program.Start(null);
 			try
 			{
-				LProgram.DeviceExecute(ATable.Device, new DropTableNode(ATable));
+				program.DeviceExecute(table.Device, new DropTableNode(table));
 			}
 			finally
 			{
-				LProgram.Stop(null);
+				program.Stop(null);
 			}
 		}
 		
-		private void AttachTableMap(ApplicationTransactionDevice ADevice, TableMap ATableMap)
+		private void AttachTableMap(ApplicationTransactionDevice device, TableMap tableMap)
 		{
-			ADevice.TableMaps.Add(ATableMap);
+			device.TableMaps.Add(tableMap);
 		}
 		
-		private void DetachTableMap(ApplicationTransactionDevice ADevice, TableMap ATableMap)
+		private void DetachTableMap(ApplicationTransactionDevice device, TableMap tableMap)
 		{
-			ADevice.TableMaps.RemoveAt(ADevice.TableMaps.IndexOfName(ATableMap.SourceTableVar.Name));
+			device.TableMaps.RemoveAt(device.TableMaps.IndexOfName(tableMap.SourceTableVar.Name));
 		}
 		
-		public void AddTableMap(ApplicationTransactionDevice ADevice, TableMap ATableMap)
+		public void AddTableMap(ApplicationTransactionDevice device, TableMap tableMap)
 		{
-			AttachTableMap(ADevice, ATableMap);
+			AttachTableMap(device, tableMap);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new AttachTableMapInstruction(ADevice, ATableMap));
+				_instructions.Add(new AttachTableMapInstruction(device, tableMap));
 			#endif
 		}
 		
-		public void RemoveTableMap(ApplicationTransactionDevice ADevice, TableMap ATableMap)
+		public void RemoveTableMap(ApplicationTransactionDevice device, TableMap tableMap)
 		{
-			DetachTableMap(ADevice, ATableMap);
+			DetachTableMap(device, tableMap);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new DetachTableMapInstruction(ADevice, ATableMap));
+				_instructions.Add(new DetachTableMapInstruction(device, tableMap));
 			#endif
 		}
 		
@@ -3251,63 +3251,63 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region Device operator
 		
-		private void AttachDeviceOperator(Schema.DeviceOperator ADeviceOperator)
+		private void AttachDeviceOperator(Schema.DeviceOperator deviceOperator)
 		{
-			ADeviceOperator.Device.AddDeviceOperator(ADeviceOperator);
+			deviceOperator.Device.AddDeviceOperator(deviceOperator);
 		}
 		
-		private void DetachDeviceOperator(Schema.DeviceOperator ADeviceOperator)
+		private void DetachDeviceOperator(Schema.DeviceOperator deviceOperator)
 		{
-			ADeviceOperator.Device.RemoveDeviceOperator(ADeviceOperator);
+			deviceOperator.Device.RemoveDeviceOperator(deviceOperator);
 		}
 
-		public void CreateDeviceOperator(DeviceOperator ADeviceOperator)
+		public void CreateDeviceOperator(DeviceOperator deviceOperator)
 		{
-			InsertCatalogObject(ADeviceOperator);
+			InsertCatalogObject(deviceOperator);
 			
-			AttachDeviceOperator(ADeviceOperator);
+			AttachDeviceOperator(deviceOperator);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new AttachDeviceOperatorInstruction(ADeviceOperator));
+				_instructions.Add(new AttachDeviceOperatorInstruction(deviceOperator));
 			#endif
 		}
 
-		public void DropDeviceOperator(DeviceOperator ADeviceOperator)
+		public void DropDeviceOperator(DeviceOperator deviceOperator)
 		{
-			DeleteCatalogObject(ADeviceOperator);
+			DeleteCatalogObject(deviceOperator);
 			
-			DetachDeviceOperator(ADeviceOperator);
+			DetachDeviceOperator(deviceOperator);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new DetachDeviceOperatorInstruction(ADeviceOperator));
+				_instructions.Add(new DetachDeviceOperatorInstruction(deviceOperator));
 			#endif
 		}
 		
-		private void AttachOperatorMap(ApplicationTransaction.OperatorMap AOperatorMap, Schema.Operator AOperator)
+		private void AttachOperatorMap(ApplicationTransaction.OperatorMap operatorMap, Schema.Operator operatorValue)
 		{
-			AOperatorMap.Operators.Add(AOperator);
+			operatorMap.Operators.Add(operatorValue);
 		}
 		
-		private void DetachOperatorMap(ApplicationTransaction.OperatorMap AOperatorMap, Schema.Operator AOperator)
+		private void DetachOperatorMap(ApplicationTransaction.OperatorMap operatorMap, Schema.Operator operatorValue)
 		{
-			AOperatorMap.Operators.Remove(AOperator);
+			operatorMap.Operators.Remove(operatorValue);
 		}
 		
-		public void AddOperatorMap(ApplicationTransaction.OperatorMap AOperatorMap, Schema.Operator AOperator)
+		public void AddOperatorMap(ApplicationTransaction.OperatorMap operatorMap, Schema.Operator operatorValue)
 		{
-			AttachOperatorMap(AOperatorMap, AOperator);
+			AttachOperatorMap(operatorMap, operatorValue);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new AttachOperatorMapInstruction(AOperatorMap, AOperator));
+				_instructions.Add(new AttachOperatorMapInstruction(operatorMap, operatorValue));
 			#endif
 		}
 		
-		public void RemoveOperatorMap(ApplicationTransaction.OperatorMap AOperatorMap, Schema.Operator AOperator)
+		public void RemoveOperatorMap(ApplicationTransaction.OperatorMap operatorMap, Schema.Operator operatorValue)
 		{
-			DetachOperatorMap(AOperatorMap, AOperator);
+			DetachOperatorMap(operatorMap, operatorValue);
 			#if LOGDDLINSTRUCTIONS
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
-				FInstructions.Add(new DetachOperatorMapInstruction(AOperatorMap, AOperator));
+				_instructions.Add(new DetachOperatorMapInstruction(operatorMap, operatorValue));
 			#endif
 		}
 		
@@ -3315,100 +3315,100 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region Device objects
 
-		public virtual bool HasDeviceObjects(Schema.Device ADevice)
+		public virtual bool HasDeviceObjects(Schema.Device device)
 		{
 			return false;
 		}
 
-		public virtual Schema.DeviceObject ResolveDeviceObject(Schema.Device ADevice, Schema.Object AObject)
+		public virtual Schema.DeviceObject ResolveDeviceObject(Schema.Device device, Schema.Object objectValue)
 		{
 			return null;
 		}
 
-		public Schema.DeviceOperator ResolveDeviceOperator(Schema.Device ADevice, Schema.Operator AOperator)
+		public Schema.DeviceOperator ResolveDeviceOperator(Schema.Device device, Schema.Operator operatorValue)
 		{
-			return ResolveDeviceObject(ADevice, AOperator) as Schema.DeviceOperator;
+			return ResolveDeviceObject(device, operatorValue) as Schema.DeviceOperator;
 		}
 
-		public Schema.DeviceScalarType ResolveDeviceScalarType(Schema.Device ADevice, Schema.ScalarType AScalarType)
+		public Schema.DeviceScalarType ResolveDeviceScalarType(Schema.Device device, Schema.ScalarType scalarType)
 		{
-			return ResolveDeviceObject(ADevice, AScalarType) as Schema.DeviceScalarType;
+			return ResolveDeviceObject(device, scalarType) as Schema.DeviceScalarType;
 		}
 
 		#endregion
 		
 		#region Security
 		
-		public virtual Right ResolveRight(string ARightName, bool AMustResolve)
+		public virtual Right ResolveRight(string rightName, bool mustResolve)
 		{
-			if (AMustResolve)
-				throw new Schema.SchemaException(Schema.SchemaException.Codes.RightNotFound, ARightName);
+			if (mustResolve)
+				throw new Schema.SchemaException(Schema.SchemaException.Codes.RightNotFound, rightName);
 			return null;
 		}
 
-		public Right ResolveRight(string ARightName)
+		public Right ResolveRight(string rightName)
 		{
-			return ResolveRight(ARightName, true);
+			return ResolveRight(rightName, true);
 		}
 
-		public bool RightExists(string ARightName)
+		public bool RightExists(string rightName)
 		{
-			return ResolveRight(ARightName, false) != null;
+			return ResolveRight(rightName, false) != null;
 		}
 
-		public virtual void InsertRight(string ARightName, string AUserID)
+		public virtual void InsertRight(string rightName, string userID)
 		{
 			// virtual
 		}
 
-		public virtual void DeleteRight(string ARightName)
+		public virtual void DeleteRight(string rightName)
 		{
 			lock (Catalog)
 			{
 				// TODO: Look at speeding this up with an index of users for each right? Memory usage may outweigh the benefits of this index...
-				foreach (Schema.User LUser in Device.UsersCache.Values)
-					LUser.ClearCachedRightAssignment(ARightName);
+				foreach (Schema.User user in Device.UsersCache.Values)
+					user.ClearCachedRightAssignment(rightName);
 			}
 		}
 
-		public virtual bool UserHasRight(string AUserID, string ARightName)
+		public virtual bool UserHasRight(string userID, string rightName)
 		{
 			return true;
 		}
 
-		public void CheckUserHasRight(string AUserID, string ARightName)
+		public void CheckUserHasRight(string userID, string rightName)
 		{
-			if (!UserHasRight(AUserID, ARightName))
-				throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, AUserID, ARightName);
+			if (!UserHasRight(userID, rightName))
+				throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, userID, rightName);
 		}
 
-		protected void ClearUserCachedRightAssignments(string AUserID)
+		protected void ClearUserCachedRightAssignments(string userID)
 		{
-			Schema.User LUser;
-			if (Device.UsersCache.TryGetValue(AUserID, out LUser))
-				LUser.ClearCachedRightAssignments();
+			Schema.User user;
+			if (Device.UsersCache.TryGetValue(userID, out user))
+				user.ClearCachedRightAssignments();
 		}
 
 		/// <summary>Adds the given user to the cache, without affecting the underlying store.</summary>
-		public void CacheUser(User AUser)
+		public void CacheUser(User user)
 		{
 			lock (Catalog)
 			{
-				InternalCacheUser(AUser);
+				InternalCacheUser(user);
 			}
 		}
 
-		protected void InternalCacheUser(User AUser)
+		protected void InternalCacheUser(User user)
 		{
-			Device.UsersCache.Add(AUser);
+			Device.UsersCache.Add(user);
 		}
 
 		/// <summary>Removes the given user from the cache, without affecting the underlying store.</summary>		
-		public void ClearUser(string AUserID)
+		public void ClearUser(string userID)
 		{
 			lock (Catalog)
 			{
-				Device.UsersCache.Remove(AUserID);
+				Device.UsersCache.Remove(userID);
 			}
 		}
 
@@ -3421,80 +3421,80 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public virtual void InsertUser(Schema.User AUser)
+		public virtual void InsertUser(Schema.User user)
 		{
-			CacheUser(AUser);
+			CacheUser(user);
 
 			#if LOGDDLINSTRUCTIONS
 			if (ServerProcess.InTransaction)
-				FInstructions.Add(new CreateUserInstruction(AUser));
+				_instructions.Add(new CreateUserInstruction(user));
 			#endif
 		}
 
-		public Schema.User ResolveUser(string AUserID, bool AMustResolve)
+		public Schema.User ResolveUser(string userID, bool mustResolve)
 		{
 			lock (Catalog)
 			{
-				Schema.User LUser;
-				if (!Device.UsersCache.TryGetValue(AUserID, out LUser))
+				Schema.User user;
+				if (!Device.UsersCache.TryGetValue(userID, out user))
 				{
-					LUser = InternalResolveUser(AUserID, LUser);
+					user = InternalResolveUser(userID, user);
 				}
 
-				if ((LUser == null) && AMustResolve)
-					throw new Schema.SchemaException(Schema.SchemaException.Codes.UserNotFound, AUserID);
+				if ((user == null) && mustResolve)
+					throw new Schema.SchemaException(Schema.SchemaException.Codes.UserNotFound, userID);
 
-				return LUser;
+				return user;
 			}
 		}
 
-		protected virtual Schema.User InternalResolveUser(string AUserID, Schema.User LUser)
+		protected virtual Schema.User InternalResolveUser(string userID, Schema.User LUser)
 		{
 			return null;
 		}
 
-		public Schema.User ResolveUser(string AUserID)
+		public Schema.User ResolveUser(string userID)
 		{
-			return ResolveUser(AUserID, true);
+			return ResolveUser(userID, true);
 		}
 
 		protected class CreateUserInstruction : DDLInstruction
 		{
-			public CreateUserInstruction(Schema.User AUser) : base()
+			public CreateUserInstruction(Schema.User user) : base()
 			{
-				FUser = AUser;
+				_user = user;
 			}
 			
-			private Schema.User FUser;
+			private Schema.User _user;
 			
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.ClearUser(FUser.ID);
+				session.ClearUser(_user.ID);
 			}
 		}
 		
 		protected class DropUserInstruction : DDLInstruction
 		{
-			public DropUserInstruction(Schema.User AUser) : base()
+			public DropUserInstruction(Schema.User user) : base()
 			{
-				FUser = AUser;
+				_user = user;
 			}
 			
-			private Schema.User FUser;
+			private Schema.User _user;
 			
-			public override void Undo(CatalogDeviceSession ASession)
+			public override void Undo(CatalogDeviceSession session)
 			{
-				ASession.CacheUser(FUser);
+				session.CacheUser(_user);
 			}
 		}
 		
-		public void InsertRole(Schema.Role ARole)
+		public void InsertRole(Schema.Role role)
 		{
 			// Add the role to the Cache
-			CacheCatalogObject(ARole);
+			CacheCatalogObject(role);
 
 			// Clear the name cache (this is done in InsertPersistentObject for all other catalog objects)
-			Device.NameCache.Clear(ARole.Name);
+			Device.NameCache.Clear(role.Name);
 
 			// If we are not deserializing
 			if (!ServerProcess.InLoadingContext())
@@ -3502,24 +3502,24 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				#if LOGDDLINSTRUCTIONS
 				// log the DDL instruction
 				if (ServerProcess.InTransaction)
-					FInstructions.Add(new CreateCatalogObjectInstruction(ARole));
+					_instructions.Add(new CreateCatalogObjectInstruction(role));
 				#endif
 
-				InternalInsertRole(ARole);
+				InternalInsertRole(role);
 			}
 		}
 
-		protected virtual void InternalInsertRole(Schema.Role ARole)
+		protected virtual void InternalInsertRole(Schema.Role role)
 		{
 			// virtual
 		}
 
-		public void DeleteRole(Schema.Role ARole)
+		public void DeleteRole(Schema.Role role)
 		{
 			lock (Catalog)
 			{
 				// Remove the object from the catalog cache
-				ClearCatalogObject(ARole);
+				ClearCatalogObject(role);
 			}
 
 			if (!ServerProcess.InLoadingContext())
@@ -3527,15 +3527,15 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				#if LOGDDLINSTRUCTIONS
 				// log the DDL instruction
 				if (ServerProcess.InTransaction)
-					FInstructions.Add(new DropCatalogObjectInstruction(ARole));
+					_instructions.Add(new DropCatalogObjectInstruction(role));
 				#endif
 
 				// If this is not a repository, remove it from the catalog store
-				InternalDeleteRole(ARole);
+				InternalDeleteRole(role);
 			}
 		}
 
-		protected virtual void InternalDeleteRole(Schema.Role ARole)
+		protected virtual void InternalDeleteRole(Schema.Role role)
 		{
 			// virtual
 		}

@@ -28,40 +28,40 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		protected System.Web.UI.WebControls.Label Label3;
 		protected System.Web.UI.WebControls.Label Label4;
 		protected System.Web.UI.WebControls.Label Label6;
-		protected System.Web.UI.WebControls.TextBox FAliasNameTextBox;
-		protected System.Web.UI.WebControls.TextBox FInstanceNameTextBox;
-		protected System.Web.UI.WebControls.TextBox FInProcessInstanceNameTextBox;
-		protected System.Web.UI.WebControls.RadioButton FConnectionRadioButton;
-		protected System.Web.UI.WebControls.Button FAcceptButton;
-		protected System.Web.UI.WebControls.Button FRejectButton;
-		protected System.Web.UI.WebControls.TextBox FHostNameTextBox;
-		protected System.Web.UI.WebControls.TextBox FPortNumberConnectionTextBox;
-		protected System.Web.UI.WebControls.TextBox FPortNumberInProcessTextBox;
-		protected System.Web.UI.WebControls.TextBox FCatalogDirectoryTextBox;
-		protected System.Web.UI.WebControls.RadioButton FInProcessRadioButton;
-		protected System.Web.UI.WebControls.TextBox FLibraryDirectoryTextBox;
+		protected System.Web.UI.WebControls.TextBox _aliasNameTextBox;
+		protected System.Web.UI.WebControls.TextBox _instanceNameTextBox;
+		protected System.Web.UI.WebControls.TextBox _inProcessInstanceNameTextBox;
+		protected System.Web.UI.WebControls.RadioButton _connectionRadioButton;
+		protected System.Web.UI.WebControls.Button _acceptButton;
+		protected System.Web.UI.WebControls.Button _rejectButton;
+		protected System.Web.UI.WebControls.TextBox _hostNameTextBox;
+		protected System.Web.UI.WebControls.TextBox _portNumberConnectionTextBox;
+		protected System.Web.UI.WebControls.TextBox _portNumberInProcessTextBox;
+		protected System.Web.UI.WebControls.TextBox _catalogDirectoryTextBox;
+		protected System.Web.UI.WebControls.RadioButton _inProcessRadioButton;
+		protected System.Web.UI.WebControls.TextBox _libraryDirectoryTextBox;
 		protected System.Web.UI.WebControls.Label Label8;
-		protected System.Web.UI.WebControls.TextBox FPassword;
+		protected System.Web.UI.WebControls.TextBox _password;
 		protected System.Web.UI.WebControls.Label Label5;
-		protected System.Web.UI.WebControls.TextBox FUserID;
+		protected System.Web.UI.WebControls.TextBox _userID;
 		protected System.Web.UI.WebControls.Label Label7;
 	
 		private void Page_Load(object sender, System.EventArgs e)
 		{
-			FConfiguration = (AliasConfiguration)Session["AliasConfiguration"];
-			if (FConfiguration == null)
+			_configuration = (AliasConfiguration)Session["AliasConfiguration"];
+			if (_configuration == null)
 				Response.Redirect("Connect.aspx");
 
-			FMode = Request.QueryString["Mode"].ToLower();
-			if (((FMode == null) || (FMode == String.Empty)) && (FMode != "edit"))
-				FMode = "add";
+			_mode = Request.QueryString["Mode"].ToLower();
+			if (((_mode == null) || (_mode == String.Empty)) && (_mode != "edit"))
+				_mode = "add";
 
 			if (!IsPostBack)
 			{
-				if (FMode == "add")
+				if (_mode == "add")
 					SetFromAlias(new ConnectionAlias());
 				else
-					SetFromAlias(FConfiguration.Aliases[FConfiguration.DefaultAliasName]);
+					SetFromAlias(_configuration.Aliases[_configuration.DefaultAliasName]);
 			}
 		}
 
@@ -81,8 +81,8 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		/// </summary>
 		private void InitializeComponent()
 		{    
-			this.FAcceptButton.Click += new System.EventHandler(this.FAcceptButton_Click);
-			this.FRejectButton.Click += new System.EventHandler(this.FRejectButton_Click);
+			this._acceptButton.Click += new System.EventHandler(this.FAcceptButton_Click);
+			this._rejectButton.Click += new System.EventHandler(this.FRejectButton_Click);
 			this.Load += new System.EventHandler(this.Page_Load);
 
 		}
@@ -90,79 +90,79 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// Configuration
 
-		private AliasConfiguration FConfiguration;
+		private AliasConfiguration _configuration;
 
 		public AliasConfiguration Configuration
 		{
-			get { return FConfiguration; }
+			get { return _configuration; }
 		}
 
 		// Mode
 
-		private string FMode;
+		private string _mode;
 
 		public string Mode
 		{
-			get { return FMode; }
+			get { return _mode; }
 		}
 
-		public void SetFromAlias(ServerAlias AAlias)
+		public void SetFromAlias(ServerAlias alias)
 		{
-			FAliasNameTextBox.Text = AAlias.Name;
+			_aliasNameTextBox.Text = alias.Name;
 
-			InProcessAlias LInProcess = AAlias as InProcessAlias;
-			ConnectionAlias LConnection = AAlias as ConnectionAlias;
-			if (LInProcess != null)
+			InProcessAlias inProcess = alias as InProcessAlias;
+			ConnectionAlias connection = alias as ConnectionAlias;
+			if (inProcess != null)
 			{
-				FInProcessRadioButton.Checked = true;
-				FInProcessInstanceNameTextBox.Text = LInProcess.InstanceName;
+				_inProcessRadioButton.Checked = true;
+				_inProcessInstanceNameTextBox.Text = inProcess.InstanceName;
 			}
 			else
 			{
-				FConnectionRadioButton.Checked = true;
-				FHostNameTextBox.Text = LConnection.HostName;
-				FInstanceNameTextBox.Text = LConnection.InstanceName;
-				FPortNumberConnectionTextBox.Text = LConnection.OverridePortNumber.ToString();
+				_connectionRadioButton.Checked = true;
+				_hostNameTextBox.Text = connection.HostName;
+				_instanceNameTextBox.Text = connection.InstanceName;
+				_portNumberConnectionTextBox.Text = connection.OverridePortNumber.ToString();
 			}
 
-			FPassword.Text = AAlias.SessionInfo.Password;
-			FUserID.Text = AAlias.SessionInfo.UserID;
+			_password.Text = alias.SessionInfo.Password;
+			_userID.Text = alias.SessionInfo.UserID;
 		}
 
 		public ServerAlias CreateAlias()
 		{
-			ServerAlias LResult;
-			if (FInProcessRadioButton.Checked)
+			ServerAlias result;
+			if (_inProcessRadioButton.Checked)
 			{
-				InProcessAlias LInProcess = new InProcessAlias();
-				LInProcess.InstanceName = FInProcessInstanceNameTextBox.Text;
-				LResult = LInProcess;
+				InProcessAlias inProcess = new InProcessAlias();
+				inProcess.InstanceName = _inProcessInstanceNameTextBox.Text;
+				result = inProcess;
 			}
 			else
 			{
-				ConnectionAlias LConnection = new ConnectionAlias();
-				LConnection.HostName = FHostNameTextBox.Text;
-				LConnection.InstanceName = FInstanceNameTextBox.Text;
-				LConnection.OverridePortNumber = Int32.Parse(FPortNumberConnectionTextBox.Text);
-				LResult = LConnection;
+				ConnectionAlias connection = new ConnectionAlias();
+				connection.HostName = _hostNameTextBox.Text;
+				connection.InstanceName = _instanceNameTextBox.Text;
+				connection.OverridePortNumber = Int32.Parse(_portNumberConnectionTextBox.Text);
+				result = connection;
 			}
 			
-			LResult.SessionInfo.Password = FPassword.Text;
-			LResult.SessionInfo.UserID = FUserID.Text;
+			result.SessionInfo.Password = _password.Text;
+			result.SessionInfo.UserID = _userID.Text;
 
-			LResult.Name = FAliasNameTextBox.Text;
+			result.Name = _aliasNameTextBox.Text;
 
-			return LResult;
+			return result;
 		}
 
 		private void FAcceptButton_Click(object sender, System.EventArgs e)
 		{
-			ServerAlias LAlias = CreateAlias();
-			if (FMode == "edit")
+			ServerAlias alias = CreateAlias();
+			if (_mode == "edit")
 				Configuration.Aliases.Remove(Configuration.DefaultAliasName);
-			Configuration.Aliases.Add(LAlias);
-			Configuration.DefaultAliasName = LAlias.Name;
-			Configuration.Save(AliasManager.CAliasConfigurationFileName);
+			Configuration.Aliases.Add(alias);
+			Configuration.DefaultAliasName = alias.Name;
+			Configuration.Save(AliasManager.AliasConfigurationFileName);
 
 			Response.Redirect("Connect.aspx");
 		}

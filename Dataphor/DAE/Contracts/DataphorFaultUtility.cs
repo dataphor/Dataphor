@@ -26,86 +26,86 @@ namespace Alphora.Dataphor.DAE.Contracts
 {
 	public static class DataphorFaultUtility
 	{
-		public static DataphorFault ExceptionToFault(DataphorException AException)
+		public static DataphorFault ExceptionToFault(DataphorException exception)
 		{
-			DataphorFault LFault = new DataphorFault();
+			DataphorFault fault = new DataphorFault();
 			
-			LFault.ExceptionClassName = AException.GetType().Name;
-			LFault.Code = AException.Code;
-			LFault.Severity = AException.Severity;
-			LFault.Message = AException.Message;
-			LFault.Details = AException.Details;
-			LFault.ServerContext = AException.ServerContext;
-			if (AException.InnerException != null)
-				LFault.InnerFault = ExceptionToFault((DataphorException)AException.InnerException);
+			fault.ExceptionClassName = exception.GetType().Name;
+			fault.Code = exception.Code;
+			fault.Severity = exception.Severity;
+			fault.Message = exception.Message;
+			fault.Details = exception.Details;
+			fault.ServerContext = exception.ServerContext;
+			if (exception.InnerException != null)
+				fault.InnerFault = ExceptionToFault((DataphorException)exception.InnerException);
 				
 			#if !SILVERLIGHT
 			// Under Silverlight, a ConnectionException will come back as a DataphorException
 			// The statement is still present in the Details.
-			ConnectionException LConnectionException = AException as ConnectionException;
-			if (LConnectionException != null)
+			ConnectionException connectionException = exception as ConnectionException;
+			if (connectionException != null)
 			{
-				LFault.Statement = LConnectionException.Statement;
+				fault.Statement = connectionException.Statement;
 			}
 			#endif
 			
-			SyntaxException LSyntaxException = AException as SyntaxException;
-			if (LSyntaxException != null)
+			SyntaxException syntaxException = exception as SyntaxException;
+			if (syntaxException != null)
 			{
-				LFault.Locator = LSyntaxException.Locator;
-				LFault.Line = LSyntaxException.Line;
-				LFault.LinePos = LSyntaxException.LinePos;
-				LFault.Token = LSyntaxException.Token;
-				LFault.TokenType = LSyntaxException.TokenType;
+				fault.Locator = syntaxException.Locator;
+				fault.Line = syntaxException.Line;
+				fault.LinePos = syntaxException.LinePos;
+				fault.Token = syntaxException.Token;
+				fault.TokenType = syntaxException.TokenType;
 			}
 			
-			CompilerException LCompilerException = AException as CompilerException;
-			if (LCompilerException != null)
+			CompilerException compilerException = exception as CompilerException;
+			if (compilerException != null)
 			{
-				LFault.Locator = LCompilerException.Locator;
-				LFault.Line = LCompilerException.Line;
-				LFault.LinePos = LCompilerException.LinePos;
-				LFault.ErrorLevel = LCompilerException.ErrorLevel;
+				fault.Locator = compilerException.Locator;
+				fault.Line = compilerException.Line;
+				fault.LinePos = compilerException.LinePos;
+				fault.ErrorLevel = compilerException.ErrorLevel;
 			}
 			
-			RuntimeException LRuntimeException = AException as RuntimeException;
-			if (LRuntimeException != null)
+			RuntimeException runtimeException = exception as RuntimeException;
+			if (runtimeException != null)
 			{
-				LFault.Locator = LRuntimeException.Locator;
-				LFault.Line = LRuntimeException.Line;
-				LFault.LinePos = LRuntimeException.LinePos;
-				LFault.Context = LRuntimeException.Context;
+				fault.Locator = runtimeException.Locator;
+				fault.Line = runtimeException.Line;
+				fault.LinePos = runtimeException.LinePos;
+				fault.Context = runtimeException.Context;
 			}
 			
-			return LFault;
+			return fault;
 		}
 		
-		public static List<DataphorFault> ExceptionsToFaults(IEnumerable<Exception> AExceptions)
+		public static List<DataphorFault> ExceptionsToFaults(IEnumerable<Exception> exceptions)
 		{
-			var LResult = new List<DataphorFault>();
+			var result = new List<DataphorFault>();
 
-			foreach (Exception LException in AExceptions)
+			foreach (Exception exception in exceptions)
 			{
-				DataphorException LDataphorException = LException as DataphorException;
-				if (LDataphorException == null)
-					LDataphorException = new DataphorException(LException);
-				LResult.Add(ExceptionToFault(LDataphorException));
+				DataphorException dataphorException = exception as DataphorException;
+				if (dataphorException == null)
+					dataphorException = new DataphorException(exception);
+				result.Add(ExceptionToFault(dataphorException));
 			}
 			
-			return LResult;
+			return result;
 		}
 		
-		public static DataphorException FaultToException(DataphorFault AFault)
+		public static DataphorException FaultToException(DataphorFault fault)
 		{
-			switch (AFault.ExceptionClassName)
+			switch (fault.ExceptionClassName)
 			{
-				case "BaseException" : return new BaseException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
-				case "BOPException" : return new BOPException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
-				case "CompilerException" : return new CompilerException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.ErrorLevel, AFault.Line, AFault.LinePos, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault)) { Locator = AFault.Locator };
-				case "RuntimeException" : return new RuntimeException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.Locator, AFault.Line, AFault.LinePos, AFault.Context, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
+				case "BaseException" : return new BaseException(fault.Severity, fault.Code, fault.Message, fault.Details, fault.ServerContext, fault.InnerFault == null ? null : FaultToException(fault.InnerFault));
+				case "BOPException" : return new BOPException(fault.Severity, fault.Code, fault.Message, fault.Details, fault.ServerContext, fault.InnerFault == null ? null : FaultToException(fault.InnerFault));
+				case "CompilerException" : return new CompilerException(fault.Severity, fault.Code, fault.Message, fault.Details, fault.ServerContext, fault.ErrorLevel, fault.Line, fault.LinePos, fault.InnerFault == null ? null : FaultToException(fault.InnerFault)) { Locator = fault.Locator };
+				case "RuntimeException" : return new RuntimeException(fault.Severity, fault.Code, fault.Message, fault.Details, fault.ServerContext, fault.Locator, fault.Line, fault.LinePos, fault.Context, fault.InnerFault == null ? null : FaultToException(fault.InnerFault));
 				#if !SILVERLIGHT
-				case "ConnectionException" : return new ConnectionException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.Statement, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
-				case "StoreException" : return new StoreException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
+				case "ConnectionException" : return new ConnectionException(fault.Severity, fault.Code, fault.Message, fault.Details, fault.ServerContext, fault.Statement, fault.InnerFault == null ? null : FaultToException(fault.InnerFault));
+				case "StoreException" : return new StoreException(fault.Severity, fault.Code, fault.Message, fault.Details, fault.ServerContext, fault.InnerFault == null ? null : FaultToException(fault.InnerFault));
 				#endif
 				case "DeviceException" : 
 				case "ApplicationTransactionException" :
@@ -113,29 +113,29 @@ namespace Alphora.Dataphor.DAE.Contracts
 				case "MemoryDeviceException" :
 				case "SimpleDeviceException" :
 				case "SQLException" :
-				case "FrontendDeviceException" : return new DeviceException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
-				case "LanguageException" : return new LanguageException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
-				case "LexerException" : return new LexerException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
-				case "ParserException" : return new ParserException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
-				case "SyntaxException" : return new SyntaxException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.Line, AFault.LinePos, AFault.TokenType, AFault.Token, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault)) { Locator = AFault.Locator };
-				case "IndexException" : return new IndexException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
-				case "ScanException" : return new ScanException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
-				case "SchemaException" : return new SchemaException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
-				case "ServerException" : return new ServerException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
-				case "ConveyorException" : return new ConveyorException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
-				case "StreamsException" : return new StreamsException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
-				default : return new DataphorException(AFault.Severity, AFault.Code, AFault.Message, AFault.Details, AFault.ServerContext, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
+				case "FrontendDeviceException" : return new DeviceException(fault.Severity, fault.Code, fault.Message, fault.Details, fault.ServerContext, fault.InnerFault == null ? null : FaultToException(fault.InnerFault));
+				case "LanguageException" : return new LanguageException(fault.Severity, fault.Code, fault.Message, fault.Details, fault.ServerContext, fault.InnerFault == null ? null : FaultToException(fault.InnerFault));
+				case "LexerException" : return new LexerException(fault.Severity, fault.Code, fault.Message, fault.Details, fault.ServerContext, fault.InnerFault == null ? null : FaultToException(fault.InnerFault));
+				case "ParserException" : return new ParserException(fault.Severity, fault.Code, fault.Message, fault.Details, fault.ServerContext, fault.InnerFault == null ? null : FaultToException(fault.InnerFault));
+				case "SyntaxException" : return new SyntaxException(fault.Severity, fault.Code, fault.Message, fault.Details, fault.ServerContext, fault.Line, fault.LinePos, fault.TokenType, fault.Token, fault.InnerFault == null ? null : FaultToException(fault.InnerFault)) { Locator = fault.Locator };
+				case "IndexException" : return new IndexException(fault.Severity, fault.Code, fault.Message, fault.Details, fault.ServerContext, fault.InnerFault == null ? null : FaultToException(fault.InnerFault));
+				case "ScanException" : return new ScanException(fault.Severity, fault.Code, fault.Message, fault.Details, fault.ServerContext, fault.InnerFault == null ? null : FaultToException(fault.InnerFault));
+				case "SchemaException" : return new SchemaException(fault.Severity, fault.Code, fault.Message, fault.Details, fault.ServerContext, fault.InnerFault == null ? null : FaultToException(fault.InnerFault));
+				case "ServerException" : return new ServerException(fault.Severity, fault.Code, fault.Message, fault.Details, fault.ServerContext, fault.InnerFault == null ? null : FaultToException(fault.InnerFault));
+				case "ConveyorException" : return new ConveyorException(fault.Severity, fault.Code, fault.Message, fault.Details, fault.ServerContext, fault.InnerFault == null ? null : FaultToException(fault.InnerFault));
+				case "StreamsException" : return new StreamsException(fault.Severity, fault.Code, fault.Message, fault.Details, fault.ServerContext, fault.InnerFault == null ? null : FaultToException(fault.InnerFault));
+				default : return new DataphorException(fault.Severity, fault.Code, fault.Message, fault.Details, fault.ServerContext, fault.InnerFault == null ? null : FaultToException(fault.InnerFault));
 			}
 		}
 		
 		public static List<Exception> FaultsToExceptions(IEnumerable<DataphorFault> LFaults)
 		{
-			var LResult = new List<Exception>();
+			var result = new List<Exception>();
 
-			foreach (DataphorFault LFault in LFaults)
-				LResult.Add(FaultToException(LFault));
+			foreach (DataphorFault fault in LFaults)
+				result.Add(FaultToException(fault));
 
-			return LResult;
+			return result;
 		}
 	}
 }

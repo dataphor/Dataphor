@@ -25,21 +25,21 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		protected void Session_Start(Object sender, EventArgs e)
 		{
-			IDictionary LSettings = (IDictionary)ConfigurationManager.GetSection("WebClient/PageNames");
+			IDictionary settings = (IDictionary)ConfigurationManager.GetSection("WebClient/PageNames");
 			Session["DefaultPage"] = "Default.aspx";
 			Session["ApplicationsPage"] = "Applications.aspx";
 			Session["ConnectPage"] = "Connect.aspx";
-			if (LSettings != null)
+			if (settings != null)
 			{
-				string LValue = (string)LSettings["Default"];
-				if ((LValue != null) && (LValue != String.Empty))
-					Session["DefaultPage"] = LValue;
-				LValue = (string)LSettings["Applications"];
-				if ((LValue != null) && (LValue != String.Empty))
-					Session["ApplicationsPage"] = LValue;
-				LValue = (string)LSettings["Connect"];
-				if ((LValue != null) && (LValue != String.Empty))
-					Session["ConnectPage"] = LValue;
+				string tempValue = (string)settings["Default"];
+				if ((tempValue != null) && (tempValue != String.Empty))
+					Session["DefaultPage"] = tempValue;
+				tempValue = (string)settings["Applications"];
+				if ((tempValue != null) && (tempValue != String.Empty))
+					Session["ApplicationsPage"] = tempValue;
+				tempValue = (string)settings["Connect"];
+				if ((tempValue != null) && (tempValue != String.Empty))
+					Session["ConnectPage"] = tempValue;
 			}
 		}
 

@@ -16,34 +16,34 @@ namespace Alphora.Dataphor.DAE.Streams
 	/// </summary>
 	public class LocalStream : DeferredWriteStream
 	{
-		public LocalStream(LocalStreamManager AStreamManager, StreamID AStreamID, DAE.Runtime.LockMode AMode) : base(null)
+		public LocalStream(LocalStreamManager streamManager, StreamID streamID, DAE.Runtime.LockMode mode) : base(null)
 		{
-			FStreamManager = AStreamManager;
-			FStreamID = AStreamID;
-			FMode = AMode;
+			_streamManager = streamManager;
+			_streamID = streamID;
+			_mode = mode;
 		}
 
-		private LocalStreamManager FStreamManager;		
-		private DAE.Runtime.LockMode FMode;
-		private StreamID FStreamID;
+		private LocalStreamManager _streamManager;		
+		private DAE.Runtime.LockMode _mode;
+		private StreamID _streamID;
 		
 		protected override Stream SourceStream
 		{
 			get
 			{
-				if (FSourceStream == null)
-					FSourceStream = new RemoteStreamWrapper(FStreamManager.SourceStreamManager.OpenRemote(FStreamID, FMode));
-				return FSourceStream;
+				if (_sourceStream == null)
+					_sourceStream = new RemoteStreamWrapper(_streamManager.SourceStreamManager.OpenRemote(_streamID, _mode));
+				return _sourceStream;
 			}
 		}
 		
 		public override void Close()
 		{
-			if (FStreamManager != null)
+			if (_streamManager != null)
 			{
 				base.Close();
-				FStreamManager.Close(FStreamID);
-				FStreamManager = null;
+				_streamManager.Close(_streamID);
+				_streamManager = null;
 			}
 		}
 	}

@@ -25,18 +25,18 @@ namespace Alphora.Dataphor.DAE.Schema
     {
 		public GenericType() : base()
 		{
-			FIsGeneric = true;
+			_isGeneric = true;
 		}
 		
-		public GenericType(bool AIsNil) : base()
+		public GenericType(bool isNil) : base()
 		{
-			FIsGeneric = true;
-			FIsNil = AIsNil;
+			_isGeneric = true;
+			_isNil = isNil;
 		}
 		
-		public override bool Equals(object AObject)
+		public override bool Equals(object objectValue)
 		{
-			return (AObject is IDataType) && Equals((IDataType)AObject);
+			return (objectValue is IDataType) && Equals((IDataType)objectValue);
 		}
 		
 		public override int GetHashCode()
@@ -44,35 +44,35 @@ namespace Alphora.Dataphor.DAE.Schema
 			return 0;
 		}
 		
-		public bool Equivalent(IDataType ADataType)
+		public bool Equivalent(IDataType dataType)
 		{
-			return Equals(ADataType);
+			return Equals(dataType);
 		}
 
-		public bool Equals(IDataType ADataType)
+		public bool Equals(IDataType dataType)
 		{
-			return ADataType is IGenericType;
+			return dataType is IGenericType;
 		}
 
 		// Is
-		public bool Is(IDataType ADataType)
+		public bool Is(IDataType dataType)
 		{
-			return ADataType is GenericType;
+			return dataType is GenericType;
 		}
 		
-		public bool Compatible(IDataType ADataType)
+		public bool Compatible(IDataType dataType)
 		{
-			return Is(ADataType) || ADataType.Is(this);
+			return Is(dataType) || dataType.Is(this);
 		}
 		
 		public string Name
 		{
-			get { return Schema.DataTypes.CSystemGeneric; }
+			get { return Schema.DataTypes.SystemGenericName; }
 			set { }
 		}
 
 		#if NATIVEROW
-		public int GetByteSize(object AData)
+		public int GetByteSize(object data)
 		{
 			return 0;
 		}
@@ -88,33 +88,33 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		// IsGeneric
 		// Indicates whether this data type is a generic data type (i.e. table, not table{})
-		private bool FIsGeneric;
+		private bool _isGeneric;
 		public bool IsGeneric
 		{
-			get { return FIsGeneric; }
-			set { FIsGeneric = value; }
+			get { return _isGeneric; }
+			set { _isGeneric = value; }
 		}
 		
 		// IsNil
 		// True if the type is known to be the constant nil at compile-time
-		private bool FIsNil;
-		public bool IsNil { get { return FIsNil; } }
+		private bool _isNil;
+		public bool IsNil { get { return _isNil; } }
 		
 		// IsDisposable
 		// Indicates whether the host representation for this data type must be disposed
-		private bool FIsDisposable = false;
+		private bool _isDisposable = false;
 		public bool IsDisposable
 		{
-			get { return FIsDisposable; }
-			set { FIsDisposable = value; }
+			get { return _isDisposable; }
+			set { _isDisposable = value; }
 		}
 
-        public TypeSpecifier EmitSpecifier(EmitMode AMode)
+        public TypeSpecifier EmitSpecifier(EmitMode mode)
         {
 			return new GenericTypeSpecifier();
         }
         
-        public void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+        public void IncludeDependencies(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
         {
         }
     }

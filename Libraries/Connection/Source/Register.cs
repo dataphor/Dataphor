@@ -13,18 +13,18 @@ namespace Alphora.Dataphor.DAE.Connection
 
 	class DAERegister
 	{
-		protected const string CD4ClassDefinitionNameSpace = "Connection";
+		protected const string D4ClassDefinitionNameSpace = "Connection";
 
 		public static SettingsList GetClasses()
 		{
-			SettingsList LClasses = new SettingsList();
+			SettingsList classes = new SettingsList();
 			
-			LClasses.Add(new SettingsItem(String.Format("{0}.{1}", CD4ClassDefinitionNameSpace, "MSSQLConnection"), typeof(MSSQLConnection).AssemblyQualifiedName));
-			LClasses.Add(new SettingsItem(String.Format("{0}.{1}", CD4ClassDefinitionNameSpace, "OLEDBConnection"), typeof(OLEDBConnection).AssemblyQualifiedName));
-			LClasses.Add(new SettingsItem(String.Format("{0}.{1}", CD4ClassDefinitionNameSpace, "SQLCEConnection"), typeof(SQLCEConnection).AssemblyQualifiedName));
-			LClasses.Add(new SettingsItem(String.Format("{0}.{1}", CD4ClassDefinitionNameSpace, "ClearAllPoolsNode"), typeof(ClearAllPoolsNode).AssemblyQualifiedName));
+			classes.Add(new SettingsItem(String.Format("{0}.{1}", D4ClassDefinitionNameSpace, "MSSQLConnection"), typeof(MSSQLConnection).AssemblyQualifiedName));
+			classes.Add(new SettingsItem(String.Format("{0}.{1}", D4ClassDefinitionNameSpace, "OLEDBConnection"), typeof(OLEDBConnection).AssemblyQualifiedName));
+			classes.Add(new SettingsItem(String.Format("{0}.{1}", D4ClassDefinitionNameSpace, "SQLCEConnection"), typeof(SQLCEConnection).AssemblyQualifiedName));
+			classes.Add(new SettingsItem(String.Format("{0}.{1}", D4ClassDefinitionNameSpace, "ClearAllPoolsNode"), typeof(ClearAllPoolsNode).AssemblyQualifiedName));
 			
-			return LClasses;
+			return classes;
 		}
 	}
 }

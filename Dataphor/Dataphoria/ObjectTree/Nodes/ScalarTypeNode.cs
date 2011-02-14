@@ -12,7 +12,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 {
 	public class ScalarTypeListNode : SchemaListNode
 	{
-		public ScalarTypeListNode(string ALibraryName) : base (ALibraryName)
+		public ScalarTypeListNode(string libraryName) : base (libraryName)
 		{
 			Text = "Types";
 			ImageIndex = 22;
@@ -21,22 +21,22 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 		
 		protected override string GetChildExpression()
 		{
-			return ".System.ScalarTypes " + CSchemaListFilter + " over { Name }";
+			return ".System.ScalarTypes " + SchemaListFilter + " over { Name }";
 		}
 		
-		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row ARow)
+		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row row)
 		{
-			return new ScalarTypeNode(this, (string)ARow["Name"]);
+			return new ScalarTypeNode(this, (string)row["Name"]);
 		}
 		
 	}
 
 	public class ScalarTypeNode : SchemaItemNode
 	{
-		public ScalarTypeNode(ScalarTypeListNode ANode, string AScalarTypeName) : base()
+		public ScalarTypeNode(ScalarTypeListNode node, string scalarTypeName) : base()
 		{
-			ParentSchemaList = ANode;
-			ObjectName = AScalarTypeName;
+			ParentSchemaList = node;
+			ObjectName = scalarTypeName;
 			ImageIndex = 23;
 			SelectedImageIndex = ImageIndex;
 		}

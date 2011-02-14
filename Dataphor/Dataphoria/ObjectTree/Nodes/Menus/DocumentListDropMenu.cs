@@ -5,10 +5,10 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes.Menus
 {
     public class DocumentListDropMenu : ContextMenu
     {
-        public DocumentListDropMenu(DocumentData ASource, DocumentListNode ATarget)
+        public DocumentListDropMenu(DocumentData source, DocumentListNode target)
         {
-            FSource = ASource;
-            FTarget = ATarget;
+            _source = source;
+            _target = target;
 
             MenuItems.Add(new MenuItem(Strings.DropMenu_Copy, new EventHandler(CopyClick)));
             MenuItems.Add(new MenuItem(Strings.DropMenu_Move, new EventHandler(MoveClick)));
@@ -16,18 +16,18 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes.Menus
             MenuItems.Add(new MenuItem(Strings.DropMenu_Cancel));
         }
 
-        private DocumentData FSource;
-        private DocumentListNode FTarget;
+        private DocumentData _source;
+        private DocumentListNode _target;
 
-        private void CopyClick(object ASender, EventArgs AArgs)
+        private void CopyClick(object sender, EventArgs args)
         {
-            FTarget.CopyFromDocument(FSource.Node.LibraryName, FSource.Node.DocumentName);
+            _target.CopyFromDocument(_source.Node.LibraryName, _source.Node.DocumentName);
         }
 
-        private void MoveClick(object ASender, EventArgs AArgs)
+        private void MoveClick(object sender, EventArgs args)
         {
-            FTarget.MoveFromDocument(FSource.Node.LibraryName, FSource.Node.DocumentName);
-            ((DocumentListNode)FSource.Node.Parent).ReconcileChildren();
+            _target.MoveFromDocument(_source.Node.LibraryName, _source.Node.DocumentName);
+            ((DocumentListNode)_source.Node.Parent).ReconcileChildren();
         }
     }
 }

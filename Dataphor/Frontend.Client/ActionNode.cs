@@ -18,42 +18,42 @@ namespace Alphora.Dataphor.Frontend.Client
 {
 	public abstract class ActionNode : Node, IActionNode
 	{
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 			Action = null;
 		}
 
 		// Action
 
-		protected IAction FAction;
+		protected IAction _action;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("Associated Action node.")]
 		public IAction Action
 		{
-			get { return FAction; }
+			get { return _action; }
 			set
 			{
-				if (FAction != value)
+				if (_action != value)
 				{
-					if (FAction != null)
+					if (_action != null)
 					{
-						FAction.OnEnabledChanged -= new EventHandler(ActionEnabledChanged);
-						FAction.OnTextChanged -= new EventHandler(ActionTextChanged);
-						FAction.OnImageChanged -= new EventHandler(ActionImageChanged);
-						FAction.OnHintChanged -= new EventHandler(ActionHintChanged);
-						FAction.OnVisibleChanged -= new EventHandler(ActionVisibleChanged);
-						FAction.Disposed -= new EventHandler(ActionDisposed);
+						_action.OnEnabledChanged -= new EventHandler(ActionEnabledChanged);
+						_action.OnTextChanged -= new EventHandler(ActionTextChanged);
+						_action.OnImageChanged -= new EventHandler(ActionImageChanged);
+						_action.OnHintChanged -= new EventHandler(ActionHintChanged);
+						_action.OnVisibleChanged -= new EventHandler(ActionVisibleChanged);
+						_action.Disposed -= new EventHandler(ActionDisposed);
 					}
-					FAction = value;
-					if (FAction != null)
+					_action = value;
+					if (_action != null)
 					{
-						FAction.OnEnabledChanged += new EventHandler(ActionEnabledChanged);
-						FAction.OnTextChanged += new EventHandler(ActionTextChanged);
-						FAction.OnImageChanged += new EventHandler(ActionImageChanged);
-						FAction.OnHintChanged += new EventHandler(ActionHintChanged);
-						FAction.OnVisibleChanged += new EventHandler(ActionVisibleChanged);
-						FAction.Disposed += new EventHandler(ActionDisposed);
+						_action.OnEnabledChanged += new EventHandler(ActionEnabledChanged);
+						_action.OnTextChanged += new EventHandler(ActionTextChanged);
+						_action.OnImageChanged += new EventHandler(ActionImageChanged);
+						_action.OnHintChanged += new EventHandler(ActionHintChanged);
+						_action.OnVisibleChanged += new EventHandler(ActionVisibleChanged);
+						_action.Disposed += new EventHandler(ActionDisposed);
 					}
 					if (Active)
 					{
@@ -65,24 +65,24 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 		}
 		
-		private void ActionDisposed(object ASender, EventArgs AArgs)
+		private void ActionDisposed(object sender, EventArgs args)
 		{
 			Action = null;
 		}
 		
 		// Enabled
 
-		private bool FEnabled = true;
+		private bool _enabled = true;
 		[DefaultValue(true)]
 		[Description("When false, the node is disabled.")]
 		public bool Enabled
 		{
-			get { return FEnabled; }
+			get { return _enabled; }
 			set
 			{
-				if (FEnabled != value)
+				if (_enabled != value)
 				{
-					FEnabled = value;
+					_enabled = value;
 					if (Active)
 						InternalUpdateEnabled();
 				}
@@ -91,10 +91,10 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		public virtual bool GetEnabled()
 		{
-			return ( FAction == null ? false : FAction.GetEnabled() ) && FEnabled;
+			return ( _action == null ? false : _action.GetEnabled() ) && _enabled;
 		}
 		
-		private void ActionEnabledChanged(object ASender, EventArgs AArgs)
+		private void ActionEnabledChanged(object sender, EventArgs args)
 		{
 			if (Active)
 				InternalUpdateEnabled();
@@ -104,17 +104,17 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		// Visible
 
-		private bool FVisible = true;
+		private bool _visible = true;
 		[DefaultValue(true)]
 		[Description("When set to false the menu will not be shown.")]
 		public bool Visible
 		{
-			get { return FVisible; }
+			get { return _visible; }
 			set
 			{
-				if (FVisible != value)
+				if (_visible != value)
 				{
-					FVisible = value;
+					_visible = value;
 					if (Active)
 						InternalUpdateVisible();
 				}
@@ -123,7 +123,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		public virtual bool GetVisible() 
 		{
-			return FVisible && ( Parent is IVisual ? ((IVisual)Parent).GetVisible() : true ) && ((FAction == null) || FAction.Visible);
+			return _visible && ( Parent is IVisual ? ((IVisual)Parent).GetVisible() : true ) && ((_action == null) || _action.Visible);
 		}
 
 		protected virtual void InternalUpdateVisible() {}
@@ -141,26 +141,26 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		// Text
 
-		private string FText = String.Empty;
+		private string _text = String.Empty;
 		[DefaultValue("")]
 		[Description("A text string that will be used by this node.  If this is not set the text property of the action will be used.")]
 		public virtual string Text
 		{
-			get { return FText; }
+			get { return _text; }
 			set
 			{
-				if (FText != value)
+				if (_text != value)
 				{
-					FText = value;
+					_text = value;
 					if (Active)
 						InternalUpdateText();
 				}
 			}
 		}
 
-		private void ActionTextChanged(object ASender, EventArgs AArgs)
+		private void ActionTextChanged(object sender, EventArgs args)
 		{
-			if ((FText == String.Empty) && Active)
+			if ((_text == String.Empty) && Active)
 				InternalUpdateText();
 		}
 
@@ -176,7 +176,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		// Image
 
-		private void ActionImageChanged(object ASender, EventArgs AArgs)
+		private void ActionImageChanged(object sender, EventArgs args)
 		{
 			if (Active)
 				InternalUpdateImage();
@@ -190,7 +190,7 @@ namespace Alphora.Dataphor.Frontend.Client
 				InternalSetImage(null);
 		}
 
-		protected virtual void InternalSetImage(Image AImage) {}
+		protected virtual void InternalSetImage(Image image) {}
 
 		// Hint
 
@@ -202,7 +202,7 @@ namespace Alphora.Dataphor.Frontend.Client
 				return String.Empty;
 		}
 
-		private void ActionHintChanged(object ASender, EventArgs AArgs)
+		private void ActionHintChanged(object sender, EventArgs args)
 		{
 			if (Active)
 				InternalUpdateHint();

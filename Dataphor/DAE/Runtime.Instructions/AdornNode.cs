@@ -25,174 +25,174 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Adorn(table) : table()
 	public class AdornNode : UnaryTableNode
 	{
-		private AdornColumnExpressions FExpressions;		
+		private AdornColumnExpressions _expressions;		
 		public AdornColumnExpressions Expressions
 		{
-			get { return FExpressions; }
-			set { FExpressions = value; }
+			get { return _expressions; }
+			set { _expressions = value; }
 		}
 		
-		private CreateConstraintDefinitions FConstraints;
+		private CreateConstraintDefinitions _constraints;
 		public CreateConstraintDefinitions Constraints
 		{
-			get { return FConstraints; }
-			set { FConstraints = value; }
+			get { return _constraints; }
+			set { _constraints = value; }
 		}
 		
-		private OrderDefinitions FOrders;
+		private OrderDefinitions _orders;
 		public OrderDefinitions Orders
 		{
-			get { return FOrders; }
-			set { FOrders = value; }
+			get { return _orders; }
+			set { _orders = value; }
 		}
 		
-		private AlterOrderDefinitions FAlterOrders;
+		private AlterOrderDefinitions _alterOrders;
 		public AlterOrderDefinitions AlterOrders
 		{
-			get { return FAlterOrders; }
-			set { FAlterOrders = value; }
+			get { return _alterOrders; }
+			set { _alterOrders = value; }
 		}
 		
-		private DropOrderDefinitions FDropOrders;
+		private DropOrderDefinitions _dropOrders;
 		public DropOrderDefinitions DropOrders
 		{
-			get { return FDropOrders; }
-			set { FDropOrders = value; }
+			get { return _dropOrders; }
+			set { _dropOrders = value; }
 		}
 		
-		private KeyDefinitions FKeys;
+		private KeyDefinitions _keys;
 		public KeyDefinitions Keys
 		{
-			get { return FKeys; }
-			set { FKeys = value; }
+			get { return _keys; }
+			set { _keys = value; }
 		}
 		
-		private AlterKeyDefinitions FAlterKeys;
+		private AlterKeyDefinitions _alterKeys;
 		public AlterKeyDefinitions AlterKeys
 		{
-			get { return FAlterKeys; }
-			set { FAlterKeys = value; }
+			get { return _alterKeys; }
+			set { _alterKeys = value; }
 		}
 		
-		private DropKeyDefinitions FDropKeys;
+		private DropKeyDefinitions _dropKeys;
 		public DropKeyDefinitions DropKeys
 		{
-			get { return FDropKeys; }
-			set { FDropKeys = value; }
+			get { return _dropKeys; }
+			set { _dropKeys = value; }
 		}
 		
-		protected ReferenceDefinitions FReferences;
+		protected ReferenceDefinitions _references;
 		public ReferenceDefinitions References 
 		{ 
-			get { return FReferences; } 
-			set { FReferences = value; }
+			get { return _references; } 
+			set { _references = value; }
 		}
 
-		private AlterReferenceDefinitions FAlterReferences;
+		private AlterReferenceDefinitions _alterReferences;
 		public AlterReferenceDefinitions AlterReferences
 		{
-			get { return FAlterReferences; }
-			set { FAlterReferences = value; }
+			get { return _alterReferences; }
+			set { _alterReferences = value; }
 		}
 		
-		private DropReferenceDefinitions FDropReferences;
+		private DropReferenceDefinitions _dropReferences;
 		public DropReferenceDefinitions DropReferences
 		{
-			get { return FDropReferences; }
-			set { FDropReferences = value; }
+			get { return _dropReferences; }
+			set { _dropReferences = value; }
 		}
 		
-		private MetaData FMetaData;
+		private MetaData _metaData;
 		public MetaData MetaData
 		{
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
 		}
 		
-		private AlterMetaData FAlterMetaData;
+		private AlterMetaData _alterMetaData;
 		public AlterMetaData AlterMetaData
 		{
-			get { return FAlterMetaData; }
-			set { FAlterMetaData = value; }
+			get { return _alterMetaData; }
+			set { _alterMetaData = value; }
 		}
 		
-		private bool FIsRestrict;
+		private bool _isRestrict;
 		public bool IsRestrict
 		{
-			get { return FIsRestrict; }
-			set { FIsRestrict = value; }
+			get { return _isRestrict; }
+			set { _isRestrict = value; }
 		}
 		
-		private PlanNode ReplaceColumnReferences(Plan APlan, PlanNode ANode, string AIdentifier, int AColumnIndex)
+		private PlanNode ReplaceColumnReferences(Plan plan, PlanNode node, string identifier, int columnIndex)
 		{
-			if (ANode is StackReferenceNode)
+			if (node is StackReferenceNode)
 			{
 				#if USECOLUMNLOCATIONBINDING
 				return new StackColumnReferenceNode(AIdentifier, ANode.DataType, ((StackReferenceNode)ANode).Location, AColumnIndex);
 				#else
-				return new StackColumnReferenceNode(AIdentifier, ANode.DataType, ((StackReferenceNode)ANode).Location);
+				return new StackColumnReferenceNode(identifier, node.DataType, ((StackReferenceNode)node).Location);
 				#endif
 			}
 			else
 			{
-				for (int LIndex = 0; LIndex < ANode.NodeCount; LIndex++)
-					ANode.Nodes[LIndex] = ReplaceColumnReferences(APlan, ANode.Nodes[LIndex], AIdentifier, AColumnIndex);
-				return ANode;
+				for (int index = 0; index < node.NodeCount; index++)
+					node.Nodes[index] = ReplaceColumnReferences(plan, node.Nodes[index], identifier, columnIndex);
+				return node;
 			}
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
-			FTableVar.InheritMetaData(SourceTableVar.MetaData);
-			FTableVar.MergeMetaData(MetaData);
-			AlterNode.AlterMetaData(FTableVar, AlterMetaData, true);
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
+			_tableVar.InheritMetaData(SourceTableVar.MetaData);
+			_tableVar.MergeMetaData(MetaData);
+			AlterNode.AlterMetaData(_tableVar, AlterMetaData, true);
 			CopyTableVarColumns(SourceTableVar.Columns);
-			int LSourceColumnIndex;
-			Schema.TableVarColumn LSourceColumn;
-			Schema.TableVarColumn LNewColumn;
-			FIsRestrict = false;
-			PlanNode LRestrictNode = null;
-			PlanNode LConstraintNode;
+			int sourceColumnIndex;
+			Schema.TableVarColumn sourceColumn;
+			Schema.TableVarColumn newColumn;
+			_isRestrict = false;
+			PlanNode restrictNode = null;
+			PlanNode constraintNode;
 
-			foreach (AdornColumnExpression LExpression in FExpressions)
+			foreach (AdornColumnExpression expression in _expressions)
 			{
-				LSourceColumnIndex = TableVar.Columns.IndexOf(LExpression.ColumnName);
-				LSourceColumn = TableVar.Columns[LExpression.ColumnName];
-				LNewColumn = CopyTableVarColumn(LSourceColumn);
-				if (LExpression.ChangeNilable)
-					LNewColumn.IsNilable = LExpression.IsNilable;
-				LNewColumn.MergeMetaData(LExpression.MetaData);
-				AlterNode.AlterMetaData(LNewColumn, LExpression.AlterMetaData, true);
-				LNewColumn.ReadOnly = Convert.ToBoolean(MetaData.GetTag(LNewColumn.MetaData, "Frontend.ReadOnly", LNewColumn.ReadOnly.ToString()));
+				sourceColumnIndex = TableVar.Columns.IndexOf(expression.ColumnName);
+				sourceColumn = TableVar.Columns[expression.ColumnName];
+				newColumn = CopyTableVarColumn(sourceColumn);
+				if (expression.ChangeNilable)
+					newColumn.IsNilable = expression.IsNilable;
+				newColumn.MergeMetaData(expression.MetaData);
+				AlterNode.AlterMetaData(newColumn, expression.AlterMetaData, true);
+				newColumn.ReadOnly = Convert.ToBoolean(MetaData.GetTag(newColumn.MetaData, "Frontend.ReadOnly", newColumn.ReadOnly.ToString()));
 
-				APlan.Symbols.Push(new Symbol(Keywords.Value, LNewColumn.DataType));
+				plan.Symbols.Push(new Symbol(Keywords.Value, newColumn.DataType));
 				try
 				{
-					foreach (ConstraintDefinition LConstraint in LExpression.Constraints)
+					foreach (ConstraintDefinition constraint in expression.Constraints)
 					{
-						FIsRestrict = true;
-						Schema.TableVarColumnConstraint LNewConstraint = new Schema.TableVarColumnConstraint(Schema.Object.GetObjectID(LConstraint.MetaData), LConstraint.ConstraintName);
-						LNewConstraint.ConstraintType = Schema.ConstraintType.Column;
-						LNewConstraint.MergeMetaData(LConstraint.MetaData);
-						APlan.PushCreationObject(LNewConstraint);
+						_isRestrict = true;
+						Schema.TableVarColumnConstraint newConstraint = new Schema.TableVarColumnConstraint(Schema.Object.GetObjectID(constraint.MetaData), constraint.ConstraintName);
+						newConstraint.ConstraintType = Schema.ConstraintType.Column;
+						newConstraint.MergeMetaData(constraint.MetaData);
+						plan.PushCreationObject(newConstraint);
 						try
 						{
-							PlanNode LNode = Compiler.CompileBooleanExpression(APlan, LConstraint.Expression);
-							LNewConstraint.Node = LNode;
-							LNewConstraint.IsRemotable = true;
-							if (LNewConstraint.HasDependencies())
-								for (int LIndex = 0; LIndex < LNewConstraint.Dependencies.Count; LIndex++)
+							PlanNode node = Compiler.CompileBooleanExpression(plan, constraint.Expression);
+							newConstraint.Node = node;
+							newConstraint.IsRemotable = true;
+							if (newConstraint.HasDependencies())
+								for (int index = 0; index < newConstraint.Dependencies.Count; index++)
 								{
-									Schema.Object LObject = LNewConstraint.Dependencies.Objects[LIndex];
-									if (LObject != null)
+									Schema.Object objectValue = newConstraint.Dependencies.Objects[index];
+									if (objectValue != null)
 									{
-										if (!LObject.IsRemotable)
+										if (!objectValue.IsRemotable)
 										{
-											LNewConstraint.IsRemotable = false;
+											newConstraint.IsRemotable = false;
 											break;
 										}
 									}
@@ -208,151 +208,151 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									}
 								}
 
-							LNewColumn.Constraints.Add(LNewConstraint);
+							newColumn.Constraints.Add(newConstraint);
 							
-							LConstraintNode = Compiler.CompileBooleanExpression(APlan, LConstraint.Expression);
-							LConstraintNode = ReplaceColumnReferences(APlan, LConstraintNode, LSourceColumn.Name, LSourceColumnIndex);
-							if (LRestrictNode == null)
-								LRestrictNode = LConstraintNode;
+							constraintNode = Compiler.CompileBooleanExpression(plan, constraint.Expression);
+							constraintNode = ReplaceColumnReferences(plan, constraintNode, sourceColumn.Name, sourceColumnIndex);
+							if (restrictNode == null)
+								restrictNode = constraintNode;
 							else
-								LRestrictNode = Compiler.EmitBinaryNode(APlan, LRestrictNode, Instructions.And, LConstraintNode);
+								restrictNode = Compiler.EmitBinaryNode(plan, restrictNode, Instructions.And, constraintNode);
 						}
 						finally
 						{
-							APlan.PopCreationObject();
+							plan.PopCreationObject();
 						}
 						
-						if (LNewConstraint.HasDependencies())
-							APlan.AttachDependencies(LNewConstraint.Dependencies);
+						if (newConstraint.HasDependencies())
+							plan.AttachDependencies(newConstraint.Dependencies);
 					}
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 				
 				// TODO: verify that the default satisfies the constraints
-				if (LExpression.Default != null)
+				if (expression.Default != null)
 				{
-					LNewColumn.Default = Compiler.CompileTableVarColumnDefault(APlan, FTableVar, LNewColumn, LExpression.Default);
-					if (LNewColumn.Default.HasDependencies())
-						APlan.AttachDependencies(LNewColumn.Default.Dependencies);
+					newColumn.Default = Compiler.CompileTableVarColumnDefault(plan, _tableVar, newColumn, expression.Default);
+					if (newColumn.Default.HasDependencies())
+						plan.AttachDependencies(newColumn.Default.Dependencies);
 				}
 				
-				if (LExpression.MetaData != null)
+				if (expression.MetaData != null)
 				{
-					Tag LTag;
-					LTag = LExpression.MetaData.Tags.GetTag("DAE.IsDefaultRemotable");
-					if (LTag != Tag.None)
-						LNewColumn.IsDefaultRemotable = LNewColumn.IsDefaultRemotable && Convert.ToBoolean(LTag.Value);
+					Tag tag;
+					tag = expression.MetaData.Tags.GetTag("DAE.IsDefaultRemotable");
+					if (tag != Tag.None)
+						newColumn.IsDefaultRemotable = newColumn.IsDefaultRemotable && Convert.ToBoolean(tag.Value);
 						
-					LTag = LExpression.MetaData.Tags.GetTag("DAE.IsChangeRemotable");
-					if (LTag != Tag.None)
-						LNewColumn.IsChangeRemotable = LNewColumn.IsChangeRemotable && Convert.ToBoolean(LTag.Value);
+					tag = expression.MetaData.Tags.GetTag("DAE.IsChangeRemotable");
+					if (tag != Tag.None)
+						newColumn.IsChangeRemotable = newColumn.IsChangeRemotable && Convert.ToBoolean(tag.Value);
 						
-					LTag = LExpression.MetaData.Tags.GetTag("DAE.IsValidateRemotable");
-					if (LTag != Tag.None)
-						LNewColumn.IsValidateRemotable = LNewColumn.IsValidateRemotable && Convert.ToBoolean(LTag.Value);
+					tag = expression.MetaData.Tags.GetTag("DAE.IsValidateRemotable");
+					if (tag != Tag.None)
+						newColumn.IsValidateRemotable = newColumn.IsValidateRemotable && Convert.ToBoolean(tag.Value);
 				}
 
-				DataType.Columns[LSourceColumnIndex] = LNewColumn.Column;
-				TableVar.Columns[LSourceColumnIndex] = LNewColumn;
+				DataType.Columns[sourceColumnIndex] = newColumn.Column;
+				TableVar.Columns[sourceColumnIndex] = newColumn;
 			}
 			
 			// Keys
 			CopyKeys(SourceTableVar.Keys);
-			foreach (DropKeyDefinition LKeyDefinition in FDropKeys)
+			foreach (DropKeyDefinition keyDefinition in _dropKeys)
 			{
-				Schema.Key LOldKey = Compiler.FindKey(APlan, TableVar, LKeyDefinition);
+				Schema.Key oldKey = Compiler.FindKey(plan, TableVar, keyDefinition);
 
-				TableVar.Keys.SafeRemove(LOldKey);
-				TableVar.Constraints.SafeRemove(LOldKey.Constraint);
-				TableVar.InsertConstraints.SafeRemove(LOldKey.Constraint);
-				TableVar.UpdateConstraints.SafeRemove(LOldKey.Constraint);
+				TableVar.Keys.SafeRemove(oldKey);
+				TableVar.Constraints.SafeRemove(oldKey.Constraint);
+				TableVar.InsertConstraints.SafeRemove(oldKey.Constraint);
+				TableVar.UpdateConstraints.SafeRemove(oldKey.Constraint);
 			}
 
-			foreach (AlterKeyDefinition LKeyDefinition in FAlterKeys)
+			foreach (AlterKeyDefinition keyDefinition in _alterKeys)
 			{
-				Schema.Key LOldKey = Compiler.FindKey(APlan, TableVar, LKeyDefinition);
-				AlterNode.AlterMetaData(LOldKey, LKeyDefinition.AlterMetaData);
+				Schema.Key oldKey = Compiler.FindKey(plan, TableVar, keyDefinition);
+				AlterNode.AlterMetaData(oldKey, keyDefinition.AlterMetaData);
 			}
 
-			Compiler.CompileTableVarKeys(APlan, FTableVar, FKeys, false);
+			Compiler.CompileTableVarKeys(plan, _tableVar, _keys, false);
 
 			// Orders
 			CopyOrders(SourceTableVar.Orders);
 				
-			foreach (DropOrderDefinition LOrderDefinition in FDropOrders)
+			foreach (DropOrderDefinition orderDefinition in _dropOrders)
 			{
-				Schema.Order LOldOrder = Compiler.FindOrder(APlan, TableVar, LOrderDefinition);
+				Schema.Order oldOrder = Compiler.FindOrder(plan, TableVar, orderDefinition);
 
-				TableVar.Orders.SafeRemove(LOldOrder);
+				TableVar.Orders.SafeRemove(oldOrder);
 			}
 
-			foreach (AlterOrderDefinition LOrderDefinition in FAlterOrders)
-				AlterNode.AlterMetaData(Compiler.FindOrder(APlan, TableVar, LOrderDefinition), LOrderDefinition.AlterMetaData);
+			foreach (AlterOrderDefinition orderDefinition in _alterOrders)
+				AlterNode.AlterMetaData(Compiler.FindOrder(plan, TableVar, orderDefinition), orderDefinition.AlterMetaData);
 
-			Compiler.CompileTableVarOrders(APlan, FTableVar, FOrders);
+			Compiler.CompileTableVarOrders(plan, _tableVar, _orders);
 
 			if (SourceNode.Order != null)
 				Order = CopyOrder(SourceNode.Order);
 
 			// Constraints
-			Compiler.CompileTableVarConstraints(APlan, FTableVar, FConstraints);
+			Compiler.CompileTableVarConstraints(plan, _tableVar, _constraints);
 
-			foreach (Schema.TableVarConstraint LConstraint in FTableVar.Constraints)
+			foreach (Schema.TableVarConstraint constraint in _tableVar.Constraints)
 			{
-				if (LRestrictNode == null)
+				if (restrictNode == null)
 				{
-					if (LConstraint is Schema.RowConstraint)
+					if (constraint is Schema.RowConstraint)
 					{
-						LRestrictNode = ((Schema.RowConstraint)LConstraint).Node;
-						FIsRestrict = true;
+						restrictNode = ((Schema.RowConstraint)constraint).Node;
+						_isRestrict = true;
 					}
 				}
 				else
 				{
-					if (LConstraint is Schema.RowConstraint)
+					if (constraint is Schema.RowConstraint)
 					{
-						LRestrictNode = Compiler.EmitBinaryNode(APlan, LRestrictNode, Instructions.And, ((Schema.RowConstraint)LConstraint).Node);
-						FIsRestrict = true;
+						restrictNode = Compiler.EmitBinaryNode(plan, restrictNode, Instructions.And, ((Schema.RowConstraint)constraint).Node);
+						_isRestrict = true;
 					}
 				}
 				
-				if (LConstraint.HasDependencies())			
-					APlan.AttachDependencies(LConstraint.Dependencies);
+				if (constraint.HasDependencies())			
+					plan.AttachDependencies(constraint.Dependencies);
 			}
 				
-			if (FIsRestrict)
-				Nodes[0] = Compiler.EmitRestrictNode(APlan, Nodes[0], LRestrictNode);
+			if (_isRestrict)
+				Nodes[0] = Compiler.EmitRestrictNode(plan, Nodes[0], restrictNode);
 				
-			DetermineRemotable(APlan);
+			DetermineRemotable(plan);
 
 			if (MetaData != null)
 			{
-				Tag LTag;
-				Schema.ResultTableVar LTableVar = (Schema.ResultTableVar)TableVar;
-				LTag = MetaData.Tags.GetTag("DAE.IsDefaultRemotable");
-				if (LTag != Tag.None)
-					LTableVar.InferredIsDefaultRemotable = LTableVar.InferredIsDefaultRemotable && Convert.ToBoolean(LTag.Value);
+				Tag tag;
+				Schema.ResultTableVar tableVar = (Schema.ResultTableVar)TableVar;
+				tag = MetaData.Tags.GetTag("DAE.IsDefaultRemotable");
+				if (tag != Tag.None)
+					tableVar.InferredIsDefaultRemotable = tableVar.InferredIsDefaultRemotable && Convert.ToBoolean(tag.Value);
 					
-				LTag = MetaData.Tags.GetTag("DAE.IsChangeRemotable");
-				if (LTag != Tag.None)
-					LTableVar.InferredIsChangeRemotable = LTableVar.InferredIsChangeRemotable && Convert.ToBoolean(LTag.Value);
+				tag = MetaData.Tags.GetTag("DAE.IsChangeRemotable");
+				if (tag != Tag.None)
+					tableVar.InferredIsChangeRemotable = tableVar.InferredIsChangeRemotable && Convert.ToBoolean(tag.Value);
 					
-				LTag = MetaData.Tags.GetTag("DAE.IsValidateRemotable");
-				if (LTag != Tag.None)
-					LTableVar.InferredIsValidateRemotable = LTableVar.InferredIsValidateRemotable && Convert.ToBoolean(LTag.Value);
+				tag = MetaData.Tags.GetTag("DAE.IsValidateRemotable");
+				if (tag != Tag.None)
+					tableVar.InferredIsValidateRemotable = tableVar.InferredIsValidateRemotable && Convert.ToBoolean(tag.Value);
 			}
 
 			if (Order == null)
 			{
-				string LOrderName = MetaData.GetTag(MetaData, "DAE.DefaultOrder", String.Empty);
-				if (LOrderName != String.Empty)
+				string orderName = MetaData.GetTag(MetaData, "DAE.DefaultOrder", String.Empty);
+				if (orderName != String.Empty)
 					Order = 
 						Compiler.CompileOrderDefinition
 						(
-							APlan, 
+							plan, 
 							TableVar, 
 							new Parser().ParseOrderDefinition
 							(
@@ -371,220 +371,220 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				TableVar.Orders.Add(Order);
 			
 			#if UseReferenceDerivation
-			CopySourceReferences(APlan, SourceNode.TableVar.SourceReferences);
-			CopyTargetReferences(APlan, SourceNode.TableVar.TargetReferences);
+			CopySourceReferences(plan, SourceNode.TableVar.SourceReferences);
+			CopyTargetReferences(plan, SourceNode.TableVar.TargetReferences);
 			#endif
 			
-			foreach (ReferenceDefinition LReferenceDefinition in FReferences)
+			foreach (ReferenceDefinition referenceDefinition in _references)
 			{
 				// Create a reference on the table var
-				Schema.Reference LReference = new Schema.Reference(Schema.Object.GetObjectID(LReferenceDefinition.MetaData), LReferenceDefinition.ReferenceName, LReferenceDefinition.MetaData);
-				LReference.Enforced = false;
-				LReference.SourceTable = TableVar;
+				Schema.Reference reference = new Schema.Reference(Schema.Object.GetObjectID(referenceDefinition.MetaData), referenceDefinition.ReferenceName, referenceDefinition.MetaData);
+				reference.Enforced = false;
+				reference.SourceTable = TableVar;
 				
-				foreach (ReferenceColumnDefinition LColumn in LReferenceDefinition.Columns)
-					LReference.SourceKey.Columns.Add(LReference.SourceTable.Columns[LColumn.ColumnName]);
-				foreach (Schema.Key LKey in LReference.SourceTable.Keys)
-					if (LReference.SourceKey.Columns.IsSupersetOf(LKey.Columns))
+				foreach (ReferenceColumnDefinition column in referenceDefinition.Columns)
+					reference.SourceKey.Columns.Add(reference.SourceTable.Columns[column.ColumnName]);
+				foreach (Schema.Key key in reference.SourceTable.Keys)
+					if (reference.SourceKey.Columns.IsSupersetOf(key.Columns))
 					{
-						LReference.SourceKey.IsUnique = true;
+						reference.SourceKey.IsUnique = true;
 						break;
 					}
 				
-				Schema.Object LSchemaObject = Compiler.ResolveCatalogIdentifier(APlan, LReferenceDefinition.ReferencesDefinition.TableVarName, true);
-				if (!(LSchemaObject is Schema.TableVar))
-					throw new CompilerException(CompilerException.Codes.InvalidReferenceObject, LReferenceDefinition, LReferenceDefinition.ReferenceName, LReferenceDefinition.ReferencesDefinition.TableVarName);
-				if (LSchemaObject.IsATObject)
-					LReferenceDefinition.ReferencesDefinition.TableVarName = Schema.Object.EnsureRooted(((Schema.TableVar)LSchemaObject).SourceTableName);
+				Schema.Object schemaObject = Compiler.ResolveCatalogIdentifier(plan, referenceDefinition.ReferencesDefinition.TableVarName, true);
+				if (!(schemaObject is Schema.TableVar))
+					throw new CompilerException(CompilerException.Codes.InvalidReferenceObject, referenceDefinition, referenceDefinition.ReferenceName, referenceDefinition.ReferencesDefinition.TableVarName);
+				if (schemaObject.IsATObject)
+					referenceDefinition.ReferencesDefinition.TableVarName = Schema.Object.EnsureRooted(((Schema.TableVar)schemaObject).SourceTableName);
 				else
-					LReferenceDefinition.ReferencesDefinition.TableVarName = Schema.Object.EnsureRooted(LSchemaObject.Name); // Set the TableVarName in the references expression to the resolved identifier so that subsequent compiles do not depend on current library context (This really only matters in remote contexts, but there it is imperative, or this could be an ambiguous identifier)
-				APlan.AttachDependency(LSchemaObject);
-				LReference.TargetTable = (Schema.TableVar)LSchemaObject;
-				LReference.AddDependency(LSchemaObject);
+					referenceDefinition.ReferencesDefinition.TableVarName = Schema.Object.EnsureRooted(schemaObject.Name); // Set the TableVarName in the references expression to the resolved identifier so that subsequent compiles do not depend on current library context (This really only matters in remote contexts, but there it is imperative, or this could be an ambiguous identifier)
+				plan.AttachDependency(schemaObject);
+				reference.TargetTable = (Schema.TableVar)schemaObject;
+				reference.AddDependency(schemaObject);
 				
-				foreach (ReferenceColumnDefinition LColumn in LReferenceDefinition.ReferencesDefinition.Columns)
-					LReference.TargetKey.Columns.Add(LReference.TargetTable.Columns[LColumn.ColumnName]);
-				foreach (Schema.Key LKey in LReference.TargetTable.Keys)
-					if (LReference.TargetKey.Columns.IsSupersetOf(LKey.Columns))
+				foreach (ReferenceColumnDefinition column in referenceDefinition.ReferencesDefinition.Columns)
+					reference.TargetKey.Columns.Add(reference.TargetTable.Columns[column.ColumnName]);
+				foreach (Schema.Key key in reference.TargetTable.Keys)
+					if (reference.TargetKey.Columns.IsSupersetOf(key.Columns))
 					{
-						LReference.TargetKey.IsUnique = true;
+						reference.TargetKey.IsUnique = true;
 						break;
 					}
 					
-				if (!LReference.TargetKey.IsUnique)
-					throw new CompilerException(CompilerException.Codes.ReferenceMustTargetKey, LReferenceDefinition, LReferenceDefinition.ReferenceName, LReferenceDefinition.ReferencesDefinition.TableVarName);
+				if (!reference.TargetKey.IsUnique)
+					throw new CompilerException(CompilerException.Codes.ReferenceMustTargetKey, referenceDefinition, referenceDefinition.ReferenceName, referenceDefinition.ReferencesDefinition.TableVarName);
 					
-				if (LReference.SourceKey.Columns.Count != LReference.TargetKey.Columns.Count)
-					throw new CompilerException(CompilerException.Codes.InvalidReferenceColumnCount, LReferenceDefinition, LReferenceDefinition.ReferenceName);
+				if (reference.SourceKey.Columns.Count != reference.TargetKey.Columns.Count)
+					throw new CompilerException(CompilerException.Codes.InvalidReferenceColumnCount, referenceDefinition, referenceDefinition.ReferenceName);
 
-				TableVar.SourceReferences.Add(LReference);
-				TableVar.DerivedReferences.Add(LReference);					
+				TableVar.SourceReferences.Add(reference);
+				TableVar.DerivedReferences.Add(reference);					
 			}
 
-			if (!APlan.IsEngine)
-				foreach (AlterReferenceDefinition LAlterReference in FAlterReferences)
+			if (!plan.IsEngine)
+				foreach (AlterReferenceDefinition alterReference in _alterReferences)
 				{
-					int LReferenceIndex = TableVar.DerivedReferences.IndexOf(LAlterReference.ReferenceName);
-					if (LReferenceIndex < 0)
-						LReferenceIndex = TableVar.DerivedReferences.IndexOfOriginatingReference(LAlterReference.ReferenceName);
+					int referenceIndex = TableVar.DerivedReferences.IndexOf(alterReference.ReferenceName);
+					if (referenceIndex < 0)
+						referenceIndex = TableVar.DerivedReferences.IndexOfOriginatingReference(alterReference.ReferenceName);
 						
 					if 
 					(
-						(LReferenceIndex >= 0) || 
+						(referenceIndex >= 0) || 
 						(
-							(APlan.ApplicationTransactionID == Guid.Empty) && 
-							(!APlan.InLoadingContext()) && 
-							!APlan.InATCreationContext // We will be in an A/T creation context if we are reinfering view references for an A/T view
+							(plan.ApplicationTransactionID == Guid.Empty) && 
+							(!plan.InLoadingContext()) && 
+							!plan.InATCreationContext // We will be in an A/T creation context if we are reinfering view references for an A/T view
 						)
 					)
 					{
-						Schema.Reference LReferenceToAlter;
-						if (LReferenceIndex < 0)
-							LReferenceToAlter = TableVar.DerivedReferences[LAlterReference.ReferenceName]; // This is just to throw the object not found error
+						Schema.Reference referenceToAlter;
+						if (referenceIndex < 0)
+							referenceToAlter = TableVar.DerivedReferences[alterReference.ReferenceName]; // This is just to throw the object not found error
 						else
-							LReferenceToAlter = TableVar.DerivedReferences[LReferenceIndex];
-						AlterNode.AlterMetaData(LReferenceToAlter, LAlterReference.AlterMetaData);
-						Schema.Object LOriginatingReference = Compiler.ResolveCatalogIdentifier(APlan, LReferenceToAlter.OriginatingReferenceName(), false);
-						if (LOriginatingReference != null)
-							APlan.AttachDependency(LOriginatingReference);
+							referenceToAlter = TableVar.DerivedReferences[referenceIndex];
+						AlterNode.AlterMetaData(referenceToAlter, alterReference.AlterMetaData);
+						Schema.Object originatingReference = Compiler.ResolveCatalogIdentifier(plan, referenceToAlter.OriginatingReferenceName(), false);
+						if (originatingReference != null)
+							plan.AttachDependency(originatingReference);
 					}
 				}
 				
-			foreach (DropReferenceDefinition LDropReference in FDropReferences)
+			foreach (DropReferenceDefinition dropReference in _dropReferences)
 			{
-				int LReferenceIndex = TableVar.DerivedReferences.IndexOf(LDropReference.ReferenceName);
-				if (LReferenceIndex >= 0)
-					TableVar.DerivedReferences.RemoveAt(LReferenceIndex);
+				int referenceIndex = TableVar.DerivedReferences.IndexOf(dropReference.ReferenceName);
+				if (referenceIndex >= 0)
+					TableVar.DerivedReferences.RemoveAt(referenceIndex);
 					
-				LReferenceIndex = TableVar.DerivedReferences.IndexOfOriginatingReference(LDropReference.ReferenceName);
-				if (LReferenceIndex >= 0)
-					TableVar.DerivedReferences.RemoveAt(LReferenceIndex);
+				referenceIndex = TableVar.DerivedReferences.IndexOfOriginatingReference(dropReference.ReferenceName);
+				if (referenceIndex >= 0)
+					TableVar.DerivedReferences.RemoveAt(referenceIndex);
 					
-				LReferenceIndex = TableVar.SourceReferences.IndexOf(LDropReference.ReferenceName);
-				if (LReferenceIndex >= 0)
-					TableVar.SourceReferences.RemoveAt(LReferenceIndex);
+				referenceIndex = TableVar.SourceReferences.IndexOf(dropReference.ReferenceName);
+				if (referenceIndex >= 0)
+					TableVar.SourceReferences.RemoveAt(referenceIndex);
 
-				LReferenceIndex = TableVar.SourceReferences.IndexOfOriginatingReference(LDropReference.ReferenceName);
-				if (LReferenceIndex >= 0)
-					TableVar.SourceReferences.RemoveAt(LReferenceIndex);
+				referenceIndex = TableVar.SourceReferences.IndexOfOriginatingReference(dropReference.ReferenceName);
+				if (referenceIndex >= 0)
+					TableVar.SourceReferences.RemoveAt(referenceIndex);
 
-				LReferenceIndex = TableVar.TargetReferences.IndexOf(LDropReference.ReferenceName);
-				if (LReferenceIndex >= 0)
-					TableVar.TargetReferences.RemoveAt(LReferenceIndex);
+				referenceIndex = TableVar.TargetReferences.IndexOf(dropReference.ReferenceName);
+				if (referenceIndex >= 0)
+					TableVar.TargetReferences.RemoveAt(referenceIndex);
 
-				LReferenceIndex = TableVar.TargetReferences.IndexOfOriginatingReference(LDropReference.ReferenceName);
-				if (LReferenceIndex >= 0)
-					TableVar.TargetReferences.RemoveAt(LReferenceIndex);
+				referenceIndex = TableVar.TargetReferences.IndexOfOriginatingReference(dropReference.ReferenceName);
+				if (referenceIndex >= 0)
+					TableVar.TargetReferences.RemoveAt(referenceIndex);
 			}
 		}
 		
-		public override void DetermineCursorBehavior(Plan APlan)
+		public override void DetermineCursorBehavior(Plan plan)
 		{
-			FCursorType = SourceNode.CursorType;
-			FRequestedCursorType = APlan.CursorContext.CursorType;
-			FCursorCapabilities = 
+			_cursorType = SourceNode.CursorType;
+			_requestedCursorType = plan.CursorContext.CursorType;
+			_cursorCapabilities = 
 				CursorCapability.Navigable | 
 				(
-					(APlan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
+					(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
 					(SourceNode.CursorCapabilities & CursorCapability.Updateable)
 				);
-			FCursorIsolation = APlan.CursorContext.CursorIsolation;
+			_cursorIsolation = plan.CursorContext.CursorIsolation;
 			if (SourceNode.Order != null)
 				Order = CopyOrder(SourceNode.Order);
 			else
 				Order = null;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			AdornExpression LExpression = new AdornExpression();
-			LExpression.Expression = (Expression)Nodes[0].EmitStatement(AMode);
-			LExpression.MetaData = MetaData == null ? null : MetaData.Copy();
-			LExpression.AlterMetaData = AlterMetaData;
-			LExpression.Expressions.AddRange(FExpressions);
-			LExpression.Constraints.AddRange(FConstraints);
-			LExpression.Orders.AddRange(FOrders);
-			LExpression.AlterOrders.AddRange(FAlterOrders);
-			LExpression.DropOrders.AddRange(FDropOrders);
-			LExpression.Keys.AddRange(FKeys);
-			LExpression.AlterKeys.AddRange(FAlterKeys);
-			LExpression.DropKeys.AddRange(FDropKeys);
-			LExpression.References.AddRange(FReferences);
-			LExpression.AlterReferences.AddRange(FAlterReferences);
-			LExpression.DropReferences.AddRange(FDropReferences);
-			LExpression.Modifiers = Modifiers;
-			return LExpression;
+			AdornExpression expression = new AdornExpression();
+			expression.Expression = (Expression)Nodes[0].EmitStatement(mode);
+			expression.MetaData = MetaData == null ? null : MetaData.Copy();
+			expression.AlterMetaData = AlterMetaData;
+			expression.Expressions.AddRange(_expressions);
+			expression.Constraints.AddRange(_constraints);
+			expression.Orders.AddRange(_orders);
+			expression.AlterOrders.AddRange(_alterOrders);
+			expression.DropOrders.AddRange(_dropOrders);
+			expression.Keys.AddRange(_keys);
+			expression.AlterKeys.AddRange(_alterKeys);
+			expression.DropKeys.AddRange(_dropKeys);
+			expression.References.AddRange(_references);
+			expression.AlterReferences.AddRange(_alterReferences);
+			expression.DropReferences.AddRange(_dropReferences);
+			expression.Modifiers = Modifiers;
+			return expression;
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			AdornTable LTable = new AdornTable(this, AProgram);
+			AdornTable table = new AdornTable(this, program);
 			try
 			{
-				LTable.Open();
-				return LTable;
+				table.Open();
+				return table;
 			}
 			catch
 			{
-				LTable.Dispose();
+				table.Dispose();
 				throw;
 			}
 		}
 		
-		protected void InternalValidateColumnConstraints(Row ARow, Schema.TableVarColumn AColumn, Program AProgram)
+		protected void InternalValidateColumnConstraints(Row row, Schema.TableVarColumn column, Program program)
 		{
-			AProgram.Stack.Push(ARow[AColumn.Name]);
+			program.Stack.Push(row[column.Name]);
 			try
 			{
-				foreach (Schema.TableVarColumnConstraint LConstraint in AColumn.Constraints)
-					LConstraint.Validate(AProgram, Schema.Transition.Insert);
+				foreach (Schema.TableVarColumnConstraint constraint in column.Constraints)
+					constraint.Validate(program, Schema.Transition.Insert);
 			}
 			finally
 			{
-				AProgram.Stack.Pop();
+				program.Stack.Pop();
 			}
 		}
 		
 		// Validate
-		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
-			if (AColumnName == String.Empty)
+			if (columnName == String.Empty)
 			{
-				PushNewRow(AProgram, ANewRow);
+				PushNewRow(program, newRow);
 				try
 				{
-					foreach (Schema.TableVarColumn LColumn in TableVar.Columns)
+					foreach (Schema.TableVarColumn column in TableVar.Columns)
 					{
-						if (LColumn.Constraints.Count > 0)
-							InternalValidateColumnConstraints(ANewRow, LColumn, AProgram);
+						if (column.Constraints.Count > 0)
+							InternalValidateColumnConstraints(newRow, column, program);
 					}
 				}
 				finally
 				{
-					PopRow(AProgram);
+					PopRow(program);
 				}
 			}
 			else
 			{
-				Schema.TableVarColumn LColumn = TableVar.Columns[TableVar.Columns.IndexOfName(AColumnName)];
-				if ((LColumn.Constraints.Count > 0) && ANewRow.HasValue(LColumn.Name))
-					InternalValidateColumnConstraints(ANewRow, LColumn, AProgram);
+				Schema.TableVarColumn column = TableVar.Columns[TableVar.Columns.IndexOfName(columnName)];
+				if ((column.Constraints.Count > 0) && newRow.HasValue(column.Name))
+					InternalValidateColumnConstraints(newRow, column, program);
 			}
 
-			return base.InternalValidate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable);
+			return base.InternalValidate(program, oldRow, newRow, valueFlags, columnName, isDescending, isProposable);
 		}
 		
-		protected bool InternalDefaultColumn(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected bool InternalDefaultColumn(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
-			int LColumnIndex = TableVar.Columns.IndexOfName(AColumnName);
-			for (int LIndex = 0; LIndex < FExpressions.Count; LIndex++)
-				if (TableVar.Columns.IndexOf(FExpressions[LIndex].ColumnName) == LColumnIndex)
-					if (FExpressions[LIndex].Default != null)
+			int columnIndex = TableVar.Columns.IndexOfName(columnName);
+			for (int index = 0; index < _expressions.Count; index++)
+				if (TableVar.Columns.IndexOf(_expressions[index].ColumnName) == columnIndex)
+					if (_expressions[index].Default != null)
 					{
-						bool LChanged = DefaultColumn(AProgram, TableVar, ANewRow, AValueFlags, AColumnName);
-						if (AIsDescending && LChanged)
-							Change(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
-						return LChanged;
+						bool changed = DefaultColumn(program, TableVar, newRow, valueFlags, columnName);
+						if (isDescending && changed)
+							Change(program, oldRow, newRow, valueFlags, columnName);
+						return changed;
 					}
 					else
 						return false;
@@ -592,27 +592,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Default
-		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
-			bool LChanged = false;
+			bool changed = false;
 
-			if (AColumnName != String.Empty)
-				LChanged = InternalDefaultColumn(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending) || LChanged;
+			if (columnName != String.Empty)
+				changed = InternalDefaultColumn(program, oldRow, newRow, valueFlags, columnName, isDescending) || changed;
 			else
-				for (int LIndex = 0; LIndex < ANewRow.DataType.Columns.Count; LIndex++)
-					LChanged = InternalDefaultColumn(AProgram, AOldRow, ANewRow, AValueFlags, ANewRow.DataType.Columns[LIndex].Name, AIsDescending) || LChanged;
+				for (int index = 0; index < newRow.DataType.Columns.Count; index++)
+					changed = InternalDefaultColumn(program, oldRow, newRow, valueFlags, newRow.DataType.Columns[index].Name, isDescending) || changed;
 
-			if (AIsDescending && PropagateDefault)
-				LChanged = base.InternalDefault(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending) || LChanged;
+			if (isDescending && PropagateDefault)
+				changed = base.InternalDefault(program, oldRow, newRow, valueFlags, columnName, isDescending) || changed;
 
-			return LChanged;
+			return changed;
 		}
 
-		public override void JoinApplicationTransaction(Program AProgram, Row ARow)
+		public override void JoinApplicationTransaction(Program program, Row row)
 		{
 			// Safe to pass null for AOldRow only if AIsDescending is false
-			InternalDefault(AProgram, null, ARow, null, String.Empty, false);
-			base.JoinApplicationTransaction(AProgram, ARow);
+			InternalDefault(program, null, row, null, String.Empty, false);
+			base.JoinApplicationTransaction(program, row);
 		}
 	}
 }

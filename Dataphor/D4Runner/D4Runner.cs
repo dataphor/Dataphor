@@ -29,7 +29,7 @@ namespace D4Runner
 		public string Host = "localhost";
 		
 		[Argument(ArgumentType.AtMostOnce, HelpText="The name of the instance to use to connect.", DefaultValue="Dataphor")]
-		public string Instance = Engine.CDefaultServerName;
+		public string Instance = Engine.DefaultServerName;
 
 		[Argument(ArgumentType.AtMostOnce, HelpText="Port of Dataphor Server (override to bypass the listener).", DefaultValue=0)]
 		public int Port = 0;
@@ -60,15 +60,15 @@ namespace D4Runner
 
 		public int Run()
 		{
-			bool LHasErrors = true;
+			bool hasErrors = true;
 			try
 			{
-				using (DataSession LDataphorConnection = new DataSession())
+				using (DataSession dataphorConnection = new DataSession())
 				{
 					if (File != null)
-						using (StreamReader LFile = new StreamReader(File))
+						using (StreamReader file = new StreamReader(File))
 						{
-							Script = LFile.ReadToEnd();
+							Script = file.ReadToEnd();
 						}
 					if (Script == null)  // Script was not in the commandline or specified in a file
 					{
@@ -78,53 +78,53 @@ namespace D4Runner
 					}
 					if (AliasName == String.Empty)
 					{
-						ConnectionAlias LAlias = new ConnectionAlias();
-						LAlias.HostName = Host;
-						LAlias.InstanceName = Instance;
+						ConnectionAlias alias = new ConnectionAlias();
+						alias.HostName = Host;
+						alias.InstanceName = Instance;
 						if (Port > 0)
-							LAlias.OverridePortNumber = Port;
-						LDataphorConnection.Alias = LAlias;
+							alias.OverridePortNumber = Port;
+						dataphorConnection.Alias = alias;
 					}
 					else
-						LDataphorConnection.AliasName = AliasName;
+						dataphorConnection.AliasName = AliasName;
 
 					if (User != null)
-						LDataphorConnection.SessionInfo.UserID = User;
+						dataphorConnection.SessionInfo.UserID = User;
 
 					if (Password != null) 
 					{
 						if (PasswordEncrypted == true)
-							LDataphorConnection.SessionInfo.UnstructuredData = Password;
+							dataphorConnection.SessionInfo.UnstructuredData = Password;
 						else 
-							LDataphorConnection.SessionInfo.Password = Password;
+							dataphorConnection.SessionInfo.Password = Password;
 					}
 					
-					LDataphorConnection.Open();
+					dataphorConnection.Open();
 
 					if (!Quiet)
 						Console.WriteLine("Executing D4 Script:\r\n{0}\r\n", Script);
 
-					ErrorList LErrors;
-					TimeSpan LTimeSpan;
+					ErrorList errors;
+					TimeSpan timeSpan;
 					ScriptExecutionUtility.ExecuteScript
 					(
-						LDataphorConnection.ServerSession, 
+						dataphorConnection.ServerSession, 
 						Script, 
 						Options, 
-						out LErrors, 
-						out LTimeSpan,
+						out errors, 
+						out timeSpan,
 						delegate(PlanStatistics AStatistics, string AResults)
 						{
 							Console.WriteLine(AResults);
 						},
 						File == null ? null : new DebugLocator("file:" + Path.GetFullPath(File), 1, 1)
 					);
-					foreach(Exception LException in LErrors)
-						Console.WriteLine(LException.Message);
+					foreach(Exception exception in errors)
+						Console.WriteLine(exception.Message);
 				
-					LHasErrors = ScriptExecutionUtility.ContainsError(LErrors);
+					hasErrors = ScriptExecutionUtility.ContainsError(errors);
 					if (!Quiet)
-						Console.WriteLine("Status: {0}  Total Time: {1}", (LHasErrors ? "Failed" : "Succeeded"), LTimeSpan);
+						Console.WriteLine("Status: {0}  Total Time: {1}", (hasErrors ? "Failed" : "Succeeded"), timeSpan);
 				}
 				if (Prompt)
 				{
@@ -133,21 +133,21 @@ namespace D4Runner
 					Console.Read();
 				}
 			} 
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				Console.WriteLine(LException.Message);
+				Console.WriteLine(exception.Message);
 			}
-			if (LHasErrors)
+			if (hasErrors)
 				return 1;
 			return 0;
 		}
 
 		[STAThread]
-		static int Main(string[] AArgs)
+		static int Main(string[] args)
 		{
-			D4Runner LApp = new D4Runner();
-			if (CommandLine.Parser.ParseArgumentsWithUsage(AArgs, LApp))
-                return LApp.Run();
+			D4Runner app = new D4Runner();
+			if (CommandLine.Parser.ParseArgumentsWithUsage(args, app))
+                return app.Run();
 			return 1;
 		}
 	}

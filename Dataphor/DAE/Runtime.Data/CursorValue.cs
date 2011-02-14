@@ -9,23 +9,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 {
 	public class CursorValue : DataValue
 	{
-		public CursorValue(IValueManager AManager, Schema.ICursorType ACursorType, int AID) : base(AManager, ACursorType)
+		public CursorValue(IValueManager manager, Schema.ICursorType cursorType, int iD) : base(manager, cursorType)
 		{
-			FID = AID;
+			_iD = iD;
 		}
 		
-		private int FID;
-		public int ID { get { return FID; } }
+		private int _iD;
+		public int ID { get { return _iD; } }
 		
 		public override object AsNative
 		{
-			get { return FID; }
-			set { FID = (int)value; }
+			get { return _iD; }
+			set { _iD = (int)value; }
 		}
 		
 		public override bool IsNil { get { return false; } }
 
-		public override int GetPhysicalSize(bool AExpandStreams)
+		public override int GetPhysicalSize(bool expandStreams)
 		{
 			return sizeof(int);
 		}
@@ -50,103 +50,103 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 		#else
 
-		public override void WriteToPhysical(byte[] ABuffer, int AOffset, bool AExpandStreams)
+		public override void WriteToPhysical(byte[] buffer, int offset, bool expandStreams)
 		{
-			ByteArrayUtility.WriteInt32(ABuffer, AOffset, FID);
+			ByteArrayUtility.WriteInt32(buffer, offset, _iD);
 		}
 
-		public override void ReadFromPhysical(byte[] ABuffer, int AOffset)
+		public override void ReadFromPhysical(byte[] buffer, int offset)
 		{
-			FID = ByteArrayUtility.ReadInt32(ABuffer, AOffset);
+			_iD = ByteArrayUtility.ReadInt32(buffer, offset);
 		}
 
 		#endif
 		
-		public override object CopyNativeAs(Schema.IDataType ADataType)
+		public override object CopyNativeAs(Schema.IDataType dataType)
 		{
-			return FID;
+			return _iD;
 		}
 	}
 
 	// Cursors
     public class Cursor : Disposable
     {
-		protected internal Cursor(CursorManager AManager, int AID, Table ATable) : base()
+		protected internal Cursor(CursorManager manager, int iD, Table table) : base()
 		{
-			FID = AID;
-			FTable = ATable;
-			FManager = AManager;
-			SnapshotContext(ATable.Program);
+			_iD = iD;
+			_table = table;
+			_manager = manager;
+			SnapshotContext(table.Program);
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
-				FID = -1;
+				_iD = -1;
 				
 				try
 				{
-					if (FTable != null)
+					if (_table != null)
 					{
-						FTable.Dispose();
-						FTable = null;
+						_table.Dispose();
+						_table = null;
 					}
 				}
 				finally
 				{
-					if (FContext != null)
-						FContext = null;
+					if (_context != null)
+						_context = null;
 				}
 			}
 			finally
 			{
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 		
-		protected Stack FContext;
+		protected Stack _context;
 		
-		public void SnapshotContext(Program AProgram)
+		public void SnapshotContext(Program program)
 		{
-			if (AProgram != null)
+			if (program != null)
 			{
-				FContext = new Stack(AProgram.Stack.MaxStackDepth, AProgram.Stack.MaxCallDepth);
-				FContext.PushWindow(0);
-				for (int LIndex = AProgram.Stack.Count - 1; LIndex >= 0; LIndex--)
-					FContext.Push(DataValue.CopyValue(AProgram.ValueManager, AProgram.Stack.Peek(LIndex)));
+				_context = new Stack(program.Stack.MaxStackDepth, program.Stack.MaxCallDepth);
+				_context.PushWindow(0);
+				for (int index = program.Stack.Count - 1; index >= 0; index--)
+					_context.Push(DataValue.CopyValue(program.ValueManager, program.Stack.Peek(index)));
 			}
 		}
 		
-		public void SwitchContext(Program AProgram)
+		public void SwitchContext(Program program)
 		{
-			if (AProgram != null)
-				FContext = AProgram.SwitchContext(FContext);
+			if (program != null)
+				_context = program.SwitchContext(_context);
 		}
 		
 		// ID
-		protected int FID = -1;
-		public int ID { get { return FID; } }
+		protected int _iD = -1;
+		public int ID { get { return _iD; } }
 		
 		// Table
-		protected Table FTable;
-		public Table Table { get { return FTable; } }
+		protected Table _table;
+		public Table Table { get { return _table; } }
 		
 		// Manager
-		protected CursorManager FManager;
- 		public CursorManager Manager { get { return FManager; } }
+		protected CursorManager _manager;
+ 		public CursorManager Manager { get { return _manager; } }
     }
     
     public class Cursors : DisposableList<Cursor>
     {		
 		public Cursors() : base(true) { }
 		
-		public Cursor GetCursor(int ACursorID)
+		public Cursor GetCursor(int cursorID)
 		{
-			foreach (Cursor LCursor in this)
-				if (LCursor.ID == ACursorID)
-					return LCursor;
-			throw new RuntimeException(RuntimeException.Codes.CursorNotFound, ACursorID.ToString());
+			foreach (Cursor cursor in this)
+				if (cursor.ID == cursorID)
+					return cursor;
+			throw new RuntimeException(RuntimeException.Codes.CursorNotFound, cursorID.ToString());
 		}
     }
     
@@ -154,52 +154,52 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     {
 		public CursorManager() : base(){}
 		
-		protected int FNextCursorID = -1;
-		protected Cursors FCursors = new Cursors();
+		protected int _nextCursorID = -1;
+		protected Cursors _cursors = new Cursors();
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
-				if (FCursors != null) 
+				if (_cursors != null) 
 				{
-					while (FCursors.Count > 0)
-						FCursors[0].Dispose();
-					FCursors.Dispose();
-					FCursors = null;
+					while (_cursors.Count > 0)
+						_cursors[0].Dispose();
+					_cursors.Dispose();
+					_cursors = null;
 				}
 			}
 			finally
 			{
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 		
-		public int CreateCursor(Table ATable)
+		public int CreateCursor(Table table)
 		{
-			ATable.Open(); // JIC
-			FNextCursorID++;
-			Cursor LCursor = new Cursor(this, FNextCursorID, ATable);
+			table.Open(); // JIC
+			_nextCursorID++;
+			Cursor cursor = new Cursor(this, _nextCursorID, table);
 			try
 			{
-				FCursors.Add(LCursor);
-				return LCursor.ID;
+				_cursors.Add(cursor);
+				return cursor.ID;
 			}
 			catch
 			{
-				LCursor.Dispose();
+				cursor.Dispose();
 				throw;
 			}
 		}
 		
-		public Cursor GetCursor(int ACursorID)
+		public Cursor GetCursor(int cursorID)
 		{
-			return FCursors.GetCursor(ACursorID);
+			return _cursors.GetCursor(cursorID);
 		}
 		
-		public void CloseCursor(int ACursorID)
+		public void CloseCursor(int cursorID)
 		{
-			GetCursor(ACursorID).Dispose();
+			GetCursor(cursorID).Dispose();
 		}
 	}
 }

@@ -26,77 +26,77 @@ namespace Alphora.Dataphor.DAE.Store
 {
 	public abstract class SQLStore : System.Object
 	{
-		private string FConnectionString;
+		private string _connectionString;
 		public string ConnectionString
 		{
-			get { return FConnectionString; }
+			get { return _connectionString; }
 			set 
 			{ 
-				if (FInitialized)
+				if (_initialized)
 					throw new StoreException(StoreException.Codes.StoreInitialized);
-				FConnectionString = value; 
+				_connectionString = value; 
 			}
 		}
 		
-		protected bool FSupportsMARS;
-		public bool SupportsMARS { get { return FSupportsMARS; } }
+		protected bool _supportsMARS;
+		public bool SupportsMARS { get { return _supportsMARS; } }
 		
-		protected bool FSupportsUpdatableCursor;
-		public bool SupportsUpdatableCursor { get { return FSupportsUpdatableCursor; } }
+		protected bool _supportsUpdatableCursor;
+		public bool SupportsUpdatableCursor { get { return _supportsUpdatableCursor; } }
 		
-		private bool FInitialized;
-		public bool Initialized { get { return FInitialized; } }
+		private bool _initialized;
+		public bool Initialized { get { return _initialized; } }
 
 		protected abstract void InternalInitialize();
 		
 		public void Initialize()
 		{
-			if (FInitialized)
+			if (_initialized)
 				throw new StoreException(StoreException.Codes.StoreInitialized);
 				
 			InternalInitialize();
 			
-			FInitialized = true;
+			_initialized = true;
 		}
 		
 		public abstract SQLConnection GetSQLConnection();
 
 		/// <summary> Returns the set of batches in the given script, delimited by the default 'go' batch terminator. </summary>
-		public static List<String> ProcessBatches(string AScript)
+		public static List<String> ProcessBatches(string script)
 		{
-			return ProcessBatches(AScript, "go");
+			return ProcessBatches(script, "go");
 		}
 		
 		/// <summary>Returns the set of batches in the given script, delimited by the given terminator.</summary>
-		public static List<String> ProcessBatches(string AScript, string ATerminator)
+		public static List<String> ProcessBatches(string script, string terminator)
 		{
 			// NOTE: This is the same code as SQLUtility.ProcessBatches, duplicated to avoid the dependency
-			List<String> LBatches = new List<String>();
+			List<String> batches = new List<String>();
 			
-			string[] LLines = AScript.Split(new string[] {"\r\n", "\r", "\n"}, StringSplitOptions.None);
-			StringBuilder LBatch = new StringBuilder();
-			for (int LIndex = 0; LIndex < LLines.Length; LIndex++)
+			string[] lines = script.Split(new string[] {"\r\n", "\r", "\n"}, StringSplitOptions.None);
+			StringBuilder batch = new StringBuilder();
+			for (int index = 0; index < lines.Length; index++)
 			{
-				if (LLines[LIndex].IndexOf("go", StringComparison.InvariantCultureIgnoreCase) == 0)
+				if (lines[index].IndexOf("go", StringComparison.InvariantCultureIgnoreCase) == 0)
 				{
-					LBatches.Add(LBatch.ToString());
-					LBatch = new StringBuilder();
+					batches.Add(batch.ToString());
+					batch = new StringBuilder();
 				}
 				else
 				{
-					LBatch.Append(LLines[LIndex]);
-					LBatch.Append("\r\n");
+					batch.Append(lines[index]);
+					batch.Append("\r\n");
 				}
 			}
 
-			if (LBatch.Length > 0)
-				LBatches.Add(LBatch.ToString());
+			if (batch.Length > 0)
+				batches.Add(batch.ToString());
 				
-			return LBatches;
+			return batches;
 		}
 		
-		private SQLStoreCounters FCounters = new SQLStoreCounters();
-		public SQLStoreCounters Counters { get { return FCounters; } }
+		private SQLStoreCounters _counters = new SQLStoreCounters();
+		public SQLStoreCounters Counters { get { return _counters; } }
 		
 		protected abstract SQLStoreConnection InternalConnect();
 
@@ -115,31 +115,31 @@ namespace Alphora.Dataphor.DAE.Store
 		/// with the connection pooling and name resolution cache we are implementing in the catalog device,
 		/// we should never get even close to this kind of concurrent access.
 		/// </remarks>
-		public const int CDefaultMaxConnections = 60;
+		public const int DefaultMaxConnections = 60;
 
-		private int FMaxConnections = CDefaultMaxConnections;
+		private int _maxConnections = DefaultMaxConnections;
 		/// <summary>Maximum number of connections to allow to this store.</summary>
 		/// <remarks>
 		/// Set this value to 0 to allow unlimited connections.
 		/// </remarks>
-		public int MaxConnections { get { return FMaxConnections; } set { FMaxConnections = value; } }
+		public int MaxConnections { get { return _maxConnections; } set { _maxConnections = value; } }
 		
-		private int FConnectionCount;
+		private int _connectionCount;
 		
 		/// <summary>Establishes a connection to the store.</summary>		
 		public SQLStoreConnection Connect()
 		{
 			lock (this)
 			{
-				if ((FMaxConnections > 0) && (FConnectionCount >= FMaxConnections))
+				if ((_maxConnections > 0) && (_connectionCount >= _maxConnections))
 					throw new StoreException(StoreException.Codes.MaximumConnectionsExceeded, ErrorSeverity.Environment);
-				FConnectionCount++;
+				_connectionCount++;
 			}
 			
 			try
 			{
 				#if SQLSTORETIMING
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
 				#endif
@@ -150,7 +150,7 @@ namespace Alphora.Dataphor.DAE.Store
 				}
 				finally
 				{
-					Counters.Add(new SQLStoreCounter("Connect", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+					Counters.Add(new SQLStoreCounter("Connect", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 				}
 				#endif
 			}
@@ -165,7 +165,7 @@ namespace Alphora.Dataphor.DAE.Store
 		{
 			lock (this)
 			{
-				FConnectionCount--;
+				_connectionCount--;
 			}
 		}
 	}

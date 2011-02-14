@@ -14,21 +14,21 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		private void StartConnection()
 		{
-			var LConnectItem = new ConnectWorkItem(RootContent);
+			var connectItem = new ConnectWorkItem(RootContent);
 			
 			#if DEBUG
-			LConnectItem.HostName = "localhost";
-			LConnectItem.InstanceName = "Draft";
-			LConnectItem.Status = ConnectStatus.Login;
-			LConnectItem.BeginLogin();
+			connectItem.HostName = "localhost";
+			connectItem.InstanceName = "Draft";
+			connectItem.Status = ConnectStatus.Login;
+			connectItem.BeginLogin();
 			#endif
 			
-			var LConnectForm = new ConnectForm(LConnectItem);
-			RootContent.Content = LConnectForm;
-			LConnectForm.Complete +=
+			var connectForm = new ConnectForm(connectItem);
+			RootContent.Content = connectForm;
+			connectForm.Complete +=
 				delegate
 				{
-					LConnectItem.Session.OnComplete += SessionComplete;
+					connectItem.Session.OnComplete += SessionComplete;
 				};
 		}
 		

@@ -13,11 +13,11 @@ namespace Alphora.Dataphor.DAE.Connection.Oracle.Oracle
 {
 	public class OracleConnection : DotNetConnection
 	{
-		public OracleConnection(string AConnection) : base(AConnection) {}
+		public OracleConnection(string connection) : base(connection) {}
 		
-		protected override IDbConnection CreateDbConnection(string AConnectionString)
+		protected override IDbConnection CreateDbConnection(string connectionString)
 		{
-			return new OraHome.Client.OracleConnection(AConnectionString);
+			return new OraHome.Client.OracleConnection(connectionString);
 		}
 		
 		protected override SQLCommand InternalCreateCommand()
@@ -25,111 +25,111 @@ namespace Alphora.Dataphor.DAE.Connection.Oracle.Oracle
 			return new OracleCommand(this, CreateDbCommand());
 		}
 
-		protected override void InternalBeginTransaction(SQLIsolationLevel AIsolationLevel)
+		protected override void InternalBeginTransaction(SQLIsolationLevel isolationLevel)
 		{
-			FIsolationLevel = System.Data.IsolationLevel.Unspecified;
-			switch (AIsolationLevel)
+			_isolationLevel = System.Data.IsolationLevel.Unspecified;
+			switch (isolationLevel)
 			{
 				case SQLIsolationLevel.ReadUncommitted : // all three will map to committed in this Optimisitc system
 				case SQLIsolationLevel.RepeatableRead : 
-				case SQLIsolationLevel.ReadCommitted : FIsolationLevel = System.Data.IsolationLevel.ReadCommitted; break;
-				case SQLIsolationLevel.Serializable : FIsolationLevel = System.Data.IsolationLevel.Serializable; break;
+				case SQLIsolationLevel.ReadCommitted : _isolationLevel = System.Data.IsolationLevel.ReadCommitted; break;
+				case SQLIsolationLevel.Serializable : _isolationLevel = System.Data.IsolationLevel.Serializable; break;
 			}
-			FTransaction = FConnection.BeginTransaction(FIsolationLevel);
+			_transaction = _connection.BeginTransaction(_isolationLevel);
 		}
 	}
 	
 	public class OracleCommand : DotNetCommand
 	{
-		public OracleCommand(OracleConnection AConnection, IDbCommand ACommand) : base(AConnection, ACommand) 
+		public OracleCommand(OracleConnection connection, IDbCommand command) : base(connection, command) 
 		{
-			FParameterDelimiter = ":";
+			_parameterDelimiter = ":";
 		}
 
-		protected override string PrepareStatement(string AStatement)
+		protected override string PrepareStatement(string statement)
 		{
-			return base.PrepareStatement(AStatement).Replace("@", ":");
+			return base.PrepareStatement(statement).Replace("@", ":");
 		}
 		
 		protected override void PrepareParameters()
 		{
 			// Prepare parameters
-			foreach (SQLParameter LParameter in Parameters)
+			foreach (SQLParameter parameter in Parameters)
 			{
-				OraHome.Client.OracleParameter LOracleParameter = (OraHome.Client.OracleParameter)FCommand.CreateParameter();
-				LOracleParameter.ParameterName = String.Format("@{0}", LParameter.Name);
-				switch (LParameter.Direction)
+				OraHome.Client.OracleParameter oracleParameter = (OraHome.Client.OracleParameter)_command.CreateParameter();
+				oracleParameter.ParameterName = String.Format("@{0}", parameter.Name);
+				switch (parameter.Direction)
 				{
-					case SQLDirection.Out : LOracleParameter.Direction = System.Data.ParameterDirection.Output; break;
-					case SQLDirection.InOut : LOracleParameter.Direction = System.Data.ParameterDirection.InputOutput; break;
-					case SQLDirection.Result : LOracleParameter.Direction = System.Data.ParameterDirection.ReturnValue; break;
-					default : LOracleParameter.Direction = System.Data.ParameterDirection.Input; break;
+					case SQLDirection.Out : oracleParameter.Direction = System.Data.ParameterDirection.Output; break;
+					case SQLDirection.InOut : oracleParameter.Direction = System.Data.ParameterDirection.InputOutput; break;
+					case SQLDirection.Result : oracleParameter.Direction = System.Data.ParameterDirection.ReturnValue; break;
+					default : oracleParameter.Direction = System.Data.ParameterDirection.Input; break;
 				}
 
-				if (LParameter.Type is SQLStringType)
+				if (parameter.Type is SQLStringType)
 				{
-					LOracleParameter.OracleDbType = OraHome.Client.OracleDbType.Varchar2;
-					LOracleParameter.Size = ((SQLStringType)LParameter.Type).Length;
+					oracleParameter.OracleDbType = OraHome.Client.OracleDbType.Varchar2;
+					oracleParameter.Size = ((SQLStringType)parameter.Type).Length;
 				}
-				else if (LParameter.Type is SQLBooleanType)
+				else if (parameter.Type is SQLBooleanType)
 				{
-					LOracleParameter.OracleDbType = OraHome.Client.OracleDbType.Int32;
+					oracleParameter.OracleDbType = OraHome.Client.OracleDbType.Int32;
 				}
-				else if (LParameter.Type is SQLIntegerType)
+				else if (parameter.Type is SQLIntegerType)
 				{
-					switch (((SQLIntegerType)LParameter.Type).ByteCount)
+					switch (((SQLIntegerType)parameter.Type).ByteCount)
 					{
-						case 1 : LOracleParameter.OracleDbType = OraHome.Client.OracleDbType.Byte; break;
-						case 2 : LOracleParameter.OracleDbType = OraHome.Client.OracleDbType.Int16; break;
+						case 1 : oracleParameter.OracleDbType = OraHome.Client.OracleDbType.Byte; break;
+						case 2 : oracleParameter.OracleDbType = OraHome.Client.OracleDbType.Int16; break;
 						case 8 : 
-							LOracleParameter.OracleDbType = OraHome.Client.OracleDbType.Decimal;
-							LOracleParameter.Precision = 20;
-							LOracleParameter.Scale = 0;
+							oracleParameter.OracleDbType = OraHome.Client.OracleDbType.Decimal;
+							oracleParameter.Precision = 20;
+							oracleParameter.Scale = 0;
 						break;
-						default : LOracleParameter.OracleDbType = OraHome.Client.OracleDbType.Int32; break;
+						default : oracleParameter.OracleDbType = OraHome.Client.OracleDbType.Int32; break;
 					}
 				}
-				else if (LParameter.Type is SQLNumericType)
+				else if (parameter.Type is SQLNumericType)
 				{
-					SQLNumericType LType = (SQLNumericType)LParameter.Type;
-					LOracleParameter.OracleDbType = OraHome.Client.OracleDbType.Decimal;
-					LOracleParameter.Precision = LType.Precision;
-					LOracleParameter.Scale = LType.Scale;
+					SQLNumericType type = (SQLNumericType)parameter.Type;
+					oracleParameter.OracleDbType = OraHome.Client.OracleDbType.Decimal;
+					oracleParameter.Precision = type.Precision;
+					oracleParameter.Scale = type.Scale;
 				}
-				else if (LParameter.Type is SQLBinaryType)
+				else if (parameter.Type is SQLBinaryType)
 				{
-					LOracleParameter.OracleDbType = OraHome.Client.OracleDbType.Blob;
+					oracleParameter.OracleDbType = OraHome.Client.OracleDbType.Blob;
 				}
-				else if (LParameter.Type is SQLTextType)
+				else if (parameter.Type is SQLTextType)
 				{
-					LOracleParameter.OracleDbType = OraHome.Client.OracleDbType.Clob;
+					oracleParameter.OracleDbType = OraHome.Client.OracleDbType.Clob;
 				}
-				else if (LParameter.Type is SQLDateTimeType)
+				else if (parameter.Type is SQLDateTimeType)
 				{
-					LOracleParameter.OracleDbType = OraHome.Client.OracleDbType.Date;
+					oracleParameter.OracleDbType = OraHome.Client.OracleDbType.Date;
 				}
-				else if (LParameter.Type is SQLDateType)
+				else if (parameter.Type is SQLDateType)
 				{
-					LOracleParameter.OracleDbType = OraHome.Client.OracleDbType.Date;
+					oracleParameter.OracleDbType = OraHome.Client.OracleDbType.Date;
 				}
-				else if (LParameter.Type is SQLTimeType)
+				else if (parameter.Type is SQLTimeType)
 				{
-					LOracleParameter.OracleDbType = OraHome.Client.OracleDbType.Date;
+					oracleParameter.OracleDbType = OraHome.Client.OracleDbType.Date;
 				}
-				else if (LParameter.Type is SQLGuidType)
+				else if (parameter.Type is SQLGuidType)
 				{
-					LOracleParameter.OracleDbType = OraHome.Client.OracleDbType.Char;
-					LOracleParameter.Size = 24;
+					oracleParameter.OracleDbType = OraHome.Client.OracleDbType.Char;
+					oracleParameter.Size = 24;
 				}
-				else if (LParameter.Type is SQLMoneyType)
+				else if (parameter.Type is SQLMoneyType)
 				{
-					LOracleParameter.OracleDbType = OraHome.Client.OracleDbType.Decimal;
-					LOracleParameter.Precision = 28;
-					LOracleParameter.Scale = 8;
+					oracleParameter.OracleDbType = OraHome.Client.OracleDbType.Decimal;
+					oracleParameter.Precision = 28;
+					oracleParameter.Scale = 8;
 				}
 				else
-					throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, LParameter.Type.GetType().Name);
-				FCommand.Parameters.Add(LOracleParameter);
+					throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, parameter.Type.GetType().Name);
+				_command.Parameters.Add(oracleParameter);
 			}
 		}
 	}

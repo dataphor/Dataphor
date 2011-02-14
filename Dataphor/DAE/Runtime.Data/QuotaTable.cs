@@ -24,99 +24,99 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public class QuotaTable : Table
     {
-		public QuotaTable(QuotaNode ANode, Program AProgram) : base(ANode, AProgram){}
+		public QuotaTable(QuotaNode node, Program program) : base(node, program){}
 		
-		public new QuotaNode Node { get { return (QuotaNode)FNode; } }
+		public new QuotaNode Node { get { return (QuotaNode)_node; } }
 		
-		protected Table FSourceTable;
-		protected int FSourceCount;
-		protected int FSourceCounter;
-		protected Row FSourceRow;
-		protected Row FCompareRow;
-		protected Row FLastCompareRow;
-		protected bool FHasLastCompareRow;
+		protected Table _sourceTable;
+		protected int _sourceCount;
+		protected int _sourceCounter;
+		protected Row _sourceRow;
+		protected Row _compareRow;
+		protected Row _lastCompareRow;
+		protected bool _hasLastCompareRow;
 		
         protected override void InternalOpen()
         {
-			FSourceTable = (Table)Node.Nodes[0].Execute(Program);
+			_sourceTable = (Table)Node.Nodes[0].Execute(Program);
 			try
 			{
-				FCompareRow = new Row(Manager, new Schema.RowType(Node.Order.Columns));
-				FLastCompareRow = new Row(Manager, FCompareRow.DataType);
-				FHasLastCompareRow = false;
-				object LObject = Node.Nodes[1].Execute(Program);
+				_compareRow = new Row(Manager, new Schema.RowType(Node.Order.Columns));
+				_lastCompareRow = new Row(Manager, _compareRow.DataType);
+				_hasLastCompareRow = false;
+				object objectValue = Node.Nodes[1].Execute(Program);
 				#if NILPROPOGATION
-				FSourceCount = LObject == null ? 0 : (int)LObject;
+				_sourceCount = objectValue == null ? 0 : (int)objectValue;
 				#else
-				if (LObject == null)
+				if (objectValue == null)
 					throw new RuntimeException(RuntimeException.Codes.NilEncountered, Node);
-				FSourceCount = (int)LObject;
+				FSourceCount = (int)objectValue;
 				#endif
-				FSourceCounter = 0;
+				_sourceCounter = 0;
 			}
 			catch
 			{
-				FSourceTable.Dispose();
-				FSourceTable = null;
+				_sourceTable.Dispose();
+				_sourceTable = null;
 				throw;
 			}
         }
         
         protected override void InternalClose()
         {
-			if (FSourceTable != null)
+			if (_sourceTable != null)
 			{
-				FSourceTable.Dispose();
-				FSourceTable = null;
+				_sourceTable.Dispose();
+				_sourceTable = null;
 			}
 			
-			if (FCompareRow != null)
+			if (_compareRow != null)
 			{
-				FCompareRow.Dispose();
-				FCompareRow = null;
+				_compareRow.Dispose();
+				_compareRow = null;
 			}
 
-			if (FLastCompareRow != null)
+			if (_lastCompareRow != null)
 			{
-				FLastCompareRow.Dispose();
-				FLastCompareRow = null;
+				_lastCompareRow.Dispose();
+				_lastCompareRow = null;
 			}
         }
         
         protected override void InternalReset()
         {
-            FSourceTable.Reset();
-            FSourceCounter = 0;
-            FLastCompareRow.ClearValues();
-            FHasLastCompareRow = false;
+            _sourceTable.Reset();
+            _sourceCounter = 0;
+            _lastCompareRow.ClearValues();
+            _hasLastCompareRow = false;
         }
         
-        protected override void InternalSelect(Row ARow)
+        protected override void InternalSelect(Row row)
         {
-			FSourceTable.Select(ARow);
+			_sourceTable.Select(row);
         }
         
         protected override bool InternalNext()
         {
 			if (!InternalEOF())
 			{
-	            if (FSourceTable.Next())
+	            if (_sourceTable.Next())
 	            {
-		            FSourceTable.Select(FCompareRow);
+		            _sourceTable.Select(_compareRow);
 
-					if (FHasLastCompareRow)
+					if (_hasLastCompareRow)
 					{		            
-						Program.Stack.Push(FCompareRow);
+						Program.Stack.Push(_compareRow);
 						try
 						{
-							Program.Stack.Push(FLastCompareRow);
+							Program.Stack.Push(_lastCompareRow);
 							try
 							{
-								object LResult = Node.EqualNode.Execute(Program);
-								if ((LResult == null) || !(bool)LResult)
+								object result = Node.EqualNode.Execute(Program);
+								if ((result == null) || !(bool)result)
 								{
-									FSourceCounter++;
-									FCompareRow.CopyTo(FLastCompareRow);
+									_sourceCounter++;
+									_compareRow.CopyTo(_lastCompareRow);
 								}
 							}
 							finally
@@ -131,9 +131,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					}
 					else
 					{
-						FSourceCounter++;
-						FCompareRow.CopyTo(FLastCompareRow);
-						FHasLastCompareRow = true;
+						_sourceCounter++;
+						_compareRow.CopyTo(_lastCompareRow);
+						_hasLastCompareRow = true;
 					}
 					return !InternalEOF();
 		        }
@@ -143,12 +143,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected override bool InternalBOF()
         {
-			return (FSourceCount == 0) || (FSourceCounter == 0);
+			return (_sourceCount == 0) || (_sourceCounter == 0);
         }
         
         protected override bool InternalEOF()
         {
-			return (FSourceCount == 0) || (FSourceCounter > FSourceCount) || (FSourceTable.EOF());
+			return (_sourceCount == 0) || (_sourceCounter > _sourceCount) || (_sourceTable.EOF());
         }
     }
 }

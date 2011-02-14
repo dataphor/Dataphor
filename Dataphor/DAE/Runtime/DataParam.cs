@@ -16,19 +16,19 @@ namespace Alphora.Dataphor.DAE.Runtime
 
     public class DataParam : object
     {
-		public DataParam(string AName, Schema.IDataType ADataType, Modifier AModifier, object AValue)
+		public DataParam(string name, Schema.IDataType dataType, Modifier modifier, object tempValue)
 		{
-			Name = AName;
-			DataType = ADataType;
-			Value = AValue;
-			Modifier = AModifier;
+			Name = name;
+			DataType = dataType;
+			Value = tempValue;
+			Modifier = modifier;
 		}
 		
-		public DataParam(string AName, Schema.IDataType ADataType, Modifier AModifier)
+		public DataParam(string name, Schema.IDataType dataType, Modifier modifier)
 		{
-			Name = AName;
-			DataType = ADataType;
-			Modifier = AModifier;
+			Name = name;
+			DataType = dataType;
+			Modifier = modifier;
 		}
 		
 		public string Name;
@@ -36,111 +36,111 @@ namespace Alphora.Dataphor.DAE.Runtime
 		public object Value;
 		public Modifier Modifier;
 
-		public static DataParam Create(IServerProcess AProcess, string AName, string AValue)
+		public static DataParam Create(IServerProcess process, string name, string tempValue)
 		{
 			return
 				new DataParam
 				(
-					AName, 
-					AProcess.DataTypes.SystemString, 
+					name, 
+					process.DataTypes.SystemString, 
 					DAE.Language.Modifier.In, 
-					AValue
+					tempValue
 				);
 		}
 
-		public static DataParam Create(IServerProcess AProcess, string AName, Guid AValue)
+		public static DataParam Create(IServerProcess process, string name, Guid tempValue)
 		{
 			return
 				new DataParam
 				(
-					AName, 
-					AProcess.DataTypes.SystemGuid, 
+					name, 
+					process.DataTypes.SystemGuid, 
 					DAE.Language.Modifier.In, 
-					AValue
+					tempValue
 				);
 		}
 
-		public static DataParam Create(IServerProcess AProcess, string AName, int AValue)
+		public static DataParam Create(IServerProcess process, string name, int tempValue)
 		{
 			return
 				new DataParam
 				(
-					AName, 
-					AProcess.DataTypes.SystemInteger, 
+					name, 
+					process.DataTypes.SystemInteger, 
 					DAE.Language.Modifier.In, 
-					AValue
+					tempValue
 				);
 		}
 
-		public static DataParam Create(IServerProcess AProcess, string AName, byte AValue)
+		public static DataParam Create(IServerProcess process, string name, byte tempValue)
 		{
 			return
 				new DataParam
 				(
-					AName, 
-					AProcess.DataTypes.SystemByte, 
+					name, 
+					process.DataTypes.SystemByte, 
 					DAE.Language.Modifier.In, 
-					AValue
+					tempValue
 				);
 		}
 
-		public static DataParam Create(IServerProcess AProcess, string AName, DateTime AValue)
+		public static DataParam Create(IServerProcess process, string name, DateTime tempValue)
 		{
 			return
 				new DataParam
 				(
-					AName, 
-					AProcess.DataTypes.SystemDateTime, 
+					name, 
+					process.DataTypes.SystemDateTime, 
 					DAE.Language.Modifier.In, 
-					AValue
+					tempValue
 				);
 		}
 
-		public static DataParam Create(IServerProcess AProcess, string AName, decimal AValue)
+		public static DataParam Create(IServerProcess process, string name, decimal tempValue)
 		{
 			return
 				new DataParam
 				(
-					AName, 
-					AProcess.DataTypes.SystemDecimal, 
+					name, 
+					process.DataTypes.SystemDecimal, 
 					DAE.Language.Modifier.In, 
-					AValue
+					tempValue
 				);
 		}
 
-		public static DataParam Create(IServerProcess AProcess, string AName, long AValue)
+		public static DataParam Create(IServerProcess process, string name, long tempValue)
 		{
 			return
 				new DataParam
 				(
-					AName, 
-					AProcess.DataTypes.SystemLong, 
+					name, 
+					process.DataTypes.SystemLong, 
 					DAE.Language.Modifier.In, 
-					AValue
+					tempValue
 				);
 		}
 
-		public static DataParam Create(IServerProcess AProcess, string AName, bool AValue)
+		public static DataParam Create(IServerProcess process, string name, bool tempValue)
 		{
 			return
 				new DataParam
 				(
-					AName, 
-					AProcess.DataTypes.SystemBoolean, 
+					name, 
+					process.DataTypes.SystemBoolean, 
 					DAE.Language.Modifier.In, 
-					AValue
+					tempValue
 				);
 		}
 
-		public static DataParam Create(IServerProcess AProcess, string AName, object AValue, DAE.Schema.IScalarType ADataType)
+		public static DataParam Create(IServerProcess process, string name, object tempValue, DAE.Schema.IScalarType dataType)
 		{
 			return
 				new DataParam
 				(
-					AName, 
-					ADataType, 
+					name, 
+					dataType, 
 					DAE.Language.Modifier.In, 
-					AValue
+					tempValue
 				);
 		}
 	}
@@ -163,42 +163,42 @@ namespace Alphora.Dataphor.DAE.Runtime
 	public class DataParams : BaseList<DataParam>
 	{
 	#endif	
-		public DataParam this[string AIndex]
+		public DataParam this[string index]
 		{
 			get
 			{
-				int LIndex = IndexOf(AIndex);
-				if (LIndex >= 0)
-					return this[LIndex];
+				int localIndex = IndexOf(index);
+				if (localIndex >= 0)
+					return this[localIndex];
 				else
-					throw new RuntimeException(RuntimeException.Codes.DataParamNotFound, AIndex);
+					throw new RuntimeException(RuntimeException.Codes.DataParamNotFound, index);
 			}
 			set
 			{
-				int LIndex = IndexOf(AIndex);
-				if (LIndex >= 0)
-					this[LIndex] = value;
+				int localIndex = IndexOf(index);
+				if (localIndex >= 0)
+					this[localIndex] = value;
 				else
-					throw new RuntimeException(RuntimeException.Codes.DataParamNotFound, AIndex);
+					throw new RuntimeException(RuntimeException.Codes.DataParamNotFound, index);
 			}
 		}
 		
-		public int IndexOf(string AName)
+		public int IndexOf(string name)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (Schema.Object.NamesEqual(this[LIndex].Name, AName))
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if (Schema.Object.NamesEqual(this[index].Name, name))
+					return index;
 			return -1;
 		}
 		
-		public bool Contains(string AName)
+		public bool Contains(string name)
 		{
-			return IndexOf(AName) >= 0;
+			return IndexOf(name) >= 0;
 		}
 		
-		public void Push(DataParam AObject)
+		public void Push(DataParam objectValue)
 		{
-			Insert(0, AObject);
+			Insert(0, objectValue);
 		}
 		
 		public DataParam Pop()

@@ -25,7 +25,7 @@ namespace Alphora.Dataphor.DAE.Store.PGSQL
 {
     public class PostgreSQLStoreConnection : SQLStoreConnection
     {
-        public PostgreSQLStoreConnection(PostgreSQLStore AStore) : base(AStore) { }
+        public PostgreSQLStoreConnection(PostgreSQLStore store) : base(store) { }
 
 		#if USESQLCONNECTION
 		protected override SQLConnection InternalCreateConnection()
@@ -39,18 +39,18 @@ namespace Alphora.Dataphor.DAE.Store.PGSQL
         }
         #endif
 
-        public override bool HasTable(string ATableName)
+        public override bool HasTable(string tableName)
         {
-            string LStatement = String.Format("select count(*)>0 from PG_TABLES where TABLENAME = '{0}'", ATableName.ToLower());
-            bool LTableExists = (bool) this.ExecuteScalar(LStatement);
-            return LTableExists;           
+            string statement = String.Format("select count(*)>0 from PG_TABLES where TABLENAME = '{0}'", tableName.ToLower());
+            bool tableExists = (bool) this.ExecuteScalar(statement);
+            return tableExists;           
         }
 
-		public override object NativeToLiteralValue(object AValue)
+		public override object NativeToLiteralValue(object tempValue)
 		{
-			if (AValue is bool)
-				return ((bool)AValue ? "'true'" : "'false'");			
-			return base.NativeToLiteralValue(AValue);
+			if (tempValue is bool)
+				return ((bool)tempValue ? "'true'" : "'false'");			
+			return base.NativeToLiteralValue(tempValue);
 		}
     }
 }

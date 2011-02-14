@@ -22,10 +22,10 @@ namespace Alphora.Dataphor.DAE.Store
 {
 	public abstract class SQLStoreConnection : System.Object, IDisposable
 	{
-		protected internal SQLStoreConnection(SQLStore AStore) : base()
+		protected internal SQLStoreConnection(SQLStore store) : base()
 		{
-			FStore = AStore;
-			FConnection = InternalCreateConnection();
+			_store = store;
+			_connection = InternalCreateConnection();
 		}
 		
 		protected abstract SQLConnection InternalCreateConnection();
@@ -36,45 +36,45 @@ namespace Alphora.Dataphor.DAE.Store
 		{
 			DisposeExecuteCommand();
 
-			if (FConnection != null)
+			if (_connection != null)
 			{
-				FConnection.Dispose();
-				FConnection = null;
+				_connection.Dispose();
+				_connection = null;
 			}
 		}
 
 		public void Dispose()
 		{
 			#if SQLSTORETIMING
-			long LStartTicks = TimingUtility.CurrentTicks;
+			long startTicks = TimingUtility.CurrentTicks;
 			#endif
 			
 			InternalDispose();
 
 			#if SQLSTORETIMING
-			Store.Counters.Add(new SQLStoreCounter("Disconnect", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			Store.Counters.Add(new SQLStoreCounter("Disconnect", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 			#endif
 			
-			if (FStore != null)
+			if (_store != null)
 			{
-				FStore.ReportDisconnect();
-				FStore = null;
+				_store.ReportDisconnect();
+				_store = null;
 			}
 		}
 
 		#endregion
 
-		private SQLStore FStore;
+		private SQLStore _store;
 		/// <summary>The store for this connection.</summary>
-		public SQLStore Store { get { return FStore; } }
+		public SQLStore Store { get { return _store; } }
 		
 		// Connection
-		private SQLConnection FConnection;
+		private SQLConnection _connection;
 		/// <summary>This is the internal connection to the server housing the catalog store.</summary>
-		protected SQLConnection Connection { get { return FConnection; } }
+		protected SQLConnection Connection { get { return _connection; } }
 		
 		/// <summary>Returns whether or not the store has a table of the given name.</summary>
-		public virtual bool HasTable(string ATableName)
+		public virtual bool HasTable(string tableName)
 		{
 			// TODO: Implement...
 			// To implement this generically would require dealing with all the provider-specific 'schema collection' tables
@@ -84,19 +84,19 @@ namespace Alphora.Dataphor.DAE.Store
 		
 		protected virtual SQLCommand InternalCreateCommand()
 		{
-			return FConnection.CreateCommand(false);
+			return _connection.CreateCommand(false);
 		}
 
 		// ExecuteCommand
-		private SQLCommand FExecuteCommand;
+		private SQLCommand _executeCommand;
 		/// <summary>This is the internal command used to execute statements on this connection.</summary>
 		protected SQLCommand ExecuteCommand
 		{
 			get
 			{
-				if (FExecuteCommand == null)
-					FExecuteCommand = InternalCreateCommand();
-				return FExecuteCommand;
+				if (_executeCommand == null)
+					_executeCommand = InternalCreateCommand();
+				return _executeCommand;
 			}
 		}
 		
@@ -108,52 +108,52 @@ namespace Alphora.Dataphor.DAE.Store
 
 		protected void DisposeExecuteCommand()
 		{
-			if (FExecuteCommand != null)
+			if (_executeCommand != null)
 			{
-				FExecuteCommand.Dispose();
-				FExecuteCommand = null;
+				_executeCommand.Dispose();
+				_executeCommand = null;
 			}
 		}
 		
-		public void ExecuteScript(string AScript)
+		public void ExecuteScript(string script)
 		{
-			bool LSaveShouldNormalizeWhitespace = ExecuteCommand.ShouldNormalizeWhitespace;
+			bool saveShouldNormalizeWhitespace = ExecuteCommand.ShouldNormalizeWhitespace;
 			ExecuteCommand.ShouldNormalizeWhitespace = false;
 			try
 			{
-				List<String> LStatements = SQLStore.ProcessBatches(AScript);
-				for (int LIndex = 0; LIndex < LStatements.Count; LIndex++)
-					ExecuteStatement(LStatements[LIndex]);
+				List<String> statements = SQLStore.ProcessBatches(script);
+				for (int index = 0; index < statements.Count; index++)
+					ExecuteStatement(statements[index]);
 			}
 			finally
 			{
-				ExecuteCommand.ShouldNormalizeWhitespace = LSaveShouldNormalizeWhitespace;
+				ExecuteCommand.ShouldNormalizeWhitespace = saveShouldNormalizeWhitespace;
 			}
 		}
 
-		public void ExecuteStatement(string AStatement)
+		public void ExecuteStatement(string statement)
 		{
 			ExecuteCommand.CommandType = SQLCommandType.Statement;
-			ExecuteCommand.Statement = AStatement;
+			ExecuteCommand.Statement = statement;
 
 			#if SQLSTORETIMING
-			long LStartTicks = TimingUtility.CurrentTicks;
+			long startTicks = TimingUtility.CurrentTicks;
 			#endif
 
 			ExecuteCommand.Execute();
 
 			#if SQLSTORETIMING
-			Store.Counters.Add(new SQLStoreCounter("ExecuteNonQuery", AStatement, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			Store.Counters.Add(new SQLStoreCounter("ExecuteNonQuery", AStatement, "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 			#endif
 		}
 		
-		public object ExecuteScalar(string AStatement)
+		public object ExecuteScalar(string statement)
 		{
 			ExecuteCommand.CommandType = SQLCommandType.Statement;
-			ExecuteCommand.Statement = AStatement;
+			ExecuteCommand.Statement = statement;
 
 			#if SQLSTORETIMING
-			long LStartTicks = TimingUtility.CurrentTicks;
+			long startTicks = TimingUtility.CurrentTicks;
 			try
 			{
 			#endif
@@ -164,271 +164,271 @@ namespace Alphora.Dataphor.DAE.Store
 			}
 			finally
 			{
-				Store.Counters.Add(new SQLStoreCounter("ExecuteScalar", AStatement, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+				Store.Counters.Add(new SQLStoreCounter("ExecuteScalar", AStatement, "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 			}
 			#endif
 		}
 		
-		protected internal SQLCursor ExecuteReader(string AStatement, out SQLCommand AReaderCommand)
+		protected internal SQLCursor ExecuteReader(string statement, out SQLCommand readerCommand)
 		{
-			AReaderCommand = GetReaderCommand();
-			AReaderCommand.CommandType = SQLCommandType.Statement;
-			AReaderCommand.Statement = AStatement;
+			readerCommand = GetReaderCommand();
+			readerCommand.CommandType = SQLCommandType.Statement;
+			readerCommand.Statement = statement;
 			
 			#if SQLSTORETIMING
-			long LStartTicks = TimingUtility.CurrentTicks;
+			long startTicks = TimingUtility.CurrentTicks;
 			try
 			{
 			#endif
-				return AReaderCommand.Open(SQLCursorType.Dynamic, SQLIsolationLevel.Serializable);
+				return readerCommand.Open(SQLCursorType.Dynamic, SQLIsolationLevel.Serializable);
 			#if SQLSTORETIMING
 			}
 			finally
 			{
-				Store.Counters.Add(new SQLStoreCounter("ExecuteReader", AStatement, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+				Store.Counters.Add(new SQLStoreCounter("ExecuteReader", AStatement, "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 			}
 			#endif
 		}
 		
-		protected virtual SQLStoreCursor InternalOpenCursor(string ATableName, List<string> AColumns, SQLIndex AIndex, bool AIsUpdatable)
+		protected virtual SQLStoreCursor InternalOpenCursor(string tableName, List<string> columns, SQLIndex index, bool isUpdatable)
 		{
 			return
 				new SQLStoreCursor
 				(
 					this,
-					ATableName,
-					AColumns,
-					AIndex,
-					AIsUpdatable
+					tableName,
+					columns,
+					index,
+					isUpdatable
 				);
 		}
 		
-		public SQLStoreCursor OpenCursor(string ATableName, List<string> AColumns, SQLIndex AIndex, bool AIsUpdatable)
+		public SQLStoreCursor OpenCursor(string tableName, List<string> columns, SQLIndex index, bool isUpdatable)
 		{
-			return InternalOpenCursor(ATableName, AColumns, AIndex, AIsUpdatable);
+			return InternalOpenCursor(tableName, columns, index, isUpdatable);
 		}
 		
-		private int FTransactionCount = 0;
-		public int TransactionCount { get { return FTransactionCount; } }
+		private int _transactionCount = 0;
+		public int TransactionCount { get { return _transactionCount; } }
 		
 		internal abstract class SQLStoreOperation : System.Object
 		{
-			public virtual void Undo(SQLStoreConnection AConnection) {}
+			public virtual void Undo(SQLStoreConnection connection) {}
 		}
 		
 		internal class SQLStoreOperationLog : List<SQLStoreOperation> {}
 		
-		private SQLStoreOperationLog FOperationLog = new SQLStoreOperationLog();
+		private SQLStoreOperationLog _operationLog = new SQLStoreOperationLog();
 		
 		internal class BeginTransactionOperation : SQLStoreOperation {}
 		
 		internal class ModifyOperation : SQLStoreOperation
 		{
-			public ModifyOperation(string AUndoStatement) : base()
+			public ModifyOperation(string undoStatement) : base()
 			{
-				FUndoStatement = AUndoStatement;
+				_undoStatement = undoStatement;
 			}
 			
-			private string FUndoStatement;
+			private string _undoStatement;
 
-			public override void Undo(SQLStoreConnection AConnection)
+			public override void Undo(SQLStoreConnection connection)
 			{
-				AConnection.ExecuteStatement(FUndoStatement);
+				connection.ExecuteStatement(_undoStatement);
 			}
 		}
 		
-		protected virtual void InternalBeginTransaction(SQLIsolationLevel AIsolationLevel)
+		protected virtual void InternalBeginTransaction(SQLIsolationLevel isolationLevel)
 		{
-			FConnection.BeginTransaction(AIsolationLevel);
+			_connection.BeginTransaction(isolationLevel);
 		}
 
 		// BeginTransaction
-		public virtual void BeginTransaction(SQLIsolationLevel AIsolationLevel)
+		public virtual void BeginTransaction(SQLIsolationLevel isolationLevel)
 		{
-			if (FTransactionCount == 0)
+			if (_transactionCount == 0)
 			{
 				#if SQLSTORETIMING
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				#endif
 				
 				DisposeExecuteCommand();
-				FConnection.BeginTransaction(AIsolationLevel);
+				_connection.BeginTransaction(isolationLevel);
 				
 				#if SQLSTORETIMING
-				Store.Counters.Add(new SQLStoreCounter("BeginTransaction", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+				Store.Counters.Add(new SQLStoreCounter("BeginTransaction", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 				#endif
 
 			}
-			FTransactionCount++;
+			_transactionCount++;
 			
-			FOperationLog.Add(new BeginTransactionOperation());
+			_operationLog.Add(new BeginTransactionOperation());
 		}
 		
 		public virtual void CommitTransaction()
 		{
-			FTransactionCount--;
-			if (FTransactionCount <= 0)
+			_transactionCount--;
+			if (_transactionCount <= 0)
 			{
 				#if SQLSTORETIMING
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				#endif
 				
-				if (FConnection.InTransaction)
-					FConnection.CommitTransaction();
+				if (_connection.InTransaction)
+					_connection.CommitTransaction();
 				
 				#if SQLSTORETIMING
-				Store.Counters.Add(new SQLStoreCounter("Disconnect", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+				Store.Counters.Add(new SQLStoreCounter("Disconnect", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 				#endif
 			}
 
-			for (int LIndex = FOperationLog.Count - 1; LIndex >= 0; LIndex--)
-				if (FOperationLog[LIndex] is BeginTransactionOperation)
+			for (int index = _operationLog.Count - 1; index >= 0; index--)
+				if (_operationLog[index] is BeginTransactionOperation)
 				{
-					FOperationLog.RemoveAt(LIndex);
+					_operationLog.RemoveAt(index);
 					break;
 				}
 		}
 		
 		public virtual void RollbackTransaction()
 		{
-			FTransactionCount--;
+			_transactionCount--;
 
-			for (int LIndex = FOperationLog.Count - 1; LIndex >= 0; LIndex--)
+			for (int index = _operationLog.Count - 1; index >= 0; index--)
 			{
-				SQLStoreOperation LOperation = FOperationLog[LIndex];
-				FOperationLog.RemoveAt(LIndex);
-				if (LOperation is BeginTransactionOperation)
+				SQLStoreOperation operation = _operationLog[index];
+				_operationLog.RemoveAt(index);
+				if (operation is BeginTransactionOperation)
 					break;
 				else
-					LOperation.Undo(this);
+					operation.Undo(this);
 			}
 
-			if (FTransactionCount <= 0)
+			if (_transactionCount <= 0)
 			{
 				#if SQLSTORETIMING
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				#endif
 				
-				if (FConnection.InTransaction)
-					FConnection.RollbackTransaction();
+				if (_connection.InTransaction)
+					_connection.RollbackTransaction();
 				
 				#if SQLSTORETIMING
-				Store.Counters.Add(new SQLStoreCounter("Disconnect", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+				Store.Counters.Add(new SQLStoreCounter("Disconnect", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 				#endif
 			}
 		}
 
-		public virtual object NativeToLiteralValue(object AValue)
+		public virtual object NativeToLiteralValue(object tempValue)
 		{
-			if (AValue is bool)
-				return ((bool)AValue ? 1 : 0).ToString();
-			if (AValue is string)
-				return String.Format("'{0}'", ((string)AValue).Replace("'", "''"));
-			if (AValue == null)
+			if (tempValue is bool)
+				return ((bool)tempValue ? 1 : 0).ToString();
+			if (tempValue is string)
+				return String.Format("'{0}'", ((string)tempValue).Replace("'", "''"));
+			if (tempValue == null)
 				return "null";
-			return AValue.ToString();
+			return tempValue.ToString();
 		}
 		
 		// TODO: Statement parameterization?
-		internal void PerformInsert(string ATableName, List<string> AColumns, List<string> AKey, object[] ARow)
+		internal void PerformInsert(string tableName, List<string> columns, List<string> key, object[] row)
 		{
-			ExecuteStatement(GenerateInsertStatement(ATableName, AColumns, AKey, ARow));
+			ExecuteStatement(GenerateInsertStatement(tableName, columns, key, row));
 		}
 
-		internal void LogInsert(string ATableName, List<string> AColumns, List<string> AKey, object[] ARow)
+		internal void LogInsert(string tableName, List<string> columns, List<string> key, object[] row)
 		{
 			#if SQLSTORETIMING
-			long LStartTicks = TimingUtility.CurrentTicks;
+			long startTicks = TimingUtility.CurrentTicks;
 			#endif
 
-			FOperationLog.Add(new ModifyOperation(GenerateDeleteStatement(ATableName, AColumns, AKey, ARow)));
+			_operationLog.Add(new ModifyOperation(GenerateDeleteStatement(tableName, columns, key, row)));
 
 			#if SQLSTORETIMING
-			Store.Counters.Add(new SQLStoreCounter("LogInsert", ATableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			Store.Counters.Add(new SQLStoreCounter("LogInsert", ATableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 			#endif
 		}
 
-		protected virtual string GenerateInsertStatement(string ATableName, List<string> AColumns, List<string> AKey, object[] ARow)
+		protected virtual string GenerateInsertStatement(string tableName, List<string> columns, List<string> key, object[] row)
 		{
-			StringBuilder LStatement = new StringBuilder();
-			LStatement.AppendFormat("insert into {0} values (", ATableName);
-			for (int LIndex = 0; LIndex < AColumns.Count; LIndex++)
+			StringBuilder statement = new StringBuilder();
+			statement.AppendFormat("insert into {0} values (", tableName);
+			for (int index = 0; index < columns.Count; index++)
 			{
-				if (LIndex > 0)
-					LStatement.Append(", ");
-				LStatement.Append(NativeToLiteralValue(LIndex >= ARow.Length ? null : ARow[LIndex]));
+				if (index > 0)
+					statement.Append(", ");
+				statement.Append(NativeToLiteralValue(index >= row.Length ? null : row[index]));
 			}
-			LStatement.Append(")");
-			return LStatement.ToString();
+			statement.Append(")");
+			return statement.ToString();
 		}
 
-		internal void PerformUpdate(string ATableName, List<string> AColumns, List<string> AKey, object[] AOldRow, object[] ANewRow)
+		internal void PerformUpdate(string tableName, List<string> columns, List<string> key, object[] oldRow, object[] newRow)
 		{
-			ExecuteStatement(GenerateUpdateStatement(ATableName, AColumns, AKey, AOldRow, ANewRow));
+			ExecuteStatement(GenerateUpdateStatement(tableName, columns, key, oldRow, newRow));
 		}
 
-		internal void LogUpdate(string ATableName, List<string> AColumns, List<string> AKey, object[] AOldRow, object[] ANewRow)
+		internal void LogUpdate(string tableName, List<string> columns, List<string> key, object[] oldRow, object[] newRow)
 		{
 			#if SQLSTORETIMING
-			long LStartTicks = TimingUtility.CurrentTicks;
+			long startTicks = TimingUtility.CurrentTicks;
 			#endif
 
-			FOperationLog.Add(new ModifyOperation(GenerateUpdateStatement(ATableName, AColumns, AKey, ANewRow, AOldRow)));
+			_operationLog.Add(new ModifyOperation(GenerateUpdateStatement(tableName, columns, key, newRow, oldRow)));
 
 			#if SQLSTORETIMING
-			Store.Counters.Add(new SQLStoreCounter("LogUpdate", ATableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			Store.Counters.Add(new SQLStoreCounter("LogUpdate", ATableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 			#endif
 		}
 
-		protected virtual string GenerateUpdateStatement(string ATableName, List<string> AColumns, List<string> AKey, object[] AOldRow, object[] ANewRow)
+		protected virtual string GenerateUpdateStatement(string tableName, List<string> columns, List<string> key, object[] oldRow, object[] newRow)
 		{
-			StringBuilder LStatement = new StringBuilder();
-			LStatement.AppendFormat("update {0} set", ATableName);
-			for (int LIndex = 0; LIndex < AColumns.Count; LIndex++)
+			StringBuilder statement = new StringBuilder();
+			statement.AppendFormat("update {0} set", tableName);
+			for (int index = 0; index < columns.Count; index++)
 			{
-				if (LIndex > 0)
-					LStatement.Append(",");
-				LStatement.AppendFormat(" {0} = {1}", AColumns[LIndex], NativeToLiteralValue(ANewRow[LIndex]));
+				if (index > 0)
+					statement.Append(",");
+				statement.AppendFormat(" {0} = {1}", columns[index], NativeToLiteralValue(newRow[index]));
 			}
-			LStatement.AppendFormat(" where");
-			for (int LIndex = 0; LIndex < AKey.Count; LIndex++)
+			statement.AppendFormat(" where");
+			for (int index = 0; index < key.Count; index++)
 			{
-				if (LIndex > 0)
-					LStatement.Append(" and");
-				LStatement.AppendFormat(" {0} = {1}", AKey[LIndex], NativeToLiteralValue(AOldRow[AColumns.IndexOf(AKey[LIndex])]));
+				if (index > 0)
+					statement.Append(" and");
+				statement.AppendFormat(" {0} = {1}", key[index], NativeToLiteralValue(oldRow[columns.IndexOf(key[index])]));
 			}
-			return LStatement.ToString();
+			return statement.ToString();
 		}
 		
-		internal void PerformDelete(string ATableName, List<string> AColumns, List<string> AKey, object[] ARow)
+		internal void PerformDelete(string tableName, List<string> columns, List<string> key, object[] row)
 		{
-			ExecuteStatement(GenerateDeleteStatement(ATableName, AColumns, AKey, ARow));
+			ExecuteStatement(GenerateDeleteStatement(tableName, columns, key, row));
 		}
 
-		internal void LogDelete(string ATableName, List<string> AColumns, List<string> AKey, object[] ARow)
+		internal void LogDelete(string tableName, List<string> columns, List<string> key, object[] row)
 		{
 			#if SQLSTORETIMING
-			long LStartTicks = TimingUtility.CurrentTicks;
+			long startTicks = TimingUtility.CurrentTicks;
 			#endif
 
-			FOperationLog.Add(new ModifyOperation(GenerateInsertStatement(ATableName, AColumns, AKey, ARow)));
+			_operationLog.Add(new ModifyOperation(GenerateInsertStatement(tableName, columns, key, row)));
 
 			#if SQLSTORETIMING
-			Store.Counters.Add(new SQLStoreCounter("LogDelete", ATableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			Store.Counters.Add(new SQLStoreCounter("LogDelete", ATableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(startTicks)));
 			#endif
 		}
 
-		protected virtual string GenerateDeleteStatement(string ATableName, List<string> AColumns, List<string> AKey, object[] ARow)
+		protected virtual string GenerateDeleteStatement(string tableName, List<string> columns, List<string> key, object[] row)
 		{
-			StringBuilder LStatement = new StringBuilder();
-			LStatement.AppendFormat("delete from {0} where", ATableName);
-			for (int LIndex = 0; LIndex < AKey.Count; LIndex++)
+			StringBuilder statement = new StringBuilder();
+			statement.AppendFormat("delete from {0} where", tableName);
+			for (int index = 0; index < key.Count; index++)
 			{
-				if (LIndex > 0)
-					LStatement.Append(" and");
-				LStatement.AppendFormat(" {0} = {1}", AKey[LIndex], NativeToLiteralValue(ARow[AColumns.IndexOf(AKey[LIndex])]));
+				if (index > 0)
+					statement.Append(" and");
+				statement.AppendFormat(" {0} = {1}", key[index], NativeToLiteralValue(row[columns.IndexOf(key[index])]));
 			}
-			return LStatement.ToString();
+			return statement.ToString();
 		}
 	}
 }

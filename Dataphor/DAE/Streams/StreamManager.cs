@@ -147,14 +147,14 @@ namespace Alphora.Dataphor.DAE.Streams
 	public abstract class StreamManager : Disposable
 	{
 		public abstract StreamID Allocate();
-		public abstract StreamID Reference(StreamID AStreamID);
-		public abstract void Deallocate(StreamID AStreamID);
-		public abstract Stream Open(int AOwnerID, StreamID AStreamID, LockMode AMode);
-		public IRemoteStream OpenRemote(int AOwnerID, StreamID AStreamID, LockMode AMode)
+		public abstract StreamID Reference(StreamID streamID);
+		public abstract void Deallocate(StreamID streamID);
+		public abstract Stream Open(int ownerID, StreamID streamID, LockMode mode);
+		public IRemoteStream OpenRemote(int ownerID, StreamID streamID, LockMode mode)
 		{
-			return (IRemoteStream)Open(AOwnerID, AStreamID, AMode);
+			return (IRemoteStream)Open(ownerID, streamID, mode);
 		}
-		public abstract void Close(int AOwnerID, StreamID AStreamID);
+		public abstract void Close(int ownerID, StreamID streamID);
 	}
 	
 	public interface IStreamProvider : IDisposable
@@ -167,10 +167,10 @@ namespace Alphora.Dataphor.DAE.Streams
 	
 	public abstract class StreamProvider : Disposable, IStreamProvider
 	{
-		public abstract Stream Open(StreamID AStreamID);
-		public abstract void Close(StreamID AStreamID);
-		public abstract void Destroy(StreamID AStreamID);
-		public abstract void Reassign(StreamID AOldStreamID, StreamID ANewStreamID);
+		public abstract Stream Open(StreamID streamID);
+		public abstract void Close(StreamID streamID);
+		public abstract void Destroy(StreamID streamID);
+		public abstract void Reassign(StreamID oldStreamID, StreamID newStreamID);
 	}
 }
 

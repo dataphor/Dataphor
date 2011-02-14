@@ -14,7 +14,7 @@ namespace Alphora.Dataphor.Frontend.Client
 {
 	public class LookupAction : DataAction, ILookupAction
 	{
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
@@ -25,224 +25,224 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 			finally
 			{
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 
 
 		// MasterKeyNames
 
-		private string FMasterKeyNames = String.Empty;
+		private string _masterKeyNames = String.Empty;
 		[DefaultValue("")]
 		[Description("A set of keys (comma or semicolon seperated) which provide the values to filter the target set.  Used with DetailKeyNames to create a master detail filter on the lookup form data set.  Should also be set in the Document property if the lookup form is a derived page.")]
 		public string MasterKeyNames
 		{
-			get { return FMasterKeyNames; }
-			set { FMasterKeyNames = value == null ? String.Empty : value; }
+			get { return _masterKeyNames; }
+			set { _masterKeyNames = value == null ? String.Empty : value; }
 		}
 
 		// DetailKeyNames
 
-		private string FDetailKeyNames = String.Empty;
+		private string _detailKeyNames = String.Empty;
 		[DefaultValue("")]
 		[Description("A set of keys (comma or semicolon seperated) by which the target set will be filtered.  Used with LookupColumnNames to create a master detail filter on the lookup form data set.  Should also be set in the Document property if the lookup form is a derived page.")]
 		public string DetailKeyNames
 		{
-			get { return FDetailKeyNames; }
-			set { FDetailKeyNames = value == null ? String.Empty : value; }
+			get { return _detailKeyNames; }
+			set { _detailKeyNames = value == null ? String.Empty : value; }
 		}
 
 		// LookupColumnNames
 
-		private string FLookupColumnNames = String.Empty;
+		private string _lookupColumnNames = String.Empty;
 		[DefaultValue("")]
 		[Description("The columns (comma or semicolon seperated) that will be read from the lookups' source.")]
 		public string LookupColumnNames
 		{
-			get { return FLookupColumnNames; }
+			get { return _lookupColumnNames; }
 			set
 			{
-				if (FLookupColumnNames != value)
-					FLookupColumnNames = value;
+				if (_lookupColumnNames != value)
+					_lookupColumnNames = value;
 			}
 		}
 
 		public string GetLookupColumnNames()
 		{
-			return FLookupColumnNames;
+			return _lookupColumnNames;
 		}
 
 		// ColumnNames
 
-		private string FColumnNames = String.Empty;
+		private string _columnNames = String.Empty;
 		[DefaultValue("")]
 		[Description("The columns (comma or semicolon seperated) that will be set by the lookup.")]
 		public string ColumnNames
 		{
-			get { return FColumnNames; }
+			get { return _columnNames; }
 			set
 			{
-				if (FColumnNames != value)
-					FColumnNames = value;
+				if (_columnNames != value)
+					_columnNames = value;
 			}
 		}
 
 		public string GetColumnNames()
 		{
-			return FColumnNames;
+			return _columnNames;
 		}
 
 		// Document
 
-		private string FDocument = String.Empty;
+		private string _document = String.Empty;
 		[DefaultValue("")]
 		[Description("A form interface document which will be shown to perform the lookup.")]
 		[Editor("Alphora.Dataphor.Dataphoria.DocumentExpressionUIEditor,Dataphoria", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DocumentExpressionOperator("Form")]
 		public string Document
 		{
-			get { return FDocument; }
-			set { FDocument = value; }
+			get { return _document; }
+			set { _document = value; }
 		}
 		
 		// AutoPost
 
-		private bool FAutoPost = true;
+		private bool _autoPost = true;
 		[DefaultValue(true)]
 		[Description("Indicates whether the source will be posted automatically after a lookup.")]
 		public bool AutoPost
 		{
-			get { return FAutoPost; }
-			set { FAutoPost = value; }
+			get { return _autoPost; }
+			set { _autoPost = value; }
 		}
 
 		// OnLookupAccepted
 
-		private IAction FOnLookupAccepted;
+		private IAction _onLookupAccepted;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action to execute after the lookup form has been accepted.")]
 		public IAction OnLookupAccepted
 		{
-			get { return FOnLookupAccepted; }
+			get { return _onLookupAccepted; }
 			set 
 			{
-				if (FOnLookupAccepted != null)
-					FOnLookupAccepted.Disposed -= new EventHandler(FormAcceptedActionDisposed);
-				FOnLookupAccepted = value;	
-				if (FOnLookupAccepted != null)
-					FOnLookupAccepted.Disposed += new EventHandler(FormAcceptedActionDisposed);
+				if (_onLookupAccepted != null)
+					_onLookupAccepted.Disposed -= new EventHandler(FormAcceptedActionDisposed);
+				_onLookupAccepted = value;	
+				if (_onLookupAccepted != null)
+					_onLookupAccepted.Disposed += new EventHandler(FormAcceptedActionDisposed);
 			}
 		}
 
-		private void FormAcceptedActionDisposed(object ASender, EventArgs AArgs)
+		private void FormAcceptedActionDisposed(object sender, EventArgs args)
 		{
 			OnLookupAccepted = null;
 		}
 
 		// OnLookupClose
 
-		protected IAction FOnLookupClose;
+		protected IAction _onLookupClose;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action to execute after the lookup form has been closed.")]
 		public IAction OnLookupClose
 		{
-			get { return FOnLookupClose; }
+			get { return _onLookupClose; }
 			set	
 			{ 
-				if (FOnLookupClose != null)
-					FOnLookupClose.Disposed -= new EventHandler(FormCloseActionDisposed);
-				FOnLookupClose = value;	
-				if (FOnLookupClose != null)
-					FOnLookupClose.Disposed += new EventHandler(FormCloseActionDisposed);
+				if (_onLookupClose != null)
+					_onLookupClose.Disposed -= new EventHandler(FormCloseActionDisposed);
+				_onLookupClose = value;	
+				if (_onLookupClose != null)
+					_onLookupClose.Disposed += new EventHandler(FormCloseActionDisposed);
 			}
 		}
 
-		private void FormCloseActionDisposed(object ASender, EventArgs AArgs)
+		private void FormCloseActionDisposed(object sender, EventArgs args)
 		{
 			OnLookupClose = null;
 		}
 
 		// OnLookupRejected
 
-		protected IAction FOnLookupRejected;
+		protected IAction _onLookupRejected;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action to execute after the lookup form has been rejected.")]
 		public IAction OnLookupRejected
 		{
-			get { return FOnLookupRejected; }
+			get { return _onLookupRejected; }
 			set	
 			{ 
-				if (FOnLookupRejected != null)
-					FOnLookupRejected.Disposed -= new EventHandler(FormRejectedActionDisposed);
-				FOnLookupRejected = value;	
-				if (FOnLookupRejected != null)
-					FOnLookupRejected.Disposed += new EventHandler(FormRejectedActionDisposed);
+				if (_onLookupRejected != null)
+					_onLookupRejected.Disposed -= new EventHandler(FormRejectedActionDisposed);
+				_onLookupRejected = value;	
+				if (_onLookupRejected != null)
+					_onLookupRejected.Disposed += new EventHandler(FormRejectedActionDisposed);
 			}
 		}
 
-		private void FormRejectedActionDisposed(object ASender, EventArgs AArgs)
+		private void FormRejectedActionDisposed(object sender, EventArgs args)
 		{
 			OnLookupRejected = null;
 		}
 
 		// BeforeLookupActivated
 
-		protected IAction FBeforeLookupActivated;
+		protected IAction _beforeLookupActivated;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action to execute after the lookup form is created, but before it is activated.")]
 		public IAction BeforeLookupActivated
 		{
-			get { return FBeforeLookupActivated; }
+			get { return _beforeLookupActivated; }
 			set	
 			{ 
-				if (FBeforeLookupActivated != null)
-					FBeforeLookupActivated.Disposed -= new EventHandler(FormRejectedActionDisposed);
-				FBeforeLookupActivated = value;	
-				if (FBeforeLookupActivated != null)
-					FBeforeLookupActivated.Disposed += new EventHandler(FormRejectedActionDisposed);
+				if (_beforeLookupActivated != null)
+					_beforeLookupActivated.Disposed -= new EventHandler(FormRejectedActionDisposed);
+				_beforeLookupActivated = value;	
+				if (_beforeLookupActivated != null)
+					_beforeLookupActivated.Disposed += new EventHandler(FormRejectedActionDisposed);
 			}
 		}
 
-		private void BeforeLookupActivatedDisposed(object ASender, EventArgs AArgs)
+		private void BeforeLookupActivatedDisposed(object sender, EventArgs args)
 		{
 			BeforeLookupActivated = null;
 		}
 
-		public void LookupFormAccept(IFormInterface AForm) 
+		public void LookupFormAccept(IFormInterface form) 
 		{
-			string[] LLookupColumns = LookupColumnNames.Split(DAE.Client.DataView.CColumnNameDelimiters);
-			string[] LSourceColumns = ColumnNames.Split(DAE.Client.DataView.CColumnNameDelimiters);
+			string[] lookupColumns = LookupColumnNames.Split(DAE.Client.DataView.ColumnNameDelimiters);
+			string[] sourceColumns = ColumnNames.Split(DAE.Client.DataView.ColumnNameDelimiters);
 
 			//Assign the field values
-			for (int i = 0; i < LSourceColumns.Length; i++)
-				Source.DataSource.DataSet.Fields[LSourceColumns[i]].Value = AForm.MainSource.DataView.Fields[LLookupColumns[i]].Value;
+			for (int i = 0; i < sourceColumns.Length; i++)
+				Source.DataSource.DataSet.Fields[sourceColumns[i]].Value = form.MainSource.DataView.Fields[lookupColumns[i]].Value;
 				
-			if (FAutoPost)
+			if (_autoPost)
 				Source.DataView.Post();
 
-			if (FOnLookupAccepted != null)
-				FOnLookupAccepted.Execute(this, new EventParams("AForm", AForm));
+			if (_onLookupAccepted != null)
+				_onLookupAccepted.Execute(this, new EventParams("AForm", form));
 
-			if (FOnLookupClose != null)
-				FOnLookupClose.Execute(this, new EventParams("AForm", AForm));
+			if (_onLookupClose != null)
+				_onLookupClose.Execute(this, new EventParams("AForm", form));
 		}
 
-		public void LookupFormReject(IFormInterface AForm)
+		public void LookupFormReject(IFormInterface form)
 		{
-			if (FOnLookupRejected != null)
-				FOnLookupRejected.Execute(this, new EventParams("AForm", AForm));
+			if (_onLookupRejected != null)
+				_onLookupRejected.Execute(this, new EventParams("AForm", form));
 
-			if (FOnLookupClose != null)
-				FOnLookupClose.Execute(this, new EventParams("AForm", AForm));
+			if (_onLookupClose != null)
+				_onLookupClose.Execute(this, new EventParams("AForm", form));
 		}
 
-		public void LookupFormInitialize(IFormInterface AForm) 
+		public void LookupFormInitialize(IFormInterface form) 
 		{
-			if (FBeforeLookupActivated != null)
-				FBeforeLookupActivated.Execute(this, new EventParams("AForm", AForm));
+			if (_beforeLookupActivated != null)
+				_beforeLookupActivated.Execute(this, new EventParams("AForm", form));
 		}
 
-		protected override void InternalExecute(INode ASender, EventParams AParams)
+		protected override void InternalExecute(INode sender, EventParams paramsValue)
 		{
 			LookupUtility.DoLookup(this, new FormInterfaceHandler(LookupFormAccept), new FormInterfaceHandler(LookupFormReject), null);
 		}

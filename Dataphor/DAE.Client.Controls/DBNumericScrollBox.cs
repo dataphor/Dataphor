@@ -16,7 +16,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 	[ToolboxBitmap(typeof(Alphora.Dataphor.DAE.Client.Controls.NumericScrollBox),"Icons.DBNumericScrollBox.bmp")]
 	public class NumericScrollBox : Control
 	{
-		public const int CSpacerHeight = 4;
+		public const int SpacerHeight = 4;
 
 		/// <summary> Initializes a new instance of a DBNumericScrollBox. </summary>
 		public NumericScrollBox()
@@ -33,12 +33,12 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			InitializeDownButton();
 			InitializeScrollTimer();
 
-			Size = FTextBox.Size + (DisplayRectangle.Size - Size);
+			Size = _textBox.Size + (DisplayRectangle.Size - Size);
 
 			ResumeLayout(false);
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
@@ -46,7 +46,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 			finally
 			{
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 		
@@ -54,15 +54,15 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		protected bool ShouldSerializeSmallIncrement()
 		{
-			return FSmallIncrement != 1m;
+			return _smallIncrement != 1m;
 		}
 		
-		private decimal FSmallIncrement = 1m;
+		private decimal _smallIncrement = 1m;
 		/// <summary> Gets or sets the Small Increment value for the Arrow Keys, Up-Down Buttons, and Scroll Feature.</summary>
 		public decimal SmallIncrement
 		{
-			get { return FSmallIncrement; }
-			set { FSmallIncrement = Math.Max(1, value);	}
+			get { return _smallIncrement; }
+			set { _smallIncrement = Math.Max(1, value);	}
 		}
 
 		#endregion
@@ -71,15 +71,15 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		protected bool ShouldSerializeLargeIncrement()
 		{
-			return FLargeIncrement != 10m;
+			return _largeIncrement != 10m;
 		}
 
-		private decimal FLargeIncrement = 10m;
+		private decimal _largeIncrement = 10m;
 		/// <summary> Gets or sets the Large Increment value for the Arrow Keys, Up-Down Buttons, and Scrolling Feature.</summary>
 		public decimal LargeIncrement
 		{
-			get { return FLargeIncrement; }
-			set	{ FLargeIncrement = Math.Max(1, value);	}
+			get { return _largeIncrement; }
+			set	{ _largeIncrement = Math.Max(1, value);	}
 		}
 
 		#endregion
@@ -88,15 +88,15 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		protected bool ShouldSerializeMinimumValue()
 		{
-			return FMinimumValue != System.Decimal.MinValue;
+			return _minimumValue != System.Decimal.MinValue;
 		}
 
-		private decimal FMinimumValue = System.Decimal.MinValue;
+		private decimal _minimumValue = System.Decimal.MinValue;
 		/// <summary> Gets or sets the Minimum value allowed in the Numeric Scroll Box.</summary>
 		public decimal MinimumValue
 		{
-			get	{ return FMinimumValue;	}
-			set	{ FMinimumValue = value; }
+			get	{ return _minimumValue;	}
+			set	{ _minimumValue = value; }
 		}
 
 		#endregion
@@ -105,85 +105,85 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		protected bool ShouldSerializeMaximumValue()
 		{
-			return FMaximumValue != System.Decimal.MaxValue;
+			return _maximumValue != System.Decimal.MaxValue;
 		}
 
-		private decimal FMaximumValue = System.Decimal.MaxValue;
+		private decimal _maximumValue = System.Decimal.MaxValue;
 		/// <summary> Gets or sets the MaximumValue allowed for the Numeric Scroll Box.</summary>
 		public decimal MaximumValue
 		{
-			get	{ return FMaximumValue;	}
-			set	{ FMaximumValue =  value; }
+			get	{ return _maximumValue;	}
+			set	{ _maximumValue =  value; }
 		}
 
 		#endregion
 
 		#region TextBox
 
-		private DBNumericTextBox FTextBox;
+		private DBNumericTextBox _textBox;
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
 		public DBNumericTextBox TextBox
 		{
-			get { return FTextBox; }
+			get { return _textBox; }
 		}
 
 		private void InitializeTextBox()
 		{
-			FTextBox = new DBNumericTextBox();
-			FTextBox.Parent = this;
-			FTextBox.Location = Point.Empty;
+			_textBox = new DBNumericTextBox();
+			_textBox.Parent = this;
+			_textBox.Location = Point.Empty;
 		}
 
-		protected override void OnGotFocus(EventArgs AArgs)
+		protected override void OnGotFocus(EventArgs args)
 		{
-			base.OnGotFocus(AArgs);
-			if (FTextBox != null)
-				FTextBox.Focus();
+			base.OnGotFocus(args);
+			if (_textBox != null)
+				_textBox.Focus();
 		}
 
 		#endregion
 
 		#region ScrollBox
 
-		private Panel FScrollBox;
+		private Panel _scrollBox;
 
 		private void InitializeScrollBox()
 		{
-			FScrollBox = new System.Windows.Forms.Panel();
-			FScrollBox.Parent = this;
-			FScrollBox.BackColor = SystemColors.ControlDark;
-			FScrollBox.MouseDown += new MouseEventHandler(DoScrollMouseDown);
-			FScrollBox.MouseUp += new MouseEventHandler(DoScrollMouseUp);
-			FScrollBox.MouseMove += new MouseEventHandler(DoScrollMouseMove);
-			FScrollBox.Cursor = Cursors.HSplit;
+			_scrollBox = new System.Windows.Forms.Panel();
+			_scrollBox.Parent = this;
+			_scrollBox.BackColor = SystemColors.ControlDark;
+			_scrollBox.MouseDown += new MouseEventHandler(DoScrollMouseDown);
+			_scrollBox.MouseUp += new MouseEventHandler(DoScrollMouseUp);
+			_scrollBox.MouseMove += new MouseEventHandler(DoScrollMouseMove);
+			_scrollBox.Cursor = Cursors.HSplit;
 		}
 		
-		private Point FMouseDownLocation;
+		private Point _mouseDownLocation;
 
 		/// <summary> Gets initial cursor coordinates for mouse movement calculation.</summary>
-		private void DoScrollMouseDown(object sender, MouseEventArgs AArgs)
+		private void DoScrollMouseDown(object sender, MouseEventArgs args)
 		{
-			FMouseDownLocation = new Point(AArgs.X, AArgs.Y);
-			FScrollBox.Capture = true;
+			_mouseDownLocation = new Point(args.X, args.Y);
+			_scrollBox.Capture = true;
 		}
 
 		/// <summary> Resets the initial point to empty.</summary>
-		protected virtual void DoScrollMouseUp(object sender, MouseEventArgs AArgs)
+		protected virtual void DoScrollMouseUp(object sender, MouseEventArgs args)
 		{
-			FScrollBox.Capture = false;
+			_scrollBox.Capture = false;
 		}
 
 		/// <summary> Calls Increment or Decrement based difference between mouse movement and initial cursor coordinates.</summary>
-		protected virtual void DoScrollMouseMove(object sender, MouseEventArgs AArgs)
+		protected virtual void DoScrollMouseMove(object sender, MouseEventArgs args)
 		{
-			if (FScrollBox.Capture)
+			if (_scrollBox.Capture)
 			{
-				decimal LDeltaY = FMouseDownLocation.Y - AArgs.Y;
-				if (LDeltaY != 0)
+				decimal deltaY = _mouseDownLocation.Y - args.Y;
+				if (deltaY != 0)
 				{
-					LDeltaY *= (Control.ModifierKeys == Keys.Control ? FLargeIncrement : FSmallIncrement);
-					Increment(LDeltaY);
-					Cursor.Position = FScrollBox.PointToScreen(FMouseDownLocation);	// keep the mouse at it original location
+					deltaY *= (Control.ModifierKeys == Keys.Control ? _largeIncrement : _smallIncrement);
+					Increment(deltaY);
+					Cursor.Position = _scrollBox.PointToScreen(_mouseDownLocation);	// keep the mouse at it original location
 				}
 			}
 		}
@@ -192,30 +192,30 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region Up Button
 
-		private Button FUpButton;
+		private Button _upButton;
 
 		private void InitializeUpButton()
 		{
-			FUpButton = new SpeedButton();
-			FUpButton.BackColor = SystemColors.Control;
-			FUpButton.Parent = FScrollBox;
-			FUpButton.Cursor = Cursors.Arrow;
-			FUpButton.MouseDown += new MouseEventHandler(DoUpButtonMouseDown);
-			FUpButton.MouseUp += new MouseEventHandler(DoUpButtonMouseUp);
-			FUpButton.Image = SpeedButton.ResourceBitmap(typeof(NumericScrollBox), "Alphora.Dataphor.DAE.Client.Controls.Images.UpButton.bmp");
-			FUpButton.Width = FUpButton.Image.Width + 8;
+			_upButton = new SpeedButton();
+			_upButton.BackColor = SystemColors.Control;
+			_upButton.Parent = _scrollBox;
+			_upButton.Cursor = Cursors.Arrow;
+			_upButton.MouseDown += new MouseEventHandler(DoUpButtonMouseDown);
+			_upButton.MouseUp += new MouseEventHandler(DoUpButtonMouseUp);
+			_upButton.Image = SpeedButton.ResourceBitmap(typeof(NumericScrollBox), "Alphora.Dataphor.DAE.Client.Controls.Images.UpButton.bmp");
+			_upButton.Width = _upButton.Image.Width + 8;
 		}
 
-		private void DoUpButtonMouseDown(object sender, System.Windows.Forms.MouseEventArgs AArgs)
+		private void DoUpButtonMouseDown(object sender, System.Windows.Forms.MouseEventArgs args)
 		{
-			Increment((Control.ModifierKeys != Keys.Control) ? FSmallIncrement : FLargeIncrement);
-			FUpButton.Capture = true;
+			Increment((Control.ModifierKeys != Keys.Control) ? _smallIncrement : _largeIncrement);
+			_upButton.Capture = true;
 			StartTimer();
 		}
 
-		private void DoUpButtonMouseUp(object sender, System.Windows.Forms.MouseEventArgs AArgs)
+		private void DoUpButtonMouseUp(object sender, System.Windows.Forms.MouseEventArgs args)
 		{
-			FUpButton.Capture = false;
+			_upButton.Capture = false;
 			StopTimer();
 		}
 		
@@ -223,32 +223,32 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region Down Button
 
-		private Button FDownButton;
+		private Button _downButton;
 
 		private void InitializeDownButton()
 		{
-			FDownButton = new SpeedButton();
-			FDownButton.BackColor = SystemColors.Control;
-			FDownButton.Parent = FScrollBox;
-			FDownButton.Cursor = Cursors.Arrow;
-			FDownButton.MouseDown += new MouseEventHandler(DoDownButtonMouseDown);
-			FDownButton.MouseUp += new MouseEventHandler(DoDownButtonMouseUp);	
-			FDownButton.Image = SpeedButton.ResourceBitmap(typeof(NumericScrollBox), "Alphora.Dataphor.DAE.Client.Controls.Images.DownButton.bmp");
-			FDownButton.Width = FDownButton.Image.Width + 8;
+			_downButton = new SpeedButton();
+			_downButton.BackColor = SystemColors.Control;
+			_downButton.Parent = _scrollBox;
+			_downButton.Cursor = Cursors.Arrow;
+			_downButton.MouseDown += new MouseEventHandler(DoDownButtonMouseDown);
+			_downButton.MouseUp += new MouseEventHandler(DoDownButtonMouseUp);	
+			_downButton.Image = SpeedButton.ResourceBitmap(typeof(NumericScrollBox), "Alphora.Dataphor.DAE.Client.Controls.Images.DownButton.bmp");
+			_downButton.Width = _downButton.Image.Width + 8;
 		}
 
 		/// <summary> DownButtonMouseDown event calls Increment or Decrement method and starts timer.</summary>
-		protected virtual void DoDownButtonMouseDown(object sender, System.Windows.Forms.MouseEventArgs AArgs)
+		protected virtual void DoDownButtonMouseDown(object sender, System.Windows.Forms.MouseEventArgs args)
 		{
-			Increment(-((Control.ModifierKeys != Keys.Control) ? FSmallIncrement : FLargeIncrement));
-			FDownButton.Capture = true;
+			Increment(-((Control.ModifierKeys != Keys.Control) ? _smallIncrement : _largeIncrement));
+			_downButton.Capture = true;
 			StartTimer();
 		}
 
 		/// <summary> DownButtonMouseUp event stops timer, and resets timer interval to it's initial value.</summary>
-		protected virtual void DoDownButtonMouseUp(object sender, System.Windows.Forms.MouseEventArgs AArgs)
+		protected virtual void DoDownButtonMouseUp(object sender, System.Windows.Forms.MouseEventArgs args)
 		{
-			FDownButton.Capture = false;
+			_downButton.Capture = false;
 			StopTimer();
 		}
 
@@ -256,82 +256,82 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region Scroll Timer
 
-		private Timer FScrollTimer;
+		private Timer _scrollTimer;
 
 		private void InitializeScrollTimer()
 		{
-			FScrollTimer = new Timer();
-			FScrollTimer.Tick += new EventHandler(DoTimerTick);
+			_scrollTimer = new Timer();
+			_scrollTimer.Tick += new EventHandler(DoTimerTick);
 		}
 
 		private void DisposeScrollTimer()
 		{
-			if (FScrollTimer != null)
+			if (_scrollTimer != null)
 			{
-				FScrollTimer.Tick -= new EventHandler(DoTimerTick);
-				FScrollTimer.Dispose();
-				FScrollTimer = null;
+				_scrollTimer.Tick -= new EventHandler(DoTimerTick);
+				_scrollTimer.Dispose();
+				_scrollTimer = null;
 			}
 		}
 
 		private void StartTimer()
 		{
-			FScrollTimer.Interval = 200;
-			FScrollTimer.Start();
+			_scrollTimer.Interval = 200;
+			_scrollTimer.Start();
 		}
 
 		private void StopTimer()
 		{
-			FScrollTimer.Stop();
+			_scrollTimer.Stop();
 		}
 
 		/// <summary> Timer event that continues as long as the up or down button is held down.</summary>
-		protected virtual void DoTimerTick(object sender, System.EventArgs AArgs)
+		protected virtual void DoTimerTick(object sender, System.EventArgs args)
 		{
-			decimal LDelta = ((Control.ModifierKeys != Keys.Control) ? FSmallIncrement : FLargeIncrement);
-			if (FDownButton.Capture)
-				LDelta *= -1;
-			Increment(LDelta);
-			FScrollTimer.Interval = Math.Max(20, FScrollTimer.Interval - 4);
+			decimal delta = ((Control.ModifierKeys != Keys.Control) ? _smallIncrement : _largeIncrement);
+			if (_downButton.Capture)
+				delta *= -1;
+			Increment(delta);
+			_scrollTimer.Interval = Math.Max(20, _scrollTimer.Interval - 4);
 		}
 		
 		#endregion
 
 		#region Layout
 
-		protected override void OnLayout(LayoutEventArgs AArgs)
+		protected override void OnLayout(LayoutEventArgs args)
 		{
-			base.OnLayout(AArgs);
-			Size LExtent = FTextBox.Size;
-			int LMinHeight = FUpButton.Image.Height + FDownButton.Image.Height + 4 + CSpacerHeight;
-			if (LExtent.Height < LMinHeight)
-				LExtent.Height = LMinHeight;
-			FScrollBox.Bounds =
+			base.OnLayout(args);
+			Size extent = _textBox.Size;
+			int minHeight = _upButton.Image.Height + _downButton.Image.Height + 4 + SpacerHeight;
+			if (extent.Height < minHeight)
+				extent.Height = minHeight;
+			_scrollBox.Bounds =
 				new Rectangle
 				(
-					LExtent.Width,
+					extent.Width,
 					0,
-					Math.Max(FUpButton.Width, FDownButton.Width),
-					LExtent.Height
+					Math.Max(_upButton.Width, _downButton.Width),
+					extent.Height
 				);
-			LExtent.Width += FScrollBox.Width;
-			ClientSize = LExtent;
-			int LUpDownButtonHeight = (LExtent.Height - CSpacerHeight) / 2;
-			FUpButton.Bounds =
+			extent.Width += _scrollBox.Width;
+			ClientSize = extent;
+			int upDownButtonHeight = (extent.Height - SpacerHeight) / 2;
+			_upButton.Bounds =
 				new Rectangle
 				(
 					0,
 					0,
-					FScrollBox.Width,
-					LUpDownButtonHeight
+					_scrollBox.Width,
+					upDownButtonHeight
 				);
-			FDownButton.Bounds =
+			_downButton.Bounds =
 				new Rectangle
 				(
 					0,
-					LExtent.Height - LUpDownButtonHeight,
-					FScrollBox.Width,
-					LUpDownButtonHeight
+					extent.Height - upDownButtonHeight,
+					_scrollBox.Width,
+					upDownButtonHeight
 				);
 		}
 
@@ -339,9 +339,9 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		{
 			get
 			{
-				Rectangle LBounds = base.DisplayRectangle;
-				LBounds.Width -= Math.Max(FUpButton.Width, FDownButton.Width);
-				return LBounds;
+				Rectangle bounds = base.DisplayRectangle;
+				bounds.Width -= Math.Max(_upButton.Width, _downButton.Width);
+				return bounds;
 			}
 		}
 
@@ -350,13 +350,13 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		#region Mouse
 
 		/// <summary> On Mouse Wheel Event calls Increment or Decrement method.</summary>
-		protected override void OnMouseWheel(MouseEventArgs AArgs)
+		protected override void OnMouseWheel(MouseEventArgs args)
 		{
-			base.OnMouseWheel(AArgs);
-			decimal LDelta = ((Control.ModifierKeys != Keys.Control) ? FSmallIncrement : FLargeIncrement);
-			if (AArgs.Delta < 0)
-				LDelta *= -1;
-			Increment(LDelta);
+			base.OnMouseWheel(args);
+			decimal delta = ((Control.ModifierKeys != Keys.Control) ? _smallIncrement : _largeIncrement);
+			if (args.Delta < 0)
+				delta *= -1;
+			Increment(delta);
 		}
 		
 		#endregion
@@ -368,23 +368,23 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Browsable(false)]
 		protected decimal Value
 		{
-			get	{ return (FTextBox.Text != String.Empty) ? Convert.ToDecimal(FTextBox.Text) : 0; }
+			get	{ return (_textBox.Text != String.Empty) ? Convert.ToDecimal(_textBox.Text) : 0; }
 		}
 
 		/// <summary> Increment method increases numeric value by the amount indicated in the parameter.</summary>
-		private void Increment(decimal AValue)
+		private void Increment(decimal value)
 		{
-			if (FTextBox.Link.Active && FTextBox.Link.Edit())
+			if (_textBox.Link.Active && _textBox.Link.Edit())
 			{
-				FTextBox.Focus();
-				if (!FTextBox.ContainsFocus)	// Don't do anything if the textbox was unable to receive focus
+				_textBox.Focus();
+				if (!_textBox.ContainsFocus)	// Don't do anything if the textbox was unable to receive focus
 					throw new AbortException();
-				AValue += Value;
-				if (AValue > FMaximumValue)
-					AValue = FMaximumValue;
-				if (AValue < FMinimumValue)
-					AValue = FMinimumValue;
-				FTextBox.InternalSetText(Convert.ToString(AValue));
+				value += Value;
+				if (value > _maximumValue)
+					value = _maximumValue;
+				if (value < _minimumValue)
+					value = _minimumValue;
+				_textBox.InternalSetText(Convert.ToString(value));
 			}		
 		}
 		
@@ -392,15 +392,15 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region Keyboard handling
 
-		protected override bool ProcessDialogKey(Keys AKey)
+		protected override bool ProcessDialogKey(Keys key)
 		{
-			switch (AKey)
+			switch (key)
 			{
-				case System.Windows.Forms.Keys.Up : Increment(FSmallIncrement); break;
-				case System.Windows.Forms.Keys.PageUp : Increment(FLargeIncrement); break;
-				case System.Windows.Forms.Keys.Down : Increment(-FSmallIncrement); break;
-				case System.Windows.Forms.Keys.PageDown : Increment(-FLargeIncrement); break;
-				default : return base.ProcessDialogKey(AKey);
+				case System.Windows.Forms.Keys.Up : Increment(_smallIncrement); break;
+				case System.Windows.Forms.Keys.PageUp : Increment(_largeIncrement); break;
+				case System.Windows.Forms.Keys.Down : Increment(-_smallIncrement); break;
+				case System.Windows.Forms.Keys.PageDown : Increment(-_largeIncrement); break;
+				default : return base.ProcessDialogKey(key);
 			}		
 			return true;
 		}

@@ -34,14 +34,14 @@ namespace Alphora.Dataphor.DAE.Server
 	public class Server : Engine
 	{
 		// Do not localize
-		public const string CDefaultLibraryDirectory = @"Libraries";
-		public const string CDefaultLibraryDataDirectory = @"LibraryData";
-		public const string CDefaultInstanceDirectory = @"Instances";
-		public const string CDefaultCatalogDirectory = @"Catalog";
-		public const string CDefaultCatalogDatabaseName = @"DAECatalog";
-		public const string CDefaultBackupDirectory = @"Backup";
-		public const string CDefaultSaveDirectory = @"Save";
-		public const string CDefaultLogDirectory = @"Log";
+		public const string DefaultLibraryDirectory = @"Libraries";
+		public const string DefaultLibraryDataDirectory = @"LibraryData";
+		public const string DefaultInstanceDirectory = @"Instances";
+		public const string DefaultCatalogDirectory = @"Catalog";
+		public const string DefaultCatalogDatabaseName = @"DAECatalog";
+		public const string DefaultBackupDirectory = @"Backup";
+		public const string DefaultSaveDirectory = @"Save";
+		public const string DefaultLogDirectory = @"Log";
 
 		public Server() : base()
 		{
@@ -50,9 +50,9 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		internal new ServerSessions Sessions { get { return base.Sessions; } }
 		
-		internal new IServerSession ConnectAs(SessionInfo ASessionInfo)
+		internal new IServerSession ConnectAs(SessionInfo sessionInfo)
 		{
-			return base.ConnectAs(ASessionInfo);
+			return base.ConnectAs(sessionInfo);
 		}
 
 		protected override void InternalStart()
@@ -83,18 +83,18 @@ namespace Alphora.Dataphor.DAE.Server
 			if (!IsEngine)
 			{
 				// Ensure the general library is loaded
-				if (!Catalog.LoadedLibraries.Contains(CGeneralLibraryName))
+				if (!Catalog.LoadedLibraries.Contains(GeneralLibraryName))
 				{
-					Program LProgram = new Program(FSystemProcess);
-					LProgram.Start(null);
+					Program program = new Program(_systemProcess);
+					program.Start(null);
 					try
 					{
-						Schema.LibraryUtility.EnsureLibraryRegistered(LProgram, CGeneralLibraryName, true);
-						FSystemSession.CurrentLibrary = SystemLibrary; // reset current library of the system session because it will be set by registering General
+						Schema.LibraryUtility.EnsureLibraryRegistered(program, GeneralLibraryName, true);
+						_systemSession.CurrentLibrary = SystemLibrary; // reset current library of the system session because it will be set by registering General
 					}
 					finally
 					{
-						LProgram.Stop(null);
+						program.Stop(null);
 					}
 				}
 			}
@@ -102,25 +102,25 @@ namespace Alphora.Dataphor.DAE.Server
 
 		public static string GetDefaultLibraryDirectory()
 		{
-			return Path.Combine(PathUtility.GetBinDirectory(), CDefaultLibraryDirectory);
+			return Path.Combine(PathUtility.GetBinDirectory(), DefaultLibraryDirectory);
 		}
 
 		protected override void InternalLoadAvailableLibraries()
 		{
-			Schema.LibraryUtility.GetAvailableLibraries(InstanceDirectory, FLibraryDirectory, Catalog.Libraries);
+			Schema.LibraryUtility.GetAvailableLibraries(InstanceDirectory, _libraryDirectory, Catalog.Libraries);
 		}
 
 		protected override bool DetermineFirstRun()
 		{
-			return ((ServerCatalogDeviceSession)FSystemProcess.CatalogDeviceSession).IsEmpty();
+			return ((ServerCatalogDeviceSession)_systemProcess.CatalogDeviceSession).IsEmpty();
 		}
 
 		protected override void SnapshotBaseCatalogObjects()
 		{
-			((ServerCatalogDeviceSession)FSystemProcess.CatalogDeviceSession).SnapshotBase();
+			((ServerCatalogDeviceSession)_systemProcess.CatalogDeviceSession).SnapshotBase();
 		}
 
-		private string FCatalogStoreClassName;
+		private string _catalogStoreClassName;
 		/// <summary>
 		/// Gets or sets the assembly qualified class name of the store used to persist the system catalog.
 		/// </summary>
@@ -130,11 +130,11 @@ namespace Alphora.Dataphor.DAE.Server
 		/// </remarks>
 		public string CatalogStoreClassName
 		{
-			get { return FCatalogStoreClassName; }
+			get { return _catalogStoreClassName; }
 			set
 			{
 				CheckState(ServerState.Stopped);
-				FCatalogStoreClassName = value;
+				_catalogStoreClassName = value;
 			}
 		}
 
@@ -145,12 +145,12 @@ namespace Alphora.Dataphor.DAE.Server
 		public string GetCatalogStoreClassName()
 		{
 			return
-				String.IsNullOrEmpty(FCatalogStoreClassName)
+				String.IsNullOrEmpty(_catalogStoreClassName)
 					? "Alphora.Dataphor.DAE.Store.SQLCE.SQLCEStore,Alphora.Dataphor.DAE.SQLCE"
-					: FCatalogStoreClassName;
+					: _catalogStoreClassName;
 		}
 
-		private string FCatalogStoreConnectionString;
+		private string _catalogStoreConnectionString;
 		/// <summary>
 		/// Gets or sets the connection string for the store used to persist the system catalog.
 		/// </summary>
@@ -167,11 +167,11 @@ namespace Alphora.Dataphor.DAE.Server
 		/// </remarks>
 		public string CatalogStoreConnectionString
 		{
-			get { return FCatalogStoreConnectionString; }
+			get { return _catalogStoreConnectionString; }
 			set
 			{
 				CheckState(ServerState.Stopped);
-				FCatalogStoreConnectionString = value;
+				_catalogStoreConnectionString = value;
 			}
 		}
 
@@ -182,9 +182,9 @@ namespace Alphora.Dataphor.DAE.Server
 		public string GetCatalogStoreConnectionString()
 		{
 			return
-				String.IsNullOrEmpty(FCatalogStoreConnectionString)
+				String.IsNullOrEmpty(_catalogStoreConnectionString)
 					? String.Format("Data Source={0};Password={1};Mode={2}", GetCatalogStoreDatabaseFileName(), String.Empty, "Read Write")
-					: FCatalogStoreConnectionString.Replace("%CatalogPath%", GetCatalogDirectory());
+					: _catalogStoreConnectionString.Replace("%CatalogPath%", GetCatalogDirectory());
 		}
 
 		/// <summary>
@@ -192,64 +192,64 @@ namespace Alphora.Dataphor.DAE.Server
 		/// </summary>
 		public string GetCatalogDirectory()
 		{
-			string LDirectory = Path.Combine(InstanceDirectory, CDefaultCatalogDirectory);
-			if (!Directory.Exists(LDirectory))
-				Directory.CreateDirectory(LDirectory);
-			return LDirectory;
+			string directory = Path.Combine(InstanceDirectory, DefaultCatalogDirectory);
+			if (!Directory.Exists(directory))
+				Directory.CreateDirectory(directory);
+			return directory;
 		}
 
 		public string GetCatalogStoreDatabaseFileName()
 		{
-			return Path.Combine(GetCatalogDirectory(), Path.ChangeExtension(CDefaultCatalogDatabaseName, ".sdf"));
+			return Path.Combine(GetCatalogDirectory(), Path.ChangeExtension(DefaultCatalogDatabaseName, ".sdf"));
 		}
 
-		private string FLibraryDirectory = String.Empty;
+		private string _libraryDirectory = String.Empty;
 		/// <summary> The directory the DAE uses to find available libraries. </summary>
 		public string LibraryDirectory
 		{
-			get { return FLibraryDirectory; }
+			get { return _libraryDirectory; }
 			set
 			{
 				if (State != ServerState.Starting && State != ServerState.Stopped)
 					throw new ServerException(ServerException.Codes.InvalidServerState, "Starting or Stopped");
 				if ((value == null) || (value == String.Empty))
-					FLibraryDirectory = GetDefaultLibraryDirectory();
+					_libraryDirectory = GetDefaultLibraryDirectory();
 				else
-					FLibraryDirectory = value;
+					_libraryDirectory = value;
 
-				string[] LDirectories = FLibraryDirectory.Split(';');
+				string[] directories = _libraryDirectory.Split(';');
 
-				StringBuilder LLibraryDirectory = new StringBuilder();
-				for (int LIndex = 0; LIndex < LDirectories.Length; LIndex++)
+				StringBuilder libraryDirectory = new StringBuilder();
+				for (int index = 0; index < directories.Length; index++)
 				{
-					if (!Path.IsPathRooted(LDirectories[LIndex]))
-						LDirectories[LIndex] = Path.Combine(PathUtility.GetBinDirectory(), LDirectories[LIndex]);
+					if (!Path.IsPathRooted(directories[index]))
+						directories[index] = Path.Combine(PathUtility.GetBinDirectory(), directories[index]);
 
-					if (!Directory.Exists(LDirectories[LIndex]) && !IsEngine)
-						Directory.CreateDirectory(LDirectories[LIndex]);
+					if (!Directory.Exists(directories[index]) && !IsEngine)
+						Directory.CreateDirectory(directories[index]);
 
-					if (LIndex > 0)
-						LLibraryDirectory.Append(";");
+					if (index > 0)
+						libraryDirectory.Append(";");
 
-					LLibraryDirectory.Append(LDirectories[LIndex]);
+					libraryDirectory.Append(directories[index]);
 				}
 
-				FLibraryDirectory = LLibraryDirectory.ToString();
+				_libraryDirectory = libraryDirectory.ToString();
 			}
 		}
 
 		protected override CatalogDevice CreateCatalogDevice()
 		{
-			return new ServerCatalogDevice(Schema.Object.GetNextObjectID(), CCatalogDeviceName);
+			return new ServerCatalogDevice(Schema.Object.GetNextObjectID(), CatalogDeviceName);
 		}
 		
 		protected override void LoadSystemAssemblies()
 		{
 			base.LoadSystemAssemblies();
 
-			Assembly LDAEAssembly = typeof(Server).Assembly;
-			FSystemLibrary.Assemblies.Add(LDAEAssembly);
-			Catalog.ClassLoader.RegisterAssembly(FSystemLibrary, LDAEAssembly);
+			Assembly dAEAssembly = typeof(Server).Assembly;
+			_systemLibrary.Assemblies.Add(dAEAssembly);
+			Catalog.ClassLoader.RegisterAssembly(_systemLibrary, dAEAssembly);
 		}
 
 		public override void LoadAvailableLibraries()
@@ -258,138 +258,138 @@ namespace Alphora.Dataphor.DAE.Server
 			lock (Catalog.Libraries)
 			{
 				// Ensure the general library exists
-				if (!Catalog.Libraries.Contains(CGeneralLibraryName))
+				if (!Catalog.Libraries.Contains(GeneralLibraryName))
 				{
-					Schema.Library LGeneralLibrary = new Schema.Library(CGeneralLibraryName);
-					LGeneralLibrary.Libraries.Add(new Schema.LibraryReference(CSystemLibraryName, new VersionNumber(-1, -1, -1, -1)));
-					Catalog.Libraries.Add(LGeneralLibrary);
-					string LLibraryDirectory = Path.Combine(Schema.LibraryUtility.GetDefaultLibraryDirectory(LibraryDirectory), LGeneralLibrary.Name);
-					if (!Directory.Exists(LLibraryDirectory))
-						Directory.CreateDirectory(LLibraryDirectory);
-					Schema.LibraryUtility.SaveToFile(LGeneralLibrary, Path.Combine(LLibraryDirectory, Schema.LibraryUtility.GetFileName(LGeneralLibrary.Name)));
+					Schema.Library generalLibrary = new Schema.Library(GeneralLibraryName);
+					generalLibrary.Libraries.Add(new Schema.LibraryReference(SystemLibraryName, new VersionNumber(-1, -1, -1, -1)));
+					Catalog.Libraries.Add(generalLibrary);
+					string libraryDirectory = Path.Combine(Schema.LibraryUtility.GetDefaultLibraryDirectory(LibraryDirectory), generalLibrary.Name);
+					if (!Directory.Exists(libraryDirectory))
+						Directory.CreateDirectory(libraryDirectory);
+					Schema.LibraryUtility.SaveToFile(generalLibrary, Path.Combine(libraryDirectory, Schema.LibraryUtility.GetFileName(generalLibrary.Name)));
 				}
 			}
 		}
 
 		private string SaveServerSettings()
 		{
-			StringBuilder LUpdateStatement = new StringBuilder();
+			StringBuilder updateStatement = new StringBuilder();
 
-			if (MaxConcurrentProcesses != CDefaultMaxConcurrentProcesses)
+			if (MaxConcurrentProcesses != DefaultMaxConcurrentProcesses)
 			{
-				if (LUpdateStatement.Length > 0)
-					LUpdateStatement.Append(", ");
-				LUpdateStatement.AppendFormat("MaxConcurrentProcesses := {0}", MaxConcurrentProcesses.ToString());
+				if (updateStatement.Length > 0)
+					updateStatement.Append(", ");
+				updateStatement.AppendFormat("MaxConcurrentProcesses := {0}", MaxConcurrentProcesses.ToString());
 			}
 
-			if (ProcessWaitTimeout != TimeSpan.FromSeconds(CDefaultProcessWaitTimeout))
+			if (ProcessWaitTimeout != TimeSpan.FromSeconds(DefaultProcessWaitTimeout))
 			{
-				if (LUpdateStatement.Length > 0)
-					LUpdateStatement.Append(", ");
-				LUpdateStatement.AppendFormat("ProcessWaitTimeout := TimeSpan.Ticks({0})", ProcessWaitTimeout.Ticks.ToString());
+				if (updateStatement.Length > 0)
+					updateStatement.Append(", ");
+				updateStatement.AppendFormat("ProcessWaitTimeout := TimeSpan.Ticks({0})", ProcessWaitTimeout.Ticks.ToString());
 			}
 
-			if (ProcessTerminationTimeout != TimeSpan.FromSeconds(CDefaultProcessTerminationTimeout))
+			if (ProcessTerminationTimeout != TimeSpan.FromSeconds(DefaultProcessTerminationTimeout))
 			{
-				if (LUpdateStatement.Length > 0)
-					LUpdateStatement.Append(", ");
-				LUpdateStatement.AppendFormat("ProcessTerminateTimeout := TimeSpan.Ticks({0})", ProcessTerminationTimeout.Ticks.ToString());
+				if (updateStatement.Length > 0)
+					updateStatement.Append(", ");
+				updateStatement.AppendFormat("ProcessTerminateTimeout := TimeSpan.Ticks({0})", ProcessTerminationTimeout.Ticks.ToString());
 			}
 
-			if (PlanCacheSize != CDefaultPlanCacheSize)
+			if (PlanCacheSize != DefaultPlanCacheSize)
 			{
-				if (LUpdateStatement.Length > 0)
-					LUpdateStatement.Append(", ");
-				LUpdateStatement.AppendFormat("PlanCacheSize := {0}", PlanCacheSize.ToString());
+				if (updateStatement.Length > 0)
+					updateStatement.Append(", ");
+				updateStatement.AppendFormat("PlanCacheSize := {0}", PlanCacheSize.ToString());
 			}
 
-			if (LUpdateStatement.Length > 0)
+			if (updateStatement.Length > 0)
 			{
-				LUpdateStatement.Insert(0, "update ServerSettings set { ");
-				LUpdateStatement.Append(" };\r\n");
+				updateStatement.Insert(0, "update ServerSettings set { ");
+				updateStatement.Append(" };\r\n");
 			}
 
-			return LUpdateStatement.ToString();
+			return updateStatement.ToString();
 		}
 
-		private Statement SaveSystemDeviceSettings(Schema.Device ADevice)
+		private Statement SaveSystemDeviceSettings(Schema.Device device)
 		{
-			AlterDeviceStatement LStatement = new AlterDeviceStatement();
-			LStatement.DeviceName = ADevice.Name;
-			LStatement.AlterClassDefinition = new AlterClassDefinition();
-			LStatement.AlterClassDefinition.AlterAttributes.AddRange(ADevice.ClassDefinition.Attributes);
-			return LStatement;
+			AlterDeviceStatement statement = new AlterDeviceStatement();
+			statement.DeviceName = device.Name;
+			statement.AlterClassDefinition = new AlterClassDefinition();
+			statement.AlterClassDefinition.AlterAttributes.AddRange(device.ClassDefinition.Attributes);
+			return statement;
 		}
 
 		private string SaveSystemDeviceSettings()
 		{
-			D4TextEmitter LEmitter = new D4TextEmitter();
-			Block LBlock = new Block();
-			if (FTempDevice.ClassDefinition.Attributes.Count > 0)
-				LBlock.Statements.Add(SaveSystemDeviceSettings(FTempDevice));
-			if (FATDevice.ClassDefinition.Attributes.Count > 0)
-				LBlock.Statements.Add(SaveSystemDeviceSettings(FATDevice));
-			if (FCatalogDevice.ClassDefinition.Attributes.Count > 0)
-				LBlock.Statements.Add(SaveSystemDeviceSettings(FCatalogDevice));
-			return new D4TextEmitter().Emit(LBlock) + "\r\n";
+			D4TextEmitter emitter = new D4TextEmitter();
+			Block block = new Block();
+			if (_tempDevice.ClassDefinition.Attributes.Count > 0)
+				block.Statements.Add(SaveSystemDeviceSettings(_tempDevice));
+			if (_aTDevice.ClassDefinition.Attributes.Count > 0)
+				block.Statements.Add(SaveSystemDeviceSettings(_aTDevice));
+			if (_catalogDevice.ClassDefinition.Attributes.Count > 0)
+				block.Statements.Add(SaveSystemDeviceSettings(_catalogDevice));
+			return new D4TextEmitter().Emit(block) + "\r\n";
 		}
 
-		private string SaveDeviceSettings(ServerProcess AProcess)
+		private string SaveDeviceSettings(ServerProcess process)
 		{
-			D4TextEmitter LEmitter = new D4TextEmitter();
-			Block LBlock = new Block();
+			D4TextEmitter emitter = new D4TextEmitter();
+			Block block = new Block();
 
-			IServerProcess LProcess = (IServerProcess)AProcess;
-			IServerCursor LCursor = LProcess.OpenCursor("select Devices { ID }", null);
+			IServerProcess localProcess = (IServerProcess)process;
+			IServerCursor cursor = localProcess.OpenCursor("select Devices { ID }", null);
 			try
 			{
-				using (Row LRow = LCursor.Plan.RequestRow())
+				using (Row row = cursor.Plan.RequestRow())
 				{
-					while (LCursor.Next())
+					while (cursor.Next())
 					{
-						LCursor.Select(LRow);
-						Schema.Device LDevice = AProcess.CatalogDeviceSession.ResolveCatalogObject((int)LRow[0/*"ID"*/]) as Schema.Device;
-						if ((LDevice != null) && (LDevice.ClassDefinition.Attributes.Count > 0))
-							LBlock.Statements.Add(SaveSystemDeviceSettings(LDevice));
+						cursor.Select(row);
+						Schema.Device device = process.CatalogDeviceSession.ResolveCatalogObject((int)row[0/*"ID"*/]) as Schema.Device;
+						if ((device != null) && (device.ClassDefinition.Attributes.Count > 0))
+							block.Statements.Add(SaveSystemDeviceSettings(device));
 					}
 				}
 			}
 			finally
 			{
-				LProcess.CloseCursor(LCursor);
+				localProcess.CloseCursor(cursor);
 			}
 
-			return new D4TextEmitter().Emit(LBlock) + "\r\n";
+			return new D4TextEmitter().Emit(block) + "\r\n";
 		}
 
-		private string SaveSecurity(ServerProcess AProcess)
+		private string SaveSecurity(ServerProcess process)
 		{
-			StringBuilder LResult = new StringBuilder();
-			IServerProcess LProcess = (IServerProcess)AProcess;
-			IServerCursor LCursor;
+			StringBuilder result = new StringBuilder();
+			IServerProcess localProcess = (IServerProcess)process;
+			IServerCursor cursor;
 
 			// Users
-			LResult.Append("// Users\r\n");
+			result.Append("// Users\r\n");
 
-			LCursor = LProcess.OpenCursor("select Users { ID }", null);
+			cursor = localProcess.OpenCursor("select Users { ID }", null);
 			try
 			{
-				using (Row LRow = LCursor.Plan.RequestRow())
+				using (Row row = cursor.Plan.RequestRow())
 				{
-					while (LCursor.Next())
+					while (cursor.Next())
 					{
-						LCursor.Select(LRow);
-						switch ((string)LRow[0/*"ID"*/])
+						cursor.Select(row);
+						switch ((string)row[0/*"ID"*/])
 						{
-							case Engine.CSystemUserID: break;
-							case Engine.CAdminUserID:
-								if (FAdminUser.Password != String.Empty)
-									LResult.AppendFormat("SetEncryptedPassword('{0}', '{1}');\r\n", FAdminUser.ID, FAdminUser.Password);
+							case Engine.SystemUserID: break;
+							case Engine.AdminUserID:
+								if (_adminUser.Password != String.Empty)
+									result.AppendFormat("SetEncryptedPassword('{0}', '{1}');\r\n", _adminUser.ID, _adminUser.Password);
 								break;
 
 							default:
-								Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)LRow[0/*"ID"*/]);
-								LResult.AppendFormat("CreateUserWithEncryptedPassword('{0}', '{1}', '{2}');\r\n", LUser.ID, LUser.Name, LUser.Password);
+								Schema.User user = process.CatalogDeviceSession.ResolveUser((string)row[0/*"ID"*/]);
+								result.AppendFormat("CreateUserWithEncryptedPassword('{0}', '{1}', '{2}');\r\n", user.ID, user.Name, user.Password);
 								break;
 						}
 					}
@@ -397,173 +397,173 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 			finally
 			{
-				LProcess.CloseCursor(LCursor);
+				localProcess.CloseCursor(cursor);
 			}
 
-			LResult.Append("\r\n");
-			LResult.Append("// Device Users\r\n");
+			result.Append("\r\n");
+			result.Append("// Device Users\r\n");
 
 			// DeviceUsers
-			LCursor = LProcess.OpenCursor("select DeviceUsers join (Devices { ID Device_ID, Name Device_Name }) { User_ID, Device_ID }", null);
+			cursor = localProcess.OpenCursor("select DeviceUsers join (Devices { ID Device_ID, Name Device_Name }) { User_ID, Device_ID }", null);
 			try
 			{
-				using (Row LRow = LCursor.Plan.RequestRow())
+				using (Row row = cursor.Plan.RequestRow())
 				{
-					while (LCursor.Next())
+					while (cursor.Next())
 					{
-						LCursor.Select(LRow);
-						Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)LRow[0/*"User_ID"*/]);
-						Schema.Device LDevice = (Schema.Device)AProcess.CatalogDeviceSession.ResolveCatalogObject((int)LRow[1/*"Device_ID"*/]);
-						Schema.DeviceUser LDeviceUser = AProcess.CatalogDeviceSession.ResolveDeviceUser(LDevice, LUser);
-						LResult.AppendFormat("CreateDeviceUserWithEncryptedPassword('{0}', '{1}', '{2}', '{3}', '{4}');\r\n", LDeviceUser.User.ID, LDeviceUser.Device.Name, LDeviceUser.DeviceUserID, LDeviceUser.DevicePassword, LDeviceUser.ConnectionParameters);
+						cursor.Select(row);
+						Schema.User user = process.CatalogDeviceSession.ResolveUser((string)row[0/*"User_ID"*/]);
+						Schema.Device device = (Schema.Device)process.CatalogDeviceSession.ResolveCatalogObject((int)row[1/*"Device_ID"*/]);
+						Schema.DeviceUser deviceUser = process.CatalogDeviceSession.ResolveDeviceUser(device, user);
+						result.AppendFormat("CreateDeviceUserWithEncryptedPassword('{0}', '{1}', '{2}', '{3}', '{4}');\r\n", deviceUser.User.ID, deviceUser.Device.Name, deviceUser.DeviceUserID, deviceUser.DevicePassword, deviceUser.ConnectionParameters);
 					}
 				}
 			}
 			finally
 			{
-				LProcess.CloseCursor(LCursor);
+				localProcess.CloseCursor(cursor);
 			}
 
-			LResult.Append("\r\n");
-			LResult.Append("// User Roles\r\n");
+			result.Append("\r\n");
+			result.Append("// User Roles\r\n");
 
 			// UserRoles
-			LCursor = LProcess.OpenCursor("select UserRoles where Role_Name <> 'System.User'", null);
+			cursor = localProcess.OpenCursor("select UserRoles where Role_Name <> 'System.User'", null);
 			try
 			{
-				using (Row LRow = LCursor.Plan.RequestRow())
+				using (Row row = cursor.Plan.RequestRow())
 				{
-					while (LCursor.Next())
+					while (cursor.Next())
 					{
-						LCursor.Select(LRow);
+						cursor.Select(row);
 
-						LResult.AppendFormat("AddUserToRole('{0}', '{1}');\r\n", (string)LRow[0/*"User_ID"*/], (string)LRow[1/*"Role_Name"*/]);
+						result.AppendFormat("AddUserToRole('{0}', '{1}');\r\n", (string)row[0/*"User_ID"*/], (string)row[1/*"Role_Name"*/]);
 					}
 				}
 			}
 			finally
 			{
-				LProcess.CloseCursor(LCursor);
+				localProcess.CloseCursor(cursor);
 			}
 
-			LResult.Append("\r\n");
-			LResult.Append("// User Right Assignments\r\n");
+			result.Append("\r\n");
+			result.Append("// User Right Assignments\r\n");
 
 			// UserRightAssignments
-			LCursor = LProcess.OpenCursor("select UserRightAssignments", null);
+			cursor = localProcess.OpenCursor("select UserRightAssignments", null);
 			try
 			{
-				using (Row LRow = LCursor.Plan.RequestRow())
+				using (Row row = cursor.Plan.RequestRow())
 				{
-					while (LCursor.Next())
+					while (cursor.Next())
 					{
-						LCursor.Select(LRow);
+						cursor.Select(row);
 
-						if ((bool)LRow[2/*"IsGranted"*/])
-							LResult.AppendFormat("GrantRightToUser('{0}', '{1}');\r\n", (string)LRow[1/*"Right_Name"*/], (string)LRow[0/*"User_ID"*/]);
+						if ((bool)row[2/*"IsGranted"*/])
+							result.AppendFormat("GrantRightToUser('{0}', '{1}');\r\n", (string)row[1/*"Right_Name"*/], (string)row[0/*"User_ID"*/]);
 						else
-							LResult.AppendFormat("RevokeRightFromUser('{0}', '{1}');\r\n", (string)LRow[1/*"Right_Name"*/], (string)LRow[0/*"User_ID"*/]);
+							result.AppendFormat("RevokeRightFromUser('{0}', '{1}');\r\n", (string)row[1/*"Right_Name"*/], (string)row[0/*"User_ID"*/]);
 					}
 				}
 			}
 			finally
 			{
-				LProcess.CloseCursor(LCursor);
+				localProcess.CloseCursor(cursor);
 			}
 
-			LResult.Append("\r\n");
-			return LResult.ToString();
+			result.Append("\r\n");
+			return result.ToString();
 		}
 
 		/// <summary>Returns a script to recreate the server state.</summary>
-		public string ScriptServerState(ServerProcess AProcess)
+		public string ScriptServerState(ServerProcess process)
 		{
-			StringBuilder LBuilder = new StringBuilder();
-			LBuilder.Append("// Server Settings\r\n");
-			LBuilder.Append(SaveServerSettings());
+			StringBuilder builder = new StringBuilder();
+			builder.Append("// Server Settings\r\n");
+			builder.Append(SaveServerSettings());
 
-			LBuilder.Append("\r\n");
-			LBuilder.Append("// Device Settings\r\n");
-			LBuilder.Append(SaveDeviceSettings(AProcess));
-			LBuilder.Append("\r\n");
+			builder.Append("\r\n");
+			builder.Append("// Device Settings\r\n");
+			builder.Append(SaveDeviceSettings(process));
+			builder.Append("\r\n");
 
-			LBuilder.Append(SaveSecurity(AProcess));
-			return LBuilder.ToString();
+			builder.Append(SaveSecurity(process));
+			return builder.ToString();
 		}
 
 		protected override void LoadServerState()
 		{
-			ServerCatalogDeviceSession LCatalogDeviceSession = (ServerCatalogDeviceSession)FSystemProcess.CatalogDeviceSession;
+			ServerCatalogDeviceSession catalogDeviceSession = (ServerCatalogDeviceSession)_systemProcess.CatalogDeviceSession;
 			
 			// Load server configuration settings
-			LCatalogDeviceSession.LoadServerSettings(this);
+			catalogDeviceSession.LoadServerSettings(this);
 
 			// Attaches any libraries that were attached from an explicit library directory
-			LCatalogDeviceSession.AttachLibraries();
+			catalogDeviceSession.AttachLibraries();
 
 			// Set the object ID generator				
-			Schema.Object.SetNextObjectID(LCatalogDeviceSession.GetMaxObjectID() + 1);
+			Schema.Object.SetNextObjectID(catalogDeviceSession.GetMaxObjectID() + 1);
 
 			// Insert a row into TableDee...
-			RunScript(FSystemProcess, "insert table { row { } } into TableDee;");
+			RunScript(_systemProcess, "insert table { row { } } into TableDee;");
 
 			// Ensure all loaded libraries are loaded
-			FSystemProcess.CatalogDeviceSession.ResolveLoadedLibraries();
+			_systemProcess.CatalogDeviceSession.ResolveLoadedLibraries();
 		}
 		
 		#region Logging
 
 		private string GetLogFileName()
 		{
-			string LLogFileName = GetLogFileName(CMaxLogs);
-			if (File.Exists(LLogFileName))
-				File.Delete(LLogFileName);
-			for (int LIndex = CMaxLogs - 1; LIndex >= 0; LIndex--)
+			string logFileName = GetLogFileName(MaxLogs);
+			if (File.Exists(logFileName))
+				File.Delete(logFileName);
+			for (int index = MaxLogs - 1; index >= 0; index--)
 			{
-				LLogFileName = GetLogFileName(LIndex);
-				if (File.Exists(LLogFileName))
-					File.Move(LLogFileName, GetLogFileName(LIndex + 1));
+				logFileName = GetLogFileName(index);
+				if (File.Exists(logFileName))
+					File.Move(logFileName, GetLogFileName(index + 1));
 			}
 			return GetLogFileName(0);
 		}
 
-		private string GetLogName(int ALogIndex)
+		private string GetLogName(int logIndex)
 		{
-			return String.Format("{0}{1}", CServerLogName, ALogIndex == 0 ? " (current)" : ALogIndex.ToString());
+			return String.Format("{0}{1}", ServerLogName, logIndex == 0 ? " (current)" : logIndex.ToString());
 		}
 
 		private string GetLogDirectory()
 		{
-			string LResult = Path.Combine(InstanceDirectory, CDefaultLogDirectory);
-			Directory.CreateDirectory(LResult);
-			return LResult;
+			string result = Path.Combine(InstanceDirectory, DefaultLogDirectory);
+			Directory.CreateDirectory(result);
+			return result;
 		}
 
-		private string GetLogFileName(int ALogIndex)
+		private string GetLogFileName(int logIndex)
 		{
-			return Path.Combine(GetLogDirectory(), String.Format("{0}{1}.log", CServerLogName, ALogIndex == 0 ? String.Empty : ALogIndex.ToString()));
+			return Path.Combine(GetLogDirectory(), String.Format("{0}{1}.log", ServerLogName, logIndex == 0 ? String.Empty : logIndex.ToString()));
 		}
 
 		public override List<string> ListLogs()
 		{
-			List<string> LLogList = new List<string>();
-			for (int LIndex = 0; LIndex <= CMaxLogs; LIndex++)
+			List<string> logList = new List<string>();
+			for (int index = 0; index <= MaxLogs; index++)
 			{
-				string LLogName = GetLogName(LIndex);
-				string LLogFileName = GetLogFileName(LIndex);
-				if (File.Exists(LLogFileName))
-					LLogList.Add(LLogName);
+				string logName = GetLogName(index);
+				string logFileName = GetLogFileName(index);
+				if (File.Exists(logFileName))
+					logList.Add(logName);
 			}
 
-			return LLogList;
+			return logList;
 		}
 
-		private FileStream FLogFile;
-		private StreamWriter FLog;
+		private FileStream _logFile;
+		private StreamWriter _log;
 
-		public EventLogEntryType LogEntryTypeToEventLogEntryType(LogEntryType AEntryType)
+		public EventLogEntryType LogEntryTypeToEventLogEntryType(LogEntryType entryType)
 		{
-			switch (AEntryType)
+			switch (entryType)
 			{
 				case LogEntryType.Error : return EventLogEntryType.Error;
 				case LogEntryType.Warning : return EventLogEntryType.Warning;
@@ -571,34 +571,34 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public override void LogMessage(LogEntryType AEntryType, string ADescription)
+		public override void LogMessage(LogEntryType entryType, string description)
 		{
 			if (LoggingEnabled)
 			{
 				if (IsAdministrator() && (System.Environment.OSVersion.Platform == PlatformID.Win32NT))
 					try
 					{
-						EventLog.WriteEntry(CServerSourceName, String.Format("Server: {0}\r\n{1}", Name, ADescription), LogEntryTypeToEventLogEntryType(AEntryType));
+						EventLog.WriteEntry(ServerSourceName, String.Format("Server: {0}\r\n{1}", Name, description), LogEntryTypeToEventLogEntryType(entryType));
 					}
 					catch
 					{
 						// ignore an error writing to the event log (it's probably complaining that it's full)
 					}
 
-				if (FLog != null)
+				if (_log != null)
 				{
-					lock (FLog)
+					lock (_log)
 					{
-						FLog.Write
+						_log.Write
 						(
 							String.Format
 							(
 								"{0} {1}{2}\r\n",
 								DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.ffff"),
-								(AEntryType == LogEntryType.Information) ?
+								(entryType == LogEntryType.Information) ?
 									String.Empty :
-									String.Format("{0}: ", AEntryType.ToString()),
-								ADescription
+									String.Format("{0}: ", entryType.ToString()),
+								description
 							)
 						);
 					}
@@ -612,8 +612,8 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				if (!IsEngine && IsAdministrator())
 				{
-					if (!EventLog.SourceExists(CServerSourceName))
-						EventLog.CreateEventSource(CServerSourceName, CServerLogName);
+					if (!EventLog.SourceExists(ServerSourceName))
+						EventLog.CreateEventSource(ServerSourceName, ServerLogName);
 				}
 				try
 				{
@@ -634,9 +634,9 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			if (System.Environment.OSVersion.Platform == PlatformID.Win32NT)
 			{
-				WindowsIdentity LWID = WindowsIdentity.GetCurrent();
-				WindowsPrincipal LWP = new WindowsPrincipal(LWID);
-				return LWP.IsInRole(WindowsBuiltInRole.Administrator);
+				WindowsIdentity wID = WindowsIdentity.GetCurrent();
+				WindowsPrincipal wP = new WindowsPrincipal(wID);
+				return wP.IsInRole(WindowsBuiltInRole.Administrator);
 			}
 			else
 				return (false); // Might not be Windows
@@ -644,7 +644,7 @@ namespace Alphora.Dataphor.DAE.Server
 
 		protected override void StopLog()
 		{
-			if (LoggingEnabled && (FLog != null))
+			if (LoggingEnabled && (_log != null))
 			{
 				LogEvent(DAE.Server.LogEvent.LogStopped);
 				try
@@ -653,65 +653,65 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FLog = null;
-					FLogFile = null;
+					_log = null;
+					_logFile = null;
 				}
 			}
 		}
 
-		private void OpenLogFile(string ALogFileName)
+		private void OpenLogFile(string logFileName)
 		{
-			FLogFile = new FileStream(ALogFileName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
-			FLogFile.Position = FLogFile.Length;
-			FLog = new StreamWriter(FLogFile);
-			FLog.AutoFlush = true;
+			_logFile = new FileStream(logFileName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
+			_logFile.Position = _logFile.Length;
+			_log = new StreamWriter(_logFile);
+			_log.AutoFlush = true;
 		}
 
 		private void CloseLogFile()
 		{
-			FLog.Flush();
-			FLog.Close();
-			FLogFile.Close();
+			_log.Flush();
+			_log.Close();
+			_logFile.Close();
 		}
 
 		public string ShowLog()
 		{
-			if (LoggingEnabled && (FLog != null))
+			if (LoggingEnabled && (_log != null))
 			{
-				string LLogFileName = FLogFile.Name;
+				string logFileName = _logFile.Name;
 				CloseLogFile();
 				try
 				{
-					using (StreamReader LReader = new StreamReader(LLogFileName))
+					using (StreamReader reader = new StreamReader(logFileName))
 					{
-						return LReader.ReadToEnd();
+						return reader.ReadToEnd();
 					}
 				}
 				finally
 				{
-					OpenLogFile(LLogFileName);
+					OpenLogFile(logFileName);
 				}
 			}
 
 			return String.Empty;
 		}
 
-		public string ShowLog(int ALogIndex)
+		public string ShowLog(int logIndex)
 		{
-			if (ALogIndex == 0)
+			if (logIndex == 0)
 				return ShowLog();
 			else
 			{
-				using (StreamReader LReader = new StreamReader(GetLogFileName(ALogIndex)))
+				using (StreamReader reader = new StreamReader(GetLogFileName(logIndex)))
 				{
-					return LReader.ReadToEnd();
+					return reader.ReadToEnd();
 				}
 			}
 		}
 
 		#endregion
 
-		private string FInstanceDirectory;
+		private string _instanceDirectory;
 		/// <summary>
 		/// The primary data directory for the instance. All write activity for the server should occur in this directory (logging, catalog, device data, etc.,.)
 		/// </summary>
@@ -721,22 +721,22 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				if (State != ServerState.Stopped)
 				{
-					if (String.IsNullOrEmpty(FInstanceDirectory))
-						FInstanceDirectory = Name;
+					if (String.IsNullOrEmpty(_instanceDirectory))
+						_instanceDirectory = Name;
 
-					if (!Path.IsPathRooted(FInstanceDirectory))
-						FInstanceDirectory = Path.Combine(Path.Combine(PathUtility.CommonAppDataPath(string.Empty, VersionModifier.None), CDefaultInstanceDirectory), FInstanceDirectory);
+					if (!Path.IsPathRooted(_instanceDirectory))
+						_instanceDirectory = Path.Combine(Path.Combine(PathUtility.CommonAppDataPath(string.Empty, VersionModifier.None), DefaultInstanceDirectory), _instanceDirectory);
 
-					if (!Directory.Exists(FInstanceDirectory))
-						Directory.CreateDirectory(FInstanceDirectory);
+					if (!Directory.Exists(_instanceDirectory))
+						Directory.CreateDirectory(_instanceDirectory);
 				}
 
-				return FInstanceDirectory;
+				return _instanceDirectory;
 			}
 			set
 			{
 				CheckState(ServerState.Stopped);
-				FInstanceDirectory = value;
+				_instanceDirectory = value;
 			}
 		}
 
@@ -744,72 +744,72 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			base.InternalRegisterCoreSystemObjects();
 
-			var LCatalogSession = (ServerCatalogDeviceSession)FSystemProcess.CatalogDeviceSession;
+			var catalogSession = (ServerCatalogDeviceSession)_systemProcess.CatalogDeviceSession;
 			
 			// Grant usage rights on the Temp and A/T devices to the User role
-			LCatalogSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.CreateStore), FUserRole.ID);
-			LCatalogSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.AlterStore), FUserRole.ID);
-			LCatalogSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.DropStore), FUserRole.ID);
-			LCatalogSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.Read), FUserRole.ID);
-			LCatalogSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.Write), FUserRole.ID);
+			catalogSession.GrantRightToRole(_tempDevice.GetRight(Schema.RightNames.CreateStore), _userRole.ID);
+			catalogSession.GrantRightToRole(_tempDevice.GetRight(Schema.RightNames.AlterStore), _userRole.ID);
+			catalogSession.GrantRightToRole(_tempDevice.GetRight(Schema.RightNames.DropStore), _userRole.ID);
+			catalogSession.GrantRightToRole(_tempDevice.GetRight(Schema.RightNames.Read), _userRole.ID);
+			catalogSession.GrantRightToRole(_tempDevice.GetRight(Schema.RightNames.Write), _userRole.ID);
 
-			LCatalogSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.CreateStore), FUserRole.ID);
-			LCatalogSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.AlterStore), FUserRole.ID);
-			LCatalogSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.DropStore), FUserRole.ID);
-			LCatalogSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.Read), FUserRole.ID);
-			LCatalogSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.Write), FUserRole.ID);
+			catalogSession.GrantRightToRole(_aTDevice.GetRight(Schema.RightNames.CreateStore), _userRole.ID);
+			catalogSession.GrantRightToRole(_aTDevice.GetRight(Schema.RightNames.AlterStore), _userRole.ID);
+			catalogSession.GrantRightToRole(_aTDevice.GetRight(Schema.RightNames.DropStore), _userRole.ID);
+			catalogSession.GrantRightToRole(_aTDevice.GetRight(Schema.RightNames.Read), _userRole.ID);
+			catalogSession.GrantRightToRole(_aTDevice.GetRight(Schema.RightNames.Write), _userRole.ID);
 
 			// Create and register the system rights
-			LCatalogSession.InsertRight(Schema.RightNames.CreateType, FSystemUser.ID);
-			LCatalogSession.InsertRight(Schema.RightNames.CreateTable, FSystemUser.ID);
-			LCatalogSession.InsertRight(Schema.RightNames.CreateView, FSystemUser.ID);
-			LCatalogSession.InsertRight(Schema.RightNames.CreateOperator, FSystemUser.ID);
-			LCatalogSession.InsertRight(Schema.RightNames.CreateDevice, FSystemUser.ID);
-			LCatalogSession.InsertRight(Schema.RightNames.CreateConstraint, FSystemUser.ID);
-			LCatalogSession.InsertRight(Schema.RightNames.CreateReference, FSystemUser.ID);
-			LCatalogSession.InsertRight(Schema.RightNames.CreateUser, FSystemUser.ID);
-			LCatalogSession.InsertRight(Schema.RightNames.CreateRole, FSystemUser.ID);
-			LCatalogSession.InsertRight(Schema.RightNames.AlterUser, FSystemUser.ID);
-			LCatalogSession.InsertRight(Schema.RightNames.DropUser, FSystemUser.ID);
-			LCatalogSession.InsertRight(Schema.RightNames.MaintainSystemDeviceUsers, FSystemUser.ID);
-			LCatalogSession.InsertRight(Schema.RightNames.MaintainUserSessions, FSystemUser.ID);
-			LCatalogSession.InsertRight(Schema.RightNames.HostImplementation, FSystemUser.ID);
+			catalogSession.InsertRight(Schema.RightNames.CreateType, _systemUser.ID);
+			catalogSession.InsertRight(Schema.RightNames.CreateTable, _systemUser.ID);
+			catalogSession.InsertRight(Schema.RightNames.CreateView, _systemUser.ID);
+			catalogSession.InsertRight(Schema.RightNames.CreateOperator, _systemUser.ID);
+			catalogSession.InsertRight(Schema.RightNames.CreateDevice, _systemUser.ID);
+			catalogSession.InsertRight(Schema.RightNames.CreateConstraint, _systemUser.ID);
+			catalogSession.InsertRight(Schema.RightNames.CreateReference, _systemUser.ID);
+			catalogSession.InsertRight(Schema.RightNames.CreateUser, _systemUser.ID);
+			catalogSession.InsertRight(Schema.RightNames.CreateRole, _systemUser.ID);
+			catalogSession.InsertRight(Schema.RightNames.AlterUser, _systemUser.ID);
+			catalogSession.InsertRight(Schema.RightNames.DropUser, _systemUser.ID);
+			catalogSession.InsertRight(Schema.RightNames.MaintainSystemDeviceUsers, _systemUser.ID);
+			catalogSession.InsertRight(Schema.RightNames.MaintainUserSessions, _systemUser.ID);
+			catalogSession.InsertRight(Schema.RightNames.HostImplementation, _systemUser.ID);
 
 			// Grant create rights to the User role
-			LCatalogSession.GrantRightToRole(Schema.RightNames.CreateType, FUserRole.ID);
-			LCatalogSession.GrantRightToRole(Schema.RightNames.CreateTable, FUserRole.ID);
-			LCatalogSession.GrantRightToRole(Schema.RightNames.CreateView, FUserRole.ID);
-			LCatalogSession.GrantRightToRole(Schema.RightNames.CreateOperator, FUserRole.ID);
-			LCatalogSession.GrantRightToRole(Schema.RightNames.CreateDevice, FUserRole.ID);
-			LCatalogSession.GrantRightToRole(Schema.RightNames.CreateConstraint, FUserRole.ID);
-			LCatalogSession.GrantRightToRole(Schema.RightNames.CreateReference, FUserRole.ID);
+			catalogSession.GrantRightToRole(Schema.RightNames.CreateType, _userRole.ID);
+			catalogSession.GrantRightToRole(Schema.RightNames.CreateTable, _userRole.ID);
+			catalogSession.GrantRightToRole(Schema.RightNames.CreateView, _userRole.ID);
+			catalogSession.GrantRightToRole(Schema.RightNames.CreateOperator, _userRole.ID);
+			catalogSession.GrantRightToRole(Schema.RightNames.CreateDevice, _userRole.ID);
+			catalogSession.GrantRightToRole(Schema.RightNames.CreateConstraint, _userRole.ID);
+			catalogSession.GrantRightToRole(Schema.RightNames.CreateReference, _userRole.ID);
 		}
 
 		internal Schema.Objects GetBaseCatalogObjects()
 		{
 			CheckState(ServerState.Started);
-			return ((ServerCatalogDeviceSession)FSystemProcess.CatalogDeviceSession).GetBaseCatalogObjects();
+			return ((ServerCatalogDeviceSession)_systemProcess.CatalogDeviceSession).GetBaseCatalogObjects();
 		}
 
-		protected override Schema.User ValidateLogin(int ASessionID, SessionInfo ASessionInfo)
+		protected override Schema.User ValidateLogin(int sessionID, SessionInfo sessionInfo)
 		{
-			if (ASessionInfo == null)
+			if (sessionInfo == null)
 				throw new ServerException(ServerException.Codes.SessionInformationRequired);
 
-			if (String.Equals(ASessionInfo.UserID, CSystemUserID, StringComparison.OrdinalIgnoreCase))
+			if (String.Equals(sessionInfo.UserID, SystemUserID, StringComparison.OrdinalIgnoreCase))
 			{
-				if (!IsEngine && (ASessionID != CSystemSessionID))
+				if (!IsEngine && (sessionID != SystemSessionID))
 					throw new ServerException(ServerException.Codes.CannotLoginAsSystemUser);
 
-				return FSystemUser;
+				return _systemUser;
 			}
 			else
 			{
-				Schema.User LUser = ((ServerCatalogDeviceSession)FSystemProcess.CatalogDeviceSession).ResolveUser(ASessionInfo.UserID);
-				if (String.Compare(Schema.SecurityUtility.DecryptPassword(LUser.Password), ASessionInfo.Password, true) != 0)
+				Schema.User user = ((ServerCatalogDeviceSession)_systemProcess.CatalogDeviceSession).ResolveUser(sessionInfo.UserID);
+				if (String.Compare(Schema.SecurityUtility.DecryptPassword(user.Password), sessionInfo.Password, true) != 0)
 					throw new ServerException(ServerException.Codes.InvalidPassword);
 
-				return LUser;
+				return user;
 			}
 		}
 
@@ -818,7 +818,7 @@ namespace Alphora.Dataphor.DAE.Server
 			// Wire up the class loader events
 			Catalog.ClassLoader.OnMiss += new ClassLoaderMissedEvent(ClassLoaderMiss);
 			
-			if (FFirstRun)
+			if (_firstRun)
 				base.InternalInitializeCatalog();
 			else
 			{
@@ -830,95 +830,95 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		private void ClassLoaderMiss(ClassLoader AClassLoader, CatalogDeviceSession ASession, ClassDefinition AClassDefinition)
+		private void ClassLoaderMiss(ClassLoader classLoader, CatalogDeviceSession session, ClassDefinition classDefinition)
 		{
 			// Ensure that the library containing the class is loaded.
-			((ServerCatalogDeviceSession)ASession).LoadLibraryForClass(AClassDefinition);
+			((ServerCatalogDeviceSession)session).LoadLibraryForClass(classDefinition);
 		}
 		
 		private void ResolveCoreSystemObjects()
 		{
 			// Use the persistent catalog store to resolve references to the core catalog objects
-			FSystemProcess.CatalogDeviceSession.ResolveUser(CSystemUserID);
-			FSystemProcess.CatalogDeviceSession.CacheCatalogObject(FCatalogDevice);
-			FAdminUser = FSystemProcess.CatalogDeviceSession.ResolveUser(CAdminUserID);
-			FUserRole = (Schema.Role)FSystemProcess.CatalogDeviceSession.ResolveName(CUserRoleName, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
-			FTempDevice = (MemoryDevice)FSystemProcess.CatalogDeviceSession.ResolveName(CTempDeviceName, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
-			FATDevice = (ApplicationTransactionDevice)FSystemProcess.CatalogDeviceSession.ResolveName(CATDeviceName, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
+			_systemProcess.CatalogDeviceSession.ResolveUser(SystemUserID);
+			_systemProcess.CatalogDeviceSession.CacheCatalogObject(_catalogDevice);
+			_adminUser = _systemProcess.CatalogDeviceSession.ResolveUser(AdminUserID);
+			_userRole = (Schema.Role)_systemProcess.CatalogDeviceSession.ResolveName(UserRoleName, _systemLibrary.GetNameResolutionPath(_systemLibrary), new List<string>());
+			_tempDevice = (MemoryDevice)_systemProcess.CatalogDeviceSession.ResolveName(TempDeviceName, _systemLibrary.GetNameResolutionPath(_systemLibrary), new List<string>());
+			_aTDevice = (ApplicationTransactionDevice)_systemProcess.CatalogDeviceSession.ResolveName(ATDeviceName, _systemLibrary.GetNameResolutionPath(_systemLibrary), new List<string>());
 		}
 
 		private void ResolveSystemDataTypes()
 		{
 			// Note that these (and the native type references set in BindNativeTypes) are also set in the CatalogDevice (FixupSystemTypeReferences)
 			// The functionality is duplicated to ensure that the references will be set on a delayed load of a system type, as well as to ensure that a repository functions correctly without delayed resolution
-			Catalog.DataTypes.SystemScalar = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemScalar, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
-			Catalog.DataTypes.SystemBoolean = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemBoolean, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
-			Catalog.DataTypes.SystemDecimal = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemDecimal, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
-			Catalog.DataTypes.SystemLong = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemLong, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
-			Catalog.DataTypes.SystemInteger = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemInteger, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
-			Catalog.DataTypes.SystemShort = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemShort, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
-			Catalog.DataTypes.SystemByte = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemByte, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
-			Catalog.DataTypes.SystemString = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemString, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
-			Catalog.DataTypes.SystemTimeSpan = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemTimeSpan, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
-			Catalog.DataTypes.SystemDateTime = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemDateTime, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
-			Catalog.DataTypes.SystemDate = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemDate, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
-			Catalog.DataTypes.SystemTime = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemTime, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
-			Catalog.DataTypes.SystemMoney = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemMoney, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
-			Catalog.DataTypes.SystemGuid = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemGuid, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
-			Catalog.DataTypes.SystemBinary = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemBinary, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
-			Catalog.DataTypes.SystemGraphic = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemGraphic, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
-			Catalog.DataTypes.SystemError = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemError, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
-			Catalog.DataTypes.SystemName = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemName, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
+			Catalog.DataTypes.SystemScalar = (Schema.ScalarType)_systemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.SystemScalarName, _systemLibrary.GetNameResolutionPath(_systemLibrary), new List<string>());
+			Catalog.DataTypes.SystemBoolean = (Schema.ScalarType)_systemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.SystemBooleanName, _systemLibrary.GetNameResolutionPath(_systemLibrary), new List<string>());
+			Catalog.DataTypes.SystemDecimal = (Schema.ScalarType)_systemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.SystemDecimalName, _systemLibrary.GetNameResolutionPath(_systemLibrary), new List<string>());
+			Catalog.DataTypes.SystemLong = (Schema.ScalarType)_systemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.SystemLongName, _systemLibrary.GetNameResolutionPath(_systemLibrary), new List<string>());
+			Catalog.DataTypes.SystemInteger = (Schema.ScalarType)_systemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.SystemIntegerName, _systemLibrary.GetNameResolutionPath(_systemLibrary), new List<string>());
+			Catalog.DataTypes.SystemShort = (Schema.ScalarType)_systemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.SystemShortName, _systemLibrary.GetNameResolutionPath(_systemLibrary), new List<string>());
+			Catalog.DataTypes.SystemByte = (Schema.ScalarType)_systemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.SystemByteName, _systemLibrary.GetNameResolutionPath(_systemLibrary), new List<string>());
+			Catalog.DataTypes.SystemString = (Schema.ScalarType)_systemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.SystemStringName, _systemLibrary.GetNameResolutionPath(_systemLibrary), new List<string>());
+			Catalog.DataTypes.SystemTimeSpan = (Schema.ScalarType)_systemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.SystemTimeSpanName, _systemLibrary.GetNameResolutionPath(_systemLibrary), new List<string>());
+			Catalog.DataTypes.SystemDateTime = (Schema.ScalarType)_systemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.SystemDateTimeName, _systemLibrary.GetNameResolutionPath(_systemLibrary), new List<string>());
+			Catalog.DataTypes.SystemDate = (Schema.ScalarType)_systemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.SystemDateName, _systemLibrary.GetNameResolutionPath(_systemLibrary), new List<string>());
+			Catalog.DataTypes.SystemTime = (Schema.ScalarType)_systemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.SystemTimeName, _systemLibrary.GetNameResolutionPath(_systemLibrary), new List<string>());
+			Catalog.DataTypes.SystemMoney = (Schema.ScalarType)_systemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.SystemMoneyName, _systemLibrary.GetNameResolutionPath(_systemLibrary), new List<string>());
+			Catalog.DataTypes.SystemGuid = (Schema.ScalarType)_systemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.SystemGuidName, _systemLibrary.GetNameResolutionPath(_systemLibrary), new List<string>());
+			Catalog.DataTypes.SystemBinary = (Schema.ScalarType)_systemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.SystemBinaryName, _systemLibrary.GetNameResolutionPath(_systemLibrary), new List<string>());
+			Catalog.DataTypes.SystemGraphic = (Schema.ScalarType)_systemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.SystemGraphicName, _systemLibrary.GetNameResolutionPath(_systemLibrary), new List<string>());
+			Catalog.DataTypes.SystemError = (Schema.ScalarType)_systemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.SystemErrorName, _systemLibrary.GetNameResolutionPath(_systemLibrary), new List<string>());
+			Catalog.DataTypes.SystemName = (Schema.ScalarType)_systemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.SystemNameName, _systemLibrary.GetNameResolutionPath(_systemLibrary), new List<string>());
 		}
 
-		internal ServerFileInfos GetFileNames(Schema.Library ALibrary, string AEnvironment)
+		internal ServerFileInfos GetFileNames(Schema.Library library, string environment)
 		{
-			ServerFileInfos LFileInfos = new ServerFileInfos();
-			Schema.Libraries LLibraries = new Schema.Libraries();
-			LLibraries.Add(ALibrary);
+			ServerFileInfos fileInfos = new ServerFileInfos();
+			Schema.Libraries libraries = new Schema.Libraries();
+			libraries.Add(library);
 			
-			while (LLibraries.Count > 0)
+			while (libraries.Count > 0)
 			{
-				Schema.Library LLibrary = LLibraries[0];
-				LLibraries.RemoveAt(0);
+				Schema.Library localLibrary = libraries[0];
+				libraries.RemoveAt(0);
 				
-				foreach (Schema.FileReference LReference in ALibrary.Files)
+				foreach (Schema.FileReference reference in library.Files)
 				{
-					if (LReference.Environments.Contains(AEnvironment) && !LFileInfos.Contains(LReference.FileName))
+					if (reference.Environments.Contains(environment) && !fileInfos.Contains(reference.FileName))
 					{
-						string LFullFileName = GetFullFileName(ALibrary, LReference.FileName);
-						LFileInfos.Add
+						string fullFileName = GetFullFileName(library, reference.FileName);
+						fileInfos.Add
 						(
 							new ServerFileInfo 
 							{ 
-								LibraryName = ALibrary.Name, 
-								FileName = LReference.FileName, 
-								FileDate = File.GetLastWriteTimeUtc(LFullFileName), 
-								IsDotNetAssembly = FileUtility.IsAssembly(LFullFileName), 
-								ShouldRegister = LReference.IsAssembly 
+								LibraryName = library.Name, 
+								FileName = reference.FileName, 
+								FileDate = File.GetLastWriteTimeUtc(fullFileName), 
+								IsDotNetAssembly = FileUtility.IsAssembly(fullFileName), 
+								ShouldRegister = reference.IsAssembly 
 							}
 						);
 					} 
 				}
 				
-				foreach (Schema.LibraryReference LReference in LLibrary.Libraries)
-					if (!LLibraries.Contains(LReference.Name))
-						LLibraries.Add(Catalog.Libraries[LReference.Name]);
+				foreach (Schema.LibraryReference reference in localLibrary.Libraries)
+					if (!libraries.Contains(reference.Name))
+						libraries.Add(Catalog.Libraries[reference.Name]);
 			}
 			
-			return LFileInfos;
+			return fileInfos;
 		}
 
-		public string GetFullFileName(Schema.Library ALibrary, string AFileName)
+		public string GetFullFileName(Schema.Library library, string fileName)
 		{
 			#if LOADFROMLIBRARIES
 			return 
-				Path.IsPathRooted(AFileName) 
-					? AFileName 
+				Path.IsPathRooted(fileName) 
+					? fileName 
 					: 
-						ALibrary.Name == Engine.CSystemLibraryName
-							? PathUtility.GetFullFileName(AFileName)
-							: Path.Combine(Schema.LibraryUtility.GetLibraryDirectory(ALibrary, LibraryDirectory), AFileName);
+						library.Name == Engine.SystemLibraryName
+							? PathUtility.GetFullFileName(fileName)
+							: Path.Combine(Schema.LibraryUtility.GetLibraryDirectory(library, LibraryDirectory), fileName);
 			#else
 			return PathUtility.GetFullFileName(AFileName);
 			#endif

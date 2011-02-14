@@ -27,21 +27,21 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			AddBinding(NotebookItem.HeaderProperty, new Func<object>(UIGetHeader));
 		}
 		
-		protected string FTitle = String.Empty;
+		protected string _title = String.Empty;
 		[DefaultValue("")]
 		public string Title
 		{
-			get	{ return FTitle; }
+			get	{ return _title; }
 			set
 			{
-				FTitle = value;
+				_title = value;
 				UpdateBinding(NotebookItem.HeaderProperty);
 			}
 		}
 		
 		protected virtual string GetTitle()
 		{
-			return String.IsNullOrEmpty(FTitle) ? Strings.CDefaultNotebookPageTitle : FTitle;
+			return String.IsNullOrEmpty(_title) ? Strings.CDefaultNotebookPageTitle : _title;
 		}
 		
 		private object UIGetHeader()
@@ -49,9 +49,9 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			return GetTitle();
 		}
 
-		public override bool IsValidOwner(Type AOwnerType)
+		public override bool IsValidOwner(Type ownerType)
 		{
-			return typeof(INotebook).IsAssignableFrom(AOwnerType);
+			return typeof(INotebook).IsAssignableFrom(ownerType);
 		}
 	}
 }

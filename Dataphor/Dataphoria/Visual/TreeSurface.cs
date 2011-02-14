@@ -15,30 +15,30 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 {
 	public class TreeSurface : Surface
 	{
-		public const int CGutterWidth = 4;
-		public const int CGutterHeight = 4;
+		public const int GutterWidth = 4;
+		public const int GutterHeight = 4;
 
 		public TreeSurface()
 		{
 			SetStyle(ControlStyles.ResizeRedraw, false);
-			FNodes = new RootTreeNodes(this);
+			_nodes = new RootTreeNodes(this);
 			SuspendLayout();
 			try
 			{
-				FHScrollBar = new HScrollBar();
-				FHScrollBar.SmallChange = 1;
-				FHScrollBar.LargeChange = 1;
-				FHScrollBar.Minimum = 0;
-				FHScrollBar.TabStop = false;
-				FHScrollBar.Scroll += new ScrollEventHandler(HScrollBarScrolled);
-				Controls.Add(FHScrollBar);
+				_hScrollBar = new HScrollBar();
+				_hScrollBar.SmallChange = 1;
+				_hScrollBar.LargeChange = 1;
+				_hScrollBar.Minimum = 0;
+				_hScrollBar.TabStop = false;
+				_hScrollBar.Scroll += new ScrollEventHandler(HScrollBarScrolled);
+				Controls.Add(_hScrollBar);
 
-				FVScrollBar = new VScrollBar();
-				FVScrollBar.SmallChange = 1;
-				FVScrollBar.Minimum = 0;
-				FVScrollBar.TabStop = false;
-				FVScrollBar.Scroll += new ScrollEventHandler(VScrollBarScrolled);
-				Controls.Add(FVScrollBar);
+				_vScrollBar = new VScrollBar();
+				_vScrollBar.SmallChange = 1;
+				_vScrollBar.Minimum = 0;
+				_vScrollBar.TabStop = false;
+				_vScrollBar.Scroll += new ScrollEventHandler(VScrollBarScrolled);
+				Controls.Add(_vScrollBar);
 			}
 			finally
 			{
@@ -48,34 +48,34 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 
 		#region Cosmetic Properties
 
-		private int FRowHeight = 40;
+		private int _rowHeight = 40;
 		public int RowHeight
 		{
-			get { return FRowHeight; }
+			get { return _rowHeight; }
 			set
 			{
 				if (value < 1)
 					value = 1;
-				if (FRowHeight != value)
+				if (_rowHeight != value)
 				{
-					FRowHeight = value;
+					_rowHeight = value;
 					UpdateSurface();
 					PerformLayout();
 				}
 			}
 		}
 
-		private int FIndent = 40;
+		private int _indent = 40;
 		public int Indent
 		{
-			get { return FIndent; }
+			get { return _indent; }
 			set
 			{
 				if (value < 1)
 					value = 1;
-				if (FIndent != value)
+				if (_indent != value)
 				{
-					FIndent = value;
+					_indent = value;
 					UpdateSurface();
 					PerformLayout();
 				}
@@ -86,154 +86,154 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 
 		#region Scrolling & Layout
 
-		private HScrollBar FHScrollBar;
-		private VScrollBar FVScrollBar;
-		private int FVisibleCount;
+		private HScrollBar _hScrollBar;
+		private VScrollBar _vScrollBar;
+		private int _visibleCount;
 
-		private void HScrollBarScrolled(object ASender, ScrollEventArgs AArgs)
+		private void HScrollBarScrolled(object sender, ScrollEventArgs args)
 		{
-			NavigateTo(new Point(AArgs.NewValue, FLocation.Y));
+			NavigateTo(new Point(args.NewValue, _location.Y));
 		}
 
-		private void VScrollBarScrolled(object ASender, ScrollEventArgs AArgs)
+		private void VScrollBarScrolled(object sender, ScrollEventArgs args)
 		{
-			SetVerticalScroll(AArgs.NewValue);
+			SetVerticalScroll(args.NewValue);
 		}
 
-		private void SetVerticalScroll(int AValue)
+		private void SetVerticalScroll(int tempValue)
 		{
-			AValue = Math.Max(0, Math.Min(FExposed.Count, AValue + (FVisibleCount - 1)) - (FVisibleCount - 1));
-			int LX = MinDisplayLevel(AValue);
-			if (LX == Int32.MaxValue)
-				LX = FLocation.X;
-			NavigateTo(new Point(LX, AValue));
+			tempValue = Math.Max(0, Math.Min(_exposed.Count, tempValue + (_visibleCount - 1)) - (_visibleCount - 1));
+			int x = MinDisplayLevel(tempValue);
+			if (x == Int32.MaxValue)
+				x = _location.X;
+			NavigateTo(new Point(x, tempValue));
 		}
 
 		/// <summary> Returns the level of the shallowest visible node. </summary>
-		private int MinDisplayLevel(int ALocationY)
+		private int MinDisplayLevel(int locationY)
 		{
-			int LMin = Int32.MaxValue;
-			int LCurrent;
-			int LEnd = Math.Min(FExposed.Count, ALocationY + FVisibleCount);
-			for (int i = ALocationY; i < LEnd; i++) 
+			int min = Int32.MaxValue;
+			int current;
+			int end = Math.Min(_exposed.Count, locationY + _visibleCount);
+			for (int i = locationY; i < end; i++) 
 			{
-				LCurrent = ((TreeNode)FExposed[i]).Level();
-				if (LCurrent < LMin)
-					LMin = LCurrent;
+				current = ((TreeNode)_exposed[i]).Level();
+				if (current < min)
+					min = current;
 			}
-			return LMin;
+			return min;
 		}
 
-		protected override bool ProcessDialogKey(Keys AKey)
+		protected override bool ProcessDialogKey(Keys key)
 		{
-			switch (AKey)
+			switch (key)
 			{
-				case Keys.Left : NavigateTo(new Point(FLocation.X - 1, FLocation.Y)); break;
-				case Keys.Up : SetVerticalScroll(FLocation.Y - 1); break;
-				case Keys.Right : NavigateTo(new Point(FLocation.X + 1, FLocation.Y)); break;
-				case Keys.Down : SetVerticalScroll(FLocation.Y + 1); break;
-				case Keys.PageUp : SetVerticalScroll(FLocation.Y - FVisibleCount); break;
-				case Keys.PageDown : SetVerticalScroll(FLocation.Y + FVisibleCount); break;
-				case Keys.Home : NavigateTo(new Point(0, FLocation.Y)); break;
-				case Keys.End : NavigateTo(new Point(FHScrollBar.Maximum, FLocation.Y)); break;
+				case Keys.Left : NavigateTo(new Point(_location.X - 1, _location.Y)); break;
+				case Keys.Up : SetVerticalScroll(_location.Y - 1); break;
+				case Keys.Right : NavigateTo(new Point(_location.X + 1, _location.Y)); break;
+				case Keys.Down : SetVerticalScroll(_location.Y + 1); break;
+				case Keys.PageUp : SetVerticalScroll(_location.Y - _visibleCount); break;
+				case Keys.PageDown : SetVerticalScroll(_location.Y + _visibleCount); break;
+				case Keys.Home : NavigateTo(new Point(0, _location.Y)); break;
+				case Keys.End : NavigateTo(new Point(_hScrollBar.Maximum, _location.Y)); break;
 				default :
-					return base.ProcessDialogKey(AKey);
+					return base.ProcessDialogKey(key);
 			}
 			return true;
 		}
 
-		private static int Constrain(int AValue, int AMin, int AMax)
+		private static int Constrain(int tempValue, int min, int max)
 		{
-			if (AValue > AMax)
-				AValue = AMax;
-			if (AValue < AMin)
-				AValue = AMin;
-			return AValue;
+			if (tempValue > max)
+				tempValue = max;
+			if (tempValue < min)
+				tempValue = min;
+			return tempValue;
 		}
 
-		private Point FLocation;
+		private Point _location;
 
-		private void NavigateTo(Point ALocation)
+		private void NavigateTo(Point location)
 		{
-			ALocation.X = Constrain(ALocation.X, FHScrollBar.Minimum, FHScrollBar.Maximum);
-			ALocation.Y = Math.Max(0, Math.Min(FExposed.Count, ALocation.Y + (FVisibleCount - 1)) - (FVisibleCount - 1));
-			if (ALocation != FLocation)
+			location.X = Constrain(location.X, _hScrollBar.Minimum, _hScrollBar.Maximum);
+			location.Y = Math.Max(0, Math.Min(_exposed.Count, location.Y + (_visibleCount - 1)) - (_visibleCount - 1));
+			if (location != _location)
 			{
-				Point LDelta = new Point((FLocation.X - ALocation.X) * FIndent, (FLocation.Y - ALocation.Y) * FRowHeight);
+				Point delta = new Point((_location.X - location.X) * _indent, (_location.Y - location.Y) * _rowHeight);
 
-				FLocation = ALocation;
+				_location = location;
 				
-				FHScrollBar.Value = FLocation.X;
-				FVScrollBar.Value = FLocation.Y;
+				_hScrollBar.Value = _location.X;
+				_vScrollBar.Value = _location.Y;
 
 				UpdateDesigners(true);	// even if layout weren't supressed, there is no guarantee that a layout will be performed
 
-				RECT LRect = UnsafeUtilities.RECTFromRectangle(DisplayRectangle);
-				UnsafeNativeMethods.ScrollWindowEx(this.Handle, LDelta.X, LDelta.Y, ref LRect, ref LRect, IntPtr.Zero, IntPtr.Zero, 2 /* SW_INVALIDATE */);
+				RECT rect = UnsafeUtilities.RECTFromRectangle(DisplayRectangle);
+				UnsafeNativeMethods.ScrollWindowEx(this.Handle, delta.X, delta.Y, ref rect, ref rect, IntPtr.Zero, IntPtr.Zero, 2 /* SW_INVALIDATE */);
 
 				PerformLayout();
 			}
 		}
 
-		protected override void OnResize(EventArgs AArgs)
+		protected override void OnResize(EventArgs args)
 		{
 			if (IsHandleCreated)
 			{
 				UpdateSurface();
 				MinimizeScrolling();
 			}
-			base.OnResize(AArgs);
+			base.OnResize(args);
 		}
 
-		protected override void OnHandleCreated(EventArgs AArgs)
+		protected override void OnHandleCreated(EventArgs args)
 		{
-			base.OnHandleCreated(AArgs);
+			base.OnHandleCreated(args);
 			UpdateSurface();
 		}
 
 		private void MinimizeScrolling()
 		{
 			// Scroll off wasted space at the end
-			int LNewLocationY = Math.Max(0, Math.Min(FExposed.Count, FLocation.Y + (FVisibleCount - 1)) - (FVisibleCount - 1));
-			if (LNewLocationY != FLocation.Y)
-				NavigateTo(new Point(FLocation.X, LNewLocationY));
+			int newLocationY = Math.Max(0, Math.Min(_exposed.Count, _location.Y + (_visibleCount - 1)) - (_visibleCount - 1));
+			if (newLocationY != _location.Y)
+				NavigateTo(new Point(_location.X, newLocationY));
 		}
 
-		protected override void OnLayout(LayoutEventArgs AArgs)
+		protected override void OnLayout(LayoutEventArgs args)
 		{
 			// Don't call base
 
-			Rectangle LBounds = base.DisplayRectangle;
+			Rectangle bounds = base.DisplayRectangle;
 
 			MinimizeScrolling();
 
 			// Size the scrollbars
-			FVScrollBar.Visible = (FVScrollBar.Maximum > 0) && (FVScrollBar.LargeChange <= FVScrollBar.Maximum);
-			FHScrollBar.Visible = (FHScrollBar.Maximum > 0);
+			_vScrollBar.Visible = (_vScrollBar.Maximum > 0) && (_vScrollBar.LargeChange <= _vScrollBar.Maximum);
+			_hScrollBar.Visible = (_hScrollBar.Maximum > 0);
 
-			FVScrollBar.Left = LBounds.Right - FVScrollBar.Width;
-			FVScrollBar.Height = LBounds.Height - (FHScrollBar.Visible ? FHScrollBar.Height : 0);
+			_vScrollBar.Left = bounds.Right - _vScrollBar.Width;
+			_vScrollBar.Height = bounds.Height - (_hScrollBar.Visible ? _hScrollBar.Height : 0);
 
-			FHScrollBar.Top = LBounds.Bottom - FHScrollBar.Height;
-			FHScrollBar.Width = LBounds.Width - (FVScrollBar.Visible ? FVScrollBar.Width : 0);
+			_hScrollBar.Top = bounds.Bottom - _hScrollBar.Height;
+			_hScrollBar.Width = bounds.Width - (_vScrollBar.Visible ? _vScrollBar.Width : 0);
 
-			LBounds = DisplayRectangle;
+			bounds = DisplayRectangle;
 
 			// Position the designers
-			IElementDesigner LDesigner;
-			TreeNode LNode;
-			int LEnd = Math.Min(FExposed.Count, FLocation.Y + FVisibleCount);
-			for (int i = FLocation.Y; i < LEnd; i++)
+			IElementDesigner designer;
+			TreeNode node;
+			int end = Math.Min(_exposed.Count, _location.Y + _visibleCount);
+			for (int i = _location.Y; i < end; i++)
 			{
-				LDesigner = (IElementDesigner)FDesigners[FExposed[i]];
-				LNode = (TreeNode)LDesigner.Element;
-				LDesigner.Bounds =
+				designer = (IElementDesigner)_designers[_exposed[i]];
+				node = (TreeNode)designer.Element;
+				designer.Bounds =
 					new Rectangle
 					(
-						((LNode.Level() - FLocation.X) * FIndent) + (CGutterWidth / 2),
-						((i - FLocation.Y) * FRowHeight) + (CGutterHeight / 2),
+						((node.Level() - _location.X) * _indent) + (GutterWidth / 2),
+						((i - _location.Y) * _rowHeight) + (GutterHeight / 2),
 						250,
-						FRowHeight - CGutterHeight
+						_rowHeight - GutterHeight
 					);
 			}
 		}
@@ -242,86 +242,86 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 		{
 			get
 			{
-				Rectangle LBounds = base.DisplayRectangle;
-				if (FVScrollBar.Visible)
-					LBounds.Width -= FVScrollBar.Width;
-				if (FHScrollBar.Visible)
-					LBounds.Height -= FHScrollBar.Height;
-				return LBounds;
+				Rectangle bounds = base.DisplayRectangle;
+				if (_vScrollBar.Visible)
+					bounds.Width -= _vScrollBar.Width;
+				if (_hScrollBar.Visible)
+					bounds.Height -= _hScrollBar.Height;
+				return bounds;
 			}
 		}
 
 		/// <summary> Reconciles the set of visible designers with the set of possible exposed nodes. </summary>
 		/// <remarks> Called when the active rectangle, or the set of exposed nodes changes. Will only 
 		/// cause a layout if a designer is added or removed and ASupressLayout is false. </remarks>
-		private void UpdateDesigners(bool ASupressLayout)
+		private void UpdateDesigners(bool supressLayout)
 		{
-			if (FUpdateCount == 0)
+			if (_updateCount == 0)
 			{
-				bool LLayoutRequired = false;
+				bool layoutRequired = false;
 				// List of unused designers (initially full)
-				ArrayList LDesigned = new ArrayList(FDesigners.Count);
-				LDesigned.AddRange(FDesigners.Keys);
+				ArrayList designed = new ArrayList(_designers.Count);
+				designed.AddRange(_designers.Keys);
 
 				SuspendLayout();
 				try
 				{
-					int LEnd = Math.Min(FExposed.Count, FLocation.Y + FVisibleCount);
-					IElementDesigner LDesigner;
-					for (int i = FLocation.Y; i < LEnd; i++)
+					int end = Math.Min(_exposed.Count, _location.Y + _visibleCount);
+					IElementDesigner designer;
+					for (int i = _location.Y; i < end; i++)
 					{
-						LDesigner = (IElementDesigner)FDesigners[FExposed[i]];
-						if (LDesigner == null)
+						designer = (IElementDesigner)_designers[_exposed[i]];
+						if (designer == null)
 						{
-							LDesigner = AddDesigner(FExposed[i]);	// Add designers we need but don't have
-							LLayoutRequired = true;
+							designer = AddDesigner(_exposed[i]);	// Add designers we need but don't have
+							layoutRequired = true;
 						}
 						else
-							LDesigned.Remove(LDesigner.Element);	// Remember that this designer is used
-						((Control)LDesigner).TabIndex = i;
+							designed.Remove(designer.Element);	// Remember that this designer is used
+						((Control)designer).TabIndex = i;
 					}
 
 					// Remove unused designers
-					foreach (object LNode in LDesigned)
+					foreach (object node in designed)
 					{
-						RemoveDesigner(LNode);
-						LLayoutRequired = true;
+						RemoveDesigner(node);
+						layoutRequired = true;
 					}
 				}
 				finally
 				{
-					ResumeLayout(!ASupressLayout && LLayoutRequired);
+					ResumeLayout(!supressLayout && layoutRequired);
 				}
 			}
 		}
 
 		private void UpdateSurface()
 		{
-			if (FUpdateCount == 0)
+			if (_updateCount == 0)
 			{
-				FHScrollBar.Maximum = Math.Max(0, Nodes.Depth() - 1);
-				FVScrollBar.Maximum = Math.Max(0, (FExposed.Count - 1));
+				_hScrollBar.Maximum = Math.Max(0, Nodes.Depth() - 1);
+				_vScrollBar.Maximum = Math.Max(0, (_exposed.Count - 1));
 
-				Rectangle LBounds = DisplayRectangle;
-				FVisibleCount = (LBounds.Height / FRowHeight) + (((LBounds.Height % FRowHeight) == 0) ? 0 : 1);
-				FVScrollBar.LargeChange = Math.Max((FVisibleCount - 1), 1);
+				Rectangle bounds = DisplayRectangle;
+				_visibleCount = (bounds.Height / _rowHeight) + (((bounds.Height % _rowHeight) == 0) ? 0 : 1);
+				_vScrollBar.LargeChange = Math.Max((_visibleCount - 1), 1);
 
 				UpdateDesigners(true);
 			}
 		}
 
-		private int FUpdateCount = 0;
+		private int _updateCount = 0;
 
 		public void BeginUpdate()
 		{
-			FUpdateCount++;
+			_updateCount++;
 			SuspendLayout();
 		}
 
 		public void EndUpdate()
 		{
-			FUpdateCount = Math.Max(0, FUpdateCount - 1);
-			if (IsHandleCreated && (FUpdateCount == 0))
+			_updateCount = Math.Max(0, _updateCount - 1);
+			if (IsHandleCreated && (_updateCount == 0))
 			{
 				UpdateSurface();
 				Invalidate(false);
@@ -336,46 +336,46 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 		#region Designers
 
 		// List of active designers by their node
-		private Hashtable FDesigners = new Hashtable();
+		private Hashtable _designers = new Hashtable();
 
 		public event GetDesignerHandler OnGetDesigner;
 
-		protected virtual IElementDesigner GetDesigner(object AElement)
+		protected virtual IElementDesigner GetDesigner(object element)
 		{
 			if (OnGetDesigner != null)
-				return OnGetDesigner(AElement);
+				return OnGetDesigner(element);
 			else
 				return null;
 		}
 
-		private IElementDesigner AddDesigner(object ANode)
+		private IElementDesigner AddDesigner(object node)
 		{
-			IElementDesigner LDesigner = GetDesigner(ANode);
-			if (LDesigner != null)
+			IElementDesigner designer = GetDesigner(node);
+			if (designer != null)
 			{
 				try
 				{
-					FDesigners.Add(ANode, LDesigner);
-					Controls.Add((Control)LDesigner);
+					_designers.Add(node, designer);
+					Controls.Add((Control)designer);
 				}
 				catch
 				{
-					LDesigner.Dispose();
+					designer.Dispose();
 					throw;
 				}
 			}
-			return LDesigner;
+			return designer;
 		}
 
-		private void RemoveDesigner(object ANode)
+		private void RemoveDesigner(object node)
 		{
-			IElementDesigner LDesigner = (IElementDesigner)FDesigners[ANode];
-			if (LDesigner != null)
+			IElementDesigner designer = (IElementDesigner)_designers[node];
+			if (designer != null)
 			{
-				if (ActiveControl == (Control)LDesigner)
+				if (ActiveControl == (Control)designer)
 					ActiveControl = null;
-				Controls.Remove((Control)LDesigner);
-				FDesigners.Remove(ANode);
+				Controls.Remove((Control)designer);
+				_designers.Remove(node);
 			}
 		}
 
@@ -383,61 +383,61 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 
 		#region Painting
 
-		protected override void OnPaint(PaintEventArgs AArgs)
+		protected override void OnPaint(PaintEventArgs args)
 		{
-			base.OnPaint(AArgs);
+			base.OnPaint(args);
 
-			Rectangle LBounds = DisplayRectangle;
-			Rectangle LLineRect;
-			TreeNode LNode;
-			int LNodeLevel;
-			int LEnd = Math.Min(FExposed.Count, FLocation.Y + FVisibleCount);
+			Rectangle bounds = DisplayRectangle;
+			Rectangle lineRect;
+			TreeNode node;
+			int nodeLevel;
+			int end = Math.Min(_exposed.Count, _location.Y + _visibleCount);
 
-			using (Pen LPen = new Pen(Color.White))
+			using (Pen pen = new Pen(Color.White))
 			{
-				using (Pen LShadowPen = new Pen(Color.Gray))
+				using (Pen shadowPen = new Pen(Color.Gray))
 				{
-					using (Brush LBrush = new SolidBrush(Color.WhiteSmoke))
+					using (Brush brush = new SolidBrush(Color.WhiteSmoke))
 					{
-						for (int i = FLocation.Y; i < LEnd; i++)
+						for (int i = _location.Y; i < end; i++)
 						{
-							LNode = (TreeNode)FExposed[i];
-							LNodeLevel = LNode.Level();
-							LLineRect =
+							node = (TreeNode)_exposed[i];
+							nodeLevel = node.Level();
+							lineRect =
 								new Rectangle
 								(
-									LBounds.X + (-FLocation.X * FIndent),
-									LBounds.Y + ((i - FLocation.Y) * FRowHeight),
-									(LNodeLevel * FIndent) + (CGutterWidth / 2),
-									FRowHeight
+									bounds.X + (-_location.X * _indent),
+									bounds.Y + ((i - _location.Y) * _rowHeight),
+									(nodeLevel * _indent) + (GutterWidth / 2),
+									_rowHeight
 								);
 
 							// Draw the lines
-							if (AArgs.Graphics.IsVisible(LLineRect) && (LNode.Parent != null))
+							if (args.Graphics.IsVisible(lineRect) && (node.Parent != null))
 							{
-								DrawVertical(AArgs.Graphics, LLineRect, LPen, LShadowPen, LNode.Parent);
+								DrawVertical(args.Graphics, lineRect, pen, shadowPen, node.Parent);
 								
 								// Draw the horizontal line leading to the node
-								int LY = LLineRect.Y + (LLineRect.Height / 2);
-								int LX = LLineRect.X + ((LNodeLevel - 1) * FIndent) + (FIndent / 2);
-								AArgs.Graphics.DrawLine(LPen, LX, LY, LLineRect.Right, LY);
-								AArgs.Graphics.DrawLine(LShadowPen, LX + 1, LY + 1, LLineRect.Right, LY + 1);
+								int y = lineRect.Y + (lineRect.Height / 2);
+								int x = lineRect.X + ((nodeLevel - 1) * _indent) + (_indent / 2);
+								args.Graphics.DrawLine(pen, x, y, lineRect.Right, y);
+								args.Graphics.DrawLine(shadowPen, x + 1, y + 1, lineRect.Right, y + 1);
 
 								// Draw the vertical line from the parent to the node (and beyond if there are additional siblings
-								if (LNode.Parent.Children.IndexOf(LNode) < (LNode.Parent.Children.Count - 1))
-									LY = LLineRect.Bottom;
-								AArgs.Graphics.DrawLine(LPen, LX, LLineRect.Top, LX, LY - 1);
-								AArgs.Graphics.DrawLine(LShadowPen, LX + 1, LLineRect.Top, LX + 1, LY - 1);
+								if (node.Parent.Children.IndexOf(node) < (node.Parent.Children.Count - 1))
+									y = lineRect.Bottom;
+								args.Graphics.DrawLine(pen, x, lineRect.Top, x, y - 1);
+								args.Graphics.DrawLine(shadowPen, x + 1, lineRect.Top, x + 1, y - 1);
 							}
 
 							// Draw the stub
-							if (LNode.Children.Count > 0)
+							if (node.Children.Count > 0)
 							{
-								Rectangle LRect = new Rectangle((((LNodeLevel - FLocation.X) * FIndent) + (FIndent / 2) - (CGutterWidth / 2)) - 1, LLineRect.Bottom - 5, 7, 6);
-								if (AArgs.Graphics.IsVisible(LRect))
+								Rectangle rect = new Rectangle((((nodeLevel - _location.X) * _indent) + (_indent / 2) - (GutterWidth / 2)) - 1, lineRect.Bottom - 5, 7, 6);
+								if (args.Graphics.IsVisible(rect))
 								{
-									AArgs.Graphics.DrawLine(LShadowPen, new Point(LRect.X + 4, LRect.Bottom), new Point(LRect.Right, LRect.Y + 1));
-									AArgs.Graphics.FillPolygon(LBrush, new Point[] {new Point(LRect.X, LRect.Y), new Point(LRect.X + 3, LRect.Bottom - 1), new Point(LRect.Right - 1, LRect.Y)});
+									args.Graphics.DrawLine(shadowPen, new Point(rect.X + 4, rect.Bottom), new Point(rect.Right, rect.Y + 1));
+									args.Graphics.FillPolygon(brush, new Point[] {new Point(rect.X, rect.Y), new Point(rect.X + 3, rect.Bottom - 1), new Point(rect.Right - 1, rect.Y)});
 								}
 							}
 						}
@@ -446,17 +446,17 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 			}
 		}
 
-		private void DrawVertical(Graphics AGraphics, Rectangle ABounds, Pen APen, Pen AShadowPen, TreeNode ANode)
+		private void DrawVertical(Graphics graphics, Rectangle bounds, Pen pen, Pen shadowPen, TreeNode node)
 		{
-			if (ANode.Parent != null)
+			if (node.Parent != null)
 			{
-				if (ANode.Parent.Children.IndexOf(ANode) < (ANode.Parent.Children.Count - 1))	// if there is another sibling after this node
+				if (node.Parent.Children.IndexOf(node) < (node.Parent.Children.Count - 1))	// if there is another sibling after this node
 				{
-					int LX = ABounds.X + (ANode.Parent.Level() * FIndent) + (FIndent / 2);
-					AGraphics.DrawLine(APen, LX, ABounds.Top, LX, ABounds.Bottom);
-					AGraphics.DrawLine(AShadowPen, LX + 1, ABounds.Top, LX + 1, ABounds.Bottom);
+					int x = bounds.X + (node.Parent.Level() * _indent) + (_indent / 2);
+					graphics.DrawLine(pen, x, bounds.Top, x, bounds.Bottom);
+					graphics.DrawLine(shadowPen, x + 1, bounds.Top, x + 1, bounds.Bottom);
 				}
-				DrawVertical(AGraphics, ABounds, APen, AShadowPen, ANode.Parent);
+				DrawVertical(graphics, bounds, pen, shadowPen, node.Parent);
 			}
 		}		
 
@@ -464,36 +464,36 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 
 		#region Nodes
 
-		private RootTreeNodes FNodes;
-		public TreeNodes Nodes { get { return FNodes; } }
+		private RootTreeNodes _nodes;
+		public TreeNodes Nodes { get { return _nodes; } }
 
-		private ArrayList FExposed = new ArrayList();
+		private ArrayList _exposed = new ArrayList();
 
-		private void ScrollVisible(int AIndex, int ADeltaY)
+		private void ScrollVisible(int index, int deltaY)
 		{
-			int LVisibleY = Math.Max(0, AIndex - FLocation.Y);
-			if (LVisibleY <= FVisibleCount)
+			int visibleY = Math.Max(0, index - _location.Y);
+			if (visibleY <= _visibleCount)
 			{
-				Rectangle LVisible = DisplayRectangle;
-				RECT LScroll = UnsafeUtilities.RECTFromLTRB(LVisible.X, LVisibleY * FRowHeight, LVisible.Right, Math.Max(LVisible.Bottom, LVisible.Bottom + FRowHeight));
-				RECT LClip = UnsafeUtilities.RECTFromRectangle(LVisible);
-				UnsafeNativeMethods.ScrollWindowEx(this.Handle, 0, ADeltaY * FRowHeight, ref LScroll, ref LClip, IntPtr.Zero, IntPtr.Zero, 2 /* SW_INVALIDATE */ | 4 /* SW_ERASE */);
+				Rectangle visible = DisplayRectangle;
+				RECT scroll = UnsafeUtilities.RECTFromLTRB(visible.X, visibleY * _rowHeight, visible.Right, Math.Max(visible.Bottom, visible.Bottom + _rowHeight));
+				RECT clip = UnsafeUtilities.RECTFromRectangle(visible);
+				UnsafeNativeMethods.ScrollWindowEx(this.Handle, 0, deltaY * _rowHeight, ref scroll, ref clip, IntPtr.Zero, IntPtr.Zero, 2 /* SW_INVALIDATE */ | 4 /* SW_ERASE */);
 			}
 		}
 
-		internal void AddExposed(TreeNode ANode, int AIndex)
+		internal void AddExposed(TreeNode node, int index)
 		{
-			FExposed.Insert(AIndex, ANode);
+			_exposed.Insert(index, node);
 			UpdateSurface();
-			ScrollVisible(AIndex, 1);
+			ScrollVisible(index, 1);
 			PerformLayout();
 		}
 
-		internal void RemoveExposed(int AIndex)
+		internal void RemoveExposed(int index)
 		{
-			FExposed.RemoveAt(AIndex);
+			_exposed.RemoveAt(index);
 			UpdateSurface();
-			ScrollVisible(AIndex + 1, -1);
+			ScrollVisible(index + 1, -1);
 			PerformLayout();
 		}
 
@@ -504,167 +504,167 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 	{
 		public TreeNode()
 		{
-			FChildren = new TreeNodes(this);
+			_children = new TreeNodes(this);
 		}
 
-		private TreeSurface FSurface;
-		public TreeSurface Surface { get { return FSurface; } }
-		internal void SetSurface(TreeSurface AService)
+		private TreeSurface _surface;
+		public TreeSurface Surface { get { return _surface; } }
+		internal void SetSurface(TreeSurface service)
 		{
-			FSurface = AService;
-			foreach (TreeNode LChild in Children)
-				LChild.SetSurface(AService);
+			_surface = service;
+			foreach (TreeNode child in Children)
+				child.SetSurface(service);
 		}
 
-		internal TreeNode FParent;
+		internal TreeNode _parent;
 		public TreeNode Parent 
 		{ 
-			get { return FParent; }
+			get { return _parent; }
 			set 
 			{
-				if (FParent != value)
+				if (_parent != value)
 				{
-					if (FParent != null)
-						FParent.Children.Remove(this);
+					if (_parent != null)
+						_parent.Children.Remove(this);
 					if (value != null)
-						FParent.Children.Add(this);
+						_parent.Children.Add(this);
 				}
 			}
 		}
 
-		private TreeNodes FChildren;
-		public TreeNodes Children { get { return FChildren; } }
+		private TreeNodes _children;
+		public TreeNodes Children { get { return _children; } }
 
-		private object FElement;
-		public object Element { get { return FElement; } set { FElement = value; } }
+		private object _element;
+		public object Element { get { return _element; } set { _element = value; } }
 
 		/// <summary> A node is "Exposed" if it is added to the list of Exposed (visible) nodes of the surface. </summary>
-		private bool FIsExposed;
+		private bool _isExposed;
 
 		/// <summary> Adds or removes the node from the list of exposed (not necessarily visible) nodes of the surface. </summary>
 		/// <remarks> Recurses to the children if the exposed state of this node changes. </remarks>
 		internal void UpdateExposed()
 		{
-			bool LShouldBeExposed = FIsVisible && (FSurface != null);
-			TreeNode LNode = Parent;
-			while ((LNode != null) && LShouldBeExposed)
+			bool shouldBeExposed = _isVisible && (_surface != null);
+			TreeNode node = Parent;
+			while ((node != null) && shouldBeExposed)
 			{
-				LShouldBeExposed = LShouldBeExposed && LNode.IsVisible && LNode.IsExpanded;
-				LNode = LNode.Parent;
+				shouldBeExposed = shouldBeExposed && node.IsVisible && node.IsExpanded;
+				node = node.Parent;
 			}
-			SetExposed(LShouldBeExposed);
+			SetExposed(shouldBeExposed);
 		}
 
 		/// <summary> Sets the exposed state of the node (and it's children). </summary>
-		internal void SetExposed(bool AValue)
+		internal void SetExposed(bool tempValue)
 		{
-			if (AValue != FIsExposed)	// This should never change when there is no surface
+			if (tempValue != _isExposed)	// This should never change when there is no surface
 			{
-				FIsExposed = AValue;
-				if (AValue)
-					FSurface.AddExposed(this, ExposedIndex());
+				_isExposed = tempValue;
+				if (tempValue)
+					_surface.AddExposed(this, ExposedIndex());
 				else
-					FSurface.RemoveExposed(ExposedIndex());
+					_surface.RemoveExposed(ExposedIndex());
 			}
-			if (AValue)
+			if (tempValue)
 				UpdateChildrenExposed();
 			else
-				foreach (TreeNode LChild in Children)
-					LChild.SetExposed(false);
+				foreach (TreeNode child in Children)
+					child.SetExposed(false);
 		}
 
 		/// <summary> Updates the exposed state of the child nodes. </summary>
 		private void UpdateChildrenExposed()
 		{
-			foreach (TreeNode LChild in Children)
-				LChild.UpdateExposed();
+			foreach (TreeNode child in Children)
+				child.UpdateExposed();
 		}
 
-		private bool FIsVisible = true;
+		private bool _isVisible = true;
 		public bool IsVisible
 		{
-			get { return FIsVisible; }
+			get { return _isVisible; }
 			set
 			{
-				if (FIsVisible != value)
+				if (_isVisible != value)
 				{
-					FIsVisible = value;
+					_isVisible = value;
 					UpdateExposed();
 				}
 			}
 		}
 
-		private bool FIsExpanded;
+		private bool _isExpanded;
 		public bool IsExpanded 
 		{ 
-			get { return FIsExpanded; }
+			get { return _isExpanded; }
 			set 
 			{
-				if (FIsExpanded != value)
+				if (_isExpanded != value)
 					InternalSetExpanded(value, false);
 			}
 		}
 
-		private void InternalRecurseExpanded(bool AIsExpanded)
+		private void InternalRecurseExpanded(bool isExpanded)
 		{
-			FIsExpanded = AIsExpanded;
-			foreach (TreeNode LChild in Children)
-				LChild.InternalRecurseExpanded(AIsExpanded);
+			_isExpanded = isExpanded;
+			foreach (TreeNode child in Children)
+				child.InternalRecurseExpanded(isExpanded);
 		}
 
-		private void InternalSetExpanded(bool AIsExpanded, bool ARecursive)
+		private void InternalSetExpanded(bool isExpanded, bool recursive)
 		{
-			if (FSurface != null)
-				FSurface.BeginUpdate();
+			if (_surface != null)
+				_surface.BeginUpdate();
 			try
 			{
-				bool LRefreshChildren = AIsExpanded || (AIsExpanded != FIsExpanded);
-				if (ARecursive)
-					InternalRecurseExpanded(AIsExpanded);
+				bool refreshChildren = isExpanded || (isExpanded != _isExpanded);
+				if (recursive)
+					InternalRecurseExpanded(isExpanded);
 				else
-					FIsExpanded = AIsExpanded;
-				if (LRefreshChildren)
+					_isExpanded = isExpanded;
+				if (refreshChildren)
 					UpdateChildrenExposed();
 			}
 			finally
 			{
-				if (FSurface != null)
-					FSurface.EndUpdate();
+				if (_surface != null)
+					_surface.EndUpdate();
 			}
 		}
 
-		public void Expand(bool ARecursive)
+		public void Expand(bool recursive)
 		{
-			InternalSetExpanded(true, ARecursive);
+			InternalSetExpanded(true, recursive);
 		}
 
-		public void Collapse(bool ARecursive)
+		public void Collapse(bool recursive)
 		{
-			InternalSetExpanded(false, ARecursive);
+			InternalSetExpanded(false, recursive);
 		}
 
 		/// <summary> A count of exposed nodes (including this one and any visible children recursively). </summary>
 		private int RecursiveCount()
 		{
-			int LResult = 0;
-			if (FIsExposed)
-				LResult++;
-			foreach (TreeNode LChild in Children)
-				LResult += LChild.RecursiveCount();
-			return LResult;
+			int result = 0;
+			if (_isExposed)
+				result++;
+			foreach (TreeNode child in Children)
+				result += child.RecursiveCount();
+			return result;
 		}
 
 		/// <summary> The index of the node relative to the visible ordering of all nodes. </summary>
 		public int ExposedIndex()
 		{
-			if (FParent != null)
+			if (_parent != null)
 			{
-				int LResult = FParent.ExposedIndex();
-				if (FParent.FIsExposed)
-					LResult++;
-				for (int i = 0; (i < FParent.Children.Count) && (FParent.Children[i] != this); i++)
-					LResult += FParent.Children[i].RecursiveCount();
-				return LResult;
+				int result = _parent.ExposedIndex();
+				if (_parent._isExposed)
+					result++;
+				for (int i = 0; (i < _parent.Children.Count) && (_parent.Children[i] != this); i++)
+					result += _parent.Children[i].RecursiveCount();
+				return result;
 			}
 			else
 				return 0;
@@ -672,100 +672,100 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 
 		public int Level()
 		{
-			int LResult = 0;
-			TreeNode LNode = FParent;
-			while (LNode != null)
+			int result = 0;
+			TreeNode node = _parent;
+			while (node != null)
 			{
-				LResult++;
-				LNode = LNode.Parent;
+				result++;
+				node = node.Parent;
 			}
-			return LResult;
+			return result;
 		}
 
 		public int Depth()
 		{
-			int LMax = 0;
-			if (FIsExposed)
+			int max = 0;
+			if (_isExposed)
 			{
-				int LCurrent;
-				foreach (TreeNode LChild in Children)
+				int current;
+				foreach (TreeNode child in Children)
 				{
-					LCurrent = LChild.Depth();
-					if (LCurrent > LMax)
-						LMax = LCurrent;
+					current = child.Depth();
+					if (current > max)
+						max = current;
 				}
-				LMax++;
+				max++;
 			}
-			return LMax;
+			return max;
 		}
 	}
 
 	public class TreeNodes : List
 	{
-		public TreeNodes(TreeNode ANode)
+		public TreeNodes(TreeNode node)
 		{
-			FNode = ANode;
+			_node = node;
 		}
 
-		private TreeNode FNode;
-		public TreeNode Node { get { return FNode; } }
+		private TreeNode _node;
+		public TreeNode Node { get { return _node; } }
 
 		public virtual TreeSurface GetSurface()
 		{
-			return FNode.Surface;
+			return _node.Surface;
 		}
 
-		public new TreeNode this[int AIndex]
+		public new TreeNode this[int index]
 		{
-			get { return (TreeNode)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (TreeNode)base[index]; }
+			set { base[index] = value; }
 		}
 
-		protected override void Adding(object AValue, int AIndex)
+		protected override void Adding(object tempValue, int index)
 		{
-			base.Adding(AValue, AIndex);
-			TreeNode LNode = (TreeNode)AValue;
-			LNode.Parent = null;
-			LNode.FParent = FNode;
-			LNode.SetSurface(GetSurface());
-			LNode.UpdateExposed();
+			base.Adding(tempValue, index);
+			TreeNode node = (TreeNode)tempValue;
+			node.Parent = null;
+			node._parent = _node;
+			node.SetSurface(GetSurface());
+			node.UpdateExposed();
 		}
 
-		protected override void Removing(object AValue, int AIndex)
+		protected override void Removing(object tempValue, int index)
 		{
-			TreeNode LNode = (TreeNode)AValue;
-			LNode.SetExposed(false);
-			LNode.SetSurface(null);
-			LNode.FParent = null;
-			base.Removing(AValue, AIndex);
+			TreeNode node = (TreeNode)tempValue;
+			node.SetExposed(false);
+			node.SetSurface(null);
+			node._parent = null;
+			base.Removing(tempValue, index);
 		}
 
 		public int Depth()
 		{
-			int LMax = 0;
-			int LCurrent;
-			foreach (TreeNode LChild in this)
+			int max = 0;
+			int current;
+			foreach (TreeNode child in this)
 			{
-				LCurrent = LChild.Depth();
-				if (LCurrent > LMax)
-					LMax = LCurrent;
+				current = child.Depth();
+				if (current > max)
+					max = current;
 			}
-			return LMax;
+			return max;
 		}
 	}
 
 	public class RootTreeNodes : TreeNodes
 	{
-		public RootTreeNodes(TreeSurface ASurface) : base(null)
+		public RootTreeNodes(TreeSurface surface) : base(null)
 		{
-			FSurface = ASurface;
+			_surface = surface;
 		}
 
-		private TreeSurface FSurface;
+		private TreeSurface _surface;
 
 		public override TreeSurface GetSurface()
 		{
-			return FSurface;
+			return _surface;
 		}
 	}
 }

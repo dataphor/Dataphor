@@ -30,7 +30,7 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 	{
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{
-			return Scheduler.CMinutesPerDay - (value is int ? (int)value : 0);
+			return Scheduler.MinutesPerDay - (value is int ? (int)value : 0);
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -45,8 +45,8 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		{
 			if (value is DateTime)
 			{
-				var LDate = (DateTime)value;
-				return LDate.ToString("dddd M/d");
+				var date = (DateTime)value;
+				return date.ToString("dddd M/d");
 			}
 			else
 				return null;
@@ -64,14 +64,14 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 		{
 			if (value != null && value is DateTime)
 			{
-				var LValue = (DateTime)value;
+				var tempValue = (DateTime)value;
 				return
 					String.Format
 					(
 						"{0}:{1:D2}{2}",
-						LValue.Hour == 0 ? 12 : (LValue.Hour <= 12 ? LValue.Hour : (LValue.Hour - 12)),
-						LValue.Minute,
-						LValue.Hour < 12 ? "am" : "pm"
+						tempValue.Hour == 0 ? 12 : (tempValue.Hour <= 12 ? tempValue.Hour : (tempValue.Hour - 12)),
+						tempValue.Minute,
+						tempValue.Hour < 12 ? "am" : "pm"
 					);
 			}
 			else

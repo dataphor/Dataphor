@@ -51,14 +51,14 @@ namespace Alphora.Dataphor.DAE.Device.SAS
 	{
 		public SASDevice(int AID, string AName) : base(AID, AName)
 		{
-			FSupportsTransactions = false;
+			_supportsTransactions = false;
 			UseTransactions = false; // The SAS CLI does not support explicit transactions
 			UseQuotedIdentifiers = false;
 		}
 		
 		protected override void SetMaxIdentifierLength()
 		{
-			FMaxIdentifierLength = 32; // this is the max identifier length in SAS all the time
+			_maxIdentifierLength = 32; // this is the max identifier length in SAS all the time
 		}
 		
 		protected override void RegisterSystemObjectMaps(ServerProcess AProcess)
@@ -491,10 +491,10 @@ order by libname, memname, indxname, indxpos
 	{
 		public SASOLEDBConnectionStringBuilder()
 		{
-			FParameters.AddOrUpdate("Provider", "sas.SHAREProvider.1");
-			FLegend.AddOrUpdate("ServerID", "Data source");
-			FLegend.AddOrUpdate("UserName", "user id");
-			FLegend.AddOrUpdate("Password", "password");
+			_parameters.AddOrUpdate("Provider", "sas.SHAREProvider.1");
+			_legend.AddOrUpdate("ServerID", "Data source");
+			_legend.AddOrUpdate("UserName", "user id");
+			_legend.AddOrUpdate("Password", "password");
 		}
 	}
 

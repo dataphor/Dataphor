@@ -29,19 +29,19 @@ namespace Alphora.Dataphor.Dataphoria
 			FTxtVersion.Text = this.GetType().Assembly.GetName(false).Version.ToString();
 
             
-            string LPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);            
-            DirectoryInfo LDirectory = new DirectoryInfo(LPath);
-            FileInfo[] LFiles = LDirectory.GetFiles("*.dll", SearchOption.TopDirectoryOnly);
+            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);            
+            DirectoryInfo directory = new DirectoryInfo(path);
+            FileInfo[] files = directory.GetFiles("*.dll", SearchOption.TopDirectoryOnly);
 
-            foreach (FileInfo file in LFiles)
+            foreach (FileInfo file in files)
             {
                 // Load the file into the application domain.
                 try
                 {
-                    AssemblyName LAssemblyName = AssemblyName.GetAssemblyName(file.FullName);
-                    FLvModules.Items.Add(new ListViewItem(new string[] { LAssemblyName.Name, LAssemblyName.Version.ToString() }));
+                    AssemblyName assemblyName = AssemblyName.GetAssemblyName(file.FullName);
+                    FLvModules.Items.Add(new ListViewItem(new string[] { assemblyName.Name, assemblyName.Version.ToString() }));
                 }
-                catch (BadImageFormatException LBadImageFormatException)
+                catch (BadImageFormatException badImageFormatException)
                 {
                     //HACK: How do I know if a .dll file is (or not) a .NET assembly?                   
                 }                                                
@@ -80,15 +80,15 @@ namespace Alphora.Dataphor.Dataphoria
 			System.Diagnostics.Process.Start("news://news.alphora.com");
 		}
 		
-		protected override bool ProcessDialogKey(Keys AKeyData)
+		protected override bool ProcessDialogKey(Keys keyData)
 		{
-			if (AKeyData == Keys.Escape)
+			if (keyData == Keys.Escape)
 			{
 				Close();
 				return true;
 			}
 			else
-				return base.ProcessDialogKey(AKeyData);
+				return base.ProcessDialogKey(keyData);
 		}
 	}
 }

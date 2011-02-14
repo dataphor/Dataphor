@@ -57,9 +57,9 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 		}
 
 		// Resource manager for this exception class
-		private static ResourceManager FResourceManager = new ResourceManager("Alphora.Dataphor.DAE.Client.Controls.Design.DesignException", typeof(DesignException).Assembly);
+		private static ResourceManager _resourceManager = new ResourceManager("Alphora.Dataphor.DAE.Client.Controls.Design.DesignException", typeof(DesignException).Assembly);
 
 		// Constructors
-		public DesignException(Codes AErrorCode) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, null) {}
+		public DesignException(Codes errorCode) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, null, null) {}
 	}
 }

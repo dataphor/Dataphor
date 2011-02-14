@@ -5,10 +5,10 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes.Menus
 {
     public class DocumentListFileDropMenu : ContextMenu
     {
-        public DocumentListFileDropMenu(Array ASource, DocumentListNode ATarget)
+        public DocumentListFileDropMenu(Array source, DocumentListNode target)
         {
-            FSource = ASource;
-            FTarget = ATarget;
+            _source = source;
+            _target = target;
 
             MenuItems.Add(new MenuItem(Strings.DropMenu_Copy, new EventHandler(CopyClick)));
             MenuItems.Add(new MenuItem(Strings.DropMenu_Move, new EventHandler(MoveClick)));
@@ -16,17 +16,17 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes.Menus
             MenuItems.Add(new MenuItem(Strings.DropMenu_Cancel));
         }
 
-        private Array FSource;
-        private DocumentListNode FTarget;
+        private Array _source;
+        private DocumentListNode _target;
 
-        private void CopyClick(object ASender, EventArgs AArgs)
+        private void CopyClick(object sender, EventArgs args)
         {
-            FTarget.CopyFromFiles(FSource);
+            _target.CopyFromFiles(_source);
         }
 
-        private void MoveClick(object ASender, EventArgs AArgs)
+        private void MoveClick(object sender, EventArgs args)
         {
-            FTarget.MoveFromFiles(FSource);
+            _target.MoveFromFiles(_source);
         }
     }
 }

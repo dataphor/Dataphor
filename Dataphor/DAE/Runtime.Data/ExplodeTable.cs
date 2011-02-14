@@ -24,69 +24,69 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	*/
     public class ExplodeTable : Table
     {
-		public ExplodeTable(ExplodeNode ANode, Program AProgram) : base(ANode, AProgram){}
+		public ExplodeTable(ExplodeNode node, Program program) : base(node, program){}
 		
-		public new ExplodeNode Node { get { return (ExplodeNode)FNode; } }
+		public new ExplodeNode Node { get { return (ExplodeNode)_node; } }
 		
 		// The current set of cursors being used to produce the result set
-		protected Stack FSourceTables;
+		protected Stack _sourceTables;
 		
 		// For every cursor but the root, this stack will contain the parent row variable for that cursor.
-		protected Stack FParentRows;
+		protected Stack _parentRows;
 		
-		protected Row FSourceRow;
-		protected Row FTargetRow;
-		protected Schema.TableType FTableType;
-		protected Schema.BaseTableVar FTableVar;
-		protected Schema.Order FSequenceOrder;
-		protected NativeTable FBuffer;
-		protected Scan FScan;
-		protected Table FRootTable;
-		protected int FSequence;
-		protected int FSequenceColumnIndex = -1;
-		protected bool FEmpty;
+		protected Row _sourceRow;
+		protected Row _targetRow;
+		protected Schema.TableType _tableType;
+		protected Schema.BaseTableVar _tableVar;
+		protected Schema.Order _sequenceOrder;
+		protected NativeTable _buffer;
+		protected Scan _scan;
+		protected Table _rootTable;
+		protected int _sequence;
+		protected int _sequenceColumnIndex = -1;
+		protected bool _empty;
 		
-		protected Row NewParentRow(Row ACurrentRow)
+		protected Row NewParentRow(Row currentRow)
 		{
 			#if USENAMEDROWVARIABLES
-			Row LRow = new Row(Manager, ACurrentRow.DataType);
+			Row row = new Row(Manager, currentRow.DataType);
 			#else
-			Row LRow = new Row(Manager, new Schema.RowType(ACurrentRow.DataType.Columns, Keywords.Parent));
+			Row row = new Row(Manager, new Schema.RowType(ACurrentRow.DataType.Columns, Keywords.Parent));
 			#endif
-			ACurrentRow.CopyTo(LRow);
-			return LRow;
+			currentRow.CopyTo(row);
+			return row;
 		}
 		
-		protected void PushSourceTable(Row ACurrentRow)
+		protected void PushSourceTable(Row currentRow)
 		{
-			if (ACurrentRow == null)
+			if (currentRow == null)
 			{
 				// Open the root expression, if it is not empty, save it on the cursor stack
-				FRootTable = (Table)Node.Nodes[1].Execute(Program);
-				if (!FRootTable.IsEmpty())
-					FSourceTables.Push(FRootTable);
+				_rootTable = (Table)Node.Nodes[1].Execute(Program);
+				if (!_rootTable.IsEmpty())
+					_sourceTables.Push(_rootTable);
 				else
-					FRootTable.Dispose();
+					_rootTable.Dispose();
 			}
 			else
 			{
 				// Otherwise, use the given row to build a parent row and open a new cursor for the child expression with that row to parameterize it
-				Row LParentRow = NewParentRow(ACurrentRow);
-				Program.Stack.Push(LParentRow);
+				Row parentRow = NewParentRow(currentRow);
+				Program.Stack.Push(parentRow);
 				try
 				{
-					Table LTable = (Table)Node.Nodes[2].Execute(Program);
+					Table table = (Table)Node.Nodes[2].Execute(Program);
 					
 					// If it is not empty, save it on the cursor stack, and save the parent row on the parent row stack
-					if (!LTable.IsEmpty())
+					if (!table.IsEmpty())
 					{
-						FSourceTables.Push(LTable);
-						FParentRows.Push(LParentRow);
+						_sourceTables.Push(table);
+						_parentRows.Push(parentRow);
 					}
 					else
 					{
-						LTable.Dispose();
-						LParentRow.Dispose();
+						table.Dispose();
+						parentRow.Dispose();
 					}
 				}
 				finally
@@ -98,152 +98,152 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected void PopSourceTable()
 		{
-			Table LTable = (Table)FSourceTables.Pop();
-			if (LTable != FRootTable)
-				((Row)FParentRows.Pop()).Dispose();
+			Table table = (Table)_sourceTables.Pop();
+			if (table != _rootTable)
+				((Row)_parentRows.Pop()).Dispose();
 			else
-				FRootTable = null;
+				_rootTable = null;
 
-			LTable.Dispose();
+			table.Dispose();
 		}
 		
 		protected override void InternalOpen()
 		{
-			FSourceTables = new Stack(Program.Stack.MaxStackDepth, Program.Stack.MaxCallDepth);
-			FSourceTables.PushWindow(0);
-			FParentRows = new Stack(Program.Stack.MaxStackDepth, Program.Stack.MaxCallDepth);
-			FParentRows.PushWindow(0);
+			_sourceTables = new Stack(Program.Stack.MaxStackDepth, Program.Stack.MaxCallDepth);
+			_sourceTables.PushWindow(0);
+			_parentRows = new Stack(Program.Stack.MaxStackDepth, Program.Stack.MaxCallDepth);
+			_parentRows.PushWindow(0);
 		 	PushSourceTable(null);
-			FSourceRow = new Row(Manager, ((TableNode)Node.Nodes[0]).DataType.RowType);
-			FTableType = new Schema.TableType();
-			FTableVar = new Schema.BaseTableVar(FTableType, Program.TempDevice);
-			Schema.TableVarColumn LNewColumn;
-			foreach (Schema.TableVarColumn LColumn in Node.TableVar.Columns)
+			_sourceRow = new Row(Manager, ((TableNode)Node.Nodes[0]).DataType.RowType);
+			_tableType = new Schema.TableType();
+			_tableVar = new Schema.BaseTableVar(_tableType, Program.TempDevice);
+			Schema.TableVarColumn newColumn;
+			foreach (Schema.TableVarColumn column in Node.TableVar.Columns)
 			{
-				LNewColumn = (Schema.TableVarColumn)LColumn.Copy();
-				FTableType.Columns.Add(LNewColumn.Column);
-				FTableVar.Columns.Add(LNewColumn);
+				newColumn = (Schema.TableVarColumn)column.Copy();
+				_tableType.Columns.Add(newColumn.Column);
+				_tableVar.Columns.Add(newColumn);
 			}
 
 			if (Node.SequenceColumnIndex < 0)
 			{
-				LNewColumn = new Schema.TableVarColumn(new Schema.Column(Keywords.Sequence, Program.DataTypes.SystemInteger), Schema.TableVarColumnType.Stored);
-				FTableType.Columns.Add(LNewColumn.Column);
-				FTableVar.Columns.Add(LNewColumn);
-				FSequenceColumnIndex = FTableVar.Columns.Count - 1;
+				newColumn = new Schema.TableVarColumn(new Schema.Column(Keywords.Sequence, Program.DataTypes.SystemInteger), Schema.TableVarColumnType.Stored);
+				_tableType.Columns.Add(newColumn.Column);
+				_tableVar.Columns.Add(newColumn);
+				_sequenceColumnIndex = _tableVar.Columns.Count - 1;
 			}
 			else
-				FSequenceColumnIndex = Node.SequenceColumnIndex;
+				_sequenceColumnIndex = Node.SequenceColumnIndex;
 
-			FTargetRow = new Row(Manager, FTableType.RowType);
-			Schema.Key LKey = new Schema.Key();
-			LKey.Columns.Add(FTableVar.Columns[FSequenceColumnIndex]);
-			FTableVar.Keys.Add(LKey);
-			FBuffer = new NativeTable(Manager, FTableVar);
-			FScan = new Scan(Manager, FBuffer, FBuffer.ClusteredIndex, ScanDirection.Forward, null, null);
-			FScan.Open();
-			FSequence = 0;
-			FEmpty = false;
+			_targetRow = new Row(Manager, _tableType.RowType);
+			Schema.Key key = new Schema.Key();
+			key.Columns.Add(_tableVar.Columns[_sequenceColumnIndex]);
+			_tableVar.Keys.Add(key);
+			_buffer = new NativeTable(Manager, _tableVar);
+			_scan = new Scan(Manager, _buffer, _buffer.ClusteredIndex, ScanDirection.Forward, null, null);
+			_scan.Open();
+			_sequence = 0;
+			_empty = false;
 			InternalNext();
-			FEmpty = FScan.EOF();
-			FScan.First();
+			_empty = _scan.EOF();
+			_scan.First();
 		}
 		
 		protected override void InternalClose()
 		{
-			while (FSourceTables.Count > 0)
+			while (_sourceTables.Count > 0)
 				PopSourceTable();
 
-			if (FSourceRow != null)
+			if (_sourceRow != null)
 			{				
-				FSourceRow.Dispose();
-				FSourceRow = null;
+				_sourceRow.Dispose();
+				_sourceRow = null;
 			}
 			
-			if (FTargetRow != null)
+			if (_targetRow != null)
 			{
-				FTargetRow.Dispose();
-				FTargetRow = null;
+				_targetRow.Dispose();
+				_targetRow = null;
 			}
 			
-			if (FScan != null)
+			if (_scan != null)
 			{
-				FScan.Dispose();
-				FScan = null;
+				_scan.Dispose();
+				_scan = null;
 			}
 			
-			if (FBuffer != null)
+			if (_buffer != null)
 			{
-				FBuffer.Drop(Manager);
-				FBuffer = null;
+				_buffer.Drop(Manager);
+				_buffer = null;
 			}
 
-			FTableType = null;
-			FSequenceColumnIndex = -1;
+			_tableType = null;
+			_sequenceColumnIndex = -1;
 		}
 		
 		protected override void InternalReset()
 		{
-			while (FSourceTables.Count > 0)
+			while (_sourceTables.Count > 0)
 				PopSourceTable();
 				
 			PushSourceTable(null);
 
-			FScan.Dispose();
-			FBuffer.Truncate(Manager);
-			FScan = new Scan(Manager, FBuffer, FBuffer.ClusteredIndex, ScanDirection.Forward, null, null);
-			FScan.Open();
-			FSequence = 0;
-			FEmpty = false;
+			_scan.Dispose();
+			_buffer.Truncate(Manager);
+			_scan = new Scan(Manager, _buffer, _buffer.ClusteredIndex, ScanDirection.Forward, null, null);
+			_scan.Open();
+			_sequence = 0;
+			_empty = false;
 			InternalNext();
-			FEmpty = FScan.EOF();
-			FScan.First();
+			_empty = _scan.EOF();
+			_scan.First();
 		}
 		
 		protected override bool InternalNext()
 		{
-			if (!FScan.Next())
+			if (!_scan.Next())
 			{
-				Table LTable;
-				while (FSourceTables.Count > 0)
+				Table table;
+				while (_sourceTables.Count > 0)
 				{
 					// Retrieve the current cursor to be iterated
-					LTable = (Table)FSourceTables[0];
-					bool LContextPopped = false;
-					bool LContextPushed = false;
-					if (FSourceTables.Count > 1)
+					table = (Table)_sourceTables[0];
+					bool contextPopped = false;
+					bool contextPushed = false;
+					if (_sourceTables.Count > 1)
 					{
 						// Push it's parent row context, if necessary
-						Program.Stack.Push(FParentRows.Peek(0));
-						LContextPushed = true;
+						Program.Stack.Push(_parentRows.Peek(0));
+						contextPushed = true;
 					}
 					try
 					{
-						if (LTable.Next())
+						if (table.Next())
 						{
-							FSequence++;
-							LTable.Select(FSourceRow);
+							_sequence++;
+							table.Select(_sourceRow);
 							
-							if (LContextPushed)
+							if (contextPushed)
 							{
-								LContextPopped = true;
+								contextPopped = true;
 								Program.Stack.Pop();
 							}
 							
-							FTargetRow.ClearValues();
-							for (int LIndex = 0; LIndex < FSourceRow.DataType.Columns.Count; LIndex++)
-								FTargetRow[LIndex] = FSourceRow[LIndex];
+							_targetRow.ClearValues();
+							for (int index = 0; index < _sourceRow.DataType.Columns.Count; index++)
+								_targetRow[index] = _sourceRow[index];
 							if (Node.LevelColumnIndex >= 0)
-								FTargetRow[Node.LevelColumnIndex] = FSourceTables.Count;
-							if (FSequenceColumnIndex >= 0)
-								FTargetRow[FSequenceColumnIndex] = FSequence;
+								_targetRow[Node.LevelColumnIndex] = _sourceTables.Count;
+							if (_sequenceColumnIndex >= 0)
+								_targetRow[_sequenceColumnIndex] = _sequence;
 								
-							FBuffer.Insert(Manager, FTargetRow);
-							if (!FScan.FindKey(FTargetRow))
+							_buffer.Insert(Manager, _targetRow);
+							if (!_scan.FindKey(_targetRow))
 								throw new RuntimeException(RuntimeException.Codes.NewRowNotFound);
 							
 							// Use the current row to push a new cursor looking for children of this row
-							PushSourceTable(FSourceRow);
+							PushSourceTable(_sourceRow);
 							return true;
 						}
 						else
@@ -252,7 +252,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					}
 					finally
 					{
-						if (LContextPushed && !LContextPopped)
+						if (contextPushed && !contextPopped)
 							Program.Stack.Pop();
 					}
 				}
@@ -261,19 +261,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return true;
 		}
 		
-		protected override void InternalSelect(Row ARow)
+		protected override void InternalSelect(Row row)
 		{
-			FScan.GetRow(ARow);
+			_scan.GetRow(row);
 		}
 		
 		protected override bool InternalBOF()
 		{
-			return FScan.BOF() || FEmpty;
+			return _scan.BOF() || _empty;
 		}
 		
 		protected override bool InternalEOF()
 		{
-			return (FScan.EOF() && (FSourceTables.Count == 0)) || FEmpty;
+			return (_scan.EOF() && (_sourceTables.Count == 0)) || _empty;
 		}
     }
 }

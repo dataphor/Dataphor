@@ -52,24 +52,24 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 	public class CatalogHeader : System.Object
 	{
-		public CatalogHeader(Schema.TableVar ATableVar, NativeTable ANativeTable, long ATimeStamp, CatalogCacheLevel ACacheLevel) : base()
+		public CatalogHeader(Schema.TableVar tableVar, NativeTable nativeTable, long timeStamp, CatalogCacheLevel cacheLevel) : base()
 		{
-			FTableVar = ATableVar;
-			FNativeTable = ANativeTable;
-			TimeStamp = ATimeStamp;
-			FCacheLevel = ACacheLevel;
+			_tableVar = tableVar;
+			_nativeTable = nativeTable;
+			TimeStamp = timeStamp;
+			_cacheLevel = cacheLevel;
 		}
 		
-		private Schema.TableVar FTableVar;
-		public Schema.TableVar TableVar { get { return FTableVar; } }
+		private Schema.TableVar _tableVar;
+		public Schema.TableVar TableVar { get { return _tableVar; } }
 		
-		private NativeTable FNativeTable;
-		public NativeTable NativeTable { get { return FNativeTable; } }
+		private NativeTable _nativeTable;
+		public NativeTable NativeTable { get { return _nativeTable; } }
 		
 		public long TimeStamp;
 		
-		private CatalogCacheLevel FCacheLevel;
-		public CatalogCacheLevel CacheLevel { get { return FCacheLevel; } }
+		private CatalogCacheLevel _cacheLevel;
+		public CatalogCacheLevel CacheLevel { get { return _cacheLevel; } }
 		
 		/// <summary>Indicates that the table buffer for this header has been populated and should be maintained. Only used for the Maintained catalog cache level. </summary>
 		public bool Cached;
@@ -79,20 +79,20 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 	{		
 		public CatalogHeaders() : base(){}
 		
-		public new CatalogHeader this[Schema.TableVar ATableVar]
+		public new CatalogHeader this[Schema.TableVar tableVar]
 		{
 			get
 			{
-				CatalogHeader LResult;
-				if (!base.TryGetValue(ATableVar, out LResult))
-					throw new CatalogException(CatalogException.Codes.CatalogHeaderNotFound, ATableVar.Name);
-				return LResult;
+				CatalogHeader result;
+				if (!base.TryGetValue(tableVar, out result))
+					throw new CatalogException(CatalogException.Codes.CatalogHeaderNotFound, tableVar.Name);
+				return result;
 			}
 		}
 		
-		public void Add(CatalogHeader AHeader)
+		public void Add(CatalogHeader header)
 		{
-			Add(AHeader.TableVar, AHeader);
+			Add(header.TableVar, header);
 		}
 	}
 }

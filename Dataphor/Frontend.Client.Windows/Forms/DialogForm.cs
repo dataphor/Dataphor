@@ -43,13 +43,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		}
 		#endregion
 
-		protected override bool ProcessDialogKey(Keys AKeyData)
+		protected override bool ProcessDialogKey(Keys keyData)
 		{
-			switch (AKeyData)
+			switch (keyData)
 			{
 				case Keys.Enter : DialogResult = DialogResult.OK; break;
 				case Keys.Escape : DialogResult = DialogResult.Cancel; break;
-				default : return base.ProcessDialogKey(AKeyData);
+				default : return base.ProcessDialogKey(keyData);
 			}
 			return true;
 		}

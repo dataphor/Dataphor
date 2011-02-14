@@ -8,17 +8,17 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 {
     public class DocumentListNode : BrowseNode
     {
-        public DocumentListNode(string ALibraryName)
+        public DocumentListNode(string libraryName)
         {
             Text = "Documents";
             ImageIndex = 7;
             SelectedImageIndex = ImageIndex;
 
-            FLibraryName = ALibraryName;
+            _libraryName = libraryName;
         }
 
-        private string FLibraryName;
-        public string LibraryName { get { return FLibraryName; } }
+        private string _libraryName;
+        public string LibraryName { get { return _libraryName; } }
 
         protected override string GetChildExpression()
         {
@@ -27,21 +27,21 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 		
         protected override Alphora.Dataphor.DAE.Runtime.DataParams GetParams()
         {
-            DAE.Runtime.DataParams LParams = new DAE.Runtime.DataParams();
-            LParams.Add(DAE.Runtime.DataParam.Create(Dataphoria.UtilityProcess, "ALibraryName", LibraryName));
-            return LParams;
+            DAE.Runtime.DataParams paramsValue = new DAE.Runtime.DataParams();
+            paramsValue.Add(DAE.Runtime.DataParam.Create(Dataphoria.UtilityProcess, "ALibraryName", LibraryName));
+            return paramsValue;
         }
 
-        protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row ARow)
+        protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row row)
         {
-            string LName = (string)ARow["Main.Name"];
-            string LType = (string)ARow["Type_ID"];
-            switch (LType)
+            string name = (string)row["Main.Name"];
+            string type = (string)row["Type_ID"];
+            switch (type)
             {
-                case "d4" : return new D4DocumentNode(this, LName, LType);
+                case "d4" : return new D4DocumentNode(this, name, type);
                 case "dfd" : 
-                case "dfdx" : return new FormDocumentNode(this, LName, LType);
-                default : return new DocumentNode(this, LName, LType);
+                case "dfdx" : return new FormDocumentNode(this, name, type);
+                default : return new DocumentNode(this, name, type);
             }
         }
 		
@@ -57,12 +57,12 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 		
         protected override ContextMenu GetContextMenu()
         {
-            ContextMenu LMenu = base.GetContextMenu();
+            ContextMenu menu = base.GetContextMenu();
 			
-            FAddSeparator.Visible = false;
-            FAddMenuItem.Visible = false;
+            _addSeparator.Visible = false;
+            _addMenuItem.Visible = false;
 			
-            return LMenu;
+            return menu;
         }			
 		
         protected override void InternalRefresh()
@@ -71,160 +71,160 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
             base.InternalRefresh();
         }
 
-        private string FindUniqueDocumentName(string ALibraryName, string ADocumentName)
+        private string FindUniqueDocumentName(string libraryName, string documentName)
         {
-            if (!Dataphoria.DocumentExists(ALibraryName, ADocumentName))
-                return ADocumentName;
+            if (!Dataphoria.DocumentExists(libraryName, documentName))
+                return documentName;
 
-            int LCount = 1;
+            int count = 1;
 
-            int LNumIndex = ADocumentName.Length - 1;
-            while ((LNumIndex >= 0) && Char.IsNumber(ADocumentName, LNumIndex))
-                LNumIndex--;
-            if (LNumIndex < (ADocumentName.Length - 1))
+            int numIndex = documentName.Length - 1;
+            while ((numIndex >= 0) && Char.IsNumber(documentName, numIndex))
+                numIndex--;
+            if (numIndex < (documentName.Length - 1))
             {
-                LCount = Int32.Parse(ADocumentName.Substring(LNumIndex + 1));
-                ADocumentName = ADocumentName.Substring(0, LNumIndex + 1);
+                count = Int32.Parse(documentName.Substring(numIndex + 1));
+                documentName = documentName.Substring(0, numIndex + 1);
             }
 
-            string LName;
+            string name;
             do
             {
-                LName = ADocumentName + LCount.ToString();
-                LCount++;
-            }  while (Dataphoria.DocumentExists(ALibraryName, LName));
+                name = documentName + count.ToString();
+                count++;
+            }  while (Dataphoria.DocumentExists(libraryName, name));
 
-            return LName;
+            return name;
         }
 
-        public void CopyFromDocument(string ALibraryName, string ADocumentName)
+        public void CopyFromDocument(string libraryName, string documentName)
         {
-            string LNewDocumentName = FindUniqueDocumentName(LibraryName, ADocumentName);
+            string newDocumentName = FindUniqueDocumentName(LibraryName, documentName);
             Dataphoria.ExecuteScript
                 (
                 String.Format
                     (
                     ".Frontend.CopyDocument('{0}', '{1}', '{2}', '{3}');",
-                    DAE.Schema.Object.EnsureRooted(ALibraryName),
-                    DAE.Schema.Object.EnsureRooted(ADocumentName),
+                    DAE.Schema.Object.EnsureRooted(libraryName),
+                    DAE.Schema.Object.EnsureRooted(documentName),
                     DAE.Schema.Object.EnsureRooted(LibraryName),
-                    LNewDocumentName
+                    newDocumentName
                     )
                 );
             ReconcileChildren();
         }
 
-        public void MoveFromDocument(string ALibraryName, string ADocumentName)
+        public void MoveFromDocument(string libraryName, string documentName)
         {
-            Dataphoria.CheckDocumentOverwrite(LibraryName, ADocumentName);
+            Dataphoria.CheckDocumentOverwrite(LibraryName, documentName);
             Dataphoria.ExecuteScript
                 (
                 String.Format
                     (
                     ".Frontend.MoveDocument('{0}', '{1}', '{2}', '{3}');",
-                    DAE.Schema.Object.EnsureRooted(ALibraryName),
-                    DAE.Schema.Object.EnsureRooted(ADocumentName),
+                    DAE.Schema.Object.EnsureRooted(libraryName),
+                    DAE.Schema.Object.EnsureRooted(documentName),
                     DAE.Schema.Object.EnsureRooted(LibraryName),
-                    ADocumentName
+                    documentName
                     )
                 );
             ReconcileChildren();
         }
 
-        public void CopyFromFiles(Array AFileList)
+        public void CopyFromFiles(Array fileList)
         {
-            FileStream LStream;
-            DocumentDesignBuffer LBuffer;
-            foreach (string LFileName in AFileList)
+            FileStream stream;
+            DocumentDesignBuffer buffer;
+            foreach (string fileName in fileList)
             {
-                LBuffer = new DocumentDesignBuffer(Dataphoria, LibraryName, Path.GetFileNameWithoutExtension(LFileName));
-                Dataphoria.CheckDocumentOverwrite(LBuffer.LibraryName, LBuffer.DocumentName);
-                LBuffer.DocumentType = Program.DocumentTypeFromFileName(LFileName);
-                LStream = new FileStream(LFileName, FileMode.Open, FileAccess.Read);
+                buffer = new DocumentDesignBuffer(Dataphoria, LibraryName, Path.GetFileNameWithoutExtension(fileName));
+                Dataphoria.CheckDocumentOverwrite(buffer.LibraryName, buffer.DocumentName);
+                buffer.DocumentType = Program.DocumentTypeFromFileName(fileName);
+                stream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
                 try
                 {
-                    LBuffer.SaveBinaryData(LStream);
+                    buffer.SaveBinaryData(stream);
                 }
                 finally
                 {
-                    LStream.Close();
+                    stream.Close();
                 }
             }
             ReconcileChildren();
         }
 
-        public void MoveFromFiles(Array AFileList)
+        public void MoveFromFiles(Array fileList)
         {
-            CopyFromFiles(AFileList);
-            foreach (string LFileName in AFileList)
-                File.Delete(LFileName);
+            CopyFromFiles(fileList);
+            foreach (string fileName in fileList)
+                File.Delete(fileName);
         }
 
-        public override void DragDrop(DragEventArgs AArgs)
+        public override void DragDrop(DragEventArgs args)
         {
-            DocumentData LSource = AArgs.Data as DocumentData;
-            if (LSource != null)
+            DocumentData source = args.Data as DocumentData;
+            if (source != null)
             {
-                switch (AArgs.Effect)
+                switch (args.Effect)
                 {
                     case DragDropEffects.Copy | DragDropEffects.Move :
-                        new DocumentListDropMenu(LSource, this).Show(TreeView, TreeView.PointToClient(System.Windows.Forms.Control.MousePosition));
+                        new DocumentListDropMenu(source, this).Show(TreeView, TreeView.PointToClient(System.Windows.Forms.Control.MousePosition));
                         break;
                     case DragDropEffects.Copy :
-                        CopyFromDocument(LSource.Node.LibraryName, LSource.Node.DocumentName);
+                        CopyFromDocument(source.Node.LibraryName, source.Node.DocumentName);
                         break;
                     case DragDropEffects.Move :
-                        MoveFromDocument(LSource.Node.LibraryName, LSource.Node.DocumentName);
-                        ((DocumentListNode)LSource.Node.Parent).ReconcileChildren();
+                        MoveFromDocument(source.Node.LibraryName, source.Node.DocumentName);
+                        ((DocumentListNode)source.Node.Parent).ReconcileChildren();
                         break;
                 }
             }
-            else if (AArgs.Data.GetDataPresent(DataFormats.FileDrop))
+            else if (args.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                Array LFileList = (Array)AArgs.Data.GetData(DataFormats.FileDrop);
-                switch (AArgs.Effect)
+                Array fileList = (Array)args.Data.GetData(DataFormats.FileDrop);
+                switch (args.Effect)
                 {
                     case DragDropEffects.Copy | DragDropEffects.Move :
-                        new DocumentListFileDropMenu(LFileList, this).Show(TreeView, TreeView.PointToClient(System.Windows.Forms.Control.MousePosition));
+                        new DocumentListFileDropMenu(fileList, this).Show(TreeView, TreeView.PointToClient(System.Windows.Forms.Control.MousePosition));
                         break;
                     case DragDropEffects.Copy :
-                        CopyFromFiles(LFileList);
+                        CopyFromFiles(fileList);
                         break;
                     case DragDropEffects.Move :
-                        MoveFromFiles(LFileList);
+                        MoveFromFiles(fileList);
                         break;
                 }
             }
         }
 
-        public override void DragOver(DragEventArgs AArgs)
+        public override void DragOver(DragEventArgs args)
         {
-            base.DragOver(AArgs);
-            DocumentData LSource = AArgs.Data as DocumentData;
-            if (LSource != null)
+            base.DragOver(args);
+            DocumentData source = args.Data as DocumentData;
+            if (source != null)
             {
                 if (System.Windows.Forms.Control.MouseButtons == MouseButtons.Left)
                 {
                     if (System.Windows.Forms.Control.ModifierKeys == Keys.Control)
-                        AArgs.Effect = DragDropEffects.Copy;
+                        args.Effect = DragDropEffects.Copy;
                     else
-                        if (LSource.Node.LibraryName != LibraryName)
-                            AArgs.Effect = DragDropEffects.Move;
+                        if (source.Node.LibraryName != LibraryName)
+                            args.Effect = DragDropEffects.Move;
                 }
                 else if (System.Windows.Forms.Control.MouseButtons == MouseButtons.Right)
-                    AArgs.Effect = DragDropEffects.Copy | DragDropEffects.Move;
+                    args.Effect = DragDropEffects.Copy | DragDropEffects.Move;
             }
-            else if (AArgs.Data.GetDataPresent(DataFormats.FileDrop))
+            else if (args.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 if (System.Windows.Forms.Control.MouseButtons == MouseButtons.Left)
                     if (System.Windows.Forms.Control.ModifierKeys == Keys.Shift)
-                        AArgs.Effect = DragDropEffects.Move;
+                        args.Effect = DragDropEffects.Move;
                     else
-                        AArgs.Effect = DragDropEffects.Copy;
+                        args.Effect = DragDropEffects.Copy;
                 else
-                    AArgs.Effect = DragDropEffects.Copy | DragDropEffects.Move;
+                    args.Effect = DragDropEffects.Copy | DragDropEffects.Move;
             }
-            if (AArgs.Effect != DragDropEffects.None)
+            if (args.Effect != DragDropEffects.None)
                 TreeView.SelectedNode = this;
         }
     }

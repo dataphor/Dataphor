@@ -38,33 +38,33 @@ namespace Alphora.Dataphor.DAE.Server
 		
 	public class LoadingContext : System.Object
 	{
-		public LoadingContext(Schema.User AUser, string ALibraryName) : base()
+		public LoadingContext(Schema.User user, string libraryName) : base()
 		{
-			FUser = AUser;
-			FLibraryName = ALibraryName;
+			_user = user;
+			_libraryName = libraryName;
 		}
 		
-		public LoadingContext(Schema.User AUser, bool AIsInternalContext)
+		public LoadingContext(Schema.User user, bool isInternalContext)
 		{
-			FUser = AUser;
-			FLibraryName = String.Empty;
-			FIsInternalContext = AIsInternalContext;
+			_user = user;
+			_libraryName = String.Empty;
+			_isInternalContext = isInternalContext;
 		}
 		
-		public LoadingContext(Schema.User AUser, string ALibraryName, bool AIsLoadingContext)
+		public LoadingContext(Schema.User user, string libraryName, bool isLoadingContext)
 		{
-			FUser = AUser;
-			FLibraryName = ALibraryName;
-			FIsLoadingContext = AIsLoadingContext;
+			_user = user;
+			_libraryName = libraryName;
+			_isLoadingContext = isLoadingContext;
 		}
 		
-		private Schema.User FUser;
-		public Schema.User User { get { return FUser; } }
+		private Schema.User _user;
+		public Schema.User User { get { return _user; } }
 		
-		private string FLibraryName;
-		public string LibraryName { get { return FLibraryName; } }
+		private string _libraryName;
+		public string LibraryName { get { return _libraryName; } }
 		
-		private bool FIsInternalContext = false;
+		private bool _isInternalContext = false;
 		/// <summary>Indicates whether this is a true loading context, or an internal context entered to prevent logging of DDL.</summary>
 		/// <remarks>
 		/// Because loading contexts are non-logging, they are also used by the server to build internal management structures such
@@ -72,19 +72,19 @@ namespace Alphora.Dataphor.DAE.Server
 		/// as sorts for types involved in the constraints. This flag indicates that this context is an internal context and that
 		/// a logging context may be pushed on top of it.
 		/// </remarks>
-		public bool IsInternalContext { get { return FIsInternalContext; } }
+		public bool IsInternalContext { get { return _isInternalContext; } }
 		
-		private bool FIsLoadingContext = true;
+		private bool _isLoadingContext = true;
 		/// <summary>Indicates whether the context is a loading context, or a context pushed to enable logging within a loading context.</summary>
 		/// <remarks>
 		/// Pushing a non-loading context is only allowed if the current loading context is an internal context, because it should be an error
 		/// to create any logged objects as a result of the creation of a deserializing object.
 		/// </remarks>
-		public bool IsLoadingContext { get { return FIsLoadingContext; } }
+		public bool IsLoadingContext { get { return _isLoadingContext; } }
 		
-		internal Schema.LoadedLibrary FCurrentLibrary;
+		internal Schema.LoadedLibrary _currentLibrary;
 		
-		internal bool FSuppressWarnings;
+		internal bool _suppressWarnings;
 	}
 	
 	public class LoadingContexts : List<LoadingContext> { }
@@ -110,18 +110,18 @@ namespace Alphora.Dataphor.DAE.Server
 	
 	public class ServerFileInfos : List<ServerFileInfo>
 	{
-		public int IndexOf(string AFileName)
+		public int IndexOf(string fileName)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (this[LIndex].FileName == AFileName)
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if (this[index].FileName == fileName)
+					return index;
 					
 			return -1;
 		}
 		
-		public bool Contains(string AFileName)
+		public bool Contains(string fileName)
 		{
-			return IndexOf(AFileName) >= 0;
+			return IndexOf(fileName) >= 0;
 		}
 	}
 }

@@ -10,20 +10,20 @@ namespace Alphora.Dataphor.DAE.Contracts
 {
 	public static class ListenerFaultUtility
 	{
-		public static ListenerFault ExceptionToFault(Exception AException)
+		public static ListenerFault ExceptionToFault(Exception exception)
 		{
-			ListenerFault LFault = new ListenerFault();
+			ListenerFault fault = new ListenerFault();
 			
-			LFault.Message = AException.Message;
-			if (AException.InnerException != null)
-				LFault.InnerFault = ExceptionToFault(AException.InnerException);
+			fault.Message = exception.Message;
+			if (exception.InnerException != null)
+				fault.InnerFault = ExceptionToFault(exception.InnerException);
 				
-			return LFault;
+			return fault;
 		}
 		
-		public static Exception FaultToException(ListenerFault AFault)
+		public static Exception FaultToException(ListenerFault fault)
 		{
-			return new Exception(AFault.Message, AFault.InnerFault == null ? null : FaultToException(AFault.InnerFault));
+			return new Exception(fault.Message, fault.InnerFault == null ? null : FaultToException(fault.InnerFault));
 		}
 	}
 }

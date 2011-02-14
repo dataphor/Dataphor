@@ -6,22 +6,22 @@ namespace Alphora.Dataphor
 	public class NotifyingBaseList<T> : ValidatingBaseList<T>
 	{
 		public NotifyingBaseList() : base() { }
-		public NotifyingBaseList(int ACapacity) : base(ACapacity) { }
+		public NotifyingBaseList(int capacity) : base(capacity) { }
 
 		public event NotifyingListChangeEventHandler<T> Changed;
 		
-		protected override void Adding(T AValue, int AIndex) 
+		protected override void Adding(T value, int index) 
 		{
-			base.Adding(AValue, AIndex);
+			base.Adding(value, index);
 			if (Changed != null)
-				Changed(this, true, AValue, AIndex);
+				Changed(this, true, value, index);
 		}
 
-		protected override void Removing(T AValue, int AIndex) 
+		protected override void Removing(T value, int index) 
 		{ 
-			base.Removing(AValue, AIndex);
+			base.Removing(value, index);
 			if (Changed != null)
-				Changed(this, false, AValue, AIndex);
+				Changed(this, false, value, index);
 		}
 	}
 	

@@ -16,10 +16,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 	
 	public class OperatorSignature : System.Object
     {
-		public OperatorSignature(Operator AOperator)
+		public OperatorSignature(Operator operatorValue)
 		{
-			FOperator = AOperator;
-			FSignatures = new OperatorSignatures(this);
+			_operator = operatorValue;
+			_signatures = new OperatorSignatures(this);
 			#if USEVIRTUAL
 			#if USETYPEDLIST
 			FParentSignatures = new TypedList(typeof(OperatorSignature), false);
@@ -39,14 +39,14 @@ namespace Alphora.Dataphor.DAE.Compiling
 		#endif
 		#endif
 		
-		private OperatorSignatures FSignatures;
-		public OperatorSignatures Signatures { get { return FSignatures; } }
+		private OperatorSignatures _signatures;
+		public OperatorSignatures Signatures { get { return _signatures; } }
 		
 		[Reference]
-		private Operator FOperator;
-		public Operator Operator { get { return FOperator; } }
+		private Operator _operator;
+		public Operator Operator { get { return _operator; } }
 		
-		public Signature Signature { get { return FOperator.Signature; } }
+		public Signature Signature { get { return _operator.Signature; } }
 
 		/*
 			Virtual Resolution Algorithm ->
@@ -60,19 +60,19 @@ namespace Alphora.Dataphor.DAE.Compiling
 				return this signature
 		*/
 		
-		public OperatorSignature ResolveVirtual(Signature ASignature)
+		public OperatorSignature ResolveVirtual(Signature signature)
 		{
 			#if USEVIRTUAL
-			foreach (OperatorSignature LSignature in FSignatures)
-				if (LSignature.Operator.IsOverride && LSignature.Signature.Is(ASignature))
-					return LSignature.ResolveVirtual(ASignature);
+			foreach (OperatorSignature localSignature in FSignatures)
+				if (localSignature.Operator.IsOverride && localSignature.Signature.Is(ASignature))
+					return localSignature.ResolveVirtual(ASignature);
 			#endif
 			return this;
 		}
 		
-		public override bool Equals(object AValue)
+		public override bool Equals(object tempValue)
 		{
-			return (AValue is OperatorSignature) && Signature.Equals(((OperatorSignature)AValue).Signature);
+			return (tempValue is OperatorSignature) && Signature.Equals(((OperatorSignature)tempValue).Signature);
 		}
 		
 		public override int GetHashCode()
@@ -80,39 +80,39 @@ namespace Alphora.Dataphor.DAE.Compiling
 			return Signature.GetHashCode();
 		}
 		
-		public string ShowSignature(int ADepth)
+		public string ShowSignature(int depth)
 		{
-			StringBuilder LString = new StringBuilder();
-			LString.Append(new String('\t', ADepth));
-			LString.Append(Signature.ToString());
-			LString.Append("\n");
-			LString.Append(FSignatures.ShowSignatures(ADepth + 1));
-			return LString.ToString();
+			StringBuilder stringValue = new StringBuilder();
+			stringValue.Append(new String('\t', depth));
+			stringValue.Append(Signature.ToString());
+			stringValue.Append("\n");
+			stringValue.Append(_signatures.ShowSignatures(depth + 1));
+			return stringValue.ToString();
 		}
     }
     
 	public class OperatorSignatures : System.Object
     {
-		public OperatorSignatures(OperatorSignature ASignature) : base()
+		public OperatorSignatures(OperatorSignature signature) : base()
 		{
-			FSignature = ASignature;
+			_signature = signature;
 		}
 		
-		private OperatorSignature FSignature;
-		private Dictionary<Signature, OperatorSignature> FSignatures = new Dictionary<Signature, OperatorSignature>(); // keys : Signature, values : OperatorSignature
+		private OperatorSignature _signature;
+		private Dictionary<Signature, OperatorSignature> _signatures = new Dictionary<Signature, OperatorSignature>(); // keys : Signature, values : OperatorSignature
 		
-		public int Count { get { return FSignatures.Count; } }
+		public int Count { get { return _signatures.Count; } }
 
-		public Dictionary<Signature, OperatorSignature> Signatures { get { return FSignatures; } }
+		public Dictionary<Signature, OperatorSignature> Signatures { get { return _signatures; } }
 
-		public OperatorSignature this[Signature ASignature]
+		public OperatorSignature this[Signature signature]
 		{
 			get
 			{
-				OperatorSignature LSignature;
-				if (!FSignatures.TryGetValue(ASignature, out LSignature))
-					throw new SchemaException(SchemaException.Codes.SignatureNotFound, ASignature.ToString());
-				return LSignature;
+				OperatorSignature localSignature;
+				if (!_signatures.TryGetValue(signature, out localSignature))
+					throw new SchemaException(SchemaException.Codes.SignatureNotFound, signature.ToString());
+				return localSignature;
 			}
 		}
 		
@@ -134,44 +134,44 @@ namespace Alphora.Dataphor.DAE.Compiling
 		*/
 		
 		//public override int Add(object AValue)
-		public void Add(OperatorSignature ASignature)
+		public void Add(OperatorSignature signature)
 		{
 			#if USETYPEINHERITANCE
-			bool LAdded = false;
-			int LIndex;
-			for (LIndex = 0; LIndex < Count; LIndex++)
+			bool added = false;
+			int index;
+			for (index = 0; index < Count; index++)
 			{		
-				if (ASignature.Signature.Equals(this[LIndex].Signature))
+				if (ASignature.Signature.Equals(this[index].Signature))
 					continue;
-				else if (ASignature.Signature.Is(this[LIndex].Signature))
+				else if (ASignature.Signature.Is(this[index].Signature))
 				{
-					if (!this[LIndex].Signatures.Contains(ASignature))
-						this[LIndex].Signatures.Add(ASignature);
-					LAdded = true;
+					if (!this[index].Signatures.Contains(ASignature))
+						this[index].Signatures.Add(ASignature);
+					added = true;
 				}
-				else if (this[LIndex].Signature.Is(ASignature.Signature))
+				else if (this[index].Signature.Is(ASignature.Signature))
 				{
 					if (!Contains(ASignature))
 					{
-						for (int LInnerIndex = Count - 1; LInnerIndex >= 0; LInnerIndex--)
-							if (this[LInnerIndex].Signature.Is(ASignature.Signature))
-								if (!ASignature.Signatures.Contains(this[LInnerIndex].Signature))
-									ASignature.Signatures.Add(InternalRemoveAt(LInnerIndex));
+						for (int innerIndex = Count - 1; innerIndex >= 0; innerIndex--)
+							if (this[innerIndex].Signature.Is(ASignature.Signature))
+								if (!ASignature.Signatures.Contains(this[innerIndex].Signature))
+									ASignature.Signatures.Add(InternalRemoveAt(innerIndex));
 								else
-									InternalRemoveAt(LInnerIndex);
+									InternalRemoveAt(innerIndex);
 						InternalAdd(ASignature);
 					}
-					LAdded = true;
+					added = true;
 				}
 			}
 
-			if (!LAdded)
+			if (!added)
 				InternalAdd(ASignature);
 			
-			Adding(AValue, LIndex);
-			return LIndex;
+			Adding(AValue, index);
+			return index;
 			#endif
-			FSignatures.Add(ASignature.Signature, ASignature);
+			_signatures.Add(signature.Signature, signature);
 		}
 		
 		/*
@@ -189,25 +189,25 @@ namespace Alphora.Dataphor.DAE.Compiling
 						throw a SignatureNotFound
 		*/
 		
-		public void Remove(Signature ASignature)
+		public void Remove(Signature signature)
 		{
-			FSignatures.Remove(ASignature);
+			_signatures.Remove(signature);
 			#if USETYPEINHERITANCE
-			int LIndex = IndexOf(ASignature);
-			if (LIndex >= 0)
-				RemoveAt(LIndex);
+			int index = IndexOf(ASignature);
+			if (index >= 0)
+				RemoveAt(index);
 			else
 			{
-				for (LIndex = 0; LIndex < Count; LIndex++)
-					if (ASignature.Is(this[LIndex].Signature))
-						this[LIndex].Signatures.Remove(ASignature);
+				for (index = 0; index < Count; index++)
+					if (ASignature.Is(this[index].Signature))
+						this[index].Signatures.Remove(ASignature);
 			}
 			#endif
 		}
 		
-		public void Remove(OperatorSignature ASignature)
+		public void Remove(OperatorSignature signature)
 		{
-			Remove(ASignature.Signature);
+			Remove(signature.Signature);
 		}
 		
 		/*
@@ -221,66 +221,66 @@ namespace Alphora.Dataphor.DAE.Compiling
 					return null
 		*/
 		
-		public void Resolve(Plan APlan, OperatorBindingContext AContext)
+		public void Resolve(Plan plan, OperatorBindingContext context)
 		{
-			OperatorSignature LResultSignature = null;
-			if (FSignatures.TryGetValue(AContext.CallSignature, out LResultSignature))
+			OperatorSignature resultSignature = null;
+			if (_signatures.TryGetValue(context.CallSignature, out resultSignature))
 			{
-				if (!AContext.Matches.Contains(LResultSignature))
-					AContext.Matches.Add(new OperatorMatch(LResultSignature, true));
+				if (!context.Matches.Contains(resultSignature))
+					context.Matches.Add(new OperatorMatch(resultSignature, true));
 			}
 			else
 			{
-				foreach (KeyValuePair<Signature, OperatorSignature> LEntry in FSignatures)
+				foreach (KeyValuePair<Signature, OperatorSignature> entry in _signatures)
 				{
-					var LSignature = LEntry.Value;
-					if (AContext.CallSignature.Is(LSignature.Signature))
+					var signature = entry.Value;
+					if (context.CallSignature.Is(signature.Signature))
 					{
-						int LMatchCount = AContext.Matches.Count;
-						LSignature.Signatures.Resolve(APlan, AContext);
-						if (AContext.Matches.IsExact)
+						int matchCount = context.Matches.Count;
+						signature.Signatures.Resolve(plan, context);
+						if (context.Matches.IsExact)
 							break;
-						else if (LMatchCount == AContext.Matches.Count)
+						else if (matchCount == context.Matches.Count)
 						{
-							if (!AContext.Matches.Contains(LSignature))
+							if (!context.Matches.Contains(signature))
 							{
-								OperatorMatch LMatch = new OperatorMatch(LSignature, false);
-								for (int LIndex = 0; LIndex < LSignature.Signature.Count; LIndex++)
-									LMatch.CanConvert[LIndex] = true;
-								AContext.Matches.Add(LMatch);
+								OperatorMatch match = new OperatorMatch(signature, false);
+								for (int index = 0; index < signature.Signature.Count; index++)
+									match.CanConvert[index] = true;
+								context.Matches.Add(match);
 							}
 						}
 					}
 					else
 					{
-						if (AContext.CallSignature.Count == LSignature.Signature.Count)
+						if (context.CallSignature.Count == signature.Signature.Count)
 						{
-							if (!AContext.Matches.Contains(LSignature))
+							if (!context.Matches.Contains(signature))
 							{
-								OperatorMatch LMatch = new OperatorMatch(LSignature);
-								bool LAddMatch = true;
-								LMatch.IsMatch = true;
-								for (int LElementIndex = 0; LElementIndex < AContext.CallSignature.Count; LElementIndex++)
+								OperatorMatch match = new OperatorMatch(signature);
+								bool addMatch = true;
+								match.IsMatch = true;
+								for (int elementIndex = 0; elementIndex < context.CallSignature.Count; elementIndex++)
 								{
-									LMatch.CanConvert[LElementIndex] = AContext.CallSignature[LElementIndex].DataType.Is(LSignature.Signature[LElementIndex].DataType);
-									if (!LMatch.CanConvert[LElementIndex] && (AContext.CallSignature[LElementIndex].Modifier != Modifier.Var) && (LSignature.Signature[LElementIndex].Modifier != Modifier.Var))
+									match.CanConvert[elementIndex] = context.CallSignature[elementIndex].DataType.Is(signature.Signature[elementIndex].DataType);
+									if (!match.CanConvert[elementIndex] && (context.CallSignature[elementIndex].Modifier != Modifier.Var) && (signature.Signature[elementIndex].Modifier != Modifier.Var))
 									{
-										LMatch.ConversionContexts[LElementIndex] = Compiler.FindConversionPath(APlan, AContext.CallSignature[LElementIndex].DataType, LSignature.Signature[LElementIndex].DataType);
-										LMatch.CanConvert[LElementIndex] = LMatch.ConversionContexts[LElementIndex].CanConvert;
+										match.ConversionContexts[elementIndex] = Compiler.FindConversionPath(plan, context.CallSignature[elementIndex].DataType, signature.Signature[elementIndex].DataType);
+										match.CanConvert[elementIndex] = match.ConversionContexts[elementIndex].CanConvert;
 										
 										// As soon as the match being constructed is more narrowing or longer than the best match found so far, it can be safely discarded as a candidate.
-										if ((LMatch.NarrowingScore < AContext.Matches.BestNarrowingScore) || ((LMatch.NarrowingScore == AContext.Matches.BestNarrowingScore) && (LMatch.PathLength > AContext.Matches.ShortestPathLength)))
+										if ((match.NarrowingScore < context.Matches.BestNarrowingScore) || ((match.NarrowingScore == context.Matches.BestNarrowingScore) && (match.PathLength > context.Matches.ShortestPathLength)))
 										{
-											LAddMatch = false;
+											addMatch = false;
 											break;
 										}
 									}
 
-									if (!LMatch.CanConvert[LElementIndex])
-										LMatch.IsMatch = false;
+									if (!match.CanConvert[elementIndex])
+										match.IsMatch = false;
 								}
-								if (LAddMatch)
-									AContext.Matches.Add(LMatch);
+								if (addMatch)
+									context.Matches.Add(match);
 							}
 						}
 					}
@@ -304,31 +304,31 @@ namespace Alphora.Dataphor.DAE.Compiling
 		}
 		#endif
 		
-		public bool Contains(Signature ASignature)
+		public bool Contains(Signature signature)
 		{
 			#if USETYPEINHERITANCE
 			if (FSignatures.Contains(ASignature))
 				return true;
-			foreach (DictionaryEntry LEntry in FSignatures)
-				if (((OperatorSignature)LEntry.Value).Contains(ASignature))
+			foreach (DictionaryEntry entry in FSignatures)
+				if (((OperatorSignature)entry.Value).Contains(ASignature))
 					return true;
 			return false;
 			#else
-			return FSignatures.ContainsKey(ASignature);
+			return _signatures.ContainsKey(signature);
 			#endif
 		}
 		
-		public bool Contains(OperatorSignature ASignature)
+		public bool Contains(OperatorSignature signature)
 		{
-			return Contains(ASignature.Signature);
+			return Contains(signature.Signature);
 		}
 
-		public string ShowSignatures(int ADepth)
+		public string ShowSignatures(int depth)
 		{
-			StringBuilder LString = new StringBuilder();
-			foreach (KeyValuePair<Signature, OperatorSignature> LEntry in FSignatures)
-				LString.Append(LEntry.Value.ShowSignature(ADepth));
-			return LString.ToString();
+			StringBuilder stringValue = new StringBuilder();
+			foreach (KeyValuePair<Signature, OperatorSignature> entry in _signatures)
+				stringValue.Append(entry.Value.ShowSignature(depth));
+			return stringValue.ToString();
 		}
     }
 }

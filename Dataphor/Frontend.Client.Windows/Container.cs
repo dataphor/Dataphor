@@ -58,22 +58,22 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// Node
 
-		public override bool IsValidChild(Type AChildType)
+		public override bool IsValidChild(Type childType)
 		{
-			if (typeof(IElement).IsAssignableFrom(AChildType))
+			if (typeof(IElement).IsAssignableFrom(childType))
 				return true;
-			return base.IsValidChild(AChildType);
+			return base.IsValidChild(childType);
 		}
 
 		// Utility
 
 		protected class ChildDetail
 		{
-			public ChildDetail(int AMin, int AMax, int ANatural)
+			public ChildDetail(int min, int max, int natural)
 			{
-				Min = AMin;
-				Max = AMax;
-				Natural = ANatural;
+				Min = min;
+				Max = max;
+				Natural = natural;
 			}
 
 			public int Min;
@@ -83,29 +83,29 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			public IWindowsElement Child;
 		}
 
-		protected static int AllocateProportionally(ChildDetail[] AItems, int ADelta, int ANaturalSum)
+		protected static int AllocateProportionally(ChildDetail[] items, int delta, int naturalSum)
 		{
-			int LOldDelta;
-			int LItemDelta;
+			int oldDelta;
+			int itemDelta;
 			// Keep handing portions of the delta until delta doesn't change
 			do
 			{
-				LOldDelta = ADelta;
-				foreach (ChildDetail LDetail in AItems)
+				oldDelta = delta;
+				foreach (ChildDetail detail in items)
 				{
-					if (LDetail != null) 
+					if (detail != null) 
 					{
-						LItemDelta = (int)(((double)LDetail.Natural / (double)ANaturalSum) * LOldDelta);
-						if (LDetail.Current + LItemDelta > LDetail.Max)
-							LItemDelta += LDetail.Max - (LDetail.Current + LItemDelta);
-						if (LDetail.Current + LItemDelta < LDetail.Min)
-							LItemDelta += LDetail.Min - (LDetail.Current + LItemDelta);
-						LDetail.Current += LItemDelta;
-						ADelta -= LItemDelta;
+						itemDelta = (int)(((double)detail.Natural / (double)naturalSum) * oldDelta);
+						if (detail.Current + itemDelta > detail.Max)
+							itemDelta += detail.Max - (detail.Current + itemDelta);
+						if (detail.Current + itemDelta < detail.Min)
+							itemDelta += detail.Min - (detail.Current + itemDelta);
+						detail.Current += itemDelta;
+						delta -= itemDelta;
 					}
 				}
-			} while (LOldDelta != ADelta);
-			return ADelta;
+			} while (oldDelta != delta);
+			return delta;
 		}
 	}
     
@@ -115,17 +115,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
     {
 		// IColumn
 
-		protected VerticalAlignment FVerticalAlignment = VerticalAlignment.Top;
+		protected VerticalAlignment _verticalAlignment = VerticalAlignment.Top;
 		[DefaultValue(VerticalAlignment.Top)]
 		[Description("When this element is given more space than it can use, this property will control where the element will be placed within it's space.")]
 		public VerticalAlignment VerticalAlignment
 		{
-			get { return FVerticalAlignment; }
+			get { return _verticalAlignment; }
 			set
 			{
-				if (FVerticalAlignment != value)
+				if (_verticalAlignment != value)
 				{
-					FVerticalAlignment = value;
+					_verticalAlignment = value;
 					UpdateLayout();
 				}
 			}
@@ -134,45 +134,45 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		// Element
 
 		/// <remarks> Arranges the column controls using standard column arrangement. </remarks>
-		protected override void InternalLayout(Rectangle ABounds)
+		protected override void InternalLayout(Rectangle bounds)
 		{
 			// Read the Min, Max and Natural sizes for the children (for perf reasons)
-			ChildDetail[] LChildDetails = new ChildDetail[Children.Count];
-			int LNaturalHeightSum = 0;
-			int LChildCount = 0;
-			foreach (IWindowsElement LChild in Children)
+			ChildDetail[] childDetails = new ChildDetail[Children.Count];
+			int naturalHeightSum = 0;
+			int childCount = 0;
+			foreach (IWindowsElement child in Children)
 			{
-				if (LChild.GetVisible()) 
+				if (child.GetVisible()) 
 				{
-					LChildDetails[LChildCount] = new ChildDetail(LChild.MinSize.Height, LChild.MaxSize.Height, LChild.NaturalSize.Height);
-					LChildDetails[LChildCount].Current = 0;
-					LChildDetails[LChildCount].Child = LChild;
-					LNaturalHeightSum += LChildDetails[LChildCount].Natural;
-					LChildCount++;
+					childDetails[childCount] = new ChildDetail(child.MinSize.Height, child.MaxSize.Height, child.NaturalSize.Height);
+					childDetails[childCount].Current = 0;
+					childDetails[childCount].Child = child;
+					naturalHeightSum += childDetails[childCount].Natural;
+					childCount++;
 				}
 			}
 
-			int LDeltaHeight = 0;
-			if (LNaturalHeightSum != 0)
-				LDeltaHeight = AllocateProportionally(LChildDetails, ABounds.Height, LNaturalHeightSum);
+			int deltaHeight = 0;
+			if (naturalHeightSum != 0)
+				deltaHeight = AllocateProportionally(childDetails, bounds.Height, naturalHeightSum);
 
 			// adjust for vertical alignment
-			if (FVerticalAlignment != VerticalAlignment.Top)
+			if (_verticalAlignment != VerticalAlignment.Top)
 			{
-				if (FVerticalAlignment == VerticalAlignment.Middle)
-					ABounds.Y += LDeltaHeight / 2;
+				if (_verticalAlignment == VerticalAlignment.Middle)
+					bounds.Y += deltaHeight / 2;
 				else // bottom
-					ABounds.Y += LDeltaHeight;
+					bounds.Y += deltaHeight;
 			}
 
 			// Optionally we could force the controls to shrink or grow to take the remaining space (LDeltaHeight)
 
 			// Now call SetSize for the children based on our calculations
-			for (int i = 0; i < LChildCount; i++)
+			for (int i = 0; i < childCount; i++)
 			{
-				ChildDetail LDetail = LChildDetails[i];
-				LDetail.Child.Layout(new Rectangle(ABounds.Location, new Size(ABounds.Width, LDetail.Current)));
-				ABounds.Y += LDetail.Current;
+				ChildDetail detail = childDetails[i];
+				detail.Child.Layout(new Rectangle(bounds.Location, new Size(bounds.Width, detail.Current)));
+				bounds.Y += detail.Current;
 			}
 		}
 		
@@ -181,18 +181,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			get
 			{
-				Size LResult = Size.Empty;
-				Size LChildMinSize;
-				foreach (IWindowsElement LChild in Children)
+				Size result = Size.Empty;
+				Size childMinSize;
+				foreach (IWindowsElement child in Children)
 				{
-					if (LChild.GetVisible()) 
+					if (child.GetVisible()) 
 					{
-						LChildMinSize = LChild.MinSize;
-						LResult.Height += LChildMinSize.Height;
-						ConstrainMinWidth(ref LResult, LChildMinSize.Width);
+						childMinSize = child.MinSize;
+						result.Height += childMinSize.Height;
+						ConstrainMinWidth(ref result, childMinSize.Width);
 					}
 				}
-				return LResult;
+				return result;
 			}
 		}
 		
@@ -201,18 +201,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			get
 			{
-				Size LResult = Size.Empty;
-				Size LChildMaxSize;
-				foreach (IWindowsElement LChild in Children)
+				Size result = Size.Empty;
+				Size childMaxSize;
+				foreach (IWindowsElement child in Children)
 				{
-					if (LChild.GetVisible()) 
+					if (child.GetVisible()) 
 					{
-						LChildMaxSize = LChild.MaxSize;
-						LResult.Height += LChildMaxSize.Height;
-						ConstrainMinWidth(ref LResult, LChildMaxSize.Width);
+						childMaxSize = child.MaxSize;
+						result.Height += childMaxSize.Height;
+						ConstrainMinWidth(ref result, childMaxSize.Width);
 					}
 				}
-				return LResult;
+				return result;
 			}
 		}
 		
@@ -224,23 +224,23 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			get
 			{
-				Size LResult = Size.Empty;
+				Size result = Size.Empty;
 
-				Size LNatural;
-				foreach (IWindowsElement LChild in Children)
+				Size natural;
+				foreach (IWindowsElement child in Children)
 				{
-					if (LChild.GetVisible()) 
+					if (child.GetVisible()) 
 					{
-						LNatural = LChild.NaturalSize;
-                        LResult.Height += LNatural.Height + LChild.MarginTop + LChild.MarginBottom + 2;
-						ConstrainMinWidth(ref LResult, LNatural.Width);
+						natural = child.NaturalSize;
+                        result.Height += natural.Height + child.MarginTop + child.MarginBottom + 2;
+						ConstrainMinWidth(ref result, natural.Width);
 					}
 				}
 				
-				ConstrainMaxWidth(ref LResult, MaxSize.Width);
-				ConstrainMinWidth(ref LResult, MinSize.Width);
+				ConstrainMaxWidth(ref result, MaxSize.Width);
+				ConstrainMinWidth(ref result, MinSize.Width);
 
-				return LResult;
+				return result;
 			}
 		}
     }
@@ -251,17 +251,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
     {		
 		// IRow
 
-		protected HorizontalAlignment FHorizontalAlignment = HorizontalAlignment.Left;
+		protected HorizontalAlignment _horizontalAlignment = HorizontalAlignment.Left;
 		[DefaultValue(HorizontalAlignment.Left)]
 		[Description("When this element is given more space than it can use, this property will control where the element will be placed within it's space.")]
 		public HorizontalAlignment HorizontalAlignment
 		{
-			get { return FHorizontalAlignment; }
+			get { return _horizontalAlignment; }
 			set
 			{
-				if (FHorizontalAlignment != value)
+				if (_horizontalAlignment != value)
 				{
-					FHorizontalAlignment = value;
+					_horizontalAlignment = value;
 					UpdateLayout();
 				}
 			}
@@ -269,45 +269,45 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		// Element
 
-		protected override void InternalLayout(Rectangle ABounds) 
+		protected override void InternalLayout(Rectangle bounds) 
 		{
 			// Read the Min, Max and Natural sizes for the children (for perf reasons)
-			ChildDetail[] LChildDetails = new ChildDetail[Children.Count];
-			int LNaturalWidthSum = 0;
-			int LChildCount = 0;
-			foreach (IWindowsElement LChild in Children)
+			ChildDetail[] childDetails = new ChildDetail[Children.Count];
+			int naturalWidthSum = 0;
+			int childCount = 0;
+			foreach (IWindowsElement child in Children)
 			{
-				if (LChild.GetVisible()) 
+				if (child.GetVisible()) 
 				{
-					LChildDetails[LChildCount] = new ChildDetail(LChild.MinSize.Width, LChild.MaxSize.Width, LChild.NaturalSize.Width);
-					LChildDetails[LChildCount].Current = 0;
-					LChildDetails[LChildCount].Child = LChild;
-					LNaturalWidthSum += LChildDetails[LChildCount].Natural;
-					LChildCount++;
+					childDetails[childCount] = new ChildDetail(child.MinSize.Width, child.MaxSize.Width, child.NaturalSize.Width);
+					childDetails[childCount].Current = 0;
+					childDetails[childCount].Child = child;
+					naturalWidthSum += childDetails[childCount].Natural;
+					childCount++;
 				}
 			}
 
-			int LDeltaWidth = 0;
-			if (LNaturalWidthSum != 0)
-				LDeltaWidth = AllocateProportionally(LChildDetails, ABounds.Width, LNaturalWidthSum);
+			int deltaWidth = 0;
+			if (naturalWidthSum != 0)
+				deltaWidth = AllocateProportionally(childDetails, bounds.Width, naturalWidthSum);
 
 			// adjust for horizontal alignment
-			if (FHorizontalAlignment != HorizontalAlignment.Left)
+			if (_horizontalAlignment != HorizontalAlignment.Left)
 			{
-				if (FHorizontalAlignment == HorizontalAlignment.Center)
-					ABounds.X += LDeltaWidth / 2;
+				if (_horizontalAlignment == HorizontalAlignment.Center)
+					bounds.X += deltaWidth / 2;
 				else // Right
-					ABounds.X += LDeltaWidth;
+					bounds.X += deltaWidth;
 			}
 
 			// Optionally we could force the controls to shrink or grow to take the remaining space (LDeltaWidth)
 
 			// Now layout the children based on our calculations
-			for (int i = 0; i < LChildCount; i++)
+			for (int i = 0; i < childCount; i++)
 			{
-				ChildDetail LDetail = LChildDetails[i];
-				LDetail.Child.Layout(new Rectangle(ABounds.Location, new Size(LDetail.Current, ABounds.Height)));
-				ABounds.X += LDetail.Current;
+				ChildDetail detail = childDetails[i];
+				detail.Child.Layout(new Rectangle(bounds.Location, new Size(detail.Current, bounds.Height)));
+				bounds.X += detail.Current;
 			}
 		}
 		
@@ -316,18 +316,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			get
 			{
-				Size LResult = Size.Empty;
-				Size LChildMinSize;
-				foreach (IWindowsElement LChild in Children)
+				Size result = Size.Empty;
+				Size childMinSize;
+				foreach (IWindowsElement child in Children)
 				{
-					if (LChild.GetVisible()) 
+					if (child.GetVisible()) 
 					{
-						LChildMinSize = LChild.MinSize;
-						LResult.Width += LChildMinSize.Width;
-						ConstrainMinHeight(ref LResult, LChildMinSize.Height);
+						childMinSize = child.MinSize;
+						result.Width += childMinSize.Width;
+						ConstrainMinHeight(ref result, childMinSize.Height);
 					}
 				}
-				return LResult;
+				return result;
 			}
 		}
 		
@@ -336,18 +336,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			get
 			{
-				Size LResult = Size.Empty;
-				Size LChildMaxSize;
-				foreach (IWindowsElement LChild in Children)
+				Size result = Size.Empty;
+				Size childMaxSize;
+				foreach (IWindowsElement child in Children)
 				{
-					if (LChild.GetVisible()) 
+					if (child.GetVisible()) 
 					{
-						LChildMaxSize = LChild.MaxSize;
-						LResult.Width += LChildMaxSize.Width;
-						ConstrainMinHeight(ref LResult, LChildMaxSize.Height);
+						childMaxSize = child.MaxSize;
+						result.Width += childMaxSize.Width;
+						ConstrainMinHeight(ref result, childMaxSize.Height);
 					}
 				}
-				return LResult;
+				return result;
 			}
 		}
 		
@@ -359,23 +359,23 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			get
 			{
-				Size LResult = Size.Empty;
+				Size result = Size.Empty;
 
-				Size LNatural;
-				foreach (IWindowsElement LChild in Children)
+				Size natural;
+				foreach (IWindowsElement child in Children)
 				{
-					if (LChild.GetVisible()) 
+					if (child.GetVisible()) 
 					{
-						LNatural = LChild.NaturalSize;
-						LResult.Width += LNatural.Width;
-						ConstrainMinHeight(ref LResult, LNatural.Height);
+						natural = child.NaturalSize;
+						result.Width += natural.Width;
+						ConstrainMinHeight(ref result, natural.Height);
 					}
 				}
 				
-				ConstrainMaxHeight(ref LResult, MaxSize.Height);
-				ConstrainMinHeight(ref LResult, MinSize.Height);
+				ConstrainMaxHeight(ref result, MaxSize.Height);
+				ConstrainMinHeight(ref result, MinSize.Height);
 
-				return LResult;
+				return result;
 			}
 		}
     }
@@ -385,19 +385,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	{
 		// Control
 
-		private WinForms.Control FControl;
+		private WinForms.Control _control;
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
 		public virtual WinForms.Control Control
 		{
-			get { return FControl; }
+			get { return _control; }
 			set 
 			{ 
-				if (FControl != null)
-					((Session)HostNode.Session).UnregisterControlHelp(FControl);
-				FControl = value; 
-				if (FControl != null)
-					((Session)HostNode.Session).RegisterControlHelp(FControl, this);
+				if (_control != null)
+					((Session)HostNode.Session).UnregisterControlHelp(_control);
+				_control = value; 
+				if (_control != null)
+					((Session)HostNode.Session).RegisterControlHelp(_control, this);
 			}
 		}
 
@@ -407,15 +407,15 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// Text
 
-		protected string FTitle = String.Empty;
+		protected string _title = String.Empty;
 		[DefaultValue("")]
 		[Description("Title used as a title for the group.")]
 		public string Title
 		{
-			get	{ return FTitle; }
+			get	{ return _title; }
 			set
 			{
-				FTitle = value;
+				_title = value;
 				if (Active)
 					InternalUpdateTitle();
 			}
@@ -423,23 +423,23 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public virtual string GetTitle()
 		{
-			return FTitle;
+			return _title;
 		}
 
-		private string FAllocatedTitle;
+		private string _allocatedTitle;
 
 		protected void DeallocateAccelerator()
 		{
-			if (FAllocatedTitle != null)
+			if (_allocatedTitle != null)
 			{
-				((IAccelerates)FindParent(typeof(IAccelerates))).Accelerators.Deallocate(FAllocatedTitle);
-				FAllocatedTitle = null;
+				((IAccelerates)FindParent(typeof(IAccelerates))).Accelerators.Deallocate(_allocatedTitle);
+				_allocatedTitle = null;
 			}
 		}
 
-		protected virtual void SetControlText(string ATitle)
+		protected virtual void SetControlText(string title)
 		{
-			Control.Text = ATitle;
+			Control.Text = title;
 		}
 
 		protected virtual bool AlwaysAccellerate()
@@ -450,38 +450,38 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		protected virtual void InternalUpdateTitle()
 		{
 			DeallocateAccelerator();
-			FAllocatedTitle = ((IAccelerates)FindParent(typeof(IAccelerates))).Accelerators.Allocate(GetTitle(), AlwaysAccellerate());
-			SetControlText(FAllocatedTitle);
+			_allocatedTitle = ((IAccelerates)FindParent(typeof(IAccelerates))).Accelerators.Allocate(GetTitle(), AlwaysAccellerate());
+			SetControlText(_allocatedTitle);
 		}
 
 		// Parent
 
 		protected virtual void SetParent()
 		{
-			FControl.Parent = ((IWindowsContainerElement)Parent).Control;
+			_control.Parent = ((IWindowsContainerElement)Parent).Control;
 		}
 
 		// Node
 
-		protected IWindowsElement FChild;
+		protected IWindowsElement _child;
 
-		public override bool IsValidChild(Type AChildType)
+		public override bool IsValidChild(Type childType)
 		{
-			if (typeof(IWindowsElement).IsAssignableFrom(AChildType))
-				return (FChild == null);
-			return base.IsValidChild(AChildType);
+			if (typeof(IWindowsElement).IsAssignableFrom(childType))
+				return (_child == null);
+			return base.IsValidChild(childType);
 		}
 
-		protected override void AddChild(INode AChild)
+		protected override void AddChild(INode child)
 		{
-			base.AddChild(AChild);
-			FChild = (IWindowsElement)AChild;
+			base.AddChild(child);
+			_child = (IWindowsElement)child;
 		}
 
-		protected override void RemoveChild(INode AChild)
+		protected override void RemoveChild(INode child)
 		{
-			FChild = null;
-			base.RemoveChild(AChild);
+			_child = null;
+			base.RemoveChild(child);
 		}
 
 		protected virtual void UpdateColor()
@@ -502,10 +502,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 			catch
 			{
-				if (FControl != null)
+				if (_control != null)
 				{
-					FControl.Dispose();
-					FControl = null;
+					_control.Dispose();
+					_control = null;
 				}
 				throw;
 			}
@@ -552,29 +552,29 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return base.GetOverhead() + (Control.Size - Control.DisplayRectangle.Size);
 		}
 
-		protected virtual void LayoutControl(Rectangle ABounds)
+		protected virtual void LayoutControl(Rectangle bounds)
 		{
-			Control.Bounds = ABounds;
+			Control.Bounds = bounds;
 		}
 
-		protected virtual void LayoutChild(IWindowsElement AChild, Rectangle ABounds)
+		protected virtual void LayoutChild(IWindowsElement child, Rectangle bounds)
 		{
-			if ((AChild != null) && AChild.GetVisible())
-				AChild.Layout(Control.DisplayRectangle);
+			if ((child != null) && child.GetVisible())
+				child.Layout(Control.DisplayRectangle);
 		}
 
-		protected override void InternalLayout(Rectangle ABounds)
+		protected override void InternalLayout(Rectangle bounds)
 		{
-			LayoutControl(ABounds);
-			LayoutChild(FChild, ABounds);
+			LayoutControl(bounds);
+			LayoutChild(_child, bounds);
 		}
 		
 		protected override Size InternalMinSize
 		{
 			get
 			{
-				if ((FChild != null) && FChild.GetVisible())
-					return FChild.MinSize;
+				if ((_child != null) && _child.GetVisible())
+					return _child.MinSize;
 				else
 					return Size.Empty;
 			}
@@ -584,8 +584,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			get
 			{
-				if ((FChild != null) && FChild.GetVisible())
-					return FChild.MaxSize;
+				if ((_child != null) && _child.GetVisible())
+					return _child.MaxSize;
 				else
 					return Size.Empty;
 			}
@@ -595,8 +595,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			get
 			{
-				if ((FChild != null) && FChild.GetVisible())
-					return FChild.NaturalSize;
+				if ((_child != null) && _child.GetVisible())
+					return _child.NaturalSize;
 				else
 					return Size.Empty;
 			}
@@ -607,7 +607,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	[DesignerCategory("Static Controls")]
 	public class Group : ControlContainer, IGroup
     {
-		public const int CBottomPadding = 2;
+		public const int BottomPadding = 2;
 
 		// ControlContainer
 
@@ -618,20 +618,20 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public override Size GetOverhead()
 		{
-			return base.GetOverhead() + new Size(0, CBottomPadding);
+			return base.GetOverhead() + new Size(0, BottomPadding);
 		}
 
         protected override Size InternalMinSize
         {
             get
             {
-                Size LResult = new Size((Size.Ceiling(Control.CreateGraphics().MeasureString(Title, Control.Font)).Width + GetOverhead().Width), Control.Font.Height);
-                if ((FChild != null) && FChild.GetVisible())
+                Size result = new Size((Size.Ceiling(Control.CreateGraphics().MeasureString(Title, Control.Font)).Width + GetOverhead().Width), Control.Font.Height);
+                if ((_child != null) && _child.GetVisible())
                 {
-                    ConstrainMinWidth(ref LResult, FChild.MinSize.Width);
-                    ConstrainMinHeight(ref LResult, FChild.MinSize.Height);
+                    ConstrainMinWidth(ref result, _child.MinSize.Width);
+                    ConstrainMinHeight(ref result, _child.MinSize.Height);
                 }
-                return LResult;         
+                return result;         
             }
         }
 
@@ -639,13 +639,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
         {
             get
             {
-                Size LResult = new Size((Size.Ceiling(Control.CreateGraphics().MeasureString(Title, Control.Font)).Width + GetOverhead().Width), Control.Font.Height);
-                if ((FChild != null) && FChild.GetVisible())
+                Size result = new Size((Size.Ceiling(Control.CreateGraphics().MeasureString(Title, Control.Font)).Width + GetOverhead().Width), Control.Font.Height);
+                if ((_child != null) && _child.GetVisible())
                 {
-                    ConstrainMinWidth(ref LResult, FChild.NaturalSize.Width);
-                    ConstrainMinHeight(ref LResult, FChild.NaturalSize.Height);
+                    ConstrainMinWidth(ref result, _child.NaturalSize.Width);
+                    ConstrainMinHeight(ref result, _child.NaturalSize.Height);
                 }
-                return LResult;
+                return result;
             }
         }
 	}

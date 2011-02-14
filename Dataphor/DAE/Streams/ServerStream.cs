@@ -11,87 +11,87 @@ namespace Alphora.Dataphor.DAE.Streams
 {
 	public class ServerStream : StreamBase
 	{
-		public ServerStream(ServerStreamManager AStreamManager, StreamID AStreamID, Stream ASourceStream) : base()
+		public ServerStream(ServerStreamManager streamManager, StreamID streamID, Stream sourceStream) : base()
 		{
-			FStreamManager = AStreamManager;
-			FStreamID = AStreamID;
-			FSourceStream = ASourceStream;
+			_streamManager = streamManager;
+			_streamID = streamID;
+			_sourceStream = sourceStream;
 		}
 		
 		// StreamManager
-		private ServerStreamManager FStreamManager;
-		public ServerStreamManager StreamManager { get { return FStreamManager; } }
+		private ServerStreamManager _streamManager;
+		public ServerStreamManager StreamManager { get { return _streamManager; } }
 		
 		// StreamID
-		private StreamID FStreamID;
-		public StreamID StreamID { get { return FStreamID; } }
+		private StreamID _streamID;
+		public StreamID StreamID { get { return _streamID; } }
 		
 		// SourceStream
-		private Stream FSourceStream;
+		private Stream _sourceStream;
 		public Stream SourceStream
 		{
-			get { return FSourceStream; }
+			get { return _sourceStream; }
 			set 
 			{
-				long LSavePosition = FSourceStream == null ? -1 : FSourceStream.Position; 
-				FSourceStream = value; 
-				if ((FSourceStream != null) && (LSavePosition >= 0))
-					FSourceStream.Position = LSavePosition;
+				long savePosition = _sourceStream == null ? -1 : _sourceStream.Position; 
+				_sourceStream = value; 
+				if ((_sourceStream != null) && (savePosition >= 0))
+					_sourceStream.Position = savePosition;
 			}
 		}
 		
 		public override void Close()
 		{
-			FSourceStream = null;
+			_sourceStream = null;
 			base.Close();
 		}
 		
 		// Length
-		public override long Length { get { return FSourceStream.Length; } }
+		public override long Length { get { return _sourceStream.Length; } }
 
 		// SetLength
-		public override void SetLength(long ALength)
+		public override void SetLength(long length)
 		{
-			FStreamManager.Change(this);
-			FSourceStream.SetLength(ALength);
+			_streamManager.Change(this);
+			_sourceStream.SetLength(length);
 		}
 		
 		// Position
 		public override long Position
 		{
-			get { return FSourceStream.Position; }
+			get { return _sourceStream.Position; }
 			set 
 			{
 				if (value > Length)
-					FStreamManager.Change(this);
-				FSourceStream.Position = value;
+					_streamManager.Change(this);
+				_sourceStream.Position = value;
 			}
 		}
 		
 		// Read
-		public override int Read(byte[] ABuffer, int AOffset, int ACount)
+		public override int Read(byte[] buffer, int offset, int count)
 		{
-			return FSourceStream.Read(ABuffer, AOffset, ACount);
+			return _sourceStream.Read(buffer, offset, count);
 		}
 		
 		// ReadByte
 		public override int ReadByte()
 		{
-			return FSourceStream.ReadByte();
+			return _sourceStream.ReadByte();
 		}
 		
 		// Write
-		public override void Write(byte[] ABuffer, int AOffset, int ACount)
+		public override void Write(byte[] buffer, int offset, int count)
 		{
-			FStreamManager.Change(this);
-			FSourceStream.Write(ABuffer, AOffset, ACount);
+			_streamManager.Change(this);
+			_sourceStream.Write(buffer, offset, count);
 		}
 		
 		// WriteByte
-		public override void WriteByte(byte AValue)
+		public override void WriteByte(byte tempValue)
 		{
-			FStreamManager.Change(this);
-			FSourceStream.WriteByte(AValue);
+			_streamManager.Change(this);
+			_sourceStream.WriteByte(tempValue);
 		}
 	}
 }

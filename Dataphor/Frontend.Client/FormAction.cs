@@ -24,41 +24,41 @@ namespace Alphora.Dataphor.Frontend.Client
 	{
 		public ExecuteModuleAction() {}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			EnsureModuleHostDisposed();
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
 		// ModuleExpression
-		private string FModuleExpression = String.Empty;		
+		private string _moduleExpression = String.Empty;		
 		[Description("A D4 expression evaluating to a DIL document containing the module to be loaded.")]
 		[DefaultValue("")]
 		public string ModuleExpression
 		{
-			get { return FModuleExpression; }
+			get { return _moduleExpression; }
 			set 
 			{ 
-				if (FModuleExpression != value)
+				if (_moduleExpression != value)
 				{
-					FModuleExpression = value == null ? String.Empty : value; 
+					_moduleExpression = value == null ? String.Empty : value; 
 					EnabledChanged();
 				}
 			}
 		}
 		
 		// ActionName
-		private string FActionName = String.Empty;
+		private string _actionName = String.Empty;
 		[Description("The name of the action to be executed. An action with this name must be present in the module being loaded.")]
 		[DefaultValue("")]
 		public string ActionName
 		{
-			get { return FActionName; }
+			get { return _actionName; }
 			set 
 			{ 
-				if (FActionName != value)
+				if (_actionName != value)
 				{
-					FActionName = value == null ? String.Empty : value; 
+					_actionName = value == null ? String.Empty : value; 
 					EnabledChanged();
 				}
 			}
@@ -66,29 +66,29 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		public override bool GetEnabled()
 		{
-			return base.GetEnabled() && (FModuleExpression != String.Empty) && (FActionName != String.Empty);
+			return base.GetEnabled() && (_moduleExpression != String.Empty) && (_actionName != String.Empty);
 		}
 
-		private IHost FModuleHost;
+		private IHost _moduleHost;
 		private void EnsureModuleHostDisposed()
 		{
-			if (FModuleHost != null)
+			if (_moduleHost != null)
 			{
-				FModuleHost.Dispose();
-				FModuleHost = null;
+				_moduleHost.Dispose();
+				_moduleHost = null;
 			}
 		}
 
-		protected override void InternalExecute(INode ASender, EventParams AParams)
+		protected override void InternalExecute(INode sender, EventParams paramsValue)
 		{
 			EnsureModuleHostDisposed();
 			
-			FModuleHost = HostNode.Session.CreateHost();
+			_moduleHost = HostNode.Session.CreateHost();
 			try
 			{
-				FModuleHost.Load(ModuleExpression, null);
-				FModuleHost.Open();
-				((IAction)FModuleHost.FindNode(FActionName)).Execute(this, AParams);
+				_moduleHost.Load(ModuleExpression, null);
+				_moduleHost.Open();
+				((IAction)_moduleHost.FindNode(_actionName)).Execute(this, paramsValue);
 			}
 			catch
 			{
@@ -103,12 +103,12 @@ namespace Alphora.Dataphor.Frontend.Client
 	{
 		public ShowFormAction() {}
 
-		public ShowFormAction([PublishSource("SourceLinkType")] SourceLinkType ASourceLinkType): base()
+		public ShowFormAction([PublishSource("SourceLinkType")] SourceLinkType sourceLinkType): base()
 		{
-			SourceLinkType = ASourceLinkType;
+			SourceLinkType = sourceLinkType;
 		}
 		
-		protected override void Dispose(bool ADisposed)
+		protected override void Dispose(bool disposed)
 		{
 			try
 			{
@@ -120,7 +120,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 			finally
 			{
-				base.Dispose(ADisposed);
+				base.Dispose(disposed);
 			}
 		}
 
@@ -128,216 +128,216 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		// this link must be set first when deserializing.
 		// which is why it is set in the constructor
-		private SourceLinkType FSourceLinkType;
+		private SourceLinkType _sourceLinkType;
 		[DefaultValue(SourceLinkType.None)]
 		[RefreshProperties(RefreshProperties.All)]
 		[Description("Determines the data relationship between this document one that will be shown.")]
 		public SourceLinkType SourceLinkType
 		{
-			get { return FSourceLinkType; }
+			get { return _sourceLinkType; }
 			set
 			{
-				if (FSourceLinkType != value)
+				if (_sourceLinkType != value)
 				{
-					if (FSourceLink != null)
+					if (_sourceLink != null)
 					{
-						FSourceLink.OnSourceDataChanged -= new EventHandler(SourceLinkSourceDataChanged);
-						FSourceLink.Dispose();
+						_sourceLink.OnSourceDataChanged -= new EventHandler(SourceLinkSourceDataChanged);
+						_sourceLink.Dispose();
 					}
-					FSourceLinkType = value;
-					if (FSourceLinkType == SourceLinkType.None)
-						FSourceLink = null;
+					_sourceLinkType = value;
+					if (_sourceLinkType == SourceLinkType.None)
+						_sourceLink = null;
 					else 
 					{
-						if (FSourceLinkType == SourceLinkType.Surrogate)
-							FSourceLink = new SurrogateSourceLink(this);
-						else if (FSourceLinkType == SourceLinkType.Detail)
-							FSourceLink = new DetailSourceLink(this);
-						FSourceLink.OnSourceDataChanged += new EventHandler(SourceLinkSourceDataChanged);
+						if (_sourceLinkType == SourceLinkType.Surrogate)
+							_sourceLink = new SurrogateSourceLink(this);
+						else if (_sourceLinkType == SourceLinkType.Detail)
+							_sourceLink = new DetailSourceLink(this);
+						_sourceLink.OnSourceDataChanged += new EventHandler(SourceLinkSourceDataChanged);
 					}
 				}
 			}
 		}
 
-		private void SourceLinkSourceDataChanged(object ASender, EventArgs AArgs)
+		private void SourceLinkSourceDataChanged(object sender, EventArgs args)
 		{
 			EnabledChanged();
 		}
 
 		// SourceLink
 
-		private SourceLink FSourceLink;
+		private SourceLink _sourceLink;
 		[BOP.Publish(BOP.PublishMethod.Inline)]
 		[Description("Contains the specific settings based on the SourceLinkType.")]
 		public SourceLink SourceLink
 		{
-			get { return FSourceLink; }
-			set { FSourceLink = value; }
+			get { return _sourceLink; }
+			set { _sourceLink = value; }
 		}
 
 		// SourceLinkRefresh
 
-		private bool FSourceLinkRefresh = true;
+		private bool _sourceLinkRefresh = true;
 		[DefaultValue(true)]
 		[Description("If true and a sourcelink is set, the source is refreshed after execution.")]
 		public bool SourceLinkRefresh
 		{
-			get { return FSourceLinkRefresh; }
-			set { FSourceLinkRefresh = value; }
+			get { return _sourceLinkRefresh; }
+			set { _sourceLinkRefresh = value; }
 		}
 		
 		// SourceLinkRefreshKeyNames
 		
-		private string FSourceLinkRefreshKeyNames = String.Empty;
+		private string _sourceLinkRefreshKeyNames = String.Empty;
 		[DefaultValue("")]
 		[Description("When refreshing the source link, determines the set of columns to be used to perform the refresh in the source.")]
 		public string SourceLinkRefreshKeyNames
 		{
-			get { return FSourceLinkRefreshKeyNames; }
-			set { FSourceLinkRefreshKeyNames = value == null ? String.Empty : value; }
+			get { return _sourceLinkRefreshKeyNames; }
+			set { _sourceLinkRefreshKeyNames = value == null ? String.Empty : value; }
 		}
 		
 		// RefreshKeyNames
 		
-		private string FRefreshKeyNames = String.Empty;
+		private string _refreshKeyNames = String.Empty;
 		[DefaultValue("")]
 		[Description("When refreshing the source link, determines the set of columns to be used to retrieve the refresh information from the displayed form.")]
 		public string RefreshKeyNames
 		{
-			get { return FRefreshKeyNames; }
-			set { FRefreshKeyNames = value == null ? String.Empty : value; }
+			get { return _refreshKeyNames; }
+			set { _refreshKeyNames = value == null ? String.Empty : value; }
 		}
 		
 		// OnFormClose
 
-		protected IAction FOnFormClose;
+		protected IAction _onFormClose;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action to execute after the form has been closed.")]
 		public IAction OnFormClose
 		{
-			get { return FOnFormClose; }
+			get { return _onFormClose; }
 			set	
 			{ 
-				if (FOnFormClose != null)
-					FOnFormClose.Disposed -= new EventHandler(FormCloseActionDisposed);
-				FOnFormClose = value;	
-				if (FOnFormClose != null)
-					FOnFormClose.Disposed += new EventHandler(FormCloseActionDisposed);
+				if (_onFormClose != null)
+					_onFormClose.Disposed -= new EventHandler(FormCloseActionDisposed);
+				_onFormClose = value;	
+				if (_onFormClose != null)
+					_onFormClose.Disposed += new EventHandler(FormCloseActionDisposed);
 			}
 		}
 
-		private void FormCloseActionDisposed(object ASender, EventArgs AArgs)
+		private void FormCloseActionDisposed(object sender, EventArgs args)
 		{
 			OnFormClose = null;
 		}
 
 		// OnFormAccepted
 
-		protected IAction FOnFormAccepted;
+		protected IAction _onFormAccepted;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action to execute when the form is accepted.  Only called for forms that are shown modally.")]
 		public IAction OnFormAccepted
 		{
-			get { return FOnFormAccepted; }
+			get { return _onFormAccepted; }
 			set	
 			{ 
-				if (FOnFormAccepted != null)
-					FOnFormAccepted.Disposed -= new EventHandler(FormAcceptedActionDisposed);
-				FOnFormAccepted = value;	
-				if (FOnFormAccepted != null)
-					FOnFormAccepted.Disposed += new EventHandler(FormAcceptedActionDisposed);
+				if (_onFormAccepted != null)
+					_onFormAccepted.Disposed -= new EventHandler(FormAcceptedActionDisposed);
+				_onFormAccepted = value;	
+				if (_onFormAccepted != null)
+					_onFormAccepted.Disposed += new EventHandler(FormAcceptedActionDisposed);
 			}
 		}
 
-		private void FormAcceptedActionDisposed(object ASender, EventArgs AArgs)
+		private void FormAcceptedActionDisposed(object sender, EventArgs args)
 		{
 			OnFormAccepted = null;
 		}
 
 		// OnFormRejected
 
-		protected IAction FOnFormRejected;
+		protected IAction _onFormRejected;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action to execute when the form is rejected.  Only called for forms that are shown modally.")]
 		public IAction OnFormRejected
 		{
-			get { return FOnFormRejected; }
+			get { return _onFormRejected; }
 			set	
 			{ 
-				if (FOnFormRejected != null)
-					FOnFormRejected.Disposed -= new EventHandler(FormRejectedActionDisposed);
-				FOnFormRejected = value;	
-				if (FOnFormRejected != null)
-					FOnFormRejected.Disposed += new EventHandler(FormRejectedActionDisposed);
+				if (_onFormRejected != null)
+					_onFormRejected.Disposed -= new EventHandler(FormRejectedActionDisposed);
+				_onFormRejected = value;	
+				if (_onFormRejected != null)
+					_onFormRejected.Disposed += new EventHandler(FormRejectedActionDisposed);
 			}
 		}
 
-		private void FormRejectedActionDisposed(object ASender, EventArgs AArgs)
+		private void FormRejectedActionDisposed(object sender, EventArgs args)
 		{
 			OnFormRejected = null;
 		}
 		
 		// BeforeFormActivated
 
-		protected IAction FBeforeFormActivated;
+		protected IAction _beforeFormActivated;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action to execute after the form is created, but before it is activated.")]
 		public IAction BeforeFormActivated
 		{
-			get { return FBeforeFormActivated; }
+			get { return _beforeFormActivated; }
 			set	
 			{ 
-				if (FBeforeFormActivated != null)
-					FBeforeFormActivated.Disposed -= new EventHandler(FormRejectedActionDisposed);
-				FBeforeFormActivated = value;	
-				if (FBeforeFormActivated != null)
-					FBeforeFormActivated.Disposed += new EventHandler(FormRejectedActionDisposed);
+				if (_beforeFormActivated != null)
+					_beforeFormActivated.Disposed -= new EventHandler(FormRejectedActionDisposed);
+				_beforeFormActivated = value;	
+				if (_beforeFormActivated != null)
+					_beforeFormActivated.Disposed += new EventHandler(FormRejectedActionDisposed);
 			}
 		}
 
-		private void BeforeFormActivatedDisposed(object ASender, EventArgs AArgs)
+		private void BeforeFormActivatedDisposed(object sender, EventArgs args)
 		{
 			BeforeFormActivated = null;
 		}
 
 		// AfterFormActivated
 
-		protected IAction FAfterFormActivated;
+		protected IAction _afterFormActivated;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("An action to execute after the form is activated, but before it is shown.")]
 		public IAction AfterFormActivated
 		{
-			get { return FAfterFormActivated; }
+			get { return _afterFormActivated; }
 			set	
 			{ 
-				if (FAfterFormActivated != null)
-					FAfterFormActivated.Disposed -= new EventHandler(FormRejectedActionDisposed);
-				FAfterFormActivated = value;	
-				if (FAfterFormActivated != null)
-					FAfterFormActivated.Disposed += new EventHandler(FormRejectedActionDisposed);
+				if (_afterFormActivated != null)
+					_afterFormActivated.Disposed -= new EventHandler(FormRejectedActionDisposed);
+				_afterFormActivated = value;	
+				if (_afterFormActivated != null)
+					_afterFormActivated.Disposed += new EventHandler(FormRejectedActionDisposed);
 			}
 		}
 
-		private void AfterFormActivatedDisposed(object ASender, EventArgs AArgs)
+		private void AfterFormActivatedDisposed(object sender, EventArgs args)
 		{
 			AfterFormActivated = null;
 		}
 
 		// Document
 
-		private string FDocument = String.Empty;
+		private string _document = String.Empty;
 		[Description("A Document expression returning a form interface to be shown.")]
 		[DefaultValue("")]
 		[Editor("Alphora.Dataphor.Dataphoria.DocumentExpressionUIEditor,Dataphoria", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DocumentExpressionOperator("Form")]
 		public string Document
 		{
-			get { return FDocument; }
+			get { return _document; }
 			set
 			{
-				if (value != FDocument)
+				if (value != _document)
 				{
-					FDocument = value;
+					_document = value;
 					EnabledChanged();
 				}
 			}
@@ -345,30 +345,30 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		// Filter
 
-		private string FFilter = String.Empty;
+		private string _filter = String.Empty;
 		[DefaultValue("")]
 		[Description("Filter to apply to the main source of the target form.")]
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
 		public string Filter
 		{
-			get { return FFilter; }
-			set { FFilter = value; }
+			get { return _filter; }
+			set { _filter = value; }
 		}
 		
 		// Mode
 
-		private FormMode FMode;
+		private FormMode _mode;
 		[DefaultValue(FormMode.None)]
 		[Description("FormMode used when opening the interface.")]
 		public FormMode Mode
 		{
-			get { return FMode; }
+			get { return _mode; }
 			set
 			{
-				if (value != FMode)
+				if (value != _mode)
 				{
-					FMode = value;
+					_mode = value;
 					EnabledChanged();
 				}
 			}
@@ -376,24 +376,24 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		// AutoAcceptAfterInsertOnQuery
 
-		private bool FAutoAcceptAfterInsertOnQuery = true;
+		private bool _autoAcceptAfterInsertOnQuery = true;
 		[DefaultValue(true)]
 		[Description("When true, if the current form is being queried (typically as a lookup) and the shown form is in insert mode and is accepted, the current form will automatically be accepted.")]
 		public bool AutoAcceptAfterInsertOnQuery
 		{
-			get { return FAutoAcceptAfterInsertOnQuery; }
-			set { FAutoAcceptAfterInsertOnQuery = value; }
+			get { return _autoAcceptAfterInsertOnQuery; }
+			set { _autoAcceptAfterInsertOnQuery = value; }
 		}
 
 		// TopMost
 
-		private bool FTopMost;
+		private bool _topMost;
 		[DefaultValue(false)]
 		[Description("The TopMost setting of the shown form.")]
 		public bool TopMost
 		{
-			get { return FTopMost; }
-			set { FTopMost = value; }
+			get { return _topMost; }
+			set { _topMost = value; }
 		}
 
 		// Action
@@ -402,11 +402,11 @@ namespace Alphora.Dataphor.Frontend.Client
 		{
 			return
 				base.GetEnabled() 
-					&& (FDocument != String.Empty) 
+					&& (_document != String.Empty) 
 					&&
 					(
 						(SourceLinkType == SourceLinkType.None) 
-							|| (FMode == FormMode.Insert) 
+							|| (_mode == FormMode.Insert) 
 							|| 
 							(
 								(SourceLink.Source != null) 
@@ -428,147 +428,147 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		// ConfirmDelete
 				
-		private bool FConfirmDelete = true;
+		private bool _confirmDelete = true;
 		[Description("Indicates whether a confirm form will be displayed.")]
 		[DefaultValue(true)]
 		public bool ConfirmDelete
 		{
-			get { return FConfirmDelete; }
-			set { FConfirmDelete = value; }
+			get { return _confirmDelete; }
+			set { _confirmDelete = value; }
 		}
 
 		// UseOpenState
 		
-		private bool FUseOpenState = true;
+		private bool _useOpenState = true;
 		[Description("Determines whether or not to set the OpenState property of the main Source of the form being shown.")]
 		[DefaultValue(true)]
 		public bool UseOpenState
 		{
-			get { return FUseOpenState; }
-			set { FUseOpenState = value; }
+			get { return _useOpenState; }
+			set { _useOpenState = value; }
 		}
 
 		// ManageWriteOnly
 		
-		private bool FManageWriteOnly = true;
+		private bool _manageWriteOnly = true;
 		[Description("Determines whether or not to set the IsWriteOnly property of the main Source of the form being shown.")]
 		[DefaultValue(true)]
 		public bool ManageWriteOnly
 		{
-			get { return FManageWriteOnly; }
-			set { FManageWriteOnly = value; }
+			get { return _manageWriteOnly; }
+			set { _manageWriteOnly = value; }
 		}
 
 		// ManageRefreshAfterPost
 		
-		private bool FManageRefreshAfterPost = true;
+		private bool _manageRefreshAfterPost = true;
 		[Description("Determines whether or not to set the RefreshAfterPost property of the main Source of the form being shown.")]
 		[DefaultValue(true)]
 		public bool ManageRefreshAfterPost
 		{
-			get { return FManageRefreshAfterPost; }
-			set { FManageRefreshAfterPost = value; }
+			get { return _manageRefreshAfterPost; }
+			set { _manageRefreshAfterPost = value; }
 		}
 		
 		// OnCompleted (IBlockable)
 		public event NodeEventHandler OnCompleted;
-		private void DoCompleted(EventParams AParams)
+		private void DoCompleted(EventParams paramsValue)
 		{
 			if (OnCompleted != null)
-				OnCompleted(this, AParams);
+				OnCompleted(this, paramsValue);
 		}
 
 		// These hooks are provided so that the ShowFormAction can be used in the eventing system
 		public event FormInterfaceHandler OnFormAcceptedEvent;
 		public event FormInterfaceHandler OnFormRejectedEvent;
-		private DataParams FMainSourceParams;
-		private EventParams FParams;
+		private DataParams _mainSourceParams;
+		private EventParams _params;
 
-		protected override void InternalExecute(INode ASender, EventParams AParams)
+		protected override void InternalExecute(INode sender, EventParams paramsValue)
 		{
-			if (FDocument != String.Empty)
+			if (_document != String.Empty)
 			{
-				FParams = AParams;
-				if ((FMode == FormMode.Delete) && !ConfirmDelete)
+				_params = paramsValue;
+				if ((_mode == FormMode.Delete) && !ConfirmDelete)
 				{
 					SourceLink.Source.DataView.Delete();
 				}
 				else
 				{
-					FMainSourceParams = AParams["AParams"] as DataParams;
+					_mainSourceParams = paramsValue["AParams"] as DataParams;
 					try
 					{
-						IFormInterface LForm = HostNode.Session.LoadForm(this, FDocument, new FormInterfaceHandler(InternalBeforeActivateForm));
+						IFormInterface form = HostNode.Session.LoadForm(this, _document, new FormInterfaceHandler(InternalBeforeActivateForm));
 						try
 						{
-							LForm.OnClosed += new EventHandler(OnClosedHandler);
-							LForm.TopMost = TopMost;
-							InternalAfterActivateForm(LForm);
-							bool LForceAcceptReject = (FOnFormAccepted != null) || (FOnFormRejected != null) || (OnFormAcceptedEvent != null) || (OnFormRejectedEvent != null);
-							if ((FMode != FormMode.None) || (SourceLinkType != SourceLinkType.None) || LForceAcceptReject)
+							form.OnClosed += new EventHandler(OnClosedHandler);
+							form.TopMost = TopMost;
+							InternalAfterActivateForm(form);
+							bool forceAcceptReject = (_onFormAccepted != null) || (_onFormRejected != null) || (OnFormAcceptedEvent != null) || (OnFormRejectedEvent != null);
+							if ((_mode != FormMode.None) || (SourceLinkType != SourceLinkType.None) || forceAcceptReject)
 							{
-								if (LForceAcceptReject)
-									LForm.ForceAcceptReject = true;
-								LForm.Show
+								if (forceAcceptReject)
+									form.ForceAcceptReject = true;
+								form.Show
 								(
 									(IFormInterface)FindParent(typeof(IFormInterface)),
 									new FormInterfaceHandler(FormAccepted),
 									new FormInterfaceHandler(FormRejected),
-									FMode
+									_mode
 								);
 							}
 							else
-								LForm.Show(FMode);
+								form.Show(_mode);
 						}
 						catch
 						{
-							LForm.Dispose();
+							form.Dispose();
 							throw;
 						}
 					}
 					finally
 					{
-						FMainSourceParams = null;
+						_mainSourceParams = null;
 					}
 				}
 			}
 		}
 
-		protected void FormRejected(IFormInterface AForm)
+		protected void FormRejected(IFormInterface form)
 		{
-			if (FOnFormRejected != null)
-				FOnFormRejected.Execute(this, new EventParams("AForm", AForm));
+			if (_onFormRejected != null)
+				_onFormRejected.Execute(this, new EventParams("AForm", form));
 				
 			if (OnFormRejectedEvent != null)
-				OnFormRejectedEvent(AForm);
+				OnFormRejectedEvent(form);
 		}
 		
-		protected void FormAccepted(IFormInterface AForm)
+		protected void FormAccepted(IFormInterface form)
 		{
 			if 
 			(
-				FSourceLinkRefresh && 
-				(FSourceLink != null) && 
-				(FSourceLink.Source != null) && 
-				(FSourceLink.Source.DataView.State == DataSetState.Browse) && 
-				(AForm.MainSource != null) //&&
+				_sourceLinkRefresh && 
+				(_sourceLink != null) && 
+				(_sourceLink.Source != null) && 
+				(_sourceLink.Source.DataView.State == DataSetState.Browse) && 
+				(form.MainSource != null) //&&
 				//!Object.ReferenceEquals(FSourceLink.Source.DataView, AForm.MainSource.DataView) // Do not refresh if this is a surrogate
 			)
 			{
 				switch (Mode)
 				{
 					case FormMode.Delete:
-						AForm.MainSource.DataView.Close(); // Close the data view first to prevent the following refresh from causing an unnecessary requery
-						FSourceLink.Source.DataView.Refresh();
+						form.MainSource.DataView.Close(); // Close the data view first to prevent the following refresh from causing an unnecessary requery
+						_sourceLink.Source.DataView.Refresh();
 					break;
 
 					case FormMode.Insert:
 					case FormMode.Edit:
 						// Find the nearest row in current set
-						DataView LSourceView = FSourceLink.Source.DataView;
-						DataView LTargetView = AForm.MainSource.DataView;
+						DataView sourceView = _sourceLink.Source.DataView;
+						DataView targetView = form.MainSource.DataView;
 						
-						if (LSourceView != LTargetView)
+						if (sourceView != targetView)
 						{
 							// Determine RefreshSourceKey
 							// Determine RefreshKey
@@ -577,124 +577,124 @@ namespace Alphora.Dataphor.Frontend.Client
 							// if the current order of the source link data view is a subset of the columns in the detail view, use it, otherwise
 							// find the minimum key in the source link data view that is a subset of the columns in the detail view and use it
 							
-							Schema.Order LSourceKey = null;
-							Schema.Order LTargetKey = null;
+							Schema.Order sourceKey = null;
+							Schema.Order targetKey = null;
 							
 							if ((SourceLinkRefreshKeyNames != "") && (RefreshKeyNames != ""))
 							{
-								string[] LSourceKeyNames = SourceLinkRefreshKeyNames.Split(new char[]{';', ','});
-								string[] LTargetKeyNames = RefreshKeyNames.Split(new char[]{';', ','});
-								if (LSourceKeyNames.Length == LTargetKeyNames.Length)
+								string[] sourceKeyNames = SourceLinkRefreshKeyNames.Split(new char[]{';', ','});
+								string[] targetKeyNames = RefreshKeyNames.Split(new char[]{';', ','});
+								if (sourceKeyNames.Length == targetKeyNames.Length)
 								{
-									LSourceKey = new Schema.Order();
-									LTargetKey = new Schema.Order();
-									for (int LIndex = 0; LIndex < LSourceKeyNames.Length; LIndex++)
+									sourceKey = new Schema.Order();
+									targetKey = new Schema.Order();
+									for (int index = 0; index < sourceKeyNames.Length; index++)
 									{
-										LSourceKey.Columns.Add(new Schema.OrderColumn(LSourceView.TableVar.Columns[LSourceKeyNames[LIndex]], true));
-										LTargetKey.Columns.Add(new Schema.OrderColumn(LTargetView.TableVar.Columns[LTargetKeyNames[LIndex]], true));
+										sourceKey.Columns.Add(new Schema.OrderColumn(sourceView.TableVar.Columns[sourceKeyNames[index]], true));
+										targetKey.Columns.Add(new Schema.OrderColumn(targetView.TableVar.Columns[targetKeyNames[index]], true));
 									}
 								}
 							}
 							
-							if (LSourceKey == null)
+							if (sourceKey == null)
 							{
-								if ((LSourceView.Order != null) && LSourceView.Order.Columns.IsSubsetOf(LTargetView.TableVar.Columns))
+								if ((sourceView.Order != null) && sourceView.Order.Columns.IsSubsetOf(targetView.TableVar.Columns))
 								{
-									LSourceKey = LSourceView.Order;
-									LTargetKey = LSourceView.Order;
+									sourceKey = sourceView.Order;
+									targetKey = sourceView.Order;
 								}
 								else
 								{
-									Schema.Key LMinimumKey = LSourceView.TableVar.Keys.MinimumSubsetKey(LTargetView.TableVar.Columns);
-									if (LMinimumKey != null)
+									Schema.Key minimumKey = sourceView.TableVar.Keys.MinimumSubsetKey(targetView.TableVar.Columns);
+									if (minimumKey != null)
 									{
-										LSourceKey = new Schema.Order(LMinimumKey);
-										LTargetKey = LSourceKey;
+										sourceKey = new Schema.Order(minimumKey);
+										targetKey = sourceKey;
 									}
 								}
 							}
 
-							if (LSourceKey != null)
+							if (sourceKey != null)
 							{						
-								using (Row LRow = new Row(LSourceView.Process.ValueManager, new Schema.RowType(LSourceKey.Columns)))
+								using (Row row = new Row(sourceView.Process.ValueManager, new Schema.RowType(sourceKey.Columns)))
 								{
-									for (int LIndex = 0; LIndex < LSourceKey.Columns.Count; LIndex++)
+									for (int index = 0; index < sourceKey.Columns.Count; index++)
 									{
-										DataField LTargetField = LTargetView[LTargetKey.Columns[LIndex].Column.Name];
-										if (LTargetField.HasValue())
-											LRow[LIndex] = LTargetField.Value;
+										DataField targetField = targetView[targetKey.Columns[index].Column.Name];
+										if (targetField.HasValue())
+											row[index] = targetField.Value;
 										else
-											LRow.ClearValue(LIndex);
+											row.ClearValue(index);
 									}
 									
-									LTargetView.Close(); // to prevent unnecessary requery
+									targetView.Close(); // to prevent unnecessary requery
 
-									string LSaveOrder = String.Empty;								
-									if (!LSourceView.Order.Equals(LSourceKey))
+									string saveOrder = String.Empty;								
+									if (!sourceView.Order.Equals(sourceKey))
 									{
-										LSaveOrder = LSourceView.OrderString;
+										saveOrder = sourceView.OrderString;
 										try
 										{
-											LSourceView.Order = LSourceKey;
+											sourceView.Order = sourceKey;
 										}
-										catch (Exception LException)
+										catch (Exception exception)
 										{
-											if (LSourceView.OrderString != LSaveOrder)
-												LSourceView.OrderString = LSaveOrder;
+											if (sourceView.OrderString != saveOrder)
+												sourceView.OrderString = saveOrder;
 											else
-												LSourceView.Refresh();
-											throw new ClientException(ClientException.Codes.UnableToFindModifiedRow, LException);
+												sourceView.Refresh();
+											throw new ClientException(ClientException.Codes.UnableToFindModifiedRow, exception);
 										}
 									}
 									try
 									{
-										LSourceView.Refresh(LRow);
+										sourceView.Refresh(row);
 									}
 									finally
 									{
-										if ((LSaveOrder != String.Empty) && (LSourceView.OrderString != LSaveOrder))
-											LSourceView.OrderString = LSaveOrder;
+										if ((saveOrder != String.Empty) && (sourceView.OrderString != saveOrder))
+											sourceView.OrderString = saveOrder;
 									}
 								}
 							}
 							else
 							{
-								LTargetView.Close();
-								LSourceView.Refresh();
+								targetView.Close();
+								sourceView.Refresh();
 							}
 						}
 					break;
 				}
 			}
 
-			if ((Mode == FormMode.Insert) && FAutoAcceptAfterInsertOnQuery)
+			if ((Mode == FormMode.Insert) && _autoAcceptAfterInsertOnQuery)
 			{
-				IFormInterface LForm = (IFormInterface)FindParent(typeof(IFormInterface));
-				if (LForm.Mode == FormMode.Query)
-					LForm.Close(CloseBehavior.AcceptOrClose);
+				IFormInterface localForm = (IFormInterface)FindParent(typeof(IFormInterface));
+				if (localForm.Mode == FormMode.Query)
+					localForm.Close(CloseBehavior.AcceptOrClose);
 			}
 			
-			if (FOnFormAccepted != null)
-				FOnFormAccepted.Execute(this, new EventParams("AForm", AForm));
+			if (_onFormAccepted != null)
+				_onFormAccepted.Execute(this, new EventParams("AForm", form));
 				
 			if (OnFormAcceptedEvent != null)
-				OnFormAcceptedEvent(AForm);
+				OnFormAcceptedEvent(form);
 		}
 
 		protected virtual void OnClosedHandler(object sender, EventArgs e)
 		{
-			if (FOnFormClose != null)
-				FOnFormClose.Execute(this, new EventParams("AForm", sender));
+			if (_onFormClose != null)
+				_onFormClose.Execute(this, new EventParams("AForm", sender));
 
 			// Disable the source(s) first before disestablishing the link
 			((IFormInterface)sender).BroadcastEvent(new DisableSourceEvent());
 			
-			if (FSourceLink != null)
-				FSourceLink.TargetSource = null;
+			if (_sourceLink != null)
+				_sourceLink.TargetSource = null;
 				
-			DoCompleted(FParams);
+			DoCompleted(_params);
 
-			FParams = null;
+			_params = null;
 		}
 
 		// Node
@@ -705,70 +705,70 @@ namespace Alphora.Dataphor.Frontend.Client
 			base.AfterActivate();
 		}
 
-		protected void InternalBeforeActivateForm(IFormInterface AForm)
+		protected void InternalBeforeActivateForm(IFormInterface form)
 		{
-			if (AForm.MainSource != null)
+			if (form.MainSource != null)
 			{
-                if (!String.IsNullOrEmpty(FFilter))
-				    AForm.MainSource.Filter = FFilter;
-                if (FMainSourceParams != null)
-				    AForm.MainSource.Params = FMainSourceParams;
-				AForm.MainSource.Default += new DataLinkHandler(DefaultData);
+                if (!String.IsNullOrEmpty(_filter))
+				    form.MainSource.Filter = _filter;
+                if (_mainSourceParams != null)
+				    form.MainSource.Params = _mainSourceParams;
+				form.MainSource.Default += new DataLinkHandler(DefaultData);
 			}
 
-			if (FSourceLink != null) 
-				FSourceLink.TargetSource = AForm.MainSource;
+			if (_sourceLink != null) 
+				_sourceLink.TargetSource = form.MainSource;
 				
-			switch (FMode)
+			switch (_mode)
 			{
 				case FormMode.Insert : 
-					if (FUseOpenState || FManageRefreshAfterPost || FManageWriteOnly)
+					if (_useOpenState || _manageRefreshAfterPost || _manageWriteOnly)
 					{
-						AForm.CheckMainSource();
-						if (FUseOpenState)
-							AForm.MainSource.OpenState = DAE.Client.DataSetState.Insert;
-						if (FManageRefreshAfterPost)
-							AForm.MainSource.RefreshAfterPost = false;
-						if (FManageWriteOnly)
-							AForm.MainSource.IsWriteOnly = true;
+						form.CheckMainSource();
+						if (_useOpenState)
+							form.MainSource.OpenState = DAE.Client.DataSetState.Insert;
+						if (_manageRefreshAfterPost)
+							form.MainSource.RefreshAfterPost = false;
+						if (_manageWriteOnly)
+							form.MainSource.IsWriteOnly = true;
 					}
 					break;
 
 				case FormMode.Edit : 
-					if (FUseOpenState || FManageRefreshAfterPost)
+					if (_useOpenState || _manageRefreshAfterPost)
 					{
-						AForm.CheckMainSource();
-						if (FUseOpenState)
-							AForm.MainSource.OpenState = DAE.Client.DataSetState.Edit; 
-						if (FManageRefreshAfterPost)
-							AForm.MainSource.RefreshAfterPost = false;
+						form.CheckMainSource();
+						if (_useOpenState)
+							form.MainSource.OpenState = DAE.Client.DataSetState.Edit; 
+						if (_manageRefreshAfterPost)
+							form.MainSource.RefreshAfterPost = false;
 					}
 					break;
 			}
 
-			if (FBeforeFormActivated != null)
-				FBeforeFormActivated.Execute(this, new EventParams("AForm", AForm));
+			if (_beforeFormActivated != null)
+				_beforeFormActivated.Execute(this, new EventParams("AForm", form));
 		}
 
-		protected virtual void DefaultData(DataLink ALink, DataSet ADataSet)
+		protected virtual void DefaultData(DataLink link, DataSet dataSet)
 		{
-			foreach (Node LChild in Children)
+			foreach (Node child in Children)
 			{
-				var LDefault = LChild as DataDefault;
-				if (LDefault != null)
-					LDefault.PerformDefault(ALink, FParams);
+				var defaultValue = child as DataDefault;
+				if (defaultValue != null)
+					defaultValue.PerformDefault(link, _params);
 			}
 		}
 
-		protected void InternalAfterActivateForm(IFormInterface AForm)
+		protected void InternalAfterActivateForm(IFormInterface form)
 		{
-			if (FAfterFormActivated != null)
-				FAfterFormActivated.Execute(this, new EventParams("AForm", AForm));
+			if (_afterFormActivated != null)
+				_afterFormActivated.Execute(this, new EventParams("AForm", form));
 		}
 
-		public override bool IsValidChild(Type AChildType)
+		public override bool IsValidChild(Type childType)
 		{
-			return typeof(DataDefault).IsAssignableFrom(AChildType) || base.IsValidChild(AChildType);
+			return typeof(DataDefault).IsAssignableFrom(childType) || base.IsValidChild(childType);
 		}
 	}
 
@@ -778,102 +778,102 @@ namespace Alphora.Dataphor.Frontend.Client
 	{
 		// TargetColumn
 
-		private string FTargetColumns = String.Empty;
+		private string _targetColumns = String.Empty;
 		[DefaultValue("")]
 		[Description("The comma or semicolon separated list of columns in the Target source that are to be defaulted.")]
 		public string TargetColumns
 		{
-			get { return FTargetColumns; }
-			set { FTargetColumns = value; }
+			get { return _targetColumns; }
+			set { _targetColumns = value; }
 		}
 		
 		// Enabled
 		
-		private bool FEnabled = true;
+		private bool _enabled = true;
 		[DefaultValue(true)]
 		[Description("The default will only be performed if Enabled is true.")]
 		public bool Enabled
 		{
-			get { return FEnabled; }
-			set { FEnabled = value; }
+			get { return _enabled; }
+			set { _enabled = value; }
 		}
 		
 		protected virtual bool GetEnabled()
 		{
-			return FEnabled && !String.IsNullOrEmpty(FTargetColumns);
+			return _enabled && !String.IsNullOrEmpty(_targetColumns);
 		}
 		
-		protected internal void PerformDefault(DataLink ALink, EventParams AParams)
+		protected internal void PerformDefault(DataLink link, EventParams paramsValue)
 		{
-			if (FEnabled && ALink.Active)
-				InternalPerformDefault(ALink, FTargetColumns.Split(';', ','), AParams);
+			if (_enabled && link.Active)
+				InternalPerformDefault(link, _targetColumns.Split(';', ','), paramsValue);
 		}
 
-		protected abstract void InternalPerformDefault(DataLink ALink, string[] ATargetColumns, EventParams AParams);
+		protected abstract void InternalPerformDefault(DataLink link, string[] targetColumns, EventParams paramsValue);
 	}
 
 	/// <summary> Defaults data from a data source. </summary>
 	public class DataSourceDefault : DataDefault, ISourceReference, IDataSourceDefault
 	{
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 			Source = null;
 		}
 
 		// Source
 
-		private ISource FSource;
+		private ISource _source;
 		[TypeConverter("Alphora.Dataphor.Frontend.Client.NodeReferenceConverter,Alphora.Dataphor.Frontend.Client")]
 		[Description("The source from which to pull the data.")]
 		public ISource Source
 		{
-			get { return FSource; }
+			get { return _source; }
 			set
 			{
-				if (FSource != value)
+				if (_source != value)
 				{
-					if (FSource != null)
-						FSource.Disposed -= new EventHandler(SourceDisposed);
-					FSource = value;
-					if (FSource != null)
-						FSource.Disposed += new EventHandler(SourceDisposed);
+					if (_source != null)
+						_source.Disposed -= new EventHandler(SourceDisposed);
+					_source = value;
+					if (_source != null)
+						_source.Disposed += new EventHandler(SourceDisposed);
 				}
 			}
 		}
 
-		private void SourceDisposed(object ASender, EventArgs AArgs)
+		private void SourceDisposed(object sender, EventArgs args)
 		{
 			Source = null;
 		}
 
 		// SourceColumns
 
-		private string FSourceColumns = String.Empty;
+		private string _sourceColumns = String.Empty;
 		[DefaultValue("")]
 		[Description("The columns in the Source source that are to be used to default from.")]
 		public string SourceColumns
 		{
-			get { return FSourceColumns; }
-			set { FSourceColumns = value; }
+			get { return _sourceColumns; }
+			set { _sourceColumns = value; }
 		}
 
 		protected override bool GetEnabled()
 		{
-			return (FSource != null) && (FSource.DataView != null) && FSource.DataView.Active && !String.IsNullOrEmpty(FSourceColumns) && base.GetEnabled();
+			return (_source != null) && (_source.DataView != null) && _source.DataView.Active && !String.IsNullOrEmpty(_sourceColumns) && base.GetEnabled();
 		}
 
-		protected override void InternalPerformDefault(DataLink ALink, string[] ATargetColumns, EventParams AParams)
+		protected override void InternalPerformDefault(DataLink link, string[] targetColumns, EventParams paramsValue)
 		{
-			var LSourceColumns = FSourceColumns.Split(',', ';');
-			for (int i = 0; i < Math.Min(LSourceColumns.Length, ATargetColumns.Length); i++)
+			var sourceColumns = _sourceColumns.Split(',', ';');
+			for (int i = 0; i < Math.Min(sourceColumns.Length, targetColumns.Length); i++)
 			{
-				var LSourceField = FSource[LSourceColumns[i].Trim()];
-				var LTargetField = ALink.DataSet[ATargetColumns[i].Trim()];
-				if (LSourceField.HasValue())
-					LTargetField.AsNative = LSourceField.AsNative;
+				var sourceField = _source[sourceColumns[i].Trim()];
+				var targetField = link.DataSet[targetColumns[i].Trim()];
+				if (sourceField.HasValue())
+					targetField.AsNative = sourceField.AsNative;
 				else
-					LTargetField.ClearValue();
+					targetField.ClearValue();
 			}
 		}
 	}
@@ -883,41 +883,41 @@ namespace Alphora.Dataphor.Frontend.Client
 	{
 		// SourceValues
 
-		private string FSourceValues = String.Empty;
+		private string _sourceValues = String.Empty;
 		[Description("Source values in D4 list literal format (e.g. 'String value', nil, 5 )")]
 		public string SourceValues
 		{
-			get { return FSourceValues; }
+			get { return _sourceValues; }
 			set 
 			{
 				value = value == null ? String.Empty : value;
-				var LExpressions = new Alphora.Dataphor.DAE.Language.D4.Parser().ParseExpressionList(value);
+				var expressions = new Alphora.Dataphor.DAE.Language.D4.Parser().ParseExpressionList(value);
 				// validate that all expressions are literals
-				foreach (Expression LExpression in LExpressions)
-					if (!(LExpression is ValueExpression))
+				foreach (Expression expression in expressions)
+					if (!(expression is ValueExpression))
 						throw new ClientException(ClientException.Codes.ValueExpressionExpected);
-				FSourceValueExpressions = LExpressions;
-				FSourceValues = value; 
+				_sourceValueExpressions = expressions;
+				_sourceValues = value; 
 			}
 		}
 
-		private List<Expression> FSourceValueExpressions;
+		private List<Expression> _sourceValueExpressions;
 
-		protected override void InternalPerformDefault(DataLink ALink, string[] ATargetColumns, EventParams AParams)
+		protected override void InternalPerformDefault(DataLink link, string[] targetColumns, EventParams paramsValue)
 		{
-			if (FSourceValueExpressions != null)
-				for (int i = 0; i < Math.Min(FSourceValueExpressions.Count, ATargetColumns.Length); i++)
+			if (_sourceValueExpressions != null)
+				for (int i = 0; i < Math.Min(_sourceValueExpressions.Count, targetColumns.Length); i++)
 				{
-					var LTargetField = ALink.DataSet[ATargetColumns[i].Trim()];
-					var LSource = (ValueExpression)FSourceValueExpressions[i];
-					switch (LSource.Token)
+					var targetField = link.DataSet[targetColumns[i].Trim()];
+					var source = (ValueExpression)_sourceValueExpressions[i];
+					switch (source.Token)
 					{
-						case TokenType.Boolean : LTargetField.AsBoolean = (bool)LSource.Value; break;
-						case TokenType.Decimal : LTargetField.AsDecimal = (decimal)LSource.Value; break;
-						case TokenType.Integer : LTargetField.AsInt32 = (int)LSource.Value; break;
-						case TokenType.Money : LTargetField.AsDecimal = (decimal)LSource.Value; break;
-						case TokenType.Nil : LTargetField.ClearValue(); break;
-						case TokenType.String : LTargetField.AsString = (string)LSource.Value; break;
+						case TokenType.Boolean : targetField.AsBoolean = (bool)source.Value; break;
+						case TokenType.Decimal : targetField.AsDecimal = (decimal)source.Value; break;
+						case TokenType.Integer : targetField.AsInt32 = (int)source.Value; break;
+						case TokenType.Money : targetField.AsDecimal = (decimal)source.Value; break;
+						case TokenType.Nil : targetField.ClearValue(); break;
+						case TokenType.String : targetField.AsString = (string)source.Value; break;
 					}
 				}
 		}
@@ -928,43 +928,43 @@ namespace Alphora.Dataphor.Frontend.Client
 	{
 		// SourceParams
 
-		private string FSourceParams = String.Empty;
+		private string _sourceParams = String.Empty;
 		[DefaultValue("")]
 		[Description("Optional comma or semicolon delimited list of Params in the Source source that are to be used to default from.  If left empty, all given parameters are used.")]
 		public string SourceParams
 		{
-			get { return FSourceParams; }
-			set { FSourceParams = value; }
+			get { return _sourceParams; }
+			set { _sourceParams = value; }
 		}
 
-		protected override void InternalPerformDefault(DataLink ALink, string[] ATargetColumns, EventParams AParams)
+		protected override void InternalPerformDefault(DataLink link, string[] targetColumns, EventParams paramsValue)
 		{
-			if (AParams != null)
+			if (paramsValue != null)
 			{
 				// Determine the list of source parameters to use
-				string[] LSourceNames;
-				if (String.IsNullOrEmpty(FSourceParams))
+				string[] sourceNames;
+				if (String.IsNullOrEmpty(_sourceParams))
 				{
-					LSourceNames = new string[AParams.Count];
+					sourceNames = new string[paramsValue.Count];
 					var i = 0;
-					foreach (KeyValuePair<string, object> LEntry in AParams)
+					foreach (KeyValuePair<string, object> entry in paramsValue)
 					{
-						LSourceNames[i] = LEntry.Key;
+						sourceNames[i] = entry.Key;
 						i++;
 					}
 				}
 				else
-					LSourceNames = FSourceParams.Split(',', ';');
+					sourceNames = _sourceParams.Split(',', ';');
 				
 				// Copy the parameter values
-				for (int i = 0; i < Math.Min(LSourceNames.Length, ATargetColumns.Length); i++)
+				for (int i = 0; i < Math.Min(sourceNames.Length, targetColumns.Length); i++)
 				{
-					var LSourceValue = AParams[LSourceNames[i].Trim()];
-					var LTargetField = ALink.DataSet[ATargetColumns[i].Trim()];
-					if (LSourceValue != null)
-						LTargetField.AsNative = LSourceValue;
+					var sourceValue = paramsValue[sourceNames[i].Trim()];
+					var targetField = link.DataSet[targetColumns[i].Trim()];
+					if (sourceValue != null)
+						targetField.AsNative = sourceValue;
 					else
-						LTargetField.ClearValue();
+						targetField.ClearValue();
 				}
 			}
 		}
@@ -975,20 +975,20 @@ namespace Alphora.Dataphor.Frontend.Client
 	{
 		// Behavior
 
-		private CloseBehavior FBehavior = CloseBehavior.RejectOrClose;
+		private CloseBehavior _behavior = CloseBehavior.RejectOrClose;
 		[DefaultValue(CloseBehavior.RejectOrClose)]
 		[Description("The behavior of the FormAction.")]
 		public CloseBehavior Behavior
 		{
-			get { return FBehavior; }
-			set { FBehavior = value; }
+			get { return _behavior; }
+			set { _behavior = value; }
 		}
 
 		// Action
 
-		protected override void InternalExecute(INode ASender, EventParams AParams)
+		protected override void InternalExecute(INode sender, EventParams paramsValue)
 		{
-			((IFormInterface)FindParent(typeof(IFormInterface))).Close(FBehavior);
+			((IFormInterface)FindParent(typeof(IFormInterface))).Close(_behavior);
 		}
 	}
 
@@ -996,28 +996,28 @@ namespace Alphora.Dataphor.Frontend.Client
 	{
 		// Document
 
-		private string FDocument = String.Empty;
+		private string _document = String.Empty;
 		[DefaultValue("")]
 		[Description("The Document of the next user interface document to be loaded.")]
 		[Editor("Alphora.Dataphor.Dataphoria.DocumentExpressionUIEditor,Dataphoria", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DocumentExpressionOperator("Form")]
 		public string Document
 		{
-			get { return FDocument; }
-			set { FDocument = value; }
+			get { return _document; }
+			set { _document = value; }
 		}
 
 		// Action
 
 		/// <remarks> Sets the next request property of the hostnode.</remarks>
 		/// <seealso cref="IHost.NextRequest"/>
-		protected override void InternalExecute(INode ASender, EventParams AParams)
+		protected override void InternalExecute(INode sender, EventParams paramsValue)
 		{
-			Request LRequest = HostNode.NextRequest;
-			if (LRequest == null)
+			Request request = HostNode.NextRequest;
+			if (request == null)
 				HostNode.NextRequest = new Request(Document);
 			else
-				LRequest.Document = Document;
+				request.Document = Document;
 		}
 
 	}
@@ -1028,7 +1028,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		/// <remarks> Clears the next request property of the hostnode. </remarks>
         /// <seealso cref="IHost.NextRequest"/>
-		protected override void InternalExecute(INode ASender, EventParams AParams)
+		protected override void InternalExecute(INode sender, EventParams paramsValue)
 		{
 			HostNode.NextRequest = null;
 		}

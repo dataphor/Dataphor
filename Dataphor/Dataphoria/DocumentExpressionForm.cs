@@ -17,80 +17,80 @@ namespace Alphora.Dataphor.Dataphoria
 	/// <summary>Class that calls the DocumentExpressionEditor.dfd for DocumentExpression Editing.</summary>
 	public class DocumentExpressionForm
 	{
-		private static void SetEditOpenState(Frontend.Client.IFormInterface AForm)
+		private static void SetEditOpenState(Frontend.Client.IFormInterface form)
 		{
-			AForm.MainSource.OpenState = DAE.Client.DataSetState.Edit;
+			form.MainSource.OpenState = DAE.Client.DataSetState.Edit;
 		}
 
-		public static string Execute(DocumentExpression ADocumentExpression)
+		public static string Execute(DocumentExpression documentExpression)
 		{
-            IDataphoria LDataphoria = Program.DataphoriaInstance;
-			Frontend.Client.Windows.IWindowsFormInterface LForm = LDataphoria.FrontendSession.LoadForm(null, ".Frontend.Form('Frontend', 'DocumentExpressionEditor')", new Frontend.Client.FormInterfaceHandler(SetEditOpenState));
+            IDataphoria dataphoria = Program.DataphoriaInstance;
+			Frontend.Client.Windows.IWindowsFormInterface form = dataphoria.FrontendSession.LoadForm(null, ".Frontend.Form('Frontend', 'DocumentExpressionEditor')", new Frontend.Client.FormInterfaceHandler(SetEditOpenState));
 			try
 			{
-				Frontend.Client.INotebook LNotebook = (Frontend.Client.INotebook)LForm.FindNode("Notebook");
-				Frontend.Client.ISource LSource = LForm.MainSource;
-				switch (ADocumentExpression.Type)
+				Frontend.Client.INotebook notebook = (Frontend.Client.INotebook)form.FindNode("Notebook");
+				Frontend.Client.ISource source = form.MainSource;
+				switch (documentExpression.Type)
 				{
 					case DocumentType.Document : 
-						LNotebook.ActivePage = (Frontend.Client.INotebookPage)LForm.FindNode("nbpLoad"); 
-						LSource.DataView.Fields["Library_Name"].AsString = ADocumentExpression.DocumentArgs.LibraryName;
-						LSource.DataView.Fields["Document_Name"].AsString = ADocumentExpression.DocumentArgs.DocumentName;
+						notebook.ActivePage = (Frontend.Client.INotebookPage)form.FindNode("nbpLoad"); 
+						source.DataView.Fields["Library_Name"].AsString = documentExpression.DocumentArgs.LibraryName;
+						source.DataView.Fields["Document_Name"].AsString = documentExpression.DocumentArgs.DocumentName;
 						break;
 					case DocumentType.Derive : 
-						LNotebook.ActivePage = (Frontend.Client.INotebookPage)LForm.FindNode("nbpDerive"); 
-						LForm.MainSource.DataView["Query"].AsString = ADocumentExpression.DeriveArgs.Query;
-						LForm.MainSource.DataView["PageType"].AsString = ADocumentExpression.DeriveArgs.PageType;
-						LForm.MainSource.DataView["MKN"].AsString = ADocumentExpression.DeriveArgs.MasterKeyNames;
-						LForm.MainSource.DataView["DKN"].AsString = ADocumentExpression.DeriveArgs.DetailKeyNames;
-						LForm.MainSource.DataView["Elaborate"].AsBoolean = ADocumentExpression.DeriveArgs.Elaborate;
+						notebook.ActivePage = (Frontend.Client.INotebookPage)form.FindNode("nbpDerive"); 
+						form.MainSource.DataView["Query"].AsString = documentExpression.DeriveArgs.Query;
+						form.MainSource.DataView["PageType"].AsString = documentExpression.DeriveArgs.PageType;
+						form.MainSource.DataView["MKN"].AsString = documentExpression.DeriveArgs.MasterKeyNames;
+						form.MainSource.DataView["DKN"].AsString = documentExpression.DeriveArgs.DetailKeyNames;
+						form.MainSource.DataView["Elaborate"].AsBoolean = documentExpression.DeriveArgs.Elaborate;
 						break;
 					default : 
-						LNotebook.ActivePage = (Frontend.Client.INotebookPage)LForm.FindNode("nbpOther"); 
-						LForm.MainSource.DataView["Expression"].AsString = ADocumentExpression.Expression;
+						notebook.ActivePage = (Frontend.Client.INotebookPage)form.FindNode("nbpOther"); 
+						form.MainSource.DataView["Expression"].AsString = documentExpression.Expression;
 						break;
 				}
-				if (LForm.ShowModal(Frontend.Client.FormMode.Edit) != DialogResult.OK)
+				if (form.ShowModal(Frontend.Client.FormMode.Edit) != DialogResult.OK)
 					throw new AbortException();
-				if ((LNotebook.ActivePage.Name) == "nbpLoad")
+				if ((notebook.ActivePage.Name) == "nbpLoad")
 				{	
-					ADocumentExpression.Type = DocumentType.Document;
-					ADocumentExpression.DocumentArgs.LibraryName = LForm.MainSource.DataView["Library_Name"].AsString;
-					ADocumentExpression.DocumentArgs.DocumentName = LForm.MainSource.DataView["Document_Name"].AsString;
+					documentExpression.Type = DocumentType.Document;
+					documentExpression.DocumentArgs.LibraryName = form.MainSource.DataView["Library_Name"].AsString;
+					documentExpression.DocumentArgs.DocumentName = form.MainSource.DataView["Document_Name"].AsString;
 				}
-				else if ((LNotebook.ActivePage.Name) == "nbpDerive")
+				else if ((notebook.ActivePage.Name) == "nbpDerive")
 				{	
-					ADocumentExpression.Type = DocumentType.Derive;
-					ADocumentExpression.DeriveArgs.Query = LForm.MainSource.DataView["Query"].AsString;
-					ADocumentExpression.DeriveArgs.PageType = LForm.MainSource.DataView["PageType"].AsString;
-					ADocumentExpression.DeriveArgs.MasterKeyNames = LForm.MainSource.DataView["MKN"].AsString;
-					ADocumentExpression.DeriveArgs.DetailKeyNames = LForm.MainSource.DataView["DKN"].AsString;
-					ADocumentExpression.DeriveArgs.Elaborate = LForm.MainSource.DataView["Elaborate"].AsBoolean;
+					documentExpression.Type = DocumentType.Derive;
+					documentExpression.DeriveArgs.Query = form.MainSource.DataView["Query"].AsString;
+					documentExpression.DeriveArgs.PageType = form.MainSource.DataView["PageType"].AsString;
+					documentExpression.DeriveArgs.MasterKeyNames = form.MainSource.DataView["MKN"].AsString;
+					documentExpression.DeriveArgs.DetailKeyNames = form.MainSource.DataView["DKN"].AsString;
+					documentExpression.DeriveArgs.Elaborate = form.MainSource.DataView["Elaborate"].AsBoolean;
 				}
-				else if ((LNotebook.ActivePage.Name) == "nbpOther")
+				else if ((notebook.ActivePage.Name) == "nbpOther")
 				{	
-					ADocumentExpression.Type = DocumentType.Other;
-					ADocumentExpression.Expression = LForm.MainSource.DataView["Expression"].AsString;
+					documentExpression.Type = DocumentType.Other;
+					documentExpression.Expression = form.MainSource.DataView["Expression"].AsString;
 				}
-				return ADocumentExpression.Expression;
+				return documentExpression.Expression;
 			}
 			finally
 			{
-				LForm.Dispose();
+				form.Dispose();
 			}
 		}
 		
 		public static string Execute()
 		{	
-			DocumentExpression LDocumentExpression = new DocumentExpression();
-			LDocumentExpression.Type = DocumentType.None;
-			return Execute(LDocumentExpression);
+			DocumentExpression documentExpression = new DocumentExpression();
+			documentExpression.Type = DocumentType.None;
+			return Execute(documentExpression);
 		}
 		
-		public static string Execute(string AExpression)
+		public static string Execute(string expression)
 		{
-			DocumentExpression LDocumentExpression = new DocumentExpression(AExpression);
-			return Execute(LDocumentExpression);
+			DocumentExpression documentExpression = new DocumentExpression(expression);
+			return Execute(documentExpression);
 		}
 	}
 }

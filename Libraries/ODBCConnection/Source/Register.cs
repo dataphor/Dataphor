@@ -13,15 +13,15 @@ namespace Alphora.Dataphor.DAE.Connection.ODBC
 
 	class DAERegister
 	{
-		protected const string CD4ClassDefinitionNameSpace = "ODBCConnection";
+		protected const string D4ClassDefinitionNameSpace = "ODBCConnection";
 
 		public static SettingsList GetClasses()
 		{
-			SettingsList LClasses = new SettingsList();
+			SettingsList classes = new SettingsList();
 			
-			LClasses.Add(new SettingsItem(String.Format("{0}.{1}", CD4ClassDefinitionNameSpace, "ODBCConnection"), typeof(ODBCConnection).AssemblyQualifiedName));
+			classes.Add(new SettingsItem(String.Format("{0}.{1}", D4ClassDefinitionNameSpace, "ODBCConnection"), typeof(ODBCConnection).AssemblyQualifiedName));
 			
-			return LClasses;
+			return classes;
 		}
 	}
 }

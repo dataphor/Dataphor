@@ -6,18 +6,18 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
 	public class FrameInterface : Interface, IFrameInterface
 	{
-		public FrameInterface(IFrame AFrame) : base()
+		public FrameInterface(IFrame frame) : base()
 		{
-			FFrame = AFrame;
+			_frame = frame;
 		}
 
 		// Frame
 
-		private IFrame FFrame;
+		private IFrame _frame;
 		
 		public IFrame Frame
 		{
-			get { return FFrame; }
+			get { return _frame; }
 		}
 
 		/// <remarks> Frame does nothing with the ForceAcceptReject. Vestigial of IInterface ancestry. </remarks>
@@ -44,7 +44,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		public override INode Parent
 		{
-			get { return FFrame; }
+			get { return _frame; }
 		}
 	}
 }

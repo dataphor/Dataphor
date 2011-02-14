@@ -14,29 +14,29 @@ namespace Alphora.Dataphor.DAE.Compiling
 	
 	public class StatementContext : System.Object
 	{
-		public StatementContext(StatementType AStatementType) : base()
+		public StatementContext(StatementType statementType) : base()
 		{
-			FStatementType = AStatementType;
+			_statementType = statementType;
 		}
 		
-		private StatementType FStatementType;
-		public StatementType StatementType { get { return FStatementType; } }
+		private StatementType _statementType;
+		public StatementType StatementType { get { return _statementType; } }
 	}
 	
 	public class StatementContexts : List<StatementContext> { }
 
 	public class SecurityContext : System.Object
 	{
-		public SecurityContext(Schema.User AUser) : base()
+		public SecurityContext(Schema.User user) : base()
 		{
-			FUser = AUser;
+			_user = user;
 		}
 		
-		private Schema.User FUser;
-		public Schema.User User { get { return FUser; } }
-		internal void SetUser(Schema.User AUser)
+		private Schema.User _user;
+		public Schema.User User { get { return _user; } }
+		internal void SetUser(Schema.User user)
 		{
-			FUser = AUser;
+			_user = user;
 		}
 	}
 	
@@ -45,34 +45,34 @@ namespace Alphora.Dataphor.DAE.Compiling
 	public class CursorContext : System.Object
 	{
 		public CursorContext() : base() {}
-		public CursorContext(CursorType ACursorType, CursorCapability ACapabilities, CursorIsolation AIsolation) : base()
+		public CursorContext(CursorType cursorType, CursorCapability capabilities, CursorIsolation isolation) : base()
 		{
-			FCursorType = ACursorType;
-			FCursorCapabilities = ACapabilities;
-			FCursorIsolation = AIsolation;
+			_cursorType = cursorType;
+			_cursorCapabilities = capabilities;
+			_cursorIsolation = isolation;
 		}
 		// CursorType
-		private CursorType FCursorType;
+		private CursorType _cursorType;
 		public CursorType CursorType
 		{
-			get { return FCursorType; }
-			set { FCursorType = value; }
+			get { return _cursorType; }
+			set { _cursorType = value; }
 		}
 		
 		// CursorCapabilities
-		private CursorCapability FCursorCapabilities;
+		private CursorCapability _cursorCapabilities;
 		public CursorCapability CursorCapabilities
 		{
-			get { return FCursorCapabilities; }
-			set { FCursorCapabilities = value; }
+			get { return _cursorCapabilities; }
+			set { _cursorCapabilities = value; }
 		}
 		
 		// CursorIsolation
-		private CursorIsolation FCursorIsolation;
+		private CursorIsolation _cursorIsolation;
 		public CursorIsolation CursorIsolation
 		{
-			get { return FCursorIsolation; }
-			set { FCursorIsolation = value; }
+			get { return _cursorIsolation; }
+			set { _cursorIsolation = value; }
 		}
 	}
 	

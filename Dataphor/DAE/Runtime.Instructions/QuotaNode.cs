@@ -27,66 +27,66 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator iQuota(table{}, int) : table{}    
     public class QuotaNode : UnaryTableNode
     {
-		private Schema.Order FQuotaOrder;
+		private Schema.Order _quotaOrder;
 		public Schema.Order QuotaOrder
 		{
-			get { return FQuotaOrder; }
-			set { FQuotaOrder = value; }
+			get { return _quotaOrder; }
+			set { _quotaOrder = value; }
 		}
 		
 		#if USENAMEDROWVARIABLES
-		private Schema.IRowType FQuotaRowType;
+		private Schema.IRowType _quotaRowType;
 		#endif
 		
 		// EqualNode
-		protected PlanNode FEqualNode;
+		protected PlanNode _equalNode;
 		public PlanNode EqualNode
 		{
-			get { return FEqualNode; }
-			set { FEqualNode = value; }
+			get { return _equalNode; }
+			set { _equalNode = value; }
 		}
 		
-		protected bool FEnforcePredicate = false;
+		protected bool _enforcePredicate = false;
 		public bool EnforcePredicate
 		{
-			get { return FEnforcePredicate; }
-			set { FEnforcePredicate = value; }
+			get { return _enforcePredicate; }
+			set { _enforcePredicate = value; }
 		}
 		
-		protected override void DetermineModifiers(Plan APlan)
+		protected override void DetermineModifiers(Plan plan)
 		{
-			base.DetermineModifiers(APlan);
+			base.DetermineModifiers(plan);
 			
 			if (Modifiers != null)
 				EnforcePredicate = Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "EnforcePredicate", EnforcePredicate.ToString()));
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			Nodes[0] = Compiler.EmitOrderNode(APlan, SourceNode, new Schema.Order(FQuotaOrder), true);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
-			FTableVar.InheritMetaData(SourceTableVar.MetaData);
+			DetermineModifiers(plan);
+			Nodes[0] = Compiler.EmitOrderNode(plan, SourceNode, new Schema.Order(_quotaOrder), true);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
+			_tableVar.InheritMetaData(SourceTableVar.MetaData);
 			CopyTableVarColumns(SourceTableVar.Columns);
-			DetermineRemotable(APlan);
+			DetermineRemotable(plan);
 
-			bool LQuotaOrderIncludesKey = false;			
-			foreach (Schema.Key LKey in SourceNode.TableVar.Keys)
-				if (Compiler.OrderIncludesKey(APlan, FQuotaOrder, LKey))
+			bool quotaOrderIncludesKey = false;			
+			foreach (Schema.Key key in SourceNode.TableVar.Keys)
+				if (Compiler.OrderIncludesKey(plan, _quotaOrder, key))
 				{
-					LQuotaOrderIncludesKey = true;
+					quotaOrderIncludesKey = true;
 					break;
 				}
 				
-			if (LQuotaOrderIncludesKey)
+			if (quotaOrderIncludesKey)
 			{
-				if ((Nodes[1].IsLiteral) && ((int)APlan.EvaluateLiteralArgument(Compiler.BindNode(APlan, Nodes[1]), "quota") == 1))
+				if ((Nodes[1].IsLiteral) && ((int)plan.EvaluateLiteralArgument(Compiler.BindNode(plan, Nodes[1]), "quota") == 1))
 				{
-					Schema.Key LKey = new Schema.Key();
-					LKey.IsInherited = true;
-					TableVar.Keys.Add(LKey);
+					Schema.Key key = new Schema.Key();
+					key.IsInherited = true;
+					TableVar.Keys.Add(key);
 				}
 				else
 					CopyKeys(SourceTableVar.Keys);
@@ -99,198 +99,198 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Order = CopyOrder(SourceNode.Order);
 
 			#if UseReferenceDerivation
-			CopySourceReferences(APlan, SourceTableVar.SourceReferences);
-			CopyTargetReferences(APlan, SourceTableVar.TargetReferences);
+			CopySourceReferences(plan, SourceTableVar.SourceReferences);
+			CopyTargetReferences(plan, SourceTableVar.TargetReferences);
 			#endif
 
-			APlan.EnterRowContext();
+			plan.EnterRowContext();
 			try
 			{
 				#if USENAMEDROWVARIABLES
-				FQuotaRowType = new Schema.RowType(FQuotaOrder.Columns);
-				APlan.Symbols.Push(new Symbol(Keywords.Left, FQuotaRowType));
+				_quotaRowType = new Schema.RowType(_quotaOrder.Columns);
+				plan.Symbols.Push(new Symbol(Keywords.Left, _quotaRowType));
 				#else
-				Schema.IRowType LLeftRowType = new Schema.RowType(FQuotaOrder.Columns, Keywords.Left);
-				APlan.Symbols.Push(new Symbol(String.Empty, LLeftRowType));
+				Schema.IRowType leftRowType = new Schema.RowType(FQuotaOrder.Columns, Keywords.Left);
+				APlan.Symbols.Push(new Symbol(String.Empty, leftRowType));
 				#endif
 				try
 				{
 					#if USENAMEDROWVARIABLES
-					APlan.Symbols.Push(new Symbol(Keywords.Right, FQuotaRowType));
+					plan.Symbols.Push(new Symbol(Keywords.Right, _quotaRowType));
 					#else
-					Schema.IRowType LRightRowType = new Schema.RowType(FQuotaOrder.Columns, Keywords.Right);
-					APlan.Symbols.Push(new Symbol(String.Empty, LRightRowType));
+					Schema.IRowType rightRowType = new Schema.RowType(FQuotaOrder.Columns, Keywords.Right);
+					APlan.Symbols.Push(new Symbol(String.Empty, rightRowType));
 					#endif
 					try
 					{
-						FEqualNode = 
+						_equalNode = 
 							#if USENAMEDROWVARIABLES
-							Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, Keywords.Left, Keywords.Right, FQuotaRowType.Columns, FQuotaRowType.Columns));
+							Compiler.CompileExpression(plan, Compiler.BuildRowEqualExpression(plan, Keywords.Left, Keywords.Right, _quotaRowType.Columns, _quotaRowType.Columns));
 							#else
-							Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, LLeftRowType.Columns, LRightRowType.Columns));
+							Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, leftRowType.Columns, rightRowType.Columns));
 							#endif
 					}
 					finally
 					{
-						APlan.Symbols.Pop();
+						plan.Symbols.Pop();
 					}
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 			finally
 			{
-				APlan.ExitRowContext();
+				plan.ExitRowContext();
 			}
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			base.InternalDetermineBinding(APlan);
-			APlan.EnterRowContext();
+			base.InternalDetermineBinding(plan);
+			plan.EnterRowContext();
 			try
 			{
 				#if USENAMEDROWVARIABLES
-				APlan.Symbols.Push(new Symbol(Keywords.Left, FQuotaRowType));
+				plan.Symbols.Push(new Symbol(Keywords.Left, _quotaRowType));
 				#else
 				APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(FQuotaOrder.Columns, Keywords.Left)));
 				#endif
 				try
 				{
 					#if USENAMEDROWVARIABLES
-					APlan.Symbols.Push(new Symbol(Keywords.Right, FQuotaRowType));
+					plan.Symbols.Push(new Symbol(Keywords.Right, _quotaRowType));
 					#else
 					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(FQuotaOrder.Columns, Keywords.Right)));
 					#endif
 					try
 					{
-						FEqualNode.DetermineBinding(APlan);
+						_equalNode.DetermineBinding(plan);
 					}
 					finally
 					{
-						APlan.Symbols.Pop();
+						plan.Symbols.Pop();
 					}
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 			finally
 			{
-				APlan.ExitRowContext();
+				plan.ExitRowContext();
 			}
 		}
 		
-		public override void DetermineCursorBehavior(Plan APlan)
+		public override void DetermineCursorBehavior(Plan plan)
 		{
-			FCursorType = SourceNode.CursorType;
-			FRequestedCursorType = APlan.CursorContext.CursorType;
-			FCursorCapabilities = 
+			_cursorType = SourceNode.CursorType;
+			_requestedCursorType = plan.CursorContext.CursorType;
+			_cursorCapabilities = 
 				CursorCapability.Navigable | 
 				(
-					(APlan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
+					(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
 					(SourceNode.CursorCapabilities & CursorCapability.Updateable)
 				);
-			FCursorIsolation = APlan.CursorContext.CursorIsolation;
+			_cursorIsolation = plan.CursorContext.CursorIsolation;
 			if (SourceNode.Order != null)
 				Order = CopyOrder(SourceNode.Order);
 			else
 				Order = null;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			QuotaExpression LExpression = new QuotaExpression();
-			LExpression.Expression = (Expression)Nodes[0].Nodes[0].EmitStatement(AMode);
-			LExpression.Quota = (Expression)Nodes[1].EmitStatement(AMode);
-			LExpression.HasByClause = true;
-			for (int LIndex = 0; LIndex < QuotaOrder.Columns.Count; LIndex++)
-				LExpression.Columns.Add(QuotaOrder.Columns[LIndex].EmitStatement(AMode));
-			LExpression.Modifiers = Modifiers;
-			return LExpression;
+			QuotaExpression expression = new QuotaExpression();
+			expression.Expression = (Expression)Nodes[0].Nodes[0].EmitStatement(mode);
+			expression.Quota = (Expression)Nodes[1].EmitStatement(mode);
+			expression.HasByClause = true;
+			for (int index = 0; index < QuotaOrder.Columns.Count; index++)
+				expression.Columns.Add(QuotaOrder.Columns[index].EmitStatement(mode));
+			expression.Modifiers = Modifiers;
+			return expression;
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			QuotaTable LTable = new QuotaTable(this, AProgram);
+			QuotaTable table = new QuotaTable(this, program);
 			try
 			{
-				LTable.Open();
-				return LTable;
+				table.Open();
+				return table;
 			}
 			catch
 			{
-				LTable.Dispose();
+				table.Dispose();
 				throw;
 			}								  
 		}
 		
-		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
-			if ((AColumnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(AColumnName))
-				return base.InternalDefault(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending);
+			if ((columnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(columnName))
+				return base.InternalDefault(program, oldRow, newRow, valueFlags, columnName, isDescending);
 			return false;
 		}
 		
-		protected override bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected override bool InternalChange(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
-			if ((AColumnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(AColumnName))
-				return base.InternalChange(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+			if ((columnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(columnName))
+				return base.InternalChange(program, oldRow, newRow, valueFlags, columnName);
 			return false;
 		}
 		
-		private PlanNode FValidateNode;
-		private void EnsureValidateNode(Plan APlan)
+		private PlanNode _validateNode;
+		private void EnsureValidateNode(Plan plan)
 		{
-			if (FValidateNode == null)
+			if (_validateNode == null)
 			{
-				APlan.Symbols.Push(new Symbol("ARow", TableVar.DataType.RowType));
+				plan.Symbols.Push(new Symbol("ARow", TableVar.DataType.RowType));
 				try
 				{
 					// ARow in (((table { ARow }) union <source expression>) <quota clause>)
-					QuotaExpression LQuotaExpression = (QuotaExpression)EmitStatement(EmitMode.ForCopy);
-					LQuotaExpression.Expression = new UnionExpression(new TableSelectorExpression(new Expression[]{new IdentifierExpression("ARow")}), LQuotaExpression.Expression);
-					Expression LValidateExpression = new BinaryExpression(new IdentifierExpression("ARow"), Instructions.In, LQuotaExpression);
-					FValidateNode = Compiler.BindNode(APlan, Compiler.OptimizeNode(APlan, Compiler.CompileExpression(APlan, LValidateExpression)));
+					QuotaExpression quotaExpression = (QuotaExpression)EmitStatement(EmitMode.ForCopy);
+					quotaExpression.Expression = new UnionExpression(new TableSelectorExpression(new Expression[]{new IdentifierExpression("ARow")}), quotaExpression.Expression);
+					Expression validateExpression = new BinaryExpression(new IdentifierExpression("ARow"), Instructions.In, quotaExpression);
+					_validateNode = Compiler.BindNode(plan, Compiler.OptimizeNode(plan, Compiler.CompileExpression(plan, validateExpression)));
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 		}								   
 		
-		public override void DetermineRemotable(Plan APlan)
+		public override void DetermineRemotable(Plan plan)
 		{
-			base.DetermineRemotable(APlan);
+			base.DetermineRemotable(plan);
 			
-			FTableVar.ShouldValidate = FTableVar.ShouldValidate || FEnforcePredicate;
+			_tableVar.ShouldValidate = _tableVar.ShouldValidate || _enforcePredicate;
 		}
 
-		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
-			if (FEnforcePredicate && (AColumnName == String.Empty))
+			if (_enforcePredicate && (columnName == String.Empty))
 			{
 				// ARow in (((table { ARow }) union <source expression>)) <quota clause>
-				EnsureValidateNode(AProgram.Plan);
-				PushRow(AProgram, ANewRow);
+				EnsureValidateNode(program.Plan);
+				PushRow(program, newRow);
 				try
 				{
-					object LObject = FValidateNode.Execute(AProgram);
-					if ((LObject != null) && !(bool)LObject)
+					object objectValue = _validateNode.Execute(program);
+					if ((objectValue != null) && !(bool)objectValue)
 						throw new RuntimeException(RuntimeException.Codes.RowViolatesQuotaPredicate, ErrorSeverity.User);
 				}
 				finally
 				{
-					PopRow(AProgram);
+					PopRow(program);
 				}
 			}
 
-			if ((AColumnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(AColumnName))
-				return base.InternalValidate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable);
+			if ((columnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(columnName))
+				return base.InternalValidate(program, oldRow, newRow, valueFlags, columnName, isDescending, isProposable);
 			return false;
 		}
     }

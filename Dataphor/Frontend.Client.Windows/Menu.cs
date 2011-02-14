@@ -22,24 +22,24 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// IAccelerates
 
-		private AcceleratorManager FAccelerators = new AcceleratorManager();
+		private AcceleratorManager _accelerators = new AcceleratorManager();
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
 		public AcceleratorManager Accelerators
 		{
-			get { return FAccelerators; }
+			get { return _accelerators; }
 		}
 
 		// MenuItem
 
-		protected IWindowsBarItem FMenuItem;
+		protected IWindowsBarItem _menuItem;
 		[Browsable(false)]
 		public IWindowsBarItem MenuItem
 		{
-			get { return FMenuItem; }
+			get { return _menuItem; }
 		}
 
-		private void MenuItemClicked(object ASender, EventArgs AArgs)
+		private void MenuItemClicked(object sender, EventArgs args)
 		{
 			try
 			{
@@ -61,7 +61,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			{
 				// A child is requesting our container, we better make sure we are one
 				EnsureMenuItem(true);
-				return (IWindowsBarContainer)FMenuItem;
+				return (IWindowsBarContainer)_menuItem;
 			}
 		}
 
@@ -69,7 +69,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected override void InternalUpdateVisible()
 		{
-			FMenuItem.Visible = GetVisible();
+			_menuItem.Visible = GetVisible();
 		}
 		
 		public override bool GetEnabled()
@@ -92,56 +92,56 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected override void InternalUpdateEnabled()
 		{
-			if ((FMenuItem != null) && (FMenuItem is IWindowsBarButton))
-				((IWindowsBarButton)FMenuItem).Enabled = GetEnabled();
+			if ((_menuItem != null) && (_menuItem is IWindowsBarButton))
+				((IWindowsBarButton)_menuItem).Enabled = GetEnabled();
 		}
 		
-		private string FAllocatedText;
+		private string _allocatedText;
 
 		protected void DeallocateAccelerator()
 		{
-			if (FAllocatedText != null)
+			if (_allocatedText != null)
 			{
 				if (Parent != null)
-					((IAccelerates)FindParent(typeof(IAccelerates))).Accelerators.Deallocate(FAllocatedText);
-				FAllocatedText = null;
+					((IAccelerates)FindParent(typeof(IAccelerates))).Accelerators.Deallocate(_allocatedText);
+				_allocatedText = null;
 			}
 		}
 
 		private void UpdateButtonText()
 		{
 			DeallocateAccelerator();
-			if (FMenuItem is IWindowsBarButton)
+			if (_menuItem is IWindowsBarButton)
 			{
-				FAllocatedText = ((IAccelerates)FindParent(typeof(IAccelerates))).Accelerators.Allocate(GetText(), true);;
-				((IWindowsBarButton)FMenuItem).Text = FAllocatedText;
+				_allocatedText = ((IAccelerates)FindParent(typeof(IAccelerates))).Accelerators.Allocate(GetText(), true);;
+				((IWindowsBarButton)_menuItem).Text = _allocatedText;
 			}
 		}
 
 		protected override void InternalUpdateText()
 		{
 			EnsureMenuItem(Children.Count > 0);
-			if (FMenuItem is IWindowsBarButton)
+			if (_menuItem is IWindowsBarButton)
 				UpdateButtonText();
 			else
 				DeallocateAccelerator();
 		}
 
-		protected override void InternalSetImage(System.Drawing.Image AImage)
+		protected override void InternalSetImage(System.Drawing.Image image)
 		{
-			IWindowsBarButton LButton = FMenuItem as IWindowsBarButton;
-			if (LButton != null)
-				LButton.Image = AImage;
+			IWindowsBarButton button = _menuItem as IWindowsBarButton;
+			if (button != null)
+				button.Image = image;
 		}
 
 		// Node
 
-		private void RebuildMenuItem(bool AIsContainer)
+		private void RebuildMenuItem(bool isContainer)
 		{
 			if (!Transitional)
 			{
 				RemoveMenuItem();
-				BuildMenuItem(AIsContainer);
+				BuildMenuItem(isContainer);
 				InternalUpdateEnabled();
 				InternalUpdateImage();
 				UpdateButtonText();
@@ -149,53 +149,53 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
-		private void EnsureMenuItem(bool AIsContainer)
+		private void EnsureMenuItem(bool isContainer)
 		{
 			if 
 			(
-				(AIsContainer != (FMenuItem is IWindowsBarContainer))
-					|| (!AIsContainer && ((GetText() == "-") != (FMenuItem is IWindowsBarSeparator)))
+				(isContainer != (_menuItem is IWindowsBarContainer))
+					|| (!isContainer && ((GetText() == "-") != (_menuItem is IWindowsBarSeparator)))
 			)
-				RebuildMenuItem(AIsContainer);
+				RebuildMenuItem(isContainer);
 		}
 
 		private void RemoveMenuItem()
 		{
-			if (FMenuItem != null)
+			if (_menuItem != null)
 			{
-				IWindowsMenuHost LWindowsMenuHost = (IWindowsMenuHost)FindParent(typeof(IWindowsMenuHost));
-				if (LWindowsMenuHost != null)
-					LWindowsMenuHost.MenuContainer.RemoveBarItem(FMenuItem);
-				FMenuItem.Dispose();
+				IWindowsMenuHost windowsMenuHost = (IWindowsMenuHost)FindParent(typeof(IWindowsMenuHost));
+				if (windowsMenuHost != null)
+					windowsMenuHost.MenuContainer.RemoveBarItem(_menuItem);
+				_menuItem.Dispose();
 			}
 		}
 
-		private void BuildMenuItem(bool AIsContainer)
+		private void BuildMenuItem(bool isContainer)
 		{
-			IWindowsMenuHost LWindowsMenuHost = (IWindowsMenuHost)FindParent(typeof(IWindowsMenuHost));
-			if (LWindowsMenuHost != null)
+			IWindowsMenuHost windowsMenuHost = (IWindowsMenuHost)FindParent(typeof(IWindowsMenuHost));
+			if (windowsMenuHost != null)
 			{
-				if (!AIsContainer)
+				if (!isContainer)
 					if (GetText() == "-")
-						FMenuItem = LWindowsMenuHost.MenuContainer.CreateSeparator();
+						_menuItem = windowsMenuHost.MenuContainer.CreateSeparator();
 					else
-						FMenuItem = LWindowsMenuHost.MenuContainer.CreateMenuItem(new EventHandler(MenuItemClicked));
+						_menuItem = windowsMenuHost.MenuContainer.CreateMenuItem(new EventHandler(MenuItemClicked));
 				else
-					FMenuItem = LWindowsMenuHost.MenuContainer.CreateContainer();
+					_menuItem = windowsMenuHost.MenuContainer.CreateContainer();
 				try
 				{
-					LWindowsMenuHost.MenuContainer.AddBarItem(FMenuItem, new GetPriorityHandler(GetMenuItemPriority));
+					windowsMenuHost.MenuContainer.AddBarItem(_menuItem, new GetPriorityHandler(GetMenuItemPriority));
 				}
 				catch
 				{
-					FMenuItem.Dispose();
-					FMenuItem = null;
+					_menuItem.Dispose();
+					_menuItem = null;
 					throw;
 				}
 			}
 		}
 
-		private int GetMenuItemPriority(IWindowsBarItem AItem)
+		private int GetMenuItemPriority(IWindowsBarItem item)
 		{
 			return Parent.Children.IndexOf(this);
 		}
@@ -233,11 +233,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 		
-		public override bool IsValidChild(Type AChildType)
+		public override bool IsValidChild(Type childType)
 		{
-			if (typeof(IMenu).IsAssignableFrom(AChildType))
+			if (typeof(IMenu).IsAssignableFrom(childType))
 				return true;
-			return base.IsValidChild(AChildType);
+			return base.IsValidChild(childType);
 		}
     }   
 }

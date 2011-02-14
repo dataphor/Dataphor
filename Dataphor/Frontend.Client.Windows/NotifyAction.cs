@@ -13,45 +13,45 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 {
 	public class NotifyAction : Action, INotifyAction
 	{
-		private string FTipTitle;
+		private string _tipTitle;
 		[DefaultValue("")]
 		[Description("The title to display.")]
 		public string TipTitle
 		{
-			get { return FTipTitle; }
-			set { FTipTitle = value; }
+			get { return _tipTitle; }
+			set { _tipTitle = value; }
 		}
 
-		private string FTipText;
+		private string _tipText;
 		[DefaultValue("")]
 		[Description("The text to display.")]
 		public string TipText
 		{
-			get { return FTipText; }
-			set { FTipText = value; }
+			get { return _tipText; }
+			set { _tipText = value; }
 		} 
 
-		private NotifyIcon FTipIcon;
+		private NotifyIcon _tipIcon;
 		[DefaultValue(NotifyIcon.Info)]
 		[Description("The icon to display.")]
 		public NotifyIcon TipIcon
 		{
-			get { return FTipIcon; }
-			set { FTipIcon = value; }
+			get { return _tipIcon; }
+			set { _tipIcon = value; }
 		}
 
-		public const int CDefaultTimeout = 10000000;
-		public const int CTimeoutRatio = 50000;
+		public const int DefaultTimeout = 10000000;
+		public const int TimeoutRatio = 50000;
 		private int GetTimeout()
 		{
-			if (String.IsNullOrEmpty(FTipText))
-				return CDefaultTimeout;
-			return CTimeoutRatio * FTipText.Length;
+			if (String.IsNullOrEmpty(_tipText))
+				return DefaultTimeout;
+			return TimeoutRatio * _tipText.Length;
 		}
 
-		protected override void InternalExecute(INode ASender, EventParams AParams)
+		protected override void InternalExecute(INode sender, EventParams paramsValue)
 		{
-			((Session)HostNode.Session).NotifyIcon.ShowBalloonTip(GetTimeout(), FTipTitle, FTipText, (System.Windows.Forms.ToolTipIcon)FTipIcon);
+			((Session)HostNode.Session).NotifyIcon.ShowBalloonTip(GetTimeout(), _tipTitle, _tipText, (System.Windows.Forms.ToolTipIcon)_tipIcon);
 		}
 	}
 }

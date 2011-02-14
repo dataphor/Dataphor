@@ -18,19 +18,19 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 {
 	class DAERegister
 	{
-		public const string CD4ClassDefinitionNameSpace = "System.Internet";
+		public const string D4ClassDefinitionNameSpace = "System.Internet";
 
 		public static SettingsList GetClasses()
 		{
-			SettingsList LClasses = new SettingsList();
+			SettingsList classes = new SettingsList();
 			
-			Type[] LTypes = typeof(DAERegister).Assembly.GetTypes();
+			Type[] types = typeof(DAERegister).Assembly.GetTypes();
 
-			foreach (Type LType in LTypes)
+			foreach (Type type in types)
 			{
 				// Nodes
-				if (LType.IsSubclassOf(typeof(PlanNode)))
-					LClasses.Add(new SettingsItem(String.Format("{0}.{1}", CD4ClassDefinitionNameSpace, Schema.Object.Unqualify(LType.Name)), LType.AssemblyQualifiedName));
+				if (type.IsSubclassOf(typeof(PlanNode)))
+					classes.Add(new SettingsItem(String.Format("{0}.{1}", D4ClassDefinitionNameSpace, Schema.Object.Unqualify(type.Name)), type.AssemblyQualifiedName));
 				
 				// Devices
 //				if (LType.IsSubclassOf(typeof(Schema.Device)))
@@ -49,7 +49,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 //					LClasses.Add(new SettingsItem(String.Format("{0}.{1}", CD4ClassDefinitionNameSpace, Schema.Object.Unqualify(LType.Name)), LType.AssemblyQualifiedName));
 			}
 			
-			return LClasses;
+			return classes;
 		}
 	}
 }

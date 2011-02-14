@@ -583,20 +583,20 @@ namespace Alphora.Dataphor.Frontend.Client
 	public class Request
 	{
 		/// <summary> Creates a new request for a Document. </summary>
-		public Request(string ADocument) : base()
+		public Request(string document) : base()
 		{
-			FDocument = ADocument;
+			_document = document;
 		}
 
 		// Document
 
-		private string FDocument;
+		private string _document;
 
 		/// <summary> The reference to the page.  </summary>
 		public string Document
 		{
-			get { return FDocument; }
-			set { FDocument = value; }
+			get { return _document; }
+			set { _document = value; }
 		}
 	}
 
@@ -607,9 +607,9 @@ namespace Alphora.Dataphor.Frontend.Client
 		public bool IsHandled;
 
 		/// <summary> Handle this event. </summary>
-		/// <param name="ANode"> Node that will be used to handle the event. </param>
+		/// <param name="node"> Node that will be used to handle the event. </param>
 		/// <remarks> Base implementation does nothing. </remarks>
-		public virtual void Handle(INode ANode) {}
+		public virtual void Handle(INode node) {}
 	}
 
 	/// <summary> A delegate definition for to handle name changes. (<see cref="Node.OnValidateName"/>). </summary>

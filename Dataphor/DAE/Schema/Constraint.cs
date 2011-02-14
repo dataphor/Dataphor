@@ -52,19 +52,19 @@ namespace Alphora.Dataphor.DAE.Schema
 	public abstract class Constraint : Object
     {
 		// constructor
-		public Constraint(string AName) : base(AName) {}
-		public Constraint(int AID, string AName) : base(AID, AName) {}
-		public Constraint(int AID, string AName, MetaData AMetaData) : base(AID, AName)
+		public Constraint(string name) : base(name) {}
+		public Constraint(int iD, string name) : base(iD, name) {}
+		public Constraint(int iD, string name, MetaData metaData) : base(iD, name)
 		{
-			MetaData = AMetaData;
+			MetaData = metaData;
 		}
 
 		// ConstraintType
-		private ConstraintType FConstraintType;
+		private ConstraintType _constraintType;
 		public ConstraintType ConstraintType
 		{
-			get { return FConstraintType; }
-			set { FConstraintType = value; }
+			get { return _constraintType; }
+			set { _constraintType = value; }
 		}
 		
 		// IsDeferred
@@ -88,106 +88,106 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		// Enforced
-		private bool FEnforced = true;
+		private bool _enforced = true;
 		/// <summary>Indicates whether or not the constraint is enforced.</summary>
 		/// <remarks>Set by the DAE.Enforced tag when the constraint is created.</remarks>
 		public bool Enforced
 		{
-			get { return FEnforced; }
-			set { FEnforced = value; }
+			get { return _enforced; }
+			set { _enforced = value; }
 		}
 		
-		public virtual string GetCustomMessage(Transition ATransition)
+		public virtual string GetCustomMessage(Transition transition)
 		{
-			string LMessage = MetaData.GetTag(MetaData, "DAE.Message", String.Empty);
-			if (LMessage == String.Empty)
+			string message = MetaData.GetTag(MetaData, "DAE.Message", String.Empty);
+			if (message == String.Empty)
 			{
-				LMessage = MetaData.GetTag(MetaData, "DAE.SimpleMessage", String.Empty);
-				if (LMessage != String.Empty)
-					LMessage = String.Format("\"{0}\"", LMessage);
+				message = MetaData.GetTag(MetaData, "DAE.SimpleMessage", String.Empty);
+				if (message != String.Empty)
+					message = String.Format("\"{0}\"", message);
 			}
-			return LMessage;
+			return message;
 		}
 		
-		protected abstract PlanNode GetViolationMessageNode(Program AProgram, Transition ATransition);
-		public string GetViolationMessage(Program AProgram, Transition ATransition)
+		protected abstract PlanNode GetViolationMessageNode(Program program, Transition transition);
+		public string GetViolationMessage(Program program, Transition transition)
 		{
 			try
 			{
-				PlanNode LNode = GetViolationMessageNode(AProgram, ATransition);
-				if (LNode != null)
+				PlanNode node = GetViolationMessageNode(program, transition);
+				if (node != null)
 				{
-					string LMessage = (string)LNode.Execute(AProgram);
-					if ((LMessage != String.Empty) && (LMessage[LMessage.Length - 1] != '.'))
-						LMessage = LMessage + '.';
-					return LMessage;
+					string message = (string)node.Execute(program);
+					if ((message != String.Empty) && (message[message.Length - 1] != '.'))
+						message = message + '.';
+					return message;
 				}
 				return String.Empty;
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				return String.Format("Errors occurred attempting to generate custom error message for constraint \"{0}\": {1}", Name, LException.Message);
+				return String.Format("Errors occurred attempting to generate custom error message for constraint \"{0}\": {1}", Name, exception.Message);
 			}
 		}
 		
-		public abstract void Validate(Program AProgram, Transition ATransition);
+		public abstract void Validate(Program program, Transition transition);
     }
     
     public abstract class SimpleConstraint : Constraint
     {
-		public SimpleConstraint(int AID, string AName) : base(AID, AName) {}
+		public SimpleConstraint(int iD, string name) : base(iD, name) {}
 		
 		// Expression
-		private PlanNode FNode;
+		private PlanNode _node;
 		public PlanNode Node
 		{
-			get { return FNode; }
-			set { FNode = value; }
+			get { return _node; }
+			set { _node = value; }
 		}
 		
 		// Violation
-		private PlanNode FViolationMessageNode;
+		private PlanNode _violationMessageNode;
 		public PlanNode ViolationMessageNode
 		{
-			get { return FViolationMessageNode; }
-			set { FViolationMessageNode = value; }
+			get { return _violationMessageNode; }
+			set { _violationMessageNode = value; }
 		}
 
-		protected override PlanNode GetViolationMessageNode(Program AProgram, Transition ATransition)
+		protected override PlanNode GetViolationMessageNode(Program program, Transition transition)
 		{
-			return FViolationMessageNode;
+			return _violationMessageNode;
 		}
     }
 
     public class ScalarTypeConstraint : SimpleConstraint
     {
-		public ScalarTypeConstraint(int AID, string AName) : base(AID, AName) {}
+		public ScalarTypeConstraint(int iD, string name) : base(iD, name) {}
 		
-		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.ScalarTypeConstraint"), DisplayName, FScalarType.DisplayName); } }
+		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.ScalarTypeConstraint"), DisplayName, _scalarType.DisplayName); } }
 
 		public override bool IsPersistent { get { return true; } }
 
 		[Reference]
-		internal ScalarType FScalarType;
+		internal ScalarType _scalarType;
 		public ScalarType ScalarType
 		{
-			get { return FScalarType; }
+			get { return _scalarType; }
 			set
 			{
-				if (FScalarType != null)
-					FScalarType.Constraints.Remove(this);
+				if (_scalarType != null)
+					_scalarType.Constraints.Remove(this);
 				if (value != null)
 					value.Constraints.Add(this);
 			}
 		}
 
-		public override int CatalogObjectID { get { return FScalarType == null ? -1 : FScalarType.ID; } }
+		public override int CatalogObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
 
-		public override int ParentObjectID { get { return FScalarType == null ? -1 : FScalarType.ID; } }
+		public override int ParentObjectID { get { return _scalarType == null ? -1 : _scalarType.ID; } }
 		
-		public ConstraintDefinition EmitDefinition(EmitMode AMode)
+		public ConstraintDefinition EmitDefinition(EmitMode mode)
 		{
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 			{
 				SaveObjectID();
 				SaveIsGenerated();
@@ -200,136 +200,136 @@ namespace Alphora.Dataphor.DAE.Schema
 				RemoveGeneratorID();
 			}
 
-			ConstraintDefinition LStatement = new ConstraintDefinition();
-			LStatement.ConstraintName = Name;
-			LStatement.MetaData = MetaData == null ? null : MetaData.Copy();
-			LStatement.Expression = (Expression)Node.EmitStatement(AMode);
-			return LStatement;
+			ConstraintDefinition statement = new ConstraintDefinition();
+			statement.ConstraintName = Name;
+			statement.MetaData = MetaData == null ? null : MetaData.Copy();
+			statement.Expression = (Expression)Node.EmitStatement(mode);
+			return statement;
 		}
 
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			AlterScalarTypeStatement LStatement = new AlterScalarTypeStatement();
-			LStatement.ScalarTypeName = Schema.Object.EnsureRooted(FScalarType.Name);
-			LStatement.CreateConstraints.Add(EmitDefinition(AMode));
-			return LStatement;
+			AlterScalarTypeStatement statement = new AlterScalarTypeStatement();
+			statement.ScalarTypeName = Schema.Object.EnsureRooted(_scalarType.Name);
+			statement.CreateConstraints.Add(EmitDefinition(mode));
+			return statement;
 		}
 
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			AlterScalarTypeStatement LStatement = new AlterScalarTypeStatement();
-			LStatement.ScalarTypeName = Schema.Object.EnsureRooted(FScalarType.Name);
-			LStatement.DropConstraints.Add(new DropConstraintDefinition(Name));
-			return LStatement;
+			AlterScalarTypeStatement statement = new AlterScalarTypeStatement();
+			statement.ScalarTypeName = Schema.Object.EnsureRooted(_scalarType.Name);
+			statement.DropConstraints.Add(new DropConstraintDefinition(Name));
+			return statement;
 		}
 		
-		public override void Validate(Program AProgram, Transition ATransition)
+		public override void Validate(Program program, Transition transition)
 		{
-			object LObject;
+			object objectValue;
 			try
 			{
-				LObject = Node.Execute(AProgram);
+				objectValue = Node.Execute(program);
 			}
 			catch (Exception E)
 			{
-				throw new RuntimeException(RuntimeException.Codes.ErrorValidatingTypeConstraint, E, Name, FScalarType.Name);
+				throw new RuntimeException(RuntimeException.Codes.ErrorValidatingTypeConstraint, E, Name, _scalarType.Name);
 			}
 				
-			if ((LObject != null) && !(bool)LObject)
+			if ((objectValue != null) && !(bool)objectValue)
 			{
-				string LMessage = GetViolationMessage(AProgram, ATransition);
-				if (LMessage != String.Empty)
-					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, LMessage);
+				string message = GetViolationMessage(program, transition);
+				if (message != String.Empty)
+					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, message);
 				else
-					throw new RuntimeException(RuntimeException.Codes.TypeConstraintViolation, ErrorSeverity.User, Name, FScalarType.Name);
+					throw new RuntimeException(RuntimeException.Codes.TypeConstraintViolation, ErrorSeverity.User, Name, _scalarType.Name);
 			}
 		}
     }
     
     public class TableVarColumnConstraint : SimpleConstraint
     {
-		public TableVarColumnConstraint(int AID, string AName) : base(AID, AName) {}
+		public TableVarColumnConstraint(int iD, string name) : base(iD, name) {}
 		
-		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.TableVarColumnConstraint"), DisplayName, FTableVarColumn.DisplayName, FTableVarColumn.TableVar.DisplayName); } }
+		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.TableVarColumnConstraint"), DisplayName, _tableVarColumn.DisplayName, _tableVarColumn.TableVar.DisplayName); } }
 
 		[Reference]
-		internal TableVarColumn FTableVarColumn;
+		internal TableVarColumn _tableVarColumn;
 		public TableVarColumn TableVarColumn
 		{
-			get { return FTableVarColumn; }
+			get { return _tableVarColumn; }
 			set
 			{
-				if (FTableVarColumn != null)
-					FTableVarColumn.Constraints.Remove(this);
+				if (_tableVarColumn != null)
+					_tableVarColumn.Constraints.Remove(this);
 				if (value != null)
 					value.Constraints.Add(this);
 			}
 		}
 
-		public override int CatalogObjectID { get { return FTableVarColumn == null ? -1 : FTableVarColumn.CatalogObjectID; } }
+		public override int CatalogObjectID { get { return _tableVarColumn == null ? -1 : _tableVarColumn.CatalogObjectID; } }
 
-		public override int ParentObjectID { get { return FTableVarColumn == null ? -1 : FTableVarColumn.ID; } }
+		public override int ParentObjectID { get { return _tableVarColumn == null ? -1 : _tableVarColumn.ID; } }
 		
-		public override bool IsATObject { get { return FTableVarColumn == null ? false : FTableVarColumn.IsATObject; } }
+		public override bool IsATObject { get { return _tableVarColumn == null ? false : _tableVarColumn.IsATObject; } }
 		
-		public ConstraintDefinition EmitDefinition(EmitMode AMode)
+		public ConstraintDefinition EmitDefinition(EmitMode mode)
 		{
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 				SaveObjectID();
 			else
 				RemoveObjectID();
 
-			ConstraintDefinition LStatement = new ConstraintDefinition();
-			LStatement.ConstraintName = Name;
-			LStatement.MetaData = MetaData == null ? null : MetaData.Copy();
-			LStatement.Expression = (Expression)Node.EmitStatement(AMode);
-			return LStatement;
+			ConstraintDefinition statement = new ConstraintDefinition();
+			statement.ConstraintName = Name;
+			statement.MetaData = MetaData == null ? null : MetaData.Copy();
+			statement.Expression = (Expression)Node.EmitStatement(mode);
+			return statement;
 		}
 
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{	
-			AlterTableStatement LStatement = new AlterTableStatement();
-			LStatement.TableVarName = Schema.Object.EnsureRooted(FTableVarColumn.TableVar.Name);
-			AlterColumnDefinition LDefinition = new AlterColumnDefinition();
-			LDefinition.ColumnName = FTableVarColumn.Name;
-			LDefinition.CreateConstraints.Add(EmitDefinition(AMode));
-			LStatement.AlterColumns.Add(LDefinition);
-			return LStatement;
+			AlterTableStatement statement = new AlterTableStatement();
+			statement.TableVarName = Schema.Object.EnsureRooted(_tableVarColumn.TableVar.Name);
+			AlterColumnDefinition definition = new AlterColumnDefinition();
+			definition.ColumnName = _tableVarColumn.Name;
+			definition.CreateConstraints.Add(EmitDefinition(mode));
+			statement.AlterColumns.Add(definition);
+			return statement;
 		}
 
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			if (FTableVarColumn.TableVar is BaseTableVar)
+			if (_tableVarColumn.TableVar is BaseTableVar)
 			{
-				AlterTableStatement LStatement = new AlterTableStatement();
-				LStatement.TableVarName = Schema.Object.EnsureRooted(FTableVarColumn.TableVar.Name);
-				AlterColumnDefinition LDefinition = new D4.AlterColumnDefinition();
-				LDefinition.ColumnName = FTableVarColumn.Name;
-				LDefinition.DropConstraints.Add(new DropConstraintDefinition(Name));
-				LStatement.AlterColumns.Add(LDefinition);
-				return LStatement;
+				AlterTableStatement statement = new AlterTableStatement();
+				statement.TableVarName = Schema.Object.EnsureRooted(_tableVarColumn.TableVar.Name);
+				AlterColumnDefinition definition = new D4.AlterColumnDefinition();
+				definition.ColumnName = _tableVarColumn.Name;
+				definition.DropConstraints.Add(new DropConstraintDefinition(Name));
+				statement.AlterColumns.Add(definition);
+				return statement;
 			}
 			else
 				return new Block();
 		}
 
-		public override void Validate(Program AProgram, Transition ATransition)
+		public override void Validate(Program program, Transition transition)
 		{
-			object LObject;
+			object objectValue;
 			try
 			{
-				LObject = Node.Execute(AProgram);
+				objectValue = Node.Execute(program);
 			}
 			catch (Exception E)
 			{
 				throw new RuntimeException(RuntimeException.Codes.ErrorValidatingColumnConstraint, E, Name, TableVarColumn.Name, TableVarColumn.TableVar.DisplayName);
 			}
 			
-			if ((LObject != null) && !(bool)LObject)
+			if ((objectValue != null) && !(bool)objectValue)
 			{
-				string LMessage = GetViolationMessage(AProgram, ATransition);
-				if (LMessage != String.Empty)
-					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, LMessage);
+				string message = GetViolationMessage(program, transition);
+				if (message != String.Empty)
+					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, message);
 				else
 					throw new RuntimeException(RuntimeException.Codes.ColumnConstraintViolation, ErrorSeverity.User, Name, TableVarColumn.Name, TableVarColumn.TableVar.DisplayName);
 			}
@@ -338,18 +338,18 @@ namespace Alphora.Dataphor.DAE.Schema
     
     public abstract class TableVarConstraint : Constraint
     {
-		public TableVarConstraint(string AName) : base(AName) {}
-		public TableVarConstraint(int AID, string AName) : base(AID, AName) {}
+		public TableVarConstraint(string name) : base(name) {}
+		public TableVarConstraint(int iD, string name) : base(iD, name) {}
 		
 		[Reference]
-		internal TableVar FTableVar;
+		internal TableVar _tableVar;
 		public TableVar TableVar
 		{
-			get { return FTableVar; }
+			get { return _tableVar; }
 			set
 			{
-				if (FTableVar != null)
-					FTableVar.Constraints.Remove(this);
+				if (_tableVar != null)
+					_tableVar.Constraints.Remove(this);
 				if (value != null)
 					value.Constraints.Add(this);
 			}
@@ -358,87 +358,87 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// <summary>Table var constraints are always persistent.</summary>
 		public override bool IsPersistent { get { return true; } }
 
-		public override int CatalogObjectID { get { return FTableVar == null ? -1 : FTableVar.ID; } }
+		public override int CatalogObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
 
-		public override int ParentObjectID { get { return FTableVar == null ? -1 : FTableVar.ID; } }
+		public override int ParentObjectID { get { return _tableVar == null ? -1 : _tableVar.ID; } }
 		
-		public override bool IsATObject { get { return FTableVar == null ? false : FTableVar.IsATObject; } }
+		public override bool IsATObject { get { return _tableVar == null ? false : _tableVar.IsATObject; } }
 		
-		public abstract Statement EmitDefinition(EmitMode AMode);
+		public abstract Statement EmitDefinition(EmitMode mode);
 
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 				SaveObjectID();
 			else
 				RemoveObjectID();
 
-			AlterTableVarStatement LStatement = (TableVar is BaseTableVar) ? (AlterTableVarStatement)new AlterTableStatement() : (AlterTableVarStatement)new AlterViewStatement();
-			LStatement.TableVarName = TableVar.Name;
-			LStatement.CreateConstraints.Add(EmitDefinition(AMode));
-			return LStatement;
+			AlterTableVarStatement statement = (TableVar is BaseTableVar) ? (AlterTableVarStatement)new AlterTableStatement() : (AlterTableVarStatement)new AlterViewStatement();
+			statement.TableVarName = TableVar.Name;
+			statement.CreateConstraints.Add(EmitDefinition(mode));
+			return statement;
 		}
 
 		/// <summary>Returns whether or not the constraint needs to be validated for the specified transition given the specified value flags.</summary>
-		public abstract bool ShouldValidate(BitArray AValueFlags, Transition ATransition);
+		public abstract bool ShouldValidate(BitArray valueFlags, Transition transition);
 	}
     
     public class RowConstraint : TableVarConstraint
     {
-		public RowConstraint(int AID, string AName) : base(AID, AName) {}
+		public RowConstraint(int iD, string name) : base(iD, name) {}
 		
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.RowConstraint"), DisplayName, TableVar.DisplayName); } }
 
 		// Node
-		private PlanNode FNode;
+		private PlanNode _node;
 		public PlanNode Node
 		{
-			get { return FNode; }
-			set { FNode = value; }
+			get { return _node; }
+			set { _node = value; }
 		}
 		
 		// ViolationMessageNode
-		private PlanNode FViolationMessageNode;
+		private PlanNode _violationMessageNode;
 		public PlanNode ViolationMessageNode
 		{
-			get { return FViolationMessageNode; }
-			set { FViolationMessageNode = value; }
+			get { return _violationMessageNode; }
+			set { _violationMessageNode = value; }
 		}
 		
 		// ColumnFlags
-		private BitArray FColumnFlags;
+		private BitArray _columnFlags;
 		/// <summary>If specified, indicates which columns are referenced by the constraint</summary>
 		public BitArray ColumnFlags
 		{
-			get { return FColumnFlags; }
-			set { FColumnFlags = value; }
+			get { return _columnFlags; }
+			set { _columnFlags = value; }
 		}
 		
-		public override Statement EmitDefinition(EmitMode AMode)
+		public override Statement EmitDefinition(EmitMode mode)
 		{
-			ConstraintDefinition LStatement = new ConstraintDefinition();
-			LStatement.ConstraintName = Name;
-			LStatement.MetaData = MetaData == null ? null : MetaData.Copy();
-			LStatement.Expression = (Expression)Node.EmitStatement(AMode);
-			return LStatement;
+			ConstraintDefinition statement = new ConstraintDefinition();
+			statement.ConstraintName = Name;
+			statement.MetaData = MetaData == null ? null : MetaData.Copy();
+			statement.Expression = (Expression)Node.EmitStatement(mode);
+			return statement;
 		}
 		
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			AlterTableVarStatement LStatement = FTableVar is Schema.BaseTableVar ? (AlterTableVarStatement)new AlterTableStatement() : new AlterViewStatement();
-			LStatement.TableVarName = Schema.Object.EnsureRooted(FTableVar.Name);
-			DropConstraintDefinition LDefinition = new DropConstraintDefinition(Name);
-			LStatement.DropConstraints.Add(LDefinition);
-			return LStatement;
+			AlterTableVarStatement statement = _tableVar is Schema.BaseTableVar ? (AlterTableVarStatement)new AlterTableStatement() : new AlterViewStatement();
+			statement.TableVarName = Schema.Object.EnsureRooted(_tableVar.Name);
+			DropConstraintDefinition definition = new DropConstraintDefinition(Name);
+			statement.DropConstraints.Add(definition);
+			return statement;
 		}
 		
 		/// <summary>Returns whether or not the constraint needs to be validated given the specified value flags.</summary>
-		public override bool ShouldValidate(BitArray AValueFlags, Schema.Transition ATransition)
+		public override bool ShouldValidate(BitArray valueFlags, Schema.Transition transition)
 		{
-			if ((FColumnFlags != null) && (AValueFlags != null))
+			if ((_columnFlags != null) && (valueFlags != null))
 			{
-				for (int LIndex = 0; LIndex < FColumnFlags.Length; LIndex++)
-					if (FColumnFlags[LIndex] && AValueFlags[LIndex])
+				for (int index = 0; index < _columnFlags.Length; index++)
+					if (_columnFlags[index] && valueFlags[index])
 						return true;
 				return false;
 			}
@@ -446,28 +446,28 @@ namespace Alphora.Dataphor.DAE.Schema
 			return true;
 		}
 
-		protected override PlanNode GetViolationMessageNode(Program AProgram, Transition ATransition)
+		protected override PlanNode GetViolationMessageNode(Program program, Transition transition)
 		{
-			return FViolationMessageNode;
+			return _violationMessageNode;
 		}
 
-		public override void Validate(Program AProgram, Transition ATransition)
+		public override void Validate(Program program, Transition transition)
 		{
-			object LObject;
+			object objectValue;
 			try
 			{
-				LObject = Node.Execute(AProgram);
+				objectValue = Node.Execute(program);
 			}
 			catch (Exception E)
 			{
 				throw new RuntimeException(RuntimeException.Codes.ErrorValidatingRowConstraint, E, Name, TableVar.DisplayName);
 			}
 
-			if ((LObject != null) && !(bool)LObject)
+			if ((objectValue != null) && !(bool)objectValue)
 			{
-				string LMessage = GetViolationMessage(AProgram, ATransition);
-				if (LMessage != String.Empty)
-					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, LMessage);
+				string message = GetViolationMessage(program, transition);
+				if (message != String.Empty)
+					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, message);
 				else
 					throw new RuntimeException(RuntimeException.Codes.RowConstraintViolation, ErrorSeverity.User, Name, TableVar.DisplayName);
 			}
@@ -478,175 +478,175 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class RowConstraints : Objects
     {		
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object AItem)
+		protected override void Validate(Object item)
 		{
-			if (!(AItem is RowConstraint))
+			if (!(item is RowConstraint))
 				throw new SchemaException(SchemaException.Codes.InvalidContainer, "RowConstraint");
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		#endif
 
-		public new RowConstraint this[int AIndex]
+		public new RowConstraint this[int index]
 		{
-			get { return (RowConstraint)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (RowConstraint)base[index]; }
+			set { base[index] = value; }
 		}
 
-		public new RowConstraint this[string AName]
+		public new RowConstraint this[string name]
 		{
-			get { return (RowConstraint)base[AName]; }
-			set { base[AName] = value; }
+			get { return (RowConstraint)base[name]; }
+			set { base[name] = value; }
 		}
     }
     
     public class TransitionConstraint : TableVarConstraint
     {
-		public TransitionConstraint(string AName) : base(AName) {}
-		public TransitionConstraint(int AID, string AName) : base(AID, AName) {}
+		public TransitionConstraint(string name) : base(name) {}
+		public TransitionConstraint(int iD, string name) : base(iD, name) {}
 		
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.TransitionConstraint"), DisplayName, TableVar.DisplayName); } }
 
 		// OnInsertNode
-		private PlanNode FOnInsertNode;
+		private PlanNode _onInsertNode;
 		public PlanNode OnInsertNode
 		{
-			get { return FOnInsertNode; }
-			set { FOnInsertNode = value; }
+			get { return _onInsertNode; }
+			set { _onInsertNode = value; }
 		}
 		
 		// OnInsertViolationMessageNode
-		private PlanNode FOnInsertViolationMessageNode;
+		private PlanNode _onInsertViolationMessageNode;
 		public PlanNode OnInsertViolationMessageNode
 		{
-			get { return FOnInsertViolationMessageNode; }
-			set { FOnInsertViolationMessageNode = value; }
+			get { return _onInsertViolationMessageNode; }
+			set { _onInsertViolationMessageNode = value; }
 		}
 		
 		// InsertColumnFlags
-		private BitArray FInsertColumnFlags;
+		private BitArray _insertColumnFlags;
 		/// <summary>If specified, indicates which columns are referenced by the insert constraint</summary>
 		public BitArray InsertColumnFlags
 		{
-			get { return FInsertColumnFlags; }
-			set { FInsertColumnFlags = value; }
+			get { return _insertColumnFlags; }
+			set { _insertColumnFlags = value; }
 		}
 		
 		// OnUpdateNode
-		private PlanNode FOnUpdateNode;
+		private PlanNode _onUpdateNode;
 		public PlanNode OnUpdateNode
 		{
-			get { return FOnUpdateNode; }
-			set { FOnUpdateNode = value; }
+			get { return _onUpdateNode; }
+			set { _onUpdateNode = value; }
 		}
 		
 		// OnUpdateViolationMessageNode
-		private PlanNode FOnUpdateViolationMessageNode;
+		private PlanNode _onUpdateViolationMessageNode;
 		public PlanNode OnUpdateViolationMessageNode
 		{
-			get { return FOnUpdateViolationMessageNode; }
-			set { FOnUpdateViolationMessageNode = value; }
+			get { return _onUpdateViolationMessageNode; }
+			set { _onUpdateViolationMessageNode = value; }
 		}
 		
 		// UpdateColumnFlags
-		private BitArray FUpdateColumnFlags;
+		private BitArray _updateColumnFlags;
 		/// <summary>If specified, indicates which columns are referenced by the update constraint</summary>
 		public BitArray UpdateColumnFlags
 		{
-			get { return FUpdateColumnFlags; }
-			set { FUpdateColumnFlags = value; }
+			get { return _updateColumnFlags; }
+			set { _updateColumnFlags = value; }
 		}
 		
 		// OnDeleteNode
-		private PlanNode FOnDeleteNode;
+		private PlanNode _onDeleteNode;
 		public PlanNode OnDeleteNode
 		{
-			get { return FOnDeleteNode; }
-			set { FOnDeleteNode = value; }
+			get { return _onDeleteNode; }
+			set { _onDeleteNode = value; }
 		}
 		
 		// OnDeleteViolationMessageNode
-		private PlanNode FOnDeleteViolationMessageNode;
+		private PlanNode _onDeleteViolationMessageNode;
 		public PlanNode OnDeleteViolationMessageNode
 		{
-			get { return FOnDeleteViolationMessageNode; }
-			set { FOnDeleteViolationMessageNode = value; }
+			get { return _onDeleteViolationMessageNode; }
+			set { _onDeleteViolationMessageNode = value; }
 		}
 		
 		// DeleteColumnFlags
-		private BitArray FDeleteColumnFlags;
+		private BitArray _deleteColumnFlags;
 		/// <summary>If specified, indicates which columns are referenced by the delete constraint</summary>
 		public BitArray DeleteColumnFlags
 		{
-			get { return FDeleteColumnFlags; }
-			set { FDeleteColumnFlags = value; }
+			get { return _deleteColumnFlags; }
+			set { _deleteColumnFlags = value; }
 		}
 		
-		public override Statement EmitDefinition(EmitMode AMode)
+		public override Statement EmitDefinition(EmitMode mode)
 		{
-			TransitionConstraintDefinition LStatement = new TransitionConstraintDefinition();
-			LStatement.ConstraintName = Name;
-			LStatement.MetaData = MetaData == null ? null : MetaData.Copy();
-			if (FOnInsertNode != null)
-				LStatement.OnInsertExpression = (Expression)FOnInsertNode.EmitStatement(AMode);
-			if (FOnUpdateNode != null)
-				LStatement.OnUpdateExpression = (Expression)FOnUpdateNode.EmitStatement(AMode);
-			if (FOnDeleteNode != null)
-				LStatement.OnDeleteExpression = (Expression)FOnDeleteNode.EmitStatement(AMode);
-			return LStatement;
+			TransitionConstraintDefinition statement = new TransitionConstraintDefinition();
+			statement.ConstraintName = Name;
+			statement.MetaData = MetaData == null ? null : MetaData.Copy();
+			if (_onInsertNode != null)
+				statement.OnInsertExpression = (Expression)_onInsertNode.EmitStatement(mode);
+			if (_onUpdateNode != null)
+				statement.OnUpdateExpression = (Expression)_onUpdateNode.EmitStatement(mode);
+			if (_onDeleteNode != null)
+				statement.OnDeleteExpression = (Expression)_onDeleteNode.EmitStatement(mode);
+			return statement;
 		}
 		
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			AlterTableVarStatement LStatement = FTableVar is Schema.BaseTableVar ? (AlterTableVarStatement)new AlterTableStatement() : new AlterViewStatement();
-			LStatement.TableVarName = Schema.Object.EnsureRooted(FTableVar.Name);
-			DropConstraintDefinition LDefinition = new DropConstraintDefinition(Name);
-			LDefinition.IsTransition = true;
-			LStatement.DropConstraints.Add(LDefinition);
-			return LStatement;
+			AlterTableVarStatement statement = _tableVar is Schema.BaseTableVar ? (AlterTableVarStatement)new AlterTableStatement() : new AlterViewStatement();
+			statement.TableVarName = Schema.Object.EnsureRooted(_tableVar.Name);
+			DropConstraintDefinition definition = new DropConstraintDefinition(Name);
+			definition.IsTransition = true;
+			statement.DropConstraints.Add(definition);
+			return statement;
 		}
 		
-		public override string GetCustomMessage(Transition ATransition)
+		public override string GetCustomMessage(Transition transition)
 		{
-			string LMessage = MetaData.GetTag(MetaData, String.Format("DAE.{0}.Message", ATransition.ToString()), MetaData.GetTag(MetaData, "DAE.Message", String.Empty));
-			if (LMessage == String.Empty)
+			string message = MetaData.GetTag(MetaData, String.Format("DAE.{0}.Message", transition.ToString()), MetaData.GetTag(MetaData, "DAE.Message", String.Empty));
+			if (message == String.Empty)
 			{
-				LMessage = MetaData.GetTag(MetaData, String.Format("DAE.{0}.SimpleMessage", ATransition.ToString()), MetaData.GetTag(MetaData, "DAE.SimpleMessage", String.Empty));
-				if (LMessage != String.Empty)
-					LMessage = String.Format("\"{0}\"", LMessage);
+				message = MetaData.GetTag(MetaData, String.Format("DAE.{0}.SimpleMessage", transition.ToString()), MetaData.GetTag(MetaData, "DAE.SimpleMessage", String.Empty));
+				if (message != String.Empty)
+					message = String.Format("\"{0}\"", message);
 			}
-			return LMessage;
+			return message;
 		}
 
 		/// <summary>Returns whether or not the constraint needs to be validated given the specified value flags.</summary>
-		public override bool ShouldValidate(BitArray AValueFlags, Schema.Transition ATransition)
+		public override bool ShouldValidate(BitArray valueFlags, Schema.Transition transition)
 		{
-			switch (ATransition)
+			switch (transition)
 			{
 				case Transition.Insert :
-					if ((FInsertColumnFlags != null) && (AValueFlags != null))
+					if ((_insertColumnFlags != null) && (valueFlags != null))
 					{
-						for (int LIndex = 0; LIndex < FInsertColumnFlags.Length; LIndex++)
-							if (FInsertColumnFlags[LIndex] && AValueFlags[LIndex])
+						for (int index = 0; index < _insertColumnFlags.Length; index++)
+							if (_insertColumnFlags[index] && valueFlags[index])
 								return true;
 						return false;
 					}
 					return true;
 				
 				case Transition.Update :
-					if ((FUpdateColumnFlags != null) && (AValueFlags != null))
+					if ((_updateColumnFlags != null) && (valueFlags != null))
 					{
-						for (int LIndex = 0; LIndex < FUpdateColumnFlags.Length; LIndex++)
-							if (FUpdateColumnFlags[LIndex] && AValueFlags[LIndex])
+						for (int index = 0; index < _updateColumnFlags.Length; index++)
+							if (_updateColumnFlags[index] && valueFlags[index])
 								return true;
 						return false;
 					}
 					return true;
 				
 				case Transition.Delete :
-					if ((FDeleteColumnFlags != null) && (AValueFlags != null))
+					if ((_deleteColumnFlags != null) && (valueFlags != null))
 					{
-						for (int LIndex = 0; LIndex < FDeleteColumnFlags.Length; LIndex++)
-							if (FDeleteColumnFlags[LIndex] && AValueFlags[LIndex])
+						for (int index = 0; index < _deleteColumnFlags.Length; index++)
+							if (_deleteColumnFlags[index] && valueFlags[index])
 								return true;
 						return false;
 					}
@@ -656,37 +656,37 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 
-		protected override PlanNode GetViolationMessageNode(Program AProgram, Transition ATransition)
+		protected override PlanNode GetViolationMessageNode(Program program, Transition transition)
 		{
-			switch (ATransition)
+			switch (transition)
 			{
-				case Transition.Insert: return FOnInsertViolationMessageNode;
-				case Transition.Update: return FOnUpdateViolationMessageNode;
-				case Transition.Delete: return FOnDeleteViolationMessageNode;
+				case Transition.Insert: return _onInsertViolationMessageNode;
+				case Transition.Update: return _onUpdateViolationMessageNode;
+				case Transition.Delete: return _onDeleteViolationMessageNode;
 			}
 			return null;
 		}
 
-		public override void Validate(Program AProgram, Transition ATransition)
+		public override void Validate(Program program, Transition transition)
 		{
-			object LObject;
-			switch (ATransition)
+			object objectValue;
+			switch (transition)
 			{
 				case Transition.Insert :
 					try
 					{
-						LObject = OnInsertNode.Execute(AProgram);
+						objectValue = OnInsertNode.Execute(program);
 					}
 					catch (Exception E)
 					{
 						throw new RuntimeException(RuntimeException.Codes.ErrorValidatingInsertConstraint, E, Name, TableVar.DisplayName);
 					}
 					
-					if ((LObject != null) && !(bool)LObject)
+					if ((objectValue != null) && !(bool)objectValue)
 					{
-						string LMessage = GetViolationMessage(AProgram, ATransition);
-						if (LMessage != String.Empty)
-							throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, LMessage);
+						string message = GetViolationMessage(program, transition);
+						if (message != String.Empty)
+							throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, message);
 						else
 							throw new RuntimeException(RuntimeException.Codes.InsertConstraintViolation, ErrorSeverity.User, Name, TableVar.DisplayName);
 					}
@@ -695,18 +695,18 @@ namespace Alphora.Dataphor.DAE.Schema
 				case Transition.Update :
 					try
 					{
-						LObject = OnUpdateNode.Execute(AProgram);
+						objectValue = OnUpdateNode.Execute(program);
 					}
 					catch (Exception E)
 					{
 						throw new RuntimeException(RuntimeException.Codes.ErrorValidatingUpdateConstraint, E, Name, TableVar.DisplayName);
 					}
 
-					if ((LObject != null) && !(bool)LObject)
+					if ((objectValue != null) && !(bool)objectValue)
 					{
-						string LMessage = GetViolationMessage(AProgram, ATransition);
-						if (LMessage != String.Empty)
-							throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, LMessage);
+						string message = GetViolationMessage(program, transition);
+						if (message != String.Empty)
+							throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, message);
 						else
 							throw new RuntimeException(RuntimeException.Codes.UpdateConstraintViolation, ErrorSeverity.User, Name, TableVar.DisplayName);
 					}
@@ -715,18 +715,18 @@ namespace Alphora.Dataphor.DAE.Schema
 				case Transition.Delete :
 					try
 					{
-						LObject = OnDeleteNode.Execute(AProgram);
+						objectValue = OnDeleteNode.Execute(program);
 					}
 					catch (Exception E)
 					{
 						throw new RuntimeException(RuntimeException.Codes.ErrorValidatingDeleteConstraint, E, Name, TableVar.DisplayName);
 					}
 					
-					if ((LObject != null) && !(bool)LObject)
+					if ((objectValue != null) && !(bool)objectValue)
 					{
-						string LMessage = GetViolationMessage(AProgram, ATransition);
-						if (LMessage != String.Empty)
-							throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, LMessage);
+						string message = GetViolationMessage(program, transition);
+						if (message != String.Empty)
+							throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, message);
 						else
 							throw new RuntimeException(RuntimeException.Codes.DeleteConstraintViolation, ErrorSeverity.User, Name, TableVar.DisplayName);
 					}
@@ -739,24 +739,24 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class TransitionConstraints : Objects
     {		
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object AItem)
+		protected override void Validate(Object item)
 		{
-			if (!(AItem is TransitionConstraint))
+			if (!(item is TransitionConstraint))
 				throw new SchemaException(SchemaException.Codes.InvalidContainer, "TransitionConstraint");
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		#endif
 
-		public new TransitionConstraint this[int AIndex]
+		public new TransitionConstraint this[int index]
 		{
-			get { return (TransitionConstraint)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (TransitionConstraint)base[index]; }
+			set { base[index] = value; }
 		}
 
-		public new TransitionConstraint this[string AName]
+		public new TransitionConstraint this[string name]
 		{
-			get { return (TransitionConstraint)base[AName]; }
-			set { base[AName] = value; }
+			get { return (TransitionConstraint)base[name]; }
+			set { base[name] = value; }
 		}
     }
 
@@ -764,200 +764,200 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class Constraints : Objects
     {		
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object AItem)
+		protected override void Validate(Object item)
 		{
-			if (!(AItem is Constraint))
+			if (!(item is Constraint))
 				throw new SchemaException(SchemaException.Codes.ConstraintContainer);
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		#endif
 
-		public new Constraint this[int AIndex]
+		public new Constraint this[int index]
 		{
-			get { return (Constraint)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (Constraint)base[index]; }
+			set { base[index] = value; }
 		}
 
-		public new Constraint this[string AName]
+		public new Constraint this[string name]
 		{
-			get { return (Constraint)base[AName]; }
-			set { base[AName] = value; }
+			get { return (Constraint)base[name]; }
+			set { base[name] = value; }
 		}
     }
     
     public class ScalarTypeConstraints : Objects
     {
-		public ScalarTypeConstraints(ScalarType AScalarType) : base()
+		public ScalarTypeConstraints(ScalarType scalarType) : base()
 		{
-			FScalarType = AScalarType;
+			_scalarType = scalarType;
 		}
 		
 		[Reference]
-		private ScalarType FScalarType;
-		public ScalarType ScalarType { get { return FScalarType; } }
+		private ScalarType _scalarType;
+		public ScalarType ScalarType { get { return _scalarType; } }
 		
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object AItem)
+		protected override void Validate(Object item)
 		{
-			if (!(AItem is ScalarTypeConstraint))
+			if (!(item is ScalarTypeConstraint))
 				throw new SchemaException(SchemaException.Codes.InvalidContainer, "ScalarTypeConstraint");
-			base.Validate(AItem);
-			FScalarType.ValidateChildObjectName(AItem.Name);
+			base.Validate(item);
+			_scalarType.ValidateChildObjectName(item.Name);
 		}
 		#endif
 		
-		protected override void Adding(Object AItem, int AIndex)
+		protected override void Adding(Object item, int index)
 		{
-			base.Adding(AItem, AIndex);
-			((ScalarTypeConstraint)AItem).FScalarType = FScalarType;
+			base.Adding(item, index);
+			((ScalarTypeConstraint)item)._scalarType = _scalarType;
 		}
 		
-		protected override void Removing(Object AItem, int AIndex)
+		protected override void Removing(Object item, int index)
 		{
-			((ScalarTypeConstraint)AItem).FScalarType = null;
-			base.Removing(AItem, AIndex);
+			((ScalarTypeConstraint)item)._scalarType = null;
+			base.Removing(item, index);
 		}
 		
-		public new ScalarTypeConstraint this[int AIndex]
+		public new ScalarTypeConstraint this[int index]
 		{
-			get { return (ScalarTypeConstraint)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (ScalarTypeConstraint)base[index]; }
+			set { base[index] = value; }
 		}
 		
-		public new ScalarTypeConstraint this[string AName]
+		public new ScalarTypeConstraint this[string name]
 		{
-			get { return (ScalarTypeConstraint)base[AName]; }
-			set { base[AName] = value; }
+			get { return (ScalarTypeConstraint)base[name]; }
+			set { base[name] = value; }
 		}
     }
 
     public class TableVarColumnConstraints : Objects
     {
-		public TableVarColumnConstraints(TableVarColumn ATableVarColumn) : base()
+		public TableVarColumnConstraints(TableVarColumn tableVarColumn) : base()
 		{
-			FTableVarColumn = ATableVarColumn;
+			_tableVarColumn = tableVarColumn;
 		}
 		
 		[Reference]
-		private TableVarColumn FTableVarColumn;
-		public TableVarColumn TableVarColumn { get { return FTableVarColumn; } }
+		private TableVarColumn _tableVarColumn;
+		public TableVarColumn TableVarColumn { get { return _tableVarColumn; } }
 		
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object AItem)
+		protected override void Validate(Object item)
 		{
-			if (!(AItem is TableVarColumnConstraint))
+			if (!(item is TableVarColumnConstraint))
 				throw new SchemaException(SchemaException.Codes.InvalidContainer, "TableVarColumnConstraint");
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		#endif
 		
-		protected override void Adding(Object AItem, int AIndex)
+		protected override void Adding(Object item, int index)
 		{
-			base.Adding(AItem, AIndex);
-			((TableVarColumnConstraint)AItem).FTableVarColumn = FTableVarColumn;
-			FTableVarColumn.ConstraintsAdding(this, AItem);
+			base.Adding(item, index);
+			((TableVarColumnConstraint)item)._tableVarColumn = _tableVarColumn;
+			_tableVarColumn.ConstraintsAdding(this, item);
 		}
 		
-		protected override void Removing(Object AItem, int AIndex)
+		protected override void Removing(Object item, int index)
 		{
-			FTableVarColumn.ConstraintsRemoving(this, AItem);
-			((TableVarColumnConstraint)AItem).FTableVarColumn = null;
-			base.Removing(AItem, AIndex);
+			_tableVarColumn.ConstraintsRemoving(this, item);
+			((TableVarColumnConstraint)item)._tableVarColumn = null;
+			base.Removing(item, index);
 		}
 		
-		public new TableVarColumnConstraint this[int AIndex]
+		public new TableVarColumnConstraint this[int index]
 		{
-			get { return (TableVarColumnConstraint)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (TableVarColumnConstraint)base[index]; }
+			set { base[index] = value; }
 		}
 		
-		public new TableVarColumnConstraint this[string AName]
+		public new TableVarColumnConstraint this[string name]
 		{
-			get { return (TableVarColumnConstraint)base[AName]; }
-			set { base[AName] = value; }
+			get { return (TableVarColumnConstraint)base[name]; }
+			set { base[name] = value; }
 		}
     }
 
     public class TableVarConstraints : Objects
     {
-		public TableVarConstraints(TableVar ATableVar) : base()
+		public TableVarConstraints(TableVar tableVar) : base()
 		{
-			FTableVar = ATableVar;
+			_tableVar = tableVar;
 		}
 		
 		[Reference]
-		private TableVar FTableVar;
-		public TableVar TableVar { get { return FTableVar; } }
+		private TableVar _tableVar;
+		public TableVar TableVar { get { return _tableVar; } }
 		
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object AItem)
+		protected override void Validate(Object item)
 		{
-			if (!(AItem is TableVarConstraint))
+			if (!(item is TableVarConstraint))
 				throw new SchemaException(SchemaException.Codes.InvalidContainer, "TableVarConstraint");
-			base.Validate(AItem);
-			FTableVar.ValidateChildObjectName(AItem.Name);
+			base.Validate(item);
+			_tableVar.ValidateChildObjectName(item.Name);
 		}
 		#endif
 		
-		protected override void Adding(Object AItem, int AIndex)
+		protected override void Adding(Object item, int index)
 		{
-			base.Adding(AItem, AIndex);
-			((TableVarConstraint)AItem).FTableVar = FTableVar;
-			FTableVar.ResetHasDeferredConstraintsComputed();
+			base.Adding(item, index);
+			((TableVarConstraint)item)._tableVar = _tableVar;
+			_tableVar.ResetHasDeferredConstraintsComputed();
 		}
 		
-		protected override void Removing(Object AItem, int AIndex)
+		protected override void Removing(Object item, int index)
 		{
-			((TableVarConstraint)AItem).FTableVar = null;
-			base.Removing(AItem, AIndex);
-			FTableVar.ResetHasDeferredConstraintsComputed();
+			((TableVarConstraint)item)._tableVar = null;
+			base.Removing(item, index);
+			_tableVar.ResetHasDeferredConstraintsComputed();
 		}
 		
-		public new TableVarConstraint this[int AIndex]
+		public new TableVarConstraint this[int index]
 		{
-			get { return (TableVarConstraint)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (TableVarConstraint)base[index]; }
+			set { base[index] = value; }
 		}
 		
-		public new TableVarConstraint this[string AName]
+		public new TableVarConstraint this[string name]
 		{
-			get { return (TableVarConstraint)base[AName]; }
-			set { base[AName] = value; }
+			get { return (TableVarConstraint)base[name]; }
+			set { base[name] = value; }
 		}
     }
 
     public class CatalogConstraint : CatalogObject
     {
 		// constructor
-		public CatalogConstraint(string AName) : base(AName) {}
-		public CatalogConstraint(int AID, string AName) : base(AID, AName) {}
-		public CatalogConstraint(int AID, string AName, PlanNode ANode) : base(AID, AName)
+		public CatalogConstraint(string name) : base(name) {}
+		public CatalogConstraint(int iD, string name) : base(iD, name) {}
+		public CatalogConstraint(int iD, string name, PlanNode node) : base(iD, name)
 		{
-			FNode = ANode;
+			_node = node;
 		}
 		
-		public CatalogConstraint(int AID, string AName, MetaData AMetaData, PlanNode ANode) : base(AID, AName)
+		public CatalogConstraint(int iD, string name, MetaData metaData, PlanNode node) : base(iD, name)
 		{
-			MetaData = AMetaData;
-			FNode = ANode;
+			MetaData = metaData;
+			_node = node;
 		}
 
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.CatalogConstraint"), DisplayName); } }
 
 		// Expression
-		private PlanNode FNode;
+		private PlanNode _node;
 		public PlanNode Node
 		{
-			get { return FNode; }
-			set { FNode = value; }
+			get { return _node; }
+			set { _node = value; }
 		}
 		
 		// ViolationMessage
-		private PlanNode FViolationMessageNode;
+		private PlanNode _violationMessageNode;
 		public PlanNode ViolationMessageNode 
 		{ 
-			get { return FViolationMessageNode; } 
-			set { FViolationMessageNode = value; } 
+			get { return _violationMessageNode; } 
+			set { _violationMessageNode = value; } 
 		}
 		
 		// ConstraintType
@@ -968,13 +968,13 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 
 		// Enforced
-		private bool FEnforced = true;
+		private bool _enforced = true;
 		/// <summary>Indicates whether or not the constraint is enforced.</summary>
 		/// <remarks>Set by the DAE.Enforced tag when the constraint is created.</remarks>
 		public bool Enforced
 		{
-			get { return FEnforced; }
-			set { FEnforced = value; }
+			get { return _enforced; }
+			set { _enforced = value; }
 		}
 		
 		// IsDeferred
@@ -997,33 +997,33 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			if (AMode == EmitMode.ForStorage)
+			if (mode == EmitMode.ForStorage)
 				SaveObjectID();
 			else
 				RemoveObjectID();
 
-			CreateConstraintStatement LStatement = new CreateConstraintStatement();
+			CreateConstraintStatement statement = new CreateConstraintStatement();
 			if (SessionObjectName != null)
 			{
-				LStatement.IsSession = true;
-				LStatement.ConstraintName = Schema.Object.EnsureRooted(SessionObjectName);
+				statement.IsSession = true;
+				statement.ConstraintName = Schema.Object.EnsureRooted(SessionObjectName);
 			}
 			else
-				LStatement.ConstraintName = Schema.Object.EnsureRooted(Name);
-			LStatement.MetaData = MetaData == null ? new MetaData() : MetaData.Copy();
+				statement.ConstraintName = Schema.Object.EnsureRooted(Name);
+			statement.MetaData = MetaData == null ? new MetaData() : MetaData.Copy();
 			if (SessionObjectName != null)
-				LStatement.MetaData.Tags.AddOrUpdate("DAE.GlobalObjectName", Name, true);
-			LStatement.Expression = (Expression)Node.EmitStatement(AMode);
-			return LStatement;
+				statement.MetaData.Tags.AddOrUpdate("DAE.GlobalObjectName", Name, true);
+			statement.Expression = (Expression)Node.EmitStatement(mode);
+			return statement;
 		}
 		
-		public override Statement EmitDropStatement(EmitMode AMode)
+		public override Statement EmitDropStatement(EmitMode mode)
 		{
-			DropConstraintStatement LStatement = new DropConstraintStatement();
-			LStatement.ConstraintName = Schema.Object.EnsureRooted(Name);
-			return LStatement;
+			DropConstraintStatement statement = new DropConstraintStatement();
+			statement.ConstraintName = Schema.Object.EnsureRooted(Name);
+			return statement;
 		}
 
 		public override string[] GetRights()
@@ -1037,52 +1037,52 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public string GetCustomMessage()
 		{
-			string LMessage = MetaData.GetTag(MetaData, "DAE.Message", String.Empty);
-			if (LMessage == String.Empty)
+			string message = MetaData.GetTag(MetaData, "DAE.Message", String.Empty);
+			if (message == String.Empty)
 			{
-				LMessage = MetaData.GetTag(MetaData, "DAE.SimpleMessage", String.Empty);
-				if (LMessage != String.Empty)
-					LMessage = String.Format("\"{0}\"", LMessage);
+				message = MetaData.GetTag(MetaData, "DAE.SimpleMessage", String.Empty);
+				if (message != String.Empty)
+					message = String.Format("\"{0}\"", message);
 			}
-			return LMessage;
+			return message;
 		}
 		
-		public string GetViolationMessage(Program AProgram)
+		public string GetViolationMessage(Program program)
 		{
 			try
 			{
-				if (FViolationMessageNode != null)
+				if (_violationMessageNode != null)
 				{
-					string LMessage = (string)FViolationMessageNode.Execute(AProgram);
-					if ((LMessage != String.Empty) && (LMessage[LMessage.Length - 1] != '.'))
-						LMessage = LMessage + '.';
-					return LMessage;
+					string message = (string)_violationMessageNode.Execute(program);
+					if ((message != String.Empty) && (message[message.Length - 1] != '.'))
+						message = message + '.';
+					return message;
 				}
 				return String.Empty;
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				return String.Format("Errors occurred attempting to generate custom error message for constraint \"{0}\": {1}", Name, LException.Message);
+				return String.Format("Errors occurred attempting to generate custom error message for constraint \"{0}\": {1}", Name, exception.Message);
 			}
 		}
 		
-		public void Validate(Program AProgram)
+		public void Validate(Program program)
 		{
-			object LObject;
+			object objectValue;
 			try
 			{
-				LObject = Node.Execute(AProgram);
+				objectValue = Node.Execute(program);
 			}
 			catch (Exception E)
 			{
 				throw new RuntimeException(RuntimeException.Codes.ErrorValidatingCatalogConstraint, E, Name);
 			}
 			
-			if ((LObject != null) && !(bool)LObject)
+			if ((objectValue != null) && !(bool)objectValue)
 			{
-				string LMessage = GetViolationMessage(AProgram);
-				if (LMessage != String.Empty)
-					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, LMessage);
+				string message = GetViolationMessage(program);
+				if (message != String.Empty)
+					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, message);
 				else
 					throw new RuntimeException(RuntimeException.Codes.CatalogConstraintViolation, ErrorSeverity.User, DisplayName);
 			}
@@ -1093,24 +1093,24 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class CatalogConstraints : Objects
     {		
 		#if USEOBJECTVALIDATE
-		protected override void Validate(Object AItem)
+		protected override void Validate(Object item)
 		{
-			if (!(AItem is CatalogConstraint))
+			if (!(item is CatalogConstraint))
 				throw new SchemaException(SchemaException.Codes.InvalidContainer, "CatalogConstraint");
-			base.Validate(AItem);
+			base.Validate(item);
 		}
 		#endif
 
-		public new CatalogConstraint this[int AIndex]
+		public new CatalogConstraint this[int index]
 		{
-			get { return (CatalogConstraint)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (CatalogConstraint)base[index]; }
+			set { base[index] = value; }
 		}
 
-		public new CatalogConstraint this[string AName]
+		public new CatalogConstraint this[string name]
 		{
-			get { return (CatalogConstraint)base[AName]; }
-			set { base[AName] = value; }
+			get { return (CatalogConstraint)base[name]; }
+			set { base[name] = value; }
 		}
     }
 }

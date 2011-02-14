@@ -21,8 +21,8 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 		{
 			SuspendLayout();
 			Dock = DockStyle.Fill;
-			FGuage = new DepthGuage();
-			Controls.Add(FGuage);
+			_guage = new DepthGuage();
+			Controls.Add(_guage);
 			ResumeLayout(false);
 		}
 
@@ -30,10 +30,10 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 		{
 			try
 			{
-				if (FSurfaceStack != null)
+				if (_surfaceStack != null)
 				{
 					PopAll();
-					FSurfaceStack = null;
+					_surfaceStack = null;
 				}
 			}
 			finally
@@ -52,36 +52,36 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 				OnModified(this, EventArgs.Empty);
 		}
 
-		private DepthGuage FGuage;
+		private DepthGuage _guage;
 
 		#region Surfaces
 
-		private ArrayList FSurfaceStack = new ArrayList(4);
+		private ArrayList _surfaceStack = new ArrayList(4);
 		
 		/// <summary> Zooms in, replacing currently displayed surface with the specified one. </summary>
-		public void Push(Surface ASurface, string ATitle)
+		public void Push(Surface surface, string title)
 		{
 			SuspendLayout();
 			
 			// Hide the old surface
-			if (FSurfaceStack.Count >= 1)
+			if (_surfaceStack.Count >= 1)
 			{
-				Surface LSurface = (Surface)FSurfaceStack[FSurfaceStack.Count - 1];
-				LSurface.RememberActive();
-				LSurface.Hide();
+				Surface localSurface = (Surface)_surfaceStack[_surfaceStack.Count - 1];
+				localSurface.RememberActive();
+				localSurface.Hide();
 			}
 
 			// Show the new surface
-			ASurface.Visible = true;
-			Controls.Add(ASurface);
-			ASurface.BringToFront();
-			if (ASurface.ActiveControl == null)
-				ASurface.SelectNextControl(null, true, true, true, true);
-			ASurface.Focus();
-			FSurfaceStack.Add(ASurface);
+			surface.Visible = true;
+			Controls.Add(surface);
+			surface.BringToFront();
+			if (surface.ActiveControl == null)
+				surface.SelectNextControl(null, true, true, true, true);
+			surface.Focus();
+			_surfaceStack.Add(surface);
 
 			// Add the new item to the depth guage
-			FGuage.Items.Add(ATitle);
+			_guage.Items.Add(title);
 
 			ResumeLayout(true);
 		}
@@ -89,27 +89,27 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 		/// <summary> Zooms out, making to previous surface displayed while disposing the current. </summary>
 		public void Pop()
 		{
-			if (FSurfaceStack.Count >= 1)
+			if (_surfaceStack.Count >= 1)
 			{
 				SuspendLayout();
 
 				// Ready the old surface
-				Surface LSurface;
-				if (FSurfaceStack.Count > 1)
+				Surface surface;
+				if (_surfaceStack.Count > 1)
 				{
-					LSurface = (Surface)FSurfaceStack[FSurfaceStack.Count - 2];
-					LSurface.RecallActive();
-					LSurface.Show();
-					LSurface.Focus();
+					surface = (Surface)_surfaceStack[_surfaceStack.Count - 2];
+					surface.RecallActive();
+					surface.Show();
+					surface.Focus();
 				}
 
 				// Drop the current surface
-				LSurface = (Surface)FSurfaceStack[FSurfaceStack.Count - 1];
-				FSurfaceStack.Remove(LSurface);
-				LSurface.Dispose();
+				surface = (Surface)_surfaceStack[_surfaceStack.Count - 1];
+				_surfaceStack.Remove(surface);
+				surface.Dispose();
 
 				// Remove the entry from the guage
-				FGuage.Items.RemoveAt(FGuage.Items.Count - 1);
+				_guage.Items.RemoveAt(_guage.Items.Count - 1);
 				
 				ResumeLayout(true);
 			}
@@ -117,30 +117,30 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 
 		public void PopAll()
 		{
-			while (FSurfaceStack.Count > 0)
+			while (_surfaceStack.Count > 0)
 				Pop();
 		}
 
 		public void PopAllButTop()
 		{
-			while (FSurfaceStack.Count > 1)
+			while (_surfaceStack.Count > 1)
 				Pop();
 		}
 
 		/// <summary> The currently displayed surface. </summary>
 		public Surface ActiveSurface
 		{
-			get { return (Surface)FSurfaceStack[FSurfaceStack.Count - 1]; }
+			get { return (Surface)_surfaceStack[_surfaceStack.Count - 1]; }
 		}
 
 		#endregion
 
 		#region Painting
 
-		protected override void OnPaintBackground(PaintEventArgs AArgs)
+		protected override void OnPaintBackground(PaintEventArgs args)
 		{
 			if (DesignMode)
-				base.OnPaintBackground(AArgs);
+				base.OnPaintBackground(args);
 			// Optimization: because the background of page will always be 
 			// covered by a surface, don't paint it.
 		}
@@ -149,9 +149,9 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 
 		#region Keyboard handling
 
-		protected override bool ProcessDialogChar(char AChar)
+		protected override bool ProcessDialogChar(char charValue)
 		{
-			switch (AChar)
+			switch (charValue)
 			{
 				case '-':
 					if (CanZoomOut())
@@ -171,7 +171,7 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 					else
 						return false;
 				default :
-					return base.ProcessDialogChar(AChar);
+					return base.ProcessDialogChar(charValue);
 			}
 		}
 
@@ -186,36 +186,36 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 		// from Windows, and not a nested default handling procedure of a child 
 		// control
 
-		private bool FPostedWheelMessage;
+		private bool _postedWheelMessage;
 
-		protected override void OnMouseWheel(MouseEventArgs AArgs)
+		protected override void OnMouseWheel(MouseEventArgs args)
 		{
-			base.OnMouseWheel(AArgs);
-			if (FPostedWheelMessage)
+			base.OnMouseWheel(args);
+			if (_postedWheelMessage)
 			{
 				try
 				{
-					if (AArgs.Delta >= 120)
+					if (args.Delta >= 120)
 						InternalZoomIn();
-					else if (AArgs.Delta <= -120)
+					else if (args.Delta <= -120)
 						InternalZoomOut();
 				}
 				finally
 				{
-					FPostedWheelMessage = false;
+					_postedWheelMessage = false;
 				}
 			}
 			else
 			{
-				if (((AArgs.Delta >= 120) && CanZoomIn()) || ((AArgs.Delta <= -120) && CanZoomOut()))
+				if (((args.Delta >= 120) && CanZoomIn()) || ((args.Delta <= -120) && CanZoomOut()))
 				{
-					FPostedWheelMessage = true;
+					_postedWheelMessage = true;
 					UnsafeNativeMethods.PostMessage
 					(
 						Handle, 
 						NativeMethods.WM_MOUSEWHEEL, 
-						new IntPtr(AArgs.Delta << 16), 
-						new IntPtr(AArgs.X | AArgs.Y << 16)
+						new IntPtr(args.Delta << 16), 
+						new IntPtr(args.X | args.Y << 16)
 					);
 				}
 			}
@@ -225,16 +225,16 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 		{
 			if (!ContainsFocus)
 				return null;
-			IntPtr LFocusedHandle = UnsafeNativeMethods.GetFocus();
-			if (LFocusedHandle == IntPtr.Zero)
+			IntPtr focusedHandle = UnsafeNativeMethods.GetFocus();
+			if (focusedHandle == IntPtr.Zero)
 				return null;
-			return Control.FromChildHandle(LFocusedHandle) as IZoomable;
+			return Control.FromChildHandle(focusedHandle) as IZoomable;
 		}
 
 		public virtual bool CanZoomIn()
 		{
-			IZoomable LZoomable = GetZoomable();
-			return  (LZoomable != null) && (LZoomable.CanZoomIn());
+			IZoomable zoomable = GetZoomable();
+			return  (zoomable != null) && (zoomable.CanZoomIn());
 		}
 
 		protected virtual void InternalZoomIn()
@@ -250,17 +250,17 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 
 		public virtual bool CanZoomOut()
 		{
-			IZoomable LZoomable = GetZoomable();
-			return (FSurfaceStack.Count > 1) || ((LZoomable != null) && (LZoomable.CanZoomOut()));
+			IZoomable zoomable = GetZoomable();
+			return (_surfaceStack.Count > 1) || ((zoomable != null) && (zoomable.CanZoomOut()));
 		}
 
 		protected virtual void InternalZoomOut()
 		{
-			IZoomable LZoomable = GetZoomable();
-			if ((LZoomable != null) && (LZoomable.CanZoomOut()))
-				LZoomable.ZoomOut();
+			IZoomable zoomable = GetZoomable();
+			if ((zoomable != null) && (zoomable.CanZoomOut()))
+				zoomable.ZoomOut();
 			else
-				if (FSurfaceStack.Count > 1)
+				if (_surfaceStack.Count > 1)
 					Pop();
 		}
 
@@ -274,17 +274,17 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 		#region Utility
 
 		/// <summary> Finds the designer control containing the given control. </summary>
-		public static DesignerControl GetDesigner(Control AControl)
+		public static DesignerControl GetDesigner(Control control)
 		{
-			DesignerControl LResult;
+			DesignerControl result;
 			do
 			{
-				LResult = AControl as DesignerControl;
-				if (LResult != null)
-					return LResult;
+				result = control as DesignerControl;
+				if (result != null)
+					return result;
 				else
-					AControl = AControl.Parent;
-			} while (AControl != null);
+					control = control.Parent;
+			} while (control != null);
 			return null;
 		}
 
@@ -293,11 +293,11 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 
 	public class DepthGuage : Control
 	{
-		public const int CHorizontalPad = -5;
-		public const int CHorizontalSpacing = 4;
-		public const int CVerticalPadding = 2;
-		public const int CCurveWidth = 10;
-		public const int CItemTextPad = 1;
+		public const int HorizontalPad = -5;
+		public const int HorizontalSpacing = 4;
+		public const int VerticalPadding = 2;
+		public const int CurveWidth = 10;
+		public const int ItemTextPad = 1;
 
 		public DepthGuage()
 		{
@@ -313,65 +313,65 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 			Size = new Size(400, 20);
 			Dock = DockStyle.Top;
 			
-			FItems = new DepthGuageItems(this);
-			FLineColor = Color.Gray;
+			_items = new DepthGuageItems(this);
+			_lineColor = Color.Gray;
 			
 			ResumeLayout(false);
 		}
 
 		#region Cosmetic Properties
 
-		private Color FFadeColor = Color.Thistle;
+		private Color _fadeColor = Color.Thistle;
 		public Color FadeColor
 		{
-			get { return FFadeColor; }
+			get { return _fadeColor; }
 			set
 			{
-				if (FFadeColor != value)
+				if (_fadeColor != value)
 				{
-					FFadeColor = value;
+					_fadeColor = value;
 					Invalidate(false);
 				}
 			}
 		}
 
-		private Color FItemColor = Color.FromArgb(230, 160, 160);
+		private Color _itemColor = Color.FromArgb(230, 160, 160);
 		public Color ItemColor
 		{
-			get { return FItemColor; }
+			get { return _itemColor; }
 			set
 			{
-				if (FItemColor != value)
+				if (_itemColor != value)
 				{
-					FItemColor = value;
+					_itemColor = value;
 					Invalidate(false);
 				}
 			}
 		}
 
-		private Color FItemFadeColor = Color.FromArgb(255, 190, 190);
+		private Color _itemFadeColor = Color.FromArgb(255, 190, 190);
 		public Color ItemFadeColor
 		{
-			get { return FItemFadeColor; }
+			get { return _itemFadeColor; }
 			set
 			{
-				if (FItemFadeColor != value)
+				if (_itemFadeColor != value)
 				{
-					FItemFadeColor = value;
+					_itemFadeColor = value;
 					Invalidate(false);
 				}
 			}
 		}
 
-		private Color FLineColor;
+		private Color _lineColor;
 		public Color LineColor
 		{
-			get { return FLineColor; }
+			get { return _lineColor; }
 			set
 			{
-				if (FLineColor != value)
+				if (_lineColor != value)
 				{
-					FLineColor = value;
+					_lineColor = value;
 					Invalidate(false);
 				}
 			}
@@ -379,72 +379,72 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 
 		#endregion
 
-		private DepthGuageItems FItems;
-		public DepthGuageItems Items { get { return FItems; } }
+		private DepthGuageItems _items;
+		public DepthGuageItems Items { get { return _items; } }
 
-		private int[] FWidths;
+		private int[] _widths;
 
 		internal void InvalidateWidths()
 		{
-			FWidths = null;
+			_widths = null;
 		}
 
-		private void EnsureWidths(Graphics AGraphics)
+		private void EnsureWidths(Graphics graphics)
 		{
-			if (FWidths == null)
+			if (_widths == null)
 			{
-				FWidths = new int[FItems.Count];
-				for (int i = 0; i < FItems.Count; i++)
-					FWidths[i] = Size.Ceiling(AGraphics.MeasureString(FItems[i], Font)).Width;
+				_widths = new int[_items.Count];
+				for (int i = 0; i < _items.Count; i++)
+					_widths[i] = Size.Ceiling(graphics.MeasureString(_items[i], Font)).Width;
 			}
 		}
 
-		protected override void OnPaint(PaintEventArgs AArgs)
+		protected override void OnPaint(PaintEventArgs args)
 		{
-			base.OnPaint(AArgs);
+			base.OnPaint(args);
 
-			EnsureWidths(AArgs.Graphics);
+			EnsureWidths(args.Graphics);
 
-			Rectangle LBounds = DisplayRectangle;
+			Rectangle bounds = DisplayRectangle;
 
 			// Fill the background
-			using (Brush LBrush = new LinearGradientBrush(LBounds, BackColor, FadeColor, 90))
-				AArgs.Graphics.FillRectangle(LBrush, LBounds);
+			using (Brush brush = new LinearGradientBrush(bounds, BackColor, FadeColor, 90))
+				args.Graphics.FillRectangle(brush, bounds);
 
 			// Shrink down to the items bounds
-			LBounds.Inflate(-CHorizontalSpacing, -(CVerticalPadding - 1));
-			AArgs.Graphics.SetClip(LBounds);
-			LBounds.Inflate(0, -1);
+			bounds.Inflate(-HorizontalSpacing, -(VerticalPadding - 1));
+			args.Graphics.SetClip(bounds);
+			bounds.Inflate(0, -1);
 
-			int LSum = 0;
-			foreach (int LWidth in FWidths)
-				LSum += LWidth;
-			LSum += (((CCurveWidth * 2) + (CItemTextPad * 2)) * FItems.Count) + (CHorizontalSpacing * (FItems.Count - 1));
+			int sum = 0;
+			foreach (int width in _widths)
+				sum += width;
+			sum += (((CurveWidth * 2) + (ItemTextPad * 2)) * _items.Count) + (HorizontalSpacing * (_items.Count - 1));
 
-			int LExtentX = LBounds.Left + Math.Min(0, LBounds.Width - LSum);
+			int extentX = bounds.Left + Math.Min(0, bounds.Width - sum);
 			
-			using (Brush LFillBrush = new LinearGradientBrush(LBounds, ItemColor, ItemFadeColor, 90))
+			using (Brush fillBrush = new LinearGradientBrush(bounds, ItemColor, ItemFadeColor, 90))
 			{
-				using (Brush LTextBrush = new SolidBrush(ForeColor))
+				using (Brush textBrush = new SolidBrush(ForeColor))
 				{
-					using (Pen LPen = new Pen(FLineColor))
+					using (Pen pen = new Pen(_lineColor))
 					{
-						int LWidth;
-						for (int i = 0; i < FItems.Count; i++)
+						int width;
+						for (int i = 0; i < _items.Count; i++)
 						{
-							using (GraphicsPath LPath = new GraphicsPath())
+							using (GraphicsPath path = new GraphicsPath())
 							{
-								LWidth = FWidths[i] + (CItemTextPad * 2);
-								LPath.AddLine(LExtentX, LBounds.Y, LExtentX + CCurveWidth + LWidth, LBounds.Y); 
-								LPath.AddBezier(LExtentX + CCurveWidth + LWidth, LBounds.Y, LExtentX + CCurveWidth + LWidth + CCurveWidth, LBounds.Y, LExtentX + CCurveWidth + LWidth + CCurveWidth, LBounds.Bottom, LExtentX + CCurveWidth + LWidth, LBounds.Bottom);
-								LPath.AddLine(LExtentX + CCurveWidth + LWidth, LBounds.Bottom, LExtentX, LBounds.Bottom);
-								LPath.AddBezier(LExtentX, LBounds.Bottom, LExtentX + CCurveWidth, LBounds.Bottom, LExtentX + CCurveWidth, LBounds.Y, LExtentX, LBounds.Y);
-								LPath.CloseFigure();
-								AArgs.Graphics.FillPath(LFillBrush, LPath);
-								AArgs.Graphics.DrawPath(LPen, LPath);
+								width = _widths[i] + (ItemTextPad * 2);
+								path.AddLine(extentX, bounds.Y, extentX + CurveWidth + width, bounds.Y); 
+								path.AddBezier(extentX + CurveWidth + width, bounds.Y, extentX + CurveWidth + width + CurveWidth, bounds.Y, extentX + CurveWidth + width + CurveWidth, bounds.Bottom, extentX + CurveWidth + width, bounds.Bottom);
+								path.AddLine(extentX + CurveWidth + width, bounds.Bottom, extentX, bounds.Bottom);
+								path.AddBezier(extentX, bounds.Bottom, extentX + CurveWidth, bounds.Bottom, extentX + CurveWidth, bounds.Y, extentX, bounds.Y);
+								path.CloseFigure();
+								args.Graphics.FillPath(fillBrush, path);
+								args.Graphics.DrawPath(pen, path);
 							}
-							AArgs.Graphics.DrawString(FItems[i], Font, LTextBrush, LExtentX + CCurveWidth + CItemTextPad, LBounds.Y + ((LBounds.Height / 2) - (Font.Height / 2)));
-							LExtentX += FWidths[i] + (CCurveWidth * 2) + (CItemTextPad * 2) + CHorizontalSpacing;
+							args.Graphics.DrawString(_items[i], Font, textBrush, extentX + CurveWidth + ItemTextPad, bounds.Y + ((bounds.Height / 2) - (Font.Height / 2)));
+							extentX += _widths[i] + (CurveWidth * 2) + (ItemTextPad * 2) + HorizontalSpacing;
 						}
 					}
 				}
@@ -454,25 +454,25 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 
 	public class DepthGuageItems : NotifyingBaseList<string>
 	{
-		public DepthGuageItems(DepthGuage AGuage) 
+		public DepthGuageItems(DepthGuage guage) 
 		{
-			FGuage = AGuage;
+			_guage = guage;
 		}
 
-		private DepthGuage FGuage;
+		private DepthGuage _guage;
 
-		protected override void Adding(string AValue, int AIndex)
+		protected override void Adding(string tempValue, int index)
 		{
-			base.Adding(AValue, AIndex);
-			FGuage.InvalidateWidths();
-			FGuage.Invalidate(false);
+			base.Adding(tempValue, index);
+			_guage.InvalidateWidths();
+			_guage.Invalidate(false);
 		}
 
-		protected override void Removing(string AValue, int AIndex)
+		protected override void Removing(string tempValue, int index)
 		{
-			base.Removing(AValue, AIndex);
-			FGuage.InvalidateWidths();
-			FGuage.Invalidate(false);
+			base.Removing(tempValue, index);
+			_guage.InvalidateWidths();
+			_guage.Invalidate(false);
 		}
 	}
 

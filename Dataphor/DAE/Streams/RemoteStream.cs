@@ -30,81 +30,81 @@ namespace Alphora.Dataphor.DAE.Streams
 	/// <summary> Pass-through wrapper for IRemoteStream. </summary>
 	public class RemoteStreamWrapper : Stream
 	{
-		public RemoteStreamWrapper(IRemoteStream ARemote)
+		public RemoteStreamWrapper(IRemoteStream remote)
 		{
-			FRemote = ARemote;
+			_remote = remote;
 		}
 
-		private IRemoteStream FRemote;
+		private IRemoteStream _remote;
 		public IRemoteStream Remote
 		{
-			get { return FRemote; }
+			get { return _remote; }
 		}
 
 		public override bool CanRead
 		{
-			get { return FRemote.CanRead; }
+			get { return _remote.CanRead; }
 		}
 		
 		public override bool CanSeek
 		{
-			get { return FRemote.CanSeek; }
+			get { return _remote.CanSeek; }
 		}
 		
 		public override bool CanWrite
 		{
-			get { return FRemote.CanWrite; }
+			get { return _remote.CanWrite; }
 		}
 		
 		public override void Flush()
 		{
-			FRemote.Flush();
+			_remote.Flush();
 		}
 
 		public override long Length 
 		{ 
-			get { return FRemote.Length; } 
+			get { return _remote.Length; } 
 		}
 
-		public override void SetLength(long ALength)
+		public override void SetLength(long length)
 		{
-			FRemote.SetLength(ALength);
+			_remote.SetLength(length);
 		}
 
 		public override long Position 
 		{ 
-			get { return FRemote.Position; }
-			set { FRemote.Position = value; }
+			get { return _remote.Position; }
+			set { _remote.Position = value; }
 		}
 
-		public override long Seek(long AOffset, SeekOrigin AOrigin)
+		public override long Seek(long offset, SeekOrigin origin)
 		{
-			return FRemote.Seek(AOffset, AOrigin);
+			return _remote.Seek(offset, origin);
 		}
 
-		public override int Read(byte[] ABuffer, int AOffset, int ACount)
+		public override int Read(byte[] buffer, int offset, int count)
 		{
-			return FRemote.Read(ABuffer, AOffset, ACount);
+			return _remote.Read(buffer, offset, count);
 		}
 
 		public override int ReadByte()
 		{
-			return FRemote.ReadByte();
+			return _remote.ReadByte();
 		}
 
-		public override void Write(byte[] ABuffer, int AOffset, int ACount)
+		public override void Write(byte[] buffer, int offset, int count)
 		{
-			FRemote.Write(ABuffer, AOffset, ACount);
+			_remote.Write(buffer, offset, count);
 		}
 
-		public override void WriteByte(byte AByte)
+		public override void WriteByte(byte byteValue)
 		{
-			FRemote.WriteByte(AByte);
+			_remote.WriteByte(byteValue);
 		}
 
 		public override void Close()
 		{
-			FRemote.Close();
+			_remote.Close();
 			base.Close();
 		}
 	}

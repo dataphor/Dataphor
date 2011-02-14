@@ -16,82 +16,82 @@ namespace Alphora.Dataphor.DAE.Server
 {
 	public class RemoteServerScript : RemoteServerChildObject, IRemoteServerScript
 	{
-		internal RemoteServerScript(RemoteServerProcess AProcess, ServerScript AServerScript) : base()
+		internal RemoteServerScript(RemoteServerProcess process, ServerScript serverScript) : base()
 		{
-			FProcess = AProcess;
-			FServerScript = AServerScript;
+			_process = process;
+			_serverScript = serverScript;
 
-			FBatches = new RemoteServerBatches();			
-			foreach (ServerBatch LBatch in AServerScript.Batches)
-				FBatches.Add(new RemoteServerBatch(this, LBatch));
+			_batches = new RemoteServerBatches();			
+			foreach (ServerBatch batch in serverScript.Batches)
+				_batches.Add(new RemoteServerBatch(this, batch));
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			FServerScript = null;
-			FProcess = null;
+			_serverScript = null;
+			_process = null;
 		
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 		
 		public void Unprepare()
 		{
-			FProcess.UnprepareScript(this);
+			_process.UnprepareScript(this);
 		}
 		
 		// Process        
-		private RemoteServerProcess FProcess;
-		public RemoteServerProcess Process { get { return FProcess; } }
+		private RemoteServerProcess _process;
+		public RemoteServerProcess Process { get { return _process; } }
 		
-		IRemoteServerProcess IRemoteServerScript.Process { get { return FProcess; } }
+		IRemoteServerProcess IRemoteServerScript.Process { get { return _process; } }
 		
-		private RemoteServerBatches FBatches;
-		public RemoteServerBatches Batches { get { return FBatches; } }
+		private RemoteServerBatches _batches;
+		public RemoteServerBatches Batches { get { return _batches; } }
 		
-		IRemoteServerBatches IRemoteServerScript.Batches { get { return FBatches; } }
+		IRemoteServerBatches IRemoteServerScript.Batches { get { return _batches; } }
 		
-		private ServerScript FServerScript;
-		internal ServerScript ServerScript { get { return FServerScript; } }
+		private ServerScript _serverScript;
+		internal ServerScript ServerScript { get { return _serverScript; } }
 		
 		// Messages
 		public Exception[] Messages
 		{
 			get
 			{
-				Exception[] LMessages = new Exception[FServerScript.Messages.Count];
-				FServerScript.Messages.CopyTo(LMessages);
-				return LMessages;
+				Exception[] messages = new Exception[_serverScript.Messages.Count];
+				_serverScript.Messages.CopyTo(messages);
+				return messages;
 			}
 		}
 		
 		public void CheckParsed()
 		{
-			if (FServerScript.Messages.HasErrors())
-				throw new ServerException(ServerException.Codes.UnparsedScript, FServerScript.Messages.ToString());
+			if (_serverScript.Messages.HasErrors())
+				throw new ServerException(ServerException.Codes.UnparsedScript, _serverScript.Messages.ToString());
 		}
 		
-		public void Execute(ref RemoteParamData AParams, ProcessCallInfo ACallInfo)
+		public void Execute(ref RemoteParamData paramsValue, ProcessCallInfo callInfo)
 		{
-			FProcess.ProcessCallInfo(ACallInfo);
+			_process.ProcessCallInfo(callInfo);
 			
-			foreach (RemoteServerBatch LBatch in FBatches)
-				LBatch.Execute(ref AParams, FProcess.EmptyCallInfo());
+			foreach (RemoteServerBatch batch in _batches)
+				batch.Execute(ref paramsValue, _process.EmptyCallInfo());
 		}
 	}
 	
 	// RemoteServerScripts
 	public class RemoteServerScripts : RemoteServerChildObjects
 	{		
-		protected override void Validate(RemoteServerChildObject AObject)
+		protected override void Validate(RemoteServerChildObject objectValue)
 		{
-			if (!(AObject is RemoteServerScript))
+			if (!(objectValue is RemoteServerScript))
 				throw new ServerException(ServerException.Codes.TypedObjectContainer, "RemoteServerScript");
 		}
 		
-		public new RemoteServerScript this[int AIndex]
+		public new RemoteServerScript this[int index]
 		{
-			get { return (RemoteServerScript)base[AIndex]; } 
-			set { base[AIndex] = value; }
+			get { return (RemoteServerScript)base[index]; } 
+			set { base[index] = value; }
 		}
 	}
 }

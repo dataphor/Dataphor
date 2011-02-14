@@ -12,122 +12,122 @@ namespace Alphora.Dataphor.DAE.Connection
 {
     public class SQLCECommand : DotNetCommand
     {
-        public SQLCECommand(SQLCEConnection AConnection, IDbCommand ACommand) : base(AConnection, ACommand) 
+        public SQLCECommand(SQLCEConnection connection, IDbCommand command) : base(connection, command) 
         {
-            FUseOrdinalBinding = true;
+            _useOrdinalBinding = true;
         }
 		
         protected override void PrepareParameters()
         {
             // Prepare parameters
-            SQLParameter LParameter;
-            for (int LIndex = 0; LIndex < FParameterIndexes.Length; LIndex++)
+            SQLParameter parameter;
+            for (int index = 0; index < _parameterIndexes.Length; index++)
             {
-                LParameter = Parameters[FParameterIndexes[LIndex]];
-                SqlCeParameter LSQLCEParameter = (SqlCeParameter)FCommand.CreateParameter();
-                LSQLCEParameter.ParameterName = String.Format("@{0}", LParameter.Name);
-                switch (LParameter.Direction)
+                parameter = Parameters[_parameterIndexes[index]];
+                SqlCeParameter sQLCEParameter = (SqlCeParameter)_command.CreateParameter();
+                sQLCEParameter.ParameterName = String.Format("@{0}", parameter.Name);
+                switch (parameter.Direction)
                 {
-                    case SQLDirection.Out : LSQLCEParameter.Direction = System.Data.ParameterDirection.Output; break;
-                    case SQLDirection.InOut : LSQLCEParameter.Direction = System.Data.ParameterDirection.InputOutput; break;
-                    case SQLDirection.Result : LSQLCEParameter.Direction = System.Data.ParameterDirection.ReturnValue; break;
-                    default : LSQLCEParameter.Direction = System.Data.ParameterDirection.Input; break;
+                    case SQLDirection.Out : sQLCEParameter.Direction = System.Data.ParameterDirection.Output; break;
+                    case SQLDirection.InOut : sQLCEParameter.Direction = System.Data.ParameterDirection.InputOutput; break;
+                    case SQLDirection.Result : sQLCEParameter.Direction = System.Data.ParameterDirection.ReturnValue; break;
+                    default : sQLCEParameter.Direction = System.Data.ParameterDirection.Input; break;
                 }
 
-                if (LParameter.Type is SQLStringType)
+                if (parameter.Type is SQLStringType)
                 {
-                    LSQLCEParameter.SqlDbType = SqlDbType.NVarChar;
-                    LSQLCEParameter.Size = ((SQLStringType)LParameter.Type).Length;
+                    sQLCEParameter.SqlDbType = SqlDbType.NVarChar;
+                    sQLCEParameter.Size = ((SQLStringType)parameter.Type).Length;
                 }
-                else if (LParameter.Type is SQLBooleanType)
+                else if (parameter.Type is SQLBooleanType)
                 {
-                    LSQLCEParameter.SqlDbType = SqlDbType.Bit;
+                    sQLCEParameter.SqlDbType = SqlDbType.Bit;
                 }
-                else if (LParameter.Type is SQLByteArrayType)
+                else if (parameter.Type is SQLByteArrayType)
                 {
-                    LSQLCEParameter.SqlDbType = SqlDbType.Binary;
-                    LSQLCEParameter.Size = ((SQLByteArrayType)LParameter.Type).Length;
+                    sQLCEParameter.SqlDbType = SqlDbType.Binary;
+                    sQLCEParameter.Size = ((SQLByteArrayType)parameter.Type).Length;
                 }
-                else if (LParameter.Type is SQLIntegerType)
+                else if (parameter.Type is SQLIntegerType)
                 {
-                    switch (((SQLIntegerType)LParameter.Type).ByteCount)
+                    switch (((SQLIntegerType)parameter.Type).ByteCount)
                     {
-                        case 1 : LSQLCEParameter.SqlDbType = SqlDbType.TinyInt; break;
-                        case 2 : LSQLCEParameter.SqlDbType = SqlDbType.SmallInt; break;
-                        case 8 : LSQLCEParameter.SqlDbType = SqlDbType.BigInt; break;
-                        default : LSQLCEParameter.SqlDbType = SqlDbType.Int; break;
+                        case 1 : sQLCEParameter.SqlDbType = SqlDbType.TinyInt; break;
+                        case 2 : sQLCEParameter.SqlDbType = SqlDbType.SmallInt; break;
+                        case 8 : sQLCEParameter.SqlDbType = SqlDbType.BigInt; break;
+                        default : sQLCEParameter.SqlDbType = SqlDbType.Int; break;
                     }
                 }
-                else if (LParameter.Type is SQLNumericType)
+                else if (parameter.Type is SQLNumericType)
                 {
-                    SQLNumericType LType = (SQLNumericType)LParameter.Type;
-                    LSQLCEParameter.SqlDbType = SqlDbType.Decimal;
-                    LSQLCEParameter.Scale = LType.Scale;
-                    LSQLCEParameter.Precision = LType.Precision;
+                    SQLNumericType type = (SQLNumericType)parameter.Type;
+                    sQLCEParameter.SqlDbType = SqlDbType.Decimal;
+                    sQLCEParameter.Scale = type.Scale;
+                    sQLCEParameter.Precision = type.Precision;
                 }
-                else if (LParameter.Type is SQLFloatType)
+                else if (parameter.Type is SQLFloatType)
                 {
-                    SQLFloatType LType = (SQLFloatType)LParameter.Type;
-                    if (LType.Width == 1)
-                        LSQLCEParameter.SqlDbType = SqlDbType.Real;
+                    SQLFloatType type = (SQLFloatType)parameter.Type;
+                    if (type.Width == 1)
+                        sQLCEParameter.SqlDbType = SqlDbType.Real;
                     else
-                        LSQLCEParameter.SqlDbType = SqlDbType.Float;
+                        sQLCEParameter.SqlDbType = SqlDbType.Float;
                 }
-                else if (LParameter.Type is SQLBinaryType)
+                else if (parameter.Type is SQLBinaryType)
                 {
-                    LSQLCEParameter.SqlDbType = SqlDbType.Image;
+                    sQLCEParameter.SqlDbType = SqlDbType.Image;
                 }
-                else if (LParameter.Type is SQLTextType)
+                else if (parameter.Type is SQLTextType)
                 {
-                    LSQLCEParameter.SqlDbType = SqlDbType.NText;
+                    sQLCEParameter.SqlDbType = SqlDbType.NText;
                 }
-                else if (LParameter.Type is SQLDateType)
+                else if (parameter.Type is SQLDateType)
                 {
-                    LSQLCEParameter.SqlDbType = SqlDbType.DateTime;
+                    sQLCEParameter.SqlDbType = SqlDbType.DateTime;
                 }
-                else if (LParameter.Type is SQLTimeType)
+                else if (parameter.Type is SQLTimeType)
                 {
-                    LSQLCEParameter.SqlDbType = SqlDbType.DateTime;
+                    sQLCEParameter.SqlDbType = SqlDbType.DateTime;
                 }
-                else if (LParameter.Type is SQLDateTimeType)
+                else if (parameter.Type is SQLDateTimeType)
                 {
-                    LSQLCEParameter.SqlDbType = SqlDbType.DateTime;
+                    sQLCEParameter.SqlDbType = SqlDbType.DateTime;
                 }
-                else if (LParameter.Type is SQLGuidType)
+                else if (parameter.Type is SQLGuidType)
                 {
-                    LSQLCEParameter.SqlDbType = SqlDbType.UniqueIdentifier;
+                    sQLCEParameter.SqlDbType = SqlDbType.UniqueIdentifier;
                 }
-                else if (LParameter.Type is SQLMoneyType)
+                else if (parameter.Type is SQLMoneyType)
                 {
-                    LSQLCEParameter.SqlDbType = SqlDbType.Money;
+                    sQLCEParameter.SqlDbType = SqlDbType.Money;
                 }
                 else
-                    throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, LParameter.Type.GetType().Name);
-                FCommand.Parameters.Add(LSQLCEParameter);
+                    throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, parameter.Type.GetType().Name);
+                _command.Parameters.Add(sQLCEParameter);
             }
         }
         
-        protected SqlCeCommand Command { get { return (SqlCeCommand)FCommand; } }
+        protected SqlCeCommand Command { get { return (SqlCeCommand)_command; } }
         
-        public SQLCECursor ExecuteResultSet(string ATableName, string AIndexName, DbRangeOptions ARangeOptions, object[] AStartValues, object[] AEndValues, ResultSetOptions AResultSetOptions)
+        public SQLCECursor ExecuteResultSet(string tableName, string indexName, DbRangeOptions rangeOptions, object[] startValues, object[] endValues, ResultSetOptions resultSetOptions)
         {
 			Command.CommandType = System.Data.CommandType.TableDirect;
-			Command.CommandText= ATableName;
-			Command.IndexName = AIndexName;
-			Command.SetRange(ARangeOptions, AStartValues, AEndValues);
+			Command.CommandText= tableName;
+			Command.IndexName = indexName;
+			Command.SetRange(rangeOptions, startValues, endValues);
 			#if SQLSTORETIMING
-			long LStartTicks = TimingUtility.CurrentTicks;
+			long startTicks = TimingUtility.CurrentTicks;
 			try
 			{
 			#endif
 
-	            return new SQLCECursor(this, Command.ExecuteResultSet(AResultSetOptions));
+	            return new SQLCECursor(this, Command.ExecuteResultSet(resultSetOptions));
 			
 			#if SQLSTORETIMING
 			}
 			finally
 			{
-				Store.Counters.Add(new SQLStoreCounter("ExecuteResultSet", ATableName, AIndexName, AStartValues != null && AEndValues == null, AStartValues != null && AEndValues != null, (ResultSetOptions.Updatable & AResultSetOptions) != 0, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+				Store.Counters.Add(new SQLStoreCounter("ExecuteResultSet", ATableName, AIndexName, AStartValues != null && AEndValues == null, AStartValues != null && AEndValues != null, (ResultSetOptions.Updatable & AResultSetOptions) != 0, TimingUtility.TimeSpanFromTicks(startTicks)));
 			}
 			#endif
         }

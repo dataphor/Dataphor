@@ -13,15 +13,15 @@ namespace Alphora.Dataphor.DAE.Connection.ADO
 
 	class DAERegister
 	{
-		protected const string CD4ClassDefinitionNameSpace = "ADOConnection";
+		protected const string D4ClassDefinitionNameSpace = "ADOConnection";
 
 		public static SettingsList GetClasses()
 		{
-			SettingsList LClasses = new SettingsList();
+			SettingsList classes = new SettingsList();
 			
-			LClasses.Add(new SettingsItem(String.Format("{0}.{1}", CD4ClassDefinitionNameSpace, "ADOConnection"), typeof(ADOConnection).AssemblyQualifiedName));
+			classes.Add(new SettingsItem(String.Format("{0}.{1}", D4ClassDefinitionNameSpace, "ADOConnection"), typeof(ADOConnection).AssemblyQualifiedName));
 			
-			return LClasses;
+			return classes;
 		}
 	}
 }

@@ -15,19 +15,19 @@ using System.Collections.Generic;
 	
 	public abstract class Operation : Disposable
 	{
-		public Operation(TableVar ATableVar) : base()
+		public Operation(TableVar tableVar) : base()
 		{
-			FTableVar = ATableVar;
+			_tableVar = tableVar;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			FTableVar = null;
-			base.Dispose(ADisposing);
+			_tableVar = null;
+			base.Dispose(disposing);
 		}
 		
-		private TableVar FTableVar;
-		public TableVar TableVar { get { return FTableVar; } }
+		private TableVar _tableVar;
+		public TableVar TableVar { get { return _tableVar; } }
 	}
 
 	#if USETYPEDLIST	
@@ -47,85 +47,85 @@ using System.Collections.Generic;
 	
 	public class InsertOperation : Operation
 	{
-		public InsertOperation(TableVar ATableVar, Row ARow, BitArray AValueFlags) : base(ATableVar)
+		public InsertOperation(TableVar tableVar, Row row, BitArray valueFlags) : base(tableVar)
 		{
-			FRow = ARow;
-			FValueFlags = AValueFlags;
+			_row = row;
+			_valueFlags = valueFlags;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (FRow != null)
+			if (_row != null)
 			{
-				FRow.Dispose();
-				FRow = null;
+				_row.Dispose();
+				_row = null;
 			}
 
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 		
-		private Row FRow;
-		public Row Row { get { return FRow; } }
+		private Row _row;
+		public Row Row { get { return _row; } }
 		
-		private BitArray FValueFlags;
-		public BitArray ValueFlags { get { return FValueFlags; } }
+		private BitArray _valueFlags;
+		public BitArray ValueFlags { get { return _valueFlags; } }
 	}
 	
 	public class UpdateOperation : Operation
 	{
-		public UpdateOperation(TableVar ATableVar, Row AOldRow, Row ANewRow, BitArray AValueFlags) : base(ATableVar)
+		public UpdateOperation(TableVar tableVar, Row oldRow, Row newRow, BitArray valueFlags) : base(tableVar)
 		{
-			FOldRow = AOldRow;
-			FNewRow = ANewRow;
-			FValueFlags = AValueFlags;
+			_oldRow = oldRow;
+			_newRow = newRow;
+			_valueFlags = valueFlags;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (FOldRow != null)
+			if (_oldRow != null)
 			{
-				FOldRow.Dispose();
-				FOldRow = null;
+				_oldRow.Dispose();
+				_oldRow = null;
 			}
 			
-			if (FNewRow != null)
+			if (_newRow != null)
 			{
-				FNewRow.Dispose();
-				FNewRow = null;
+				_newRow.Dispose();
+				_newRow = null;
 			}
 			
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 		
-		private Row FOldRow;
-		public Row OldRow { get { return FOldRow; } }
+		private Row _oldRow;
+		public Row OldRow { get { return _oldRow; } }
 		
-		private Row FNewRow; 
-		public Row NewRow { get { return FNewRow; } }
+		private Row _newRow; 
+		public Row NewRow { get { return _newRow; } }
 		
-		private BitArray FValueFlags;
-		public BitArray ValueFlags { get { return FValueFlags; } }
+		private BitArray _valueFlags;
+		public BitArray ValueFlags { get { return _valueFlags; } }
 	}
 	
 	public class DeleteOperation : Operation
 	{
-		public DeleteOperation(TableVar ATableVar, Row ARow) : base(ATableVar)
+		public DeleteOperation(TableVar tableVar, Row row) : base(tableVar)
 		{
-			FRow = ARow;
+			_row = row;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (FRow != null)
+			if (_row != null)
 			{
-				FRow.Dispose();
-				FRow = null;
+				_row.Dispose();
+				_row = null;
 			}
 
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 		
-		private Row FRow;
-		public Row Row { get { return FRow; } }
+		private Row _row;
+		public Row Row { get { return _row; } }
 	}
 }

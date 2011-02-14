@@ -13,13 +13,13 @@ namespace Alphora.Dataphor
 	/// <summary> A non-persistant stream that overflows to a file when it grows sufficiently. </summary>
 	public class TemporaryStream : Stream, IDisposable
 	{
-		public const int CInitialBufferSize = 256;	// Initial size of the memory buffer
-		public const int CThreshold = 0xFFFF;	// Maximum size of the in memory portion
+		public const int InitialBufferSize = 256;	// Initial size of the memory buffer
+		public const int Threshold = 0xFFFF;	// Maximum size of the in memory portion
 		
-		private byte[] FBuffer = new byte[CInitialBufferSize];
-		private FileStream FFile;
-		private long FPosition;
-		private long FLength;
+		private byte[] _buffer = new byte[InitialBufferSize];
+		private FileStream _file;
+		private long _position;
+		private long _length;
 		
 		public override bool CanRead
 		{
@@ -43,172 +43,172 @@ namespace Alphora.Dataphor
 
 		public override long Length
 		{
-			get { return FLength; }
+			get { return _length; }
 		}
 
 		public override long Position
 		{
-			get { return FPosition; }
+			get { return _position; }
 			set
 			{
-				if (value != FPosition)
+				if (value != _position)
 				{
-					if (value > FLength)
+					if (value > _length)
 						throw new ArgumentOutOfRangeException("Position");
 						
-					if (value > CThreshold)
-						FFile.Position = value - CThreshold;
+					if (value > Threshold)
+						_file.Position = value - Threshold;
 					else
 					{
 						// If we have overflowed, but the position is in the buffer portion, reset as much as possible
-						if (FLength > CThreshold)
-							FFile.Position = 0;
+						if (_length > Threshold)
+							_file.Position = 0;
 					}					
-					FPosition = value;
+					_position = value;
 				}
 			}
 		}
 
-		public override int Read(byte[] ABuffer, int AOffset, int ACount)
+		public override int Read(byte[] buffer, int offset, int count)
 		{
 			// Limit the count to the number of bytes available
-			ACount += (int)Math.Min(FLength - (FPosition + (long)ACount), 0);
+			count += (int)Math.Min(_length - (_position + (long)count), 0);
 			
 			// Ensure the range of the read
-			if ((FPosition + ACount > FLength) || (ACount < 0))
+			if ((_position + count > _length) || (count < 0))
 				throw new ArgumentOutOfRangeException("ACount");
 				
 			// Compute the number of bytes that will be read from the buffer portion
-			int LBufferCount = (int)Math.Max(Math.Min((long)CThreshold - FPosition, (long)ACount), 0L);
+			int bufferCount = (int)Math.Max(Math.Min((long)Threshold - _position, (long)count), 0L);
 			
 			// Copy the memory portion
-			Buffer.BlockCopy(FBuffer, (int)FPosition, ABuffer, AOffset, LBufferCount);
+			Buffer.BlockCopy(_buffer, (int)_position, buffer, offset, bufferCount);
 			
 			// Copy the file portion
-			if (ACount - LBufferCount > 0)
-				FFile.Read(ABuffer, AOffset + LBufferCount, ACount - LBufferCount);
+			if (count - bufferCount > 0)
+				_file.Read(buffer, offset + bufferCount, count - bufferCount);
 			
 			// Increment the offset
-			FPosition += ACount;
+			_position += count;
 			
-			return ACount;
+			return count;
 		}
 
-		public override long Seek(long AOffset, SeekOrigin AOrigin)
+		public override long Seek(long offset, SeekOrigin origin)
 		{
-			long LOrigin;
-			switch (AOrigin)
+			long localOrigin;
+			switch (origin)
 			{
-				case SeekOrigin.Begin : LOrigin = 0; break;
-				case SeekOrigin.End : LOrigin = FLength; break;
-				default : LOrigin = FPosition; break;
+				case SeekOrigin.Begin : localOrigin = 0; break;
+				case SeekOrigin.End : localOrigin = _length; break;
+				default : localOrigin = _position; break;
 			}
-			Position = LOrigin + AOffset;
+			Position = localOrigin + offset;
 			return Position;
 		}
 
-		public override void SetLength(long AValue)
+		public override void SetLength(long value)
 		{
-			if (AValue > CThreshold)
+			if (value > Threshold)
 			{
-				FileStream LFile = EnsureFile();
-				LFile.SetLength(AValue - CThreshold);
-				FFile = LFile;
+				FileStream file = EnsureFile();
+				file.SetLength(value - Threshold);
+				_file = file;
 			}
 			else
 			{
 				DisposeFile();
-				Array.Clear(FBuffer, (int)AValue, FBuffer.Length - (int)AValue);
+				Array.Clear(_buffer, (int)value, _buffer.Length - (int)value);
 			}
 
 			// Ensure the size of the buffer
-			EnsureCapacity((int)Math.Min(AValue, CThreshold));
+			EnsureCapacity((int)Math.Min(value, Threshold));
 
 			// Constrain the position
-			FPosition = Math.Min(FPosition, AValue);
+			_position = Math.Min(_position, value);
 			
 			// Set the length
-			FLength = AValue;
+			_length = value;
 		}
 
-		public override void Write(byte[] ABuffer, int AOffset, int ACount)
+		public override void Write(byte[] buffer, int offset, int count)
 		{
 			// Ensure the size of the buffer
-			EnsureCapacity((int)Math.Min(FPosition + ACount, CThreshold));
+			EnsureCapacity((int)Math.Min(_position + count, Threshold));
 
 			// Compute the number of bytes that will be written to the buffer portion
-			int LBufferCount = (int)Math.Max(Math.Min(CThreshold - FPosition, ACount), 0);
+			int bufferCount = (int)Math.Max(Math.Min(Threshold - _position, count), 0);
 
 			// Write to the buffer
-			if (FPosition < CThreshold)
-				Buffer.BlockCopy(ABuffer, AOffset, FBuffer, (int)FPosition, LBufferCount);
+			if (_position < Threshold)
+				Buffer.BlockCopy(buffer, offset, _buffer, (int)_position, bufferCount);
 			
-			if ((FPosition + ACount) - CThreshold > 0)
+			if ((_position + count) - Threshold > 0)
 			{
 				// Ensure that the file is prepared
-				FileStream LFile = EnsureFile();
+				FileStream file = EnsureFile();
 			
 				// Write to the file
-				LFile.Write(ABuffer, AOffset + LBufferCount, ACount - LBufferCount);
+				file.Write(buffer, offset + bufferCount, count - bufferCount);
 				
 				// Only set (if not already set) the file if we successfully did the write
-				FFile = LFile;
+				_file = file;
 			}
 			
 			// Advance the position
-			FPosition += ACount;
+			_position += count;
 			
 			// Increase the size (if necessary)
-			FLength = Math.Max(FPosition, FLength);
+			_length = Math.Max(_position, _length);
 		}
 
-		private void EnsureCapacity(int ACapacity)
+		private void EnsureCapacity(int capacity)
 		{
-			if (ACapacity >= FBuffer.Length)
+			if (capacity >= _buffer.Length)
 			{
 				// Determine the factor of two necessary to meet the capacity
-				int LBufferSize = FBuffer.Length;
-				while (LBufferSize < ACapacity)
-					LBufferSize <<= 1;
+				int bufferSize = _buffer.Length;
+				while (bufferSize < capacity)
+					bufferSize <<= 1;
 		
 				// Allocate new buffer and copy			
-				byte[] LBuffer = new byte[Math.Min(LBufferSize, CThreshold)];
-				Buffer.BlockCopy(FBuffer, 0, LBuffer, 0, Math.Min((int)FLength, FBuffer.Length));
-				FBuffer = LBuffer;
+				byte[] buffer = new byte[Math.Min(bufferSize, Threshold)];
+				Buffer.BlockCopy(_buffer, 0, buffer, 0, Math.Min((int)_length, _buffer.Length));
+				_buffer = buffer;
 			}
 		}
 		
 		private FileStream EnsureFile()
 		{
-			if (FFile == null)
+			if (_file == null)
 				return new FileStream(Path.GetTempFileName(), FileMode.Create, FileAccess.ReadWrite);
 			else
-				return FFile;
+				return _file;
 		}
 
 		private void DisposeFile()
 		{
-			if (FFile != null)
+			if (_file != null)
 			{
-				string LFileName = FFile.Name;
+				string fileName = _file.Name;
 				try
 				{
-					FFile.Dispose();
+					_file.Dispose();
 				}
 				finally
 				{
-					File.Delete(LFileName);
+					File.Delete(fileName);
 				}
-				FFile = null;
+				_file = null;
 			}
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			DisposeFile();
-			FBuffer = null;
+			_buffer = null;
 
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 	}
 }

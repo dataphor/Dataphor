@@ -27,239 +27,239 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
 	public abstract class TableComparisonNode : InstructionNode
 	{
-		protected PlanNode FRowEqualNode;
+		protected PlanNode _rowEqualNode;
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = APlan.DataTypes.SystemBoolean;
+			DetermineModifiers(plan);
+			_dataType = plan.DataTypes.SystemBoolean;
 			
 			if (Nodes[0].DataType.Is(Nodes[1].DataType))
-				Nodes[0] = Compiler.Upcast(APlan, Nodes[0], Nodes[1].DataType);
+				Nodes[0] = Compiler.Upcast(plan, Nodes[0], Nodes[1].DataType);
 			else if (Nodes[1].DataType.Is(Nodes[0].DataType))
-				Nodes[1] = Compiler.Upcast(APlan, Nodes[1], Nodes[0].DataType);
+				Nodes[1] = Compiler.Upcast(plan, Nodes[1], Nodes[0].DataType);
 			else
 			{
-				ConversionContext LContext = Compiler.FindConversionPath(APlan, Nodes[0].DataType, Nodes[1].DataType);
-				if (LContext.CanConvert)
-					Nodes[0] = Compiler.Upcast(APlan, Compiler.ConvertNode(APlan, Nodes[0], LContext), Nodes[1].DataType);
+				ConversionContext context = Compiler.FindConversionPath(plan, Nodes[0].DataType, Nodes[1].DataType);
+				if (context.CanConvert)
+					Nodes[0] = Compiler.Upcast(plan, Compiler.ConvertNode(plan, Nodes[0], context), Nodes[1].DataType);
 				else
 				{
-					LContext = Compiler.FindConversionPath(APlan, Nodes[1].DataType, Nodes[0].DataType);
-					Compiler.CheckConversionContext(APlan, LContext);
-					Nodes[1] = Compiler.Upcast(APlan, Compiler.ConvertNode(APlan, Nodes[1], LContext), Nodes[0].DataType);
+					context = Compiler.FindConversionPath(plan, Nodes[1].DataType, Nodes[0].DataType);
+					Compiler.CheckConversionContext(plan, context);
+					Nodes[1] = Compiler.Upcast(plan, Compiler.ConvertNode(plan, Nodes[1], context), Nodes[0].DataType);
 				}
 			}
 
-			APlan.EnterRowContext();
+			plan.EnterRowContext();
 			try
 			{
 				#if USENAMEDROWVARIABLES
-				APlan.Symbols.Push(new Symbol(Keywords.Left, LeftTableNode.DataType.RowType));
+				plan.Symbols.Push(new Symbol(Keywords.Left, LeftTableNode.DataType.RowType));
 				#else
-				Schema.IRowType LLeftRowType = LeftTableNode.DataType.CreateRowType(Keywords.Left);
-				APlan.Symbols.Push(new Symbol(String.Empty, LLeftRowType));
+				Schema.IRowType leftRowType = LeftTableNode.DataType.CreateRowType(Keywords.Left);
+				APlan.Symbols.Push(new Symbol(String.Empty, leftRowType));
 				#endif
 				try
 				{
 					#if USENAMEDROWVARIABLES
-					APlan.Symbols.Push(new Symbol(Keywords.Right, RightTableNode.DataType.RowType));
+					plan.Symbols.Push(new Symbol(Keywords.Right, RightTableNode.DataType.RowType));
 					#else
-					Schema.IRowType LRightRowType = RightTableNode.DataType.CreateRowType(Keywords.Right);
-					APlan.Symbols.Push(new Symbol(String.Empty, LRightRowType));
+					Schema.IRowType rightRowType = RightTableNode.DataType.CreateRowType(Keywords.Right);
+					APlan.Symbols.Push(new Symbol(String.Empty, rightRowType));
 					#endif
 					try
 					{
-						FRowEqualNode = 
+						_rowEqualNode = 
 							#if USENAMEDROWVARIABLES
-							Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, Keywords.Left, Keywords.Right, LeftTableNode.TableVar.Columns, RightTableNode.TableVar.Columns));
+							Compiler.CompileExpression(plan, Compiler.BuildRowEqualExpression(plan, Keywords.Left, Keywords.Right, LeftTableNode.TableVar.Columns, RightTableNode.TableVar.Columns));
 							#else
-							Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, LLeftRowType.Columns, LRightRowType.Columns));
+							Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, leftRowType.Columns, rightRowType.Columns));
 							#endif
 					}
 					finally
 					{
-						APlan.Symbols.Pop();
+						plan.Symbols.Pop();
 					}
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 			finally
 			{
-				APlan.ExitRowContext();
+				plan.ExitRowContext();
 			}
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			LeftTableNode.DetermineBinding(APlan);
-			RightTableNode.DetermineBinding(APlan);
-			APlan.EnterRowContext();
+			LeftTableNode.DetermineBinding(plan);
+			RightTableNode.DetermineBinding(plan);
+			plan.EnterRowContext();
 			try
 			{
 				#if USENAMEDROWVARIABLES
-				APlan.Symbols.Push(new Symbol(Keywords.Left, LeftTableNode.DataType.RowType));
+				plan.Symbols.Push(new Symbol(Keywords.Left, LeftTableNode.DataType.RowType));
 				#else
 				APlan.Symbols.Push(new Symbol(String.Empty, LeftTableNode.DataType.CreateRowType(Keywords.Left)));
 				#endif
 				try
 				{
 					#if USENAMEDROWVARIABLES
-					APlan.Symbols.Push(new Symbol(Keywords.Right, RightTableNode.DataType.RowType));
+					plan.Symbols.Push(new Symbol(Keywords.Right, RightTableNode.DataType.RowType));
 					#else
 					APlan.Symbols.Push(new Symbol(String.Empty, RightTableNode.DataType.CreateRowType(Keywords.Right)));
 					#endif
 					try
 					{
-						RowEqualNode.DetermineBinding(APlan);
+						RowEqualNode.DetermineBinding(plan);
 					}
 					finally
 					{
-						APlan.Symbols.Pop();
+						plan.Symbols.Pop();
 					}
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 			finally
 			{
-				APlan.ExitRowContext();
+				plan.ExitRowContext();
 			}
 		}
 
-		protected bool IsSubset(Program AProgram, Table ALeftTable, Table ARightTable)
+		protected bool IsSubset(Program program, Table leftTable, Table rightTable)
 		{
-			Row LLeftRow = new Row(AProgram.ValueManager, LeftTableNode.DataType.RowType);
+			Row leftRow = new Row(program.ValueManager, LeftTableNode.DataType.RowType);
 			try
 			{
-				Row LRightRow = new Row(AProgram.ValueManager, RightTableNode.DataType.RowType);
+				Row rightRow = new Row(program.ValueManager, RightTableNode.DataType.RowType);
 				try
 				{
-					if (ALeftTable.Supports(CursorCapability.BackwardsNavigable))
-						ALeftTable.First();
+					if (leftTable.Supports(CursorCapability.BackwardsNavigable))
+						leftTable.First();
 					else
-						ALeftTable.Reset();
-					while (ALeftTable.Next())
+						leftTable.Reset();
+					while (leftTable.Next())
 					{
-						ALeftTable.Select(LLeftRow);
-						bool LHasRow = false;
-						if (ARightTable.Supports(CursorCapability.BackwardsNavigable))
-							ARightTable.First();
+						leftTable.Select(leftRow);
+						bool hasRow = false;
+						if (rightTable.Supports(CursorCapability.BackwardsNavigable))
+							rightTable.First();
 						else
-							ARightTable.Reset();
-						while (ARightTable.Next())
+							rightTable.Reset();
+						while (rightTable.Next())
 						{
-							ARightTable.Select(LRightRow);
-							AProgram.Stack.Push(LLeftRow);
+							rightTable.Select(rightRow);
+							program.Stack.Push(leftRow);
 							try
 							{
-								AProgram.Stack.Push(LRightRow);
+								program.Stack.Push(rightRow);
 								try
 								{
-									object LResult = RowEqualNode.Execute(AProgram);
-									if ((LResult != null) && (bool)LResult)
+									object result = RowEqualNode.Execute(program);
+									if ((result != null) && (bool)result)
 									{
-										LHasRow = true;
+										hasRow = true;
 										break;
 									}
 								}
 								finally
 								{
-									AProgram.Stack.Pop();
+									program.Stack.Pop();
 								}
 							}
 							finally
 							{
-								AProgram.Stack.Pop();
+								program.Stack.Pop();
 							}
 						}
-						if (!LHasRow)
+						if (!hasRow)
 							return false;
 					}
 					return true;
 				}
 				finally
 				{
-					LRightRow.Dispose();
+					rightRow.Dispose();
 				}
 			}
 			finally
 			{
-				LLeftRow.Dispose();
+				leftRow.Dispose();
 			}
 		}
 		
-		protected bool IsSuperset(Program AProgram, Table ALeftTable, Table ARightTable)
+		protected bool IsSuperset(Program program, Table leftTable, Table rightTable)
 		{
-			Row LLeftRow = new Row(AProgram.ValueManager, LeftTableNode.DataType.RowType);
+			Row leftRow = new Row(program.ValueManager, LeftTableNode.DataType.RowType);
 			try
 			{
-				Row LRightRow = new Row(AProgram.ValueManager, RightTableNode.DataType.RowType);
+				Row rightRow = new Row(program.ValueManager, RightTableNode.DataType.RowType);
 				try
 				{
-					if (ARightTable.Supports(CursorCapability.BackwardsNavigable))
-						ARightTable.First();
+					if (rightTable.Supports(CursorCapability.BackwardsNavigable))
+						rightTable.First();
 					else
-						ARightTable.Reset();
-					while (ARightTable.Next())
+						rightTable.Reset();
+					while (rightTable.Next())
 					{
-						ARightTable.Select(LRightRow);
-						bool LHasRow = false;
-						if (ALeftTable.Supports(CursorCapability.BackwardsNavigable))
-							ALeftTable.First();
+						rightTable.Select(rightRow);
+						bool hasRow = false;
+						if (leftTable.Supports(CursorCapability.BackwardsNavigable))
+							leftTable.First();
 						else
-							ALeftTable.Reset();
-						while (ALeftTable.Next())
+							leftTable.Reset();
+						while (leftTable.Next())
 						{
-							ALeftTable.Select(LLeftRow);
-							AProgram.Stack.Push(LLeftRow);
+							leftTable.Select(leftRow);
+							program.Stack.Push(leftRow);
 							try
 							{
-								AProgram.Stack.Push(LRightRow);
+								program.Stack.Push(rightRow);
 								try
 								{
-									object LResult = RowEqualNode.Execute(AProgram);
-									if ((LResult != null) && (bool)LResult)
+									object result = RowEqualNode.Execute(program);
+									if ((result != null) && (bool)result)
 									{
-										LHasRow = true;
+										hasRow = true;
 										break;
 									}
 								}
 								finally
 								{
-									AProgram.Stack.Pop();
+									program.Stack.Pop();
 								}
 							}
 							finally
 							{
-								AProgram.Stack.Pop();
+								program.Stack.Pop();
 							}
 						}
-						if (!LHasRow)
+						if (!hasRow)
 							return false;
 					}
 					return true;
 				}
 				finally
 				{
-					LRightRow.Dispose();
+					rightRow.Dispose();
 				}
 			}
 			finally
 			{
-				LLeftRow.Dispose();
+				leftRow.Dispose();
 			}
 		}
 		
 		protected TableNode LeftTableNode { get { return (TableNode)Nodes[0]; } }
 		protected TableNode RightTableNode { get { return (TableNode)Nodes[1]; } }
-		protected PlanNode RowEqualNode { get { return FRowEqualNode; } }
-		public override object InternalExecute(Program AProgram, object[] AArguments) { return null; }
+		protected PlanNode RowEqualNode { get { return _rowEqualNode; } }
+		public override object InternalExecute(Program program, object[] arguments) { return null; }
 	}
 	
 	// Table comparison operators
@@ -268,18 +268,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// A = B iff A <= B and A >= B
 	public class TableEqualNode : TableComparisonNode
 	{
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			using (Table LLeftTable = (Table)Nodes[0].Execute(AProgram))
+			using (Table leftTable = (Table)Nodes[0].Execute(program))
 			{
-				using (Table LRightTable = (Table)Nodes[1].Execute(AProgram))
+				using (Table rightTable = (Table)Nodes[1].Execute(program))
 				{
 					#if NILPROPOGATION
-					if ((LLeftTable == null) || (LRightTable == null))
+					if ((leftTable == null) || (rightTable == null))
 						return null;
 					#endif
 
-					return IsSubset(AProgram, LLeftTable, LRightTable) && IsSuperset(AProgram, LLeftTable, LRightTable);
+					return IsSubset(program, leftTable, rightTable) && IsSuperset(program, leftTable, rightTable);
 				}
 			}
 		}
@@ -290,18 +290,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// A != B iff A !<= B or A !>= B
 	public class TableNotEqualNode : TableComparisonNode
 	{
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			using (Table LLeftTable = (Table)Nodes[0].Execute(AProgram))
+			using (Table leftTable = (Table)Nodes[0].Execute(program))
 			{
-				using (Table LRightTable = (Table)Nodes[1].Execute(AProgram))
+				using (Table rightTable = (Table)Nodes[1].Execute(program))
 				{
 					#if NILPROPOGATION
-					if ((LLeftTable == null) || (LRightTable == null))
+					if ((leftTable == null) || (rightTable == null))
 						return null;
 					#endif
 
-					return !IsSubset(AProgram, LLeftTable, LRightTable) || !IsSuperset(AProgram, LLeftTable, LRightTable);
+					return !IsSubset(program, leftTable, rightTable) || !IsSuperset(program, leftTable, rightTable);
 				}
 			}
 		}
@@ -313,18 +313,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// A < B iff A <= B and A !>= B
 	public class TableLessNode : TableComparisonNode
 	{
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			using (Table LLeftTable = (Table)Nodes[0].Execute(AProgram))
+			using (Table leftTable = (Table)Nodes[0].Execute(program))
 			{
-				using (Table LRightTable = (Table)Nodes[1].Execute(AProgram))
+				using (Table rightTable = (Table)Nodes[1].Execute(program))
 				{
 					#if NILPROPOGATION
-					if ((LLeftTable == null) || (LRightTable == null))
+					if ((leftTable == null) || (rightTable == null))
 						return null;
 					#endif
 
-					return IsSubset(AProgram, LLeftTable, LRightTable) && !IsSuperset(AProgram, LLeftTable, LRightTable);
+					return IsSubset(program, leftTable, rightTable) && !IsSuperset(program, leftTable, rightTable);
 				}
 			}
 		}
@@ -336,18 +336,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// A <= B iff each row in A is also in B
 	public class TableInclusiveLessNode : TableComparisonNode
 	{
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			using (Table LLeftTable = (Table)Nodes[0].Execute(AProgram))
+			using (Table leftTable = (Table)Nodes[0].Execute(program))
 			{
-				using (Table LRightTable = (Table)Nodes[1].Execute(AProgram))
+				using (Table rightTable = (Table)Nodes[1].Execute(program))
 				{
 					#if NILPROPOGATION
-					if ((LLeftTable == null) || (LRightTable == null))
+					if ((leftTable == null) || (rightTable == null))
 						return null;
 					#endif
 
-					return IsSubset(AProgram, LLeftTable, LRightTable);
+					return IsSubset(program, leftTable, rightTable);
 				}
 			}
 		}
@@ -359,18 +359,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// A > B iff A >= B and A !<= B
 	public class TableGreaterNode : TableComparisonNode
 	{
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			using (Table LLeftTable = (Table)Nodes[0].Execute(AProgram))
+			using (Table leftTable = (Table)Nodes[0].Execute(program))
 			{
-				using (Table LRightTable = (Table)Nodes[1].Execute(AProgram))
+				using (Table rightTable = (Table)Nodes[1].Execute(program))
 				{
 					#if NILPROPOGATION
-					if ((LLeftTable == null) || (LRightTable == null))
+					if ((leftTable == null) || (rightTable == null))
 						return null;
 					#endif
 
-					return IsSuperset(AProgram, LLeftTable, LRightTable) && !IsSubset(AProgram, LLeftTable, LRightTable);
+					return IsSuperset(program, leftTable, rightTable) && !IsSubset(program, leftTable, rightTable);
 				}
 			}
 		}
@@ -382,18 +382,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// A >= B iff each row in B is in A
 	public class TableInclusiveGreaterNode : TableComparisonNode
 	{
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			using (Table LLeftTable = (Table)Nodes[0].Execute(AProgram))
+			using (Table leftTable = (Table)Nodes[0].Execute(program))
 			{
-				using (Table LRightTable = (Table)Nodes[1].Execute(AProgram))
+				using (Table rightTable = (Table)Nodes[1].Execute(program))
 				{
 					#if NILPROPOGATION
-					if ((LLeftTable == null) || (LRightTable == null))
+					if ((leftTable == null) || (rightTable == null))
 						return null;
 					#endif
 
-					return IsSuperset(AProgram, LLeftTable, LRightTable);
+					return IsSuperset(program, leftTable, rightTable);
 				}
 			}
 		}

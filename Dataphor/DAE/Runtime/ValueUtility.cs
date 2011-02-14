@@ -15,49 +15,49 @@ namespace Alphora.Dataphor.DAE.Runtime
 	
 	public static class ValueUtility
 	{
-		public static object ValidateValue(Program AProgram, Schema.ScalarType AType, object AValue)
+		public static object ValidateValue(Program program, Schema.ScalarType type, object tempValue)
 		{
-			return ValidateValue(AProgram, AType, AValue, null);
+			return ValidateValue(program, type, tempValue, null);
 		}
 		
-		public static object ValidateValue(Program AProgram, Schema.ScalarType AType, object AValue, Schema.Operator AFromOperator)
+		public static object ValidateValue(Program program, Schema.ScalarType type, object tempValue, Schema.Operator fromOperator)
 		{
-			AProgram.Stack.Push(AValue);
+			program.Stack.Push(tempValue);
 			try
 			{
-				TableNode.ValidateScalarTypeConstraints(AProgram, AType, false);
-				TableNode.ExecuteScalarTypeValidateHandlers(AProgram, AType, AFromOperator);
+				TableNode.ValidateScalarTypeConstraints(program, type, false);
+				TableNode.ExecuteScalarTypeValidateHandlers(program, type, fromOperator);
 			}
 			finally
 			{
-				AValue = AProgram.Stack.Pop();
+				tempValue = program.Stack.Pop();
 			}
 			
-			return AValue;
+			return tempValue;
 		}
 		
-		public static object DefaultValue(Program AProgram, Schema.ScalarType AType)
+		public static object DefaultValue(Program program, Schema.ScalarType type)
 		{
 			// ScalarType level default trigger handlers
-			AProgram.Stack.Push(null);
+			program.Stack.Push(null);
 			try
 			{
-				if (AType.HasHandlers())
-					foreach (Schema.EventHandler LHandler in AType.EventHandlers)
-						if ((LHandler.EventType & EventType.Default) != 0)
+				if (type.HasHandlers())
+					foreach (Schema.EventHandler handler in type.EventHandlers)
+						if ((handler.EventType & EventType.Default) != 0)
 						{
-							object LResult = LHandler.PlanNode.Execute(AProgram);
-							if ((LResult != null) && (bool)LResult)
-								return AProgram.Stack.Peek(0);
+							object result = handler.PlanNode.Execute(program);
+							if ((result != null) && (bool)result)
+								return program.Stack.Peek(0);
 						}
 			}
 			finally
 			{
-				AProgram.Stack.Pop();
+				program.Stack.Pop();
 			}
 
-			if (AType.Default != null)
-				return AType.Default.Node.Execute(AProgram);
+			if (type.Default != null)
+				return type.Default.Node.Execute(program);
 			else
 				return null;
 		}

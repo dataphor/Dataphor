@@ -16,209 +16,209 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	
 	public class SQLRow : System.Object
 	{
-		public SQLRow(int AColumnCount) : base()
+		public SQLRow(int columnCount) : base()
 		{
-			FData = new object[AColumnCount];
+			_data = new object[columnCount];
 		}
 		
-		private object[] FData;
-		public object this[int AIndex]
+		private object[] _data;
+		public object this[int index]
 		{
-			get { return FData[AIndex]; }
-			set { FData[AIndex] = value; }
+			get { return _data[index]; }
+			set { _data[index] = value; }
 		}
 	}
 	
 	public class SQLRows : System.Object
 	{
-		public const int CInitialCapacity = SQLDeviceCursor.CDefaultBufferSize;
+		public const int InitialCapacity = SQLDeviceCursor.DefaultBufferSize;
 
-		private SQLRow[] FRows = new SQLRow[CInitialCapacity];
+		private SQLRow[] _rows = new SQLRow[InitialCapacity];
 
-		private int FCount = 0;		
-		public int Count { get { return FCount; } }
+		private int _count = 0;		
+		public int Count { get { return _count; } }
 		
-		public SQLRow this[int AIndex] 
+		public SQLRow this[int index] 
 		{ 
-			get { return FRows[AIndex]; } 
-			set { FRows[AIndex] = value; } 
+			get { return _rows[index]; } 
+			set { _rows[index] = value; } 
 		}
 		
-        private void EnsureCapacity(int ARequiredCapacity)
+        private void EnsureCapacity(int requiredCapacity)
         {
-			if (FRows.Length <= ARequiredCapacity)
+			if (_rows.Length <= requiredCapacity)
 			{
-				SQLRow[] LNewRows = new SQLRow[FRows.Length * 2];
-				Array.Copy(FRows, 0, LNewRows, 0, FRows.Length);
-				FRows = LNewRows;
+				SQLRow[] newRows = new SQLRow[_rows.Length * 2];
+				Array.Copy(_rows, 0, newRows, 0, _rows.Length);
+				_rows = newRows;
 			}
         }
         
-        public void Add(SQLRow ARow)
+        public void Add(SQLRow row)
         {
-			EnsureCapacity(FCount);
-			FRows[FCount] = ARow;
-			FCount++;
+			EnsureCapacity(_count);
+			_rows[_count] = row;
+			_count++;
         }
         
         public void Clear()
         {
-			FRows = new SQLRow[CInitialCapacity];
-			FCount = 0;
+			_rows = new SQLRow[InitialCapacity];
+			_count = 0;
         }
 	}
 	
 	public class SQLDeviceCursor : Disposable
 	{
-		public const int CDefaultBufferSize = 10;
+		public const int DefaultBufferSize = 10;
 		
 		public SQLDeviceCursor
 		(
-			SQLDeviceSession ADeviceSession, 
-			SelectStatement AStatement, 
-			bool AIsAggregate,
-			SQLParameters AParameters, 
-			int[] AKeyIndexes,
-			SQLScalarType[] AKeyTypes,
-			SQLParameters AKeyParameters,
-			SQLLockType ALockType,
-			SQLCursorType ACursorType, 
-			SQLIsolationLevel AIsolationLevel
+			SQLDeviceSession deviceSession, 
+			SelectStatement statement, 
+			bool isAggregate,
+			SQLParameters parameters, 
+			int[] keyIndexes,
+			SQLScalarType[] keyTypes,
+			SQLParameters keyParameters,
+			SQLLockType lockType,
+			SQLCursorType cursorType, 
+			SQLIsolationLevel isolationLevel
 		) : base()
 		{
-			FDeviceSession = ADeviceSession;
-			FStatement = AStatement;
-			FIsAggregate = AIsAggregate;
-			FOriginalWhereClause = FStatement.QueryExpression.SelectExpression.WhereClause;
-			FOriginalHavingClause = FStatement.QueryExpression.SelectExpression.HavingClause;
-			FOriginalParameters = AParameters;
-			FParameters = new SQLParameters();
-			FParameters.AddRange(AParameters);
-			FKeyIndexes = AKeyIndexes;
-			FKeyTypes = AKeyTypes;
-			FKeyParameters = AKeyParameters;
-			FLockType = ALockType;
-			FCursorType = ACursorType;
-			FIsolationLevel = AIsolationLevel;
+			_deviceSession = deviceSession;
+			_statement = statement;
+			_isAggregate = isAggregate;
+			_originalWhereClause = _statement.QueryExpression.SelectExpression.WhereClause;
+			_originalHavingClause = _statement.QueryExpression.SelectExpression.HavingClause;
+			_originalParameters = parameters;
+			_parameters = new SQLParameters();
+			_parameters.AddRange(parameters);
+			_keyIndexes = keyIndexes;
+			_keyTypes = keyTypes;
+			_keyParameters = keyParameters;
+			_lockType = lockType;
+			_cursorType = cursorType;
+			_isolationLevel = isolationLevel;
 			EnsureConnection();
-			FIsDeferred = new bool[ColumnCount];
-			for (int LIndex = 0; LIndex < ColumnCount; LIndex++)
-				FIsDeferred[LIndex] = FCursor.IsDeferred(LIndex);
+			_isDeferred = new bool[ColumnCount];
+			for (int index = 0; index < ColumnCount; index++)
+				_isDeferred[index] = _cursor.IsDeferred(index);
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (FConnection != null)
-				FDeviceSession.ReleaseConnection(FConnection, true);
-			base.Dispose(ADisposing);
+			if (_connection != null)
+				_deviceSession.ReleaseConnection(_connection, true);
+			base.Dispose(disposing);
 		}
 		
 		// SQLDeviceSession
-		private SQLDeviceSession FDeviceSession;
-		public SQLDeviceSession DeviceSession { get { return FDeviceSession; } }
+		private SQLDeviceSession _deviceSession;
+		public SQLDeviceSession DeviceSession { get { return _deviceSession; } }
 
-		private SQLLockType FLockType;
-		private SQLCursorType FCursorType;
-		private SQLIsolationLevel FIsolationLevel;
-		private SelectStatement FStatement;
-		private SQLParameters FOriginalParameters;
-		private SQLParameters FParameters;
-		private WhereClause FOriginalWhereClause;
-		private HavingClause FOriginalHavingClause;
-		private WhereClause FRestrictedWhereClause;
-		private HavingClause FRestrictedHavingClause;
-		private int[] FKeyIndexes;
-		private SQLScalarType[] FKeyTypes;
-		private SQLParameters FKeyParameters;
-		private bool FIsRestricted; // indicates whether the statement is in its original state, or has been modified with a restriction condition based on last known position
-		private bool FIsAggregate; // indicates whether the statement is an aggregate statement
+		private SQLLockType _lockType;
+		private SQLCursorType _cursorType;
+		private SQLIsolationLevel _isolationLevel;
+		private SelectStatement _statement;
+		private SQLParameters _originalParameters;
+		private SQLParameters _parameters;
+		private WhereClause _originalWhereClause;
+		private HavingClause _originalHavingClause;
+		private WhereClause _restrictedWhereClause;
+		private HavingClause _restrictedHavingClause;
+		private int[] _keyIndexes;
+		private SQLScalarType[] _keyTypes;
+		private SQLParameters _keyParameters;
+		private bool _isRestricted; // indicates whether the statement is in its original state, or has been modified with a restriction condition based on last known position
+		private bool _isAggregate; // indicates whether the statement is an aggregate statement
 
-		private SQLConnection FConnection;
-		private SQLCommand FCommand;
-		private SQLCursor FCursor;
+		private SQLConnection _connection;
+		private SQLCommand _command;
+		private SQLCursor _cursor;
 		
 		// BufferSize - 0 indicates a disconnected recordset
-		private int FBufferSize = CDefaultBufferSize;
+		private int _bufferSize = DefaultBufferSize;
 		public int BufferSize
 		{
-			get { return FBufferSize; }
-			set { FBufferSize = value; }
+			get { return _bufferSize; }
+			set { _bufferSize = value; }
 		}
 		
 		// Buffer
-		private SQLRows FBuffer = new SQLRows();
-		private int FBufferIndex = -1;
-		private bool FEOF;
+		private SQLRows _buffer = new SQLRows();
+		private int _bufferIndex = -1;
+		private bool _eOF;
 
 		// ReleaseConnection(SQLConnectionHeader) // clears the SQLDeviceCursor reference for the SQLConnectionHeader record in the SQLDeviceSession
-		public void ReleaseConnection(SQLConnectionHeader AConnectionHeader)
+		public void ReleaseConnection(SQLConnectionHeader connectionHeader)
 		{
-			ReleaseConnection(AConnectionHeader, false);
+			ReleaseConnection(connectionHeader, false);
 		}
 		
-		public void ReleaseConnection(SQLConnectionHeader AConnectionHeader, bool ADisposing)		
+		public void ReleaseConnection(SQLConnectionHeader connectionHeader, bool disposing)		
 		{
-			if (!ADisposing)
+			if (!disposing)
 				EnsureStatic();
-			FCursor.Dispose();
-			FCursor = null;
-			FCommand.Dispose();
-			FCommand = null;
-			FConnection = null;
-			AConnectionHeader.DeviceCursor = null;
+			_cursor.Dispose();
+			_cursor = null;
+			_command.Dispose();
+			_command = null;
+			_connection = null;
+			connectionHeader.DeviceCursor = null;
 		}
 		
 		// AcquireConnection(SQLConnectionHeader) // sets the SQLDeviceCursor reference for the SQLConnectionHeader record in the SQLDeviceSession
-		public void AcquireConnection(SQLConnectionHeader AConnectionHeader)
+		public void AcquireConnection(SQLConnectionHeader connectionHeader)
 		{
-			FConnection = AConnectionHeader.Connection;
+			_connection = connectionHeader.Connection;
 			try
 			{
-				FCommand = FConnection.CreateCommand(true);
+				_command = _connection.CreateCommand(true);
 				try
 				{
-					if (FBuffer.Count > 0)
+					if (_buffer.Count > 0)
 						RestrictStatement();
 					else
 						UnrestrictStatement();
 					PrepareStatement();
 
-					FCommand.Statement = FDeviceSession.Device.Emitter.Emit(FStatement);
-					FCommand.Parameters.AddRange(FParameters);
-					FCommand.LockType = FLockType;
+					_command.Statement = _deviceSession.Device.Emitter.Emit(_statement);
+					_command.Parameters.AddRange(_parameters);
+					_command.LockType = _lockType;
 
 					try
 					{
-						FCursor = FCommand.Open(FCursorType, FIsolationLevel);
+						_cursor = _command.Open(_cursorType, _isolationLevel);
 						try
 						{
-							if (FBuffer.Count > 0)
-								FCursor.Next();
-							AConnectionHeader.DeviceCursor = this;
+							if (_buffer.Count > 0)
+								_cursor.Next();
+							connectionHeader.DeviceCursor = this;
 						}
 						catch
 						{
-							FCommand.Close(FCursor);
-							FCursor = null;
+							_command.Close(_cursor);
+							_cursor = null;
 							throw;
 						}
 					}
-					catch (Exception LException)
+					catch (Exception exception)
 					{
-						FDeviceSession.TransactionFailure = FConnection.TransactionFailure;
-						throw FDeviceSession.WrapException(LException);
+						_deviceSession.TransactionFailure = _connection.TransactionFailure;
+						throw _deviceSession.WrapException(exception);
 					}
 				}
 				catch
 				{
-					FCommand.Dispose();
-					FCommand = null;
+					_command.Dispose();
+					_command = null;
 					throw;
 				}
 			}
 			catch
 			{
-				FConnection = null;
+				_connection = null;
 				throw;
 			}
 		}
@@ -330,7 +330,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		
 		private void EnsureRestrictedWhereClause()
 		{
-			if ((FRestrictedWhereClause == null) && (FRestrictedHavingClause == null))
+			if ((_restrictedWhereClause == null) && (_restrictedHavingClause == null))
 			{
 				// modify the statement to return everything greater than the last row in the set, inclusive, for all key colummns
 				/*
@@ -345,268 +345,268 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						else
 							current key column > current origin value
 				*/
-				Expression LColumnExpression;
-				Expression LKeyExpression;
-				Expression LRestrictExpression = null;
+				Expression columnExpression;
+				Expression keyExpression;
+				Expression restrictExpression = null;
 				
-				for (int LKeyIndex = FKeyIndexes.Length - 1; LKeyIndex >= 0; LKeyIndex--)
+				for (int keyIndex = _keyIndexes.Length - 1; keyIndex >= 0; keyIndex--)
 				{
-					LKeyExpression = null;
-					for (int LColumnIndex = 0; LColumnIndex < LKeyIndex; LColumnIndex++)
+					keyExpression = null;
+					for (int columnIndex = 0; columnIndex < keyIndex; columnIndex++)
 					{
-						LColumnExpression =
+						columnExpression =
 							new BinaryExpression
 							(
 								new BinaryExpression
 								(
-									new UnaryExpression("iIsNull", FStatement.QueryExpression.SelectExpression.SelectClause.Columns[FKeyIndexes[LColumnIndex]].Expression),
+									new UnaryExpression("iIsNull", _statement.QueryExpression.SelectExpression.SelectClause.Columns[_keyIndexes[columnIndex]].Expression),
 									"iAnd",
-									new UnaryExpression("iIsNull", new QueryParameterExpression(FStatement.QueryExpression.SelectExpression.SelectClause.Columns[FKeyIndexes[LColumnIndex]].ColumnAlias))
+									new UnaryExpression("iIsNull", new QueryParameterExpression(_statement.QueryExpression.SelectExpression.SelectClause.Columns[_keyIndexes[columnIndex]].ColumnAlias))
 								),
 								"iOr",
 								new BinaryExpression
 								(
-									FStatement.QueryExpression.SelectExpression.SelectClause.Columns[FKeyIndexes[LColumnIndex]].Expression,
+									_statement.QueryExpression.SelectExpression.SelectClause.Columns[_keyIndexes[columnIndex]].Expression,
 									"iEqual", 
-									new QueryParameterExpression(FStatement.QueryExpression.SelectExpression.SelectClause.Columns[FKeyIndexes[LColumnIndex]].ColumnAlias)
+									new QueryParameterExpression(_statement.QueryExpression.SelectExpression.SelectClause.Columns[_keyIndexes[columnIndex]].ColumnAlias)
 								)
 							);
 							
-						if (LKeyExpression != null)
-							LKeyExpression = new BinaryExpression(LKeyExpression, "iAnd", LColumnExpression);
+						if (keyExpression != null)
+							keyExpression = new BinaryExpression(keyExpression, "iAnd", columnExpression);
 						else
-							LKeyExpression = LColumnExpression;
+							keyExpression = columnExpression;
 					}
 					
-					if (FStatement.OrderClause.Columns[LKeyIndex].Ascending)
+					if (_statement.OrderClause.Columns[keyIndex].Ascending)
 					{
-						if (LKeyIndex == (FKeyIndexes.Length - 1))
-							LColumnExpression =
+						if (keyIndex == (_keyIndexes.Length - 1))
+							columnExpression =
 								new BinaryExpression
 								(
-									new UnaryExpression("iIsNull", new QueryParameterExpression(FStatement.QueryExpression.SelectExpression.SelectClause.Columns[FKeyIndexes[LKeyIndex]].ColumnAlias)),
+									new UnaryExpression("iIsNull", new QueryParameterExpression(_statement.QueryExpression.SelectExpression.SelectClause.Columns[_keyIndexes[keyIndex]].ColumnAlias)),
 									"iOr",
 									new BinaryExpression
 									(
-										FStatement.QueryExpression.SelectExpression.SelectClause.Columns[FKeyIndexes[LKeyIndex]].Expression,
+										_statement.QueryExpression.SelectExpression.SelectClause.Columns[_keyIndexes[keyIndex]].Expression,
 										"iInclusiveGreater",
-										new QueryParameterExpression(FStatement.QueryExpression.SelectExpression.SelectClause.Columns[FKeyIndexes[LKeyIndex]].ColumnAlias)
+										new QueryParameterExpression(_statement.QueryExpression.SelectExpression.SelectClause.Columns[_keyIndexes[keyIndex]].ColumnAlias)
 									)
 								);
 						else
-							LColumnExpression =
+							columnExpression =
 								new BinaryExpression
 								(
 									new BinaryExpression
 									(
-										new UnaryExpression("iNot", new UnaryExpression("iIsNull", FStatement.QueryExpression.SelectExpression.SelectClause.Columns[FKeyIndexes[LKeyIndex]].Expression)),
+										new UnaryExpression("iNot", new UnaryExpression("iIsNull", _statement.QueryExpression.SelectExpression.SelectClause.Columns[_keyIndexes[keyIndex]].Expression)),
 										"iAnd",
-										new UnaryExpression("iIsNull", new QueryParameterExpression(FStatement.QueryExpression.SelectExpression.SelectClause.Columns[FKeyIndexes[LKeyIndex]].ColumnAlias))
+										new UnaryExpression("iIsNull", new QueryParameterExpression(_statement.QueryExpression.SelectExpression.SelectClause.Columns[_keyIndexes[keyIndex]].ColumnAlias))
 									),
 									"iOr",
 									new BinaryExpression
 									(
-										FStatement.QueryExpression.SelectExpression.SelectClause.Columns[FKeyIndexes[LKeyIndex]].Expression,
+										_statement.QueryExpression.SelectExpression.SelectClause.Columns[_keyIndexes[keyIndex]].Expression,
 										"iGreater",
-										new QueryParameterExpression(FStatement.QueryExpression.SelectExpression.SelectClause.Columns[FKeyIndexes[LKeyIndex]].ColumnAlias)
+										new QueryParameterExpression(_statement.QueryExpression.SelectExpression.SelectClause.Columns[_keyIndexes[keyIndex]].ColumnAlias)
 									)
 								);
 					}
 					else
 					{
-						if (LKeyIndex == (FKeyIndexes.Length - 1))
-							LColumnExpression =
+						if (keyIndex == (_keyIndexes.Length - 1))
+							columnExpression =
 								new BinaryExpression
 								(
-									new UnaryExpression("iIsNull", FStatement.QueryExpression.SelectExpression.SelectClause.Columns[FKeyIndexes[LKeyIndex]].Expression),
+									new UnaryExpression("iIsNull", _statement.QueryExpression.SelectExpression.SelectClause.Columns[_keyIndexes[keyIndex]].Expression),
 									"iOr",
 									new BinaryExpression
 									(
-										FStatement.QueryExpression.SelectExpression.SelectClause.Columns[FKeyIndexes[LKeyIndex]].Expression,
+										_statement.QueryExpression.SelectExpression.SelectClause.Columns[_keyIndexes[keyIndex]].Expression,
 										"iInclusiveLess", 
-										new QueryParameterExpression(FStatement.QueryExpression.SelectExpression.SelectClause.Columns[FKeyIndexes[LKeyIndex]].ColumnAlias)
+										new QueryParameterExpression(_statement.QueryExpression.SelectExpression.SelectClause.Columns[_keyIndexes[keyIndex]].ColumnAlias)
 									)
 								);
 						else
-							LColumnExpression =
+							columnExpression =
 								new BinaryExpression
 								(
 									new BinaryExpression
 									(
-										new UnaryExpression("iIsNull", FStatement.QueryExpression.SelectExpression.SelectClause.Columns[FKeyIndexes[LKeyIndex]].Expression),
+										new UnaryExpression("iIsNull", _statement.QueryExpression.SelectExpression.SelectClause.Columns[_keyIndexes[keyIndex]].Expression),
 										"iAnd",
-										new UnaryExpression("iNot", new UnaryExpression("iIsNull", new QueryParameterExpression(FStatement.QueryExpression.SelectExpression.SelectClause.Columns[FKeyIndexes[LKeyIndex]].ColumnAlias)))
+										new UnaryExpression("iNot", new UnaryExpression("iIsNull", new QueryParameterExpression(_statement.QueryExpression.SelectExpression.SelectClause.Columns[_keyIndexes[keyIndex]].ColumnAlias)))
 									),
 									"iOr",
 									new BinaryExpression
 									(
-										FStatement.QueryExpression.SelectExpression.SelectClause.Columns[FKeyIndexes[LKeyIndex]].Expression,
+										_statement.QueryExpression.SelectExpression.SelectClause.Columns[_keyIndexes[keyIndex]].Expression,
 										"iLess", 
-										new QueryParameterExpression(FStatement.QueryExpression.SelectExpression.SelectClause.Columns[FKeyIndexes[LKeyIndex]].ColumnAlias)
+										new QueryParameterExpression(_statement.QueryExpression.SelectExpression.SelectClause.Columns[_keyIndexes[keyIndex]].ColumnAlias)
 									)
 								);
 					}
 							
-					if (LKeyExpression != null)
-						LKeyExpression = new BinaryExpression(LKeyExpression, "iAnd", LColumnExpression);
+					if (keyExpression != null)
+						keyExpression = new BinaryExpression(keyExpression, "iAnd", columnExpression);
 					else
-						LKeyExpression = LColumnExpression;
+						keyExpression = columnExpression;
 						
-					if (LRestrictExpression != null)
-						LRestrictExpression = new BinaryExpression(LRestrictExpression, "iOr", LKeyExpression);
+					if (restrictExpression != null)
+						restrictExpression = new BinaryExpression(restrictExpression, "iOr", keyExpression);
 					else
-						LRestrictExpression = LKeyExpression;
+						restrictExpression = keyExpression;
 				}
 				
-				if (FIsAggregate)
+				if (_isAggregate)
 				{
-					FRestrictedHavingClause = new HavingClause();
-					if (FOriginalHavingClause != null)
-						FRestrictedHavingClause.Expression = new BinaryExpression(FOriginalHavingClause.Expression, "iAnd", LRestrictExpression);
+					_restrictedHavingClause = new HavingClause();
+					if (_originalHavingClause != null)
+						_restrictedHavingClause.Expression = new BinaryExpression(_originalHavingClause.Expression, "iAnd", restrictExpression);
 					else
-						FRestrictedHavingClause.Expression = LRestrictExpression;
+						_restrictedHavingClause.Expression = restrictExpression;
 				}
 				else
 				{
-					FRestrictedWhereClause = new WhereClause();
-					if (FOriginalWhereClause != null)
-						FRestrictedWhereClause.Expression = new BinaryExpression(FOriginalWhereClause.Expression, "iAnd", LRestrictExpression);
+					_restrictedWhereClause = new WhereClause();
+					if (_originalWhereClause != null)
+						_restrictedWhereClause.Expression = new BinaryExpression(_originalWhereClause.Expression, "iAnd", restrictExpression);
 					else
-						FRestrictedWhereClause.Expression = LRestrictExpression;
+						_restrictedWhereClause.Expression = restrictExpression;
 				}
 			}
 		}
 		
 		private void RestrictStatement()
 		{
-			if (!FIsRestricted)
+			if (!_isRestricted)
 			{
 				EnsureRestrictedWhereClause();
-				if (FRestrictedWhereClause != null)
-					FStatement.QueryExpression.SelectExpression.WhereClause = FRestrictedWhereClause;
-				if (FRestrictedHavingClause != null)
-					FStatement.QueryExpression.SelectExpression.HavingClause = FRestrictedHavingClause;
-				FParameters.Clear();
-				FParameters.AddRange(FOriginalParameters);
-				FParameters.AddRange(FKeyParameters);
+				if (_restrictedWhereClause != null)
+					_statement.QueryExpression.SelectExpression.WhereClause = _restrictedWhereClause;
+				if (_restrictedHavingClause != null)
+					_statement.QueryExpression.SelectExpression.HavingClause = _restrictedHavingClause;
+				_parameters.Clear();
+				_parameters.AddRange(_originalParameters);
+				_parameters.AddRange(_keyParameters);
 
-				FIsRestricted = true;
+				_isRestricted = true;
 			}
 		}
 		
 		private void UnrestrictStatement()
 		{
-			if (FIsRestricted)
+			if (_isRestricted)
 			{
-				FStatement.QueryExpression.SelectExpression.WhereClause = FOriginalWhereClause;
-				FStatement.QueryExpression.SelectExpression.HavingClause = FOriginalHavingClause;
-				FParameters.Clear();
-				FParameters.AddRange(FOriginalParameters);
+				_statement.QueryExpression.SelectExpression.WhereClause = _originalWhereClause;
+				_statement.QueryExpression.SelectExpression.HavingClause = _originalHavingClause;
+				_parameters.Clear();
+				_parameters.AddRange(_originalParameters);
 				
-				FIsRestricted = false;
+				_isRestricted = false;
 			}
 		}
 		
 		private void PrepareStatement()
 		{
-			if (FIsRestricted)
-				for (int LIndex = 0; LIndex < FKeyIndexes.Length; LIndex++)
+			if (_isRestricted)
+				for (int index = 0; index < _keyIndexes.Length; index++)
 					if (DeviceSession.Device.UseParametersForCursors)
-						FKeyParameters[LIndex].Value = FBuffer[FBuffer.Count - 1][FKeyIndexes[LIndex]];
+						_keyParameters[index].Value = _buffer[_buffer.Count - 1][_keyIndexes[index]];
 					else
 					{
-						object LValue = FBuffer[FBuffer.Count - 1][FKeyIndexes[LIndex]];
-						object LScalar;
-						if (IsNull(LValue))
-							LScalar = null;
+						object tempValue = _buffer[_buffer.Count - 1][_keyIndexes[index]];
+						object scalar;
+						if (IsNull(tempValue))
+							scalar = null;
 						else
-							LScalar = FKeyTypes[LIndex].ToScalar(DeviceSession.ServerProcess.ValueManager, LValue);
-						FKeyParameters[LIndex].Literal = FKeyTypes[LIndex].ToLiteral(DeviceSession.ServerProcess.ValueManager, LScalar);
+							scalar = _keyTypes[index].ToScalar(DeviceSession.ServerProcess.ValueManager, tempValue);
+						_keyParameters[index].Literal = _keyTypes[index].ToLiteral(DeviceSession.ServerProcess.ValueManager, scalar);
 					}
 		}
 		
 		private void EnsureConnection()
 		{
-			if (FConnection == null)
-				AcquireConnection(FDeviceSession.RequestConnection(FIsolationLevel == SQLIsolationLevel.ReadUncommitted));
+			if (_connection == null)
+				AcquireConnection(_deviceSession.RequestConnection(_isolationLevel == SQLIsolationLevel.ReadUncommitted));
 		}
 		
 		public SQLRow ReadRow()
 		{
-			SQLRow LRow = new SQLRow(ColumnCount);
-			for (int LIndex = 0; LIndex < ColumnCount; LIndex++)
-				LRow[LIndex] = FCursor[LIndex];
-			return LRow;
+			SQLRow row = new SQLRow(ColumnCount);
+			for (int index = 0; index < ColumnCount; index++)
+				row[index] = _cursor[index];
+			return row;
 		}
 
 		// ColumnCount
-		private int FColumnCount = -1;
+		private int _columnCount = -1;
 		public int ColumnCount 
 		{ 
 			get 
 			{ 
-				if (FColumnCount == -1)
-					FColumnCount = FCursor.ColumnCount;
-				return FColumnCount;
+				if (_columnCount == -1)
+					_columnCount = _cursor.ColumnCount;
+				return _columnCount;
 			} 
 		}
 		
 		// IsDeferred
-		private bool[] FIsDeferred;
-		public bool IsDeferred(int AIndex)
+		private bool[] _isDeferred;
+		public bool IsDeferred(int index)
 		{
-			return FIsDeferred[AIndex];
+			return _isDeferred[index];
 		}
 
 		// Next
 		public bool Next() 
 		{
-			FBufferIndex++;
-			if (FBufferIndex >= FBuffer.Count)
+			_bufferIndex++;
+			if (_bufferIndex >= _buffer.Count)
 				FetchNext(true);
-			return FBufferIndex < FBuffer.Count;
+			return _bufferIndex < _buffer.Count;
 		}
 		
-		private void FetchNext(bool AClear)
+		private void FetchNext(bool clear)
 		{
-			if (!FEOF)
+			if (!_eOF)
 			{
 				EnsureConnection();
-				if (AClear)
-					FBuffer.Clear();
+				if (clear)
+					_buffer.Clear();
 
 				try
 				{
 					// Fill the buffer
 					while (true)
 					{
-						FDeviceSession.ServerProcess.CheckAborted();	// Yield to proces abort
-						if (FCursor.Next())
+						_deviceSession.ServerProcess.CheckAborted();	// Yield to proces abort
+						if (_cursor.Next())
 						{
-							FBuffer.Add(ReadRow());
-							if ((FBufferSize > 0) && FBuffer.Count >= FBufferSize)
+							_buffer.Add(ReadRow());
+							if ((_bufferSize > 0) && _buffer.Count >= _bufferSize)
 								break;
 						}
 						else
 						{
-							FEOF = true;
+							_eOF = true;
 							// OPTIMIZATION: if browse isolation and EOF, release the connection
-							if (FIsolationLevel == SQLIsolationLevel.ReadUncommitted)
-								FDeviceSession.ReleaseConnection(FConnection, false);
+							if (_isolationLevel == SQLIsolationLevel.ReadUncommitted)
+								_deviceSession.ReleaseConnection(_connection, false);
 							break;
 						}
 					}
 				}
-				catch (Exception LException)
+				catch (Exception exception)
 				{
-					if (FConnection != null)
-						FDeviceSession.TransactionFailure = FConnection.TransactionFailure;
-					throw FDeviceSession.WrapException(LException);
+					if (_connection != null)
+						_deviceSession.TransactionFailure = _connection.TransactionFailure;
+					throw _deviceSession.WrapException(exception);
 				}
 				finally
 				{
-					if (AClear)
-						FBufferIndex = 0;
+					if (clear)
+						_bufferIndex = 0;
 				}
 			}
 		}
@@ -614,50 +614,50 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		// EnsureStatic
 		private void EnsureStatic()
 		{
-			if (FCursorType == SQLCursorType.Static)
+			if (_cursorType == SQLCursorType.Static)
 			{
-				if (!FEOF)
+				if (!_eOF)
 				{
-					FBufferSize = 0;
+					_bufferSize = 0;
 					FetchNext(false);
 				}
 			}
 		}
 		
 		// Data 
-		public object this[int AIndex] { get { return FBuffer[FBufferIndex][AIndex]; } }
+		public object this[int index] { get { return _buffer[_bufferIndex][index]; } }
 		
-		protected bool IsNull(object AValue)
+		protected bool IsNull(object tempValue)
 		{
-			return (AValue == null) || (AValue == System.DBNull.Value);
+			return (tempValue == null) || (tempValue == System.DBNull.Value);
 		}
 		
 		// IsNull
-		public bool IsNull(int AIndex)
+		public bool IsNull(int index)
 		{
-			return IsNull(this[AIndex]);
+			return IsNull(this[index]);
 		}
 		
 		// OpenDeferredStream
-		public Stream OpenDeferredStream(int AIndex)
+		public Stream OpenDeferredStream(int index)
 		{
-			object LValue = this[AIndex];
-			if (!((LValue == null) || (LValue == System.DBNull.Value)))
+			object tempValue = this[index];
+			if (!((tempValue == null) || (tempValue == System.DBNull.Value)))
 			{
-				if (LValue is string)
+				if (tempValue is string)
 				{
-					MemoryStream LMemoryStream = new MemoryStream();
-					using (StreamWriter LWriter = new StreamWriter(LMemoryStream))
+					MemoryStream memoryStream = new MemoryStream();
+					using (StreamWriter writer = new StreamWriter(memoryStream))
 					{
-						LWriter.Write(LValue);
-						LWriter.Flush();
-						return new MemoryStream(LMemoryStream.GetBuffer(), 0, LMemoryStream.GetBuffer().Length, false, true);
+						writer.Write(tempValue);
+						writer.Flush();
+						return new MemoryStream(memoryStream.GetBuffer(), 0, memoryStream.GetBuffer().Length, false, true);
 					}
 				}
-				else if (LValue is byte[])
+				else if (tempValue is byte[])
 				{
-					byte[] LByteValue = (byte[])LValue;
-					return new MemoryStream(LByteValue, 0, LByteValue.Length, false, true);
+					byte[] byteValue = (byte[])tempValue;
+					return new MemoryStream(byteValue, 0, byteValue.Length, false, true);
 				}
 				else
 					throw new ConnectionException(ConnectionException.Codes.UnableToConvertDeferredStreamValue);

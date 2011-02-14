@@ -16,23 +16,23 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// <summary>
 		/// Copies a delimited section out of a given script.
 		/// </summary>
-		public static string CopySection(string AScript, LineInfo ALineInfo)
+		public static string CopySection(string script, LineInfo lineInfo)
 		{
-			int LPos = 0;
-			for (int LIndex = 1; LIndex < ALineInfo.Line; LIndex++)
-				while (AScript[LPos++] != '\n');
+			int pos = 0;
+			for (int index = 1; index < lineInfo.Line; index++)
+				while (script[pos++] != '\n');
 				
-			for (int LIndex = 1; LIndex < ALineInfo.LinePos; LIndex++)
-				LPos++;
+			for (int index = 1; index < lineInfo.LinePos; index++)
+				pos++;
 				
-			int LEndPos = LPos;
-			for (int LIndex = ALineInfo.Line; LIndex < ALineInfo.EndLine; LIndex++)
-				while (AScript[LEndPos++] != '\n');
+			int endPos = pos;
+			for (int index = lineInfo.Line; index < lineInfo.EndLine; index++)
+				while (script[endPos++] != '\n');
 				
-			for (int LIndex = 1; LIndex < ALineInfo.EndLinePos; LIndex++)
-				LEndPos++;
+			for (int index = 1; index < lineInfo.EndLinePos; index++)
+				endPos++;
 				
-			return AScript.Substring(LPos, LEndPos - LPos);
+			return script.Substring(pos, endPos - pos);
 		}
 	}
 }

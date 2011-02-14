@@ -27,30 +27,30 @@ namespace Alphora.Dataphor.DAE.Client
 	{
 		public TableDataSet()
 		{
-			FMasterLink = new MasterDataLink(this);
-			FMasterLink.OnDataChanged += new DataLinkHandler(MasterDataChanged);
-			FMasterLink.OnRowChanged += new DataLinkFieldHandler(MasterRowChanged);
-			FMasterLink.OnStateChanged += new DataLinkHandler(MasterStateChanged);
-			FMasterLink.OnPrepareToPost += new DataLinkHandler(MasterPrepareToPost);
-			FMasterLink.OnPrepareToCancel += new DataLinkHandler(MasterPrepareToCancel);
+			_masterLink = new MasterDataLink(this);
+			_masterLink.OnDataChanged += new DataLinkHandler(MasterDataChanged);
+			_masterLink.OnRowChanged += new DataLinkFieldHandler(MasterRowChanged);
+			_masterLink.OnStateChanged += new DataLinkHandler(MasterStateChanged);
+			_masterLink.OnPrepareToPost += new DataLinkHandler(MasterPrepareToPost);
+			_masterLink.OnPrepareToCancel += new DataLinkHandler(MasterPrepareToCancel);
 		}
 
-		protected override void InternalDispose(bool ADisposing)
+		protected override void InternalDispose(bool disposing)
 		{
 			try
 			{
-				base.InternalDispose(ADisposing);
+				base.InternalDispose(disposing);
 			}
 			finally
 			{
-				if (FMasterLink != null)
+				if (_masterLink != null)
 				{
-					FMasterLink.OnPrepareToPost -= new DataLinkHandler(MasterPrepareToPost);
-					FMasterLink.OnStateChanged -= new DataLinkHandler(MasterStateChanged);
-					FMasterLink.OnRowChanged -= new DataLinkFieldHandler(MasterRowChanged);
-					FMasterLink.OnDataChanged -= new DataLinkHandler(MasterDataChanged);
-					FMasterLink.Dispose();
-					FMasterLink = null;
+					_masterLink.OnPrepareToPost -= new DataLinkHandler(MasterPrepareToPost);
+					_masterLink.OnStateChanged -= new DataLinkHandler(MasterStateChanged);
+					_masterLink.OnRowChanged -= new DataLinkFieldHandler(MasterRowChanged);
+					_masterLink.OnDataChanged -= new DataLinkHandler(MasterDataChanged);
+					_masterLink.Dispose();
+					_masterLink = null;
 				}
 			}
 		}
@@ -58,17 +58,17 @@ namespace Alphora.Dataphor.DAE.Client
 		#region Master/Detail
 
 		// DetailKey
-		private Schema.Key FDetailKey;
+		private Schema.Key _detailKey;
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public Schema.Key DetailKey
 		{
-			get { return FDetailKey; }
+			get { return _detailKey; }
 			set
 			{
-				if (FDetailKey != value)
+				if (_detailKey != value)
 				{
-					FDetailKey = value;
+					_detailKey = value;
 					if (Active)
 						CursorSetChanged(null, true);
 				}
@@ -80,7 +80,7 @@ namespace Alphora.Dataphor.DAE.Client
 		[Description("Detail key names")]
 		public string DetailKeyNames
 		{
-			get { return GetNamesFromKey(FDetailKey); }
+			get { return GetNamesFromKey(_detailKey); }
 			set
 			{
 				if (DetailKeyNames != value)
@@ -89,17 +89,17 @@ namespace Alphora.Dataphor.DAE.Client
 		}
 
 		// MasterKey
-		private Schema.Key FMasterKey;
+		private Schema.Key _masterKey;
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public Schema.Key MasterKey
 		{
-			get { return FMasterKey; }
+			get { return _masterKey; }
 			set
 			{
-				if (FMasterKey != value)
+				if (_masterKey != value)
 				{
-					FMasterKey = value;
+					_masterKey = value;
 					if (Active)
 						CursorSetChanged(null, true);
 				}
@@ -111,7 +111,7 @@ namespace Alphora.Dataphor.DAE.Client
 		[Description("Master key names")]
 		public string MasterKeyNames
 		{
-			get { return GetNamesFromKey(FMasterKey); }
+			get { return GetNamesFromKey(_masterKey); }
 			set
 			{
 				if (MasterKeyNames != value)
@@ -120,28 +120,28 @@ namespace Alphora.Dataphor.DAE.Client
 		}
 		
 		// MasterSource
-		private DataLink FMasterLink;
+		private DataLink _masterLink;
 		[DefaultValue(null)]
 		[Category("Behavior")]
 		[Description("Master source")]
 		public DataSource MasterSource
 		{
-			get { return FMasterLink.Source; }
+			get { return _masterLink.Source; }
 			set
 			{
-				if (FMasterLink.Source != value)
+				if (_masterLink.Source != value)
 				{
 					if (IsLinkedTo(value))
 						throw new ClientException(ClientException.Codes.CircularLink);
-					FMasterLink.Source = value;
+					_masterLink.Source = value;
 				}
 			}
 		}
 
-		public bool IsDetailKey(string AColumnName)
+		public bool IsDetailKey(string columnName)
 		{
 			if (IsMasterSetup())
-				return DetailKey.Columns.Contains(AColumnName);
+				return DetailKey.Columns.Contains(columnName);
 			else
 				return false;
 		}
@@ -151,23 +151,23 @@ namespace Alphora.Dataphor.DAE.Client
 			// The invariant is the first non-empty intersection of any key of the master table type with the master key
 			if (IsMasterSetup())
 			{
-				List<string> LInvariant = new List<string>();
-				foreach (Schema.Key LKey in MasterSource.DataSet.TableVar.Keys)
+				List<string> invariant = new List<string>();
+				foreach (Schema.Key key in MasterSource.DataSet.TableVar.Keys)
 				{
-					foreach (Schema.TableVarColumn LColumn in LKey.Columns)
+					foreach (Schema.TableVarColumn column in key.Columns)
 					{
-						int LIndex = FMasterKey.Columns.IndexOfName(LColumn.Name);
-						if (LIndex >= 0)
-							LInvariant.Add(FDetailKey.Columns[LIndex].Name);
+						int index = _masterKey.Columns.IndexOfName(column.Name);
+						if (index >= 0)
+							invariant.Add(_detailKey.Columns[index].Name);
 					}
-					if (LInvariant.Count > 0)
-						return LInvariant.ToArray();
+					if (invariant.Count > 0)
+						return invariant.ToArray();
 				}
 			}
 			return new string[]{};
 		}
 		
-		protected virtual void MasterStateChanged(DataLink ALink, DataSet ADataSet)
+		protected virtual void MasterStateChanged(DataLink link, DataSet dataSet)
 		{
 			if (Active)
 			{
@@ -181,41 +181,41 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 
-		protected virtual void MasterPrepareToPost(DataLink ALink, DataSet ADataSet)
+		protected virtual void MasterPrepareToPost(DataLink link, DataSet dataSet)
 		{
 			if (Active)
 				EnsureBrowseState();
 		}
 
-		protected virtual void MasterPrepareToCancel(DataLink ALink, DataSet ADataSet)
+		protected virtual void MasterPrepareToCancel(DataLink link, DataSet dataSet)
 		{
 			if (Active)
 				EnsureBrowseState(false);
 		}
 
-		protected virtual void MasterDataChanged(DataLink ALink, DataSet ADataSet)
+		protected virtual void MasterDataChanged(DataLink link, DataSet dataSet)
 		{
 			if (Active)
 				CursorSetChanged(null, false);
 		}
 		
-		protected virtual void MasterRowChanged(DataLink ALInk, DataSet ADataSet, DataField AField)
+		protected virtual void MasterRowChanged(DataLink lInk, DataSet dataSet, DataField field)
 		{
-			if (Active && ((AField == null) || MasterKey.Columns.Contains(AField.ColumnName)))
+			if (Active && ((field == null) || MasterKey.Columns.Contains(field.ColumnName)))
 				CursorSetChanged(null, false);
 		}
 
-		public bool IsLinkedTo(DataSource ASource)
+		public bool IsLinkedTo(DataSource source)
 		{
-			DataSet LDataSet;
-			while (ASource != null)
+			DataSet dataSet;
+			while (source != null)
 			{
-				LDataSet = ASource.DataSet;
-				if (LDataSet == null)
+				dataSet = source.DataSet;
+				if (dataSet == null)
 					break;
-				if (LDataSet == this)
+				if (dataSet == this)
 					return true;
-				ASource = (LDataSet is TableDataSet) ? ((TableDataSet)LDataSet).MasterSource : null;
+				source = (dataSet is TableDataSet) ? ((TableDataSet)dataSet).MasterSource : null;
 			}
 			return false;
 		}
@@ -225,12 +225,12 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			if (IsMasterSetup())
 			{
-				TableDataSet LDataSet = MasterSource.DataSet as TableDataSet;
-				bool LIsMasterValid = (LDataSet == null) || (!LDataSet.IsDetail() || LDataSet.IsMasterValid());
-				if (LIsMasterValid && !MasterSource.DataSet.IsEmpty())
+				TableDataSet dataSet = MasterSource.DataSet as TableDataSet;
+				bool isMasterValid = (dataSet == null) || (!dataSet.IsDetail() || dataSet.IsMasterValid());
+				if (isMasterValid && !MasterSource.DataSet.IsEmpty())
 				{
-					foreach (DAE.Schema.TableVarColumn LColumn in FMasterKey.Columns)
-						if (!(MasterSource.DataSet.Fields[LColumn.Name].HasValue()))
+					foreach (DAE.Schema.TableVarColumn column in _masterKey.Columns)
+						if (!(MasterSource.DataSet.Fields[column.Name].HasValue()))
 							return false;
 					return true;
 				}
@@ -246,11 +246,11 @@ namespace Alphora.Dataphor.DAE.Client
 		/// <summary> Posts each detail table of this dataset. </summary>
 		public void PostDetails()
 		{
-			foreach (DataLink LLink in EnumerateLinks())
+			foreach (DataLink link in EnumerateLinks())
 			{
-				MasterDataLink LMasterLink = LLink as MasterDataLink;
-				if (LMasterLink != null)
-					LMasterLink.DetailDataSet.Post();	// A post while not in insert or edit state does nothing
+				MasterDataLink masterLink = link as MasterDataLink;
+				if (masterLink != null)
+					masterLink.DetailDataSet.Post();	// A post while not in insert or edit state does nothing
 			}
 		}
 
@@ -262,69 +262,69 @@ namespace Alphora.Dataphor.DAE.Client
 				(MasterSource != null) &&
 				(MasterSource.DataSet != null) &&
 				(MasterSource.DataSet.Active) &&
-				(FMasterKey != null) &&
-				(FDetailKey != null);
+				(_masterKey != null) &&
+				(_detailKey != null);
 		}
 		
 		/// <summary> Defaults the key columns of a row matching a subset of the type of this DataSet with those of the Master. </summary>
-		public void InitializeFromMaster(Row ARow)
+		public void InitializeFromMaster(Row row)
 		{
 			if (IsMasterSetup() && !MasterSource.DataSet.IsEmpty())
 			{
-				DataField LField;
-				for (int LIndex = 0; LIndex < FMasterKey.Columns.Count; LIndex++)
-					if (ARow.DataType.Columns.Contains(FDetailKey.Columns[LIndex].Name))
+				DataField field;
+				for (int index = 0; index < _masterKey.Columns.Count; index++)
+					if (row.DataType.Columns.Contains(_detailKey.Columns[index].Name))
 					{
-						LField = MasterSource.DataSet.Fields[FMasterKey.Columns[LIndex].Name];
-						if (LField.HasValue())
-							ARow[FDetailKey.Columns[LIndex].Name] = LField.Value;
+						field = MasterSource.DataSet.Fields[_masterKey.Columns[index].Name];
+						if (field.HasValue())
+							row[_detailKey.Columns[index].Name] = field.Value;
 					}
 			}
 		}
 		
 		/// <summary> Initializes row values with default data. </summary>
-		protected override void InternalInitializeRow(Row ARow)
+		protected override void InternalInitializeRow(Row row)
 		{
 			Process.BeginTransaction(IsolationLevel);
 			try
 			{
 				if (IsMasterSetup() && !MasterSource.DataSet.IsEmpty())
 				{
-					Row LOriginalRow = new Row(ARow.Manager, ARow.DataType);
+					Row originalRow = new Row(row.Manager, row.DataType);
 					try
 					{
-						Schema.TableVarColumn LColumn;
-						DataField LField;
-						DataField LDetailField;
-						for (int LIndex = 0; LIndex < FMasterKey.Columns.Count; LIndex++)
+						Schema.TableVarColumn column;
+						DataField field;
+						DataField detailField;
+						for (int index = 0; index < _masterKey.Columns.Count; index++)
 						{
-							LColumn = FMasterKey.Columns[LIndex];
-							LField = MasterSource.DataSet.Fields[LColumn.Name];
-							if (FFields.Contains(FDetailKey.Columns[LIndex].Name))
+							column = _masterKey.Columns[index];
+							field = MasterSource.DataSet.Fields[column.Name];
+							if (_fields.Contains(_detailKey.Columns[index].Name))
 							{
-								LDetailField = Fields[FDetailKey.Columns[LIndex].Name];
-								if (LField.HasValue())
+								detailField = Fields[_detailKey.Columns[index].Name];
+								if (field.HasValue())
 								{
-									Row LSaveOldRow = FOldRow;
-									FOldRow = LOriginalRow;
+									Row saveOldRow = _oldRow;
+									_oldRow = originalRow;
 									try
 									{						
-										ARow[LDetailField.Name] = LField.Value;
+										row[detailField.Name] = field.Value;
 										try
 										{
-											FIsModified = InternalColumnChanging(LDetailField, LOriginalRow, ARow) || FIsModified;
+											_isModified = InternalColumnChanging(detailField, originalRow, row) || _isModified;
 										}
 										catch
 										{
-											ARow.ClearValue(LDetailField.Name);
+											row.ClearValue(detailField.Name);
 											throw;
 										}
 										
-										FIsModified = InternalColumnChanged(LDetailField, LOriginalRow, ARow) || FIsModified;
+										_isModified = InternalColumnChanged(detailField, originalRow, row) || _isModified;
 									}
 									finally
 									{
-										FOldRow = LSaveOldRow;
+										_oldRow = saveOldRow;
 									}
 								}
 							}
@@ -332,18 +332,18 @@ namespace Alphora.Dataphor.DAE.Client
 					}
 					finally
 					{
-						LOriginalRow.Dispose();
+						originalRow.Dispose();
 					}
 				}
 					
-				bool LSaveIsModified = FIsModified;
+				bool saveIsModified = _isModified;
 				try
 				{
-					base.InternalInitializeRow(ARow);
+					base.InternalInitializeRow(row);
 				}
 				finally
 				{
-					FIsModified = LSaveIsModified;
+					_isModified = saveIsModified;
 				}
 
 				Process.CommitTransaction();
@@ -360,44 +360,44 @@ namespace Alphora.Dataphor.DAE.Client
 		#region Order
 
 		// Order
-		protected Schema.Order FOrder;
+		protected Schema.Order _order;
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public Schema.Order Order
 		{
-			get { return FOrder; }
+			get { return _order; }
 			set
 			{
 				if (Active)
 				{
-					using (Row LRow = RememberActive())
+					using (Row row = RememberActive())
 					{
-						FOrder = value;
-						CursorSetChanged(LRow, true);
+						_order = value;
+						CursorSetChanged(row, true);
 					}
 				}
 				else
-					FOrder = value;
+					_order = value;
 			}
 		}
 		
-		public Schema.Order StringToOrder(string AOrder)
+		public Schema.Order StringToOrder(string order)
 		{
-			if (AOrder.IndexOf(Keywords.Key) >= 0)
+			if (order.IndexOf(Keywords.Key) >= 0)
 			{
-				KeyDefinition LKeyDefinition = FParser.ParseKeyDefinition(AOrder);
-				Schema.Order LOrder = new Schema.Order();
-				foreach (KeyColumnDefinition LColumn in LKeyDefinition.Columns)
-					LOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns[LColumn.ColumnName], true));
-				return LOrder;
+				KeyDefinition keyDefinition = _parser.ParseKeyDefinition(order);
+				Schema.Order localOrder = new Schema.Order();
+				foreach (KeyColumnDefinition column in keyDefinition.Columns)
+					localOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns[column.ColumnName], true));
+				return localOrder;
 			}
 			else
 			{
-				OrderDefinition LOrderDefinition = FParser.ParseOrderDefinition(AOrder);
-				Schema.Order LOrder = new Schema.Order();
-				foreach (OrderColumnDefinition LColumn in LOrderDefinition.Columns)
-					LOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns[LColumn.ColumnName], LColumn.Ascending, LColumn.IncludeNils));
-				return LOrder;
+				OrderDefinition orderDefinition = _parser.ParseOrderDefinition(order);
+				Schema.Order localOrder = new Schema.Order();
+				foreach (OrderColumnDefinition column in orderDefinition.Columns)
+					localOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns[column.ColumnName], column.Ascending, column.IncludeNils));
+				return localOrder;
 			}
 		}
 		
@@ -409,14 +409,14 @@ namespace Alphora.Dataphor.DAE.Client
 			get 
 			{
 				if (!Active)
-					return (FOrderDefinition == null) ? String.Empty : new D4TextEmitter().Emit(FOrderDefinition);
+					return (_orderDefinition == null) ? String.Empty : new D4TextEmitter().Emit(_orderDefinition);
 				else
 					return Order != null ? Order.Name : String.Empty;
 			}
 			set
 			{
 				if (!Active)
-					FOrderDefinition = FParser.ParseOrderDefinition(value);
+					_orderDefinition = _parser.ParseOrderDefinition(value);
 				else
 				{
 					if ((value == null) || (value == String.Empty))
@@ -437,9 +437,9 @@ namespace Alphora.Dataphor.DAE.Client
 			get 
 			{ 
 				if (Active)
-					return GetNamesFromOrder(FOrder);
+					return GetNamesFromOrder(_order);
 				else
-					return GetNamesFromOrder(FOrderDefinition == null ? null : OrderDefinitionToOrder(FOrderDefinition));
+					return GetNamesFromOrder(_orderDefinition == null ? null : OrderDefinitionToOrder(_orderDefinition));
 			}
 			set
 			{
@@ -453,15 +453,15 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 		
-		public Schema.Order OrderDefinitionToOrder(OrderDefinition AOrder)
+		public Schema.Order OrderDefinitionToOrder(OrderDefinition order)
 		{
-			Schema.Order LOrder = new Schema.Order(AOrder.MetaData);
-			foreach (OrderColumnDefinition LColumn in AOrder.Columns)
-				LOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns[LColumn.ColumnName], LColumn.Ascending, LColumn.IncludeNils));
-			return LOrder;
+			Schema.Order localOrder = new Schema.Order(order.MetaData);
+			foreach (OrderColumnDefinition column in order.Columns)
+				localOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns[column.ColumnName], column.Ascending, column.IncludeNils));
+			return localOrder;
 		}
 		
-		protected OrderDefinition FOrderDefinition;
+		protected OrderDefinition _orderDefinition;
 		[Category("Data")]
 		[DefaultValue(null)]
 		[Description("Order of the dataset.")]
@@ -471,14 +471,14 @@ namespace Alphora.Dataphor.DAE.Client
 			get
 			{
 				if (!Active)
-					return FOrderDefinition;
+					return _orderDefinition;
 				else
 					return Order != null ? (OrderDefinition)Order.EmitStatement(EmitMode.ForCopy) : null;
 			}
 			set
 			{
 				if (!Active)
-					FOrderDefinition = value;
+					_orderDefinition = value;
 				else
 				{
 					if (value == null)
@@ -489,7 +489,7 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 		
-		protected Parser FParser = new Parser();
+		protected Parser _parser = new Parser();
 		
 		#endregion
 
@@ -498,31 +498,31 @@ namespace Alphora.Dataphor.DAE.Client
 		protected override void InternalPrepareParams()
 		{
 			if (IsMasterSetup())
-				for (int LIndex = 0; LIndex < FMasterKey.Columns.Count; LIndex++)
-					FCursor.Params.Add(new MasterDataSetDataParam(GetParameterName(FDetailKey.Columns[LIndex].Name), MasterSource.DataSet.TableType.Columns[FMasterKey.Columns[LIndex].Name].DataType, Modifier.Const, FMasterKey.Columns[LIndex].Name, MasterSource, true));
+				for (int index = 0; index < _masterKey.Columns.Count; index++)
+					_cursor.Params.Add(new MasterDataSetDataParam(GetParameterName(_detailKey.Columns[index].Name), MasterSource.DataSet.TableType.Columns[_masterKey.Columns[index].Name].DataType, Modifier.Const, _masterKey.Columns[index].Name, MasterSource, true));
 
 			base.InternalPrepareParams();
 		}
 
 		protected override void SetParamValues()
 		{
-			bool LMasterValid = IsMasterValid();
-			foreach (DataSetDataParam LParam in FCursor.Params)
+			bool masterValid = IsMasterValid();
+			foreach (DataSetDataParam param in _cursor.Params)
 			{
-				MasterDataSetDataParam LMasterParam = LParam as MasterDataSetDataParam;
+				MasterDataSetDataParam masterParam = param as MasterDataSetDataParam;
 				if 
 				(
-					(LMasterParam == null) 
-					|| (LMasterParam.IsMaster && LMasterValid) 
+					(masterParam == null) 
+					|| (masterParam.IsMaster && masterValid) 
 					|| 
 					(
-						!LMasterParam.IsMaster 
-						&& (LMasterParam.Source != null) 
-						&& (LMasterParam.Source.DataSet != null) 
-						&& LMasterParam.Source.DataSet.Active
+						!masterParam.IsMaster 
+						&& (masterParam.Source != null) 
+						&& (masterParam.Source.DataSet != null) 
+						&& masterParam.Source.DataSet.Active
 					)
 				)
-					LParam.Bind(Process);
+					param.Bind(Process);
 			}
 		}
 		
@@ -537,8 +537,8 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		private void SetOrder()
 		{
-			FOrder = FCursor.Order;
-			FOrderDefinition = null;
+			_order = _cursor.Order;
+			_orderDefinition = null;
 		}
 
 		protected override void InternalOpen()
@@ -553,8 +553,8 @@ namespace Alphora.Dataphor.DAE.Client
 
 		private void ClearOrder()
 		{
-			FOrderDefinition = FOrder != null ? (OrderDefinition)FOrder.EmitStatement(EmitMode.ForCopy) : null;
-			FOrder = null;
+			_orderDefinition = _order != null ? (OrderDefinition)_order.EmitStatement(EmitMode.ForCopy) : null;
+			_order = null;
 		}
 		
 		protected override void InternalClose()
@@ -568,16 +568,16 @@ namespace Alphora.Dataphor.DAE.Client
 
 	public class MasterDataLink : DataLink
 	{
-		public MasterDataLink(TableDataSet ADataSet)
+		public MasterDataLink(TableDataSet dataSet)
 		{
-			FDetailDataSet = ADataSet;
+			_detailDataSet = dataSet;
 		}
 
-		private TableDataSet FDetailDataSet;
+		private TableDataSet _detailDataSet;
 		/// <summary> The detail dataset associated with the master link. </summary>
 		public TableDataSet DetailDataSet
 		{
-			get { return FDetailDataSet; }
+			get { return _detailDataSet; }
 		}
 	}
 }

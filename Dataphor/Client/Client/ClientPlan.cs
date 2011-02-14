@@ -15,40 +15,40 @@ namespace Alphora.Dataphor.DAE.Client
 {
 	public abstract class ClientPlan : ClientObject, IRemoteServerPlan
 	{
-		public ClientPlan(ClientProcess AClientProcess, PlanDescriptor APlanDescriptor)
+		public ClientPlan(ClientProcess clientProcess, PlanDescriptor planDescriptor)
 		{
-			FClientProcess = AClientProcess;
-			FPlanDescriptor = APlanDescriptor;
+			_clientProcess = clientProcess;
+			_planDescriptor = planDescriptor;
 		}
 		
-		private ClientProcess FClientProcess;
-		public ClientProcess ClientProcess { get { return FClientProcess; } }
+		private ClientProcess _clientProcess;
+		public ClientProcess ClientProcess { get { return _clientProcess; } }
 		
 		protected IClientDataphorService GetServiceInterface()
 		{
-			return FClientProcess.ClientSession.ClientConnection.ClientServer.GetServiceInterface();
+			return _clientProcess.ClientSession.ClientConnection.ClientServer.GetServiceInterface();
 		}
 		
-		protected PlanDescriptor FPlanDescriptor;
-		public PlanDescriptor PlanDescriptor { get { return FPlanDescriptor; } }
+		protected PlanDescriptor _planDescriptor;
+		public PlanDescriptor PlanDescriptor { get { return _planDescriptor; } }
 		
-		public int PlanHandle { get { return FPlanDescriptor.Handle; } }
+		public int PlanHandle { get { return _planDescriptor.Handle; } }
 		
 		#region IRemoteServerPlan Members
 
 		public IRemoteServerProcess Process
 		{
-			get { return FClientProcess; }
+			get { return _clientProcess; }
 		}
 
-		private Exception[] FMessages;
+		private Exception[] _messages;
 		public Exception[] Messages
 		{
 			get 
 			{ 
-				if (FMessages == null)
-					FMessages = DataphorFaultUtility.FaultsToExceptions(FPlanDescriptor.Messages).ToArray();
-				return FMessages;
+				if (_messages == null)
+					_messages = DataphorFaultUtility.FaultsToExceptions(_planDescriptor.Messages).ToArray();
+				return _messages;
 			}
 		}
 
@@ -58,7 +58,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public Guid ID
 		{
-			get { return FPlanDescriptor.ID; }
+			get { return _planDescriptor.ID; }
 		}
 
 		public void CheckCompiled()
@@ -68,34 +68,34 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public PlanStatistics PlanStatistics
 		{
-			get { return FPlanDescriptor.Statistics; }
+			get { return _planDescriptor.Statistics; }
 		}
 
-		protected ProgramStatistics FProgramStatistics = new ProgramStatistics();
-		public ProgramStatistics ProgramStatistics { get { return FProgramStatistics; } }
+		protected ProgramStatistics _programStatistics = new ProgramStatistics();
+		public ProgramStatistics ProgramStatistics { get { return _programStatistics; } }
 
 		#endregion
 	}
 
 	public class ClientStatementPlan : ClientPlan, IRemoteServerStatementPlan
 	{
-		public ClientStatementPlan(ClientProcess AClientProcess, PlanDescriptor APlanDescriptor) : base(AClientProcess, APlanDescriptor) { }
+		public ClientStatementPlan(ClientProcess clientProcess, PlanDescriptor planDescriptor) : base(clientProcess, planDescriptor) { }
 		
 		#region IRemoteServerStatementPlan Members
 
-		public void Execute(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, ProcessCallInfo ACallInfo)
+		public void Execute(ref RemoteParamData paramsValue, out ProgramStatistics executeTime, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginExecutePlan(PlanHandle, ACallInfo, AParams, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				ExecuteResult LExecuteResult = GetServiceInterface().EndExecutePlan(LResult);
-				AExecuteTime = LExecuteResult.ExecuteTime;
-				AParams.Data = LExecuteResult.ParamData;
+				IAsyncResult result = GetServiceInterface().BeginExecutePlan(PlanHandle, callInfo, paramsValue, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				ExecuteResult executeResult = GetServiceInterface().EndExecutePlan(result);
+				executeTime = executeResult.ExecuteTime;
+				paramsValue.Data = executeResult.ParamData;
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
@@ -104,77 +104,77 @@ namespace Alphora.Dataphor.DAE.Client
 
 	public class ClientExpressionPlan : ClientPlan, IRemoteServerExpressionPlan
 	{
-		public ClientExpressionPlan(ClientProcess AClientProcess, PlanDescriptor APlanDescriptor) : base(AClientProcess, APlanDescriptor) { }
+		public ClientExpressionPlan(ClientProcess clientProcess, PlanDescriptor planDescriptor) : base(clientProcess, planDescriptor) { }
 		
 		#region IRemoteServerExpressionPlan Members
 
-		public byte[] Evaluate(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, ProcessCallInfo ACallInfo)
+		public byte[] Evaluate(ref RemoteParamData paramsValue, out ProgramStatistics executeTime, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginEvaluatePlan(PlanHandle, ACallInfo, AParams, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				EvaluateResult LEvaluateResult = GetServiceInterface().EndEvaluatePlan(LResult);
-				AExecuteTime = LEvaluateResult.ExecuteTime;
-				FProgramStatistics = AExecuteTime;
-				AParams.Data = LEvaluateResult.ParamData;
-				return LEvaluateResult.Result;
+				IAsyncResult result = GetServiceInterface().BeginEvaluatePlan(PlanHandle, callInfo, paramsValue, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				EvaluateResult evaluateResult = GetServiceInterface().EndEvaluatePlan(result);
+				executeTime = evaluateResult.ExecuteTime;
+				_programStatistics = executeTime;
+				paramsValue.Data = evaluateResult.ParamData;
+				return evaluateResult.Result;
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public IRemoteServerCursor Open(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, ProcessCallInfo ACallInfo)
+		public IRemoteServerCursor Open(ref RemoteParamData paramsValue, out ProgramStatistics executeTime, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginOpenPlanCursor(PlanHandle, ACallInfo, AParams, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				CursorResult LCursorResult = GetServiceInterface().EndOpenPlanCursor(LResult);
-				AExecuteTime = LCursorResult.ExecuteTime;
-				FProgramStatistics = AExecuteTime;
-				AParams.Data = LCursorResult.ParamData;
-				return new ClientCursor(this, LCursorResult.CursorDescriptor);
+				IAsyncResult result = GetServiceInterface().BeginOpenPlanCursor(PlanHandle, callInfo, paramsValue, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				CursorResult cursorResult = GetServiceInterface().EndOpenPlanCursor(result);
+				executeTime = cursorResult.ExecuteTime;
+				_programStatistics = executeTime;
+				paramsValue.Data = cursorResult.ParamData;
+				return new ClientCursor(this, cursorResult.CursorDescriptor);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public IRemoteServerCursor Open(ref RemoteParamData AParams, out ProgramStatistics AExecuteTime, out Guid[] ABookmarks, int ACount, out RemoteFetchData AFetchData, ProcessCallInfo ACallInfo)
+		public IRemoteServerCursor Open(ref RemoteParamData paramsValue, out ProgramStatistics executeTime, out Guid[] bookmarks, int count, out RemoteFetchData fetchData, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginOpenPlanCursorWithFetch(PlanHandle, ACallInfo, AParams, ACount, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				CursorWithFetchResult LCursorResult = GetServiceInterface().EndOpenPlanCursorWithFetch(LResult);
-				AExecuteTime = LCursorResult.ExecuteTime;
-				FProgramStatistics = AExecuteTime;
-				AParams.Data = LCursorResult.ParamData;
-				ABookmarks = LCursorResult.Bookmarks;
-				AFetchData = LCursorResult.FetchData;
-				return new ClientCursor(this, LCursorResult.CursorDescriptor);
+				IAsyncResult result = GetServiceInterface().BeginOpenPlanCursorWithFetch(PlanHandle, callInfo, paramsValue, count, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				CursorWithFetchResult cursorResult = GetServiceInterface().EndOpenPlanCursorWithFetch(result);
+				executeTime = cursorResult.ExecuteTime;
+				_programStatistics = executeTime;
+				paramsValue.Data = cursorResult.ParamData;
+				bookmarks = cursorResult.Bookmarks;
+				fetchData = cursorResult.FetchData;
+				return new ClientCursor(this, cursorResult.CursorDescriptor);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public void Close(IRemoteServerCursor ACursor, ProcessCallInfo ACallInfo)
+		public void Close(IRemoteServerCursor cursor, ProcessCallInfo callInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginCloseCursor(((ClientCursor)ACursor).CursorHandle, ACallInfo, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndCloseCursor(LResult);
+				IAsyncResult result = GetServiceInterface().BeginCloseCursor(((ClientCursor)cursor).CursorHandle, callInfo, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				GetServiceInterface().EndCloseCursor(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
@@ -184,22 +184,22 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public CursorCapability Capabilities
 		{
-			get { return FPlanDescriptor.Capabilities; }
+			get { return _planDescriptor.Capabilities; }
 		}
 
 		public CursorType CursorType
 		{
-			get { return FPlanDescriptor.CursorType; }
+			get { return _planDescriptor.CursorType; }
 		}
 
-		public bool Supports(CursorCapability ACapability)
+		public bool Supports(CursorCapability capability)
 		{
-			return (Capabilities & ACapability) != 0;
+			return (Capabilities & capability) != 0;
 		}
 
 		public CursorIsolation Isolation
 		{
-			get { return FPlanDescriptor.CursorIsolation; }
+			get { return _planDescriptor.CursorIsolation; }
 		}
 
 		#endregion

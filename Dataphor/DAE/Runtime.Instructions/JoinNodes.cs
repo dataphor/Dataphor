@@ -29,131 +29,131 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// Root node for all join and semi operators
 	public abstract class ConditionedTableNode : BinaryTableNode
 	{
-		protected Schema.JoinKey FLeftKey = new Schema.JoinKey();
+		protected Schema.JoinKey _leftKey = new Schema.JoinKey();
 		public Schema.JoinKey LeftKey
 		{
-			get { return FLeftKey; }
-			set { FLeftKey = value; }
+			get { return _leftKey; }
+			set { _leftKey = value; }
 		}
 		
-		protected Schema.JoinKey FRightKey = new Schema.JoinKey();
+		protected Schema.JoinKey _rightKey = new Schema.JoinKey();
 		public Schema.JoinKey RightKey
 		{
-			get { return FRightKey; }
-			set { FRightKey = value; }
+			get { return _rightKey; }
+			set { _rightKey = value; }
 		}
 		
-		protected Schema.Order FJoinOrder;
+		protected Schema.Order _joinOrder;
 		public Schema.Order JoinOrder
 		{
-			get { return FJoinOrder; }
-			set { FJoinOrder = value; }
+			get { return _joinOrder; }
+			set { _joinOrder = value; }
 		}
 		
-		protected bool FIsNatural;
+		protected bool _isNatural;
 		public bool IsNatural
 		{
-			get { return FIsNatural; }
-			set { FIsNatural = value; }
+			get { return _isNatural; }
+			set { _isNatural = value; }
 		}
 		
-		private bool FEnforcePredicate = false;
+		private bool _enforcePredicate = false;
 		public bool EnforcePredicate
 		{
-			get { return FEnforcePredicate; }
-			set { FEnforcePredicate = value; }
+			get { return _enforcePredicate; }
+			set { _enforcePredicate = value; }
 		}
 		
-		protected Expression CollapseQualifierExpression(QualifierExpression AExpression)
+		protected Expression CollapseQualifierExpression(QualifierExpression expression)
 		{
-			if (AExpression.LeftExpression is QualifierExpression)
-				AExpression.LeftExpression = CollapseQualifierExpression((QualifierExpression)AExpression.LeftExpression);
-			if (AExpression.RightExpression is QualifierExpression)
-				AExpression.RightExpression = CollapseQualifierExpression((QualifierExpression)AExpression.RightExpression);
-			if ((AExpression.LeftExpression is IdentifierExpression) && (AExpression.RightExpression is IdentifierExpression))
-				return new IdentifierExpression(String.Format("{0}{1}{2}", ((IdentifierExpression)AExpression.LeftExpression).Identifier, Keywords.Qualifier, ((IdentifierExpression)AExpression.RightExpression).Identifier));
+			if (expression.LeftExpression is QualifierExpression)
+				expression.LeftExpression = CollapseQualifierExpression((QualifierExpression)expression.LeftExpression);
+			if (expression.RightExpression is QualifierExpression)
+				expression.RightExpression = CollapseQualifierExpression((QualifierExpression)expression.RightExpression);
+			if ((expression.LeftExpression is IdentifierExpression) && (expression.RightExpression is IdentifierExpression))
+				return new IdentifierExpression(String.Format("{0}{1}{2}", ((IdentifierExpression)expression.LeftExpression).Identifier, Keywords.Qualifier, ((IdentifierExpression)expression.RightExpression).Identifier));
 			else
-				throw new CompilerException(CompilerException.Codes.UnableToCollapseQualifierExpression, AExpression);
+				throw new CompilerException(CompilerException.Codes.UnableToCollapseQualifierExpression, expression);
 		}
 		
-		protected void CollapseJoinExpression(Expression AExpression)
+		protected void CollapseJoinExpression(Expression expression)
 		{
-			if (AExpression is BinaryExpression)
+			if (expression is BinaryExpression)
 			{
-				BinaryExpression LBinaryExpression = (BinaryExpression)AExpression;
-				if (LBinaryExpression.LeftExpression is BinaryExpression)
-					CollapseJoinExpression(LBinaryExpression.LeftExpression);
-				else if (LBinaryExpression.LeftExpression is QualifierExpression)
-					LBinaryExpression.LeftExpression = CollapseQualifierExpression((QualifierExpression)LBinaryExpression.LeftExpression);
+				BinaryExpression binaryExpression = (BinaryExpression)expression;
+				if (binaryExpression.LeftExpression is BinaryExpression)
+					CollapseJoinExpression(binaryExpression.LeftExpression);
+				else if (binaryExpression.LeftExpression is QualifierExpression)
+					binaryExpression.LeftExpression = CollapseQualifierExpression((QualifierExpression)binaryExpression.LeftExpression);
 				
-				if (LBinaryExpression.RightExpression is BinaryExpression)
-					CollapseJoinExpression(LBinaryExpression.RightExpression);
-				else if (LBinaryExpression.RightExpression is QualifierExpression)
-					LBinaryExpression.RightExpression = CollapseQualifierExpression((QualifierExpression)LBinaryExpression.RightExpression);
+				if (binaryExpression.RightExpression is BinaryExpression)
+					CollapseJoinExpression(binaryExpression.RightExpression);
+				else if (binaryExpression.RightExpression is QualifierExpression)
+					binaryExpression.RightExpression = CollapseQualifierExpression((QualifierExpression)binaryExpression.RightExpression);
 			}
 		}
 		
-		protected bool IsEquiJoin(Expression AExpression)
+		protected bool IsEquiJoin(Expression expression)
 		{
 			// TODO: IsEquiJoin should be a semantic determination, not a syntactic one...
-			CollapseJoinExpression(AExpression);
+			CollapseJoinExpression(expression);
 			
-			if (AExpression is BinaryExpression)
+			if (expression is BinaryExpression)
 			{
-				BinaryExpression LExpression = (BinaryExpression)AExpression;
-				if (String.Compare(LExpression.Instruction, Instructions.And) == 0)
-					return IsEquiJoin(LExpression.LeftExpression) && IsEquiJoin(LExpression.RightExpression);
+				BinaryExpression localExpression = (BinaryExpression)expression;
+				if (String.Compare(localExpression.Instruction, Instructions.And) == 0)
+					return IsEquiJoin(localExpression.LeftExpression) && IsEquiJoin(localExpression.RightExpression);
 				
-				if (String.Compare(LExpression.Instruction, Instructions.Equal) == 0)
+				if (String.Compare(localExpression.Instruction, Instructions.Equal) == 0)
 				{
-					if ((LExpression.LeftExpression is IdentifierExpression) && (LExpression.RightExpression is IdentifierExpression))
+					if ((localExpression.LeftExpression is IdentifierExpression) && (localExpression.RightExpression is IdentifierExpression))
 					{
-						string LLeftIdentifier = ((IdentifierExpression)LExpression.LeftExpression).Identifier;
-						string LRightIdentifier = ((IdentifierExpression)LExpression.RightExpression).Identifier;
-						if (LLeftIdentifier.IndexOf(Keywords.Left) == 0)
-							LLeftIdentifier = Schema.Object.Dequalify(LLeftIdentifier);
-						if (LRightIdentifier.IndexOf(Keywords.Right) == 0)
-							LRightIdentifier = Schema.Object.Dequalify(LRightIdentifier);
+						string leftIdentifier = ((IdentifierExpression)localExpression.LeftExpression).Identifier;
+						string rightIdentifier = ((IdentifierExpression)localExpression.RightExpression).Identifier;
+						if (leftIdentifier.IndexOf(Keywords.Left) == 0)
+							leftIdentifier = Schema.Object.Dequalify(leftIdentifier);
+						if (rightIdentifier.IndexOf(Keywords.Right) == 0)
+							rightIdentifier = Schema.Object.Dequalify(rightIdentifier);
 							
-						if (!LeftTableType.Columns.Contains(LLeftIdentifier) && !RightTableType.Columns.Contains(LLeftIdentifier))
-							throw new CompilerException(CompilerException.Codes.UnknownIdentifier, LExpression.LeftExpression, LLeftIdentifier);
+						if (!LeftTableType.Columns.Contains(leftIdentifier) && !RightTableType.Columns.Contains(leftIdentifier))
+							throw new CompilerException(CompilerException.Codes.UnknownIdentifier, localExpression.LeftExpression, leftIdentifier);
 							
-						if (LeftTableType.Columns.Contains(LLeftIdentifier) && RightTableType.Columns.Contains(LLeftIdentifier))
+						if (LeftTableType.Columns.Contains(leftIdentifier) && RightTableType.Columns.Contains(leftIdentifier))
 							throw new CompilerException
 							(
 								CompilerException.Codes.AmbiguousIdentifier, 
-								LLeftIdentifier, 
+								leftIdentifier, 
 								ExceptionUtility.StringsToCommaList
 								(
 									new string[]
 									{
-										LeftTableType.Columns[LLeftIdentifier].Name,
-										RightTableType.Columns[LLeftIdentifier].Name
+										LeftTableType.Columns[leftIdentifier].Name,
+										RightTableType.Columns[leftIdentifier].Name
 									}
 								)
 							);
 						
-						if (!LeftTableType.Columns.Contains(LRightIdentifier) && !RightTableType.Columns.Contains(LRightIdentifier))
-							throw new CompilerException(CompilerException.Codes.UnknownIdentifier, LExpression.RightExpression, LRightIdentifier);
+						if (!LeftTableType.Columns.Contains(rightIdentifier) && !RightTableType.Columns.Contains(rightIdentifier))
+							throw new CompilerException(CompilerException.Codes.UnknownIdentifier, localExpression.RightExpression, rightIdentifier);
 							
-						if (LeftTableType.Columns.Contains(LRightIdentifier) && RightTableType.Columns.Contains(LRightIdentifier))
+						if (LeftTableType.Columns.Contains(rightIdentifier) && RightTableType.Columns.Contains(rightIdentifier))
 							throw new CompilerException
 							(
 								CompilerException.Codes.AmbiguousIdentifier,
-								LRightIdentifier,
+								rightIdentifier,
 								ExceptionUtility.StringsToCommaList
 								(
 									new string[]
 									{
-										LeftTableType.Columns[LRightIdentifier].Name,
-										RightTableType.Columns[LRightIdentifier].Name
+										LeftTableType.Columns[rightIdentifier].Name,
+										RightTableType.Columns[rightIdentifier].Name
 									}
 								)
 							);
 							
 						return
-							(LeftTableType.Columns.Contains(LLeftIdentifier) && RightTableType.Columns.Contains(LRightIdentifier)) ||
-							(LeftTableType.Columns.Contains(LRightIdentifier) && RightTableType.Columns.Contains(LLeftIdentifier));
+							(LeftTableType.Columns.Contains(leftIdentifier) && RightTableType.Columns.Contains(rightIdentifier)) ||
+							(LeftTableType.Columns.Contains(rightIdentifier) && RightTableType.Columns.Contains(leftIdentifier));
 					}
 				}
 			}
@@ -161,205 +161,205 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return false;
 		}
 		
-		protected void DetermineJoinKeys(Expression AExpression)
+		protected void DetermineJoinKeys(Expression expression)
 		{
             // !!! Assumption: IsEquiJoin == true;
-            BinaryExpression LExpression = (BinaryExpression)AExpression;
-            if (String.Compare(LExpression.Instruction, Instructions.And) == 0)
+            BinaryExpression localExpression = (BinaryExpression)expression;
+            if (String.Compare(localExpression.Instruction, Instructions.And) == 0)
             {
-                DetermineJoinKeys(LExpression.LeftExpression);
-                DetermineJoinKeys(LExpression.RightExpression);
+                DetermineJoinKeys(localExpression.LeftExpression);
+                DetermineJoinKeys(localExpression.RightExpression);
             }
-            else if (String.Compare(LExpression.Instruction, Instructions.Equal) == 0)
+            else if (String.Compare(localExpression.Instruction, Instructions.Equal) == 0)
             {
-				string LLeftIdentifier = ((IdentifierExpression)LExpression.LeftExpression).Identifier;
-				string LRightIdentifier = ((IdentifierExpression)LExpression.RightExpression).Identifier;
-				if (LLeftIdentifier.IndexOf(Keywords.Left) == 0)
-					LLeftIdentifier = Schema.Object.Dequalify(LLeftIdentifier);
-				if (LRightIdentifier.IndexOf(Keywords.Right) == 0)
-					LRightIdentifier = Schema.Object.Dequalify(LRightIdentifier);
+				string leftIdentifier = ((IdentifierExpression)localExpression.LeftExpression).Identifier;
+				string rightIdentifier = ((IdentifierExpression)localExpression.RightExpression).Identifier;
+				if (leftIdentifier.IndexOf(Keywords.Left) == 0)
+					leftIdentifier = Schema.Object.Dequalify(leftIdentifier);
+				if (rightIdentifier.IndexOf(Keywords.Right) == 0)
+					rightIdentifier = Schema.Object.Dequalify(rightIdentifier);
 
-				Schema.TableVarColumn LColumn;
-                if (LeftTableVar.Columns.Contains(LLeftIdentifier))
+				Schema.TableVarColumn column;
+                if (LeftTableVar.Columns.Contains(leftIdentifier))
                 {
-					LColumn = LeftTableVar.Columns[LLeftIdentifier];
-                    FLeftKey.Columns.Add(LColumn);
-                    LColumn = RightTableVar.Columns[LRightIdentifier];
-                    FRightKey.Columns.Add(LColumn);
+					column = LeftTableVar.Columns[leftIdentifier];
+                    _leftKey.Columns.Add(column);
+                    column = RightTableVar.Columns[rightIdentifier];
+                    _rightKey.Columns.Add(column);
                 }
                 else
                 {
-					LColumn = RightTableVar.Columns[LLeftIdentifier];
-                    FRightKey.Columns.Add(LColumn);
-                    LColumn = LeftTableVar.Columns[LRightIdentifier];
-                    FLeftKey.Columns.Add(LColumn);
+					column = RightTableVar.Columns[leftIdentifier];
+                    _rightKey.Columns.Add(column);
+                    column = LeftTableVar.Columns[rightIdentifier];
+                    _leftKey.Columns.Add(column);
                 }
             }
 		}
 
-		protected bool IsJoinOrder(Plan APlan, Schema.JoinKey AJoinKey, TableNode ANode)
+		protected bool IsJoinOrder(Plan plan, Schema.JoinKey joinKey, TableNode node)
 		{
-			return (ANode.Supports(CursorCapability.Searchable) && (ANode.Order != null) && (Compiler.OrderFromKey(APlan, AJoinKey).Equivalent(ANode.Order)));
+			return (node.Supports(CursorCapability.Searchable) && (node.Order != null) && (Compiler.OrderFromKey(plan, joinKey).Equivalent(node.Order)));
 		}
 
-		protected Expression FExpression;
+		protected Expression _expression;
 		public Expression Expression
 		{
-			get { return FExpression; }
-			set { FExpression = value; }
+			get { return _expression; }
+			set { _expression = value; }
 		}
 		
 		protected virtual Expression GenerateJoinExpression()
 		{
 			// foreach common column name
 			//   generate an expression of the form left.column = right.column [and...]
-			Expression LExpression = null;
-			BinaryExpression LEqualExpression;
-			int LColumnIndex;
-			Schema.TableVarColumn LLeftColumn;
-			Schema.TableVarColumn LRightColumn;
-			for (int LIndex = 0; LIndex < LeftTableVar.Columns.Count; LIndex++)
+			Expression expression = null;
+			BinaryExpression equalExpression;
+			int columnIndex;
+			Schema.TableVarColumn leftColumn;
+			Schema.TableVarColumn rightColumn;
+			for (int index = 0; index < LeftTableVar.Columns.Count; index++)
 			{
-				LLeftColumn = LeftTableVar.Columns[LIndex];
-				LColumnIndex = RightTableVar.Columns.IndexOfName(LLeftColumn.Name);
-				if (LColumnIndex >= 0)
+				leftColumn = LeftTableVar.Columns[index];
+				columnIndex = RightTableVar.Columns.IndexOfName(leftColumn.Name);
+				if (columnIndex >= 0)
 				{
-					LRightColumn = RightTableVar.Columns[LColumnIndex];
-					LEqualExpression = 
+					rightColumn = RightTableVar.Columns[columnIndex];
+					equalExpression = 
 						new BinaryExpression
 						(
 							#if USENAMEDROWVARIABLES
-							new QualifierExpression(new IdentifierExpression(Keywords.Left), new IdentifierExpression(LLeftColumn.Name)),
+							new QualifierExpression(new IdentifierExpression(Keywords.Left), new IdentifierExpression(leftColumn.Name)),
 							#else
-							new IdentifierExpression(Schema.Object.Qualify(LLeftColumn.Name, Keywords.Left)), 
+							new IdentifierExpression(Schema.Object.Qualify(leftColumn.Name, Keywords.Left)), 
 							#endif
 							Instructions.Equal, 
 							#if USENAMEDROWVARIABLES
-							new QualifierExpression(new IdentifierExpression(Keywords.Right), new IdentifierExpression(LRightColumn.Name))
+							new QualifierExpression(new IdentifierExpression(Keywords.Right), new IdentifierExpression(rightColumn.Name))
 							#else
 							new IdentifierExpression(Schema.Object.Qualify(LRightColumn.Name, Keywords.Right))
 							#endif
 						);
 						
-					FLeftKey.Columns.Add(LLeftColumn);
-					FRightKey.Columns.Add(LRightColumn);
+					_leftKey.Columns.Add(leftColumn);
+					_rightKey.Columns.Add(rightColumn);
 						
-					if (LExpression == null)
-						LExpression = LEqualExpression;
+					if (expression == null)
+						expression = equalExpression;
 					else
-						LExpression = 
+						expression = 
 							new BinaryExpression
 							(
-								LExpression,
+								expression,
 								Instructions.And,
-								LEqualExpression
+								equalExpression
 							);
 				}
 			}
-			return LExpression;
+			return expression;
 		}
 				
-		protected virtual void InternalCreateDataType(Plan APlan)
+		protected virtual void InternalCreateDataType(Plan plan)
 		{
-			FDataType = new Schema.TableType();
+			_dataType = new Schema.TableType();
 		}
 
 		// LeftExistsNode
-		protected PlanNode FLeftExistsNode;
+		protected PlanNode _leftExistsNode;
 		public PlanNode LeftExistsNode
 		{
-			get { return FLeftExistsNode; }
-			set { FLeftExistsNode = value; }
+			get { return _leftExistsNode; }
+			set { _leftExistsNode = value; }
 		}
 		
 		// RightExistsNode
-		protected PlanNode FRightExistsNode;
+		protected PlanNode _rightExistsNode;
 		public PlanNode RightExistsNode
 		{
-			get { return FRightExistsNode; }
-			set { FRightExistsNode = value; }
+			get { return _rightExistsNode; }
+			set { _rightExistsNode = value; }
 		}
 		
-		protected bool LeftExists(Program AProgram, Row ARow)
+		protected bool LeftExists(Program program, Row row)
 		{
-			EnsureLeftExistsNode(AProgram.Plan);
-			PushNewRow(AProgram, ARow);
+			EnsureLeftExistsNode(program.Plan);
+			PushNewRow(program, row);
 			try
 			{
-				return (bool)FLeftExistsNode.Execute(AProgram);
+				return (bool)_leftExistsNode.Execute(program);
 			}
 			finally
 			{
-				PopRow(AProgram);
+				PopRow(program);
 			}
 		}
 		
-		protected bool RightExists(Program AProgram, Row ARow)
+		protected bool RightExists(Program program, Row row)
 		{
-			EnsureRightExistsNode(AProgram.Plan);
-			PushNewRow(AProgram, ARow);
+			EnsureRightExistsNode(program.Plan);
+			PushNewRow(program, row);
 			try
 			{
-				return (bool)FRightExistsNode.Execute(AProgram);
+				return (bool)_rightExistsNode.Execute(program);
 			}
 			finally
 			{
-				PopRow(AProgram);
+				PopRow(program);
 			}
 		}
 		
-		protected void EnsureLeftExistsNode(Plan APlan)
+		protected void EnsureLeftExistsNode(Plan plan)
 		{
-			if (FLeftExistsNode == null)
+			if (_leftExistsNode == null)
 			{
-				ApplicationTransaction LTransaction = null;
-				if (APlan.ApplicationTransactionID != Guid.Empty)
-					LTransaction = APlan.GetApplicationTransaction();
+				ApplicationTransaction transaction = null;
+				if (plan.ApplicationTransactionID != Guid.Empty)
+					transaction = plan.GetApplicationTransaction();
 				try
 				{
-					if (LTransaction != null)
-						LTransaction.PushLookup();
+					if (transaction != null)
+						transaction.PushLookup();
 					try
 					{
-						APlan.PushATCreationContext();
+						plan.PushATCreationContext();
 						try
 						{
-							APlan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
+							plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
 							try
 							{
-								PushSymbols(APlan, FSymbols);
+								PushSymbols(plan, _symbols);
 								try
 								{
-									APlan.EnterRowContext();
+									plan.EnterRowContext();
 									try
 									{
 										#if USENAMEDROWVARIABLES
-										APlan.Symbols.Push(new Symbol(Keywords.New, DataType.RowType));
+										plan.Symbols.Push(new Symbol(Keywords.New, DataType.RowType));
 										#else
 										APlan.Symbols.Push(new Symbol(String.Empty, DataType.NewRowType));
 										#endif
 										try
 										{
-											FLeftExistsNode =
+											_leftExistsNode =
 												Compiler.Bind
 												(
-													APlan,
+													plan,
 													Compiler.EmitUnaryNode
 													(
-														APlan,
+														plan,
 														Instructions.Exists,
 														Compiler.EmitRestrictNode
 														(
-															APlan,
-															Compiler.CompileExpression(APlan, (Expression)LeftNode.EmitStatement(EmitMode.ForCopy)),
+															plan,
+															Compiler.CompileExpression(plan, (Expression)LeftNode.EmitStatement(EmitMode.ForCopy)),
 															#if USENAMEDROWVARIABLES
 															Compiler.BuildKeyEqualExpression
 															(
-																APlan,
+																plan,
 																String.Empty,
 																Keywords.New,
-																FLeftKey.Columns,
-																FLeftKey.Columns
+																_leftKey.Columns,
+																_leftKey.Columns
 															)
 															#else
 															Compiler.BuildKeyEqualExpression
@@ -375,95 +375,95 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 										}
 										finally
 										{
-											APlan.Symbols.Pop();
+											plan.Symbols.Pop();
 										}
 									}
 									finally
 									{
-										APlan.ExitRowContext();
+										plan.ExitRowContext();
 									}
 								}
 								finally
 								{
-									PopSymbols(APlan, FSymbols);
+									PopSymbols(plan, _symbols);
 								}
 							}
 							finally
 							{
-								APlan.PopCursorContext();
+								plan.PopCursorContext();
 							}
 						}
 						finally
 						{
-							APlan.PopATCreationContext();
+							plan.PopATCreationContext();
 						}
 					}
 					finally
 					{
-						if (LTransaction != null)
-							LTransaction.PopLookup();
+						if (transaction != null)
+							transaction.PopLookup();
 					}
 				}
 				finally
 				{
-					if (LTransaction != null)
-						Monitor.Exit(LTransaction);
+					if (transaction != null)
+						Monitor.Exit(transaction);
 				}
 			}
 		}
 		
-		protected void EnsureRightExistsNode(Plan APlan)
+		protected void EnsureRightExistsNode(Plan plan)
 		{
-			if (FRightExistsNode == null)
+			if (_rightExistsNode == null)
 			{
-				ApplicationTransaction LTransaction = null;
-				if (APlan.ApplicationTransactionID != Guid.Empty)
-					LTransaction = APlan.GetApplicationTransaction();
+				ApplicationTransaction transaction = null;
+				if (plan.ApplicationTransactionID != Guid.Empty)
+					transaction = plan.GetApplicationTransaction();
 				try
 				{
-					if (LTransaction != null)
-						LTransaction.PushLookup();
+					if (transaction != null)
+						transaction.PushLookup();
 					try
 					{
-						APlan.PushATCreationContext();
+						plan.PushATCreationContext();
 						try
 						{
-							APlan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
+							plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
 							try
 							{
-								PushSymbols(APlan, FSymbols);
+								PushSymbols(plan, _symbols);
 								try
 								{
-									APlan.EnterRowContext();
+									plan.EnterRowContext();
 									try
 									{
 										#if USENAMEDROWVARIABLES
-										APlan.Symbols.Push(new Symbol(Keywords.New, DataType.RowType));
+										plan.Symbols.Push(new Symbol(Keywords.New, DataType.RowType));
 										#else
 										APlan.Symbols.Push(new Symbol(String.Empty, DataType.NewRowType));
 										#endif
 										try
 										{
-											FRightExistsNode =
+											_rightExistsNode =
 												Compiler.Bind
 												(
-													APlan,
+													plan,
 													Compiler.EmitUnaryNode
 													(
-														APlan,
+														plan,
 														Instructions.Exists,
 														Compiler.EmitRestrictNode
 														(
-															APlan,
-															Compiler.CompileExpression(APlan, (Expression)RightNode.EmitStatement(EmitMode.ForCopy)),
+															plan,
+															Compiler.CompileExpression(plan, (Expression)RightNode.EmitStatement(EmitMode.ForCopy)),
 															#if USENAMEDROWVARIABLES
 															Compiler.BuildKeyEqualExpression
 															(
-																APlan,
+																plan,
 																String.Empty,
 																Keywords.New,
-																FRightKey.Columns,
-																FRightKey.Columns
+																_rightKey.Columns,
+																_rightKey.Columns
 															)
 															#else
 															Compiler.BuildKeyEqualExpression
@@ -479,39 +479,39 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 										}
 										finally
 										{
-											APlan.Symbols.Pop();
+											plan.Symbols.Pop();
 										}
 									}
 									finally
 									{
-										APlan.ExitRowContext();
+										plan.ExitRowContext();
 									}
 								}
 								finally
 								{
-									PopSymbols(APlan, FSymbols);
+									PopSymbols(plan, _symbols);
 								}
 							}
 							finally
 							{
-								APlan.PopCursorContext();
+								plan.PopCursorContext();
 							}
 						}
 						finally
 						{
-							APlan.PopATCreationContext();
+							plan.PopATCreationContext();
 						}
 					}
 					finally
 					{
-						if (LTransaction != null)
-							LTransaction.PopLookup();
+						if (transaction != null)
+							transaction.PopLookup();
 					}
 				}
 				finally
 				{
-					if (LTransaction != null)
-						Monitor.Exit(LTransaction);
+					if (transaction != null)
+						Monitor.Exit(transaction);
 				}
 			}
 		}
@@ -519,21 +519,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public abstract class SemiTableNode : ConditionedTableNode
 	{
-		public override void JoinApplicationTransaction(Program AProgram, Row ARow)
+		public override void JoinApplicationTransaction(Program program, Row row)
 		{
-			Row LLeftRow = new Row(AProgram.ValueManager, LeftNode.DataType.RowType);
+			Row leftRow = new Row(program.ValueManager, LeftNode.DataType.RowType);
 			try
 			{
-				ARow.CopyTo(LLeftRow);
-				LeftNode.JoinApplicationTransaction(AProgram, LLeftRow);
+				row.CopyTo(leftRow);
+				LeftNode.JoinApplicationTransaction(program, leftRow);
 			}
 			finally
 			{
-				LLeftRow.Dispose();
+				leftRow.Dispose();
 			}
 		}
 
-		protected virtual void DetermineSemiTableModifiers(Plan APlan)
+		protected virtual void DetermineSemiTableModifiers(Plan plan)
 		{
 			PropagateInsertRight = PropagateAction.False;
 			PropagateUpdateRight = false;
@@ -563,74 +563,74 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			
 			// Set IsNilable for each column in the left and right tables based on PropagateXXXLeft and Right
-			bool LIsLeftNilable = (PropagateInsertLeft == PropagateAction.False) || !PropagateUpdateLeft;
-			bool LIsRightNilable = (PropagateInsertRight == PropagateAction.False) || !PropagateUpdateRight;
+			bool isLeftNilable = (PropagateInsertLeft == PropagateAction.False) || !PropagateUpdateLeft;
+			bool isRightNilable = (PropagateInsertRight == PropagateAction.False) || !PropagateUpdateRight;
 			
-			int LRightColumnIndex = RightTableVar.Columns.Count == 0 ? LeftTableVar.Columns.Count : TableVar.Columns.IndexOfName(RightTableVar.Columns[0].Name);
+			int rightColumnIndex = RightTableVar.Columns.Count == 0 ? LeftTableVar.Columns.Count : TableVar.Columns.IndexOfName(RightTableVar.Columns[0].Name);
 			
-			for (int LIndex = 0; LIndex < TableVar.Columns.Count; LIndex++)
+			for (int index = 0; index < TableVar.Columns.Count; index++)
 			{
-				if (LIndex < LRightColumnIndex)
+				if (index < rightColumnIndex)
 				{
-					if (LIsLeftNilable)
-						TableVar.Columns[LIndex].IsNilable = LIsLeftNilable;
+					if (isLeftNilable)
+						TableVar.Columns[index].IsNilable = isLeftNilable;
 				}
 				else
 				{
-					if (LIsRightNilable)
-						TableVar.Columns[LIndex].IsNilable = LIsRightNilable;
+					if (isRightNilable)
+						TableVar.Columns[index].IsNilable = isRightNilable;
 				}
 			}
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			InternalCreateDataType(APlan);
+			DetermineModifiers(plan);
+			InternalCreateDataType(plan);
 
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
-			FTableVar.InheritMetaData(LeftTableVar.MetaData);
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
+			_tableVar.InheritMetaData(LeftTableVar.MetaData);
 			
-			if (FIsNatural)
+			if (_isNatural)
 			{
-				FExpression = GenerateJoinExpression();
+				_expression = GenerateJoinExpression();
 
-				if ((FExpression == null) && !APlan.SuppressWarnings)
-					APlan.Messages.Add(new CompilerException(CompilerException.Codes.PossiblyIncorrectSemiTableExpression, CompilerErrorLevel.Warning, APlan.CurrentStatement(), LeftTableType.ToString(), RightTableType.ToString()));
+				if ((_expression == null) && !plan.SuppressWarnings)
+					plan.Messages.Add(new CompilerException(CompilerException.Codes.PossiblyIncorrectSemiTableExpression, CompilerErrorLevel.Warning, plan.CurrentStatement(), LeftTableType.ToString(), RightTableType.ToString()));
 			}
 			else
 			{
-				if (!IsEquiJoin(FExpression))
-					throw new CompilerException(CompilerException.Codes.JoinMustBeEquiJoin, FExpression);
+				if (!IsEquiJoin(_expression))
+					throw new CompilerException(CompilerException.Codes.JoinMustBeEquiJoin, _expression);
 					
-				DetermineJoinKeys(FExpression);
+				DetermineJoinKeys(_expression);
 			}
 			
-			foreach (Schema.Key LKey in LeftTableVar.Keys)
-				if (FLeftKey.Columns.IsSupersetOf(LKey.Columns))
+			foreach (Schema.Key key in LeftTableVar.Keys)
+				if (_leftKey.Columns.IsSupersetOf(key.Columns))
 				{
-					FLeftKey.IsUnique = true;
+					_leftKey.IsUnique = true;
 					break;
 				}
 				
-			foreach (Schema.Key LKey in RightTableVar.Keys)
-				if (FRightKey.Columns.IsSupersetOf(LKey.Columns))
+			foreach (Schema.Key key in RightTableVar.Keys)
+				if (_rightKey.Columns.IsSupersetOf(key.Columns))
 				{
-					FRightKey.IsUnique = true;
+					_rightKey.IsUnique = true;
 					break;
 				}
 				
 			// Determine columns
 			CopyTableVarColumns(LeftTableVar.Columns);
 			
-			DetermineRemotable(APlan);
+			DetermineRemotable(plan);
 
 			// Determine the keys
 			CopyPreservedKeys(LeftTableVar.Keys);
 			
 			// Determine modifiers
-			DetermineSemiTableModifiers(APlan);
+			DetermineSemiTableModifiers(plan);
 			
 			// Determine orders			
 			CopyPreservedOrders(LeftTableVar.Orders);
@@ -638,214 +638,214 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Order = CopyOrder(LeftNode.Order);
 			
 			#if UseReferenceDerivation
-			CopySourceReferences(APlan, LeftTableVar.SourceReferences);
-			CopyTargetReferences(APlan, LeftTableVar.TargetReferences);
+			CopySourceReferences(plan, LeftTableVar.SourceReferences);
+			CopyTargetReferences(plan, LeftTableVar.TargetReferences);
 			#endif
 			
-			APlan.EnterRowContext();
+			plan.EnterRowContext();
 			try
 			{			
 				#if USENAMEDROWVARIABLES
-				APlan.Symbols.Push(new Symbol(Keywords.Left, LeftTableType.RowType));
+				plan.Symbols.Push(new Symbol(Keywords.Left, LeftTableType.RowType));
 				#else
 				APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(LeftTableType.Columns, Keywords.Left)));
 				#endif
 				try
 				{
 					#if USENAMEDROWVARIABLES
-					APlan.Symbols.Push(new Symbol(Keywords.Right, RightTableType.RowType));
+					plan.Symbols.Push(new Symbol(Keywords.Right, RightTableType.RowType));
 					#else
 					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(RightTableType.Columns, Keywords.Right)));
 					#endif
 					try
 					{
-						if (FExpression != null)
+						if (_expression != null)
 						{
-							PlanNode LPlanNode = Compiler.CompileExpression(APlan, FExpression);
-							if (!(LPlanNode.DataType.Is(APlan.DataTypes.SystemBoolean)))
-								throw new CompilerException(CompilerException.Codes.BooleanExpressionExpected, FExpression);
-							Nodes.Add(LPlanNode);
+							PlanNode planNode = Compiler.CompileExpression(plan, _expression);
+							if (!(planNode.DataType.Is(plan.DataTypes.SystemBoolean)))
+								throw new CompilerException(CompilerException.Codes.BooleanExpressionExpected, _expression);
+							Nodes.Add(planNode);
 						}
 						else
-							Nodes.Add(new ValueNode(APlan.DataTypes.SystemBoolean, true));
+							Nodes.Add(new ValueNode(plan.DataTypes.SystemBoolean, true));
 					}
 					finally
 					{
-						APlan.Symbols.Pop();
+						plan.Symbols.Pop();
 					}
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 			finally
 			{
-				APlan.ExitRowContext();
+				plan.ExitRowContext();
 			}
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			Nodes[0].DetermineBinding(APlan);
-			APlan.PushCursorContext(new CursorContext(APlan.CursorContext.CursorType, APlan.CursorContext.CursorCapabilities & ~CursorCapability.Updateable, APlan.CursorContext.CursorIsolation));
+			Nodes[0].DetermineBinding(plan);
+			plan.PushCursorContext(new CursorContext(plan.CursorContext.CursorType, plan.CursorContext.CursorCapabilities & ~CursorCapability.Updateable, plan.CursorContext.CursorIsolation));
 			try
 			{
-				Nodes[1].DetermineBinding(APlan);
+				Nodes[1].DetermineBinding(plan);
 			}
 			finally
 			{
-				APlan.PopCursorContext();
+				plan.PopCursorContext();
 			}
 			
-			APlan.EnterRowContext();
+			plan.EnterRowContext();
 			try
 			{
 				#if USENAMEDROWVARIABLES
-				APlan.Symbols.Push(new Symbol(Keywords.Left, LeftTableType.RowType));
+				plan.Symbols.Push(new Symbol(Keywords.Left, LeftTableType.RowType));
 				#else
 				APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(LeftTableType.Columns, Keywords.Left)));
 				#endif
 				try
 				{
 					#if USENAMEDROWVARIABLES
-					APlan.Symbols.Push(new Symbol(Keywords.Right, RightTableType.RowType));
+					plan.Symbols.Push(new Symbol(Keywords.Right, RightTableType.RowType));
 					#else
 					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(RightTableType.Columns, Keywords.Right)));
 					#endif
 					try
 					{
-						Nodes[2].DetermineBinding(APlan);
+						Nodes[2].DetermineBinding(plan);
 					}
 					finally
 					{
-						APlan.Symbols.Pop();
+						plan.Symbols.Pop();
 					}
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 			finally
 			{
-				APlan.ExitRowContext();
+				plan.ExitRowContext();
 			}
 		}
 		
-		public override void DetermineDevice(Plan APlan)
+		public override void DetermineDevice(Plan plan)
 		{
-			base.DetermineDevice(APlan);
-			if (!FDeviceSupported)
-				DetermineSemiTableAlgorithm(APlan);
+			base.DetermineDevice(plan);
+			if (!_deviceSupported)
+				DetermineSemiTableAlgorithm(plan);
 		}
 		
-		protected abstract void DetermineSemiTableAlgorithm(Plan APlan);
+		protected abstract void DetermineSemiTableAlgorithm(Plan plan);
 		
-		public virtual void DetermineCursorCapabilities(Plan APlan)
+		public virtual void DetermineCursorCapabilities(Plan plan)
 		{
-			FCursorCapabilities = 
+			_cursorCapabilities = 
 				CursorCapability.Navigable |
 				(
 					LeftNode.CursorCapabilities & 
 					CursorCapability.BackwardsNavigable
 				) |
 				(
-					APlan.CursorContext.CursorCapabilities &
+					plan.CursorContext.CursorCapabilities &
 					LeftNode.CursorCapabilities &
 					CursorCapability.Updateable
 				);
 		}
 
-		public override void DetermineCursorBehavior(Plan APlan)
+		public override void DetermineCursorBehavior(Plan plan)
 		{
 			if ((LeftNode.CursorType == CursorType.Dynamic) || (RightNode.CursorType == CursorType.Dynamic))
-				FCursorType = CursorType.Dynamic;
+				_cursorType = CursorType.Dynamic;
 			else
-				FCursorType = CursorType.Static;
+				_cursorType = CursorType.Static;
 
-			FRequestedCursorType = APlan.CursorContext.CursorType;
+			_requestedCursorType = plan.CursorContext.CursorType;
 
-			DetermineCursorCapabilities(APlan);
+			DetermineCursorCapabilities(plan);
 
-			FCursorIsolation = APlan.CursorContext.CursorIsolation;
+			_cursorIsolation = plan.CursorContext.CursorIsolation;
 		}
 
-		protected Type FSemiTableAlgorithm;
+		protected Type _semiTableAlgorithm;
 
-		public override void DetermineRemotable(Plan APlan)
+		public override void DetermineRemotable(Plan plan)
 		{
-			base.DetermineRemotable(APlan);
+			base.DetermineRemotable(plan);
 			
-			FTableVar.ShouldChange = PropagateChangeLeft && (FTableVar.ShouldChange || LeftTableVar.ShouldChange);
-			FTableVar.ShouldDefault = PropagateDefaultLeft && (FTableVar.ShouldDefault || LeftTableVar.ShouldDefault);
-			FTableVar.ShouldValidate = PropagateValidateLeft && (FTableVar.ShouldValidate || LeftTableVar.ShouldValidate);
+			_tableVar.ShouldChange = PropagateChangeLeft && (_tableVar.ShouldChange || LeftTableVar.ShouldChange);
+			_tableVar.ShouldDefault = PropagateDefaultLeft && (_tableVar.ShouldDefault || LeftTableVar.ShouldDefault);
+			_tableVar.ShouldValidate = PropagateValidateLeft && (_tableVar.ShouldValidate || LeftTableVar.ShouldValidate);
 			
-			foreach (Schema.TableVarColumn LColumn in FTableVar.Columns)
+			foreach (Schema.TableVarColumn column in _tableVar.Columns)
 			{
-				Schema.TableVarColumn LSourceColumn = LeftTableVar.Columns[LeftTableVar.Columns.IndexOfName(LColumn.Name)];
+				Schema.TableVarColumn sourceColumn = LeftTableVar.Columns[LeftTableVar.Columns.IndexOfName(column.Name)];
 
-				LColumn.ShouldChange = PropagateChangeLeft && (LColumn.ShouldChange || LSourceColumn.ShouldChange);
-				FTableVar.ShouldChange = FTableVar.ShouldChange || LColumn.ShouldChange;
+				column.ShouldChange = PropagateChangeLeft && (column.ShouldChange || sourceColumn.ShouldChange);
+				_tableVar.ShouldChange = _tableVar.ShouldChange || column.ShouldChange;
 
-				LColumn.ShouldDefault = PropagateDefaultLeft && (LColumn.ShouldDefault || LSourceColumn.ShouldDefault);
-				FTableVar.ShouldDefault = FTableVar.ShouldDefault || LColumn.ShouldDefault;
+				column.ShouldDefault = PropagateDefaultLeft && (column.ShouldDefault || sourceColumn.ShouldDefault);
+				_tableVar.ShouldDefault = _tableVar.ShouldDefault || column.ShouldDefault;
 
-				LColumn.ShouldValidate = PropagateValidateLeft && (LColumn.ShouldValidate || LSourceColumn.ShouldValidate);
-				FTableVar.ShouldValidate = FTableVar.ShouldValidate || LColumn.ShouldValidate;
+				column.ShouldValidate = PropagateValidateLeft && (column.ShouldValidate || sourceColumn.ShouldValidate);
+				_tableVar.ShouldValidate = _tableVar.ShouldValidate || column.ShouldValidate;
 			}
 		}
 		
-		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
-			if (AIsDescending && PropagateDefaultLeft)
-				return LeftNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+			if (isDescending && PropagateDefaultLeft)
+				return LeftNode.Default(program, oldRow, newRow, valueFlags, columnName);
 			return false;
 		}
 		
-		protected override bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected override bool InternalChange(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
 			if (PropagateChangeLeft)
-				return LeftNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+				return LeftNode.Change(program, oldRow, newRow, valueFlags, columnName);
 			return false;
 		}
 		
-		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
-			if (AIsDescending && PropagateValidateLeft)
-				return LeftNode.Validate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+			if (isDescending && PropagateValidateLeft)
+				return LeftNode.Validate(program, oldRow, newRow, valueFlags, columnName);
 			return false;
 		}
 		
-		protected abstract void ValidatePredicate(Program AProgram, Row ARow);
+		protected abstract void ValidatePredicate(Program program, Row row);
 		
-		protected override void InternalExecuteInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected override void InternalExecuteInsert(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
 			switch (PropagateInsertLeft)
 			{
 				case PropagateAction.True :
-					if (!AUnchecked)
-						ValidatePredicate(AProgram, ANewRow);
-					LeftNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+					if (!uncheckedValue)
+						ValidatePredicate(program, newRow);
+					LeftNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue);
 				break;
 				
 				case PropagateAction.Ensure :
 				case PropagateAction.Ignore :
-					if (!AUnchecked)
-						ValidatePredicate(AProgram, ANewRow);
+					if (!uncheckedValue)
+						ValidatePredicate(program, newRow);
 					
-					using (Row LLeftRow = new Row(AProgram.ValueManager, LeftNode.DataType.RowType))
+					using (Row leftRow = new Row(program.ValueManager, LeftNode.DataType.RowType))
 					{
-						ANewRow.CopyTo(LLeftRow);
-						using (Row LCurrentRow = LeftNode.Select(AProgram, LLeftRow))
+						newRow.CopyTo(leftRow);
+						using (Row currentRow = LeftNode.Select(program, leftRow))
 						{
-							if (LCurrentRow != null)
+							if (currentRow != null)
 							{
 								if (PropagateInsertLeft == PropagateAction.Ensure)
-									LeftNode.Update(AProgram, LCurrentRow, ANewRow, AValueFlags, false, AUnchecked);
+									LeftNode.Update(program, currentRow, newRow, valueFlags, false, uncheckedValue);
 							}
 							else
-								LeftNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+								LeftNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue);
 						}
 					}
 				break;
@@ -894,13 +894,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 */
 		
-		protected override void InternalExecuteUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
 		{
 			if (PropagateUpdateLeft)
 			{
-				if (!AUnchecked)
-					ValidatePredicate(AProgram, ANewRow);
-				LeftNode.Update(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+				if (!uncheckedValue)
+					ValidatePredicate(program, newRow);
+				LeftNode.Update(program, oldRow, newRow, valueFlags, checkConcurrency, uncheckedValue);
 			}
 		}
 		
@@ -946,10 +946,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 */
 		
-		protected override void InternalExecuteDelete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteDelete(Program program, Row row, bool checkConcurrency, bool uncheckedValue)
 		{
 			if (PropagateDeleteLeft)
-				LeftNode.Delete(AProgram, ARow, ACheckConcurrency, AUnchecked);
+				LeftNode.Delete(program, row, checkConcurrency, uncheckedValue);
 		}
 		
 /*
@@ -964,258 +964,258 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 */
 
-		protected override void WritePlanAttributes(System.Xml.XmlWriter AWriter)
+		protected override void WritePlanAttributes(System.Xml.XmlWriter writer)
 		{
-			base.WritePlanAttributes(AWriter);
-			AWriter.WriteAttributeString("Condition", Nodes[2].SafeEmitStatementAsString());
+			base.WritePlanAttributes(writer);
+			writer.WriteAttributeString("Condition", Nodes[2].SafeEmitStatementAsString());
 		}
 	}
 	
 	public class HavingNode : SemiTableNode
 	{
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			HavingTable LTable = (HavingTable)Activator.CreateInstance(FSemiTableAlgorithm, System.Reflection.BindingFlags.Default, null, new object[]{this, AProgram}, System.Globalization.CultureInfo.CurrentCulture);
+			HavingTable table = (HavingTable)Activator.CreateInstance(_semiTableAlgorithm, System.Reflection.BindingFlags.Default, null, new object[]{this, program}, System.Globalization.CultureInfo.CurrentCulture);
 			try
 			{
-				LTable.Open();
-				return LTable;
+				table.Open();
+				return table;
 			}
 			catch
 			{
-				LTable.Dispose();
+				table.Dispose();
 				throw;
 			}
 		}
 
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			HavingExpression LExpression = new HavingExpression();
-			LExpression.LeftExpression = (Expression)Nodes[0].EmitStatement(AMode);
-			LExpression.RightExpression = (Expression)Nodes[1].EmitStatement(AMode);
+			HavingExpression expression = new HavingExpression();
+			expression.LeftExpression = (Expression)Nodes[0].EmitStatement(mode);
+			expression.RightExpression = (Expression)Nodes[1].EmitStatement(mode);
 			if (!IsNatural)
-				LExpression.Condition = FExpression;
-			LExpression.Modifiers = Modifiers;
-			return LExpression;
+				expression.Condition = _expression;
+			expression.Modifiers = Modifiers;
+			return expression;
 		}
 
-		protected override void ValidatePredicate(Program AProgram, Row ARow)
+		protected override void ValidatePredicate(Program program, Row row)
 		{
-			if (EnforcePredicate && !RightExists(AProgram, ARow))
+			if (EnforcePredicate && !RightExists(program, row))
 				throw new RuntimeException(RuntimeException.Codes.RowViolatesHavingPredicate, ErrorSeverity.User);
 		}
 		
-		protected override void DetermineSemiTableAlgorithm(Plan APlan)
+		protected override void DetermineSemiTableAlgorithm(Plan plan)
 		{
-			FSemiTableAlgorithm = typeof(SearchedHavingTable);
+			_semiTableAlgorithm = typeof(SearchedHavingTable);
 
 			// ensure that the right side is a searchable node
-			Nodes[1] = Compiler.EnsureSearchableNode(APlan, RightNode, RightKey);
+			Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, RightKey);
 		}
 	}
 	
 	public class WithoutNode : SemiTableNode
 	{
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			WithoutTable LTable = (WithoutTable)Activator.CreateInstance(FSemiTableAlgorithm, System.Reflection.BindingFlags.Default, null, new object[]{this, AProgram}, System.Globalization.CultureInfo.CurrentCulture);
+			WithoutTable table = (WithoutTable)Activator.CreateInstance(_semiTableAlgorithm, System.Reflection.BindingFlags.Default, null, new object[]{this, program}, System.Globalization.CultureInfo.CurrentCulture);
 			try
 			{
-				LTable.Open();
-				return LTable;
+				table.Open();
+				return table;
 			}
 			catch
 			{
-				LTable.Dispose();
+				table.Dispose();
 				throw;
 			}
 		}
 
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			WithoutExpression LExpression = new WithoutExpression();
-			LExpression.LeftExpression = (Expression)Nodes[0].EmitStatement(AMode);
-			LExpression.RightExpression = (Expression)Nodes[1].EmitStatement(AMode);
+			WithoutExpression expression = new WithoutExpression();
+			expression.LeftExpression = (Expression)Nodes[0].EmitStatement(mode);
+			expression.RightExpression = (Expression)Nodes[1].EmitStatement(mode);
 			if (!IsNatural)
-				LExpression.Condition = FExpression;
-			LExpression.Modifiers = Modifiers;
-			return LExpression;
+				expression.Condition = _expression;
+			expression.Modifiers = Modifiers;
+			return expression;
 		}
 
-		protected override void ValidatePredicate(Program AProgram, Row ARow)
+		protected override void ValidatePredicate(Program program, Row row)
 		{
-			if (EnforcePredicate && RightExists(AProgram, ARow))
+			if (EnforcePredicate && RightExists(program, row))
 				throw new RuntimeException(RuntimeException.Codes.RowViolatesWithoutPredicate, ErrorSeverity.User);
 		}
 
-		protected override void DetermineSemiTableAlgorithm(Plan APlan)
+		protected override void DetermineSemiTableAlgorithm(Plan plan)
 		{
-			FSemiTableAlgorithm = typeof(SearchedWithoutTable);
+			_semiTableAlgorithm = typeof(SearchedWithoutTable);
 
 			// ensure that the right side is a searchable node
-			Nodes[1] = Compiler.EnsureSearchableNode(APlan, RightNode, RightKey);
+			Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, RightKey);
 		}
 	}
 	
 	// operator iJoin(table{}, table{}, bool) : table{}	
 	public class JoinNode : ConditionedTableNode
 	{		
-		protected virtual void DetermineLeftColumns(Plan APlan, bool AIsNilable)
+		protected virtual void DetermineLeftColumns(Plan plan, bool isNilable)
 		{
-			CopyTableVarColumns(LeftTableVar.Columns, AIsNilable);
+			CopyTableVarColumns(LeftTableVar.Columns, isNilable);
 			
-			Schema.TableVarColumn LNewColumn;
-			foreach (Schema.TableVarColumn LColumn in LeftKey.Columns)
+			Schema.TableVarColumn newColumn;
+			foreach (Schema.TableVarColumn column in LeftKey.Columns)
 			{
-				LNewColumn = TableVar.Columns[LColumn];
-				LNewColumn.IsChangeRemotable = false;
-				LNewColumn.IsDefaultRemotable = false;
+				newColumn = TableVar.Columns[column];
+				newColumn.IsChangeRemotable = false;
+				newColumn.IsDefaultRemotable = false;
 			}
 		}
 		
-		protected virtual void DetermineRightColumns(Plan APlan, bool AIsNilable)
+		protected virtual void DetermineRightColumns(Plan plan, bool isNilable)
 		{
-			Schema.TableVarColumn LNewColumn;
+			Schema.TableVarColumn newColumn;
 
-			if (!FIsNatural)
-				CopyTableVarColumns(RightTableVar.Columns, AIsNilable);
+			if (!_isNatural)
+				CopyTableVarColumns(RightTableVar.Columns, isNilable);
 			else
 			{
-				foreach (Schema.TableVarColumn LColumn in RightTableVar.Columns)
+				foreach (Schema.TableVarColumn column in RightTableVar.Columns)
 				{
-					if (!FRightKey.Columns.ContainsName(LColumn.Name))
+					if (!_rightKey.Columns.ContainsName(column.Name))
 					{
-						LNewColumn = CopyTableVarColumn(LColumn);
-						LNewColumn.IsNilable = LNewColumn.IsNilable || AIsNilable;
-						DataType.Columns.Add(LNewColumn.Column);
-						TableVar.Columns.Add(LNewColumn);
+						newColumn = CopyTableVarColumn(column);
+						newColumn.IsNilable = newColumn.IsNilable || isNilable;
+						DataType.Columns.Add(newColumn.Column);
+						TableVar.Columns.Add(newColumn);
 					}
 					else
 					{	
-						Schema.TableVarColumn LLeftColumn = TableVar.Columns[LColumn];
-						LLeftColumn.IsDefaultRemotable = LLeftColumn.IsDefaultRemotable && LColumn.IsDefaultRemotable;
-						LLeftColumn.IsChangeRemotable = LLeftColumn.IsChangeRemotable && LColumn.IsChangeRemotable;
-						LLeftColumn.IsValidateRemotable = LLeftColumn.IsValidateRemotable && LColumn.IsValidateRemotable;
-						LLeftColumn.IsNilable = LLeftColumn.IsNilable || LColumn.IsNilable || AIsNilable;
-						LLeftColumn.JoinInheritMetaData(LColumn.MetaData);
+						Schema.TableVarColumn leftColumn = TableVar.Columns[column];
+						leftColumn.IsDefaultRemotable = leftColumn.IsDefaultRemotable && column.IsDefaultRemotable;
+						leftColumn.IsChangeRemotable = leftColumn.IsChangeRemotable && column.IsChangeRemotable;
+						leftColumn.IsValidateRemotable = leftColumn.IsValidateRemotable && column.IsValidateRemotable;
+						leftColumn.IsNilable = leftColumn.IsNilable || column.IsNilable || isNilable;
+						leftColumn.JoinInheritMetaData(column.MetaData);
 					}
 				}
 			}
 
-			foreach (Schema.TableVarColumn LColumn in LeftKey.Columns)
+			foreach (Schema.TableVarColumn column in LeftKey.Columns)
 			{
-				LNewColumn = TableVar.Columns[LColumn];
-				LNewColumn.IsChangeRemotable = false;
-				LNewColumn.IsDefaultRemotable = false;
+				newColumn = TableVar.Columns[column];
+				newColumn.IsChangeRemotable = false;
+				newColumn.IsDefaultRemotable = false;
 			}
 		}
 		
-		protected JoinCardinality FCardinality;
-		public JoinCardinality Cardinality { get { return FCardinality; } set { FCardinality = value; } }
+		protected JoinCardinality _cardinality;
+		public JoinCardinality Cardinality { get { return _cardinality; } set { _cardinality = value; } }
 		
-		protected virtual void DetermineCardinality(Plan APlan)
+		protected virtual void DetermineCardinality(Plan plan)
 		{
-			if (FLeftKey.IsUnique)
-				if (FRightKey.IsUnique)
-					FCardinality = JoinCardinality.OneToOne;
+			if (_leftKey.IsUnique)
+				if (_rightKey.IsUnique)
+					_cardinality = JoinCardinality.OneToOne;
 				else
-					FCardinality = JoinCardinality.OneToMany;
+					_cardinality = JoinCardinality.OneToMany;
 			else
-				if (FRightKey.IsUnique)
-					FCardinality = JoinCardinality.ManyToOne;
+				if (_rightKey.IsUnique)
+					_cardinality = JoinCardinality.ManyToOne;
 				else
-					FCardinality = JoinCardinality.ManyToMany;
+					_cardinality = JoinCardinality.ManyToMany;
 		}
 		
-		protected Type FJoinAlgorithm;
-		public Type JoinAlgorithm { get { return FJoinAlgorithm; } }
+		protected Type _joinAlgorithm;
+		public Type JoinAlgorithm { get { return _joinAlgorithm; } }
 		
-		protected override void WritePlanAttributes(System.Xml.XmlWriter AWriter)
+		protected override void WritePlanAttributes(System.Xml.XmlWriter writer)
 		{
-			base.WritePlanAttributes(AWriter);
-			AWriter.WriteAttributeString("Cardinality", FCardinality.ToString());
-			if (FJoinAlgorithm != null)
-				AWriter.WriteAttributeString("Algorithm", FJoinAlgorithm.ToString());
-			AWriter.WriteAttributeString("Condition", Nodes[2].SafeEmitStatementAsString());
+			base.WritePlanAttributes(writer);
+			writer.WriteAttributeString("Cardinality", _cardinality.ToString());
+			if (_joinAlgorithm != null)
+				writer.WriteAttributeString("Algorithm", _joinAlgorithm.ToString());
+			writer.WriteAttributeString("Condition", Nodes[2].SafeEmitStatementAsString());
 		}
 		
-		protected bool JoinOrdersAscendingCompatible(Schema.Order ALeftOrder, Schema.Order ARightOrder)
+		protected bool JoinOrdersAscendingCompatible(Schema.Order leftOrder, Schema.Order rightOrder)
 		{
-			for (int LIndex = 0; LIndex < FLeftKey.Columns.Count; LIndex++)
-				if (ALeftOrder.Columns[LIndex].Ascending != ARightOrder.Columns[LIndex].Ascending)
+			for (int index = 0; index < _leftKey.Columns.Count; index++)
+				if (leftOrder.Columns[index].Ascending != rightOrder.Columns[index].Ascending)
 					return false;
 			return true;
 		}
 		
-		protected virtual void DetermineJoinAlgorithm(Plan APlan)
+		protected virtual void DetermineJoinAlgorithm(Plan plan)
 		{
-			if (FExpression == null)
-				FJoinAlgorithm = typeof(TimesTable);
+			if (_expression == null)
+				_joinAlgorithm = typeof(TimesTable);
 			else
 			{
-				FJoinOrder = Compiler.OrderFromKey(APlan, FLeftKey);
-				Schema.OrderColumn LColumn;
-				for (int LIndex = 0; LIndex < FJoinOrder.Columns.Count; LIndex++)
+				_joinOrder = Compiler.OrderFromKey(plan, _leftKey);
+				Schema.OrderColumn column;
+				for (int index = 0; index < _joinOrder.Columns.Count; index++)
 				{
-					LColumn = FJoinOrder.Columns[LIndex];
-					LColumn.Sort = Compiler.GetSort(APlan, LColumn.Column.DataType);
-					if (LColumn.Sort.HasDependencies())
-						APlan.AttachDependencies(LColumn.Sort.Dependencies);
-					LColumn.IsDefaultSort = true;
+					column = _joinOrder.Columns[index];
+					column.Sort = Compiler.GetSort(plan, column.Column.DataType);
+					if (column.Sort.HasDependencies())
+						plan.AttachDependencies(column.Sort.Dependencies);
+					column.IsDefaultSort = true;
 				}
 
 				// if no inputs are ordered by join keys, add an order node to one side
-				if (!IsJoinOrder(APlan, FLeftKey, LeftNode) && !IsJoinOrder(APlan, FRightKey, RightNode))
+				if (!IsJoinOrder(plan, _leftKey, LeftNode) && !IsJoinOrder(plan, _rightKey, RightNode))
 				{
 					// if the right side is unique, order it
 					// else if the left side is unique, order it
 					// else order the right side (should be whichever side has the least cardinality)
-					if (FRightKey.IsUnique)
-						Nodes[1] = Compiler.EnsureSearchableNode(APlan, RightNode, FRightKey);
-					else if (FLeftKey.IsUnique)
-						Nodes[0] = Compiler.EnsureSearchableNode(APlan, LeftNode, FLeftKey);
+					if (_rightKey.IsUnique)
+						Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, _rightKey);
+					else if (_leftKey.IsUnique)
+						Nodes[0] = Compiler.EnsureSearchableNode(plan, LeftNode, _leftKey);
 					else
-						Nodes[1] = Compiler.EnsureSearchableNode(APlan, RightNode, FRightKey);
+						Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, _rightKey);
 				}
 
-				if (IsJoinOrder(APlan, FLeftKey, LeftNode) && IsJoinOrder(APlan, FRightKey, RightNode) && JoinOrdersAscendingCompatible(LeftNode.Order, RightNode.Order) && (FLeftKey.IsUnique || FRightKey.IsUnique))
+				if (IsJoinOrder(plan, _leftKey, LeftNode) && IsJoinOrder(plan, _rightKey, RightNode) && JoinOrdersAscendingCompatible(LeftNode.Order, RightNode.Order) && (_leftKey.IsUnique || _rightKey.IsUnique))
 				{
 					// if both inputs are ordered by join keys and one or both join keys are unique
 						// use a merge join algorithm
-					if (FLeftKey.IsUnique && FRightKey.IsUnique)
+					if (_leftKey.IsUnique && _rightKey.IsUnique)
 					{
-						FJoinAlgorithm = typeof(UniqueMergeJoinTable);
+						_joinAlgorithm = typeof(UniqueMergeJoinTable);
 						Order = CopyOrder(LeftNode.Order);
 					}
-					else if (FLeftKey.IsUnique)
+					else if (_leftKey.IsUnique)
 					{
-						FJoinAlgorithm = typeof(LeftUniqueMergeJoinTable);
+						_joinAlgorithm = typeof(LeftUniqueMergeJoinTable);
 						Order = CopyOrder(RightNode.Order);
 					}
 					else
 					{
-						FJoinAlgorithm = typeof(RightUniqueMergeJoinTable);
+						_joinAlgorithm = typeof(RightUniqueMergeJoinTable);
 						Order = CopyOrder(LeftNode.Order);
 					}
 				}
-				else if (IsJoinOrder(APlan, FLeftKey, LeftNode))
+				else if (IsJoinOrder(plan, _leftKey, LeftNode))
 				{
 					// else if one input is ordered by join keys
 						// use a searched join algorithm
-					if (FLeftKey.IsUnique)
-						FJoinAlgorithm = typeof(LeftUniqueSearchedJoinTable);
+					if (_leftKey.IsUnique)
+						_joinAlgorithm = typeof(LeftUniqueSearchedJoinTable);
 					else
-						FJoinAlgorithm = typeof(NonUniqueLeftSearchedJoinTable);
+						_joinAlgorithm = typeof(NonUniqueLeftSearchedJoinTable);
 
 					if (RightNode.Order != null)
 						Order = CopyOrder(RightNode.Order);
 				}
-				else if (IsJoinOrder(APlan, FRightKey, RightNode))
+				else if (IsJoinOrder(plan, _rightKey, RightNode))
 				{
-					if (FRightKey.IsUnique)
-						FJoinAlgorithm = typeof(RightUniqueSearchedJoinTable);
+					if (_rightKey.IsUnique)
+						_joinAlgorithm = typeof(RightUniqueSearchedJoinTable);
 					else
-						FJoinAlgorithm = typeof(NonUniqueRightSearchedJoinTable);
+						_joinAlgorithm = typeof(NonUniqueRightSearchedJoinTable);
 						
 					if (LeftNode.Order != null)
 						Order = CopyOrder(LeftNode.Order);
@@ -1225,73 +1225,73 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					// NOTE - this code is not being hit right now because all joins are ordered by the code above
 					// use a nested loop join
 					// note that if both left and right sides are unique this selection is arbitrary (possible cost based optimization)
-					if (FLeftKey.IsUnique)
-						FJoinAlgorithm = typeof(LeftUniqueNestedLoopJoinTable);
-					else if (FRightKey.IsUnique)
-						FJoinAlgorithm = typeof(RightUniqueNestedLoopJoinTable);
+					if (_leftKey.IsUnique)
+						_joinAlgorithm = typeof(LeftUniqueNestedLoopJoinTable);
+					else if (_rightKey.IsUnique)
+						_joinAlgorithm = typeof(RightUniqueNestedLoopJoinTable);
 					else
-						FJoinAlgorithm = typeof(NonUniqueNestedLoopJoinTable);
+						_joinAlgorithm = typeof(NonUniqueNestedLoopJoinTable);
 				}
 			}
 		}
 		
-		protected virtual void JoinLeftApplicationTransaction(Program AProgram, Row ARow)
+		protected virtual void JoinLeftApplicationTransaction(Program program, Row row)
 		{
-			Row LLeftRow = new Row(AProgram.ValueManager, LeftNode.DataType.RowType);
+			Row leftRow = new Row(program.ValueManager, LeftNode.DataType.RowType);
 			try
 			{
-				ARow.CopyTo(LLeftRow);
-				LeftNode.JoinApplicationTransaction(AProgram, LLeftRow);
+				row.CopyTo(leftRow);
+				LeftNode.JoinApplicationTransaction(program, leftRow);
 			}
 			finally
 			{
-				LLeftRow.Dispose();
+				leftRow.Dispose();
 			}
 		}
 		
-		protected virtual void JoinRightApplicationTransaction(Program AProgram, Row ARow)
+		protected virtual void JoinRightApplicationTransaction(Program program, Row row)
 		{
-			Row LRightRow = new Row(AProgram.ValueManager, RightNode.DataType.RowType);
+			Row rightRow = new Row(program.ValueManager, RightNode.DataType.RowType);
 			try
 			{
-				ARow.CopyTo(LRightRow);
-				RightNode.JoinApplicationTransaction(AProgram, LRightRow);
+				row.CopyTo(rightRow);
+				RightNode.JoinApplicationTransaction(program, rightRow);
 			}
 			finally
 			{
-				LRightRow.Dispose();
+				rightRow.Dispose();
 			}
 		}
 		
-		public override void JoinApplicationTransaction(Program AProgram, Row ARow)
+		public override void JoinApplicationTransaction(Program program, Row row)
 		{
-			JoinLeftApplicationTransaction(AProgram, ARow);
-			if (!FIsLookup || FIsDetailLookup)
-				JoinRightApplicationTransaction(AProgram, ARow);
+			JoinLeftApplicationTransaction(program, row);
+			if (!_isLookup || _isDetailLookup)
+				JoinRightApplicationTransaction(program, row);
 		}
 		
-		protected virtual void DetermineDetailLookup(Plan APlan)
+		protected virtual void DetermineDetailLookup(Plan plan)
 		{
 			if ((Modifiers != null) && (Modifiers.Contains("IsDetailLookup")))
-				FIsDetailLookup = Boolean.Parse(Modifiers["IsDetailLookup"].Value);
+				_isDetailLookup = Boolean.Parse(Modifiers["IsDetailLookup"].Value);
 			else
 			{
-				FIsDetailLookup = false;
+				_isDetailLookup = false;
 				
 				// If this is a lookup and the left join columns are a non-trivial proper superset of any key of the left side, this is a detail lookup
-				if (FIsLookup)
-					foreach (Schema.Key LKey in LeftTableVar.Keys)
-						if ((LKey.Columns.Count > 0) && FLeftKey.Columns.IsProperSupersetOf(LKey.Columns))
+				if (_isLookup)
+					foreach (Schema.Key key in LeftTableVar.Keys)
+						if ((key.Columns.Count > 0) && _leftKey.Columns.IsProperSupersetOf(key.Columns))
 						{
-							FIsDetailLookup = true;
+							_isDetailLookup = true;
 							break;
 						}
 				
 				#if USEDETAILLOOKUP
 				// If this is a lookup, the left key is not unique, and any key of the left table is a subset of the left key, this is a detail lookup
 				if (FIsLookup && !FLeftKey.IsUnique)
-					foreach (Schema.Key LKey in LeftTableVar.Keys)
-						if (LKey.Columns.IsSubsetOf(FLeftKey.Columns))
+					foreach (Schema.Key key in LeftTableVar.Keys)
+						if (key.Columns.IsSubsetOf(FLeftKey.Columns))
 						{
 							FIsDetailLookup = true;
 							break;
@@ -1304,9 +1304,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				FIsDetailLookup = false;
 				if (FIsLookup && !FLeftKey.IsUnique)
 				{
-					Schema.Key LInvariant = LeftNode.TableVar.CalculateInvariant();
-					foreach (Schema.Column LColumn in FLeftKey.Columns)
-						if (LInvariant.Columns.Contains(LColumn.Name))
+					Schema.Key invariant = LeftNode.TableVar.CalculateInvariant();
+					foreach (Schema.Column column in FLeftKey.Columns)
+						if (invariant.Columns.Contains(column.Name))
 						{
 							FIsDetailLookup = true;
 							break;
@@ -1316,48 +1316,48 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected virtual void DetermineColumns(Plan APlan)
+		protected virtual void DetermineColumns(Plan plan)
 		{
-			DetermineLeftColumns(APlan, false);
-			DetermineRightColumns(APlan, false);
+			DetermineLeftColumns(plan, false);
+			DetermineRightColumns(plan, false);
 		}
 		
-		protected bool FUpdateLeftToRight;
+		protected bool _updateLeftToRight;
 		public bool UpdateLeftToRight
 		{
-			get { return FUpdateLeftToRight; }
-			set { FUpdateLeftToRight = value; }
+			get { return _updateLeftToRight; }
+			set { _updateLeftToRight = value; }
 		}
 		
-		protected bool FIsLookup;
+		protected bool _isLookup;
 		public bool IsLookup
 		{
-			get { return FIsLookup; }
-			set { FIsLookup = value; }
+			get { return _isLookup; }
+			set { _isLookup = value; }
 		}
 		
-		protected bool FIsDetailLookup;
+		protected bool _isDetailLookup;
 		public bool IsDetailLookup
 		{
-			get { return FIsDetailLookup; }
-			set { FIsDetailLookup = value; }
+			get { return _isDetailLookup; }
+			set { _isDetailLookup = value; }
 		}
 		
-		protected bool FIsIntersect;
+		protected bool _isIntersect;
 		public bool IsIntersect
 		{
-			get { return FIsIntersect; }
-			set { FIsIntersect = value; }
+			get { return _isIntersect; }
+			set { _isIntersect = value; }
 		}
 		
-		protected bool FIsTimes;
+		protected bool _isTimes;
 		public bool IsTimes
 		{
-			get { return FIsTimes; }
-			set { FIsTimes = value; }
+			get { return _isTimes; }
+			set { _isTimes = value; }
 		}
 		
-		protected virtual void DetermineManyToManyKeys(Plan APlan)
+		protected virtual void DetermineManyToManyKeys(Plan plan)
 		{
 			// This algorithm is also used to infer keys for any cardinality changing outer (one-to-many or many-to-many)
 			// If neither join key is unique
@@ -1367,71 +1367,71 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							// extended with all columns of the right key, excluding join columns that are not key columns of the left input or are the correlated column of an existing column in the key
 						// create a key based on all columns of the right key, excluding join columns that are not key columns of the left input,
 							// extended with all columns of the left key, excluding join columns that are not key columns of the right input or are the correlated column of an existing column in the key
-			Schema.Key LKey;
-			foreach (Schema.Key LLeftKey in LeftTableVar.Keys)
-				foreach (Schema.Key LRightKey in RightTableVar.Keys)
+			Schema.Key key;
+			foreach (Schema.Key leftKey in LeftTableVar.Keys)
+				foreach (Schema.Key rightKey in RightTableVar.Keys)
 				{
-					LKey = new Schema.Key();
-					LKey.IsInherited = true;
-					LKey.IsSparse = LLeftKey.IsSparse || LRightKey.IsSparse;
-					foreach (Schema.TableVarColumn LColumn in LLeftKey.Columns)
+					key = new Schema.Key();
+					key.IsInherited = true;
+					key.IsSparse = leftKey.IsSparse || rightKey.IsSparse;
+					foreach (Schema.TableVarColumn column in leftKey.Columns)
 					{
-						int LLeftKeyIndex = LeftKey.Columns.IndexOfName(LColumn.Name);
-						if ((LLeftKeyIndex < 0) || (RightTableVar.Keys.IsKeyColumnName(RightKey.Columns[LLeftKeyIndex].Name)))
-							LKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+						int leftKeyIndex = LeftKey.Columns.IndexOfName(column.Name);
+						if ((leftKeyIndex < 0) || (RightTableVar.Keys.IsKeyColumnName(RightKey.Columns[leftKeyIndex].Name)))
+							key.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)]);
 					}
 
-					foreach (Schema.TableVarColumn LColumn in LRightKey.Columns)
+					foreach (Schema.TableVarColumn column in rightKey.Columns)
 					{
-						int LRightKeyIndex = RightKey.Columns.IndexOfName(LColumn.Name);
-						Schema.TableVarColumn LTableVarColumn = TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)];
+						int rightKeyIndex = RightKey.Columns.IndexOfName(column.Name);
+						Schema.TableVarColumn tableVarColumn = TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)];
 						if 
 						(
 							(
-								(LRightKeyIndex < 0) || 
+								(rightKeyIndex < 0) || 
 								(
-									LeftTableVar.Keys.IsKeyColumnName(LeftKey.Columns[LRightKeyIndex].Name) && 
-									!LKey.Columns.ContainsName(LeftKey.Columns[LRightKeyIndex].Name)
+									LeftTableVar.Keys.IsKeyColumnName(LeftKey.Columns[rightKeyIndex].Name) && 
+									!key.Columns.ContainsName(LeftKey.Columns[rightKeyIndex].Name)
 								)
 							) && 
-							!LKey.Columns.Contains(LTableVarColumn)
+							!key.Columns.Contains(tableVarColumn)
 						)
-							LKey.Columns.Add(LTableVarColumn);
+							key.Columns.Add(tableVarColumn);
 					}
 
-					if (!TableVar.Keys.Contains(LKey))
-						TableVar.Keys.Add(LKey);
+					if (!TableVar.Keys.Contains(key))
+						TableVar.Keys.Add(key);
 						
-					LKey = new Schema.Key();
-					LKey.IsInherited = true;
-					LKey.IsSparse = LLeftKey.IsSparse || LRightKey.IsSparse;
-					foreach (Schema.TableVarColumn LColumn in LRightKey.Columns)
+					key = new Schema.Key();
+					key.IsInherited = true;
+					key.IsSparse = leftKey.IsSparse || rightKey.IsSparse;
+					foreach (Schema.TableVarColumn column in rightKey.Columns)
 					{
-						int LRightKeyIndex = RightKey.Columns.IndexOfName(LColumn.Name);
-						if ((LRightKeyIndex < 0) || (LeftTableVar.Keys.IsKeyColumnName(LeftKey.Columns[LRightKeyIndex].Name)))
-							LKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+						int rightKeyIndex = RightKey.Columns.IndexOfName(column.Name);
+						if ((rightKeyIndex < 0) || (LeftTableVar.Keys.IsKeyColumnName(LeftKey.Columns[rightKeyIndex].Name)))
+							key.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)]);
 					}
 						
-					foreach (Schema.TableVarColumn LColumn in LLeftKey.Columns)
+					foreach (Schema.TableVarColumn column in leftKey.Columns)
 					{
-						int LLeftKeyIndex = LeftKey.Columns.IndexOfName(LColumn.Name);
-						Schema.TableVarColumn LTableVarColumn = TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)];
+						int leftKeyIndex = LeftKey.Columns.IndexOfName(column.Name);
+						Schema.TableVarColumn tableVarColumn = TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)];
 						if
 						(
 							(
-								(LLeftKeyIndex < 0) ||
+								(leftKeyIndex < 0) ||
 								(
-									RightTableVar.Keys.IsKeyColumnName(RightKey.Columns[LLeftKeyIndex].Name) &&
-									!LKey.Columns.ContainsName(RightKey.Columns[LLeftKeyIndex].Name)
+									RightTableVar.Keys.IsKeyColumnName(RightKey.Columns[leftKeyIndex].Name) &&
+									!key.Columns.ContainsName(RightKey.Columns[leftKeyIndex].Name)
 								)
 							) &&
-							!LKey.Columns.Contains(LTableVarColumn)
+							!key.Columns.Contains(tableVarColumn)
 						)
-							LKey.Columns.Add(LTableVarColumn);
+							key.Columns.Add(tableVarColumn);
 					}
 					
-					if (!TableVar.Keys.Contains(LKey))
-						TableVar.Keys.Add(LKey);
+					if (!TableVar.Keys.Contains(key))
+						TableVar.Keys.Add(key);
 				}
 				
 			RemoveSuperKeys();
@@ -1440,7 +1440,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		#if USEUNIFIEDJOINKEYINFERENCE
 		// BTR -> The USEUNIFIEDJOINKEYINFERENCE define is introduced to make reversion easier if it becomes necessary, and to allow for easy reference of
 		// the way the old algorithms worked. I am confident that this is now the correct algorithm for all join types.
-		protected void InferJoinKeys(Plan APlan, JoinCardinality ACardinality, bool AIsLeftOuter, bool AIsRightOuter)
+		protected void InferJoinKeys(Plan plan, JoinCardinality cardinality, bool isLeftOuter, bool isRightOuter)
 		{
 			// foreach key of the left table var
 				// foreach key of the right table var
@@ -1448,68 +1448,68 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						// if the left key is sparse, or the join is a cardinality preserving right outer, the resulting key is sparse
 					// copy the right key, adding all the columns of the left key that are not join columns
 						// if the right key is sparse, or the join is a cardinality preserving left outer, the resulting key is sparse
-			Schema.Key LNewKey;
-			foreach (Schema.Key LLeftKey in LeftTableVar.Keys)
-				foreach (Schema.Key LRightKey in RightTableVar.Keys)
+			Schema.Key newKey;
+			foreach (Schema.Key leftKey in LeftTableVar.Keys)
+				foreach (Schema.Key rightKey in RightTableVar.Keys)
 				{
-					LNewKey = new Schema.Key();
-					LNewKey.IsInherited = true;
-					LNewKey.IsSparse = 
-						LLeftKey.IsSparse 
+					newKey = new Schema.Key();
+					newKey.IsInherited = true;
+					newKey.IsSparse = 
+						leftKey.IsSparse 
 							|| 
 							(
-								AIsRightOuter 
-									&& (!IsNatural || (IsNatural && !LLeftKey.Columns.IsSubsetOf(RightTableVar.Columns))) 
-									&& ((ACardinality == JoinCardinality.OneToOne) || (ACardinality == JoinCardinality.OneToMany))
+								isRightOuter 
+									&& (!IsNatural || (IsNatural && !leftKey.Columns.IsSubsetOf(RightTableVar.Columns))) 
+									&& ((cardinality == JoinCardinality.OneToOne) || (cardinality == JoinCardinality.OneToMany))
 							);
 							
-					foreach (Schema.TableVarColumn LColumn in LLeftKey.Columns)
-						LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+					foreach (Schema.TableVarColumn column in leftKey.Columns)
+						newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)]);
 						
-					foreach (Schema.TableVarColumn LColumn in LRightKey.Columns)
-						if (!RightKey.Columns.ContainsName(LColumn.Name) && !LNewKey.Columns.ContainsName(LColumn.Name)) // if this is not a right join column, and it is not already part of the key
-							LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+					foreach (Schema.TableVarColumn column in rightKey.Columns)
+						if (!RightKey.Columns.ContainsName(column.Name) && !newKey.Columns.ContainsName(column.Name)) // if this is not a right join column, and it is not already part of the key
+							newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)]);
 							
-					if (LNewKey.Columns.Count == 0)
-						LNewKey.IsSparse = false;
+					if (newKey.Columns.Count == 0)
+						newKey.IsSparse = false;
 							
-					if (!TableVar.Keys.Contains(LNewKey))
-						TableVar.Keys.Add(LNewKey);
+					if (!TableVar.Keys.Contains(newKey))
+						TableVar.Keys.Add(newKey);
 							
-					LNewKey = new Schema.Key();
-					LNewKey.IsInherited = true;
-					LNewKey.IsSparse =
-						LRightKey.IsSparse
+					newKey = new Schema.Key();
+					newKey.IsInherited = true;
+					newKey.IsSparse =
+						rightKey.IsSparse
 							|| 
 							(
-								AIsLeftOuter 
-									&& (!IsNatural || (IsNatural && !LRightKey.Columns.IsSubsetOf(LeftTableVar.Columns))) 
-									&& ((ACardinality == JoinCardinality.OneToOne) || (ACardinality == JoinCardinality.ManyToOne))
+								isLeftOuter 
+									&& (!IsNatural || (IsNatural && !rightKey.Columns.IsSubsetOf(LeftTableVar.Columns))) 
+									&& ((cardinality == JoinCardinality.OneToOne) || (cardinality == JoinCardinality.ManyToOne))
 							);
 							
-					foreach (Schema.TableVarColumn LColumn in LLeftKey.Columns)
-						if (!LeftKey.Columns.ContainsName(LColumn.Name) ) // if this is not a left join column
-							LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+					foreach (Schema.TableVarColumn column in leftKey.Columns)
+						if (!LeftKey.Columns.ContainsName(column.Name) ) // if this is not a left join column
+							newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)]);
 
-					foreach (Schema.TableVarColumn LColumn in LRightKey.Columns)
-						if (!LNewKey.Columns.ContainsName(LColumn.Name)) // if this column is not already part of the key
-							LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+					foreach (Schema.TableVarColumn column in rightKey.Columns)
+						if (!newKey.Columns.ContainsName(column.Name)) // if this column is not already part of the key
+							newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)]);
 							
-					if (LNewKey.Columns.Count == 0)
-						LNewKey.IsSparse = false;
+					if (newKey.Columns.Count == 0)
+						newKey.IsSparse = false;
 						
-					if (!TableVar.Keys.Contains(LNewKey))
-						TableVar.Keys.Add(LNewKey);
+					if (!TableVar.Keys.Contains(newKey))
+						TableVar.Keys.Add(newKey);
 				}
 				
 			RemoveSuperKeys();
 		}
 		#endif
 		
-		protected virtual void DetermineJoinKey(Plan APlan)
+		protected virtual void DetermineJoinKey(Plan plan)
 		{
 			#if USEUNIFIEDJOINKEYINFERENCE
-			InferJoinKeys(APlan, Cardinality, false, false);
+			InferJoinKeys(plan, Cardinality, false, false);
 			#else
 			if (FLeftKey.IsUnique && FRightKey.IsUnique)
 			{
@@ -1520,53 +1520,53 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					// foreach key of the right table var
 						// copy the key
 						// copy the key with all correlated columns replaced with the left join key columns (a no-op for natural joins)
-				foreach (Schema.Key LLeftKey in LeftTableVar.Keys)
+				foreach (Schema.Key leftKey in LeftTableVar.Keys)
 				{
-					Schema.Key LNewKey = CopyKey(LLeftKey);
-					if (!TableVar.Keys.Contains(LNewKey))
-						TableVar.Keys.Add(LNewKey);
+					Schema.Key newKey = CopyKey(leftKey);
+					if (!TableVar.Keys.Contains(newKey))
+						TableVar.Keys.Add(newKey);
 
 					if (!IsNatural)
 					{
-						LNewKey = new Schema.Key();
-						LNewKey.IsInherited = true;
-						LNewKey.IsSparse = LLeftKey.IsSparse;
-						foreach (Schema.TableVarColumn LColumn in LLeftKey.Columns)
+						newKey = new Schema.Key();
+						newKey.IsInherited = true;
+						newKey.IsSparse = leftKey.IsSparse;
+						foreach (Schema.TableVarColumn column in leftKey.Columns)
 						{
-							int LLeftKeyIndex = LeftKey.Columns.IndexOfName(LColumn.Name);
-							if (LLeftKeyIndex >= 0)
-								LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(RightKey.Columns[LLeftKeyIndex].Name)]);
+							int leftKeyIndex = LeftKey.Columns.IndexOfName(column.Name);
+							if (leftKeyIndex >= 0)
+								newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(RightKey.Columns[leftKeyIndex].Name)]);
 							else
-								LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+								newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)]);
 						}
 
-						if (!TableVar.Keys.Contains(LNewKey))
-							TableVar.Keys.Add(LNewKey);
+						if (!TableVar.Keys.Contains(newKey))
+							TableVar.Keys.Add(newKey);
 					}
 				}
 				
-				foreach (Schema.Key LRightKey in RightTableVar.Keys)
+				foreach (Schema.Key rightKey in RightTableVar.Keys)
 				{
-					Schema.Key LNewKey = CopyKey(LRightKey);
-					if (!TableVar.Keys.Contains(LNewKey))
-						TableVar.Keys.Add(LNewKey);
+					Schema.Key newKey = CopyKey(rightKey);
+					if (!TableVar.Keys.Contains(newKey))
+						TableVar.Keys.Add(newKey);
 
 					if (!IsNatural)
 					{
-						LNewKey = new Schema.Key();
-						LNewKey.IsInherited = true;
-						LNewKey.IsSparse = LRightKey.IsSparse;
-						foreach (Schema.TableVarColumn LColumn in LRightKey.Columns)
+						newKey = new Schema.Key();
+						newKey.IsInherited = true;
+						newKey.IsSparse = rightKey.IsSparse;
+						foreach (Schema.TableVarColumn column in rightKey.Columns)
 						{
-							int LRightKeyIndex = RightKey.Columns.IndexOfName(LColumn.Name);
-							if (LRightKeyIndex >= 0)
-								LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LeftKey.Columns[LRightKeyIndex].Name)]);
+							int rightKeyIndex = RightKey.Columns.IndexOfName(column.Name);
+							if (rightKeyIndex >= 0)
+								newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LeftKey.Columns[rightKeyIndex].Name)]);
 							else
-								LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+								newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)]);
 						}
 						
-						if (!TableVar.Keys.Contains(LNewKey))
-							TableVar.Keys.Add(LNewKey);
+						if (!TableVar.Keys.Contains(newKey))
+							TableVar.Keys.Add(newKey);
 					}
 				}
 				
@@ -1578,40 +1578,40 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					// for each key of the right table var
 						// copy the key, excluding join columns that are not key columns in the left
 						// copy the key, excluding join columns that are not key columns in the left, with all correlated columns replaced with the left join key columns (a no-op for natural joins)
-				foreach (Schema.Key LRightKey in RightTableVar.Keys)
+				foreach (Schema.Key rightKey in RightTableVar.Keys)
 				{
-					Schema.Key LNewKey = new Schema.Key();
-					LNewKey.IsInherited = true;
-					LNewKey.IsSparse = LRightKey.IsSparse;
-					foreach (Schema.TableVarColumn LColumn in LRightKey.Columns)
+					Schema.Key newKey = new Schema.Key();
+					newKey.IsInherited = true;
+					newKey.IsSparse = rightKey.IsSparse;
+					foreach (Schema.TableVarColumn column in rightKey.Columns)
 					{
-						int LRightKeyIndex = RightKey.Columns.IndexOfName(LColumn.Name);
-						if ((LRightKeyIndex < 0) || LeftTableVar.Keys.IsKeyColumnName(LeftKey.Columns[LRightKeyIndex].Name))
-							LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+						int rightKeyIndex = RightKey.Columns.IndexOfName(column.Name);
+						if ((rightKeyIndex < 0) || LeftTableVar.Keys.IsKeyColumnName(LeftKey.Columns[rightKeyIndex].Name))
+							newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)]);
 					}
 					
-					if (!TableVar.Keys.Contains(LNewKey))
-						TableVar.Keys.Add(LNewKey);
+					if (!TableVar.Keys.Contains(newKey))
+						TableVar.Keys.Add(newKey);
 
 					if (!IsNatural)
 					{
-						LNewKey = new Schema.Key();
-						LNewKey.IsInherited = true;
-						LNewKey.IsSparse = LRightKey.IsSparse;
-						foreach (Schema.TableVarColumn LColumn in LRightKey.Columns)
+						newKey = new Schema.Key();
+						newKey.IsInherited = true;
+						newKey.IsSparse = rightKey.IsSparse;
+						foreach (Schema.TableVarColumn column in rightKey.Columns)
 						{
-							int LRightKeyIndex = RightKey.Columns.IndexOfName(LColumn.Name);
-							if (LRightKeyIndex >= 0)
+							int rightKeyIndex = RightKey.Columns.IndexOfName(column.Name);
+							if (rightKeyIndex >= 0)
 							{
-								if (LeftTableVar.Keys.IsKeyColumnName(LeftKey.Columns[LRightKeyIndex].Name))
-									LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LeftKey.Columns[LRightKeyIndex].Name)]);
+								if (LeftTableVar.Keys.IsKeyColumnName(LeftKey.Columns[rightKeyIndex].Name))
+									newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LeftKey.Columns[rightKeyIndex].Name)]);
 							}
 							else
-								LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+								newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)]);
 						}
 						
-						if (!TableVar.Keys.Contains(LNewKey))
-							TableVar.Keys.Add(LNewKey);
+						if (!TableVar.Keys.Contains(newKey))
+							TableVar.Keys.Add(newKey);
 					}
 				}
 			}
@@ -1621,41 +1621,41 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					// for each key of the left table var
 						// copy the key, excluding join columns that are not key columns in the right
 						// copy the key, excluding join columns that are not key columns in the right, with all correlated columns replaced with the right join key columns (a no-op for natural joins)
-				foreach (Schema.Key LLeftKey in LeftTableVar.Keys)
+				foreach (Schema.Key leftKey in LeftTableVar.Keys)
 				{
-					Schema.Key LNewKey = new Schema.Key();
-					LNewKey.IsInherited = true;
-					LNewKey.IsSparse = LLeftKey.IsSparse;
+					Schema.Key newKey = new Schema.Key();
+					newKey.IsInherited = true;
+					newKey.IsSparse = leftKey.IsSparse;
 					
-					foreach (Schema.TableVarColumn LColumn in LLeftKey.Columns)
+					foreach (Schema.TableVarColumn column in leftKey.Columns)
 					{
-						int LLeftKeyIndex = LeftKey.Columns.IndexOfName(LColumn.Name);
-						if ((LLeftKeyIndex < 0) || (RightTableVar.Keys.IsKeyColumnName(RightKey.Columns[LLeftKeyIndex].Name)))
-							LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+						int leftKeyIndex = LeftKey.Columns.IndexOfName(column.Name);
+						if ((leftKeyIndex < 0) || (RightTableVar.Keys.IsKeyColumnName(RightKey.Columns[leftKeyIndex].Name)))
+							newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)]);
 					}
 
-					if (!TableVar.Keys.Contains(LNewKey))
-						TableVar.Keys.Add(LNewKey);
+					if (!TableVar.Keys.Contains(newKey))
+						TableVar.Keys.Add(newKey);
 
 					if (!IsNatural)
 					{
-						LNewKey = new Schema.Key();
-						LNewKey.IsInherited = true;
-						LNewKey.IsSparse = LLeftKey.IsSparse;
-						foreach (Schema.TableVarColumn LColumn in LLeftKey.Columns)
+						newKey = new Schema.Key();
+						newKey.IsInherited = true;
+						newKey.IsSparse = leftKey.IsSparse;
+						foreach (Schema.TableVarColumn column in leftKey.Columns)
 						{
-							int LLeftKeyIndex = LeftKey.Columns.IndexOfName(LColumn.Name);
-							if (LLeftKeyIndex >= 0)
+							int leftKeyIndex = LeftKey.Columns.IndexOfName(column.Name);
+							if (leftKeyIndex >= 0)
 							{
-								if (RightTableVar.Keys.IsKeyColumnName(RightKey.Columns[LLeftKeyIndex].Name))
-									LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(RightKey.Columns[LLeftKeyIndex].Name)]);
+								if (RightTableVar.Keys.IsKeyColumnName(RightKey.Columns[leftKeyIndex].Name))
+									newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(RightKey.Columns[leftKeyIndex].Name)]);
 							}
 							else
-								LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+								newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)]);
 						}
 						
-						if (!TableVar.Keys.Contains(LNewKey))
-							TableVar.Keys.Add(LNewKey);
+						if (!TableVar.Keys.Contains(newKey))
+							TableVar.Keys.Add(newKey);
 					}
 				}
 			}
@@ -1666,33 +1666,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 		}
 		
-		protected virtual void DetermineOrders(Plan APlan)
+		protected virtual void DetermineOrders(Plan plan)
 		{
-			if (FLeftKey.IsUnique && FRightKey.IsUnique)
+			if (_leftKey.IsUnique && _rightKey.IsUnique)
 			{
 				CopyPreservedOrders(LeftTableVar.Orders);
 				CopyPreservedOrders(RightTableVar.Orders);
 			}
-			else if (FLeftKey.IsUnique)
+			else if (_leftKey.IsUnique)
 				CopyPreservedOrders(RightTableVar.Orders);
-			else if (FRightKey.IsUnique)
+			else if (_rightKey.IsUnique)
 				CopyPreservedOrders(LeftTableVar.Orders);
 		}
 		
-		protected override void DetermineModifiers(Plan APlan)
+		protected override void DetermineModifiers(Plan plan)
 		{
-			base.DetermineModifiers(APlan);
+			base.DetermineModifiers(plan);
 			
 			if (Modifiers != null)
 				IsTimes = Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "IsTimes", IsTimes.ToString()));
 		}
 		
-		protected virtual void DetermineJoinModifiers(Plan APlan)
+		protected virtual void DetermineJoinModifiers(Plan plan)
 		{
-			bool LIsLeft = !(this is RightOuterJoinNode);
-			if (FIsLookup)
+			bool isLeft = !(this is RightOuterJoinNode);
+			if (_isLookup)
 			{
-				if (LIsLeft)
+				if (isLeft)
 				{
 					PropagateInsertRight = PropagateAction.False;
 					PropagateUpdateRight = false;
@@ -1721,25 +1721,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			switch (Cardinality)
 			{
 				case JoinCardinality.OneToMany :
-					if (LIsLeft || !FIsLookup)
+					if (isLeft || !_isLookup)
 						PropagateInsertLeft = PropagateAction.Ignore;
 				break;
 					
 				case JoinCardinality.ManyToOne :
-					if (!LIsLeft || !FIsLookup)
+					if (!isLeft || !_isLookup)
 						PropagateInsertRight = PropagateAction.Ignore;
 				break;
 					
 				case JoinCardinality.ManyToMany :
-					if (LIsLeft)
+					if (isLeft)
 					{
 						PropagateInsertLeft = PropagateAction.Ignore;
-						if (!FIsLookup)
+						if (!_isLookup)
 							PropagateInsertRight = PropagateAction.Ignore;
 					}
 					else
 					{
-						if (!FIsLookup)
+						if (!_isLookup)
 							PropagateInsertLeft = PropagateAction.Ignore;
 						PropagateInsertRight = PropagateAction.Ignore;
 					}
@@ -1773,44 +1773,44 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			
 			// Set IsNilable for each column in the left and right tables based on PropagateXXXLeft and Right
-			bool LIsLeftNilable = (PropagateInsertLeft == PropagateAction.False) || !PropagateUpdateLeft;
-			bool LIsRightNilable = (PropagateInsertRight == PropagateAction.False) || !PropagateUpdateRight;
+			bool isLeftNilable = (PropagateInsertLeft == PropagateAction.False) || !PropagateUpdateLeft;
+			bool isRightNilable = (PropagateInsertRight == PropagateAction.False) || !PropagateUpdateRight;
 			
-			int LRightColumnIndex = RightTableVar.Columns.Count == 0 ? LeftTableVar.Columns.Count : TableVar.Columns.IndexOfName(RightTableVar.Columns[0].Name);
+			int rightColumnIndex = RightTableVar.Columns.Count == 0 ? LeftTableVar.Columns.Count : TableVar.Columns.IndexOfName(RightTableVar.Columns[0].Name);
 			
-			for (int LIndex = 0; LIndex < TableVar.Columns.Count; LIndex++)
+			for (int index = 0; index < TableVar.Columns.Count; index++)
 			{
-				if (LIndex < LRightColumnIndex)
+				if (index < rightColumnIndex)
 				{
-					if (LIsLeftNilable)
-						TableVar.Columns[LIndex].IsNilable = LIsLeftNilable;
+					if (isLeftNilable)
+						TableVar.Columns[index].IsNilable = isLeftNilable;
 				}
 				else
 				{
-					if (LIsRightNilable)
-						TableVar.Columns[LIndex].IsNilable = LIsRightNilable;
+					if (isRightNilable)
+						TableVar.Columns[index].IsNilable = isRightNilable;
 				}
 			}
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			InternalCreateDataType(APlan);
+			DetermineModifiers(plan);
+			InternalCreateDataType(plan);
 
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
-			FTableVar.InheritMetaData(LeftTableVar.MetaData);
-			FTableVar.JoinInheritMetaData(RightTableVar.MetaData);
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
+			_tableVar.InheritMetaData(LeftTableVar.MetaData);
+			_tableVar.JoinInheritMetaData(RightTableVar.MetaData);
 			
-			if (FIsNatural)
+			if (_isNatural)
 			{
-				if (FIsIntersect && (!RightTableType.Compatible(LeftTableType)))
-					throw new CompilerException(CompilerException.Codes.TableExpressionsNotCompatible, APlan.CurrentStatement(), LeftTableType.ToString(), RightTableType.ToString());
+				if (_isIntersect && (!RightTableType.Compatible(LeftTableType)))
+					throw new CompilerException(CompilerException.Codes.TableExpressionsNotCompatible, plan.CurrentStatement(), LeftTableType.ToString(), RightTableType.ToString());
 					
-				FExpression = GenerateJoinExpression();
+				_expression = GenerateJoinExpression();
 				
-				if (FIsTimes)
+				if (_isTimes)
 				{
 					if (Modifiers == null)
 						Modifiers = new LanguageModifiers();
@@ -1818,172 +1818,172 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						Modifiers.Add(new LanguageModifier("IsTimes", "true"));
 				}
 				
-				if (FIsTimes && (FExpression != null))
-					throw new CompilerException(CompilerException.Codes.TableExpressionsNotProductCompatible, APlan.CurrentStatement(), LeftTableType.ToString(), RightTableType.ToString());
+				if (_isTimes && (_expression != null))
+					throw new CompilerException(CompilerException.Codes.TableExpressionsNotProductCompatible, plan.CurrentStatement(), LeftTableType.ToString(), RightTableType.ToString());
 
-				if (!FIsTimes && (FExpression == null) && !APlan.SuppressWarnings)
-					APlan.Messages.Add(new CompilerException(CompilerException.Codes.PossiblyIncorrectProductExpression, CompilerErrorLevel.Warning, APlan.CurrentStatement(), LeftTableType.ToString(), RightTableType.ToString()));
+				if (!_isTimes && (_expression == null) && !plan.SuppressWarnings)
+					plan.Messages.Add(new CompilerException(CompilerException.Codes.PossiblyIncorrectProductExpression, CompilerErrorLevel.Warning, plan.CurrentStatement(), LeftTableType.ToString(), RightTableType.ToString()));
 			}
 			else
 			{
-				if (!IsEquiJoin(FExpression))
-					throw new CompilerException(CompilerException.Codes.JoinMustBeEquiJoin, FExpression);
+				if (!IsEquiJoin(_expression))
+					throw new CompilerException(CompilerException.Codes.JoinMustBeEquiJoin, _expression);
 					
-				DetermineJoinKeys(FExpression);
+				DetermineJoinKeys(_expression);
 			}
 			
-			foreach (Schema.Key LKey in LeftTableVar.Keys)
-				if (FLeftKey.Columns.IsSupersetOf(LKey.Columns))
+			foreach (Schema.Key key in LeftTableVar.Keys)
+				if (_leftKey.Columns.IsSupersetOf(key.Columns))
 				{
-					FLeftKey.IsUnique = true;
+					_leftKey.IsUnique = true;
 					break;
 				}
 				
-			foreach (Schema.Key LKey in RightTableVar.Keys)
-				if (FRightKey.Columns.IsSupersetOf(LKey.Columns))
+			foreach (Schema.Key key in RightTableVar.Keys)
+				if (_rightKey.Columns.IsSupersetOf(key.Columns))
 				{
-					FRightKey.IsUnique = true;
+					_rightKey.IsUnique = true;
 					break;
 				}
 				
-			DetermineCardinality(APlan);
-			DetermineDetailLookup(APlan);
+			DetermineCardinality(plan);
+			DetermineDetailLookup(plan);
 				
 			// Determine columns
-			DetermineColumns(APlan);				
+			DetermineColumns(plan);				
 			
 			// Determine the keys
-			DetermineJoinKey(APlan);
+			DetermineJoinKey(plan);
 			
-			FUpdateLeftToRight = (FLeftKey.IsUnique && FRightKey.IsUnique) || (!FLeftKey.IsUnique && !FRightKey.IsUnique) || FLeftKey.IsUnique;
+			_updateLeftToRight = (_leftKey.IsUnique && _rightKey.IsUnique) || (!_leftKey.IsUnique && !_rightKey.IsUnique) || _leftKey.IsUnique;
 
 			// Determine modifiers
-			DetermineJoinModifiers(APlan);
+			DetermineJoinModifiers(plan);
 			
 			// DetermineRemotable
-			DetermineRemotable(APlan);
+			DetermineRemotable(plan);
 
 			// Determine orders			
-			DetermineOrders(APlan);
+			DetermineOrders(plan);
 
 			#if UseReferenceDerivation
-			foreach (Schema.Reference LReference in LeftTableVar.SourceReferences)
-				CopySourceReference(APlan, LReference, LReference.IsExcluded || RightTableVar.TargetReferences.ContainsOriginatingReference(LReference.OriginatingReferenceName()) && LeftKey.Columns.Equals(LReference.SourceKey.Columns));
+			foreach (Schema.Reference reference in LeftTableVar.SourceReferences)
+				CopySourceReference(plan, reference, reference.IsExcluded || RightTableVar.TargetReferences.ContainsOriginatingReference(reference.OriginatingReferenceName()) && LeftKey.Columns.Equals(reference.SourceKey.Columns));
 					
-			foreach (Schema.Reference LReference in LeftTableVar.TargetReferences)
-				CopyTargetReference(APlan, LReference, LReference.IsExcluded || RightTableVar.SourceReferences.ContainsOriginatingReference(LReference.OriginatingReferenceName()) && LeftKey.Columns.Equals(LReference.TargetKey.Columns));
+			foreach (Schema.Reference reference in LeftTableVar.TargetReferences)
+				CopyTargetReference(plan, reference, reference.IsExcluded || RightTableVar.SourceReferences.ContainsOriginatingReference(reference.OriginatingReferenceName()) && LeftKey.Columns.Equals(reference.TargetKey.Columns));
 					
-			foreach (Schema.Reference LReference in RightTableVar.SourceReferences)
-				CopySourceReference(APlan, LReference, LReference.IsExcluded || LeftTableVar.TargetReferences.ContainsOriginatingReference(LReference.OriginatingReferenceName()) && RightKey.Columns.Equals(LReference.SourceKey.Columns));
+			foreach (Schema.Reference reference in RightTableVar.SourceReferences)
+				CopySourceReference(plan, reference, reference.IsExcluded || LeftTableVar.TargetReferences.ContainsOriginatingReference(reference.OriginatingReferenceName()) && RightKey.Columns.Equals(reference.SourceKey.Columns));
 			
-			foreach (Schema.Reference LReference in RightTableVar.TargetReferences)
-				CopyTargetReference(APlan, LReference, LReference.IsExcluded || LeftTableVar.SourceReferences.ContainsOriginatingReference(LReference.OriginatingReferenceName()) && RightKey.Columns.Equals(LReference.TargetKey.Columns));
+			foreach (Schema.Reference reference in RightTableVar.TargetReferences)
+				CopyTargetReference(plan, reference, reference.IsExcluded || LeftTableVar.SourceReferences.ContainsOriginatingReference(reference.OriginatingReferenceName()) && RightKey.Columns.Equals(reference.TargetKey.Columns));
 			#endif
 			
-			APlan.EnterRowContext();
+			plan.EnterRowContext();
 			try
 			{			
 				#if USENAMEDROWVARIABLES
-				APlan.Symbols.Push(new Symbol(Keywords.Left, LeftTableType.RowType));
+				plan.Symbols.Push(new Symbol(Keywords.Left, LeftTableType.RowType));
 				#else
 				APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(LeftTableType.Columns, FIsNatural ? Keywords.Left : String.Empty)));
 				#endif
 				try
 				{
 					#if USENAMEDROWVARIABLES
-					APlan.Symbols.Push(new Symbol(Keywords.Right, RightTableType.RowType));
+					plan.Symbols.Push(new Symbol(Keywords.Right, RightTableType.RowType));
 					#else
 					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(RightTableType.Columns, FIsNatural ? Keywords.Right : String.Empty)));
 					#endif
 					try
 					{
-						if (FExpression != null)
+						if (_expression != null)
 						{
-							PlanNode LPlanNode = Compiler.CompileExpression(APlan, FExpression);
-							if (!(LPlanNode.DataType.Is(APlan.DataTypes.SystemBoolean)))
-								throw new CompilerException(CompilerException.Codes.BooleanExpressionExpected, FExpression);
-							Nodes.Add(LPlanNode);
+							PlanNode planNode = Compiler.CompileExpression(plan, _expression);
+							if (!(planNode.DataType.Is(plan.DataTypes.SystemBoolean)))
+								throw new CompilerException(CompilerException.Codes.BooleanExpressionExpected, _expression);
+							Nodes.Add(planNode);
 						}
 						else
-							Nodes.Add(new ValueNode(APlan.DataTypes.SystemBoolean, true));
+							Nodes.Add(new ValueNode(plan.DataTypes.SystemBoolean, true));
 						
 					}
 					finally
 					{
-						APlan.Symbols.Pop();
+						plan.Symbols.Pop();
 					}
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 			finally
 			{
-				APlan.ExitRowContext();
+				plan.ExitRowContext();
 			}
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			Nodes[0].DetermineBinding(APlan);
+			Nodes[0].DetermineBinding(plan);
 			if (IsLookup && !IsDetailLookup)
-				APlan.PushCursorContext(new CursorContext(APlan.CursorContext.CursorType, APlan.CursorContext.CursorCapabilities & ~CursorCapability.Updateable, APlan.CursorContext.CursorIsolation));
+				plan.PushCursorContext(new CursorContext(plan.CursorContext.CursorType, plan.CursorContext.CursorCapabilities & ~CursorCapability.Updateable, plan.CursorContext.CursorIsolation));
 			try
 			{
-				Nodes[1].DetermineBinding(APlan);
+				Nodes[1].DetermineBinding(plan);
 			}
 			finally
 			{
 				if (IsLookup && !IsDetailLookup)
-					APlan.PopCursorContext();
+					plan.PopCursorContext();
 			}
 			
-			APlan.EnterRowContext();
+			plan.EnterRowContext();
 			try
 			{
 				#if USENAMEDROWVARIABLES
-				APlan.Symbols.Push(new Symbol(Keywords.Left, LeftTableType.RowType));
+				plan.Symbols.Push(new Symbol(Keywords.Left, LeftTableType.RowType));
 				#else
 				APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(LeftTableType.Columns, FIsNatural ? Keywords.Left : String.Empty)));
 				#endif
 				try
 				{
 					#if USENAMEDROWVARIABLES
-					APlan.Symbols.Push(new Symbol(Keywords.Right, RightTableType.RowType));
+					plan.Symbols.Push(new Symbol(Keywords.Right, RightTableType.RowType));
 					#else
 					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(RightTableType.Columns, FIsNatural ? Keywords.Right : String.Empty)));
 					#endif
 					try
 					{
-						Nodes[2].DetermineBinding(APlan);
+						Nodes[2].DetermineBinding(plan);
 					}
 					finally
 					{
-						APlan.Symbols.Pop();
+						plan.Symbols.Pop();
 					}
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 			finally
 			{
-				APlan.ExitRowContext();
+				plan.ExitRowContext();
 			}
 		}
 		
-		public override void DetermineDevice(Plan APlan)
+		public override void DetermineDevice(Plan plan)
 		{
-			base.DetermineDevice(APlan);
-			if (!FDeviceSupported)
-				DetermineJoinAlgorithm(APlan);
+			base.DetermineDevice(plan);
+			if (!_deviceSupported)
+				DetermineJoinAlgorithm(plan);
 		}
 		
-		public virtual void DetermineCursorCapabilities(Plan APlan)
+		public virtual void DetermineCursorCapabilities(Plan plan)
 		{
-			FCursorCapabilities = 
+			_cursorCapabilities = 
 				CursorCapability.Navigable |
 				(
 					LeftNode.CursorCapabilities & 
@@ -1991,144 +1991,144 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					CursorCapability.BackwardsNavigable
 				) |
 				(
-					APlan.CursorContext.CursorCapabilities &
+					plan.CursorContext.CursorCapabilities &
 					LeftNode.CursorCapabilities &
 					((IsLookup && !IsDetailLookup) ? CursorCapability.Updateable : RightNode.CursorCapabilities) & 
 					CursorCapability.Updateable
 				);
 		}
 
-		public override void DetermineCursorBehavior(Plan APlan)
+		public override void DetermineCursorBehavior(Plan plan)
 		{
 			if ((LeftNode.CursorType == CursorType.Dynamic) || (RightNode.CursorType == CursorType.Dynamic))
-				FCursorType = CursorType.Dynamic;
+				_cursorType = CursorType.Dynamic;
 			else
-				FCursorType = CursorType.Static;
-			FRequestedCursorType = APlan.CursorContext.CursorType;
+				_cursorType = CursorType.Static;
+			_requestedCursorType = plan.CursorContext.CursorType;
 
-			DetermineCursorCapabilities(APlan);
+			DetermineCursorCapabilities(plan);
 
-			FCursorIsolation = APlan.CursorContext.CursorIsolation;
+			_cursorIsolation = plan.CursorContext.CursorIsolation;
 		}
 		
-		protected PlanNode FLeftSelectNode;
+		protected PlanNode _leftSelectNode;
 		public PlanNode LeftSelectNode
 		{
-			get { return FLeftSelectNode; }
-			set { FLeftSelectNode = value; }
+			get { return _leftSelectNode; }
+			set { _leftSelectNode = value; }
 		}
 		
-		protected PlanNode FRightSelectNode;
+		protected PlanNode _rightSelectNode;
 		public PlanNode RightSelectNode
 		{
-			get { return FRightSelectNode; }
-			set { FRightSelectNode = value; }
+			get { return _rightSelectNode; }
+			set { _rightSelectNode = value; }
 		}
 		
-		protected Row SelectLeftRow(Program AProgram)
+		protected Row SelectLeftRow(Program program)
 		{
-			EnsureLeftSelectNode(AProgram.Plan);
-			using (Table LTable = (Table)FLeftSelectNode.Execute(AProgram))
+			EnsureLeftSelectNode(program.Plan);
+			using (Table table = (Table)_leftSelectNode.Execute(program))
 			{
-				LTable.Open();
-				if (LTable.Next())
-					return LTable.Select();
+				table.Open();
+				if (table.Next())
+					return table.Select();
 				else
 					return null;
 			}
 		}
 		
-		protected bool SelectLeftRow(Program AProgram, Row ARow)
+		protected bool SelectLeftRow(Program program, Row row)
 		{
-			EnsureLeftSelectNode(AProgram.Plan);
-			using (Table LTable = (Table)FLeftSelectNode.Execute(AProgram))
+			EnsureLeftSelectNode(program.Plan);
+			using (Table table = (Table)_leftSelectNode.Execute(program))
 			{
-				LTable.Open();
-				if (LTable.Next())
+				table.Open();
+				if (table.Next())
 				{
-					LTable.Select(ARow);
+					table.Select(row);
 					return true;
 				}
 				return false;
 			}
 		}
 		
-		protected Row SelectRightRow(Program AProgram)
+		protected Row SelectRightRow(Program program)
 		{
-			EnsureRightSelectNode(AProgram.Plan);
-			using (Table LTable = (Table)FRightSelectNode.Execute(AProgram))
+			EnsureRightSelectNode(program.Plan);
+			using (Table table = (Table)_rightSelectNode.Execute(program))
 			{
-				LTable.Open();
-				if (LTable.Next())
-					return LTable.Select();
+				table.Open();
+				if (table.Next())
+					return table.Select();
 				else
 					return null;
 			}
 		}
 		
-		protected bool SelectRightRow(Program AProgram, Row ARow)
+		protected bool SelectRightRow(Program program, Row row)
 		{
-			EnsureRightSelectNode(AProgram.Plan);
-			using (Table LTable = (Table)FRightSelectNode.Execute(AProgram))
+			EnsureRightSelectNode(program.Plan);
+			using (Table table = (Table)_rightSelectNode.Execute(program))
 			{
-				LTable.Open();
-				if (LTable.Next())
+				table.Open();
+				if (table.Next())
 				{
-					LTable.Select(ARow);
+					table.Select(row);
 					return true;
 				}
 				return false;
 			}
 		}
 		
-		protected void EnsureLeftSelectNode(Plan APlan)
+		protected void EnsureLeftSelectNode(Plan plan)
 		{
-			if (FLeftSelectNode == null)
+			if (_leftSelectNode == null)
 			{
-				ApplicationTransaction LTransaction = null;
-				if (APlan.ApplicationTransactionID != Guid.Empty)
-					LTransaction = APlan.GetApplicationTransaction();
+				ApplicationTransaction transaction = null;
+				if (plan.ApplicationTransactionID != Guid.Empty)
+					transaction = plan.GetApplicationTransaction();
 				try
 				{
-					if ((LTransaction != null) && (!ShouldTranslateLeft || (IsLookup && !IsDetailLookup)))
-						LTransaction.PushLookup();
+					if ((transaction != null) && (!ShouldTranslateLeft || (IsLookup && !IsDetailLookup)))
+						transaction.PushLookup();
 					try
 					{
-						APlan.PushATCreationContext();
+						plan.PushATCreationContext();
 						try
 						{
-							APlan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
+							plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
 							try
 							{
-								PushSymbols(APlan, FSymbols);
+								PushSymbols(plan, _symbols);
 								try
 								{
-									APlan.EnterRowContext();
+									plan.EnterRowContext();
 									try
 									{
 										#if USENAMEDROWVARIABLES
-										APlan.Symbols.Push(new Symbol(Keywords.New, DataType.RowType));
+										plan.Symbols.Push(new Symbol(Keywords.New, DataType.RowType));
 										#else
 										APlan.Symbols.Push(new Symbol(String.Empty, DataType.NewRowType));
 										#endif
 										try
 										{
-											FLeftSelectNode =
+											_leftSelectNode =
 												Compiler.Bind
 												(
-													APlan,
+													plan,
 													Compiler.EmitRestrictNode
 													(
-														APlan,
-														Compiler.CompileExpression(APlan, (Expression)LeftNode.EmitStatement(EmitMode.ForCopy)),
+														plan,
+														Compiler.CompileExpression(plan, (Expression)LeftNode.EmitStatement(EmitMode.ForCopy)),
 														#if USENAMEDROWVARIABLES
 														Compiler.BuildKeyEqualExpression
 														(
-															APlan,
+															plan,
 															String.Empty,
 															Keywords.New,
-															FLeftKey.Columns,
-															FRightKey.Columns
+															_leftKey.Columns,
+															_rightKey.Columns
 														)
 														#else
 														Compiler.BuildKeyEqualExpression
@@ -2143,91 +2143,91 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 										}
 										finally
 										{
-											APlan.Symbols.Pop();
+											plan.Symbols.Pop();
 										}
 									}
 									finally
 									{
-										APlan.ExitRowContext();
+										plan.ExitRowContext();
 									}
 								}
 								finally
 								{
-									PopSymbols(APlan, FSymbols);
+									PopSymbols(plan, _symbols);
 								}
 							}
 							finally
 							{
-								APlan.PopCursorContext();
+								plan.PopCursorContext();
 							}
 						}
 						finally
 						{
-							APlan.PopATCreationContext();
+							plan.PopATCreationContext();
 						}
 					}
 					finally
 					{
-						if (LTransaction != null)
-							LTransaction.PopLookup();
+						if (transaction != null)
+							transaction.PopLookup();
 					}
 				}
 				finally
 				{
-					if (LTransaction != null)
-						Monitor.Exit(LTransaction);
+					if (transaction != null)
+						Monitor.Exit(transaction);
 				}
 			}
 		}
 		
-		protected void EnsureRightSelectNode(Plan APlan)
+		protected void EnsureRightSelectNode(Plan plan)
 		{
-			if (FRightSelectNode == null)
+			if (_rightSelectNode == null)
 			{
-				ApplicationTransaction LTransaction = null;
-				if (APlan.ApplicationTransactionID != Guid.Empty)
-					LTransaction = APlan.GetApplicationTransaction();
+				ApplicationTransaction transaction = null;
+				if (plan.ApplicationTransactionID != Guid.Empty)
+					transaction = plan.GetApplicationTransaction();
 				try
 				{
-					if ((LTransaction != null) && (!ShouldTranslateRight || (IsLookup && !IsDetailLookup)))
-						LTransaction.PushLookup();
+					if ((transaction != null) && (!ShouldTranslateRight || (IsLookup && !IsDetailLookup)))
+						transaction.PushLookup();
 					try
 					{
-						APlan.PushATCreationContext();
+						plan.PushATCreationContext();
 						try
 						{
-							APlan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
+							plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable, CursorIsolation.Isolated));
 							try
 							{
-								PushSymbols(APlan, FSymbols);
+								PushSymbols(plan, _symbols);
 								try
 								{
-									APlan.EnterRowContext();
+									plan.EnterRowContext();
 									try
 									{
 										#if USENAMEDROWVARIABLES
-										APlan.Symbols.Push(new Symbol(Keywords.New, DataType.RowType));
+										plan.Symbols.Push(new Symbol(Keywords.New, DataType.RowType));
 										#else
 										APlan.Symbols.Push(new Symbol(String.Empty, DataType.NewRowType));
 										#endif
 										try
 										{
-											FRightSelectNode =
+											_rightSelectNode =
 												Compiler.Bind
 												(	
-													APlan,
+													plan,
 													Compiler.EmitRestrictNode
 													(
-														APlan,
-														Compiler.CompileExpression(APlan, (Expression)RightNode.EmitStatement(EmitMode.ForCopy)),
+														plan,
+														Compiler.CompileExpression(plan, (Expression)RightNode.EmitStatement(EmitMode.ForCopy)),
 														#if USENAMEDROWVARIABLES
 														Compiler.BuildKeyEqualExpression
 														(
-															APlan,
+															plan,
 															String.Empty,
 															Keywords.New,
-															FRightKey.Columns,
-															FLeftKey.Columns
+															_rightKey.Columns,
+															_leftKey.Columns
 														)
 														#else
 														Compiler.BuildKeyEqualExpression
@@ -2242,259 +2242,259 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 										}
 										finally
 										{
-											APlan.Symbols.Pop();
+											plan.Symbols.Pop();
 										}
 									}
 									finally
 									{
-										APlan.ExitRowContext();
+										plan.ExitRowContext();
 									}
 								}
 								finally
 								{
-									PopSymbols(APlan, FSymbols);
+									PopSymbols(plan, _symbols);
 								}
 							}
 							finally
 							{
-								APlan.PopCursorContext();
+								plan.PopCursorContext();
 							}
 						}
 						finally
 						{
-							APlan.PopATCreationContext();
+							plan.PopATCreationContext();
 						}
 					}
 					finally
 					{
-						if (LTransaction != null)
-							LTransaction.PopLookup();
+						if (transaction != null)
+							transaction.PopLookup();
 					}
 				}
 				finally
 				{
-					if (LTransaction != null)
-						Monitor.Exit(LTransaction);
+					if (transaction != null)
+						Monitor.Exit(transaction);
 				}
 			}
 		}
 		
-		private bool FCoordinateLeft = true;
+		private bool _coordinateLeft = true;
 		public bool CoordinateLeft
 		{
-			get { return FCoordinateLeft; }
-			set { FCoordinateLeft = value; }
+			get { return _coordinateLeft; }
+			set { _coordinateLeft = value; }
 		}
 		
-		private bool FCoordinateRight = true;
+		private bool _coordinateRight = true;
 		public bool CoordinateRight
 		{
-			get { return FCoordinateRight; }
-			set { FCoordinateRight = value; }
+			get { return _coordinateRight; }
+			set { _coordinateRight = value; }
 		}
 		
-		private bool FRetrieveLeft = false;
+		private bool _retrieveLeft = false;
 		public bool RetrieveLeft
 		{
-			get { return FRetrieveLeft; }
-			set { FRetrieveLeft = value; }
+			get { return _retrieveLeft; }
+			set { _retrieveLeft = value; }
 		}
 		
-		private bool FRetrieveRight = false;
+		private bool _retrieveRight = false;
 		public bool RetrieveRight
 		{
-			get { return FRetrieveRight; }
-			set { FRetrieveRight = value; }
+			get { return _retrieveRight; }
+			set { _retrieveRight = value; }
 		}
 		
-		private bool FClearLeft = false;
+		private bool _clearLeft = false;
 		public bool ClearLeft
 		{
-			get { return FClearLeft; }
-			set { FClearLeft = value; }
+			get { return _clearLeft; }
+			set { _clearLeft = value; }
 		}
 		
-		private bool FClearRight = false;
+		private bool _clearRight = false;
 		public bool ClearRight
 		{
-			get { return FClearRight; }
-			set { FClearRight = value; }
+			get { return _clearRight; }
+			set { _clearRight = value; }
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			JoinTable LTable = (JoinTable)Activator.CreateInstance(FJoinAlgorithm, System.Reflection.BindingFlags.Default, null, new object[]{this, AProgram}, System.Globalization.CultureInfo.CurrentCulture);
+			JoinTable table = (JoinTable)Activator.CreateInstance(_joinAlgorithm, System.Reflection.BindingFlags.Default, null, new object[]{this, program}, System.Globalization.CultureInfo.CurrentCulture);
 			try
 			{
-				LTable.Open();
-				return LTable;
+				table.Open();
+				return table;
 			}
 			catch
 			{
-				LTable.Dispose();
+				table.Dispose();
 				throw;
 			}
 		}
 		
-		public override void DetermineRemotable(Plan APlan)
+		public override void DetermineRemotable(Plan plan)
 		{
-			base.DetermineRemotable(APlan);
+			base.DetermineRemotable(plan);
 			
-			FTableVar.ShouldValidate = FTableVar.ShouldValidate || LeftTableVar.ShouldValidate || RightTableVar.ShouldValidate || (EnforcePredicate && !FIsNatural);
-			FTableVar.ShouldDefault = FTableVar.ShouldDefault || LeftTableVar.ShouldDefault || RightTableVar.ShouldDefault;
-			FTableVar.ShouldChange = FTableVar.ShouldChange || LeftTableVar.ShouldChange || RightTableVar.ShouldChange;
+			_tableVar.ShouldValidate = _tableVar.ShouldValidate || LeftTableVar.ShouldValidate || RightTableVar.ShouldValidate || (EnforcePredicate && !_isNatural);
+			_tableVar.ShouldDefault = _tableVar.ShouldDefault || LeftTableVar.ShouldDefault || RightTableVar.ShouldDefault;
+			_tableVar.ShouldChange = _tableVar.ShouldChange || LeftTableVar.ShouldChange || RightTableVar.ShouldChange;
 			
-			foreach (Schema.TableVarColumn LColumn in FTableVar.Columns)
+			foreach (Schema.TableVarColumn column in _tableVar.Columns)
 			{
-				int LColumnIndex;
-				Schema.TableVarColumn LSourceColumn;
+				int columnIndex;
+				Schema.TableVarColumn sourceColumn;
 				
-				LColumnIndex = LeftTableVar.Columns.IndexOfName(LColumn.Name);
-				if (LColumnIndex >= 0)
+				columnIndex = LeftTableVar.Columns.IndexOfName(column.Name);
+				if (columnIndex >= 0)
 				{
-					LSourceColumn = LeftTableVar.Columns[LColumnIndex];
-					LColumn.ShouldDefault = LColumn.ShouldDefault || LSourceColumn.ShouldDefault;
-					FTableVar.ShouldDefault = FTableVar.ShouldDefault || LColumn.ShouldDefault;
+					sourceColumn = LeftTableVar.Columns[columnIndex];
+					column.ShouldDefault = column.ShouldDefault || sourceColumn.ShouldDefault;
+					_tableVar.ShouldDefault = _tableVar.ShouldDefault || column.ShouldDefault;
 					
-					LColumn.ShouldValidate = LColumn.ShouldValidate || LSourceColumn.ShouldValidate;
-					FTableVar.ShouldValidate = FTableVar.ShouldValidate || LColumn.ShouldValidate;
+					column.ShouldValidate = column.ShouldValidate || sourceColumn.ShouldValidate;
+					_tableVar.ShouldValidate = _tableVar.ShouldValidate || column.ShouldValidate;
 
-					LColumn.ShouldChange = FLeftKey.Columns.ContainsName(LColumn.Name) || LColumn.ShouldChange || LSourceColumn.ShouldChange;
-					FTableVar.ShouldChange = FTableVar.ShouldChange || LColumn.ShouldChange;
+					column.ShouldChange = _leftKey.Columns.ContainsName(column.Name) || column.ShouldChange || sourceColumn.ShouldChange;
+					_tableVar.ShouldChange = _tableVar.ShouldChange || column.ShouldChange;
 				}
 
-				LColumnIndex = RightTableVar.Columns.IndexOfName(LColumn.Name);
-				if (LColumnIndex >= 0)
+				columnIndex = RightTableVar.Columns.IndexOfName(column.Name);
+				if (columnIndex >= 0)
 				{
-					LSourceColumn = RightTableVar.Columns[LColumnIndex];
-					LColumn.ShouldDefault = LColumn.ShouldDefault || LSourceColumn.ShouldDefault;
-					FTableVar.ShouldDefault = FTableVar.ShouldDefault || LColumn.ShouldDefault;
+					sourceColumn = RightTableVar.Columns[columnIndex];
+					column.ShouldDefault = column.ShouldDefault || sourceColumn.ShouldDefault;
+					_tableVar.ShouldDefault = _tableVar.ShouldDefault || column.ShouldDefault;
 					
-					LColumn.ShouldValidate = LColumn.ShouldValidate || LSourceColumn.ShouldValidate;
-					FTableVar.ShouldValidate = FTableVar.ShouldValidate || LColumn.ShouldValidate;
+					column.ShouldValidate = column.ShouldValidate || sourceColumn.ShouldValidate;
+					_tableVar.ShouldValidate = _tableVar.ShouldValidate || column.ShouldValidate;
 
-					LColumn.ShouldChange = FRightKey.Columns.ContainsName(LColumn.Name) || LColumn.ShouldChange || LSourceColumn.ShouldChange;
-					FTableVar.ShouldChange = FTableVar.ShouldChange || LColumn.ShouldChange;
+					column.ShouldChange = _rightKey.Columns.ContainsName(column.Name) || column.ShouldChange || sourceColumn.ShouldChange;
+					_tableVar.ShouldChange = _tableVar.ShouldChange || column.ShouldChange;
 				}
 			}
 		}
 		
-		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
-			if (EnforcePredicate && !FIsNatural && (AColumnName == String.Empty))
+			if (EnforcePredicate && !_isNatural && (columnName == String.Empty))
 			{
-				Row LLeftRow = new Row(AProgram.ValueManager, LeftTableType.RowType);
+				Row leftRow = new Row(program.ValueManager, LeftTableType.RowType);
 				try
 				{
-					ANewRow.CopyTo(LLeftRow);
-					AProgram.Stack.Push(LLeftRow);
+					newRow.CopyTo(leftRow);
+					program.Stack.Push(leftRow);
 					try
 					{
-						Row LRightRow = new Row(AProgram.ValueManager, RightTableType.RowType);
+						Row rightRow = new Row(program.ValueManager, RightTableType.RowType);
 						try
 						{
-							ANewRow.CopyTo(LRightRow);
-							AProgram.Stack.Push(LRightRow);
+							newRow.CopyTo(rightRow);
+							program.Stack.Push(rightRow);
 							try
 							{
-								object LObject = Nodes[2].Execute(AProgram);
-								if ((LObject != null) && !(bool)LObject)
+								object objectValue = Nodes[2].Execute(program);
+								if ((objectValue != null) && !(bool)objectValue)
 									throw new RuntimeException(RuntimeException.Codes.RowViolatesJoinPredicate);
 							}
 							finally
 							{
-								AProgram.Stack.Pop();
+								program.Stack.Pop();
 							}
 						}
 						finally
 						{
-							LRightRow.Dispose();
+							rightRow.Dispose();
 						}
 					}
 					finally
 					{
-						AProgram.Stack.Pop();
+						program.Stack.Pop();
 					}
 				}
 				finally
 				{
-					LLeftRow.Dispose();
+					leftRow.Dispose();
 				}
 			}
 
-			if (AIsDescending)
+			if (isDescending)
 			{
-				bool LChanged = false;
-				if (PropagateValidateLeft && ((AColumnName == String.Empty) || (LeftNode.TableVar.Columns.ContainsName(AColumnName))))
-					LChanged = LeftNode.Validate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;
-				if (PropagateValidateRight && ((AColumnName == String.Empty) || (RightNode.TableVar.Columns.ContainsName(AColumnName))))
-					LChanged = RightNode.Validate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;
-				return LChanged;
+				bool changed = false;
+				if (PropagateValidateLeft && ((columnName == String.Empty) || (LeftNode.TableVar.Columns.ContainsName(columnName))))
+					changed = LeftNode.Validate(program, oldRow, newRow, valueFlags, columnName) || changed;
+				if (PropagateValidateRight && ((columnName == String.Empty) || (RightNode.TableVar.Columns.ContainsName(columnName))))
+					changed = RightNode.Validate(program, oldRow, newRow, valueFlags, columnName) || changed;
+				return changed;
 			}
 			return false;
 		}
 		
-		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
-			if (AIsDescending)
+			if (isDescending)
 			{
-				bool LChanged = false;
+				bool changed = false;
 
-				if (PropagateDefaultLeft && ((AColumnName == String.Empty) || LeftTableType.Columns.ContainsName(AColumnName)))
+				if (PropagateDefaultLeft && ((columnName == String.Empty) || LeftTableType.Columns.ContainsName(columnName)))
 				{
-					BitArray LValueFlags = new BitArray(LeftKey.Columns.Count);
-					for (int LIndex = 0; LIndex < LeftKey.Columns.Count; LIndex++)
-						LValueFlags[LIndex] = ANewRow.HasValue(LeftKey.Columns[LIndex].Name);
-					LChanged = LeftNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;
-					if (LChanged)
-						for (int LIndex = 0; LIndex < LeftKey.Columns.Count; LIndex++)
-							if (!LValueFlags[LIndex] && ANewRow.HasValue(LeftKey.Columns[LIndex].Name))
-								Change(AProgram, AOldRow, ANewRow, AValueFlags, LeftKey.Columns[LIndex].Name);
+					BitArray localValueFlags = new BitArray(LeftKey.Columns.Count);
+					for (int index = 0; index < LeftKey.Columns.Count; index++)
+						localValueFlags[index] = newRow.HasValue(LeftKey.Columns[index].Name);
+					changed = LeftNode.Default(program, oldRow, newRow, valueFlags, columnName) || changed;
+					if (changed)
+						for (int index = 0; index < LeftKey.Columns.Count; index++)
+							if (!localValueFlags[index] && newRow.HasValue(LeftKey.Columns[index].Name))
+								Change(program, oldRow, newRow, valueFlags, LeftKey.Columns[index].Name);
 				}
 
-				if (PropagateDefaultRight && ((AColumnName == String.Empty) || RightTableType.Columns.ContainsName(AColumnName)))
+				if (PropagateDefaultRight && ((columnName == String.Empty) || RightTableType.Columns.ContainsName(columnName)))
 				{
-					BitArray LValueFlags = new BitArray(RightKey.Columns.Count);
-					for (int LIndex = 0; LIndex < RightKey.Columns.Count; LIndex++)
-						LValueFlags[LIndex] = ANewRow.HasValue(RightKey.Columns[LIndex].Name);
-					LChanged = RightNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;
-					if (LChanged)
-						for (int LIndex = 0; LIndex < RightKey.Columns.Count; LIndex++)
-							if (!LValueFlags[LIndex] && ANewRow.HasValue(RightKey.Columns[LIndex].Name))
-								Change(AProgram, AOldRow, ANewRow, AValueFlags, RightKey.Columns[LIndex].Name);
+					BitArray localValueFlags = new BitArray(RightKey.Columns.Count);
+					for (int index = 0; index < RightKey.Columns.Count; index++)
+						localValueFlags[index] = newRow.HasValue(RightKey.Columns[index].Name);
+					changed = RightNode.Default(program, oldRow, newRow, valueFlags, columnName) || changed;
+					if (changed)
+						for (int index = 0; index < RightKey.Columns.Count; index++)
+							if (!localValueFlags[index] && newRow.HasValue(RightKey.Columns[index].Name))
+								Change(program, oldRow, newRow, valueFlags, RightKey.Columns[index].Name);
 				}
 
-				return LChanged;
+				return changed;
 			}
 			return false;
 		}
 		
 		///<summary>Coordinates the value of the left join-key column with the value of the right join-key column given by AColumnName.</summary>		
-		protected void CoordinateLeftJoinKey(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected void CoordinateLeftJoinKey(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
-			int LRightIndex = ANewRow.DataType.Columns.IndexOfName(AColumnName);
-			int LLeftIndex = ANewRow.DataType.Columns.IndexOfName(FLeftKey.Columns[FRightKey.Columns.IndexOfName(AColumnName)].Name);
-			if (ANewRow.HasValue(LRightIndex))
-				ANewRow[LLeftIndex] = ANewRow[LRightIndex];
+			int rightIndex = newRow.DataType.Columns.IndexOfName(columnName);
+			int leftIndex = newRow.DataType.Columns.IndexOfName(_leftKey.Columns[_rightKey.Columns.IndexOfName(columnName)].Name);
+			if (newRow.HasValue(rightIndex))
+				newRow[leftIndex] = newRow[rightIndex];
 			else
-				ANewRow.ClearValue(LLeftIndex);
+				newRow.ClearValue(leftIndex);
 				
 			if (PropagateChangeLeft)
-				LeftNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, ANewRow.DataType.Columns[LLeftIndex].Name);
+				LeftNode.Change(program, oldRow, newRow, valueFlags, newRow.DataType.Columns[leftIndex].Name);
 		}
 
 		///<summary>Coordinates the value of the right join-key column with the value of the left join-key column given by AColumnName.</summary>		
-		protected void CoordinateRightJoinKey(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected void CoordinateRightJoinKey(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
-			int LLeftIndex = ANewRow.DataType.Columns.IndexOfName(AColumnName);
-			int LRightIndex = ANewRow.DataType.Columns.IndexOfName(FRightKey.Columns[FLeftKey.Columns.IndexOfName(AColumnName)].Name);
-			if (ANewRow.HasValue(LLeftIndex))
-				ANewRow[LRightIndex] = ANewRow[LLeftIndex];
+			int leftIndex = newRow.DataType.Columns.IndexOfName(columnName);
+			int rightIndex = newRow.DataType.Columns.IndexOfName(_rightKey.Columns[_leftKey.Columns.IndexOfName(columnName)].Name);
+			if (newRow.HasValue(leftIndex))
+				newRow[rightIndex] = newRow[leftIndex];
 			else
-				ANewRow.ClearValue(LRightIndex);
+				newRow.ClearValue(rightIndex);
 
 			if (PropagateChangeRight)
-				RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, ANewRow.DataType.Columns[LRightIndex].Name);
+				RightNode.Change(program, oldRow, newRow, valueFlags, newRow.DataType.Columns[rightIndex].Name);
 		}
 		
 		/*
@@ -2555,53 +2555,53 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if PropagateChangeRight and change is not to a specific column, or is to a column in the right side
 					propagate the change
 		*/
-		protected override bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected override bool InternalChange(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
-			PushNewRow(AProgram, ANewRow);
+			PushNewRow(program, newRow);
 			try
 			{
-				bool LChanged = false;
-				bool LChangePropagated = false;
+				bool changed = false;
+				bool changePropagated = false;
 				
-				if (AColumnName != String.Empty)
+				if (columnName != String.Empty)
 				{
-					if (LeftKey.Columns.ContainsName(AColumnName))
+					if (LeftKey.Columns.ContainsName(columnName))
 					{
-						if (!AProgram.ServerProcess.ServerSession.Server.IsEngine && RetrieveRight)
+						if (!program.ServerProcess.ServerSession.Server.IsEngine && RetrieveRight)
 						{
-							LChanged = true;
+							changed = true;
 							if (IsNatural)
-								LChangePropagated = true;
-							if (SelectRightRow(AProgram, ANewRow))
+								changePropagated = true;
+							if (SelectRightRow(program, newRow))
 							{
-								foreach (Schema.Column LColumn in RightTableType.Columns)
+								foreach (Schema.Column column in RightTableType.Columns)
 									if (PropagateChangeRight)
-										RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+										RightNode.Change(program, oldRow, newRow, valueFlags, column.Name);
 							}
 							else
 							{
-								foreach (Schema.Column LColumn in RightTableType.Columns)
+								foreach (Schema.Column column in RightTableType.Columns)
 								{
-									if (RightKey.Columns.ContainsName(LColumn.Name) && CoordinateRight)
+									if (RightKey.Columns.ContainsName(column.Name) && CoordinateRight)
 									{
-										int LLeftIndex = ANewRow.DataType.Columns.IndexOfName(FLeftKey.Columns[FRightKey.Columns.IndexOfName(LColumn.Name)].Name);
-										int LRightIndex = ANewRow.DataType.Columns.IndexOfName(LColumn.Name);
-										if (ANewRow.HasValue(LLeftIndex))
-											ANewRow[LRightIndex] = ANewRow[LLeftIndex];
+										int leftIndex = newRow.DataType.Columns.IndexOfName(_leftKey.Columns[_rightKey.Columns.IndexOfName(column.Name)].Name);
+										int rightIndex = newRow.DataType.Columns.IndexOfName(column.Name);
+										if (newRow.HasValue(leftIndex))
+											newRow[rightIndex] = newRow[leftIndex];
 										else
-											ANewRow.ClearValue(LRightIndex);
+											newRow.ClearValue(rightIndex);
 									}
 									else
 									{
 										if (ClearRight)
-											ANewRow.ClearValue(LColumn.Name);
+											newRow.ClearValue(column.Name);
 
-										if (!ANewRow.HasValue(LColumn.Name) && PropagateDefaultRight)
-											RightNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+										if (!newRow.HasValue(column.Name) && PropagateDefaultRight)
+											RightNode.Default(program, oldRow, newRow, valueFlags, column.Name);
 									}
 
 									if (PropagateChangeRight)
-										RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+										RightNode.Change(program, oldRow, newRow, valueFlags, column.Name);
 								}
 							}
 						}
@@ -2609,64 +2609,64 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						{
 							if (CoordinateRight)
 							{
-								LChanged = true;
-								int LLeftIndex = ANewRow.DataType.Columns.IndexOfName(AColumnName);
-								int LRightIndex = ANewRow.DataType.Columns.IndexOfName(FRightKey.Columns[FLeftKey.Columns.IndexOfName(AColumnName)].Name);
-								if (ANewRow.HasValue(LLeftIndex))
-									ANewRow[LRightIndex] = ANewRow[LLeftIndex];
+								changed = true;
+								int leftIndex = newRow.DataType.Columns.IndexOfName(columnName);
+								int rightIndex = newRow.DataType.Columns.IndexOfName(_rightKey.Columns[_leftKey.Columns.IndexOfName(columnName)].Name);
+								if (newRow.HasValue(leftIndex))
+									newRow[rightIndex] = newRow[leftIndex];
 								else
-									ANewRow.ClearValue(LRightIndex);
+									newRow.ClearValue(rightIndex);
 
 								if (PropagateChangeRight)
-									RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, ANewRow.DataType.Columns[LRightIndex].Name);
+									RightNode.Change(program, oldRow, newRow, valueFlags, newRow.DataType.Columns[rightIndex].Name);
 							}
 						}
 					}
-					else if (LeftTableVar.Columns.ContainsName(AColumnName))
+					else if (LeftTableVar.Columns.ContainsName(columnName))
 					{
 						if (PropagateChangeLeft)
 						{
-							LChangePropagated = true;
-							LChanged = LeftNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;
+							changePropagated = true;
+							changed = LeftNode.Change(program, oldRow, newRow, valueFlags, columnName) || changed;
 						}
 					}
-					else if (RightKey.Columns.ContainsName(AColumnName))
+					else if (RightKey.Columns.ContainsName(columnName))
 					{
-						if (!AProgram.ServerProcess.ServerSession.Server.IsEngine && RetrieveLeft)
+						if (!program.ServerProcess.ServerSession.Server.IsEngine && RetrieveLeft)
 						{
-							LChanged = true;
+							changed = true;
 							if (IsNatural)
-								LChangePropagated = true;
-							if (SelectLeftRow(AProgram, ANewRow))
+								changePropagated = true;
+							if (SelectLeftRow(program, newRow))
 							{
-								foreach (Schema.Column LColumn in LeftTableType.Columns)
+								foreach (Schema.Column column in LeftTableType.Columns)
 									if (PropagateChangeLeft)
-										LeftNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+										LeftNode.Change(program, oldRow, newRow, valueFlags, column.Name);
 							}
 							else
 							{
-								foreach (Schema.Column LColumn in LeftTableType.Columns)
+								foreach (Schema.Column column in LeftTableType.Columns)
 								{
-									if (LeftKey.Columns.ContainsName(LColumn.Name) && CoordinateLeft)
+									if (LeftKey.Columns.ContainsName(column.Name) && CoordinateLeft)
 									{
-										int LRightIndex = ANewRow.DataType.Columns.IndexOfName(FRightKey.Columns[FLeftKey.Columns.IndexOfName(LColumn.Name)].Name);
-										int LLeftIndex = ANewRow.DataType.Columns.IndexOfName(LColumn.Name);
-										if (ANewRow.HasValue(LRightIndex))
-											ANewRow[LLeftIndex] = ANewRow[LRightIndex];
+										int rightIndex = newRow.DataType.Columns.IndexOfName(_rightKey.Columns[_leftKey.Columns.IndexOfName(column.Name)].Name);
+										int leftIndex = newRow.DataType.Columns.IndexOfName(column.Name);
+										if (newRow.HasValue(rightIndex))
+											newRow[leftIndex] = newRow[rightIndex];
 										else
-											ANewRow.ClearValue(LLeftIndex);
+											newRow.ClearValue(leftIndex);
 									}
 									else
 									{
 										if (ClearLeft)
-											ANewRow.ClearValue(LColumn.Name);
+											newRow.ClearValue(column.Name);
 
-										if (!ANewRow.HasValue(LColumn.Name) && PropagateDefaultLeft)
-											LeftNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+										if (!newRow.HasValue(column.Name) && PropagateDefaultLeft)
+											LeftNode.Default(program, oldRow, newRow, valueFlags, column.Name);
 									}
 
 									if (PropagateChangeLeft)
-										LeftNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+										LeftNode.Change(program, oldRow, newRow, valueFlags, column.Name);
 								}
 							}
 						}
@@ -2674,172 +2674,172 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						{
 							if (CoordinateLeft)
 							{
-								LChanged = true;
-								int LRightIndex = ANewRow.DataType.Columns.IndexOfName(AColumnName);
-								int LLeftIndex = ANewRow.DataType.Columns.IndexOfName(FLeftKey.Columns[FRightKey.Columns.IndexOfName(AColumnName)].Name);
-								if (ANewRow.HasValue(LRightIndex))
-									ANewRow[LLeftIndex] = ANewRow[LRightIndex];
+								changed = true;
+								int rightIndex = newRow.DataType.Columns.IndexOfName(columnName);
+								int leftIndex = newRow.DataType.Columns.IndexOfName(_leftKey.Columns[_rightKey.Columns.IndexOfName(columnName)].Name);
+								if (newRow.HasValue(rightIndex))
+									newRow[leftIndex] = newRow[rightIndex];
 								else
-									ANewRow.ClearValue(LLeftIndex);
+									newRow.ClearValue(leftIndex);
 
 								if (PropagateChangeLeft)
-									LeftNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, ANewRow.DataType.Columns[LLeftIndex].Name);
+									LeftNode.Change(program, oldRow, newRow, valueFlags, newRow.DataType.Columns[leftIndex].Name);
 							}
 						}
 					}
-					else if (RightTableVar.Columns.ContainsName(AColumnName))
+					else if (RightTableVar.Columns.ContainsName(columnName))
 					{
 						if (PropagateChangeRight)
 						{
-							LChangePropagated = true;
-							LChanged = RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;
+							changePropagated = true;
+							changed = RightNode.Change(program, oldRow, newRow, valueFlags, columnName) || changed;
 						}
 					}
 				}
 
-				if (!LChangePropagated && PropagateChangeLeft && ((AColumnName == String.Empty) || LeftTableVar.Columns.ContainsName(AColumnName)))
-					LChanged = LeftNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;
+				if (!changePropagated && PropagateChangeLeft && ((columnName == String.Empty) || LeftTableVar.Columns.ContainsName(columnName)))
+					changed = LeftNode.Change(program, oldRow, newRow, valueFlags, columnName) || changed;
 						
-				if (!LChangePropagated && PropagateChangeRight && ((AColumnName == String.Empty) || RightTableVar.Columns.ContainsName(AColumnName)))
-					LChanged = RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;
+				if (!changePropagated && PropagateChangeRight && ((columnName == String.Empty) || RightTableVar.Columns.ContainsName(columnName)))
+					changed = RightNode.Change(program, oldRow, newRow, valueFlags, columnName) || changed;
 
-				return LChanged;
+				return changed;
 			}
 			finally
 			{
-				PopRow(AProgram);
+				PopRow(program);
 			}
 		}
 		
-		private void InternalExecuteInsertLeft(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		private void InternalExecuteInsertLeft(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
 			switch (PropagateInsertLeft)
 			{
 				case PropagateAction.True : 
-					LeftNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked); 
+					LeftNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue); 
 				break;
 
 				case PropagateAction.Ensure :
 				case PropagateAction.Ignore :
-					using (Row LLeftRow = LeftNode.Select(AProgram, ANewRow))
+					using (Row leftRow = LeftNode.Select(program, newRow))
 					{
-						if (LLeftRow != null)
+						if (leftRow != null)
 						{
 							if (PropagateInsertLeft == PropagateAction.Ensure)
-								LeftNode.Update(AProgram, LLeftRow, ANewRow, AValueFlags, false, AUnchecked);
+								LeftNode.Update(program, leftRow, newRow, valueFlags, false, uncheckedValue);
 						}
 						else
-							LeftNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+							LeftNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue);
 					}
 				break;
 			}
 		}
 		
-		private void InternalExecuteInsertRight(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		private void InternalExecuteInsertRight(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
 			switch (PropagateInsertRight)
 			{
 				case PropagateAction.True : 
-					RightNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked); 
+					RightNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue); 
 				break;
 				
 				case PropagateAction.Ensure :
 				case PropagateAction.Ignore :
-					using (Row LRightRow = RightNode.Select(AProgram, ANewRow))
+					using (Row rightRow = RightNode.Select(program, newRow))
 					{
-						if (LRightRow != null)
+						if (rightRow != null)
 						{
 							if (PropagateInsertRight == PropagateAction.Ensure)
-								RightNode.Update(AProgram, LRightRow, ANewRow, AValueFlags, false, AUnchecked);
+								RightNode.Update(program, rightRow, newRow, valueFlags, false, uncheckedValue);
 						}
 						else
-							RightNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+							RightNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue);
 					}
 				break;
 			}
 		}
 		
-		protected override void InternalExecuteInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected override void InternalExecuteInsert(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
-			if (FUpdateLeftToRight)
+			if (_updateLeftToRight)
 			{
-				InternalExecuteInsertLeft(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
-				InternalExecuteInsertRight(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+				InternalExecuteInsertLeft(program, oldRow, newRow, valueFlags, uncheckedValue);
+				InternalExecuteInsertRight(program, oldRow, newRow, valueFlags, uncheckedValue);
 			}
 			else
 			{
-				InternalExecuteInsertRight(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
-				InternalExecuteInsertLeft(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+				InternalExecuteInsertRight(program, oldRow, newRow, valueFlags, uncheckedValue);
+				InternalExecuteInsertLeft(program, oldRow, newRow, valueFlags, uncheckedValue);
 			}
 		}
 		
-		protected override void InternalExecuteUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
 		{
-			if (FUpdateLeftToRight)
+			if (_updateLeftToRight)
 			{	
 				if (PropagateUpdateLeft)
-					LeftNode.Update(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+					LeftNode.Update(program, oldRow, newRow, valueFlags, checkConcurrency, uncheckedValue);
 					
 				if (PropagateUpdateRight)
-					RightNode.Update(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+					RightNode.Update(program, oldRow, newRow, valueFlags, checkConcurrency, uncheckedValue);
 			}
 			else
 			{
 				if (PropagateUpdateRight)
-					RightNode.Update(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+					RightNode.Update(program, oldRow, newRow, valueFlags, checkConcurrency, uncheckedValue);
 
 				if (PropagateUpdateLeft)
-					LeftNode.Update(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+					LeftNode.Update(program, oldRow, newRow, valueFlags, checkConcurrency, uncheckedValue);
 			}
 		}
 		
-		protected override void InternalExecuteDelete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteDelete(Program program, Row row, bool checkConcurrency, bool uncheckedValue)
 		{
-			if (FUpdateLeftToRight)
+			if (_updateLeftToRight)
 			{
 				if (PropagateDeleteRight)
-					RightNode.Delete(AProgram, ARow, ACheckConcurrency, AUnchecked);
+					RightNode.Delete(program, row, checkConcurrency, uncheckedValue);
 				if (PropagateDeleteLeft)
-					LeftNode.Delete(AProgram, ARow, ACheckConcurrency, AUnchecked);
+					LeftNode.Delete(program, row, checkConcurrency, uncheckedValue);
 			}
 			else
 			{
 				if (PropagateDeleteLeft)
-					LeftNode.Delete(AProgram, ARow, ACheckConcurrency, AUnchecked);
+					LeftNode.Delete(program, row, checkConcurrency, uncheckedValue);
 				if (PropagateDeleteRight)
-					RightNode.Delete(AProgram, ARow, ACheckConcurrency, AUnchecked);
+					RightNode.Delete(program, row, checkConcurrency, uncheckedValue);
 			}
 		}
 
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			InnerJoinExpression LExpression = new InnerJoinExpression();
-			LExpression.LeftExpression = (Expression)Nodes[0].EmitStatement(AMode);
-			LExpression.RightExpression = (Expression)Nodes[1].EmitStatement(AMode);
+			InnerJoinExpression expression = new InnerJoinExpression();
+			expression.LeftExpression = (Expression)Nodes[0].EmitStatement(mode);
+			expression.RightExpression = (Expression)Nodes[1].EmitStatement(mode);
 			if (!IsNatural)
-				LExpression.Condition = FExpression; //(Expression)Nodes[2].EmitStatement(AMode); // use expression instead of EmitStatement because the statement may be of the form A ?= B = 0;
-			LExpression.IsLookup = FIsLookup;
-			LExpression.Cardinality = FCardinality;
+				expression.Condition = _expression; //(Expression)Nodes[2].EmitStatement(AMode); // use expression instead of EmitStatement because the statement may be of the form A ?= B = 0;
+			expression.IsLookup = _isLookup;
+			expression.Cardinality = _cardinality;
 			//LExpression.IsDetailLookup = FIsDetailLookup;
-			LExpression.Modifiers = Modifiers;
-			return LExpression;
+			expression.Modifiers = Modifiers;
+			return expression;
 		}
 	}
 	
 	public class OuterJoinNode : JoinNode
 	{
         // RowExistsColumnIndex
-        protected int FRowExistsColumnIndex = -1;
+        protected int _rowExistsColumnIndex = -1;
         public int RowExistsColumnIndex
         {
-            get { return FRowExistsColumnIndex; }
+            get { return _rowExistsColumnIndex; }
         }
         
-        protected IncludeColumnExpression FRowExistsColumn;
+        protected IncludeColumnExpression _rowExistsColumn;
         public IncludeColumnExpression RowExistsColumn
         {
-			get { return FRowExistsColumn; }
-			set { FRowExistsColumn = value; }
+			get { return _rowExistsColumn; }
+			set { _rowExistsColumn = value; }
         }
         
         // AnyOf
@@ -2847,11 +2847,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         // HasRow = if hasrowexists then rowexists else HasAllOf and (AnyOf.Count == 0 or HasAnyOf)
         // Setting this property will have no effect after the DetermineJoinModifiers call
         // By default, this property is set to the set of non-join key  columns
-        private string FAnyOf;
+        private string _anyOf;
         public string AnyOf
         {
-			get { return FAnyOf; }
-			set { FAnyOf = value; }
+			get { return _anyOf; }
+			set { _anyOf = value; }
 		}
 		
 		// AllOf
@@ -2859,66 +2859,66 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// HasRow = if hasrowexists then rowexists else HasAllOf and HasAnyOf
 		// Setting this property will have no effect after the DetermineJoinModifiers call
 		// By default, this property is set to the set of  join key columns
-		private string FAllOf;
+		private string _allOf;
 		public string AllOf
 		{
-			get { return FAllOf; }
-			set { FAllOf = value; }
+			get { return _allOf; }
+			set { _allOf = value; }
 		}
 		
-		protected Schema.JoinKey FAllOfKey = new Schema.JoinKey();
+		protected Schema.JoinKey _allOfKey = new Schema.JoinKey();
 		public Schema.JoinKey AllOfKey
 		{
-			get { return FAllOfKey; }
-			set { FAllOfKey = value; }
+			get { return _allOfKey; }
+			set { _allOfKey = value; }
 		}
 		
-		protected Schema.JoinKey FAnyOfKey = new Schema.JoinKey();
+		protected Schema.JoinKey _anyOfKey = new Schema.JoinKey();
 		public Schema.JoinKey AnyOfKey
 		{
-			get { return FAnyOfKey; }
-			set { FAnyOfKey = value; }
+			get { return _anyOfKey; }
+			set { _anyOfKey = value; }
 		}
 		
-		protected void DetermineKeyColumns(string AColumnNames, Schema.Key AKey)
+		protected void DetermineKeyColumns(string columnNames, Schema.Key key)
 		{
-			if (AColumnNames != String.Empty)
+			if (columnNames != String.Empty)
 			{
-				string[] LColumnNames = AColumnNames.Split(';');
-				foreach (string LColumnName in LColumnNames)
-					AKey.Columns.Add(TableVar.Columns[LColumnName]);
+				string[] localColumnNames = columnNames.Split(';');
+				foreach (string columnName in localColumnNames)
+					key.Columns.Add(TableVar.Columns[columnName]);
 			}
 		}
         
-        protected override void InternalCreateDataType(Plan APlan)
+        protected override void InternalCreateDataType(Plan plan)
         {
-			FDataType = new Schema.TableType();
+			_dataType = new Schema.TableType();
         }
         
-		protected bool IsRowExistsColumn(string AColumnName)
+		protected bool IsRowExistsColumn(string columnName)
 		{
-			return (FRowExistsColumnIndex >= 0) && (Schema.Object.NamesEqual(TableVar.Columns[FRowExistsColumnIndex].Name, AColumnName));
+			return (_rowExistsColumnIndex >= 0) && (Schema.Object.NamesEqual(TableVar.Columns[_rowExistsColumnIndex].Name, columnName));
 		}
 		
-        protected bool HasAllValues(Row ARow, Schema.Key AKey)
+        protected bool HasAllValues(Row row, Schema.Key key)
         {
-			int LColumnIndex;
-			foreach (Schema.TableVarColumn LColumn in AKey.Columns)
+			int columnIndex;
+			foreach (Schema.TableVarColumn column in key.Columns)
 			{
-				LColumnIndex = ARow.DataType.Columns.IndexOfName(LColumn.Name);
-				if ((LColumnIndex >= 0) && !ARow.HasValue(LColumnIndex))
+				columnIndex = row.DataType.Columns.IndexOfName(column.Name);
+				if ((columnIndex >= 0) && !row.HasValue(columnIndex))
 					return false;
 			}
 			return true;
         }
         
-        protected bool HasAnyValues(Row ARow, Schema.Key AKey)
+        protected bool HasAnyValues(Row row, Schema.Key key)
         {
-			int LColumnIndex;
-			foreach (Schema.TableVarColumn LColumn in AKey.Columns)
+			int columnIndex;
+			foreach (Schema.TableVarColumn column in key.Columns)
 			{
-				LColumnIndex = ARow.DataType.Columns.IndexOfName(LColumn.Name);
-				if ((LColumnIndex >= 0) && ARow.HasValue(LColumnIndex))
+				columnIndex = row.DataType.Columns.IndexOfName(column.Name);
+				if ((columnIndex >= 0) && row.HasValue(columnIndex))
 					return true;
 			}
 			return false;
@@ -2926,106 +2926,106 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         
 		protected bool HasRowExistsColumn()
 		{
-			return FRowExistsColumnIndex >= 0;
+			return _rowExistsColumnIndex >= 0;
 		}
 		
-		protected bool HasValues(Row ARow)
+		protected bool HasValues(Row row)
 		{
-			return HasAllValues(ARow, FAllOfKey) && ((FAnyOfKey.Columns.Count == 0) || HasAnyValues(ARow, FAnyOfKey));
+			return HasAllValues(row, _allOfKey) && ((_anyOfKey.Columns.Count == 0) || HasAnyValues(row, _anyOfKey));
 		}
 		
-        protected bool HasRow(Row ARow)
+        protected bool HasRow(Row row)
         {
-			if (FRowExistsColumnIndex >= 0)
-				return ARow.HasValue(TableVar.Columns[FRowExistsColumnIndex].Name) && (bool)ARow[TableVar.Columns[FRowExistsColumnIndex].Name];
+			if (_rowExistsColumnIndex >= 0)
+				return row.HasValue(TableVar.Columns[_rowExistsColumnIndex].Name) && (bool)row[TableVar.Columns[_rowExistsColumnIndex].Name];
 			else
-				return HasValues(ARow);
+				return HasValues(row);
         }
         
-        protected bool HasAllJoinValues(Row ARow, Schema.Key AKey)
+        protected bool HasAllJoinValues(Row row, Schema.Key key)
         {
-			int LColumnIndex;
-			foreach (Schema.TableVarColumn LColumn in AKey.Columns)
+			int columnIndex;
+			foreach (Schema.TableVarColumn column in key.Columns)
 			{
-				LColumnIndex = ARow.DataType.Columns.IndexOfName(LColumn.Name);
-				if ((LColumnIndex >= 0) && !ARow.HasValue(LColumnIndex))
+				columnIndex = row.DataType.Columns.IndexOfName(column.Name);
+				if ((columnIndex >= 0) && !row.HasValue(columnIndex))
 					return false;
 			}
 			return true;
         }
 
-		protected bool HasAnyNonJoinRightValues(Row ARow)
+		protected bool HasAnyNonJoinRightValues(Row row)
 		{
-			foreach (Schema.Column LColumn in RightTableType.Columns)
+			foreach (Schema.Column column in RightTableType.Columns)
 			{
-				if (!FRightKey.Columns.ContainsName(LColumn.Name) && ARow.HasValue(LColumn.Name))
+				if (!_rightKey.Columns.ContainsName(column.Name) && row.HasValue(column.Name))
 					return true;
 			}
 			return false;
 		}
         
-		protected bool HasAnyNonJoinLeftValues(Row ARow)
+		protected bool HasAnyNonJoinLeftValues(Row row)
 		{
-			foreach (Schema.Column LColumn in LeftTableType.Columns)
+			foreach (Schema.Column column in LeftTableType.Columns)
 			{
-				if (!FLeftKey.Columns.ContainsName(LColumn.Name) && ARow.HasValue(LColumn.Name))
+				if (!_leftKey.Columns.ContainsName(column.Name) && row.HasValue(column.Name))
 					return true;
 			}
 			return false;
 		}
 
-		public override void DetermineRemotable(Plan APlan)
+		public override void DetermineRemotable(Plan plan)
 		{
-			Schema.ResultTableVar LTableVar = (Schema.ResultTableVar)TableVar;
-			LTableVar.InferredIsDefaultRemotable = (!PropagateDefaultLeft || LeftTableVar.IsDefaultRemotable) && (!PropagateDefaultRight || RightTableVar.IsDefaultRemotable);
-			LTableVar.InferredIsChangeRemotable = (!PropagateChangeLeft || LeftTableVar.IsChangeRemotable) && (!PropagateChangeRight || RightTableVar.IsChangeRemotable);
-			LTableVar.InferredIsValidateRemotable = (!PropagateValidateLeft || LeftTableVar.IsValidateRemotable) && (!PropagateValidateRight || RightTableVar.IsValidateRemotable);
+			Schema.ResultTableVar tableVar = (Schema.ResultTableVar)TableVar;
+			tableVar.InferredIsDefaultRemotable = (!PropagateDefaultLeft || LeftTableVar.IsDefaultRemotable) && (!PropagateDefaultRight || RightTableVar.IsDefaultRemotable);
+			tableVar.InferredIsChangeRemotable = (!PropagateChangeLeft || LeftTableVar.IsChangeRemotable) && (!PropagateChangeRight || RightTableVar.IsChangeRemotable);
+			tableVar.InferredIsValidateRemotable = (!PropagateValidateLeft || LeftTableVar.IsValidateRemotable) && (!PropagateValidateRight || RightTableVar.IsValidateRemotable);
 
-			FTableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			FTableVar.ShouldValidate = FTableVar.ShouldValidate || LeftTableVar.ShouldValidate || RightTableVar.ShouldValidate || (EnforcePredicate && !FIsNatural);
-			FTableVar.ShouldDefault = FTableVar.ShouldDefault || LeftTableVar.ShouldDefault || RightTableVar.ShouldDefault;
-			FTableVar.ShouldChange = FTableVar.ShouldChange || LeftTableVar.ShouldChange || RightTableVar.ShouldChange || HasRowExistsColumn();
+			_tableVar.DetermineRemotable(plan.CatalogDeviceSession);
+			_tableVar.ShouldValidate = _tableVar.ShouldValidate || LeftTableVar.ShouldValidate || RightTableVar.ShouldValidate || (EnforcePredicate && !_isNatural);
+			_tableVar.ShouldDefault = _tableVar.ShouldDefault || LeftTableVar.ShouldDefault || RightTableVar.ShouldDefault;
+			_tableVar.ShouldChange = _tableVar.ShouldChange || LeftTableVar.ShouldChange || RightTableVar.ShouldChange || HasRowExistsColumn();
 			
-			foreach (Schema.TableVarColumn LColumn in FTableVar.Columns)
+			foreach (Schema.TableVarColumn column in _tableVar.Columns)
 			{
-				int LColumnIndex;
-				Schema.TableVarColumn LSourceColumn;
+				int columnIndex;
+				Schema.TableVarColumn sourceColumn;
 				
-				if (IsRowExistsColumn(LColumn.Name))
+				if (IsRowExistsColumn(column.Name))
 				{
-					LColumn.ShouldDefault = true;
-					LColumn.ShouldChange = true;
+					column.ShouldDefault = true;
+					column.ShouldChange = true;
 				}
 				
-				if (FAnyOfKey.Columns.ContainsName(LColumn.Name) || FAllOfKey.Columns.ContainsName(LColumn.Name))
-					LColumn.ShouldChange = true;
+				if (_anyOfKey.Columns.ContainsName(column.Name) || _allOfKey.Columns.ContainsName(column.Name))
+					column.ShouldChange = true;
 				
-				LColumnIndex = LeftTableVar.Columns.IndexOfName(LColumn.Name);
-				if (LColumnIndex >= 0)
+				columnIndex = LeftTableVar.Columns.IndexOfName(column.Name);
+				if (columnIndex >= 0)
 				{
-					LSourceColumn = LeftTableVar.Columns[LColumnIndex];
-					LColumn.ShouldDefault = LColumn.ShouldDefault || LSourceColumn.ShouldDefault;
-					FTableVar.ShouldDefault = FTableVar.ShouldDefault || LColumn.ShouldDefault;
+					sourceColumn = LeftTableVar.Columns[columnIndex];
+					column.ShouldDefault = column.ShouldDefault || sourceColumn.ShouldDefault;
+					_tableVar.ShouldDefault = _tableVar.ShouldDefault || column.ShouldDefault;
 					
-					LColumn.ShouldValidate = LColumn.ShouldValidate || LSourceColumn.ShouldValidate;
-					FTableVar.ShouldValidate = FTableVar.ShouldValidate || LColumn.ShouldValidate;
+					column.ShouldValidate = column.ShouldValidate || sourceColumn.ShouldValidate;
+					_tableVar.ShouldValidate = _tableVar.ShouldValidate || column.ShouldValidate;
 
-					LColumn.ShouldChange = FLeftKey.Columns.ContainsName(LColumn.Name) || LColumn.ShouldChange || LSourceColumn.ShouldChange;
-					FTableVar.ShouldChange = FTableVar.ShouldChange || LColumn.ShouldChange;
+					column.ShouldChange = _leftKey.Columns.ContainsName(column.Name) || column.ShouldChange || sourceColumn.ShouldChange;
+					_tableVar.ShouldChange = _tableVar.ShouldChange || column.ShouldChange;
 				}
 
-				LColumnIndex = RightTableVar.Columns.IndexOfName(LColumn.Name);
-				if (LColumnIndex >= 0)
+				columnIndex = RightTableVar.Columns.IndexOfName(column.Name);
+				if (columnIndex >= 0)
 				{
-					LSourceColumn = RightTableVar.Columns[LColumnIndex];
-					LColumn.ShouldDefault = LColumn.ShouldDefault || LSourceColumn.ShouldDefault;
-					FTableVar.ShouldDefault = FTableVar.ShouldDefault || LColumn.ShouldDefault;
+					sourceColumn = RightTableVar.Columns[columnIndex];
+					column.ShouldDefault = column.ShouldDefault || sourceColumn.ShouldDefault;
+					_tableVar.ShouldDefault = _tableVar.ShouldDefault || column.ShouldDefault;
 					
-					LColumn.ShouldValidate = LColumn.ShouldValidate || LSourceColumn.ShouldValidate;
-					FTableVar.ShouldValidate = FTableVar.ShouldValidate || LColumn.ShouldValidate;
+					column.ShouldValidate = column.ShouldValidate || sourceColumn.ShouldValidate;
+					_tableVar.ShouldValidate = _tableVar.ShouldValidate || column.ShouldValidate;
 
-					LColumn.ShouldChange = FRightKey.Columns.ContainsName(LColumn.Name) || LColumn.ShouldChange || LSourceColumn.ShouldChange;
-					FTableVar.ShouldChange = FTableVar.ShouldChange || LColumn.ShouldChange;
+					column.ShouldChange = _rightKey.Columns.ContainsName(column.Name) || column.ShouldChange || sourceColumn.ShouldChange;
+					_tableVar.ShouldChange = _tableVar.ShouldChange || column.ShouldChange;
 				}
 			}
 		}
@@ -3034,40 +3034,40 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator LeftJoin(table{}, table{}, object, object) : table{}	
 	public class LeftOuterJoinNode : OuterJoinNode
 	{
-        protected override void DetermineColumns(Plan APlan)
+        protected override void DetermineColumns(Plan plan)
         {
-			DetermineLeftColumns(APlan, false);
+			DetermineLeftColumns(plan, false);
 			
-			if (FRowExistsColumn != null)
+			if (_rowExistsColumn != null)
 			{
-				Schema.TableVarColumn LRowExistsColumn =
+				Schema.TableVarColumn rowExistsColumn =
 					Compiler.CompileIncludeColumnExpression
 					(
-						APlan,
-						FRowExistsColumn, 
+						plan,
+						_rowExistsColumn, 
 						Keywords.RowExists, 
-						APlan.DataTypes.SystemBoolean, 
+						plan.DataTypes.SystemBoolean, 
 						Schema.TableVarColumnType.RowExists
 					);
-				DataType.Columns.Add(LRowExistsColumn.Column);
-				TableVar.Columns.Add(LRowExistsColumn);
-				FRowExistsColumnIndex = TableVar.Columns.Count - 1;
-				LRowExistsColumn.IsChangeRemotable = false;
-				LRowExistsColumn.IsDefaultRemotable = false;
+				DataType.Columns.Add(rowExistsColumn.Column);
+				TableVar.Columns.Add(rowExistsColumn);
+				_rowExistsColumnIndex = TableVar.Columns.Count - 1;
+				rowExistsColumn.IsChangeRemotable = false;
+				rowExistsColumn.IsDefaultRemotable = false;
 			}
 
-			DetermineRightColumns(APlan, true);
+			DetermineRightColumns(plan, true);
         }
         
-		protected override void DetermineJoinModifiers(Plan APlan)
+		protected override void DetermineJoinModifiers(Plan plan)
 		{
-			base.DetermineJoinModifiers(APlan);
+			base.DetermineJoinModifiers(plan);
 			
 			AnyOf = String.Empty;
 			AllOf = String.Empty;
-			foreach (Schema.TableVarColumn LColumn in RightTableVar.Columns)
-				if (!RightKey.Columns.ContainsName(LColumn.Name))
-					AnyOf = (AnyOf == String.Empty) ? LColumn.Name : String.Format("{0};{1}", AnyOf, Schema.Object.EnsureRooted(LColumn.Name));
+			foreach (Schema.TableVarColumn column in RightTableVar.Columns)
+				if (!RightKey.Columns.ContainsName(column.Name))
+					AnyOf = (AnyOf == String.Empty) ? column.Name : String.Format("{0};{1}", AnyOf, Schema.Object.EnsureRooted(column.Name));
 					
 			AnyOf = LanguageModifiers.GetModifier(Modifiers, "AnyOf", AnyOf);
 			AllOf = LanguageModifiers.GetModifier(Modifiers, "AllOf", AllOf);
@@ -3077,48 +3077,48 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			
 			// Set change remotable to false for all AnyOf and AllOf columns
-			foreach (Schema.TableVarColumn LColumn in AnyOfKey.Columns)
-				LColumn.IsChangeRemotable = false;
+			foreach (Schema.TableVarColumn column in AnyOfKey.Columns)
+				column.IsChangeRemotable = false;
 				
-			foreach (Schema.TableVarColumn LColumn in AllOfKey.Columns)
-				LColumn.IsChangeRemotable = false;
+			foreach (Schema.TableVarColumn column in AllOfKey.Columns)
+				column.IsChangeRemotable = false;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			LeftOuterJoinExpression LExpression = new LeftOuterJoinExpression();
-			LExpression.LeftExpression = (Expression)Nodes[0].EmitStatement(AMode);
-			LExpression.RightExpression = (Expression)Nodes[1].EmitStatement(AMode);
+			LeftOuterJoinExpression expression = new LeftOuterJoinExpression();
+			expression.LeftExpression = (Expression)Nodes[0].EmitStatement(mode);
+			expression.RightExpression = (Expression)Nodes[1].EmitStatement(mode);
 			if (!IsNatural)
-				LExpression.Condition = FExpression;
-			LExpression.IsLookup = FIsLookup;
-			LExpression.Cardinality = FCardinality;
-			if (FRowExistsColumnIndex >= 0)
+				expression.Condition = _expression;
+			expression.IsLookup = _isLookup;
+			expression.Cardinality = _cardinality;
+			if (_rowExistsColumnIndex >= 0)
 			{
-				Schema.TableVarColumn LColumn = TableVar.Columns[FRowExistsColumnIndex];
-				LExpression.RowExistsColumn = new IncludeColumnExpression(LColumn.Name);
-				if (LColumn.MetaData != null)
+				Schema.TableVarColumn column = TableVar.Columns[_rowExistsColumnIndex];
+				expression.RowExistsColumn = new IncludeColumnExpression(column.Name);
+				if (column.MetaData != null)
 				{
-					LExpression.RowExistsColumn.MetaData = new MetaData();
+					expression.RowExistsColumn.MetaData = new MetaData();
 					#if USEHASHTABLEFORTAGS
-					foreach (Tag LTag in LColumn.MetaData.Tags)
-						if (!LColumn.MetaData.Tags.IsReference(LTag.Name))
-							LExpression.RowExistsColumn.MetaData.Tags.Add(LTag.Copy());
+					foreach (Tag tag in column.MetaData.Tags)
+						if (!column.MetaData.Tags.IsReference(tag.Name))
+							expression.RowExistsColumn.MetaData.Tags.Add(tag.Copy());
 					#else
-					for (int LIndex = 0; LIndex < LColumn.MetaData.Tags.Count; LIndex++)
-						if (!LColumn.MetaData.Tags[LIndex].IsInherited) //!LColumn.MetaData.Tags.IsReference(LIndex))
-							LExpression.RowExistsColumn.MetaData.Tags.Add(LColumn.MetaData.Tags[LIndex].Copy());
+					for (int index = 0; index < column.MetaData.Tags.Count; index++)
+						if (!column.MetaData.Tags[index].IsInherited) //!LColumn.MetaData.Tags.IsReference(LIndex))
+							expression.RowExistsColumn.MetaData.Tags.Add(column.MetaData.Tags[index].Copy());
 					#endif
 				}
 			}
-			LExpression.Modifiers = Modifiers;
-			return LExpression;
+			expression.Modifiers = Modifiers;
+			return expression;
 		}
 		
-		protected override void DetermineJoinKey(Plan APlan)
+		protected override void DetermineJoinKey(Plan plan)
 		{
 			#if USEUNIFIEDJOINKEYINFERENCE
-			InferJoinKeys(APlan, Cardinality, true, false);
+			InferJoinKeys(plan, Cardinality, true, false);
 			#else
 			if (FLeftKey.IsUnique && FRightKey.IsUnique)
 			{
@@ -3129,55 +3129,55 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					// for each key of the right table var
 						// copy the key, if it is not a proper subset of the join key, inferred as sparse if the left join key is not a superset of the key
 						// copy the key, if it is not a proper subset of the join key, with all correlated columns replaced with the left key columns (a no-op for natural joins), inferred as sparse if the right join key is not a superset of the key
-				foreach (Schema.Key LLeftKey in LeftTableVar.Keys)
+				foreach (Schema.Key leftKey in LeftTableVar.Keys)
 				{
-					Schema.Key LNewKey = CopyKey(LLeftKey);
-					if (!TableVar.Keys.Contains(LNewKey))
-						TableVar.Keys.Add(LNewKey);
+					Schema.Key newKey = CopyKey(leftKey);
+					if (!TableVar.Keys.Contains(newKey))
+						TableVar.Keys.Add(newKey);
 
 					if (!IsNatural)
 					{
-						LNewKey = new Schema.Key();
-						LNewKey.IsInherited = true;
-						LNewKey.IsSparse = true;
-						foreach (Schema.TableVarColumn LColumn in LLeftKey.Columns)
+						newKey = new Schema.Key();
+						newKey.IsInherited = true;
+						newKey.IsSparse = true;
+						foreach (Schema.TableVarColumn column in leftKey.Columns)
 						{
-							int LLeftKeyIndex = LeftKey.Columns.IndexOfName(LColumn.Name);
-							if (LLeftKeyIndex >= 0)
-								LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(RightKey.Columns[LLeftKeyIndex].Name)]);
+							int leftKeyIndex = LeftKey.Columns.IndexOfName(column.Name);
+							if (leftKeyIndex >= 0)
+								newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(RightKey.Columns[leftKeyIndex].Name)]);
 							else
-								LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+								newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)]);
 						}
 
-						if (!TableVar.Keys.Contains(LNewKey))
-							TableVar.Keys.Add(LNewKey);
+						if (!TableVar.Keys.Contains(newKey))
+							TableVar.Keys.Add(newKey);
 					}
 				}
 				
-				foreach (Schema.Key LRightKey in RightTableVar.Keys)
+				foreach (Schema.Key rightKey in RightTableVar.Keys)
 				{
-					if (!LRightKey.Columns.IsProperSubsetOf(RightKey.Columns))
+					if (!rightKey.Columns.IsProperSubsetOf(RightKey.Columns))
 					{
-						Schema.Key LNewKey = CopyKey(LRightKey, !LeftKey.Columns.IsSupersetOf(LRightKey.Columns));
-						if (!TableVar.Keys.Contains(LNewKey))
-							TableVar.Keys.Add(LNewKey);
+						Schema.Key newKey = CopyKey(rightKey, !LeftKey.Columns.IsSupersetOf(rightKey.Columns));
+						if (!TableVar.Keys.Contains(newKey))
+							TableVar.Keys.Add(newKey);
 
 						if (!IsNatural)
 						{
-							LNewKey = new Schema.Key();
-							LNewKey.IsInherited = true;
-							LNewKey.IsSparse = !RightKey.Columns.IsSupersetOf(LRightKey.Columns);
-							foreach (Schema.TableVarColumn LColumn in LRightKey.Columns)
+							newKey = new Schema.Key();
+							newKey.IsInherited = true;
+							newKey.IsSparse = !RightKey.Columns.IsSupersetOf(rightKey.Columns);
+							foreach (Schema.TableVarColumn column in rightKey.Columns)
 							{
-								int LRightKeyIndex = RightKey.Columns.IndexOfName(LColumn.Name);
-								if (LRightKeyIndex >= 0)
-									LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LeftKey.Columns[LRightKeyIndex].Name)]);
+								int rightKeyIndex = RightKey.Columns.IndexOfName(column.Name);
+								if (rightKeyIndex >= 0)
+									newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LeftKey.Columns[rightKeyIndex].Name)]);
 								else
-									LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+									newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)]);
 							}
 							
-							if (!TableVar.Keys.Contains(LNewKey))
-								TableVar.Keys.Add(LNewKey);
+							if (!TableVar.Keys.Contains(newKey))
+								TableVar.Keys.Add(newKey);
 						}
 					}
 				}
@@ -3191,41 +3191,41 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						// copy the key, excluding join columns that are not key columns of the left, inferred as sparse if the left join key is not a superset of the resulting key's columns
 						// copy the key, excluding join columns that are not key columns of the left, with all correlated columns replaced with the left key columns (a no-op for natural joins), non-sparse
 					// In addition to these, the same keys inferred for many-to-many joins are inferred
-				foreach (Schema.Key LRightKey in RightTableVar.Keys)
+				foreach (Schema.Key rightKey in RightTableVar.Keys)
 				{
-					Schema.Key LNewKey = new Schema.Key();
-					LNewKey.IsInherited = true;
-					foreach (Schema.TableVarColumn LColumn in LRightKey.Columns)
+					Schema.Key newKey = new Schema.Key();
+					newKey.IsInherited = true;
+					foreach (Schema.TableVarColumn column in rightKey.Columns)
 					{
-						int LRightKeyIndex = RightKey.Columns.IndexOfName(LColumn.Name);
-						if ((LRightKeyIndex < 0) || (LeftTableVar.Keys.IsKeyColumnName(LeftKey.Columns[LRightKeyIndex].Name)))
-							LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+						int rightKeyIndex = RightKey.Columns.IndexOfName(column.Name);
+						if ((rightKeyIndex < 0) || (LeftTableVar.Keys.IsKeyColumnName(LeftKey.Columns[rightKeyIndex].Name)))
+							newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)]);
 					}
 
-					LNewKey.IsSparse = !LeftKey.Columns.IsSupersetOf(LNewKey.Columns);
+					newKey.IsSparse = !LeftKey.Columns.IsSupersetOf(newKey.Columns);
 
-					if (!TableVar.Keys.Contains(LNewKey))
-						TableVar.Keys.Add(LNewKey);
+					if (!TableVar.Keys.Contains(newKey))
+						TableVar.Keys.Add(newKey);
 
 					if (!IsNatural)
 					{
-						LNewKey = new Schema.Key();
-						LNewKey.IsInherited = true;
-						LNewKey.IsSparse = LRightKey.IsSparse;
-						foreach (Schema.TableVarColumn LColumn in LRightKey.Columns)
+						newKey = new Schema.Key();
+						newKey.IsInherited = true;
+						newKey.IsSparse = rightKey.IsSparse;
+						foreach (Schema.TableVarColumn column in rightKey.Columns)
 						{
-							int LRightKeyIndex = RightKey.Columns.IndexOfName(LColumn.Name);
-							if (LRightKeyIndex >= 0)
+							int rightKeyIndex = RightKey.Columns.IndexOfName(column.Name);
+							if (rightKeyIndex >= 0)
 							{
-								if (LeftTableVar.Keys.IsKeyColumnName(LeftKey.Columns[LRightKeyIndex].Name))
-									LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LeftKey.Columns[LRightKeyIndex].Name)]);
+								if (LeftTableVar.Keys.IsKeyColumnName(LeftKey.Columns[rightKeyIndex].Name))
+									newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LeftKey.Columns[rightKeyIndex].Name)]);
 							}
 							else
-								LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+								newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)]);
 						}
 						
-						if (!TableVar.Keys.Contains(LNewKey))
-							TableVar.Keys.Add(LNewKey);
+						if (!TableVar.Keys.Contains(newKey))
+							TableVar.Keys.Add(newKey);
 					}
 				}
 				
@@ -3237,42 +3237,42 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					// for each key of the left table var
 						// copy the key, non-sparse
 						// copy the key with all correlated columns replaced with the right key columns (a no-op for natural joins), inferred as sparse if the left join key is not a superset of the key's columns
-				foreach (Schema.Key LLeftKey in LeftTableVar.Keys)
+				foreach (Schema.Key leftKey in LeftTableVar.Keys)
 				{
-					Schema.Key LNewKey = new Schema.Key();
-					LNewKey.IsInherited = true;
-					LNewKey.IsSparse = LLeftKey.IsSparse;
+					Schema.Key newKey = new Schema.Key();
+					newKey.IsInherited = true;
+					newKey.IsSparse = leftKey.IsSparse;
 					
-					foreach (Schema.TableVarColumn LColumn in LLeftKey.Columns)
+					foreach (Schema.TableVarColumn column in leftKey.Columns)
 					{
-						int LLeftKeyIndex = LeftKey.Columns.IndexOfName(LColumn.Name);
-						if ((LLeftKeyIndex < 0) || (RightTableVar.Keys.IsKeyColumnName(RightKey.Columns[LLeftKeyIndex].Name)))
-							LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+						int leftKeyIndex = LeftKey.Columns.IndexOfName(column.Name);
+						if ((leftKeyIndex < 0) || (RightTableVar.Keys.IsKeyColumnName(RightKey.Columns[leftKeyIndex].Name)))
+							newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)]);
 					}
 
-					if (!TableVar.Keys.Contains(LNewKey))
-						TableVar.Keys.Add(LNewKey);
+					if (!TableVar.Keys.Contains(newKey))
+						TableVar.Keys.Add(newKey);
 
 					if (!IsNatural)
 					{
-						LNewKey = new Schema.Key();
-						LNewKey.IsInherited = true;
-						foreach (Schema.TableVarColumn LColumn in LLeftKey.Columns)
+						newKey = new Schema.Key();
+						newKey.IsInherited = true;
+						foreach (Schema.TableVarColumn column in leftKey.Columns)
 						{
-							int LLeftKeyIndex = LeftKey.Columns.IndexOfName(LColumn.Name);
-							if (LLeftKeyIndex >= 0)
+							int leftKeyIndex = LeftKey.Columns.IndexOfName(column.Name);
+							if (leftKeyIndex >= 0)
 							{
-								if (RightTableVar.Keys.IsKeyColumnName(RightKey.Columns[LLeftKeyIndex].Name))
-									LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(RightKey.Columns[LLeftKeyIndex].Name)]);
+								if (RightTableVar.Keys.IsKeyColumnName(RightKey.Columns[leftKeyIndex].Name))
+									newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(RightKey.Columns[leftKeyIndex].Name)]);
 							}
 							else
-								LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+								newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)]);
 						}
 						
-						LNewKey.IsSparse = !LeftKey.Columns.IsSupersetOf(LNewKey.Columns);
+						newKey.IsSparse = !LeftKey.Columns.IsSupersetOf(newKey.Columns);
 
-						if (!TableVar.Keys.Contains(LNewKey))
-							TableVar.Keys.Add(LNewKey);
+						if (!TableVar.Keys.Contains(newKey))
+							TableVar.Keys.Add(newKey);
 					}
 				}
 			}
@@ -3299,46 +3299,46 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 		}
 		
-		protected override void DetermineJoinAlgorithm(Plan APlan)
+		protected override void DetermineJoinAlgorithm(Plan plan)
 		{
-			if (FExpression == null)
-				FJoinAlgorithm = typeof(TimesTable);
+			if (_expression == null)
+				_joinAlgorithm = typeof(TimesTable);
 			else
 			{
-				FJoinOrder = Compiler.OrderFromKey(APlan, FLeftKey);
-				Schema.OrderColumn LColumn;
-				for (int LIndex = 0; LIndex < FJoinOrder.Columns.Count; LIndex++)
+				_joinOrder = Compiler.OrderFromKey(plan, _leftKey);
+				Schema.OrderColumn column;
+				for (int index = 0; index < _joinOrder.Columns.Count; index++)
 				{
-					LColumn = FJoinOrder.Columns[LIndex];
-					LColumn.Sort = Compiler.GetSort(APlan, LColumn.Column.DataType);
-					if (LColumn.Sort.HasDependencies())
-						APlan.AttachDependencies(LColumn.Sort.Dependencies);
-					LColumn.IsDefaultSort = true;
+					column = _joinOrder.Columns[index];
+					column.Sort = Compiler.GetSort(plan, column.Column.DataType);
+					if (column.Sort.HasDependencies())
+						plan.AttachDependencies(column.Sort.Dependencies);
+					column.IsDefaultSort = true;
 				}
 
 				// if no inputs are ordered by join keys, add an order node to the right side
-				if (!IsJoinOrder(APlan, FRightKey, RightNode))
+				if (!IsJoinOrder(plan, _rightKey, RightNode))
 				{
-					Nodes[1] = Compiler.EnsureSearchableNode(APlan, RightNode, FRightKey);
-					Nodes[1].DetermineDevice(APlan);
+					Nodes[1] = Compiler.EnsureSearchableNode(plan, RightNode, _rightKey);
+					Nodes[1].DetermineDevice(plan);
 				}
 
-				if (IsJoinOrder(APlan, FLeftKey, LeftNode) && IsJoinOrder(APlan, FRightKey, RightNode) && JoinOrdersAscendingCompatible(LeftNode.Order, RightNode.Order) && (FLeftKey.IsUnique || FRightKey.IsUnique))
+				if (IsJoinOrder(plan, _leftKey, LeftNode) && IsJoinOrder(plan, _rightKey, RightNode) && JoinOrdersAscendingCompatible(LeftNode.Order, RightNode.Order) && (_leftKey.IsUnique || _rightKey.IsUnique))
 				{
 					// if both inputs are ordered by join keys and one or both join keys are unique
 						// use a merge join algorithm
-					FJoinAlgorithm = typeof(MergeLeftJoinTable);
+					_joinAlgorithm = typeof(MergeLeftJoinTable);
 					
 					Order = CopyOrder(LeftNode.Order);
 				}
-				else if (IsJoinOrder(APlan, FRightKey, RightNode))
+				else if (IsJoinOrder(plan, _rightKey, RightNode))
 				{
 					// else if the right input is ordered by join keys
 						// use a searched join algorithm
-					if (FRightKey.IsUnique)
-						FJoinAlgorithm = typeof(RightUniqueSearchedLeftJoinTable);
+					if (_rightKey.IsUnique)
+						_joinAlgorithm = typeof(RightUniqueSearchedLeftJoinTable);
 					else
-						FJoinAlgorithm = typeof(NonUniqueSearchedLeftJoinTable);
+						_joinAlgorithm = typeof(NonUniqueSearchedLeftJoinTable);
 						
 					if (LeftNode.Order != null)
 						Order = CopyOrder(LeftNode.Order);
@@ -3347,115 +3347,115 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					// use a nested loop join
 					// NOTE: this code will not be hit because of the join accelerator step above
-					if (FRightKey.IsUnique)
-						FJoinAlgorithm = typeof(RightUniqueNestedLoopLeftJoinTable);
+					if (_rightKey.IsUnique)
+						_joinAlgorithm = typeof(RightUniqueNestedLoopLeftJoinTable);
 					else
-						FJoinAlgorithm = typeof(NonUniqueNestedLoopLeftJoinTable);
+						_joinAlgorithm = typeof(NonUniqueNestedLoopLeftJoinTable);
 				}
 			}
 		}
 		
-		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
-			bool LChanged = false;
+			bool changed = false;
 			
-			if ((HasRowExistsColumn() && (AColumnName == String.Empty)) || IsRowExistsColumn(AColumnName))
+			if ((HasRowExistsColumn() && (columnName == String.Empty)) || IsRowExistsColumn(columnName))
 			{
-				LChanged = DefaultColumn(AProgram, TableVar, ANewRow, AValueFlags, TableVar.Columns[FRowExistsColumnIndex].Name) || LChanged;
+				changed = DefaultColumn(program, TableVar, newRow, valueFlags, TableVar.Columns[_rowExistsColumnIndex].Name) || changed;
 
-				int LRowIndex = ANewRow.DataType.Columns.IndexOfName(TableVar.Columns[FRowExistsColumnIndex].Name);
-				if (!ANewRow.HasValue(LRowIndex))
+				int rowIndex = newRow.DataType.Columns.IndexOfName(TableVar.Columns[_rowExistsColumnIndex].Name);
+				if (!newRow.HasValue(rowIndex))
 				{
-					LChanged = true;
-					ANewRow[LRowIndex] = false;
+					changed = true;
+					newRow[rowIndex] = false;
 				}
 			}
 			
-			if (AIsDescending)
+			if (isDescending)
 			{
-				if (PropagateDefaultLeft && ((AColumnName == String.Empty) || LeftTableType.Columns.ContainsName(AColumnName)))
+				if (PropagateDefaultLeft && ((columnName == String.Empty) || LeftTableType.Columns.ContainsName(columnName)))
 				{
-					BitArray LValueFlags = new BitArray(LeftKey.Columns.Count);
-					for (int LIndex = 0; LIndex < LeftKey.Columns.Count; LIndex++)
-						LValueFlags[LIndex] = ANewRow.HasValue(LeftKey.Columns[LIndex].Name);
-					LChanged = LeftNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;
-					if (LChanged)
-						for (int LIndex = 0; LIndex < LeftKey.Columns.Count; LIndex++)
-							if (!LValueFlags[LIndex] && ANewRow.HasValue(LeftKey.Columns[LIndex].Name))
-								Change(AProgram, AOldRow, ANewRow, AValueFlags, LeftKey.Columns[LIndex].Name);
+					BitArray localValueFlags = new BitArray(LeftKey.Columns.Count);
+					for (int index = 0; index < LeftKey.Columns.Count; index++)
+						localValueFlags[index] = newRow.HasValue(LeftKey.Columns[index].Name);
+					changed = LeftNode.Default(program, oldRow, newRow, valueFlags, columnName) || changed;
+					if (changed)
+						for (int index = 0; index < LeftKey.Columns.Count; index++)
+							if (!localValueFlags[index] && newRow.HasValue(LeftKey.Columns[index].Name))
+								Change(program, oldRow, newRow, valueFlags, LeftKey.Columns[index].Name);
 				}
 
-				if (PropagateDefaultRight && ((AColumnName == String.Empty) || RightTableType.Columns.ContainsName(AColumnName)) && HasRow(ANewRow))
+				if (PropagateDefaultRight && ((columnName == String.Empty) || RightTableType.Columns.ContainsName(columnName)) && HasRow(newRow))
 				{
-					BitArray LValueFlags = new BitArray(RightKey.Columns.Count);
-					for (int LIndex = 0; LIndex < RightKey.Columns.Count; LIndex++)
-						LValueFlags[LIndex] = ANewRow.HasValue(RightKey.Columns[LIndex].Name);
-					LChanged = RightNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;
-					if (LChanged)
-						for (int LIndex = 0; LIndex < RightKey.Columns.Count; LIndex++)
-							if (!LValueFlags[LIndex] && ANewRow.HasValue(RightKey.Columns[LIndex].Name))
-								Change(AProgram, AOldRow, ANewRow, AValueFlags, RightKey.Columns[LIndex].Name);
+					BitArray localValueFlags = new BitArray(RightKey.Columns.Count);
+					for (int index = 0; index < RightKey.Columns.Count; index++)
+						localValueFlags[index] = newRow.HasValue(RightKey.Columns[index].Name);
+					changed = RightNode.Default(program, oldRow, newRow, valueFlags, columnName) || changed;
+					if (changed)
+						for (int index = 0; index < RightKey.Columns.Count; index++)
+							if (!localValueFlags[index] && newRow.HasValue(RightKey.Columns[index].Name))
+								Change(program, oldRow, newRow, valueFlags, RightKey.Columns[index].Name);
 				}
 			}
 
-			return LChanged;
+			return changed;
 		}
 		
-		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
-			if (!FIsNatural && (AColumnName == String.Empty) && HasRow(ANewRow))
-				return base.InternalValidate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable);
+			if (!_isNatural && (columnName == String.Empty) && HasRow(newRow))
+				return base.InternalValidate(program, oldRow, newRow, valueFlags, columnName, isDescending, isProposable);
 			else
 			{
-				if (AIsDescending)
+				if (isDescending)
 				{
-					bool LChanged = false;
-					if (PropagateValidateLeft && ((AColumnName == String.Empty) || (LeftNode.TableVar.Columns.ContainsName(AColumnName))))
-						LChanged = LeftNode.Validate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;
+					bool changed = false;
+					if (PropagateValidateLeft && ((columnName == String.Empty) || (LeftNode.TableVar.Columns.ContainsName(columnName))))
+						changed = LeftNode.Validate(program, oldRow, newRow, valueFlags, columnName) || changed;
 
-					if (PropagateValidateRight && (((AColumnName == String.Empty) || (RightNode.TableVar.Columns.ContainsName(AColumnName))) && HasRow(ANewRow)))
-						LChanged = RightNode.Validate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;
-					return LChanged;
+					if (PropagateValidateRight && (((columnName == String.Empty) || (RightNode.TableVar.Columns.ContainsName(columnName))) && HasRow(newRow)))
+						changed = RightNode.Validate(program, oldRow, newRow, valueFlags, columnName) || changed;
+					return changed;
 				}
 			}
 			return false;
 		}
 		
-		private bool PerformChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, ref bool AChangePropagated)
+		private bool PerformChange(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, ref bool changePropagated)
 		{
-			bool LChanged = false;
+			bool changed = false;
 
-			if (AColumnName != String.Empty)
+			if (columnName != String.Empty)
 			{
-				bool LIsRowExistsColumn = IsRowExistsColumn(AColumnName);
-				if (FLeftKey.Columns.ContainsName(AColumnName) || LIsRowExistsColumn)
+				bool isRowExistsColumn = IsRowExistsColumn(columnName);
+				if (_leftKey.Columns.ContainsName(columnName) || isRowExistsColumn)
 				{
-					LChanged = true;
+					changed = true;
 					if (IsNatural)
-						AChangePropagated = true;
-					if (!LIsRowExistsColumn || HasRow(ANewRow))
+						changePropagated = true;
+					if (!isRowExistsColumn || HasRow(newRow))
 					{
-						if (!AProgram.ServerProcess.ServerSession.Server.IsEngine && RetrieveRight)
+						if (!program.ServerProcess.ServerSession.Server.IsEngine && RetrieveRight)
 						{
-							EnsureRightSelectNode(AProgram.Plan);
-							using (Table LTable = FRightSelectNode.Execute(AProgram) as Table)
+							EnsureRightSelectNode(program.Plan);
+							using (Table table = _rightSelectNode.Execute(program) as Table)
 							{
-								LTable.Open();
-								if (LTable.Next())
+								table.Open();
+								if (table.Next())
 								{
-									LTable.Select(ANewRow);
-									if (HasRowExistsColumn() && !LIsRowExistsColumn)
-										ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = true;
+									table.Select(newRow);
+									if (HasRowExistsColumn() && !isRowExistsColumn)
+										newRow[DataType.Columns[_rowExistsColumnIndex].Name] = true;
 
 									if (PropagateChangeRight)
-										foreach (Schema.Column LColumn in RightTableType.Columns)
-											RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+										foreach (Schema.Column column in RightTableType.Columns)
+											RightNode.Change(program, oldRow, newRow, valueFlags, column.Name);
 								}
 								else
 								{
-									if (!LIsRowExistsColumn)
+									if (!isRowExistsColumn)
 										if (HasRowExistsColumn())
-											ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = false;
+											newRow[DataType.Columns[_rowExistsColumnIndex].Name] = false;
 										else
 										{
 											// Clear any of/all of columns
@@ -3463,63 +3463,63 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 											// I don't want to run through them all here because it will end up firing changes twice in the default case
 										}
 										
-									foreach (Schema.Column LColumn in RightTableType.Columns)
+									foreach (Schema.Column column in RightTableType.Columns)
 									{
-										int LRightKeyIndex = FRightKey.Columns.IndexOfName(LColumn.Name);
-										if (!HasRowExistsColumn() && (LRightKeyIndex >= 0) && CoordinateRight)
+										int rightKeyIndex = _rightKey.Columns.IndexOfName(column.Name);
+										if (!HasRowExistsColumn() && (rightKeyIndex >= 0) && CoordinateRight)
 										{
-											int LLeftRowIndex = ANewRow.DataType.Columns.IndexOfName(FLeftKey.Columns[LRightKeyIndex].Name);
-											if (ANewRow.HasValue(LLeftRowIndex))
-												ANewRow[LColumn.Name] = ANewRow[LLeftRowIndex];
+											int leftRowIndex = newRow.DataType.Columns.IndexOfName(_leftKey.Columns[rightKeyIndex].Name);
+											if (newRow.HasValue(leftRowIndex))
+												newRow[column.Name] = newRow[leftRowIndex];
 											else
-												ANewRow.ClearValue(LColumn.Name);
+												newRow.ClearValue(column.Name);
 										}
 										else
 										{
 											if (ClearRight)
-												ANewRow.ClearValue(LColumn.Name);
+												newRow.ClearValue(column.Name);
 
-											if (LIsRowExistsColumn && PropagateDefaultRight)
-												RightNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+											if (isRowExistsColumn && PropagateDefaultRight)
+												RightNode.Default(program, oldRow, newRow, valueFlags, column.Name);
 										}
 											
 										if (PropagateChangeRight)
-											RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+											RightNode.Change(program, oldRow, newRow, valueFlags, column.Name);
 									}
 								}
 							}
 						}
 						else
 						{
-							if (!LIsRowExistsColumn)
+							if (!isRowExistsColumn)
 							{
-								if (HasRow(ANewRow) && CoordinateRight)
-									CoordinateRightJoinKey(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+								if (HasRow(newRow) && CoordinateRight)
+									CoordinateRightJoinKey(program, oldRow, newRow, valueFlags, columnName);
 							}
 							else // rowexists was set
 							{
-								foreach (Schema.TableVarColumn LColumn in RightTableVar.Columns)
+								foreach (Schema.TableVarColumn column in RightTableVar.Columns)
 								{
-									int LRightKeyIndex = FRightKey.Columns.IndexOfName(LColumn.Name);
-									if ((LRightKeyIndex >= 0) && CoordinateRight)
+									int rightKeyIndex = _rightKey.Columns.IndexOfName(column.Name);
+									if ((rightKeyIndex >= 0) && CoordinateRight)
 									{
-										int LLeftRowIndex = ANewRow.DataType.Columns.IndexOfName(FLeftKey.Columns[LRightKeyIndex].Name);
-										if (ANewRow.HasValue(LLeftRowIndex))
-											ANewRow[LColumn.Name] = ANewRow[LLeftRowIndex];
+										int leftRowIndex = newRow.DataType.Columns.IndexOfName(_leftKey.Columns[rightKeyIndex].Name);
+										if (newRow.HasValue(leftRowIndex))
+											newRow[column.Name] = newRow[leftRowIndex];
 										else
-											ANewRow.ClearValue(LColumn.Name);
+											newRow.ClearValue(column.Name);
 									}
 									else
 									{
 										if (ClearRight)
-											ANewRow.ClearValue(LColumn.Name);
+											newRow.ClearValue(column.Name);
 
-										if (!ANewRow.HasValue(LColumn.Name) && PropagateDefaultRight)
-											RightNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+										if (!newRow.HasValue(column.Name) && PropagateDefaultRight)
+											RightNode.Default(program, oldRow, newRow, valueFlags, column.Name);
 									}
 									
 									if (PropagateChangeRight)
-										RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+										RightNode.Change(program, oldRow, newRow, valueFlags, column.Name);
 								}
 							}
 						}
@@ -3527,60 +3527,60 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					else // rowexists was cleared
 					{
 						if (ClearRight)
-							foreach (Schema.TableVarColumn LColumn in RightTableVar.Columns)
+							foreach (Schema.TableVarColumn column in RightTableVar.Columns)
 							{
-								ANewRow.ClearValue(LColumn.Name);
+								newRow.ClearValue(column.Name);
 								if (PropagateChangeRight)
-									RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+									RightNode.Change(program, oldRow, newRow, valueFlags, column.Name);
 							}
 					}
 				}
 				
-				if (FRightKey.Columns.ContainsName(AColumnName) && HasRow(ANewRow) && CoordinateLeft)
+				if (_rightKey.Columns.ContainsName(columnName) && HasRow(newRow) && CoordinateLeft)
 				{
-					LChanged = true;
+					changed = true;
 					if (IsNatural)
-						AChangePropagated = true;
-					CoordinateLeftJoinKey(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+						changePropagated = true;
+					CoordinateLeftJoinKey(program, oldRow, newRow, valueFlags, columnName);
 				}
 					
-				if (FAnyOfKey.Columns.ContainsName(AColumnName) || FAllOfKey.Columns.ContainsName(AColumnName))
+				if (_anyOfKey.Columns.ContainsName(columnName) || _allOfKey.Columns.ContainsName(columnName))
 				{
-					LChanged = true;
-					if (HasValues(ANewRow))
+					changed = true;
+					if (HasValues(newRow))
 					{
 						if (HasRowExistsColumn())
-							ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = true;
+							newRow[DataType.Columns[_rowExistsColumnIndex].Name] = true;
 							
-						foreach (Schema.TableVarColumn LColumn in RightTableVar.Columns)
+						foreach (Schema.TableVarColumn column in RightTableVar.Columns)
 						{
-							int LRightKeyIndex = FRightKey.Columns.IndexOfName(LColumn.Name);
-							if ((LRightKeyIndex >= 0) && CoordinateRight)
-								CoordinateRightJoinKey(AProgram, AOldRow, ANewRow, AValueFlags, FLeftKey.Columns[LRightKeyIndex].Name);
+							int rightKeyIndex = _rightKey.Columns.IndexOfName(column.Name);
+							if ((rightKeyIndex >= 0) && CoordinateRight)
+								CoordinateRightJoinKey(program, oldRow, newRow, valueFlags, _leftKey.Columns[rightKeyIndex].Name);
 							else
 							{
-								if (PropagateDefaultRight && RightNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name) && PropagateChangeRight)
-									RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+								if (PropagateDefaultRight && RightNode.Default(program, oldRow, newRow, valueFlags, column.Name) && PropagateChangeRight)
+									RightNode.Change(program, oldRow, newRow, valueFlags, column.Name);
 							}
 						}
 					}
 					else
 					{
 						if (HasRowExistsColumn())
-							ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = false;
+							newRow[DataType.Columns[_rowExistsColumnIndex].Name] = false;
 							
 						if (ClearRight)
-							foreach (Schema.TableVarColumn LColumn in RightTableVar.Columns)
+							foreach (Schema.TableVarColumn column in RightTableVar.Columns)
 							{
-								ANewRow.ClearValue(LColumn.Name);
+								newRow.ClearValue(column.Name);
 								if (PropagateChangeRight)
-									RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+									RightNode.Change(program, oldRow, newRow, valueFlags, column.Name);
 							}
 					}
 				}
 			}
 			
-			return LChanged;
+			return changed;
 		}
 		
 		/*
@@ -3669,175 +3669,175 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if PropagateChangeRight and change is not to a specific column, or is to a column in the right side
 				propagate the change
 		*/
-		protected override bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected override bool InternalChange(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
-			PushNewRow(AProgram, ANewRow);
+			PushNewRow(program, newRow);
 			try
 			{
-				bool LChanged = false;
-				bool LChangePropagated = false;
+				bool changed = false;
+				bool changePropagated = false;
 				
-				LChanged = PerformChange(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, ref LChangePropagated);
+				changed = PerformChange(program, oldRow, newRow, valueFlags, columnName, ref changePropagated);
 				
-				if (!LChangePropagated && PropagateChangeLeft && ((AColumnName == String.Empty) || LeftTableType.Columns.ContainsName(AColumnName)))
+				if (!changePropagated && PropagateChangeLeft && ((columnName == String.Empty) || LeftTableType.Columns.ContainsName(columnName)))
 				{
 					// TODO: Need to generalize this solution and integrate it better with overall value-flags determination
 					// For now, instead of passing the given AValueFlags, we create a new LValueFlags and use it to detect whether or not
 					// the change affected any of the join columns. If it did, we need to refire the lookup logic.
 					// This is safe at this point, because nothing is actually using the ValueFlags on change.
-					BitArray LValueFlags = new BitArray(ANewRow.DataType.Columns.Count);
-					LValueFlags.SetAll(false);
-					LChanged = LeftNode.Change(AProgram, AOldRow, ANewRow, LValueFlags, AColumnName) || LChanged;
-					for (int LIndex = 0; LIndex < LValueFlags.Count; LIndex++)
+					BitArray localValueFlags = new BitArray(newRow.DataType.Columns.Count);
+					localValueFlags.SetAll(false);
+					changed = LeftNode.Change(program, oldRow, newRow, localValueFlags, columnName) || changed;
+					for (int index = 0; index < localValueFlags.Count; index++)
 					{
-						if (LValueFlags[LIndex])
+						if (localValueFlags[index])
 						{
-							string LColumnName = ANewRow.DataType.Columns[LIndex].Name;
-							if (LeftKey.Columns.ContainsName(LColumnName))
-								LChanged = PerformChange(AProgram, AOldRow, ANewRow, AValueFlags, LColumnName, ref LChangePropagated) || LChanged;
+							string localColumnName = newRow.DataType.Columns[index].Name;
+							if (LeftKey.Columns.ContainsName(localColumnName))
+								changed = PerformChange(program, oldRow, newRow, valueFlags, localColumnName, ref changePropagated) || changed;
 						}
 					}
 				}
 					
-				if (!LChangePropagated && PropagateChangeRight && ((AColumnName == String.Empty) || RightTableType.Columns.ContainsName(AColumnName)))
-					LChanged = RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;
+				if (!changePropagated && PropagateChangeRight && ((columnName == String.Empty) || RightTableType.Columns.ContainsName(columnName)))
+					changed = RightNode.Change(program, oldRow, newRow, valueFlags, columnName) || changed;
 
-				return LChanged;
+				return changed;
 			}
 			finally
 			{
-				PopRow(AProgram);
+				PopRow(program);
 			}
 		}
 		
-		protected void InternalInsertLeft(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected void InternalInsertLeft(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
 			switch (PropagateInsertLeft)
 			{
 				case PropagateAction.True : 
-					LeftNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked); 
+					LeftNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue); 
 				break;
 					
 				case PropagateAction.Ensure :
 				case PropagateAction.Ignore :
-					using (Row LLeftRow = LeftNode.Select(AProgram, ANewRow))
+					using (Row leftRow = LeftNode.Select(program, newRow))
 					{
-						if (LLeftRow != null)
+						if (leftRow != null)
 						{
 							if (PropagateInsertLeft == PropagateAction.Ensure)
-								LeftNode.Update(AProgram, LLeftRow, ANewRow, AValueFlags, false, AUnchecked);
+								LeftNode.Update(program, leftRow, newRow, valueFlags, false, uncheckedValue);
 						}
 						else
-							LeftNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+							LeftNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue);
 					}
 				break;
 			}
 		}
 		
-		protected void InternalInsertRight(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected void InternalInsertRight(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
-			if (HasRow(ANewRow))				
+			if (HasRow(newRow))				
 			{
 				switch (PropagateInsertRight)
 				{
 					case PropagateAction.True :
-						RightNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked); 
+						RightNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue); 
 					break;
 					
 					case PropagateAction.Ensure :
 					case PropagateAction.Ignore :
-						using (Row LRightRow = RightNode.Select(AProgram, ANewRow))
+						using (Row rightRow = RightNode.Select(program, newRow))
 						{
-							if (LRightRow != null)
+							if (rightRow != null)
 							{
 								if (PropagateInsertRight == PropagateAction.Ensure)
-									RightNode.Update(AProgram, LRightRow, ANewRow, AValueFlags, false, AUnchecked);
+									RightNode.Update(program, rightRow, newRow, valueFlags, false, uncheckedValue);
 							}
 							else
-								RightNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+								RightNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue);
 						}
 					break;
 				}
 			}
 		}
 
-		protected override void InternalExecuteInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected override void InternalExecuteInsert(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
-			if (FUpdateLeftToRight)
+			if (_updateLeftToRight)
 			{
-				InternalInsertLeft(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
-				InternalInsertRight(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+				InternalInsertLeft(program, oldRow, newRow, valueFlags, uncheckedValue);
+				InternalInsertRight(program, oldRow, newRow, valueFlags, uncheckedValue);
 			}
 			else
 			{
-				InternalInsertRight(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
-				InternalInsertLeft(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+				InternalInsertRight(program, oldRow, newRow, valueFlags, uncheckedValue);
+				InternalInsertLeft(program, oldRow, newRow, valueFlags, uncheckedValue);
 			}
 		}
 		
-		protected override void InternalExecuteUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
 		{
-			if (FUpdateLeftToRight)
+			if (_updateLeftToRight)
 			{
 				if (PropagateUpdateLeft)
-					LeftNode.Update(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+					LeftNode.Update(program, oldRow, newRow, valueFlags, checkConcurrency, uncheckedValue);
 					
 				if (PropagateUpdateRight)
 				{
-					if (HasRow(AOldRow))
+					if (HasRow(oldRow))
 					{
-						if (HasRow(ANewRow))
-							RightNode.Update(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+						if (HasRow(newRow))
+							RightNode.Update(program, oldRow, newRow, valueFlags, checkConcurrency, uncheckedValue);
 						else
-							RightNode.Delete(AProgram, AOldRow, ACheckConcurrency, AUnchecked);
+							RightNode.Delete(program, oldRow, checkConcurrency, uncheckedValue);
 					}
-					else if (HasRow(ANewRow))
-						RightNode.Insert(AProgram, null, ANewRow, AValueFlags, AUnchecked);
+					else if (HasRow(newRow))
+						RightNode.Insert(program, null, newRow, valueFlags, uncheckedValue);
 				}
 			}
 			else
 			{
 				if (PropagateUpdateRight)
 				{
-					if (HasRow(AOldRow))
+					if (HasRow(oldRow))
 					{
-						if (HasRow(ANewRow))
-							RightNode.Update(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+						if (HasRow(newRow))
+							RightNode.Update(program, oldRow, newRow, valueFlags, checkConcurrency, uncheckedValue);
 						else
-							RightNode.Delete(AProgram, AOldRow, ACheckConcurrency, AUnchecked);
+							RightNode.Delete(program, oldRow, checkConcurrency, uncheckedValue);
 					}
-					else if (HasRow(ANewRow))
-						RightNode.Insert(AProgram, null, ANewRow, AValueFlags, AUnchecked);
+					else if (HasRow(newRow))
+						RightNode.Insert(program, null, newRow, valueFlags, uncheckedValue);
 				}
 
 				if (PropagateUpdateLeft)
-					LeftNode.Update(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+					LeftNode.Update(program, oldRow, newRow, valueFlags, checkConcurrency, uncheckedValue);
 			}
 		}
 
-		protected override void InternalExecuteDelete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteDelete(Program program, Row row, bool checkConcurrency, bool uncheckedValue)
 		{
-			if (FUpdateLeftToRight)
+			if (_updateLeftToRight)
 			{
-				if (PropagateDeleteRight && HasRow(ARow))
-					RightNode.Delete(AProgram, ARow, ACheckConcurrency, AUnchecked);
+				if (PropagateDeleteRight && HasRow(row))
+					RightNode.Delete(program, row, checkConcurrency, uncheckedValue);
 				
 				if (PropagateDeleteLeft)
-					LeftNode.Delete(AProgram, ARow, ACheckConcurrency, AUnchecked);
+					LeftNode.Delete(program, row, checkConcurrency, uncheckedValue);
 			}
 			else
 			{
 				if (PropagateDeleteLeft)
-					LeftNode.Delete(AProgram, ARow, ACheckConcurrency, AUnchecked);
+					LeftNode.Delete(program, row, checkConcurrency, uncheckedValue);
 
-				if (PropagateDeleteRight && HasRow(ARow))
-					RightNode.Delete(AProgram, ARow, ACheckConcurrency, AUnchecked);
+				if (PropagateDeleteRight && HasRow(row))
+					RightNode.Delete(program, row, checkConcurrency, uncheckedValue);
 			}
 		}
 
-		public override void DetermineCursorCapabilities(Plan APlan)
+		public override void DetermineCursorCapabilities(Plan plan)
 		{
-			FCursorCapabilities = 
+			_cursorCapabilities = 
 				CursorCapability.Navigable |
 				(
 					LeftNode.CursorCapabilities & 
@@ -3846,59 +3846,59 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				) |
 				(
 					(
-						APlan.CursorContext.CursorCapabilities & 
+						plan.CursorContext.CursorCapabilities & 
 						LeftNode.CursorCapabilities & 
 						CursorCapability.Updateable
 					) &
-					((FIsLookup && !FIsDetailLookup) ? CursorCapability.Updateable : (RightNode.CursorCapabilities & CursorCapability.Updateable))
+					((_isLookup && !_isDetailLookup) ? CursorCapability.Updateable : (RightNode.CursorCapabilities & CursorCapability.Updateable))
 				);
 		}
 
-		public override void JoinApplicationTransaction(Program AProgram, Row ARow)
+		public override void JoinApplicationTransaction(Program program, Row row)
 		{
-			JoinLeftApplicationTransaction(AProgram, ARow);
-			if (!FIsLookup || FIsDetailLookup)
-				JoinRightApplicationTransaction(AProgram, ARow);
+			JoinLeftApplicationTransaction(program, row);
+			if (!_isLookup || _isDetailLookup)
+				JoinRightApplicationTransaction(program, row);
 		}
 	}
     
 	// operator RightJoin(table{}, table{}, object, object) : table{}	
 	public class RightOuterJoinNode : OuterJoinNode
 	{
-        protected override void DetermineColumns(Plan APlan)
+        protected override void DetermineColumns(Plan plan)
         {
-			DetermineLeftColumns(APlan, true);
+			DetermineLeftColumns(plan, true);
 			
-			if (FRowExistsColumn != null)
+			if (_rowExistsColumn != null)
 			{
-				Schema.TableVarColumn LRowExistsColumn =
+				Schema.TableVarColumn rowExistsColumn =
 					Compiler.CompileIncludeColumnExpression
 					(
-						APlan,
-						FRowExistsColumn, 
+						plan,
+						_rowExistsColumn, 
 						Keywords.RowExists, 
-						APlan.DataTypes.SystemBoolean, 
+						plan.DataTypes.SystemBoolean, 
 						Schema.TableVarColumnType.RowExists
 					);
-				DataType.Columns.Add(LRowExistsColumn.Column);
-				TableVar.Columns.Add(LRowExistsColumn);
-				FRowExistsColumnIndex = TableVar.Columns.Count - 1;
-				LRowExistsColumn.IsChangeRemotable = false;
-				LRowExistsColumn.IsDefaultRemotable = false;
+				DataType.Columns.Add(rowExistsColumn.Column);
+				TableVar.Columns.Add(rowExistsColumn);
+				_rowExistsColumnIndex = TableVar.Columns.Count - 1;
+				rowExistsColumn.IsChangeRemotable = false;
+				rowExistsColumn.IsDefaultRemotable = false;
 			}
 
-			DetermineRightColumns(APlan, false);
+			DetermineRightColumns(plan, false);
         }
         
-		protected override void DetermineJoinModifiers(Plan APlan)
+		protected override void DetermineJoinModifiers(Plan plan)
 		{
-			base.DetermineJoinModifiers(APlan);
+			base.DetermineJoinModifiers(plan);
 			
 			AnyOf = String.Empty;
 			AllOf = String.Empty;
-			foreach (Schema.TableVarColumn LColumn in LeftTableVar.Columns)
-				if (!LeftKey.Columns.ContainsName(LColumn.Name))
-					AnyOf = (AnyOf == String.Empty) ? LColumn.Name : String.Format("{0};{1}", AnyOf, Schema.Object.EnsureRooted(LColumn.Name));
+			foreach (Schema.TableVarColumn column in LeftTableVar.Columns)
+				if (!LeftKey.Columns.ContainsName(column.Name))
+					AnyOf = (AnyOf == String.Empty) ? column.Name : String.Format("{0};{1}", AnyOf, Schema.Object.EnsureRooted(column.Name));
 					
 			AnyOf = LanguageModifiers.GetModifier(Modifiers, "AnyOf", AnyOf);
 			AllOf = LanguageModifiers.GetModifier(Modifiers, "AllOf", AllOf);
@@ -3907,35 +3907,35 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			DetermineKeyColumns(AllOf, AllOfKey);
 
 			// Set change remotable to false for all AnyOf and AllOf columns
-			foreach (Schema.TableVarColumn LColumn in AnyOfKey.Columns)
-				LColumn.IsChangeRemotable = false;
+			foreach (Schema.TableVarColumn column in AnyOfKey.Columns)
+				column.IsChangeRemotable = false;
 				
-			foreach (Schema.TableVarColumn LColumn in AllOfKey.Columns)
-				LColumn.IsChangeRemotable = false;
+			foreach (Schema.TableVarColumn column in AllOfKey.Columns)
+				column.IsChangeRemotable = false;
 		}
 		
-		protected override void DetermineDetailLookup(Plan APlan)
+		protected override void DetermineDetailLookup(Plan plan)
 		{
 			if ((Modifiers != null) && (Modifiers.Contains("IsDetailLookup")))
-				FIsDetailLookup = Convert.ToBoolean(Modifiers["IsDetailLookup"]);
+				_isDetailLookup = Convert.ToBoolean(Modifiers["IsDetailLookup"]);
 			else
 			{
-				FIsDetailLookup = false;
+				_isDetailLookup = false;
 
 				// If this is a lookup and the right join columns are a non-trivial proper superset of any key of the right side, this is a detail lookup
-				if (FIsLookup)
-					foreach (Schema.Key LKey in RightTableVar.Keys)
-						if ((FRightKey.Columns.Count > 0) && FRightKey.Columns.IsProperSupersetOf(LKey.Columns))
+				if (_isLookup)
+					foreach (Schema.Key key in RightTableVar.Keys)
+						if ((_rightKey.Columns.Count > 0) && _rightKey.Columns.IsProperSupersetOf(key.Columns))
 						{
-							FIsDetailLookup = true;
+							_isDetailLookup = true;
 							break;
 						}
 				
 				#if USEDETAILLOOKUP
 				// if this is a lookup, the right key is not unique, and any key of the right table is a subset of the right key, this is a detail lookup.
 				if (FIsLookup && !FRightKey.IsUnique)
-					foreach (Schema.Key LKey in RightTableVar.Keys)
-						if (LKey.Columns.IsSubsetOf(FRightKey.Columns))
+					foreach (Schema.Key key in RightTableVar.Keys)
+						if (key.Columns.IsSubsetOf(FRightKey.Columns))
 						{
 							FIsDetailLookup = true;
 							break;
@@ -3948,9 +3948,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				FIsDetailLookup = false;
 				if (FIsLookup && !FLeftKey.IsUnique)
 				{
-					Schema.Key LInvariant = RightNode.TableVar.CalculateInvariant();
-					foreach (Schema.Column LColumn in FRightKey.Columns)
-						if (LInvariant.Columns.Contains(LColumn.Name))
+					Schema.Key invariant = RightNode.TableVar.CalculateInvariant();
+					foreach (Schema.Column column in FRightKey.Columns)
+						if (invariant.Columns.Contains(column.Name))
 						{
 							FIsDetailLookup = true;
 							break;
@@ -3960,10 +3960,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		protected override void DetermineJoinKey(Plan APlan)
+		protected override void DetermineJoinKey(Plan plan)
 		{
 			#if USEUNIFIEDJOINKEYINFERENCE
-			InferJoinKeys(APlan, Cardinality, false, true);
+			InferJoinKeys(plan, Cardinality, false, true);
 			#else
 			if (FRightKey.IsUnique && FLeftKey.IsUnique)
 			{
@@ -3974,55 +3974,55 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					// for each key of the left table var
 						// copy the key, if it is not a proper subset of the join key, inferred as sparse if the right join key is not a superset of the key
 						// copy the key, if it is not a proper subset of the join key, with all correlated columns replaced with the right key columns (a no-op for natural joins), inferred as sparse if the left join key is not a superset of the key
-				foreach (Schema.Key LRightKey in RightTableVar.Keys)
+				foreach (Schema.Key rightKey in RightTableVar.Keys)
 				{
-					Schema.Key LNewKey = CopyKey(LRightKey);
-					if (!TableVar.Keys.Contains(LNewKey))
-						TableVar.Keys.Add(LNewKey);
+					Schema.Key newKey = CopyKey(rightKey);
+					if (!TableVar.Keys.Contains(newKey))
+						TableVar.Keys.Add(newKey);
 
 					if (!IsNatural)
 					{
-						LNewKey = new Schema.Key();
-						LNewKey.IsInherited = true;
-						LNewKey.IsSparse = true;
-						foreach (Schema.TableVarColumn LColumn in LRightKey.Columns)
+						newKey = new Schema.Key();
+						newKey.IsInherited = true;
+						newKey.IsSparse = true;
+						foreach (Schema.TableVarColumn column in rightKey.Columns)
 						{
-							int LRightKeyIndex = RightKey.Columns.IndexOfName(LColumn.Name);
-							if (LRightKeyIndex >= 0)
-								LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LeftKey.Columns[LRightKeyIndex].Name)]);
+							int rightKeyIndex = RightKey.Columns.IndexOfName(column.Name);
+							if (rightKeyIndex >= 0)
+								newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LeftKey.Columns[rightKeyIndex].Name)]);
 							else
-								LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+								newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)]);
 						}
 						
-						if (!TableVar.Keys.Contains(LNewKey))
-							TableVar.Keys.Add(LNewKey);
+						if (!TableVar.Keys.Contains(newKey))
+							TableVar.Keys.Add(newKey);
 					}
 				}
 
-				foreach (Schema.Key LLeftKey in LeftTableVar.Keys)
+				foreach (Schema.Key leftKey in LeftTableVar.Keys)
 				{
-					if (!LLeftKey.Columns.IsProperSubsetOf(LeftKey.Columns))
+					if (!leftKey.Columns.IsProperSubsetOf(LeftKey.Columns))
 					{
-						Schema.Key LNewKey = CopyKey(LLeftKey, !RightKey.Columns.IsSupersetOf(LLeftKey.Columns));
-						if (!TableVar.Keys.Contains(LNewKey))
-							TableVar.Keys.Add(LNewKey);
+						Schema.Key newKey = CopyKey(leftKey, !RightKey.Columns.IsSupersetOf(leftKey.Columns));
+						if (!TableVar.Keys.Contains(newKey))
+							TableVar.Keys.Add(newKey);
 
 						if (!IsNatural)
 						{
-							LNewKey = new Schema.Key();
-							LNewKey.IsInherited = true;
-							LNewKey.IsSparse = !LeftKey.Columns.IsSupersetOf(LLeftKey.Columns);
-							foreach (Schema.TableVarColumn LColumn in LLeftKey.Columns)
+							newKey = new Schema.Key();
+							newKey.IsInherited = true;
+							newKey.IsSparse = !LeftKey.Columns.IsSupersetOf(leftKey.Columns);
+							foreach (Schema.TableVarColumn column in leftKey.Columns)
 							{
-								int LLeftKeyIndex = LeftKey.Columns.IndexOfName(LColumn.Name);
-								if (LLeftKeyIndex >= 0)
-									LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(RightKey.Columns[LLeftKeyIndex].Name)]);
+								int leftKeyIndex = LeftKey.Columns.IndexOfName(column.Name);
+								if (leftKeyIndex >= 0)
+									newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(RightKey.Columns[leftKeyIndex].Name)]);
 								else
-									LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+									newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)]);
 							}
 
-							if (!TableVar.Keys.Contains(LNewKey))
-								TableVar.Keys.Add(LNewKey);
+							if (!TableVar.Keys.Contains(newKey))
+								TableVar.Keys.Add(newKey);
 						}
 					}
 				}
@@ -4035,41 +4035,41 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					// for each key of the left table var
 						// copy the key, excluding join columns that are not key columns of the right, inferred as sparse if the right join key is not a superset of the resulting key's columns
 						// copy the key, excluding join columns that are not key columns of the right, with all correlated columns replaced with the right key columns (a no-op for natural joins), non-sparse
-				foreach (Schema.Key LLeftKey in LeftTableVar.Keys)
+				foreach (Schema.Key leftKey in LeftTableVar.Keys)
 				{
-					Schema.Key LNewKey = new Schema.Key();
-					LNewKey.IsInherited = true;
-					foreach (Schema.TableVarColumn LColumn in LLeftKey.Columns)
+					Schema.Key newKey = new Schema.Key();
+					newKey.IsInherited = true;
+					foreach (Schema.TableVarColumn column in leftKey.Columns)
 					{
-						int LLeftKeyIndex = LeftKey.Columns.IndexOfName(LColumn.Name);
-						if ((LLeftKeyIndex < 0) || RightTableVar.Keys.IsKeyColumnName(RightKey.Columns[LLeftKeyIndex].Name))
-							LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+						int leftKeyIndex = LeftKey.Columns.IndexOfName(column.Name);
+						if ((leftKeyIndex < 0) || RightTableVar.Keys.IsKeyColumnName(RightKey.Columns[leftKeyIndex].Name))
+							newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)]);
 					}
 
-					LNewKey.IsSparse = !RightKey.Columns.IsSupersetOf(LLeftKey.Columns);
+					newKey.IsSparse = !RightKey.Columns.IsSupersetOf(leftKey.Columns);
 					
-					if (!TableVar.Keys.Contains(LNewKey))
-						TableVar.Keys.Add(LNewKey);
+					if (!TableVar.Keys.Contains(newKey))
+						TableVar.Keys.Add(newKey);
 
 					if (!IsNatural)
 					{
-						LNewKey = new Schema.Key();
-						LNewKey.IsInherited = true;
-						LNewKey.IsSparse = LLeftKey.IsSparse;
-						foreach (Schema.TableVarColumn LColumn in LLeftKey.Columns)
+						newKey = new Schema.Key();
+						newKey.IsInherited = true;
+						newKey.IsSparse = leftKey.IsSparse;
+						foreach (Schema.TableVarColumn column in leftKey.Columns)
 						{
-							int LLeftKeyIndex = LeftKey.Columns.IndexOfName(LColumn.Name);
-							if (LLeftKeyIndex >= 0)
+							int leftKeyIndex = LeftKey.Columns.IndexOfName(column.Name);
+							if (leftKeyIndex >= 0)
 							{	
-								if (RightTableVar.Keys.IsKeyColumnName(RightKey.Columns[LLeftKeyIndex].Name))
-									LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(RightKey.Columns[LLeftKeyIndex].Name)]);
+								if (RightTableVar.Keys.IsKeyColumnName(RightKey.Columns[leftKeyIndex].Name))
+									newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(RightKey.Columns[leftKeyIndex].Name)]);
 							}
 							else
-								LNewKey.Columns.Add(LColumn);
+								newKey.Columns.Add(column);
 						}
 						
-						if (!TableVar.Keys.Contains(LNewKey))
-							TableVar.Keys.Add(LNewKey);
+						if (!TableVar.Keys.Contains(newKey))
+							TableVar.Keys.Add(newKey);
 					}
 				}
 			}
@@ -4080,39 +4080,39 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						// copy the key, excluding join columns that are not key columns of the left, non-sparse
 						// copy the key, excluding join columns that are not key columns of the left, with all correlated columns replaced with the right key columns (a no-op for natural joins), inferred as sparse if the left join key is not a superset of the resulting key's columns
 					// In addition to these, the same keys inferred for many-to-many joins are inferred
-				foreach (Schema.Key LRightKey in RightTableVar.Keys)
+				foreach (Schema.Key rightKey in RightTableVar.Keys)
 				{
-					Schema.Key LNewKey = new Schema.Key();
-					LNewKey.IsInherited = true;
-					LNewKey.IsSparse = LRightKey.IsSparse;
-					foreach (Schema.TableVarColumn LColumn in LRightKey.Columns)
+					Schema.Key newKey = new Schema.Key();
+					newKey.IsInherited = true;
+					newKey.IsSparse = rightKey.IsSparse;
+					foreach (Schema.TableVarColumn column in rightKey.Columns)
 					{
-						int LRightKeyIndex = RightKey.Columns.IndexOfName(LColumn.Name);
-						if ((LRightKeyIndex < 0) || LeftTableVar.Keys.IsKeyColumnName(LeftKey.Columns[LRightKeyIndex].Name))
-							LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+						int rightKeyIndex = RightKey.Columns.IndexOfName(column.Name);
+						if ((rightKeyIndex < 0) || LeftTableVar.Keys.IsKeyColumnName(LeftKey.Columns[rightKeyIndex].Name))
+							newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(column.Name)]);
 					}
 
-					if (!TableVar.Keys.Contains(LNewKey))
-						TableVar.Keys.Add(LNewKey);
+					if (!TableVar.Keys.Contains(newKey))
+						TableVar.Keys.Add(newKey);
 	
-					LNewKey = new Schema.Key();
-					LNewKey.IsInherited = true;
-					foreach (Schema.TableVarColumn LColumn in LRightKey.Columns)
+					newKey = new Schema.Key();
+					newKey.IsInherited = true;
+					foreach (Schema.TableVarColumn column in rightKey.Columns)
 					{
-						int LRightKeyIndex = RightKey.Columns.IndexOfName(LColumn.Name);
-						if (LRightKeyIndex >= 0)
+						int rightKeyIndex = RightKey.Columns.IndexOfName(column.Name);
+						if (rightKeyIndex >= 0)
 						{
-							if (LeftTableVar.Keys.IsKeyColumnName(LeftKey.Columns[LRightKeyIndex].Name))
-								LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LeftKey.Columns[LRightKeyIndex].Name)]);
+							if (LeftTableVar.Keys.IsKeyColumnName(LeftKey.Columns[rightKeyIndex].Name))
+								newKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LeftKey.Columns[rightKeyIndex].Name)]);
 						}
 						else
-							LNewKey.Columns.Add(LColumn);
+							newKey.Columns.Add(column);
 					}
 					
-					LNewKey.IsSparse = !RightKey.Columns.IsSupersetOf(LNewKey.Columns);
+					newKey.IsSparse = !RightKey.Columns.IsSupersetOf(newKey.Columns);
 
-					if (!TableVar.Keys.Contains(LNewKey))
-						TableVar.Keys.Add(LNewKey);
+					if (!TableVar.Keys.Contains(newKey))
+						TableVar.Keys.Add(newKey);
 				}
 				
 				DetermineManyToManyKeys(APlan);
@@ -4124,46 +4124,46 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 		}
 		
-		protected override void DetermineJoinAlgorithm(Plan APlan)
+		protected override void DetermineJoinAlgorithm(Plan plan)
 		{
-			if (FExpression == null)
-				FJoinAlgorithm = typeof(TimesTable);
+			if (_expression == null)
+				_joinAlgorithm = typeof(TimesTable);
 			else
 			{
-				FJoinOrder = Compiler.OrderFromKey(APlan, FLeftKey);
-				Schema.OrderColumn LColumn;
-				for (int LIndex = 0; LIndex < FJoinOrder.Columns.Count; LIndex++)
+				_joinOrder = Compiler.OrderFromKey(plan, _leftKey);
+				Schema.OrderColumn column;
+				for (int index = 0; index < _joinOrder.Columns.Count; index++)
 				{
-					LColumn = FJoinOrder.Columns[LIndex];
-					LColumn.Sort = Compiler.GetSort(APlan, LColumn.Column.DataType);
-					if (LColumn.Sort.HasDependencies())
-						APlan.AttachDependencies(LColumn.Sort.Dependencies);
-					LColumn.IsDefaultSort = true;
+					column = _joinOrder.Columns[index];
+					column.Sort = Compiler.GetSort(plan, column.Column.DataType);
+					if (column.Sort.HasDependencies())
+						plan.AttachDependencies(column.Sort.Dependencies);
+					column.IsDefaultSort = true;
 				}
 
 				// if no inputs are ordered by join keys, add an order node to the left side
-				if (!IsJoinOrder(APlan, FLeftKey, LeftNode))
+				if (!IsJoinOrder(plan, _leftKey, LeftNode))
 				{
-					Nodes[0] = Compiler.EnsureSearchableNode(APlan, LeftNode, FLeftKey);
-					Nodes[0].DetermineDevice(APlan);
+					Nodes[0] = Compiler.EnsureSearchableNode(plan, LeftNode, _leftKey);
+					Nodes[0].DetermineDevice(plan);
 				}
 
 				// if both inputs are ordered by join keys and one or both join keys are unique
-				if (IsJoinOrder(APlan, FLeftKey, LeftNode) && IsJoinOrder(APlan, FRightKey, RightNode) && JoinOrdersAscendingCompatible(LeftNode.Order, RightNode.Order) && (FLeftKey.IsUnique || FRightKey.IsUnique))
+				if (IsJoinOrder(plan, _leftKey, LeftNode) && IsJoinOrder(plan, _rightKey, RightNode) && JoinOrdersAscendingCompatible(LeftNode.Order, RightNode.Order) && (_leftKey.IsUnique || _rightKey.IsUnique))
 				{
 					// use a merge join algorithm
-					FJoinAlgorithm = typeof(MergeRightJoinTable);
+					_joinAlgorithm = typeof(MergeRightJoinTable);
 					
 					Order = CopyOrder(RightNode.Order);
 				}
 				// else if the left input is ordered by join keys
 					// use a searched join algorithm
-				else if (IsJoinOrder(APlan, FLeftKey, LeftNode))
+				else if (IsJoinOrder(plan, _leftKey, LeftNode))
 				{
-					if (FLeftKey.IsUnique)
-						FJoinAlgorithm = typeof(LeftUniqueSearchedRightJoinTable);
+					if (_leftKey.IsUnique)
+						_joinAlgorithm = typeof(LeftUniqueSearchedRightJoinTable);
 					else
-						FJoinAlgorithm = typeof(NonUniqueSearchedRightJoinTable);
+						_joinAlgorithm = typeof(NonUniqueSearchedRightJoinTable);
 						
 					if (RightNode.Order != null)
 						Order = CopyOrder(RightNode.Order);
@@ -4172,143 +4172,143 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					// use a nested loop join
 					// NOTE: this code will not be hit because of the join accelerator step above
-					if (FLeftKey.IsUnique)
-						FJoinAlgorithm = typeof(LeftUniqueNestedLoopRightJoinTable);
+					if (_leftKey.IsUnique)
+						_joinAlgorithm = typeof(LeftUniqueNestedLoopRightJoinTable);
 					else
-						FJoinAlgorithm = typeof(NonUniqueNestedLoopRightJoinTable);
+						_joinAlgorithm = typeof(NonUniqueNestedLoopRightJoinTable);
 				}
 			}
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
 			if (IsLookup && !IsDetailLookup)
-				APlan.PushCursorContext(new CursorContext(APlan.CursorContext.CursorType, APlan.CursorContext.CursorCapabilities & ~CursorCapability.Updateable, APlan.CursorContext.CursorIsolation));
+				plan.PushCursorContext(new CursorContext(plan.CursorContext.CursorType, plan.CursorContext.CursorCapabilities & ~CursorCapability.Updateable, plan.CursorContext.CursorIsolation));
 			try
 			{
-				Nodes[0].DetermineBinding(APlan);
+				Nodes[0].DetermineBinding(plan);
 			}
 			finally
 			{
 				if (IsLookup && !IsDetailLookup)
-					APlan.PopCursorContext();
+					plan.PopCursorContext();
 			}
 
-			Nodes[1].DetermineBinding(APlan);
+			Nodes[1].DetermineBinding(plan);
 			
-			APlan.EnterRowContext();
+			plan.EnterRowContext();
 			try
 			{
 				#if USENAMEDROWVARIABLES
-				APlan.Symbols.Push(new Symbol(Keywords.Left, LeftTableType.RowType));
+				plan.Symbols.Push(new Symbol(Keywords.Left, LeftTableType.RowType));
 				#else
 				APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(LeftTableType.Columns, FIsNatural ? Keywords.Left : String.Empty)));
 				#endif
 				try
 				{
 					#if USENAMEDROWVARIABLES
-					APlan.Symbols.Push(new Symbol(Keywords.Right, RightTableType.RowType));
+					plan.Symbols.Push(new Symbol(Keywords.Right, RightTableType.RowType));
 					#else
 					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(RightTableType.Columns, FIsNatural ? Keywords.Right : String.Empty)));
 					#endif
 					try
 					{
-						Nodes[2].DetermineBinding(APlan);
+						Nodes[2].DetermineBinding(plan);
 					}
 					finally
 					{
-						APlan.Symbols.Pop();
+						plan.Symbols.Pop();
 					}
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 			finally
 			{
-				APlan.ExitRowContext();
+				plan.ExitRowContext();
 			}
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			RightOuterJoinExpression LExpression = new RightOuterJoinExpression();
-			LExpression.LeftExpression = (Expression)Nodes[0].EmitStatement(AMode);
-			LExpression.RightExpression = (Expression)Nodes[1].EmitStatement(AMode);
+			RightOuterJoinExpression expression = new RightOuterJoinExpression();
+			expression.LeftExpression = (Expression)Nodes[0].EmitStatement(mode);
+			expression.RightExpression = (Expression)Nodes[1].EmitStatement(mode);
 			if (!IsNatural)
-				LExpression.Condition = FExpression; //(Expression)Nodes[2].EmitStatement(AMode);
-			LExpression.IsLookup = FIsLookup;
-			LExpression.Cardinality = FCardinality;
+				expression.Condition = _expression; //(Expression)Nodes[2].EmitStatement(AMode);
+			expression.IsLookup = _isLookup;
+			expression.Cardinality = _cardinality;
 			//LExpression.IsDetailLookup = FIsDetailLookup;
-			if (FRowExistsColumnIndex >= 0)
-			LExpression.RowExistsColumn = new IncludeColumnExpression(DataType.Columns[FRowExistsColumnIndex].Name);
-			LExpression.Modifiers = Modifiers;
-			return LExpression;
+			if (_rowExistsColumnIndex >= 0)
+			expression.RowExistsColumn = new IncludeColumnExpression(DataType.Columns[_rowExistsColumnIndex].Name);
+			expression.Modifiers = Modifiers;
+			return expression;
 		}
 		
-		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
-			bool LChanged = false;
+			bool changed = false;
 
-			if ((HasRowExistsColumn() && (AColumnName == String.Empty)) || IsRowExistsColumn(AColumnName))
+			if ((HasRowExistsColumn() && (columnName == String.Empty)) || IsRowExistsColumn(columnName))
 			{
-				LChanged = DefaultColumn(AProgram, TableVar, ANewRow, AValueFlags, TableVar.Columns[FRowExistsColumnIndex].Name) || LChanged;
+				changed = DefaultColumn(program, TableVar, newRow, valueFlags, TableVar.Columns[_rowExistsColumnIndex].Name) || changed;
 
-				int LRowIndex = ANewRow.DataType.Columns.IndexOfName(TableVar.Columns[FRowExistsColumnIndex].Name);
-				if (!ANewRow.HasValue(LRowIndex))
+				int rowIndex = newRow.DataType.Columns.IndexOfName(TableVar.Columns[_rowExistsColumnIndex].Name);
+				if (!newRow.HasValue(rowIndex))
 				{
-					LChanged = true;
-					ANewRow[LRowIndex] = false;
+					changed = true;
+					newRow[rowIndex] = false;
 				}
 			}
 
-			if (AIsDescending)
+			if (isDescending)
 			{
-				if (PropagateDefaultLeft && ((AColumnName == String.Empty) || LeftTableType.Columns.ContainsName(AColumnName)) && HasRow(ANewRow))
+				if (PropagateDefaultLeft && ((columnName == String.Empty) || LeftTableType.Columns.ContainsName(columnName)) && HasRow(newRow))
 				{
-					BitArray LValueFlags = new BitArray(LeftKey.Columns.Count);
-					for (int LIndex = 0; LIndex < LeftKey.Columns.Count; LIndex++)
-						LValueFlags[LIndex] = ANewRow.HasValue(LeftKey.Columns[LIndex].Name);
-					LChanged = LeftNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;
-					if (LChanged)
-						for (int LIndex = 0; LIndex < LeftKey.Columns.Count; LIndex++)
-							if (!LValueFlags[LIndex] && ANewRow.HasValue(LeftKey.Columns[LIndex].Name))
-								Change(AProgram, AOldRow, ANewRow, AValueFlags, LeftKey.Columns[LIndex].Name);
+					BitArray localValueFlags = new BitArray(LeftKey.Columns.Count);
+					for (int index = 0; index < LeftKey.Columns.Count; index++)
+						localValueFlags[index] = newRow.HasValue(LeftKey.Columns[index].Name);
+					changed = LeftNode.Default(program, oldRow, newRow, valueFlags, columnName) || changed;
+					if (changed)
+						for (int index = 0; index < LeftKey.Columns.Count; index++)
+							if (!localValueFlags[index] && newRow.HasValue(LeftKey.Columns[index].Name))
+								Change(program, oldRow, newRow, valueFlags, LeftKey.Columns[index].Name);
 				}
 
-				if (PropagateDefaultRight && ((AColumnName == String.Empty) || RightTableType.Columns.ContainsName(AColumnName)))
+				if (PropagateDefaultRight && ((columnName == String.Empty) || RightTableType.Columns.ContainsName(columnName)))
 				{
-					BitArray LValueFlags = new BitArray(RightKey.Columns.Count);
-					for (int LIndex = 0; LIndex < RightKey.Columns.Count; LIndex++)
-						LValueFlags[LIndex] = ANewRow.HasValue(RightKey.Columns[LIndex].Name);
-					LChanged = RightNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;
-					if (LChanged)
-						for (int LIndex = 0; LIndex < RightKey.Columns.Count; LIndex++)
-							if (!LValueFlags[LIndex] && ANewRow.HasValue(RightKey.Columns[LIndex].Name))
-								Change(AProgram, AOldRow, ANewRow, AValueFlags, RightKey.Columns[LIndex].Name);
+					BitArray localValueFlags = new BitArray(RightKey.Columns.Count);
+					for (int index = 0; index < RightKey.Columns.Count; index++)
+						localValueFlags[index] = newRow.HasValue(RightKey.Columns[index].Name);
+					changed = RightNode.Default(program, oldRow, newRow, valueFlags, columnName) || changed;
+					if (changed)
+						for (int index = 0; index < RightKey.Columns.Count; index++)
+							if (!localValueFlags[index] && newRow.HasValue(RightKey.Columns[index].Name))
+								Change(program, oldRow, newRow, valueFlags, RightKey.Columns[index].Name);
 				}
 			}
 
-			return LChanged;
+			return changed;
 		}
 		
-		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
 			// The new row only needs to satisfy the join predicate if the row contains values for the left side.
-			if (!FIsNatural && (AColumnName == String.Empty) && HasRow(ANewRow))
-				return base.InternalValidate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable);
+			if (!_isNatural && (columnName == String.Empty) && HasRow(newRow))
+				return base.InternalValidate(program, oldRow, newRow, valueFlags, columnName, isDescending, isProposable);
 			else
 			{
-				if (AIsDescending)
+				if (isDescending)
 				{
-					bool LChanged = false;
-					if (((AColumnName == String.Empty) || (LeftNode.TableVar.Columns.ContainsName(AColumnName))) && HasRow(ANewRow))
-						LChanged = LeftNode.Validate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;
+					bool changed = false;
+					if (((columnName == String.Empty) || (LeftNode.TableVar.Columns.ContainsName(columnName))) && HasRow(newRow))
+						changed = LeftNode.Validate(program, oldRow, newRow, valueFlags, columnName) || changed;
 
-					if ((AColumnName == String.Empty) || (RightNode.TableVar.Columns.ContainsName(AColumnName)))
-						LChanged = RightNode.Validate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;
-					return LChanged;
+					if ((columnName == String.Empty) || (RightNode.TableVar.Columns.ContainsName(columnName)))
+						changed = RightNode.Validate(program, oldRow, newRow, valueFlags, columnName) || changed;
+					return changed;
 				}
 			}
 			return false;
@@ -4400,45 +4400,45 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if PropagateChangeRight and change is not to a specific column, or is to a column in the right side
 				propagate the change
 		*/
-		protected override bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected override bool InternalChange(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
-			PushNewRow(AProgram, ANewRow);
+			PushNewRow(program, newRow);
 			try
 			{
-				bool LChanged = false;
-				bool LChangePropagated = false;
+				bool changed = false;
+				bool changePropagated = false;
 				
-				if (AColumnName != String.Empty)
+				if (columnName != String.Empty)
 				{
-					bool LIsRowExistsColumn = IsRowExistsColumn(AColumnName);
-					if (FRightKey.Columns.ContainsName(AColumnName) || LIsRowExistsColumn)
+					bool isRowExistsColumn = IsRowExistsColumn(columnName);
+					if (_rightKey.Columns.ContainsName(columnName) || isRowExistsColumn)
 					{
-						LChanged = true;
+						changed = true;
 						if (IsNatural)
-							LChangePropagated = true;
-						if (!LIsRowExistsColumn || HasRow(ANewRow))
+							changePropagated = true;
+						if (!isRowExistsColumn || HasRow(newRow))
 						{
-							if (!AProgram.ServerProcess.ServerSession.Server.IsEngine && RetrieveLeft)
+							if (!program.ServerProcess.ServerSession.Server.IsEngine && RetrieveLeft)
 							{
-								EnsureLeftSelectNode(AProgram.Plan);
-								using (Table LTable = FLeftSelectNode.Execute(AProgram) as Table)
+								EnsureLeftSelectNode(program.Plan);
+								using (Table table = _leftSelectNode.Execute(program) as Table)
 								{
-									LTable.Open();
-									if (LTable.Next())
+									table.Open();
+									if (table.Next())
 									{
-										LTable.Select(ANewRow);
-										if (HasRowExistsColumn() && !LIsRowExistsColumn)
-											ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = true;
+										table.Select(newRow);
+										if (HasRowExistsColumn() && !isRowExistsColumn)
+											newRow[DataType.Columns[_rowExistsColumnIndex].Name] = true;
 
 										if (PropagateChangeLeft)
-											foreach (Schema.Column LColumn in LeftTableType.Columns)
-												LeftNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+											foreach (Schema.Column column in LeftTableType.Columns)
+												LeftNode.Change(program, oldRow, newRow, valueFlags, column.Name);
 									}
 									else
 									{
-										if (!LIsRowExistsColumn)
+										if (!isRowExistsColumn)
 											if (HasRowExistsColumn())
-												ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = false;
+												newRow[DataType.Columns[_rowExistsColumnIndex].Name] = false;
 											else
 											{
 												// Clear any of/all of columns
@@ -4446,63 +4446,63 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 												// I don't want to run through them all here because it will end up firing changes twice in the default case
 											}
 											
-										foreach (Schema.Column LColumn in LeftTableType.Columns)
+										foreach (Schema.Column column in LeftTableType.Columns)
 										{
-											int LLeftKeyIndex = FLeftKey.Columns.IndexOfName(LColumn.Name);
-											if (!HasRowExistsColumn() && (LLeftKeyIndex >= 0) && CoordinateLeft)
+											int leftKeyIndex = _leftKey.Columns.IndexOfName(column.Name);
+											if (!HasRowExistsColumn() && (leftKeyIndex >= 0) && CoordinateLeft)
 											{
-												int LRightRowIndex = ANewRow.DataType.Columns.IndexOfName(FRightKey.Columns[LLeftKeyIndex].Name);
-												if (ANewRow.HasValue(LRightRowIndex))
-													ANewRow[LColumn.Name] = ANewRow[LRightRowIndex];
+												int rightRowIndex = newRow.DataType.Columns.IndexOfName(_rightKey.Columns[leftKeyIndex].Name);
+												if (newRow.HasValue(rightRowIndex))
+													newRow[column.Name] = newRow[rightRowIndex];
 												else
-													ANewRow.ClearValue(LColumn.Name);
+													newRow.ClearValue(column.Name);
 											}
 											else
 											{
 												if (ClearLeft)
-													ANewRow.ClearValue(LColumn.Name);
+													newRow.ClearValue(column.Name);
 
-												if (LIsRowExistsColumn && PropagateDefaultLeft)
-													LeftNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+												if (isRowExistsColumn && PropagateDefaultLeft)
+													LeftNode.Default(program, oldRow, newRow, valueFlags, column.Name);
 											}
 												
 											if (PropagateChangeLeft)
-												LeftNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+												LeftNode.Change(program, oldRow, newRow, valueFlags, column.Name);
 										}
 									}
 								}
 							}
 							else
 							{
-								if (!LIsRowExistsColumn)
+								if (!isRowExistsColumn)
 								{
-									if (HasRow(ANewRow) && CoordinateLeft)
-										CoordinateLeftJoinKey(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+									if (HasRow(newRow) && CoordinateLeft)
+										CoordinateLeftJoinKey(program, oldRow, newRow, valueFlags, columnName);
 								}
 								else // rowexists was set
 								{
-									foreach (Schema.TableVarColumn LColumn in LeftTableVar.Columns)
+									foreach (Schema.TableVarColumn column in LeftTableVar.Columns)
 									{
-										int LLeftKeyIndex = FLeftKey.Columns.IndexOfName(LColumn.Name);
-										if ((LLeftKeyIndex >= 0) && CoordinateLeft)
+										int leftKeyIndex = _leftKey.Columns.IndexOfName(column.Name);
+										if ((leftKeyIndex >= 0) && CoordinateLeft)
 										{
-											int LRightRowIndex = ANewRow.DataType.Columns.IndexOfName(FRightKey.Columns[LLeftKeyIndex].Name);
-											if (ANewRow.HasValue(LRightRowIndex))
-												ANewRow[LColumn.Name] = ANewRow[LRightRowIndex];
+											int rightRowIndex = newRow.DataType.Columns.IndexOfName(_rightKey.Columns[leftKeyIndex].Name);
+											if (newRow.HasValue(rightRowIndex))
+												newRow[column.Name] = newRow[rightRowIndex];
 											else
-												ANewRow.ClearValue(LColumn.Name);
+												newRow.ClearValue(column.Name);
 										}
 										else
 										{
 											if (ClearLeft)
-												ANewRow.ClearValue(LColumn.Name);
+												newRow.ClearValue(column.Name);
 
-											if (!ANewRow.HasValue(LColumn.Name) && PropagateDefaultLeft)
-												LeftNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+											if (!newRow.HasValue(column.Name) && PropagateDefaultLeft)
+												LeftNode.Default(program, oldRow, newRow, valueFlags, column.Name);
 										}
 										
 										if (PropagateChangeLeft)
-											LeftNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+											LeftNode.Change(program, oldRow, newRow, valueFlags, column.Name);
 									}
 								}
 							}
@@ -4510,202 +4510,202 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						else // rowexists was cleared
 						{
 							if (ClearLeft)
-								foreach (Schema.TableVarColumn LColumn in LeftTableVar.Columns)
+								foreach (Schema.TableVarColumn column in LeftTableVar.Columns)
 								{
-									ANewRow.ClearValue(LColumn.Name);
+									newRow.ClearValue(column.Name);
 									if (PropagateChangeLeft)
-										LeftNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+										LeftNode.Change(program, oldRow, newRow, valueFlags, column.Name);
 								}
 						}
 					}
 					
-					if (FLeftKey.Columns.ContainsName(AColumnName) && HasRow(ANewRow) && CoordinateRight)
+					if (_leftKey.Columns.ContainsName(columnName) && HasRow(newRow) && CoordinateRight)
 					{
-						LChanged = true;
+						changed = true;
 						if (IsNatural)
-							LChangePropagated = true;
-						CoordinateRightJoinKey(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+							changePropagated = true;
+						CoordinateRightJoinKey(program, oldRow, newRow, valueFlags, columnName);
 					}
 						
-					if (FAnyOfKey.Columns.ContainsName(AColumnName) || FAllOfKey.Columns.ContainsName(AColumnName))
+					if (_anyOfKey.Columns.ContainsName(columnName) || _allOfKey.Columns.ContainsName(columnName))
 					{
-						LChanged = true;
-						if (HasValues(ANewRow))
+						changed = true;
+						if (HasValues(newRow))
 						{
 							if (HasRowExistsColumn())
-								ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = true;
+								newRow[DataType.Columns[_rowExistsColumnIndex].Name] = true;
 								
-							foreach (Schema.TableVarColumn LColumn in LeftTableVar.Columns)
+							foreach (Schema.TableVarColumn column in LeftTableVar.Columns)
 							{
-								int LLeftKeyIndex = FLeftKey.Columns.IndexOfName(LColumn.Name);
-								if ((LLeftKeyIndex >= 0) && CoordinateLeft)
-									CoordinateLeftJoinKey(AProgram, AOldRow, ANewRow, AValueFlags, FRightKey.Columns[LLeftKeyIndex].Name);
+								int leftKeyIndex = _leftKey.Columns.IndexOfName(column.Name);
+								if ((leftKeyIndex >= 0) && CoordinateLeft)
+									CoordinateLeftJoinKey(program, oldRow, newRow, valueFlags, _rightKey.Columns[leftKeyIndex].Name);
 								else
 								{
-									if (PropagateDefaultLeft && LeftNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name) && PropagateChangeLeft)
-										LeftNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+									if (PropagateDefaultLeft && LeftNode.Default(program, oldRow, newRow, valueFlags, column.Name) && PropagateChangeLeft)
+										LeftNode.Change(program, oldRow, newRow, valueFlags, column.Name);
 								}
 							}
 						}
 						else
 						{
 							if (HasRowExistsColumn())
-								ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = false;
+								newRow[DataType.Columns[_rowExistsColumnIndex].Name] = false;
 								
 							if (ClearLeft)
-								foreach (Schema.TableVarColumn LColumn in LeftTableVar.Columns)
+								foreach (Schema.TableVarColumn column in LeftTableVar.Columns)
 								{
-									ANewRow.ClearValue(LColumn.Name);
+									newRow.ClearValue(column.Name);
 									if (PropagateChangeLeft)
-										LeftNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, LColumn.Name);
+										LeftNode.Change(program, oldRow, newRow, valueFlags, column.Name);
 								}
 						}
 					}
 				}
 					
-				if (!LChangePropagated && PropagateChangeRight && ((AColumnName == String.Empty) || RightTableType.Columns.ContainsName(AColumnName)))
-					LChanged = RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;
+				if (!changePropagated && PropagateChangeRight && ((columnName == String.Empty) || RightTableType.Columns.ContainsName(columnName)))
+					changed = RightNode.Change(program, oldRow, newRow, valueFlags, columnName) || changed;
 					
-				if (!LChangePropagated && PropagateChangeLeft && ((AColumnName == String.Empty) || LeftTableType.Columns.ContainsName(AColumnName)))
-					LChanged = LeftNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;
+				if (!changePropagated && PropagateChangeLeft && ((columnName == String.Empty) || LeftTableType.Columns.ContainsName(columnName)))
+					changed = LeftNode.Change(program, oldRow, newRow, valueFlags, columnName) || changed;
 
-				return LChanged;
+				return changed;
 			}
 			finally
 			{
-				PopRow(AProgram);
+				PopRow(program);
 			}
 		}
 		
-		protected void InternalInsertLeft(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected void InternalInsertLeft(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
-			if (HasRow(ANewRow))
+			if (HasRow(newRow))
 			{
 				switch (PropagateInsertLeft)
 				{
 					case PropagateAction.True : 
-						LeftNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked); break;
+						LeftNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue); break;
 						
 					case PropagateAction.Ensure :
 					case PropagateAction.Ignore :
-					using (Row LLeftRow = LeftNode.Select(AProgram, ANewRow))
+					using (Row leftRow = LeftNode.Select(program, newRow))
 					{
-						if (LLeftRow != null)
+						if (leftRow != null)
 						{
 							if (PropagateInsertLeft == PropagateAction.Ensure)
-								LeftNode.Update(AProgram, LLeftRow, ANewRow, AValueFlags, false, AUnchecked);
+								LeftNode.Update(program, leftRow, newRow, valueFlags, false, uncheckedValue);
 						}
 						else
-							LeftNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+							LeftNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue);
 					}
 					break;
 				}
 			}
 		}
 		
-		protected void InternalInsertRight(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected void InternalInsertRight(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
 			switch (PropagateInsertRight)
 			{
 				case PropagateAction.True :
-					RightNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked); 
+					RightNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue); 
 				break;
 				
 				case PropagateAction.Ensure :
 				case PropagateAction.Ignore :
-					using (Row LRightRow = RightNode.Select(AProgram, ANewRow))
+					using (Row rightRow = RightNode.Select(program, newRow))
 					{
-						if (LRightRow != null)
+						if (rightRow != null)
 						{
 							if (PropagateInsertRight == PropagateAction.Ensure)
-								RightNode.Update(AProgram, LRightRow, ANewRow, AValueFlags, false, AUnchecked);
+								RightNode.Update(program, rightRow, newRow, valueFlags, false, uncheckedValue);
 						}
 						else
-							RightNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+							RightNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue);
 					}
 				break;
 			}
 		}
 
-		protected override void InternalExecuteInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected override void InternalExecuteInsert(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
-			if (FUpdateLeftToRight)
+			if (_updateLeftToRight)
 			{
-				InternalInsertLeft(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
-				InternalInsertRight(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+				InternalInsertLeft(program, oldRow, newRow, valueFlags, uncheckedValue);
+				InternalInsertRight(program, oldRow, newRow, valueFlags, uncheckedValue);
 			}
 			else
 			{
-				InternalInsertRight(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
-				InternalInsertLeft(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+				InternalInsertRight(program, oldRow, newRow, valueFlags, uncheckedValue);
+				InternalInsertLeft(program, oldRow, newRow, valueFlags, uncheckedValue);
 			}
 		}
 		
-		protected override void InternalExecuteUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
 		{
-			if (FUpdateLeftToRight)
+			if (_updateLeftToRight)
 			{
 				if (PropagateUpdateLeft)
 				{
-					if (HasRow(AOldRow))
+					if (HasRow(oldRow))
 					{
-						if (HasRow(ANewRow))
-							LeftNode.Update(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+						if (HasRow(newRow))
+							LeftNode.Update(program, oldRow, newRow, valueFlags, checkConcurrency, uncheckedValue);
 						else
-							LeftNode.Delete(AProgram, AOldRow, ACheckConcurrency, AUnchecked);
+							LeftNode.Delete(program, oldRow, checkConcurrency, uncheckedValue);
 					}
 					else
-						if (HasRow(ANewRow))
-							LeftNode.Insert(AProgram, null, ANewRow, AValueFlags, AUnchecked);
+						if (HasRow(newRow))
+							LeftNode.Insert(program, null, newRow, valueFlags, uncheckedValue);
 				}
 
 				if (PropagateUpdateRight)
-					RightNode.Update(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+					RightNode.Update(program, oldRow, newRow, valueFlags, checkConcurrency, uncheckedValue);
 			}
 			else
 			{
 				if (PropagateUpdateRight)
-					RightNode.Update(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+					RightNode.Update(program, oldRow, newRow, valueFlags, checkConcurrency, uncheckedValue);
 					
 				if (PropagateUpdateLeft)
 				{
-					if (HasRow(AOldRow))
+					if (HasRow(oldRow))
 					{
-						if (HasRow(ANewRow))
-							LeftNode.Update(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+						if (HasRow(newRow))
+							LeftNode.Update(program, oldRow, newRow, valueFlags, checkConcurrency, uncheckedValue);
 						else
-							LeftNode.Delete(AProgram, AOldRow, ACheckConcurrency, AUnchecked);
+							LeftNode.Delete(program, oldRow, checkConcurrency, uncheckedValue);
 					}
 					else
-						if (HasRow(ANewRow))
-							LeftNode.Insert(AProgram, null, ANewRow, AValueFlags, AUnchecked);
+						if (HasRow(newRow))
+							LeftNode.Insert(program, null, newRow, valueFlags, uncheckedValue);
 				}
 			}
 		}
 
-		protected override void InternalExecuteDelete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteDelete(Program program, Row row, bool checkConcurrency, bool uncheckedValue)
 		{
-			if (FUpdateLeftToRight)
+			if (_updateLeftToRight)
 			{
 				if (PropagateDeleteRight)
-					RightNode.Delete(AProgram, ARow, ACheckConcurrency, AUnchecked);
+					RightNode.Delete(program, row, checkConcurrency, uncheckedValue);
 				
-				if (PropagateDeleteLeft && HasRow(ARow))
-					LeftNode.Delete(AProgram, ARow, ACheckConcurrency, AUnchecked);
+				if (PropagateDeleteLeft && HasRow(row))
+					LeftNode.Delete(program, row, checkConcurrency, uncheckedValue);
 			}
 			else
 			{
-				if (PropagateDeleteLeft && HasRow(ARow))
-					LeftNode.Delete(AProgram, ARow, ACheckConcurrency, AUnchecked);
+				if (PropagateDeleteLeft && HasRow(row))
+					LeftNode.Delete(program, row, checkConcurrency, uncheckedValue);
 				
 				if (PropagateDeleteRight)
-					RightNode.Delete(AProgram, ARow, ACheckConcurrency, AUnchecked);
+					RightNode.Delete(program, row, checkConcurrency, uncheckedValue);
 			}
 		}
 
-		public override void DetermineCursorCapabilities(Plan APlan)
+		public override void DetermineCursorCapabilities(Plan plan)
 		{
-			FCursorCapabilities = 
+			_cursorCapabilities = 
 				CursorCapability.Navigable |
 				(
 					LeftNode.CursorCapabilities & 
@@ -4714,19 +4714,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				) |
 				(
 					(
-						APlan.CursorContext.CursorCapabilities & 
+						plan.CursorContext.CursorCapabilities & 
 						RightNode.CursorCapabilities & 
 						CursorCapability.Updateable
 					) &
-					((FIsLookup && !FIsDetailLookup) ? CursorCapability.Updateable : (LeftNode.CursorCapabilities & CursorCapability.Updateable))
+					((_isLookup && !_isDetailLookup) ? CursorCapability.Updateable : (LeftNode.CursorCapabilities & CursorCapability.Updateable))
 				);
 		}
 
-		public override void JoinApplicationTransaction(Program AProgram, Row ARow)
+		public override void JoinApplicationTransaction(Program program, Row row)
 		{
-			if (!FIsLookup || FIsDetailLookup)
-				JoinLeftApplicationTransaction(AProgram, ARow);
-			JoinRightApplicationTransaction(AProgram, ARow);
+			if (!_isLookup || _isDetailLookup)
+				JoinLeftApplicationTransaction(program, row);
+			JoinRightApplicationTransaction(program, row);
 		}
 	}
 }

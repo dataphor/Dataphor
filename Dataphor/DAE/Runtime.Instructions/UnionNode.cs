@@ -26,307 +26,307 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	public class UnionNode : BinaryTableNode
 	{
 		// EnforcePredicate
-		private bool FEnforcePredicate = true;
+		private bool _enforcePredicate = true;
 		public bool EnforcePredicate
 		{
-			get { return FEnforcePredicate; }
-			set { FEnforcePredicate = value; }
+			get { return _enforcePredicate; }
+			set { _enforcePredicate = value; }
 		}
 		
-		protected override void DetermineModifiers(Plan APlan)
+		protected override void DetermineModifiers(Plan plan)
 		{
-			base.DetermineModifiers(APlan);
+			base.DetermineModifiers(plan);
 			
 			EnforcePredicate = Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "EnforcePredicate", EnforcePredicate.ToString()));
 		}
 
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
+			DetermineModifiers(plan);
 			if (Nodes[0].DataType.Is(Nodes[1].DataType))
-				Nodes[0] = Compiler.Upcast(APlan, Nodes[0], Nodes[1].DataType);
+				Nodes[0] = Compiler.Upcast(plan, Nodes[0], Nodes[1].DataType);
 			else if (Nodes[1].DataType.Is(Nodes[0].DataType))
-				Nodes[1] = Compiler.Upcast(APlan, Nodes[1], Nodes[0].DataType);
+				Nodes[1] = Compiler.Upcast(plan, Nodes[1], Nodes[0].DataType);
 			else
 			{
-				ConversionContext LContext = Compiler.FindConversionPath(APlan, Nodes[0].DataType, Nodes[1].DataType);
-				if (LContext.CanConvert)
-					Nodes[0] = Compiler.Upcast(APlan, Compiler.ConvertNode(APlan, Nodes[0], LContext), Nodes[1].DataType);
+				ConversionContext context = Compiler.FindConversionPath(plan, Nodes[0].DataType, Nodes[1].DataType);
+				if (context.CanConvert)
+					Nodes[0] = Compiler.Upcast(plan, Compiler.ConvertNode(plan, Nodes[0], context), Nodes[1].DataType);
 				else
 				{
-					LContext = Compiler.FindConversionPath(APlan, Nodes[1].DataType, Nodes[0].DataType);
-					Compiler.CheckConversionContext(APlan, LContext);
-					Nodes[1] = Compiler.Upcast(APlan, Compiler.ConvertNode(APlan, Nodes[1], LContext), Nodes[0].DataType);
+					context = Compiler.FindConversionPath(plan, Nodes[1].DataType, Nodes[0].DataType);
+					Compiler.CheckConversionContext(plan, context);
+					Nodes[1] = Compiler.Upcast(plan, Compiler.ConvertNode(plan, Nodes[1], context), Nodes[0].DataType);
 				}
 			}
 
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
-			FTableVar.InheritMetaData(LeftTableVar.MetaData);
-			FTableVar.JoinInheritMetaData(RightTableVar.MetaData);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
+			_tableVar.InheritMetaData(LeftTableVar.MetaData);
+			_tableVar.JoinInheritMetaData(RightTableVar.MetaData);
 
 			// Determine columns
 			CopyTableVarColumns(LeftTableVar.Columns);
 			
-			Schema.TableVarColumn LLeftColumn;
-			foreach (Schema.TableVarColumn LRightColumn in RightTableVar.Columns)
+			Schema.TableVarColumn leftColumn;
+			foreach (Schema.TableVarColumn rightColumn in RightTableVar.Columns)
 			{
-				LLeftColumn = TableVar.Columns[TableVar.Columns.IndexOfName(LRightColumn.Name)];
-				LLeftColumn.IsDefaultRemotable = LLeftColumn.IsDefaultRemotable && LRightColumn.IsDefaultRemotable;
-				LLeftColumn.IsChangeRemotable = LLeftColumn.IsChangeRemotable && LRightColumn.IsChangeRemotable;
-				LLeftColumn.IsValidateRemotable = LLeftColumn.IsValidateRemotable && LRightColumn.IsValidateRemotable;
-				LLeftColumn.JoinInheritMetaData(LRightColumn.MetaData);
+				leftColumn = TableVar.Columns[TableVar.Columns.IndexOfName(rightColumn.Name)];
+				leftColumn.IsDefaultRemotable = leftColumn.IsDefaultRemotable && rightColumn.IsDefaultRemotable;
+				leftColumn.IsChangeRemotable = leftColumn.IsChangeRemotable && rightColumn.IsChangeRemotable;
+				leftColumn.IsValidateRemotable = leftColumn.IsValidateRemotable && rightColumn.IsValidateRemotable;
+				leftColumn.JoinInheritMetaData(rightColumn.MetaData);
 			}
 			
-			DetermineRemotable(APlan);
+			DetermineRemotable(plan);
 			
 			// Determine key
-			Schema.Key LKey = new Schema.Key();
-			LKey.IsInherited = true;
-			foreach (Schema.TableVarColumn LColumn in TableVar.Columns)
-				LKey.Columns.Add(LColumn);
-			TableVar.Keys.Add(LKey);
+			Schema.Key key = new Schema.Key();
+			key.IsInherited = true;
+			foreach (Schema.TableVarColumn column in TableVar.Columns)
+				key.Columns.Add(column);
+			TableVar.Keys.Add(key);
 			
-			DetermineOrder(APlan);
+			DetermineOrder(plan);
 
 			// Determine orders
 			CopyOrders(LeftTableVar.Orders);
-			foreach (Schema.Order LOrder in RightTableVar.Orders)
-				if (!TableVar.Orders.Contains(LOrder))
-					TableVar.Orders.Add(CopyOrder(LOrder));
+			foreach (Schema.Order order in RightTableVar.Orders)
+				if (!TableVar.Orders.Contains(order))
+					TableVar.Orders.Add(CopyOrder(order));
 					
 			#if UseReferenceDerivation
-			CopySourceReferences(APlan, LeftTableVar.SourceReferences);
-			CopySourceReferences(APlan, RightTableVar.SourceReferences);
-			CopyTargetReferences(APlan, LeftTableVar.TargetReferences);
-			CopyTargetReferences(APlan, RightTableVar.TargetReferences);
+			CopySourceReferences(plan, LeftTableVar.SourceReferences);
+			CopySourceReferences(plan, RightTableVar.SourceReferences);
+			CopyTargetReferences(plan, LeftTableVar.TargetReferences);
+			CopyTargetReferences(plan, RightTableVar.TargetReferences);
 			#endif
 		}
 		
-		private void DetermineOrder(Plan APlan)
+		private void DetermineOrder(Plan plan)
 		{
-			Order = Compiler.OrderFromKey(APlan, FTableVar.Keys.MinimumKey(true));
+			Order = Compiler.OrderFromKey(plan, _tableVar.Keys.MinimumKey(true));
 		}
 		
-		public override void DetermineCharacteristics(Plan APlan)
+		public override void DetermineCharacteristics(Plan plan)
 		{
-			base.DetermineCharacteristics(APlan);
+			base.DetermineCharacteristics(plan);
 
 			// Set IsNilable for each column in the left and right tables based on PropagateXXXLeft and Right
-			bool LIsNilable = 
+			bool isNilable = 
 				(PropagateInsertLeft == PropagateAction.False) || !PropagateUpdateLeft ||
 				(PropagateInsertRight == PropagateAction.False) || !PropagateUpdateRight;
 				
-			if (LIsNilable)
-				foreach (Schema.TableVarColumn LColumn in TableVar.Columns)
-					LColumn.IsNilable = LIsNilable;
+			if (isNilable)
+				foreach (Schema.TableVarColumn column in TableVar.Columns)
+					column.IsNilable = isNilable;
 		}
 		
-		public override void DetermineCursorBehavior(Plan APlan)
+		public override void DetermineCursorBehavior(Plan plan)
 		{
 			if ((LeftNode.CursorType == CursorType.Dynamic) || (RightNode.CursorType == CursorType.Dynamic))
-				FCursorType = CursorType.Dynamic;
+				_cursorType = CursorType.Dynamic;
 			else
-				FCursorType = CursorType.Static;
-			FRequestedCursorType = APlan.CursorContext.CursorType;
+				_cursorType = CursorType.Static;
+			_requestedCursorType = plan.CursorContext.CursorType;
 
-			FCursorCapabilities = 
+			_cursorCapabilities = 
 				CursorCapability.Navigable |
 				CursorCapability.BackwardsNavigable |
 				(
-					(APlan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
+					(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
 					(
 						(LeftNode.CursorCapabilities & CursorCapability.Updateable) |
 						(RightNode.CursorCapabilities & CursorCapability.Updateable)
 					)
 				);
 
-			FCursorIsolation = APlan.CursorContext.CursorIsolation;
+			_cursorIsolation = plan.CursorContext.CursorIsolation;
 			
-			DetermineOrder(APlan);
+			DetermineOrder(plan);
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			UnionExpression LExpression = new UnionExpression();
-			LExpression.LeftExpression = (Expression)Nodes[0].EmitStatement(AMode);
-			LExpression.RightExpression = (Expression)Nodes[1].EmitStatement(AMode);
-			LExpression.Modifiers = Modifiers;
-			return LExpression;
+			UnionExpression expression = new UnionExpression();
+			expression.LeftExpression = (Expression)Nodes[0].EmitStatement(mode);
+			expression.RightExpression = (Expression)Nodes[1].EmitStatement(mode);
+			expression.Modifiers = Modifiers;
+			return expression;
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			UnionTable LTable = new UnionTable(this, AProgram);
+			UnionTable table = new UnionTable(this, program);
 			try
 			{
-				LTable.Open();
-				return LTable;
+				table.Open();
+				return table;
 			}
 			catch
 			{
-				LTable.Dispose();
+				table.Dispose();
 				throw;
 			}
 		}
 		
-		public override void DetermineRemotable(Plan APlan)
+		public override void DetermineRemotable(Plan plan)
 		{
-			base.DetermineRemotable(APlan);
+			base.DetermineRemotable(plan);
 			
-			FTableVar.ShouldValidate = FTableVar.ShouldValidate || LeftTableVar.ShouldValidate || RightTableVar.ShouldValidate;
-			FTableVar.ShouldDefault = FTableVar.ShouldDefault || LeftTableVar.ShouldDefault || RightTableVar.ShouldDefault;
-			FTableVar.ShouldChange = FTableVar.ShouldChange || LeftTableVar.ShouldChange || RightTableVar.ShouldChange;
+			_tableVar.ShouldValidate = _tableVar.ShouldValidate || LeftTableVar.ShouldValidate || RightTableVar.ShouldValidate;
+			_tableVar.ShouldDefault = _tableVar.ShouldDefault || LeftTableVar.ShouldDefault || RightTableVar.ShouldDefault;
+			_tableVar.ShouldChange = _tableVar.ShouldChange || LeftTableVar.ShouldChange || RightTableVar.ShouldChange;
 			
-			foreach (Schema.TableVarColumn LColumn in FTableVar.Columns)
+			foreach (Schema.TableVarColumn column in _tableVar.Columns)
 			{
-				int LColumnIndex;
-				Schema.TableVarColumn LSourceColumn;
+				int columnIndex;
+				Schema.TableVarColumn sourceColumn;
 				
-				LColumnIndex = LeftTableVar.Columns.IndexOfName(LColumn.Name);
-				if (LColumnIndex >= 0)
+				columnIndex = LeftTableVar.Columns.IndexOfName(column.Name);
+				if (columnIndex >= 0)
 				{
-					LSourceColumn = LeftTableVar.Columns[LColumnIndex];
-					LColumn.ShouldDefault = LColumn.ShouldDefault || LSourceColumn.ShouldDefault;
-					FTableVar.ShouldDefault = FTableVar.ShouldDefault || LColumn.ShouldDefault;
+					sourceColumn = LeftTableVar.Columns[columnIndex];
+					column.ShouldDefault = column.ShouldDefault || sourceColumn.ShouldDefault;
+					_tableVar.ShouldDefault = _tableVar.ShouldDefault || column.ShouldDefault;
 					
-					LColumn.ShouldValidate = LColumn.ShouldValidate || LSourceColumn.ShouldValidate;
-					FTableVar.ShouldValidate = FTableVar.ShouldValidate || LColumn.ShouldValidate;
+					column.ShouldValidate = column.ShouldValidate || sourceColumn.ShouldValidate;
+					_tableVar.ShouldValidate = _tableVar.ShouldValidate || column.ShouldValidate;
 
-					LColumn.ShouldChange = LColumn.ShouldChange || LSourceColumn.ShouldChange;
-					FTableVar.ShouldChange = FTableVar.ShouldChange || LColumn.ShouldChange;
+					column.ShouldChange = column.ShouldChange || sourceColumn.ShouldChange;
+					_tableVar.ShouldChange = _tableVar.ShouldChange || column.ShouldChange;
 				}
 
-				LColumnIndex = RightTableVar.Columns.IndexOfName(LColumn.Name);
-				if (LColumnIndex >= 0)
+				columnIndex = RightTableVar.Columns.IndexOfName(column.Name);
+				if (columnIndex >= 0)
 				{
-					LSourceColumn = RightTableVar.Columns[LColumnIndex];
-					LColumn.ShouldDefault = LColumn.ShouldDefault || LSourceColumn.ShouldDefault;
-					FTableVar.ShouldDefault = FTableVar.ShouldDefault || LColumn.ShouldDefault;
+					sourceColumn = RightTableVar.Columns[columnIndex];
+					column.ShouldDefault = column.ShouldDefault || sourceColumn.ShouldDefault;
+					_tableVar.ShouldDefault = _tableVar.ShouldDefault || column.ShouldDefault;
 					
-					LColumn.ShouldValidate = LColumn.ShouldValidate || LSourceColumn.ShouldValidate;
-					FTableVar.ShouldValidate = FTableVar.ShouldValidate || LColumn.ShouldValidate;
+					column.ShouldValidate = column.ShouldValidate || sourceColumn.ShouldValidate;
+					_tableVar.ShouldValidate = _tableVar.ShouldValidate || column.ShouldValidate;
 
-					LColumn.ShouldChange = LColumn.ShouldChange || LSourceColumn.ShouldChange;
-					FTableVar.ShouldChange = FTableVar.ShouldChange || LColumn.ShouldChange;
+					column.ShouldChange = column.ShouldChange || sourceColumn.ShouldChange;
+					_tableVar.ShouldChange = _tableVar.ShouldChange || column.ShouldChange;
 				}
 			}
 		}
 		
-		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
-			if (AIsDescending)
+			if (isDescending)
 			{
-				BitArray LValueFlags = ANewRow.GetValueFlags();
-				bool LChanged = false;
+				BitArray localValueFlags = newRow.GetValueFlags();
+				bool changed = false;
 				if (PropagateDefaultLeft)
-					LChanged = LeftNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+					changed = LeftNode.Default(program, oldRow, newRow, valueFlags, columnName);
 				if (PropagateDefaultRight)
-					LChanged = RightNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;
-				if (LChanged)
-					for (int LIndex = 0; LIndex < ANewRow.DataType.Columns.Count; LIndex++)
-						if (!LValueFlags[LIndex] && ANewRow.HasValue(LIndex))
-							Change(AProgram, AOldRow, ANewRow, AValueFlags, ANewRow.DataType.Columns[LIndex].Name);
-				return LChanged;
+					changed = RightNode.Default(program, oldRow, newRow, valueFlags, columnName) || changed;
+				if (changed)
+					for (int index = 0; index < newRow.DataType.Columns.Count; index++)
+						if (!localValueFlags[index] && newRow.HasValue(index))
+							Change(program, oldRow, newRow, valueFlags, newRow.DataType.Columns[index].Name);
+				return changed;
 			}
 			return false;
 		}
 		
-		protected override bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected override bool InternalChange(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
-			bool LChanged = false;
+			bool changed = false;
 			if (PropagateChangeLeft)
-				LChanged = LeftNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+				changed = LeftNode.Change(program, oldRow, newRow, valueFlags, columnName);
 			if (PropagateChangeRight)
-				LChanged = RightNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;
-			return LChanged;
+				changed = RightNode.Change(program, oldRow, newRow, valueFlags, columnName) || changed;
+			return changed;
 		}
 		
-		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
-			if (AIsDescending)
+			if (isDescending)
 			{
-				bool LChanged = false;
+				bool changed = false;
 				if (PropagateValidateLeft)
-					LChanged = LeftNode.Validate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+					changed = LeftNode.Validate(program, oldRow, newRow, valueFlags, columnName);
 				if (PropagateValidateRight)
-					LChanged = RightNode.Validate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName) || LChanged;
-				return LChanged;
+					changed = RightNode.Validate(program, oldRow, newRow, valueFlags, columnName) || changed;
+				return changed;
 			}
 			return false;
 		}
 		
-		protected void InternalInsertLeft(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected void InternalInsertLeft(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
 			switch (PropagateInsertLeft)
 			{
 				case PropagateAction.True : 
-					LeftNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked); 
+					LeftNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue); 
 				break;
 
 				case PropagateAction.Ensure :
 				case PropagateAction.Ignore :
-					using (Row LLeftRow = new Row(AProgram.ValueManager, LeftNode.DataType.RowType))
+					using (Row leftRow = new Row(program.ValueManager, LeftNode.DataType.RowType))
 					{
-						ANewRow.CopyTo(LLeftRow);
-						using (Row LCurrentRow = LeftNode.Select(AProgram, LLeftRow))
+						newRow.CopyTo(leftRow);
+						using (Row currentRow = LeftNode.Select(program, leftRow))
 						{
-							if (LCurrentRow != null)
+							if (currentRow != null)
 							{
 								if (PropagateInsertLeft == PropagateAction.Ensure)
-									LeftNode.Update(AProgram, LCurrentRow, ANewRow, AValueFlags, false, AUnchecked);
+									LeftNode.Update(program, currentRow, newRow, valueFlags, false, uncheckedValue);
 							}
 							else
-								LeftNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+								LeftNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue);
 						}
 					}
 				break;
 			}
 		}
 		
-		protected void InternalInsertRight(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected void InternalInsertRight(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
 			switch (PropagateInsertRight)
 			{
 				case PropagateAction.True : 
-					RightNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked); 
+					RightNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue); 
 				break;
 
 				case PropagateAction.Ensure :
 				case PropagateAction.Ignore :
-					using (Row LRightRow = new Row(AProgram.ValueManager, RightNode.DataType.RowType))
+					using (Row rightRow = new Row(program.ValueManager, RightNode.DataType.RowType))
 					{
-						ANewRow.CopyTo(LRightRow);
-						using (Row LCurrentRow = RightNode.Select(AProgram, LRightRow))
+						newRow.CopyTo(rightRow);
+						using (Row currentRow = RightNode.Select(program, rightRow))
 						{
-							if (LCurrentRow != null)
+							if (currentRow != null)
 							{
 								if (PropagateInsertRight == PropagateAction.Ensure)
-									RightNode.Update(AProgram, LCurrentRow, ANewRow, AValueFlags, false, AUnchecked);
+									RightNode.Update(program, currentRow, newRow, valueFlags, false, uncheckedValue);
 							}
 							else
-								RightNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+								RightNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue);
 						}
 					}
 				break;
 			}
 		}
 		
-		protected override void InternalExecuteInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected override void InternalExecuteInsert(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
 			// Attempt to insert the row in the left node.
 			if ((PropagateInsertLeft != PropagateAction.False) && (PropagateInsertRight != PropagateAction.False) && EnforcePredicate)
 			{
 				try
 				{
-					InternalInsertLeft(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+					InternalInsertLeft(program, oldRow, newRow, valueFlags, uncheckedValue);
 				}
-				catch (DataphorException LException)
+				catch (DataphorException exception)
 				{
-					if ((LException.Severity == ErrorSeverity.User) || (LException.Severity == ErrorSeverity.Application))
+					if ((exception.Severity == ErrorSeverity.User) || (exception.Severity == ErrorSeverity.Application))
 					{
-						InternalInsertRight(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+						InternalInsertRight(program, oldRow, newRow, valueFlags, uncheckedValue);
 						return;
 					}
 					throw;
@@ -335,22 +335,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				// Attempt to insert the row in the right node.
 				try
 				{
-					InternalInsertRight(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+					InternalInsertRight(program, oldRow, newRow, valueFlags, uncheckedValue);
 				}
-				catch (DataphorException LException)
+				catch (DataphorException exception)
 				{									
-					if ((LException.Severity != ErrorSeverity.User) && (LException.Severity != ErrorSeverity.Application))
+					if ((exception.Severity != ErrorSeverity.User) && (exception.Severity != ErrorSeverity.Application))
 						throw;
 				}
 			}
 			else
 			{
-				InternalInsertLeft(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
-				InternalInsertRight(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+				InternalInsertLeft(program, oldRow, newRow, valueFlags, uncheckedValue);
+				InternalInsertRight(program, oldRow, newRow, valueFlags, uncheckedValue);
 			}
 		}
 
-		protected override void InternalExecuteUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
 		{
 			if (PropagateUpdateLeft && PropagateUpdateRight && EnforcePredicate)
 			{
@@ -359,29 +359,29 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					if (PropagateUpdateLeft)
 					{
-						using (Row LLeftRow = LeftNode.FullSelect(AProgram, AOldRow))
+						using (Row leftRow = LeftNode.FullSelect(program, oldRow))
 						{
-							if (LLeftRow != null)
-								LeftNode.Delete(AProgram, AOldRow, ACheckConcurrency, AUnchecked);
+							if (leftRow != null)
+								LeftNode.Delete(program, oldRow, checkConcurrency, uncheckedValue);
 
 						}
 
-						LeftNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+						LeftNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue);
 					}
 				}
-				catch (DataphorException LException)
+				catch (DataphorException exception)
 				{
-					if ((LException.Severity == ErrorSeverity.User) || (LException.Severity == ErrorSeverity.Application))
+					if ((exception.Severity == ErrorSeverity.User) || (exception.Severity == ErrorSeverity.Application))
 					{
 						if (PropagateUpdateRight)
 						{
-							using (Row LRightRow = RightNode.FullSelect(AProgram, AOldRow))
+							using (Row rightRow = RightNode.FullSelect(program, oldRow))
 							{
-								if (LRightRow != null)
-									RightNode.Delete(AProgram, AOldRow, ACheckConcurrency, AUnchecked);
+								if (rightRow != null)
+									RightNode.Delete(program, oldRow, checkConcurrency, uncheckedValue);
 							}
 
-							RightNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+							RightNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue);
 						}
 						return;
 					}
@@ -393,52 +393,52 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					if (PropagateUpdateRight)
 					{
-						using (Row LRightRow = RightNode.FullSelect(AProgram, AOldRow))
+						using (Row rightRow = RightNode.FullSelect(program, oldRow))
 						{
-							if (LRightRow != null)
-								RightNode.Delete(AProgram, AOldRow, ACheckConcurrency, AUnchecked);
+							if (rightRow != null)
+								RightNode.Delete(program, oldRow, checkConcurrency, uncheckedValue);
 						}
 
-						RightNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+						RightNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue);
 					}
 				}
-				catch (DataphorException LException)
+				catch (DataphorException exception)
 				{
-					if ((LException.Severity != ErrorSeverity.User) && (LException.Severity != ErrorSeverity.Application))
+					if ((exception.Severity != ErrorSeverity.User) && (exception.Severity != ErrorSeverity.Application))
 						throw;
 				}
 			}
 			else
 			{
 				if (PropagateUpdateLeft)
-					LeftNode.Update(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+					LeftNode.Update(program, oldRow, newRow, valueFlags, checkConcurrency, uncheckedValue);
 				
 				if (PropagateUpdateRight)
-					RightNode.Update(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+					RightNode.Update(program, oldRow, newRow, valueFlags, checkConcurrency, uncheckedValue);
 			}
 		}
 		
-		protected override void InternalExecuteDelete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteDelete(Program program, Row row, bool checkConcurrency, bool uncheckedValue)
 		{
 			if (PropagateDeleteLeft)
-				using (Row LLeftRow = LeftNode.FullSelect(AProgram, ARow))
+				using (Row leftRow = LeftNode.FullSelect(program, row))
 				{
-					if (LLeftRow != null)
-						LeftNode.Delete(AProgram, ARow, ACheckConcurrency, AUnchecked);
+					if (leftRow != null)
+						LeftNode.Delete(program, row, checkConcurrency, uncheckedValue);
 				}
 
 			if (PropagateDeleteRight)
-				using (Row LRightRow = RightNode.FullSelect(AProgram, ARow))
+				using (Row rightRow = RightNode.FullSelect(program, row))
 				{
-					if (LRightRow != null)
-						RightNode.Delete(AProgram, ARow, ACheckConcurrency, AUnchecked);
+					if (rightRow != null)
+						RightNode.Delete(program, row, checkConcurrency, uncheckedValue);
 				}
 		}
 		
-		public override void JoinApplicationTransaction(Program AProgram, Row ARow)
+		public override void JoinApplicationTransaction(Program program, Row row)
 		{
-			LeftNode.JoinApplicationTransaction(AProgram, ARow);
-			RightNode.JoinApplicationTransaction(AProgram, ARow);
+			LeftNode.JoinApplicationTransaction(program, row);
+			RightNode.JoinApplicationTransaction(program, row);
 		}
 	}
 }

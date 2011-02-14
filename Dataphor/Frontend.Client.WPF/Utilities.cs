@@ -7,38 +7,38 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 	/// <summary> WPF helpers. </summary>
 	public static class Utilities
 	{
-		public static T GetChildOfTypeInVisualTree<T>(DependencyObject AElement) 
+		public static T GetChildOfTypeInVisualTree<T>(DependencyObject element) 
 			where T : DependencyObject
 		{
-			int LCount = VisualTreeHelper.GetChildrenCount(AElement);
-			for (int i = 0; i < LCount; i++)
+			int count = VisualTreeHelper.GetChildrenCount(element);
+			for (int i = 0; i < count; i++)
 			{
-				T LChild = VisualTreeHelper.GetChild(AElement, i) as T;
-				if (LChild != null)
-					return LChild;
+				T child = VisualTreeHelper.GetChild(element, i) as T;
+				if (child != null)
+					return child;
 				else
 				{
-					LChild = GetChildOfTypeInVisualTree<T>(LChild);
-					if (LChild != null)
-						return LChild;
+					child = GetChildOfTypeInVisualTree<T>(child);
+					if (child != null)
+						return child;
 				}
 			}
 			return null;
 		}
 
-		public static T GetAncestorOfTypeInVisualTree<T>(DependencyObject AElement) 
+		public static T GetAncestorOfTypeInVisualTree<T>(DependencyObject element) 
 			where T : FrameworkElement
 		{
-			if (AElement != null)
+			if (element != null)
 			{
-				T LItem = AElement as T;
-				if (LItem != null)
-					return LItem;
+				T item = element as T;
+				if (item != null)
+					return item;
 				else
 				{
-					var LParent = VisualTreeHelper.GetParent(AElement);
-					if (LParent != null)
-						return GetAncestorOfTypeInVisualTree<T>(LParent);
+					var parent = VisualTreeHelper.GetParent(element);
+					if (parent != null)
+						return GetAncestorOfTypeInVisualTree<T>(parent);
 				}
 			}
 			return null;

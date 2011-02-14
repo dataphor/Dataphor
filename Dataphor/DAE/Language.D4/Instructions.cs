@@ -132,39 +132,39 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public const string ReRaise = "iReRaise";
 		public const string ToPresentation = "iToPresentation";
 		
-        private static string[] FInstructions;
+        private static string[] _instructions;
         
         private static void PopulateInstructions()
         {
-			FieldInfo[] LFields = typeof(Instructions).GetFields();
+			FieldInfo[] fields = typeof(Instructions).GetFields();
 
-			int LFieldCount = 0;
-			foreach (FieldInfo LField in LFields)
-				if (LField.FieldType.Equals(typeof(string)) && LField.IsLiteral)
-					LFieldCount++;
+			int fieldCount = 0;
+			foreach (FieldInfo field in fields)
+				if (field.FieldType.Equals(typeof(string)) && field.IsLiteral)
+					fieldCount++;
 
-			FInstructions = new string[LFieldCount];
+			_instructions = new string[fieldCount];
 
-			int LFieldCounter = 0;
-			foreach (FieldInfo LField in LFields)
-				if (LField.FieldType.Equals(typeof(string)) && LField.IsLiteral)
+			int fieldCounter = 0;
+			foreach (FieldInfo field in fields)
+				if (field.FieldType.Equals(typeof(string)) && field.IsLiteral)
 				{
-					FInstructions[LFieldCounter] = (string)LField.GetValue(null);
-					LFieldCounter++;
+					_instructions[fieldCounter] = (string)field.GetValue(null);
+					fieldCounter++;
 				}
         }
         
-        public static bool Contains(string AIdentifier)
+        public static bool Contains(string identifier)
         {
-			if (FInstructions == null)
+			if (_instructions == null)
 				PopulateInstructions();
 				
-			return ((IList)FInstructions).Contains(AIdentifier);
+			return ((IList)_instructions).Contains(identifier);
         }
 
-		public static bool IsLessInstruction(string AInstruction)
+		public static bool IsLessInstruction(string instruction)
 		{
-			switch (AInstruction)
+			switch (instruction)
 			{
 				case Instructions.Less :
 				case Instructions.InclusiveLess : return true;
@@ -172,9 +172,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 		}
 		
-		public static bool IsGreaterInstruction(string AInstruction)
+		public static bool IsGreaterInstruction(string instruction)
 		{
-			switch (AInstruction)
+			switch (instruction)
 			{
 				case Instructions.Greater :
 				case Instructions.InclusiveGreater : return true;
@@ -182,9 +182,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 		}
 		
-		public static bool IsExclusiveInstruction(string AInstruction)
+		public static bool IsExclusiveInstruction(string instruction)
 		{
-			switch (AInstruction)
+			switch (instruction)
 			{
 				case Instructions.Less :
 				case Instructions.Greater : return true;

@@ -16,214 +16,214 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 {
 	public abstract class NativeCLIClient : ServiceClient<IClientNativeCLIService>
 	{
-		public const string CDefaultInstanceName = "Dataphor";
+		public const string DefaultInstanceName = "Dataphor";
 		
-		public NativeCLIClient(string AHostName) : this(AHostName, CDefaultInstanceName, 0, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default) { }
-		public NativeCLIClient(string AHostName, string AInstanceName) : this(AHostName, AInstanceName, 0, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default) { }
-		public NativeCLIClient(string AHostName, string AInstanceName, int AOverridePortNumber, ConnectionSecurityMode ASecurityMode) : this(AHostName, AInstanceName, 0, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default) { }
-		public NativeCLIClient(string AHostName, string AInstanceName, int AOverridePortNumber, ConnectionSecurityMode ASecurityMode, int AOverrideListenerPortNumber, ConnectionSecurityMode AListenerSecurityMode) : base(GetNativeServerURI(AHostName, AInstanceName, AOverridePortNumber, ASecurityMode, AOverrideListenerPortNumber, AListenerSecurityMode))
+		public NativeCLIClient(string hostName) : this(hostName, DefaultInstanceName, 0, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default) { }
+		public NativeCLIClient(string hostName, string instanceName) : this(hostName, instanceName, 0, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default) { }
+		public NativeCLIClient(string hostName, string instanceName, int overridePortNumber, ConnectionSecurityMode securityMode) : this(hostName, instanceName, 0, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default) { }
+		public NativeCLIClient(string hostName, string instanceName, int overridePortNumber, ConnectionSecurityMode securityMode, int overrideListenerPortNumber, ConnectionSecurityMode listenerSecurityMode) : base(GetNativeServerURI(hostName, instanceName, overridePortNumber, securityMode, overrideListenerPortNumber, listenerSecurityMode))
 		{
-			FHostName = AHostName;
-			FInstanceName = AInstanceName;
-			FOverridePortNumber = AOverridePortNumber;
-			FSecurityMode = ASecurityMode;
-			FOverrideListenerPortNumber = AOverrideListenerPortNumber;
-			FListenerSecurityMode = AListenerSecurityMode;
+			_hostName = hostName;
+			_instanceName = instanceName;
+			_overridePortNumber = overridePortNumber;
+			_securityMode = securityMode;
+			_overrideListenerPortNumber = overrideListenerPortNumber;
+			_listenerSecurityMode = listenerSecurityMode;
 		}
 		
-		private string FHostName;
-		public string HostName { get { return FHostName; } }
+		private string _hostName;
+		public string HostName { get { return _hostName; } }
 		
-		private string FInstanceName;
-		public string InstanceName { get { return FInstanceName; } }
+		private string _instanceName;
+		public string InstanceName { get { return _instanceName; } }
 
-		private int FOverridePortNumber;
-		public int OverridePortNumber { get { return FOverridePortNumber; } }
+		private int _overridePortNumber;
+		public int OverridePortNumber { get { return _overridePortNumber; } }
 		
-		private ConnectionSecurityMode FSecurityMode;
-		public ConnectionSecurityMode SecurityMode { get { return FSecurityMode; } }
+		private ConnectionSecurityMode _securityMode;
+		public ConnectionSecurityMode SecurityMode { get { return _securityMode; } }
 		
-		private int FOverrideListenerPortNumber;
-		public int OverrideListenerPortNumber { get { return FOverrideListenerPortNumber; } }
+		private int _overrideListenerPortNumber;
+		public int OverrideListenerPortNumber { get { return _overrideListenerPortNumber; } }
 		
-		private ConnectionSecurityMode FListenerSecurityMode;
-		public ConnectionSecurityMode ListenerSecurityMode { get { return FListenerSecurityMode; } }
+		private ConnectionSecurityMode _listenerSecurityMode;
+		public ConnectionSecurityMode ListenerSecurityMode { get { return _listenerSecurityMode; } }
 		
-		public static string GetNativeServerURI(string AHostName, string AInstanceName, int AOverridePortNumber, ConnectionSecurityMode ASecurityMode, int AOverrideListenerPortNumber, ConnectionSecurityMode AListenerSecurityMode)
+		public static string GetNativeServerURI(string hostName, string instanceName, int overridePortNumber, ConnectionSecurityMode securityMode, int overrideListenerPortNumber, ConnectionSecurityMode listenerSecurityMode)
 		{
-			if (AOverridePortNumber > 0)
-				return DataphorServiceUtility.BuildNativeInstanceURI(AHostName, AOverridePortNumber, ASecurityMode == ConnectionSecurityMode.Transport, AInstanceName);
+			if (overridePortNumber > 0)
+				return DataphorServiceUtility.BuildNativeInstanceURI(hostName, overridePortNumber, securityMode == ConnectionSecurityMode.Transport, instanceName);
 			else
-				return ListenerFactory.GetInstanceURI(AHostName, AOverrideListenerPortNumber, AListenerSecurityMode, AInstanceName, ASecurityMode, true);
+				return ListenerFactory.GetInstanceURI(hostName, overrideListenerPortNumber, listenerSecurityMode, instanceName, securityMode, true);
 		}
 	}
 	
 	public class NativeSessionCLIClient : NativeCLIClient
 	{
-		public NativeSessionCLIClient(string AHostName) : base(AHostName) { }
-		public NativeSessionCLIClient(string AHostName, string AInstanceName) : base(AHostName, AInstanceName) { }
-		public NativeSessionCLIClient(string AHostName, string AInstanceName, int AOverridePortNumber, ConnectionSecurityMode ASecurityMode) : base(AHostName, AInstanceName, AOverridePortNumber, ASecurityMode) { }
-		public NativeSessionCLIClient(string AHostName, string AInstanceName, int AOverridePortNumber, ConnectionSecurityMode ASecurityMode, int AOverrideListenerPortNumber, ConnectionSecurityMode AListenerSecurityMode) : base(AHostName, AInstanceName, AOverridePortNumber, ASecurityMode, AOverrideListenerPortNumber, AListenerSecurityMode) { }
+		public NativeSessionCLIClient(string hostName) : base(hostName) { }
+		public NativeSessionCLIClient(string hostName, string instanceName) : base(hostName, instanceName) { }
+		public NativeSessionCLIClient(string hostName, string instanceName, int overridePortNumber, ConnectionSecurityMode securityMode) : base(hostName, instanceName, overridePortNumber, securityMode) { }
+		public NativeSessionCLIClient(string hostName, string instanceName, int overridePortNumber, ConnectionSecurityMode securityMode, int overrideListenerPortNumber, ConnectionSecurityMode listenerSecurityMode) : base(hostName, instanceName, overridePortNumber, securityMode, overrideListenerPortNumber, listenerSecurityMode) { }
 		
-		public NativeSessionHandle StartSession(NativeSessionInfo ASessionInfo)
+		public NativeSessionHandle StartSession(NativeSessionInfo sessionInfo)
 		{
 			try
 			{
-				IAsyncResult LResult = GetInterface().BeginStartSession(ASessionInfo, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetInterface().EndStartSession(LResult);
+				IAsyncResult result = GetInterface().BeginStartSession(sessionInfo, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetInterface().EndStartSession(result);
 			}
-			catch (FaultException<NativeCLIFault> LException)
+			catch (FaultException<NativeCLIFault> exception)
 			{
-				throw NativeCLIFaultUtility.FaultToException(LException.Detail);
+				throw NativeCLIFaultUtility.FaultToException(exception.Detail);
 			}
 		}
 		
-		public void StopSession(NativeSessionHandle ASessionHandle)
+		public void StopSession(NativeSessionHandle sessionHandle)
 		{
 			try
 			{
-				IAsyncResult LResult = GetInterface().BeginStopSession(ASessionHandle, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				GetInterface().EndStopSession(LResult);
+				IAsyncResult result = GetInterface().BeginStopSession(sessionHandle, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				GetInterface().EndStopSession(result);
 			}
-			catch (FaultException<NativeCLIFault> LException)
+			catch (FaultException<NativeCLIFault> exception)
 			{
-				throw NativeCLIFaultUtility.FaultToException(LException.Detail);
+				throw NativeCLIFaultUtility.FaultToException(exception.Detail);
 			}
 		}
 		
-		public void BeginTransaction(NativeSessionHandle ASessionHandle, NativeIsolationLevel AIsolationLevel)
+		public void BeginTransaction(NativeSessionHandle sessionHandle, NativeIsolationLevel isolationLevel)
 		{
 			try
 			{
-				IAsyncResult LResult = GetInterface().BeginBeginTransaction(ASessionHandle, AIsolationLevel, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				GetInterface().EndBeginTransaction(LResult);
+				IAsyncResult result = GetInterface().BeginBeginTransaction(sessionHandle, isolationLevel, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				GetInterface().EndBeginTransaction(result);
 			}
-			catch (FaultException<NativeCLIFault> LException)
+			catch (FaultException<NativeCLIFault> exception)
 			{
-				throw NativeCLIFaultUtility.FaultToException(LException.Detail);
+				throw NativeCLIFaultUtility.FaultToException(exception.Detail);
 			}
 		}
 		
-		public void PrepareTransaction(NativeSessionHandle ASessionHandle)
+		public void PrepareTransaction(NativeSessionHandle sessionHandle)
 		{
 			try
 			{
-				IAsyncResult LResult = GetInterface().BeginPrepareTransaction(ASessionHandle, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				GetInterface().EndPrepareTransaction(LResult);
+				IAsyncResult result = GetInterface().BeginPrepareTransaction(sessionHandle, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				GetInterface().EndPrepareTransaction(result);
 			}
-			catch (FaultException<NativeCLIFault> LException)
+			catch (FaultException<NativeCLIFault> exception)
 			{
-				throw NativeCLIFaultUtility.FaultToException(LException.Detail);
+				throw NativeCLIFaultUtility.FaultToException(exception.Detail);
 			}
 		}
 		
-		public void CommitTransaction(NativeSessionHandle ASessionHandle)
+		public void CommitTransaction(NativeSessionHandle sessionHandle)
 		{
 			try
 			{
-				IAsyncResult LResult = GetInterface().BeginCommitTransaction(ASessionHandle, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				GetInterface().EndCommitTransaction(LResult);
+				IAsyncResult result = GetInterface().BeginCommitTransaction(sessionHandle, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				GetInterface().EndCommitTransaction(result);
 			}
-			catch (FaultException<NativeCLIFault> LException)
+			catch (FaultException<NativeCLIFault> exception)
 			{
-				throw NativeCLIFaultUtility.FaultToException(LException.Detail);
+				throw NativeCLIFaultUtility.FaultToException(exception.Detail);
 			}
 		}
 		
-		public void RollbackTransaction(NativeSessionHandle ASessionHandle)
+		public void RollbackTransaction(NativeSessionHandle sessionHandle)
 		{
 			try
 			{
-				IAsyncResult LResult = GetInterface().BeginRollbackTransaction(ASessionHandle, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				GetInterface().EndRollbackTransaction(LResult);
+				IAsyncResult result = GetInterface().BeginRollbackTransaction(sessionHandle, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				GetInterface().EndRollbackTransaction(result);
 			}
-			catch (FaultException<NativeCLIFault> LException)
+			catch (FaultException<NativeCLIFault> exception)
 			{
-				throw NativeCLIFaultUtility.FaultToException(LException.Detail);
+				throw NativeCLIFaultUtility.FaultToException(exception.Detail);
 			}
 		}
 		
-		public int GetTransactionCount(NativeSessionHandle ASessionHandle)
+		public int GetTransactionCount(NativeSessionHandle sessionHandle)
 		{
 			try
 			{
-				IAsyncResult LResult = GetInterface().BeginGetTransactionCount(ASessionHandle, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetInterface().EndGetTransactionCount(LResult);
+				IAsyncResult result = GetInterface().BeginGetTransactionCount(sessionHandle, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetInterface().EndGetTransactionCount(result);
 			}
-			catch (FaultException<NativeCLIFault> LException)
+			catch (FaultException<NativeCLIFault> exception)
 			{
-				throw NativeCLIFaultUtility.FaultToException(LException.Detail);
+				throw NativeCLIFaultUtility.FaultToException(exception.Detail);
 			}
 		}
 		
-		public NativeResult Execute(NativeSessionHandle ASessionHandle, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions)
+		public NativeResult Execute(NativeSessionHandle sessionHandle, string statement, NativeParam[] paramsValue, NativeExecutionOptions options)
 		{
 			try
 			{
-				IAsyncResult LResult = GetInterface().BeginSessionExecuteStatement(ASessionHandle, AStatement, AParams, AOptions, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetInterface().EndSessionExecuteStatement(LResult);
+				IAsyncResult result = GetInterface().BeginSessionExecuteStatement(sessionHandle, statement, paramsValue, options, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetInterface().EndSessionExecuteStatement(result);
 			}
-			catch (FaultException<NativeCLIFault> LException)
+			catch (FaultException<NativeCLIFault> exception)
 			{
-				throw NativeCLIFaultUtility.FaultToException(LException.Detail);
+				throw NativeCLIFaultUtility.FaultToException(exception.Detail);
 			}
 		}
 
-		public NativeResult[] Execute(NativeSessionHandle ASessionHandle, NativeExecuteOperation[] AOperations)
+		public NativeResult[] Execute(NativeSessionHandle sessionHandle, NativeExecuteOperation[] operations)
 		{
 			try
 			{
-				IAsyncResult LResult = GetInterface().BeginSessionExecuteStatements(ASessionHandle, AOperations, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetInterface().EndSessionExecuteStatements(LResult);
+				IAsyncResult result = GetInterface().BeginSessionExecuteStatements(sessionHandle, operations, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetInterface().EndSessionExecuteStatements(result);
 			}
-			catch (FaultException<NativeCLIFault> LException)
+			catch (FaultException<NativeCLIFault> exception)
 			{
-				throw NativeCLIFaultUtility.FaultToException(LException.Detail);
+				throw NativeCLIFaultUtility.FaultToException(exception.Detail);
 			}
 		}
 	}
 	
 	public class NativeStatelessCLIClient : NativeCLIClient
 	{
-		public NativeStatelessCLIClient(string AHostName) : base(AHostName) { }
-		public NativeStatelessCLIClient(string AHostName, string AInstanceName) : base(AHostName, AInstanceName) { }
-		public NativeStatelessCLIClient(string AHostName, string AInstanceName, int AOverridePortNumber, ConnectionSecurityMode ASecurityMode) : base(AHostName, AInstanceName, AOverridePortNumber, ASecurityMode) { }
-		public NativeStatelessCLIClient(string AHostName, string AInstanceName, int AOverridePortNumber, ConnectionSecurityMode ASecurityMode, int AOverrideListenerPortNumber, ConnectionSecurityMode AListenerSecurityMode) : base(AHostName, AInstanceName, AOverridePortNumber, ASecurityMode, AOverrideListenerPortNumber, AListenerSecurityMode) { }
+		public NativeStatelessCLIClient(string hostName) : base(hostName) { }
+		public NativeStatelessCLIClient(string hostName, string instanceName) : base(hostName, instanceName) { }
+		public NativeStatelessCLIClient(string hostName, string instanceName, int overridePortNumber, ConnectionSecurityMode securityMode) : base(hostName, instanceName, overridePortNumber, securityMode) { }
+		public NativeStatelessCLIClient(string hostName, string instanceName, int overridePortNumber, ConnectionSecurityMode securityMode, int overrideListenerPortNumber, ConnectionSecurityMode listenerSecurityMode) : base(hostName, instanceName, overridePortNumber, securityMode, overrideListenerPortNumber, listenerSecurityMode) { }
 
-		public NativeResult Execute(NativeSessionInfo ASessionInfo, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions)
+		public NativeResult Execute(NativeSessionInfo sessionInfo, string statement, NativeParam[] paramsValue, NativeExecutionOptions options)
 		{
 			try
 			{
-				IAsyncResult LResult = GetInterface().BeginExecuteStatement(ASessionInfo, AStatement, AParams, AOptions, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetInterface().EndExecuteStatement(LResult);
+				IAsyncResult result = GetInterface().BeginExecuteStatement(sessionInfo, statement, paramsValue, options, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetInterface().EndExecuteStatement(result);
 			}
-			catch (FaultException<NativeCLIFault> LException)
+			catch (FaultException<NativeCLIFault> exception)
 			{
-				throw NativeCLIFaultUtility.FaultToException(LException.Detail);
+				throw NativeCLIFaultUtility.FaultToException(exception.Detail);
 			}
 		}
 		
-		public NativeResult[] Execute(NativeSessionInfo ASessionInfo, NativeExecuteOperation[] AOperations)
+		public NativeResult[] Execute(NativeSessionInfo sessionInfo, NativeExecuteOperation[] operations)
 		{
 			try
 			{
-				IAsyncResult LResult = GetInterface().BeginExecuteStatements(ASessionInfo, AOperations, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return GetInterface().EndExecuteStatements(LResult);
+				IAsyncResult result = GetInterface().BeginExecuteStatements(sessionInfo, operations, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return GetInterface().EndExecuteStatements(result);
 			}
-			catch (FaultException<NativeCLIFault> LException)
+			catch (FaultException<NativeCLIFault> exception)
 			{
-				throw NativeCLIFaultUtility.FaultToException(LException.Detail);
+				throw NativeCLIFaultUtility.FaultToException(exception.Detail);
 			}
 		}
 	}

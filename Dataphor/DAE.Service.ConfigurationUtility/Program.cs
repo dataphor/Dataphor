@@ -23,34 +23,34 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
         }
 
         [STAThread]
-        static void Main(string[] AArgs)
+        static void Main(string[] args)
         {
             Application.ThreadException += new ThreadExceptionEventHandler(ThreadException);
-            System.Diagnostics.Process[] LProcesses;
+            System.Diagnostics.Process[] processes;
             // See if this is already running
-            LProcesses = System.Diagnostics.Process.GetProcessesByName("DAEConfigUtil");
+            processes = System.Diagnostics.Process.GetProcessesByName("DAEConfigUtil");
             // There will be 1 running...this one!  But any more, and we just exit.
-            if (LProcesses.Length <= 1)
+            if (processes.Length <= 1)
             {
-                ApplicationForm LAppForm;
-                if ((AArgs.Length > 0) && (AArgs[0] == SFSilentMode))
-                    LAppForm = new ApplicationForm(true);
+                ApplicationForm appForm;
+                if ((args.Length > 0) && (args[0] == SFSilentMode))
+                    appForm = new ApplicationForm(true);
                 else
-                    LAppForm = new ApplicationForm(false);
+                    appForm = new ApplicationForm(false);
                 Application.Run();
             }
         }
 
-        protected static void ThreadException(object ASender, ThreadExceptionEventArgs AArgs)
+        protected static void ThreadException(object sender, ThreadExceptionEventArgs args)
         {
-            HandleException(AArgs.Exception);
+            HandleException(args.Exception);
         }
 
-        public static void HandleException(Exception AException)
+        public static void HandleException(Exception exception)
         {
-            if (AException is ThreadAbortException)
+            if (exception is ThreadAbortException)
                 Thread.ResetAbort();
-            Session.HandleException(AException);
+            Session.HandleException(exception);
         }
     }
 }

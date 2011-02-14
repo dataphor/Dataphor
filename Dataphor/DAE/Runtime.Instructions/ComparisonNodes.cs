@@ -25,10 +25,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iEqual(scalar, scalar) : Boolean </remarks>
     public class ScalarEqualNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
@@ -39,14 +39,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iEqual(byte, byte) : bool </remarks>
     public class ByteEqualNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (byte)AArgument1 == (byte)AArgument2;
+				return (byte)argument1 == (byte)argument2;
 		}
     }
     
@@ -73,14 +73,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iEqual(short, short) : bool </remarks>
     public class ShortEqualNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (short)AArgument1 == (short)AArgument2;
+				return (short)argument1 == (short)argument2;
 		}
     }
     
@@ -107,14 +107,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iEqual(integer, integer) : bool </remarks>
     public class IntegerEqualNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (int)AArgument1 == (int)AArgument2;
+				return (int)argument1 == (int)argument2;
 		}
     }
     
@@ -141,14 +141,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iEqual(long, long) : bool </remarks>
     public class LongEqualNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (long)AArgument1 == (long)AArgument2;
+				return (long)argument1 == (long)argument2;
 		}
     }
     
@@ -175,28 +175,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iEqual(Guid, Guid) : bool </remarks>
     public class GuidEqualNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (Guid)AArgument1 == (Guid)AArgument2;
+				return (Guid)argument1 == (Guid)argument2;
 		}
     }
     
     /// <remarks> operator iEqual(bool, bool) : bool </remarks>
     public class BooleanEqualNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (bool)AArgument1 == (bool)AArgument2;
+				return (bool)argument1 == (bool)argument2;
 		}
     }
 
@@ -219,28 +219,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iEqual(decimal, decimal) : bool </remarks>
     public class DecimalEqualNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (decimal)AArgument1 == (decimal)AArgument2;
+				return (decimal)argument1 == (decimal)argument2;
 		}
     }
 
 	/// <remarks> operator iEqual(string, string) : bool </remarks>
 	public class StringEqualNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return String.Equals((string)AArgument1, (string)AArgument2, StringComparison.Ordinal);
+				return String.Equals((string)argument1, (string)argument2, StringComparison.Ordinal);
 		}
 	}
 
@@ -262,42 +262,42 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iEqual(money, money) : bool </remarks>
 	public class MoneyEqualNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (decimal)AArgument1 == (decimal)AArgument2;
+				return (decimal)argument1 == (decimal)argument2;
 		}
 	}
 	
 	/// <remarks> operator iEqual(Error, Error) : Boolean; </remarks>
 	public class ErrorEqualNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return ((Exception)AArgument1).Message == ((Exception)AArgument2).Message;
+				return ((Exception)argument1).Message == ((Exception)argument2).Message;
 		}
 	}
 	
 	/// <remarks> operator iNotEqual(byte, byte) : bool </remarks>
     public class ByteNotEqualNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (byte)AArgument1 != (byte)AArgument2;
+				return (byte)argument1 != (byte)argument2;
 		}
     }
 
@@ -324,14 +324,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iNotEqual(short , short ) : bool </remarks>
     public class ShortNotEqualNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (short)AArgument1 != (short)AArgument2;
+				return (short)argument1 != (short)argument2;
 		}
     }
 
@@ -358,14 +358,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iNotEqual(integer, integer) : bool </remarks>
     public class IntegerNotEqualNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (int)AArgument1 != (int)AArgument2;
+				return (int)argument1 != (int)argument2;
 		}
     }
 
@@ -392,14 +392,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iNotEqual(long, long) : bool </remarks>
     public class LongNotEqualNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (long)AArgument1 != (long)AArgument2;
+				return (long)argument1 != (long)argument2;
 		}
     }
 
@@ -426,28 +426,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iNotEqual(Guid, Guid) : bool </remarks>
     public class GuidNotEqualNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (Guid)AArgument1 != (Guid)AArgument2;
+				return (Guid)argument1 != (Guid)argument2;
 		}
     }
 
     /// <remarks> operator iNotEqual(bool, bool) : bool </remarks>
     public class BooleanNotEqualNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (bool)AArgument1 != (bool)AArgument2;
+				return (bool)argument1 != (bool)argument2;
 		}
     }
 
@@ -474,28 +474,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iNotEqual(decimal, decimal) : bool </remarks>
     public class DecimalNotEqualNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (decimal)AArgument1 != (decimal)AArgument2;
+				return (decimal)argument1 != (decimal)argument2;
 		}
     }
 
 	/// <remarks> operator iNotEqual(string, string) : bool </remarks>
 	public class StringNotEqualNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return !String.Equals((string)AArgument1, (string)AArgument2, StringComparison.Ordinal);
+				return !String.Equals((string)argument1, (string)argument2, StringComparison.Ordinal);
 		}
 	}
 
@@ -517,42 +517,42 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iNotEqual(money, money) : bool </remarks>
 	public class MoneyNotEqualNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (decimal)AArgument1 != (decimal)AArgument2;
+				return (decimal)argument1 != (decimal)argument2;
 		}
 	}
 
 	/// <remarks> operator iGreater(bool, bool) : bool </remarks>
     public class BooleanGreaterNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (bool)AArgument1 ? !(bool)AArgument2 : false;
+				return (bool)argument1 ? !(bool)argument2 : false;
 		}
     }
 
 	/// <remarks> operator iGreater(byte, byte) : bool </remarks>
     public class ByteGreaterNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (byte)AArgument1 > (byte)AArgument2;
+				return (byte)argument1 > (byte)argument2;
 		}
     }
 
@@ -575,14 +575,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iGreater(short, short) : bool </remarks>
     public class ShortGreaterNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (short)AArgument1 > (short)AArgument2;
+				return (short)argument1 > (short)argument2;
 		}
     }
 
@@ -605,14 +605,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iGreater(integer, integer) : bool </remarks>
     public class IntegerGreaterNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (int)AArgument1 > (int)AArgument2;
+				return (int)argument1 > (int)argument2;
 		}
     }
 
@@ -639,14 +639,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iGreater(long, long) : bool </remarks>
     public class LongGreaterNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (long)AArgument1 > (long)AArgument2;
+				return (long)argument1 > (long)argument2;
 		}
     }
 
@@ -669,14 +669,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iGreater(Guid, Guid) : bool </remarks>
     public class GuidGreaterNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return ((Guid)AArgument1).CompareTo((Guid)AArgument2) > 0;
+				return ((Guid)argument1).CompareTo((Guid)argument2) > 0;
 		}
     }
 
@@ -703,28 +703,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iGreater(decimal, decimal) : bool </remarks>
     public class DecimalGreaterNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (decimal)AArgument1 > (decimal)AArgument2;
+				return (decimal)argument1 > (decimal)argument2;
 		}
     }
 
 	/// <remarks> operator iGreater(string, string) : bool </remarks>
 	public class StringGreaterNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return String.Compare((string)AArgument1, (string)AArgument2, StringComparison.Ordinal) > 0;
+				return String.Compare((string)argument1, (string)argument2, StringComparison.Ordinal) > 0;
 		}
 	}
 
@@ -746,42 +746,42 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iGreater(money, money) : bool </remarks>
 	public class MoneyGreaterNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return ((decimal)AArgument1).CompareTo((decimal)AArgument2) > 0;
+				return ((decimal)argument1).CompareTo((decimal)argument2) > 0;
 		}
 	}
 
 	/// <remarks> operator iLess(bool, bool) : bool </remarks>
     public class BooleanLessNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return !(bool)AArgument1 ? (bool)AArgument2 : false;
+				return !(bool)argument1 ? (bool)argument2 : false;
 		}
     }
 
     /// <remarks> operator iLess(byte, byte) : bool </remarks>
     public class ByteLessNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (byte)AArgument1 < (byte)AArgument2;
+				return (byte)argument1 < (byte)argument2;
 		}
     }
 
@@ -804,14 +804,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iLess(short, short) : bool </remarks>
     public class ShortLessNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (short)AArgument1 < (short)AArgument2;
+				return (short)argument1 < (short)argument2;
 		}
     }
 
@@ -834,14 +834,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iLess(integer, integer) : bool </remarks>
     public class IntegerLessNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (int)AArgument1 < (int)AArgument2;
+				return (int)argument1 < (int)argument2;
 		}
     }
 
@@ -868,14 +868,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iLess(long, long) : bool </remarks>
     public class LongLessNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (long)AArgument1 < (long)AArgument2;
+				return (long)argument1 < (long)argument2;
 		}
     }
 
@@ -898,14 +898,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iLess(Guid, Guid) : bool </remarks>
     public class GuidLessNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return ((Guid)AArgument1).CompareTo((Guid)AArgument2) < 0;
+				return ((Guid)argument1).CompareTo((Guid)argument2) < 0;
 		}
     }
     
@@ -932,28 +932,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iLess(decimal, decimal) : bool </remarks>
     public class DecimalLessNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (decimal)AArgument1 < (decimal)AArgument2;
+				return (decimal)argument1 < (decimal)argument2;
 		}
     }
 
 	/// <remarks> operator iLess(string, string) : bool </remarks>
 	public class StringLessNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return String.Compare((string)AArgument1, (string)AArgument2, StringComparison.Ordinal) < 0;
+				return String.Compare((string)argument1, (string)argument2, StringComparison.Ordinal) < 0;
 		}
 	}
 
@@ -975,31 +975,31 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iLess(money, money) : bool </remarks>
 	public class MoneyLessNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return ((decimal)AArgument1).CompareTo((decimal)AArgument2) < 0;
+				return ((decimal)argument1).CompareTo((decimal)argument2) < 0;
 		}
 	}
 
 	/// <remarks> operator iInclusiveGreater(bool, bool) : bool </remarks>
     public class BooleanInclusiveGreaterNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
 			{
-				bool LLeftValue = (bool)AArgument1;
-				bool LRightValue = (bool)AArgument2;
-				return LLeftValue == LRightValue || LLeftValue ? true : false;
+				bool leftValue = (bool)argument1;
+				bool rightValue = (bool)argument2;
+				return leftValue == rightValue || leftValue ? true : false;
 			}
 		}
     }
@@ -1007,14 +1007,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iInclusiveGreater(byte, byte) : bool </remarks>
     public class ByteInclusiveGreaterNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (byte)AArgument1 >= (byte)AArgument2;
+				return (byte)argument1 >= (byte)argument2;
 		}
     }
 
@@ -1037,14 +1037,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iInclusiveGreater(short, short) : bool </remarks>
     public class ShortInclusiveGreaterNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (short)AArgument1 >= (short)AArgument2;
+				return (short)argument1 >= (short)argument2;
 		}
     }
 
@@ -1067,14 +1067,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iInclusiveGreater(integer, integer) : bool </remarks>
     public class IntegerInclusiveGreaterNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (int)AArgument1 >= (int)AArgument2;
+				return (int)argument1 >= (int)argument2;
 		}
     }
 
@@ -1097,14 +1097,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iInclusiveGreater(long, long) : bool </remarks>
     public class LongInclusiveGreaterNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (long)AArgument1 >= (long)AArgument2;
+				return (long)argument1 >= (long)argument2;
 		}
     }
 
@@ -1127,14 +1127,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iInclusiveGreater(Guid, Guid) : bool </remarks>
     public class GuidInclusiveGreaterNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return ((Guid)AArgument1).CompareTo((Guid)AArgument2) >= 0;
+				return ((Guid)argument1).CompareTo((Guid)argument2) >= 0;
 		}
     }
 
@@ -1157,28 +1157,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iInclusiveGreater(decimal, decimal) : bool </remarks>
     public class DecimalInclusiveGreaterNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (decimal)AArgument1 >= (decimal)AArgument2;
+				return (decimal)argument1 >= (decimal)argument2;
 		}
     }
 
 	/// <remarks> operator iInclusiveGreater(string, string) : bool </remarks>
 	public class StringInclusiveGreaterNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return String.Compare((string)AArgument1, (string)AArgument2, StringComparison.Ordinal) >= 0;
+				return String.Compare((string)argument1, (string)argument2, StringComparison.Ordinal) >= 0;
 		}
 	}
 
@@ -1200,31 +1200,31 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iInclusiveGreater(money, money) : bool </remarks>
 	public class MoneyInclusiveGreaterNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return ((decimal)AArgument1).CompareTo((decimal)AArgument2) >= 0;
+				return ((decimal)argument1).CompareTo((decimal)argument2) >= 0;
 		}
 	}
 
 	/// <remarks> operator iInclusiveLess(bool, bool) : bool </remarks>
     public class BooleanInclusiveLessNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
 			{
-				bool LLeftValue = (bool)AArgument1;
-				bool LRightValue = (bool)AArgument2;
-				return LLeftValue == LRightValue || !LLeftValue ? true : false;
+				bool leftValue = (bool)argument1;
+				bool rightValue = (bool)argument2;
+				return leftValue == rightValue || !leftValue ? true : false;
 			}
 		}
     }
@@ -1232,14 +1232,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iInclusiveLess(byte, byte) : bool </remarks>
     public class ByteInclusiveLessNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (byte)AArgument1 <= (byte)AArgument2;
+				return (byte)argument1 <= (byte)argument2;
 		}
     }
 
@@ -1267,14 +1267,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iInclusiveLess(short, short) : bool </remarks>
     public class ShortInclusiveLessNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (short)AArgument1 <= (short)AArgument2;
+				return (short)argument1 <= (short)argument2;
 		}
     }
 
@@ -1297,14 +1297,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iInclusiveLess(integer, integer) : bool </remarks>
     public class IntegerInclusiveLessNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (int)AArgument1 <= (int)AArgument2;
+				return (int)argument1 <= (int)argument2;
 		}
     }
 
@@ -1327,14 +1327,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iInclusiveLess(long, long) : bool </remarks>
     public class LongInclusiveLessNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (long)AArgument1 <= (long)AArgument2;
+				return (long)argument1 <= (long)argument2;
 		}
     }
 
@@ -1357,14 +1357,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iInclusiveLess(Guid, Guid) : bool </remarks>
     public class GuidInclusiveLessNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return ((Guid)AArgument1).CompareTo((Guid)AArgument2) <= 0;
+				return ((Guid)argument1).CompareTo((Guid)argument2) <= 0;
 		}
     }
 
@@ -1387,28 +1387,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iInclusiveLess(decimal, decimal) : bool </remarks>
     public class DecimalInclusiveLessNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return (decimal)AArgument1 <= (decimal)AArgument2;
+				return (decimal)argument1 <= (decimal)argument2;
 		}
     }
 
 	/// <remarks> operator iInclusiveLess(string, string) : bool </remarks>
 	public class StringInclusiveLessNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return String.Compare((string)AArgument1, (string)AArgument2, StringComparison.Ordinal) <= 0;
+				return String.Compare((string)argument1, (string)argument2, StringComparison.Ordinal) <= 0;
 		}
 	}
     
@@ -1430,31 +1430,31 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iInclusiveLess(money, money) : bool </remarks>
 	public class MoneyInclusiveLessNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
-				return ((decimal)AArgument1).CompareTo((decimal)AArgument2) <= 0;
+				return ((decimal)argument1).CompareTo((decimal)argument2) <= 0;
 		}
 	}
     
 	/// <remarks> operator iCompare(bool, bool) : integer </remarks>
     public class BooleanCompareNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
 			{
-				bool LLeftValue = (bool)AArgument1;
-				bool LRightValue = (bool)AArgument2;
-				return LLeftValue == LRightValue ? 0 : LLeftValue ? 1 : -1;
+				bool leftValue = (bool)argument1;
+				bool rightValue = (bool)argument2;
+				return leftValue == rightValue ? 0 : leftValue ? 1 : -1;
 			}
 		}
     }
@@ -1462,17 +1462,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iCompare(byte, byte) : integer </remarks>
     public class ByteCompareNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
 			{
-				byte LLeftValue = (byte)AArgument1;
-				byte LRightValue = (byte)AArgument2;
-				return LLeftValue == LRightValue ? 0 : LLeftValue > LRightValue ? 1 : -1;
+				byte leftValue = (byte)argument1;
+				byte rightValue = (byte)argument2;
+				return leftValue == rightValue ? 0 : leftValue > rightValue ? 1 : -1;
 			}
 		}
     }
@@ -1500,17 +1500,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iCompare(short, short) : integer </remarks>
     public class ShortCompareNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
 			{
-				short LLeftValue = (short)AArgument1;
-				short LRightValue = (short)AArgument2;
-				return LLeftValue == LRightValue ? 0 : LLeftValue > LRightValue ? 1 : -1;
+				short leftValue = (short)argument1;
+				short rightValue = (short)argument2;
+				return leftValue == rightValue ? 0 : leftValue > rightValue ? 1 : -1;
 			}
 		}
     }
@@ -1538,17 +1538,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iCompare(int, int) : integer </remarks>
     public class IntegerCompareNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
 			{
-				int LLeftValue = (int)AArgument1;
-				int LRightValue = (int)AArgument2;
-				return LLeftValue == LRightValue ? 0 : LLeftValue > LRightValue ? 1 : -1;
+				int leftValue = (int)argument1;
+				int rightValue = (int)argument2;
+				return leftValue == rightValue ? 0 : leftValue > rightValue ? 1 : -1;
 			}
 		}
     }
@@ -1576,17 +1576,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iCompare(long, long) : integer </remarks>
     public class LongCompareNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
 			{
-				long LLeftValue = (long)AArgument1;
-				long LRightValue = (long)AArgument2;
-				return LLeftValue == LRightValue ? 0 : LLeftValue > LRightValue ? 1 : -1;
+				long leftValue = (long)argument1;
+				long rightValue = (long)argument2;
+				return leftValue == rightValue ? 0 : leftValue > rightValue ? 1 : -1;
 			}
 		}
     }
@@ -1614,17 +1614,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iCompare(Guid, Guid) : integer </remarks>
     public class GuidCompareNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
 			{
-				Guid LLeftValue = (Guid)AArgument1;
-				Guid LRightValue = (Guid)AArgument2;
-				return LLeftValue.CompareTo(LRightValue);
+				Guid leftValue = (Guid)argument1;
+				Guid rightValue = (Guid)argument2;
+				return leftValue.CompareTo(rightValue);
 			}
 		}
     }
@@ -1632,17 +1632,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iCompare(decimal, decimal) : integer </remarks>
     public class DecimalCompareNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
 			{
-				decimal LLeftValue = (decimal)AArgument1;
-				decimal LRightValue = (decimal)AArgument2;
-				return LLeftValue == LRightValue ? 0 : LLeftValue > LRightValue ? 1 : -1;
+				decimal leftValue = (decimal)argument1;
+				decimal rightValue = (decimal)argument2;
+				return leftValue == rightValue ? 0 : leftValue > rightValue ? 1 : -1;
 			}
 		}
     }
@@ -1650,17 +1650,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iCompare(money, money) : integer </remarks>
     public class MoneyCompareNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
 			{
-				decimal LLeftValue = (decimal)AArgument1;
-				decimal LRightValue = (decimal)AArgument2;
-				return LLeftValue == LRightValue ? 0 : LLeftValue > LRightValue ? 1 : -1;
+				decimal leftValue = (decimal)argument1;
+				decimal rightValue = (decimal)argument2;
+				return leftValue == rightValue ? 0 : leftValue > rightValue ? 1 : -1;
 			}
 		}
     }
@@ -1668,17 +1668,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iCompare(string, string) : integer </remarks>
     public class StringCompareNode : BinaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
 			{
-				string LLeftValue = (string)AArgument1;
-				string LRightValue = (string)AArgument2;
-				return String.Compare(LLeftValue, LRightValue, StringComparison.Ordinal);
+				string leftValue = (string)argument1;
+				string rightValue = (string)argument2;
+				return String.Compare(leftValue, rightValue, StringComparison.Ordinal);
 			}
 		}
     }
@@ -1705,68 +1705,68 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iCompare(TimeSpan, TimeSpan) : integer </remarks>
 	public class TimeSpanCompareNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
 			{
-				TimeSpan LLeftValue = ((TimeSpan)AArgument1);
-				TimeSpan LRightValue = ((TimeSpan)AArgument2);
-				return LLeftValue == LRightValue ? 0 : LLeftValue > LRightValue ? 1 : -1;
+				TimeSpan leftValue = ((TimeSpan)argument1);
+				TimeSpan rightValue = ((TimeSpan)argument2);
+				return leftValue == rightValue ? 0 : leftValue > rightValue ? 1 : -1;
 			}
 		}
 	}
 
 	public class DateTimeCompareNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
 			{
-				DateTime LLeftValue = ((DateTime)AArgument1);
-				DateTime LRightValue = ((DateTime)AArgument2);
-				return LLeftValue == LRightValue ? 0 : LLeftValue > LRightValue ? 1 : -1;
+				DateTime leftValue = ((DateTime)argument1);
+				DateTime rightValue = ((DateTime)argument2);
+				return leftValue == rightValue ? 0 : leftValue > rightValue ? 1 : -1;
 			}
 		}
 	}
 
 	public class DateCompareNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
 			{
-				DateTime LLeftValue = ((DateTime)AArgument1);
-				DateTime LRightValue = ((DateTime)AArgument2);
-				return LLeftValue == LRightValue ? 0 : LLeftValue > LRightValue ? 1 : -1;
+				DateTime leftValue = ((DateTime)argument1);
+				DateTime rightValue = ((DateTime)argument2);
+				return leftValue == rightValue ? 0 : leftValue > rightValue ? 1 : -1;
 			}
 		}
 	}
 
 	public class TimeCompareNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			else
 			#endif
 			{
-				DateTime LLeftValue = ((DateTime)AArgument1);
-				DateTime LRightValue = ((DateTime)AArgument2);
-				return LLeftValue == LRightValue ? 0 : LLeftValue > LRightValue ? 1 : -1;
+				DateTime leftValue = ((DateTime)argument1);
+				DateTime rightValue = ((DateTime)argument2);
+				return leftValue == rightValue ? 0 : leftValue > rightValue ? 1 : -1;
 			}
 		}
 	}
@@ -1774,20 +1774,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator Max(byte, byte) : byte </remarks>
 	public class ByteMaxNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if (AArgument1 == null)
-				if (AArgument2 == null)
+			if (argument1 == null)
+				if (argument2 == null)
 					return null;
 				else
-					return (byte)AArgument2;
-			else if (AArgument2 == null)
-				return (byte)AArgument1;
+					return (byte)argument2;
+			else if (argument2 == null)
+				return (byte)argument1;
 			else
 			{
-				byte LLeftValue = (byte)AArgument1;
-				byte LRightValue = (byte)AArgument2;
-				return LLeftValue > LRightValue ? LLeftValue : LRightValue;
+				byte leftValue = (byte)argument1;
+				byte rightValue = (byte)argument2;
+				return leftValue > rightValue ? leftValue : rightValue;
 			}
 		}
 	}
@@ -1795,20 +1795,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator Max(Short, Short) : Short </remarks>
 	public class ShortMaxNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if (AArgument1 == null)
-				if (AArgument2 == null)
+			if (argument1 == null)
+				if (argument2 == null)
 					return null;
 				else
-					return (short)AArgument2;
-			else if (AArgument2 == null)
-				return (short)AArgument1;
+					return (short)argument2;
+			else if (argument2 == null)
+				return (short)argument1;
 			else
 			{
-				short LLeftValue = (short)AArgument1;
-				short LRightValue = (short)AArgument2;
-				return LLeftValue > LRightValue ? LLeftValue : LRightValue;
+				short leftValue = (short)argument1;
+				short rightValue = (short)argument2;
+				return leftValue > rightValue ? leftValue : rightValue;
 			}
 		}
 	}
@@ -1816,20 +1816,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator Max(Integer, Integer) : Integer </remarks>
 	public class IntegerMaxNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if (AArgument1 == null)
-				if (AArgument2 == null)
+			if (argument1 == null)
+				if (argument2 == null)
 					return null;
 				else
-					return (int)AArgument2;
-			else if (AArgument2 == null)
-				return (int)AArgument1;
+					return (int)argument2;
+			else if (argument2 == null)
+				return (int)argument1;
 			else
 			{
-				int LLeftValue = (int)AArgument1;
-				int LRightValue = (int)AArgument2;
-				return LLeftValue > LRightValue ? LLeftValue : LRightValue;
+				int leftValue = (int)argument1;
+				int rightValue = (int)argument2;
+				return leftValue > rightValue ? leftValue : rightValue;
 			}
 		}
 	}
@@ -1837,20 +1837,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator Max(Long, Long) : Long </remarks>
 	public class LongMaxNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if (AArgument1 == null)
-				if (AArgument2 == null)
+			if (argument1 == null)
+				if (argument2 == null)
 					return null;
 				else
-					return (long)AArgument2;
-			else if (AArgument2 == null)
-				return (long)AArgument1;
+					return (long)argument2;
+			else if (argument2 == null)
+				return (long)argument1;
 			else
 			{
-				long LLeftValue = (long)AArgument1;
-				long LRightValue = (long)AArgument2;
-				return LLeftValue > LRightValue ? LLeftValue : LRightValue;
+				long leftValue = (long)argument1;
+				long rightValue = (long)argument2;
+				return leftValue > rightValue ? leftValue : rightValue;
 			}
 		}
 	}
@@ -1858,20 +1858,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator Max(Decimal, Decimal) : Decimal </remarks>
 	public class DecimalMaxNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if (AArgument1 == null)
-				if (AArgument2 == null)
+			if (argument1 == null)
+				if (argument2 == null)
 					return null;
 				else
-					return (decimal)AArgument2;
-			else if (AArgument2 == null)
-				return (decimal)AArgument1;
+					return (decimal)argument2;
+			else if (argument2 == null)
+				return (decimal)argument1;
 			else
 			{
-				decimal LLeftValue = (decimal)AArgument1;
-				decimal LRightValue = (decimal)AArgument2;
-				return LLeftValue > LRightValue ? LLeftValue : LRightValue;
+				decimal leftValue = (decimal)argument1;
+				decimal rightValue = (decimal)argument2;
+				return leftValue > rightValue ? leftValue : rightValue;
 			}
 		}
 	}
@@ -1879,20 +1879,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator Max(TimeSpan, TimeSpan) : TimeSpan </remarks>
 	public class TimeSpanMaxNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if (AArgument1 == null)
-				if (AArgument2 == null)
+			if (argument1 == null)
+				if (argument2 == null)
 					return null;
 				else
-					return ((TimeSpan)AArgument2);
-			else if (AArgument2 == null)
-				return ((TimeSpan)AArgument1);
+					return ((TimeSpan)argument2);
+			else if (argument2 == null)
+				return ((TimeSpan)argument1);
 			else
 			{
-				TimeSpan LLeftValue = ((TimeSpan)AArgument1);
-				TimeSpan LRightValue = ((TimeSpan)AArgument2);
-				return LLeftValue > LRightValue ? LLeftValue : LRightValue;
+				TimeSpan leftValue = ((TimeSpan)argument1);
+				TimeSpan rightValue = ((TimeSpan)argument2);
+				return leftValue > rightValue ? leftValue : rightValue;
 			}
 		}
 	}
@@ -1900,20 +1900,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator Max(DateTime, DateTime) : DateTime </remarks>
 	public class DateTimeMaxNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if (AArgument1 == null)
-				if (AArgument2 == null)
+			if (argument1 == null)
+				if (argument2 == null)
 					return null;
 				else
-					return ((DateTime)AArgument2);
-			else if (AArgument2 == null)
-				return ((DateTime)AArgument1);
+					return ((DateTime)argument2);
+			else if (argument2 == null)
+				return ((DateTime)argument1);
 			else
 			{
-				DateTime LLeftValue = ((DateTime)AArgument1);
-				DateTime LRightValue = ((DateTime)AArgument2);
-				return LLeftValue > LRightValue ? LLeftValue : LRightValue;
+				DateTime leftValue = ((DateTime)argument1);
+				DateTime rightValue = ((DateTime)argument2);
+				return leftValue > rightValue ? leftValue : rightValue;
 			}
 		}
 	}
@@ -1921,20 +1921,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator Max(Date, Date) : Date </remarks>
 	public class DateMaxNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if (AArgument1 == null)
-				if (AArgument2 == null)
+			if (argument1 == null)
+				if (argument2 == null)
 					return null;
 				else
-					return ((DateTime)AArgument2);
-			else if (AArgument2 == null)
-				return ((DateTime)AArgument1);
+					return ((DateTime)argument2);
+			else if (argument2 == null)
+				return ((DateTime)argument1);
 			else
 			{
-				DateTime LLeftValue = ((DateTime)AArgument1);
-				DateTime LRightValue = ((DateTime)AArgument2);
-				return LLeftValue > LRightValue ? LLeftValue : LRightValue;
+				DateTime leftValue = ((DateTime)argument1);
+				DateTime rightValue = ((DateTime)argument2);
+				return leftValue > rightValue ? leftValue : rightValue;
 			}
 		}
 	}
@@ -1942,20 +1942,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator Max(Time, Time) : Time </remarks>
 	public class TimeMaxNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if (AArgument1 == null)
-				if (AArgument2 == null)
+			if (argument1 == null)
+				if (argument2 == null)
 					return null;
 				else
-					return ((DateTime)AArgument2);
-			else if (AArgument2 == null)
-				return ((DateTime)AArgument1);
+					return ((DateTime)argument2);
+			else if (argument2 == null)
+				return ((DateTime)argument1);
 			else
 			{
-				DateTime LLeftValue = ((DateTime)AArgument1);
-				DateTime LRightValue = ((DateTime)AArgument2);
-				return LLeftValue > LRightValue ? LLeftValue : LRightValue;
+				DateTime leftValue = ((DateTime)argument1);
+				DateTime rightValue = ((DateTime)argument2);
+				return leftValue > rightValue ? leftValue : rightValue;
 			}
 		}
 	}
@@ -1963,20 +1963,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator Max(Money, Money) : Money </remarks>
 	public class MoneyMaxNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if (AArgument1 == null)
-				if (AArgument2 == null)
+			if (argument1 == null)
+				if (argument2 == null)
 					return null;
 				else
-					return (decimal)AArgument2;
-			else if (AArgument2 == null)
-				return (decimal)AArgument1;
+					return (decimal)argument2;
+			else if (argument2 == null)
+				return (decimal)argument1;
 			else
 			{
-				decimal LLeftValue = (decimal)AArgument1;
-				decimal LRightValue = (decimal)AArgument2;
-				return LLeftValue > LRightValue ? LLeftValue : LRightValue;
+				decimal leftValue = (decimal)argument1;
+				decimal rightValue = (decimal)argument2;
+				return leftValue > rightValue ? leftValue : rightValue;
 			}
 		}
 	}
@@ -1984,20 +1984,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator Min(byte, byte) : byte </remarks>
 	public class ByteMinNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if (AArgument1 == null)
-				if (AArgument2 == null)
+			if (argument1 == null)
+				if (argument2 == null)
 					return null;
 				else
-					return (byte)AArgument2;
-			else if (AArgument2 == null)
-				return (byte)AArgument1;
+					return (byte)argument2;
+			else if (argument2 == null)
+				return (byte)argument1;
 			else
 			{
-				byte LLeftValue = (byte)AArgument1;
-				byte LRightValue = (byte)AArgument2;
-				return LLeftValue < LRightValue ? LLeftValue : LRightValue;
+				byte leftValue = (byte)argument1;
+				byte rightValue = (byte)argument2;
+				return leftValue < rightValue ? leftValue : rightValue;
 			}
 		}
 	}
@@ -2005,20 +2005,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator Min(Short, Short) : Short </remarks>
 	public class ShortMinNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if (AArgument1 == null)
-				if (AArgument2 == null)
+			if (argument1 == null)
+				if (argument2 == null)
 					return null;
 				else
-					return (short)AArgument2;
-			else if (AArgument2 == null)
-				return (short)AArgument1;
+					return (short)argument2;
+			else if (argument2 == null)
+				return (short)argument1;
 			else
 			{
-				short LLeftValue = (short)AArgument1;
-				short LRightValue = (short)AArgument2;
-				return LLeftValue < LRightValue ? LLeftValue : LRightValue;
+				short leftValue = (short)argument1;
+				short rightValue = (short)argument2;
+				return leftValue < rightValue ? leftValue : rightValue;
 			}
 		}
 	}
@@ -2026,20 +2026,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator Min(Integer, Integer) : Integer </remarks>
 	public class IntegerMinNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if (AArgument1 == null)
-				if (AArgument2 == null)
+			if (argument1 == null)
+				if (argument2 == null)
 					return null;
 				else
-					return (int)AArgument2;
-			else if (AArgument2 == null)
-				return (int)AArgument1;
+					return (int)argument2;
+			else if (argument2 == null)
+				return (int)argument1;
 			else
 			{
-				int LLeftValue = (int)AArgument1;
-				int LRightValue = (int)AArgument2;
-				return LLeftValue < LRightValue ? LLeftValue : LRightValue;
+				int leftValue = (int)argument1;
+				int rightValue = (int)argument2;
+				return leftValue < rightValue ? leftValue : rightValue;
 			}
 		}
 	}
@@ -2047,20 +2047,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator Min(Long, Long) : Long </remarks>
 	public class LongMinNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if (AArgument1 == null)
-				if (AArgument2 == null)
+			if (argument1 == null)
+				if (argument2 == null)
 					return null;
 				else
-					return (long)AArgument2;
-			else if (AArgument2 == null)
-				return (long)AArgument1;
+					return (long)argument2;
+			else if (argument2 == null)
+				return (long)argument1;
 			else
 			{
-				long LLeftValue = (long)AArgument1;
-				long LRightValue = (long)AArgument2;
-				return LLeftValue < LRightValue ? LLeftValue : LRightValue;
+				long leftValue = (long)argument1;
+				long rightValue = (long)argument2;
+				return leftValue < rightValue ? leftValue : rightValue;
 			}
 		}
 	}
@@ -2068,20 +2068,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator Min(Decimal, Decimal) : Decimal </remarks>
 	public class DecimalMinNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if (AArgument1 == null)
-				if (AArgument2 == null)
+			if (argument1 == null)
+				if (argument2 == null)
 					return null;
 				else
-					return (decimal)AArgument2;
-			else if (AArgument2 == null)
-				return (decimal)AArgument1;
+					return (decimal)argument2;
+			else if (argument2 == null)
+				return (decimal)argument1;
 			else
 			{
-				decimal LLeftValue = (decimal)AArgument1;
-				decimal LRightValue = (decimal)AArgument2;
-				return LLeftValue < LRightValue ? LLeftValue : LRightValue;
+				decimal leftValue = (decimal)argument1;
+				decimal rightValue = (decimal)argument2;
+				return leftValue < rightValue ? leftValue : rightValue;
 			}
 		}
 	}
@@ -2089,20 +2089,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator Min(DateTime, DateTime) : DateTime </remarks>
 	public class DateTimeMinNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if (AArgument1 == null)
-				if (AArgument2 == null)
+			if (argument1 == null)
+				if (argument2 == null)
 					return null;
 				else
-					return ((DateTime)AArgument2);
-			else if (AArgument2 == null)
-				return ((DateTime)AArgument1);
+					return ((DateTime)argument2);
+			else if (argument2 == null)
+				return ((DateTime)argument1);
 			else
 			{
-				DateTime LLeftValue = ((DateTime)AArgument1);
-				DateTime LRightValue = ((DateTime)AArgument2);
-				return LLeftValue < LRightValue ? LLeftValue : LRightValue;
+				DateTime leftValue = ((DateTime)argument1);
+				DateTime rightValue = ((DateTime)argument2);
+				return leftValue < rightValue ? leftValue : rightValue;
 			}
 		}
 	}
@@ -2110,20 +2110,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator Min(TimeSpan, TimeSpan) : TimeSpan </remarks>
 	public class TimeSpanMinNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if (AArgument1 == null)
-				if (AArgument2 == null)
+			if (argument1 == null)
+				if (argument2 == null)
 					return null;
 				else
-					return ((TimeSpan)AArgument2);
-			else if (AArgument2 == null)
-				return ((TimeSpan)AArgument1);
+					return ((TimeSpan)argument2);
+			else if (argument2 == null)
+				return ((TimeSpan)argument1);
 			else
 			{
-				TimeSpan LLeftValue = ((TimeSpan)AArgument1);
-				TimeSpan LRightValue = ((TimeSpan)AArgument2);
-				return LLeftValue < LRightValue ? LLeftValue : LRightValue;
+				TimeSpan leftValue = ((TimeSpan)argument1);
+				TimeSpan rightValue = ((TimeSpan)argument2);
+				return leftValue < rightValue ? leftValue : rightValue;
 			}
 		}
 	}
@@ -2131,20 +2131,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator Min(Date, Date) : Date </remarks>
 	public class DateMinNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if (AArgument1 == null)
-				if (AArgument2 == null)
+			if (argument1 == null)
+				if (argument2 == null)
 					return null;
 				else
-					return ((DateTime)AArgument2);
-			else if (AArgument2 == null)
-				return ((DateTime)AArgument1);
+					return ((DateTime)argument2);
+			else if (argument2 == null)
+				return ((DateTime)argument1);
 			else
 			{
-				DateTime LLeftValue = ((DateTime)AArgument1);
-				DateTime LRightValue = ((DateTime)AArgument2);
-				return LLeftValue < LRightValue ? LLeftValue : LRightValue;
+				DateTime leftValue = ((DateTime)argument1);
+				DateTime rightValue = ((DateTime)argument2);
+				return leftValue < rightValue ? leftValue : rightValue;
 			}
 		}
 	}
@@ -2152,20 +2152,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator Min(Time, Time) : Time </remarks>
 	public class TimeMinNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if (AArgument1 == null)
-				if (AArgument2 == null)
+			if (argument1 == null)
+				if (argument2 == null)
 					return null;
 				else
-					return ((DateTime)AArgument2);
-			else if (AArgument2 == null)
-				return ((DateTime)AArgument1);
+					return ((DateTime)argument2);
+			else if (argument2 == null)
+				return ((DateTime)argument1);
 			else
 			{
-				DateTime LLeftValue = ((DateTime)AArgument1);
-				DateTime LRightValue = ((DateTime)AArgument2);
-				return LLeftValue < LRightValue ? LLeftValue : LRightValue;
+				DateTime leftValue = ((DateTime)argument1);
+				DateTime rightValue = ((DateTime)argument2);
+				return leftValue < rightValue ? leftValue : rightValue;
 			}
 		}
 	}
@@ -2173,20 +2173,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator Min(Money, Money) : Money </remarks>
 	public class MoneyMinNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if (AArgument1 == null)
-				if (AArgument2 == null)
+			if (argument1 == null)
+				if (argument2 == null)
 					return null;
 				else
-					return (decimal)AArgument2;
-			else if (AArgument2 == null)
-				return (decimal)AArgument1;
+					return (decimal)argument2;
+			else if (argument2 == null)
+				return (decimal)argument1;
 			else
 			{
-				decimal LLeftValue = (decimal)AArgument1;
-				decimal LRightValue = (decimal)AArgument2;
-				return LLeftValue < LRightValue ? LLeftValue : LRightValue;
+				decimal leftValue = (decimal)argument1;
+				decimal rightValue = (decimal)argument2;
+				return leftValue < rightValue ? leftValue : rightValue;
 			}
 		}
 	}
@@ -2194,18 +2194,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iBetween(boolean, boolean, boolean) : integer </remarks>
     public class BooleanBetweenNode : TernaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2, object AArgument3)
+		public override object InternalExecute(Program program, object argument1, object argument2, object argument3)
 		{
 			#if NILPROPOGATION
-			if ((AArgument1 == null) || (AArgument2 == null) || (AArgument3 == null))
+			if ((argument1 == null) || (argument2 == null) || (argument3 == null))
 				return null;
 			else
 			#endif
 			{
-				bool LValue = (bool)AArgument1;
-				bool LLowerBound = (bool)AArgument2;
-				bool LUpperBound = (bool)AArgument3;
-				return (LValue || (LValue == LLowerBound)) && (!LValue || (LValue == LUpperBound));
+				bool tempValue = (bool)argument1;
+				bool lowerBound = (bool)argument2;
+				bool upperBound = (bool)argument3;
+				return (tempValue || (tempValue == lowerBound)) && (!tempValue || (tempValue == upperBound));
 			}
 		}
     }
@@ -2213,18 +2213,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iBetween(byte, byte, byte) : integer </remarks>
     public class ByteBetweenNode : TernaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2, object AArgument3)
+		public override object InternalExecute(Program program, object argument1, object argument2, object argument3)
 		{
 			#if NILPROPOGATION
-			if ((AArgument1 == null) || (AArgument2 == null) || (AArgument3 == null))
+			if ((argument1 == null) || (argument2 == null) || (argument3 == null))
 				return null;
 			else
 			#endif
 			{
-				byte LValue = (byte)AArgument1;
-				byte LLowerBound = (byte)AArgument2;
-				byte LUpperBound = (byte)AArgument3;
-				return (LValue >= LLowerBound) && (LValue <= LUpperBound);
+				byte tempValue = (byte)argument1;
+				byte lowerBound = (byte)argument2;
+				byte upperBound = (byte)argument3;
+				return (tempValue >= lowerBound) && (tempValue <= upperBound);
 			}
 		}
     }
@@ -2253,18 +2253,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iBetween(short, short, short) : integer </remarks>
     public class ShortBetweenNode : TernaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2, object AArgument3)
+		public override object InternalExecute(Program program, object argument1, object argument2, object argument3)
 		{
 			#if NILPROPOGATION
-			if ((AArgument1 == null) || (AArgument2 == null) || (AArgument3 == null))
+			if ((argument1 == null) || (argument2 == null) || (argument3 == null))
 				return null;
 			else
 			#endif
 			{
-				short LValue = (short)AArgument1;
-				short LLowerBound = (short)AArgument2;
-				short LUpperBound = (short)AArgument3;
-				return (LValue >= LLowerBound) && (LValue <= LUpperBound);
+				short tempValue = (short)argument1;
+				short lowerBound = (short)argument2;
+				short upperBound = (short)argument3;
+				return (tempValue >= lowerBound) && (tempValue <= upperBound);
 			}
 		}
     }
@@ -2293,18 +2293,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iBetween(integer, integer, integer) : integer </remarks>
     public class IntegerBetweenNode : TernaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2, object AArgument3)
+		public override object InternalExecute(Program program, object argument1, object argument2, object argument3)
 		{
 			#if NILPROPOGATION
-			if ((AArgument1 == null) || (AArgument2 == null) || (AArgument3 == null))
+			if ((argument1 == null) || (argument2 == null) || (argument3 == null))
 				return null;
 			else
 			#endif
 			{
-				int LValue = (int)AArgument1;
-				int LLowerBound = (int)AArgument2;
-				int LUpperBound = (int)AArgument3;
-				return (LValue >= LLowerBound) && (LValue <= LUpperBound);
+				int tempValue = (int)argument1;
+				int lowerBound = (int)argument2;
+				int upperBound = (int)argument3;
+				return (tempValue >= lowerBound) && (tempValue <= upperBound);
 			}
 		}
     }
@@ -2333,18 +2333,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iBetween(long, long, long) : integer </remarks>
     public class LongBetweenNode : TernaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2, object AArgument3)
+		public override object InternalExecute(Program program, object argument1, object argument2, object argument3)
 		{
 			#if NILPROPOGATION
-			if ((AArgument1 == null) || (AArgument2 == null) || (AArgument3 == null))
+			if ((argument1 == null) || (argument2 == null) || (argument3 == null))
 				return null;
 			else
 			#endif
 			{
-				long LValue = (long)AArgument1;
-				long LLowerBound = (long)AArgument2;
-				long LUpperBound = (long)AArgument3;
-				return (LValue >= LLowerBound) && (LValue <= LUpperBound);
+				long tempValue = (long)argument1;
+				long lowerBound = (long)argument2;
+				long upperBound = (long)argument3;
+				return (tempValue >= lowerBound) && (tempValue <= upperBound);
 			}
 		}
     }
@@ -2373,18 +2373,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iBetween(Guid, Guid, Guid) : integer </remarks>
     public class GuidBetweenNode : TernaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2, object AArgument3)
+		public override object InternalExecute(Program program, object argument1, object argument2, object argument3)
 		{
 			#if NILPROPOGATION
-			if ((AArgument1 == null) || (AArgument2 == null) || (AArgument3 == null))
+			if ((argument1 == null) || (argument2 == null) || (argument3 == null))
 				return null;
 			else
 			#endif
 			{
-				Guid LValue = (Guid)AArgument1;
-				Guid LLowerBound = (Guid)AArgument2;
-				Guid LUpperBound = (Guid)AArgument3;
-				return (LValue.CompareTo(LLowerBound) >= 0) && (LValue.CompareTo(LUpperBound) <= 0);
+				Guid tempValue = (Guid)argument1;
+				Guid lowerBound = (Guid)argument2;
+				Guid upperBound = (Guid)argument3;
+				return (tempValue.CompareTo(lowerBound) >= 0) && (tempValue.CompareTo(upperBound) <= 0);
 			}
 		}
     }
@@ -2392,18 +2392,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iBetween(decimal, decimal, decimal) : integer </remarks>
     public class DecimalBetweenNode : TernaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2, object AArgument3)
+		public override object InternalExecute(Program program, object argument1, object argument2, object argument3)
 		{
 			#if NILPROPOGATION
-			if ((AArgument1 == null) || (AArgument2 == null) || (AArgument3 == null))
+			if ((argument1 == null) || (argument2 == null) || (argument3 == null))
 				return null;
 			else
 			#endif
 			{
-				decimal LValue = (decimal)AArgument1;
-				decimal LLowerBound = (decimal)AArgument2;
-				decimal LUpperBound = (decimal)AArgument3;
-				return (LValue >= LLowerBound) && (LValue <= LUpperBound);
+				decimal tempValue = (decimal)argument1;
+				decimal lowerBound = (decimal)argument2;
+				decimal upperBound = (decimal)argument3;
+				return (tempValue >= lowerBound) && (tempValue <= upperBound);
 			}
 		}
     }
@@ -2411,18 +2411,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iBetween(money, money, money) : integer </remarks>
     public class MoneyBetweenNode : TernaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2, object AArgument3)
+		public override object InternalExecute(Program program, object argument1, object argument2, object argument3)
 		{
 			#if NILPROPOGATION
-			if ((AArgument1 == null) || (AArgument2 == null) || (AArgument3 == null))
+			if ((argument1 == null) || (argument2 == null) || (argument3 == null))
 				return null;
 			else
 			#endif
 			{
-				decimal LValue = (decimal)AArgument1;
-				decimal LLowerBound = (decimal)AArgument2;
-				decimal LUpperBound = (decimal)AArgument3;
-				return (LValue >= LLowerBound) && (LValue <= LUpperBound);
+				decimal tempValue = (decimal)argument1;
+				decimal lowerBound = (decimal)argument2;
+				decimal upperBound = (decimal)argument3;
+				return (tempValue >= lowerBound) && (tempValue <= upperBound);
 			}
 		}
     }
@@ -2430,18 +2430,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iBetween(string, string, string) : integer </remarks>
     public class StringBetweenNode : TernaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2, object AArgument3)
+		public override object InternalExecute(Program program, object argument1, object argument2, object argument3)
 		{
 			#if NILPROPOGATION
-			if ((AArgument1 == null) || (AArgument2 == null) || (AArgument3 == null))
+			if ((argument1 == null) || (argument2 == null) || (argument3 == null))
 				return null;
 			else
 			#endif
 			{
-				string LValue = (string)AArgument1;
-				string LLowerBound = (string)AArgument2;
-				string LUpperBound = (string)AArgument3;
-				return (String.Compare(LValue, LLowerBound, StringComparison.Ordinal) >= 0) && (String.Compare(LValue, LUpperBound, StringComparison.Ordinal) <= 0);
+				string tempValue = (string)argument1;
+				string lowerBound = (string)argument2;
+				string upperBound = (string)argument3;
+				return (String.Compare(tempValue, lowerBound, StringComparison.Ordinal) >= 0) && (String.Compare(tempValue, upperBound, StringComparison.Ordinal) <= 0);
 			}
 		}
     }
@@ -2469,18 +2469,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iBetween(TimeSpan, TimeSpan, TimeSpan) : integer </remarks>
     public class TimeSpanBetweenNode : TernaryInstructionNode
     {
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2, object AArgument3)
+		public override object InternalExecute(Program program, object argument1, object argument2, object argument3)
 		{
 			#if NILPROPOGATION
-			if ((AArgument1 == null) || (AArgument2 == null) || (AArgument3 == null))
+			if ((argument1 == null) || (argument2 == null) || (argument3 == null))
 				return null;
 			else
 			#endif
 			{
-				TimeSpan LValue = ((TimeSpan)AArgument1);
-				TimeSpan LLowerBound = ((TimeSpan)AArgument2);
-				TimeSpan LUpperBound = ((TimeSpan)AArgument3);
-				return (LValue >= LLowerBound) && (LValue <= LUpperBound);
+				TimeSpan tempValue = ((TimeSpan)argument1);
+				TimeSpan lowerBound = ((TimeSpan)argument2);
+				TimeSpan upperBound = ((TimeSpan)argument3);
+				return (tempValue >= lowerBound) && (tempValue <= upperBound);
 			}
 		}
     }

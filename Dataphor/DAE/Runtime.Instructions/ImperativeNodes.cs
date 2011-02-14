@@ -37,14 +37,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			ShouldEmitIL = true;
 		}
 		
-		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
+		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
 		{
-			AGenerator.Emit(OpCodes.Ldstr, "IL Generated exception");
-			AGenerator.Emit(OpCodes.Newobj, typeof(Exception).GetConstructor(new Type[] { typeof(String) }));
-			AGenerator.Emit(OpCodes.Throw);
+			generator.Emit(OpCodes.Ldstr, "IL Generated exception");
+			generator.Emit(OpCodes.Newobj, typeof(Exception).GetConstructor(new Type[] { typeof(String) }));
+			generator.Emit(OpCodes.Throw);
 		}
 
-		public override object NilaryInternalExecute(Program AProgram)
+		public override object NilaryInternalExecute(Program program)
 		{
 			throw new NotImplementedException();
 		}
@@ -58,36 +58,36 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsBreakable = true;
 		}
 		
-		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
+		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
 		{	
-			int[] LExecutePath = PrepareExecutePath(APlan, AExecutePath);
+			int[] localExecutePath = PrepareExecutePath(plan, executePath);
 			
-			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
-				EmitExecute(APlan, AGenerator, LExecutePath, LIndex);
+			for (int index = 0; index < NodeCount; index++)
+				EmitExecute(plan, generator, localExecutePath, index);
 		}
 
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
-				Nodes[LIndex].Execute(AProgram);
+			for (int index = 0; index < NodeCount; index++)
+				Nodes[index].Execute(program);
 			return null;
 		}
 
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			Block LBlock = new Block();
-			Statement LStatement;
-			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
+			Block block = new Block();
+			Statement statement;
+			for (int index = 0; index < NodeCount; index++)
 			{
-				LStatement = Nodes[LIndex].EmitStatement(AMode);
-				if (!(LStatement is EmptyStatement))
-					LBlock.Statements.Add(LStatement);
+				statement = Nodes[index].EmitStatement(mode);
+				if (!(statement is EmptyStatement))
+					block.Statements.Add(statement);
 			}
-			switch (LBlock.Statements.Count)
+			switch (block.Statements.Count)
 			{
 				case 0: return new EmptyStatement();
-				case 1: return LBlock.Statements[0];
-				default: return LBlock;
+				case 1: return block.Statements[0];
+				default: return block;
 			}
 		}
 	}
@@ -100,32 +100,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsBreakable = true;
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
-				Nodes[LIndex].Execute(AProgram);
+			for (int index = 0; index < NodeCount; index++)
+				Nodes[index].Execute(program);
 			return null;
 		}
 
-		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
+		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
 		{	
-			int[] LExecutePath = PrepareExecutePath(APlan, AExecutePath);
+			int[] localExecutePath = PrepareExecutePath(plan, executePath);
 			
-			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
-				EmitExecute(APlan, AGenerator, LExecutePath, LIndex);
+			for (int index = 0; index < NodeCount; index++)
+				EmitExecute(plan, generator, localExecutePath, index);
 		}
 
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			DelimitedBlock LBlock = new DelimitedBlock();
-			Statement LStatement;
-			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
+			DelimitedBlock block = new DelimitedBlock();
+			Statement statement;
+			for (int index = 0; index < NodeCount; index++)
 			{
-				LStatement = Nodes[LIndex].EmitStatement(AMode);
-				if (!(LStatement is EmptyStatement))
-					LBlock.Statements.Add(LStatement);
+				statement = Nodes[index].EmitStatement(mode);
+				if (!(statement is EmptyStatement))
+					block.Statements.Add(statement);
 			}
-			return LBlock;
+			return block;
 		}
 	}
 	
@@ -137,57 +137,57 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsBreakable = true;
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			APlan.Symbols.PushFrame();
+			plan.Symbols.PushFrame();
 			try
 			{
-				base.InternalDetermineBinding(APlan);
+				base.InternalDetermineBinding(plan);
 			}
 			finally
 			{
-				APlan.Symbols.PopFrame();
+				plan.Symbols.PopFrame();
 			}
 		}
 		
-		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
+		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
 		{	
-			int[] LExecutePath = PrepareExecutePath(APlan, AExecutePath);
+			int[] localExecutePath = PrepareExecutePath(plan, executePath);
 			
 			// Call AProcess.Context.PushFrame();
-			AGenerator.Emit(OpCodes.Ldarg_1);
-			AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-			AGenerator.Emit(OpCodes.Call, typeof(Stack).GetMethod("PushFrame", new Type[] { }));
-			AGenerator.BeginExceptionBlock();
+			generator.Emit(OpCodes.Ldarg_1);
+			generator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
+			generator.Emit(OpCodes.Call, typeof(Stack).GetMethod("PushFrame", new Type[] { }));
+			generator.BeginExceptionBlock();
 			
-			EmitExecute(APlan, AGenerator, LExecutePath, 0);
+			EmitExecute(plan, generator, localExecutePath, 0);
 
 			// Call AProcess.Context.PopFrame()				
-			AGenerator.BeginFinallyBlock();
-			AGenerator.Emit(OpCodes.Ldarg_1);
-			AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-			AGenerator.Emit(OpCodes.Call, typeof(Stack).GetMethod("PopFrame"));
+			generator.BeginFinallyBlock();
+			generator.Emit(OpCodes.Ldarg_1);
+			generator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
+			generator.Emit(OpCodes.Call, typeof(Stack).GetMethod("PopFrame"));
 				
-			AGenerator.EndExceptionBlock();
+			generator.EndExceptionBlock();
 		}
 
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			AProgram.Stack.PushFrame();
+			program.Stack.PushFrame();
 			try
 			{
-				Nodes[0].Execute(AProgram);
+				Nodes[0].Execute(program);
 				return null;
 			}
 			finally
 			{
-				AProgram.Stack.PopFrame();
+				program.Stack.PopFrame();
 			}
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			return Nodes[0].EmitStatement(AMode);
+			return Nodes[0].EmitStatement(mode);
 		}
 	}
 	
@@ -199,28 +199,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsBreakable = true;
 		}
 		
-		public ExpressionStatementNode(PlanNode ANode) : base()
+		public ExpressionStatementNode(PlanNode node) : base()
 		{
 			ShouldEmitIL = true;
-			Nodes.Add(ANode);
+			Nodes.Add(node);
 		}
 		
-		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
+		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
 		{	
-			int[] LExecutePath = PrepareExecutePath(APlan, AExecutePath);
-			EmitExecute(APlan, AGenerator, LExecutePath, 0);			
+			int[] localExecutePath = PrepareExecutePath(plan, executePath);
+			EmitExecute(plan, generator, localExecutePath, 0);			
 		}
 
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			object LObject = Nodes[0].Execute(AProgram);
-			DataValue.DisposeValue(AProgram.ValueManager, LObject);
+			object objectValue = Nodes[0].Execute(program);
+			DataValue.DisposeValue(program.ValueManager, objectValue);
 			return null;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			return new ExpressionStatement((Expression)Nodes[0].EmitStatement(AMode));
+			return new ExpressionStatement((Expression)Nodes[0].EmitStatement(mode));
 		}
 	}
 	
@@ -242,18 +242,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsBreakable = true;
 		}
 
-		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
+		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
 		{
-			AGenerator.Emit(OpCodes.Newobj, typeof(ExitError).GetConstructor(new Type[] { }));
-			AGenerator.Emit(OpCodes.Throw);
+			generator.Emit(OpCodes.Newobj, typeof(ExitError).GetConstructor(new Type[] { }));
+			generator.Emit(OpCodes.Throw);
 		}
 
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
 			throw new ExitError();
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
 			return new ExitStatement();
 		}
@@ -314,7 +314,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 */
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
 			try
 			{
@@ -322,11 +322,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					try
 					{
-						object LObject = Nodes[0].Execute(AProgram);
-						if ((LObject == null) || !(bool)LObject)
+						object objectValue = Nodes[0].Execute(program);
+						if ((objectValue == null) || !(bool)objectValue)
 							break;
 							
-						Nodes[1].Execute(AProgram);
+						Nodes[1].Execute(program);
 					}
 					catch (ContinueError) { }
 				}
@@ -335,12 +335,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return null;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			WhileStatement LStatement = new WhileStatement();
-			LStatement.Condition = (Expression)Nodes[0].EmitStatement(AMode);
-			LStatement.Statement = Nodes[1].EmitStatement(AMode);
-			return LStatement;
+			WhileStatement statement = new WhileStatement();
+			statement.Condition = (Expression)Nodes[0].EmitStatement(mode);
+			statement.Statement = Nodes[1].EmitStatement(mode);
+			return statement;
 		}
 	}
 	
@@ -398,7 +398,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 */
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
 			try
 			{
@@ -406,9 +406,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					try
 					{
-						Nodes[0].Execute(AProgram);
-						object LObject = Nodes[1].Execute(AProgram);
-						if ((LObject == null) || !(bool)LObject)
+						Nodes[0].Execute(program);
+						object objectValue = Nodes[1].Execute(program);
+						if ((objectValue == null) || !(bool)objectValue)
 							break;
 					}
 					catch (ContinueError){}
@@ -418,12 +418,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return null;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			DoWhileStatement LStatement = new DoWhileStatement();
-			LStatement.Statement = Nodes[0].EmitStatement(AMode);
-			LStatement.Condition = (Expression)Nodes[1].EmitStatement(AMode);
-			return LStatement;
+			DoWhileStatement statement = new DoWhileStatement();
+			statement.Statement = Nodes[0].EmitStatement(mode);
+			statement.Condition = (Expression)Nodes[1].EmitStatement(mode);
+			return statement;
 		}
 	}
 
@@ -437,169 +437,169 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsBreakable = true;
 		}
 		
-		private ForEachStatement FStatement;
+		private ForEachStatement _statement;
 		public ForEachStatement Statement
 		{
-			get { return FStatement; }
-			set { FStatement = value; }
+			get { return _statement; }
+			set { _statement = value; }
 		}
 		
-		private Schema.IDataType FVariableType;
+		private Schema.IDataType _variableType;
 		public Schema.IDataType VariableType
 		{
-			get { return FVariableType; }
-			set { FVariableType = value; }
+			get { return _variableType; }
+			set { _variableType = value; }
 		}
 		
-		private int FLocation;
+		private int _location;
 		public int Location
 		{
-			get { return FLocation; }
-			set { FLocation = value; }
+			get { return _location; }
+			set { _location = value; }
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			Nodes[0].DetermineBinding(APlan);
-			if (FStatement.VariableName == String.Empty)
-				APlan.EnterRowContext();
+			Nodes[0].DetermineBinding(plan);
+			if (_statement.VariableName == String.Empty)
+				plan.EnterRowContext();
 			try
 			{
-				if ((FStatement.VariableName == String.Empty) || FStatement.IsAllocation)
-					APlan.Symbols.Push(new Symbol(FStatement.VariableName, FVariableType));
+				if ((_statement.VariableName == String.Empty) || _statement.IsAllocation)
+					plan.Symbols.Push(new Symbol(_statement.VariableName, _variableType));
 				try
 				{
-					if ((FStatement.VariableName != String.Empty) && !FStatement.IsAllocation)
+					if ((_statement.VariableName != String.Empty) && !_statement.IsAllocation)
 					{
-						int LColumnIndex;
-						Location = Compiler.ResolveVariableIdentifier(APlan, FStatement.VariableName, out LColumnIndex);
+						int columnIndex;
+						Location = Compiler.ResolveVariableIdentifier(plan, _statement.VariableName, out columnIndex);
 						if (Location < 0)
-							throw new CompilerException(CompilerException.Codes.UnknownIdentifier, FStatement.VariableName);
+							throw new CompilerException(CompilerException.Codes.UnknownIdentifier, _statement.VariableName);
 							
-						if (LColumnIndex >= 0)
-							throw new CompilerException(CompilerException.Codes.InvalidColumnBinding, FStatement.VariableName);
+						if (columnIndex >= 0)
+							throw new CompilerException(CompilerException.Codes.InvalidColumnBinding, _statement.VariableName);
 					}
 
-					Nodes[1].DetermineBinding(APlan);
+					Nodes[1].DetermineBinding(plan);
 				}
 				finally
 				{
-					if ((FStatement.VariableName == String.Empty) || FStatement.IsAllocation)
-						APlan.Symbols.Pop();
+					if ((_statement.VariableName == String.Empty) || _statement.IsAllocation)
+						plan.Symbols.Pop();
 				}
 			}
 			finally
 			{
-				if (FStatement.VariableName == String.Empty)
-					APlan.ExitRowContext();
+				if (_statement.VariableName == String.Empty)
+					plan.ExitRowContext();
 			}
 		}
 		
-		private bool CursorNext(Program AProgram, Cursor ACursor)
+		private bool CursorNext(Program program, Cursor cursor)
 		{
-			ACursor.SwitchContext(AProgram);
+			cursor.SwitchContext(program);
 			try
 			{
-				return ACursor.Table.Next();
+				return cursor.Table.Next();
 			}
 			finally
 			{
-				ACursor.SwitchContext(AProgram);
+				cursor.SwitchContext(program);
 			}
 		}
 		
-		private void CursorSelect(Program AProgram, Cursor ACursor, Row ARow)
+		private void CursorSelect(Program program, Cursor cursor, Row row)
 		{
-			ACursor.SwitchContext(AProgram);
+			cursor.SwitchContext(program);
 			try
 			{
-				ACursor.Table.Select(ARow);
+				cursor.Table.Select(row);
 			}
 			finally
 			{
-				ACursor.SwitchContext(AProgram);
+				cursor.SwitchContext(program);
 			}
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
 			if (Nodes[0].DataType is Schema.ICursorType)
 			{
-				CursorValue LCursorValue = (CursorValue)Nodes[0].Execute(AProgram);
-				Cursor LCursor = AProgram.CursorManager.GetCursor(LCursorValue.ID);
+				CursorValue cursorValue = (CursorValue)Nodes[0].Execute(program);
+				Cursor cursor = program.CursorManager.GetCursor(cursorValue.ID);
 				try
 				{
-					int LStackIndex = 0;
-					if ((FStatement.VariableName == String.Empty) || FStatement.IsAllocation)
-						AProgram.Stack.Push(null);
+					int stackIndex = 0;
+					if ((_statement.VariableName == String.Empty) || _statement.IsAllocation)
+						program.Stack.Push(null);
 					else
-						LStackIndex = Location;
+						stackIndex = Location;
 					try
 					{
-						using (Row LRow = new Row(AProgram.ValueManager, (Schema.IRowType)FVariableType))
+						using (Row row = new Row(program.ValueManager, (Schema.IRowType)_variableType))
 						{
-							AProgram.Stack.Poke(LStackIndex, LRow);
+							program.Stack.Poke(stackIndex, row);
 							try
 							{
-								while (CursorNext(AProgram, LCursor))
+								while (CursorNext(program, cursor))
 								{
 									try
 									{
 										// Select row...
-										CursorSelect(AProgram, LCursor, LRow);
-										Nodes[1].Execute(AProgram);
+										CursorSelect(program, cursor, row);
+										Nodes[1].Execute(program);
 									}
 									catch (ContinueError) {}
 								}
 							}
 							finally
 							{
-								AProgram.Stack.Poke(LStackIndex, null); // TODO: Stack imbalance if the iteration statement allocates a variable
+								program.Stack.Poke(stackIndex, null); // TODO: Stack imbalance if the iteration statement allocates a variable
 							}
 						}
 					}
 					finally
 					{
-						if ((FStatement.VariableName == String.Empty) || FStatement.IsAllocation)
-							AProgram.Stack.Pop();
+						if ((_statement.VariableName == String.Empty) || _statement.IsAllocation)
+							program.Stack.Pop();
 					}
 				}
 				catch (BreakError) {}
 				finally
 				{
-					AProgram.CursorManager.CloseCursor(LCursorValue.ID);
+					program.CursorManager.CloseCursor(cursorValue.ID);
 				}
 			}
 			else
 			{
-				ListValue LValue = (ListValue)Nodes[0].Execute(AProgram);
-				if (LValue != null)
+				ListValue tempValue = (ListValue)Nodes[0].Execute(program);
+				if (tempValue != null)
 				{
 					try
 					{
-						int LStackIndex = 0;
-						if ((FStatement.VariableName == String.Empty) || FStatement.IsAllocation)
-							AProgram.Stack.Push(null);
+						int stackIndex = 0;
+						if ((_statement.VariableName == String.Empty) || _statement.IsAllocation)
+							program.Stack.Push(null);
 						else
-							LStackIndex = Location;
+							stackIndex = Location;
 						
 						try
 						{
-							for (int LIndex = 0; LIndex < LValue.Count(); LIndex++)
+							for (int index = 0; index < tempValue.Count(); index++)
 							{
 								try
 								{
 									// Select iteration value
-									AProgram.Stack.Poke(LStackIndex, LValue[LIndex]);
-									Nodes[1].Execute(AProgram);
+									program.Stack.Poke(stackIndex, tempValue[index]);
+									Nodes[1].Execute(program);
 								}
 								catch (ContinueError) {}
 							}
 						}
 						finally
 						{
-							if ((FStatement.VariableName == String.Empty) || FStatement.IsAllocation)
-								AProgram.Stack.Pop();
+							if ((_statement.VariableName == String.Empty) || _statement.IsAllocation)
+								program.Stack.Pop();
 						}
 					}
 					catch (BreakError) {}
@@ -608,22 +608,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return null;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			ForEachStatement LStatement = new ForEachStatement();
-			LStatement.IsAllocation = FStatement.IsAllocation;
-			LStatement.VariableName = FStatement.VariableName;
+			ForEachStatement statement = new ForEachStatement();
+			statement.IsAllocation = _statement.IsAllocation;
+			statement.VariableName = _statement.VariableName;
 			if (Nodes[0] is CursorNode)
 			{
-				CursorSelectorExpression LCursorSelectorExpression = (CursorSelectorExpression)Nodes[0].EmitStatement(AMode);
-				LStatement.Expression = LCursorSelectorExpression.CursorDefinition;
+				CursorSelectorExpression cursorSelectorExpression = (CursorSelectorExpression)Nodes[0].EmitStatement(mode);
+				statement.Expression = cursorSelectorExpression.CursorDefinition;
 			}
 			else
-				LStatement.Expression = new CursorDefinition((Expression)Nodes[0].EmitStatement(AMode));
+				statement.Expression = new CursorDefinition((Expression)Nodes[0].EmitStatement(mode));
 			
-			LStatement.Statement = Nodes[1].EmitStatement(AMode);	
+			statement.Statement = Nodes[1].EmitStatement(mode);	
 			
-			return LStatement;
+			return statement;
 		}
 	}
 
@@ -640,18 +640,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsBreakable = true;
 		}
 
-		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
+		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
 		{
-			AGenerator.Emit(OpCodes.Newobj, typeof(BreakError).GetConstructor(new Type[] { }));
-			AGenerator.Emit(OpCodes.Throw);
+			generator.Emit(OpCodes.Newobj, typeof(BreakError).GetConstructor(new Type[] { }));
+			generator.Emit(OpCodes.Throw);
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
 			throw new BreakError();
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
 			return new BreakStatement();
 		}
@@ -670,18 +670,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsBreakable = true;
 		}
 
-		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
+		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
 		{
-			AGenerator.Emit(OpCodes.Newobj, typeof(ContinueError).GetConstructor(new Type[] { }));
-			AGenerator.Emit(OpCodes.Throw);
+			generator.Emit(OpCodes.Newobj, typeof(ContinueError).GetConstructor(new Type[] { }));
+			generator.Emit(OpCodes.Throw);
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
 			throw new ContinueError();
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
 			return new ContinueStatement();
 		}
@@ -722,22 +722,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 */
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
 			if (NodeCount > 0)
-				AProgram.Stack.ErrorVar = Nodes[0].Execute(AProgram);
-			if (AProgram.Stack.ErrorVar == null)
+				program.Stack.ErrorVar = Nodes[0].Execute(program);
+			if (program.Stack.ErrorVar == null)
 				throw new RuntimeException(RuntimeException.Codes.NilEncountered);
-			AProgram.ReportThrow();
-			throw (Exception)AProgram.Stack.ErrorVar;
+			program.ReportThrow();
+			throw (Exception)program.Stack.ErrorVar;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			RaiseStatement LStatement = new RaiseStatement();
+			RaiseStatement statement = new RaiseStatement();
 			if (NodeCount > 0)
-				LStatement.Expression = (Expression)Nodes[0].EmitStatement(AMode);
-			return LStatement;
+				statement.Expression = (Expression)Nodes[0].EmitStatement(mode);
+			return statement;
 		}
 	}
 	
@@ -749,42 +749,42 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsBreakable = true;
 		}
 
-		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
+		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
 		{
-			int[] LExecutePath = PrepareExecutePath(APlan, AExecutePath);
+			int[] localExecutePath = PrepareExecutePath(plan, executePath);
 			
-			AGenerator.BeginExceptionBlock();
+			generator.BeginExceptionBlock();
 
 			// Execute the protected statement
-			EmitExecute(APlan, AGenerator, LExecutePath, 0);
+			EmitExecute(plan, generator, localExecutePath, 0);
 				
-			AGenerator.BeginFinallyBlock();
+			generator.BeginFinallyBlock();
 
 			// Execute the finally statement
-			EmitExecute(APlan, AGenerator, LExecutePath, 1);
+			EmitExecute(plan, generator, localExecutePath, 1);
 				
-			AGenerator.EndExceptionBlock();
+			generator.EndExceptionBlock();
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
 			try
 			{
-				Nodes[0].Execute(AProgram);
+				Nodes[0].Execute(program);
 				return null;
 			}
 			finally
 			{
-				Nodes[1].Execute(AProgram);
+				Nodes[1].Execute(program);
 			}
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			TryFinallyStatement LStatement = new TryFinallyStatement();
-			LStatement.TryStatement = Nodes[0].EmitStatement(AMode);
-			LStatement.FinallyStatement = Nodes[1].EmitStatement(AMode);
-			return LStatement;
+			TryFinallyStatement statement = new TryFinallyStatement();
+			statement.TryStatement = Nodes[0].EmitStatement(mode);
+			statement.FinallyStatement = Nodes[1].EmitStatement(mode);
+			return statement;
 		}
 	}
 	
@@ -796,39 +796,39 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsBreakable = true;
 		}
 		
-		protected bool FIsGeneric;
+		protected bool _isGeneric;
 		public bool IsGeneric
 		{
-			get { return FIsGeneric; }
-			set { FIsGeneric = value; }
+			get { return _isGeneric; }
+			set { _isGeneric = value; }
 		}
 		
-		protected Schema.IDataType FErrorType;
+		protected Schema.IDataType _errorType;
 		public Schema.IDataType ErrorType
 		{
-			get { return FErrorType; }
-			set { FErrorType = value; }
+			get { return _errorType; }
+			set { _errorType = value; }
 		}
 		
-		protected string FVariableName = String.Empty;
+		protected string _variableName = String.Empty;
 		public string VariableName
 		{
-			get { return FVariableName; }
-			set { FVariableName = value == null ? String.Empty : value; }
+			get { return _variableName; }
+			set { _variableName = value == null ? String.Empty : value; }
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			APlan.Symbols.PushFrame();
+			plan.Symbols.PushFrame();
 			try
 			{
-				if (FVariableName != String.Empty)
-					APlan.Symbols.Push(new Symbol(FVariableName, FErrorType));
-				base.InternalDetermineBinding(APlan);
+				if (_variableName != String.Empty)
+					plan.Symbols.Push(new Symbol(_variableName, _errorType));
+				base.InternalDetermineBinding(plan);
 			}
 			finally
 			{
-				APlan.Symbols.PopFrame();
+				plan.Symbols.PopFrame();
 			}
 		}
 
@@ -872,43 +872,43 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		//    AGenerator.EndExceptionBlock();
 		//}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			AProgram.Stack.PushFrame();
+			program.Stack.PushFrame();
 			try
 			{
-				if (FVariableName != String.Empty)
-					AProgram.Stack.Push(DataValue.CopyValue(AProgram.ValueManager, AProgram.Stack.ErrorVar));
-				Nodes[0].Execute(AProgram);	   
+				if (_variableName != String.Empty)
+					program.Stack.Push(DataValue.CopyValue(program.ValueManager, program.Stack.ErrorVar));
+				Nodes[0].Execute(program);	   
 				return null;
 			}
 			finally
 			{
-				AProgram.Stack.PopFrame();
+				program.Stack.PopFrame();
 			}
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
 			if (IsGeneric)
 			{
-				GenericErrorHandler LHandler = new GenericErrorHandler();
-				LHandler.Statement = Nodes[0].EmitStatement(AMode);
-				return LHandler;
+				GenericErrorHandler handler = new GenericErrorHandler();
+				handler.Statement = Nodes[0].EmitStatement(mode);
+				return handler;
 			}
 			else
 			{
 				if (VariableName != String.Empty)
 				{
-					ParameterizedErrorHandler LHandler = new ParameterizedErrorHandler(ErrorType.Name, VariableName);
-					LHandler.Statement = Nodes[0].EmitStatement(AMode);
-					return LHandler;
+					ParameterizedErrorHandler handler = new ParameterizedErrorHandler(ErrorType.Name, VariableName);
+					handler.Statement = Nodes[0].EmitStatement(mode);
+					return handler;
 				}
 				else
 				{
-					SpecificErrorHandler LHandler = new SpecificErrorHandler(ErrorType.Name);
-					LHandler.Statement = Nodes[0].EmitStatement(AMode);
-					return LHandler;
+					SpecificErrorHandler handler = new SpecificErrorHandler(ErrorType.Name);
+					handler.Statement = Nodes[0].EmitStatement(mode);
+					return handler;
 				}
 			}
 		}
@@ -921,49 +921,49 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsBreakable = true;
 		}
 		
-		public static ErrorHandlerNode GetErrorHandlerNode(PlanNode ANode)
+		public static ErrorHandlerNode GetErrorHandlerNode(PlanNode node)
 		{
-			ErrorHandlerNode LResult = ANode as ErrorHandlerNode;
-			if (LResult != null)
-				return LResult;
-			return GetErrorHandlerNode(ANode.Nodes[0]);
+			ErrorHandlerNode result = node as ErrorHandlerNode;
+			if (result != null)
+				return result;
+			return GetErrorHandlerNode(node.Nodes[0]);
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
 			try
 			{
-				Nodes[0].Execute(AProgram);
+				Nodes[0].Execute(program);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
 				// if this is a host exception, set the error variable
-				if (AProgram.Stack.ErrorVar == null)
-					AProgram.Stack.ErrorVar = LException;
+				if (program.Stack.ErrorVar == null)
+					program.Stack.ErrorVar = exception;
 					
-				ErrorHandlerNode LNode;
-				object LErrorVar = AProgram.Stack.ErrorVar;
-				for (int LIndex = 1; LIndex < NodeCount; LIndex++)
+				ErrorHandlerNode node;
+				object errorVar = program.Stack.ErrorVar;
+				for (int index = 1; index < NodeCount; index++)
 				{
-					LNode = GetErrorHandlerNode(Nodes[LIndex]);
-					if (AProgram.DataTypes.SystemError.Is(LNode.ErrorType)) // TODO: No RTTI on the error
+					node = GetErrorHandlerNode(Nodes[index]);
+					if (program.DataTypes.SystemError.Is(node.ErrorType)) // TODO: No RTTI on the error
 					{
-						LNode.Execute(AProgram);
+						node.Execute(program);
 						break;
 					}
 				}
-				AProgram.Stack.ErrorVar = null;
+				program.Stack.ErrorVar = null;
 			}
 			return null;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			TryExceptStatement LStatement = new TryExceptStatement();
-			LStatement.TryStatement = Nodes[0].EmitStatement(AMode);
-			for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
-				LStatement.ErrorHandlers.Add((GenericErrorHandler)GetErrorHandlerNode(Nodes[LIndex]).EmitStatement(AMode));
-			return LStatement;
+			TryExceptStatement statement = new TryExceptStatement();
+			statement.TryStatement = Nodes[0].EmitStatement(mode);
+			for (int index = 1; index < Nodes.Count; index++)
+				statement.ErrorHandlers.Add((GenericErrorHandler)GetErrorHandlerNode(Nodes[index]).EmitStatement(mode));
+			return statement;
 		}
 	}
 	
@@ -1015,33 +1015,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 */
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			object LObject = Nodes[0].Execute(AProgram);
-			bool LValue = false;
+			object objectValue = Nodes[0].Execute(program);
+			bool tempValue = false;
 			#if NILPROPOGATION
-			if ((LObject == null))
-				LValue = false;
+			if ((objectValue == null))
+				tempValue = false;
 			else
 			#endif
-				LValue = (bool)LObject;
-			if (LValue)
-				Nodes[1].Execute(AProgram);
+				tempValue = (bool)objectValue;
+			if (tempValue)
+				Nodes[1].Execute(program);
 			else
 				if (Nodes.Count > 2)
-					Nodes[2].Execute(AProgram);
+					Nodes[2].Execute(program);
 
 			return null;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			IfStatement LStatement = new IfStatement();
-			LStatement.Expression = (Expression)Nodes[0].EmitStatement(AMode);
-			LStatement.TrueStatement = Nodes[1].EmitStatement(AMode);
+			IfStatement statement = new IfStatement();
+			statement.Expression = (Expression)Nodes[0].EmitStatement(mode);
+			statement.TrueStatement = Nodes[1].EmitStatement(mode);
 			if (Nodes.Count > 2)
-				LStatement.FalseStatement = Nodes[2].EmitStatement(AMode);
-			return LStatement;
+				statement.FalseStatement = Nodes[2].EmitStatement(mode);
+			return statement;
 		}
 	}
 	
@@ -1052,30 +1052,30 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsBreakable = true;
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			foreach (CaseItemNode LNode in Nodes)
+			foreach (CaseItemNode node in Nodes)
 			{
-				if (LNode.Nodes.Count == 2)
+				if (node.Nodes.Count == 2)
 				{
-					bool LValue = false;
-					object LObject = LNode.Nodes[0].Execute(AProgram);
+					bool tempValue = false;
+					object objectValue = node.Nodes[0].Execute(program);
 					#if NILPROPOGATION
-					if ((LObject == null))
-						LValue = false;
+					if ((objectValue == null))
+						tempValue = false;
 					else
 					#endif
-						LValue = (bool)LObject;
+						tempValue = (bool)objectValue;
 					
-					if (LValue)
+					if (tempValue)
 					{
-						LNode.Nodes[1].Execute(AProgram);
+						node.Nodes[1].Execute(program);
 						break;
 					}
 				}
 				else
 				{
-					LNode.Nodes[0].Execute(AProgram);
+					node.Nodes[0].Execute(program);
 					break;
 				}
 			}
@@ -1083,17 +1083,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return null;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			CaseStatement LCaseStatement = new CaseStatement();
-			foreach (CaseItemNode LNode in Nodes)
+			CaseStatement caseStatement = new CaseStatement();
+			foreach (CaseItemNode node in Nodes)
 			{
-				if (LNode.Nodes.Count == 2)
-					LCaseStatement.CaseItems.Add(new CaseItemStatement((Expression)LNode.Nodes[0].EmitStatement(AMode), LNode.Nodes[1].EmitStatement(AMode)));
+				if (node.Nodes.Count == 2)
+					caseStatement.CaseItems.Add(new CaseItemStatement((Expression)node.Nodes[0].EmitStatement(mode), node.Nodes[1].EmitStatement(mode)));
 				else
-					LCaseStatement.ElseStatement = LNode.Nodes[0].EmitStatement(AMode);
+					caseStatement.ElseStatement = node.Nodes[0].EmitStatement(mode);
 			}
-			return LCaseStatement;
+			return caseStatement;
 		}
 	}
 	
@@ -1109,99 +1109,99 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsBreakable = true;
 		}
 		
-		public override void DetermineBinding(Plan APlan)
+		public override void DetermineBinding(Plan plan)
 		{
-			Nodes[0].DetermineBinding(APlan);
+			Nodes[0].DetermineBinding(plan);
 			// Do not bind node 1, it will fail (it contains nameless stack references)
-			APlan.Symbols.Push(new Symbol(String.Empty, Nodes[0].DataType));
+			plan.Symbols.Push(new Symbol(String.Empty, Nodes[0].DataType));
 			try
 			{
-				for (int LIndex = 2; LIndex < Nodes.Count; LIndex++)
-					Nodes[LIndex].DetermineBinding(APlan);
+				for (int index = 2; index < Nodes.Count; index++)
+					Nodes[index].DetermineBinding(plan);
 			}
 			finally
 			{
-				APlan.Symbols.Pop();
+				plan.Symbols.Pop();
 			}
 		}
 
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			object LSelector = Nodes[0].Execute(AProgram);
+			object selector = Nodes[0].Execute(program);
 			try
 			{
-				AProgram.Stack.Push(LSelector);
+				program.Stack.Push(selector);
 				try
 				{
-					for (int LIndex = 2; LIndex < Nodes.Count; LIndex++)
+					for (int index = 2; index < Nodes.Count; index++)
 					{
-						CaseItemNode LNode = (CaseItemNode)Nodes[LIndex];
-						if (LNode.Nodes.Count == 2)
+						CaseItemNode node = (CaseItemNode)Nodes[index];
+						if (node.Nodes.Count == 2)
 						{
-							bool LValue = false;
-							object LWhenVar = LNode.Nodes[0].Execute(AProgram);
+							bool tempValue = false;
+							object whenVar = node.Nodes[0].Execute(program);
 							try
 							{
-								AProgram.Stack.Push(LWhenVar);
+								program.Stack.Push(whenVar);
 								try
 								{
-									object LObject = Nodes[1].Execute(AProgram);
+									object objectValue = Nodes[1].Execute(program);
 									#if NILPROPOGATION
-									if (LObject == null)
-										LValue = false;
+									if (objectValue == null)
+										tempValue = false;
 									else
 									#endif
-										LValue = (bool)LObject;
+										tempValue = (bool)objectValue;
 								}
 								finally
 								{
-									AProgram.Stack.Pop();
+									program.Stack.Pop();
 								}
 							}
 							finally
 							{
-								DataValue.DisposeValue(AProgram.ValueManager, LWhenVar);
+								DataValue.DisposeValue(program.ValueManager, whenVar);
 							}
 
-							if (LValue)
+							if (tempValue)
 							{
-								LNode.Nodes[1].Execute(AProgram);
+								node.Nodes[1].Execute(program);
 								break;
 							}
 						}
 						else
 						{
-							LNode.Nodes[0].Execute(AProgram);
+							node.Nodes[0].Execute(program);
 							break;
 						}
 					}
 				}
 				finally
 				{	
-					AProgram.Stack.Pop();
+					program.Stack.Pop();
 				}
 			}
 			finally
 			{
-				DataValue.DisposeValue(AProgram.ValueManager, LSelector);
+				DataValue.DisposeValue(program.ValueManager, selector);
 			}
 			
 			return null;
 		}
 
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			CaseStatement LCaseStatement = new CaseStatement();
-			LCaseStatement.Expression = (Expression)Nodes[0].EmitStatement(AMode);
-			for (int LIndex = 2; LIndex < Nodes.Count; LIndex++)
+			CaseStatement caseStatement = new CaseStatement();
+			caseStatement.Expression = (Expression)Nodes[0].EmitStatement(mode);
+			for (int index = 2; index < Nodes.Count; index++)
 			{
-				CaseItemNode LNode = (CaseItemNode)Nodes[LIndex];
-				if (LNode.Nodes.Count == 2)
-					LCaseStatement.CaseItems.Add(new CaseItemStatement((Expression)LNode.Nodes[0].EmitStatement(AMode), LNode.Nodes[1].EmitStatement(AMode)));
+				CaseItemNode node = (CaseItemNode)Nodes[index];
+				if (node.Nodes.Count == 2)
+					caseStatement.CaseItems.Add(new CaseItemStatement((Expression)node.Nodes[0].EmitStatement(mode), node.Nodes[1].EmitStatement(mode)));
 				else
-					LCaseStatement.ElseStatement = LNode.Nodes[0].EmitStatement(AMode);
+					caseStatement.ElseStatement = node.Nodes[0].EmitStatement(mode);
 			}
-			return LCaseStatement;
+			return caseStatement;
 		}
 	}
 	
@@ -1212,7 +1212,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsBreakable = true;
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
 			return null;
 		}
@@ -1223,34 +1223,34 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// constructor
 		public ValueNode() : base() 
 		{
-			FIsLiteral = true;
-			FIsFunctional = true;
-			FIsDeterministic = true;
-			FIsRepeatable = true;
-			FIsNilable = false;
+			_isLiteral = true;
+			_isFunctional = true;
+			_isDeterministic = true;
+			_isRepeatable = true;
+			_isNilable = false;
 			ShouldEmitIL = true;
 		}
 
-		public ValueNode(Schema.IDataType ADataType, object AValue) : base()
+		public ValueNode(Schema.IDataType dataType, object tempValue) : base()
 		{
-			FDataType = ADataType;
-			FValue = AValue;
-			FIsLiteral = true;
-			FIsFunctional = true;
-			FIsDeterministic = true;
-			FIsRepeatable = true;
-			FIsNilable = FValue == null;
+			_dataType = dataType;
+			_value = tempValue;
+			_isLiteral = true;
+			_isFunctional = true;
+			_isDeterministic = true;
+			_isRepeatable = true;
+			_isNilable = _value == null;
 			ShouldEmitIL = true;
 		}
 		
-		protected object FValue;
+		protected object _value;
 		public object Value
 		{
-			get { return FValue; }
+			get { return _value; }
 			set 
 			{ 
-				FValue = value; 
-				FIsNilable = FValue == null;
+				_value = value; 
+				_isNilable = _value == null;
 			}
 		}
 
@@ -1278,34 +1278,34 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 */
 
 		// Execute
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			return FValue;		 
+			return _value;		 
 		}
 		
 		// EmitStatement
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			if (FValue == null)
+			if (_value == null)
 				return new ValueExpression(null, TokenType.Nil);
-			else if (Schema.Object.NamesEqual(FDataType.Name, Schema.DataTypes.CSystemBoolean))
-				return new ValueExpression(FValue, TokenType.Boolean);
-			else if (Schema.Object.NamesEqual(FDataType.Name, Schema.DataTypes.CSystemLong))
-				return new ValueExpression(FValue, TokenType.Integer);
-			else if (Schema.Object.NamesEqual(FDataType.Name, Schema.DataTypes.CSystemInteger))
-				return new ValueExpression(FValue, TokenType.Integer);
-			else if (Schema.Object.NamesEqual(FDataType.Name, Schema.DataTypes.CSystemDecimal))
-				return new ValueExpression(FValue, TokenType.Decimal);
-			else if (Schema.Object.NamesEqual(FDataType.Name, Schema.DataTypes.CSystemString))
-				return new ValueExpression(FValue, TokenType.String);
+			else if (Schema.Object.NamesEqual(_dataType.Name, Schema.DataTypes.SystemBooleanName))
+				return new ValueExpression(_value, TokenType.Boolean);
+			else if (Schema.Object.NamesEqual(_dataType.Name, Schema.DataTypes.SystemLongName))
+				return new ValueExpression(_value, TokenType.Integer);
+			else if (Schema.Object.NamesEqual(_dataType.Name, Schema.DataTypes.SystemIntegerName))
+				return new ValueExpression(_value, TokenType.Integer);
+			else if (Schema.Object.NamesEqual(_dataType.Name, Schema.DataTypes.SystemDecimalName))
+				return new ValueExpression(_value, TokenType.Decimal);
+			else if (Schema.Object.NamesEqual(_dataType.Name, Schema.DataTypes.SystemStringName))
+				return new ValueExpression(_value, TokenType.String);
 			#if USEISTRING
 			else if (Schema.Object.NamesEqual(FDataType.Name, Schema.DataTypes.CSystemIString))
 				return new ValueExpression(FValue, LexerToken.IString);
 			#endif
-			else if (Schema.Object.NamesEqual(FDataType.Name, Schema.DataTypes.CSystemMoney))
-				return new ValueExpression(FValue, TokenType.Money);
+			else if (Schema.Object.NamesEqual(_dataType.Name, Schema.DataTypes.SystemMoneyName))
+				return new ValueExpression(_value, TokenType.Money);
 			else
-				throw new RuntimeException(RuntimeException.Codes.UnsupportedValueType, FDataType.Name);
+				throw new RuntimeException(RuntimeException.Codes.UnsupportedValueType, _dataType.Name);
 		}
     }																			
     
@@ -1316,70 +1316,70 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			ShouldEmitIL = true;
 		}
 
-		public ParameterNode(PlanNode ANode, Modifier AModifier)
+		public ParameterNode(PlanNode node, Modifier modifier)
 		{
-			Nodes.Add(ANode);
-			FModifier = AModifier;
+			Nodes.Add(node);
+			_modifier = modifier;
 			ShouldEmitIL = true;
 		}
 		
-		private Modifier FModifier;
+		private Modifier _modifier;
 		public Modifier Modifier
 		{
-			get { return FModifier; }
-			set { FModifier = value; }
+			get { return _modifier; }
+			set { _modifier = value; }
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			return new ParameterExpression(FModifier, (Expression)Nodes[0].EmitStatement(AMode));
+			return new ParameterExpression(_modifier, (Expression)Nodes[0].EmitStatement(mode));
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = Nodes[0].DataType;
+			DetermineModifiers(plan);
+			_dataType = Nodes[0].DataType;
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
 			if (Modifier == Modifier.Var)
-				APlan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
+				plan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
 			try
 			{
-				base.InternalDetermineBinding(APlan);
+				base.InternalDetermineBinding(plan);
 			}
 			finally
 			{
 				if (Modifier == Modifier.Var)
-					APlan.PopCursorContext();
+					plan.PopCursorContext();
 			}
 		}
 		
-		public override void BindToProcess(Plan APlan)
+		public override void BindToProcess(Plan plan)
 		{
 			if (Modifier == Modifier.Var)
-				APlan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
+				plan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
 			try
 			{	
-				base.BindToProcess(APlan);
+				base.BindToProcess(plan);
 			}
 			finally
 			{
 				if (Modifier == Modifier.Var)
-					APlan.PopCursorContext();
+					plan.PopCursorContext();
 			}
 		}
 
-		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
+		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
 		{
-			int[] LExecutePath = PrepareExecutePath(APlan, AExecutePath);
-			EmitEvaluate(APlan, AGenerator, LExecutePath, 0);
+			int[] localExecutePath = PrepareExecutePath(plan, executePath);
+			EmitEvaluate(plan, generator, localExecutePath, 0);
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			return Nodes[0].Execute(AProgram);
+			return Nodes[0].Execute(program);
 		}
 	}
 	
@@ -1393,44 +1393,44 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsBreakable = true;
 		}
 		
-		private PlanNode FAllocateResultNode;
+		private PlanNode _allocateResultNode;
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			base.DetermineDataType(APlan);
+			base.DetermineDataType(plan);
 
-			if (FDataType != null)
+			if (_dataType != null)
 			{
-				FAllocateResultNode = new VariableNode(Keywords.Result, FDataType);
-				FAllocateResultNode.IsBreakable = false;
+				_allocateResultNode = new VariableNode(Keywords.Result, _dataType);
+				_allocateResultNode.IsBreakable = false;
 			}
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			bool LSaveIsInsert = APlan.IsInsert;
-			APlan.IsInsert = false;
+			bool saveIsInsert = plan.IsInsert;
+			plan.IsInsert = false;
 			try
 			{
-				base.InternalDetermineBinding(APlan);
+				base.InternalDetermineBinding(plan);
 			}
 			finally
 			{
-				APlan.IsInsert = LSaveIsInsert;
+				plan.IsInsert = saveIsInsert;
 			}
 
-			for (int LIndex = 0; LIndex < Operator.Operands.Count; LIndex++)
-				APlan.Symbols.Push(new Symbol(Operator.Operands[LIndex].Name, Nodes[LIndex].DataType));
+			for (int index = 0; index < Operator.Operands.Count; index++)
+				plan.Symbols.Push(new Symbol(Operator.Operands[index].Name, Nodes[index].DataType));
 				
-			APlan.Symbols.PushWindow(Operator.Operands.Count);
+			plan.Symbols.PushWindow(Operator.Operands.Count);
 			try
 			{
-				if (FAllocateResultNode != null)
-					FAllocateResultNode.DetermineBinding(APlan);
+				if (_allocateResultNode != null)
+					_allocateResultNode.DetermineBinding(plan);
 			}
 			finally
 			{
-				APlan.Symbols.PopWindow();
+				plan.Symbols.PopWindow();
 			}
 		}
 
@@ -1640,74 +1640,74 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 */
 		
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			for (int LIndex = 0; LIndex < Operator.Operands.Count; LIndex++)
-				AProgram.Stack.Push(AArguments[LIndex]);
+			for (int index = 0; index < Operator.Operands.Count; index++)
+				program.Stack.Push(arguments[index]);
 
 			// TODO: I am not sure this is necessary, the derived table var does not do this
 			// All rights checking should be being performed at compile-time, so there should
 			// be no reason to impersonate the operator owner at this point...				
-			AProgram.Plan.PushSecurityContext(new SecurityContext(Operator.Owner));
+			program.Plan.PushSecurityContext(new SecurityContext(Operator.Owner));
 			try
 			{
-				bool LSaveIsInsert = AProgram.ServerProcess.IsInsert;
-				AProgram.ServerProcess.IsInsert = false;
+				bool saveIsInsert = program.ServerProcess.IsInsert;
+				program.ServerProcess.IsInsert = false;
 				try
 				{
-					ApplicationTransaction LTransaction = null;
-					if ((AProgram.ServerProcess.ApplicationTransactionID != Guid.Empty) && !Operator.ShouldTranslate)
-						LTransaction = AProgram.ServerProcess.GetApplicationTransaction();
+					ApplicationTransaction transaction = null;
+					if ((program.ServerProcess.ApplicationTransactionID != Guid.Empty) && !Operator.ShouldTranslate)
+						transaction = program.ServerProcess.GetApplicationTransaction();
 					try
 					{
-						if (LTransaction != null)
-							LTransaction.PushGlobalContext();
+						if (transaction != null)
+							transaction.PushGlobalContext();
 						try
 						{
 							// Prepare the result
-							if (FAllocateResultNode != null)
-								FAllocateResultNode.Execute(AProgram);
+							if (_allocateResultNode != null)
+								_allocateResultNode.Execute(program);
 
 							// Record the stack depth
-							int LStackDepth = AProgram.Stack.Count;
+							int stackDepth = program.Stack.Count;
 
 							try
 							{
-								Operator.Block.BlockNode.Execute(AProgram);
+								Operator.Block.BlockNode.Execute(program);
 							}
 							catch (ExitError){}
 							
 							// Pass any var arguments back out to the instruction
-							for (int LIndex = 0; LIndex < Operator.Operands.Count; LIndex++)
-								if (Operator.Operands[LIndex].Modifier == Modifier.Var)
-									AArguments[LIndex] = AProgram.Stack[AProgram.Stack.Count - LStackDepth + (Operator.Operands.Count + (FAllocateResultNode != null ? 1 : 0) - 1 - LIndex)];
+							for (int index = 0; index < Operator.Operands.Count; index++)
+								if (Operator.Operands[index].Modifier == Modifier.Var)
+									arguments[index] = program.Stack[program.Stack.Count - stackDepth + (Operator.Operands.Count + (_allocateResultNode != null ? 1 : 0) - 1 - index)];
 							
 							// Return the result
-							if (FAllocateResultNode != null)
-								return AProgram.Stack[AProgram.Stack.Count - LStackDepth];
+							if (_allocateResultNode != null)
+								return program.Stack[program.Stack.Count - stackDepth];
 
 							return null;
 						}
 						finally
 						{
-							if (LTransaction != null)
-								LTransaction.PopGlobalContext();
+							if (transaction != null)
+								transaction.PopGlobalContext();
 						}
 					}
 					finally
 					{
-						if (LTransaction != null)
-							Monitor.Exit(LTransaction);
+						if (transaction != null)
+							Monitor.Exit(transaction);
 					}
 				}
 				finally
 				{
-					AProgram.ServerProcess.IsInsert = LSaveIsInsert;
+					program.ServerProcess.IsInsert = saveIsInsert;
 				}
 			}
 			finally
 			{
-				AProgram.Plan.PopSecurityContext();
+				program.Plan.PopSecurityContext();
 			}
 		}
 	}
@@ -1719,51 +1719,51 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsBreakable = true;
 		}
 
-		public VariableNode(string AVariableName, Schema.IDataType AVariableType) : base()
+		public VariableNode(string variableName, Schema.IDataType variableType) : base()
 		{
 			IsBreakable = true;
-			FVariableName = AVariableName;
-			FVariableType = AVariableType;
+			_variableName = variableName;
+			_variableType = variableType;
 		}
 		
-		protected string FVariableName = String.Empty;
+		protected string _variableName = String.Empty;
 		public string VariableName
 		{
-			get { return FVariableName; }
-			set { FVariableName = value == null ? String.Empty : value; }
+			get { return _variableName; }
+			set { _variableName = value == null ? String.Empty : value; }
 		}
 		
-		protected Schema.IDataType FVariableType;
+		protected Schema.IDataType _variableType;
 		public Schema.IDataType VariableType
 		{
-			get { return FVariableType; }
-			set { FVariableType = value; }
+			get { return _variableType; }
+			set { _variableType = value; }
 		}
 		
-		private bool FHasDefault;
+		private bool _hasDefault;
 		public bool HasDefault 
 		{ 
-			get { return FHasDefault; } 
-			set { FHasDefault = value; } 
+			get { return _hasDefault; } 
+			set { _hasDefault = value; } 
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
 			if (NodeCount > 0)
-				APlan.Symbols.Push(new Symbol(String.Empty, APlan.DataTypes.SystemGeneric));
+				plan.Symbols.Push(new Symbol(String.Empty, plan.DataTypes.SystemGeneric));
 			try
 			{
-				base.InternalDetermineBinding(APlan);
+				base.InternalDetermineBinding(plan);
 			}
 			finally
 			{
 				if (NodeCount > 0)
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 			}
-			APlan.Symbols.Push(new Symbol(FVariableName, FVariableType));
-			Schema.ScalarType LScalarType = FVariableType as Schema.ScalarType;
-			if (LScalarType != null)
-				FHasDefault = ((LScalarType.Default != null) || (LScalarType.HasHandlers(EventType.Default)));
+			plan.Symbols.Push(new Symbol(_variableName, _variableType));
+			Schema.ScalarType scalarType = _variableType as Schema.ScalarType;
+			if (scalarType != null)
+				_hasDefault = ((scalarType.Default != null) || (scalarType.HasHandlers(EventType.Default)));
 		}
 
 /*
@@ -1837,36 +1837,36 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 */
 		
 		// Note that initialization is more efficient than the equivalent declaration / assignment construct 
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			AProgram.Stack.Push(null);
-			int LStackDepth = AProgram.Stack.Count;
+			program.Stack.Push(null);
+			int stackDepth = program.Stack.Count;
 
 			if (NodeCount > 0)
 			{
-				object LValue = Nodes[0].Execute(AProgram);
+				object tempValue = Nodes[0].Execute(program);
 				if (Nodes[0].DataType is Schema.ScalarType)
-					LValue = ValueUtility.ValidateValue(AProgram, (Schema.ScalarType)Nodes[0].DataType, LValue);
-				AProgram.Stack.Poke(AProgram.Stack.Count - LStackDepth, LValue);
+					tempValue = ValueUtility.ValidateValue(program, (Schema.ScalarType)Nodes[0].DataType, tempValue);
+				program.Stack.Poke(program.Stack.Count - stackDepth, tempValue);
 			}
 			else
 			{
-				if (FHasDefault && (VariableType is Schema.ScalarType))
-					AProgram.Stack.Poke(0, ValueUtility.DefaultValue(AProgram, (Schema.ScalarType)VariableType));
+				if (_hasDefault && (VariableType is Schema.ScalarType))
+					program.Stack.Poke(0, ValueUtility.DefaultValue(program, (Schema.ScalarType)VariableType));
 			}
 
 
 			return null;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			VariableStatement LStatement = new VariableStatement();
-			LStatement.VariableName = new IdentifierExpression(VariableName);
-			LStatement.TypeSpecifier = VariableType.EmitSpecifier(AMode);
+			VariableStatement statement = new VariableStatement();
+			statement.VariableName = new IdentifierExpression(VariableName);
+			statement.TypeSpecifier = VariableType.EmitSpecifier(mode);
 			if (NodeCount > 0)
-				LStatement.Expression = (Expression)Nodes[0].EmitStatement(AMode);
-			return LStatement;
+				statement.Expression = (Expression)Nodes[0].EmitStatement(mode);
+			return statement;
 		}
 	}
 	
@@ -1877,21 +1877,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			ShouldEmitIL = true;
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			APlan.Symbols.Pop();
+			plan.Symbols.Pop();
 		}
 
-		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
+		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
 		{
-			AGenerator.Emit(OpCodes.Ldarg_1);
-			AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-			AGenerator.Emit(OpCodes.Call, typeof(Stack).GetMethod("Pop", new Type[] { }));
+			generator.Emit(OpCodes.Ldarg_1);
+			generator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
+			generator.Emit(OpCodes.Call, typeof(Stack).GetMethod("Pop", new Type[] { }));
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			AProgram.Stack.Pop();
+			program.Stack.Pop();
 			return null;
 		}
 	}
@@ -1903,9 +1903,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			ShouldEmitIL = true;
 		}
 		
-		public DeallocateVariableNode(int ALocation) : base()
+		public DeallocateVariableNode(int location) : base()
 		{
-			Location = ALocation;
+			Location = location;
 			ShouldEmitIL = true;
 		}
 		
@@ -1936,13 +1936,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 */
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			DataValue.DisposeValue(AProgram.ValueManager, AProgram.Stack[Location]);
+			DataValue.DisposeValue(program.ValueManager, program.Stack[Location]);
 			return null;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
 			return new EmptyStatement();
 		}
@@ -1955,17 +1955,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			ShouldEmitIL = true;
 		}
 
-		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
+		public override void EmitIL(Plan plan, ILGenerator generator, int[] executePath)
 		{
-			AGenerator.Emit(OpCodes.Nop);
+			generator.Emit(OpCodes.Nop);
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
 			return null;
 		}
 
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
 			return new EmptyStatement();
 		}
@@ -1979,22 +1979,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsBreakable = true;
 		}
 		
-		public AssignmentNode(PlanNode ATargetNode, PlanNode AValueNode) : base()
+		public AssignmentNode(PlanNode targetNode, PlanNode valueNode) : base()
 		{
-			Nodes.Add(ATargetNode);
-			Nodes.Add(AValueNode);
+			Nodes.Add(targetNode);
+			Nodes.Add(valueNode);
 			ShouldEmitIL = true;
 			IsBreakable = true;
 		}
 
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			int LLocation = ((StackReferenceNode)Nodes[0]).Location;
-			Symbol LSymbol = APlan.Symbols[LLocation];
-			if (LSymbol.IsConstant)
-				throw new CompilerException(CompilerException.Codes.ConstantObjectCannotBeAssigned, APlan.CurrentStatement(), LSymbol.Name);
-			APlan.Symbols.SetIsModified(LLocation);
+			DetermineModifiers(plan);
+			int location = ((StackReferenceNode)Nodes[0]).Location;
+			Symbol symbol = plan.Symbols[location];
+			if (symbol.IsConstant)
+				throw new CompilerException(CompilerException.Codes.ConstantObjectCannotBeAssigned, plan.CurrentStatement(), symbol.Name);
+			plan.Symbols.SetIsModified(location);
 		}
 
 /*
@@ -2025,21 +2025,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 */
 
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			object LObject = Nodes[1].Execute(AProgram);
+			object objectValue = Nodes[1].Execute(program);
 			if (Nodes[1].DataType is Schema.ScalarType)
-				LObject = ValueUtility.ValidateValue(AProgram, (Schema.ScalarType)Nodes[1].DataType, LObject);
-			AProgram.Stack.Poke(((StackReferenceNode)Nodes[0]).Location, LObject);
+				objectValue = ValueUtility.ValidateValue(program, (Schema.ScalarType)Nodes[1].DataType, objectValue);
+			program.Stack.Poke(((StackReferenceNode)Nodes[0]).Location, objectValue);
 			return null;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			AssignmentStatement LStatement = new AssignmentStatement();
-			LStatement.Target = (Expression)Nodes[0].EmitStatement(AMode);
-			LStatement.Expression = (Expression)Nodes[1].EmitStatement(AMode);
-			return LStatement;
+			AssignmentStatement statement = new AssignmentStatement();
+			statement.Target = (Expression)Nodes[0].EmitStatement(mode);
+			statement.Expression = (Expression)Nodes[1].EmitStatement(mode);
+			return statement;
 		}
 	}
 	
@@ -2049,129 +2049,129 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     public class ConditionNode : PlanNode
     {
 		// DetermineDataType
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			if (!Nodes[0].DataType.Is(APlan.DataTypes.SystemBoolean))
-				throw new CompilerException(CompilerException.Codes.BooleanExpressionExpected, APlan.CurrentStatement());
+			DetermineModifiers(plan);
+			if (!Nodes[0].DataType.Is(plan.DataTypes.SystemBoolean))
+				throw new CompilerException(CompilerException.Codes.BooleanExpressionExpected, plan.CurrentStatement());
 				
 			if (Nodes[2].DataType.Is(Nodes[1].DataType))
 			{
-				FDataType = Nodes[1].DataType;
-				Nodes[2] = Compiler.Upcast(APlan, Nodes[2], FDataType);
+				_dataType = Nodes[1].DataType;
+				Nodes[2] = Compiler.Upcast(plan, Nodes[2], _dataType);
 			}
 			else if (Nodes[1].DataType.Is(Nodes[2].DataType))
 			{
-				FDataType = Nodes[2].DataType;
-				Nodes[1] = Compiler.Upcast(APlan, Nodes[1], FDataType);
+				_dataType = Nodes[2].DataType;
+				Nodes[1] = Compiler.Upcast(plan, Nodes[1], _dataType);
 			}
 			else
 			{
-				ConversionContext LContext = Compiler.FindConversionPath(APlan, Nodes[2].DataType, Nodes[1].DataType);
-				if (LContext.CanConvert)
+				ConversionContext context = Compiler.FindConversionPath(plan, Nodes[2].DataType, Nodes[1].DataType);
+				if (context.CanConvert)
 				{
-					FDataType = Nodes[1].DataType;
-					Nodes[2] = Compiler.Upcast(APlan, Compiler.ConvertNode(APlan, Nodes[2], LContext), Nodes[1].DataType);
+					_dataType = Nodes[1].DataType;
+					Nodes[2] = Compiler.Upcast(plan, Compiler.ConvertNode(plan, Nodes[2], context), Nodes[1].DataType);
 				}
 				else
 				{
-					LContext = Compiler.FindConversionPath(APlan, Nodes[1].DataType, Nodes[2].DataType);
-					if (LContext.CanConvert)
+					context = Compiler.FindConversionPath(plan, Nodes[1].DataType, Nodes[2].DataType);
+					if (context.CanConvert)
 					{
-						FDataType = Nodes[2].DataType;
-						Nodes[1] = Compiler.Upcast(APlan, Compiler.ConvertNode(APlan, Nodes[1], LContext), Nodes[2].DataType);
+						_dataType = Nodes[2].DataType;
+						Nodes[1] = Compiler.Upcast(plan, Compiler.ConvertNode(plan, Nodes[1], context), Nodes[2].DataType);
 					}
 					else
-						Compiler.CheckConversionContext(APlan, LContext);
+						Compiler.CheckConversionContext(plan, context);
 				}
 			}
 		}
 		
 		// Execute
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			bool LValue = false;
-			object LObject = Nodes[0].Execute(AProgram);
+			bool tempValue = false;
+			object objectValue = Nodes[0].Execute(program);
 			#if NILPROPOGATION
-			if ((LObject == null))
-				LValue = false;
+			if ((objectValue == null))
+				tempValue = false;
 			else
 			#endif
-				LValue = (bool)LObject;
+				tempValue = (bool)objectValue;
 
-			if (LValue)
-				return Nodes[1].Execute(AProgram);
+			if (tempValue)
+				return Nodes[1].Execute(program);
 			else
-				return Nodes[2].Execute(AProgram);
+				return Nodes[2].Execute(program);
 		}
 		
 		// EmitStatement
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			return new IfExpression((Expression)Nodes[0].EmitStatement(AMode), (Expression)Nodes[1].EmitStatement(AMode), (Expression)Nodes[2].EmitStatement(AMode));
+			return new IfExpression((Expression)Nodes[0].EmitStatement(mode), (Expression)Nodes[1].EmitStatement(mode), (Expression)Nodes[2].EmitStatement(mode));
 		}
     }
 
 	public class ConditionedCaseNode : PlanNode
 	{
 		// DetermineDataType
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
+			DetermineModifiers(plan);
 
-			FDataType = Nodes[0].Nodes[1].DataType;
-			for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
+			_dataType = Nodes[0].Nodes[1].DataType;
+			for (int index = 1; index < Nodes.Count; index++)
 			{
-				int LNodeIndex = Nodes[LIndex].Nodes.Count - 1;
-				if (Nodes[LIndex].Nodes[LNodeIndex].DataType.Is(Nodes[0].Nodes[1].DataType))
-					Nodes[LIndex].Nodes[LNodeIndex] = Compiler.Upcast(APlan, Nodes[LIndex].Nodes[LNodeIndex], FDataType);
+				int nodeIndex = Nodes[index].Nodes.Count - 1;
+				if (Nodes[index].Nodes[nodeIndex].DataType.Is(Nodes[0].Nodes[1].DataType))
+					Nodes[index].Nodes[nodeIndex] = Compiler.Upcast(plan, Nodes[index].Nodes[nodeIndex], _dataType);
 				else
 				{	
-					ConversionContext LContext = Compiler.FindConversionPath(APlan, Nodes[LIndex].Nodes[LNodeIndex].DataType, FDataType);
-					if (LContext.CanConvert)
-						Nodes[LIndex].Nodes[LNodeIndex] = Compiler.Upcast(APlan, Compiler.ConvertNode(APlan, Nodes[LIndex].Nodes[LNodeIndex], LContext), FDataType);
+					ConversionContext context = Compiler.FindConversionPath(plan, Nodes[index].Nodes[nodeIndex].DataType, _dataType);
+					if (context.CanConvert)
+						Nodes[index].Nodes[nodeIndex] = Compiler.Upcast(plan, Compiler.ConvertNode(plan, Nodes[index].Nodes[nodeIndex], context), _dataType);
 					else
-						Compiler.CheckConversionContext(APlan, LContext);
+						Compiler.CheckConversionContext(plan, context);
 				}
 			}
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			foreach (ConditionedCaseItemNode LNode in Nodes)
+			foreach (ConditionedCaseItemNode node in Nodes)
 			{
-				if (LNode.Nodes.Count == 2)
+				if (node.Nodes.Count == 2)
 				{
-					bool LValue = false;
-					object LObject = LNode.Nodes[0].Execute(AProgram);
+					bool tempValue = false;
+					object objectValue = node.Nodes[0].Execute(program);
 					#if NILPROPOGATION
-					if ((LObject == null))
-						LValue = false;
+					if ((objectValue == null))
+						tempValue = false;
 					else
 					#endif
-						LValue = (bool)LObject;
+						tempValue = (bool)objectValue;
 					
-					if (LValue)
-						return LNode.Nodes[1].Execute(AProgram);
+					if (tempValue)
+						return node.Nodes[1].Execute(program);
 				}
 				else
-					return LNode.Nodes[0].Execute(AProgram);
+					return node.Nodes[0].Execute(program);
 			}
 			
 			return null;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			CaseExpression LCaseExpression = new CaseExpression();
-			foreach (ConditionedCaseItemNode LNode in Nodes)
+			CaseExpression caseExpression = new CaseExpression();
+			foreach (ConditionedCaseItemNode node in Nodes)
 			{
-				if (LNode.Nodes.Count == 2)
-					LCaseExpression.CaseItems.Add(new CaseItemExpression((Expression)LNode.Nodes[0].EmitStatement(AMode), (Expression)LNode.Nodes[1].EmitStatement(AMode)));
+				if (node.Nodes.Count == 2)
+					caseExpression.CaseItems.Add(new CaseItemExpression((Expression)node.Nodes[0].EmitStatement(mode), (Expression)node.Nodes[1].EmitStatement(mode)));
 				else
-					LCaseExpression.ElseExpression = new CaseElseExpression((Expression)LNode.Nodes[0].EmitStatement(AMode));
+					caseExpression.ElseExpression = new CaseElseExpression((Expression)node.Nodes[0].EmitStatement(mode));
 			}
-			return LCaseExpression;
+			return caseExpression;
 		}
 	}
 	
@@ -2183,111 +2183,111 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	public class SelectedConditionedCaseNode : PlanNode
 	{
 		// DetermineDataType
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = Nodes[2].Nodes[1].DataType;
-			for (int LIndex = 3; LIndex < Nodes.Count; LIndex++)
+			DetermineModifiers(plan);
+			_dataType = Nodes[2].Nodes[1].DataType;
+			for (int index = 3; index < Nodes.Count; index++)
 			{
-				int LNodeIndex = Nodes[LIndex].Nodes.Count - 1;
-				if (Nodes[LIndex].Nodes[LNodeIndex].DataType.Is(FDataType))
-					Nodes[LIndex].Nodes[LNodeIndex] = Compiler.Upcast(APlan, Nodes[LIndex].Nodes[LNodeIndex], FDataType);
+				int nodeIndex = Nodes[index].Nodes.Count - 1;
+				if (Nodes[index].Nodes[nodeIndex].DataType.Is(_dataType))
+					Nodes[index].Nodes[nodeIndex] = Compiler.Upcast(plan, Nodes[index].Nodes[nodeIndex], _dataType);
 				else
 				{	
-					ConversionContext LContext = Compiler.FindConversionPath(APlan, Nodes[LIndex].Nodes[LNodeIndex].DataType, FDataType);
-					if (LContext.CanConvert)
-						Nodes[LIndex].Nodes[LNodeIndex] = Compiler.Upcast(APlan, Compiler.ConvertNode(APlan, Nodes[LIndex].Nodes[LNodeIndex], LContext), FDataType);
+					ConversionContext context = Compiler.FindConversionPath(plan, Nodes[index].Nodes[nodeIndex].DataType, _dataType);
+					if (context.CanConvert)
+						Nodes[index].Nodes[nodeIndex] = Compiler.Upcast(plan, Compiler.ConvertNode(plan, Nodes[index].Nodes[nodeIndex], context), _dataType);
 					else
-						Compiler.CheckConversionContext(APlan, LContext);
+						Compiler.CheckConversionContext(plan, context);
 				}
 			}
 		}
 		
-		public override void DetermineBinding(Plan APlan)
+		public override void DetermineBinding(Plan plan)
 		{
-			Nodes[0].DetermineBinding(APlan);
+			Nodes[0].DetermineBinding(plan);
 			// Do not bind node 1, it will fail (it contains nameless stack references)
-			for (int LIndex = 2; LIndex < Nodes.Count; LIndex++)
-				Nodes[LIndex].DetermineBinding(APlan);
+			for (int index = 2; index < Nodes.Count; index++)
+				Nodes[index].DetermineBinding(plan);
 		}
 
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			object LSelector = Nodes[0].Execute(AProgram);
+			object selector = Nodes[0].Execute(program);
 			try
 			{
-				for (int LIndex = 2; LIndex < Nodes.Count; LIndex++)
+				for (int index = 2; index < Nodes.Count; index++)
 				{
-					ConditionedCaseItemNode LNode = (ConditionedCaseItemNode)Nodes[LIndex];
-					if (LNode.Nodes.Count == 2)
+					ConditionedCaseItemNode node = (ConditionedCaseItemNode)Nodes[index];
+					if (node.Nodes.Count == 2)
 					{
-						bool LValue = false;
-						object LWhenVar = LNode.Nodes[0].Execute(AProgram);
+						bool tempValue = false;
+						object whenVar = node.Nodes[0].Execute(program);
 						try
 						{
-							AProgram.Stack.Push(LSelector);
+							program.Stack.Push(selector);
 							try
 							{
-								AProgram.Stack.Push(LWhenVar);
+								program.Stack.Push(whenVar);
 								try
 								{
-									object LObject = Nodes[1].Execute(AProgram);
+									object objectValue = Nodes[1].Execute(program);
 									#if NILPROPOGATION
-									if ((LObject == null))
-										LValue = false;
+									if ((objectValue == null))
+										tempValue = false;
 									else
 									#endif
-										LValue = (bool)LObject;
+										tempValue = (bool)objectValue;
 								}
 								finally
 								{
-									AProgram.Stack.Pop();
+									program.Stack.Pop();
 								}
 							}
 							finally
 							{	
-								AProgram.Stack.Pop();
+								program.Stack.Pop();
 							}
 						}
 						finally
 						{
-							DataValue.DisposeValue(AProgram.ValueManager, LWhenVar);
+							DataValue.DisposeValue(program.ValueManager, whenVar);
 						}
 
-						if (LValue)
-							return LNode.Nodes[1].Execute(AProgram);
+						if (tempValue)
+							return node.Nodes[1].Execute(program);
 					}
 					else
-						return LNode.Nodes[0].Execute(AProgram);
+						return node.Nodes[0].Execute(program);
 				}
 			}
 			finally
 			{
-				DataValue.DisposeValue(AProgram.ValueManager, LSelector);
+				DataValue.DisposeValue(program.ValueManager, selector);
 			}
 			
 			return null;
 		}
 
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			CaseExpression LCaseExpression = new CaseExpression();
-			LCaseExpression.Expression = (Expression)Nodes[0].EmitStatement(AMode);
-			for (int LIndex = 2; LIndex < Nodes.Count; LIndex++)
+			CaseExpression caseExpression = new CaseExpression();
+			caseExpression.Expression = (Expression)Nodes[0].EmitStatement(mode);
+			for (int index = 2; index < Nodes.Count; index++)
 			{
-				ConditionedCaseItemNode LNode = (ConditionedCaseItemNode)Nodes[LIndex];
-				if (LNode.Nodes.Count == 2)
-					LCaseExpression.CaseItems.Add(new CaseItemExpression((Expression)LNode.Nodes[0].EmitStatement(AMode), (Expression)LNode.Nodes[1].EmitStatement(AMode)));
+				ConditionedCaseItemNode node = (ConditionedCaseItemNode)Nodes[index];
+				if (node.Nodes.Count == 2)
+					caseExpression.CaseItems.Add(new CaseItemExpression((Expression)node.Nodes[0].EmitStatement(mode), (Expression)node.Nodes[1].EmitStatement(mode)));
 				else
-					LCaseExpression.ElseExpression = new CaseElseExpression((Expression)LNode.Nodes[0].EmitStatement(AMode));
+					caseExpression.ElseExpression = new CaseElseExpression((Expression)node.Nodes[0].EmitStatement(mode));
 			}
-			return LCaseExpression;
+			return caseExpression;
 		}
 	}
 	
 	public class ConditionedCaseItemNode : PlanNode
 	{
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
 			return null;
 		}
@@ -2297,21 +2297,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public VarReferenceNode() : base()
 		{
-			FIsLiteral = false;
-			FIsFunctional = true;
-			FIsDeterministic = true;
-			FIsRepeatable = true;
-			FIsOrderPreserving = true;
+			_isLiteral = false;
+			_isFunctional = true;
+			_isDeterministic = true;
+			_isRepeatable = true;
+			_isOrderPreserving = true;
 		}
 		
-		public VarReferenceNode(Schema.IDataType ADataType) : base()
+		public VarReferenceNode(Schema.IDataType dataType) : base()
 		{
-			FDataType = ADataType;
-			FIsLiteral = false;
-			FIsFunctional = true;
-			FIsDeterministic = true;
-			FIsRepeatable = true;
-			FIsOrderPreserving = true;
+			_dataType = dataType;
+			_isLiteral = false;
+			_isFunctional = true;
+			_isDeterministic = true;
+			_isRepeatable = true;
+			_isOrderPreserving = true;
 		}
 	}
 	
@@ -2323,40 +2323,40 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			ShouldEmitIL = true;
 		}
 		
-		public StackReferenceNode(Schema.IDataType ADataType, int ALocation) : base(ADataType)
+		public StackReferenceNode(Schema.IDataType dataType, int location) : base(dataType)
 		{
-			Location = ALocation;
+			Location = location;
 			ShouldEmitIL = true;
 		}
 		
-		public StackReferenceNode(Schema.IDataType ADataType, int ALocation, bool AByReference) : base(ADataType)
+		public StackReferenceNode(Schema.IDataType dataType, int location, bool byReference) : base(dataType)
 		{
-			Location = ALocation;
-			ByReference = AByReference;
+			Location = location;
+			ByReference = byReference;
 			ShouldEmitIL = true;
 		}
 		
-		public StackReferenceNode(string AIdentifier, Schema.IDataType ADataType, int ALocation) : base(ADataType)
+		public StackReferenceNode(string identifier, Schema.IDataType dataType, int location) : base(dataType)
 		{
-			Identifier = AIdentifier;
-			Location = ALocation;
+			Identifier = identifier;
+			Location = location;
 			ShouldEmitIL = true;
 		}
 		
-		public StackReferenceNode(string AIdentifier, Schema.IDataType ADataType, int ALocation, bool AByReference) : base(ADataType)
+		public StackReferenceNode(string identifier, Schema.IDataType dataType, int location, bool byReference) : base(dataType)
 		{
-			Identifier = AIdentifier;
-			Location = ALocation;
-			ByReference = AByReference;
+			Identifier = identifier;
+			Location = location;
+			ByReference = byReference;
 			ShouldEmitIL = true;
 		}
 		
 		// Identifier
-		protected string FIdentifier = String.Empty;
+		protected string _identifier = String.Empty;
 		public string Identifier
 		{
-			get { return FIdentifier; }
-			set { FIdentifier = value == null ? String.Empty : value; }
+			get { return _identifier; }
+			set { _identifier = value == null ? String.Empty : value; }
 		}
 		
 		// Location
@@ -2366,20 +2366,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public bool ByReference;
 		
 		// Statement
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			return new VariableIdentifierExpression(FIdentifier);
+			return new VariableIdentifierExpression(_identifier);
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			int LColumnIndex;
-			Location = Compiler.ResolveVariableIdentifier(APlan, FIdentifier, out LColumnIndex);
+			int columnIndex;
+			Location = Compiler.ResolveVariableIdentifier(plan, _identifier, out columnIndex);
 			if (Location < 0)
-				throw new CompilerException(CompilerException.Codes.UnknownIdentifier, FIdentifier);
+				throw new CompilerException(CompilerException.Codes.UnknownIdentifier, _identifier);
 				
-			if (LColumnIndex >= 0)
-				throw new CompilerException(CompilerException.Codes.InvalidColumnBinding, FIdentifier);
+			if (columnIndex >= 0)
+				throw new CompilerException(CompilerException.Codes.InvalidColumnBinding, _identifier);
 		}
 
 /*
@@ -2431,25 +2431,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 */
 		
 		// Execute
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
 			if (ByReference)
-				return AProgram.Stack[Location];
+				return program.Stack[Location];
 			else
-				return DataValue.CopyValue(AProgram.ValueManager, AProgram.Stack[Location]);
+				return DataValue.CopyValue(program.ValueManager, program.Stack[Location]);
 		}
 
-		protected override void WritePlanAttributes(System.Xml.XmlWriter AWriter)
+		protected override void WritePlanAttributes(System.Xml.XmlWriter writer)
 		{
-			base.WritePlanAttributes(AWriter);
-			AWriter.WriteAttributeString("Identifier", Identifier);
-			AWriter.WriteAttributeString("StackIndex", Location.ToString());
-			AWriter.WriteAttributeString("ByReference", Convert.ToString(ByReference));
+			base.WritePlanAttributes(writer);
+			writer.WriteAttributeString("Identifier", Identifier);
+			writer.WriteAttributeString("StackIndex", Location.ToString());
+			writer.WriteAttributeString("ByReference", Convert.ToString(ByReference));
 		}
 
-		public override bool IsContextLiteral(int ALocation)
+		public override bool IsContextLiteral(int location)
 		{
-			if (Location == ALocation)
+			if (Location == location)
 				return false;
 			return true;
 		}
@@ -2478,22 +2478,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			ShouldEmitIL = true;
 		}
 		
-		public StackColumnReferenceNode(string AIdentifier, Schema.IDataType ADataType, int ALocation) : base(ADataType)
+		public StackColumnReferenceNode(string identifier, Schema.IDataType dataType, int location) : base(dataType)
 		{
-			Identifier = AIdentifier;
-			Location = ALocation;
+			Identifier = identifier;
+			Location = location;
 			ShouldEmitIL = true;
 		}
 		#endif
 		
 		// Identifier
-		private string FIdentifier;
+		private string _identifier;
 		public string Identifier
 		{
-			get { return FIdentifier; }
+			get { return _identifier; }
 			set 
 			{ 
-				FIdentifier = value;
+				_identifier = value;
 				#if !USECOLUMNLOCATIONBINDING
 				SetResolvingIdentifier();
 				#endif
@@ -2501,7 +2501,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 
 		#if !USECOLUMNLOCATIONBINDING		
-		private string FResolvingIdentifier;
+		private string _resolvingIdentifier;
 		private void SetResolvingIdentifier()
 		{
 			switch (Schema.Object.Qualifier(Schema.Object.EnsureUnrooted(Identifier)))
@@ -2510,9 +2510,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				case Keywords.Left :
 				case Keywords.Right :
 				case Keywords.Source :
-					FResolvingIdentifier = Schema.Object.Dequalify(Schema.Object.EnsureUnrooted(Identifier)); break;
+					_resolvingIdentifier = Schema.Object.Dequalify(Schema.Object.EnsureUnrooted(Identifier)); break;
 				
-				default : FResolvingIdentifier = Identifier; break;
+				default : _resolvingIdentifier = Identifier; break;
 			}
 		}
 		#endif
@@ -2529,24 +2529,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public bool ByReference;
 		
 		// Statement
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
 			if (Schema.Object.Qualifier(Schema.Object.EnsureUnrooted(Identifier)) == Keywords.Parent)
-				return new ExplodeColumnExpression(FResolvingIdentifier);
+				return new ExplodeColumnExpression(_resolvingIdentifier);
 			else
-				return new ColumnIdentifierExpression(FResolvingIdentifier);
+				return new ColumnIdentifierExpression(_resolvingIdentifier);
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
 			#if USECOLUMNLOCATIONBINDING
 			Location = Compiler.ResolveVariableIdentifier(APlan, Identifier, out ColumnLocation);
 			if ((Location < 0) || (ColumnLocation < 0))
 				throw new CompilerException(CompilerException.Codes.UnknownIdentifier, Identifier);
 			#else
-			int LColumnIndex;
-			Location = Compiler.ResolveVariableIdentifier(APlan, Identifier, out LColumnIndex);
-			if ((Location < 0) || (LColumnIndex < 0))
+			int columnIndex;
+			Location = Compiler.ResolveVariableIdentifier(plan, Identifier, out columnIndex);
+			if ((Location < 0) || (columnIndex < 0))
 				throw new CompilerException(CompilerException.Codes.UnknownIdentifier, Identifier);
 			#endif
 		}
@@ -2637,90 +2637,90 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 */
 		
 		// Execute
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			Row LRow = (Row)AProgram.Stack[Location];
+			Row row = (Row)program.Stack[Location];
 			#if NILPROPOGATION
-			if ((LRow == null) || LRow.IsNil)
+			if ((row == null) || row.IsNil)
 				return null;
 			#endif
 
 			#if USECOLUMNLOCATIONBINDING
-			if (LRow.HasValue(ColumnLocation))
-				return ByReference ? LRow[ColumnLocation] : DataValue.CopyValue(AProgram.ServerProcess, LRow[ColumnLocation]);
+			if (row.HasValue(ColumnLocation))
+				return ByReference ? row[ColumnLocation] : DataValue.CopyValue(AProgram.ServerProcess, row[ColumnLocation]);
 			else
 				return null;
 			#else
-			int LColumnIndex = LRow.DataType.Columns.IndexOf(FResolvingIdentifier);
-			if (LColumnIndex < 0)
-				throw new CompilerException(CompilerException.Codes.UnknownIdentifier, FResolvingIdentifier);
-			if (LRow.HasValue(LColumnIndex))
-				return ByReference ? LRow[LColumnIndex] : DataValue.CopyValue(AProgram.ValueManager, LRow[LColumnIndex]);
+			int columnIndex = row.DataType.Columns.IndexOf(_resolvingIdentifier);
+			if (columnIndex < 0)
+				throw new CompilerException(CompilerException.Codes.UnknownIdentifier, _resolvingIdentifier);
+			if (row.HasValue(columnIndex))
+				return ByReference ? row[columnIndex] : DataValue.CopyValue(program.ValueManager, row[columnIndex]);
 			else
 				return null;
 			#endif
 		}
 
-		protected override void WritePlanAttributes(System.Xml.XmlWriter AWriter)
+		protected override void WritePlanAttributes(System.Xml.XmlWriter writer)
 		{
-			base.WritePlanAttributes(AWriter);
-			AWriter.WriteAttributeString("ColumnName", Identifier);
-			AWriter.WriteAttributeString("StackIndex", Location.ToString());
+			base.WritePlanAttributes(writer);
+			writer.WriteAttributeString("ColumnName", Identifier);
+			writer.WriteAttributeString("StackIndex", Location.ToString());
 		}
 
-		public override bool IsContextLiteral(int ALocation)
+		public override bool IsContextLiteral(int location)
 		{
-			if (Location == ALocation)
+			if (Location == location)
 				return false;
 			return true;
 		}
 
-		public override void DetermineCharacteristics(Plan APlan)
+		public override void DetermineCharacteristics(Plan plan)
 		{
-			var LColumn =
+			var column =
 			IsLiteral = false;
 			IsFunctional = true;
 			IsDeterministic = true;
 			IsRepeatable = true;
 			// TODO: introduce infrastructure (possible by merging tablevar with tabletype) to infer nilability through columns
 			IsNilable = false;  //((Schema.RowType)APlan.Symbols[Location].DataType).Columns[FResolvingIdentifier].IsNilable;
-			base.DetermineCharacteristics(APlan);
+			base.DetermineCharacteristics(plan);
 		}
     }
 
     public class PropertyReferenceNode : VarReferenceNode
     {
 		public PropertyReferenceNode() : base(){}
-		public PropertyReferenceNode(Schema.IDataType ADataType, Schema.ScalarType AScalarType, PlanNode AValueNode, int ARepresentationIndex, int APropertyIndex) : base(((Schema.ScalarType)ADataType).Representations[ARepresentationIndex].Properties[APropertyIndex].DataType)
+		public PropertyReferenceNode(Schema.IDataType dataType, Schema.ScalarType scalarType, PlanNode valueNode, int representationIndex, int propertyIndex) : base(((Schema.ScalarType)dataType).Representations[representationIndex].Properties[propertyIndex].DataType)
 		{
-			Nodes.Add(AValueNode);
-			FScalarType = AScalarType;
-			FRepresentationIndex = ARepresentationIndex;
-			FPropertyIndex = APropertyIndex;
+			Nodes.Add(valueNode);
+			_scalarType = scalarType;
+			_representationIndex = representationIndex;
+			_propertyIndex = propertyIndex;
 		}
 		
-		private Schema.ScalarType FScalarType;
+		private Schema.ScalarType _scalarType;
 		public Schema.ScalarType ScalarType
 		{
-			get { return FScalarType; }
-			set { FScalarType = value; }
+			get { return _scalarType; }
+			set { _scalarType = value; }
 		}
 		
-		private int FRepresentationIndex;
+		private int _representationIndex;
 		public int RepresentationIndex
 		{
-			get { return FRepresentationIndex; }
-			set { FRepresentationIndex = value; }
+			get { return _representationIndex; }
+			set { _representationIndex = value; }
 		}
 		
-		private int FPropertyIndex;
+		private int _propertyIndex;
 		public int PropertyIndex
 		{
-			get { return FPropertyIndex; }
-			set { FPropertyIndex = value; }
+			get { return _propertyIndex; }
+			set { _propertyIndex = value; }
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
 			throw new RuntimeException(RuntimeException.Codes.PropertyRefNodeExecuted);
 		}

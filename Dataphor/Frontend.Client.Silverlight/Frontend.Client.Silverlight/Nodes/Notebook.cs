@@ -6,7 +6,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
 	public class Notebook : Element, INotebook, ISilverlightContainerElement
 	{
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
@@ -14,7 +14,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			}
 			finally
 			{
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 
@@ -24,9 +24,9 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		}
 
 		/// <remarks> This callback method is invoked on the main thread. </remarks>
-		private void SelectionChanged(object ASender, SelectionChangedEventArgs AArgs)
+		private void SelectionChanged(object sender, SelectionChangedEventArgs args)
 		{
-			var LNewItem = AArgs.AddedItems.Count == 0 ? null : AArgs.AddedItems[0];
+			var newItem = args.AddedItems.Count == 0 ? null : args.AddedItems[0];
 			Session.Invoke
 			(
 				(System.Action)
@@ -35,7 +35,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 					{
 						if (Active)
 						{
-							SetActive(FindPage(LNewItem));
+							SetActive(FindPage(newItem));
 							if (OnActivePageChange != null)
 								OnActivePageChange.Execute(this, new EventParams());
 						}
@@ -44,41 +44,41 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			);
 		}
 
-		private IBaseNotebookPage FindPage(object AItem)
+		private IBaseNotebookPage FindPage(object item)
 		{
-			foreach (ISilverlightBaseNotebookPage LPage in Children)
-				if (LPage.ContentControl == AItem)
-					return LPage;
+			foreach (ISilverlightBaseNotebookPage page in Children)
+				if (page.ContentControl == item)
+					return page;
 			return null;
 		}
 
-		private void SetActive(IBaseNotebookPage APage)
+		private void SetActive(IBaseNotebookPage page)
 		{
-			if (APage != FActivePage)
+			if (page != _activePage)
 			{
-				IBaseNotebookPage LOldPage = FActivePage;
-				FActivePage = APage;
+				IBaseNotebookPage oldPage = _activePage;
+				_activePage = page;
 
-				if (LOldPage != null)
-					((ISilverlightBaseNotebookPage)LOldPage).Unselected();
-				if (FActivePage != null)
-					((ISilverlightBaseNotebookPage)FActivePage).Selected();
+				if (oldPage != null)
+					((ISilverlightBaseNotebookPage)oldPage).Unselected();
+				if (_activePage != null)
+					((ISilverlightBaseNotebookPage)_activePage).Selected();
 			}
 		}
 
 		// ActivePage
 
-		private IBaseNotebookPage FActivePage;
+		private IBaseNotebookPage _activePage;
 		public IBaseNotebookPage ActivePage
 		{
-			get { return FActivePage; }
+			get { return _activePage; }
 			set
 			{
-				if (FActivePage != value)
+				if (_activePage != value)
 				{
 					if ((value != null) && (!IsChildNode(value)))
 						throw new ClientException(ClientException.Codes.InvalidActivePage);
-					FActivePage = value;
+					_activePage = value;
 					UpdateBinding(NotebookControl.TargetSelectedIndexProperty);
 				}
 			}
@@ -86,34 +86,34 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		private object UIGetTargetSelectedIndex()
 		{
-			return FActivePage == null ? -1 : Children.IndexOf(FActivePage);;
+			return _activePage == null ? -1 : Children.IndexOf(_activePage);;
 		}
 
-		private bool IsChildNode(INode ANode)
+		private bool IsChildNode(INode node)
 		{
-			foreach (INode LNode in Children)
-				if (LNode == ANode)
+			foreach (INode localNode in Children)
+				if (localNode == node)
 					return true;
 			return false;
 		}
 
 		// OnActivePageChange
 
-		private IAction FOnActivePageChange;
+		private IAction _onActivePageChange;
 		public IAction OnActivePageChange
 		{
-			get { return FOnActivePageChange; }
+			get { return _onActivePageChange; }
 			set
 			{
-				if (FOnActivePageChange != null)
-					FOnActivePageChange.Disposed -= new EventHandler(OnActivePageChangeDisposed);
-				FOnActivePageChange = value;
-				if (FOnActivePageChange != null)
-					FOnActivePageChange.Disposed += new EventHandler(OnActivePageChangeDisposed);
+				if (_onActivePageChange != null)
+					_onActivePageChange.Disposed -= new EventHandler(OnActivePageChangeDisposed);
+				_onActivePageChange = value;
+				if (_onActivePageChange != null)
+					_onActivePageChange.Disposed += new EventHandler(OnActivePageChangeDisposed);
 			}
 		}
 
-		private void OnActivePageChangeDisposed(object ASender, EventArgs AArgs)
+		private void OnActivePageChangeDisposed(object sender, EventArgs args)
 		{
 			OnActivePageChange = null;
 		}
@@ -123,39 +123,39 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		protected override void Activate()
 		{
 			// Use the first child if there is not an explicit active page set (do this before calling base so the child will know that it will be active)
-			if ((FActivePage == null) && (Children.Count > 0))
-				FActivePage = (IBaseNotebookPage)Children[0];
+			if ((_activePage == null) && (Children.Count > 0))
+				_activePage = (IBaseNotebookPage)Children[0];
 
 			base.Activate();
 
-			if (FActivePage != null)
-				((ISilverlightBaseNotebookPage)FActivePage).Selected();
+			if (_activePage != null)
+				((ISilverlightBaseNotebookPage)_activePage).Selected();
 		}
 
-		public override bool IsValidChild(Type AChildType)
+		public override bool IsValidChild(Type childType)
 		{
-			if (typeof(ISilverlightBaseNotebookPage).IsAssignableFrom(AChildType))
+			if (typeof(ISilverlightBaseNotebookPage).IsAssignableFrom(childType))
 				return true;
-			return base.IsValidChild(AChildType);
+			return base.IsValidChild(childType);
 		}
 
 		internal protected override void ChildrenChanged()
 		{
 			base.ChildrenChanged();
-			if ((FActivePage == null) && (Children.Count > 0))
+			if ((_activePage == null) && (Children.Count > 0))
 				ActivePage = (IBaseNotebookPage)Children[0];
 		}
 
 		/// <remarks> This method is invoked on the main thread. </remarks>
-		public void InsertChild(int AIndex, FrameworkElement AChild)
+		public void InsertChild(int index, FrameworkElement child)
 		{
-			NotebookControl.Items.Insert(Math.Min(AIndex, NotebookControl.Items.Count), AChild);
+			NotebookControl.Items.Insert(Math.Min(index, NotebookControl.Items.Count), child);
 		}
 
 		/// <remarks> This method is invoked on the main thread. </remarks>
-		public void RemoveChild(FrameworkElement AChild)
+		public void RemoveChild(FrameworkElement child)
 		{
-			NotebookControl.Items.Remove(AChild);
+			NotebookControl.Items.Remove(child);
 		}
 
 		// Element

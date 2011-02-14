@@ -20,18 +20,18 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 {
 	public class PlanTree : TreeSurface
 	{
-		protected override IElementDesigner GetDesigner(object AElement)
+		protected override IElementDesigner GetDesigner(object element)
 		{
-			SimplePlanNodeBox LBox = new SimplePlanNodeBox((Visual.TreeNode)AElement);
-			LBox.Click += new EventHandler(DesignerClick);
-			LBox.Disposed += new EventHandler(DesignerDisposed);
-			return LBox;
+			SimplePlanNodeBox box = new SimplePlanNodeBox((Visual.TreeNode)element);
+			box.Click += new EventHandler(DesignerClick);
+			box.Disposed += new EventHandler(DesignerDisposed);
+			return box;
 		}
 
-		public void Set(XElement ARoot)
+		public void Set(XElement root)
 		{
 			BeginUpdate();
-			AddNode(Nodes, ARoot).Expand(false);
+			AddNode(Nodes, root).Expand(false);
 			EndUpdate();
 		}
 
@@ -42,105 +42,105 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			EndUpdate();
 		}
 
-		private Visual.TreeNode AddNode(TreeNodes ANodes, XElement AElement)
+		private Visual.TreeNode AddNode(TreeNodes nodes, XElement element)
 		{
-			Visual.TreeNode LNode = new Visual.TreeNode();
-			LNode.IsExpanded = !FExpandOnDemand;
-			LNode.Element = AElement;
-			foreach (XElement LChild in AElement.Elements())
+			Visual.TreeNode node = new Visual.TreeNode();
+			node.IsExpanded = !_expandOnDemand;
+			node.Element = element;
+			foreach (XElement child in element.Elements())
 			{
-				if (LChild.Name.LocalName.IndexOf(".") < 1)
-					AddNode(LNode.Children, LChild);
+				if (child.Name.LocalName.IndexOf(".") < 1)
+					AddNode(node.Children, child);
 			}
-			ANodes.Add(LNode);
-			return LNode;
+			nodes.Add(node);
+			return node;
 		}
 
-		private bool FExpandOnDemand = true;
+		private bool _expandOnDemand = true;
 		public bool ExpandOnDemand
 		{
-			get { return FExpandOnDemand; }
+			get { return _expandOnDemand; }
 			set
 			{
-				if (value != FExpandOnDemand)
+				if (value != _expandOnDemand)
 				{
-					FExpandOnDemand = value;
+					_expandOnDemand = value;
 					if (!value && (Nodes.Count > 0))
 						Nodes[0].Expand(true);
 				}
 			}
 		}
 
-		private void ExpandNode(IElementDesigner ADesigner)
+		private void ExpandNode(IElementDesigner designer)
 		{
-			if (ADesigner != null)
+			if (designer != null)
 			{
-				Visual.TreeNode LNode = (Visual.TreeNode)ADesigner.Element;
+				Visual.TreeNode node = (Visual.TreeNode)designer.Element;
 
 				// Collapse all children
-				foreach (Visual.TreeNode LChild in LNode.Children)
-					LChild.Collapse(false);
+				foreach (Visual.TreeNode child in node.Children)
+					child.Collapse(false);
 
 				// Expand this node
-				LNode.Expand(false);
+				node.Expand(false);
 			}
 		}
 
-		private void DesignerClick(object ASender, EventArgs AArgs)
+		private void DesignerClick(object sender, EventArgs args)
 		{
-			if (FExpandOnDemand)
-				ExpandNode(ASender as IElementDesigner);
+			if (_expandOnDemand)
+				ExpandNode(sender as IElementDesigner);
 		}
 
-		private void DesignerDisposed(object ASender, EventArgs AArgs)
+		private void DesignerDisposed(object sender, EventArgs args)
 		{
-			((Control)ASender).Click -= new EventHandler(DesignerClick);
+			((Control)sender).Click -= new EventHandler(DesignerClick);
 		}
 	}
 
 	public class SimplePlanNodeBox : TextDesignerBox, IElementDesigner
 	{
-		public SimplePlanNodeBox(Visual.TreeNode ANode)
+		public SimplePlanNodeBox(Visual.TreeNode node)
 		{
-			FNode = ANode;
-			XElement LElement = (XElement)((Visual.TreeNode)ANode).Element;
+			_node = node;
+			XElement element = (XElement)((Visual.TreeNode)node).Element;
 
-			XAttribute LDescription = LElement.Attribute("Description");
-			if ((LDescription == null) || (LDescription.Value == String.Empty))
-				Text = LElement.Name.LocalName;
+			XAttribute description = element.Attribute("Description");
+			if ((description == null) || (description.Value == String.Empty))
+				Text = element.Name.LocalName;
 			else
-				Text = LDescription.Value;
+				Text = description.Value;
 
-			XAttribute LDeviceSupported = LElement.Attribute("DeviceSupported");
-			if ((LDeviceSupported == null) || (LDeviceSupported.Value.ToLower() != "true"))
+			XAttribute deviceSupported = element.Attribute("DeviceSupported");
+			if ((deviceSupported == null) || (deviceSupported.Value.ToLower() != "true"))
 				SurfaceColor = Color.FromArgb(200, 230, 200);
 			else
 				SurfaceColor = Color.FromArgb(230, 200, 200);
 
-			XAttribute LCategory = LElement.Attribute("Category");
-			if (LCategory != null)
-				if (LCategory.Value == "Instruction")
+			XAttribute category = element.Attribute("Category");
+			if (category != null)
+				if (category.Value == "Instruction")
 					RoundRadius = 10;
-				else if (LCategory.Value == "Unknown")
+				else if (category.Value == "Unknown")
 					RoundRadius = 20;
 		}
 
-		private Visual.TreeNode FNode;
-		public Visual.TreeNode Node { get { return FNode; } }
+		private Visual.TreeNode _node;
+		public Visual.TreeNode Node { get { return _node; } }
 
-		public object Element { get { return FNode; } }
+		public object Element { get { return _node; } }
 
 		public override void ZoomIn()
 		{
-			XElement LElement = (XElement)Node.Element;
+			XElement element = (XElement)Node.Element;
 			
-			DetailedPlanNodeBox LBox = new DetailedPlanNodeBox(LElement);
-			LBox.RoundRadius = this.RoundRadius;
-			LBox.SurfaceColor = this.SurfaceColor;
-			SingleElementSurface LSurface = new SingleElementSurface(LElement, LBox);
+			DetailedPlanNodeBox box = new DetailedPlanNodeBox(element);
+			box.RoundRadius = this.RoundRadius;
+			box.SurfaceColor = this.SurfaceColor;
+			SingleElementSurface surface = new SingleElementSurface(element, box);
 
-			DesignerControl LControl = DesignerControl.GetDesigner(this);
-			LControl.Push(LSurface, Text);
+			DesignerControl control = DesignerControl.GetDesigner(this);
+			control.Push(surface, Text);
 		}
 
 		public override bool CanZoomIn()
@@ -151,11 +151,11 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 
 	public class ElementGroup : ArrayList
 	{
-		private string FName = String.Empty;
+		private string _name = String.Empty;
 		public string Name
 		{
-			get { return FName; }
-			set { FName = (value == null ? String.Empty : value); }
+			get { return _name; }
+			set { _name = (value == null ? String.Empty : value); }
 		}
 	}
 
@@ -163,7 +163,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 	{
 		public static Color CTabSurfaceColor = Color.FromArgb(200, 230, 230);
 
-		public DetailedPlanNodeBox(XElement AElement)
+		public DetailedPlanNodeBox(XElement element)
 		{
 			SuspendLayout();
 
@@ -172,239 +172,239 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			NormalDepth = MaxDepth;
 			SurfaceColor = Color.FromArgb(190, 190, 220);
 
-			FElement = AElement;
+			_element = element;
 
-			FGroups = GetChildGroups();
+			_groups = GetChildGroups();
 
-			FProperties = new Table();
-			FProperties.BeginUpdate();
-			FProperties.BackColor = SurfaceColor;
-			FProperties.ForeColor = ForeColor;
-			TableColumn LColumn = new TableColumn(FProperties);
-			LColumn.Name = "Attribute";
-			LColumn.Title = Strings.Analyzer_AttributeTable_AttributeTitle;
-			FProperties.Columns.Add(LColumn);
-			LColumn = new TableColumn(FProperties);
-			LColumn.Name = "Value";
-			LColumn.Title = Strings.Analyzer_AttributeTable_ValueTitle;
-			FProperties.Columns.Add(LColumn);
-			FProperties.OnGetValue += new GetTableValueHandler(PropertiesGetValue);
-			FProperties.OnGetDesignerRequired += new GetTableDesignerRequiredHandler(PropertiesGetDesignerRequired);
-			FProperties.OnGetDesigner += new GetTableDesignerHandler(PropertiesGetDesigner);
-			Controls.Add(FProperties);
-			foreach (XAttribute LAttribute in FElement.Attributes())
-				FProperties.Rows.Add(LAttribute);
-			FProperties.EndUpdate();
+			_properties = new Table();
+			_properties.BeginUpdate();
+			_properties.BackColor = SurfaceColor;
+			_properties.ForeColor = ForeColor;
+			TableColumn column = new TableColumn(_properties);
+			column.Name = "Attribute";
+			column.Title = Strings.Analyzer_AttributeTable_AttributeTitle;
+			_properties.Columns.Add(column);
+			column = new TableColumn(_properties);
+			column.Name = "Value";
+			column.Title = Strings.Analyzer_AttributeTable_ValueTitle;
+			_properties.Columns.Add(column);
+			_properties.OnGetValue += new GetTableValueHandler(PropertiesGetValue);
+			_properties.OnGetDesignerRequired += new GetTableDesignerRequiredHandler(PropertiesGetDesignerRequired);
+			_properties.OnGetDesigner += new GetTableDesignerHandler(PropertiesGetDesigner);
+			Controls.Add(_properties);
+			foreach (XAttribute attribute in _element.Attributes())
+				_properties.Rows.Add(attribute);
+			_properties.EndUpdate();
 
-			if (FGroups.Count > 0)
+			if (_groups.Count > 0)
 			{
-				FNotebook = new DAE.Client.Controls.Notebook();
-				Controls.Add(FNotebook);
+				_notebook = new DAE.Client.Controls.Notebook();
+				Controls.Add(_notebook);
 			}
 		
 			// Place a table for each group
-			foreach (DictionaryEntry LEntry in FGroups)
+			foreach (DictionaryEntry entry in _groups)
 			{
-				DAE.Client.Controls.NotebookPage LPage = new DAE.Client.Controls.NotebookPage();
-				LPage.BackColor = CTabSurfaceColor;
-				LPage.Text = (string)LEntry.Key;
-				LPage.Controls.Add(CreateGroupTable((ElementGroup)LEntry.Value));
-				LPage.Controls[0].Dock = DockStyle.Fill;
-				FNotebook.Pages.Add(LPage);
+				DAE.Client.Controls.NotebookPage page = new DAE.Client.Controls.NotebookPage();
+				page.BackColor = CTabSurfaceColor;
+				page.Text = (string)entry.Key;
+				page.Controls.Add(CreateGroupTable((ElementGroup)entry.Value));
+				page.Controls[0].Dock = DockStyle.Fill;
+				_notebook.Pages.Add(page);
 			}
 
 			ResumeLayout(false);
 		}
 
-		private XElement FElement;
-		public object Element { get { return FElement; } }
+		private XElement _element;
+		public object Element { get { return _element; } }
 
 		#region Properties
 
-		private Table FProperties;
-		public Table Properties { get { return FProperties; } }
+		private Table _properties;
+		public Table Properties { get { return _properties; } }
 
 		protected override void SurfaceColorChanged()
 		{
 			base.SurfaceColorChanged();
-			if (FProperties != null)
-				FProperties.BackColor = SurfaceColor;
+			if (_properties != null)
+				_properties.BackColor = SurfaceColor;
 		}
 
-		private string PropertiesGetValue(Table ATable, Point ACell)
+		private string PropertiesGetValue(Table table, Point cell)
 		{
-			XAttribute LAttribute = (XAttribute)FProperties.Rows[ACell.Y];
-			if (ACell.X == 0)
-				return LAttribute.Name.LocalName;
+			XAttribute attribute = (XAttribute)_properties.Rows[cell.Y];
+			if (cell.X == 0)
+				return attribute.Name.LocalName;
 			else
-				return LAttribute.Value;
+				return attribute.Value;
 		}
 
-		private bool PropertiesGetDesignerRequired(Table ATable, Point ACell, Graphics AGraphics, Rectangle ABounds)
+		private bool PropertiesGetDesignerRequired(Table table, Point cell, Graphics graphics, Rectangle bounds)
 		{
-			Size LBounds = Size.Ceiling(AGraphics.MeasureString(PropertiesGetValue(ATable, ACell), ATable.Font));
-			return (LBounds.Width > ABounds.Width) || (LBounds.Height > ABounds.Height);
+			Size localBounds = Size.Ceiling(graphics.MeasureString(PropertiesGetValue(table, cell), table.Font));
+			return (localBounds.Width > bounds.Width) || (localBounds.Height > bounds.Height);
 		}
 
-		private IElementDesigner PropertiesGetDesigner(Table ATable, Point ACell)
+		private IElementDesigner PropertiesGetDesigner(Table table, Point cell)
 		{
-			CellDesignerBox LBox = new CellDesignerBox();
-			LBox.TextHAlign = HorizontalAlignment.Left;
-			LBox.Text = PropertiesGetValue(ATable, ACell);
-			return LBox;
+			CellDesignerBox box = new CellDesignerBox();
+			box.TextHAlign = HorizontalAlignment.Left;
+			box.Text = PropertiesGetValue(table, cell);
+			return box;
 		}
 
 		#endregion
 
 		#region Child Groups
 
-		private DAE.Client.Controls.Notebook FNotebook;
+		private DAE.Client.Controls.Notebook _notebook;
 		
-		private IDictionary FGroups;
-		public IDictionary Groups { get { return FGroups; } }
+		private IDictionary _groups;
+		public IDictionary Groups { get { return _groups; } }
 
 		/// <summary> Get the set of child elements grouped by their qualifiers. </summary>
 		private IDictionary GetChildGroups()
 		{
-			HybridDictionary LGroups = new HybridDictionary();
-			string LQualifierName;
-			ElementGroup LGroup;
-			foreach (XElement LElement in FElement.Elements())
+			HybridDictionary groups = new HybridDictionary();
+			string qualifierName;
+			ElementGroup group;
+			foreach (XElement element in _element.Elements())
 			{
-				if (LElement.Name.LocalName.IndexOf(".") >= 0)
+				if (element.Name.LocalName.IndexOf(".") >= 0)
 				{
-					LQualifierName = LElement.Name.LocalName.Substring(0, LElement.Name.LocalName.IndexOf("."));
-					LGroup = LGroups[LQualifierName] as ElementGroup;
-					if (LGroup != null)
-						LGroup.Add(LElement);
+					qualifierName = element.Name.LocalName.Substring(0, element.Name.LocalName.IndexOf("."));
+					group = groups[qualifierName] as ElementGroup;
+					if (group != null)
+						group.Add(element);
 					else
 					{
-						LGroup = new ElementGroup();
-						LGroup.Name = LQualifierName;
-						LGroup.Add(LElement);
-						LGroups.Add(LQualifierName, LGroup);
+						group = new ElementGroup();
+						group.Name = qualifierName;
+						group.Add(element);
+						groups.Add(qualifierName, group);
 					}
 				}
 			}
-			return LGroups;
+			return groups;
 		}
 
-		private Table CreateGroupTable(ElementGroup AGroup)
+		private Table CreateGroupTable(ElementGroup group)
 		{
-			Table LGroupTable = new Table();
-			LGroupTable.BackColor = CTabSurfaceColor;
-			LGroupTable.Tag = AGroup;
-			LGroupTable.OnGetValue += new GetTableValueHandler(GroupsGetValue);
-			LGroupTable.OnGetDesignerRequired += new GetTableDesignerRequiredHandler(GroupsGetDesignerRequired);
-			LGroupTable.OnGetDesigner += new GetTableDesignerHandler(GroupsGetDesigner);
-			LGroupTable.BeginUpdate();
-			TableColumn LColumn;
-			foreach (XElement LElement in AGroup)
+			Table groupTable = new Table();
+			groupTable.BackColor = CTabSurfaceColor;
+			groupTable.Tag = group;
+			groupTable.OnGetValue += new GetTableValueHandler(GroupsGetValue);
+			groupTable.OnGetDesignerRequired += new GetTableDesignerRequiredHandler(GroupsGetDesignerRequired);
+			groupTable.OnGetDesigner += new GetTableDesignerHandler(GroupsGetDesigner);
+			groupTable.BeginUpdate();
+			TableColumn column;
+			foreach (XElement element in group)
 			{
 				// Ensure that there are columns for each attribute
-				foreach (XAttribute LAttribute in LElement.Attributes())
+				foreach (XAttribute attribute in element.Attributes())
 				{
-					LColumn = LGroupTable.Columns[LAttribute.Name.LocalName];
-					if (LColumn == null)
+					column = groupTable.Columns[attribute.Name.LocalName];
+					if (column == null)
 					{
-						LColumn = new TableColumn(LGroupTable);
-						LColumn.Name = LAttribute.Name.LocalName;
-						LColumn.Title = LAttribute.Name.LocalName;
-						LGroupTable.Columns.Add(LColumn);
+						column = new TableColumn(groupTable);
+						column.Name = attribute.Name.LocalName;
+						column.Title = attribute.Name.LocalName;
+						groupTable.Columns.Add(column);
 					}
 				}
 
 				// Ensure that there is a 'Details' column if there are any child elements
-				if (LElement.HasElements)
+				if (element.HasElements)
 				{
-					LColumn = LGroupTable.Columns["InternalDetails"];
-					if (LColumn == null)
+					column = groupTable.Columns["InternalDetails"];
+					if (column == null)
 					{
-						LColumn = new TableColumn(LGroupTable);
-						LColumn.Name = "InternalDetails";
-						LColumn.Title = Strings.Analyzer_DetailsColumnTitle;
-						LGroupTable.Columns.Add(LColumn);
+						column = new TableColumn(groupTable);
+						column.Name = "InternalDetails";
+						column.Title = Strings.Analyzer_DetailsColumnTitle;
+						groupTable.Columns.Add(column);
 					}
 				}
 
 				// Add a row for each element
-				LGroupTable.Rows.Add(LElement);
+				groupTable.Rows.Add(element);
 			}
-			LGroupTable.EndUpdate();
-			return LGroupTable;
+			groupTable.EndUpdate();
+			return groupTable;
 		}
 		
-		private string GroupsGetValue(Table ATable, Point ACell)
+		private string GroupsGetValue(Table table, Point cell)
 		{
-			string LColumnName = ATable.Columns[ACell.X].Name;
-			XElement LElement = (XElement)((ElementGroup)ATable.Tag)[ACell.Y];
+			string columnName = table.Columns[cell.X].Name;
+			XElement element = (XElement)((ElementGroup)table.Tag)[cell.Y];
 
-			if (LColumnName == "InternalDetails")
+			if (columnName == "InternalDetails")
 				return String.Empty;
 			else
 			{
-				XAttribute LAttribute = LElement.Attribute(LColumnName);
-				if (LAttribute == null)
+				XAttribute attribute = element.Attribute(columnName);
+				if (attribute == null)
 					return String.Empty;
 				else
-					return LAttribute.Value;
+					return attribute.Value;
 			}
 		}
 
-		private bool GroupsGetDesignerRequired(Table ATable, Point ACell, Graphics AGraphics, Rectangle ABounds)
+		private bool GroupsGetDesignerRequired(Table table, Point cell, Graphics graphics, Rectangle bounds)
 		{
-			string LColumnName = ATable.Columns[ACell.X].Name;
+			string columnName = table.Columns[cell.X].Name;
 
-			if (LColumnName == "InternalDetails")
+			if (columnName == "InternalDetails")
 				return true;
 			else
 			{
-				Size LBounds = Size.Ceiling(AGraphics.MeasureString(GroupsGetValue(ATable, ACell), ATable.Font));
-				return (LBounds.Width > ABounds.Width) || (LBounds.Height > ABounds.Height);
+				Size localBounds = Size.Ceiling(graphics.MeasureString(GroupsGetValue(table, cell), table.Font));
+				return (localBounds.Width > bounds.Width) || (localBounds.Height > bounds.Height);
 			}
 		}
 
-		private IElementDesigner GroupsGetDesigner(Table ATable, Point ACell)
+		private IElementDesigner GroupsGetDesigner(Table table, Point cell)
 		{
-			string LColumnName = ATable.Columns[ACell.X].Name;
-			if (LColumnName == "InternalDetails")
-				return new DetailsCellDesignerBox((XElement)((ElementGroup)ATable.Tag)[ACell.Y]);
+			string columnName = table.Columns[cell.X].Name;
+			if (columnName == "InternalDetails")
+				return new DetailsCellDesignerBox((XElement)((ElementGroup)table.Tag)[cell.Y]);
 			else
 			{
-				CellDesignerBox LBox = new CellDesignerBox();
-				LBox.TextHAlign = HorizontalAlignment.Left;
-				LBox.Text = GroupsGetValue(ATable, ACell);
-				return LBox;
+				CellDesignerBox box = new CellDesignerBox();
+				box.TextHAlign = HorizontalAlignment.Left;
+				box.Text = GroupsGetValue(table, cell);
+				return box;
 			}
 		}
 
 		#endregion
 
-		protected override void OnLayout(System.Windows.Forms.LayoutEventArgs AArgs)
+		protected override void OnLayout(System.Windows.Forms.LayoutEventArgs args)
 		{
-			base.OnLayout(AArgs);
+			base.OnLayout(args);
 
-			Rectangle LBounds = DisplayRectangle;
-			LBounds.Inflate(-5, -5);
+			Rectangle bounds = DisplayRectangle;
+			bounds.Inflate(-5, -5);
 
 			// Give a quarter of the area to the properties table
-			FProperties.Bounds = new Rectangle(LBounds.X, LBounds.Y, LBounds.Width, LBounds.Height / 4);
+			_properties.Bounds = new Rectangle(bounds.X, bounds.Y, bounds.Width, bounds.Height / 4);
 
 			// Distribute the remaining space evenly to the group tables
 			if (Controls.Count > 1)
 			{
-				LBounds.Y += LBounds.Height / 4;
-				LBounds.Height -= LBounds.Height / 4;
-				int LTableHeight = LBounds.Height / (Controls.Count - 1);
+				bounds.Y += bounds.Height / 4;
+				bounds.Height -= bounds.Height / 4;
+				int tableHeight = bounds.Height / (Controls.Count - 1);
 				for (int i = 1; i < Controls.Count; i++)
 				{
 					Controls[i].Bounds = 
 						new Rectangle
 						(
-							LBounds.X, 
-							LBounds.Y + ((i - 1) * LTableHeight),
-							LBounds.Width,
-							LTableHeight
+							bounds.X, 
+							bounds.Y + ((i - 1) * tableHeight),
+							bounds.Width,
+							tableHeight
 						);
 				}
 			}
@@ -413,10 +413,10 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 
 	public class DetailsCellDesignerBox : TextDesignerBox, IElementDesigner
 	{
-		public DetailsCellDesignerBox(XElement AElement)
+		public DetailsCellDesignerBox(XElement element)
 		{
 			SuspendLayout();
-			FElement = AElement;
+			_element = element;
 			Text = Strings.Analyzer_DetailsColumnTitle;
 			MaxDepth = 3;
 			NormalDepth = 1;
@@ -426,14 +426,14 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			ResumeLayout(false);
 		}
 
-		private XElement FElement;
-		public object Element { get { return FElement; } }
+		private XElement _element;
+		public object Element { get { return _element; } }
 
-		private bool HasUnqualifiedChildElement(XElement AElement)
+		private bool HasUnqualifiedChildElement(XElement element)
 		{
-			foreach (XElement LChild in AElement.Elements())
+			foreach (XElement child in element.Elements())
 			{
-				if (LChild.Name.LocalName.IndexOf(".") < 0)
+				if (child.Name.LocalName.IndexOf(".") < 0)
 					return true;
 			}
 			return false;
@@ -441,14 +441,14 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 
 		public override void ZoomIn()
 		{
-			if (HasUnqualifiedChildElement(FElement))
+			if (HasUnqualifiedChildElement(_element))
 			{
-				PlanTree LSurface = new PlanTree();
-				LSurface.Set(FElement);
-				DesignerControl.GetDesigner(this).Push(LSurface, String.Format(Strings.Analyzer_PlanNodeTitle, FElement.Name.LocalName));
+				PlanTree surface = new PlanTree();
+				surface.Set(_element);
+				DesignerControl.GetDesigner(this).Push(surface, String.Format(Strings.Analyzer_PlanNodeTitle, _element.Name.LocalName));
 			}
 			else
-				DesignerControl.GetDesigner(this).Push(new SingleElementSurface(FElement, new DetailedPlanNodeBox(FElement)), String.Format(Strings.Analyzer_DetailNodeTitle, FElement.Name.LocalName));
+				DesignerControl.GetDesigner(this).Push(new SingleElementSurface(_element, new DetailedPlanNodeBox(_element)), String.Format(Strings.Analyzer_DetailNodeTitle, _element.Name.LocalName));
 		}
 
 		public override bool CanZoomIn()
@@ -472,10 +472,10 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 
 		public override void ZoomIn()
 		{
-			CellDetailBox LBox = new CellDetailBox(Text);
-			SingleElementSurface LSurface = new SingleElementSurface(null, LBox);
-			DesignerControl LControl = DesignerControl.GetDesigner(this);
-			LControl.Push(LSurface, Strings.Analyzer_TextDetailTitle);
+			CellDetailBox box = new CellDetailBox(Text);
+			SingleElementSurface surface = new SingleElementSurface(null, box);
+			DesignerControl control = DesignerControl.GetDesigner(this);
+			control.Push(surface, Strings.Analyzer_TextDetailTitle);
 		}
 
 		public override bool CanZoomIn()
@@ -486,34 +486,34 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 
 	public class CellDetailBox : FloatingBox, IElementDesigner
 	{
-		public CellDetailBox(string AText)
+		public CellDetailBox(string text)
 		{
 			SuspendLayout();
 
 			NormalDepth = MaxDepth;
 			
-			FTextEdit = new Alphora.Dataphor.Dataphoria.TextEditor.ResultPanel();
-			FTextEdit.SetText(AText);
-			Controls.Add(FTextEdit);
+			_textEdit = new Alphora.Dataphor.Dataphoria.TextEditor.ResultPanel();
+			_textEdit.SetText(text);
+			Controls.Add(_textEdit);
 
 			ResumeLayout(false);
 		}
 
-		private TextEdit FTextEdit;
+		private TextEdit _textEdit;
 		public TextEdit TextEdit
 		{
-			get { return FTextEdit; }
+			get { return _textEdit; }
 		}
 
-		protected override void OnLayout(LayoutEventArgs AArgs)
+		protected override void OnLayout(LayoutEventArgs args)
 		{
-			base.OnLayout(AArgs);
-			FTextEdit.Bounds = DisplayRectangle;
+			base.OnLayout(args);
+			_textEdit.Bounds = DisplayRectangle;
 		}
 
 		public object Element
 		{
-			get { return FTextEdit.Document.TextContent; }
+			get { return _textEdit.Document.TextContent; }
 		}
 	}
 }

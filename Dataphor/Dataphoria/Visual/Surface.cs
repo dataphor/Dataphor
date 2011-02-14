@@ -30,25 +30,25 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 
 		// Focus
 
-		private Control FRememberedActive;
+		private Control _rememberedActive;
 
 		public void RememberActive()
 		{
-			FRememberedActive = ActiveControl;
-			FRememberedActive.Disposed += new EventHandler(RememberedActiveDisposed);
+			_rememberedActive = ActiveControl;
+			_rememberedActive.Disposed += new EventHandler(RememberedActiveDisposed);
 		}
 
 		public void RecallActive()
 		{
-			if (FRememberedActive != null)
-				FRememberedActive.Disposed -= new EventHandler(RememberedActiveDisposed);
-			ActiveControl = FRememberedActive;
+			if (_rememberedActive != null)
+				_rememberedActive.Disposed -= new EventHandler(RememberedActiveDisposed);
+			ActiveControl = _rememberedActive;
 		}
 
-		private void RememberedActiveDisposed(object ASender, EventArgs AArgs)
+		private void RememberedActiveDisposed(object sender, EventArgs args)
 		{
-			FRememberedActive.Disposed -= new EventHandler(RememberedActiveDisposed);
-			FRememberedActive = null;
+			_rememberedActive.Disposed -= new EventHandler(RememberedActiveDisposed);
+			_rememberedActive = null;
 		}
 	}
 }

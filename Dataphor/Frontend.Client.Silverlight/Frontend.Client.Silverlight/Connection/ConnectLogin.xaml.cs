@@ -8,33 +8,33 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
     public partial class ConnectLogin : UserControl
     {
-        public ConnectLogin(ConnectWorkItem AWorkItem)
+        public ConnectLogin(ConnectWorkItem workItem)
         {
-			FWorkItem = AWorkItem;
-			FWorkItem.PropertyChanged += new PropertyChangedEventHandler(WorkItemPropertyChanged);
-			DataContext = AWorkItem;
+			_workItem = workItem;
+			_workItem.PropertyChanged += new PropertyChangedEventHandler(WorkItemPropertyChanged);
+			DataContext = workItem;
             InitializeComponent();
             UpdateLoginEnabled();
         }
 
-		private void WorkItemPropertyChanged(object ASender, PropertyChangedEventArgs AArgs)
+		private void WorkItemPropertyChanged(object sender, PropertyChangedEventArgs args)
 		{
-			if (AArgs.PropertyName == "UserName")
+			if (args.PropertyName == "UserName")
 				UpdateLoginEnabled();
 		}
         
-        private ConnectWorkItem FWorkItem;
+        private ConnectWorkItem _workItem;
 
-        private void Button_Click(object ASender, System.Windows.RoutedEventArgs AArgs)
+        private void Button_Click(object sender, System.Windows.RoutedEventArgs args)
         {
 			BindingUtility.UpdateTextBoxBindingSources(this);
-			FWorkItem.BeginLogin();
+			_workItem.BeginLogin();
         }
         
 		private void UpdateLoginEnabled()
 		{
-			LoginButton.IsEnabled = !String.IsNullOrEmpty(FWorkItem.HostName) && !String.IsNullOrEmpty(FWorkItem.InstanceName) 
-				&& !String.IsNullOrEmpty(FWorkItem.UserName);
+			LoginButton.IsEnabled = !String.IsNullOrEmpty(_workItem.HostName) && !String.IsNullOrEmpty(_workItem.InstanceName) 
+				&& !String.IsNullOrEmpty(_workItem.UserName);
 		}
 
 		private void TextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
@@ -45,7 +45,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		private void BackClicked(object sender, System.Windows.RoutedEventArgs e)
 		{
-        	FWorkItem.Back();
+        	_workItem.Back();
 		}
     }
 }

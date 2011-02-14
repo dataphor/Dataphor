@@ -38,19 +38,19 @@ namespace Alphora.Dataphor.DAE.Connection
 {
 	public class MSSQLConnection : DotNetConnection
 	{
-		public MSSQLConnection(string AConnectionString) : base(AConnectionString) 
+		public MSSQLConnection(string connectionString) : base(connectionString) 
 		{ 
-			DbConnectionStringBuilder LBuilder = new DbConnectionStringBuilder();
-			LBuilder.ConnectionString = AConnectionString;
-			if (LBuilder.ContainsKey("MultipleActiveResultSets"))
+			DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
+			builder.ConnectionString = connectionString;
+			if (builder.ContainsKey("MultipleActiveResultSets"))
 			{
-				FSupportsMARS = "True" == ((string)LBuilder["MultipleActiveResultSets"]);
+				_supportsMARS = "True" == ((string)builder["MultipleActiveResultSets"]);
 			}
 		}
 
-		protected override IDbConnection CreateDbConnection(string AConnectionString)
+		protected override IDbConnection CreateDbConnection(string connectionString)
 		{
-			return new SqlConnection(AConnectionString);
+			return new SqlConnection(connectionString);
 		}
 
 		protected override SQLCommand InternalCreateCommand()
@@ -60,20 +60,20 @@ namespace Alphora.Dataphor.DAE.Connection
 
 		#region Exception Wrapping
 
-		protected override bool IsTransactionFailure(Exception AException)
+		protected override bool IsTransactionFailure(Exception exception)
 		{
-			SqlException LException = AException as SqlException;
-			if (LException != null)
-				foreach (SqlError LError in LException.Errors)
-					if (IsTransactionFailure(LError.Number))
+			SqlException localException = exception as SqlException;
+			if (localException != null)
+				foreach (SqlError error in localException.Errors)
+					if (IsTransactionFailure(error.Number))
 						return true;
 
 			return false;
 		}
 
-		protected bool IsTransactionFailure(int AErrorCode)
+		protected bool IsTransactionFailure(int errorCode)
 		{
-			switch (AErrorCode)
+			switch (errorCode)
 			{
 				case 1205:
 					return true; // Transaction was deadlocked
@@ -90,12 +90,12 @@ namespace Alphora.Dataphor.DAE.Connection
 			return false;
 		}
 
-		protected bool IsUserCorrectableError(int AErrorCode)
+		protected bool IsUserCorrectableError(int errorCode)
 		{
-			if (AErrorCode >= 50000)
+			if (errorCode >= 50000)
 				return true;
 
-			switch (AErrorCode)
+			switch (errorCode)
 			{
 				case 3621:
 					return true; // The statement has been terminated.
@@ -122,22 +122,22 @@ namespace Alphora.Dataphor.DAE.Connection
 			}
 		}
 
-		protected override Exception InternalWrapException(Exception AException, string AStatement)
+		protected override Exception InternalWrapException(Exception exception, string statement)
 		{
-			ErrorSeverity LSeverity = GetExceptionSeverity(AException);
-			if (LSeverity == ErrorSeverity.User)
-				return new DataphorException(ErrorSeverity.User, DataphorException.CApplicationError, AException.Message);
-			return base.InternalWrapException(AException, AStatement);
+			ErrorSeverity severity = GetExceptionSeverity(exception);
+			if (severity == ErrorSeverity.User)
+				return new DataphorException(ErrorSeverity.User, DataphorException.ApplicationError, exception.Message);
+			return base.InternalWrapException(exception, statement);
 		}
 
-		private ErrorSeverity GetExceptionSeverity(Exception AException)
+		private ErrorSeverity GetExceptionSeverity(Exception exception)
 		{
 			// If the error code indicates an integrity constraint violation or other user-correctable message, severity is user, otherwise, severity is application
-			SqlException LException = AException as SqlException;
-			if (LException != null)
+			SqlException localException = exception as SqlException;
+			if (localException != null)
 			{
-				foreach (SqlError LError in LException.Errors)
-					if (!IsUserCorrectableError(LError.Number))
+				foreach (SqlError error in localException.Errors)
+					if (!IsUserCorrectableError(error.Number))
 						return ErrorSeverity.Application;
 				return ErrorSeverity.User;
 			}

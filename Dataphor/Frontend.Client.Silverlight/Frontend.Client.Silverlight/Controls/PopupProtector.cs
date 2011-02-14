@@ -44,80 +44,80 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			set { SetValue(ProtectorBrushProperty, value); }
 		}
 
-		private Popup FBackgroundPopup;
-		private Canvas FBackgroundCanvas;
+		private Popup _backgroundPopup;
+		private Canvas _backgroundCanvas;
 		
-		protected virtual void OnIsActiveChanged(bool AOldValue, bool ANewValue)
+		protected virtual void OnIsActiveChanged(bool oldValue, bool newValue)
 		{
-			if (ANewValue)
+			if (newValue)
 			{
 				ApplyTemplate();
 
-				if (FBackgroundPopup == null)
+				if (_backgroundPopup == null)
 				{
-					FBackgroundPopup = new Popup();
-					FBackgroundCanvas = new Canvas();
-					FBackgroundPopup.Child = FBackgroundCanvas;
-					FBackgroundCanvas.MouseLeftButtonDown += new MouseButtonEventHandler(BackgroundClicked);
+					_backgroundPopup = new Popup();
+					_backgroundCanvas = new Canvas();
+					_backgroundPopup.Child = _backgroundCanvas;
+					_backgroundCanvas.MouseLeftButtonDown += new MouseButtonEventHandler(BackgroundClicked);
 				}
 
 				// Listen to content size changes
-				var LContent = GetContent();
-				if (LContent != null)
-					LContent.SizeChanged += new SizeChangedEventHandler(ContentSizeChanged);
+				var content = GetContent();
+				if (content != null)
+					content.SizeChanged += new SizeChangedEventHandler(ContentSizeChanged);
 
 				// Listen to host size changes
 				Application.Current.Host.Content.Resized += new EventHandler(PageResized);
 
 				PrepareBackgroundCanvas();
 
-				FBackgroundPopup.IsOpen = true;
+				_backgroundPopup.IsOpen = true;
 			}
 			else
 			{
 				UnprepareBackgroundCanvas();
 
 				// Stop listening to content size changes
-				var LContent = GetContent();
-				if (LContent != null)
-					LContent.SizeChanged -= new SizeChangedEventHandler(ContentSizeChanged);
+				var content = GetContent();
+				if (content != null)
+					content.SizeChanged -= new SizeChangedEventHandler(ContentSizeChanged);
 
 				// Stop listening to host size changes
 				Application.Current.Host.Content.Resized -= new EventHandler(PageResized);
 
-				if (FBackgroundPopup != null)
-					FBackgroundPopup.IsOpen = false;
+				if (_backgroundPopup != null)
+					_backgroundPopup.IsOpen = false;
 			}
 		}
 
 		private void PrepareBackgroundCanvas()
 		{
-			var LSize = GetBackgroundCanvasSize();
+			var size = GetBackgroundCanvasSize();
 
-			var LContent = GetContent();
-			if (LContent != null)
+			var content = GetContent();
+			if (content != null)
 			{
 				// Build covering canvas' surrounding the content
-				var LGroup = new TransformGroup();
-				LGroup.Children.Add(LContent.TransformToVisual(null) as Transform);
+				var group = new TransformGroup();
+				group.Children.Add(content.TransformToVisual(null) as Transform);
 				if (Application.Current.Host.Settings.EnableAutoZoom)
 				{
-					var LScale = 1d / Application.Current.Host.Content.ZoomFactor;
-					LGroup.Children.Add(new ScaleTransform { ScaleX = LScale, ScaleY = LScale });
+					var scale = 1d / Application.Current.Host.Content.ZoomFactor;
+					group.Children.Add(new ScaleTransform { ScaleX = scale, ScaleY = scale });
 				}
-				Rect LBounds = LGroup.TransformBounds(new Rect(0d, 0d, LContent.ActualWidth, LContent.ActualHeight));
+				Rect bounds = group.TransformBounds(new Rect(0d, 0d, content.ActualWidth, content.ActualHeight));
 
-				AddCanvas(0d, LBounds.Top, LBounds.Left, LBounds.Height);	// Side left
-				AddCanvas(0d, 0d, LSize.Width, LBounds.Top);	// Entire top
-				AddCanvas(LBounds.Right, LBounds.Top, LSize.Width - LBounds.Right, LBounds.Height);	// Side right
-				AddCanvas(0d, LBounds.Bottom, LSize.Width, LSize.Height - LBounds.Bottom);	// Entire bottom
+				AddCanvas(0d, bounds.Top, bounds.Left, bounds.Height);	// Side left
+				AddCanvas(0d, 0d, size.Width, bounds.Top);	// Entire top
+				AddCanvas(bounds.Right, bounds.Top, size.Width - bounds.Right, bounds.Height);	// Side right
+				AddCanvas(0d, bounds.Bottom, size.Width, size.Height - bounds.Bottom);	// Entire bottom
 			}
 			else
 				// No content, so cover entire host area
-				AddCanvas(0d, 0d, LSize.Width, LSize.Height);
+				AddCanvas(0d, 0d, size.Width, size.Height);
 
-			FBackgroundCanvas.Width = LSize.Width;
-			FBackgroundCanvas.Height = LSize.Height;
+			_backgroundCanvas.Width = size.Width;
+			_backgroundCanvas.Height = size.Height;
 		}
 
 		private FrameworkElement GetContent()
@@ -125,30 +125,30 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			return (VisualTreeHelper.GetChildrenCount(this) == 0) ? null : (VisualTreeHelper.GetChild(this, 0) as FrameworkElement);
 		}
 
-		private void AddCanvas(double ALeft, double ATop, double AWidth, double AHeight)
+		private void AddCanvas(double left, double top, double width, double height)
 		{
-			if (AWidth > 0d && AHeight > 0d)
+			if (width > 0d && height > 0d)
 			{
-				var LRect = new System.Windows.Shapes.Rectangle();
+				var rect = new System.Windows.Shapes.Rectangle();
 
-				var LBackgroundBinding = new Binding("ProtectorBrush");
-				LBackgroundBinding.Source = this;
-				LRect.SetBinding(System.Windows.Shapes.Rectangle.FillProperty, LBackgroundBinding);
+				var backgroundBinding = new Binding("ProtectorBrush");
+				backgroundBinding.Source = this;
+				rect.SetBinding(System.Windows.Shapes.Rectangle.FillProperty, backgroundBinding);
 			
-				Canvas.SetLeft(LRect, ALeft);
-				Canvas.SetTop(LRect, ATop);
-				LRect.Width = AWidth;
-				LRect.Height = AHeight;
+				Canvas.SetLeft(rect, left);
+				Canvas.SetTop(rect, top);
+				rect.Width = width;
+				rect.Height = height;
 			
-				FBackgroundCanvas.Children.Add(LRect);
+				_backgroundCanvas.Children.Add(rect);
 			}
 		}
 
 		private void UnprepareBackgroundCanvas()
 		{
 			// Empty background
-			while (FBackgroundCanvas.Children.Count > 0)
-				FBackgroundCanvas.Children.RemoveAt(0);
+			while (_backgroundCanvas.Children.Count > 0)
+				_backgroundCanvas.Children.RemoveAt(0);
 		}
 
 		private void ContentSizeChanged(object sender, SizeChangedEventArgs e)
@@ -164,20 +164,20 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		private Size GetBackgroundCanvasSize()
 		{
-			var LSize = new Size(Application.Current.Host.Content.ActualWidth, Application.Current.Host.Content.ActualHeight);
+			var size = new Size(Application.Current.Host.Content.ActualWidth, Application.Current.Host.Content.ActualHeight);
 			if (Application.Current.Host.Settings.EnableAutoZoom)
 			{
-				double LZoomFactor = Application.Current.Host.Content.ZoomFactor;
-				if (LZoomFactor != 0.0)
+				double zoomFactor = Application.Current.Host.Content.ZoomFactor;
+				if (zoomFactor != 0.0)
 				{
-					LSize.Height /= LZoomFactor;
-					LSize.Width /= LZoomFactor;
+					size.Height /= zoomFactor;
+					size.Width /= zoomFactor;
 				}
 			}
-			return LSize;
+			return size;
 		}
 
-		private void PageResized(object ASender, EventArgs AArgs)
+		private void PageResized(object sender, EventArgs args)
 		{
 			ReprepareBackground();
 		}

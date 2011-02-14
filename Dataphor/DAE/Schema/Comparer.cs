@@ -16,16 +16,16 @@ namespace Alphora.Dataphor.DAE.Schema
 	/// <summary>Performs schema comparisons.</summary>
 	public class SchemaComparer
 	{
-		public SchemaComparer(DAE.Server.Engine AOldServer, DAE.Server.Engine ANewServer, string ALibraryName)
+		public SchemaComparer(DAE.Server.Engine oldServer, DAE.Server.Engine newServer, string libraryName)
 		{
-			FOldServer = AOldServer;
-			FNewServer = ANewServer;
-			FLibraryName = (ALibraryName == null ? String.Empty : ALibraryName);
+			_oldServer = oldServer;
+			_newServer = newServer;
+			_libraryName = (libraryName == null ? String.Empty : libraryName);
 		}
 
-		private DAE.Server.Engine FOldServer;
-		private DAE.Server.Engine FNewServer;
-		private string FLibraryName;
+		private DAE.Server.Engine _oldServer;
+		private DAE.Server.Engine _newServer;
+		private string _libraryName;
 /*
 		public void EmitCreateObject(EmissionContext AContext, Schema.Object AObject)
 		{

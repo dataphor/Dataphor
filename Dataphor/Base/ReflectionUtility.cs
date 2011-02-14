@@ -15,10 +15,10 @@ namespace Alphora.Dataphor
 	/// </summary>
 	public class Token
 	{
-		public Token(string AName, object AValue)
+		public Token(string name, object value)
 		{
-			Name = AName;
-			Value = AValue;
+			Name = name;
+			Value = value;
 		}
 		
 		public string Name;
@@ -28,91 +28,91 @@ namespace Alphora.Dataphor
 	public class ReflectionUtility 
 	{
 		/// <summary> Gets the Type of the property or field member. </summary>
-		public static Type GetMemberType(MemberInfo AMember)
+		public static Type GetMemberType(MemberInfo member)
 		{
-			if (AMember is PropertyInfo)
-				return ((PropertyInfo)AMember).PropertyType;
+			if (member is PropertyInfo)
+				return ((PropertyInfo)member).PropertyType;
 			else
-				return ((FieldInfo)AMember).FieldType;
+				return ((FieldInfo)member).FieldType;
 		}
 
 		/// <summary> Sets a property or field member of the specified instance to the specified value. </summary>
-		public static void SetMemberValue(MemberInfo AMember, object AInstance, object AValue)
+		public static void SetMemberValue(MemberInfo member, object instance, object value)
 		{
 			try
 			{
-				if (AMember is PropertyInfo)
-					((PropertyInfo)AMember).SetValue(AInstance, AValue, new Object[] {});
+				if (member is PropertyInfo)
+					((PropertyInfo)member).SetValue(instance, value, new Object[] {});
 				else
-					((FieldInfo)AMember).SetValue(AInstance, AValue);
+					((FieldInfo)member).SetValue(instance, value);
 			}
 			catch (Exception E)
 			{
-				throw new BaseException(BaseException.Codes.UnableToSetProperty, E, AMember.Name);
+				throw new BaseException(BaseException.Codes.UnableToSetProperty, E, member.Name);
 			}
 		}
 
 		/// <summary> Sets the member of the given instance to the given string value. </summary>
 		/// <remarks> Sets the member using the converter for the member's type. </remarks>
-		public static void SetInstanceMember(object AInstance, string AMemberName, string AValue)
+		public static void SetInstanceMember(object instance, string memberName, string value)
 		{
-			MemberInfo LMember = FindSimpleMember(AInstance.GetType(), AMemberName);
+			MemberInfo member = FindSimpleMember(instance.GetType(), memberName);
 			SetMemberValue
 			(
-				LMember,
-				AInstance,
-				StringToValue(AValue, GetMemberType(LMember))
+				member,
+				instance,
+				StringToValue(value, GetMemberType(member))
 			);
 		}
 
 		/// <summary> Finds an appropriate field, property, or method member with no parameters. </summary>
 		/// <remarks> Throws if a qualifying member is not found. </remarks>
-		public static MemberInfo FindSimpleMember(Type AType, string AName)
+		public static MemberInfo FindSimpleMember(Type type, string name)
 		{
 			// Find an appropriate member matching the attribute
-			MemberInfo[] LMembers = AType.GetMember
+			MemberInfo[] members = type.GetMember
 			(
-				AName, 
+				name, 
 				MemberTypes.Property | MemberTypes.Field | MemberTypes.Method, 
 				BindingFlags.IgnoreCase	| BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance
 			);
-			MemberInfo LResult = null;
-			foreach (MemberInfo LMember in LMembers)
+			MemberInfo result = null;
+			foreach (MemberInfo member in members)
 				if 
 				(
-					(LMember is FieldInfo) || 
+					(member is FieldInfo) || 
 					(
 						(
-							(LMember is PropertyInfo) && 
-							(((PropertyInfo)LMember).GetIndexParameters().Length == 0)
+							(member is PropertyInfo) && 
+							(((PropertyInfo)member).GetIndexParameters().Length == 0)
 						) ||
 						(
-							(LMember is MethodInfo) &&
-							(((MethodInfo)LMember).GetParameters().Length == 0)
+							(member is MethodInfo) &&
+							(((MethodInfo)member).GetParameters().Length == 0)
 						)
 					)
 				)
-					LResult = LMember;
-			if (LResult == null)
-				throw new BaseException(BaseException.Codes.MemberNotFound, AName, AType.FullName);
-			return LResult;
+					result = member;
+			if (result == null)
+				throw new BaseException(BaseException.Codes.MemberNotFound, name, type.FullName);
+			return result;
 		}
 		
 		/// <summary> Gets a single attribute for a type based on the attribute class type. </summary>
 		/// <remarks> Returns null if not found.  Throws if more than one instance of the specified attribute appears. </remarks>
-		public static object GetAttribute(ICustomAttributeProvider AProvider, Type AAttributeType)
+		public static object GetAttribute(ICustomAttributeProvider provider, Type attributeType)
 		{
-			if (AProvider == null)
+			if (provider == null)
 				return null;
-			object[] LAttributes = AProvider.GetCustomAttributes(AAttributeType, true);
-			if (LAttributes.Length > 1)
-				throw new BaseException(BaseException.Codes.ExpectingSingleAttribute, AAttributeType.Name);
-			else if (LAttributes.Length == 1)
-				return LAttributes[0];
+			object[] attributes = provider.GetCustomAttributes(attributeType, true);
+			if (attributes.Length > 1)
+				throw new BaseException(BaseException.Codes.ExpectingSingleAttribute, attributeType.Name);
+			else if (attributes.Length == 1)
+				return attributes[0];
 			else 
 			{
-				if (AProvider is MemberInfo)
-					return GetAttribute(((MemberInfo)AProvider).DeclaringType, AAttributeType);
+				if (provider is MemberInfo)
+					return GetAttribute(((MemberInfo)provider).DeclaringType, attributeType);
 				else
 					return null;
 			}
@@ -120,91 +120,91 @@ namespace Alphora.Dataphor
 
 		/// <summary> Finds a constructor for a type based on the provided signature. </summary>
 		/// <remarks> Throws if not found. </remarks>
-		public static ConstructorInfo FindConstructor(string ASignature, Type AType)
+		public static ConstructorInfo FindConstructor(string signature, Type type)
 		{
 			// Determine the constructor signature
-			string[] LSignatureNames = ASignature.Split(new char[] {';'});
-			Type[] LSignature = new Type[LSignatureNames.Length];
-			for (int i = LSignature.Length - 1; i >= 0; i--)
-				LSignature[i] = GetType(LSignatureNames[i], AType.Assembly);
+			string[] signatureNames = signature.Split(new char[] {';'});
+			Type[] localSignature = new Type[signatureNames.Length];
+			for (int i = localSignature.Length - 1; i >= 0; i--)
+				localSignature[i] = GetType(signatureNames[i], type.Assembly);
 
 			// Find the matching constructor
-			ConstructorInfo LConstructor = AType.GetConstructor(LSignature);
-			if (LConstructor == null)
-				throw new BaseException(BaseException.Codes.DefaultConstructorNotFound, ASignature);
+			ConstructorInfo constructor = type.GetConstructor(localSignature);
+			if (constructor == null)
+				throw new BaseException(BaseException.Codes.DefaultConstructorNotFound, signature);
 
-			return LConstructor;
+			return constructor;
 		}
 
 		/// <summary> Converts a string value type to the .NET value based on the provided type. </summary>
-		public static object StringToValue(string AValue, Type AType)
+		public static object StringToValue(string value, Type type)
 		{
 			#if SILVERLIGHT
-			if (AValue == null)
+			if (value == null)
 				throw new BaseException(BaseException.Codes.CannotConvertNull, ErrorSeverity.System);
-			if (typeof(Enum).IsAssignableFrom(AType))
-				return Enum.Parse(AType, AValue, true);
-			switch (Type.GetTypeCode(AType))
+			if (typeof(Enum).IsAssignableFrom(type))
+				return Enum.Parse(type, value, true);
+			switch (Type.GetTypeCode(type))
 			{
 				case TypeCode.Boolean:
-					return Convert.ToBoolean(AValue);
+					return Convert.ToBoolean(value);
 				case TypeCode.Char:
-					return Convert.ToChar(AValue);
+					return Convert.ToChar(value);
 				case TypeCode.SByte:
-					return Convert.ToSByte(AValue);
+					return Convert.ToSByte(value);
 				case TypeCode.Byte:
-					return Convert.ToByte(AValue);
+					return Convert.ToByte(value);
 				case TypeCode.Int16:
-					return Convert.ToInt16(AValue);
+					return Convert.ToInt16(value);
 				case TypeCode.UInt16:
-					return Convert.ToUInt16(AValue);
+					return Convert.ToUInt16(value);
 				case TypeCode.Int32:
-					return Convert.ToInt32(AValue);
+					return Convert.ToInt32(value);
 				case TypeCode.UInt32:
-					return Convert.ToUInt32(AValue);
+					return Convert.ToUInt32(value);
 				case TypeCode.Int64:
-					return Convert.ToInt64(AValue);
+					return Convert.ToInt64(value);
 				case TypeCode.UInt64:
-					return Convert.ToUInt64(AValue);
+					return Convert.ToUInt64(value);
 				case TypeCode.Single:
-					return Convert.ToSingle(AValue);
+					return Convert.ToSingle(value);
 				case TypeCode.Double:
-					return Convert.ToDouble(AValue);
+					return Convert.ToDouble(value);
 				case TypeCode.Decimal:
-					return Convert.ToDecimal(AValue);
+					return Convert.ToDecimal(value);
 				case TypeCode.DateTime:
-					return Convert.ToDateTime(AValue);
+					return Convert.ToDateTime(value);
 				case TypeCode.String:
-					return AValue;
+					return value;
 				default:
-					if (AType == typeof(byte[]))
-						return Convert.FromBase64String(AValue);
-					else if (AType != typeof(object))
+					if (type == typeof(byte[]))
+						return Convert.FromBase64String(value);
+					else if (type != typeof(object))
 					{
-						if (AType == typeof(TimeSpan))
-							return TimeSpan.Parse(AValue);
-						else if (AType == typeof(Guid))
-							return new Guid(AValue);
-						else if (AType == typeof(Uri))
-							return new Uri(AValue);
+						if (type == typeof(TimeSpan))
+							return TimeSpan.Parse(value);
+						else if (type == typeof(Guid))
+							return new Guid(value);
+						else if (type == typeof(Uri))
+							return new Uri(value);
 						else
 							break;
 					}
 					break;
 			}
-			throw new BaseException(BaseException.Codes.CannotConvertFromString, AType.Name);
+			throw new BaseException(BaseException.Codes.CannotConvertFromString, type.Name);
 			#else
-			return TypeDescriptor.GetConverter(AType).ConvertFromString(AValue);
+			return TypeDescriptor.GetConverter(type).ConvertFromString(value);
 			#endif
 		}
 
 		/// <summary> Converts a .NET value to a string based on the provided type. </summary>
-		public static string ValueToString(object AValue, Type AType)
+		public static string ValueToString(object value, Type type)
 		{
 			#if SILVERLIGHT
-			if (AValue == null)
+			if (value == null)
 				throw new BaseException(BaseException.Codes.CannotConvertNull, ErrorSeverity.System);
-			switch (Type.GetTypeCode(AType))
+			switch (Type.GetTypeCode(type))
 			{
 				case TypeCode.Boolean:
 				case TypeCode.Char:
@@ -221,142 +221,142 @@ namespace Alphora.Dataphor
 				case TypeCode.Decimal:
 				case TypeCode.DateTime:
 				case TypeCode.String:
-					return AValue.ToString();
+					return value.ToString();
 
 				default:
-					if (AType == typeof(byte[]))
-						return Convert.ToBase64String((byte[])AValue);
-					else if (AType != typeof(object))
+					if (type == typeof(byte[]))
+						return Convert.ToBase64String((byte[])value);
+					else if (type != typeof(object))
 					{
-						if (AType == typeof(TimeSpan) || AType == typeof(Guid) || AType == typeof(Uri) || typeof(Enum).IsAssignableFrom(AType))
-							return AValue.ToString();
+						if (type == typeof(TimeSpan) || type == typeof(Guid) || type == typeof(Uri) || typeof(Enum).IsAssignableFrom(type))
+							return value.ToString();
 					}
-					else if (typeof(IConvertible).IsAssignableFrom(AType))
-						return ((IConvertible)AValue).ToString(System.Globalization.CultureInfo.InvariantCulture);
+					else if (typeof(IConvertible).IsAssignableFrom(type))
+						return ((IConvertible)value).ToString(System.Globalization.CultureInfo.InvariantCulture);
 					break;
 			}
-			throw new BaseException(BaseException.Codes.CannotConvertToString, AType.Name);
+			throw new BaseException(BaseException.Codes.CannotConvertToString, type.Name);
 			#else
-			return TypeDescriptor.GetConverter(AType).ConvertToString(AValue);
+			return TypeDescriptor.GetConverter(type).ConvertToString(value);
 			#endif
 		}
 
 		/// <summary> Gets a field, property, or simple method's value for a particular instance. </summary>
-		public static object GetMemberValue(MemberInfo AMember, object AInstance)
+		public static object GetMemberValue(MemberInfo member, object instance)
 		{
-			if (AMember is PropertyInfo) 
+			if (member is PropertyInfo) 
 			{
-				if (((PropertyInfo)AMember).GetIndexParameters().Length != 0)
+				if (((PropertyInfo)member).GetIndexParameters().Length != 0)
 					return null;
-				return ((PropertyInfo)AMember).GetValue(AInstance, new Object[] {});
+				return ((PropertyInfo)member).GetValue(instance, new Object[] {});
 			}
-			else if (AMember is FieldInfo)
-				return ((FieldInfo)AMember).GetValue(AInstance);
+			else if (member is FieldInfo)
+				return ((FieldInfo)member).GetValue(instance);
 			else
-				return ((MethodInfo)AMember).Invoke(AInstance, new object[] {});
+				return ((MethodInfo)member).Invoke(instance, new object[] {});
 		}
 
-		public static object ResolveToken(string AToken, params Token[] ATokens)
+		public static object ResolveToken(string token, params Token[] tokens)
 		{
-			for (int LIndex = 0; LIndex < ATokens.Length; LIndex++)
-				if (ATokens[LIndex].Name == AToken)
-					return ATokens[LIndex].Value;
+			for (int index = 0; index < tokens.Length; index++)
+				if (tokens[index].Name == token)
+					return tokens[index].Value;
 					
-			throw new ArgumentException(String.Format("Could not resolve token {0}.", AToken));
+			throw new ArgumentException(String.Format("Could not resolve token {0}.", token));
 		}
 		
-		public static object ResolveReference(string AReference, params Token[] ATokens)
+		public static object ResolveReference(string reference, params Token[] tokens)
 		{
-			string[] LReferences = AReference.Split('.');
-			object LObject = null;
-			for (int LIndex = 0; LIndex < LReferences.Length; LIndex++)
+			string[] references = reference.Split('.');
+			object objectValue = null;
+			for (int index = 0; index < references.Length; index++)
 			{
-				if (LIndex == 0)
-					LObject = ResolveToken(LReferences[LIndex], ATokens);
+				if (index == 0)
+					objectValue = ResolveToken(references[index], tokens);
 				else
 				{
-					int LBracketIndex = LReferences[LIndex].IndexOf('[');
-					if (LBracketIndex > 0)
+					int bracketIndex = references[index].IndexOf('[');
+					if (bracketIndex > 0)
 					{
-						if (LReferences[LIndex].IndexOf(']') != LReferences[LIndex].Length - 1)
-							throw new ArgumentException(String.Format("Indexer reference does not have a closing bracket: {0}", LReferences[LIndex]));
-						string LMemberName = LReferences[LIndex].Substring(0, LBracketIndex);
-						LObject = GetMemberValue(FindSimpleMember(LObject.GetType(), LMemberName), LObject);
+						if (references[index].IndexOf(']') != references[index].Length - 1)
+							throw new ArgumentException(String.Format("Indexer reference does not have a closing bracket: {0}", references[index]));
+						string memberName = references[index].Substring(0, bracketIndex);
+						objectValue = GetMemberValue(FindSimpleMember(objectValue.GetType(), memberName), objectValue);
 						
-						string LReferenceIndex = LReferences[LIndex].Substring(LBracketIndex + 1, LReferences[LIndex].Length - 1 - (LBracketIndex + 1));
-						string[] LMemberIndexes = LReferenceIndex.Split(',');
+						string referenceIndex = references[index].Substring(bracketIndex + 1, references[index].Length - 1 - (bracketIndex + 1));
+						string[] memberIndexes = referenceIndex.Split(',');
 
-						if (LObject.GetType().IsArray)
+						if (objectValue.GetType().IsArray)
 						{
-							Array LArray = (Array)LObject;
-							int[] LMemberIndexValues = new int[LMemberIndexes.Length];
-							for (int LMemberIndex = 0; LMemberIndex < LMemberIndexes.Length; LMemberIndex++)
-								LMemberIndexValues[LMemberIndex] = Int32.Parse(LMemberIndexes[LMemberIndex]);
+							Array array = (Array)objectValue;
+							int[] memberIndexValues = new int[memberIndexes.Length];
+							for (int memberIndex = 0; memberIndex < memberIndexes.Length; memberIndex++)
+								memberIndexValues[memberIndex] = Int32.Parse(memberIndexes[memberIndex]);
 								
-							LObject = LArray.GetValue(LMemberIndexValues);
+							objectValue = array.GetValue(memberIndexValues);
 						}
 						else
 						{
-							DefaultMemberAttribute LDefaultMember = GetAttribute(LObject.GetType(), typeof(DefaultMemberAttribute)) as DefaultMemberAttribute;
-							if (LDefaultMember == null)
-								throw new ArgumentException(String.Format("Member {0} does not have a default property.", LMemberName));
+							DefaultMemberAttribute defaultMember = GetAttribute(objectValue.GetType(), typeof(DefaultMemberAttribute)) as DefaultMemberAttribute;
+							if (defaultMember == null)
+								throw new ArgumentException(String.Format("Member {0} does not have a default property.", memberName));
 
-							Type[] LMemberIndexTypes = new Type[LMemberIndexes.Length];
-							object[] LMemberIndexValues = new object[LMemberIndexes.Length];
-							for (int LMemberIndex = 0; LMemberIndex < LMemberIndexes.Length; LMemberIndex++)
+							Type[] memberIndexTypes = new Type[memberIndexes.Length];
+							object[] memberIndexValues = new object[memberIndexes.Length];
+							for (int memberIndex = 0; memberIndex < memberIndexes.Length; memberIndex++)
 							{
-								int LMemberIndexInt;
-								if (Int32.TryParse(LMemberIndexes[LMemberIndex], out LMemberIndexInt))
+								int memberIndexInt;
+								if (Int32.TryParse(memberIndexes[memberIndex], out memberIndexInt))
 								{
-									LMemberIndexTypes[LMemberIndex] = typeof(Int32);
-									LMemberIndexValues[LMemberIndex] = LMemberIndexInt;
+									memberIndexTypes[memberIndex] = typeof(Int32);
+									memberIndexValues[memberIndex] = memberIndexInt;
 								}
 								else
 								{
-									LMemberIndexTypes[LMemberIndex] = typeof(String);
-									LMemberIndexValues[LMemberIndex] = LMemberIndexes[LMemberIndex];
+									memberIndexTypes[memberIndex] = typeof(String);
+									memberIndexValues[memberIndex] = memberIndexes[memberIndex];
 								}
 							}
 
-							PropertyInfo LInfo = LObject.GetType().GetProperty(LDefaultMember.MemberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy, null, null, LMemberIndexTypes, null);
-							if (LInfo == null)
-								throw new ArgumentException(String.Format("Could not resolve an indexer for member {0} with the reference list {1}.", LMemberName, LReferenceIndex));
+							PropertyInfo info = objectValue.GetType().GetProperty(defaultMember.MemberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy, null, null, memberIndexTypes, null);
+							if (info == null)
+								throw new ArgumentException(String.Format("Could not resolve an indexer for member {0} with the reference list {1}.", memberName, referenceIndex));
 								
-							LObject = LInfo.GetValue(LObject, LMemberIndexValues);
+							objectValue = info.GetValue(objectValue, memberIndexValues);
 						}
 					}
 					else
 					{
-						LObject = GetMemberValue(FindSimpleMember(LObject.GetType(), LReferences[LIndex]), LObject);
+						objectValue = GetMemberValue(FindSimpleMember(objectValue.GetType(), references[index]), objectValue);
 					}
 				}
 			}
 		
-			return LObject;
+			return objectValue;
 		}
 		
 		/// <summary> Internal dictionary of assembly references by weak (short) name. </summary>
-		private static Dictionary<string, Assembly> FAssemblyByName;
+		private static Dictionary<string, Assembly> _assemblyByName;
 
 		/// <summary> Ensures that the internal dictionary is populated with the set of initially loaded assemblies. </summary>
 		/// <remarks> Under Silverlight, this call must be made on the main thread. </remarks>
 		public static void EnsureAssemblyByName()
 		{
-			if (FAssemblyByName == null)
+			if (_assemblyByName == null)
 			{
 				if 
 				(
 					System.Threading.Interlocked.CompareExchange<Dictionary<string, Assembly>>
 					(
-						ref FAssemblyByName, 
+						ref _assemblyByName, 
 						new Dictionary<string, Assembly>(),
 						null
 					) == null
 				)
-					lock (FAssemblyByName)
+					lock (_assemblyByName)
 					{
 						#if SILVERLIGHT
-						foreach (var LPart in System.Windows.Deployment.Current.Parts)
+						foreach (var part in System.Windows.Deployment.Current.Parts)
 						{
 							RegisterAssembly
 							(
@@ -364,144 +364,144 @@ namespace Alphora.Dataphor
 								(
 									System.Windows.Application.GetResourceStream
 									(
-										new Uri(LPart.Source, UriKind.Relative)
+										new Uri(part.Source, UriKind.Relative)
 									).Stream
 								)
 							);
 						}
 						#else
-						foreach (var LAssembly in AppDomain.CurrentDomain.GetAssemblies())
-							RegisterAssembly(LAssembly);
+						foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+							RegisterAssembly(assembly);
 						#endif
 					}
 			}
 		}
 		
 		/// <summary> Attempts to locate an assembly by weak (short) name. </summary>
-		public static bool TryGetAssemblyByName(string AName, out Assembly AAssembly)
+		public static bool TryGetAssemblyByName(string name, out Assembly assembly)
 		{
 			EnsureAssemblyByName();
-			lock (FAssemblyByName)
-				return FAssemblyByName.TryGetValue(AName, out AAssembly);
+			lock (_assemblyByName)
+				return _assemblyByName.TryGetValue(name, out assembly);
 		}
 		
 		/// <summary> Registers an assembly for resolution by weak (short) name. </summary>
-		public static void RegisterAssembly(Assembly AAssembly)
+		public static void RegisterAssembly(Assembly assembly)
 		{
 			EnsureAssemblyByName();
-			lock (FAssemblyByName)
-				FAssemblyByName.Add(AssemblyNameUtility.GetName(AAssembly.FullName), AAssembly); 
+			lock (_assemblyByName)
+				_assemblyByName.Add(AssemblyNameUtility.GetName(assembly.FullName), assembly); 
 		}
 		
 		public static Assembly[] GetRegisteredAssemblies()
 		{
 			#if SILVERLIGHT
 			EnsureAssemblyByName();
-			lock (FAssemblyByName)
+			lock (_assemblyByName)
 			{
-				var LResult = new Assembly[FAssemblyByName.Count];
+				var result = new Assembly[_assemblyByName.Count];
 				var i = 0;
-				foreach (Assembly LAssembly in FAssemblyByName.Values)
+				foreach (Assembly assembly in _assemblyByName.Values)
 				{
-					LResult[i] = LAssembly;
+					result[i] = assembly;
 					i++;
 				}
-				return LResult;
+				return result;
 			}
 			#else
 			return AppDomain.CurrentDomain.GetAssemblies();
 			#endif
 		}
 
-		public static Type SearchAllAssembliesForClass(string AQualifiedClassName)
+		public static Type SearchAllAssembliesForClass(string qualifiedClassName)
 		{
-			var LAssemblies = GetRegisteredAssemblies();
-			foreach (Assembly LAssembly in LAssemblies)
+			var assemblies = GetRegisteredAssemblies();
+			foreach (Assembly assembly in assemblies)
 			{
-				var LResult = LAssembly.GetType(AQualifiedClassName, false);
-				if (LResult != null)
-					return LResult;
+				var result = assembly.GetType(qualifiedClassName, false);
+				if (result != null)
+					return result;
 			}
-			throw new BaseException(BaseException.Codes.ClassNotFound, AQualifiedClassName);
+			throw new BaseException(BaseException.Codes.ClassNotFound, qualifiedClassName);
 		}
 
 		/// <summary> Creates a new instance using the given name components. </summary>
 		/// <remarks> If the given assembly name is weak (short), an attempt will be made 
 		/// to find a strong name in the registered assemblies for it. </remarks>
-		public static object CreateInstance(string ANamespace, string AClassName, string AAssemblyName)
+		public static object CreateInstance(string namespaceValue, string className, string assemblyName)
 		{
-			return Activator.CreateInstance(GetType(ANamespace, AClassName, AAssemblyName));
+			return Activator.CreateInstance(GetType(namespaceValue, className, assemblyName));
 		}
 		
 		/// <summary> Locates a type, using the given assembly if no assembly name is provided. </summary>
 		/// <remarks> If an assembly name is given and it is short, an attempt will be made 
 		/// to find a full name in the registered assemblies for it. </remarks>
-		public static Type GetType(string AAssemblyQualifiedClassName, Assembly ADefaultAssembly)
+		public static Type GetType(string assemblyQualifiedClassName, Assembly defaultAssembly)
 		{
-			string LAssemblyName;
-			string LQualifiedClassName;
-			var LIndex = AAssemblyQualifiedClassName.IndexOf(",");
-			if (LIndex >= 0)
+			string assemblyName;
+			string qualifiedClassName;
+			var index = assemblyQualifiedClassName.IndexOf(",");
+			if (index >= 0)
 			{
-				LAssemblyName = AAssemblyQualifiedClassName.Substring(LIndex + 1).Trim();
-				LQualifiedClassName = AAssemblyQualifiedClassName.Substring(0, LIndex).Trim();
+				assemblyName = assemblyQualifiedClassName.Substring(index + 1).Trim();
+				qualifiedClassName = assemblyQualifiedClassName.Substring(0, index).Trim();
 			}
 			else
 			{
-				LAssemblyName = ADefaultAssembly.FullName;
-				LQualifiedClassName = AAssemblyQualifiedClassName.Trim();
+				assemblyName = defaultAssembly.FullName;
+				qualifiedClassName = assemblyQualifiedClassName.Trim();
 				
-				Type LResult = ADefaultAssembly.GetType(LQualifiedClassName, false);
-				if (LResult != null)
-					return LResult;
+				Type result = defaultAssembly.GetType(qualifiedClassName, false);
+				if (result != null)
+					return result;
 			}
 			
-			return GetType(LQualifiedClassName, LAssemblyName);	
+			return GetType(qualifiedClassName, assemblyName);	
 		}
 
 		/// <summary> Locates a type, using the calling assembly if no assembly name is provided. </summary>
 		/// <remarks> If an assembly name is given and it is short, an attempt will be made 
 		/// to find a full name in the registered assemblies for it. </remarks>
-		public static Type GetType(string AAssemblyQualifiedClassName)
+		public static Type GetType(string assemblyQualifiedClassName)
 		{
-			return GetType(AAssemblyQualifiedClassName, Assembly.GetCallingAssembly());	
+			return GetType(assemblyQualifiedClassName, Assembly.GetCallingAssembly());	
 		}
 
 		/// <summary> Locates a type using the given name components. </summary>
 		/// <remarks> If the given assembly name is short, an attempt will be made 
 		/// to find a full name in the registered assemblies for it. </remarks>
-		public static Type GetType(string ANamespace, string AClassName, string AAssemblyName)
+		public static Type GetType(string namespaceValue, string className, string assemblyName)
 		{
 			return 
 				GetType
 				(
-					(String.IsNullOrEmpty(ANamespace) ? "" : (ANamespace + "."))
-						+ AClassName,
-					AAssemblyName
+					(String.IsNullOrEmpty(namespaceValue) ? "" : (namespaceValue + "."))
+						+ className,
+					assemblyName
 				);
 		}
 
 		/// <summary> Locates a type using the given name components. </summary>
 		/// <remarks> If the given assembly name is short, an attempt will be made 
 		/// to find a full name in the registered assemblies for it. </remarks>
-		public static Type GetType(string AQualifiedClassName, string AAssemblyName)
+		public static Type GetType(string qualifiedClassName, string assemblyName)
 		{
 			// Lookup a full assembly name for the given assembly name if there is one
-			Assembly LAssembly;
-			if (TryGetAssemblyByName(AAssemblyName, out LAssembly))
-				AAssemblyName = LAssembly.FullName;
+			Assembly assembly;
+			if (TryGetAssemblyByName(assemblyName, out assembly))
+				assemblyName = assembly.FullName;
 
-			var LResult =
+			var result =
 				Type.GetType
 				(
-					AQualifiedClassName + (String.IsNullOrEmpty(AAssemblyName) ? "" : ("," + AAssemblyName)), 
+					qualifiedClassName + (String.IsNullOrEmpty(assemblyName) ? "" : ("," + assemblyName)), 
 					false, 
 					true
 				);
 			return 
-				LResult != null 
-					? LResult 
-					: SearchAllAssembliesForClass(AQualifiedClassName);
+				result != null 
+					? result 
+					: SearchAllAssembliesForClass(qualifiedClassName);
 		}
 	}
 }

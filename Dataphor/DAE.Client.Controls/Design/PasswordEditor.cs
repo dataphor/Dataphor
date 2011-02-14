@@ -14,37 +14,37 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 {
 	public class PasswordEditor : UITypeEditor
 	{
-		private IWindowsFormsEditorService FEditorService = null;
+		private IWindowsFormsEditorService _editorService = null;
 		
-		public override object EditValue(ITypeDescriptorContext AContext, IServiceProvider AProvider, object AValue) 
+		public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object tempValue) 
 		{	 
-			if (AContext != null && AContext.Instance != null && AProvider != null) 
+			if (context != null && context.Instance != null && provider != null) 
 			{
-				FEditorService = (IWindowsFormsEditorService)AProvider.GetService(typeof(IWindowsFormsEditorService));
-				if (FEditorService != null)
+				_editorService = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
+				if (_editorService != null)
 				{
-					PasswordEdit LEdit = new PasswordEdit();
+					PasswordEdit edit = new PasswordEdit();
 					try
 					{
-						LEdit.Password = (string)AValue;
-						FEditorService.ShowDialog(LEdit);
-						if (LEdit.DialogResult == DialogResult.OK)
-							AValue = LEdit.Password;
+						edit.Password = (string)tempValue;
+						_editorService.ShowDialog(edit);
+						if (edit.DialogResult == DialogResult.OK)
+							tempValue = edit.Password;
 					}
 					finally
 					{
-						LEdit.Dispose();
+						edit.Dispose();
 					}
 				}
 			}
-			return AValue;
+			return tempValue;
 		}
 	 
-		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext AContext) 
+		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) 
 		{ 
-			if (AContext != null && AContext.Instance != null) 
+			if (context != null && context.Instance != null) 
 				return UITypeEditorEditStyle.Modal;
-			return base.GetEditStyle(AContext);
+			return base.GetEditStyle(context);
 		}
 	}
 }

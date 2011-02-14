@@ -17,18 +17,18 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 	/// <summary> Editor for the ColumnName property of IncrementalSearchColumn's. </summary>
 	public class GridColumnNameEditor : DAE.Client.Design.ColumnNameEditor
 	{
-		public override DataSet DataSet(ITypeDescriptorContext AContext)
+		public override DataSet DataSet(ITypeDescriptorContext context)
 		{
 			if 
 				(
-				(AContext != null) && 
-				(AContext.Instance != null) &&
-				(AContext.Instance is GridColumn)
+				(context != null) && 
+				(context.Instance != null) &&
+				(context.Instance is GridColumn)
 				)
 			{
-				GridColumn LColumn = (GridColumn)AContext.Instance;
-				if ((LColumn.Grid != null) && (LColumn.Grid.Source != null))
-					return LColumn.Grid.Source.DataSet;
+				GridColumn column = (GridColumn)context.Instance;
+				if ((column.Grid != null) && (column.Grid.Source != null))
+					return column.Grid.Source.DataSet;
 			}
 			return null;
 		}	 
@@ -39,17 +39,17 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 	{
 		public GridColumnCollectionEditor(Type type) : base(type) {}
 
-		protected override object CreateInstance(Type AItemType)
+		protected override object CreateInstance(Type itemType)
 		{
-			if (AItemType == typeof(Alphora.Dataphor.DAE.Client.Controls.GridColumn))
+			if (itemType == typeof(Alphora.Dataphor.DAE.Client.Controls.GridColumn))
 				return base.CreateInstance(typeof(Alphora.Dataphor.DAE.Client.Controls.TextColumn));
 			else
-				return base.CreateInstance(AItemType);
+				return base.CreateInstance(itemType);
 		}
 
 		protected override Type[] CreateNewItemTypes()
 		{
-			Type[] LItemTypes = 
+			Type[] itemTypes = 
 				{
 					typeof(Alphora.Dataphor.DAE.Client.Controls.TextColumn),
 					typeof(Alphora.Dataphor.DAE.Client.Controls.ActionColumn),
@@ -58,68 +58,68 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 					typeof(Alphora.Dataphor.DAE.Client.Controls.LinkColumn),
 					typeof(Alphora.Dataphor.DAE.Client.Controls.SequenceColumn)
 				};
-			return LItemTypes;
+			return itemTypes;
 		}
 
-		private int NonDefaultGridColumnCount(Alphora.Dataphor.DisposableList AColumnsArray)
+		private int NonDefaultGridColumnCount(Alphora.Dataphor.DisposableList columnsArray)
 		{
-			int LObjectCount = 0;
-			for (int i = 0; i < AColumnsArray.Count; i++)
-				if (AColumnsArray[i] is Alphora.Dataphor.DAE.Client.Controls.DataColumn)
+			int objectCount = 0;
+			for (int i = 0; i < columnsArray.Count; i++)
+				if (columnsArray[i] is Alphora.Dataphor.DAE.Client.Controls.DataColumn)
 				{
-					if (!((Alphora.Dataphor.DAE.Client.Controls.DataColumn)AColumnsArray[i]).IsDefaultGridColumn)
-						LObjectCount++;
+					if (!((Alphora.Dataphor.DAE.Client.Controls.DataColumn)columnsArray[i]).IsDefaultGridColumn)
+						objectCount++;
 				}
 				else
-					LObjectCount++;
-			return LObjectCount;
+					objectCount++;
+			return objectCount;
 		}
 
-		protected override object[] GetItems(object AEditValue)
+		protected override object[] GetItems(object editValue)
 		{
-			Alphora.Dataphor.DisposableList LArray = (Alphora.Dataphor.DisposableList)AEditValue;
-			int LObjectCount = NonDefaultGridColumnCount(LArray);
-			if (LObjectCount > 0)
+			Alphora.Dataphor.DisposableList array = (Alphora.Dataphor.DisposableList)editValue;
+			int objectCount = NonDefaultGridColumnCount(array);
+			if (objectCount > 0)
 			{
-				object[] LNonDefaultColumns = new object[LObjectCount];
-				int LInsertIndex = 0;
-				for (int i = 0; i < LArray.Count; i++)
-					if (LArray[i] is Alphora.Dataphor.DAE.Client.Controls.DataColumn)
+				object[] nonDefaultColumns = new object[objectCount];
+				int insertIndex = 0;
+				for (int i = 0; i < array.Count; i++)
+					if (array[i] is Alphora.Dataphor.DAE.Client.Controls.DataColumn)
 					{
-						if (!((Alphora.Dataphor.DAE.Client.Controls.DataColumn)LArray[i]).IsDefaultGridColumn)
-							LNonDefaultColumns[LInsertIndex++] = LArray[i];
+						if (!((Alphora.Dataphor.DAE.Client.Controls.DataColumn)array[i]).IsDefaultGridColumn)
+							nonDefaultColumns[insertIndex++] = array[i];
 					}
 					else
-						LNonDefaultColumns[LInsertIndex++] = LArray[i];
-				return LNonDefaultColumns;
+						nonDefaultColumns[insertIndex++] = array[i];
+				return nonDefaultColumns;
 			}
 			else
 				return new object[] {};
 			
 		}
 
-		private CollectionForm FForm;
+		private CollectionForm _form;
 		protected override CollectionForm CreateCollectionForm()
 		{
-			CollectionForm LForm = base.CreateCollectionForm();
-			FForm = LForm;
-			return LForm;
+			CollectionForm form = base.CreateCollectionForm();
+			_form = form;
+			return form;
 		}
 											   
-		protected override object SetItems(object AEditValue, object[] AValue)
+		protected override object SetItems(object editValue, object[] tempValue)
 		{
-			object LResult = base.SetItems(AEditValue, AValue);		
-			if ((AEditValue is GridColumns) && (FForm != null))
-				foreach (Control LControl in FForm.Controls)
-					if (LControl is PropertyGrid)
-						((PropertyGrid)LControl).Refresh();
-			return LResult;
+			object result = base.SetItems(editValue, tempValue);		
+			if ((editValue is GridColumns) && (_form != null))
+				foreach (Control control in _form.Controls)
+					if (control is PropertyGrid)
+						((PropertyGrid)control).Refresh();
+			return result;
 		}
 	}
 
 	public class AbstractCollectionBrowse : Form
 	{
-		protected System.Windows.Forms.ListView FListView;
+		protected System.Windows.Forms.ListView _listView;
 		private System.Windows.Forms.Button btnAdd;
 		private System.Windows.Forms.Button btnEdit;
 		private System.Windows.Forms.Button btnDelete;
@@ -145,7 +145,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 
 		protected virtual void InitializeComponent()
 		{
-			this.FListView = new System.Windows.Forms.ListView();
+			this._listView = new System.Windows.Forms.ListView();
 			this.btnAdd = new System.Windows.Forms.Button();
 			this.btnEdit = new System.Windows.Forms.Button();
 			this.btnDelete = new System.Windows.Forms.Button();
@@ -153,18 +153,18 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			// 
 			// FListView
 			// 
-			this.FListView.AllowColumnReorder = true;
-			this.FListView.Anchor = (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+			this._listView.AllowColumnReorder = true;
+			this._listView.Anchor = (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
 				| System.Windows.Forms.AnchorStyles.Left) 
 				| System.Windows.Forms.AnchorStyles.Right);
-			this.FListView.FullRowSelect = true;
-			this.FListView.HideSelection = false;
-			this.FListView.Location = new System.Drawing.Point(8, 8);
-			this.FListView.MultiSelect = false;
-			this.FListView.Name = "FListView";
-			this.FListView.Size = new System.Drawing.Size(272, 132);
-			this.FListView.TabIndex = 0;
-			this.FListView.View = System.Windows.Forms.View.Details;
+			this._listView.FullRowSelect = true;
+			this._listView.HideSelection = false;
+			this._listView.Location = new System.Drawing.Point(8, 8);
+			this._listView.MultiSelect = false;
+			this._listView.Name = "FListView";
+			this._listView.Size = new System.Drawing.Size(272, 132);
+			this._listView.TabIndex = 0;
+			this._listView.View = System.Windows.Forms.View.Details;
 			// 
 			// btnAdd
 			// 
@@ -201,7 +201,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 																		  this.btnDelete,
 																		  this.btnEdit,
 																		  this.btnAdd,
-																		  this.FListView});
+																		  this._listView});
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
 			this.Name = "AbstractCollectionBrowse";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
@@ -215,17 +215,17 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			//Abstract
 		}
 
-		protected virtual void btnAdd_Click(object ASender, System.EventArgs AArgs)
+		protected virtual void btnAdd_Click(object sender, System.EventArgs args)
 		{
 			//Abstract
 		}
 
-		protected virtual void btnEdit_Click(object ASender, System.EventArgs AArgs)
+		protected virtual void btnEdit_Click(object sender, System.EventArgs args)
 		{
 			//Abstract
 		}
 
-		protected virtual void btnDelete_Click(object ASender, System.EventArgs AArgs)
+		protected virtual void btnDelete_Click(object sender, System.EventArgs args)
 		{
 			//Abstract
 		}
@@ -233,112 +233,112 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 
 	public class AdornColumnExpressionBrowse : AbstractCollectionBrowse
 	{
-		private AdornColumnExpressions FExpressions;
+		private AdornColumnExpressions _expressions;
 
-		public AdornColumnExpressionBrowse(AdornColumnExpressions ACollection)
+		public AdornColumnExpressionBrowse(AdornColumnExpressions collection)
 		{
 			this.Text = "Column Expressions";
-			FExpressions = ACollection;
-			ExpressionsChanged(FExpressions, null);
+			_expressions = collection;
+			ExpressionsChanged(_expressions, null);
 		}
 
-		protected override void Dispose( bool ADisposing )
+		protected override void Dispose( bool disposing )
 		{
-			if (FExpressions != null)
+			if (_expressions != null)
 			{
-				FExpressions = null;
+				_expressions = null;
 			}
-			base.Dispose( ADisposing );
+			base.Dispose( disposing );
 		}
 
 		protected override void InitColumns()
 		{
-			FListView.Columns.Add("Column Name", 100, HorizontalAlignment.Left);
-			FListView.Columns.Add("Default", 110, HorizontalAlignment.Left);
-			FListView.Columns.Add("Constraint", 180, HorizontalAlignment.Left);
+			_listView.Columns.Add("Column Name", 100, HorizontalAlignment.Left);
+			_listView.Columns.Add("Default", 110, HorizontalAlignment.Left);
+			_listView.Columns.Add("Constraint", 180, HorizontalAlignment.Left);
 		}
 
-		private void ExpressionsChanged(object ASender, object AItem)
+		private void ExpressionsChanged(object sender, object item)
 		{
-			if (FListView != null)
+			if (_listView != null)
 			{
-				FListView.BeginUpdate();
+				_listView.BeginUpdate();
 				try
 				{
-					FListView.Items.Clear();
+					_listView.Items.Clear();
 					int i = 0;
-					foreach (AdornColumnExpression LExpression in FExpressions)
+					foreach (AdornColumnExpression expression in _expressions)
 					{
-						FListView.Items.Add(new ListViewItem());
-						FListView.Items[i].Tag = LExpression;
-						FListView.Items[i].Text = LExpression.ColumnName;
-						FListView.Items[i].SubItems.Add(LExpression.Default != null ? LExpression.Default.ExpressionString : String.Empty);
-						FListView.Items[i].SubItems.Add(LExpression.Constraints.Count > 0 ? LExpression.Constraints[0].ExpressionString : String.Empty); 
+						_listView.Items.Add(new ListViewItem());
+						_listView.Items[i].Tag = expression;
+						_listView.Items[i].Text = expression.ColumnName;
+						_listView.Items[i].SubItems.Add(expression.Default != null ? expression.Default.ExpressionString : String.Empty);
+						_listView.Items[i].SubItems.Add(expression.Constraints.Count > 0 ? expression.Constraints[0].ExpressionString : String.Empty); 
 						++i;
 					}
-					if (FListView.Items.Count > 0)
-						FListView.Items[0].Focused = true;
+					if (_listView.Items.Count > 0)
+						_listView.Items[0].Focused = true;
 				}
 				finally
 				{
-					FListView.EndUpdate();
+					_listView.EndUpdate();
 				}
 				
 			}
 		}
 		
-		protected override void btnAdd_Click(object ASender, System.EventArgs AArgs)
+		protected override void btnAdd_Click(object sender, System.EventArgs args)
 		{
-			base.btnAdd_Click(ASender, AArgs);
-			AdornColumnExpression LExpression = new AdornColumnExpression();
-			AdornColumnExpressionEdit LEditForm = new AdornColumnExpressionEdit(LExpression);
+			base.btnAdd_Click(sender, args);
+			AdornColumnExpression expression = new AdornColumnExpression();
+			AdornColumnExpressionEdit editForm = new AdornColumnExpressionEdit(expression);
 			try
 			{
-				LEditForm.ShowDialog((IWin32Window)this);
-				if (LEditForm.DialogResult == DialogResult.OK)
-					FExpressions.Add(LExpression);
+				editForm.ShowDialog((IWin32Window)this);
+				if (editForm.DialogResult == DialogResult.OK)
+					_expressions.Add(expression);
 			}
 			finally
 			{
-				LEditForm.Dispose();
+				editForm.Dispose();
 			}
 		}
 
 		private void CheckItemSelected()
 		{
-			if (FListView.SelectedItems.Count == 0)
+			if (_listView.SelectedItems.Count == 0)
 				throw new DesignException(DesignException.Codes.NoItemSelected);
 		}
 
-		protected override void btnEdit_Click(object ASender, System.EventArgs AArgs)
+		protected override void btnEdit_Click(object sender, System.EventArgs args)
 		{
-			base.btnEdit_Click(ASender, AArgs);
+			base.btnEdit_Click(sender, args);
 			CheckItemSelected();
-			ListViewItem LListViewItem = FListView.Items[FListView.SelectedIndices[0]];
-			AdornColumnExpression LExpression = (AdornColumnExpression)LListViewItem.Tag;
-			AdornColumnExpressionEdit LEditForm = new AdornColumnExpressionEdit(LExpression);
+			ListViewItem listViewItem = _listView.Items[_listView.SelectedIndices[0]];
+			AdornColumnExpression expression = (AdornColumnExpression)listViewItem.Tag;
+			AdornColumnExpressionEdit editForm = new AdornColumnExpressionEdit(expression);
 			try
 			{
-				LEditForm.ShowDialog((IWin32Window)this);
-				if (LEditForm.DialogResult == DialogResult.OK)
-					ExpressionsChanged(FExpressions, null);
+				editForm.ShowDialog((IWin32Window)this);
+				if (editForm.DialogResult == DialogResult.OK)
+					ExpressionsChanged(_expressions, null);
 			}
 			finally
 			{
-				LEditForm.Dispose();
+				editForm.Dispose();
 			}
 		}
 
-		protected override void btnDelete_Click(object ASender, System.EventArgs AArgs)
+		protected override void btnDelete_Click(object sender, System.EventArgs args)
 		{
-			base.btnDelete_Click(ASender, AArgs);
+			base.btnDelete_Click(sender, args);
 			CheckItemSelected();
 			if (MessageBox.Show("Delete Item?", "Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
 			{
-				ListViewItem LListViewItem = FListView.Items[FListView.SelectedIndices[0]];
-				FExpressions.RemoveAt(FExpressions.IndexOf(LListViewItem.Tag));
-				LListViewItem.Tag = null;
-				ExpressionsChanged(FExpressions, null);
+				ListViewItem listViewItem = _listView.Items[_listView.SelectedIndices[0]];
+				_expressions.RemoveAt(_expressions.IndexOf(listViewItem.Tag));
+				listViewItem.Tag = null;
+				ExpressionsChanged(_expressions, null);
 			}
 		}
 	}
@@ -373,10 +373,10 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 		private System.Windows.Forms.Button btnDefaultMetaData;
 		private System.ComponentModel.Container components = null;
 
-		public AdornColumnExpressionEdit(AdornColumnExpression AExpression)
+		public AdornColumnExpressionEdit(AdornColumnExpression expression)
 		{
 			InitializeComponent();
-			Value = AExpression;
+			Value = expression;
 		}
 
 		protected override void Dispose( bool disposing )
@@ -701,24 +701,24 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 
 		}
 
-		private AdornColumnExpression FValue;
+		private AdornColumnExpression _value;
 		public AdornColumnExpression Value
 		{
-			get { return FValue; }
+			get { return _value; }
 			set
 			{
 				if (value == null)
 					throw new DesignException(DesignException.Codes.AdornColumnExpressionNotNull);
-				FValue = value;
+				_value = value;
 				ValueChanged();
 			}
 		}
 
 		protected virtual void ValueChanged()
 		{
-			tbColumnName.Text = FValue.ColumnName;
-			rbDefault.Checked = FValue.Default != null;
-			rbConstraint.Checked = FValue.Constraints.Count > 0;
+			tbColumnName.Text = _value.ColumnName;
+			rbDefault.Checked = _value.Default != null;
+			rbConstraint.Checked = _value.Constraints.Count > 0;
 		}
 
 		private void btnOK_Click(object sender, System.EventArgs e)
@@ -732,64 +732,64 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			Close();
 		}
 
-		private void EditMetaData(ref MetaData AValue)
+		private void EditMetaData(ref MetaData tempValue)
 		{
-			MetaDataEditForm LMetaDataEditForm = new MetaDataEditForm(AValue); 
+			MetaDataEditForm metaDataEditForm = new MetaDataEditForm(tempValue); 
 			try
 			{
-				LMetaDataEditForm.ShowDialog((IWin32Window)this);
-				if (LMetaDataEditForm.DialogResult == DialogResult.OK)
-					AValue = LMetaDataEditForm.MetaData;
+				metaDataEditForm.ShowDialog((IWin32Window)this);
+				if (metaDataEditForm.DialogResult == DialogResult.OK)
+					tempValue = metaDataEditForm.MetaData;
 			}
 			finally
 			{
-				LMetaDataEditForm.Dispose();
+				metaDataEditForm.Dispose();
 			}
 		}
 
 		private void btnDefaultMetaData_Click(object sender, System.EventArgs e)
 		{
-			EditMetaData(ref FDefaultMetaData);
-			if (FDefaultMetaData == null)
+			EditMetaData(ref _defaultMetaData);
+			if (_defaultMetaData == null)
 				tbDefaultMetaData.Text = "(none)";
 			else
-				tbDefaultMetaData.Text = FDefaultMetaData.ToString();
+				tbDefaultMetaData.Text = _defaultMetaData.ToString();
 
 		}
 
 		private void btnConstraintMetaData_Click(object sender, System.EventArgs e)
 		{
-			EditMetaData(ref FConstraintMetaData);
-			if (FConstraintMetaData == null)
+			EditMetaData(ref _constraintMetaData);
+			if (_constraintMetaData == null)
 				tbConstraintMetaData.Text = "(none)";
 			else
-				tbConstraintMetaData.Text = FConstraintMetaData.ToString();
+				tbConstraintMetaData.Text = _constraintMetaData.ToString();
 		}
 
-		protected virtual void ExpressionClosing(object ASender, CancelEventArgs AArgs)
+		protected virtual void ExpressionClosing(object sender, CancelEventArgs args)
 		{
-			if (((MultiLineEditForm)ASender).Value != String.Empty)
+			if (((MultiLineEditForm)sender).Value != String.Empty)
 			{
-				Alphora.Dataphor.DAE.Language.D4.Parser LParser = new Alphora.Dataphor.DAE.Language.D4.Parser();
-				LParser.ParseExpression(((MultiLineEditForm)ASender).Value);
+				Alphora.Dataphor.DAE.Language.D4.Parser parser = new Alphora.Dataphor.DAE.Language.D4.Parser();
+				parser.ParseExpression(((MultiLineEditForm)sender).Value);
 			}
 		}
 
-		private void EditExpression(System.Windows.Forms.TextBox ATextBoxExpression)
+		private void EditExpression(System.Windows.Forms.TextBox textBoxExpression)
 		{
-			MultiLineEditForm LForm = new MultiLineEditForm(ATextBoxExpression.Text);
+			MultiLineEditForm form = new MultiLineEditForm(textBoxExpression.Text);
 			try
 			{
-				LForm.Closing += new CancelEventHandler(ExpressionClosing);
-				LForm.Text = "Expression";
-				LForm.ShowDialog((IWin32Window)this);
-				if (LForm.DialogResult == DialogResult.OK)
-					ATextBoxExpression.Text = LForm.Value;
+				form.Closing += new CancelEventHandler(ExpressionClosing);
+				form.Text = "Expression";
+				form.ShowDialog((IWin32Window)this);
+				if (form.DialogResult == DialogResult.OK)
+					textBoxExpression.Text = form.Value;
 			}
 			finally
 			{
-				LForm.Closing -= new  CancelEventHandler(ExpressionClosing);
-				LForm.Dispose();
+				form.Closing -= new  CancelEventHandler(ExpressionClosing);
+				form.Dispose();
 			}
 		}
 
@@ -803,10 +803,10 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			EditExpression(tbConstraintExpression);
 		}
 
-		private MetaData FDefaultMetaData;
+		private MetaData _defaultMetaData;
 		public MetaData DefaultMetaData
 		{
-			get { return FDefaultMetaData; }
+			get { return _defaultMetaData; }
 		}
 
 		private void rbDefaultNone_CheckedChanged(object sender, System.EventArgs e)
@@ -814,7 +814,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			if (rbDefaultNone.Checked)
 			{
 				groupBox3.Enabled = false;
-				FDefaultMetaData = null;
+				_defaultMetaData = null;
 			}
 		}
 
@@ -823,27 +823,27 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			if (rbDefault.Checked)
 			{
 				groupBox3.Enabled = true;
-				if (FValue.Default != null)
+				if (_value.Default != null)
 				{
-					tbDefaultExpression.Text = FValue.Default.ExpressionString;
-					if (FValue.Default.MetaData != null)
+					tbDefaultExpression.Text = _value.Default.ExpressionString;
+					if (_value.Default.MetaData != null)
 					{
-						FDefaultMetaData = FValue.Default.MetaData.Copy();
-						tbDefaultMetaData.Text = FDefaultMetaData.ToString();
+						_defaultMetaData = _value.Default.MetaData.Copy();
+						tbDefaultMetaData.Text = _defaultMetaData.ToString();
 					}
 					else
 					{
-						FDefaultMetaData = null;
+						_defaultMetaData = null;
 						tbDefaultMetaData.Text = "(none)";
 					}
 				}
 			}
 		}
 
-		private MetaData FConstraintMetaData;
+		private MetaData _constraintMetaData;
 		public MetaData ConstraintMetaData
 		{
-			get { return FConstraintMetaData; }
+			get { return _constraintMetaData; }
 		}
 
 		private void rbConstraintNone_CheckedChanged(object sender, System.EventArgs e)
@@ -851,7 +851,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			if (rbConstraintNone.Checked)
 			{
 				gbConstraints.Enabled = false;
-				FConstraintMetaData = null;
+				_constraintMetaData = null;
 			}
 		}
 
@@ -860,28 +860,28 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			if (rbConstraint.Checked)
 			{
 				gbConstraints.Enabled = true;
-				if (FValue.Constraints.Count > 0)
+				if (_value.Constraints.Count > 0)
 				{
-					ConstraintDefinition LConstraint = FValue.Constraints[0];
-					tbName.Text = LConstraint.ConstraintName;
-					tbConstraintExpression.Text = LConstraint.ExpressionString;
-					if (LConstraint.MetaData != null)
+					ConstraintDefinition constraint = _value.Constraints[0];
+					tbName.Text = constraint.ConstraintName;
+					tbConstraintExpression.Text = constraint.ExpressionString;
+					if (constraint.MetaData != null)
 					{
-						FConstraintMetaData = LConstraint.MetaData.Copy();
-						tbConstraintMetaData.Text = FConstraintMetaData.ToString();
+						_constraintMetaData = constraint.MetaData.Copy();
+						tbConstraintMetaData.Text = _constraintMetaData.ToString();
 					}
 					else
 					{
 						tbConstraintMetaData.Text = "(none)";
-						FConstraintMetaData = null;
+						_constraintMetaData = null;
 					}
 				}
 			}
 		}
 
-		protected override void OnClosing(CancelEventArgs AArgs)
+		protected override void OnClosing(CancelEventArgs args)
 		{
-			base.OnClosing(AArgs);
+			base.OnClosing(args);
 			if (DialogResult == DialogResult.OK)
 			{
 				try
@@ -902,33 +902,33 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 					}
 				
 					//Assign values...
-					FValue.ColumnName = tbColumnName.Text;
+					_value.ColumnName = tbColumnName.Text;
 					if (rbDefault.Checked)
 					{
-						DefaultDefinition LDefault = new DefaultDefinition();
-						LDefault.ExpressionString = tbDefaultExpression.Text;
-						LDefault.MetaData = DefaultMetaData;
-						FValue.Default = LDefault;
+						DefaultDefinition defaultValue = new DefaultDefinition();
+						defaultValue.ExpressionString = tbDefaultExpression.Text;
+						defaultValue.MetaData = DefaultMetaData;
+						_value.Default = defaultValue;
 					}
 					else
-						FValue.Default = null;
+						_value.Default = null;
 
 					if (rbConstraint.Checked)
 					{
-						ConstraintDefinition LConstraint = new ConstraintDefinition();
-						LConstraint.ConstraintName = tbName.Text;
-						LConstraint.ExpressionString = tbConstraintExpression.Text;
-						LConstraint.MetaData = ConstraintMetaData;
-						if (FValue.Constraints.Count > 0)
-							FValue.Constraints.Remove(FValue.Constraints[0]);
-						FValue.Constraints.Add(LConstraint);
+						ConstraintDefinition constraint = new ConstraintDefinition();
+						constraint.ConstraintName = tbName.Text;
+						constraint.ExpressionString = tbConstraintExpression.Text;
+						constraint.MetaData = ConstraintMetaData;
+						if (_value.Constraints.Count > 0)
+							_value.Constraints.Remove(_value.Constraints[0]);
+						_value.Constraints.Add(constraint);
 					}
 					else
-						FValue.Constraints.Clear();
+						_value.Constraints.Clear();
 				}
 				catch
 				{
-					AArgs.Cancel = true;
+					args.Cancel = true;
 					throw;
 				}
 			}
@@ -937,153 +937,153 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 
 	public class AdornColumnExpressionsEditor : UITypeEditor
 	{
-		private IWindowsFormsEditorService FEditorService = null;
+		private IWindowsFormsEditorService _editorService = null;
 
-		private ITypeDescriptorContext FContext;
+		private ITypeDescriptorContext _context;
 
-		private void ExpressionChanged(object ASender, object AItem)
+		private void ExpressionChanged(object sender, object item)
 		{
-			if (FContext != null)
-				FContext.OnComponentChanged();
+			if (_context != null)
+				_context.OnComponentChanged();
 		}
 	
-		public override object EditValue(ITypeDescriptorContext AContext, IServiceProvider AProvider, object AValue) 
+		public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object tempValue) 
 		{	 
-			if (AContext != null && AContext.Instance != null && AProvider != null) 
+			if (context != null && context.Instance != null && provider != null) 
 			{
-				FContext = AContext;
-				FEditorService = (IWindowsFormsEditorService)AProvider.GetService(typeof(IWindowsFormsEditorService));
-				if (FEditorService != null)
+				_context = context;
+				_editorService = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
+				if (_editorService != null)
 				{
-					AdornColumnExpressionBrowse LForm = new AdornColumnExpressionBrowse((AdornColumnExpressions)AValue);
+					AdornColumnExpressionBrowse form = new AdornColumnExpressionBrowse((AdornColumnExpressions)tempValue);
 					try
 					{
-						FEditorService.ShowDialog(LForm);
+						_editorService.ShowDialog(form);
 					}
 					finally
 					{
-						FContext = null;
-						LForm.Dispose();
+						_context = null;
+						form.Dispose();
 					}
 				}
 			}
-			return AValue;
+			return tempValue;
 		}
 
 		
 	 
-		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext AContext) 
+		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) 
 		{
-			if (AContext != null && AContext.Instance != null) 
+			if (context != null && context.Instance != null) 
 				return UITypeEditorEditStyle.Modal;
 			else
-				return base.GetEditStyle(AContext);
+				return base.GetEditStyle(context);
 		}
 	}
 
 	public class ConstraintsBrowse : AbstractCollectionBrowse
 	{
-		private ConstraintDefinitions FConstraints;
+		private ConstraintDefinitions _constraints;
 
-		public ConstraintsBrowse(ConstraintDefinitions ACollection)
+		public ConstraintsBrowse(ConstraintDefinitions collection)
 		{
 			this.Text = "Constraints";
-			FConstraints = ACollection;
+			_constraints = collection;
 		}
 
-		protected override void Dispose( bool ADisposing )
+		protected override void Dispose( bool disposing )
 		{
-			if (FConstraints != null)
+			if (_constraints != null)
 			{
-				FConstraints = null;
+				_constraints = null;
 			}
-			base.Dispose( ADisposing );
+			base.Dispose( disposing );
 		}
 
 		protected override void InitColumns()
 		{
-			FListView.Columns.Add("Constraint Name", 100, HorizontalAlignment.Left);
-			FListView.Columns.Add("Expression", 120, HorizontalAlignment.Left);
+			_listView.Columns.Add("Constraint Name", 100, HorizontalAlignment.Left);
+			_listView.Columns.Add("Expression", 120, HorizontalAlignment.Left);
 		}
 
-		private void ConstraintsChanged(object ASender, object AItem)
+		private void ConstraintsChanged(object sender, object item)
 		{
-			if (FListView != null)
+			if (_listView != null)
 			{
-				FListView.BeginUpdate();
+				_listView.BeginUpdate();
 				try
 				{
-					FListView.Items.Clear();
+					_listView.Items.Clear();
 					int i = 0;
-					foreach (ConstraintDefinition LConstraint in FConstraints)
+					foreach (ConstraintDefinition constraint in _constraints)
 					{
-						FListView.Items.Add(new ListViewItem());
-						FListView.Items[i].Tag = LConstraint;
-						FListView.Items[i].Text = LConstraint.ConstraintName;
-						FListView.Items[i].SubItems.Add(LConstraint.ExpressionString);
+						_listView.Items.Add(new ListViewItem());
+						_listView.Items[i].Tag = constraint;
+						_listView.Items[i].Text = constraint.ConstraintName;
+						_listView.Items[i].SubItems.Add(constraint.ExpressionString);
 						++i;
 					}
-					if (FListView.Items.Count > 0)
-						FListView.Items[0].Focused = true;
+					if (_listView.Items.Count > 0)
+						_listView.Items[0].Focused = true;
 				}
 				finally
 				{
-					FListView.EndUpdate();
+					_listView.EndUpdate();
 				}
 				
 			}
 		}
 		
-		protected override void btnAdd_Click(object ASender, System.EventArgs AArgs)
+		protected override void btnAdd_Click(object sender, System.EventArgs args)
 		{
-			base.btnAdd_Click(ASender, AArgs);
-			ConstraintDefinition LConstraint = new ConstraintDefinition();
-			ConstraintEdit LEditForm = new ConstraintEdit(LConstraint);
+			base.btnAdd_Click(sender, args);
+			ConstraintDefinition constraint = new ConstraintDefinition();
+			ConstraintEdit editForm = new ConstraintEdit(constraint);
 			try
 			{
-				LEditForm.ShowDialog((IWin32Window)this);
-				if (LEditForm.DialogResult == DialogResult.OK)
-					FConstraints.Add(LConstraint);
+				editForm.ShowDialog((IWin32Window)this);
+				if (editForm.DialogResult == DialogResult.OK)
+					_constraints.Add(constraint);
 			}
 			finally
 			{
-				LEditForm.Dispose();
+				editForm.Dispose();
 			}
 		}
 
 		private void CheckItemSelected()
 		{
-			if (FListView.SelectedItems.Count == 0)
+			if (_listView.SelectedItems.Count == 0)
 				throw new DesignException(DesignException.Codes.NoItemSelected);
 		}
 
-		protected override void btnEdit_Click(object ASender, System.EventArgs AArgs)
+		protected override void btnEdit_Click(object sender, System.EventArgs args)
 		{
-			base.btnEdit_Click(ASender, AArgs);
+			base.btnEdit_Click(sender, args);
 			CheckItemSelected();
-			ListViewItem LListViewItem = FListView.Items[FListView.SelectedIndices[0]];
-			ConstraintDefinition LConstraint = (ConstraintDefinition)LListViewItem.Tag;
-			ConstraintEdit LEditForm = new ConstraintEdit(LConstraint);
+			ListViewItem listViewItem = _listView.Items[_listView.SelectedIndices[0]];
+			ConstraintDefinition constraint = (ConstraintDefinition)listViewItem.Tag;
+			ConstraintEdit editForm = new ConstraintEdit(constraint);
 			try
 			{
-				LEditForm.ShowDialog((IWin32Window)this);
+				editForm.ShowDialog((IWin32Window)this);
 			}
 			finally
 			{
-				LEditForm.Dispose();
+				editForm.Dispose();
 			}
 		}
 
-		protected override void btnDelete_Click(object ASender, System.EventArgs AArgs)
+		protected override void btnDelete_Click(object sender, System.EventArgs args)
 		{
-			base.btnDelete_Click(ASender, AArgs);
+			base.btnDelete_Click(sender, args);
 			CheckItemSelected();
 			if (MessageBox.Show("Delete Item?", "Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
 			{
-				ListViewItem LListViewItem = FListView.Items[FListView.SelectedIndices[0]];
-				FConstraints.RemoveAt(FConstraints.IndexOf(LListViewItem.Tag));
-				LListViewItem.Tag = null;
-				ConstraintsChanged(FConstraints, null);
+				ListViewItem listViewItem = _listView.Items[_listView.SelectedIndices[0]];
+				_constraints.RemoveAt(_constraints.IndexOf(listViewItem.Tag));
+				listViewItem.Tag = null;
+				ConstraintsChanged(_constraints, null);
 			}
 		}
 	}	
@@ -1102,10 +1102,10 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 		private System.Windows.Forms.Button btnOK;
 		private System.ComponentModel.Container components = null;
 
-		public ConstraintEdit(ConstraintDefinition AValue)
+		public ConstraintEdit(ConstraintDefinition tempValue)
 		{
 			InitializeComponent();
-			Value = AValue;
+			Value = tempValue;
 		}
 
 		protected override void Dispose( bool disposing )
@@ -1241,112 +1241,112 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 
 		}
 
-		private ConstraintDefinition FValue;
+		private ConstraintDefinition _value;
 		public ConstraintDefinition Value
 		{
-			get { return FValue; }
+			get { return _value; }
 			set
 			{
-				FValue = value;
+				_value = value;
 				ValueChanged();
 			}
 		}
 
 		protected virtual void ValueChanged()
 		{
-			if (FValue != null)
+			if (_value != null)
 			{
-				tbName.Text = FValue.ConstraintName;
-				tbConstraintExpression.Text = FValue.ExpressionString;
-				if (FValue.MetaData != null)
+				tbName.Text = _value.ConstraintName;
+				tbConstraintExpression.Text = _value.ExpressionString;
+				if (_value.MetaData != null)
 				{
-					FMetaData = FValue.MetaData.Copy();
-					tbConstraintMetaData.Text = FMetaData.ToString();
+					_metaData = _value.MetaData.Copy();
+					tbConstraintMetaData.Text = _metaData.ToString();
 				}
 				else
 				{
 					tbConstraintMetaData.Text = "(none)";
-					FMetaData = null;
+					_metaData = null;
 				}
 			}
 		}
 
-		private void btnOK_Click(object ASender, System.EventArgs AArgs)
+		private void btnOK_Click(object sender, System.EventArgs args)
 		{
 			Close();
 		}
 
-		private void btnCancel_Click(object ASender, System.EventArgs AArgs)
+		private void btnCancel_Click(object sender, System.EventArgs args)
 		{
 			Close();
 		}
 
-		protected virtual void ExpressionClosing(object ASender, CancelEventArgs AArgs)
+		protected virtual void ExpressionClosing(object sender, CancelEventArgs args)
 		{
-			if (((MultiLineEditForm)ASender).Value != String.Empty)
+			if (((MultiLineEditForm)sender).Value != String.Empty)
 			{
-				Alphora.Dataphor.DAE.Language.D4.Parser LParser = new Alphora.Dataphor.DAE.Language.D4.Parser();
-				LParser.ParseExpression(((MultiLineEditForm)ASender).Value);
+				Alphora.Dataphor.DAE.Language.D4.Parser parser = new Alphora.Dataphor.DAE.Language.D4.Parser();
+				parser.ParseExpression(((MultiLineEditForm)sender).Value);
 			}
 		}
 
-		private void EditExpression(System.Windows.Forms.TextBox ATextBoxExpression)
+		private void EditExpression(System.Windows.Forms.TextBox textBoxExpression)
 		{
-			MultiLineEditForm LForm = new MultiLineEditForm(ATextBoxExpression.Text);
+			MultiLineEditForm form = new MultiLineEditForm(textBoxExpression.Text);
 			try
 			{
-				LForm.Closing += new CancelEventHandler(ExpressionClosing);
-				LForm.Text = "Expression";
-				LForm.ShowDialog((IWin32Window)this);
-				if (LForm.DialogResult == DialogResult.OK)
-					ATextBoxExpression.Text = LForm.Value;
+				form.Closing += new CancelEventHandler(ExpressionClosing);
+				form.Text = "Expression";
+				form.ShowDialog((IWin32Window)this);
+				if (form.DialogResult == DialogResult.OK)
+					textBoxExpression.Text = form.Value;
 			}
 			finally
 			{
-				LForm.Closing -= new  CancelEventHandler(ExpressionClosing);
-				LForm.Dispose();
+				form.Closing -= new  CancelEventHandler(ExpressionClosing);
+				form.Dispose();
 			}
 		}
 
-		private void btnConstraintExpression_Click(object ASender, System.EventArgs AArgs)
+		private void btnConstraintExpression_Click(object sender, System.EventArgs args)
 		{
 			EditExpression(tbConstraintExpression);
 		}
 
-		private MetaData FMetaData;
+		private MetaData _metaData;
 		public MetaData MetaData
 		{
-			get { return FMetaData; }
+			get { return _metaData; }
 		}
 
-		private void EditMetaData(ref MetaData AValue)
+		private void EditMetaData(ref MetaData tempValue)
 		{
-			MetaDataEditForm LMetaDataEditForm = new MetaDataEditForm(AValue); 
+			MetaDataEditForm metaDataEditForm = new MetaDataEditForm(tempValue); 
 			try
 			{
-				LMetaDataEditForm.ShowDialog((IWin32Window)this);
-				if (LMetaDataEditForm.DialogResult == DialogResult.OK)
-					AValue = LMetaDataEditForm.MetaData;
+				metaDataEditForm.ShowDialog((IWin32Window)this);
+				if (metaDataEditForm.DialogResult == DialogResult.OK)
+					tempValue = metaDataEditForm.MetaData;
 			}
 			finally
 			{
-				LMetaDataEditForm.Dispose();
+				metaDataEditForm.Dispose();
 			}
 		}
 
 		private void btnConstraintMetaData_Click(object sender, System.EventArgs e)
 		{
-			EditMetaData(ref FMetaData);
-			if (FMetaData == null)
+			EditMetaData(ref _metaData);
+			if (_metaData == null)
 				tbConstraintMetaData.Text = "(none)";
 			else
-				tbConstraintMetaData.Text = FMetaData.ToString();
+				tbConstraintMetaData.Text = _metaData.ToString();
 		}
 
 		
-		protected override void OnClosing(CancelEventArgs AArgs)
+		protected override void OnClosing(CancelEventArgs args)
 		{
-			base.OnClosing(AArgs);
+			base.OnClosing(args);
 			if (DialogResult == DialogResult.OK)
 			{
 				try
@@ -1357,13 +1357,13 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 						throw new DesignException(DesignException.Codes.ConstraintExpressionRequired);
 				
 					//Assign values...
-					FValue.ConstraintName = tbName.Text;
-					FValue.ExpressionString = tbConstraintExpression.Text;
-					FValue.MetaData = MetaData;
+					_value.ConstraintName = tbName.Text;
+					_value.ExpressionString = tbConstraintExpression.Text;
+					_value.MetaData = MetaData;
 				}
 				catch
 				{
-					AArgs.Cancel = true;
+					args.Cancel = true;
 					throw;
 				}
 			}
@@ -1373,39 +1373,39 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 
 	public class ConstraintsEditor : UITypeEditor
 	{
-		private IWindowsFormsEditorService FEditorService = null;
+		private IWindowsFormsEditorService _editorService = null;
 
-		private ITypeDescriptorContext FContext;
+		private ITypeDescriptorContext _context;
 
-		public override object EditValue(ITypeDescriptorContext AContext, IServiceProvider AProvider, object AValue) 
+		public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object tempValue) 
 		{	 
-			if (AContext != null && AContext.Instance != null && AProvider != null) 
+			if (context != null && context.Instance != null && provider != null) 
 			{
-				FContext = AContext;
-				FEditorService = (IWindowsFormsEditorService)AProvider.GetService(typeof(IWindowsFormsEditorService));
-				if (FEditorService != null)
+				_context = context;
+				_editorService = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
+				if (_editorService != null)
 				{
-					ConstraintsBrowse LForm = new ConstraintsBrowse((ConstraintDefinitions)AValue);
+					ConstraintsBrowse form = new ConstraintsBrowse((ConstraintDefinitions)tempValue);
 					try
 					{
-						FEditorService.ShowDialog(LForm);
+						_editorService.ShowDialog(form);
 					}
 					finally
 					{
-						FContext = null;
-						LForm.Dispose();
+						_context = null;
+						form.Dispose();
 					}
 				}
 			}
-			return AValue;
+			return tempValue;
 		}
 
-		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext AContext) 
+		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) 
 		{
-			if (AContext != null && AContext.Instance != null) 
+			if (context != null && context.Instance != null) 
 				return UITypeEditorEditStyle.Modal;
 			else
-				return base.GetEditStyle(AContext);
+				return base.GetEditStyle(context);
 		}
 	}
 
@@ -1419,10 +1419,10 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 		private System.Windows.Forms.RadioButton rbDescending;
 		private System.ComponentModel.Container components = null;
 
-		public OrderColumnDefinitionEdit(OrderColumnDefinition AValue)
+		public OrderColumnDefinitionEdit(OrderColumnDefinition tempValue)
 		{
 			InitializeComponent();
-			Value = AValue;
+			Value = tempValue;
 		}
 
 		protected override void Dispose( bool disposing )
@@ -1518,52 +1518,52 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 
 		}
 
-		private OrderColumnDefinition FValue;
+		private OrderColumnDefinition _value;
 		public OrderColumnDefinition Value
 		{
-			get { return FValue; }
+			get { return _value; }
 			set
 			{
 				if (value == null)
 					throw new DesignException(DesignException.Codes.InvalidOrderColumnDefinition);
-				FValue = value;
+				_value = value;
 				DefinitionChanged();
 			}
 		}
 
 		private void DefinitionChanged()
 		{
-			tbColumnName.Text = FValue.ColumnName;
-			rbAscending.Checked = FValue.Ascending;
-			rbDescending.Checked = !FValue.Ascending;
+			tbColumnName.Text = _value.ColumnName;
+			rbAscending.Checked = _value.Ascending;
+			rbDescending.Checked = !_value.Ascending;
 		}
 
-		private void btnOK_Click(object ASender, System.EventArgs AArgs)
+		private void btnOK_Click(object sender, System.EventArgs args)
 		{
 			Close();
 		}
 
-		private void btnCancel_Click(object ASender, System.EventArgs AArgs)
+		private void btnCancel_Click(object sender, System.EventArgs args)
 		{
 			Close();
 		}
 
-		protected override void OnClosing(CancelEventArgs AArgs)
+		protected override void OnClosing(CancelEventArgs args)
 		{
-			base.OnClosing(AArgs);
+			base.OnClosing(args);
 			try
 			{
 				if (DialogResult == DialogResult.OK)
 				{
 					if (tbColumnName.Text == String.Empty)
 						throw new DesignException(DesignException.Codes.ColumnNameNeeded);
-					FValue.ColumnName = tbColumnName.Text;
-					FValue.Ascending = rbAscending.Checked;
+					_value.ColumnName = tbColumnName.Text;
+					_value.Ascending = rbAscending.Checked;
 				}
 			}
 			catch
 			{
-				AArgs.Cancel = true;
+				args.Cancel = true;
 				throw;
 			}
 		}
@@ -1583,10 +1583,10 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 		private System.Windows.Forms.Button btnCancel;
 		private System.ComponentModel.Container components = null;
 
-		public OrderDefinitionEdit(OrderDefinition AValue)
+		public OrderDefinitionEdit(OrderDefinition tempValue)
 		{
 			InitializeComponent();
-			Value = AValue;
+			Value = tempValue;
 		}
 
 		/// <summary>
@@ -1729,39 +1729,39 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 
 		}
 
-		protected System.Drawing.Bitmap LoadBitmap(string AResourceName)
+		protected System.Drawing.Bitmap LoadBitmap(string resourceName)
 		{
-			System.Drawing.Bitmap LResult = new System.Drawing.Bitmap(GetType().Assembly.GetManifestResourceStream(AResourceName));
-			LResult.MakeTransparent();
-			return LResult;
+			System.Drawing.Bitmap result = new System.Drawing.Bitmap(GetType().Assembly.GetManifestResourceStream(resourceName));
+			result.MakeTransparent();
+			return result;
 		}
 
-		private OrderDefinition FValue;
+		private OrderDefinition _value;
 		protected internal OrderDefinition Value
 		{
-			get { return FValue; }
+			get { return _value; }
 			set
 			{
 				if (value == null)
 					throw new DesignException(DesignException.Codes.NullOrderDefinition);
-				FValue = value;
+				_value = value;
 				ValueChanged();
 			}
 		}
 
 		protected virtual void ValueChanged()
 		{
-			ListViewItem LItem;
+			ListViewItem item;
 			listView1.Items.Clear();
-			foreach(OrderColumnDefinition LColumn in FValue.Columns)
+			foreach(OrderColumnDefinition column in _value.Columns)
 			{
-				LItem = listView1.Items.Add(new ListViewItem());
-				LItem.Tag = LColumn;
-				LItem.Text = LColumn.ColumnName;
-				if (LColumn.Ascending)
-					LItem.SubItems.Add("asc");
+				item = listView1.Items.Add(new ListViewItem());
+				item.Tag = column;
+				item.Text = column.ColumnName;
+				if (column.Ascending)
+					item.SubItems.Add("asc");
 				else
-					LItem.SubItems.Add("desc");
+					item.SubItems.Add("desc");
 			}
 		}
 
@@ -1773,49 +1773,49 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 
 		private void btnAdd_Click(object sender, System.EventArgs e)
 		{
-			OrderColumnDefinition LDefinition = new OrderColumnDefinition();
-			OrderColumnDefinitionEdit LEditForm = new OrderColumnDefinitionEdit(LDefinition);
+			OrderColumnDefinition definition = new OrderColumnDefinition();
+			OrderColumnDefinitionEdit editForm = new OrderColumnDefinitionEdit(definition);
 			try
 			{
-				LEditForm.ShowDialog((IWin32Window)this);
-				if (LEditForm.DialogResult == DialogResult.OK)
+				editForm.ShowDialog((IWin32Window)this);
+				if (editForm.DialogResult == DialogResult.OK)
 				{
-					ListViewItem LItem = new ListViewItem();
-					LItem.Text = LDefinition.ColumnName;
-					if (LDefinition.Ascending)
-						LItem.SubItems.Add("asc");
+					ListViewItem item = new ListViewItem();
+					item.Text = definition.ColumnName;
+					if (definition.Ascending)
+						item.SubItems.Add("asc");
 					else
-						LItem.SubItems.Add("desc");
-					listView1.Items.Add(LItem);
+						item.SubItems.Add("desc");
+					listView1.Items.Add(item);
 				}
 			}
 			finally
 			{
-				LEditForm.Dispose();
+				editForm.Dispose();
 			}
 		}
 
 		private void btnEdit_Click(object sender, System.EventArgs e)
 		{
 			CheckItemSelected();
-			ListViewItem LItem = listView1.SelectedItems[0];
-			OrderColumnDefinition LDefinition = new OrderColumnDefinition(LItem.Text, LItem.SubItems[1].Text != "desc");
-			OrderColumnDefinitionEdit LEditForm = new OrderColumnDefinitionEdit(LDefinition);
+			ListViewItem item = listView1.SelectedItems[0];
+			OrderColumnDefinition definition = new OrderColumnDefinition(item.Text, item.SubItems[1].Text != "desc");
+			OrderColumnDefinitionEdit editForm = new OrderColumnDefinitionEdit(definition);
 			try
 			{
-				LEditForm.ShowDialog((IWin32Window)this);
-				if (LEditForm.DialogResult == DialogResult.OK)
+				editForm.ShowDialog((IWin32Window)this);
+				if (editForm.DialogResult == DialogResult.OK)
 				{
-					LItem.Text = LDefinition.ColumnName;
-					if (LDefinition.Ascending)
-						LItem.SubItems[1].Text = "asc";
+					item.Text = definition.ColumnName;
+					if (definition.Ascending)
+						item.SubItems[1].Text = "asc";
 					else
-						LItem.SubItems[1].Text = "desc";
+						item.SubItems[1].Text = "desc";
 				}
 			}
 			finally
 			{
-				LEditForm.Dispose();
+				editForm.Dispose();
 			}
 		}
 
@@ -1829,52 +1829,52 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 		private void btnUp_Click(object sender, System.EventArgs e)
 		{
 			CheckItemSelected();
-			int LSelectedIndex = listView1.SelectedIndices[0];
-			ListViewItem LItem = listView1.SelectedItems[0];
-			if (LSelectedIndex > 0)
+			int selectedIndex = listView1.SelectedIndices[0];
+			ListViewItem item = listView1.SelectedItems[0];
+			if (selectedIndex > 0)
 			{
-				listView1.Items.Remove(LItem);
-				listView1.Items.Insert(LSelectedIndex - 1, LItem);
+				listView1.Items.Remove(item);
+				listView1.Items.Insert(selectedIndex - 1, item);
 			}
 		}
 
 		private void btnDown_Click(object sender, System.EventArgs e)
 		{
 			CheckItemSelected();
-			int LSelectedIndex = listView1.SelectedIndices[0];
-			ListViewItem LItem = listView1.SelectedItems[0];
-			if (LSelectedIndex < (listView1.Items.Count - 1))
+			int selectedIndex = listView1.SelectedIndices[0];
+			ListViewItem item = listView1.SelectedItems[0];
+			if (selectedIndex < (listView1.Items.Count - 1))
 			{
-				listView1.Items.Remove(LItem);
-				listView1.Items.Insert(LSelectedIndex + 1, LItem);
+				listView1.Items.Remove(item);
+				listView1.Items.Insert(selectedIndex + 1, item);
 			}
 		}
 
-		private void btnOK_Click(object ASender, System.EventArgs AArgs)
+		private void btnOK_Click(object sender, System.EventArgs args)
 		{
 			Close();
 		}
 
-		private void btnCancel_Click(object ASender, System.EventArgs AArgs)
+		private void btnCancel_Click(object sender, System.EventArgs args)
 		{
 			Close();
 		}
 
-		protected override void OnClosing(CancelEventArgs AArgs)
+		protected override void OnClosing(CancelEventArgs args)
 		{
-			base.OnClosing(AArgs);
+			base.OnClosing(args);
 			try
 			{
 				if (DialogResult == DialogResult.OK)
 				{
-					FValue.Columns.Clear();
-					foreach(ListViewItem LItem in listView1.Items)
-						FValue.Columns.Add(new OrderColumnDefinition(LItem.Text, LItem.SubItems[1].Text != "desc"));
+					_value.Columns.Clear();
+					foreach(ListViewItem item in listView1.Items)
+						_value.Columns.Add(new OrderColumnDefinition(item.Text, item.SubItems[1].Text != "desc"));
 				}
 			}
 			catch
 			{
-				AArgs.Cancel = true;
+				args.Cancel = true;
 				throw;
 			}
 		}
@@ -1882,109 +1882,109 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 
 	public class OrderDefinitionsBrowse : AbstractCollectionBrowse
 	{
-		private OrderDefinitions FOrders;
+		private OrderDefinitions _orders;
 
-		public OrderDefinitionsBrowse(OrderDefinitions ACollection)
+		public OrderDefinitionsBrowse(OrderDefinitions collection)
 		{
 			this.Text = "Order Definitions";
-			FOrders = ACollection;
+			_orders = collection;
 		}
 
-		protected override void Dispose( bool ADisposing )
+		protected override void Dispose( bool disposing )
 		{
-			if (FOrders != null)
+			if (_orders != null)
 			{
-				FOrders = null;
+				_orders = null;
 			}
-			base.Dispose( ADisposing );
+			base.Dispose( disposing );
 		}
 
 		protected override void InitColumns()
 		{
-			FListView.Columns.Add("Order", 250, HorizontalAlignment.Left);
+			_listView.Columns.Add("Order", 250, HorizontalAlignment.Left);
 		}
 
-		private void OrdersChanged(object ASender, object AItem)
+		private void OrdersChanged(object sender, object item)
 		{
-			if (FListView != null)
+			if (_listView != null)
 			{
-				FListView.BeginUpdate();
+				_listView.BeginUpdate();
 				try
 				{
-					FListView.Items.Clear();
+					_listView.Items.Clear();
 					int i = 0;
-					string LCaption;
-					foreach (OrderDefinition LOrder in FOrders)
+					string caption;
+					foreach (OrderDefinition order in _orders)
 					{
-						FListView.Items.Add(new ListViewItem());
-						LCaption = String.Empty;
-						foreach(OrderColumnDefinition LColumn in LOrder.Columns)
+						_listView.Items.Add(new ListViewItem());
+						caption = String.Empty;
+						foreach(OrderColumnDefinition column in order.Columns)
 						{
-							if (LCaption != String.Empty)
-								LCaption += ", ";
-							if (LColumn.Ascending)
-								LCaption += LColumn.ColumnName;
+							if (caption != String.Empty)
+								caption += ", ";
+							if (column.Ascending)
+								caption += column.ColumnName;
 							else
-								LCaption += LColumn.ColumnName + " desc"; 
+								caption += column.ColumnName + " desc"; 
 						}
-						FListView.Items[i].Tag = LOrder;
-						FListView.Items[i].Text = LCaption;
+						_listView.Items[i].Tag = order;
+						_listView.Items[i].Text = caption;
 						++i;
 					}
-					if (FListView.Items.Count > 0)
-						FListView.Items[0].Focused = true;
+					if (_listView.Items.Count > 0)
+						_listView.Items[0].Focused = true;
 				}
 				finally
 				{
-					FListView.EndUpdate();
+					_listView.EndUpdate();
 				}
 				
 			}
 		}
 		
-		protected override void btnAdd_Click(object ASender, System.EventArgs AArgs)
+		protected override void btnAdd_Click(object sender, System.EventArgs args)
 		{
-			base.btnAdd_Click(ASender, AArgs);
-			OrderDefinition LOrder = new OrderDefinition();
-			OrderDefinitionEdit LEditForm = new OrderDefinitionEdit(LOrder);
+			base.btnAdd_Click(sender, args);
+			OrderDefinition order = new OrderDefinition();
+			OrderDefinitionEdit editForm = new OrderDefinitionEdit(order);
 			try
 			{
-				LEditForm.ShowDialog((IWin32Window)this);
-				if (LEditForm.DialogResult == DialogResult.OK)
+				editForm.ShowDialog((IWin32Window)this);
+				if (editForm.DialogResult == DialogResult.OK)
 				{
-					if (LOrder.Columns.Count > 0)
-						FOrders.Add(LOrder);
+					if (order.Columns.Count > 0)
+						_orders.Add(order);
 				}
 			}
 			finally
 			{
-				LEditForm.Dispose();
+				editForm.Dispose();
 			}
 		}
 
 		private void CheckItemSelected()
 		{
-			if (FListView.SelectedItems.Count == 0)
+			if (_listView.SelectedItems.Count == 0)
 				throw new DesignException(DesignException.Codes.NoItemSelected);
 		}
 
 		public event EventHandler OnOrdersEdited;
 
-		protected override void btnEdit_Click(object ASender, System.EventArgs AArgs)
+		protected override void btnEdit_Click(object sender, System.EventArgs args)
 		{
-			base.btnEdit_Click(ASender, AArgs);
+			base.btnEdit_Click(sender, args);
 			CheckItemSelected();
-			ListViewItem LListViewItem = FListView.Items[FListView.SelectedIndices[0]];
-			OrderDefinition LOrder = (OrderDefinition)LListViewItem.Tag;
-			OrderDefinitionEdit LEditForm = new OrderDefinitionEdit(LOrder);
+			ListViewItem listViewItem = _listView.Items[_listView.SelectedIndices[0]];
+			OrderDefinition order = (OrderDefinition)listViewItem.Tag;
+			OrderDefinitionEdit editForm = new OrderDefinitionEdit(order);
 			try
 			{
-				LEditForm.ShowDialog((IWin32Window)this);
-				if (LEditForm.DialogResult == DialogResult.OK)
+				editForm.ShowDialog((IWin32Window)this);
+				if (editForm.DialogResult == DialogResult.OK)
 				{
-					if (LOrder.Columns.Count == 0)
-						FOrders.Remove(LOrder);
-					OrdersChanged(FOrders, LOrder);
+					if (order.Columns.Count == 0)
+						_orders.Remove(order);
+					OrdersChanged(_orders, order);
 					if (OnOrdersEdited != null)
 						OnOrdersEdited(this, EventArgs.Empty);
 					
@@ -1992,108 +1992,108 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			}
 			finally
 			{
-				LEditForm.Dispose();
+				editForm.Dispose();
 			}
 		}
 
-		protected override void btnDelete_Click(object ASender, System.EventArgs AArgs)
+		protected override void btnDelete_Click(object sender, System.EventArgs args)
 		{
-			base.btnDelete_Click(ASender, AArgs);
+			base.btnDelete_Click(sender, args);
 			CheckItemSelected();
 			if (MessageBox.Show("Delete Item?", "Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
 			{
-				ListViewItem LListViewItem = FListView.Items[FListView.SelectedIndices[0]];
-				FOrders.RemoveAt(FOrders.IndexOf(LListViewItem.Tag));
-				LListViewItem.Tag = null;
-				OrdersChanged(FOrders, null);
+				ListViewItem listViewItem = _listView.Items[_listView.SelectedIndices[0]];
+				_orders.RemoveAt(_orders.IndexOf(listViewItem.Tag));
+				listViewItem.Tag = null;
+				OrdersChanged(_orders, null);
 			}
 		}
 	}
 
 	public class OrderDefinitionsEditor : UITypeEditor
 	{
-		private IWindowsFormsEditorService FEditorService = null;
+		private IWindowsFormsEditorService _editorService = null;
 
-		private ITypeDescriptorContext FContext;
+		private ITypeDescriptorContext _context;
 
-		public override object EditValue(ITypeDescriptorContext AContext, IServiceProvider AProvider, object AValue) 
+		public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object tempValue) 
 		{	 
-			if (AContext != null && AContext.Instance != null && AProvider != null) 
+			if (context != null && context.Instance != null && provider != null) 
 			{
-				FContext = AContext;
-				FEditorService = (IWindowsFormsEditorService)AProvider.GetService(typeof(IWindowsFormsEditorService));
-				if (FEditorService != null)
+				_context = context;
+				_editorService = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
+				if (_editorService != null)
 				{
-					OrderDefinitionsBrowse LForm = new OrderDefinitionsBrowse((OrderDefinitions)AValue);
+					OrderDefinitionsBrowse form = new OrderDefinitionsBrowse((OrderDefinitions)tempValue);
 					try
 					{
-						FEditorService.ShowDialog(LForm);
+						_editorService.ShowDialog(form);
 					}
 					finally
 					{
-						FContext = null;
-						LForm.Dispose();
+						_context = null;
+						form.Dispose();
 					}
 				}
 			}
-			return AValue;
+			return tempValue;
 		}
 
-		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext AContext) 
+		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) 
 		{
-			if (AContext != null && AContext.Instance != null) 
+			if (context != null && context.Instance != null) 
 				return UITypeEditorEditStyle.Modal;
 			else
-				return base.GetEditStyle(AContext);
+				return base.GetEditStyle(context);
 		}
 	}
 
 	public class OrderEditor : UITypeEditor
 	{
-		private IWindowsFormsEditorService FEditorService = null;
+		private IWindowsFormsEditorService _editorService = null;
 
-		public override object EditValue(ITypeDescriptorContext AContext, IServiceProvider AProvider, object AValue) 
+		public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object tempValue) 
 		{	 
-			if (AContext != null && AContext.Instance != null && AProvider != null) 
+			if (context != null && context.Instance != null && provider != null) 
 			{
-				OrderDefinition LOrder = new OrderDefinition();
-				if (AValue != null)
+				OrderDefinition order = new OrderDefinition();
+				if (tempValue != null)
 				{
-					if (((OrderDefinition)AValue).MetaData != null)
-						LOrder.MetaData = ((OrderDefinition)AValue).MetaData.Copy();
-					foreach (OrderColumnDefinition LColumn in ((OrderDefinition)AValue).Columns)
-						LOrder.Columns.Add(new OrderColumnDefinition(LColumn.ColumnName, LColumn.Ascending));
+					if (((OrderDefinition)tempValue).MetaData != null)
+						order.MetaData = ((OrderDefinition)tempValue).MetaData.Copy();
+					foreach (OrderColumnDefinition column in ((OrderDefinition)tempValue).Columns)
+						order.Columns.Add(new OrderColumnDefinition(column.ColumnName, column.Ascending));
 				}
-				FEditorService = (IWindowsFormsEditorService)AProvider.GetService(typeof(IWindowsFormsEditorService));
-				if (FEditorService != null)
+				_editorService = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
+				if (_editorService != null)
 				{
-					OrderDefinitionEdit LForm = new OrderDefinitionEdit(LOrder);
+					OrderDefinitionEdit form = new OrderDefinitionEdit(order);
 					try
 					{
-						FEditorService.ShowDialog(LForm);
-						if (LForm.DialogResult == DialogResult.OK)
+						_editorService.ShowDialog(form);
+						if (form.DialogResult == DialogResult.OK)
 						{
-							if (LOrder.Columns.Count == 0)
-								AValue = null;
+							if (order.Columns.Count == 0)
+								tempValue = null;
 							else
-								AValue = LOrder;
+								tempValue = order;
 						}
 					}
 					finally
 					{
-						LForm.Dispose();
+						form.Dispose();
 					}
 				}
 			}
-			return AValue;
+			return tempValue;
 		}
 
-		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext AContext) 
+		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) 
 		{
-			if (AContext != null && AContext.Instance != null) 
+			if (context != null && context.Instance != null) 
 				return UITypeEditorEditStyle.Modal;
 			else
-				return base.GetEditStyle(AContext);
+				return base.GetEditStyle(context);
 		}
 	}
 
@@ -2105,10 +2105,10 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 		private System.Windows.Forms.Label label1;
 		private System.ComponentModel.Container components = null;
 
-		public KeyColumnDefinitionEdit(KeyColumnDefinition AValue)
+		public KeyColumnDefinitionEdit(KeyColumnDefinition tempValue)
 		{
 			InitializeComponent();
-			Value = AValue;
+			Value = tempValue;
 		}
 
 		protected override void Dispose( bool disposing )
@@ -2185,49 +2185,49 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 
 		}
 
-		private KeyColumnDefinition FValue;
+		private KeyColumnDefinition _value;
 		public KeyColumnDefinition Value
 		{
-			get { return FValue; }
+			get { return _value; }
 			set
 			{
 				if (value == null)
 					throw new DesignException(DesignException.Codes.InvalidKeyColumnDefinition);
-				FValue = value;
+				_value = value;
 				DefinitionChanged();
 			}
 		}
 
 		private void DefinitionChanged()
 		{
-			tbColumnName.Text = FValue.ColumnName;
+			tbColumnName.Text = _value.ColumnName;
 		}
 
-		private void btnOK_Click(object ASender, System.EventArgs AArgs)
+		private void btnOK_Click(object sender, System.EventArgs args)
 		{
 			Close();
 		}
 
-		private void btnCancel_Click(object ASender, System.EventArgs AArgs)
+		private void btnCancel_Click(object sender, System.EventArgs args)
 		{
 			Close();
 		}
 
-		protected override void OnClosing(CancelEventArgs AArgs)
+		protected override void OnClosing(CancelEventArgs args)
 		{
-			base.OnClosing(AArgs);
+			base.OnClosing(args);
 			try
 			{
 				if (DialogResult == DialogResult.OK)
 				{
 					if (tbColumnName.Text == String.Empty)
 						throw new DesignException(DesignException.Codes.ColumnNameNeeded);
-					FValue.ColumnName = tbColumnName.Text;
+					_value.ColumnName = tbColumnName.Text;
 				}
 			}
 			catch
 			{
-				AArgs.Cancel = true;
+				args.Cancel = true;
 				throw;
 			}
 		}
@@ -2246,10 +2246,10 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 		private System.Windows.Forms.Button btnCancel;
 		private System.ComponentModel.Container components = null;
 
-		public KeyDefinitionEdit(KeyDefinition AValue)
+		public KeyDefinitionEdit(KeyDefinition tempValue)
 		{
 			InitializeComponent();
-			Value = AValue;
+			Value = tempValue;
 		}
 
 		/// <summary>
@@ -2385,35 +2385,35 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 
 		}
 
-		protected System.Drawing.Bitmap LoadBitmap(string AResourceName)
+		protected System.Drawing.Bitmap LoadBitmap(string resourceName)
 		{
-			System.Drawing.Bitmap LResult = new System.Drawing.Bitmap(GetType().Assembly.GetManifestResourceStream(AResourceName));
-			LResult.MakeTransparent();
-			return LResult;
+			System.Drawing.Bitmap result = new System.Drawing.Bitmap(GetType().Assembly.GetManifestResourceStream(resourceName));
+			result.MakeTransparent();
+			return result;
 		}
 
-		private KeyDefinition FValue;
+		private KeyDefinition _value;
 		protected internal KeyDefinition Value
 		{
-			get { return FValue; }
+			get { return _value; }
 			set
 			{
 				if (value == null)
 					throw new DesignException(DesignException.Codes.NullKeyDefinition);
-				FValue = value;
+				_value = value;
 				ValueChanged();
 			}
 		}
 
 		protected virtual void ValueChanged()
 		{
-			ListViewItem LItem;
+			ListViewItem item;
 			listView1.Items.Clear();
-			foreach(KeyColumnDefinition LColumn in FValue.Columns)
+			foreach(KeyColumnDefinition column in _value.Columns)
 			{
-				LItem = listView1.Items.Add(new ListViewItem());
-				LItem.Tag = LColumn;
-				LItem.Text = LColumn.ColumnName;
+				item = listView1.Items.Add(new ListViewItem());
+				item.Tag = column;
+				item.Text = column.ColumnName;
 			}
 		}
 
@@ -2425,39 +2425,39 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 
 		private void btnAdd_Click(object sender, System.EventArgs e)
 		{
-			KeyColumnDefinition LDefinition = new KeyColumnDefinition();
-			KeyColumnDefinitionEdit LEditForm = new KeyColumnDefinitionEdit(LDefinition);
+			KeyColumnDefinition definition = new KeyColumnDefinition();
+			KeyColumnDefinitionEdit editForm = new KeyColumnDefinitionEdit(definition);
 			try
 			{
-				LEditForm.ShowDialog((IWin32Window)this);
-				if (LEditForm.DialogResult == DialogResult.OK)
+				editForm.ShowDialog((IWin32Window)this);
+				if (editForm.DialogResult == DialogResult.OK)
 				{
-					ListViewItem LItem = new ListViewItem();
-					LItem.Text = LDefinition.ColumnName;
-					listView1.Items.Add(LItem);
+					ListViewItem item = new ListViewItem();
+					item.Text = definition.ColumnName;
+					listView1.Items.Add(item);
 				}
 			}
 			finally
 			{
-				LEditForm.Dispose();
+				editForm.Dispose();
 			}
 		}
 
 		private void btnEdit_Click(object sender, System.EventArgs e)
 		{
 			CheckItemSelected();
-			ListViewItem LItem = listView1.SelectedItems[0];
-			KeyColumnDefinition LDefinition = new KeyColumnDefinition(LItem.Text);
-			KeyColumnDefinitionEdit LEditForm = new KeyColumnDefinitionEdit(LDefinition);
+			ListViewItem item = listView1.SelectedItems[0];
+			KeyColumnDefinition definition = new KeyColumnDefinition(item.Text);
+			KeyColumnDefinitionEdit editForm = new KeyColumnDefinitionEdit(definition);
 			try
 			{
-				LEditForm.ShowDialog((IWin32Window)this);
-				if (LEditForm.DialogResult == DialogResult.OK)
-					LItem.Text = LDefinition.ColumnName;
+				editForm.ShowDialog((IWin32Window)this);
+				if (editForm.DialogResult == DialogResult.OK)
+					item.Text = definition.ColumnName;
 			}
 			finally
 			{
-				LEditForm.Dispose();
+				editForm.Dispose();
 			}
 		}
 
@@ -2471,52 +2471,52 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 		private void btnUp_Click(object sender, System.EventArgs e)
 		{
 			CheckItemSelected();
-			int LSelectedIndex = listView1.SelectedIndices[0];
-			ListViewItem LItem = listView1.SelectedItems[0];
-			if (LSelectedIndex > 0)
+			int selectedIndex = listView1.SelectedIndices[0];
+			ListViewItem item = listView1.SelectedItems[0];
+			if (selectedIndex > 0)
 			{
-				listView1.Items.Remove(LItem);
-				listView1.Items.Insert(LSelectedIndex - 1, LItem);
+				listView1.Items.Remove(item);
+				listView1.Items.Insert(selectedIndex - 1, item);
 			}
 		}
 
 		private void btnDown_Click(object sender, System.EventArgs e)
 		{
 			CheckItemSelected();
-			int LSelectedIndex = listView1.SelectedIndices[0];
-			ListViewItem LItem = listView1.SelectedItems[0];
-			if (LSelectedIndex < (listView1.Items.Count - 1))
+			int selectedIndex = listView1.SelectedIndices[0];
+			ListViewItem item = listView1.SelectedItems[0];
+			if (selectedIndex < (listView1.Items.Count - 1))
 			{
-				listView1.Items.Remove(LItem);
-				listView1.Items.Insert(LSelectedIndex + 1, LItem);
+				listView1.Items.Remove(item);
+				listView1.Items.Insert(selectedIndex + 1, item);
 			}
 		}
 
-		private void btnOK_Click(object ASender, System.EventArgs AArgs)
+		private void btnOK_Click(object sender, System.EventArgs args)
 		{
 			Close();
 		}
 
-		private void btnCancel_Click(object ASender, System.EventArgs AArgs)
+		private void btnCancel_Click(object sender, System.EventArgs args)
 		{
 			Close();
 		}
 
-		protected override void OnClosing(CancelEventArgs AArgs)
+		protected override void OnClosing(CancelEventArgs args)
 		{
-			base.OnClosing(AArgs);
+			base.OnClosing(args);
 			try
 			{
 				if (DialogResult == DialogResult.OK)
 				{
-					FValue.Columns.Clear();
-					foreach(ListViewItem LItem in listView1.Items)
-						FValue.Columns.Add(new KeyColumnDefinition(LItem.Text));
+					_value.Columns.Clear();
+					foreach(ListViewItem item in listView1.Items)
+						_value.Columns.Add(new KeyColumnDefinition(item.Text));
 				}
 			}
 			catch
 			{
-				AArgs.Cancel = true;
+				args.Cancel = true;
 				throw;
 			}
 		}
@@ -2525,184 +2525,184 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 	public class KeyDefinitionsBrowse : AbstractCollectionBrowse
 	{
 
-		private KeyDefinitions FKeys;
+		private KeyDefinitions _keys;
 
-		public KeyDefinitionsBrowse(KeyDefinitions ACollection)
+		public KeyDefinitionsBrowse(KeyDefinitions collection)
 		{
 			this.Text = "Key Definitions";
-			FKeys = ACollection;
+			_keys = collection;
 		}
 
-		protected override void Dispose( bool ADisposing )
+		protected override void Dispose( bool disposing )
 		{
-			if (FKeys != null)
+			if (_keys != null)
 			{
-				FKeys = null;
+				_keys = null;
 			}
-			base.Dispose( ADisposing );
+			base.Dispose( disposing );
 		}
 
 		protected override void InitColumns()
 		{
-			FListView.Columns.Add("Order", 250, HorizontalAlignment.Left);
+			_listView.Columns.Add("Order", 250, HorizontalAlignment.Left);
 		}
 
-		protected override void btnAdd_Click(object ASender, System.EventArgs AArgs)
+		protected override void btnAdd_Click(object sender, System.EventArgs args)
 		{
-			base.btnAdd_Click(ASender, AArgs);
-			KeyDefinition LKey = new KeyDefinition();
-			KeyDefinitionEdit LEditForm = new KeyDefinitionEdit(LKey);
+			base.btnAdd_Click(sender, args);
+			KeyDefinition key = new KeyDefinition();
+			KeyDefinitionEdit editForm = new KeyDefinitionEdit(key);
 			try
 			{
-				LEditForm.ShowDialog((IWin32Window)this);
-				if (LEditForm.DialogResult == DialogResult.OK)
+				editForm.ShowDialog((IWin32Window)this);
+				if (editForm.DialogResult == DialogResult.OK)
 				{
-					if (LKey.Columns.Count > 0)
-						FKeys.Add(LKey);
+					if (key.Columns.Count > 0)
+						_keys.Add(key);
 				}
 			}
 			finally
 			{
-				LEditForm.Dispose();
+				editForm.Dispose();
 			}
 		}
 
 		private void CheckItemSelected()
 		{
-			if (FListView.SelectedItems.Count == 0)
+			if (_listView.SelectedItems.Count == 0)
 				throw new DesignException(DesignException.Codes.NoItemSelected);
 		}
 
-		protected override void btnEdit_Click(object ASender, System.EventArgs AArgs)
+		protected override void btnEdit_Click(object sender, System.EventArgs args)
 		{
-			base.btnEdit_Click(ASender, AArgs);
+			base.btnEdit_Click(sender, args);
 			CheckItemSelected();
-			ListViewItem LListViewItem = FListView.Items[FListView.SelectedIndices[0]];
-			KeyDefinition LKey = (KeyDefinition)LListViewItem.Tag;
-			KeyDefinitionEdit LEditForm = new KeyDefinitionEdit(LKey);
+			ListViewItem listViewItem = _listView.Items[_listView.SelectedIndices[0]];
+			KeyDefinition key = (KeyDefinition)listViewItem.Tag;
+			KeyDefinitionEdit editForm = new KeyDefinitionEdit(key);
 			try
 			{
-				LEditForm.ShowDialog((IWin32Window)this);
-				if (LEditForm.DialogResult == DialogResult.OK)
+				editForm.ShowDialog((IWin32Window)this);
+				if (editForm.DialogResult == DialogResult.OK)
 				{
-					if (LKey.Columns.Count == 0)
-						FKeys.Remove(LKey);
+					if (key.Columns.Count == 0)
+						_keys.Remove(key);
 				}
 			}
 			finally
 			{
-				LEditForm.Dispose();
+				editForm.Dispose();
 			}
 		}
 
-		protected override void btnDelete_Click(object ASender, System.EventArgs AArgs)
+		protected override void btnDelete_Click(object sender, System.EventArgs args)
 		{
-			base.btnDelete_Click(ASender, AArgs);
+			base.btnDelete_Click(sender, args);
 			CheckItemSelected();
 			if (MessageBox.Show("Delete Item?", "Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
 			{
-				ListViewItem LListViewItem = FListView.Items[FListView.SelectedIndices[0]];
-				FKeys.RemoveAt(FKeys.IndexOf(LListViewItem.Tag));
-				LListViewItem.Tag = null;
+				ListViewItem listViewItem = _listView.Items[_listView.SelectedIndices[0]];
+				_keys.RemoveAt(_keys.IndexOf(listViewItem.Tag));
+				listViewItem.Tag = null;
 			}
 		}
 	}
 
 	public class KeyDefinitionsEditor : UITypeEditor
 	{
-		private IWindowsFormsEditorService FEditorService = null;
+		private IWindowsFormsEditorService _editorService = null;
 
-		private ITypeDescriptorContext FContext;
+		private ITypeDescriptorContext _context;
 
-		public override object EditValue(ITypeDescriptorContext AContext, IServiceProvider AProvider, object AValue) 
+		public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object tempValue) 
 		{	 
-			if (AContext != null && AContext.Instance != null && AProvider != null) 
+			if (context != null && context.Instance != null && provider != null) 
 			{
-				FContext = AContext;
-				FEditorService = (IWindowsFormsEditorService)AProvider.GetService(typeof(IWindowsFormsEditorService));
-				if (FEditorService != null)
+				_context = context;
+				_editorService = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
+				if (_editorService != null)
 				{
-					KeyDefinitionsBrowse LForm = new KeyDefinitionsBrowse((KeyDefinitions)AValue);
+					KeyDefinitionsBrowse form = new KeyDefinitionsBrowse((KeyDefinitions)tempValue);
 					try
 					{
-						FEditorService.ShowDialog(LForm);
+						_editorService.ShowDialog(form);
 					}
 					finally
 					{
-						FContext = null;
-						LForm.Dispose();
+						_context = null;
+						form.Dispose();
 					}
 				}
 			}
-			return AValue;
+			return tempValue;
 		}
 
-		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext AContext) 
+		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) 
 		{
-			if (AContext != null && AContext.Instance != null) 
+			if (context != null && context.Instance != null) 
 				return UITypeEditorEditStyle.Modal;
 			else
-				return base.GetEditStyle(AContext);
+				return base.GetEditStyle(context);
 		}
 	}
 
 	public class KeyEditor : UITypeEditor
 	{
-		private IWindowsFormsEditorService FEditorService = null;
+		private IWindowsFormsEditorService _editorService = null;
 
-		public override object EditValue(ITypeDescriptorContext AContext, IServiceProvider AProvider, object AValue) 
+		public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object tempValue) 
 		{	 
-			if (AContext != null && AContext.Instance != null && AProvider != null) 
+			if (context != null && context.Instance != null && provider != null) 
 			{
-				KeyDefinition LKey = new KeyDefinition();
-				if (AValue != null)
+				KeyDefinition key = new KeyDefinition();
+				if (tempValue != null)
 				{
-					if (((KeyDefinition)AValue).MetaData != null)
-						LKey.MetaData = ((KeyDefinition)AValue).MetaData.Copy();
-					foreach (KeyColumnDefinition LColumn in ((KeyDefinition)AValue).Columns)
-						LKey.Columns.Add(new KeyColumnDefinition(LColumn.ColumnName));
+					if (((KeyDefinition)tempValue).MetaData != null)
+						key.MetaData = ((KeyDefinition)tempValue).MetaData.Copy();
+					foreach (KeyColumnDefinition column in ((KeyDefinition)tempValue).Columns)
+						key.Columns.Add(new KeyColumnDefinition(column.ColumnName));
 				}
-				FEditorService = (IWindowsFormsEditorService)AProvider.GetService(typeof(IWindowsFormsEditorService));
-				if (FEditorService != null)
+				_editorService = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
+				if (_editorService != null)
 				{
-					KeyDefinitionEdit LForm = new KeyDefinitionEdit(LKey);
+					KeyDefinitionEdit form = new KeyDefinitionEdit(key);
 					try
 					{
-						FEditorService.ShowDialog(LForm);
-						if (LForm.DialogResult == DialogResult.OK)
+						_editorService.ShowDialog(form);
+						if (form.DialogResult == DialogResult.OK)
 						{
-							if (LKey.Columns.Count == 0)
-								AValue = null;
+							if (key.Columns.Count == 0)
+								tempValue = null;
 							else
-								AValue = LKey;
+								tempValue = key;
 						}
 					}
 					finally
 					{
-						LForm.Dispose();
+						form.Dispose();
 					}
 				}
 			}
-			return AValue;
+			return tempValue;
 		}
 
-		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext AContext) 
+		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) 
 		{
-			if (AContext != null && AContext.Instance != null) 
+			if (context != null && context.Instance != null) 
 				return UITypeEditorEditStyle.Modal;
 			else
-				return base.GetEditStyle(AContext);
+				return base.GetEditStyle(context);
 		}
 	}
 
 	public class D4ExpressionEmitEdit : MultiLineEditor
 	{
-		protected override void Validate(string AValue)
+		protected override void Validate(string tempValue)
 		{
-			if (AValue != String.Empty)
+			if (tempValue != String.Empty)
 			{
-				Alphora.Dataphor.DAE.Language.D4.Parser LParser = new Alphora.Dataphor.DAE.Language.D4.Parser();
-				LParser.ParseExpression(AValue);
+				Alphora.Dataphor.DAE.Language.D4.Parser parser = new Alphora.Dataphor.DAE.Language.D4.Parser();
+				parser.ParseExpression(tempValue);
 			}
 		}
 	}
@@ -2710,27 +2710,27 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 	public class DefaultDefinitionEditForm : Form
 	{
 		private System.Windows.Forms.RadioButton rbNone;
-		private System.Windows.Forms.GroupBox FGroupBox1;
+		private System.Windows.Forms.GroupBox _groupBox1;
 		private System.Windows.Forms.RadioButton rbDefault;
-		private System.Windows.Forms.PropertyGrid FPropertyGrid;
-		private System.ComponentModel.IContainer FComponents;
-		private DefaultDefinition FOriginalValue;
+		private System.Windows.Forms.PropertyGrid _propertyGrid;
+		private System.ComponentModel.IContainer _components;
+		private DefaultDefinition _originalValue;
 
-		public DefaultDefinitionEditForm(DefaultDefinition AValue)
+		public DefaultDefinitionEditForm(DefaultDefinition tempValue)
 		{
 			InitializeForm();
-			FOriginalValue = AValue;
-			Value = AValue;
+			_originalValue = tempValue;
+			Value = tempValue;
 		}
 
 		private void InitializeForm()
 		{
-			FComponents = new System.ComponentModel.Container();
+			_components = new System.ComponentModel.Container();
 			this.rbNone = new System.Windows.Forms.RadioButton();
-			this.FGroupBox1 = new System.Windows.Forms.GroupBox();
+			this._groupBox1 = new System.Windows.Forms.GroupBox();
 			this.rbDefault = new System.Windows.Forms.RadioButton();
-			this.FPropertyGrid = new System.Windows.Forms.PropertyGrid();
-			this.FGroupBox1.SuspendLayout();
+			this._propertyGrid = new System.Windows.Forms.PropertyGrid();
+			this._groupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// rbNone
@@ -2744,14 +2744,14 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			// 
 			// FGroupBox1
 			// 
-			this.FGroupBox1.Controls.AddRange(new System.Windows.Forms.Control[] {
-																					 this.FPropertyGrid});
-			this.FGroupBox1.Enabled = false;
-			this.FGroupBox1.Location = new System.Drawing.Point(8, 40);
-			this.FGroupBox1.Name = "FGroupBox1";
-			this.FGroupBox1.Size = new System.Drawing.Size(216, 184);
-			this.FGroupBox1.TabIndex = 1;
-			this.FGroupBox1.TabStop = false;
+			this._groupBox1.Controls.AddRange(new System.Windows.Forms.Control[] {
+																					 this._propertyGrid});
+			this._groupBox1.Enabled = false;
+			this._groupBox1.Location = new System.Drawing.Point(8, 40);
+			this._groupBox1.Name = "FGroupBox1";
+			this._groupBox1.Size = new System.Drawing.Size(216, 184);
+			this._groupBox1.TabIndex = 1;
+			this._groupBox1.TabStop = false;
 			// 
 			// rbDefault
 			// 
@@ -2764,16 +2764,16 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			// 
 			// FPropertyGrid
 			// 
-			this.FPropertyGrid.CommandsVisibleIfAvailable = true;
-			this.FPropertyGrid.LargeButtons = false;
-			this.FPropertyGrid.LineColor = System.Drawing.SystemColors.ScrollBar;
-			this.FPropertyGrid.Location = new System.Drawing.Point(8, 16);
-			this.FPropertyGrid.Name = "FPropertyGrid";
-			this.FPropertyGrid.Size = new System.Drawing.Size(200, 160);
-			this.FPropertyGrid.TabIndex = 0;
-			this.FPropertyGrid.Text = "propertyGrid1";
-			this.FPropertyGrid.ViewBackColor = System.Drawing.SystemColors.Window;
-			this.FPropertyGrid.ViewForeColor = System.Drawing.SystemColors.WindowText;			
+			this._propertyGrid.CommandsVisibleIfAvailable = true;
+			this._propertyGrid.LargeButtons = false;
+			this._propertyGrid.LineColor = System.Drawing.SystemColors.ScrollBar;
+			this._propertyGrid.Location = new System.Drawing.Point(8, 16);
+			this._propertyGrid.Name = "FPropertyGrid";
+			this._propertyGrid.Size = new System.Drawing.Size(200, 160);
+			this._propertyGrid.TabIndex = 0;
+			this._propertyGrid.Text = "propertyGrid1";
+			this._propertyGrid.ViewBackColor = System.Drawing.SystemColors.Window;
+			this._propertyGrid.ViewForeColor = System.Drawing.SystemColors.WindowText;			
 			// 
 			// Form
 			// 
@@ -2782,7 +2782,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			this.Controls.AddRange(new System.Windows.Forms.Control[] {
 																		  this.rbNone,
 																		  this.rbDefault,
-																		  this.FGroupBox1});
+																		  this._groupBox1});
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "FormDefault";
@@ -2790,29 +2790,29 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Default Definition";
-			this.FGroupBox1.ResumeLayout(false);
+			this._groupBox1.ResumeLayout(false);
 			this.ResumeLayout(false);
 		}
 
-		protected override void Dispose( bool ADisposing )
+		protected override void Dispose( bool disposing )
 		{
-			if( ADisposing )
+			if( disposing )
 			{
-				if(FComponents != null)
-					FComponents.Dispose();
+				if(_components != null)
+					_components.Dispose();
 			}
-			base.Dispose( ADisposing );
+			base.Dispose( disposing );
 		}
 
-		private DefaultDefinition FValue;
+		private DefaultDefinition _value;
 		public DefaultDefinition Value
 		{
-			get { return FValue; }
+			get { return _value; }
 			set
 			{
-				if (FValue != value)
+				if (_value != value)
 				{
-					FValue = value;
+					_value = value;
 					Changed();
 				}
 			}
@@ -2820,17 +2820,17 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 
 		protected void Changed()
 		{
-			if (FValue != null)
+			if (_value != null)
 			{
-				FGroupBox1.Enabled = true;
+				_groupBox1.Enabled = true;
 				rbDefault.Checked = true;
 			}
 			else
 			{
-				FGroupBox1.Enabled = false;
+				_groupBox1.Enabled = false;
 				rbDefault.Checked = false;
 			}
-			FPropertyGrid.SelectedObject = FValue;
+			_propertyGrid.SelectedObject = _value;
 		}
 
 		private void rbNone_CheckedChanged(object sender, System.EventArgs e)
@@ -2845,8 +2845,8 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			{
 				if (Value == null)
 				{
-					if (FOriginalValue != null)
-						Value = FOriginalValue;
+					if (_originalValue != null)
+						Value = _originalValue;
 					else
 						Value = new DefaultDefinition();
 				}
@@ -2856,61 +2856,61 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 
 	public class DefaultDefinitionEdit : UITypeEditor
 	{
-		private IWindowsFormsEditorService FEditorService = null;
+		private IWindowsFormsEditorService _editorService = null;
 	
-		public override object EditValue(ITypeDescriptorContext AContext, IServiceProvider AProvider, object AValue) 
+		public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object tempValue) 
 		{	 
-			if (AContext != null && AContext.Instance != null && AProvider != null) 
+			if (context != null && context.Instance != null && provider != null) 
 			{
-				FEditorService = (IWindowsFormsEditorService)AProvider.GetService(typeof(IWindowsFormsEditorService));
-				if (FEditorService != null)
+				_editorService = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
+				if (_editorService != null)
 				{
-					DefaultDefinitionEditForm LForm = new DefaultDefinitionEditForm(AValue as DefaultDefinition);
+					DefaultDefinitionEditForm form = new DefaultDefinitionEditForm(tempValue as DefaultDefinition);
 					try
 					{
-						LForm.Closing += new CancelEventHandler(Form_Closing);
-						FEditorService.ShowDialog(LForm);
-						if (LForm.Value != AValue)
-							AValue = LForm.Value;
+						form.Closing += new CancelEventHandler(Form_Closing);
+						_editorService.ShowDialog(form);
+						if (form.Value != tempValue)
+							tempValue = form.Value;
 					}
 					finally
 					{
-						LForm.Closing -= new CancelEventHandler(Form_Closing);
-						LForm.Dispose();
+						form.Closing -= new CancelEventHandler(Form_Closing);
+						form.Dispose();
 					}
 				}
 			}
-			return AValue;
+			return tempValue;
 		}
 
-		private void Form_Closing(object ASender, System.ComponentModel.CancelEventArgs AArgs)
+		private void Form_Closing(object sender, System.ComponentModel.CancelEventArgs args)
 		{
 			try
 			{
-				Validate(((DefaultDefinitionEditForm)ASender).Value);
+				Validate(((DefaultDefinitionEditForm)sender).Value);
 			}
 			catch
 			{
-				AArgs.Cancel = true;
+				args.Cancel = true;
 				throw;
 			}
 		}
 
-		protected virtual void Validate(DefaultDefinition AValue)
+		protected virtual void Validate(DefaultDefinition tempValue)
 		{
-			if (AValue != null)
+			if (tempValue != null)
 			{
-				if (AValue.Expression == null)
+				if (tempValue.Expression == null)
 					throw new DesignException(DesignException.Codes.InvalidDefaultDefinition);
 			}
 		}
 	 
-		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext AContext) 
+		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) 
 		{
-			if (AContext != null && AContext.Instance != null) 
+			if (context != null && context.Instance != null) 
 				return UITypeEditorEditStyle.Modal;
 			else
-				return base.GetEditStyle(AContext);
+				return base.GetEditStyle(context);
 		}
 	}
 }

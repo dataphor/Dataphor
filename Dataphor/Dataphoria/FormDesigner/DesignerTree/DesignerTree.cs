@@ -17,24 +17,24 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree
 	{
 		public DesignerTree()
 		{
-			FDropFilter = new DropHighlightDrawFilter(this);
+			_dropFilter = new DropHighlightDrawFilter(this);
 			LabelEdit = false;
 		}
 
-		private DropHighlightDrawFilter FDropFilter;
+		private DropHighlightDrawFilter _dropFilter;
 		[Browsable(false)]
 		public DropHighlightDrawFilter DropFilter
 		{
-			get { return FDropFilter; }
+			get { return _dropFilter; }
 		}
 
-		private FormDesigner FFormDesigner;
+		private FormDesigner _formDesigner;
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public FormDesigner FormDesigner
 		{
-			get { return FFormDesigner; }
-			set { FFormDesigner = value; }
+			get { return _formDesigner; }
+			set { _formDesigner = value; }
 		}
 
 		public void Modified()
@@ -42,20 +42,20 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree
 			FormDesigner.Service.SetModified(true);
 		}
 
-		public DesignerNode AddNode(INode ANode)
+		public DesignerNode AddNode(INode node)
 		{
-			DesignerNode LNewNode = new DesignerNode(ANode, this);
-			AddBaseNode(LNewNode);
+			DesignerNode newNode = new DesignerNode(node, this);
+			AddBaseNode(newNode);
 			ExpandAll();
-			return LNewNode;
+			return newNode;
 		}
 
-		public DesignerNode InsertNode(int AIndex, INode ANode)
+		public DesignerNode InsertNode(int index, INode node)
 		{
-			DesignerNode LNewNode = new DesignerNode(ANode, this);
-			InsertBaseNode(AIndex, LNewNode);
+			DesignerNode newNode = new DesignerNode(node, this);
+			InsertBaseNode(index, newNode);
 			ExpandAll();
-			return LNewNode;
+			return newNode;
 		}
 
 		// SelectedNode
@@ -70,22 +70,22 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree
 
 		// Labels
 
-		protected override void OnAfterLabelEdit(NodeLabelEditEventArgs AArgs)
+		protected override void OnAfterLabelEdit(NodeLabelEditEventArgs args)
 		{
-			DesignerNode LNode = (DesignerNode)AArgs.Node;
+			DesignerNode node = (DesignerNode)args.Node;
 			try
 			{
-				if (LNode.Node.Name != AArgs.Label)
+				if (node.Node.Name != args.Label)
 				{
-					IHost LHost = LNode.Node.HostNode;
-					if (LHost.GetNode(AArgs.Label) != null)
-						FormDesigner.Dataphoria.Warnings.AppendError(FormDesigner, new DataphoriaException(DataphoriaException.Codes.InvalidRename, AArgs.Label), false);
+					IHost host = node.Node.HostNode;
+					if (host.GetNode(args.Label) != null)
+						FormDesigner.Dataphoria.Warnings.AppendError(FormDesigner, new DataphoriaException(DataphoriaException.Codes.InvalidRename, args.Label), false);
 					else
 					{
-						if (AArgs.Label != null)
+						if (args.Label != null)
 						{
 							Modified();
-							LNode.Node.Name = AArgs.Label;
+							node.Node.Name = args.Label;
 						}
 					}
 				}
@@ -93,35 +93,35 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree
 			finally
 			{
 				LabelEdit = false;
-				AArgs.CancelEdit = true;	// always cancel so that the edit doesn't overwrite our update
-				LNode.UpdateText(false);
+				args.CancelEdit = true;	// always cancel so that the edit doesn't overwrite our update
+				node.UpdateText(false);
 			}
 		}
 
 		// Palette
 
-		private PaletteItem FPaletteItem;
+		private PaletteItem _paletteItem;
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public PaletteItem PaletteItem
 		{
-			get { return FPaletteItem; }
+			get { return _paletteItem; }
 			set
 			{
-				if (value != FPaletteItem)
+				if (value != _paletteItem)
 				{
-					if (FPaletteItem == null)
+					if (_paletteItem == null)
 					{
-						FDropFilter.QueryAllowedPositions = new QueryAllowedPositionsHandler(QueryAllowedPalettePositions);
+						_dropFilter.QueryAllowedPositions = new QueryAllowedPositionsHandler(QueryAllowedPalettePositions);
 						UpdateDropHighlight();
 						Cursor = Cursors.Cross;
 					}
-					FPaletteItem = value;
-					if (FPaletteItem == null)
+					_paletteItem = value;
+					if (_paletteItem == null)
 					{
 						Cursor = Cursors.Default;
-						FDropFilter.ClearDropHighlight();
-						FDropFilter.QueryAllowedPositions = null;
+						_dropFilter.ClearDropHighlight();
+						_dropFilter.QueryAllowedPositions = null;
 					}
 				}
 			}
@@ -129,10 +129,10 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree
 
 		public void UpdateDropHighlight()
 		{
-			FDropFilter.SetDropHighlight(PointToClient(Control.MousePosition), FPaletteItem, DropOperation.Copy);
+			_dropFilter.SetDropHighlight(PointToClient(Control.MousePosition), _paletteItem, DropOperation.Copy);
 		}
 
-		protected override bool IsInputKey(Keys AKey)
+		protected override bool IsInputKey(Keys key)
 		{
 			return 
 				(
@@ -140,180 +140,180 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree
 						&&
 						(
 							(
-								((AKey == Keys.Delete) || (AKey == Keys.F2)) && !SelectedNode.ReadOnly
+								((key == Keys.Delete) || (key == Keys.F2)) && !SelectedNode.ReadOnly
 							)
-								|| (AKey == (Keys.X | Keys.Control))
-								|| (AKey == (Keys.C | Keys.Control))
-								|| (AKey == (Keys.V | Keys.Control))
+								|| (key == (Keys.X | Keys.Control))
+								|| (key == (Keys.C | Keys.Control))
+								|| (key == (Keys.V | Keys.Control))
 						)
 				)
-					|| base.IsInputKey(AKey);
+					|| base.IsInputKey(key);
 		}
 
-		protected override void OnKeyDown(KeyEventArgs AArgs)
+		protected override void OnKeyDown(KeyEventArgs args)
 		{
 			if (SelectedNode != null)
 			{
-				switch (AArgs.KeyData)
+				switch (args.KeyData)
 				{
 					case Keys.Delete : SelectedNode.Delete(); break;
 					case Keys.X | Keys.Control : SelectedNode.CutToClipboard(); break;
 					case Keys.C | Keys.Control : SelectedNode.CopyToClipboard(); break;
 					case Keys.V | Keys.Control : SelectedNode.PasteFromClipboard(); break;
 					case Keys.F2 : SelectedNode.Rename(); break;
-					default : base.OnKeyDown(AArgs); return;
+					default : base.OnKeyDown(args); return;
 				}
-				AArgs.Handled = true;
+				args.Handled = true;
 			}
 			else
-				base.OnKeyDown(AArgs);
+				base.OnKeyDown(args);
 		}
 
-		protected override void OnMouseMove(MouseEventArgs AArgs)
+		protected override void OnMouseMove(MouseEventArgs args)
 		{
-			base.OnMouseMove(AArgs);
-			if (FPaletteItem != null)
+			base.OnMouseMove(args);
+			if (_paletteItem != null)
 				UpdateDropHighlight();
 			else
 			{
-				TreeNode LNode = GetNodeAt(AArgs.X, AArgs.Y);
-				if ((AArgs.Button != MouseButtons.None) && (SelectedNode != null) && (LNode != null))
+				TreeNode node = GetNodeAt(args.X, args.Y);
+				if ((args.Button != MouseButtons.None) && (SelectedNode != null) && (node != null))
 					BeginDrag();
 			}
 		}
 
-		protected override void OnMouseLeave(EventArgs AArgs)
+		protected override void OnMouseLeave(EventArgs args)
 		{
-			base.OnMouseLeave(AArgs);
-			if (FPaletteItem != null)
-				FDropFilter.ClearDropHighlight();
+			base.OnMouseLeave(args);
+			if (_paletteItem != null)
+				_dropFilter.ClearDropHighlight();
 		}
 
-		protected override void WndProc(ref Message AMessage)
+		protected override void WndProc(ref Message message)
 		{
-			if (AMessage.Msg == NativeMethods.WM_LBUTTONDOWN)
+			if (message.Msg == NativeMethods.WM_LBUTTONDOWN)
 			{
-				int LParam = (int)AMessage.LParam;
-				if ((FPaletteItem != null) && (this.GetNodeAt(LParam & 0xFFFF, LParam >> 16) != null))
+				int param = (int)message.LParam;
+				if ((_paletteItem != null) && (this.GetNodeAt(param & 0xFFFF, param >> 16) != null))
 				{
-					if (FDropFilter.DropHighlightNode != null)
-						((DesignerNode)FDropFilter.DropHighlightNode).AddNew(FPaletteItem, FDropFilter.DropLinePosition);
+					if (_dropFilter.DropHighlightNode != null)
+						((DesignerNode)_dropFilter.DropHighlightNode).AddNew(_paletteItem, _dropFilter.DropLinePosition);
 					FormDesigner.PaletteItemDropped();
-					AMessage.Result = IntPtr.Zero;
+					message.Result = IntPtr.Zero;
 					return;
 				}
 			}
-			base.WndProc(ref AMessage);
+			base.WndProc(ref message);
 		}
 
 
-		private void QueryAllowedPalettePositions(object ASender, QueryAllowedPositionsEventArgs AArgs)
+		private void QueryAllowedPalettePositions(object sender, QueryAllowedPositionsEventArgs args)
 		{
-			((DesignerNode)AArgs.TargetNode).QueryAllowedPalettePositions(AArgs);
+			((DesignerNode)args.TargetNode).QueryAllowedPalettePositions(args);
 		}
 
 		// Drag & drop
 
-		private void QueryAllowedDragPositions(object ASender, QueryAllowedPositionsEventArgs AArgs)
+		private void QueryAllowedDragPositions(object sender, QueryAllowedPositionsEventArgs args)
 		{
-			((DesignerNode)AArgs.TargetNode).QueryAllowedDragPositions(AArgs);
+			((DesignerNode)args.TargetNode).QueryAllowedDragPositions(args);
 		}
 
 		private void BeginDrag()
 		{
 			if (SelectedNode.Parent != null) // not the root node
 			{
-				FDropFilter.QueryAllowedPositions += new QueryAllowedPositionsHandler(QueryAllowedDragPositions);
+				_dropFilter.QueryAllowedPositions += new QueryAllowedPositionsHandler(QueryAllowedDragPositions);
 				DoDragDrop(new DesignerNodeData(SelectedNode), DragDropEffects.Move | DragDropEffects.Copy);
 			}
 		}
 
 		private void EndDrag()
 		{
-			FDropFilter.QueryAllowedPositions -= new QueryAllowedPositionsHandler(QueryAllowedDragPositions);
-			FDropFilter.ClearDropHighlight();;
+			_dropFilter.QueryAllowedPositions -= new QueryAllowedPositionsHandler(QueryAllowedDragPositions);
+			_dropFilter.ClearDropHighlight();;
 		}
 
-		private void InternalEnterOrOver(DragEventArgs AArgs)
+		private void InternalEnterOrOver(DragEventArgs args)
 		{
-			DropOperation LRequestedOperation;
+			DropOperation requestedOperation;
 			if (Control.MouseButtons == MouseButtons.Right)
-				LRequestedOperation = DropOperation.Both;
+				requestedOperation = DropOperation.Both;
 			else
 			{
 				if (Control.ModifierKeys == Keys.Control)
-					LRequestedOperation = DropOperation.Copy;
+					requestedOperation = DropOperation.Copy;
 				else
-					LRequestedOperation = DropOperation.Move;
+					requestedOperation = DropOperation.Move;
 			}
 
-			FDropFilter.SetDropHighlight
+			_dropFilter.SetDropHighlight
 			(
-				PointToClient(new Point(AArgs.X, AArgs.Y)), 
-				AArgs.Data,
-				LRequestedOperation
+				PointToClient(new Point(args.X, args.Y)), 
+				args.Data,
+				requestedOperation
 			);
 
-			AArgs.Effect = DragDropEffects.None;
-			if ((FDropFilter.DropOperation & DropOperation.Copy) != 0)
-				AArgs.Effect |= DragDropEffects.Copy;
-			if ((FDropFilter.DropOperation & DropOperation.Move) != 0)
-				AArgs.Effect |= DragDropEffects.Move;
+			args.Effect = DragDropEffects.None;
+			if ((_dropFilter.DropOperation & DropOperation.Copy) != 0)
+				args.Effect |= DragDropEffects.Copy;
+			if ((_dropFilter.DropOperation & DropOperation.Move) != 0)
+				args.Effect |= DragDropEffects.Move;
 		}
 
-		protected override void OnDragOver(DragEventArgs AArgs)
+		protected override void OnDragOver(DragEventArgs args)
 		{
-			base.OnDragOver(AArgs);
-			InternalEnterOrOver(AArgs);
+			base.OnDragOver(args);
+			InternalEnterOrOver(args);
 		}
 
-		protected override void OnDragEnter(DragEventArgs AArgs)
+		protected override void OnDragEnter(DragEventArgs args)
 		{
-			base.OnDragEnter(AArgs);
-			InternalEnterOrOver(AArgs);
+			base.OnDragEnter(args);
+			InternalEnterOrOver(args);
 		}
 
-		protected override void OnDragDrop(DragEventArgs AArgs)
+		protected override void OnDragDrop(DragEventArgs args)
 		{
-			if (AArgs.Effect != DragDropEffects.None)
+			if (args.Effect != DragDropEffects.None)
 			{
 				try
 				{
-					base.OnDragDrop(AArgs);
-					DesignerNodeData LData = AArgs.Data as DesignerNodeData;
+					base.OnDragDrop(args);
+					DesignerNodeData data = args.Data as DesignerNodeData;
 					if 
 					(
-						(FDropFilter.DropHighlightNode != null) && 
-						(FDropFilter.DropLinePosition != DropLinePosition.None) &&
-						(LData != null)
+						(_dropFilter.DropHighlightNode != null) && 
+						(_dropFilter.DropLinePosition != DropLinePosition.None) &&
+						(data != null)
 					)
 					{
-						if (LData.RightButton)
-							new DesignerTreeDropMenu(LData.TreeNode, (DesignerNode)FDropFilter.DropHighlightNode, FDropFilter.DropLinePosition, FDropFilter.DropOperation).Show(this, PointToClient(Control.MousePosition));
+						if (data.RightButton)
+							new DesignerTreeDropMenu(data.TreeNode, (DesignerNode)_dropFilter.DropHighlightNode, _dropFilter.DropLinePosition, _dropFilter.DropOperation).Show(this, PointToClient(Control.MousePosition));
 						else
 						{
 							if (Control.ModifierKeys == Keys.Control)
-								((DesignerNode)FDropFilter.DropHighlightNode).CopyFromNode(LData.TreeNode, FDropFilter.DropLinePosition);
+								((DesignerNode)_dropFilter.DropHighlightNode).CopyFromNode(data.TreeNode, _dropFilter.DropLinePosition);
 							else
-								((DesignerNode)FDropFilter.DropHighlightNode).MoveFromNode(LData.TreeNode, FDropFilter.DropLinePosition);
+								((DesignerNode)_dropFilter.DropHighlightNode).MoveFromNode(data.TreeNode, _dropFilter.DropLinePosition);
 						}
 					}
 					EndDrag();
 				}
-				catch (Exception LException)
+				catch (Exception exception)
 				{
 					// must handle exceptions because the framework ignores them
-					FormDesigner.Dataphoria.Warnings.AppendError(FormDesigner, LException, false);
+					FormDesigner.Dataphoria.Warnings.AppendError(FormDesigner, exception, false);
 					// do not re-throw
 				}
 			}
 		}
 
-		protected override void OnQueryContinueDrag(QueryContinueDragEventArgs AArgs)
+		protected override void OnQueryContinueDrag(QueryContinueDragEventArgs args)
 		{
-			if (AArgs.EscapePressed)
+			if (args.EscapePressed)
 			{
-				AArgs.Action = DragAction.Cancel;
+				args.Action = DragAction.Cancel;
 				EndDrag();
 			}
 		}

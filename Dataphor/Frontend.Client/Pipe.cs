@@ -36,19 +36,19 @@ namespace Alphora.Dataphor.Frontend.Client
 	public class PipeRequest
 	{
 		/// <summary> Creates a new PipeRequest with a reference string, responsehandler, and error handler delegates. </summary>
-		public PipeRequest(string ADocument, PipeResponseHandler AResponseHandler, PipeErrorHandler AErrorHandler) : base()
+		public PipeRequest(string document, PipeResponseHandler responseHandler, PipeErrorHandler errorHandler) : base()
 		{
-			Document = ADocument;
-			ResponseHandler = AResponseHandler;
-			ErrorHandler = AErrorHandler;
+			Document = document;
+			ResponseHandler = responseHandler;
+			ErrorHandler = errorHandler;
 		}
 
-		private string FDocument = String.Empty;
+		private string _document = String.Empty;
 		/// <summary> The expression for the document to be requested. </summary>
 		public string Document
 		{
-			get { return FDocument; }
-			set { FDocument = value; }
+			get { return _document; }
+			set { _document = value; }
 		}
 
 		/// <summary> Event to be called when the request is complete. </summary>
@@ -57,10 +57,10 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <summary> Event to be called when the request fails. </summary>
 		public PipeErrorHandler ErrorHandler;
 
-		internal Scalar FResult;
+		internal Scalar _result;
 		/// <summary> This will contain the data after the request is complete. </summary>
 		/// <remarks> This scalar result will automatically be Disposed by the async handler. </remarks>
-		public Scalar Result { get { return FResult; } }
+		public Scalar Result { get { return _result; } }
 	}
 
 	/// <summary> Used to invoke a given delegate with the given arguments. </summary>
@@ -75,274 +75,274 @@ namespace Alphora.Dataphor.Frontend.Client
 	/// </remarks>
 	public class Pipe : Disposable
 	{
-		public Pipe(IServerSession AServerSession)
+		public Pipe(IServerSession serverSession)
 		{
-			FServerSession = AServerSession;
+			_serverSession = serverSession;
 
-			ProcessInfo LProcessInfo = new ProcessInfo(FServerSession.SessionInfo);
-			LProcessInfo.DefaultIsolationLevel = DAE.IsolationLevel.Browse;
-			FSyncProcess = FServerSession.StartProcess(LProcessInfo);
+			ProcessInfo processInfo = new ProcessInfo(_serverSession.SessionInfo);
+			processInfo.DefaultIsolationLevel = DAE.IsolationLevel.Browse;
+			_syncProcess = _serverSession.StartProcess(processInfo);
 
 			InitializeAsync();
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			lock (FAsyncLock)
+			lock (_asyncLock)
 			{
 				CancelAll();
-				FStoppingAsync = true;
-				FQueueSignal.Set();
+				_stoppingAsync = true;
+				_queueSignal.Set();
 			}
 			// Don't bother waiting around for the thread to finish, it will close the signal when it completes 
 			//  and blocking here might (will) cause deadlock when the thread tries to sync back onto the main thread
 
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 			
-			if (FAsyncProcess != null)
-				FServerSession.StopProcess(FAsyncProcess);
-			FServerSession.StopProcess(FSyncProcess);
+			if (_asyncProcess != null)
+				_serverSession.StopProcess(_asyncProcess);
+			_serverSession.StopProcess(_syncProcess);
 		}
 
-		private DAE.IServerSession FServerSession;
-		private DAE.IServerProcess FSyncProcess;
+		private DAE.IServerSession _serverSession;
+		private DAE.IServerProcess _syncProcess;
 
 		public DAE.IServerProcess Process
 		{
-			get { return FSyncProcess; }
+			get { return _syncProcess; }
 		}
 
 		#region Caches
 
-		private FixedSizeCache<string, byte[]> FImageCache;
+		private FixedSizeCache<string, byte[]> _imageCache;
 		public FixedSizeCache<string, byte[]> ImageCache
 		{
-			get { return FImageCache; }
-			set { FImageCache = value; }
+			get { return _imageCache; }
+			set { _imageCache = value; }
 		}
 
-		private IDocumentCache FCache;
+		private IDocumentCache _cache;
 		/// <summary> Optional document cache associated with this pipe. </summary>
 		/// <remarks> The pipe does not own this cache. </remarks>
 		public IDocumentCache Cache
 		{
-			get { return FCache; }
-			set { FCache = value; }
+			get { return _cache; }
+			set { _cache = value; }
 		}
 
-		private DAE.Schema.RowType FCacheRowType;	// shared across threads (synced using the pipe instance)
+		private DAE.Schema.RowType _cacheRowType;	// shared across threads (synced using the pipe instance)
 
-		private DAE.Schema.RowType GetCacheRowType(IServerProcess AProcess)
+		private DAE.Schema.RowType GetCacheRowType(IServerProcess process)
 		{
-			if (FCacheRowType == null)
+			if (_cacheRowType == null)
 			{
-				FCacheRowType = new DAE.Schema.RowType();
-				FCacheRowType.Columns.Add(new DAE.Schema.Column("Value", AProcess.DataTypes.SystemScalar));
+				_cacheRowType = new DAE.Schema.RowType();
+				_cacheRowType.Columns.Add(new DAE.Schema.Column("Value", process.DataTypes.SystemScalar));
 			}
-			return FCacheRowType;
+			return _cacheRowType;
 		}
 
-		private Scalar LoadFromCache(string ADocument, IServerProcess AProcess)
+		private Scalar LoadFromCache(string document, IServerProcess process)
 		{
-			byte[] LData;
-			using (Stream LStream = Cache.Reference(ADocument))
+			byte[] data;
+			using (Stream stream = Cache.Reference(document))
 			{
-				int LLength = StreamUtility.ReadInteger(LStream);
-				LData = new byte[LLength];
-				LStream.Read(LData, 0, LLength);
+				int length = StreamUtility.ReadInteger(stream);
+				data = new byte[length];
+				stream.Read(data, 0, length);
 			}
-			using (DAE.Runtime.Data.Row LRow = ((DAE.Runtime.Data.Row)DataValue.FromPhysical(AProcess.GetServerProcess().ValueManager, GetCacheRowType(AProcess), LData, 0)))	// Uses GetServerProcess() as an optimization because this row is to remain local
+			using (DAE.Runtime.Data.Row row = ((DAE.Runtime.Data.Row)DataValue.FromPhysical(process.GetServerProcess().ValueManager, GetCacheRowType(process), data, 0)))	// Uses GetServerProcess() as an optimization because this row is to remain local
 			{
-				return (Scalar)LRow.GetValue("Value").Copy();
+				return (Scalar)row.GetValue("Value").Copy();
 			}
 		}
 
-		private void SaveToCache(string ADocument, IServerProcess AProcess, DAE.Runtime.Data.DataValue AValue, uint ACRC32)
+		private void SaveToCache(string document, IServerProcess process, DAE.Runtime.Data.DataValue value, uint cRC32)
 		{
-			using (Stream LTargetStream = Cache.Freshen(ADocument, ACRC32))
+			using (Stream targetStream = Cache.Freshen(document, cRC32))
 			{
-				byte[] LBytes;
-				using (DAE.Runtime.Data.Row LRow = new DAE.Runtime.Data.Row(AProcess.ValueManager, GetCacheRowType(AProcess)))
+				byte[] bytes;
+				using (DAE.Runtime.Data.Row row = new DAE.Runtime.Data.Row(process.ValueManager, GetCacheRowType(process)))
 				{
-					LRow["Value"] = AValue;
-					LBytes = new byte[LRow.GetPhysicalSize(true)];
-					LRow.WriteToPhysical(LBytes, 0, true);
+					row["Value"] = value;
+					bytes = new byte[row.GetPhysicalSize(true)];
+					row.WriteToPhysical(bytes, 0, true);
 				}
-				StreamUtility.WriteInteger(LTargetStream, LBytes.Length);
-				LTargetStream.Write(LBytes, 0, LBytes.Length);
+				StreamUtility.WriteInteger(targetStream, bytes.Length);
+				targetStream.Write(bytes, 0, bytes.Length);
 			}
 		}
 
-		private bool IsImageRequest(string ADocument)
+		private bool IsImageRequest(string document)
 		{
-			if ((ADocument != null) && (ADocument != String.Empty))
+			if ((document != null) && (document != String.Empty))
 			{
-				Expression LParsedExpression;
-				CallExpression LCallExpression;
+				Expression parsedExpression;
+				CallExpression callExpression;
 			
-				Alphora.Dataphor.DAE.Language.D4.Parser LParser = new Alphora.Dataphor.DAE.Language.D4.Parser();
-				LParsedExpression = LParser.ParseExpression(ADocument);
+				Alphora.Dataphor.DAE.Language.D4.Parser parser = new Alphora.Dataphor.DAE.Language.D4.Parser();
+				parsedExpression = parser.ParseExpression(document);
 				
 				//check to see if its a qulifier expression first				
-				QualifierExpression LQualifierExpression = LParsedExpression as QualifierExpression;
-				if (LQualifierExpression != null)
+				QualifierExpression qualifierExpression = parsedExpression as QualifierExpression;
+				if (qualifierExpression != null)
 				{
-					if ((((IdentifierExpression)LQualifierExpression.LeftExpression).Identifier) == "Frontend" || 
-						(((IdentifierExpression)LQualifierExpression.LeftExpression).Identifier) == ".Frontend")
+					if ((((IdentifierExpression)qualifierExpression.LeftExpression).Identifier) == "Frontend" || 
+						(((IdentifierExpression)qualifierExpression.LeftExpression).Identifier) == ".Frontend")
 					{
-						LCallExpression = LQualifierExpression.RightExpression as CallExpression;
+						callExpression = qualifierExpression.RightExpression as CallExpression;
 					}
 					else 
-						LCallExpression = LParsedExpression as CallExpression;
+						callExpression = parsedExpression as CallExpression;
 				}
 				else 
-					LCallExpression = LParsedExpression as CallExpression;
+					callExpression = parsedExpression as CallExpression;
 				
-				return ((LCallExpression != null) && (LCallExpression.Identifier == "Image"));
+				return ((callExpression != null) && (callExpression.Identifier == "Image"));
 			}
 			return false;
 		}
 
-		private void SaveToImageCache(string ADocument, IServerProcess AProcess, Scalar LResult)
+		private void SaveToImageCache(string document, IServerProcess process, Scalar LResult)
 		{
 			lock (ImageCache)
 			{
-				byte[] LValue = null;
+				byte[] value = null;
 				if ((LResult != null) && (!LResult.IsNil))
-					LValue = LResult.AsByteArray;
-				ImageCache.Add(ADocument, LValue);
+					value = LResult.AsByteArray;
+				ImageCache.Add(document, value);
 			}
 		}
 
-		private Scalar LoadWithCache(string ADocument, IServerProcess AProcess)
+		private Scalar LoadWithCache(string document, IServerProcess process)
 		{
-			Scalar LResult;
+			Scalar result;
 			lock (Cache)
 			{
-				uint LCRC32 = Cache.GetCRC32(ADocument);
+				uint cRC32 = Cache.GetCRC32(document);
 
 				using
 					(
-						DAE.Runtime.Data.Row LRow = (DAE.Runtime.Data.Row)AProcess.Evaluate
+						DAE.Runtime.Data.Row row = (DAE.Runtime.Data.Row)process.Evaluate
 						(
 							String.Format
 							(
 								"LoadIfNecessary('{0}', {1})",
-								ADocument.Replace("'", "''"),
-								((int)LCRC32).ToString()
+								document.Replace("'", "''"),
+								((int)cRC32).ToString()
 							),
 							null
 						)
 					)
 				{
-					if ((bool)LRow["CRCMatches"])
-						LResult = LoadFromCache(ADocument, AProcess);
+					if ((bool)row["CRCMatches"])
+						result = LoadFromCache(document, process);
 					else
 					{
-						using (DAE.Runtime.Data.Scalar LValue = LRow.GetValue("Value") as DAE.Runtime.Data.Scalar)
+						using (DAE.Runtime.Data.Scalar value = row.GetValue("Value") as DAE.Runtime.Data.Scalar)
 						{
-							SaveToCache(ADocument, AProcess, LValue, (uint)(int)LRow["ActualCRC32"]);
-							LResult = (DAE.Runtime.Data.Scalar)LValue.Copy();
+							SaveToCache(document, process, value, (uint)(int)row["ActualCRC32"]);
+							result = (DAE.Runtime.Data.Scalar)value.Copy();
 						}
 					}
 				}
 			}
-			return LResult;
+			return result;
 		}
 
 		#endregion
 
 		#region Synchronous requests
 
-		private Scalar InternalRequest(string ADocument, IServerProcess AProcess)
+		private Scalar InternalRequest(string document, IServerProcess process)
 		{
-			bool LIsImageRequest = false;
+			bool isImageRequest = false;
 
 			if (ImageCache != null)
 			{
-				LIsImageRequest = IsImageRequest(ADocument);
-				if (LIsImageRequest)
+				isImageRequest = IsImageRequest(document);
+				if (isImageRequest)
 					lock (ImageCache)
 					{
-						byte[] LData;
-						if (ImageCache.TryGetValue(ADocument, out LData))
-							return new Scalar(AProcess.ValueManager, AProcess.DataTypes.SystemGraphic, LData);
+						byte[] data;
+						if (ImageCache.TryGetValue(document, out data))
+							return new Scalar(process.ValueManager, process.DataTypes.SystemGraphic, data);
 					}
 			}
 
-			Scalar LResult;
+			Scalar result;
 			
 			if (Cache != null)
-				LResult = LoadWithCache(ADocument, AProcess);
+				result = LoadWithCache(document, process);
 			else
-				LResult = (Scalar)AProcess.Evaluate(ADocument, null);
+				result = (Scalar)process.Evaluate(document, null);
 			
-			if (LIsImageRequest)
+			if (isImageRequest)
 			{
-				SaveToImageCache(ADocument, AProcess, LResult);
+				SaveToImageCache(document, process, result);
 			}
 
-			return LResult;
+			return result;
 		}
 
 		/// <summary> Requests a document and returns the scalar results. </summary>
-		/// <param name="ADocument"> A document expression to request. </param>
+		/// <param name="document"> A document expression to request. </param>
 		/// <returns> A scalar value.  The caller must Dispose this Scalar to free it's resources. </returns>
-		public Scalar RequestDocument(string ADocument)
+		public Scalar RequestDocument(string document)
 		{
-			return InternalRequest(ADocument, FSyncProcess);
+			return InternalRequest(document, _syncProcess);
 		}
 
 		#endregion
 
 		#region Asynchronous requests
 
-		private DAE.IServerProcess FAsyncProcess;
+		private DAE.IServerProcess _asyncProcess;
 
 		/// <summary> Asynchronous worker thread. </summary>
-		private Thread FAsyncThread;
+		private Thread _asyncThread;
 		
 		/// <summary> Used internally to track which request is currently being processed. </summary>
-		private PipeRequest FCurrentRequest;
+		private PipeRequest _currentRequest;
 		
 		/// <summary> Internal list used for request queueing. </summary>
-		private List<PipeRequest> FQueue = new List<PipeRequest>();
+		private List<PipeRequest> _queue = new List<PipeRequest>();
 
 		/// <summary> Signaled while there is something in the queue. </summary>
-		private ManualResetEvent FQueueSignal = new ManualResetEvent(false);
+		private ManualResetEvent _queueSignal = new ManualResetEvent(false);
 		
 		/// <summary> Protects FQueue, FCurrentRequest, and FQueueSignal. </summary>
-		private object FAsyncLock = new Object();
+		private object _asyncLock = new Object();
 
 		/// <summary> Indicates that the current request has been cancelled. </summary>
-		private bool FCancellingCurrent;
+		private bool _cancellingCurrent;
 
 		/// <summary> Indicates that the asynchonous thread is to terminate. </summary>
-		private bool FStoppingAsync;
+		private bool _stoppingAsync;
 
 		/// <summary> Queues up an asynchronous request for a document. </summary>
-		public void QueueRequest(PipeRequest APipeRequest)
+		public void QueueRequest(PipeRequest pipeRequest)
 		{
-			lock (FAsyncLock)
+			lock (_asyncLock)
 			{
-				FQueue.Add(APipeRequest);
-				FQueueSignal.Set();
+				_queue.Add(pipeRequest);
+				_queueSignal.Set();
 			}
 		}
 
 		/// <summary> Removes a request from the queue or cancels the request if it is being processed. </summary>
 		/// <remarks> The caller is not guaranteed that after calling this that a response will not be sent. </remarks>
-		public void CancelRequest(PipeRequest APipeRequest)
+		public void CancelRequest(PipeRequest pipeRequest)
 		{
-			lock (FAsyncLock)
+			lock (_asyncLock)
 			{
-				if (APipeRequest == FCurrentRequest)
+				if (pipeRequest == _currentRequest)
 					CancelCurrent();
 				else
 				{
-					FQueue.Remove(APipeRequest);
-					if (FQueue.Count == 0)
-						FQueueSignal.Reset();
+					_queue.Remove(pipeRequest);
+					if (_queue.Count == 0)
+						_queueSignal.Reset();
 				}
 			}
 		}
@@ -351,29 +351,29 @@ namespace Alphora.Dataphor.Frontend.Client
 		{
 			CreateAsyncProcess();
 
-			FAsyncThread = new Thread(new ThreadStart(ProcessAsync));
-			FAsyncThread.IsBackground = true;
-			FAsyncThread.Start();
+			_asyncThread = new Thread(new ThreadStart(ProcessAsync));
+			_asyncThread.IsBackground = true;
+			_asyncThread.Start();
 		}
 		
 		private void CreateAsyncProcess()
 		{
-			ProcessInfo LProcessInfo = new ProcessInfo(FServerSession.SessionInfo);
-			LProcessInfo.DefaultIsolationLevel = DAE.IsolationLevel.Browse;
-			if (!FStoppingAsync)
-				FAsyncProcess = FServerSession.StartProcess(LProcessInfo);
+			ProcessInfo processInfo = new ProcessInfo(_serverSession.SessionInfo);
+			processInfo.DefaultIsolationLevel = DAE.IsolationLevel.Browse;
+			if (!_stoppingAsync)
+				_asyncProcess = _serverSession.StartProcess(processInfo);
 			else
-				FAsyncProcess = null;
+				_asyncProcess = null;
 		}
 
 		/// <summary> Cancels all queued requests. </summary>
 		public void CancelAll()
 		{
-			lock (FAsyncLock)
+			lock (_asyncLock)
 			{
-				FQueue.Clear();
-				FQueueSignal.Reset();
-				if (FCurrentRequest != null)
+				_queue.Clear();
+				_queueSignal.Reset();
+				if (_currentRequest != null)
 					CancelCurrent();
 			}
 		}
@@ -385,27 +385,27 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// invocation. </remarks>
 		private void CancelCurrent()
 		{
-			if (FAsyncProcess != null)
+			if (_asyncProcess != null)
 			{
-				FCancellingCurrent = true;
-				ThreadPool.QueueUserWorkItem(new WaitCallback(AsyncCancelCurrent), FAsyncProcess.ProcessID);
+				_cancellingCurrent = true;
+				ThreadPool.QueueUserWorkItem(new WaitCallback(AsyncCancelCurrent), _asyncProcess.ProcessID);
 				CreateAsyncProcess();
 			}
 		}
 
-		private void AsyncCancelCurrent(object AState)
+		private void AsyncCancelCurrent(object state)
 		{
 			try
 			{
 				// Stop the current process
-				IServerProcess LProcess = FServerSession.StartProcess(new ProcessInfo(FServerSession.SessionInfo));
+				IServerProcess process = _serverSession.StartProcess(new ProcessInfo(_serverSession.SessionInfo));
 				try
 				{
-					LProcess.Execute("StopProcess(" + ((int)AState).ToString() + ")", null);
+					process.Execute("StopProcess(" + ((int)state).ToString() + ")", null);
 				}
 				finally
 				{
-					FServerSession.StopProcess(LProcess);
+					_serverSession.StopProcess(process);
 				}
 			}
 			catch
@@ -414,7 +414,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 			finally
 			{
-				FCancellingCurrent = false;
+				_cancellingCurrent = false;
 			}
 		}
 
@@ -426,21 +426,21 @@ namespace Alphora.Dataphor.Frontend.Client
 				try
 				{
 					// Wait until an item is enqueued or shut-down occurs
-					FQueueSignal.WaitOne();
+					_queueSignal.WaitOne();
 
 					// Check for shut-down
-					if (FStoppingAsync)
+					if (_stoppingAsync)
 						break;
 
-					lock (FAsyncLock)
+					lock (_asyncLock)
 					{
 						// Dequeue an item
-						if (FQueue.Count > 0)
+						if (_queue.Count > 0)
 						{
-							FCurrentRequest = FQueue[0];
-							FQueue.RemoveAt(0);
-							if (FQueue.Count == 0)
-								FQueueSignal.Reset();
+							_currentRequest = _queue[0];
+							_queue.RemoveAt(0);
+							if (_queue.Count == 0)
+								_queueSignal.Reset();
 						}
 					}
 					try
@@ -448,22 +448,22 @@ namespace Alphora.Dataphor.Frontend.Client
 						try
 						{
 							// Make the request
-							FCurrentRequest.FResult = InternalRequest(FCurrentRequest.Document, FAsyncProcess);
+							_currentRequest._result = InternalRequest(_currentRequest.Document, _asyncProcess);
 						}
-						catch (Exception LException)
+						catch (Exception exception)
 						{
 							// Error callback
 							// Can't take a lock to ensure that FCancellingCurrent doesn't change before we invoke (might dead-lock on the SafelyInvoke back to the main thread... which might be waiting on the FAsyncLock)
-							if ((FCurrentRequest.ErrorHandler != null) && !FCancellingCurrent)
-								SafelyInvoke(FCurrentRequest.ErrorHandler, new object[] { FCurrentRequest, this, LException });
+							if ((_currentRequest.ErrorHandler != null) && !_cancellingCurrent)
+								SafelyInvoke(_currentRequest.ErrorHandler, new object[] { _currentRequest, this, exception });
 							// Don't rethrow
 							continue; // Skip the success callback
 						}
 
 						// Success callback
 						// Can't take a lock to ensure that FCancellingCurrent doesn't change before we invoke (might dead-lock on the SafelyInvoke back to the main thread... which might be waiting on the FAsyncLock)
-						if ((FCurrentRequest.ResponseHandler != null) && !FCancellingCurrent)
-							SafelyInvoke(FCurrentRequest.ResponseHandler, new object[] { FCurrentRequest, this });
+						if ((_currentRequest.ResponseHandler != null) && !_cancellingCurrent)
+							SafelyInvoke(_currentRequest.ResponseHandler, new object[] { _currentRequest, this });
 					}
 					catch (ThreadAbortException)
 					{
@@ -476,20 +476,20 @@ namespace Alphora.Dataphor.Frontend.Client
 					}
 					finally
 					{
-						lock (FAsyncLock)
+						lock (_asyncLock)
 						{
 							try
 							{
 								try
 								{
 									// Free up the result resources
-									if (FCurrentRequest.FResult != null)
-										FCurrentRequest.FResult.Dispose();
+									if (_currentRequest._result != null)
+										_currentRequest._result.Dispose();
 								}
 								finally
 								{
 									// Clear the current request
-									FCurrentRequest = null;
+									_currentRequest = null;
 								}
 							}
 							finally
@@ -508,25 +508,25 @@ namespace Alphora.Dataphor.Frontend.Client
 						}
 					}
 				}
-				catch (Exception LException)
+				catch (Exception exception)
 				{
-					Error.Warn(LException.ToString());
+					Error.Warn(exception.ToString());
 					// Don't rethrow.  We do not want an error here to stop the worker thread (and terminate the application).
 				}
 			}
-			FQueueSignal.Close();
+			_queueSignal.Close();
 		}
 
 		public event InvokeHandler OnSafelyInvoke;
 
 		/// <summary> Attempts to execute the delegate on the main window thread. </summary>
 		/// <remarks> If there is no main window, the delegate is invoked within this thread. </remarks>
-		private object SafelyInvoke(Delegate ADelegate, object[] AArguments)
+		private object SafelyInvoke(Delegate delegateValue, object[] arguments)
 		{
 			if (OnSafelyInvoke != null)
-				return OnSafelyInvoke(ADelegate, AArguments);
+				return OnSafelyInvoke(delegateValue, arguments);
 			else
-				return ADelegate.DynamicInvoke(AArguments);
+				return delegateValue.DynamicInvoke(arguments);
 		}
 
 		#endregion

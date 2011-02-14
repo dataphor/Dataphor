@@ -23,7 +23,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 	[ToolboxBitmap(typeof(Alphora.Dataphor.DAE.Client.Controls.IncrementalSearch),"Icons.IncrementalSearch.bmp")]
 	public class IncrementalSearch : Control, IDataSourceReference
 	{
-		public const int CButtonMarginWidth = 2;
+		public const int ButtonMarginWidth = 2;
 
 		public IncrementalSearch() : base()
 		{
@@ -47,11 +47,11 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			ResumeLayout(false);
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 			finally
 			{
@@ -96,27 +96,27 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region Data Source
 
-		private DataLink FLink;
+		private DataLink _link;
 		protected DataLink Link
 		{
-			get { return FLink; }
+			get { return _link; }
 		}
 
 		private void InitializeLink()
 		{
-			FLink = new DataLink();
-			FLink.OnActiveChanged += new DataLinkHandler(DataActiveChange);
-			FLink.OnDataChanged += new DataLinkHandler(DataChange);
+			_link = new DataLink();
+			_link.OnActiveChanged += new DataLinkHandler(DataActiveChange);
+			_link.OnDataChanged += new DataLinkHandler(DataChange);
 		}
 
 		private void DisposeLink()
 		{
-			if (FLink != null)
+			if (_link != null)
 			{
-				FLink.OnActiveChanged -= new DataLinkHandler(DataActiveChange);
-				FLink.OnDataChanged -= new DataLinkHandler(DataChange);
-				FLink.Dispose();
-				FLink = null;
+				_link.OnActiveChanged -= new DataLinkHandler(DataActiveChange);
+				_link.OnDataChanged -= new DataLinkHandler(DataChange);
+				_link.Dispose();
+				_link = null;
 			}
 		}
 
@@ -126,45 +126,45 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Description("The DataSource for this control")]
 		public DataSource Source
 		{
-			get	{ return FLink.Source; }
-			set	{ FLink.Source = value;	}
+			get	{ return _link.Source; }
+			set	{ _link.Source = value;	}
 		}
 
-		private Order FOrder;
-		protected Order Order { get { return FOrder; } }
+		private Order _order;
+		protected Order Order { get { return _order; } }
 
-		private void SetOrder(Order AOrder)
+		private void SetOrder(Order order)
 		{
-			if (AOrder != FOrder)
+			if (order != _order)
 			{
-				FOrder = AOrder;
+				_order = order;
 				UpdateControls();
 			}
 		}
 
-		protected virtual void DataActiveChange(DataLink ADataLink, DataSet ADataSet)
+		protected virtual void DataActiveChange(DataLink dataLink, DataSet dataSet)
 		{
-			if (ADataLink.Active && (ADataSet is TableDataSet))
-				SetOrder(((TableDataSet)ADataSet).Order);
+			if (dataLink.Active && (dataSet is TableDataSet))
+				SetOrder(((TableDataSet)dataSet).Order);
 			else
 				SetOrder(null);
 		}
 
-		protected virtual void DataChange(DataLink ADataLink, DataSet ADataSet)
+		protected virtual void DataChange(DataLink dataLink, DataSet dataSet)
 		{
-			TableDataSet LDataSet = ADataSet as TableDataSet;
-			if (ADataLink.Active && (LDataSet != null))
+			TableDataSet localDataSet = dataSet as TableDataSet;
+			if (dataLink.Active && (localDataSet != null))
 			{
-				if (FOrder != LDataSet.Order)
-					SetOrder(LDataSet.Order);
+				if (_order != localDataSet.Order)
+					SetOrder(localDataSet.Order);
 				else
-					if (!FSearching)
+					if (!_searching)
 					{
 						CancelPending();	// Don't search if the set has already changed
 
-						Control LControl = FControlPanel.GetFocusedControl();
-						if (LControl != null)
-							SyncronizeControls((IIncrementalControl)LControl, true);
+						Control control = _controlPanel.GetFocusedControl();
+						if (control != null)
+							SyncronizeControls((IIncrementalControl)control, true);
 						else
 							Reset();
 					}
@@ -175,84 +175,84 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region Control Panel
 
-		private IncrementalControlPanel FControlPanel;
+		private IncrementalControlPanel _controlPanel;
 
 		private void InitializeControlPanel()
 		{
-			FControlPanel = new IncrementalControlPanel();
-			FControlPanel.Parent = this;
-			FControlPanel.ClippingChanged += new System.EventHandler(ControlPanelClippingChanged);
+			_controlPanel = new IncrementalControlPanel();
+			_controlPanel.Parent = this;
+			_controlPanel.ClippingChanged += new System.EventHandler(ControlPanelClippingChanged);
 		}
 
 		private void DisposeControlPanel()
 		{
-			if (FControlPanel != null)
+			if (_controlPanel != null)
 			{
-				FControlPanel.Dispose();
-				FControlPanel = null;
+				_controlPanel.Dispose();
+				_controlPanel = null;
 			}
 		}
 
-		protected virtual Control CreateIncrementalControl(OrderColumn AColumn)
+		protected virtual Control CreateIncrementalControl(OrderColumn column)
 		{
-			Control LControl;
+			Control control;
 			// TODO: Make incremental control selection extensible (or at least more controllable)
-			if (((DAE.Schema.ScalarType)AColumn.Column.DataType).NativeType == DAE.Runtime.Data.NativeAccessors.AsBoolean.NativeType)
-				LControl = new IncrementalCheckBox();
+			if (((DAE.Schema.ScalarType)column.Column.DataType).NativeType == DAE.Runtime.Data.NativeAccessors.AsBoolean.NativeType)
+				control = new IncrementalCheckBox();
 			else
-				LControl = new IncrementalTextBox();
-			IIncrementalControl LIncremental = ((IIncrementalControl)LControl);
-			LIncremental.ColumnName = AColumn.Column.Name;
-			LIncremental.OnChanged += new System.EventHandler(ControlChanged);
-			LControl.Leave += new System.EventHandler(ControlLeave);
-			LControl.Enter += new System.EventHandler(ControlEnter);
+				control = new IncrementalTextBox();
+			IIncrementalControl incremental = ((IIncrementalControl)control);
+			incremental.ColumnName = column.Column.Name;
+			incremental.OnChanged += new System.EventHandler(ControlChanged);
+			control.Leave += new System.EventHandler(ControlLeave);
+			control.Enter += new System.EventHandler(ControlEnter);
 
 			// Search for this column in the Columns list for more information
-			IncrementalSearchColumn LColumn = FColumns[AColumn.Column.Name];
-			if (LColumn != null)
-				LIncremental.Initialize(LColumn);
+			IncrementalSearchColumn localColumn = _columns[column.Column.Name];
+			if (localColumn != null)
+				incremental.Initialize(localColumn);
 
-			return LControl;
+			return control;
 		}
 
-		protected override void OnGotFocus(EventArgs AArgs)
+		protected override void OnGotFocus(EventArgs args)
 		{
-			base.OnGotFocus(AArgs);
-			if (FControlPanel.Controls.Count > 0)
-				FControlPanel.Controls[0].Focus();
+			base.OnGotFocus(args);
+			if (_controlPanel.Controls.Count > 0)
+				_controlPanel.Controls[0].Focus();
 		}
 
-		private bool FAutoFocus;
+		private bool _autoFocus;
 
 		protected virtual void UpdateControls()
 		{
 			CancelPending();
 
-			FControlPanel.SuspendLayout();
+			_controlPanel.SuspendLayout();
 			try
 			{
-				FControlPanel.Clear();
+				_controlPanel.Clear();
 
-				if (FLink.Active && (Order != null))
+				if (_link.Active && (Order != null))
 				{
-					foreach (OrderColumn LColumn in Order.Columns)
+					foreach (OrderColumn column in Order.Columns)
 					{
-						if (!((TableDataSet)FLink.DataSet).IsDetailKey(LColumn.Column.Name))
-							FControlPanel.Controls.Add(CreateIncrementalControl(LColumn));
+						if (!((TableDataSet)_link.DataSet).IsDetailKey(column.Column.Name))
+							_controlPanel.Controls.Add(CreateIncrementalControl(column));
 					}
 					UpdateControlStyles();
 				}
 			}
 			finally
 			{
-				FControlPanel.ResumeLayout(true);
+				_controlPanel.ResumeLayout(true);
 			}
 
-			if (FAutoFocus)
+			if (_autoFocus)
 			{
-				FAutoFocus = false;
-				if (FControlPanel.Controls.Count > 0)
-					FControlPanel.Controls[0].Focus();
+				_autoFocus = false;
+				if (_controlPanel.Controls.Count > 0)
+					_controlPanel.Controls[0].Focus();
 			}
 		}
 
@@ -264,76 +264,76 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		///		These changes will not cause searching.  If the given control is null, then all controls 
 		///		are reset.
 		///	</remarks>
-		private void SyncronizeControls(IIncrementalControl ASelectedControl, bool AResetSelected)
+		private void SyncronizeControls(IIncrementalControl selectedControl, bool resetSelected)
 		{
-			FSetting = true;
+			_setting = true;
 			try
 			{
-				bool LPassed;
-				if (ASelectedControl == null)
-					LPassed = true;
+				bool passed;
+				if (selectedControl == null)
+					passed = true;
 				else
 				{
-					LPassed = false;
-					if (AResetSelected)
-						ASelectedControl.Reset();
+					passed = false;
+					if (resetSelected)
+						selectedControl.Reset();
 				}
-				foreach (IIncrementalControl LControl in FControlPanel.Controls)
+				foreach (IIncrementalControl control in _controlPanel.Controls)
 				{
-					if (LControl == ASelectedControl)
-						LPassed = true;
+					if (control == selectedControl)
+						passed = true;
 					else
 					{
-						if (LPassed)
-							LControl.Reset();
+						if (passed)
+							control.Reset();
 						else
-							if (FLink.Active && !FLink.DataSet.IsEmpty())
-								LControl.InjectValue(FLink.DataSet.ActiveRow, true);
+							if (_link.Active && !_link.DataSet.IsEmpty())
+								control.InjectValue(_link.DataSet.ActiveRow, true);
 					}
 				}
 			}
 			finally
 			{
-				FSetting = false;
+				_setting = false;
 			}
 		}
 
 		/// <summary> Auto fill-in more significant search controls and clear less significant ones when focus changes. </summary>
-		private void ControlEnter(object ASender, EventArgs AArgs)
+		private void ControlEnter(object sender, EventArgs args)
 		{
-			SyncronizeControls((IIncrementalControl)ASender, false);
+			SyncronizeControls((IIncrementalControl)sender, false);
 		}
 
 		#endregion
 
 		#region Columns
 
-		private IncrementalColumns FColumns;
+		private IncrementalColumns _columns;
 		[Category("Columns")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
 		public IncrementalColumns Columns
 		{
-			get { return FColumns; }
+			get { return _columns; }
 		}
 
 		private void InitializeColumns()
 		{
-			FColumns = new IncrementalColumns();
-			FColumns.ColumnChanged += new System.EventHandler(ColumnChanged);
+			_columns = new IncrementalColumns();
+			_columns.ColumnChanged += new System.EventHandler(ColumnChanged);
 		}
 
 		private void DisposeColumns()
 		{
-			if (FColumns != null)
+			if (_columns != null)
 			{
-				FColumns.Dispose();
-				FColumns = null;
+				_columns.Dispose();
+				_columns = null;
 			}
 		}
 
-		private void ColumnChanged(object ASender, EventArgs AArgs)
+		private void ColumnChanged(object sender, EventArgs args)
 		{
-			if ((FLink != null) && FLink.Active && FControlPanel.Contains(((IncrementalSearchColumn)ASender).ColumnName))
+			if ((_link != null) && _link.Active && _controlPanel.Contains(((IncrementalSearchColumn)sender).ColumnName))
 				UpdateControls();
 		}
 
@@ -341,35 +341,35 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region Cosmetics
 
-		private Color FNoValueBackColor = ControlColor.NoValueBackColor;
+		private Color _noValueBackColor = ControlColor.NoValueBackColor;
 		/// <summary> BackColor for edit controls that support NoValueBackColor. </summary>
 		[Category("Appearance")]
 		[Description("BackColor for edit controls that support NoValueBackColor.")]
 		public Color NoValueBackColor
 		{
-			get { return FNoValueBackColor; }
+			get { return _noValueBackColor; }
 			set
 			{
-				if (FNoValueBackColor != value)
+				if (_noValueBackColor != value)
 				{
-					FNoValueBackColor = value;
+					_noValueBackColor = value;
 					UpdateControlStyles();
 				}
 			}
 		}
 
-		private Color FInvalidValueBackColor = ControlColor.ConversionFailBackColor;
+		private Color _invalidValueBackColor = ControlColor.ConversionFailBackColor;
 		/// <summary> BackColor of controls that fail to convert their value to the columns DataType. </summary>
 		[Category("Appearance")]
 		[Description("BackColor of controls that fail to convert their value to the columns DataType.")]
 		public Color InvalidValueBackColor
 		{
-			get { return FInvalidValueBackColor; }
+			get { return _invalidValueBackColor; }
 			set
 			{
-				if (FInvalidValueBackColor != value)
+				if (_invalidValueBackColor != value)
 				{
-					FInvalidValueBackColor = value;
+					_invalidValueBackColor = value;
 					UpdateControlStyles();
 				}
 			}
@@ -377,26 +377,26 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		private void UpdateControlStyles()
 		{
-			foreach (IIncrementalControl LControl in FControlPanel.Controls)
-				LControl.UpdateStyle(this);
+			foreach (IIncrementalControl control in _controlPanel.Controls)
+				control.UpdateStyle(this);
 		}
 
-		private TitleAlignment FTitleAlignment = TitleAlignment.Left;
+		private TitleAlignment _titleAlignment = TitleAlignment.Left;
 		[Category("Appearance")]
 		[DefaultValue(TitleAlignment.Left)]
 		[Description("Location of the column label.")]
 		public TitleAlignment TitleAlignment
 		{
-			get { return FTitleAlignment; }
+			get { return _titleAlignment; }
 			set
 			{
-				if (FTitleAlignment != value)
+				if (_titleAlignment != value)
 				{
-					FTitleAlignment = value;
+					_titleAlignment = value;
 					SuspendLayout();
 					try
 					{
-						FControlPanel.TitleAlignment = value;
+						_controlPanel.TitleAlignment = value;
 					}
 					finally
 					{
@@ -410,26 +410,26 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region Search Timer
 
-		private System.Windows.Forms.Timer FSearchTimer;
+		private System.Windows.Forms.Timer _searchTimer;
 		protected System.Windows.Forms.Timer SearchTimer
 		{
-			get { return FSearchTimer; }
+			get { return _searchTimer; }
 		}
 
 		private void InitializeSearchTimer()
 		{
-			FSearchTimer = new System.Windows.Forms.Timer();
-			FSearchTimer.Interval = 600;
-			FSearchTimer.Tick += new System.EventHandler(SearchTimerElapsed);
+			_searchTimer = new System.Windows.Forms.Timer();
+			_searchTimer.Interval = 600;
+			_searchTimer.Tick += new System.EventHandler(SearchTimerElapsed);
 		}
 
 		private void DisposeSearchTimer()
 		{
-			if (FSearchTimer != null)
+			if (_searchTimer != null)
 			{
-				FSearchTimer.Tick -= new System.EventHandler(SearchTimerElapsed);
-				FSearchTimer.Dispose();
-				FSearchTimer = null;
+				_searchTimer.Tick -= new System.EventHandler(SearchTimerElapsed);
+				_searchTimer.Dispose();
+				_searchTimer = null;
 			}
 		}
 
@@ -442,17 +442,17 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Category("Behavior")]
 		public int TimerInterval
 		{
-			get { return FSearchTimer.Interval; }
+			get { return _searchTimer.Interval; }
 			set
 			{
 				if (value < 0)
 					value = 0;
-				if (FSearchTimer.Interval != value)
-					FSearchTimer.Interval = value;
+				if (_searchTimer.Interval != value)
+					_searchTimer.Interval = value;
 			}
 		}
 
-		protected void SearchTimerElapsed(object ASender, EventArgs AArgs)
+		protected void SearchTimerElapsed(object sender, EventArgs args)
 		{
 			ProcessPending();
 		}
@@ -462,55 +462,55 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		#region Search Pending
 
 		/// <summary> The control (if any) that has changed, cuasing a pending search. </summary>
-		private Control FPendingControl;
+		private Control _pendingControl;
 
 		public bool IsSearchPending()
 		{
-			return FPendingControl != null;
+			return _pendingControl != null;
 		}
 
 		public void CancelPending()
 		{
-			FSearchTimer.Stop();
-			FPendingControl = null;
+			_searchTimer.Stop();
+			_pendingControl = null;
 		}
 
 		/// <summary> Processes the pending search request (if there is one). </summary>
 		public void ProcessPending()
 		{
-			FSearchTimer.Stop();
-			if (FPendingControl != null)
+			_searchTimer.Stop();
+			if (_pendingControl != null)
 				try
 				{
 					InternalSearch();
 				}
 				finally
 				{
-					FPendingControl = null;
+					_pendingControl = null;
 				}
 		}
 
 		/// <summary> Processes any existing pending search and makes the specified </summary>
-		private void MakePending(Control AControl)
+		private void MakePending(Control control)
 		{
-			if (AControl == null)
+			if (control == null)
 				ProcessPending();
 			else
 			{
 				CancelPending();
-				FSearchTimer.Start();
-				FPendingControl = AControl;
+				_searchTimer.Start();
+				_pendingControl = control;
 			}
 		}
 
-		private void ControlChanged(object ASender, EventArgs AArgs)
+		private void ControlChanged(object sender, EventArgs args)
 		{
 			// If a control changes value (besides us setting it), then make it pending for search
-			if (!FSetting)
-				MakePending((Control)ASender);
+			if (!_setting)
+				MakePending((Control)sender);
 		}
 
-		private void ControlLeave(object ASender, EventArgs AArgs)
+		private void ControlLeave(object sender, EventArgs args)
 		{
 			// Make sure that any pending search is performed before leaving the search control.
 			if (!Disposing && !IsDisposed)
@@ -522,104 +522,104 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		#region Searching
 
 		/// <summary> Indicates that we are updateing the values of the controls (we should thus ignore their change notifications). </summary>
-		private bool FSetting;
+		private bool _setting;
 
 		/// <summary> Cancels any pending search and clears and specified search criteria. </summary>
 		public void Reset()
 		{
 			CancelPending();
-			FSetting = true;
+			_setting = true;
 			try
 			{
-				foreach (IIncrementalControl LIncremental in FControlPanel.Controls)
-					LIncremental.Reset();
+				foreach (IIncrementalControl incremental in _controlPanel.Controls)
+					incremental.Reset();
 			}
 			finally
 			{
-				FSetting = false;
+				_setting = false;
 			}
 		}
 
 		/// <summary> Creates a row to search for based on the master columns (if applicable) and the search criteria up to the pending control. </summary>
 		private DAE.Runtime.Data.Row CreateSearchRow()
 		{
-			IIncrementalControl LPendingIncremental = (IIncrementalControl)FPendingControl;
+			IIncrementalControl pendingIncremental = (IIncrementalControl)_pendingControl;
 
 			// Build a row consisting of order columns up to and including the pending control
-			RowType LRowType = new RowType();	
-			foreach (OrderColumn LColumn in FOrder.Columns)
+			RowType rowType = new RowType();	
+			foreach (OrderColumn column in _order.Columns)
 			{
-				LRowType.Columns.Add(new Column(LColumn.Column.Name, LColumn.Column.DataType));
-				if (LColumn.Column.Name == LPendingIncremental.ColumnName)
+				rowType.Columns.Add(new Column(column.Column.Name, column.Column.DataType));
+				if (column.Column.Name == pendingIncremental.ColumnName)
 					break;
 			}
 
-			TableDataSet LDataSet = (TableDataSet)FLink.DataSet;
+			TableDataSet dataSet = (TableDataSet)_link.DataSet;
 			
-			Row LRow = new Row(FLink.DataSet.Process.ValueManager, LRowType);
+			Row row = new Row(_link.DataSet.Process.ValueManager, rowType);
 			try
 			{
-				LDataSet.InitializeFromMaster(LRow);
-				foreach (Schema.Column LColumn in LRowType.Columns)
+				dataSet.InitializeFromMaster(row);
+				foreach (Schema.Column column in rowType.Columns)
 				{
-					if (!LDataSet.IsDetailKey(LColumn.Name))
-						if (!((IIncrementalControl)FControlPanel[LColumn.Name]).ExtractValue(LRow))
+					if (!dataSet.IsDetailKey(column.Name))
+						if (!((IIncrementalControl)_controlPanel[column.Name]).ExtractValue(row))
 							return null;
 				}
-				return LRow;
+				return row;
 			}
 			catch
 			{
-				LRow.Dispose();
+				row.Dispose();
 				throw;
 			}
 		}
 
-		private bool FSearching;
+		private bool _searching;
 
 		/// <summary> Performs the search, using pending search control. </summary>
 		private void InternalSearch()
 		{
-			if (FLink.Active)
+			if (_link.Active)
 			{
-				if (!FLink.DataSet.IsEmpty())	// When the view is empty there is nothing to find so don't bother.
+				if (!_link.DataSet.IsEmpty())	// When the view is empty there is nothing to find so don't bother.
 				{
-					FSearching = true;
+					_searching = true;
 					try
 					{
 						// Perform the search
-						System.Windows.Forms.Cursor LOldCursor = this.Cursor;
+						System.Windows.Forms.Cursor oldCursor = this.Cursor;
 						this.Cursor = System.Windows.Forms.Cursors.WaitCursor;
 						try
 						{
-							using (Row LRow = CreateSearchRow())
+							using (Row row = CreateSearchRow())
 							{
-								if (LRow == null)
+								if (row == null)
 									return;
-								FLink.DataSet.FindNearest(LRow);
+								_link.DataSet.FindNearest(row);
 							}
 						}
 						finally
 						{
-							this.Cursor = LOldCursor;
+							this.Cursor = oldCursor;
 						}
 					}
 					finally
 					{
-						FSearching = false;
+						_searching = false;
 					}
 
 					// Provide nearest match feedback
-					if (!FLink.DataSet.IsEmpty())
+					if (!_link.DataSet.IsEmpty())
 					{
-						FSetting = true;
+						_setting = true;
 						try
 						{
-							((IIncrementalControl)FPendingControl).InjectValue(FLink.DataSet.ActiveRow, false);
+							((IIncrementalControl)_pendingControl).InjectValue(_link.DataSet.ActiveRow, false);
 						}
 						finally
 						{
-							FSetting = false;
+							_setting = false;
 						}
 					}
 				}
@@ -630,24 +630,24 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region SearchBy Button
 
-		private BitmapButton FButton;
+		private BitmapButton _button;
 
 		private void InitializeButton()
 		{
-			FButton = new SpeedButton();
-			FButton.Image = SpeedButton.ResourceBitmap(typeof(IncrementalSearch), "Alphora.Dataphor.DAE.Client.Controls.Images.SortBy.png");
-			FButton.Click += new System.EventHandler(SearchByButtonPressed);
-			FButton.Parent = this;
-			FButton.Size = MinButtonSize();
+			_button = new SpeedButton();
+			_button.Image = SpeedButton.ResourceBitmap(typeof(IncrementalSearch), "Alphora.Dataphor.DAE.Client.Controls.Images.SortBy.png");
+			_button.Click += new System.EventHandler(SearchByButtonPressed);
+			_button.Parent = this;
+			_button.Size = MinButtonSize();
 		}
 
 		private void DisposeButton()
 		{
-			if (FButton != null)
+			if (_button != null)
 			{
-				FButton.Click -= new System.EventHandler(SearchByButtonPressed);
-				FButton.Dispose();
-				FButton = null;
+				_button.Click -= new System.EventHandler(SearchByButtonPressed);
+				_button.Dispose();
+				_button = null;
 			}
 		}
 
@@ -655,55 +655,55 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Category("Appearance")]
 		public bool HideSearchByButton
 		{
-			get { return !FButton.Visible; }
-			set { FButton.Visible = !value; }
+			get { return !_button.Visible; }
+			set { _button.Visible = !value; }
 		}
 
-		private SearchByDropDown FSearchByDropDown;
+		private SearchByDropDown _searchByDropDown;
 
 		public void SelectSearchBy()
 		{
-			if (FLink.Active && (FSearchByDropDown == null))
+			if (_link.Active && (_searchByDropDown == null))
 			{
-				FSearchByDropDown = new SearchByDropDown(this, (TableDataSet)FLink.DataSet);
-				FSearchByDropDown.Closed += new System.EventHandler(SearchByDropDownClosed);
-				FSearchByDropDown.Show();
+				_searchByDropDown = new SearchByDropDown(this, (TableDataSet)_link.DataSet);
+				_searchByDropDown.Closed += new System.EventHandler(SearchByDropDownClosed);
+				_searchByDropDown.Show();
 			}
 		}
 
-		private void SearchByDropDownClosed(object ASender, EventArgs AArgs)
+		private void SearchByDropDownClosed(object sender, EventArgs args)
 		{
-			FSearchByDropDown = null;
-			Form LForm = FindForm();
-			if (LForm != null)
-				LForm.Focus();
-			FAutoFocus = true;
+			_searchByDropDown = null;
+			Form form = FindForm();
+			if (form != null)
+				form.Focus();
+			_autoFocus = true;
 		}
 
-		private void SearchByButtonPressed(object ASender, EventArgs AArgs)
+		private void SearchByButtonPressed(object sender, EventArgs args)
 		{
 			SelectSearchBy();
 		}
 
-		protected override bool IsInputKey(System.Windows.Forms.Keys AKey)
+		protected override bool IsInputKey(System.Windows.Forms.Keys key)
 		{
 			return 
-				(AKey != System.Windows.Forms.Keys.Up) 
-					&& (AKey != System.Windows.Forms.Keys.Down) 
+				(key != System.Windows.Forms.Keys.Up) 
+					&& (key != System.Windows.Forms.Keys.Down) 
 					&&
 					(
-						(AKey == System.Windows.Forms.Keys.Insert) 
-							|| (AKey == (System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.Down)) 
-							|| base.IsInputKey(AKey)
+						(key == System.Windows.Forms.Keys.Insert) 
+							|| (key == (System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.Down)) 
+							|| base.IsInputKey(key)
 					);
 		}
 
-		protected override bool ProcessDialogKey(System.Windows.Forms.Keys AKey)
+		protected override bool ProcessDialogKey(System.Windows.Forms.Keys key)
 		{
-			switch (AKey)
+			switch (key)
 			{
 				case System.Windows.Forms.Keys.Insert : SelectSearchBy(); break;
-				default : return base.ProcessDialogKey(AKey);
+				default : return base.ProcessDialogKey(key);
 			}
 			return true;
 		}
@@ -712,102 +712,102 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region Layout
 
-		private Point FRightClipLocation;
-		private Point FLeftClipLocation;
+		private Point _rightClipLocation;
+		private Point _leftClipLocation;
 
-		protected override void OnLayout(LayoutEventArgs AArgs)
+		protected override void OnLayout(LayoutEventArgs args)
 		{
 			if (!Disposing)
 			{
-				base.OnLayout(AArgs);
+				base.OnLayout(args);
 				// Size the control
 				Height = NaturalHeight();
-				Rectangle LBounds = DisplayRectangle;
-				LBounds.Inflate(-2, -2);
+				Rectangle bounds = DisplayRectangle;
+				bounds.Inflate(-2, -2);
 				
 				// Layout the button
 				if (!HideSearchByButton)
 				{
-					FButton.Bounds =
+					_button.Bounds =
 						new Rectangle
 						(
-							LBounds.Right - FButton.Width,
-							LBounds.Top,
-							FButton.Width,
-							LBounds.Height
+							bounds.Right - _button.Width,
+							bounds.Top,
+							_button.Width,
+							bounds.Height
 						);
-					LBounds.Width -= FButton.Width + CButtonMarginWidth;
+					bounds.Width -= _button.Width + ButtonMarginWidth;
 				}
 
-				FLeftClipLocation = new Point(0, (LBounds.Height - FLeftClipBitmap.Height) / 2);
-				FRightClipLocation = new Point(LBounds.Right - FRightClipBitmap.Width, (LBounds.Height - FRightClipBitmap.Height) / 2);
+				_leftClipLocation = new Point(0, (bounds.Height - _leftClipBitmap.Height) / 2);
+				_rightClipLocation = new Point(bounds.Right - _rightClipBitmap.Width, (bounds.Height - _rightClipBitmap.Height) / 2);
 
 				// Layout the panel assuming space will be needed for both "clippers"
-				LBounds.X += FLeftClipBitmap.Width;
-				LBounds.Width -= FLeftClipBitmap.Width + FRightClipBitmap.Width;
-				FControlPanel.Bounds = LBounds;
+				bounds.X += _leftClipBitmap.Width;
+				bounds.Width -= _leftClipBitmap.Width + _rightClipBitmap.Width;
+				_controlPanel.Bounds = bounds;
 			}
 		}
 
 		private Size MinButtonSize()
 		{
-			return FButton.Image.Size + new Size(8, 8);
+			return _button.Image.Size + new Size(8, 8);
 		}
 
 		public int NaturalHeight()
 		{
-			return Math.Max(MinButtonSize().Height, FControlPanel.NaturalHeight()) + 2;
+			return Math.Max(MinButtonSize().Height, _controlPanel.NaturalHeight()) + 2;
 		}
 
 		#endregion
 
 		#region Painting
 
-		private Bitmap FLeftClipBitmap;
-		private Bitmap FRightClipBitmap;
+		private Bitmap _leftClipBitmap;
+		private Bitmap _rightClipBitmap;
 
 		private void InitializePainting()
 		{
-			FLeftClipBitmap = IncrementalControlPanel.LoadResourceBitmap("Alphora.Dataphor.DAE.Client.Controls.Images.Clip.png");
-			FRightClipBitmap = IncrementalControlPanel.LoadResourceBitmap("Alphora.Dataphor.DAE.Client.Controls.Images.Clip.png");
-			FRightClipBitmap.RotateFlip(RotateFlipType.RotateNoneFlipX);
+			_leftClipBitmap = IncrementalControlPanel.LoadResourceBitmap("Alphora.Dataphor.DAE.Client.Controls.Images.Clip.png");
+			_rightClipBitmap = IncrementalControlPanel.LoadResourceBitmap("Alphora.Dataphor.DAE.Client.Controls.Images.Clip.png");
+			_rightClipBitmap.RotateFlip(RotateFlipType.RotateNoneFlipX);
 		}
 
 		private void DisposePainting()
 		{
-			if (FLeftClipBitmap != null)
+			if (_leftClipBitmap != null)
 			{
-				FLeftClipBitmap.Dispose();
-				FLeftClipBitmap = null;
+				_leftClipBitmap.Dispose();
+				_leftClipBitmap = null;
 			}
-			if (FRightClipBitmap != null)
+			if (_rightClipBitmap != null)
 			{
-				FRightClipBitmap.Dispose();
-				FRightClipBitmap = null;
+				_rightClipBitmap.Dispose();
+				_rightClipBitmap = null;
 			}
 		}
 
-		protected override void OnPaint(PaintEventArgs AArgs)
+		protected override void OnPaint(PaintEventArgs args)
 		{
-			base.OnPaint(AArgs);
-			Rectangle LBounds = DisplayRectangle;
-			LBounds.Inflate(-1, -1);
+			base.OnPaint(args);
+			Rectangle bounds = DisplayRectangle;
+			bounds.Inflate(-1, -1);
 
 			// Paint the border
-			using (Pen LPen = new Pen(SystemColors.ActiveBorder))
+			using (Pen pen = new Pen(SystemColors.ActiveBorder))
 			{
-				AArgs.Graphics.DrawRectangle(LPen, LBounds);
+				args.Graphics.DrawRectangle(pen, bounds);
 			}
 
-			LBounds.Inflate(-1, -1);
+			bounds.Inflate(-1, -1);
 
 			// Paint the left clip indicator
-			if (FControlPanel.ClipOffset > 0)
-				AArgs.Graphics.DrawImage(FLeftClipBitmap, FLeftClipLocation.X, FLeftClipLocation.Y, FLeftClipBitmap.Width, FLeftClipBitmap.Height);
+			if (_controlPanel.ClipOffset > 0)
+				args.Graphics.DrawImage(_leftClipBitmap, _leftClipLocation.X, _leftClipLocation.Y, _leftClipBitmap.Width, _leftClipBitmap.Height);
 
 			// Paint the right clip indicator
-			if (FControlPanel.Overflows)
-				AArgs.Graphics.DrawImage(FRightClipBitmap, FRightClipLocation.X, FRightClipLocation.Y, FRightClipBitmap.Width, FRightClipBitmap.Height);
+			if (_controlPanel.Overflows)
+				args.Graphics.DrawImage(_rightClipBitmap, _rightClipLocation.X, _rightClipLocation.Y, _rightClipBitmap.Width, _rightClipBitmap.Height);
 		}
 
 		private void ControlPanelClippingChanged(object sender, EventArgs e)
@@ -824,8 +824,8 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 	internal class IncrementalControlPanel : Control
 	{
 		private const int WM_MOUSEMOVE	= 0x0200;
-		private const int CTitleVSpacing = 4;
-		private const int CMinControlWidth = 8;
+		private const int TitleVSpacing = 4;
+		private const int MinControlWidth = 8;
 
 		protected internal IncrementalControlPanel() : base()
 		{
@@ -833,55 +833,55 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			SetStyle(ControlStyles.Selectable, true);
 			SetStyle(ControlStyles.SupportsTransparentBackColor, true);
 			SetStyle(ControlStyles.CacheText, false);
-			FGripperBitmap = LoadResourceBitmap("Alphora.Dataphor.DAE.Client.Controls.Images.ThinGripper.png");
+			_gripperBitmap = LoadResourceBitmap("Alphora.Dataphor.DAE.Client.Controls.Images.ThinGripper.png");
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(ADisposing);
-			if (FGripperBitmap != null)
+			base.Dispose(disposing);
+			if (_gripperBitmap != null)
 			{
-				FGripperBitmap.Dispose();
-				FGripperBitmap = null;
+				_gripperBitmap.Dispose();
+				_gripperBitmap = null;
 			}
 		}
 
-		public static Bitmap LoadResourceBitmap(string AResourceName)
+		public static Bitmap LoadResourceBitmap(string resourceName)
 		{
-			using (Stream LStream = typeof(IncrementalControlPanel).Assembly.GetManifestResourceStream(AResourceName))
+			using (Stream stream = typeof(IncrementalControlPanel).Assembly.GetManifestResourceStream(resourceName))
 			{
-				return new Bitmap(LStream);
+				return new Bitmap(stream);
 			}
 		}
 
 		/// <summary> Locates a control by its column name. </summary>
-		public Control this[string AColumnName]
+		public Control this[string columnName]
 		{
 			get
 			{
-				foreach (IIncrementalControl LIncremental in Controls)
-					if (LIncremental.ColumnName == AColumnName)
-						return (Control)LIncremental;
+				foreach (IIncrementalControl incremental in Controls)
+					if (incremental.ColumnName == columnName)
+						return (Control)incremental;
 				return null;
 			}
 		}
 
 		/// <summary> Returns true if the panel contains a control for the given column name.</summary>
-		public bool Contains(string AColumnName)
+		public bool Contains(string columnName)
 		{
-			return this[AColumnName] != null;
+			return this[columnName] != null;
 		}
 
-		private TitleAlignment FTitleAlignment = TitleAlignment.Left;
+		private TitleAlignment _titleAlignment = TitleAlignment.Left;
 		[DefaultValue(TitleAlignment.Left)]
 		public TitleAlignment TitleAlignment
 		{
-			get { return FTitleAlignment; }
+			get { return _titleAlignment; }
 			set
 			{
-				if (FTitleAlignment != value)
+				if (_titleAlignment != value)
 				{
-					FTitleAlignment = value;
+					_titleAlignment = value;
 					PerformLayout();
 				}
 			}
@@ -892,15 +892,15 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		public Control GetFocusedControl()
 		{
 			if (ContainsFocus)
-				foreach (Control LControl in Controls)
-					if (LControl.ContainsFocus)
-						return LControl;
+				foreach (Control control in Controls)
+					if (control.ContainsFocus)
+						return control;
 			return null;
 		}
 
-		protected override void OnGotFocus(EventArgs AArgs)
+		protected override void OnGotFocus(EventArgs args)
 		{
-			base.OnGotFocus(AArgs);
+			base.OnGotFocus(args);
 			if (Controls.Count > 0)
 				Controls[0].Focus();
 		}
@@ -909,8 +909,8 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		#region Layout
 
-		private Rectangle[] FTitleBounds;
-		private Point[] FGripperLocations;
+		private Rectangle[] _titleBounds;
+		private Point[] _gripperLocations;
 
 		public event System.EventHandler ClippingChanged;
 		protected virtual void OnClippingChanged()
@@ -919,17 +919,17 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				ClippingChanged(this, EventArgs.Empty);
 		}
 
-		private int FClipOffset;
+		private int _clipOffset;
 		public int ClipOffset
 		{
-			get { return FClipOffset; }
+			get { return _clipOffset; }
 		}
-		private void SetClipOffset(int AValue)
+		private void SetClipOffset(int value)
 		{
-			AValue = Math.Max(0, AValue);
-			if (AValue != FClipOffset)
+			value = Math.Max(0, value);
+			if (value != _clipOffset)
 			{
-				FClipOffset = AValue;
+				_clipOffset = value;
 				PerformLayout();
 				OnClippingChanged();
 			}
@@ -941,170 +941,170 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			SetClipOffset(0);
 		}
 
-		private bool FOverflows;
+		private bool _overflows;
 		public bool Overflows
 		{
-			get { return FOverflows; }
+			get { return _overflows; }
 		}
-		private void SetOverflows(bool AValue)
+		private void SetOverflows(bool value)
 		{
-			if (AValue != FOverflows)
+			if (value != _overflows)
 			{
-				FOverflows = AValue;
+				_overflows = value;
 				OnClippingChanged();
 			}
 		}
 
-		protected override void OnLayout(LayoutEventArgs AArgs)
+		protected override void OnLayout(LayoutEventArgs args)
 		{
 			// TODO: possibly put in code limiting the width of the title text
-			base.OnLayout(AArgs);
-			FTitleBounds = new Rectangle[Controls.Count];
-			FGripperLocations = new Point[Controls.Count];
-			Rectangle LBounds = DisplayRectangle;
-			Control LControl;
+			base.OnLayout(args);
+			_titleBounds = new Rectangle[Controls.Count];
+			_gripperLocations = new Point[Controls.Count];
+			Rectangle bounds = DisplayRectangle;
+			Control control;
 
-			int LLeftOffset = -FClipOffset;
-			using (Graphics LGraphics = CreateGraphics())
+			int leftOffset = -_clipOffset;
+			using (Graphics graphics = CreateGraphics())
 			{
 				for (int i = 0; i < Controls.Count; i++)
 				{
-					LControl = Controls[i];
-					switch (FTitleAlignment)
+					control = Controls[i];
+					switch (_titleAlignment)
 					{
 						case TitleAlignment.Top :
-							LControl.Location = new Point(LLeftOffset, Font.Height + CTitleVSpacing);
-							FTitleBounds[i] = 
+							control.Location = new Point(leftOffset, Font.Height + TitleVSpacing);
+							_titleBounds[i] = 
 								new Rectangle
 								(
-									LLeftOffset, 
+									leftOffset, 
 									0, 
-									Size.Ceiling(LGraphics.MeasureString(((IIncrementalControl)LControl).Title, Font)).Width, 
+									Size.Ceiling(graphics.MeasureString(((IIncrementalControl)control).Title, Font)).Width, 
 									Font.Height
 								);
-							FGripperLocations[i] = new Point(LLeftOffset + LControl.Width, Font.Height + CTitleVSpacing + ((LControl.Height - FGripperBitmap.Height) / 2));
-							LLeftOffset += Math.Max(FTitleBounds[i].Width, LControl.Width) + FGripperBitmap.Width;
+							_gripperLocations[i] = new Point(leftOffset + control.Width, Font.Height + TitleVSpacing + ((control.Height - _gripperBitmap.Height) / 2));
+							leftOffset += Math.Max(_titleBounds[i].Width, control.Width) + _gripperBitmap.Width;
 							break;
 						case TitleAlignment.Left :
-							FTitleBounds[i] =
+							_titleBounds[i] =
 								new Rectangle
 								(
-									LLeftOffset,
-									Math.Max(0, (LBounds.Height - Font.Height) / 2),
-									Size.Ceiling(LGraphics.MeasureString(((IIncrementalControl)LControl).Title, Font)).Width,
+									leftOffset,
+									Math.Max(0, (bounds.Height - Font.Height) / 2),
+									Size.Ceiling(graphics.MeasureString(((IIncrementalControl)control).Title, Font)).Width,
 									Font.Height
 								);
-							LLeftOffset += FTitleBounds[i].Width;
+							leftOffset += _titleBounds[i].Width;
 							goto case TitleAlignment.None;
 						case TitleAlignment.None :
-							LControl.Location = new Point(LLeftOffset, (LBounds.Height - LControl.Height) / 2);
-							LLeftOffset += LControl.Width;
-							FGripperLocations[i] = new Point(LLeftOffset, LControl.Top + (LControl.Height - FGripperBitmap.Height) / 2);
-							LLeftOffset += FGripperBitmap.Width;
+							control.Location = new Point(leftOffset, (bounds.Height - control.Height) / 2);
+							leftOffset += control.Width;
+							_gripperLocations[i] = new Point(leftOffset, control.Top + (control.Height - _gripperBitmap.Height) / 2);
+							leftOffset += _gripperBitmap.Width;
 							break;
 					}
 				}
 			}
-			SetOverflows(LLeftOffset > LBounds.Right);
+			SetOverflows(leftOffset > bounds.Right);
 			Invalidate();
 		}
 
 		public int NaturalHeight()
 		{
-			Control LControl = new IncrementalCheckBox();
-			int LMaxControlHeight = LControl.Height;
-			LControl.Dispose();
-			LControl = new IncrementalTextBox();
-			if (LMaxControlHeight < LControl.Height)
-				LMaxControlHeight = LControl.Height;
-			LControl.Dispose();
+			Control control = new IncrementalCheckBox();
+			int maxControlHeight = control.Height;
+			control.Dispose();
+			control = new IncrementalTextBox();
+			if (maxControlHeight < control.Height)
+				maxControlHeight = control.Height;
+			control.Dispose();
 
-			switch (FTitleAlignment)
+			switch (_titleAlignment)
 			{
 				case TitleAlignment.Top :
-					return Font.Height + CTitleVSpacing + LMaxControlHeight;
+					return Font.Height + TitleVSpacing + maxControlHeight;
 				case TitleAlignment.Left :
-					return Math.Max(LMaxControlHeight, Font.Height);
+					return Math.Max(maxControlHeight, Font.Height);
 				default :
-					return LMaxControlHeight;
+					return maxControlHeight;
 			}
 		}
 
-		protected override void OnControlAdded(ControlEventArgs AArgs)
+		protected override void OnControlAdded(ControlEventArgs args)
 		{
-			base.OnControlAdded(AArgs);
-			AArgs.Control.Enter += new System.EventHandler(ControlEnter);
+			base.OnControlAdded(args);
+			args.Control.Enter += new System.EventHandler(ControlEnter);
 		}
 
-		protected override void OnControlRemoved(ControlEventArgs AArgs)
+		protected override void OnControlRemoved(ControlEventArgs args)
 		{
-			AArgs.Control.Enter -= new System.EventHandler(ControlEnter);
-			base.OnControlRemoved(AArgs);
+			args.Control.Enter -= new System.EventHandler(ControlEnter);
+			base.OnControlRemoved(args);
 		}
 
 		/// <summary> Ensures that the focused control is scrolled into view. </summary>
-		private void ControlEnter(object ASender, EventArgs AArgs)
+		private void ControlEnter(object sender, EventArgs args)
 		{
-			Control LControl = (Control)ASender;
-			int LControlIndex = Controls.IndexOf(LControl);
-			Rectangle LBounds = DisplayRectangle;
-			int LOffset = 0;	// The proposed shift of the controls)
-			int LRightExtent = FGripperLocations[LControlIndex].X + FGripperBitmap.Width;
+			Control control = (Control)sender;
+			int controlIndex = Controls.IndexOf(control);
+			Rectangle bounds = DisplayRectangle;
+			int offset = 0;	// The proposed shift of the controls)
+			int rightExtent = _gripperLocations[controlIndex].X + _gripperBitmap.Width;
 
-			switch (FTitleAlignment)
+			switch (_titleAlignment)
 			{
 				case TitleAlignment.Left :
-					Rectangle LTitleBounds = FTitleBounds[LControlIndex];
+					Rectangle titleBounds = _titleBounds[controlIndex];
 					// Attempt to bring the left of the text into view
-					LOffset = Math.Max(0, LBounds.Left - LTitleBounds.Left);
+					offset = Math.Max(0, bounds.Left - titleBounds.Left);
 					// Attempt to bring the right of the control into view
-					LOffset += Math.Min(0, LBounds.Right - (LRightExtent + LOffset));
+					offset += Math.Min(0, bounds.Right - (rightExtent + offset));
 					// Regardless, make sure that the left of the control is in view
-					LOffset += Math.Max(0, LBounds.Left - (LControl.Left + LOffset));
+					offset += Math.Max(0, bounds.Left - (control.Left + offset));
 					break;
 				case TitleAlignment.Top :
-					LRightExtent = Math.Max(LRightExtent, FTitleBounds[LControlIndex].Right);
+					rightExtent = Math.Max(rightExtent, _titleBounds[controlIndex].Right);
 					goto case TitleAlignment.None;
 				case TitleAlignment.None :	
 					// Attempt to bring the right of the control/title into view
-					LOffset = Math.Min(0, LBounds.Right - LRightExtent);
+					offset = Math.Min(0, bounds.Right - rightExtent);
 					// Regardless, make sure that the left of the control is in view
-					LOffset += Math.Max(0, LBounds.Left - (LControl.Left + LOffset));
+					offset += Math.Max(0, bounds.Left - (control.Left + offset));
 					break;
 			}
-			SetClipOffset(FClipOffset - LOffset);
+			SetClipOffset(_clipOffset - offset);
 		}
 
 		#endregion
 
 		#region Painting
 
-		private Bitmap FGripperBitmap;
+		private Bitmap _gripperBitmap;
 
-		protected override void OnPaint(PaintEventArgs AArgs)
+		protected override void OnPaint(PaintEventArgs args)
 		{
-			base.OnPaint(AArgs);
-			using (SolidBrush LTextBrush = new SolidBrush(ForeColor))
+			base.OnPaint(args);
+			using (SolidBrush textBrush = new SolidBrush(ForeColor))
 			{
-				if ((FTitleBounds != null) && (FTitleBounds.Length == Controls.Count))
+				if ((_titleBounds != null) && (_titleBounds.Length == Controls.Count))
 				{
-					IIncrementalControl LControl;
-					Rectangle LBounds;
+					IIncrementalControl control;
+					Rectangle bounds;
 					
 					// Draw the titles
 					for (int i = 0; i < Controls.Count; i++)
 					{
-						LControl = (IIncrementalControl)Controls[i];
-						LBounds = FTitleBounds[i];
-						if (AArgs.Graphics.IsVisible(LBounds))
-							AArgs.Graphics.DrawString(LControl.Title, Font, LTextBrush, LBounds);
+						control = (IIncrementalControl)Controls[i];
+						bounds = _titleBounds[i];
+						if (args.Graphics.IsVisible(bounds))
+							args.Graphics.DrawString(control.Title, Font, textBrush, bounds);
 					}
 					
 					// Draw the grippers
-					foreach (Point LLocation in FGripperLocations)
+					foreach (Point location in _gripperLocations)
 					{
-						if (AArgs.Graphics.IsVisible(new Rectangle(LLocation, FGripperBitmap.Size)))
-							AArgs.Graphics.DrawImage(FGripperBitmap, LLocation.X, LLocation.Y, FGripperBitmap.Width, FGripperBitmap.Height);
+						if (args.Graphics.IsVisible(new Rectangle(location, _gripperBitmap.Size)))
+							args.Graphics.DrawImage(_gripperBitmap, location.X, location.Y, _gripperBitmap.Width, _gripperBitmap.Height);
 					}
 				}
 			}
@@ -1114,53 +1114,53 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		
 		#region Resizing
 
-		private Point FMouseLocation;
-		private int FOriginalWidth;
-		private int FResizingControlIndex = -1;
+		private Point _mouseLocation;
+		private int _originalWidth;
+		private int _resizingControlIndex = -1;
 
 		/// <summary> Returns the index of the gripper that contains the specified point, or -1. </summary>
-		private int GripperContainingPoint(Point ALocation)
+		private int GripperContainingPoint(Point location)
 		{
-			for (int i = 0; i < FGripperLocations.Length; i++)
-				if (new Rectangle(FGripperLocations[i], FGripperBitmap.Size).Contains(ALocation))
+			for (int i = 0; i < _gripperLocations.Length; i++)
+				if (new Rectangle(_gripperLocations[i], _gripperBitmap.Size).Contains(location))
 					return i;
 			return -1;
 		}
 
-		protected override void OnMouseDown(MouseEventArgs AArgs)
+		protected override void OnMouseDown(MouseEventArgs args)
 		{
-			base.OnMouseDown(AArgs);
-			FMouseLocation = new Point(AArgs.X, AArgs.Y);
-			FResizingControlIndex = GripperContainingPoint(FMouseLocation);
-			if (FResizingControlIndex > -1)
+			base.OnMouseDown(args);
+			_mouseLocation = new Point(args.X, args.Y);
+			_resizingControlIndex = GripperContainingPoint(_mouseLocation);
+			if (_resizingControlIndex > -1)
 			{
-				FOriginalWidth = Controls[FResizingControlIndex].Width;
+				_originalWidth = Controls[_resizingControlIndex].Width;
 				Capture = true;
 			}
 		}
 
-		protected override void OnMouseMove(MouseEventArgs AArgs)
+		protected override void OnMouseMove(MouseEventArgs args)
 		{
-			base.OnMouseMove(AArgs);
-			Point LNewLocation = new Point(AArgs.X, AArgs.Y);
-			if (FResizingControlIndex >= 0)
+			base.OnMouseMove(args);
+			Point newLocation = new Point(args.X, args.Y);
+			if (_resizingControlIndex >= 0)
 			{
-				Control LControl = Controls[FResizingControlIndex];
-				LControl.Width = Math.Max(CMinControlWidth, FOriginalWidth + (LNewLocation.X - FMouseLocation.X));
+				Control control = Controls[_resizingControlIndex];
+				control.Width = Math.Max(MinControlWidth, _originalWidth + (newLocation.X - _mouseLocation.X));
 			}
 			else
 			{
-				if (GripperContainingPoint(LNewLocation) > -1)
+				if (GripperContainingPoint(newLocation) > -1)
 					this.Cursor = System.Windows.Forms.Cursors.VSplit;
 				else
 					this.Cursor = System.Windows.Forms.Cursors.Default;
 			}
 		}
 
-		protected override void OnMouseUp(MouseEventArgs AArgs)
+		protected override void OnMouseUp(MouseEventArgs args)
 		{
-			base.OnMouseUp(AArgs);
-			FResizingControlIndex = -1;
+			base.OnMouseUp(args);
+			_resizingControlIndex = -1;
 			Capture = false;
 		}
 
@@ -1170,39 +1170,39 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 	[ToolboxItem(false)]
 	public class IncrementalColumns : DisposableList
 	{
-		protected override void Validate(object AValue)
+		protected override void Validate(object value)
 		{
-			if (!(AValue is IncrementalSearchColumn))
+			if (!(value is IncrementalSearchColumn))
 				throw new ControlsException(ControlsException.Codes.InvalidColumnChild);
 		}
 
-		protected override void Adding(object AValue, int AIndex)
+		protected override void Adding(object value, int index)
 		{
-			base.Adding(AValue, AIndex);
-			((IncrementalSearchColumn)AValue).Changed += new System.EventHandler(ChildColumnChanged);
+			base.Adding(value, index);
+			((IncrementalSearchColumn)value).Changed += new System.EventHandler(ChildColumnChanged);
 		}
 
-		protected override void Removing(object AValue, int AIndex)
+		protected override void Removing(object value, int index)
 		{
-			base.Removing(AValue, AIndex);
-			((IncrementalSearchColumn)AValue).Changed += new System.EventHandler(ChildColumnChanged);
+			base.Removing(value, index);
+			((IncrementalSearchColumn)value).Changed += new System.EventHandler(ChildColumnChanged);
 		}
 
 		public event System.EventHandler ColumnChanged;
 
-		private void ChildColumnChanged(object ASender, EventArgs AArgs)
+		private void ChildColumnChanged(object sender, EventArgs args)
 		{
 			if (ColumnChanged != null)
-				ColumnChanged(ASender, AArgs);
+				ColumnChanged(sender, args);
 		}
 
-		public IncrementalSearchColumn this[string AColumnName]
+		public IncrementalSearchColumn this[string columnName]
 		{
 			get
 			{
-				foreach (IncrementalSearchColumn LColumn in this)
-					if (LColumn.ColumnName == AColumnName)
-						return LColumn;
+				foreach (IncrementalSearchColumn column in this)
+					if (column.ColumnName == columnName)
+						return column;
 				return null;
 			}
 		}
@@ -1211,73 +1211,73 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 	[ToolboxItem(false)]
 	public class IncrementalSearchColumn : MarshalByRefObject
 	{
-		public const int CDefaultPixelWidth = 100;
+		public const int DefaultPixelWidth = 100;
 
-		private string FColumnName = String.Empty;
+		private string _columnName = String.Empty;
 		[Category("Data")]
 		[RefreshProperties(RefreshProperties.Repaint)]
 		public string ColumnName
 		{
-			get { return FColumnName; }
+			get { return _columnName; }
 			set
 			{
 				if (value == null)
 					value = String.Empty;
-				if (FColumnName != value)
+				if (_columnName != value)
 				{
-					FColumnName = value;
+					_columnName = value;
 					OnChanged();
 				}
 			}
 		}
 
-		private string FTitle = String.Empty;
+		private string _title = String.Empty;
 		[DefaultValue("")]
 		[Category("Appearance")]
 		[Description("Column title.")]
 		public string Title
 		{
-			get { return FTitle; }
+			get { return _title; }
 			set
 			{
 				if (value == null)
 					value = String.Empty;
-				if (FTitle != value)
+				if (_title != value)
 				{
-					FTitle = value;
+					_title = value;
 					OnChanged();
 				}
 			}
 		}
 
-		private HorizontalAlignment FTextAlignment;
+		private HorizontalAlignment _textAlignment;
 		[Category("Appearance")]
 		[DefaultValue(HorizontalAlignment.Left)]
 		public HorizontalAlignment TextAlignment
 		{
-			get { return FTextAlignment; }
+			get { return _textAlignment; }
 			set
 			{
-				if (FTextAlignment != value)
+				if (_textAlignment != value)
 				{
-					FTextAlignment = value;
+					_textAlignment = value;
 					OnChanged();
 				}
 			}
 		}
 
-		private int FControlWidth = CDefaultPixelWidth;
-		[DefaultValue(CDefaultPixelWidth)]
+		private int _controlWidth = DefaultPixelWidth;
+		[DefaultValue(DefaultPixelWidth)]
 		[Category("Appearance")]
 		[Description("Pixel width of the control.")]
 		public int ControlWidth
 		{
-			get { return FControlWidth; }
+			get { return _controlWidth; }
 			set
 			{
-				if (FControlWidth != value)
+				if (_controlWidth != value)
 				{
-					FControlWidth = value;
+					_controlWidth = value;
 					OnChanged();
 				}
 			}
@@ -1326,130 +1326,130 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 	{
 		public static int CMaxItems = 5;
 
-		public SearchByDropDown(Control AOwner, TableDataSet ADataSet)
+		public SearchByDropDown(Control owner, TableDataSet dataSet)
 		{
-			Owner = AOwner.FindForm();
+			Owner = owner.FindForm();
 			FormBorderStyle = FormBorderStyle.None;
 			StartPosition = FormStartPosition.Manual;
 			ShowInTaskbar = false;
 
-			FDataSet = ADataSet;
+			_dataSet = dataSet;
 
 			// Construct the a complete list of possible orderings including non-sparse keys
-			Schema.Orders LOrders = new Schema.Orders();
-			LOrders.AddRange(ADataSet.TableVar.Orders);
-			Schema.Order LOrderForKey;
-			foreach (Schema.Key LKey in ADataSet.TableVar.Keys)
-				if (!LKey.IsSparse)
+			Schema.Orders orders = new Schema.Orders();
+			orders.AddRange(dataSet.TableVar.Orders);
+			Schema.Order orderForKey;
+			foreach (Schema.Key key in dataSet.TableVar.Keys)
+				if (!key.IsSparse)
 				{
-					LOrderForKey = new Schema.Order(LKey);
-					if (!LOrders.Contains(LOrderForKey))
-						LOrders.Add(LOrderForKey);
+					orderForKey = new Schema.Order(key);
+					if (!orders.Contains(orderForKey))
+						orders.Add(orderForKey);
 				}
 
-			FListBox = new ListBox();
+			_listBox = new ListBox();
 
 			// Populate the listbox with the appropriate order wrappers
-			OrderWrapper LWrapper;
-			foreach (Schema.Order LOrder in LOrders)
-				if (IsOrderVisible(LOrder))
+			OrderWrapper wrapper;
+			foreach (Schema.Order order in orders)
+				if (IsOrderVisible(order))
 				{
-					LWrapper = new OrderWrapper(LOrder, ADataSet);
-					FListBox.Items.Add(LWrapper);
-					if (LOrder.Equals(ADataSet.Order))
-						FListBox.SelectedItem = LWrapper;
+					wrapper = new OrderWrapper(order, dataSet);
+					_listBox.Items.Add(wrapper);
+					if (order.Equals(dataSet.Order))
+						_listBox.SelectedItem = wrapper;
 				}
 
-			FListBox.Dock = DockStyle.Fill;
-			FListBox.Parent = this;
-			FListBox.Click += new System.EventHandler(ListBoxClick);
-			FListBox.BorderStyle = BorderStyle.FixedSingle;
+			_listBox.Dock = DockStyle.Fill;
+			_listBox.Parent = this;
+			_listBox.Click += new System.EventHandler(ListBoxClick);
+			_listBox.BorderStyle = BorderStyle.FixedSingle;
 			
 			Bounds =
 				LookupBoundsUtility.DetermineBounds
 				(
 					new Size
 					(
-						AOwner.Width,
-						(Math.Min(CMaxItems, FListBox.Items.Count) * Font.Height) + (Height - DisplayRectangle.Height)
+						owner.Width,
+						(Math.Min(CMaxItems, _listBox.Items.Count) * Font.Height) + (Height - DisplayRectangle.Height)
 					),
 					new Size(100, Font.Height + (Height - DisplayRectangle.Height)),
-					AOwner
+					owner
 				);
 		}
 
 		private class OrderWrapper
 		{
-			public OrderWrapper(Schema.Order AOrder, TableDataSet ADataSet)
+			public OrderWrapper(Schema.Order order, TableDataSet dataSet)
 			{
-				FOrder = AOrder;
-				FDataSet = ADataSet;
+				_order = order;
+				_dataSet = dataSet;
 			}
 
-			private Schema.Order FOrder;
-			public Schema.Order Order { get { return FOrder; } }
+			private Schema.Order _order;
+			public Schema.Order Order { get { return _order; } }
 
-			private TableDataSet FDataSet;
+			private TableDataSet _dataSet;
 
 			public override string ToString()
 			{
-				return Language.D4.MetaData.GetTag(FOrder.MetaData, "Frontend.Title", GetDefaultTitle());
+				return Language.D4.MetaData.GetTag(_order.MetaData, "Frontend.Title", GetDefaultTitle());
 			}
 			
-			private static string GetColumnTitle(Schema.TableVarColumn AColumn)
+			private static string GetColumnTitle(Schema.TableVarColumn column)
 			{
-				return RemoveAccellerators(Language.D4.MetaData.GetTag(AColumn.MetaData, "Frontend.Title", Schema.Object.Unqualify(AColumn.Name)));
+				return RemoveAccellerators(Language.D4.MetaData.GetTag(column.MetaData, "Frontend.Title", Schema.Object.Unqualify(column.Name)));
 			}
 
 			// COPY: RemoveAccellerators is copied from Frontend.Client.Utility
-			public static string RemoveAccellerators(string ASource)
+			public static string RemoveAccellerators(string source)
 			{
-				System.Text.StringBuilder LResult = new System.Text.StringBuilder(ASource.Length);
-				for (int i = 0; i < ASource.Length; i++)
+				System.Text.StringBuilder result = new System.Text.StringBuilder(source.Length);
+				for (int i = 0; i < source.Length; i++)
 				{
-					if (ASource[i] == '&') 
+					if (source[i] == '&') 
 					{
-						if ((i < (ASource.Length - 1)) && (ASource[i + 1] == '&'))
+						if ((i < (source.Length - 1)) && (source[i + 1] == '&'))
 							i++;
 						else
 							continue;
 					}
-					LResult.Append(ASource[i]);
+					result.Append(source[i]);
 				}
-				return LResult.ToString();
+				return result.ToString();
 			}
 
-			public static bool IsColumnVisible(Schema.TableVarColumn AColumn)
+			public static bool IsColumnVisible(Schema.TableVarColumn column)
 			{
-				return Convert.ToBoolean(Language.D4.MetaData.GetTag(AColumn.MetaData, "Frontend.Visible", "true"));
+				return Convert.ToBoolean(Language.D4.MetaData.GetTag(column.MetaData, "Frontend.Visible", "true"));
 			}
 
 			private string GetDefaultTitle()
 			{
-				System.Text.StringBuilder LName = new System.Text.StringBuilder();
-				foreach (Schema.OrderColumn LColumn in FOrder.Columns)
+				System.Text.StringBuilder name = new System.Text.StringBuilder();
+				foreach (Schema.OrderColumn column in _order.Columns)
 				{
-					if (IsColumnVisible(LColumn.Column) && !FDataSet.IsDetailKey(LColumn.Column.Name))
+					if (IsColumnVisible(column.Column) && !_dataSet.IsDetailKey(column.Column.Name))
 					{
-						if (LName.Length > 0)
-							LName.Append(", ");
-						LName.Append(GetColumnTitle(LColumn.Column));
-						if (!LColumn.Ascending)
-							LName.Append(" (descending)");	// TODO: localize
+						if (name.Length > 0)
+							name.Append(", ");
+						name.Append(GetColumnTitle(column.Column));
+						if (!column.Ascending)
+							name.Append(" (descending)");	// TODO: localize
 					}
 				}
-				return "by " + LName.ToString();
+				return "by " + name.ToString();
 			}
 		}
 
-		private ListBox FListBox;
-		private TableDataSet FDataSet;
+		private ListBox _listBox;
+		private TableDataSet _dataSet;
 
 		public void Accept()
 		{
-			if (FListBox.SelectedItem != null)
+			if (_listBox.SelectedItem != null)
 			{
-				FDataSet.Order = ((OrderWrapper)FListBox.SelectedItem).Order;
+				_dataSet.Order = ((OrderWrapper)_listBox.SelectedItem).Order;
 				Close();
 			}
 		}
@@ -1459,71 +1459,71 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			Close();
 		}
 
-		protected bool IsOrderVisible(Schema.Order AOrder)
+		protected bool IsOrderVisible(Schema.Order order)
 		{
-			bool LIsVisible = Convert.ToBoolean(Language.D4.MetaData.GetTag(AOrder.MetaData, "Frontend.Visible", "true"));
-			bool LHasVisibleColumns = false;
-			if (LIsVisible)
+			bool isVisible = Convert.ToBoolean(Language.D4.MetaData.GetTag(order.MetaData, "Frontend.Visible", "true"));
+			bool hasVisibleColumns = false;
+			if (isVisible)
 			{
-				bool LIsColumnVisible;
-				bool LHasInvisibleColumns = false;
-				foreach (Schema.OrderColumn LColumn in AOrder.Columns)
+				bool isColumnVisible;
+				bool hasInvisibleColumns = false;
+				foreach (Schema.OrderColumn column in order.Columns)
 				{
-					LIsColumnVisible = OrderWrapper.IsColumnVisible(LColumn.Column);
-					if (LIsColumnVisible)
-						LHasVisibleColumns = true;
-					if (LHasInvisibleColumns && LIsColumnVisible)
+					isColumnVisible = OrderWrapper.IsColumnVisible(column.Column);
+					if (isColumnVisible)
+						hasVisibleColumns = true;
+					if (hasInvisibleColumns && isColumnVisible)
 					{
-						LIsVisible = false;
+						isVisible = false;
 						break;
 					}
 					
-					if (!LIsColumnVisible)
-						LHasInvisibleColumns = true;
+					if (!isColumnVisible)
+						hasInvisibleColumns = true;
 				}
 			}
-			return LHasVisibleColumns && LIsVisible;
+			return hasVisibleColumns && isVisible;
 		}
 
-		private void ListBoxClick(object ASender, EventArgs AArgs)
+		private void ListBoxClick(object sender, EventArgs args)
 		{
 			Application.Idle += new System.EventHandler(ProcessAccept);
 		}
 
-		private void ProcessAccept(object ASender, EventArgs AArgs)
+		private void ProcessAccept(object sender, EventArgs args)
 		{
 			Application.Idle -= new System.EventHandler(ProcessAccept);
 			Accept();
 		}
 
-		protected override bool IsInputKey(System.Windows.Forms.Keys AKey)
+		protected override bool IsInputKey(System.Windows.Forms.Keys key)
 		{
-			return (AKey == System.Windows.Forms.Keys.Escape) || (AKey == System.Windows.Forms.Keys.Enter) || base.IsInputKey(AKey);
+			return (key == System.Windows.Forms.Keys.Escape) || (key == System.Windows.Forms.Keys.Enter) || base.IsInputKey(key);
 		}
 
-		protected override bool ProcessDialogKey(System.Windows.Forms.Keys AKey)
+		protected override bool ProcessDialogKey(System.Windows.Forms.Keys key)
 		{
-			switch (AKey)
+			switch (key)
 			{
 				case System.Windows.Forms.Keys.Enter : Accept(); break;
 				case System.Windows.Forms.Keys.Escape : Reject(); break;
-				default : return base.ProcessDialogKey(AKey);
+				default : return base.ProcessDialogKey(key);
 			}
 			return true;
 		}
 
-		private bool FIsClosing;
+		private bool _isClosing;
 
-		protected override void OnClosing(CancelEventArgs AArgs)
+		protected override void OnClosing(CancelEventArgs args)
 		{
-			base.OnClosing(AArgs);
-			FIsClosing = true;
+			base.OnClosing(args);
+			_isClosing = true;
 		}
 
-		protected override void OnDeactivate(EventArgs AArgs)
+		protected override void OnDeactivate(EventArgs args)
 		{
-			base.OnDeactivate(AArgs);
-			if (!FIsClosing)
+			base.OnDeactivate(args);
+			if (!_isClosing)
 				Reject();
 		}
 

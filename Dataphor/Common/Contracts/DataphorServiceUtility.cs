@@ -14,71 +14,71 @@ namespace Alphora.Dataphor.DAE.Contracts
 
 	public static class DataphorServiceUtility
 	{
-		public const int CDefaultListenerPortNumber = 8060;
-		public const int CDefaultSecureListenerPortNumber = 8600;
+		public const int DefaultListenerPortNumber = 8060;
+		public const int DefaultSecureListenerPortNumber = 8600;
 		
-		private static string GetScheme(bool ASecure)
+		private static string GetScheme(bool secure)
 		{
-			return ASecure ? Uri.UriSchemeHttps : Uri.UriSchemeHttp;
+			return secure ? Uri.UriSchemeHttps : Uri.UriSchemeHttp;
 		}
 		
-		public static string BuildInstanceURI(string AHostName, int APortNumber, bool ASecure, string AInstanceName)
+		public static string BuildInstanceURI(string hostName, int portNumber, bool secure, string instanceName)
 		{
-			return String.Format("{0}://{1}:{2}/{3}/service", GetScheme(ASecure), AHostName, APortNumber, AInstanceName);
+			return String.Format("{0}://{1}:{2}/{3}/service", GetScheme(secure), hostName, portNumber, instanceName);
 		}
 		
-		public static string BuildNativeInstanceURI(string AHostName, int APortNumber, bool ASecure, string AInstanceName)
+		public static string BuildNativeInstanceURI(string hostName, int portNumber, bool secure, string instanceName)
 		{
-			return String.Format("{0}://{1}:{2}/{3}/service/native", GetScheme(ASecure), AHostName, APortNumber, AInstanceName);
+			return String.Format("{0}://{1}:{2}/{3}/service/native", GetScheme(secure), hostName, portNumber, instanceName);
 		}
 		
-		public static string BuildListenerURI(string AHostName, int AOverridePortNumber, ConnectionSecurityMode ASecurityMode)
+		public static string BuildListenerURI(string hostName, int overridePortNumber, ConnectionSecurityMode securityMode)
 		{
 			return 
 				BuildListenerURI
 				(
-					AHostName, 
-					AOverridePortNumber == 0 
+					hostName, 
+					overridePortNumber == 0 
 						? 
 						(
-							ASecurityMode == ConnectionSecurityMode.Transport 
-								? CDefaultSecureListenerPortNumber 
-								: CDefaultListenerPortNumber 
+							securityMode == ConnectionSecurityMode.Transport 
+								? DefaultSecureListenerPortNumber 
+								: DefaultListenerPortNumber 
 						)
-						: AOverridePortNumber, 
-					ASecurityMode == ConnectionSecurityMode.Transport
+						: overridePortNumber, 
+					securityMode == ConnectionSecurityMode.Transport
 				);
 		}
 		
-		public static string BuildListenerURI(string AHostName, int APortNumber, bool ASecure)
+		public static string BuildListenerURI(string hostName, int portNumber, bool secure)
 		{
-			return String.Format("{0}://{1}:{2}/listener/service", GetScheme(ASecure), AHostName, APortNumber);
+			return String.Format("{0}://{1}:{2}/listener/service", GetScheme(secure), hostName, portNumber);
 		}
 		
-		public static string BuildCrossDomainServiceURI(string AHostName, int APortNumber, bool ASecure)
+		public static string BuildCrossDomainServiceURI(string hostName, int portNumber, bool secure)
 		{
-			return String.Format("{0}://{1}:{2}", GetScheme(ASecure), AHostName, APortNumber);
+			return String.Format("{0}://{1}:{2}", GetScheme(secure), hostName, portNumber);
 		}
 
-		public const int CMaxMessageLength = 2147483647;
+		public const int MaxMessageLength = 2147483647;
 
-		public static Binding GetBinding(bool ASecure)
+		public static Binding GetBinding(bool secure)
 		{
 			//return new BasicHttpBinding();
-			var LMessageEncodingElement = new BinaryMessageEncodingBindingElement();
+			var messageEncodingElement = new BinaryMessageEncodingBindingElement();
 			#if !SILVERLIGHT
-			LMessageEncodingElement.ReaderQuotas.MaxArrayLength = CMaxMessageLength;
-			LMessageEncodingElement.ReaderQuotas.MaxStringContentLength = CMaxMessageLength;
+			messageEncodingElement.ReaderQuotas.MaxArrayLength = MaxMessageLength;
+			messageEncodingElement.ReaderQuotas.MaxStringContentLength = MaxMessageLength;
 			#endif
 			
-			var LTransportElement = ASecure ? new HttpsTransportBindingElement() : new HttpTransportBindingElement();
-			LTransportElement.MaxBufferSize = CMaxMessageLength;
-			LTransportElement.MaxReceivedMessageSize = CMaxMessageLength;
+			var transportElement = secure ? new HttpsTransportBindingElement() : new HttpTransportBindingElement();
+			transportElement.MaxBufferSize = MaxMessageLength;
+			transportElement.MaxReceivedMessageSize = MaxMessageLength;
 			
-			var LBinding = new CustomBinding(LMessageEncodingElement, LTransportElement);
-			LBinding.SendTimeout = TimeSpan.MaxValue;
-			LBinding.ReceiveTimeout = TimeSpan.MaxValue;
-			return LBinding;
+			var binding = new CustomBinding(messageEncodingElement, transportElement);
+			binding.SendTimeout = TimeSpan.MaxValue;
+			binding.ReceiveTimeout = TimeSpan.MaxValue;
+			return binding;
 		}
 	}
 }

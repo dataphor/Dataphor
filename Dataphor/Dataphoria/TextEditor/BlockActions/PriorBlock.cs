@@ -4,14 +4,14 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor.BlockActions
 {
     public class PriorBlock : BaseBlockAction
     {
-        public override void Execute(TextArea ATextArea)
+        public override void Execute(TextArea textArea)
         {
-            if (ATextArea.Document.TextLength > 0)
+            if (textArea.Document.TextLength > 0)
             {                
-                int LPriorBlock = GetPriorBlockOffset(ATextArea);
-                ATextArea.AutoClearSelection = true;
-                ATextArea.Caret.Position = ATextArea.Document.OffsetToPosition(LPriorBlock);
-                ATextArea.SetDesiredColumn();
+                int priorBlock = GetPriorBlockOffset(textArea);
+                textArea.AutoClearSelection = true;
+                textArea.Caret.Position = textArea.Document.OffsetToPosition(priorBlock);
+                textArea.SetDesiredColumn();
             }
         }
     }

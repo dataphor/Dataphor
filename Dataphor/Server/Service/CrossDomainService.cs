@@ -25,24 +25,24 @@ namespace Alphora.Dataphor.DAE.Service
 	{
 		public Message GetPolicyFile()
 		{
-			XDocument LDocument;
-			using (FileStream LStream = File.Open("clientaccesspolicy.xml", FileMode.Open, FileAccess.Read))
-				LDocument = XDocument.Load(new StreamReader(LStream));
+			XDocument document;
+			using (FileStream stream = File.Open("clientaccesspolicy.xml", FileMode.Open, FileAccess.Read))
+				document = XDocument.Load(new StreamReader(stream));
 				
 			// Replace a "dynamicresources" element with a set of resource elements for each instance
-			var LDynamic = LDocument.Root.Element("cross-domain-access").Element("policy").Element("grant-to").Element("dynamicresources");
-			if (LDynamic != null)
+			var dynamic = document.Root.Element("cross-domain-access").Element("policy").Element("grant-to").Element("dynamicresources");
+			if (dynamic != null)
 			{
-				var LNewElements = new List<object>();
-				foreach (var LName in InstanceManager.Instances.Keys)
-					LNewElements.Add(new XElement("resource", new XAttribute("path", "/" + LName), new XAttribute("include-subpaths", "true")));
-				LDynamic.ReplaceWith(LNewElements);
+				var newElements = new List<object>();
+				foreach (var name in InstanceManager.Instances.Keys)
+					newElements.Add(new XElement("resource", new XAttribute("path", "/" + name), new XAttribute("include-subpaths", "true")));
+				dynamic.ReplaceWith(newElements);
 			}
 			
-			Message LMessage = Message.CreateMessage(MessageVersion.None, "", LDocument.CreateReader());
-			using (MessageBuffer LBuffer = LMessage.CreateBufferedCopy(1000))
+			Message message = Message.CreateMessage(MessageVersion.None, "", document.CreateReader());
+			using (MessageBuffer buffer = message.CreateBufferedCopy(1000))
 			{
-				return LBuffer.CreateMessage();
+				return buffer.CreateMessage();
 			}
 		}
 	}

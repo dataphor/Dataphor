@@ -14,39 +14,39 @@ namespace Alphora.Dataphor.Windows
 	{
 		/// <summary> Ensures that the specified file is writable (not read-only) if it exists. </summary>
 		/// <remarks> If the file does not exist, this method does nothing. </remarks>
-		public static void EnsureWriteable(string AFileName)
+		public static void EnsureWriteable(string fileName)
 		{
-			if (File.Exists(AFileName))
+			if (File.Exists(fileName))
 			{
-				FileAttributes LAttributes = File.GetAttributes(AFileName);
-				if ((LAttributes & FileAttributes.ReadOnly) != 0)
-					File.SetAttributes(AFileName, LAttributes & ~FileAttributes.ReadOnly);
+				FileAttributes attributes = File.GetAttributes(fileName);
+				if ((attributes & FileAttributes.ReadOnly) != 0)
+					File.SetAttributes(fileName, attributes & ~FileAttributes.ReadOnly);
 			}
 		}
 
 		/// <summary> Ensures that the specified file is read-only if it exists. </summary>
 		/// <remarks> If the file does not exist, this method does nothing. </remarks>
-		public static void EnsureReadOnly(string AFileName)
+		public static void EnsureReadOnly(string fileName)
 		{
-			if (File.Exists(AFileName))
+			if (File.Exists(fileName))
 			{
-				FileAttributes LAttributes = File.GetAttributes(AFileName);
-				if ((LAttributes & FileAttributes.ReadOnly) == 0)
-					File.SetAttributes(AFileName, LAttributes | FileAttributes.ReadOnly);
+				FileAttributes attributes = File.GetAttributes(fileName);
+				if ((attributes & FileAttributes.ReadOnly) == 0)
+					File.SetAttributes(fileName, attributes | FileAttributes.ReadOnly);
 			}
 		}
 		
 		/// <summary>
 		/// Returns true if the given file is an assembly, false otherwise.
 		/// </summary>
-		public static bool IsAssembly(string AFileName)
+		public static bool IsAssembly(string fileName)
 		{
 			// According to this: http://msdn.microsoft.com/en-us/library/ms173100%28VS.80%29.aspx
 			// This is the Microsoft recommended approach. Thanks for helping follow your recommended
 			// best practice of not using exceptions to indicate return values!
 			try
 			{
-				AssemblyName.GetAssemblyName(AFileName);
+				AssemblyName.GetAssemblyName(fileName);
 				return true;
 			}
 			catch (FileLoadException)
@@ -65,50 +65,50 @@ namespace Alphora.Dataphor.Windows
 	/// <summary> Sundry static path related routines. </summary>
 	public sealed class PathUtility
 	{
-		public static void EnsureWriteable(string ADirectoryName, bool ARecursive)
+		public static void EnsureWriteable(string directoryName, bool recursive)
 		{
-			if (Directory.Exists(ADirectoryName))
+			if (Directory.Exists(directoryName))
 			{
-				foreach (string LFile in Directory.GetFiles(ADirectoryName))
-					FileUtility.EnsureWriteable(LFile);
+				foreach (string file in Directory.GetFiles(directoryName))
+					FileUtility.EnsureWriteable(file);
 						
-				if (ARecursive)
-					foreach (string LDirectory in Directory.GetDirectories(ADirectoryName))
-						EnsureWriteable(LDirectory, ARecursive);
+				if (recursive)
+					foreach (string directory in Directory.GetDirectories(directoryName))
+						EnsureWriteable(directory, recursive);
 			}
 		}
 
-		private static string BuildAppPath(string ARoot, string AApplicationName, VersionModifier AModifier)
+		private static string BuildAppPath(string root, string applicationName, VersionModifier modifier)
 		{
-			StringBuilder LResult = new StringBuilder(ARoot);
-			LResult.AppendFormat(@"{0}Alphora{0}Dataphor{0}", Path.DirectorySeparatorChar);
+			StringBuilder result = new StringBuilder(root);
+			result.AppendFormat(@"{0}Alphora{0}Dataphor{0}", Path.DirectorySeparatorChar);
 			
-			if (AModifier != VersionModifier.None)
+			if (modifier != VersionModifier.None)
 			{
 				//Append version
-				Version LVersion = typeof(PathUtility).Assembly.GetName().Version;
-				LResult.Append(LVersion.Major.ToString());
-				if (AModifier != VersionModifier.MajorSpecific)
+				Version version = typeof(PathUtility).Assembly.GetName().Version;
+				result.Append(version.Major.ToString());
+				if (modifier != VersionModifier.MajorSpecific)
 				{
-					LResult.Append('.');
-					LResult.Append(LVersion.Minor.ToString());
-					if (AModifier == VersionModifier.BuildSpecific)
+					result.Append('.');
+					result.Append(version.Minor.ToString());
+					if (modifier == VersionModifier.BuildSpecific)
 					{
-						LResult.Append('.');
-						LResult.Append(LVersion.Build.ToString());
+						result.Append('.');
+						result.Append(version.Build.ToString());
 					}
 				}
-				LResult.Append(Path.DirectorySeparatorChar);
+				result.Append(Path.DirectorySeparatorChar);
 			}
 
-			if ((AApplicationName != null) && (AApplicationName != String.Empty))
+			if ((applicationName != null) && (applicationName != String.Empty))
 			{
-				LResult.Append(AApplicationName);
-				LResult.Append(Path.DirectorySeparatorChar);
+				result.Append(applicationName);
+				result.Append(Path.DirectorySeparatorChar);
 			}
 
-			Directory.CreateDirectory(LResult.ToString());
-			return LResult.ToString();
+			Directory.CreateDirectory(result.ToString());
+			return result.ToString();
 		}
 
 		public static string CommonAppDataPath()
@@ -116,23 +116,23 @@ namespace Alphora.Dataphor.Windows
 			return CommonAppDataPath(String.Empty, VersionModifier.VersionSpecific);
 		}
 
-		public static string CommonAppDataPath(string AApplicationName)
+		public static string CommonAppDataPath(string applicationName)
 		{
-			return CommonAppDataPath(AApplicationName, VersionModifier.VersionSpecific);
+			return CommonAppDataPath(applicationName, VersionModifier.VersionSpecific);
 		}
 		
-		public static string CommonAppDataPath(string AApplicationName, bool ABuildSpecific)
+		public static string CommonAppDataPath(string applicationName, bool buildSpecific)
 		{
-			return CommonAppDataPath(AApplicationName, ABuildSpecific ? VersionModifier.BuildSpecific : VersionModifier.VersionSpecific);
+			return CommonAppDataPath(applicationName, buildSpecific ? VersionModifier.BuildSpecific : VersionModifier.VersionSpecific);
 		}
 		
-		public static string CommonAppDataPath(string AApplicationName, VersionModifier AVersionModifier)
+		public static string CommonAppDataPath(string applicationName, VersionModifier versionModifier)
 		{
 			return BuildAppPath
 			(
 				Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-				AApplicationName,
-				AVersionModifier
+				applicationName,
+				versionModifier
 			);
 		}
 
@@ -141,23 +141,23 @@ namespace Alphora.Dataphor.Windows
 			return UserAppDataPath(String.Empty, VersionModifier.VersionSpecific);
 		}
 
-		public static string UserAppDataPath(string AApplicationName)
+		public static string UserAppDataPath(string applicationName)
 		{
-			return UserAppDataPath(AApplicationName, VersionModifier.VersionSpecific);
+			return UserAppDataPath(applicationName, VersionModifier.VersionSpecific);
 		}
 		
-		public static string UserAppDataPath(string AApplicationName, bool ABuildSpecific)
+		public static string UserAppDataPath(string applicationName, bool buildSpecific)
 		{
-			return UserAppDataPath(AApplicationName, ABuildSpecific ? VersionModifier.BuildSpecific : VersionModifier.VersionSpecific);
+			return UserAppDataPath(applicationName, buildSpecific ? VersionModifier.BuildSpecific : VersionModifier.VersionSpecific);
 		}
 
-		public static string UserAppDataPath(string AApplicationName, VersionModifier AVersionModifier)
+		public static string UserAppDataPath(string applicationName, VersionModifier versionModifier)
 		{
 			return BuildAppPath
 			(
 				Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-				AApplicationName,
-				AVersionModifier
+				applicationName,
+				versionModifier
 			);
 		}
 
@@ -165,9 +165,9 @@ namespace Alphora.Dataphor.Windows
 		{
 			if (AppDomain.CurrentDomain.RelativeSearchPath != null)
 			{
-				string[] LPaths = AppDomain.CurrentDomain.RelativeSearchPath.Split(';');
-				if (LPaths.Length > 0)
-					return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, LPaths[0]);
+				string[] paths = AppDomain.CurrentDomain.RelativeSearchPath.Split(';');
+				if (paths.Length > 0)
+					return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, paths[0]);
 			}
 			return AppDomain.CurrentDomain.BaseDirectory;
 		}
@@ -175,19 +175,19 @@ namespace Alphora.Dataphor.Windows
 		public static string GetInstallationDirectory()
 		{
 			// Start with the base directory
-			string LResult = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
+			string result = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
 			
 			// if this directory is named "bin", we are in a development environment, pop out one more to get the actual Dataphor directory
-			if (Path.GetFileName(LResult).ToLower() == "bin")
-				LResult = Path.GetDirectoryName(LResult);
+			if (Path.GetFileName(result).ToLower() == "bin")
+				result = Path.GetDirectoryName(result);
 				
 			// pop out one more to get the root installation directory
-			return Path.GetDirectoryName(LResult);
+			return Path.GetDirectoryName(result);
 		}
 		
-		public static string GetFullFileName(string AFileName)
+		public static string GetFullFileName(string fileName)
 		{
-			return Path.IsPathRooted(AFileName) ? AFileName : Path.Combine(PathUtility.GetBinDirectory(), AFileName);
+			return Path.IsPathRooted(fileName) ? fileName : Path.Combine(PathUtility.GetBinDirectory(), fileName);
 		}
 	}
 }

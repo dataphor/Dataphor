@@ -33,21 +33,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	
 	public class NativeRow : System.Object
 	{
-		public NativeRow(int AColumnCount) : base()
+		public NativeRow(int columnCount) : base()
 		{
 			#if USEDATATYPESINNATIVEROW
-			FDataTypes = new Schema.IDataType[AColumnCount];
+			_dataTypes = new Schema.IDataType[columnCount];
 			#endif
-			FValues = new object[AColumnCount];
+			_values = new object[columnCount];
 		}
 		
 		#if USEDATATYPESINNATIVEROW
-		private Schema.IDataType[] FDataTypes;
-		public Schema.IDataType[] DataTypes { get { return FDataTypes; } }
+		private Schema.IDataType[] _dataTypes;
+		public Schema.IDataType[] DataTypes { get { return _dataTypes; } }
 		#endif
 		
-		private object[] FValues;
-		public object[] Values { get { return FValues; } }
+		private object[] _values;
+		public object[] Values { get { return _values; } }
 		
 		public BitArray ModifiedFlags;
 	}
@@ -59,51 +59,51 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	/// </remarks>    
 	public class Row : DataValue
 	{
-		public Row(IValueManager AManager, Schema.IRowType ADataType) : base(AManager, ADataType)
+		public Row(IValueManager manager, Schema.IRowType dataType) : base(manager, dataType)
 		{
-			FRow = new NativeRow(DataType.Columns.Count);
+			_row = new NativeRow(DataType.Columns.Count);
 			#if USEDATATYPESINNATIVEROW
-			for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
-				FRow.DataTypes[LIndex] = DataType.Columns[LIndex].DataType;
+			for (int index = 0; index < DataType.Columns.Count; index++)
+				_row.DataTypes[index] = DataType.Columns[index].DataType;
 			#endif
 			ValuesOwned = true;
 		}
 
 		// The given object[] is assumed to contains values of the appropriate type for the given data type
-		public Row(IValueManager AManager, Schema.IRowType ADataType, NativeRow ARow) : base(AManager, ADataType)
+		public Row(IValueManager manager, Schema.IRowType dataType, NativeRow row) : base(manager, dataType)
 		{
-			FRow = ARow;
+			_row = row;
 			ValuesOwned = false;
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (FRow != null)
+			if (_row != null)
 			{
 				if (ValuesOwned)
 					ClearValues();
-				FRow = null;
+				_row = null;
 			}
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 		
 		public new Schema.IRowType DataType { get { return (Schema.IRowType)base.DataType; } }
 		
-		private NativeRow FRow;
+		private NativeRow _row;
 		
 		public override object AsNative
 		{
-			get { return FRow; }
+			get { return _row; }
 			set 
 			{
-				if (FRow != null)
+				if (_row != null)
 					ClearValues();
-				FRow = (NativeRow)value; 
+				_row = (NativeRow)value; 
 			}
 		}
 		
-		private object[] FWriteList;
-		private DataValue[] FElementWriteList;
+		private object[] _writeList;
+		private DataValue[] _elementWriteList;
 
 		/*
 			Row Value Format ->
@@ -141,28 +141,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						XX+1-XX+5 -> The length of the physical representation of this value
 						XX+6-YY -> The physical representation of this value (expanded based on the expanded setting for the list value)
 		*/
-		public override int GetPhysicalSize(bool AExpandStreams)
+		public override int GetPhysicalSize(bool expandStreams)
 		{
-			int LSize = 1; // write the value indicator
+			int size = 1; // write the value indicator
 			if (!IsNil)
 			{
-				LSize += 1; // write the extended streams indicator
-				FWriteList = new object[DataType.Columns.Count]; // list for saving the sizes or streams of each attribute in the row
-				FElementWriteList = new DataValue[DataType.Columns.Count]; // list for saving host representations of values between the GetPhysicalSize and WriteToPhysical calls
-				Stream LStream;
-				StreamID LStreamID;
-				Schema.ScalarType LScalarType;
-				Streams.Conveyor LConveyor;
-				DataValue LElement;
-				int LElementSize;
-				for (int LIndex = 0; LIndex < FWriteList.Length; LIndex++)
+				size += 1; // write the extended streams indicator
+				_writeList = new object[DataType.Columns.Count]; // list for saving the sizes or streams of each attribute in the row
+				_elementWriteList = new DataValue[DataType.Columns.Count]; // list for saving host representations of values between the GetPhysicalSize and WriteToPhysical calls
+				Stream stream;
+				StreamID streamID;
+				Schema.ScalarType scalarType;
+				Streams.Conveyor conveyor;
+				DataValue element;
+				int elementSize;
+				for (int index = 0; index < _writeList.Length; index++)
 				{
-					LSize += sizeof(byte); // write a value indicator
-					if (FRow.Values[LIndex] != null)
+					size += sizeof(byte); // write a value indicator
+					if (_row.Values[index] != null)
 					{
 						#if USEDATATYPESINNATIVEROW
-						if (!DataType.Columns[LIndex].DataType.Equals(FRow.DataTypes[LIndex]))
-							LSize += Manager.GetConveyor(Manager.DataTypes.SystemString).GetSize(FRow.DataTypes[LIndex].Name); // write the name of the data type of the value
+						if (!DataType.Columns[index].DataType.Equals(_row.DataTypes[index]))
+							size += Manager.GetConveyor(Manager.DataTypes.SystemString).GetSize(_row.DataTypes[index].Name); // write the name of the data type of the value
 						#endif
 						/*							
 						LElement = DataValue.FromNativeRow(Manager, DataType, FRow, LIndex);
@@ -172,350 +172,350 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						LSize += sizeof(int) + LElementSize;
 						*/
 						#if USEDATATYPESINNATIVEROW
-						LScalarType = FRow.DataTypes[LIndex] as Schema.ScalarType;
+						scalarType = _row.DataTypes[index] as Schema.ScalarType;
 						#else
-						LScalarType = DataType.Columns[LIndex].DataType as Schema.ScalarType;
+						scalarType = DataType.Columns[index].DataType as Schema.ScalarType;
 						#endif
-						if ((LScalarType != null) && !LScalarType.IsCompound)
+						if ((scalarType != null) && !scalarType.IsCompound)
 						{
-							if (FRow.Values[LIndex] is StreamID)
+							if (_row.Values[index] is StreamID)
 							{
 								// If this is a non-native scalar
-								LStreamID = (StreamID)FRow.Values[LIndex];
-								if (AExpandStreams)
+								streamID = (StreamID)_row.Values[index];
+								if (expandStreams)
 								{
-									if (LStreamID != StreamID.Null)
+									if (streamID != StreamID.Null)
 									{
-										LStream = Manager.StreamManager.Open((StreamID)FRow.Values[LIndex], LockMode.Exclusive);
-										FWriteList[LIndex] = LStream;
-										LSize += sizeof(int) + (int)LStream.Length;
+										stream = Manager.StreamManager.Open((StreamID)_row.Values[index], LockMode.Exclusive);
+										_writeList[index] = stream;
+										size += sizeof(int) + (int)stream.Length;
 									}
 								}
 								else
 								{
-									if (LStreamID != StreamID.Null)
+									if (streamID != StreamID.Null)
 									{
-										LElementSize = sizeof(long);
-										FWriteList[LIndex] = LElementSize;
-										LSize += LElementSize;
+										elementSize = sizeof(long);
+										_writeList[index] = elementSize;
+										size += elementSize;
 									}
 								}
 							}
 							else
 							{
-								LConveyor = Manager.GetConveyor(LScalarType);
-								if (LConveyor.IsStreaming)
+								conveyor = Manager.GetConveyor(scalarType);
+								if (conveyor.IsStreaming)
 								{
-									LStream = new MemoryStream(64);
-									FWriteList[LIndex] = LStream;
-									LConveyor.Write(FRow.Values[LIndex], LStream);
-									LStream.Position = 0;
-									LSize += sizeof(int) + (int)LStream.Length;
+									stream = new MemoryStream(64);
+									_writeList[index] = stream;
+									conveyor.Write(_row.Values[index], stream);
+									stream.Position = 0;
+									size += sizeof(int) + (int)stream.Length;
 								}
 								else
 								{
-									LElementSize = LConveyor.GetSize(FRow.Values[LIndex]);
-									FWriteList[LIndex] = LElementSize;
-									LSize += sizeof(int) + LElementSize;;
+									elementSize = conveyor.GetSize(_row.Values[index]);
+									_writeList[index] = elementSize;
+									size += sizeof(int) + elementSize;;
 								}
 							}
 						}
 						else
 						{
-							LElement = DataValue.FromNativeRow(Manager, DataType, FRow, LIndex);
-							FElementWriteList[LIndex] = LElement;
-							LElementSize = LElement.GetPhysicalSize(AExpandStreams);
-							FWriteList[LIndex] = LElementSize;
-							LSize += sizeof(int) + LElementSize;
+							element = DataValue.FromNativeRow(Manager, DataType, _row, index);
+							_elementWriteList[index] = element;
+							elementSize = element.GetPhysicalSize(expandStreams);
+							_writeList[index] = elementSize;
+							size += sizeof(int) + elementSize;
 						}						
 					}
 				}
 			}
-			return LSize;
+			return size;
 		}
 		
-		public override void WriteToPhysical(byte[] ABuffer, int AOffset, bool AExpandStreams)
+		public override void WriteToPhysical(byte[] buffer, int offset, bool expandStreams)
 		{
-			if (FWriteList == null)
+			if (_writeList == null)
 				throw new RuntimeException(RuntimeException.Codes.UnpreparedWriteToPhysicalCall);
 				
-			ABuffer[AOffset] = (byte)(IsNil ? 0 : 1); // Write the value indicator
-			AOffset++;
+			buffer[offset] = (byte)(IsNil ? 0 : 1); // Write the value indicator
+			offset++;
 			
 			if (!IsNil)
 			{
-				ABuffer[AOffset] = (byte)(AExpandStreams ? 1 : 0); // Write the expanded streams indicator
-				AOffset++;
+				buffer[offset] = (byte)(expandStreams ? 1 : 0); // Write the expanded streams indicator
+				offset++;
 					
 				#if USEDATATYPESINNATIVEROW
-				Streams.Conveyor LStringConveyor = null;
+				Streams.Conveyor stringConveyor = null;
 				#endif
-				Streams.Conveyor LInt64Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemLong);
-				Streams.Conveyor LInt32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
+				Streams.Conveyor int64Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemLong);
+				Streams.Conveyor int32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
 
-				Stream LStream;
-				StreamID LStreamID;
-				int LElementSize;
-				Schema.ScalarType LScalarType;
-				Streams.Conveyor LConveyor;
-				DataValue LElement;
-				for (int LIndex = 0; LIndex < FWriteList.Length; LIndex++)
+				Stream stream;
+				StreamID streamID;
+				int elementSize;
+				Schema.ScalarType scalarType;
+				Streams.Conveyor conveyor;
+				DataValue element;
+				for (int index = 0; index < _writeList.Length; index++)
 				{
-					if (FRow.Values[LIndex] == null)
+					if (_row.Values[index] == null)
 					{
-						ABuffer[AOffset] = (byte)0; // Write the native nil indicator
-						AOffset++;
+						buffer[offset] = (byte)0; // Write the native nil indicator
+						offset++;
 					}
 					else
 					{
 						#if USEDATATYPESINNATIVEROW
-						LScalarType = FRow.DataTypes[LIndex] as Schema.ScalarType;
+						scalarType = _row.DataTypes[index] as Schema.ScalarType;
 						#else
-						LScalarType = DataType.Columns[LIndex].DataType as Schema.ScalarType;
+						scalarType = DataType.Columns[index].DataType as Schema.ScalarType;
 						#endif
-						if ((LScalarType != null) && !LScalarType.IsCompound)
+						if ((scalarType != null) && !scalarType.IsCompound)
 						{
-							if (FRow.Values[LIndex] is StreamID)
+							if (_row.Values[index] is StreamID)
 							{
 								// If this is a non-native scalar
-								LStreamID = (StreamID)FRow.Values[LIndex];
-								if (LStreamID == StreamID.Null)
+								streamID = (StreamID)_row.Values[index];
+								if (streamID == StreamID.Null)
 								{
-									ABuffer[AOffset] = (byte)1; // Write the non-native nil indicator
-									AOffset++;
+									buffer[offset] = (byte)1; // Write the non-native nil indicator
+									offset++;
 								}
 								else
 								{
 									#if USEDATATYPESINNATIVEROW
-									if (DataType.Columns[LIndex].DataType.Equals(FRow.DataTypes[LIndex]))
+									if (DataType.Columns[index].DataType.Equals(_row.DataTypes[index]))
 									{
 									#endif
-										ABuffer[AOffset] = (byte)3; // Write the native standard value indicator
-										AOffset++;
+										buffer[offset] = (byte)3; // Write the native standard value indicator
+										offset++;
 									#if USEDATATYPESINNATIVEROW
 									}
 									else
 									{
-										ABuffer[AOffset] = (byte)5; // Write the native specialized value indicator
-										AOffset++;
-										if (LStringConveyor == null)
-											LStringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
-										LElementSize = LStringConveyor.GetSize(FRow.DataTypes[LIndex].Name);
-										LStringConveyor.Write(FRow.DataTypes[LIndex].Name, ABuffer, AOffset); // Write the name of the data type of the value
-										AOffset += LElementSize;
+										buffer[offset] = (byte)5; // Write the native specialized value indicator
+										offset++;
+										if (stringConveyor == null)
+											stringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
+										elementSize = stringConveyor.GetSize(_row.DataTypes[index].Name);
+										stringConveyor.Write(_row.DataTypes[index].Name, buffer, offset); // Write the name of the data type of the value
+										offset += elementSize;
 									}
 									#endif
 									
-									if (AExpandStreams)
+									if (expandStreams)
 									{
-										LStream = (Stream)FWriteList[LIndex];
-										LInt32Conveyor.Write(Convert.ToInt32(LStream.Length), ABuffer, AOffset);
-										AOffset += sizeof(int);
-										LStream.Read(ABuffer, AOffset, (int)LStream.Length);
-										AOffset += (int)LStream.Length;
-										LStream.Close();
+										stream = (Stream)_writeList[index];
+										int32Conveyor.Write(Convert.ToInt32(stream.Length), buffer, offset);
+										offset += sizeof(int);
+										stream.Read(buffer, offset, (int)stream.Length);
+										offset += (int)stream.Length;
+										stream.Close();
 									}
 									else
 									{
-										LInt64Conveyor.Write((long)LStreamID.Value, ABuffer, AOffset);
-										AOffset += sizeof(long);
+										int64Conveyor.Write((long)streamID.Value, buffer, offset);
+										offset += sizeof(long);
 									}
 								}
 							}
 							else
 							{
 								#if USEDATATYPESINNATIVEROW
-								if (DataType.Columns[LIndex].DataType.Equals(FRow.DataTypes[LIndex]))
+								if (DataType.Columns[index].DataType.Equals(_row.DataTypes[index]))
 								{
 								#endif
-									ABuffer[AOffset] = (byte)2; // Write the native standard value indicator
-									AOffset++;
+									buffer[offset] = (byte)2; // Write the native standard value indicator
+									offset++;
 								#if USEDATATYPESINNATIVEROW
 								}
 								else
 								{
-									ABuffer[AOffset] = (byte)4; // Write the native specialized value indicator
-									AOffset++;
-									if (LStringConveyor == null)
-										LStringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
-									LElementSize = LStringConveyor.GetSize(FRow.DataTypes[LIndex].Name);
-									LStringConveyor.Write(FRow.DataTypes[LIndex].Name, ABuffer, AOffset); // Write the name of the data type of the value
-									AOffset += LElementSize;
+									buffer[offset] = (byte)4; // Write the native specialized value indicator
+									offset++;
+									if (stringConveyor == null)
+										stringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
+									elementSize = stringConveyor.GetSize(_row.DataTypes[index].Name);
+									stringConveyor.Write(_row.DataTypes[index].Name, buffer, offset); // Write the name of the data type of the value
+									offset += elementSize;
 								}
 								#endif
 
-								LConveyor = Manager.GetConveyor(LScalarType);
-								if (LConveyor.IsStreaming)
+								conveyor = Manager.GetConveyor(scalarType);
+								if (conveyor.IsStreaming)
 								{
-									LStream = (Stream)FWriteList[LIndex];
-									LInt32Conveyor.Write(Convert.ToInt32(LStream.Length), ABuffer, AOffset); // Write the length of the value
-									AOffset += sizeof(int);
-									LStream.Read(ABuffer, AOffset, (int)LStream.Length); // Write the value of this scalar
-									AOffset += (int)LStream.Length;
+									stream = (Stream)_writeList[index];
+									int32Conveyor.Write(Convert.ToInt32(stream.Length), buffer, offset); // Write the length of the value
+									offset += sizeof(int);
+									stream.Read(buffer, offset, (int)stream.Length); // Write the value of this scalar
+									offset += (int)stream.Length;
 								}
 								else
 								{
-									LElementSize = (int)FWriteList[LIndex]; // Write the length of the value
-									LInt32Conveyor.Write(LElementSize, ABuffer, AOffset);
-									AOffset += sizeof(int);
-									LConveyor.Write(FRow.Values[LIndex], ABuffer, AOffset); // Write the value of this scalar
-									AOffset += LElementSize;
+									elementSize = (int)_writeList[index]; // Write the length of the value
+									int32Conveyor.Write(elementSize, buffer, offset);
+									offset += sizeof(int);
+									conveyor.Write(_row.Values[index], buffer, offset); // Write the value of this scalar
+									offset += elementSize;
 								}
 							}
 						}
 						else
 						{
 							#if USEDATATYPESINNATIVEROW
-							if (DataType.Columns[LIndex].DataType.Equals(FRow.DataTypes[LIndex]))
+							if (DataType.Columns[index].DataType.Equals(_row.DataTypes[index]))
 							{
 							#endif
-								ABuffer[AOffset] = (byte)2; // Write the native standard value indicator
-								AOffset++;
+								buffer[offset] = (byte)2; // Write the native standard value indicator
+								offset++;
 							#if USEDATATYPESINNATIVEROW
 							}
 							else
 							{
-								ABuffer[AOffset] = (byte)4; // Write the native specialized value indicator
-								AOffset++;
-								if (LStringConveyor == null)
-									LStringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
-								LElementSize = LStringConveyor.GetSize(FRow.DataTypes[LIndex].Name);
-								LStringConveyor.Write(FRow.DataTypes[LIndex].Name, ABuffer, AOffset); // Write the name of the data type of the value
-								AOffset += LElementSize;
+								buffer[offset] = (byte)4; // Write the native specialized value indicator
+								offset++;
+								if (stringConveyor == null)
+									stringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
+								elementSize = stringConveyor.GetSize(_row.DataTypes[index].Name);
+								stringConveyor.Write(_row.DataTypes[index].Name, buffer, offset); // Write the name of the data type of the value
+								offset += elementSize;
 							}
 							#endif
 
-							LElement = FElementWriteList[LIndex];
-							LElementSize = (int)FWriteList[LIndex];
-							LInt32Conveyor.Write(LElementSize, ABuffer, AOffset);
-							AOffset += sizeof(int);
-							LElement.WriteToPhysical(ABuffer, AOffset, AExpandStreams); // Write the physical representation of the value;
-							AOffset += LElementSize;
-							LElement.Dispose();
+							element = _elementWriteList[index];
+							elementSize = (int)_writeList[index];
+							int32Conveyor.Write(elementSize, buffer, offset);
+							offset += sizeof(int);
+							element.WriteToPhysical(buffer, offset, expandStreams); // Write the physical representation of the value;
+							offset += elementSize;
+							element.Dispose();
 						}
 					}
 				}
 			}
 		}
 
-		public override void ReadFromPhysical(byte[] ABuffer, int AOffset)
+		public override void ReadFromPhysical(byte[] buffer, int offset)
 		{
 			ClearValues(); // Clear the current value of the row
 			
-			if (ABuffer[AOffset] == 0)
+			if (buffer[offset] == 0)
 			{
-				FRow = null;
+				_row = null;
 			}
 			else
 			{
-				FRow = new NativeRow(DataType.Columns.Count);
-				AOffset++;
+				_row = new NativeRow(DataType.Columns.Count);
+				offset++;
 			
-				bool LExpandStreams = ABuffer[AOffset] != 0; // Read the exapnded streams indicator
-				AOffset++;
+				bool expandStreams = buffer[offset] != 0; // Read the exapnded streams indicator
+				offset++;
 					
 				#if USEDATATYPESINNATIVEROW
-				Streams.Conveyor LStringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
-				string LDataTypeName;
-				Schema.IDataType LDataType;
+				Streams.Conveyor stringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
+				string dataTypeName;
+				Schema.IDataType dataType;
 				#endif
-				Streams.Conveyor LInt64Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemLong);
-				Streams.Conveyor LInt32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
+				Streams.Conveyor int64Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemLong);
+				Streams.Conveyor int32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
 
-				Stream LStream;
-				StreamID LStreamID;
-				int LElementSize;
-				Schema.ScalarType LScalarType;
-				Streams.Conveyor LConveyor;
-				for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
+				Stream stream;
+				StreamID streamID;
+				int elementSize;
+				Schema.ScalarType scalarType;
+				Streams.Conveyor conveyor;
+				for (int index = 0; index < DataType.Columns.Count; index++)
 				{
-					byte LValueIndicator = ABuffer[AOffset];
-					AOffset++;
+					byte valueIndicator = buffer[offset];
+					offset++;
 					
-					switch (LValueIndicator)
+					switch (valueIndicator)
 					{
 						case 0 : // native nil
 							#if USEDATATYPESINNATIVEROW
-							FRow.DataTypes[LIndex] = DataType.Columns[LIndex].DataType;
+							_row.DataTypes[index] = DataType.Columns[index].DataType;
 							#endif
-							FRow.Values[LIndex] = null;
+							_row.Values[index] = null;
 						break;
 						
 						case 1 : // non-native nil
 							#if USEDATATYPESINNATIVEROW
-							FRow.DataTypes[LIndex] = DataType.Columns[LIndex].DataType;
+							_row.DataTypes[index] = DataType.Columns[index].DataType;
 							#endif
-							FRow.Values[LIndex] = StreamID.Null;
+							_row.Values[index] = StreamID.Null;
 						break;
 						
 						case 2 : // native standard value
-							LScalarType = DataType.Columns[LIndex].DataType as Schema.ScalarType;
-							if ((LScalarType != null) && !LScalarType.IsCompound)
+							scalarType = DataType.Columns[index].DataType as Schema.ScalarType;
+							if ((scalarType != null) && !scalarType.IsCompound)
 							{
-								LConveyor = Manager.GetConveyor(LScalarType);
-								if (LConveyor.IsStreaming)
+								conveyor = Manager.GetConveyor(scalarType);
+								if (conveyor.IsStreaming)
 								{
-									LElementSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
-									AOffset += sizeof(int);
-									LStream = new MemoryStream(ABuffer, AOffset, LElementSize, false, true);
+									elementSize = (int)int32Conveyor.Read(buffer, offset);
+									offset += sizeof(int);
+									stream = new MemoryStream(buffer, offset, elementSize, false, true);
 									#if USEDATATYPESINNATIVEROW
-									FRow.DataTypes[LIndex] = DataType.Columns[LIndex].DataType;
+									_row.DataTypes[index] = DataType.Columns[index].DataType;
 									#endif
-									FRow.Values[LIndex] = LConveyor.Read(LStream);
-									AOffset += LElementSize;
+									_row.Values[index] = conveyor.Read(stream);
+									offset += elementSize;
 								}
 								else
 								{
-									LElementSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
-									AOffset += sizeof(int);
+									elementSize = (int)int32Conveyor.Read(buffer, offset);
+									offset += sizeof(int);
 									#if USEDATATYPESINNATIVEROW
-									FRow.DataTypes[LIndex] = DataType.Columns[LIndex].DataType;
+									_row.DataTypes[index] = DataType.Columns[index].DataType;
 									#endif
-									FRow.Values[LIndex] = LConveyor.Read(ABuffer, AOffset);
-									AOffset += LElementSize;
+									_row.Values[index] = conveyor.Read(buffer, offset);
+									offset += elementSize;
 								}
 							}
 							else
 							{
-								LElementSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
-								AOffset += sizeof(int);
+								elementSize = (int)int32Conveyor.Read(buffer, offset);
+								offset += sizeof(int);
 								#if USEDATATYPESINNATIVEROW
-								FRow.DataTypes[LIndex] = DataType.Columns[LIndex].DataType;
+								_row.DataTypes[index] = DataType.Columns[index].DataType;
 								#endif
-								using (DataValue LValue = DataValue.FromPhysical(Manager, DataType.Columns[LIndex].DataType, ABuffer, AOffset))
+								using (DataValue tempValue = DataValue.FromPhysical(Manager, DataType.Columns[index].DataType, buffer, offset))
 								{
-									FRow.Values[LIndex] = LValue.AsNative;
-									LValue.ValuesOwned = false;
+									_row.Values[index] = tempValue.AsNative;
+									tempValue.ValuesOwned = false;
 								}
-								AOffset += LElementSize;
+								offset += elementSize;
 							}
 						break;
 						
 						case 3 : // non-native standard value
-							LScalarType = DataType.Columns[LIndex].DataType as Schema.ScalarType;
-							if (LScalarType != null)
+							scalarType = DataType.Columns[index].DataType as Schema.ScalarType;
+							if (scalarType != null)
 							{
-								if (LExpandStreams)
+								if (expandStreams)
 								{
-									LElementSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
-									AOffset += sizeof(int);
-									LStreamID = Manager.StreamManager.Allocate();
-									LStream = Manager.StreamManager.Open(LStreamID, LockMode.Exclusive);
-									LStream.Write(ABuffer, AOffset, LElementSize);
-									LStream.Close();
+									elementSize = (int)int32Conveyor.Read(buffer, offset);
+									offset += sizeof(int);
+									streamID = Manager.StreamManager.Allocate();
+									stream = Manager.StreamManager.Open(streamID, LockMode.Exclusive);
+									stream.Write(buffer, offset, elementSize);
+									stream.Close();
 									#if USEDATATYPESINNATIVEROW
-									FRow.DataTypes[LIndex] = LScalarType;
+									_row.DataTypes[index] = scalarType;
 									#endif
-									FRow.Values[LIndex] = LStreamID;
-									AOffset += LElementSize;
+									_row.Values[index] = streamID;
+									offset += elementSize;
 								}
 								else
 								{
 									#if USEDATATYPESINNATIVEROW
-									FRow.DataTypes[LIndex] = LScalarType;
+									_row.DataTypes[index] = scalarType;
 									#endif
-									FRow.Values[LIndex] = new StreamID(Convert.ToUInt64(LInt64Conveyor.Read(ABuffer, AOffset)));
-									AOffset += sizeof(long);
+									_row.Values[index] = new StreamID(Convert.ToUInt64(int64Conveyor.Read(buffer, offset)));
+									offset += sizeof(long);
 								}
 							}
 							else
@@ -526,42 +526,42 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						
 						case 4 : // native specialized value
 							#if USEDATATYPESINNATIVEROW
-							LDataTypeName = (string)LStringConveyor.Read(ABuffer, AOffset);
-							LDataType = Manager.CompileTypeSpecifier(LDataTypeName);
-							AOffset += LStringConveyor.GetSize(LDataTypeName);
-							LScalarType = LDataType as Schema.ScalarType;
-							if ((LScalarType != null) && !LScalarType.IsCompound)
+							dataTypeName = (string)stringConveyor.Read(buffer, offset);
+							dataType = Manager.CompileTypeSpecifier(dataTypeName);
+							offset += stringConveyor.GetSize(dataTypeName);
+							scalarType = dataType as Schema.ScalarType;
+							if ((scalarType != null) && !scalarType.IsCompound)
 							{
-								LConveyor = Manager.GetConveyor(LScalarType);
-								if (LConveyor.IsStreaming)
+								conveyor = Manager.GetConveyor(scalarType);
+								if (conveyor.IsStreaming)
 								{
-									LElementSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
-									AOffset += sizeof(int);
-									LStream = new MemoryStream(ABuffer, AOffset, LElementSize, false, true);
-									FRow.DataTypes[LIndex] = LScalarType;
-									FRow.Values[LIndex] = LConveyor.Read(LStream);
-									AOffset += LElementSize;
+									elementSize = (int)int32Conveyor.Read(buffer, offset);
+									offset += sizeof(int);
+									stream = new MemoryStream(buffer, offset, elementSize, false, true);
+									_row.DataTypes[index] = scalarType;
+									_row.Values[index] = conveyor.Read(stream);
+									offset += elementSize;
 								}
 								else
 								{
-									LElementSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
-									AOffset += sizeof(int);
-									FRow.DataTypes[LIndex] = LScalarType;
-									FRow.Values[LIndex] = LConveyor.Read(ABuffer, AOffset);
-									AOffset += LElementSize;
+									elementSize = (int)int32Conveyor.Read(buffer, offset);
+									offset += sizeof(int);
+									_row.DataTypes[index] = scalarType;
+									_row.Values[index] = conveyor.Read(buffer, offset);
+									offset += elementSize;
 								}
 							}
 							else
 							{
-								LElementSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
-								AOffset += sizeof(int);
-								FRow.DataTypes[LIndex] = LDataType;
-								using (DataValue LValue = DataValue.FromPhysical(Manager, LDataType, ABuffer, AOffset))
+								elementSize = (int)int32Conveyor.Read(buffer, offset);
+								offset += sizeof(int);
+								_row.DataTypes[index] = dataType;
+								using (DataValue tempValue = DataValue.FromPhysical(Manager, dataType, buffer, offset))
 								{
-									FRow.Values[LIndex] = LValue.AsNative;
-									LValue.ValuesOwned = false;
+									_row.Values[index] = tempValue.AsNative;
+									tempValue.ValuesOwned = false;
 								}
-								AOffset += LElementSize;
+								offset += elementSize;
 							}
 						break;
 							#else
@@ -570,29 +570,29 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						
 						case 5 : // non-native specialized value
 							#if USEDATATYPESINNATIVEROW
-							LDataTypeName = (string)LStringConveyor.Read(ABuffer, AOffset);
-							LDataType = Manager.CompileTypeSpecifier(LDataTypeName);
-							AOffset += LStringConveyor.GetSize(LDataTypeName);
-							LScalarType = LDataType as Schema.ScalarType;
-							if (LScalarType != null)
+							dataTypeName = (string)stringConveyor.Read(buffer, offset);
+							dataType = Manager.CompileTypeSpecifier(dataTypeName);
+							offset += stringConveyor.GetSize(dataTypeName);
+							scalarType = dataType as Schema.ScalarType;
+							if (scalarType != null)
 							{
-								if (LExpandStreams)
+								if (expandStreams)
 								{
-									LElementSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
-									AOffset += sizeof(int);
-									LStreamID = Manager.StreamManager.Allocate();
-									LStream = Manager.StreamManager.Open(LStreamID, LockMode.Exclusive);
-									LStream.Write(ABuffer, AOffset, LElementSize);
-									LStream.Close();
-									FRow.DataTypes[LIndex] = LScalarType;
-									FRow.Values[LIndex] = LStreamID;
-									AOffset += LElementSize;
+									elementSize = (int)int32Conveyor.Read(buffer, offset);
+									offset += sizeof(int);
+									streamID = Manager.StreamManager.Allocate();
+									stream = Manager.StreamManager.Open(streamID, LockMode.Exclusive);
+									stream.Write(buffer, offset, elementSize);
+									stream.Close();
+									_row.DataTypes[index] = scalarType;
+									_row.Values[index] = streamID;
+									offset += elementSize;
 								}
 								else
 								{
-									FRow.DataTypes[LIndex] = LScalarType;
-									FRow.Values[LIndex] = new StreamID(Convert.ToUInt64(LInt64Conveyor.Read(ABuffer, AOffset)));
-									AOffset += sizeof(long);
+									_row.DataTypes[index] = scalarType;
+									_row.Values[index] = new StreamID(Convert.ToUInt64(int64Conveyor.Read(buffer, offset)));
+									offset += sizeof(long);
 								}
 							}
 							else
@@ -608,81 +608,81 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 		
-		public bool HasNonNativeValue(int AIndex)
+		public bool HasNonNativeValue(int index)
 		{
 			#if USEDATATYPESINNATIVEROW
-			return (FRow.DataTypes[AIndex] is Schema.IScalarType) && (FRow.Values[AIndex] is StreamID);
+			return (_row.DataTypes[index] is Schema.IScalarType) && (_row.Values[index] is StreamID);
 			#else
 			return (DataType.Columns[AIndex].DataType is Schema.IScalarType) && (FRow.Values[AIndex] is StreamID);
 			#endif
 		}
 		
-		public StreamID GetNonNativeStreamID(int AIndex)
+		public StreamID GetNonNativeStreamID(int index)
 		{
-			return (StreamID)FRow.Values[AIndex];
+			return (StreamID)_row.Values[index];
 		}
 		
 		/// <summary>This is a by-reference access of the value, changes made to the resulting DataValue will be refelected in the actual row.</summary>
-		public DataValue GetValue(int AIndex)
+		public DataValue GetValue(int index)
 		{
-			return FromNativeRow(Manager, DataType, FRow, AIndex);
+			return FromNativeRow(Manager, DataType, _row, index);
 		}
 		
-		public void SetValue(int AIndex, DataValue AValue)
+		public void SetValue(int index, DataValue tempValue)
 		{
-			this[AIndex] = AValue;
+			this[index] = tempValue;
 		}
 		
 		/// <summary>
 		/// Returns the native representation if the value is stored in non-native form (as a StreamID)
 		/// </summary>
-		public object GetNativeValue(int AIndex)
+		public object GetNativeValue(int index)
 		{
 			// TODO: This should recursively ensure that no contained values are non-native
-			if (HasNonNativeValue(AIndex))
-				return GetValue(AIndex).AsNative;
+			if (HasNonNativeValue(index))
+				return GetValue(index).AsNative;
 				
-			return this[AIndex];
+			return this[index];
 		}
 
 		/// <summary>This is a by-reference access of the value, changes made to the resulting DataValue will be refelected in the actual row.</summary>
-		public object this[int AIndex]
+		public object this[int index]
 		{
 			get 
 			{
 				#if USEDATATYPESINNATIVEROW
-				if (FRow.DataTypes[AIndex] is Schema.IScalarType)
+				if (_row.DataTypes[index] is Schema.IScalarType)
 				#else
 				if (DataType.Columns[AIndex].DataType is Schema.IScalarType)
 				#endif
-					return FRow.Values[AIndex];
-				return FromNativeRow(Manager, DataType, FRow, AIndex); 
+					return _row.Values[index];
+				return FromNativeRow(Manager, DataType, _row, index); 
 			}
 			set
 			{
-				if (FRow.Values[AIndex] != null)
+				if (_row.Values[index] != null)
 					#if USEDATATYPESINNATIVEROW
-					DataValue.DisposeNative(Manager, FRow.DataTypes[AIndex], FRow.Values[AIndex]);
+					DataValue.DisposeNative(Manager, _row.DataTypes[index], _row.Values[index]);
 					#else
 					DataValue.DisposeNative(Manager, DataType.Columns[AIndex].DataType, FRow.Values[AIndex]);
 					#endif
 					
-				DataValue LValue = value as DataValue;
-				if (LValue != null)
+				DataValue tempValue = value as DataValue;
+				if (tempValue != null)
 				{
 					#if USEDATATYPESINNATIVEROW
-					FRow.DataTypes[AIndex] = LValue.DataType;
+					_row.DataTypes[index] = tempValue.DataType;
 					#endif
-					FRow.Values[AIndex] = LValue.CopyNative();
+					_row.Values[index] = tempValue.CopyNative();
 				}
 				else if (value != null)
 				{
 					#if USEDATATYPESINNATIVEROW
-					if ((DataType.Columns[AIndex].DataType.Equals(Manager.DataTypes.SystemGeneric)) || (DataType.Columns[AIndex].DataType.Equals(Manager.DataTypes.SystemScalar)))
-						FRow.DataTypes[AIndex] = DataValue.NativeTypeToScalarType(Manager, value.GetType());
+					if ((DataType.Columns[index].DataType.Equals(Manager.DataTypes.SystemGeneric)) || (DataType.Columns[index].DataType.Equals(Manager.DataTypes.SystemScalar)))
+						_row.DataTypes[index] = DataValue.NativeTypeToScalarType(Manager, value.GetType());
 					else
-						FRow.DataTypes[AIndex] = DataType.Columns[AIndex].DataType;
-					FRow.Values[AIndex] = DataValue.CopyNative(Manager, FRow.DataTypes[AIndex], value);
+						_row.DataTypes[index] = DataType.Columns[index].DataType;
+					_row.Values[index] = DataValue.CopyNative(Manager, _row.DataTypes[index], value);
 					#else
 					FRow.Values[AIndex] = DataValue.CopyNative(Manager, DataType.Columns[AIndex].DataType, value);
 					#endif
@@ -690,209 +690,209 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				else
 				{
 					#if USEDATATYPESINNATIVEROW
-					FRow.DataTypes[AIndex] = DataType.Columns[AIndex].DataType;
+					_row.DataTypes[index] = DataType.Columns[index].DataType;
 					#endif
-					FRow.Values[AIndex] = null;
+					_row.Values[index] = null;
 				}
 				
-				if (FRow.ModifiedFlags != null)
-					FRow.ModifiedFlags[AIndex] = true;
+				if (_row.ModifiedFlags != null)
+					_row.ModifiedFlags[index] = true;
 			}
 		}
 		
-		private int FModifiedContextCount;
+		private int _modifiedContextCount;
 
 		public void BeginModifiedContext()
 		{
-			if (FModifiedContextCount == 0)
+			if (_modifiedContextCount == 0)
 			{
-				FRow.ModifiedFlags = new BitArray(FRow.Values.Length);
-				FRow.ModifiedFlags.SetAll(false);
+				_row.ModifiedFlags = new BitArray(_row.Values.Length);
+				_row.ModifiedFlags.SetAll(false);
 			}
-			FModifiedContextCount++;
+			_modifiedContextCount++;
 		}
 		
 		public BitArray EndModifiedContext()
 		{
-			FModifiedContextCount--;
-			if (FModifiedContextCount == 0)
+			_modifiedContextCount--;
+			if (_modifiedContextCount == 0)
 			{
-				BitArray LResult = FRow.ModifiedFlags;
-				FRow.ModifiedFlags = null;
-				return LResult;
+				BitArray result = _row.ModifiedFlags;
+				_row.ModifiedFlags = null;
+				return result;
 			}
-			return FRow.ModifiedFlags;
+			return _row.ModifiedFlags;
 		}
 		
 		/// <summary>Returns the index of the given column name, resolving first for the full name, then for a partial match.</summary>
-		public int IndexOfColumn(string AColumnName)
+		public int IndexOfColumn(string columnName)
 		{
-			return DataType.Columns.IndexOfColumn(AColumnName);
+			return DataType.Columns.IndexOfColumn(columnName);
 		}
 
 		///	<summary>Returns the index of the given column name, resolving first for the full name, then for a partial match.  Throws an exception if the column name is not found.</summary>
-		public int GetIndexOfColumn(string AColumnName)
+		public int GetIndexOfColumn(string columnName)
 		{
-			return DataType.Columns.GetIndexOfColumn(AColumnName);
+			return DataType.Columns.GetIndexOfColumn(columnName);
 		}
 		
-		public object this[string AColumnName]
+		public object this[string columnName]
 		{
-			get { return this[GetIndexOfColumn(AColumnName)]; }
-			set { this[GetIndexOfColumn(AColumnName)] = value; }
+			get { return this[GetIndexOfColumn(columnName)]; }
+			set { this[GetIndexOfColumn(columnName)] = value; }
 		}
 		
-		public DataValue GetValue(string AColumnName)
+		public DataValue GetValue(string columnName)
 		{
-			return GetValue(GetIndexOfColumn(AColumnName));
+			return GetValue(GetIndexOfColumn(columnName));
 		}
 		
-		public void SetValue(string AColumnName, DataValue AValue)
+		public void SetValue(string columnName, DataValue tempValue)
 		{
-			SetValue(GetIndexOfColumn(AColumnName), AValue);
+			SetValue(GetIndexOfColumn(columnName), tempValue);
 		}
 
-		public bool HasValue(int AIndex)
+		public bool HasValue(int index)
 		{
-			return FRow != null && FRow.Values[AIndex] != null;
+			return _row != null && _row.Values[index] != null;
 		}
 		
-		public bool HasValue(string AColumnName)
+		public bool HasValue(string columnName)
 		{
-			return HasValue(GetIndexOfColumn(AColumnName));
+			return HasValue(GetIndexOfColumn(columnName));
 		}
 		
 		public bool HasNils()
 		{
-			for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
-				if (!HasValue(LIndex))
+			for (int index = 0; index < DataType.Columns.Count; index++)
+				if (!HasValue(index))
 					return true;
 			return false;
 		}
 		
 		public bool HasAnyNoValues()
 		{
-			for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
-				if (!HasValue(LIndex))
+			for (int index = 0; index < DataType.Columns.Count; index++)
+				if (!HasValue(index))
 					return true;
 			return false;
 		}
 		
 		public bool HasNonNativeValues()
 		{
-			for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
-				if (HasNonNativeValue(LIndex))
+			for (int index = 0; index < DataType.Columns.Count; index++)
+				if (HasNonNativeValue(index))
 					return true;
 			return false;
 		}
 		
-		public override bool IsNil { get { return FRow == null; } }
+		public override bool IsNil { get { return _row == null; } }
 
-		public void ClearValue(int AIndex)
+		public void ClearValue(int index)
 		{
-			if (FRow.Values[AIndex] != null)
+			if (_row.Values[index] != null)
 			{
 				if (ValuesOwned)
 					#if USEDATATYPESINNATIVEROW
-					DataValue.DisposeNative(Manager, FRow.DataTypes[AIndex], FRow.Values[AIndex]);
+					DataValue.DisposeNative(Manager, _row.DataTypes[index], _row.Values[index]);
 					#else
 					DataValue.DisposeNative(Manager, DataType.Columns[AIndex].DataType, FRow.Values[AIndex]);
 					#endif
 				
 				#if USEDATATYPESINNATIVEROW
-				FRow.DataTypes[AIndex] = DataType.Columns[AIndex].DataType;
+				_row.DataTypes[index] = DataType.Columns[index].DataType;
 				#endif
-				FRow.Values[AIndex] = null;
+				_row.Values[index] = null;
 			}
 		}
 
-		public void ClearValue(string AColumnName)
+		public void ClearValue(string columnName)
 		{
-			ClearValue(GetIndexOfColumn(AColumnName));
+			ClearValue(GetIndexOfColumn(columnName));
 		}
 		
 		public void ClearValues()
 		{
-			for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
-				ClearValue(LIndex);
+			for (int index = 0; index < DataType.Columns.Count; index++)
+				ClearValue(index);
 		}
 		
 		/// <summary>Returns an array of ARow.DataType.Columns.Count boolean values indicating whether each column in ARow has a value.</summary>
 		public BitArray GetValueFlags()
 		{
-			BitArray LValueFlags = new BitArray(DataType.Columns.Count);
-			for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
-				LValueFlags[LIndex] = HasValue(LIndex);
-			return LValueFlags;
+			BitArray valueFlags = new BitArray(DataType.Columns.Count);
+			for (int index = 0; index < DataType.Columns.Count; index++)
+				valueFlags[index] = HasValue(index);
+			return valueFlags;
 		}
 		
-		public override object CopyNativeAs(Schema.IDataType ADataType)
+		public override object CopyNativeAs(Schema.IDataType dataType)
 		{
-			if (FRow == null)
+			if (_row == null)
 				return null;
 				
-			if (Object.ReferenceEquals(DataType, ADataType))
+			if (Object.ReferenceEquals(DataType, dataType))
 			{
-				NativeRow LNewRow = new NativeRow(DataType.Columns.Count);
-				if (FRow != null)
-					for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
+				NativeRow newRow = new NativeRow(DataType.Columns.Count);
+				if (_row != null)
+					for (int index = 0; index < DataType.Columns.Count; index++)
 					{
 						#if USEDATATYPESINNATIVEROW
-						LNewRow.DataTypes[LIndex] = FRow.DataTypes[LIndex];
-						LNewRow.Values[LIndex] = CopyNative(Manager, FRow.DataTypes[LIndex], FRow.Values[LIndex]);
+						newRow.DataTypes[index] = _row.DataTypes[index];
+						newRow.Values[index] = CopyNative(Manager, _row.DataTypes[index], _row.Values[index]);
 						#else
-						LNewRow.Values[LIndex] = CopyNative(Manager, DataType.Columns[LIndex].DataType, FRow.Values[LIndex]);
+						newRow.Values[index] = CopyNative(Manager, DataType.Columns[index].DataType, FRow.Values[index]);
 						#endif
 					}
-				return LNewRow;
+				return newRow;
 			}
 			else
 			{
-				NativeRow LNewRow = new NativeRow(DataType.Columns.Count);
-				Schema.IRowType LNewRowType = (Schema.IRowType)ADataType;
-				if (FRow != null)
-					for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
+				NativeRow newRow = new NativeRow(DataType.Columns.Count);
+				Schema.IRowType newRowType = (Schema.IRowType)dataType;
+				if (_row != null)
+					for (int index = 0; index < DataType.Columns.Count; index++)
 					{
-						int LNewIndex = LNewRowType.Columns.IndexOfName(DataType.Columns[LIndex].Name);
+						int newIndex = newRowType.Columns.IndexOfName(DataType.Columns[index].Name);
 						#if USEDATATYPESINNATIVEROW
-						LNewRow.DataTypes[LNewIndex] = FRow.DataTypes[LIndex];
-						LNewRow.Values[LNewIndex] = CopyNative(Manager, FRow.DataTypes[LIndex], FRow.Values[LIndex]);
+						newRow.DataTypes[newIndex] = _row.DataTypes[index];
+						newRow.Values[newIndex] = CopyNative(Manager, _row.DataTypes[index], _row.Values[index]);
 						#else
-						LNewRow.Values[LNewIndex] = CopyNative(Manager, DataType.Columns[LIndex].DataType, FRow.Values[LIndex]);
+						newRow.Values[newIndex] = CopyNative(Manager, DataType.Columns[index].DataType, FRow.Values[index]);
 						#endif
 					}
-				return LNewRow;
+				return newRow;
 			}
 		}
 
-		public void CopyTo(Row ARow)
+		public void CopyTo(Row row)
 		{
-			int LColumnIndex;
-			for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
+			int columnIndex;
+			for (int index = 0; index < DataType.Columns.Count; index++)
 			{
-				LColumnIndex = ARow.IndexOfColumn(DataType.Columns[LIndex].Name);
-				if (LColumnIndex >= 0)
-					if (HasValue(LIndex))
-						ARow[LColumnIndex] = this[LIndex];
+				columnIndex = row.IndexOfColumn(DataType.Columns[index].Name);
+				if (columnIndex >= 0)
+					if (HasValue(index))
+						row[columnIndex] = this[index];
 					else
-						ARow.ClearValue(LColumnIndex);
+						row.ClearValue(columnIndex);
 			}
 		}
 
 		public override string ToString()
 		{
-			StringBuilder LResult = new StringBuilder();
-			LResult.Append("row { ");
-			for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
+			StringBuilder result = new StringBuilder();
+			result.Append("row { ");
+			for (int index = 0; index < DataType.Columns.Count; index++)
 			{
-				if (LIndex > 0)
-					LResult.Append(", ");
-				LResult.Append(GetValue(LIndex).ToString());
+				if (index > 0)
+					result.Append(", ");
+				result.Append(GetValue(index).ToString());
 			}
 			if (DataType.Columns.Count > 0)
-				LResult.Append(" ");
-			LResult.Append("}");
-			return LResult.ToString();
+				result.Append(" ");
+			result.Append("}");
+			return result.ToString();
 		}
 	}
 }

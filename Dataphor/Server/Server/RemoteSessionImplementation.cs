@@ -21,137 +21,137 @@ namespace Alphora.Dataphor.DAE.Server
 	// RemoteSession    
     public class RemoteSessionImplementation : RemoteSession
     {
-		public RemoteSessionImplementation(ServerProcess AProcess, Schema.ServerLink AServerLink) : base(AProcess, AServerLink)
+		public RemoteSessionImplementation(ServerProcess process, Schema.ServerLink serverLink) : base(process, serverLink)
 		{
-			FNativeCLISession = 
+			_nativeCLISession = 
 				new NativeCLISession
 				(
-					AServerLink.HostName, 
-					AServerLink.InstanceName, 
-					AServerLink.OverridePortNumber, 
-					AServerLink.UseSecureConnection
+					serverLink.HostName, 
+					serverLink.InstanceName, 
+					serverLink.OverridePortNumber, 
+					serverLink.UseSecureConnection
 						? ConnectionSecurityMode.Transport 
 						: ConnectionSecurityMode.None, 
-					AServerLink.OverrideListenerPortNumber, 
-					AServerLink.UseSecureListenerConnection
+					serverLink.OverrideListenerPortNumber, 
+					serverLink.UseSecureListenerConnection
 						? ConnectionSecurityMode.Transport 
 						: ConnectionSecurityMode.None, 
 					GetNativeSessionInfo()
 				);
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (FNativeCLISession != null)
+			if (_nativeCLISession != null)
 			{
-				FNativeCLISession.Dispose();
-				FNativeCLISession = null;
+				_nativeCLISession.Dispose();
+				_nativeCLISession = null;
 			}
 			
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 		
-		public NativeSessionInfo GetNativeSessionInfoFromProcess(ServerProcess AProcess)
+		public NativeSessionInfo GetNativeSessionInfoFromProcess(ServerProcess process)
 		{
-			NativeSessionInfo LNativeSessionInfo = new NativeSessionInfo();
-			LNativeSessionInfo.DefaultIsolationLevel = NativeCLIUtility.IsolationLevelToNativeIsolationLevel(AProcess.DefaultIsolationLevel);
+			NativeSessionInfo nativeSessionInfo = new NativeSessionInfo();
+			nativeSessionInfo.DefaultIsolationLevel = NativeCLIUtility.IsolationLevelToNativeIsolationLevel(process.DefaultIsolationLevel);
 			//LNativeSessionInfo.DefaultLibraryName = AProcess.ServerSession.CurrentLibrary.Name; // Still not sure if this makes sense...
-			LNativeSessionInfo.DefaultMaxCallDepth = AProcess.ServerSession.SessionInfo.DefaultMaxCallDepth;
-			LNativeSessionInfo.DefaultMaxStackDepth = AProcess.ServerSession.SessionInfo.DefaultMaxStackDepth;
-			LNativeSessionInfo.DefaultUseDTC = AProcess.UseDTC;
-			LNativeSessionInfo.DefaultUseImplicitTransactions = AProcess.UseImplicitTransactions;
-			LNativeSessionInfo.ShouldEmitIL = AProcess.ServerSession.SessionInfo.ShouldEmitIL;
-			LNativeSessionInfo.UsePlanCache = AProcess.ServerSession.SessionInfo.UsePlanCache;
-			return LNativeSessionInfo;
+			nativeSessionInfo.DefaultMaxCallDepth = process.ServerSession.SessionInfo.DefaultMaxCallDepth;
+			nativeSessionInfo.DefaultMaxStackDepth = process.ServerSession.SessionInfo.DefaultMaxStackDepth;
+			nativeSessionInfo.DefaultUseDTC = process.UseDTC;
+			nativeSessionInfo.DefaultUseImplicitTransactions = process.UseImplicitTransactions;
+			nativeSessionInfo.ShouldEmitIL = process.ServerSession.SessionInfo.ShouldEmitIL;
+			nativeSessionInfo.UsePlanCache = process.ServerSession.SessionInfo.UsePlanCache;
+			return nativeSessionInfo;
 		}
 
-		public NativeSessionInfo GetNativeSessionInfoFromSessionInfo(SessionInfo ASessionInfo, ProcessInfo AProcessInfo)
+		public NativeSessionInfo GetNativeSessionInfoFromSessionInfo(SessionInfo sessionInfo, ProcessInfo processInfo)
 		{
-			NativeSessionInfo LNativeSessionInfo = new NativeSessionInfo();
-			LNativeSessionInfo.DefaultIsolationLevel = NativeCLIUtility.IsolationLevelToNativeIsolationLevel(AProcessInfo == null ? ASessionInfo.DefaultIsolationLevel : AProcessInfo.DefaultIsolationLevel);
+			NativeSessionInfo nativeSessionInfo = new NativeSessionInfo();
+			nativeSessionInfo.DefaultIsolationLevel = NativeCLIUtility.IsolationLevelToNativeIsolationLevel(processInfo == null ? sessionInfo.DefaultIsolationLevel : processInfo.DefaultIsolationLevel);
 			//LNativeSessionInfo.DefaultLibraryName = ASessionInfo.DefaultLibraryName; // This doesn't make a lot of sense in the default scenario
-			LNativeSessionInfo.DefaultMaxCallDepth = ASessionInfo.DefaultMaxCallDepth;
-			LNativeSessionInfo.DefaultMaxStackDepth = ASessionInfo.DefaultMaxStackDepth;
-			LNativeSessionInfo.DefaultUseDTC = AProcessInfo == null ? ASessionInfo.DefaultUseDTC : AProcessInfo.UseDTC;
-			LNativeSessionInfo.DefaultUseImplicitTransactions = AProcessInfo == null ? ASessionInfo.DefaultUseImplicitTransactions : AProcessInfo.UseImplicitTransactions;
-			LNativeSessionInfo.ShouldEmitIL = ASessionInfo.ShouldEmitIL;
-			LNativeSessionInfo.UsePlanCache = ASessionInfo.UsePlanCache;
-			return LNativeSessionInfo;
+			nativeSessionInfo.DefaultMaxCallDepth = sessionInfo.DefaultMaxCallDepth;
+			nativeSessionInfo.DefaultMaxStackDepth = sessionInfo.DefaultMaxStackDepth;
+			nativeSessionInfo.DefaultUseDTC = processInfo == null ? sessionInfo.DefaultUseDTC : processInfo.UseDTC;
+			nativeSessionInfo.DefaultUseImplicitTransactions = processInfo == null ? sessionInfo.DefaultUseImplicitTransactions : processInfo.UseImplicitTransactions;
+			nativeSessionInfo.ShouldEmitIL = sessionInfo.ShouldEmitIL;
+			nativeSessionInfo.UsePlanCache = sessionInfo.UsePlanCache;
+			return nativeSessionInfo;
 		}
 		
 		private NativeSessionInfo GetServerLinkNativeSessionInfo()
 		{
-			NativeSessionInfo LNativeSessionInfo = null;
+			NativeSessionInfo nativeSessionInfo = null;
 			
 			if (ServerLink.MetaData != null)
 			{
-				Tag LTag;
+				Tag tag;
 				
-				LTag = ServerLink.MetaData.Tags.GetTag("DefaultIsolationLevel");
-				if (LTag != Tag.None)
+				tag = ServerLink.MetaData.Tags.GetTag("DefaultIsolationLevel");
+				if (tag != Tag.None)
 				{
-					if (LNativeSessionInfo == null) LNativeSessionInfo = new NativeSessionInfo();
-					LNativeSessionInfo.DefaultIsolationLevel = (NativeIsolationLevel)Enum.Parse(typeof(NativeIsolationLevel), LTag.Value);
+					if (nativeSessionInfo == null) nativeSessionInfo = new NativeSessionInfo();
+					nativeSessionInfo.DefaultIsolationLevel = (NativeIsolationLevel)Enum.Parse(typeof(NativeIsolationLevel), tag.Value);
 				}
 					
-				LTag = ServerLink.MetaData.Tags.GetTag("DefaultLibraryName");
-				if (LTag != Tag.None)
+				tag = ServerLink.MetaData.Tags.GetTag("DefaultLibraryName");
+				if (tag != Tag.None)
 				{
-					if (LNativeSessionInfo == null) LNativeSessionInfo = new NativeSessionInfo();
-					LNativeSessionInfo.DefaultLibraryName = LTag.Value;
+					if (nativeSessionInfo == null) nativeSessionInfo = new NativeSessionInfo();
+					nativeSessionInfo.DefaultLibraryName = tag.Value;
 				}
 					
-				LTag = ServerLink.MetaData.Tags.GetTag("DefaultMaxCallDepth");
-				if (LTag != Tag.None)
+				tag = ServerLink.MetaData.Tags.GetTag("DefaultMaxCallDepth");
+				if (tag != Tag.None)
 				{
-					if (LNativeSessionInfo == null) LNativeSessionInfo = new NativeSessionInfo();
-					LNativeSessionInfo.DefaultMaxCallDepth = Convert.ToInt32(LTag.Value);
+					if (nativeSessionInfo == null) nativeSessionInfo = new NativeSessionInfo();
+					nativeSessionInfo.DefaultMaxCallDepth = Convert.ToInt32(tag.Value);
 				}
 					
-				LTag = ServerLink.MetaData.Tags.GetTag("DefaultMaxStackDepth");
-				if (LTag != Tag.None)
+				tag = ServerLink.MetaData.Tags.GetTag("DefaultMaxStackDepth");
+				if (tag != Tag.None)
 				{
-					if (LNativeSessionInfo == null) LNativeSessionInfo = new NativeSessionInfo();
-					LNativeSessionInfo.DefaultMaxStackDepth = Convert.ToInt32(LTag.Value);
+					if (nativeSessionInfo == null) nativeSessionInfo = new NativeSessionInfo();
+					nativeSessionInfo.DefaultMaxStackDepth = Convert.ToInt32(tag.Value);
 				}
 
-				LTag = ServerLink.MetaData.Tags.GetTag("DefaultUseDTC");
-				if (LTag != Tag.None)
+				tag = ServerLink.MetaData.Tags.GetTag("DefaultUseDTC");
+				if (tag != Tag.None)
 				{
-					if (LNativeSessionInfo == null) LNativeSessionInfo = new NativeSessionInfo();
-					LNativeSessionInfo.DefaultUseDTC = Convert.ToBoolean(LTag.Value);
+					if (nativeSessionInfo == null) nativeSessionInfo = new NativeSessionInfo();
+					nativeSessionInfo.DefaultUseDTC = Convert.ToBoolean(tag.Value);
 				}
 
-				LTag = ServerLink.MetaData.Tags.GetTag("DefaultUseImplicitTransactions");
-				if (LTag != Tag.None)
+				tag = ServerLink.MetaData.Tags.GetTag("DefaultUseImplicitTransactions");
+				if (tag != Tag.None)
 				{
-					if (LNativeSessionInfo == null) LNativeSessionInfo = new NativeSessionInfo();
-					LNativeSessionInfo.DefaultUseImplicitTransactions = Convert.ToBoolean(LTag.Value);
+					if (nativeSessionInfo == null) nativeSessionInfo = new NativeSessionInfo();
+					nativeSessionInfo.DefaultUseImplicitTransactions = Convert.ToBoolean(tag.Value);
 				}
 				
-				LTag = ServerLink.MetaData.Tags.GetTag("ShouldEmitIL");
-				if (LTag != Tag.None)
+				tag = ServerLink.MetaData.Tags.GetTag("ShouldEmitIL");
+				if (tag != Tag.None)
 				{
-					if (LNativeSessionInfo == null) LNativeSessionInfo = new NativeSessionInfo();
-					LNativeSessionInfo.ShouldEmitIL = Convert.ToBoolean(LTag.Value);
+					if (nativeSessionInfo == null) nativeSessionInfo = new NativeSessionInfo();
+					nativeSessionInfo.ShouldEmitIL = Convert.ToBoolean(tag.Value);
 				}
 				
-				LTag = ServerLink.MetaData.Tags.GetTag("UsePlanCache");
-				if (LTag != Tag.None)
+				tag = ServerLink.MetaData.Tags.GetTag("UsePlanCache");
+				if (tag != Tag.None)
 				{
-					if (LNativeSessionInfo == null) LNativeSessionInfo = new NativeSessionInfo();
-					LNativeSessionInfo.UsePlanCache = Convert.ToBoolean(LTag.Value);
+					if (nativeSessionInfo == null) nativeSessionInfo = new NativeSessionInfo();
+					nativeSessionInfo.UsePlanCache = Convert.ToBoolean(tag.Value);
 				}
 			}
 
-			return LNativeSessionInfo;
+			return nativeSessionInfo;
 		}
 		
 		public NativeSessionInfo GetDefaultNativeSessionInfo()
 		{
-			NativeSessionInfo LSessionInfo = GetServerLinkNativeSessionInfo();
-			if (LSessionInfo != null)
-				return LSessionInfo;
+			NativeSessionInfo sessionInfo = GetServerLinkNativeSessionInfo();
+			if (sessionInfo != null)
+				return sessionInfo;
 				
 			if (ServerLink.UseSessionInfo)
 				return GetNativeSessionInfoFromSessionInfo(ServerProcess.ServerSession.SessionInfo, ServerProcess.ProcessInfo);
@@ -161,64 +161,64 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		private NativeSessionInfo GetNativeSessionInfo()
 		{
-			NativeSessionInfo LNativeSessionInfo = GetDefaultNativeSessionInfo();
+			NativeSessionInfo nativeSessionInfo = GetDefaultNativeSessionInfo();
 			
 			// Determine credentials
-			Schema.ServerLinkUser LLinkUser = ServerLink.GetUser(ServerProcess.ServerSession.User.ID);
-			LNativeSessionInfo.HostName = ServerProcess.ServerSession.SessionInfo.HostName;
-			LNativeSessionInfo.UserID = LLinkUser.ServerLinkUserID;
-			LNativeSessionInfo.Password = Schema.SecurityUtility.DecryptPassword(LLinkUser.ServerLinkPassword);
-			return LNativeSessionInfo;
+			Schema.ServerLinkUser linkUser = ServerLink.GetUser(ServerProcess.ServerSession.User.ID);
+			nativeSessionInfo.HostName = ServerProcess.ServerSession.SessionInfo.HostName;
+			nativeSessionInfo.UserID = linkUser.ServerLinkUserID;
+			nativeSessionInfo.Password = Schema.SecurityUtility.DecryptPassword(linkUser.ServerLinkPassword);
+			return nativeSessionInfo;
 		}
 		
-		private NativeCLISession FNativeCLISession;
+		private NativeCLISession _nativeCLISession;
 		
 		public override int TransactionCount
 		{
-			get { return FNativeCLISession.GetTransactionCount(); }
+			get { return _nativeCLISession.GetTransactionCount(); }
 		}
 		
-		public override void BeginTransaction(IsolationLevel AIsolationLevel)
+		public override void BeginTransaction(IsolationLevel isolationLevel)
 		{
-			FNativeCLISession.BeginTransaction(NativeCLIUtility.IsolationLevelToNativeIsolationLevel(AIsolationLevel));
+			_nativeCLISession.BeginTransaction(NativeCLIUtility.IsolationLevelToNativeIsolationLevel(isolationLevel));
 		}
 		
 		public override void PrepareTransaction()
 		{
-			FNativeCLISession.PrepareTransaction();
+			_nativeCLISession.PrepareTransaction();
 		}
 		
 		public override void CommitTransaction()
 		{
-			FNativeCLISession.CommitTransaction();
+			_nativeCLISession.CommitTransaction();
 		}
 		
 		public override void RollbackTransaction()
 		{
-			FNativeCLISession.RollbackTransaction();
+			_nativeCLISession.RollbackTransaction();
 		}
 		
-		public override void Execute(string AStatement, DataParams AParams)
+		public override void Execute(string statement, DataParams paramsValue)
 		{
-			NativeParam[] LParams = NativeMarshal.DataParamsToNativeParams(ServerProcess, AParams);
-			FNativeCLISession.Execute(AStatement, LParams);
-			NativeMarshal.SetDataOutputParams(ServerProcess, AParams, LParams);
+			NativeParam[] localParamsValue = NativeMarshal.DataParamsToNativeParams(ServerProcess, paramsValue);
+			_nativeCLISession.Execute(statement, localParamsValue);
+			NativeMarshal.SetDataOutputParams(ServerProcess, paramsValue, localParamsValue);
 		}
 		
-		public override DataValue Evaluate(string AExpression, DataParams AParams)
+		public override DataValue Evaluate(string expression, DataParams paramsValue)
 		{
-			NativeParam[] LParams = NativeMarshal.DataParamsToNativeParams(ServerProcess, AParams);
-			NativeResult LResult = FNativeCLISession.Execute(AExpression, LParams);
-			NativeMarshal.SetDataOutputParams(ServerProcess, AParams, LResult.Params);
-			return NativeMarshal.NativeValueToDataValue(ServerProcess, LResult.Value);
+			NativeParam[] localParamsValue = NativeMarshal.DataParamsToNativeParams(ServerProcess, paramsValue);
+			NativeResult result = _nativeCLISession.Execute(expression, localParamsValue);
+			NativeMarshal.SetDataOutputParams(ServerProcess, paramsValue, result.Params);
+			return NativeMarshal.NativeValueToDataValue(ServerProcess, result.Value);
 		}
 		
-		public override Schema.TableVar PrepareTableVar(Plan APlan, string AExpression, DataParams AParams)
+		public override Schema.TableVar PrepareTableVar(Plan plan, string expression, DataParams paramsValue)
 		{
-			NativeParam[] LParams = NativeMarshal.DataParamsToNativeParams(ServerProcess, AParams);
-			NativeResult LResult = FNativeCLISession.Execute(AExpression, LParams, NativeExecutionOptions.SchemaOnly);
-			if (LResult.Value is NativeTableValue)
-				return NativeMarshal.NativeTableToTableVar(APlan, (NativeTableValue)LResult.Value);
+			NativeParam[] localParamsValue = NativeMarshal.DataParamsToNativeParams(ServerProcess, paramsValue);
+			NativeResult result = _nativeCLISession.Execute(expression, localParamsValue, NativeExecutionOptions.SchemaOnly);
+			if (result.Value is NativeTableValue)
+				return NativeMarshal.NativeTableToTableVar(plan, (NativeTableValue)result.Value);
 			throw new CompilerException(CompilerException.Codes.TableExpressionExpected);
 		}
     }

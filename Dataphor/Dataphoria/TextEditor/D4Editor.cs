@@ -36,8 +36,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 	/// <summary> D4 text editor. </summary>
 	public partial class D4Editor : TextEditor, IErrorSource
 	{
-		protected DockContent FDockContentResultPanel;
-		private ResultPanel FResultPanel;
+		protected DockContent _dockContentResultPanel;
+		private ResultPanel _resultPanel;
 
 		public D4Editor() // dummy constructor for MDI menu merging
 		{
@@ -46,63 +46,63 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             InitializeCodeCompletion();
 		}
 
-		public D4Editor(IDataphoria ADataphoria, string ADesignerID) : base(ADataphoria, ADesignerID)
+		public D4Editor(IDataphoria dataphoria, string designerID) : base(dataphoria, designerID)
 		{
 			InitializeComponent();
 			InitializeDocking();
 			InitializeDebugger();
 		    InitializeCodeCompletion();
 			
-			FTextEdit.EditActions[Keys.Shift | Keys.Control | Keys.OemQuestion] = new ToggleBlockDelimiter();
-			FTextEdit.EditActions[Keys.Control | Keys.Oemcomma] = new PriorBlock();
-			FTextEdit.EditActions[Keys.Control | Keys.OemPeriod] = new NextBlock();
-			FTextEdit.EditActions[Keys.Shift | Keys.Control | Keys.Oemcomma] = new SelectPriorBlock();
-			FTextEdit.EditActions[Keys.Shift | Keys.Control | Keys.OemPeriod] = new SelectNextBlock();
+			_textEdit.EditActions[Keys.Shift | Keys.Control | Keys.OemQuestion] = new ToggleBlockDelimiter();
+			_textEdit.EditActions[Keys.Control | Keys.Oemcomma] = new PriorBlock();
+			_textEdit.EditActions[Keys.Control | Keys.OemPeriod] = new NextBlock();
+			_textEdit.EditActions[Keys.Shift | Keys.Control | Keys.Oemcomma] = new SelectPriorBlock();
+			_textEdit.EditActions[Keys.Shift | Keys.Control | Keys.OemPeriod] = new SelectNextBlock();
 
-			FResultPanel.BeginningFind += BeginningFind;
-			FResultPanel.ReplacementsPerformed += ReplacementsPerformed;
-			FResultPanel.TextNotFound += TextNotFound;
+			_resultPanel.BeginningFind += BeginningFind;
+			_resultPanel.ReplacementsPerformed += ReplacementsPerformed;
+			_resultPanel.TextNotFound += TextNotFound;
 
 			UpdateCurrentLocation();
 		}
 
         private void InitializeCodeCompletion()
         {                        
-            FTextEdit.ActiveTextAreaControl.TextArea.KeyEventHandler +=
+            _textEdit.ActiveTextAreaControl.TextArea.KeyEventHandler +=
                 (
 					AKey =>
 					{
 						// Send the command to the existing code completion window if there is one
-						if (FCodeCompletionWindow != null)
+						if (_codeCompletionWindow != null)
 						{
-							if (FCodeCompletionWindow.ProcessKeyEvent(AKey))
+							if (_codeCompletionWindow.ProcessKeyEvent(AKey))
 								return true;
 						}
 						
 						// Handle the request to show code completion
 						if (AKey == ' ' && ModifierKeys == Keys.Control)
 						{
-							var LCompletionDataProvider = new D4CompletionDataProvider(this.Dataphoria);
+							var completionDataProvider = new D4CompletionDataProvider(this.Dataphoria);
 
-							FCodeCompletionWindow = 
+							_codeCompletionWindow = 
 								CodeCompletionWindow.ShowCompletionWindow
 								(
 									this,
-									FTextEdit,
+									_textEdit,
 									Text,
-									LCompletionDataProvider,
+									completionDataProvider,
 									AKey
 								);
-							if (FCodeCompletionWindow != null)
+							if (_codeCompletionWindow != null)
 							{
-								FCodeCompletionWindow.Closed +=
+								_codeCompletionWindow.Closed +=
 									(
 										(ASender, AE) =>
 										{
-											if (FCodeCompletionWindow != null)
+											if (_codeCompletionWindow != null)
 											{
-												FCodeCompletionWindow.Dispose();
-												FCodeCompletionWindow = null;
+												_codeCompletionWindow.Dispose();
+												_codeCompletionWindow = null;
 											}
 										}
 									);
@@ -124,36 +124,36 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		
 		private void InitializeDocking()
 		{
-			FResultPanel = new ResultPanel();
+			_resultPanel = new ResultPanel();
 
 			// 
 			// FResultPanel
 			// 
-			FResultPanel.BackColor = SystemColors.Control;
-			FResultPanel.CausesValidation = false;
-			FResultPanel.EnableFolding = false;
-			FResultPanel.IndentStyle = IndentStyle.Auto;
-			FResultPanel.IsIconBarVisible = false;
-			FResultPanel.Location = new Point(1, 21);
-			FResultPanel.Name = "FResultPanel";
-			FResultPanel.ShowInvalidLines = false;
-			FResultPanel.ShowLineNumbers = false;
-			FResultPanel.ShowVRuler = true;
-			FResultPanel.Size = new Size(453, 212);
-			FResultPanel.TabIndent = 3;
-			FResultPanel.TabIndex = 1;
-			FResultPanel.TabStop = false;
-			FResultPanel.VRulerRow = 100;
-			FResultPanel.Dock = DockStyle.Fill;
+			_resultPanel.BackColor = SystemColors.Control;
+			_resultPanel.CausesValidation = false;
+			_resultPanel.EnableFolding = false;
+			_resultPanel.IndentStyle = IndentStyle.Auto;
+			_resultPanel.IsIconBarVisible = false;
+			_resultPanel.Location = new Point(1, 21);
+			_resultPanel.Name = "FResultPanel";
+			_resultPanel.ShowInvalidLines = false;
+			_resultPanel.ShowLineNumbers = false;
+			_resultPanel.ShowVRuler = true;
+			_resultPanel.Size = new Size(453, 212);
+			_resultPanel.TabIndent = 3;
+			_resultPanel.TabIndex = 1;
+			_resultPanel.TabStop = false;
+			_resultPanel.VRulerRow = 100;
+			_resultPanel.Dock = DockStyle.Fill;
 
-			FDockContentResultPanel = new DockContent();
-			FDockContentResultPanel.HideOnClose = true;
-			FDockContentResultPanel.Controls.Add(FResultPanel);
-			FDockContentResultPanel.Text = "Results";
-			FDockContentResultPanel.TabText = "Results";
-			FDockContentResultPanel.ShowHint = DockState.DockBottom;
-			FDockContentResultPanel.DockPanel = FDockPanel;
-			FDockContentResultPanel.Name = "DockContentResultPanel";
+			_dockContentResultPanel = new DockContent();
+			_dockContentResultPanel.HideOnClose = true;
+			_dockContentResultPanel.Controls.Add(_resultPanel);
+			_dockContentResultPanel.Text = "Results";
+			_dockContentResultPanel.TabText = "Results";
+			_dockContentResultPanel.ShowHint = DockState.DockBottom;
+			_dockContentResultPanel.DockPanel = FDockPanel;
+			_dockContentResultPanel.Name = "DockContentResultPanel";
 		}
 
 		protected override IHighlightingStrategy GetHighlightingStrategy()
@@ -169,51 +169,51 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		private void ShowResults()
 		{
-			FDockContentResultPanel.Show();
-			FTextEdit.Focus();
+			_dockContentResultPanel.Show();
+			_textEdit.Focus();
 		}
 
 		#region Execution
 
-		private ScriptExecutor FExecutor;
+		private ScriptExecutor _executor;
 
-		void IErrorSource.ErrorHighlighted(Exception AException)
+		void IErrorSource.ErrorHighlighted(Exception exception)
 		{
 			// nothing
 		}
 
-		void IErrorSource.ErrorSelected(Exception AException)
+		void IErrorSource.ErrorSelected(Exception exception)
 		{
-			if (!Service.Dataphoria.LocateToError(AException))
+			if (!Service.Dataphoria.LocateToError(exception))
 			{
-				var LLocated = AException as ILocatedException;
-				if (LLocated != null)
-					GotoPosition(LLocated.Line, LLocated.LinePos);
+				var located = exception as ILocatedException;
+				if (located != null)
+					GotoPosition(located.Line, located.LinePos);
 
 				Activate();	
-				FTextEdit.Focus();			
+				_textEdit.Focus();			
 			}
 		}
 
-		private void AppendResultPanel(string AResults)
+		private void AppendResultPanel(string results)
 		{
 			ShowResults();
-			FResultPanel.AppendText(AResults);
+			_resultPanel.AppendText(results);
 		}
 
 		private void HideResultPanel()
 		{
-			FResultPanel.Clear();
-			FDockContentResultPanel.Hide();			
+			_resultPanel.Clear();
+			_dockContentResultPanel.Hide();			
 		}
 
 		private string GetTextToExecute()
 		{
 			return
 				(
-					FTextEdit.ActiveTextAreaControl.SelectionManager.HasSomethingSelected
-						? FTextEdit.ActiveTextAreaControl.SelectionManager.SelectedText
-						: FTextEdit.Document.TextContent
+					_textEdit.ActiveTextAreaControl.SelectionManager.HasSomethingSelected
+						? _textEdit.ActiveTextAreaControl.SelectionManager.SelectedText
+						: _textEdit.Document.TextContent
 				);
 		}
 
@@ -229,192 +229,192 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		private TextLocation GetSelectionPosition()
 		{
-			if (FTextEdit.ActiveTextAreaControl.SelectionManager.HasSomethingSelected)
-				return FTextEdit.ActiveTextAreaControl.SelectionManager.SelectionCollection[0].StartPosition;
+			if (_textEdit.ActiveTextAreaControl.SelectionManager.HasSomethingSelected)
+				return _textEdit.ActiveTextAreaControl.SelectionManager.SelectionCollection[0].StartPosition;
 			return TextLocation.Empty;
 		}
 
-		private void ProcessErrors(ErrorList AErrors)
+		private void ProcessErrors(ErrorList errors)
 		{
-			TextLocation LOffset = GetSelectionPosition();
-			DebugLocator LLocator = Service.GetLocator();
-			string LLocatorLocator = LLocator == null ? null : LLocator.Locator;
+			TextLocation offset = GetSelectionPosition();
+			DebugLocator locator = Service.GetLocator();
+			string locatorLocator = locator == null ? null : locator.Locator;
 			
-			for (int LIndex = AErrors.Count - 1; LIndex >= 0; LIndex--)
+			for (int index = errors.Count - 1; index >= 0; index--)
 			{
-				Exception LException = AErrors[LIndex];
+				Exception exception = errors[index];
 
-				bool LIsWarning;
-				var LCompilerException = LException as CompilerException;
-				if (LCompilerException != null)
-					LIsWarning = LCompilerException.ErrorLevel == CompilerErrorLevel.Warning;
+				bool isWarning;
+				var compilerException = exception as CompilerException;
+				if (compilerException != null)
+					isWarning = compilerException.ErrorLevel == CompilerErrorLevel.Warning;
 				else
-					LIsWarning = false;
+					isWarning = false;
 
 				// Adjust the offset of the exception to account for the current selection
-				ShiftException(LOffset, LLocatorLocator, LException);
+				ShiftException(offset, locatorLocator, exception);
 
-				Dataphoria.Warnings.AppendError(this, LException, LIsWarning);
+				Dataphoria.Warnings.AppendError(this, exception, isWarning);
 			}
 		}
 
-		private static void ShiftException(TextLocation AOffset, string ALocator, Exception AException)
+		private static void ShiftException(TextLocation offset, string locator, Exception exception)
 		{
-			var LLocatorException = AException as ILocatorException;
-			if (LLocatorException != null)
+			var locatorException = exception as ILocatorException;
+			if (locatorException != null)
 			{
-				if (String.IsNullOrEmpty(LLocatorException.Locator))
+				if (String.IsNullOrEmpty(locatorException.Locator))
 				{
-					LLocatorException.Locator = ALocator;
-					OffsetLocatedException(AOffset, LLocatorException);
+					locatorException.Locator = locator;
+					OffsetLocatedException(offset, locatorException);
 				}
-				else if (LLocatorException.Locator == ALocator)
-					OffsetLocatedException(AOffset, LLocatorException);
+				else if (locatorException.Locator == locator)
+					OffsetLocatedException(offset, locatorException);
 			}
 			else
 			{
-				var LLocatedException = AException as ILocatedException;
-				if (LLocatedException != null)
-					OffsetLocatedException(AOffset, LLocatedException);
+				var locatedException = exception as ILocatedException;
+				if (locatedException != null)
+					OffsetLocatedException(offset, locatedException);
 			}
-			if (AException.InnerException != null)
-				ShiftException(AOffset, ALocator, AException.InnerException);
+			if (exception.InnerException != null)
+				ShiftException(offset, locator, exception.InnerException);
 		}
 
-		private static void OffsetLocatedException(TextLocation AOffset, ILocatedException ALocatedException)
+		private static void OffsetLocatedException(TextLocation offset, ILocatedException locatedException)
 		{
-			if (ALocatedException.Line == 1)
-				ALocatedException.LinePos += AOffset.X;
-			if (ALocatedException.Line >= 0)
-				ALocatedException.Line += AOffset.Y;
+			if (locatedException.Line == 1)
+				locatedException.LinePos += offset.X;
+			if (locatedException.Line >= 0)
+				locatedException.Line += offset.Y;
 		}
 
 		public void Prepare()
 		{
-			FResultPanel.Clear();
+			_resultPanel.Clear();
 			PrepareForExecute();
 
-			var LResult = new StringBuilder();
+			var result = new StringBuilder();
 
-			var LErrors = new ErrorList();
+			var errors = new ErrorList();
 			try
 			{
-				using (var LStatusForm = new StatusForm(Strings.ProcessingQuery))
+				using (var statusForm = new StatusForm(Strings.ProcessingQuery))
 				{
-					bool LAttemptExecute = true;
+					bool attemptExecute = true;
 					try
 					{
-						DateTime LStartTime = DateTime.Now;
+						DateTime startTime = DateTime.Now;
 						try
 						{
-							IServerScript LScript;
-							IServerProcess LProcess =
+							IServerScript script;
+							IServerProcess process =
 								DataSession.ServerSession.StartProcess(
 									new ProcessInfo(DataSession.ServerSession.SessionInfo));
 							try
 							{
-								LScript = LProcess.PrepareScript(GetTextToExecute());
+								script = process.PrepareScript(GetTextToExecute());
 								try
 								{
-									if (ScriptExecutionUtility.ConvertParserErrors(LScript.Messages, LErrors))
+									if (ScriptExecutionUtility.ConvertParserErrors(script.Messages, errors))
 									{
-										foreach (IServerBatch LBatch in LScript.Batches)
+										foreach (IServerBatch batch in script.Batches)
 										{
-											if (LBatch.IsExpression())
+											if (batch.IsExpression())
 											{
-												IServerExpressionPlan LPlan = LBatch.PrepareExpression(null);
+												IServerExpressionPlan plan = batch.PrepareExpression(null);
 												try
 												{
-													LAttemptExecute &=
-														ScriptExecutionUtility.ConvertCompilerErrors(LPlan.Messages,
-																									 LErrors);
-													if (LAttemptExecute)
+													attemptExecute &=
+														ScriptExecutionUtility.ConvertCompilerErrors(plan.Messages,
+																									 errors);
+													if (attemptExecute)
 													{
-														LResult.AppendFormat
+														result.AppendFormat
 														(
 															Strings.PrepareSuccessful,
 															new object[]
 															{
-																LPlan.PlanStatistics.PrepareTime.ToString(),
-																LPlan.PlanStatistics.CompileTime.ToString(),
-																LPlan.PlanStatistics.OptimizeTime.ToString(),
-																LPlan.PlanStatistics.BindingTime.ToString()
+																plan.PlanStatistics.PrepareTime.ToString(),
+																plan.PlanStatistics.CompileTime.ToString(),
+																plan.PlanStatistics.OptimizeTime.ToString(),
+																plan.PlanStatistics.BindingTime.ToString()
 															}
 														);
-														LResult.Append("\r\n");
+														result.Append("\r\n");
 													}
 												}
 												finally
 												{
-													LBatch.UnprepareExpression(LPlan);
+													batch.UnprepareExpression(plan);
 												}
 											}
 											else
 											{
-												IServerStatementPlan LPlan = LBatch.PrepareStatement(null);
+												IServerStatementPlan plan = batch.PrepareStatement(null);
 												try
 												{
-													LAttemptExecute &=
-														ScriptExecutionUtility.ConvertCompilerErrors(LPlan.Messages,
-																									 LErrors);
-													if (LAttemptExecute)
+													attemptExecute &=
+														ScriptExecutionUtility.ConvertCompilerErrors(plan.Messages,
+																									 errors);
+													if (attemptExecute)
 													{
-														LResult.AppendFormat
+														result.AppendFormat
 														(
 															Strings.PrepareSuccessful,
 															new object[]
 															{
-																LPlan.PlanStatistics.PrepareTime.ToString(),
-																LPlan.PlanStatistics.CompileTime.ToString(),
-																LPlan.PlanStatistics.OptimizeTime.ToString(),
-																LPlan.PlanStatistics.BindingTime.ToString()
+																plan.PlanStatistics.PrepareTime.ToString(),
+																plan.PlanStatistics.CompileTime.ToString(),
+																plan.PlanStatistics.OptimizeTime.ToString(),
+																plan.PlanStatistics.BindingTime.ToString()
 															}
 														);
-														LResult.Append("\r\n");
+														result.Append("\r\n");
 													}
 												}
 												finally
 												{
-													LBatch.UnprepareStatement(LPlan);
+													batch.UnprepareStatement(plan);
 												}
 											}
 
-											AppendResultPanel(LResult.ToString());
-											LResult.Length = 0;
+											AppendResultPanel(result.ToString());
+											result.Length = 0;
 										}
 									}
 								}
 								finally
 								{
-									LProcess.UnprepareScript(LScript);
+									process.UnprepareScript(script);
 								}
 							}
 							finally
 							{
-								DataSession.ServerSession.StopProcess(LProcess);
+								DataSession.ServerSession.StopProcess(process);
 							}
 						}
 						finally
 						{
-							TimeSpan LElapsed = DateTime.Now - LStartTime;
-							FExecutionTimeStatus.Text = LElapsed.ToString();
+							TimeSpan elapsed = DateTime.Now - startTime;
+							_executionTimeStatus.Text = elapsed.ToString();
 						}
 
-						if (LAttemptExecute)
+						if (attemptExecute)
 							SetStatus(Strings.ScriptPrepareSuccessful);
 						else
 							SetStatus(Strings.ScriptPrepareFailed);
 					}
-					catch (Exception LException)
+					catch (Exception exception)
 					{
 						SetStatus(Strings.ScriptFailed);
-						LErrors.Add(LException);
+						errors.Add(exception);
 					}
 				}
 			}
 			finally
 			{
-				ProcessErrors(LErrors);
+				ProcessErrors(errors);
 			}
 		}
 
@@ -428,38 +428,38 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		{
 			PrepareForExecute();
 
-			string LPlan;
-			var LErrors = new ErrorList();
+			string plan;
+			var errors = new ErrorList();
 			try
 			{
-				using (var LStatusForm = new StatusForm(Strings.ProcessingQuery))
+				using (var statusForm = new StatusForm(Strings.ProcessingQuery))
 				{
-					DateTime LStartTime = DateTime.Now;
+					DateTime startTime = DateTime.Now;
 					try
 					{
-						var LParams = new DataParams();
-						LParams.Add(DataParam.Create(Dataphoria.UtilityProcess, "AQuery", GetTextToExecute()));
-						LPlan = ((DAE.Runtime.Data.Scalar)Dataphoria.EvaluateQuery("ShowPlan(AQuery)", LParams)).AsString;
+						var paramsValue = new DataParams();
+						paramsValue.Add(DataParam.Create(Dataphoria.UtilityProcess, "AQuery", GetTextToExecute()));
+						plan = ((DAE.Runtime.Data.Scalar)Dataphoria.EvaluateQuery("ShowPlan(AQuery)", paramsValue)).AsString;
 					}
 					finally
 					{
-						TimeSpan LElapsed = DateTime.Now - LStartTime;
-						FExecutionTimeStatus.Text = LElapsed.ToString();
+						TimeSpan elapsed = DateTime.Now - startTime;
+						_executionTimeStatus.Text = elapsed.ToString();
 					}
 				}
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				LErrors.Add(LException);
-				ProcessErrors(LErrors);
+				errors.Add(exception);
+				ProcessErrors(errors);
 				SetStatus(Strings.ScriptAnalyzeFailed);
 				return;
 			}
 
 			SetStatus(Strings.ScriptAnalyzeSuccessful);
 
-			var LAnalyzer = (Analyzer.Analyzer) Dataphoria.OpenDesigner(Dataphoria.GetDefaultDesigner("pla"), null);
-			LAnalyzer.LoadPlan(LPlan);
+			var analyzer = (Analyzer.Analyzer) Dataphoria.OpenDesigner(Dataphoria.GetDefaultDesigner("pla"), null);
+			analyzer.LoadPlan(plan);
 		}
 
 		public void AnalyzeLine()
@@ -480,16 +480,16 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			CancelExecute();
 
 			PrepareForExecute();
-			FResultPanel.Clear();
+			_resultPanel.Clear();
 
 			FExecuteMenuItem.Enabled = false;
 			FExecuteButton.Enabled = false;
 			FExecuteLineMenuItem.Enabled = false;
 			FCancelExecuteMenuItem.Enabled = true;
 			FCancelExecuteButton.Enabled = true;
-			FWorkingAnimation.Visible = true;
+			_workingAnimation.Visible = true;
 
-			FExecutor = 
+			_executor = 
 				new ScriptExecutor
 				(
 					DataSession.ServerSession, 
@@ -498,22 +498,22 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 					ExecutorFinished,
 					GetExecuteLocator()
 				);
-			FExecutor.Start();
+			_executor.Start();
 		}
 
 		public bool SelectLine()
 		{
-			if (FTextEdit.Document.TextLength > 0)
+			if (_textEdit.Document.TextLength > 0)
 			{
 				// Select the current line
-				LineSegment LLine = FTextEdit.Document.GetLineSegment(FTextEdit.ActiveTextAreaControl.Caret.Line);
-				FTextEdit.ActiveTextAreaControl.SelectionManager.SetSelection
+				LineSegment line = _textEdit.Document.GetLineSegment(_textEdit.ActiveTextAreaControl.Caret.Line);
+				_textEdit.ActiveTextAreaControl.SelectionManager.SetSelection
 				(
 					new DefaultSelection
 					(
-						FTextEdit.Document,
-						new TextLocation(0, FTextEdit.ActiveTextAreaControl.Caret.Line),
-						new TextLocation(LLine.Length, FTextEdit.ActiveTextAreaControl.Caret.Line)
+						_textEdit.Document,
+						new TextLocation(0, _textEdit.ActiveTextAreaControl.Caret.Line),
+						new TextLocation(line.Length, _textEdit.ActiveTextAreaControl.Caret.Line)
 					)
 				);
 				return true;
@@ -527,16 +527,16 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 				Execute();
 		}
 
-		private void ExecutorProgress(PlanStatistics AStatistics, string AResults)
+		private void ExecutorProgress(PlanStatistics statistics, string results)
 		{
 			if (!IsDisposed)
-				AppendResultPanel(AResults);
+				AppendResultPanel(results);
 		}
 
-		private void ExecutorFinished(ErrorList AMessages, TimeSpan AElapsedTime)
+		private void ExecutorFinished(ErrorList messages, TimeSpan elapsedTime)
 		{
 			// Stop animation & update controls
-			FWorkingAnimation.Visible = false;
+			_workingAnimation.Visible = false;
 			FExecuteLineMenuItem.Enabled = true;
 			FExecuteMenuItem.Enabled = true;
 			FExecuteButton.Enabled = true;
@@ -544,26 +544,26 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			FCancelExecuteButton.Enabled = false;
 
 			// Handler Error/Warnings
-			ProcessErrors(AMessages);
-			if (ScriptExecutionUtility.ContainsError(AMessages))
+			ProcessErrors(messages);
+			if (ScriptExecutionUtility.ContainsError(messages))
 				SetStatus(Strings.ScriptFailed);
 			else
 				SetStatus(Strings.ScriptSuccessful);
 
 			// Handle execution time
-			FExecutionTimeStatus.Text = AElapsedTime.ToString();
+			_executionTimeStatus.Text = elapsedTime.ToString();
 
-			FExecutor = null;
+			_executor = null;
 		}
 
 		private void CancelExecute()
 		{
-			if (FExecutor != null)
+			if (_executor != null)
 			{
 				try
 				{
-					FExecutor.Stop();
-					FExecutor = null;
+					_executor.Stop();
+					_executor = null;
 				}
 				finally
 				{
@@ -576,10 +576,10 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		// IErrorSource
 
-		protected override void OnClosing(CancelEventArgs AArgs)
+		protected override void OnClosing(CancelEventArgs args)
 		{
-			base.OnClosing(AArgs);
-			if (FExecutor != null)
+			base.OnClosing(args);
+			if (_executor != null)
 			{
 				if 
 				(
@@ -592,7 +592,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 				)
 					CancelExecute();
 				else
-					AArgs.Cancel = true;
+					args.Cancel = true;
 			}
 		}
 
@@ -600,35 +600,35 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		#region Exporting
 
-		private void PromptAndExport(ExportType ATypes)
+		private void PromptAndExport(ExportType types)
 		{
-			using (var LSaveDialog = new SaveFileDialog())
+			using (var saveDialog = new SaveFileDialog())
 			{
-				LSaveDialog.Title = Strings.ExportSaveDialogTitle;
-				LSaveDialog.Filter = "XML Schema (*.xsd)|*.xsd|XML File (*.xml)|*.xml|All Files (*.*)|*.*";
-				if (ATypes == ExportType.Schema) // schema only
+				saveDialog.Title = Strings.ExportSaveDialogTitle;
+				saveDialog.Filter = "XML Schema (*.xsd)|*.xsd|XML File (*.xml)|*.xml|All Files (*.*)|*.*";
+				if (types == ExportType.Schema) // schema only
 				{
-					LSaveDialog.DefaultExt = "xsd";
-					LSaveDialog.FilterIndex = 1;
+					saveDialog.DefaultExt = "xsd";
+					saveDialog.FilterIndex = 1;
 				}
 				else
 				{
-					LSaveDialog.DefaultExt = "xml";
-					LSaveDialog.FilterIndex = 2;
+					saveDialog.DefaultExt = "xml";
+					saveDialog.FilterIndex = 2;
 				}
-				LSaveDialog.RestoreDirectory = false;
-				LSaveDialog.InitialDirectory = ".";
-				LSaveDialog.OverwritePrompt = true;
-				LSaveDialog.CheckPathExists = true;
-				LSaveDialog.AddExtension = true;
+				saveDialog.RestoreDirectory = false;
+				saveDialog.InitialDirectory = ".";
+				saveDialog.OverwritePrompt = true;
+				saveDialog.CheckPathExists = true;
+				saveDialog.AddExtension = true;
 
-				if (LSaveDialog.ShowDialog() != DialogResult.OK)
+				if (saveDialog.ShowDialog() != DialogResult.OK)
 					throw new AbortException();
 
 				Cursor = Cursors.WaitCursor;
 				try
 				{
-					Execute(ATypes, LSaveDialog.FileName);
+					Execute(types, saveDialog.FileName);
 				}
 				finally
 				{
@@ -637,54 +637,54 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			}
 		}
 
-		private void Execute(ExportType AExportType, string AFileName)
+		private void Execute(ExportType exportType, string fileName)
 		{
 			// Make sure our server is connected...
 			Dataphoria.EnsureServerConnection();
 
-			using (var LStatusForm = new StatusForm(Strings.Exporting))
+			using (var statusForm = new StatusForm(Strings.Exporting))
 			{
-				using (var LConnection = new DAEConnection())
+				using (var connection = new DAEConnection())
 				{
 					if (DesignerID == "SQL")
 						SwitchToSQL();
 					try
 					{
-						using (var LAdapter = new DAEDataAdapter(GetTextToExecute(), LConnection))
+						using (var adapter = new DAEDataAdapter(GetTextToExecute(), connection))
 						{
-							using (var LDataSet = new DataSet())
+							using (var dataSet = new DataSet())
 							{
-								var LProcess =
+								var process =
 									DataSession.ServerSession.StartProcess(new ProcessInfo(DataSession.ServerSession.SessionInfo));
 								try
 								{
-									LConnection.Open(DataSession.Server, DataSession.ServerSession, LProcess);
+									connection.Open(DataSession.Server, DataSession.ServerSession, process);
 									try
 									{
-										switch (AExportType)
+										switch (exportType)
 										{
 											case ExportType.Data:
-												LAdapter.Fill(LDataSet);
-												LDataSet.WriteXml(AFileName, XmlWriteMode.IgnoreSchema);
+												adapter.Fill(dataSet);
+												dataSet.WriteXml(fileName, XmlWriteMode.IgnoreSchema);
 												break;
 											case ExportType.Schema:
-												LAdapter.FillSchema(LDataSet, SchemaType.Source);
-												LDataSet.WriteXmlSchema(AFileName);
+												adapter.FillSchema(dataSet, SchemaType.Source);
+												dataSet.WriteXmlSchema(fileName);
 												break;
 											default:
-												LAdapter.Fill(LDataSet);
-												LDataSet.WriteXml(AFileName, XmlWriteMode.WriteSchema);
+												adapter.Fill(dataSet);
+												dataSet.WriteXml(fileName, XmlWriteMode.WriteSchema);
 												break;
 										}
 									}
 									finally
 									{
-										LConnection.Close();
+										connection.Close();
 									}
 								}
 								finally
 								{
-									DataSession.ServerSession.StopProcess(LProcess);
+									DataSession.ServerSession.StopProcess(process);
 								}
 							}
 						}
@@ -702,15 +702,15 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		#region Status and tool bar
 
-		protected ToolStripStatusLabel FExecutionTimeStatus;
-		private PictureBox FWorkingAnimation;
-		protected ToolStripControlHost  FWorkingStatus;
+		protected ToolStripStatusLabel _executionTimeStatus;
+		private PictureBox _workingAnimation;
+		protected ToolStripControlHost  _workingStatus;
 
 		protected override void InitializeStatusBar()
 		{
 			base.InitializeStatusBar();
 
-			this.FExecutionTimeStatus = new ToolStripStatusLabel 
+			this._executionTimeStatus = new ToolStripStatusLabel 
 			{
 				Name = "FExecutionTimeStatus",
 				Alignment = ToolStripItemAlignment.Right,
@@ -720,36 +720,36 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 				DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
 			};
 
-			const string LCResourceName = "Alphora.Dataphor.Dataphoria.Images.Rider.gif";
-			Stream LManifestResourceStream = GetType().Assembly.GetManifestResourceStream(LCResourceName);
-			Error.AssertFail(LManifestResourceStream != null, "Resource must exist: " + LCResourceName);
-			FWorkingAnimation = 
+			const string cResourceName = "Alphora.Dataphor.Dataphoria.Images.Rider.gif";
+			Stream manifestResourceStream = GetType().Assembly.GetManifestResourceStream(cResourceName);
+			Error.AssertFail(manifestResourceStream != null, "Resource must exist: " + cResourceName);
+			_workingAnimation = 
 				new PictureBox
 				{
-					Image = Image.FromStream(LManifestResourceStream),
+					Image = Image.FromStream(manifestResourceStream),
 					SizeMode = PictureBoxSizeMode.AutoSize											
 				};
-			FWorkingStatus = new ToolStripControlHost(FWorkingAnimation, "FWorkingStatus")
+			_workingStatus = new ToolStripControlHost(_workingAnimation, "FWorkingStatus")
 			{
-				Size = FWorkingAnimation.Size,
+				Size = _workingAnimation.Size,
 				Visible = false,
 				Alignment = ToolStripItemAlignment.Right,
 			};
 			
-			FStatusStrip.Items.Add(FExecutionTimeStatus);
-			FStatusStrip.Items.Add(FWorkingStatus);
+			FStatusStrip.Items.Add(_executionTimeStatus);
+			FStatusStrip.Items.Add(_workingStatus);
 		}
 
 		protected override void DisposeStatusBar()
 		{
 			base.DisposeStatusBar();
 
-			FWorkingAnimation.Image.Dispose(); //otherwise the animation thread will still be hanging around
+			_workingAnimation.Image.Dispose(); //otherwise the animation thread will still be hanging around
 		}
 
-		public override void MergeToolbarWith(ToolStrip AParentToolStrip)
+		public override void MergeToolbarWith(ToolStrip parentToolStrip)
 		{
-			base.MergeToolbarWith(AParentToolStrip);
+			base.MergeToolbarWith(parentToolStrip);
 		}
 
 		#endregion
@@ -760,7 +760,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		{
 			Dataphoria.Debugger.PropertyChanged += Debugger_PropertyChanged;
 			Dataphoria.Debugger.Breakpoints.Changed += Debugger_BreakpointsChanged;
-			FTextEdit.ActiveTextAreaControl.TextArea.IconBarMargin.MouseDown += IconBarMouseDown;
+			_textEdit.ActiveTextAreaControl.TextArea.IconBarMargin.MouseDown += IconBarMouseDown;
 		}
 		
 		private void DeinitializeDebugger()
@@ -769,141 +769,141 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			Dataphoria.Debugger.Breakpoints.Changed -= Debugger_BreakpointsChanged;
 		}
 
-        protected override void NameOrModifiedChanged(object ASender, EventArgs AArgs)
+        protected override void NameOrModifiedChanged(object sender, EventArgs args)
         {
-			base.NameOrModifiedChanged(ASender, AArgs);
+			base.NameOrModifiedChanged(sender, args);
 			ClearBreakpointBookmarks();
 			LoadBreakpointBookmarks();
 			UpdateCurrentLocation();
 		}
 
-		private void IconBarMouseDown(AbstractMargin AIconBar, Point AMousePos, MouseButtons AMouseButtons)
+		private void IconBarMouseDown(AbstractMargin iconBar, Point mousePos, MouseButtons mouseButtons)
 		{
-			if (AMouseButtons == MouseButtons.Left)
+			if (mouseButtons == MouseButtons.Left)
 			{
 				TextLocation ALogicPos = 
-					AIconBar.TextArea.TextView.GetLogicalPosition
+					iconBar.TextArea.TextView.GetLogicalPosition
 					(
 						0, 
-						AMousePos.Y - AIconBar.TextArea.TextView.DrawingPosition.Top
+						mousePos.Y - iconBar.TextArea.TextView.DrawingPosition.Top
 					);
 
-				if (ALogicPos.Y >= 0 && ALogicPos.Y < AIconBar.TextArea.Document.TotalNumberOfLines)
+				if (ALogicPos.Y >= 0 && ALogicPos.Y < iconBar.TextArea.Document.TotalNumberOfLines)
 				{
-					var LLocator = Service.GetLocator();
-					if (LLocator != null)
-						Dataphoria.Debugger.ToggleBreakpoint(new DebugLocator(LLocator.Locator, ALogicPos.Line + 1, -1));
+					var locator = Service.GetLocator();
+					if (locator != null)
+						Dataphoria.Debugger.ToggleBreakpoint(new DebugLocator(locator.Locator, ALogicPos.Line + 1, -1));
 				}
 			}
 		}
 
-		private void Debugger_PropertyChanged(object ASender, string[] APropertyNames)
+		private void Debugger_PropertyChanged(object sender, string[] propertyNames)
 		{
-			if (Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "IsPaused" || AItem == "CurrentLocation"; }))
+			if (Array.Exists<string>(propertyNames, (string AItem) => { return AItem == "IsPaused" || AItem == "CurrentLocation"; }))
 				UpdateCurrentLocation();
 		}
 
-		private CurrentLineBookmark FCurrentBookmark;
-	    private CodeCompletionWindow FCodeCompletionWindow;
+		private CurrentLineBookmark _currentBookmark;
+	    private CodeCompletionWindow _codeCompletionWindow;
 
 	    private void UpdateCurrentLocation()
 		{
-			var LNewCurrent = Dataphoria.Debugger.CurrentLocation;
+			var newCurrent = Dataphoria.Debugger.CurrentLocation;
 			
 			// Remove the existing current bookmark if it is no longer accurate
- 			if (FCurrentBookmark != null && (LNewCurrent == null || !FCurrentBookmark.Locator.Equals(LNewCurrent)))
+ 			if (_currentBookmark != null && (newCurrent == null || !_currentBookmark.Locator.Equals(newCurrent)))
  			{
- 				FTextEdit.Document.BookmarkManager.RemoveMark(FCurrentBookmark);
- 				FCurrentBookmark.RemoveMarker();
- 				FCurrentBookmark = null;
+ 				_textEdit.Document.BookmarkManager.RemoveMark(_currentBookmark);
+ 				_currentBookmark.RemoveMarker();
+ 				_currentBookmark = null;
  			}
  			
  			// Add a new current bookmark if needed and appropriate
 			if 
 			(
-				FCurrentBookmark == null 
-					&& LNewCurrent != null 
-					&& Service.LocatorNameMatches(LNewCurrent.Locator) 
-					&& LNewCurrent.Line >= 1 
-					&& LNewCurrent.Line <= FTextEdit.Document.TotalNumberOfLines
+				_currentBookmark == null 
+					&& newCurrent != null 
+					&& Service.LocatorNameMatches(newCurrent.Locator) 
+					&& newCurrent.Line >= 1 
+					&& newCurrent.Line <= _textEdit.Document.TotalNumberOfLines
 			)
  			{
- 				var LLocation = new TextLocation(LNewCurrent.LinePos < 1 ? 0 : LNewCurrent.LinePos - 1, LNewCurrent.Line - 1);
- 				FCurrentBookmark = new CurrentLineBookmark(FTextEdit.Document, LLocation, LNewCurrent);
-				AddBookmark(FCurrentBookmark);
+ 				var location = new TextLocation(newCurrent.LinePos < 1 ? 0 : newCurrent.LinePos - 1, newCurrent.Line - 1);
+ 				_currentBookmark = new CurrentLineBookmark(_textEdit.Document, location, newCurrent);
+				AddBookmark(_currentBookmark);
  			}
 		}
 
-		private void AddBookmark(DebugBookmark ABookmark)
+		private void AddBookmark(DebugBookmark bookmark)
 		{
-			FTextEdit.Document.BookmarkManager.AddMark(ABookmark);
-			FTextEdit.ActiveTextAreaControl.TextArea.Refresh(FTextEdit.ActiveTextAreaControl.TextArea.IconBarMargin);
+			_textEdit.Document.BookmarkManager.AddMark(bookmark);
+			_textEdit.ActiveTextAreaControl.TextArea.Refresh(_textEdit.ActiveTextAreaControl.TextArea.IconBarMargin);
 		}
 
-		private void RemoveBookmark(BreakpointBookmark ABookmark)
+		private void RemoveBookmark(BreakpointBookmark bookmark)
 		{
-			FTextEdit.Document.BookmarkManager.RemoveMark(ABookmark);
-			ABookmark.RemoveMarker();
-			FTextEdit.ActiveTextAreaControl.TextArea.Refresh(FTextEdit.ActiveTextAreaControl.TextArea.IconBarMargin);
+			_textEdit.Document.BookmarkManager.RemoveMark(bookmark);
+			bookmark.RemoveMarker();
+			_textEdit.ActiveTextAreaControl.TextArea.Refresh(_textEdit.ActiveTextAreaControl.TextArea.IconBarMargin);
 		}
 
-		private void Debugger_BreakpointsChanged(NotifyingBaseList<DebugLocator> ASender, bool AIsAdded, DebugLocator AItem, int AIndex)
+		private void Debugger_BreakpointsChanged(NotifyingBaseList<DebugLocator> sender, bool isAdded, DebugLocator item, int index)
 		{
-			if (Service.LocatorNameMatches(AItem.Locator))
+			if (Service.LocatorNameMatches(item.Locator))
 			{
-				if (AIsAdded)
-					AddBreakpointBookmark(AItem);
+				if (isAdded)
+					AddBreakpointBookmark(item);
 				else
 				{
-					var LOldBookmark = (BreakpointBookmark)FTextEdit.Document.BookmarkManager.GetFirstMark((Bookmark APredicate) => { return (APredicate is BreakpointBookmark) && ((BreakpointBookmark)APredicate).Locator == AItem; });
-					if (LOldBookmark != null)
-						RemoveBookmark(LOldBookmark);
+					var oldBookmark = (BreakpointBookmark)_textEdit.Document.BookmarkManager.GetFirstMark((Bookmark APredicate) => { return (APredicate is BreakpointBookmark) && ((BreakpointBookmark)APredicate).Locator == item; });
+					if (oldBookmark != null)
+						RemoveBookmark(oldBookmark);
 				}
 			}
 		}
 		
 		private void LoadBreakpointBookmarks()
 		{
-			foreach (DebugLocator LItem in Dataphoria.Debugger.Breakpoints)
-				if (Service.LocatorNameMatches(LItem.Locator))
-					AddBreakpointBookmark(LItem);
+			foreach (DebugLocator item in Dataphoria.Debugger.Breakpoints)
+				if (Service.LocatorNameMatches(item.Locator))
+					AddBreakpointBookmark(item);
 		}
 
 		private void ClearBreakpointBookmarks()
 		{
-			for (int i = FTextEdit.Document.BookmarkManager.Marks.Count - 1; i >= 0; i--)
+			for (int i = _textEdit.Document.BookmarkManager.Marks.Count - 1; i >= 0; i--)
 			{
-				var LBookmark = FTextEdit.Document.BookmarkManager.Marks[i] as BreakpointBookmark;
-				if (LBookmark != null)
-					RemoveBookmark(LBookmark);
+				var bookmark = _textEdit.Document.BookmarkManager.Marks[i] as BreakpointBookmark;
+				if (bookmark != null)
+					RemoveBookmark(bookmark);
 			}
 		}
 
-		private void AddBreakpointBookmark(DebugLocator AItem)
+		private void AddBreakpointBookmark(DebugLocator item)
 		{
-			var LLocation = new TextLocation((AItem.LinePos >= 0 ? AItem.LinePos - 1 : 0), AItem.Line - 1);
-			var LNewBookmark = new BreakpointBookmark(FTextEdit.Document, LLocation, AItem);
-			AddBookmark(LNewBookmark);
+			var location = new TextLocation((item.LinePos >= 0 ? item.LinePos - 1 : 0), item.Line - 1);
+			var newBookmark = new BreakpointBookmark(_textEdit.Document, location, item);
+			AddBookmark(newBookmark);
 		}
 
 		private DebugLocator GetExecuteLocator()
 		{
-			var LLocator = Service.GetLocator();
-			if (LLocator != null)
+			var locator = Service.GetLocator();
+			if (locator != null)
 			{
-				if (FTextEdit.ActiveTextAreaControl.SelectionManager.HasSomethingSelected)
+				if (_textEdit.ActiveTextAreaControl.SelectionManager.HasSomethingSelected)
 				{
-					TextLocation LLocation = FTextEdit.ActiveTextAreaControl.SelectionManager.SelectionCollection[0].StartPosition;
+					TextLocation location = _textEdit.ActiveTextAreaControl.SelectionManager.SelectionCollection[0].StartPosition;
 					return 
 						new DebugLocator
 						(
-							LLocator.Locator, 
-							LLocation.Line + 1, 
-							LLocation.Column + 1
+							locator.Locator, 
+							location.Line + 1, 
+							location.Column + 1
 						);
 				}
 				else
-					return LLocator;
+					return locator;
 			}
 			else
 				return null;
@@ -911,11 +911,11 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		private void ToggleBreakpoint()
 		{
-			var LLocator = Service.GetLocator();
-			if (LLocator != null)
+			var locator = Service.GetLocator();
+			if (locator != null)
 				Dataphoria.Debugger.ToggleBreakpoint
 				(
-					new DebugLocator(LLocator.Locator, FTextEdit.ActiveTextAreaControl.Caret.Line + 1, -1)
+					new DebugLocator(locator.Locator, _textEdit.ActiveTextAreaControl.Caret.Line + 1, -1)
 				);
 		}
 
@@ -960,17 +960,17 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		private void SelectBlockClicked(object sender, EventArgs e)
 		{
-			new SelectBlock().Execute(FTextEdit.ActiveTextAreaControl.TextArea);
+			new SelectBlock().Execute(_textEdit.ActiveTextAreaControl.TextArea);
 		}
 
 		private void PriorBlockClicked(object sender, EventArgs e)
 		{
-			new PriorBlock().Execute(FTextEdit.ActiveTextAreaControl.TextArea);
+			new PriorBlock().Execute(_textEdit.ActiveTextAreaControl.TextArea);
 		}
 
 		private void NextBlockClicked(object sender, EventArgs e)
 		{
-			new NextBlock().Execute(FTextEdit.ActiveTextAreaControl.TextArea);
+			new NextBlock().Execute(_textEdit.ActiveTextAreaControl.TextArea);
 		}
 
 		private void ToggleBreakpointClicked(object sender, EventArgs e)

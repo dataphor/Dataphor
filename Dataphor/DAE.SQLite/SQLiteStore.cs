@@ -19,8 +19,8 @@ namespace Alphora.Dataphor.DAE.Store.SQLite
 	{
 		protected override void InternalInitialize()
 		{
-			FSupportsMARS = true;
-			FSupportsUpdatableCursor = false;
+			_supportsMARS = true;
+			_supportsUpdatableCursor = false;
 		}
 
 		public override SQLConnection GetSQLConnection()

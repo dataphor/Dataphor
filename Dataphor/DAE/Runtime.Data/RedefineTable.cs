@@ -22,75 +22,75 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public class RedefineTable : Table
     {
-		public RedefineTable(RedefineNode ANode, Program AProgram) : base(ANode, AProgram){}
+		public RedefineTable(RedefineNode node, Program program) : base(node, program){}
 
-        public new RedefineNode Node { get { return (RedefineNode)FNode; } }
+        public new RedefineNode Node { get { return (RedefineNode)_node; } }
         
-		protected Table FSourceTable;
-		protected Row FSourceRow;
+		protected Table _sourceTable;
+		protected Row _sourceRow;
         
         protected override void InternalOpen()
         {
-			FSourceTable = Node.Nodes[0].Execute(Program) as Table;
+			_sourceTable = Node.Nodes[0].Execute(Program) as Table;
 			try
 			{
-				FSourceRow = new Row(Manager, FSourceTable.DataType.RowType);
+				_sourceRow = new Row(Manager, _sourceTable.DataType.RowType);
 			}
 			catch
 			{
-				FSourceTable.Dispose();
-				FSourceTable = null;
+				_sourceTable.Dispose();
+				_sourceTable = null;
 				throw;
 			}
         }
         
         protected override void InternalClose()
         {
-			if (FSourceTable != null)
+			if (_sourceTable != null)
 			{
-				FSourceTable.Dispose();
-				FSourceTable = null;
+				_sourceTable.Dispose();
+				_sourceTable = null;
 			}
 
-            if (FSourceRow != null)
+            if (_sourceRow != null)
             {
-				FSourceRow.Dispose();
-                FSourceRow = null;
+				_sourceRow.Dispose();
+                _sourceRow = null;
             }
         }
         
         protected override void InternalReset()
         {
-            FSourceTable.Reset();
+            _sourceTable.Reset();
         }
         
-        protected override void InternalSelect(Row ARow)
+        protected override void InternalSelect(Row row)
         {
-            FSourceTable.Select(FSourceRow);
+            _sourceTable.Select(_sourceRow);
 
-			int LColumnIndex;            
-            for (int LIndex = 0; LIndex < Node.DataType.Columns.Count; LIndex++)
+			int columnIndex;            
+            for (int index = 0; index < Node.DataType.Columns.Count; index++)
             {
-				if (!((IList)Node.RedefineColumnOffsets).Contains(LIndex))
+				if (!((IList)Node.RedefineColumnOffsets).Contains(index))
 				{
-					LColumnIndex = ARow.DataType.Columns.IndexOfName(DataType.Columns[LIndex].Name);
-					if (LColumnIndex >= 0)
-						if (FSourceRow.HasValue(LIndex))
-							ARow[LColumnIndex] = FSourceRow[LIndex];
+					columnIndex = row.DataType.Columns.IndexOfName(DataType.Columns[index].Name);
+					if (columnIndex >= 0)
+						if (_sourceRow.HasValue(index))
+							row[columnIndex] = _sourceRow[index];
 						else
-							ARow.ClearValue(LColumnIndex);
+							row.ClearValue(columnIndex);
 				}
             }
 
-	        Program.Stack.Push(FSourceRow);
+	        Program.Stack.Push(_sourceRow);
             try
             {
-				for (int LIndex = 0; LIndex < Node.RedefineColumnOffsets.Length; LIndex++)
+				for (int index = 0; index < Node.RedefineColumnOffsets.Length; index++)
 				{
-					LColumnIndex = ARow.DataType.Columns.IndexOfName(Node.DataType.Columns[Node.RedefineColumnOffsets[LIndex]].Name);
-					if (LColumnIndex >= 0)
+					columnIndex = row.DataType.Columns.IndexOfName(Node.DataType.Columns[Node.RedefineColumnOffsets[index]].Name);
+					if (columnIndex >= 0)
 					{
-						ARow[LColumnIndex] = Node.Nodes[LIndex + 1].Execute(Program);
+						row[columnIndex] = Node.Nodes[index + 1].Execute(Program);
 					}
 				}
             }
@@ -102,17 +102,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected override bool InternalNext()
         {
-            return FSourceTable.Next();
+            return _sourceTable.Next();
         }
         
         protected override bool InternalBOF()
         {
-            return FSourceTable.BOF();
+            return _sourceTable.BOF();
         }
         
         protected override bool InternalEOF()
         {
-            return FSourceTable.EOF();
+            return _sourceTable.EOF();
         }
     }
 }

@@ -31,194 +31,194 @@ namespace Alphora.Dataphor.DAE.Client
 
 	public static class ScriptExecutionUtility
 	{
-		public static void ExecuteScript(IServerSession ASession, string AScript, ScriptExecuteOption AOptions, out ErrorList AErrors, out TimeSpan ATimeElapsed, ReportScriptProgressHandler AReportScriptProgress, DebugLocator ALocator)
+		public static void ExecuteScript(IServerSession session, string script, ScriptExecuteOption options, out ErrorList errors, out TimeSpan timeElapsed, ReportScriptProgressHandler reportScriptProgress, DebugLocator locator)
 		{
-			IServerProcess LProcess = ASession.StartProcess(new ProcessInfo(ASession.SessionInfo));
+			IServerProcess process = session.StartProcess(new ProcessInfo(session.SessionInfo));
 			try
 			{
-				ExecuteScript(LProcess, AScript, AOptions, out AErrors, out ATimeElapsed, AReportScriptProgress, ALocator);
+				ExecuteScript(process, script, options, out errors, out timeElapsed, reportScriptProgress, locator);
 			}
 			finally
 			{
-				ASession.StopProcess(LProcess);
+				session.StopProcess(process);
 			}
 		}
 
-		public static void ExecuteScript(IServerProcess AProcess, string AScript, ScriptExecuteOption AOptions, out ErrorList AErrors, out TimeSpan ATimeElapsed, ReportScriptProgressHandler AReportScriptProgress, DebugLocator ALocator)
+		public static void ExecuteScript(IServerProcess process, string script, ScriptExecuteOption options, out ErrorList errors, out TimeSpan timeElapsed, ReportScriptProgressHandler reportScriptProgress, DebugLocator locator)
 		{
-			StringBuilder LResult = new StringBuilder();
-			AErrors = new ErrorList();
-			ATimeElapsed = TimeSpan.Zero;
+			StringBuilder result = new StringBuilder();
+			errors = new ErrorList();
+			timeElapsed = TimeSpan.Zero;
 
-			bool LAttemptExecute = true;
-			DateTime LStartTime = DateTime.Now;
+			bool attemptExecute = true;
+			DateTime startTime = DateTime.Now;
 			try
 			{
-				IServerScript LScript = AProcess.PrepareScript(AScript, ALocator);
+				IServerScript localScript = process.PrepareScript(script, locator);
 				try
 				{
-					if (ConvertParserErrors(LScript.Messages, AErrors))
+					if (ConvertParserErrors(localScript.Messages, errors))
 					{
-						foreach (IServerBatch LBatch in LScript.Batches)
+						foreach (IServerBatch batch in localScript.Batches)
 						{
-							PlanStatistics LStatistics = null;
+							PlanStatistics statistics = null;
 							try
 							{
-								if (LBatch.IsExpression())
+								if (batch.IsExpression())
 								{
-									IServerExpressionPlan LPlan = LBatch.PrepareExpression(null);
+									IServerExpressionPlan plan = batch.PrepareExpression(null);
 									try
 									{
-										LAttemptExecute &= ConvertCompilerErrors(LPlan.Messages, AErrors);
-										if (LAttemptExecute)
+										attemptExecute &= ConvertCompilerErrors(plan.Messages, errors);
+										if (attemptExecute)
 										{
-											int LRowCount = ReadResult(LResult, LPlan);
+											int rowCount = ReadResult(result, plan);
 
-											AppendStatistics(LResult, AOptions, LPlan.PlanStatistics, LPlan.ProgramStatistics, LRowCount);
-											LStatistics = LPlan.PlanStatistics;
+											AppendStatistics(result, options, plan.PlanStatistics, plan.ProgramStatistics, rowCount);
+											statistics = plan.PlanStatistics;
 										}
 									}
 									finally
 									{
-										LBatch.UnprepareExpression(LPlan);
+										batch.UnprepareExpression(plan);
 									}
 								}
 								else
 								{
-									IServerStatementPlan LPlan = LBatch.PrepareStatement(null);
+									IServerStatementPlan plan = batch.PrepareStatement(null);
 									try
 									{
-										LAttemptExecute &= ConvertCompilerErrors(LPlan.Messages, AErrors);
-										if (LAttemptExecute)
+										attemptExecute &= ConvertCompilerErrors(plan.Messages, errors);
+										if (attemptExecute)
 										{
-											LPlan.Execute(null);
+											plan.Execute(null);
 
-											AppendStatistics(LResult, AOptions, LPlan.PlanStatistics, LPlan.ProgramStatistics, -1);
-											LStatistics = LPlan.PlanStatistics;
+											AppendStatistics(result, options, plan.PlanStatistics, plan.ProgramStatistics, -1);
+											statistics = plan.PlanStatistics;
 										}
 									}
 									finally
 									{
-										LBatch.UnprepareStatement(LPlan);
+										batch.UnprepareStatement(plan);
 									}
 								}
 							}
 							finally
 							{
-								if (AReportScriptProgress != null)
-									AReportScriptProgress(LStatistics, LResult.ToString());
-								LResult.Length = 0;
+								if (reportScriptProgress != null)
+									reportScriptProgress(statistics, result.ToString());
+								result.Length = 0;
 							}
 						}	// foreach batch...
 					}	// if (no parser errors)...
 				}
 				finally
 				{
-					AProcess.UnprepareScript(LScript);
+					process.UnprepareScript(localScript);
 				}
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				AErrors.Add(LException);
+				errors.Add(exception);
 			}
-			ATimeElapsed = DateTime.Now - LStartTime;
+			timeElapsed = DateTime.Now - startTime;
 		}
 
 		private static int ReadResult(StringBuilder LResult, IServerExpressionPlan LPlan)
 		{
-			int LRowCount;
+			int rowCount;
 			if (LPlan.DataType is DAE.Schema.ITableType)
 			{
-				IServerCursor LCursor = LPlan.Open(null);
+				IServerCursor cursor = LPlan.Open(null);
 				try
 				{
-					LRowCount = ResultsFromCursor(LCursor, LResult);
+					rowCount = ResultsFromCursor(cursor, LResult);
 					LResult.Append("\r\n");
 				}
 				finally
 				{
-					LPlan.Close(LCursor);
+					LPlan.Close(cursor);
 				}
 			}
 			else
 			{
-				DataValue LValue = LPlan.Evaluate(null);
-				LRowCount = -1; // row count not applicable
-				if ((LValue == null) || LValue.IsNil)
+				DataValue value = LPlan.Evaluate(null);
+				rowCount = -1; // row count not applicable
+				if ((value == null) || value.IsNil)
 					LResult.Append(Strings.Get("NoValue"));
 				else
 					if (LPlan.DataType is DAE.Schema.IRowType)
-						ResultsFromRow((Row)LValue, LResult);
+						ResultsFromRow((Row)value, LResult);
 					else if (LPlan.DataType is DAE.Schema.IListType)
-						ResultsFromList((ListValue)LValue, LResult);
+						ResultsFromList((ListValue)value, LResult);
 					else if (LPlan.DataType is DAE.Schema.IScalarType)
-						LResult.Append(((Scalar)LValue).AsDisplayString);
+						LResult.Append(((Scalar)value).AsDisplayString);
 					else
 						LResult.Append(String.Format("<Unknown Result Type: {0}>", LPlan.DataType.Name));
 				LResult.Append("\r\n");
 			}
-			return LRowCount;
+			return rowCount;
 		}
 
-		private static void AppendStatistics(StringBuilder AResult, ScriptExecuteOption AOptions, PlanStatistics AStatistics, ProgramStatistics AProgramStatistics, int ARowCount)
+		private static void AppendStatistics(StringBuilder result, ScriptExecuteOption options, PlanStatistics statistics, ProgramStatistics programStatistics, int rowCount)
 		{
-			if ((AOptions & ScriptExecuteOption.ShowSuccessStatus) != 0)
+			if ((options & ScriptExecuteOption.ShowSuccessStatus) != 0)
 			{
-				AResult.Append(Strings.Get("ExecuteSuccess"));
-				if (ARowCount != -1)
+				result.Append(Strings.Get("ExecuteSuccess"));
+				if (rowCount != -1)
 				{
-					if (ARowCount == 1)
-						AResult.Append(Strings.Get("ExecuteSuccessRowCountSingular"));
+					if (rowCount == 1)
+						result.Append(Strings.Get("ExecuteSuccessRowCountSingular"));
 					else
-						AResult.AppendFormat(Strings.Get("ExecuteSuccessRowCountPlural"), ARowCount.ToString("#,##0"));
+						result.AppendFormat(Strings.Get("ExecuteSuccessRowCountPlural"), rowCount.ToString("#,##0"));
 				}
-				AResult.Append("\r\n");
+				result.Append("\r\n");
 			}
-			if ((AOptions & ScriptExecuteOption.ShowPrepareTime) != 0)
+			if ((options & ScriptExecuteOption.ShowPrepareTime) != 0)
 			{
-				AResult.AppendFormat(Strings.Get("PrepareTime"), AStatistics.PrepareTime.ToString(), AStatistics.CompileTime.ToString(), AStatistics.OptimizeTime.ToString(), AStatistics.BindingTime.ToString());
-				AResult.Append("\r\n");
+				result.AppendFormat(Strings.Get("PrepareTime"), statistics.PrepareTime.ToString(), statistics.CompileTime.ToString(), statistics.OptimizeTime.ToString(), statistics.BindingTime.ToString());
+				result.Append("\r\n");
 			}
-			if ((AOptions & ScriptExecuteOption.ShowExecutionTime) != 0)
+			if ((options & ScriptExecuteOption.ShowExecutionTime) != 0)
 			{
-				AResult.AppendFormat(Strings.Get("ExecuteTime"), AProgramStatistics.ExecuteTime.ToString(), AProgramStatistics.DeviceExecuteTime.ToString(), AProgramStatistics.ExecuteTime == TimeSpan.Zero ? "N/A" : String.Format("{0}%", ((Convert.ToDecimal(AProgramStatistics.DeviceExecuteTime.Ticks) / AProgramStatistics.ExecuteTime.Ticks) * 100).ToString("F6")));
-				AResult.Append("\r\n");
+				result.AppendFormat(Strings.Get("ExecuteTime"), programStatistics.ExecuteTime.ToString(), programStatistics.DeviceExecuteTime.ToString(), programStatistics.ExecuteTime == TimeSpan.Zero ? "N/A" : String.Format("{0}%", ((Convert.ToDecimal(programStatistics.DeviceExecuteTime.Ticks) / programStatistics.ExecuteTime.Ticks) * 100).ToString("F6")));
+				result.Append("\r\n");
 			}
 		}
 
 		/// <returns> True if no errors.  Continue processing... </returns>
-		public static bool ConvertParserErrors(DAE.Language.ParserMessages AMessages, ErrorList AErrors)
+		public static bool ConvertParserErrors(DAE.Language.ParserMessages messages, ErrorList errors)
 		{
-			bool LError = false;
-			foreach (Exception LException in AMessages)
+			bool error = false;
+			foreach (Exception exception in messages)
 			{
-				AErrors.Add(LException);
-				LError = true;
+				errors.Add(exception);
+				error = true;
 			}
-			return !LError;
+			return !error;
 		}
 
 		/// <returns> True if no errors.  Continue processing... </returns>
-		public static bool ConvertCompilerErrors(CompilerMessages AMessages, ErrorList AErrors)
+		public static bool ConvertCompilerErrors(CompilerMessages messages, ErrorList errors)
 		{
-			bool LAnyErrors = false;
-			CompilerException LCompilerException;
-			foreach (Exception LException in AMessages)
+			bool anyErrors = false;
+			CompilerException compilerException;
+			foreach (Exception exception in messages)
 			{
-				LCompilerException = LException as CompilerException;
-				LAnyErrors = LAnyErrors || (LCompilerException == null) || (LCompilerException.ErrorLevel != CompilerErrorLevel.Warning);
-				AErrors.Add(LException);
+				compilerException = exception as CompilerException;
+				anyErrors = anyErrors || (compilerException == null) || (compilerException.ErrorLevel != CompilerErrorLevel.Warning);
+				errors.Add(exception);
 			}
-			return !LAnyErrors;
+			return !anyErrors;
 		}
 		
-		public static bool ContainsError(ErrorList AErrors)
+		public static bool ContainsError(ErrorList errors)
 		{
-			CompilerException LCompilerException;
-			foreach (Exception LException in AErrors)
+			CompilerException compilerException;
+			foreach (Exception exception in errors)
 			{
-				LCompilerException = LException as CompilerException;
-				if ((LCompilerException == null) || (LCompilerException.ErrorLevel != CompilerErrorLevel.Warning))
+				compilerException = exception as CompilerException;
+				if ((compilerException == null) || (compilerException.ErrorLevel != CompilerErrorLevel.Warning))
 					return true;
 			}
 			return false;
@@ -226,109 +226,109 @@ namespace Alphora.Dataphor.DAE.Client
 
 		#region Results generation
 
-		private static ResultColumn[] BuildResultColumns(DAE.Schema.IRowType ARowType)
+		private static ResultColumn[] BuildResultColumns(DAE.Schema.IRowType rowType)
 		{
-			ResultColumn[] LResult = new ResultColumn[ARowType.Columns.Count];
-			for (int i = 0; i < ARowType.Columns.Count; i++)
-				LResult[i] = new ResultColumn(ARowType.Columns[i].Name);
-			return LResult;
+			ResultColumn[] result = new ResultColumn[rowType.Columns.Count];
+			for (int i = 0; i < rowType.Columns.Count; i++)
+				result[i] = new ResultColumn(rowType.Columns[i].Name);
+			return result;
 		}
 
-		private static void ReadRow(DAE.Runtime.Data.Row ARow, ResultColumn[] LTarget)
+		private static void ReadRow(DAE.Runtime.Data.Row row, ResultColumn[] LTarget)
 		{
-			for (int LColumnIndex = 0; LColumnIndex < ARow.DataType.Columns.Count; LColumnIndex++)
+			for (int columnIndex = 0; columnIndex < row.DataType.Columns.Count; columnIndex++)
 			{
-				if (!ARow.HasValue(LColumnIndex))
-					LTarget[LColumnIndex].Add(Strings.Get("NoValue"));
+				if (!row.HasValue(columnIndex))
+					LTarget[columnIndex].Add(Strings.Get("NoValue"));
 				else		
 				{
-					string LValue;
+					string value;
 					try
 					{
-						LValue = ARow.GetValue(LColumnIndex).ToString();
+						value = row.GetValue(columnIndex).ToString();
 					}
-					catch (Exception LException)
+					catch (Exception exception)
 					{
-						LValue = "<error retrieving value: " + LException.Message.Replace("\r\n", "↵") + ">";
+						value = "<error retrieving value: " + exception.Message.Replace("\r\n", "↵") + ">";
 					}
 					
-					LTarget[LColumnIndex].Add(LValue);
+					LTarget[columnIndex].Add(value);
 				}
 			}
 		}
 
-		private static int BuildResults(ResultColumn[] AColumns, StringBuilder AResults)
+		private static int BuildResults(ResultColumn[] columns, StringBuilder results)
 		{
-			int LRowCount = (AColumns.Length == 0 ? 0 : AColumns[0].Rows.Count);
+			int rowCount = (columns.Length == 0 ? 0 : columns[0].Rows.Count);
 
 			// Write the column header
-			foreach (ResultColumn LColumn in AColumns)
+			foreach (ResultColumn column in columns)
 			{
-				AResults.Append(((string)LColumn.Rows[0]).PadRight(LColumn.MaxLength).Substring(0, LColumn.MaxLength));
-				AResults.Append(' ');
+				results.Append(((string)column.Rows[0]).PadRight(column.MaxLength).Substring(0, column.MaxLength));
+				results.Append(' ');
 			}
-			AResults.Append("\r\n");
+			results.Append("\r\n");
 
 			// Write the line
-			foreach (ResultColumn LColumn in AColumns)
+			foreach (ResultColumn column in columns)
 			{
-				AResults.Append(String.Empty.PadRight(LColumn.MaxLength, '-'));
-				AResults.Append(' ');
+				results.Append(String.Empty.PadRight(column.MaxLength, '-'));
+				results.Append(' ');
 			}
-			AResults.Append("\r\n");
+			results.Append("\r\n");
 
 			// Write the rows
-			for (int LRowIndex = 1; LRowIndex < LRowCount; LRowIndex++)
+			for (int rowIndex = 1; rowIndex < rowCount; rowIndex++)
 			{
-				foreach (ResultColumn LColumn in AColumns)
+				foreach (ResultColumn column in columns)
 				{
-					AResults.Append(((string)LColumn.Rows[LRowIndex]).PadRight(LColumn.MaxLength).Substring(0, LColumn.MaxLength));
-					AResults.Append(' ');
+					results.Append(((string)column.Rows[rowIndex]).PadRight(column.MaxLength).Substring(0, column.MaxLength));
+					results.Append(' ');
 				}
-				AResults.Append("\r\n");
+				results.Append("\r\n");
 			}
-			return (LRowCount > 1 ? LRowCount-1 : 0);
+			return (rowCount > 1 ? rowCount-1 : 0);
 		}
 
-		public static int ResultsFromCursor(IServerCursor ACursor, StringBuilder AResults)
+		public static int ResultsFromCursor(IServerCursor cursor, StringBuilder results)
 		{
-			DAE.Schema.IRowType LRowType = ((DAE.Schema.TableType)ACursor.Plan.DataType).RowType;
+			DAE.Schema.IRowType rowType = ((DAE.Schema.TableType)cursor.Plan.DataType).RowType;
 
-			ResultColumn[] LResultColumns = BuildResultColumns(LRowType);
+			ResultColumn[] resultColumns = BuildResultColumns(rowType);
 
-			int LRowCount;
+			int rowCount;
 			try
 			{
-				using (DAE.Runtime.Data.Row LRow = new DAE.Runtime.Data.Row(ACursor.Plan.Process.ValueManager, LRowType))
+				using (DAE.Runtime.Data.Row row = new DAE.Runtime.Data.Row(cursor.Plan.Process.ValueManager, rowType))
 				{
-					while (ACursor.Next())
+					while (cursor.Next())
 					{
-						ACursor.Select(LRow);
-						ReadRow(LRow, LResultColumns);
+						cursor.Select(row);
+						ReadRow(row, resultColumns);
 					}
 				}
 			}
 			finally
 			{
 				// Even if something fails (or aborts) build what we can
-				LRowCount = BuildResults(LResultColumns, AResults);
+				rowCount = BuildResults(resultColumns, results);
 			}
-			return LRowCount;
+			return rowCount;
 		}
 
-		private static void ResultsFromRow(Row ARow, StringBuilder AResults)
+		private static void ResultsFromRow(Row row, StringBuilder results)
 		{
-			ResultColumn[] LResultColumns = BuildResultColumns(ARow.DataType);
-			ReadRow(ARow, LResultColumns);
-			BuildResults(LResultColumns, AResults);
+			ResultColumn[] resultColumns = BuildResultColumns(row.DataType);
+			ReadRow(row, resultColumns);
+			BuildResults(resultColumns, results);
 		}
 		
-		private static void ResultsFromList(ListValue AList, StringBuilder AResults)
+		private static void ResultsFromList(ListValue list, StringBuilder results)
 		{
-			ResultColumn[] LResultColumns = new ResultColumn[] { new ResultColumn("Elements") };
-			for (int LIndex = 0; LIndex < AList.Count(); LIndex++)
-				LResultColumns[0].Add(AList.GetValue(LIndex).ToString());
-			BuildResults(LResultColumns, AResults);
+			ResultColumn[] resultColumns = new ResultColumn[] { new ResultColumn("Elements") };
+			for (int index = 0; index < list.Count(); index++)
+				resultColumns[0].Add(list.GetValue(index).ToString());
+			BuildResults(resultColumns, results);
 		}
 		
 		/// <summary> Used internally by the TextExpressionWriter to buffer string data which has been read. </summary>

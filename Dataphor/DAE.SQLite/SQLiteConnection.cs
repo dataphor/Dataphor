@@ -12,14 +12,14 @@ namespace Alphora.Dataphor.DAE.Connection
 {
 	public class SQLiteConnection : DotNetConnection
 	{
-		public SQLiteConnection(string AConnection) : base(AConnection) 
+		public SQLiteConnection(string connection) : base(connection) 
 		{
-			FSupportsMARS = true;
+			_supportsMARS = true;
 		}
 		
-		protected override IDbConnection CreateDbConnection(string AConnectionString)
+		protected override IDbConnection CreateDbConnection(string connectionString)
 		{
-			return new System.Data.SQLite.SQLiteConnection(AConnectionString);
+			return new System.Data.SQLite.SQLiteConnection(connectionString);
 		}
 		
 		protected override SQLCommand InternalCreateCommand()
@@ -27,66 +27,66 @@ namespace Alphora.Dataphor.DAE.Connection
 			return new SQLiteCommand(this, CreateDbCommand());
 		}
 		
-		protected bool FInReadUncommittedTransaction;
+		protected bool _inReadUncommittedTransaction;
 
-		protected override void InternalBeginTransaction(SQLIsolationLevel AIsolationLevel)
+		protected override void InternalBeginTransaction(SQLIsolationLevel isolationLevel)
 		{
-			if (AIsolationLevel == SQLIsolationLevel.ReadUncommitted)
-				FInReadUncommittedTransaction = true;
+			if (isolationLevel == SQLIsolationLevel.ReadUncommitted)
+				_inReadUncommittedTransaction = true;
 			else
-				base.InternalBeginTransaction(AIsolationLevel);
+				base.InternalBeginTransaction(isolationLevel);
 		}
 
 		protected override void InternalCommitTransaction()
 		{
-			if (FInReadUncommittedTransaction)
-				FInReadUncommittedTransaction = false;
+			if (_inReadUncommittedTransaction)
+				_inReadUncommittedTransaction = false;
 			else
 				base.InternalCommitTransaction();
 		}
 
 		protected override void InternalRollbackTransaction()
 		{
-			if (FInReadUncommittedTransaction)
-				FInReadUncommittedTransaction = false;
+			if (_inReadUncommittedTransaction)
+				_inReadUncommittedTransaction = false;
 			else
 				base.InternalRollbackTransaction();
 		}
 		
-		protected override bool IsTransactionFailure(Exception AException)
+		protected override bool IsTransactionFailure(Exception exception)
 		{
-			SQLiteException LException = AException as SQLiteException;
-			if (LException != null)
-				return IsTransactionFailure(LException.ErrorCode);
+			SQLiteException localException = exception as SQLiteException;
+			if (localException != null)
+				return IsTransactionFailure(localException.ErrorCode);
 
 			return false;
 		}
 		
-		protected bool IsTransactionFailure(SQLiteErrorCode AErrorCode)
+		protected bool IsTransactionFailure(SQLiteErrorCode errorCode)
 		{
 			return false;
 		}
 		
-		protected bool IsUserCorrectableError(SQLiteErrorCode AErrorCode)
+		protected bool IsUserCorrectableError(SQLiteErrorCode errorCode)
 		{
-			return AErrorCode == SQLiteErrorCode.Constraint;
+			return errorCode == SQLiteErrorCode.Constraint;
 		}
 		
-		protected override Exception InternalWrapException(Exception AException, string AStatement)
+		protected override Exception InternalWrapException(Exception exception, string statement)
 		{
-			ErrorSeverity LSeverity = GetExceptionSeverity(AException);
-			if (LSeverity == ErrorSeverity.User)
-				return new DataphorException(ErrorSeverity.User, DataphorException.CApplicationError, AException.Message);
-			return base.InternalWrapException(AException, AStatement);
+			ErrorSeverity severity = GetExceptionSeverity(exception);
+			if (severity == ErrorSeverity.User)
+				return new DataphorException(ErrorSeverity.User, DataphorException.ApplicationError, exception.Message);
+			return base.InternalWrapException(exception, statement);
 		}
 
-		private ErrorSeverity GetExceptionSeverity(Exception AException)
+		private ErrorSeverity GetExceptionSeverity(Exception exception)
 		{
 			// If the error code indicates an integrity constraint violation or other user-correctable message, severity is user, otherwise, severity is application
-			SQLiteException LException = AException as SQLiteException;
-			if (LException != null)
+			SQLiteException localException = exception as SQLiteException;
+			if (localException != null)
 			{
-				if (!IsUserCorrectableError(LException.ErrorCode))
+				if (!IsUserCorrectableError(localException.ErrorCode))
 					return ErrorSeverity.Application;
 				return ErrorSeverity.User;
 			}

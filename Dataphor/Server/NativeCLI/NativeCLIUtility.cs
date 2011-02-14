@@ -14,9 +14,9 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 {
 	public static class NativeCLIUtility
 	{
-		public static IsolationLevel NativeIsolationLevelToIsolationLevel(NativeIsolationLevel AIsolationLevel)
+		public static IsolationLevel NativeIsolationLevelToIsolationLevel(NativeIsolationLevel isolationLevel)
 		{
-			switch (AIsolationLevel)
+			switch (isolationLevel)
 			{
 				case NativeIsolationLevel.Browse: return IsolationLevel.Browse;
 				case NativeIsolationLevel.CursorStability: return IsolationLevel.CursorStability;
@@ -25,9 +25,9 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			}
 		}
 		
-		public static NativeIsolationLevel IsolationLevelToNativeIsolationLevel(IsolationLevel AIsolationLevel)
+		public static NativeIsolationLevel IsolationLevelToNativeIsolationLevel(IsolationLevel isolationLevel)
 		{
-			switch (AIsolationLevel)
+			switch (isolationLevel)
 			{
 				case IsolationLevel.Isolated : return NativeIsolationLevel.Isolated;
 				case IsolationLevel.CursorStability : return NativeIsolationLevel.CursorStability;
@@ -36,27 +36,27 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			}
 		}
 
-		public static SessionInfo NativeSessionInfoToSessionInfo(NativeSessionInfo ANativeSessionInfo)
+		public static SessionInfo NativeSessionInfoToSessionInfo(NativeSessionInfo nativeSessionInfo)
 		{
-			SessionInfo LSessionInfo = new SessionInfo();
-			LSessionInfo.UserID = ANativeSessionInfo.UserID;
-			LSessionInfo.Password = ANativeSessionInfo.Password;
-			LSessionInfo.DefaultLibraryName = ANativeSessionInfo.DefaultLibraryName;
-			LSessionInfo.HostName = ANativeSessionInfo.HostName;
-			LSessionInfo.Environment = "NativeCLI";
-			LSessionInfo.DefaultUseDTC = ANativeSessionInfo.DefaultUseDTC;
-			LSessionInfo.DefaultIsolationLevel = NativeIsolationLevelToIsolationLevel(ANativeSessionInfo.DefaultIsolationLevel);
-			LSessionInfo.DefaultUseImplicitTransactions = ANativeSessionInfo.DefaultUseImplicitTransactions;
-			LSessionInfo.DefaultMaxStackDepth = ANativeSessionInfo.DefaultMaxStackDepth;
-			LSessionInfo.DefaultMaxCallDepth = ANativeSessionInfo.DefaultMaxCallDepth;
-			LSessionInfo.UsePlanCache = ANativeSessionInfo.UsePlanCache;
-			LSessionInfo.ShouldEmitIL = ANativeSessionInfo.ShouldEmitIL;
-			return LSessionInfo;
+			SessionInfo sessionInfo = new SessionInfo();
+			sessionInfo.UserID = nativeSessionInfo.UserID;
+			sessionInfo.Password = nativeSessionInfo.Password;
+			sessionInfo.DefaultLibraryName = nativeSessionInfo.DefaultLibraryName;
+			sessionInfo.HostName = nativeSessionInfo.HostName;
+			sessionInfo.Environment = "NativeCLI";
+			sessionInfo.DefaultUseDTC = nativeSessionInfo.DefaultUseDTC;
+			sessionInfo.DefaultIsolationLevel = NativeIsolationLevelToIsolationLevel(nativeSessionInfo.DefaultIsolationLevel);
+			sessionInfo.DefaultUseImplicitTransactions = nativeSessionInfo.DefaultUseImplicitTransactions;
+			sessionInfo.DefaultMaxStackDepth = nativeSessionInfo.DefaultMaxStackDepth;
+			sessionInfo.DefaultMaxCallDepth = nativeSessionInfo.DefaultMaxCallDepth;
+			sessionInfo.UsePlanCache = nativeSessionInfo.UsePlanCache;
+			sessionInfo.ShouldEmitIL = nativeSessionInfo.ShouldEmitIL;
+			return sessionInfo;
 		}
 
-		public static NativeCLI.ErrorSeverity DataphorSeverityToNativeCLISeverity(Dataphor.ErrorSeverity ASeverity)
+		public static NativeCLI.ErrorSeverity DataphorSeverityToNativeCLISeverity(Dataphor.ErrorSeverity severity)
 		{
-			switch (ASeverity)
+			switch (severity)
 			{
 				case Dataphor.ErrorSeverity.User : return NativeCLI.ErrorSeverity.User;
 				case Dataphor.ErrorSeverity.Application : return NativeCLI.ErrorSeverity.Application;
@@ -67,21 +67,21 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			return NativeCLI.ErrorSeverity.Unspecified;
 		}
 		
-		public static NativeCLIException WrapException(Exception AException)
+		public static NativeCLIException WrapException(Exception exception)
 		{
-			DataphorException LDataphorException = AException as DataphorException;
-			if (LDataphorException != null)
-				return new NativeCLIException(LDataphorException.Message, LDataphorException.Code, DataphorSeverityToNativeCLISeverity(LDataphorException.Severity), LDataphorException.GetDetails(), LDataphorException.GetServerContext(), WrapException(LDataphorException.InnerException));
+			DataphorException dataphorException = exception as DataphorException;
+			if (dataphorException != null)
+				return new NativeCLIException(dataphorException.Message, dataphorException.Code, DataphorSeverityToNativeCLISeverity(dataphorException.Severity), dataphorException.GetDetails(), dataphorException.GetServerContext(), WrapException(dataphorException.InnerException));
 			
-			if (AException != null)
-				return new NativeCLIException(AException.Message, WrapException(AException.InnerException));
+			if (exception != null)
+				return new NativeCLIException(exception.Message, WrapException(exception.InnerException));
 				
 			return null;
 		}
 		
-		public static Modifier NativeModifierToModifier(NativeModifier ANativeModifier)
+		public static Modifier NativeModifierToModifier(NativeModifier nativeModifier)
 		{
-			switch (ANativeModifier)
+			switch (nativeModifier)
 			{
 				case NativeModifier.In : return Modifier.In;
 				case NativeModifier.Out : return Modifier.Out;
@@ -90,9 +90,9 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			}
 		}
 
-		public static NativeModifier ModifierToNativeModifier(Modifier AModifier)
+		public static NativeModifier ModifierToNativeModifier(Modifier modifier)
 		{
-			switch (AModifier)
+			switch (modifier)
 			{
 				case Modifier.In : return NativeModifier.In;
 				case Modifier.Out : return NativeModifier.Out;

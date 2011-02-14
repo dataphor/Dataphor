@@ -20,60 +20,60 @@ namespace Alphora.Dataphor.DAE.Server
 	// ServerCursor    
 	public class ServerCursor : ServerChildObject, IServerCursor
 	{
-		public ServerCursor(ServerExpressionPlan APlan, Program AProgram, DataParams AParams) : base() 
+		public ServerCursor(ServerExpressionPlan plan, Program program, DataParams paramsValue) : base() 
 		{
-			FPlan = APlan;
-			FProgram = AProgram;
-			FParams = AParams;
+			_plan = plan;
+			_program = program;
+			_params = paramsValue;
 		}
 
-		private bool FDisposed;
+		private bool _disposed;
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
 				Close();
 				
-				if (!FDisposed)
+				if (!_disposed)
 				{
-					FDisposed = true;
+					_disposed = true;
 				}
 			}
 			finally
 			{
-				FParams = null;
-				FPlan = null;
+				_params = null;
+				_plan = null;
 				
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 		
-		protected Exception WrapException(Exception AException)
+		protected Exception WrapException(Exception exception)
 		{
-			return FPlan.ServerProcess.ServerSession.WrapException(AException);
+			return _plan.ServerProcess.ServerSession.WrapException(exception);
 		}
 		
-		private ServerExpressionPlan FPlan;
-		public ServerExpressionPlan Plan { get { return FPlan; } }
+		private ServerExpressionPlan _plan;
+		public ServerExpressionPlan Plan { get { return _plan; } }
 		
-		private Program FProgram;
-		private bool FProgramStarted;
+		private Program _program;
+		private bool _programStarted;
 		
-		IServerExpressionPlan IServerCursor.Plan { get { return FPlan; } }
+		IServerExpressionPlan IServerCursor.Plan { get { return _plan; } }
 
 		// IActive
 
 		// Open        
 		public void Open()
 		{
-			if (!FActive)
+			if (!_active)
 			{
 				#if USESERVERCURSOREVENTS
 				DoBeforeOpen();
 				#endif
 				InternalOpen();
-				FActive = true;
+				_active = true;
 				#if USESERVERCURSOREVENTS
 				DoAfterOpen();
 				#endif
@@ -83,13 +83,13 @@ namespace Alphora.Dataphor.DAE.Server
 		// Close
 		public void Close()
 		{
-			if (FActive)
+			if (_active)
 			{
 				#if USESERVERCURSOREVENTS
 				DoBeforeClose();
 				#endif
 				InternalClose();
-				FActive = false;
+				_active = false;
 				#if USESERVERCURSOREVENTS
 				DoAfterClose();
 				#endif
@@ -97,10 +97,10 @@ namespace Alphora.Dataphor.DAE.Server
 		}
         
 		// Active
-		protected bool FActive;
+		protected bool _active;
 		public bool Active
 		{
-			get { return FActive; }
+			get { return _active; }
 			set
 			{
 				if (value)
@@ -122,33 +122,33 @@ namespace Alphora.Dataphor.DAE.Server
 				throw new ServerException(ServerException.Codes.CursorActive);
 		}
         
-		protected PlanNode SourceNode { get { return FPlan.SourceNode; } }
+		protected PlanNode SourceNode { get { return _plan.SourceNode; } }
 		
-		protected DataParams FParams;
-		protected Table FSourceTable;
-		protected Schema.IRowType FSourceRowType;
-		public Schema.IRowType SourceRowType { get { return FSourceRowType; } }
+		protected DataParams _params;
+		protected Table _sourceTable;
+		protected Schema.IRowType _sourceRowType;
+		public Schema.IRowType SourceRowType { get { return _sourceRowType; } }
 		
-		protected IStreamManager StreamManager { get { return (IStreamManager)FPlan.Process; } }
+		protected IStreamManager StreamManager { get { return (IStreamManager)_plan.Process; } }
 				
 		protected virtual void InternalOpen()
 		{
 			// get a table object to supply the data
-			FPlan.SetActiveCursor(this);
+			_plan.SetActiveCursor(this);
 			try
 			{
-				FProgram.Start(FParams);
-				FProgramStarted = true;
+				_program.Start(_params);
+				_programStarted = true;
 
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 
-				CursorNode LCursorNode = FPlan.CursorNode;
+				CursorNode cursorNode = _plan.CursorNode;
 				//LCursorNode.EnsureApplicationTransactionJoined(FPlan.ServerProcess);
-				FSourceTable = (Table)FPlan.CursorNode.SourceNode.Execute(FProgram);
-				FSourceTable.Open();
-				FSourceRowType = FSourceTable.DataType.RowType;
+				_sourceTable = (Table)_plan.CursorNode.SourceNode.Execute(_program);
+				_sourceTable.Open();
+				_sourceRowType = _sourceTable.DataType.RowType;
 				
-				FProgram.Statistics.ExecuteTime = TimingUtility.TimeSpanFromTicks(LStartTicks);
+				_program.Statistics.ExecuteTime = TimingUtility.TimeSpanFromTicks(startTicks);
 			}
 			catch
 			{
@@ -165,52 +165,52 @@ namespace Alphora.Dataphor.DAE.Server
 				{
 					try
 					{
-						if (FBookmarks != null)
+						if (_bookmarks != null)
 						{
 							InternalDisposeBookmarks();
-							FBookmarks = null;
+							_bookmarks = null;
 						}
 					}
 					finally
 					{
-						if (FSourceTable != null)
+						if (_sourceTable != null)
 						{
-							FSourceTable.Dispose();
-							FSourceTable = null;
-							FSourceRowType = null;
+							_sourceTable.Dispose();
+							_sourceTable = null;
+							_sourceRowType = null;
 						}
 					}
 				}
 				finally
 				{
-					if (FProgramStarted)
-						FProgram.Stop(FParams);
+					if (_programStarted)
+						_program.Stop(_params);
 				}
 			}
 			finally
 			{
-				FPlan.ClearActiveCursor();
+				_plan.ClearActiveCursor();
 			}
 		}
 		
 		// Isolation
-		public CursorIsolation Isolation { get { return FSourceTable.Isolation; } }
+		public CursorIsolation Isolation { get { return _sourceTable.Isolation; } }
 		
 		// CursorType
-		public CursorType CursorType { get { return FSourceTable.CursorType; } }
+		public CursorType CursorType { get { return _sourceTable.CursorType; } }
 
 		// Capabilities		
-		public CursorCapability Capabilities { get { return FSourceTable.Capabilities; } }
+		public CursorCapability Capabilities { get { return _sourceTable.Capabilities; } }
 
-		public bool Supports(CursorCapability ACapability)
+		public bool Supports(CursorCapability capability)
 		{
-			return (Capabilities & ACapability) != 0;
+			return (Capabilities & capability) != 0;
 		}
 
-		protected void CheckCapability(CursorCapability ACapability)
+		protected void CheckCapability(CursorCapability capability)
 		{
-			if (!Supports(ACapability))
-				throw new ServerException(ServerException.Codes.CapabilityNotSupported, Enum.GetName(typeof(CursorCapability), ACapability));
+			if (!Supports(capability))
+				throw new ServerException(ServerException.Codes.CapabilityNotSupported, Enum.GetName(typeof(CursorCapability), capability));
 		}
 
 		#if USESERVERCURSOREVENTS
@@ -245,1043 +245,1043 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		#endif
 
-		private Bookmarks FBookmarks = new Bookmarks();
+		private Bookmarks _bookmarks = new Bookmarks();
 
 		protected Guid InternalGetBookmark()
 		{
-			Guid LResult = Guid.NewGuid();
-			FBookmarks.Add(LResult, FSourceTable.GetBookmark());
-			return LResult;
+			Guid result = Guid.NewGuid();
+			_bookmarks.Add(result, _sourceTable.GetBookmark());
+			return result;
 		}
 
-		protected bool InternalGotoBookmark(Guid ABookmark, bool AForward)
+		protected bool InternalGotoBookmark(Guid bookmark, bool forward)
 		{
-			Row LRow;
-			if (!FBookmarks.TryGetValue(ABookmark, out LRow))
-				throw new ServerException(ServerException.Codes.InvalidBookmark, ABookmark);
-			return FSourceTable.GotoBookmark(FBookmarks[ABookmark], AForward);
+			Row row;
+			if (!_bookmarks.TryGetValue(bookmark, out row))
+				throw new ServerException(ServerException.Codes.InvalidBookmark, bookmark);
+			return _sourceTable.GotoBookmark(_bookmarks[bookmark], forward);
 		}
 
-		protected int InternalCompareBookmarks(Guid ABookmark1, Guid ABookmark2)
+		protected int InternalCompareBookmarks(Guid bookmark1, Guid bookmark2)
 		{
-			return FSourceTable.CompareBookmarks(FBookmarks[ABookmark1], FBookmarks[ABookmark2]);
+			return _sourceTable.CompareBookmarks(_bookmarks[bookmark1], _bookmarks[bookmark2]);
 		}
 
-		protected void InternalDisposeBookmark(Guid ABookmark)
+		protected void InternalDisposeBookmark(Guid bookmark)
 		{
-			Row LInternalBookmark = null;
-			FBookmarks.TryGetValue(ABookmark, out LInternalBookmark);
-			FBookmarks.Remove(ABookmark);
-			if (LInternalBookmark != null)
-				LInternalBookmark.Dispose();
+			Row internalBookmark = null;
+			_bookmarks.TryGetValue(bookmark, out internalBookmark);
+			_bookmarks.Remove(bookmark);
+			if (internalBookmark != null)
+				internalBookmark.Dispose();
 		}
 
-		protected void InternalDisposeBookmarks(Guid[] ABookmarks)
+		protected void InternalDisposeBookmarks(Guid[] bookmarks)
 		{
-			foreach (Guid LBookmark in ABookmarks)
-				InternalDisposeBookmark(LBookmark);
+			foreach (Guid bookmark in bookmarks)
+				InternalDisposeBookmark(bookmark);
 		}
 		
 		protected void InternalDisposeBookmarks()
 		{
-			Guid[] LKeys = new Guid[FBookmarks.Keys.Count];
-			FBookmarks.Keys.CopyTo(LKeys, 0);
-			InternalDisposeBookmarks(LKeys);
+			Guid[] keys = new Guid[_bookmarks.Keys.Count];
+			_bookmarks.Keys.CopyTo(keys, 0);
+			InternalDisposeBookmarks(keys);
 		}
 
 		// cursor support		
 		public void Reset()
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				FSourceTable.Reset();
-				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				long startTicks = TimingUtility.CurrentTicks;
+				_sourceTable.Reset();
+				_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
 		public bool Next()
 		{
-			bool LResult;
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			bool result;
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				LResult = FSourceTable.Next();
-				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				long startTicks = TimingUtility.CurrentTicks;
+				result = _sourceTable.Next();
+				_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
-			return LResult;
+			return result;
 		}
 		
 		public void Last()
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				FSourceTable.Last();
-				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				long startTicks = TimingUtility.CurrentTicks;
+				_sourceTable.Last();
+				_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
 		public bool BOF()
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{		
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					return FSourceTable.BOF();
+					return _sourceTable.BOF();
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
 		public bool EOF()
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					return FSourceTable.EOF();
+					return _sourceTable.EOF();
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
 		public bool IsEmpty()
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					return FSourceTable.BOF() && FSourceTable.EOF();
+					return _sourceTable.BOF() && _sourceTable.EOF();
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
 		public Row Select()
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					return FSourceTable.Select();
+					return _sourceTable.Select();
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
-		public void Select(Row ARow)
+		public void Select(Row row)
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				FSourceTable.Select(ARow);
-				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				long startTicks = TimingUtility.CurrentTicks;
+				_sourceTable.Select(row);
+				_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
 		public void First()
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				FSourceTable.First();
-				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				long startTicks = TimingUtility.CurrentTicks;
+				_sourceTable.First();
+				_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
 		public bool Prior()
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					return FSourceTable.Prior();
+					return _sourceTable.Prior();
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
 		public Guid GetBookmark()
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
 					return InternalGetBookmark();
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 
-		public bool GotoBookmark(Guid ABookmark, bool AForward)
+		public bool GotoBookmark(Guid bookmark, bool forward)
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					return InternalGotoBookmark(ABookmark, AForward);
+					return InternalGotoBookmark(bookmark, forward);
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
-		public int CompareBookmarks(Guid ABookmark1, Guid ABookmark2)
+		public int CompareBookmarks(Guid bookmark1, Guid bookmark2)
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					return InternalCompareBookmarks(ABookmark1, ABookmark2);
+					return InternalCompareBookmarks(bookmark1, bookmark2);
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 
 		/// <summary> Disposes a bookmark. </summary>
 		/// <remarks> Does nothing if the bookmark does not exist, or has already been disposed. </remarks>
-		public void DisposeBookmark(Guid ABookmark)
+		public void DisposeBookmark(Guid bookmark)
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				InternalDisposeBookmark(ABookmark);
-				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				long startTicks = TimingUtility.CurrentTicks;
+				InternalDisposeBookmark(bookmark);
+				_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 
 		/// <summary> Disposes a list of bookmarks. </summary>
 		/// <remarks> Does nothing if the bookmark does not exist, or has already been disposed. </remarks>
-		public void DisposeBookmarks(Guid[] ABookmarks)
+		public void DisposeBookmarks(Guid[] bookmarks)
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				InternalDisposeBookmarks(ABookmarks);
-				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				long startTicks = TimingUtility.CurrentTicks;
+				InternalDisposeBookmarks(bookmarks);
+				_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
-		public Schema.Order Order { get { return FSourceTable.Order; } }
+		public Schema.Order Order { get { return _sourceTable.Order; } }
 		
 		public Row GetKey()
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					return FSourceTable.GetKey();
+					return _sourceTable.GetKey();
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
-		public bool FindKey(Row AKey)
+		public bool FindKey(Row key)
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					return FSourceTable.FindKey(AKey);
+					return _sourceTable.FindKey(key);
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
-		public void FindNearest(Row AKey)
+		public void FindNearest(Row key)
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				FSourceTable.FindNearest(AKey);
-				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				long startTicks = TimingUtility.CurrentTicks;
+				_sourceTable.FindNearest(key);
+				_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
-		public bool Refresh(Row ARow)
+		public bool Refresh(Row row)
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					return FSourceTable.Refresh(ARow);
+					return _sourceTable.Refresh(row);
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
-		public void Insert(Row ARow)
+		public void Insert(Row row)
 		{
-			Insert(ARow, null);
+			Insert(row, null);
 		}
 		
-		public void Insert(Row ARow, BitArray AValueFlags)
+		public void Insert(Row row, BitArray valueFlags)
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				CheckCapability(CursorCapability.Updateable);
-				FSourceTable.Insert(null, ARow, AValueFlags, false);
-				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				_sourceTable.Insert(null, row, valueFlags, false);
+				_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
-		public void Update(Row ARow)
+		public void Update(Row row)
 		{
-			Update(ARow, null);
+			Update(row, null);
 		}
 		
-		public void Update(Row ARow, BitArray AValueFlags)
+		public void Update(Row row, BitArray valueFlags)
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				CheckCapability(CursorCapability.Updateable);
-				FSourceTable.Update(ARow, AValueFlags, false);
-				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				_sourceTable.Update(row, valueFlags, false);
+				_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
 		public void Delete()
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				CheckCapability(CursorCapability.Updateable);
-				FSourceTable.Delete();
-				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				_sourceTable.Delete();
+				_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
 		public void Truncate()
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				CheckCapability(CursorCapability.Truncateable);
-				FSourceTable.Truncate();
-				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				_sourceTable.Truncate();
+				_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
 		public int RowCount()
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					return FSourceTable.RowCount();
+					return _sourceTable.RowCount();
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 
-		public bool Default(Row ARow, string AColumnName)
+		public bool Default(Row row, string columnName)
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					return ((TableNode)SourceNode).Default(FPlan.Program, null, ARow, null, AColumnName);
+					return ((TableNode)SourceNode).Default(_plan.Program, null, row, null, columnName);
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
-		public bool Change(Row AOldRow, Row ANewRow, string AColumnName)
+		public bool Change(Row oldRow, Row newRow, string columnName)
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					return ((TableNode)SourceNode).Change(FPlan.Program, AOldRow, ANewRow, null, AColumnName);
+					return ((TableNode)SourceNode).Change(_plan.Program, oldRow, newRow, null, columnName);
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
-		public bool Validate(Row AOldRow, Row ANewRow, string AColumnName)
+		public bool Validate(Row oldRow, Row newRow, string columnName)
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					return ((TableNode)SourceNode).Validate(FPlan.Program, AOldRow, ANewRow, null, AColumnName);
+					return ((TableNode)SourceNode).Validate(_plan.Program, oldRow, newRow, null, columnName);
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
 		private CursorGetFlags InternalGetFlags()
 		{
-			CursorGetFlags LGetFlags = CursorGetFlags.None;
-			if (FSourceTable.BOF())
-				LGetFlags = LGetFlags | CursorGetFlags.BOF;
-			if (FSourceTable.EOF())
-				LGetFlags = LGetFlags | CursorGetFlags.EOF;
-			return LGetFlags;
+			CursorGetFlags getFlags = CursorGetFlags.None;
+			if (_sourceTable.BOF())
+				getFlags = getFlags | CursorGetFlags.BOF;
+			if (_sourceTable.EOF())
+				getFlags = getFlags | CursorGetFlags.EOF;
+			return getFlags;
 		}
 
 		public CursorGetFlags GetFlags()
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
 					return InternalGetFlags();
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 
 		// Fetch
-		public int Fetch(Row[] ARows, Guid[] ABookmarks, int ACount, bool ASkipCurrent, out CursorGetFlags AFlags)
+		public int Fetch(Row[] rows, Guid[] bookmarks, int count, bool skipCurrent, out CursorGetFlags flags)
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					int LCount = 0;
-					while (ACount != 0)
+					int localCount = 0;
+					while (count != 0)
 					{
-						if (ACount > 0)
+						if (count > 0)
 						{
-							if ((LCount == 0) && ASkipCurrent && !FSourceTable.Next())
+							if ((localCount == 0) && skipCurrent && !_sourceTable.Next())
 								break;							   
 
-							if ((LCount > 0) && (!FSourceTable.Next()))
+							if ((localCount > 0) && (!_sourceTable.Next()))
 								break;
 
-							FSourceTable.Select(ARows[LCount]);
-							ABookmarks[LCount] = Supports(CursorCapability.Bookmarkable) ? InternalGetBookmark() : Guid.Empty;
-							ACount--;
+							_sourceTable.Select(rows[localCount]);
+							bookmarks[localCount] = Supports(CursorCapability.Bookmarkable) ? InternalGetBookmark() : Guid.Empty;
+							count--;
 						}
 						else
 						{
-							if ((LCount == 0) && ASkipCurrent && !FSourceTable.Prior())
+							if ((localCount == 0) && skipCurrent && !_sourceTable.Prior())
 								break;
 								
-							if ((LCount > 0) && (!FSourceTable.Prior()))
+							if ((localCount > 0) && (!_sourceTable.Prior()))
 								break;
 
-							FSourceTable.Select(ARows[LCount]);
-							ABookmarks[LCount] = Supports(CursorCapability.Bookmarkable) ? InternalGetBookmark() : Guid.Empty;
-							ACount++;
+							_sourceTable.Select(rows[localCount]);
+							bookmarks[localCount] = Supports(CursorCapability.Bookmarkable) ? InternalGetBookmark() : Guid.Empty;
+							count++;
 						}
-						LCount++;
+						localCount++;
 					}
-					AFlags = InternalGetFlags();
-					return LCount;
+					flags = InternalGetFlags();
+					return localCount;
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
 		// MoveBy
-		public int MoveBy(int ADelta, out CursorGetFlags AFlags)
+		public int MoveBy(int delta, out CursorGetFlags flags)
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					int LDelta = 0;
-					while (ADelta != 0)
+					int localDelta = 0;
+					while (delta != 0)
 					{
-						if (ADelta > 0)
+						if (delta > 0)
 						{
-							if (!FSourceTable.Next())
+							if (!_sourceTable.Next())
 								break;
-							ADelta--;
+							delta--;
 						}
 						else
 						{
-							if (!FSourceTable.Prior())
+							if (!_sourceTable.Prior())
 								break;
-							ADelta++;
+							delta++;
 						}
-						LDelta++;
+						localDelta++;
 					}
-					AFlags = InternalGetFlags();
-					return LDelta;
+					flags = InternalGetFlags();
+					return localDelta;
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
 		// MoveTo
-		public CursorGetFlags MoveTo(bool AFirst)
+		public CursorGetFlags MoveTo(bool first)
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					if (AFirst)
-						FSourceTable.First();
+					if (first)
+						_sourceTable.First();
 					else
-						FSourceTable.Last();
+						_sourceTable.Last();
 					return InternalGetFlags();
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
 		public CursorGetFlags ResetWithFlags()
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					FSourceTable.Reset();
+					_sourceTable.Reset();
 					return InternalGetFlags();
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 
-		public bool GotoBookmark(Guid ABookmark, bool AForward, out CursorGetFlags AFlags)
+		public bool GotoBookmark(Guid bookmark, bool forward, out CursorGetFlags flags)
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					bool LSuccess = InternalGotoBookmark(ABookmark, AForward);
-					AFlags = InternalGetFlags();
-					return LSuccess;
+					bool success = InternalGotoBookmark(bookmark, forward);
+					flags = InternalGetFlags();
+					return success;
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 
-		public bool FindKey(Row AKey, out CursorGetFlags AFlags)
+		public bool FindKey(Row key, out CursorGetFlags flags)
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					bool LSuccess = FSourceTable.FindKey(AKey);
-					AFlags = InternalGetFlags();
-					return LSuccess;
+					bool success = _sourceTable.FindKey(key);
+					flags = InternalGetFlags();
+					return success;
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
-		public void FindNearest(Row AKey, out CursorGetFlags AFlags)
+		public void FindNearest(Row key, out CursorGetFlags flags)
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					FSourceTable.FindNearest(AKey);
-					AFlags = InternalGetFlags();
+					_sourceTable.FindNearest(key);
+					flags = InternalGetFlags();
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 		
-		public bool Refresh(Row ARow, out CursorGetFlags AFlags)
+		public bool Refresh(Row row, out CursorGetFlags flags)
 		{
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			Exception exception = null;
+			int nestingLevel = _plan.ServerProcess.BeginTransactionalCall();
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				long startTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					bool LSuccess = FSourceTable.Refresh(ARow);
-					AFlags = InternalGetFlags();
-					return LSuccess;
+					bool success = _sourceTable.Refresh(row);
+					flags = InternalGetFlags();
+					return success;
 				}
 				finally
 				{
-					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					_program.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(startTicks);
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
+				exception = E;
 				throw WrapException(E);
 			}
 			finally
 			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+				_plan.ServerProcess.EndTransactionalCall(nestingLevel, exception);
 			}
 		}
 	}

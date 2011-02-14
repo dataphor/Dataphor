@@ -12,30 +12,30 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	public sealed class FolderUtility
 	{
 		/// <summary> Prompts the user for a directory. </summary>
-		public static string GetDirectory(string ADefault)
+		public static string GetDirectory(string defaultValue)
 		{
-			FolderBrowserDialog LBrowser = new FolderBrowserDialog();
-			if ((ADefault == String.Empty) || !System.IO.Directory.Exists(ADefault))
-				LBrowser.RootFolder = System.Environment.SpecialFolder.Desktop;
+			FolderBrowserDialog browser = new FolderBrowserDialog();
+			if ((defaultValue == String.Empty) || !System.IO.Directory.Exists(defaultValue))
+				browser.RootFolder = System.Environment.SpecialFolder.Desktop;
 			else
-				LBrowser.SelectedPath = ADefault;
-			if (LBrowser.ShowDialog() != DialogResult.OK)
+				browser.SelectedPath = defaultValue;
+			if (browser.ShowDialog() != DialogResult.OK)
 				throw new AbortException();
-			return LBrowser.SelectedPath;
+			return browser.SelectedPath;
 		}
 	}
 
 	public sealed class ControlUtility
 	{
-		public static Control InnermostActiveControl(ContainerControl AControl)
+		public static Control InnermostActiveControl(ContainerControl control)
 		{
-			ContainerControl LControl = AControl;
-            while ((LControl.ActiveControl != null) && (LControl.ActiveControl is ContainerControl))
-                  LControl = (ContainerControl)LControl.ActiveControl;
-			if (LControl.ActiveControl != null)
-				return LControl.ActiveControl;
+			ContainerControl localControl = control;
+            while ((localControl.ActiveControl != null) && (localControl.ActiveControl is ContainerControl))
+                  localControl = (ContainerControl)localControl.ActiveControl;
+			if (localControl.ActiveControl != null)
+				return localControl.ActiveControl;
 			else
-				return LControl;
+				return localControl;
 		}
 	}
 }

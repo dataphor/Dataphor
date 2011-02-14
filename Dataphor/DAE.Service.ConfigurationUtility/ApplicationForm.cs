@@ -16,78 +16,78 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 	public class ApplicationForm : System.Windows.Forms.Form
 	{
 		// Do not localize
-		public const string CTrayDisplayText = "Dataphor Configuration Utility";		
-		private const string CProcessName = "DAE.Service.ConfigurationUtility";
-		private const string CRunningBMPName = "Alphora.Dataphor.DAE.Service.ConfigurationUtility.Images.Running.gif";
-		private const string CStoppedBMPName = "Alphora.Dataphor.DAE.Service.ConfigurationUtility.Images.Stopped.gif";
-		private const string CRunningIconName = "Alphora.Dataphor.DAE.Service.ConfigurationUtility.Images.Running.ico";
-		private const string CStoppedIconName = "Alphora.Dataphor.DAE.Service.ConfigurationUtility.Images.Stopped.ico";
-		private const string CUnavailableBMPName = "Alphora.Dataphor.DAE.Service.ConfigurationUtility.Images.Unavailable.gif";
-		private const string CUnavailableIconName = "Alphora.Dataphor.DAE.Service.ConfigurationUtility.Images.Unavailable.ico";
-		private const string CConfigurationUtilitySettingsFileName = @"DAEConfigurationUtility.config";
-		public bool FMainFormIsShowing = false;
-		private const int CServicePollingInterval = 5000;
+		public const string TrayDisplayText = "Dataphor Configuration Utility";		
+		private const string ProcessName = "DAE.Service.ConfigurationUtility";
+		private const string RunningBMPName = "Alphora.Dataphor.DAE.Service.ConfigurationUtility.Images.Running.gif";
+		private const string StoppedBMPName = "Alphora.Dataphor.DAE.Service.ConfigurationUtility.Images.Stopped.gif";
+		private const string RunningIconName = "Alphora.Dataphor.DAE.Service.ConfigurationUtility.Images.Running.ico";
+		private const string StoppedIconName = "Alphora.Dataphor.DAE.Service.ConfigurationUtility.Images.Stopped.ico";
+		private const string UnavailableBMPName = "Alphora.Dataphor.DAE.Service.ConfigurationUtility.Images.Unavailable.gif";
+		private const string UnavailableIconName = "Alphora.Dataphor.DAE.Service.ConfigurationUtility.Images.Unavailable.ico";
+		private const string ConfigurationUtilitySettingsFileName = @"DAEConfigurationUtility.config";
+		public bool _mainFormIsShowing = false;
+		private const int ServicePollingInterval = 5000;
 
-		public ConfigurationUtilitySettings FConfigurationUtilitySettings = new ConfigurationUtilitySettings();
-		public ServiceStatus FServiceStatus = ServiceStatus.Unassigned;
-		public NotifyIcon FTrayIcon = new NotifyIcon();
-		private ContextMenu FMenu = new ContextMenu();
-		private MainForm FMainForm;
+		public ConfigurationUtilitySettings _configurationUtilitySettings = new ConfigurationUtilitySettings();
+		public ServiceStatus _serviceStatus = ServiceStatus.Unassigned;
+		public NotifyIcon _trayIcon = new NotifyIcon();
+		private ContextMenu _menu = new ContextMenu();
+		private MainForm _mainForm;
 		
 		public string SelectedInstanceName
 		{
-			get { return FConfigurationUtilitySettings.SelectedInstanceName; }
+			get { return _configurationUtilitySettings.SelectedInstanceName; }
 			set
 			{
-				FConfigurationUtilitySettings.SelectedInstanceName = value;
+				_configurationUtilitySettings.SelectedInstanceName = value;
 				Timer_Tick(this, null);
 			}
 		}
 
 		public enum ImageStatus { Running, Stopped, Unavailable };
 
-		public System.Windows.Forms.Timer FTimer = new System.Windows.Forms.Timer();
+		public System.Windows.Forms.Timer _timer = new System.Windows.Forms.Timer();
 
 		private System.ComponentModel.Container components = null;
 
-		public ApplicationForm(bool ASilentModeSetting)
+		public ApplicationForm(bool silentModeSetting)
 		{
 			try
 			{
 				// Deserialize the app settings
-				string LFileName = PathUtility.CommonAppDataPath() + CConfigurationUtilitySettingsFileName;
-				if (System.IO.File.Exists(LFileName))
+				string fileName = PathUtility.CommonAppDataPath() + ConfigurationUtilitySettingsFileName;
+				if (System.IO.File.Exists(fileName))
 				{
-					using (System.IO.FileStream LStream = new System.IO.FileStream(LFileName, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+					using (System.IO.FileStream stream = new System.IO.FileStream(fileName, System.IO.FileMode.Open, System.IO.FileAccess.Read))
 					{
-						new BOP.Deserializer().Deserialize(LStream, FConfigurationUtilitySettings);
+						new BOP.Deserializer().Deserialize(stream, _configurationUtilitySettings);
 					}
 				}
 
 				// We need to do this, because if they uninstall and re-install, the box will be checked
 				// but the registry will not have a value.
-				using(Microsoft.Win32.RegistryKey LRegKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(MainForm.CAppAutoStartRegKeyName, true))
+				using(Microsoft.Win32.RegistryKey regKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(MainForm.AppAutoStartRegKeyName, true))
 				{
-					if (FConfigurationUtilitySettings.AppAutoStart == true)
-                        LRegKey.SetValue(MainForm.CAppAutoStartRegValueName, Application.ExecutablePath + " " + Program.SilentMode);
+					if (_configurationUtilitySettings.AppAutoStart == true)
+                        regKey.SetValue(MainForm.AppAutoStartRegValueName, Application.ExecutablePath + " " + Program.SilentMode);
 					else
-						LRegKey.DeleteValue(MainForm.CAppAutoStartRegValueName, false);
+						regKey.DeleteValue(MainForm.AppAutoStartRegValueName, false);
 				}
 
-				FTrayIcon.Text = CTrayDisplayText;
-				FTrayIcon.Visible = FConfigurationUtilitySettings.ShowTrayIcon;
-				FTrayIcon.DoubleClick += new System.EventHandler(this.TrayIcon_DoubleClick);
+				_trayIcon.Text = TrayDisplayText;
+				_trayIcon.Visible = _configurationUtilitySettings.ShowTrayIcon;
+				_trayIcon.DoubleClick += new System.EventHandler(this.TrayIcon_DoubleClick);
 				// Set up the context pop-up menu
-				FMenu.MenuItems.Add(new MenuItem("Open", new System.EventHandler(this.TrayIcon_DoubleClick)));
-				FMenu.MenuItems.Add(new MenuItem("Exit", new System.EventHandler(this.TrayIcon_PopupMenu_Exit)));
-				FTrayIcon.ContextMenu = FMenu;
+				_menu.MenuItems.Add(new MenuItem("Open", new System.EventHandler(this.TrayIcon_DoubleClick)));
+				_menu.MenuItems.Add(new MenuItem("Exit", new System.EventHandler(this.TrayIcon_PopupMenu_Exit)));
+				_trayIcon.ContextMenu = _menu;
 
 				// Check every n second(s) to see if the service status has been changed by some other program
-				FTimer.Tick += new System.EventHandler(this.Timer_Tick);
-				FTimer.Interval = CServicePollingInterval;
-				FTimer.Start();
+				_timer.Tick += new System.EventHandler(this.Timer_Tick);
+				_timer.Interval = ServicePollingInterval;
+				_timer.Start();
 
-				if (ASilentModeSetting == false)
+				if (silentModeSetting == false)
 				{
 					ShowMainForm();
 				}
@@ -103,33 +103,33 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 		}
 
 
-		private void TrayIcon_DoubleClick(object sender, System.EventArgs AArgs)
+		private void TrayIcon_DoubleClick(object sender, System.EventArgs args)
 		{
 			ShowMainForm();
 		}
 
-		private void TrayIcon_PopupMenu_Exit(object sender, System.EventArgs AArgs)
+		private void TrayIcon_PopupMenu_Exit(object sender, System.EventArgs args)
 		{
-			if (FMainFormIsShowing == true)
+			if (_mainFormIsShowing == true)
 			{
 				Serialize();
-				FTrayIcon.Visible = false;
+				_trayIcon.Visible = false;
 
-				FMainForm.Close();
-				FMainFormIsShowing = false;
+				_mainForm.Close();
+				_mainFormIsShowing = false;
 			}
 
-			FTrayIcon.Visible = false;
+			_trayIcon.Visible = false;
 			Application.Exit();
 		}
 
-		private void Timer_Tick(object sender, System.EventArgs AArgs)
+		private void Timer_Tick(object sender, System.EventArgs args)
 		{
 			try
 			{
-				if (FMainFormIsShowing == true)
+				if (_mainFormIsShowing == true)
 				{
-					FMainForm.ServiceAutoStart.Checked = ServiceUtility.GetServiceAutoStart(SelectedInstanceName);
+					_mainForm.ServiceAutoStart.Checked = ServiceUtility.GetServiceAutoStart(SelectedInstanceName);
 				}
 			}
 			catch(Exception e)
@@ -140,35 +140,35 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 			CheckServiceStatus();
 		}
 
-		public void SetImageStatus(ImageStatus AImageStatus)
+		public void SetImageStatus(ImageStatus imageStatus)
 		{
-			string LIconName = string.Empty;
-			string LBMPName = string.Empty;
+			string iconName = string.Empty;
+			string bMPName = string.Empty;
 
-			switch (AImageStatus)
+			switch (imageStatus)
 			{
 				case ImageStatus.Running:
-					LIconName = CRunningIconName;
-					LBMPName = CRunningBMPName;
+					iconName = RunningIconName;
+					bMPName = RunningBMPName;
 					break;
 				case ImageStatus.Stopped:
-					LIconName = CStoppedIconName;
-					LBMPName = CStoppedBMPName;
+					iconName = StoppedIconName;
+					bMPName = StoppedBMPName;
 					break;
 				case ImageStatus.Unavailable:
-					LIconName = CUnavailableIconName;
-					LBMPName = CUnavailableBMPName;
+					iconName = UnavailableIconName;
+					bMPName = UnavailableBMPName;
 					break;
 			}
 
-			Icon LIcon = new Icon(this.GetType().Assembly.GetManifestResourceStream(LIconName));
-			FTrayIcon.Icon = LIcon;
+			Icon icon = new Icon(this.GetType().Assembly.GetManifestResourceStream(iconName));
+			_trayIcon.Icon = icon;
 
-			if (FMainFormIsShowing == true)
+			if (_mainFormIsShowing == true)
 			{
-				Bitmap LBitmap = new Bitmap(this.GetType().Assembly.GetManifestResourceStream(LBMPName));
-				LBitmap.MakeTransparent(System.Drawing.Color.White);
-				FMainForm.ServerStatusPicture.Image = LBitmap;
+				Bitmap bitmap = new Bitmap(this.GetType().Assembly.GetManifestResourceStream(bMPName));
+				bitmap.MakeTransparent(System.Drawing.Color.White);
+				_mainForm.ServerStatusPicture.Image = bitmap;
 			}
 		}
 
@@ -176,57 +176,57 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 		{
 			try
 			{
-				using (System.IO.FileStream LStream = new System.IO.FileStream(PathUtility.CommonAppDataPath() + CConfigurationUtilitySettingsFileName, System.IO.FileMode.Create, System.IO.FileAccess.Write))
+				using (System.IO.FileStream stream = new System.IO.FileStream(PathUtility.CommonAppDataPath() + ConfigurationUtilitySettingsFileName, System.IO.FileMode.Create, System.IO.FileAccess.Write))
 				{
-					new BOP.Serializer().Serialize(LStream, FConfigurationUtilitySettings);
+					new BOP.Serializer().Serialize(stream, _configurationUtilitySettings);
 				}
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				Application.OnThreadException(LException);
+				Application.OnThreadException(exception);
 			}
 		}
 
 		public void CheckServiceStatus()
 		{
-			FServiceStatus = ServiceUtility.GetServiceStatus(SelectedInstanceName);
+			_serviceStatus = ServiceUtility.GetServiceStatus(SelectedInstanceName);
 
-			switch (FServiceStatus)
+			switch (_serviceStatus)
 			{
 				case ServiceStatus.Running:
 					SetImageStatus(ApplicationForm.ImageStatus.Running);
-					if (FMainFormIsShowing == true)
+					if (_mainFormIsShowing == true)
 					{
-						FMainForm.StartStopButton.Text = "Stop";
-						FMainForm.StartStopButton.Enabled = true;
-						FMainForm.InstallButton.Text = "Uninstall";
-						FMainForm.InstallButton.Enabled = false;
-						FMainForm.ServiceAutoStart.Enabled = true;
+						_mainForm.StartStopButton.Text = "Stop";
+						_mainForm.StartStopButton.Enabled = true;
+						_mainForm.InstallButton.Text = "Uninstall";
+						_mainForm.InstallButton.Enabled = false;
+						_mainForm.ServiceAutoStart.Enabled = true;
 					}
 				break;
 
 				case ServiceStatus.Stopped:
 					SetImageStatus(ApplicationForm.ImageStatus.Stopped);
-					if (FMainFormIsShowing == true)
+					if (_mainFormIsShowing == true)
 					{
-						FMainForm.StartStopButton.Text = "Start";
-						FMainForm.StartStopButton.Enabled = true;
-						FMainForm.InstallButton.Text = "Uninstall";
-						FMainForm.InstallButton.Enabled = true;
-						FMainForm.ServiceAutoStart.Enabled = true;
+						_mainForm.StartStopButton.Text = "Start";
+						_mainForm.StartStopButton.Enabled = true;
+						_mainForm.InstallButton.Text = "Uninstall";
+						_mainForm.InstallButton.Enabled = true;
+						_mainForm.ServiceAutoStart.Enabled = true;
 					}
 				break;
 
 				case ServiceStatus.Unavailable:
 				default:
 					SetImageStatus(ApplicationForm.ImageStatus.Unavailable);
-					if (FMainFormIsShowing == true)
+					if (_mainFormIsShowing == true)
 					{
-						FMainForm.StartStopButton.Text = "Not-Available";
-						FMainForm.StartStopButton.Enabled = false;
-						FMainForm.InstallButton.Text = "Install";
-						FMainForm.InstallButton.Enabled = true;
-						FMainForm.ServiceAutoStart.Enabled = false;
+						_mainForm.StartStopButton.Text = "Not-Available";
+						_mainForm.StartStopButton.Enabled = false;
+						_mainForm.InstallButton.Text = "Install";
+						_mainForm.InstallButton.Enabled = true;
+						_mainForm.ServiceAutoStart.Enabled = false;
 					}
 				break;
 			}
@@ -234,18 +234,18 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 
 		private void ShowMainForm()
 		{
-			if (!FMainFormIsShowing)
+			if (!_mainFormIsShowing)
 			{
-				FMainForm = new MainForm(this);
-				FMainFormIsShowing = true;
+				_mainForm = new MainForm(this);
+				_mainFormIsShowing = true;
 				Timer_Tick(this, null);
-				FMainForm.Show();
-				FMainForm.ShowInTaskbar = true;
+				_mainForm.Show();
+				_mainForm.ShowInTaskbar = true;
 			}
 			else
 			{
-				FMainForm.WindowState = FormWindowState.Normal;
-				FMainForm.BringToFront();
+				_mainForm.WindowState = FormWindowState.Normal;
+				_mainForm.BringToFront();
 			}
 		}
 

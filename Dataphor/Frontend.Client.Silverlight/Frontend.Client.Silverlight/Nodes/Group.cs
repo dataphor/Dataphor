@@ -19,16 +19,16 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			AddBinding(GroupBox.HeaderProperty, new Func<object>(UIGetHeader));
 		}
 		
-		private string FTitle = String.Empty;
+		private string _title = String.Empty;
 		[DefaultValue("")]
 		public string Title
 		{
-			get { return FTitle; }
+			get { return _title; }
 			set
 			{
-				if (FTitle != value)
+				if (_title != value)
 				{
-					FTitle = value;
+					_title = value;
 					UpdateBinding(GroupBox.HeaderProperty);
 				}
 			}
@@ -36,10 +36,10 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		private object UIGetHeader()
 		{
-			if (String.IsNullOrEmpty(FTitle))
+			if (String.IsNullOrEmpty(_title))
 				return null;
 			else
-				return FTitle;
+				return _title;
 		}
 	}
 }

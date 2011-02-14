@@ -10,7 +10,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 {
 	public class FindReplaceForm : System.Windows.Forms.Form
 	{
-		public const string CFindTitle = "Find";
+		public const string FindTitle = "Find";
 
 		private System.Windows.Forms.Panel panel1;
 		private System.Windows.Forms.Panel panel3;
@@ -30,16 +30,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private System.Windows.Forms.Button CancelingButton;
 		private System.Windows.Forms.Panel panel2;
 
-		public FindReplaceForm(FindAction AAction)
+		public FindReplaceForm(FindAction action)
 		{
 			InitializeComponent();
-			if (AAction == FindAction.Find)
+			if (action == FindAction.Find)
 			{
 				AcceptButton = FindButton;
 				PerformLayout();
 				panel2.Visible = false;
 				Height -= panel2.Height;
-				Text = CFindTitle;
+				Text = FindTitle;
 			}
 			else
 				AcceptButton = ReplaceButton;
@@ -255,16 +255,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			get 
 			{ 
-				FindSettings LSettings = new FindSettings();
-				LSettings.FindText = FindText.Text;
-				LSettings.ReplaceText = ReplaceText.Text;
-				LSettings.WrapAtEnd = WrapAtEnd.Checked;
-				LSettings.CaseSensitive = CaseSensitive.Checked;
-				LSettings.WholeWordOnly = WholeWordOnly.Checked;
-				LSettings.ReverseDirection = ReverseDirection.Checked;
-				LSettings.UseRegEx = UseRegEx.Checked;
-				LSettings.SelectionOnly = SelectionOnly.Checked;
-				return LSettings;
+				FindSettings settings = new FindSettings();
+				settings.FindText = FindText.Text;
+				settings.ReplaceText = ReplaceText.Text;
+				settings.WrapAtEnd = WrapAtEnd.Checked;
+				settings.CaseSensitive = CaseSensitive.Checked;
+				settings.WholeWordOnly = WholeWordOnly.Checked;
+				settings.ReverseDirection = ReverseDirection.Checked;
+				settings.UseRegEx = UseRegEx.Checked;
+				settings.SelectionOnly = SelectionOnly.Checked;
+				return settings;
 			}
 			set
 			{
@@ -281,11 +281,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// Action
 
-		private FindAction FAction;
+		private FindAction _action;
 		public FindAction Action
 		{
-			get { return FAction; }
-			set { FAction = value; }
+			get { return _action; }
+			set { _action = value; }
 		}
 
 		private void Find_Click(object sender, System.EventArgs e)

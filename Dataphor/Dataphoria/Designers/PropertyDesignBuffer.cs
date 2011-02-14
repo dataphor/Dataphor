@@ -7,83 +7,83 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 {
 	public class PropertyDesignBuffer : DesignBuffer
 	{
-		public PropertyDesignBuffer(IDataphoria ADataphoria, object AInstance, PropertyDescriptor ADescriptor)
-			: base(ADataphoria, null)
+		public PropertyDesignBuffer(IDataphoria dataphoria, object instance, PropertyDescriptor descriptor)
+			: base(dataphoria, null)
 		{
-			FInstance = AInstance;
-			FDescriptor = ADescriptor;
-			FID = Guid.NewGuid();
+			_instance = instance;
+			_descriptor = descriptor;
+			_iD = Guid.NewGuid();
 		}
 
 		// Instance
 
-		private object FInstance;
+		private object _instance;
 		public object Instance
 		{
-			get { return FInstance; }
+			get { return _instance; }
 		}
 
 		// Descriptor
 
-		private PropertyDescriptor FDescriptor;
+		private PropertyDescriptor _descriptor;
 		public PropertyDescriptor Descriptor
 		{
-			get { return FDescriptor; }
+			get { return _descriptor; }
 		}
 
 		// ID
 
-		private Guid FID;
+		private Guid _iD;
 		public Guid ID
 		{
-			get { return FID; }
+			get { return _iD; }
 		}
 
 		// DesignBuffer
 
 		public override string GetDescription()
 		{
-			Frontend.Client.INode LNode = FInstance as Frontend.Client.INode;
-			return (LNode != null ? LNode.Name + "." : String.Empty) + FDescriptor.Name;
+			Frontend.Client.INode node = _instance as Frontend.Client.INode;
+			return (node != null ? node.Name + "." : String.Empty) + _descriptor.Name;
 		}
 
-		public override bool Equals(object AObject)
+		public override bool Equals(object objectValue)
 		{
-			PropertyDesignBuffer LBuffer = AObject as PropertyDesignBuffer;
-			if ((LBuffer != null) && Object.ReferenceEquals(FInstance, LBuffer.Instance) && FDescriptor.Equals(LBuffer.Descriptor))
+			PropertyDesignBuffer buffer = objectValue as PropertyDesignBuffer;
+			if ((buffer != null) && Object.ReferenceEquals(_instance, buffer.Instance) && _descriptor.Equals(buffer.Descriptor))
 				return true;
 			else
-				return base.Equals(AObject);
+				return base.Equals(objectValue);
 		}
 
 		public override int GetHashCode()
 		{
-			return FInstance.GetHashCode() ^ FDescriptor.GetHashCode();
+			return _instance.GetHashCode() ^ _descriptor.GetHashCode();
 		}
 
 		// Data
 
-		public override void SaveData(string AData)
+		public override void SaveData(string data)
 		{
-			FDescriptor.SetValue(FInstance, AData);
+			_descriptor.SetValue(_instance, data);
 		}
 
-		public override void SaveBinaryData(Stream AData)
+		public override void SaveBinaryData(Stream data)
 		{
 			Error.Fail("SaveBinaryData is not supported for PropertyDesignBuffer");
 		}
 
 		public override string LoadData()
 		{
-			return (string)FDescriptor.GetValue(FInstance);
+			return (string)_descriptor.GetValue(_instance);
 		}
 
-		public override void LoadData(Stream AData)
+		public override void LoadData(Stream data)
 		{
 			Error.Fail("LoadData(Stream) is not supported for PropertyDesignBuffer");
 		}
 
-		public override bool LocatorNameMatches(string AName)
+		public override bool LocatorNameMatches(string name)
 		{
 			return false;
 		}

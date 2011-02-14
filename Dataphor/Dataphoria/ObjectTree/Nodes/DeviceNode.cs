@@ -13,7 +13,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 {
 	public class DeviceListNode : SchemaListNode
 	{
-		public DeviceListNode(string ALibraryName) : base (ALibraryName)
+		public DeviceListNode(string libraryName) : base (libraryName)
 		{
 			Text = "Devices";
 			ImageIndex = 18;
@@ -22,44 +22,44 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		protected override string GetChildExpression()
 		{
-			return ".System.Devices " + CSchemaListFilter + " over { Name, ReconciliationMode }";
+			return ".System.Devices " + SchemaListFilter + " over { Name, ReconciliationMode }";
 		}
 		
-		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row ARow)
+		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row row)
 		{
-			return new DeviceNode(this, (string)ARow["Name"], (DAE.Language.D4.ReconcileMode)Enum.Parse(typeof(DAE.Language.D4.ReconcileMode), (string)ARow["ReconciliationMode"], true));
+			return new DeviceNode(this, (string)row["Name"], (DAE.Language.D4.ReconcileMode)Enum.Parse(typeof(DAE.Language.D4.ReconcileMode), (string)row["ReconciliationMode"], true));
 		}
 	}
 
 	public class DeviceNode : SchemaItemNode
 	{
-		public DeviceNode(DeviceListNode ANode, string ADeviceName, DAE.Language.D4.ReconcileMode AReconciliationMode) : base()
+		public DeviceNode(DeviceListNode node, string deviceName, DAE.Language.D4.ReconcileMode reconciliationMode) : base()
 		{
-			ParentSchemaList = ANode;
-			ObjectName = ADeviceName;
+			ParentSchemaList = node;
+			ObjectName = deviceName;
 			ImageIndex = 19;
 			SelectedImageIndex = ImageIndex;
-			FReconciliationMode = AReconciliationMode;
+			_reconciliationMode = reconciliationMode;
 		}
 		
 		private MenuItem LNone;
 		private MenuItem LStartup;
 		private MenuItem LCommand;
 		private MenuItem LAutomatic;
-		private DAE.Language.D4.ReconcileMode FReconciliationMode;
+		private DAE.Language.D4.ReconcileMode _reconciliationMode;
 
 		protected override ContextMenu GetContextMenu()
 		{
-			ContextMenu LMenu = base.GetContextMenu();
+			ContextMenu menu = base.GetContextMenu();
 			LNone = new MenuItem(Strings.ObjectTree_ReconciliationModeNoneMenuText, new EventHandler(NoneClicked));
-			LNone.Checked = FReconciliationMode == DAE.Language.D4.ReconcileMode.None;
+			LNone.Checked = _reconciliationMode == DAE.Language.D4.ReconcileMode.None;
 			LStartup = new MenuItem(Strings.ObjectTree_ReconciliationModeStartupMenuText, new EventHandler(StartupClicked));
-			LStartup.Checked = (FReconciliationMode & DAE.Language.D4.ReconcileMode.Startup) != 0;
+			LStartup.Checked = (_reconciliationMode & DAE.Language.D4.ReconcileMode.Startup) != 0;
 			LCommand = new MenuItem(Strings.ObjectTree_ReconciliationModeCommandMenuText, new EventHandler(CommandClicked));
-			LCommand.Checked = (FReconciliationMode & DAE.Language.D4.ReconcileMode.Command) != 0;
+			LCommand.Checked = (_reconciliationMode & DAE.Language.D4.ReconcileMode.Command) != 0;
 			LAutomatic = new MenuItem(Strings.ObjectTree_ReconciliationModeAutomaticMenuText, new EventHandler(AutomaticClicked));
-			LAutomatic.Checked = (FReconciliationMode & DAE.Language.D4.ReconcileMode.Automatic) != 0;
-			LMenu.MenuItems.Add
+			LAutomatic.Checked = (_reconciliationMode & DAE.Language.D4.ReconcileMode.Automatic) != 0;
+			menu.MenuItems.Add
 			(
 				0,
 				new MenuItem
@@ -74,7 +74,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 					}
 				)
 			);
-			return LMenu;
+			return menu;
 		}
 
 		protected override string GetViewExpression()
@@ -98,7 +98,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			);
 		}
 
-		private void NoneClicked(object ASender, EventArgs AArgs)
+		private void NoneClicked(object sender, EventArgs args)
 		{
 			LNone.Checked = !LNone.Checked;
 			if (LNone.Checked)
@@ -115,21 +115,21 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			UpdateReconciliationMode();
 		}
 		
-		private void StartupClicked(object ASender, EventArgs AArgs)
+		private void StartupClicked(object sender, EventArgs args)
 		{
 			LStartup.Checked = !LStartup.Checked;
 			LNone.Checked = (!(LStartup.Checked || LCommand.Checked || LAutomatic.Checked));
 			UpdateReconciliationMode();
 		}
 
-		private void CommandClicked(object ASender, EventArgs AArgs)
+		private void CommandClicked(object sender, EventArgs args)
 		{
 			LCommand.Checked = !LCommand.Checked;
 			LNone.Checked = (!(LStartup.Checked || LCommand.Checked || LAutomatic.Checked));
 			UpdateReconciliationMode();
 		}
 		
-		private void AutomaticClicked(object ASender, EventArgs AArgs)
+		private void AutomaticClicked(object sender, EventArgs args)
 		{
 			LAutomatic.Checked = !LAutomatic.Checked;
 			LNone.Checked = (!(LStartup.Checked || LCommand.Checked || LAutomatic.Checked));

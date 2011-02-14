@@ -21,13 +21,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 {
 	public class TextEdit : SD.TextEditorControl
 	{
-		private static FindSettings FFindSettings = new FindSettings();
-		private static FindAction FFindAction = FindAction.Find;
+		private static FindSettings _findSettings = new FindSettings();
+		private static FindAction _findAction = FindAction.Find;
 
 		static TextEdit()
 		{
 			// This regex is to replace simple line feeds with CR/LF pairs.  For a long time the Dataphoria editor generated just LFs
-			FRepairCRLF = new System.Text.RegularExpressions.Regex(@"(?<!\r)\n", System.Text.RegularExpressions.RegexOptions.Compiled);
+			_repairCRLF = new System.Text.RegularExpressions.Regex(@"(?<!\r)\n", System.Text.RegularExpressions.RegexOptions.Compiled);
 		}
 
 		public TextEdit()
@@ -60,72 +60,72 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		    editactions[Keys.Delete | Keys.Shift | Keys.Control] = new SD.Actions.DeleteToLineEnd();
 		}
 
-		private static System.Text.RegularExpressions.Regex FRepairCRLF;
+		private static System.Text.RegularExpressions.Regex _repairCRLF;
 
 		public string GetLineNumberText()
 		{
-			TextLocation LPosition = ActiveTextAreaControl.Caret.Position;
+			TextLocation position = ActiveTextAreaControl.Caret.Position;
 			return String.Format
 			(
 				"Ln {0} Col {1}", 
-				LPosition.Y + 1,
-				LPosition.X + 1
+				position.Y + 1,
+				position.X + 1
 			);
 		}
 
-		private bool FSettingText;
+		private bool _settingText;
 
 		/// <summary> Document changed event that is only raised if the change wasn't caused by text changing. </summary>
 		public event DocumentEventHandler DocumentChanged;
 
-		private void DocumentDocumentChanged(object ASender, ICSharpCode.TextEditor.Document.DocumentEventArgs AArgs)
+		private void DocumentDocumentChanged(object sender, ICSharpCode.TextEditor.Document.DocumentEventArgs args)
 		{
-			if (!FSettingText)
-				DoDocumentChanged(ASender, AArgs);
+			if (!_settingText)
+				DoDocumentChanged(sender, args);
 		}
 
-		protected virtual void DoDocumentChanged(object ASender, DocumentEventArgs AArgs)
+		protected virtual void DoDocumentChanged(object sender, DocumentEventArgs args)
 		{
 			if (DocumentChanged != null)
-				DocumentChanged(ASender, AArgs);
+				DocumentChanged(sender, args);
 		}
 		
-		public void AppendText(string ANewText)
+		public void AppendText(string newText)
 		{
-			FSettingText = true;
+			_settingText = true;
 			BeginUpdate();
 			try
 			{
-				TextLocation LOldEndPoint = Document.OffsetToPosition(Document.TextLength);
+				TextLocation oldEndPoint = Document.OffsetToPosition(Document.TextLength);
 				
-				bool LOldReadOnly = Document.ReadOnly;
+				bool oldReadOnly = Document.ReadOnly;
 				Document.ReadOnly = false;
 
-				if ((Document.TextLength > 0) && (ANewText.Length > 0))
+				if ((Document.TextLength > 0) && (newText.Length > 0))
 					Document.Insert(Document.TextLength, "\r\n");
-				Document.Insert(Document.TextLength, ANewText);
+				Document.Insert(Document.TextLength, newText);
 
-				Document.ReadOnly = LOldReadOnly;
+				Document.ReadOnly = oldReadOnly;
 
-				ActiveTextAreaControl.Caret.Position = LOldEndPoint;
+				ActiveTextAreaControl.Caret.Position = oldEndPoint;
 				ActiveTextAreaControl.ScrollToCaret();
 			}
 			finally
 			{
-				FSettingText = false;
+				_settingText = false;
 				EndUpdate();
 			}
 
 			Refresh();  // if this isn't done then half the loaded text won't show up.
 		}
 		
-		public void SetText(string ANewText)
+		public void SetText(string newText)
 		{
-			FSettingText = true;
+			_settingText = true;
 			BeginUpdate();
 			try
 			{
-				Document.TextContent = FRepairCRLF.Replace(ANewText, "\r\n"); 
+				Document.TextContent = _repairCRLF.Replace(newText, "\r\n"); 
 				Document.UndoStack.ClearAll();
 				Document.BookmarkManager.Clear();
 				Document.UpdateQueue.Clear();
@@ -134,7 +134,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 			finally
 			{
-				FSettingText = false;
+				_settingText = false;
 				EndUpdate();
 			}
 
@@ -143,7 +143,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public void Clear()
 		{
-			FSettingText = true;
+			_settingText = true;
 			BeginUpdate();
 			try
 			{
@@ -155,7 +155,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 			finally
 			{
-				FSettingText = false;
+				_settingText = false;
 				EndUpdate();
 			}
 
@@ -164,30 +164,30 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public event InitializeTextAreaControlHandler OnInitializeTextAreaControl;
 
-		protected override void InitializeTextAreaControl(SD.TextAreaControl ANewControl)
+		protected override void InitializeTextAreaControl(SD.TextAreaControl newControl)
 		{
-			base.InitializeTextAreaControl(ANewControl);
+			base.InitializeTextAreaControl(newControl);
 			if (OnInitializeTextAreaControl != null)
-				OnInitializeTextAreaControl(this, ANewControl);
+				OnInitializeTextAreaControl(this, newControl);
 		}
 
 		#region Extensible Keyboard Handling
 
-		protected override bool ProcessDialogKey(Keys AKey)
+		protected override bool ProcessDialogKey(Keys key)
 		{
 			try
 			{
-				switch (AKey)
+				switch (key)
 				{
 					case Keys.F | Keys.Control : PromptFindReplace(false); break;
 					case Keys.H | Keys.Control : PromptFindReplace(true); break;
 					case Keys.F3 : FindAgain(); break;
-					default : return base.ProcessDialogKey(AKey);
+					default : return base.ProcessDialogKey(key);
 				}
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				Frontend.Client.Windows.Session.HandleException(LException);
+				Frontend.Client.Windows.Session.HandleException(exception);
 			}
 			return true;
 			
@@ -215,10 +215,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		}
 
 		public event ReplacementsPerformedHandler ReplacementsPerformed;
-		protected virtual void DoReplacementsPerformed(int ACount)
+		protected virtual void DoReplacementsPerformed(int count)
 		{
 			if (ReplacementsPerformed != null)
-				ReplacementsPerformed(this, ACount);
+				ReplacementsPerformed(this, count);
 		}
 
 		public event EventHandler TextNotFound;
@@ -232,14 +232,14 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		public void PerformFind()
 		{
 			DoBeginningFind();
-			if (FFindSettings.FindText != String.Empty)
+			if (_findSettings.FindText != String.Empty)
 			{
-				Cursor LOldCursor = Cursor.Current;
+				Cursor oldCursor = Cursor.Current;
 				Cursor = Cursors.WaitCursor;
 				BeginUpdate();
 				try
 				{
-					switch (FFindAction)
+					switch (_findAction)
 					{
 						case (FindAction.ReplaceAll):
 							DoReplacementsPerformed(FindAndReplaceAll());
@@ -258,49 +258,49 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				{
 					EndUpdate();
 					Invalidate();
-					Cursor = LOldCursor;
+					Cursor = oldCursor;
 				}
 			}
 		}
 
-		public void PromptFindReplace(bool AReplace)
+		public void PromptFindReplace(bool replace)
 		{
 			DoBeginningFind();
-			using (FindReplaceForm LForm = new FindReplaceForm((AReplace ? FindAction.Replace : FindAction.Find)))
+			using (FindReplaceForm form = new FindReplaceForm((replace ? FindAction.Replace : FindAction.Find)))
 			{
-				FFindSettings.SelectionOnly = false;
+				_findSettings.SelectionOnly = false;
 				if (ActiveTextAreaControl.SelectionManager.HasSomethingSelected)
 				{
 					if (ActiveTextAreaControl.SelectionManager.SelectedText.IndexOf("\n") != -1)
-						FFindSettings.SelectionOnly = true;
+						_findSettings.SelectionOnly = true;
 					else
-						FFindSettings.FindText = ActiveTextAreaControl.SelectionManager.SelectedText;
+						_findSettings.FindText = ActiveTextAreaControl.SelectionManager.SelectedText;
 				}
 				else
 				{
-					int LWordStart = FindWordStart(Document, ActiveTextAreaControl.Caret.Offset);
-					string LFindText = Document.GetText(LWordStart, Math.Max(0, FindWordEnd(Document, LWordStart) - LWordStart));
-					if (LFindText != String.Empty)
-						FFindSettings.FindText = LFindText;
+					int wordStart = FindWordStart(Document, ActiveTextAreaControl.Caret.Offset);
+					string findText = Document.GetText(wordStart, Math.Max(0, FindWordEnd(Document, wordStart) - wordStart));
+					if (findText != String.Empty)
+						_findSettings.FindText = findText;
 				}
 
-				LForm.Settings = FFindSettings;
+				form.Settings = _findSettings;
 
-				if (LForm.ShowDialog() != DialogResult.OK)
+				if (form.ShowDialog() != DialogResult.OK)
 					throw new AbortException();
-				FFindSettings = LForm.Settings;
-				FFindAction = LForm.Action;
+				_findSettings = form.Settings;
+				_findAction = form.Action;
 				PerformFind();
 			}
 		}
 
 		public void FindAgain()
 		{
-			FFindSettings.SelectionOnly = false;  // never use selection only on a repeat find, since selection was set by last find
-			if (FFindAction == FindAction.ReplaceAll)
-				FFindAction = FindAction.Find;  // never repeat Find and Replace All
+			_findSettings.SelectionOnly = false;  // never use selection only on a repeat find, since selection was set by last find
+			if (_findAction == FindAction.ReplaceAll)
+				_findAction = FindAction.Find;  // never repeat Find and Replace All
 
-			if (FFindSettings.FindText == String.Empty)
+			if (_findSettings.FindText == String.Empty)
 				PromptFindReplace(false);
 			else
 				PerformFind();
@@ -312,7 +312,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private int GetStartOffset()
 		{
-			if (FFindSettings.SelectionOnly && ActiveTextAreaControl.SelectionManager.HasSomethingSelected)
+			if (_findSettings.SelectionOnly && ActiveTextAreaControl.SelectionManager.HasSomethingSelected)
 				return Document.PositionToOffset(ActiveTextAreaControl.SelectionManager.SelectionCollection[0].StartPosition);
 			else
 				return 0;
@@ -320,70 +320,70 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private int GetEndOffset()
 		{
-			if (FFindSettings.SelectionOnly && ActiveTextAreaControl.SelectionManager.HasSomethingSelected)
+			if (_findSettings.SelectionOnly && ActiveTextAreaControl.SelectionManager.HasSomethingSelected)
 			{
-				SD.Document.ISelection LSelection = ActiveTextAreaControl.SelectionManager.SelectionCollection[0];
-				return LSelection.Offset + LSelection.Length;
+				SD.Document.ISelection selection = ActiveTextAreaControl.SelectionManager.SelectionCollection[0];
+				return selection.Offset + selection.Length;
 			}
 			else
 				return Document.TextLength;	// Apparently the Document.TextLength is an offset because if we subtract one we cut off the last character
 		}
 
-		public Match GetMatch(int AStartOffset, int AEndOffset, int ACaretOffset, bool AForceRightToLeft)
+		public Match GetMatch(int startOffset, int endOffset, int caretOffset, bool forceRightToLeft)
 		{
-			string LFindString = FFindSettings.FindText;
-			if (!FFindSettings.UseRegEx)
-				LFindString = Regex.Escape(LFindString);
-			if (FFindSettings.WholeWordOnly)
-				LFindString = String.Format(@"\b{0}\b", LFindString);
-			Regex LRegex = new Regex(LFindString, (!FFindSettings.CaseSensitive ? RegexOptions.IgnoreCase : 0) | (AForceRightToLeft || FFindSettings.ReverseDirection ? RegexOptions.RightToLeft : 0));
+			string findString = _findSettings.FindText;
+			if (!_findSettings.UseRegEx)
+				findString = Regex.Escape(findString);
+			if (_findSettings.WholeWordOnly)
+				findString = String.Format(@"\b{0}\b", findString);
+			Regex regex = new Regex(findString, (!_findSettings.CaseSensitive ? RegexOptions.IgnoreCase : 0) | (forceRightToLeft || _findSettings.ReverseDirection ? RegexOptions.RightToLeft : 0));
 
-			ACaretOffset = Math.Max(Math.Min(AEndOffset, ACaretOffset), AStartOffset);
-			int LLength = (AForceRightToLeft || FFindSettings.ReverseDirection ? (ACaretOffset - AStartOffset) : (AEndOffset - ACaretOffset));
-			int LStart = (AForceRightToLeft || FFindSettings.ReverseDirection ? AStartOffset : ACaretOffset);
-			Match LMatch = LRegex.Match(Document.TextContent, LStart, LLength);
+			caretOffset = Math.Max(Math.Min(endOffset, caretOffset), startOffset);
+			int length = (forceRightToLeft || _findSettings.ReverseDirection ? (caretOffset - startOffset) : (endOffset - caretOffset));
+			int start = (forceRightToLeft || _findSettings.ReverseDirection ? startOffset : caretOffset);
+			Match match = regex.Match(Document.TextContent, start, length);
 
-			if ((!LMatch.Success || (((LMatch.Index + LMatch.Length) > AEndOffset) || (LMatch.Index < AStartOffset))) && FFindSettings.WrapAtEnd)
+			if ((!match.Success || (((match.Index + match.Length) > endOffset) || (match.Index < startOffset))) && _findSettings.WrapAtEnd)
 			{
-				if (FFindSettings.ReverseDirection)
-					LMatch = LRegex.Match(Document.TextContent, ACaretOffset, (AEndOffset - ACaretOffset)); // Find from end offset
+				if (_findSettings.ReverseDirection)
+					match = regex.Match(Document.TextContent, caretOffset, (endOffset - caretOffset)); // Find from end offset
 				else
-					LMatch = LRegex.Match(Document.TextContent, AStartOffset, (ACaretOffset - AStartOffset)); // Find from start offset
+					match = regex.Match(Document.TextContent, startOffset, (caretOffset - startOffset)); // Find from start offset
 
 				// Don't return a successful match if the match is out of bounds
-				if (LMatch.Success && (((LMatch.Index + LMatch.Length) > AEndOffset) || (LMatch.Index < AStartOffset)))
-					LMatch = Match.Empty;
+				if (match.Success && (((match.Index + match.Length) > endOffset) || (match.Index < startOffset)))
+					match = Match.Empty;
 			}
-			return LMatch;
+			return match;
 		}
 
 		private Match InternalFind()
 		{
-			int LStartOffset = GetStartOffset();
-			int LEndOffset = GetEndOffset();
-			int LCaretOffset = (FFindSettings.SelectionOnly ? (FFindSettings.ReverseDirection ? LEndOffset : LStartOffset) : ActiveTextAreaControl.Caret.Offset);
-			return GetMatch(LStartOffset, LEndOffset, LCaretOffset, false);
+			int startOffset = GetStartOffset();
+			int endOffset = GetEndOffset();
+			int caretOffset = (_findSettings.SelectionOnly ? (_findSettings.ReverseDirection ? endOffset : startOffset) : ActiveTextAreaControl.Caret.Offset);
+			return GetMatch(startOffset, endOffset, caretOffset, false);
 		}
 
 		public bool Find()
 		{
-			Match LMatch = InternalFind();
+			Match match = InternalFind();
 
-			if (LMatch.Success)
+			if (match.Success)
 			{
 				ActiveTextAreaControl.SelectionManager.SetSelection
 				(
 					new SD.Document.DefaultSelection
 					(
 						Document, 
-						Document.OffsetToPosition(LMatch.Index), 
-						Document.OffsetToPosition(LMatch.Index + LMatch.Length)
+						Document.OffsetToPosition(match.Index), 
+						Document.OffsetToPosition(match.Index + match.Length)
 					)
 				);
-				if (FFindSettings.ReverseDirection)
-					ActiveTextAreaControl.Caret.Position = Document.OffsetToPosition(LMatch.Index);		// Move the caret to the BEGINNING of the selection for backwards search
+				if (_findSettings.ReverseDirection)
+					ActiveTextAreaControl.Caret.Position = Document.OffsetToPosition(match.Index);		// Move the caret to the BEGINNING of the selection for backwards search
 				else
-					ActiveTextAreaControl.Caret.Position = Document.OffsetToPosition(LMatch.Index + LMatch.Length);	// Move the caret to the END of the selection for backwards search
+					ActiveTextAreaControl.Caret.Position = Document.OffsetToPosition(match.Index + match.Length);	// Move the caret to the END of the selection for backwards search
 				return true;
 			}
 			else
@@ -392,24 +392,24 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public bool FindAndReplace()
 		{		
-			Match LMatch = InternalFind();
-			if (LMatch.Success)
+			Match match = InternalFind();
+			if (match.Success)
 			{
-				Document.Replace(LMatch.Index, LMatch.Length, FFindSettings.ReplaceText);
+				Document.Replace(match.Index, match.Length, _findSettings.ReplaceText);
 
 				ActiveTextAreaControl.SelectionManager.SetSelection
 				(
 					new SD.Document.DefaultSelection
 					(
 						Document, 
-						Document.OffsetToPosition(LMatch.Index), 
-						Document.OffsetToPosition(LMatch.Index + FFindSettings.ReplaceText.Length)	// Select through the end of the replaced text
+						Document.OffsetToPosition(match.Index), 
+						Document.OffsetToPosition(match.Index + _findSettings.ReplaceText.Length)	// Select through the end of the replaced text
 					)
 				);
-				if (FFindSettings.ReverseDirection)
-					ActiveTextAreaControl.Caret.Position = Document.OffsetToPosition(LMatch.Index);		// Move the caret to the BEGINNING of the selection for backwards search
+				if (_findSettings.ReverseDirection)
+					ActiveTextAreaControl.Caret.Position = Document.OffsetToPosition(match.Index);		// Move the caret to the BEGINNING of the selection for backwards search
 				else
-					ActiveTextAreaControl.Caret.Position = Document.OffsetToPosition(LMatch.Index + FFindSettings.ReplaceText.Length);	// Move the caret to the END of the selection for backwards search
+					ActiveTextAreaControl.Caret.Position = Document.OffsetToPosition(match.Index + _findSettings.ReplaceText.Length);	// Move the caret to the END of the selection for backwards search
 
 				return true;
 			}
@@ -419,24 +419,24 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public int FindAndReplaceAll()
 		{
-			int LCount = 0;
-			int LStartOffset = GetStartOffset();
-			int LEndOffset = GetEndOffset();
+			int count = 0;
+			int startOffset = GetStartOffset();
+			int endOffset = GetEndOffset();
 
-			Match LMatch = GetMatch(LStartOffset, LEndOffset, LEndOffset, true);	// Force right to left so the indexes don't change
+			Match match = GetMatch(startOffset, endOffset, endOffset, true);	// Force right to left so the indexes don't change
 
-			if (LMatch.Success)
+			if (match.Success)
 				ActiveTextAreaControl.SelectionManager.ClearSelection();
 
 			ActiveTextAreaControl.TextArea.BeginUpdate();
             Document.UndoStack.StartUndoGroup();
 			try
 			{
-				while (LMatch.Success && (LMatch.Index >= LStartOffset))
+				while (match.Success && (match.Index >= startOffset))
 				{
-					LCount++;
-					Document.Replace(LMatch.Index, LMatch.Length, FFindSettings.ReplaceText);
-					LMatch = LMatch.NextMatch();
+					count++;
+					Document.Replace(match.Index, match.Length, _findSettings.ReplaceText);
+					match = match.NextMatch();
 				}
 			}
 			finally
@@ -446,7 +446,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 			
 
-		    return LCount;
+		    return count;
 		}
 
 		#endregion
@@ -520,31 +520,31 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 	public class AllTheWayHome : SD.Actions.AbstractEditAction
 	{
-		public override void Execute(SD.TextArea ATextArea)
+		public override void Execute(SD.TextArea textArea)
 		{
-			TextLocation LNewPos = ATextArea.Caret.Position;
-			LNewPos.X = 0;
-			if (LNewPos != ATextArea.Caret.Position) 
+			TextLocation newPos = textArea.Caret.Position;
+			newPos.X = 0;
+			if (newPos != textArea.Caret.Position) 
 			{
-				ATextArea.Caret.Position = LNewPos;
-				ATextArea.SetDesiredColumn();
+				textArea.Caret.Position = newPos;
+				textArea.SetDesiredColumn();
 			}
 		}
 	}
 
 	public class ReplaceEditorAction : SD.Actions.AbstractEditAction
 	{
-		public override void Execute(SD.TextArea ATextArea)
+		public override void Execute(SD.TextArea textArea)
 		{
-			((TextEdit)ATextArea.Parent).PromptFindReplace(true);
+			((TextEdit)textArea.Parent).PromptFindReplace(true);
 		}
 	}
 
 	public class FindAgainEditorAction : SD.Actions.AbstractEditAction
 	{
-		public override void Execute(SD.TextArea ATextArea)
+		public override void Execute(SD.TextArea textArea)
 		{
-			((TextEdit)ATextArea.Parent).FindAgain();
+			((TextEdit)textArea.Parent).FindAgain();
 		}
 	}
 }

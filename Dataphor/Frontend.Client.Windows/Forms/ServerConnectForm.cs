@@ -21,15 +21,15 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private System.ComponentModel.IContainer components;
 		private Button EditAliasButton;
 		private Button DeleteAliasButton;
-		private ListView FServerList;
-		private ColumnHeader FIconColumn;
-		private ColumnHeader FAliasColumn;
+		private ListView _serverList;
+		private ColumnHeader _iconColumn;
+		private ColumnHeader _aliasColumn;
 		private System.Windows.Forms.TextBox UserIDTextBox;
 		private Label label1;
 		private Label label2;
 		private System.Windows.Forms.TextBox PasswordTextBox;
 		private Button AddAliasButton;
-		private System.Windows.Forms.ImageList FImageList;
+		private System.Windows.Forms.ImageList _imageList;
 
 		public ServerConnectForm() 
 		{
@@ -70,10 +70,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ServerConnectForm));
-			this.FImageList = new System.Windows.Forms.ImageList(this.components);
-			this.FServerList = new System.Windows.Forms.ListView();
-			this.FIconColumn = new System.Windows.Forms.ColumnHeader();
-			this.FAliasColumn = new System.Windows.Forms.ColumnHeader();
+			this._imageList = new System.Windows.Forms.ImageList(this.components);
+			this._serverList = new System.Windows.Forms.ListView();
+			this._iconColumn = new System.Windows.Forms.ColumnHeader();
+			this._aliasColumn = new System.Windows.Forms.ColumnHeader();
 			this.DeleteAliasButton = new System.Windows.Forms.Button();
 			this.EditAliasButton = new System.Windows.Forms.Button();
 			this.AddAliasButton = new System.Windows.Forms.Button();
@@ -94,52 +94,52 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.FContentPanel.Controls.Add(this.AddAliasButton);
 			this.FContentPanel.Controls.Add(this.EditAliasButton);
 			this.FContentPanel.Controls.Add(this.DeleteAliasButton);
-			this.FContentPanel.Controls.Add(this.FServerList);
+			this.FContentPanel.Controls.Add(this._serverList);
 			this.FContentPanel.Size = new System.Drawing.Size(398, 259);
 			// 
 			// FImageList
 			// 
-			this.FImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("FImageList.ImageStream")));
-			this.FImageList.TransparentColor = System.Drawing.Color.White;
-			this.FImageList.Images.SetKeyName(0, "");
-			this.FImageList.Images.SetKeyName(1, "");
-			this.FImageList.Images.SetKeyName(2, "");
-			this.FImageList.Images.SetKeyName(3, "");
-			this.FImageList.Images.SetKeyName(4, "");
-			this.FImageList.Images.SetKeyName(5, "");
-			this.FImageList.Images.SetKeyName(6, "");
+			this._imageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("FImageList.ImageStream")));
+			this._imageList.TransparentColor = System.Drawing.Color.White;
+			this._imageList.Images.SetKeyName(0, "");
+			this._imageList.Images.SetKeyName(1, "");
+			this._imageList.Images.SetKeyName(2, "");
+			this._imageList.Images.SetKeyName(3, "");
+			this._imageList.Images.SetKeyName(4, "");
+			this._imageList.Images.SetKeyName(5, "");
+			this._imageList.Images.SetKeyName(6, "");
 			// 
 			// FServerList
 			// 
-			this.FServerList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+			this._serverList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
 						| System.Windows.Forms.AnchorStyles.Left)
 						| System.Windows.Forms.AnchorStyles.Right)));
-			this.FServerList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.FIconColumn,
-            this.FAliasColumn});
-			this.FServerList.FullRowSelect = true;
-			this.FServerList.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-			this.FServerList.HideSelection = false;
-			this.FServerList.Location = new System.Drawing.Point(7, 6);
-			this.FServerList.MultiSelect = false;
-			this.FServerList.Name = "FServerList";
-			this.FServerList.Size = new System.Drawing.Size(296, 158);
-			this.FServerList.SmallImageList = this.FImageList;
-			this.FServerList.TabIndex = 7;
-			this.FServerList.UseCompatibleStateImageBehavior = false;
-			this.FServerList.View = System.Windows.Forms.View.Details;
-			this.FServerList.DoubleClick += new System.EventHandler(this.ServerListDoubleClicked);
-			this.FServerList.SelectedIndexChanged += new System.EventHandler(this.FServerList_SelectedIndexChanged);
+			this._serverList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this._iconColumn,
+            this._aliasColumn});
+			this._serverList.FullRowSelect = true;
+			this._serverList.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+			this._serverList.HideSelection = false;
+			this._serverList.Location = new System.Drawing.Point(7, 6);
+			this._serverList.MultiSelect = false;
+			this._serverList.Name = "FServerList";
+			this._serverList.Size = new System.Drawing.Size(296, 158);
+			this._serverList.SmallImageList = this._imageList;
+			this._serverList.TabIndex = 7;
+			this._serverList.UseCompatibleStateImageBehavior = false;
+			this._serverList.View = System.Windows.Forms.View.Details;
+			this._serverList.DoubleClick += new System.EventHandler(this.ServerListDoubleClicked);
+			this._serverList.SelectedIndexChanged += new System.EventHandler(this.FServerList_SelectedIndexChanged);
 			// 
 			// FIconColumn
 			// 
-			this.FIconColumn.Text = "";
-			this.FIconColumn.Width = 24;
+			this._iconColumn.Text = "";
+			this._iconColumn.Width = 24;
 			// 
 			// FAliasColumn
 			// 
-			this.FAliasColumn.Text = "Server Alias";
-			this.FAliasColumn.Width = 220;
+			this._aliasColumn.Text = "Server Alias";
+			this._aliasColumn.Width = 220;
 			// 
 			// DeleteAliasButton
 			// 
@@ -243,132 +243,132 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		/// <remarks> Any changes to the alias list are saved even if the form is cancelled. </remarks>
 		public static AliasConfiguration Execute()
 		{
-			AliasConfiguration LConfiguration = AliasManager.LoadConfiguration();
-			Execute(LConfiguration);
-			return LConfiguration;
+			AliasConfiguration configuration = AliasManager.LoadConfiguration();
+			Execute(configuration);
+			return configuration;
 		}
 
-		public static void Execute(AliasConfiguration AConfiguration)
+		public static void Execute(AliasConfiguration configuration)
 		{
-			using (ServerConnectForm LForm = new ServerConnectForm())
+			using (ServerConnectForm form = new ServerConnectForm())
 			{
-				LForm.SetConfiguration(AConfiguration);
-				LForm.EnsureServerSelected();
+				form.SetConfiguration(configuration);
+				form.EnsureServerSelected();
 
-				DialogResult LResult = LForm.ShowDialog();
+				DialogResult result = form.ShowDialog();
 
-				ServerAlias LSelected = LForm.SelectedAlias;
-				if (LSelected != null)
-					LSelected.SessionInfo.UserID = LForm.UserIDTextBox.Text;
+				ServerAlias selected = form.SelectedAlias;
+				if (selected != null)
+					selected.SessionInfo.UserID = form.UserIDTextBox.Text;
 				
-				if (LSelected != null)
-					LForm.Configuration.DefaultAliasName = LSelected.Name;
+				if (selected != null)
+					form.Configuration.DefaultAliasName = selected.Name;
 				else
-					LForm.Configuration.DefaultAliasName = String.Empty;
+					form.Configuration.DefaultAliasName = String.Empty;
 					
-				AliasManager.SaveConfiguration(LForm.Configuration);
+				AliasManager.SaveConfiguration(form.Configuration);
 
-				if (LResult != DialogResult.OK)
+				if (result != DialogResult.OK)
 					throw new AbortException();
 
-				if (LSelected != null)
-					LSelected.SessionInfo.Password = LForm.PasswordTextBox.Text;
+				if (selected != null)
+					selected.SessionInfo.Password = form.PasswordTextBox.Text;
 			}
 		}
 
-		private AliasConfiguration FConfiguration;
+		private AliasConfiguration _configuration;
 		
 		public AliasConfiguration Configuration
 		{
-			get { return FConfiguration; }
+			get { return _configuration; }
 		}
 
 		public ServerAlias SelectedAlias
 		{
 			get
 			{
-				if (FServerList.SelectedItems.Count > 0)
-					return (ServerAlias)FServerList.SelectedItems[0].Tag;
+				if (_serverList.SelectedItems.Count > 0)
+					return (ServerAlias)_serverList.SelectedItems[0].Tag;
 				else
 					return null;
 			}
 		}
 
-		private void SetConfiguration(AliasConfiguration AConfiguration)
+		private void SetConfiguration(AliasConfiguration configuration)
 		{
-			FConfiguration = AConfiguration;
-			FServerList.Items.Clear();
-			foreach (ServerAlias LAlias in AConfiguration.Aliases.Values)
-				AddItem(LAlias);
-			SelectAlias(AConfiguration.DefaultAliasName);
+			_configuration = configuration;
+			_serverList.Items.Clear();
+			foreach (ServerAlias alias in configuration.Aliases.Values)
+				AddItem(alias);
+			SelectAlias(configuration.DefaultAliasName);
 		}
 
 		/// <remarks> If the named alias is not found, first item is selected. </remarks>
-		private void SelectAlias(string AAliasName)
+		private void SelectAlias(string aliasName)
 		{
-			ListViewItem LItem;
-			for (int i = 0; i < FServerList.Items.Count; i++)
+			ListViewItem item;
+			for (int i = 0; i < _serverList.Items.Count; i++)
 			{
-				LItem = FServerList.Items[i];
-				if (String.Compare(((ServerAlias)LItem.Tag).Name, AAliasName, true) == 0)
+				item = _serverList.Items[i];
+				if (String.Compare(((ServerAlias)item.Tag).Name, aliasName, true) == 0)
 				{
-					LItem.Selected = true;
+					item.Selected = true;
 					return;
 				}
 			}
-			if (FServerList.Items.Count > 0)
-				FServerList.Items[0].Selected = true;
+			if (_serverList.Items.Count > 0)
+				_serverList.Items[0].Selected = true;
 		}
 
-		private void AddItem(ServerAlias AAlias)
+		private void AddItem(ServerAlias alias)
 		{
-			ListViewItem LItem = new ListViewItem(String.Empty, (AAlias is InProcessAlias ? 0 : 1));
-			LItem.SubItems.Add(AAlias.ToString());
-			LItem.Tag = AAlias;
-			FServerList.Items.Add(LItem);
+			ListViewItem item = new ListViewItem(String.Empty, (alias is InProcessAlias ? 0 : 1));
+			item.SubItems.Add(alias.ToString());
+			item.Tag = alias;
+			_serverList.Items.Add(item);
 		}
 
 		/// <remarks> Does nothing if not found. </remarks>
-		private void RemoveItem(ServerAlias AAlias)
+		private void RemoveItem(ServerAlias alias)
 		{
-			ListViewItem LItem;
-			for (int i = 0; i < FServerList.Items.Count; i++)
+			ListViewItem item;
+			for (int i = 0; i < _serverList.Items.Count; i++)
 			{
-				LItem = FServerList.Items[i];
-				if (LItem.Tag == AAlias)
-					FServerList.Items.RemoveAt(i);
+				item = _serverList.Items[i];
+				if (item.Tag == alias)
+					_serverList.Items.RemoveAt(i);
 			}
 			EnsureServerSelected();
 		}
 
 		private void AddAliasButton_Click(object sender, System.EventArgs e)
 		{
-			ServerAlias LAlias = EditAliasForm.ExecuteAdd();
-			FConfiguration.Aliases.Add(LAlias);
-			AddItem(LAlias);
-			SelectAlias(LAlias.Name);
+			ServerAlias alias = EditAliasForm.ExecuteAdd();
+			_configuration.Aliases.Add(alias);
+			AddItem(alias);
+			SelectAlias(alias.Name);
 		}
 
 		private void EditAliasButton_Click(object sender, System.EventArgs e)
 		{
-			ServerAlias LOldAlias = SelectedAlias;
-			if (LOldAlias != null)
+			ServerAlias oldAlias = SelectedAlias;
+			if (oldAlias != null)
 			{
-				ServerAlias LNewAlias = EditAliasForm.ExecuteEdit(LOldAlias);
-				RemoveItem(LOldAlias);
-				FConfiguration.Aliases.Remove(LOldAlias.Name);
-				FConfiguration.Aliases.Add(LNewAlias);
-				AddItem(LNewAlias);
-				SelectAlias(LNewAlias.Name);
+				ServerAlias newAlias = EditAliasForm.ExecuteEdit(oldAlias);
+				RemoveItem(oldAlias);
+				_configuration.Aliases.Remove(oldAlias.Name);
+				_configuration.Aliases.Add(newAlias);
+				AddItem(newAlias);
+				SelectAlias(newAlias.Name);
 			}
 		}
 
 		private void DeleteAliasButton_Click(object sender, System.EventArgs e)
 		{
-			ServerAlias LAlias = SelectedAlias;
+			ServerAlias alias = SelectedAlias;
 			if 
 			(
-				(LAlias != null) && 
+				(alias != null) && 
 				(
 					MessageBox.Show
 					(
@@ -381,8 +381,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				)
 			)
 			{
-				RemoveItem(LAlias);
-				FConfiguration.Aliases.Remove(LAlias.Name);
+				RemoveItem(alias);
+				_configuration.Aliases.Remove(alias.Name);
 			}
 			EnsureServerSelected();
 		}
@@ -390,17 +390,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private void EnsureServerSelected()
 		{
 			// Select the first item if nothing is selected
-			if ((FServerList.SelectedItems.Count == 0) && (FServerList.Items.Count > 0))
+			if ((_serverList.SelectedItems.Count == 0) && (_serverList.Items.Count > 0))
 			{
-				FServerList.Items[0].Selected = true;
+				_serverList.Items[0].Selected = true;
 			}
 		}
 
 		private void FServerList_SelectedIndexChanged(object sender, System.EventArgs e)
 		{
 			// Ensure that the selected item is visible
-			if (FServerList.SelectedIndices.Count > 0)
-				FServerList.EnsureVisible(FServerList.SelectedIndices[0]);
+			if (_serverList.SelectedIndices.Count > 0)
+				_serverList.EnsureVisible(_serverList.SelectedIndices[0]);
 
 			if (SelectedAlias != null)
 			{
@@ -415,10 +415,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
-		protected override void OnClosing(CancelEventArgs AArgs)
+		protected override void OnClosing(CancelEventArgs args)
 		{
- 			base.OnClosing(AArgs);
-			AArgs.Cancel = false;
+ 			base.OnClosing(args);
+			args.Cancel = false;
 			try
 			{
 				if (DialogResult == DialogResult.OK)
@@ -429,7 +429,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					}
 					catch
 					{
-						AArgs.Cancel = true;
+						args.Cancel = true;
 						throw;
 					}
 				}
@@ -456,19 +456,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
-		private bool InternalProcessKey(Keys AKeyData)
+		private bool InternalProcessKey(Keys keyData)
 		{
-			if (FServerList.SelectedIndices.Count > 0)
+			if (_serverList.SelectedIndices.Count > 0)
 			{
-				switch (AKeyData)
+				switch (keyData)
 				{
 					case Keys.Up :
-						if (FServerList.SelectedIndices[0] > 0)
-							FServerList.Items[FServerList.SelectedIndices[0] - 1].Selected = true;
+						if (_serverList.SelectedIndices[0] > 0)
+							_serverList.Items[_serverList.SelectedIndices[0] - 1].Selected = true;
 						return true;
 					case Keys.Down :
-						if (FServerList.SelectedIndices[0] < (FServerList.Items.Count - 1))
-							FServerList.Items[FServerList.SelectedIndices[0] + 1].Selected = true;
+						if (_serverList.SelectedIndices[0] < (_serverList.Items.Count - 1))
+							_serverList.Items[_serverList.SelectedIndices[0] + 1].Selected = true;
 						return true;
 				}
 			}
@@ -476,9 +476,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		}
 
 		/// <remarks> Allow the user to scroll the selected server list from anywhere on the form. </remarks>
-		protected override bool ProcessDialogKey(Keys AKeyData)
+		protected override bool ProcessDialogKey(Keys keyData)
 		{
-			return InternalProcessKey(AKeyData) || base.ProcessDialogKey(AKeyData);
+			return InternalProcessKey(keyData) || base.ProcessDialogKey(keyData);
 		}
 
 		private void UserIDTextBox_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)

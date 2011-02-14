@@ -6,96 +6,96 @@ namespace Alphora.Dataphor.DAE.Connection.PGSQL
 {
     public class PostgreSQLCommand : DotNetCommand
     {
-        public PostgreSQLCommand(PostgreSQLConnection AConnection, IDbCommand ACommand)
-            : base(AConnection, ACommand) 
+        public PostgreSQLCommand(PostgreSQLConnection connection, IDbCommand command)
+            : base(connection, command) 
         {
-            FParameterDelimiter = ":";
+            _parameterDelimiter = ":";
         }
 
-        protected override string PrepareStatement(string AStatement)
+        protected override string PrepareStatement(string statement)
         {
-            return base.PrepareStatement(AStatement).Replace("@", ":");
+            return base.PrepareStatement(statement).Replace("@", ":");
         }
 		
         protected override void PrepareParameters()
         {
             // Prepare parameters
-            SQLParameter LParameter;
-            for (int LIndex = 0; LIndex < FParameterIndexes.Length; LIndex++)
+            SQLParameter parameter;
+            for (int index = 0; index < _parameterIndexes.Length; index++)
             {
-                LParameter = Parameters[FParameterIndexes[LIndex]];
-                var LNpgsqlParameter = (NpgsqlParameter)FCommand.CreateParameter();
-                LNpgsqlParameter.ParameterName = String.Format(":{0}", LParameter.Name);
-                LNpgsqlParameter.IsNullable = true;
-                switch (LParameter.Direction)
+                parameter = Parameters[_parameterIndexes[index]];
+                var npgsqlParameter = (NpgsqlParameter)_command.CreateParameter();
+                npgsqlParameter.ParameterName = String.Format(":{0}", parameter.Name);
+                npgsqlParameter.IsNullable = true;
+                switch (parameter.Direction)
                 {
-                    case SQLDirection.Out : LNpgsqlParameter.Direction = ParameterDirection.Output; break;
-                    case SQLDirection.InOut : LNpgsqlParameter.Direction = ParameterDirection.InputOutput; break;
-                    case SQLDirection.Result : LNpgsqlParameter.Direction = ParameterDirection.ReturnValue; break;
-                    default : LNpgsqlParameter.Direction = ParameterDirection.Input; break;
+                    case SQLDirection.Out : npgsqlParameter.Direction = ParameterDirection.Output; break;
+                    case SQLDirection.InOut : npgsqlParameter.Direction = ParameterDirection.InputOutput; break;
+                    case SQLDirection.Result : npgsqlParameter.Direction = ParameterDirection.ReturnValue; break;
+                    default : npgsqlParameter.Direction = ParameterDirection.Input; break;
                 }
 
-                if (LParameter.Type is SQLStringType)
+                if (parameter.Type is SQLStringType)
                 {
-                    LNpgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Varchar;
-                    LNpgsqlParameter.Size = ((SQLStringType)LParameter.Type).Length;
+                    npgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Varchar;
+                    npgsqlParameter.Size = ((SQLStringType)parameter.Type).Length;
                 }
-                else if (LParameter.Type is SQLBooleanType)
+                else if (parameter.Type is SQLBooleanType)
                 {
-                    LNpgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Boolean;
+                    npgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Boolean;
                 }
-                else if (LParameter.Type is SQLIntegerType)
+                else if (parameter.Type is SQLIntegerType)
                 {
-                    switch (((SQLIntegerType)LParameter.Type).ByteCount)
+                    switch (((SQLIntegerType)parameter.Type).ByteCount)
                     {
-                        case 1: LNpgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Smallint; break;
-                        case 2: LNpgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Smallint; break;
+                        case 1: npgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Smallint; break;
+                        case 2: npgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Smallint; break;
                         case 8 :
-                            LNpgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Numeric; 
-                            LNpgsqlParameter.Precision = 20;
-                            LNpgsqlParameter.Scale = 0;
+                            npgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Numeric; 
+                            npgsqlParameter.Precision = 20;
+                            npgsqlParameter.Scale = 0;
                             break;
-                        default: LNpgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Integer; break;
+                        default: npgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Integer; break;
                     }
                 }
-                else if (LParameter.Type is SQLNumericType)
+                else if (parameter.Type is SQLNumericType)
                 {
-                    var LType = (SQLNumericType)LParameter.Type;
-                    LNpgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Numeric;
-                    LNpgsqlParameter.Precision = LType.Precision;
-                    LNpgsqlParameter.Scale = LType.Scale;
+                    var type = (SQLNumericType)parameter.Type;
+                    npgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Numeric;
+                    npgsqlParameter.Precision = type.Precision;
+                    npgsqlParameter.Scale = type.Scale;
                 }
-                else if (LParameter.Type is SQLBinaryType)
+                else if (parameter.Type is SQLBinaryType)
                 {
-                    LNpgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Bytea;
+                    npgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Bytea;
                 }
-                else if (LParameter.Type is SQLTextType)
+                else if (parameter.Type is SQLTextType)
                 {
-                    LNpgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Text;
+                    npgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Text;
                 }
-                else if (LParameter.Type is SQLDateTimeType)
+                else if (parameter.Type is SQLDateTimeType)
                 {
-                    LNpgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Timestamp;
+                    npgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Timestamp;
                 }
-                else if (LParameter.Type is SQLDateType)
+                else if (parameter.Type is SQLDateType)
                 {
-                    LNpgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Date;
+                    npgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Date;
                 }
-                else if (LParameter.Type is SQLTimeType)
+                else if (parameter.Type is SQLTimeType)
                 {
-                    LNpgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Time;
+                    npgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Time;
                 }
-                else if (LParameter.Type is SQLGuidType)
+                else if (parameter.Type is SQLGuidType)
                 {
-                    LNpgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Uuid;                    
+                    npgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Uuid;                    
                 }
-                else if (LParameter.Type is SQLMoneyType)
+                else if (parameter.Type is SQLMoneyType)
                 {
-                    LNpgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Money;                    
+                    npgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Money;                    
                 }
                 else
-                    throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, LParameter.Type.GetType().Name);
-                FCommand.Parameters.Add(LNpgsqlParameter);
+                    throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, parameter.Type.GetType().Name);
+                _command.Parameters.Add(npgsqlParameter);
             }
         }
     }

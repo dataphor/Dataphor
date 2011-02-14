@@ -50,31 +50,31 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
  
 		private void OnItemContainerStyleChanged(Style oldItemContainerStyle, Style newItemContainerStyle)
 		{
-			foreach (MenuItem LItem in Items)
-				ApplyItemContainerStyle(LItem);
+			foreach (MenuItem item in Items)
+				ApplyItemContainerStyle(item);
 		}
  
-		private void ApplyItemContainerStyle(MenuItem AItem)
+		private void ApplyItemContainerStyle(MenuItem item)
 		{
 			if
 			(
-				AItem != null
+				item != null
 					&&
 					(
-						AItem.ReadLocalValue(FrameworkElement.StyleProperty) == DependencyProperty.UnsetValue
-							|| AItem.IsStyleSetFromItemsContainer
+						item.ReadLocalValue(FrameworkElement.StyleProperty) == DependencyProperty.UnsetValue
+							|| item.IsStyleSetFromItemsContainer
 					)
 			)
 			{
 				if (ItemContainerStyle != null)
 				{
-					AItem.Style = ItemContainerStyle;
-					AItem.IsStyleSetFromItemsContainer = true;
+					item.Style = ItemContainerStyle;
+					item.IsStyleSetFromItemsContainer = true;
 				}
 				else
 				{
-					AItem.ClearValue(FrameworkElement.StyleProperty);
-					AItem.IsStyleSetFromItemsContainer = false;
+					item.ClearValue(FrameworkElement.StyleProperty);
+					item.IsStyleSetFromItemsContainer = false;
 				}
 			}
 		}
@@ -89,45 +89,45 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			return item is MenuItem;
 		}
 
-		protected override void PrepareContainerForItemOverride(DependencyObject AElement, object AItem)
+		protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
 		{
- 			base.PrepareContainerForItemOverride(AElement, AItem);
- 			var LMenuItem = AElement as MenuItem;
- 			if (LMenuItem != null)
+ 			base.PrepareContainerForItemOverride(element, item);
+ 			var menuItem = element as MenuItem;
+ 			if (menuItem != null)
  			{
- 				LMenuItem.Highlighted += new RoutedEventHandler(SubMenuItemHighlighted);
-				LMenuItem.ItemClicked += SubMenuItemItemClicked;
-				LMenuItem.Clicked += MenuItemClicked;
-				ApplyItemContainerStyle(LMenuItem);
+ 				menuItem.Highlighted += new RoutedEventHandler(SubMenuItemHighlighted);
+				menuItem.ItemClicked += SubMenuItemItemClicked;
+				menuItem.Clicked += MenuItemClicked;
+				ApplyItemContainerStyle(menuItem);
 			}
 		}
 		
-		protected override void ClearContainerForItemOverride(DependencyObject AElement, object AItem)
+		protected override void ClearContainerForItemOverride(DependencyObject element, object item)
 		{
- 			base.ClearContainerForItemOverride(AElement, AItem);
- 			var LMenuItem = AElement as MenuItem;
- 			if (LMenuItem != null)
+ 			base.ClearContainerForItemOverride(element, item);
+ 			var menuItem = element as MenuItem;
+ 			if (menuItem != null)
  			{
- 				LMenuItem.Highlighted -= new RoutedEventHandler(SubMenuItemHighlighted);
-				LMenuItem.ItemClicked -= SubMenuItemItemClicked;
-				LMenuItem.Clicked -= MenuItemClicked;
+ 				menuItem.Highlighted -= new RoutedEventHandler(SubMenuItemHighlighted);
+				menuItem.ItemClicked -= SubMenuItemItemClicked;
+				menuItem.Clicked -= MenuItemClicked;
  			}
 		}
 
-		private PopupProtector FProtectorControl;
+		private PopupProtector _protectorControl;
 
 		protected PopupProtector ProtectorControl
 		{
-			get { return FProtectorControl; }
+			get { return _protectorControl; }
 			set
 			{
-				if (FProtectorControl != value)
+				if (_protectorControl != value)
 				{
-					if (FProtectorControl != null)
-						FProtectorControl.Clicked -= new RoutedEventHandler(ProtectorControlClicked);
-					FProtectorControl = value;
-					if (FProtectorControl != null)
-						FProtectorControl.Clicked += new RoutedEventHandler(ProtectorControlClicked);
+					if (_protectorControl != null)
+						_protectorControl.Clicked -= new RoutedEventHandler(ProtectorControlClicked);
+					_protectorControl = value;
+					if (_protectorControl != null)
+						_protectorControl.Clicked += new RoutedEventHandler(ProtectorControlClicked);
 				}
 			}
 		}
@@ -145,35 +145,35 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		public event MenuItemClickedHandler ItemClicked;
 		
-		private void SubMenuItemItemClicked(MenuItem ASender)
+		private void SubMenuItemItemClicked(MenuItem sender)
 		{
-			if (ASender.Items.Count == 0)
+			if (sender.Items.Count == 0)
 				IsActive = false;
-			OnItemClicked(ASender);
+			OnItemClicked(sender);
 		}
 
-		protected virtual void OnItemClicked(MenuItem ASender)
+		protected virtual void OnItemClicked(MenuItem sender)
 		{
 			if (ItemClicked != null)
-				ItemClicked(ASender);
+				ItemClicked(sender);
 		}
 		
-		private void MenuItemClicked(MenuItem ASender)
+		private void MenuItemClicked(MenuItem sender)
 		{
-			IsActive = !IsActive && ASender.Items.Count > 0;
-			UpdateItemsExpansion(IsActive ? ASender : null);
-			OnItemClicked(ASender);
+			IsActive = !IsActive && sender.Items.Count > 0;
+			UpdateItemsExpansion(IsActive ? sender : null);
+			OnItemClicked(sender);
 		}
 
-		private void SubMenuItemHighlighted(object ASender, RoutedEventArgs AArgs)
+		private void SubMenuItemHighlighted(object sender, RoutedEventArgs args)
 		{
-			UpdateItemsExpansion(IsActive ? (MenuItem)ASender : null);
+			UpdateItemsExpansion(IsActive ? (MenuItem)sender : null);
 		}
 
-		private void UpdateItemsExpansion(MenuItem AActive)
+		private void UpdateItemsExpansion(MenuItem active)
 		{
-			foreach (MenuItem LItem in Items)
-				LItem.IsExpanded = LItem.Items.Count > 0 && Object.ReferenceEquals(LItem, AActive);
+			foreach (MenuItem item in Items)
+				item.IsExpanded = item.Items.Count > 0 && Object.ReferenceEquals(item, active);
 		}
 	}
 }

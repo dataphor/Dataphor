@@ -33,24 +33,24 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			SetStyle(ControlStyles.UserPaint, true);
 			SetStyle(ControlStyles.DoubleBuffer, true);
 			CausesValidation = false;
-			FCenter = true;
-			FFocusedBorderWidth = 2;
-			FFocusedBorderColor = SystemColors.WindowFrame;
+			_center = true;
+			_focusedBorderWidth = 2;
+			_focusedBorderColor = SystemColors.WindowFrame;
 			BorderStyle = BorderStyle.None;
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			FImage = null;
-			base.Dispose(ADisposing);
+			_image = null;
+			base.Dispose(disposing);
 		}
 
 		[Category("Image")]
 		public event EventHandler ImageChanged;
-		protected virtual void OnImageChanged(EventArgs AArgs)
+		protected virtual void OnImageChanged(EventArgs args)
 		{
 			if (ImageChanged != null)
-				ImageChanged(this, AArgs);
+				ImageChanged(this, args);
 		}
 
 		[DefaultValue(false)]
@@ -61,58 +61,58 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			set { SetStyle(ControlStyles.Selectable, !value); }
 		}
 
-		protected Image FImage;
+		protected Image _image;
 		[DefaultValue(null)]
 		[Category("Appearance")]
 		public virtual System.Drawing.Image Image
 		{
-			get { return FImage; }
+			get { return _image; }
 			set
 			{
-				if (FImage != value)
+				if (_image != value)
 				{
-					FImage = value;
+					_image = value;
 					Invalidate(Region);
 					OnImageChanged(EventArgs.Empty);
 				}
 			}
 		}
 
-		protected StretchStyles FStretchStyle;
+		protected StretchStyles _stretchStyle;
 		[Category("Behavior")]
 		[DefaultValue(StretchStyles.StretchRatio)]
 		[Description("How to stretch the image.")]
 		public StretchStyles StretchStyle
 		{
-			get { return FStretchStyle; }
+			get { return _stretchStyle; }
 			set
 			{
-				if (FStretchStyle != value)
+				if (_stretchStyle != value)
 				{
-					FStretchStyle = value;
+					_stretchStyle = value;
 					Invalidate(Region);
 				}
 			}
 		}
 
-		protected bool FCenter;
+		protected bool _center;
 		[DefaultValue(true)]
 		[Category("Behavior")]
 		[Description("Centers the Image in the control.")]
 		public bool Center
 		{
-			get { return FCenter; }
+			get { return _center; }
 			set
 			{
-				if (FCenter != value)
+				if (_center != value)
 				{
-					FCenter = value;
+					_center = value;
 					Invalidate(Region);
 				}
 			}
 		}
 
-		private Color FFocusedBorderColor;
+		private Color _focusedBorderColor;
 		/// <summary>
 		/// Color of the focused border.
 		/// </summary>
@@ -120,15 +120,15 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Description("Color of the focused border.")]
 		public Color FocusedBorderColor
 		{
-			get { return FFocusedBorderColor; }
+			get { return _focusedBorderColor; }
 			set
 			{
-				if (FFocusedBorderColor != value)
-					FFocusedBorderColor = value;
+				if (_focusedBorderColor != value)
+					_focusedBorderColor = value;
 			}
 		}
 
-		private int FFocusedBorderWidth;
+		private int _focusedBorderWidth;
 		/// <summary>
 		/// Width of the focused border.
 		/// </summary>
@@ -137,17 +137,17 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Description("Width of the border when focused")]
 		public int FocusedBorderWidth
 		{
-			get { return FFocusedBorderWidth; }
+			get { return _focusedBorderWidth; }
 			set
 			{
-				if ((FFocusedBorderWidth != value) && (value >= 0))
+				if ((_focusedBorderWidth != value) && (value >= 0))
 				{
-					FFocusedBorderWidth = value;
+					_focusedBorderWidth = value;
 					if (Focused)
 					{
 						EraseFocusBorder();
-						using (Graphics LGraphics = CreateGraphics())
-							PaintFocusBorder(LGraphics);
+						using (Graphics graphics = CreateGraphics())
+							PaintFocusBorder(graphics);
 					}
 				}	
 			}
@@ -155,7 +155,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		protected virtual Rectangle DestinationRect()
 		{
-			if (FImage != null)
+			if (_image != null)
 				return InternalGetDestinationRect();
 			else
 				return new Rectangle(0, 0, 0, 0);
@@ -164,31 +164,31 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		/// <summary>
 		///	Returns true if the client rectangle is taller than the images aspect rectangle.
 		/// </summary>
-		/// <param name="AImageRectangle"> See <see cref="Rectangle"/> </param>
+		/// <param name="imageRectangle"> See <see cref="Rectangle"/> </param>
 		/// <remarks>
 		///		Compares the ratio(Height / Width) of the image with the components ratio(Height / Width),
 		///		returns true if the client ratio is greater or equal to the Image ratio.
 		///	</remarks>
-		public static bool IsClientTaller(Rectangle AImageRectangle, Rectangle AClientRectangle)
+		public static bool IsClientTaller(Rectangle imageRectangle, Rectangle clientRectangle)
 		{
-			return ((float)AImageRectangle.Height / (float)AImageRectangle.Width) <= ((float)AClientRectangle.Height / (float)AClientRectangle.Width);
+			return ((float)imageRectangle.Height / (float)imageRectangle.Width) <= ((float)clientRectangle.Height / (float)clientRectangle.Width);
 		}
 		
-		public static Rectangle ImageAspectRectangle(Rectangle AImageRectangle, Rectangle AClientRectangle)
+		public static Rectangle ImageAspectRectangle(Rectangle imageRectangle, Rectangle clientRectangle)
 		{
-			if (ImageAspect.IsClientTaller(AImageRectangle, AClientRectangle))
+			if (ImageAspect.IsClientTaller(imageRectangle, clientRectangle))
 			{
-				float LDy = AImageRectangle.Height * ((float)AClientRectangle.Width / (float)AImageRectangle.Width);
-				AImageRectangle.Height = (int)Math.Round(LDy);
-				AImageRectangle.Width = AClientRectangle.Width;
+				float dy = imageRectangle.Height * ((float)clientRectangle.Width / (float)imageRectangle.Width);
+				imageRectangle.Height = (int)Math.Round(dy);
+				imageRectangle.Width = clientRectangle.Width;
 			}
 			else
 			{
-				float LDx = AImageRectangle.Width * ((float)AClientRectangle.Height / (float)AImageRectangle.Height);
-				AImageRectangle.Width = (int)Math.Round(LDx);
-				AImageRectangle.Height = AClientRectangle.Height;
+				float dx = imageRectangle.Width * ((float)clientRectangle.Height / (float)imageRectangle.Height);
+				imageRectangle.Width = (int)Math.Round(dx);
+				imageRectangle.Height = clientRectangle.Height;
 			}
-			return AImageRectangle;
+			return imageRectangle;
 		}
 
 		/// <summary>
@@ -196,134 +196,134 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		/// </summary>
 		private Rectangle InternalGetDestinationRect()
 		{
-			Rectangle LRectangle = new Rectangle(0, 0, FImage.Width, FImage.Height);
-			if (FStretchStyle == StretchStyles.StretchRatio)
+			Rectangle rectangle = new Rectangle(0, 0, _image.Width, _image.Height);
+			if (_stretchStyle == StretchStyles.StretchRatio)
 			{
-				if ((LRectangle.Width != 0) && (LRectangle.Height != 0))
-					LRectangle = ImageAspectRectangle(LRectangle, ClientRectangle);
-				if (FCenter)
+				if ((rectangle.Width != 0) && (rectangle.Height != 0))
+					rectangle = ImageAspectRectangle(rectangle, ClientRectangle);
+				if (_center)
 				{
-					LRectangle.Offset
+					rectangle.Offset
 						(
-						(this.ClientRectangle.Width - LRectangle.Width) / 2,
-						(this.ClientRectangle.Height - LRectangle.Height) / 2
+						(this.ClientRectangle.Width - rectangle.Width) / 2,
+						(this.ClientRectangle.Height - rectangle.Height) / 2
 						);
 				}
 			}
-			else if (FStretchStyle == StretchStyles.StretchFill)
+			else if (_stretchStyle == StretchStyles.StretchFill)
 			{
-				LRectangle.Width = this.ClientRectangle.Width;
-				LRectangle.Height = this.ClientRectangle.Height;
+				rectangle.Width = this.ClientRectangle.Width;
+				rectangle.Height = this.ClientRectangle.Height;
 			}
 			else
 			{
-				if (FCenter)
+				if (_center)
 				{
-					LRectangle.Offset
+					rectangle.Offset
 					(
-						(this.ClientRectangle.Width - LRectangle.Width) / 2,
-						(this.ClientRectangle.Height - LRectangle.Height) / 2
+						(this.ClientRectangle.Width - rectangle.Width) / 2,
+						(this.ClientRectangle.Height - rectangle.Height) / 2
 					);
 				}
 			}
-			FLastDestinationRect = LRectangle;
-			return LRectangle;
+			_lastDestinationRect = rectangle;
+			return rectangle;
 		}
 
-		protected virtual void PaintImage(PaintEventArgs AArgs)
+		protected virtual void PaintImage(PaintEventArgs args)
 		{
-			using (SolidBrush LBackBrush = new SolidBrush(BackColor))
-				using (Region LRegion = new Region(AArgs.ClipRectangle))
-					AArgs.Graphics.FillRegion(LBackBrush, LRegion);
-			if ((FImage != null) && (!FImage.Size.IsEmpty))
+			using (SolidBrush backBrush = new SolidBrush(BackColor))
+				using (Region region = new Region(args.ClipRectangle))
+					args.Graphics.FillRegion(backBrush, region);
+			if ((_image != null) && (!_image.Size.IsEmpty))
 			{
-				Rectangle LDestRect = DestinationRect();
-				AArgs.Graphics.DrawImage(Image, LDestRect);
+				Rectangle destRect = DestinationRect();
+				args.Graphics.DrawImage(Image, destRect);
 			}
 		}
 
-		protected virtual void PaintFocusBorder(Graphics AGraphics)
+		protected virtual void PaintFocusBorder(Graphics graphics)
 		{
-			if (Focused && (FFocusedBorderWidth > 0))
+			if (Focused && (_focusedBorderWidth > 0))
 			{
-				Pen LPen = new Pen(FFocusedBorderColor, FFocusedBorderWidth);
-				AGraphics.DrawRectangle(LPen, ClientRectangle);
+				Pen pen = new Pen(_focusedBorderColor, _focusedBorderWidth);
+				graphics.DrawRectangle(pen, ClientRectangle);
 			}
 		}
 
 		protected virtual void EraseFocusBorder()
 		{
 			//Erase top then bottom.
-			Rectangle LRect = new Rectangle(0,0, ClientRectangle.Width, FocusedBorderWidth);
-			Region LRegionTopThenBottom = new Region(LRect);
-			this.Invalidate(LRegionTopThenBottom);
-			LRegionTopThenBottom.Translate(0,ClientRectangle.Height - FocusedBorderWidth);
-			this.Invalidate(LRegionTopThenBottom);
+			Rectangle rect = new Rectangle(0,0, ClientRectangle.Width, FocusedBorderWidth);
+			Region regionTopThenBottom = new Region(rect);
+			this.Invalidate(regionTopThenBottom);
+			regionTopThenBottom.Translate(0,ClientRectangle.Height - FocusedBorderWidth);
+			this.Invalidate(regionTopThenBottom);
 
 			//Erase Left then right.
-			LRect.Width = FocusedBorderWidth;
-			LRect.Height = ClientRectangle.Height;
-			Region LRegionLeftThenRight = new Region(LRect);
-			this.Invalidate(LRegionLeftThenRight);
-			LRegionLeftThenRight.Translate(ClientRectangle.Width - FocusedBorderWidth,0);
-			this.Invalidate(LRegionLeftThenRight);
+			rect.Width = FocusedBorderWidth;
+			rect.Height = ClientRectangle.Height;
+			Region regionLeftThenRight = new Region(rect);
+			this.Invalidate(regionLeftThenRight);
+			regionLeftThenRight.Translate(ClientRectangle.Width - FocusedBorderWidth,0);
+			this.Invalidate(regionLeftThenRight);
 		}
 
-		protected override void OnPaint(PaintEventArgs APaintEventArgs)
+		protected override void OnPaint(PaintEventArgs paintEventArgs)
 		{
-			base.OnPaint(APaintEventArgs);
-			if ((!APaintEventArgs.ClipRectangle.IsEmpty) && (APaintEventArgs.ClipRectangle.IntersectsWith(DestinationRect())))
-				PaintImage(APaintEventArgs);
-			PaintFocusBorder(APaintEventArgs.Graphics);
+			base.OnPaint(paintEventArgs);
+			if ((!paintEventArgs.ClipRectangle.IsEmpty) && (paintEventArgs.ClipRectangle.IntersectsWith(DestinationRect())))
+				PaintImage(paintEventArgs);
+			PaintFocusBorder(paintEventArgs.Graphics);
 		}
 
-		private Rectangle FLastDestinationRect = Rectangle.Empty;
-		protected override void OnResize(EventArgs AEventArgs)
+		private Rectangle _lastDestinationRect = Rectangle.Empty;
+		protected override void OnResize(EventArgs eventArgs)
 		{
-			base.OnResize(AEventArgs);
-			Rectangle LLastDestinationRect = FLastDestinationRect;
-			Rectangle LNewDestinationRect = DestinationRect();
-			if (LNewDestinationRect.Contains(LLastDestinationRect))
-				Invalidate(LNewDestinationRect);
+			base.OnResize(eventArgs);
+			Rectangle lastDestinationRect = _lastDestinationRect;
+			Rectangle newDestinationRect = DestinationRect();
+			if (newDestinationRect.Contains(lastDestinationRect))
+				Invalidate(newDestinationRect);
 			else
-				Invalidate(Rectangle.Union(LLastDestinationRect, LNewDestinationRect));
+				Invalidate(Rectangle.Union(lastDestinationRect, newDestinationRect));
 		}
 
-		protected override void OnGotFocus(EventArgs AEventArgs)
+		protected override void OnGotFocus(EventArgs eventArgs)
 		{
-			base.OnGotFocus(AEventArgs);
-			using (Graphics LGraphics = CreateGraphics())
+			base.OnGotFocus(eventArgs);
+			using (Graphics graphics = CreateGraphics())
 			{
-				PaintFocusBorder(LGraphics);
+				PaintFocusBorder(graphics);
 			}
 		}
 
-		protected override void OnLostFocus(EventArgs AEventArgs)
+		protected override void OnLostFocus(EventArgs eventArgs)
 		{
-			base.OnLostFocus(AEventArgs);
+			base.OnLostFocus(eventArgs);
 			EraseFocusBorder();
 		}
 
-		protected override void OnMouseDown(MouseEventArgs AMouseEventArgs)
+		protected override void OnMouseDown(MouseEventArgs mouseEventArgs)
 		{
-			if ((AMouseEventArgs.Button == MouseButtons.Left) && CanSelect && CanFocus)
+			if ((mouseEventArgs.Button == MouseButtons.Left) && CanSelect && CanFocus)
 				Focus();
-			base.OnMouseDown(AMouseEventArgs);
+			base.OnMouseDown(mouseEventArgs);
 		}
 
-		private bool FControlKeyPressed;
-		protected override void OnKeyDown(KeyEventArgs AKeyEventArgs)
+		private bool _controlKeyPressed;
+		protected override void OnKeyDown(KeyEventArgs keyEventArgs)
 		{
-			FControlKeyPressed = AKeyEventArgs.Control;
-			base.OnKeyDown(AKeyEventArgs);
+			_controlKeyPressed = keyEventArgs.Control;
+			base.OnKeyDown(keyEventArgs);
 		}
 
-		protected override void OnKeyPress(KeyPressEventArgs AKeyPressEventArgs)
+		protected override void OnKeyPress(KeyPressEventArgs keyPressEventArgs)
 		{
-			base.OnKeyPress(AKeyPressEventArgs);
-			if (FControlKeyPressed)
+			base.OnKeyPress(keyPressEventArgs);
+			if (_controlKeyPressed)
 			{				
-				switch (AKeyPressEventArgs.KeyChar)
+				switch (keyPressEventArgs.KeyChar)
 				{
 					case (char)24 : UnsafeNativeMethods.SendMessage(Handle, NativeMethods.WM_CUT, IntPtr.Zero, IntPtr.Zero);
 						break;
@@ -335,69 +335,69 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 
-		protected virtual void WMCut(ref Message AMessage)
+		protected virtual void WMCut(ref Message message)
 		{
-			if ((FImage != null) && !ReadOnly)
+			if ((_image != null) && !ReadOnly)
 			{
-				WMCopy(ref AMessage);
-				FImage = null;
+				WMCopy(ref message);
+				_image = null;
 				Invalidate(Region);
 				OnImageChanged(EventArgs.Empty);
 			}
 		}
 
-		protected virtual void WMCopy(ref Message AMessage)
+		protected virtual void WMCopy(ref Message message)
 		{
-			if (FImage != null)
+			if (_image != null)
 				Clipboard.SetDataObject(Image, false);
 		}
 
 		private void PasteFromClipboard()
 		{
-			IDataObject LDataObjectInterface = Clipboard.GetDataObject();
-			if (LDataObjectInterface != null)
+			IDataObject dataObjectInterface = Clipboard.GetDataObject();
+			if (dataObjectInterface != null)
 			{
-				Image LImage = null;
-				if (LDataObjectInterface.GetDataPresent(typeof(System.Drawing.Bitmap)))
-					LImage = (Bitmap)LDataObjectInterface.GetData(typeof(System.Drawing.Bitmap));
-				else if (LDataObjectInterface.GetDataPresent(typeof(System.Drawing.Imaging.Metafile)))
-					LImage = (System.Drawing.Imaging.Metafile)LDataObjectInterface.GetData(typeof(System.Drawing.Imaging.Metafile));
-				if (LImage != null)
+				Image image = null;
+				if (dataObjectInterface.GetDataPresent(typeof(System.Drawing.Bitmap)))
+					image = (Bitmap)dataObjectInterface.GetData(typeof(System.Drawing.Bitmap));
+				else if (dataObjectInterface.GetDataPresent(typeof(System.Drawing.Imaging.Metafile)))
+					image = (System.Drawing.Imaging.Metafile)dataObjectInterface.GetData(typeof(System.Drawing.Imaging.Metafile));
+				if (image != null)
 				{
-					FImage = LImage;
+					_image = image;
 					Invalidate(Region);
 					OnImageChanged(EventArgs.Empty);
 				}
 			}
 		}
 
-		protected virtual void WMPaste(ref Message AMessage)
+		protected virtual void WMPaste(ref Message message)
 		{
 			if (!ReadOnly)
 			{
 				PasteFromClipboard();
 				//ToDo: Fix streaming anomalies when image is set by a paste operation.
 				//Workaround Paste copy then paste again. Seems to fix it hmmm ugly.
-				WMCopy(ref AMessage);
+				WMCopy(ref message);
 				PasteFromClipboard();
 			}
 		}
 		
-		protected override void WndProc(ref Message AMessage)
+		protected override void WndProc(ref Message message)
 		{
-			switch (AMessage.Msg)
+			switch (message.Msg)
 			{
 				case NativeMethods.WM_CUT:
-					WMCut(ref AMessage);
+					WMCut(ref message);
 					break;
 				case NativeMethods.WM_COPY:
-					WMCopy(ref AMessage);
+					WMCopy(ref message);
 					break;
 				case NativeMethods.WM_PASTE:
-					WMPaste(ref AMessage);
+					WMPaste(ref message);
 					break;
 			}
-			base.WndProc(ref AMessage);
+			base.WndProc(ref message);
 		}
 		
 	}

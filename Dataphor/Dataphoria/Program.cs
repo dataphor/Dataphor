@@ -12,28 +12,28 @@ namespace Alphora.Dataphor.Dataphoria
         private static IDataphoria SDataphoriaInstance;
         public static IDataphoria DataphoriaInstance { get { return SDataphoriaInstance; } }
 
-        private static void AppDomainException(object ASender, UnhandledExceptionEventArgs AArgs) { }
+        private static void AppDomainException(object sender, UnhandledExceptionEventArgs args) { }
 
-        public static string DocumentTypeFromFileName(string AFileName)
+        public static string DocumentTypeFromFileName(string fileName)
         {
-            string LResult = Path.GetExtension(AFileName).ToLower();
-            if (LResult.Length > 0)
-                LResult = LResult.Substring(1);
-            return LResult;
+            string result = Path.GetExtension(fileName).ToLower();
+            if (result.Length > 0)
+                result = result.Substring(1);
+            return result;
         }
 
         /// <summary> Gets a new document expression for a given expression string. </summary>
-        public static DocumentExpression GetDocumentExpression(string AExpression)
+        public static DocumentExpression GetDocumentExpression(string expression)
         {
-            var LExpression = new DocumentExpression(AExpression);
-            if (LExpression.Type != DocumentType.Document)
+            var localExpression = new DocumentExpression(expression);
+            if (localExpression.Type != DocumentType.Document)
                 throw new DataphoriaException(DataphoriaException.Codes.CanOnlyLiveEditDocuments);
-            return LExpression;
+            return localExpression;
         }
 
         /// <summary> The main entry point for the application. </summary>
         [STAThread]
-        private static void Main(string[] AArgs)
+        private static void Main(string[] args)
         {
             AppDomain.CurrentDomain.UnhandledException += AppDomainException;
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException, true);
@@ -47,7 +47,7 @@ namespace Alphora.Dataphor.Dataphoria
                     SDataphoriaInstance = new Dataphoria();
                     try
                     {
-                        SDataphoriaInstance.OpenFiles(AArgs);
+                        SDataphoriaInstance.OpenFiles(args);
                         Application.Run((Form)SDataphoriaInstance);
                     }
                     finally
@@ -56,9 +56,9 @@ namespace Alphora.Dataphor.Dataphoria
                         SDataphoriaInstance = null;
                     }
                 }
-                catch (Exception LException)
+                catch (Exception exception)
                 {
-                    HandleException(LException);
+                    HandleException(exception);
                 }
             }
             finally
@@ -67,16 +67,16 @@ namespace Alphora.Dataphor.Dataphoria
             }
         }
 
-        protected static void ThreadException(object ASender, ThreadExceptionEventArgs AArgs)
+        protected static void ThreadException(object sender, ThreadExceptionEventArgs args)
         {
-            HandleException(AArgs.Exception);
+            HandleException(args.Exception);
         }
 
-        public static void HandleException(Exception AException)
+        public static void HandleException(Exception exception)
         {
-            if (AException is ThreadAbortException)
+            if (exception is ThreadAbortException)
                 Thread.ResetAbort();
-            Session.HandleException(AException);            
+            Session.HandleException(exception);            
         }
     }
 }

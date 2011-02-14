@@ -18,14 +18,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Floor(AValue : Money) : Money;
 	public class DecimalFloorNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
 			
-			return Decimal.Floor((decimal)AArgument1);
+			return Decimal.Floor((decimal)argument1);
 		}
 	}
 	
@@ -33,14 +33,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Truncate(AValue : Money) : Money;
 	public class DecimalTruncateNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
 			
-			return Decimal.Truncate((decimal)AArgument1);
+			return Decimal.Truncate((decimal)argument1);
 		}
 	}
 
@@ -48,18 +48,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Ceiling(AValue : Money) : Money;
 	public class DecimalCeilingNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
 			
-			decimal LArgument = (decimal)AArgument1;
-			decimal LResult = Decimal.Floor(LArgument);
-			if (LResult != LArgument)
-				LResult += 1m;
-			return LResult;
+			decimal argument = (decimal)argument1;
+			decimal result = Decimal.Floor(argument);
+			if (result != argument)
+				result += 1m;
+			return result;
 		}
 	}
 
@@ -70,16 +70,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	//TODO: I'm changing this from NewFangledIEEEBankersRound to YeOldElementarySchoolKidsRound (Sadly, mostly to provide continuity with other DBMSs).  We eventually need to have both.
 	public class DecimalRoundNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			#if NILPROPOGATION
-			if (AArguments[0] == null || ((AArguments.Length > 1) && AArguments[1] == null))
+			if (arguments[0] == null || ((arguments.Length > 1) && arguments[1] == null))
 				return null;
 			#endif
 			
-			int LDigits = AArguments.Length > 1 ? (int)AArguments[1] : 2;
-			decimal LValue = (decimal)AArguments[0];
-			return (decimal)(Math.Floor((double)LValue * Math.Pow(10.0, (double)LDigits) + 0.5) / Math.Pow(10.0, (double)LDigits));
+			int digits = arguments.Length > 1 ? (int)arguments[1] : 2;
+			decimal tempValue = (decimal)arguments[0];
+			return (decimal)(Math.Floor((double)tempValue * Math.Pow(10.0, (double)digits) + 0.5) / Math.Pow(10.0, (double)digits));
 		}
 	}
 
@@ -87,15 +87,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Frac(AValue : Money) : Money;	
 	public class DecimalFracNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
 			
-			decimal LArgument = (decimal)AArgument1;
-			return LArgument - Decimal.Truncate(LArgument);
+			decimal argument = (decimal)argument1;
+			return argument - Decimal.Truncate(argument);
 		}
 	}
 
@@ -103,28 +103,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Abs(AValue : Money) : Money;	
 	public class DecimalAbsNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
 			
-			return Math.Abs((decimal)AArgument1);
+			return Math.Abs((decimal)argument1);
 		}
 	}
 	
 	// operator Abs(AValue : integer) : integer;
 	public class IntegerAbsNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
 			
-			return Math.Abs((int)AArgument1);
+			return Math.Abs((int)argument1);
 		}
 	}
 
@@ -133,114 +133,114 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Log(AValue : decimal, ABase : decimal) : decimal;
 	public class DecimalLogNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			#endif
 			
-			return (decimal)Math.Log((double)(decimal)AArgument1, (double)(decimal)AArgument2);
+			return (decimal)Math.Log((double)(decimal)argument1, (double)(decimal)argument2);
 		}
 	}
 
 	// operator Ln(AValue : decimal) : decimal;
 	public class DecimalLnNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
 			
-			return (decimal)Math.Log((double)(decimal)AArgument1);
+			return (decimal)Math.Log((double)(decimal)argument1);
 		}
 	}
 
 	// operator Log10(AValue : decimal) : decimal;
 	public class DecimalLog10Node : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
 			
-			return (decimal)Math.Log10((double)(decimal)AArgument1);
+			return (decimal)Math.Log10((double)(decimal)argument1);
 		}
 	}
 
 	// operator Exp(AValue : decimal) : decimal;
 	public class DecimalExpNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
 			
-			return (decimal)Math.Exp((double)(decimal)AArgument1);
+			return (decimal)Math.Exp((double)(decimal)argument1);
 		}
 	}
 
 	// operator Factorial(AValue : integer) : integer;
 	public class IntegerFactorialNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
 			
-			int LReturnVal = 1;
-			int LValue = (int)AArgument1;
+			int returnVal = 1;
+			int tempValue = (int)argument1;
 
-			for (int i = 2; i <= LValue; i++)
+			for (int i = 2; i <= tempValue; i++)
 			{
 				checked
 				{
-					LReturnVal *= i;
+					returnVal *= i;
 				} //larger than 12 will overflow.
 			}
-			return LReturnVal;
+			return returnVal;
 		}
 	}
 
 	public class SeedNode : InstructionNode
 	{
-		private static Random FRandom;
+		private static Random _random;
 		public static decimal NextDecimal()
 		{
 			lock (typeof(SeedNode))
 			{
-				if (FRandom == null)
-					FRandom = new Random();
-				return (decimal)FRandom.NextDouble();
+				if (_random == null)
+					_random = new Random();
+				return (decimal)_random.NextDouble();
 			}
 		}
 		
-		public static int Next(int ALowerBound, int AUpperBound)
+		public static int Next(int lowerBound, int upperBound)
 		{
 			lock (typeof(SeedNode))
 			{
-				if (FRandom == null)
-					FRandom = new Random();
-				return FRandom.Next(ALowerBound, AUpperBound);
+				if (_random == null)
+					_random = new Random();
+				return _random.Next(lowerBound, upperBound);
 			}
 		}
 		
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			lock (typeof(SeedNode))
 			{
-				if (AArguments.Length == 0)
-					FRandom = new Random();
+				if (arguments.Length == 0)
+					_random = new Random();
 				else
-					FRandom = new Random((int)AArguments[0]);
+					_random = new Random((int)arguments[0]);
 			}
 			return null;
 		}
@@ -249,7 +249,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Random() : Decimal
 	public class DecimalRandomNode : NilaryInstructionNode
 	{
-		public override object NilaryInternalExecute(Program AProgram)
+		public override object NilaryInternalExecute(Program program)
 		{
 			return SeedNode.NextDecimal();
 		}
@@ -258,28 +258,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Random(const ACount : Integer) : Integer
 	public class IntegerRandomNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			#endif
 			
-			return SeedNode.Next(0, (int)AArgument1);
+			return SeedNode.Next(0, (int)argument1);
 		}
 	}
 
 	// operator Random(const ALowerBound : Integer, const AUpperBound : Integer) : Integer;	
 	public class IntegerIntegerRandomNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			#endif
 			
-			return SeedNode.Next((int)AArgument1, (int)AArgument2 + 1);
+			return SeedNode.Next((int)argument1, (int)argument2 + 1);
 		}
 	}
 }

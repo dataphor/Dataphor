@@ -7,11 +7,11 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 {
     public class FormPanel : ContainerControl
     {
-        private Form FHostedForm;
-        private HScrollBar FHScrollBar;
-        private bool FIsOwner;
-        private Point FOriginalLocation;
-        private VScrollBar FVScrollBar;
+        private Form _hostedForm;
+        private HScrollBar _hScrollBar;
+        private bool _isOwner;
+        private Point _originalLocation;
+        private VScrollBar _vScrollBar;
 
         public FormPanel()
         {
@@ -19,50 +19,50 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
             SuspendLayout();
 
-            FHScrollBar = new HScrollBar();
-            FHScrollBar.Dock = DockStyle.Bottom;
-            FHScrollBar.SmallChange = 5;
-            FHScrollBar.Scroll += HScrollBarScroll;
-            Controls.Add(FHScrollBar);
+            _hScrollBar = new HScrollBar();
+            _hScrollBar.Dock = DockStyle.Bottom;
+            _hScrollBar.SmallChange = 5;
+            _hScrollBar.Scroll += HScrollBarScroll;
+            Controls.Add(_hScrollBar);
 
-            FVScrollBar = new VScrollBar();
-            FVScrollBar.Dock = DockStyle.Right;
-            FVScrollBar.SmallChange = 5;
-            FVScrollBar.Scroll += VScrollBarScroll;
-            Controls.Add(FVScrollBar);
+            _vScrollBar = new VScrollBar();
+            _vScrollBar.Dock = DockStyle.Right;
+            _vScrollBar.SmallChange = 5;
+            _vScrollBar.Scroll += VScrollBarScroll;
+            Controls.Add(_vScrollBar);
 
             ResumeLayout(false);
         }
 
         public Form HostedForm
         {
-            get { return FHostedForm; }
+            get { return _hostedForm; }
         }
 
-        public void SetHostedForm(IWindowsFormInterface AForm, bool AIsOwner)
+        public void SetHostedForm(IWindowsFormInterface form, bool isOwner)
         {
             InternalClear();
-            FHostedForm = (Form) AForm.Form;
-            if (FHostedForm != null)
+            _hostedForm = (Form) form.Form;
+            if (_hostedForm != null)
             {
-                FIsOwner = AIsOwner;
-                if (!AIsOwner)
-                    FOriginalLocation = FHostedForm.Location;
+                _isOwner = isOwner;
+                if (!isOwner)
+                    _originalLocation = _hostedForm.Location;
                 SuspendLayout();
                 try
                 {
-                    AForm.BeginUpdate();
+                    form.BeginUpdate();
                     try
                     {
-                        FHostedForm.TopLevel = false;
-                        Controls.Add(FHostedForm);
-                        FHostedForm.SendToBack();
-                        if (AIsOwner)
-                            AForm.Show();
+                        _hostedForm.TopLevel = false;
+                        Controls.Add(_hostedForm);
+                        _hostedForm.SendToBack();
+                        if (isOwner)
+                            form.Show();
                     }
                     finally
                     {
-                        AForm.EndUpdate(false);
+                        form.EndUpdate(false);
                     }
                 }
                 finally
@@ -75,99 +75,99 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
         public void ClearHostedForm()
         {
             InternalClear();
-            FHostedForm = null;
+            _hostedForm = null;
         }
 
         private void InternalClear()
         {
-            if (FHostedForm != null)
+            if (_hostedForm != null)
             {
-                FHostedForm.Hide();
-                Controls.Remove(FHostedForm);
-                if (!FIsOwner)
+                _hostedForm.Hide();
+                Controls.Remove(_hostedForm);
+                if (!_isOwner)
                 {
-                    FHostedForm.TopLevel = true;
-                    FHostedForm.Location = FOriginalLocation;
-                    FHostedForm.Show();
-                    FHostedForm.BringToFront();
+                    _hostedForm.TopLevel = true;
+                    _hostedForm.Location = _originalLocation;
+                    _hostedForm.Show();
+                    _hostedForm.BringToFront();
                 }
             }
         }
 
-        protected override void OnLayout(LayoutEventArgs AArgs)
+        protected override void OnLayout(LayoutEventArgs args)
         {
-            if ((AArgs.AffectedControl == null) || (AArgs.AffectedControl == FHostedForm) ||
-                (AArgs.AffectedControl == this))
+            if ((args.AffectedControl == null) || (args.AffectedControl == _hostedForm) ||
+                (args.AffectedControl == this))
             {
                 // Prepare the "adjusted" clients size
-                Size LAdjustedClientSize = ClientSize;
-                LAdjustedClientSize.Width -= FVScrollBar.Width;
-                LAdjustedClientSize.Height -= FHScrollBar.Height;
+                Size adjustedClientSize = ClientSize;
+                adjustedClientSize.Width -= _vScrollBar.Width;
+                adjustedClientSize.Height -= _hScrollBar.Height;
                 // Ensure a minimum client size to avoid errors setting scrollbar limits etc.
-                if (LAdjustedClientSize.Width <= 0)
-                    LAdjustedClientSize.Width = 1;
-                if (LAdjustedClientSize.Height <= 0)
-                    LAdjustedClientSize.Height = 1;
+                if (adjustedClientSize.Width <= 0)
+                    adjustedClientSize.Width = 1;
+                if (adjustedClientSize.Height <= 0)
+                    adjustedClientSize.Height = 1;
 
-                if (FHostedForm != null)
+                if (_hostedForm != null)
                 {
-                    int LMaxValue;
+                    int maxValue;
 
-                    LMaxValue = Math.Max(0, FHostedForm.Width - LAdjustedClientSize.Width);
-                    if (FHScrollBar.Value > LMaxValue)
-                        FHScrollBar.Value = LMaxValue;
-                    FHScrollBar.Maximum = Math.Max(0, FHostedForm.Width);
-                    FHScrollBar.Visible = (FHScrollBar.Maximum - LAdjustedClientSize.Width) > 0;
-                    if (FHScrollBar.Visible)
-                        FHScrollBar.LargeChange = LAdjustedClientSize.Width;
+                    maxValue = Math.Max(0, _hostedForm.Width - adjustedClientSize.Width);
+                    if (_hScrollBar.Value > maxValue)
+                        _hScrollBar.Value = maxValue;
+                    _hScrollBar.Maximum = Math.Max(0, _hostedForm.Width);
+                    _hScrollBar.Visible = (_hScrollBar.Maximum - adjustedClientSize.Width) > 0;
+                    if (_hScrollBar.Visible)
+                        _hScrollBar.LargeChange = adjustedClientSize.Width;
 
-                    LMaxValue = Math.Max(0, FHostedForm.Height - LAdjustedClientSize.Height);
-                    if (FVScrollBar.Value > LMaxValue)
-                        FVScrollBar.Value = LMaxValue;
-                    FVScrollBar.Maximum = Math.Max(0, FHostedForm.Height);
-                    FVScrollBar.Visible = (FVScrollBar.Maximum - LAdjustedClientSize.Height) > 0;
-                    if (FVScrollBar.Visible)
-                        FVScrollBar.LargeChange = LAdjustedClientSize.Height;
+                    maxValue = Math.Max(0, _hostedForm.Height - adjustedClientSize.Height);
+                    if (_vScrollBar.Value > maxValue)
+                        _vScrollBar.Value = maxValue;
+                    _vScrollBar.Maximum = Math.Max(0, _hostedForm.Height);
+                    _vScrollBar.Visible = (_vScrollBar.Maximum - adjustedClientSize.Height) > 0;
+                    if (_vScrollBar.Visible)
+                        _vScrollBar.LargeChange = adjustedClientSize.Height;
 
-                    FHostedForm.Location = new Point(-FHScrollBar.Value, -FVScrollBar.Value);
-                    FHostedForm.SendToBack();
+                    _hostedForm.Location = new Point(-_hScrollBar.Value, -_vScrollBar.Value);
+                    _hostedForm.SendToBack();
                 }
                 else
                 {
-                    FHScrollBar.Visible = false;
-                    FVScrollBar.Visible = false;
+                    _hScrollBar.Visible = false;
+                    _vScrollBar.Visible = false;
                 }
             }
-            base.OnLayout(AArgs);
+            base.OnLayout(args);
         }
 
-        protected override void OnControlAdded(ControlEventArgs AArgs)
+        protected override void OnControlAdded(ControlEventArgs args)
         {
-            base.OnControlAdded(AArgs);
-            AArgs.Control.Move += ControlMove;
+            base.OnControlAdded(args);
+            args.Control.Move += ControlMove;
         }
 
-        protected override void OnControlRemoved(ControlEventArgs AArgs)
+        protected override void OnControlRemoved(ControlEventArgs args)
         {
-            AArgs.Control.Move -= ControlMove;
-            base.OnControlRemoved(AArgs);
+            args.Control.Move -= ControlMove;
+            base.OnControlRemoved(args);
         }
 
-        private void ControlMove(object ASender, EventArgs AArgs)
+        private void ControlMove(object sender, EventArgs args)
         {
-            var LControl = (Control) ASender;
-            if ((LControl.IsHandleCreated) && (LControl.Location != Point.Empty))
+            var control = (Control) sender;
+            if ((control.IsHandleCreated) && (control.Location != Point.Empty))
                 PerformLayout();
         }
 
-        private void HScrollBarScroll(object ASender, ScrollEventArgs AArgs)
+        private void HScrollBarScroll(object sender, ScrollEventArgs args)
         {
-            PerformLayout(FHostedForm, "Location");
+            PerformLayout(_hostedForm, "Location");
         }
 
-        private void VScrollBarScroll(object ASender, ScrollEventArgs AArgs)
+        private void VScrollBarScroll(object sender, ScrollEventArgs args)
         {
-            PerformLayout(FHostedForm, "Location");
+            PerformLayout(_hostedForm, "Location");
         }
     }
 }

@@ -22,29 +22,29 @@ namespace Alphora.Dataphor.DAE.Server
 	public class InstanceManager
 	{
 		// Do not localize
-		public const string CInstanceConfigurationFileName = "ServerConfigurations.config";
-		public const string CDefaultInstanceName = "Dataphor";
+		public const string InstanceConfigurationFileName = "ServerConfigurations.config";
+		public const string DefaultInstanceName = "Dataphor";
 
-		private static InstanceList FInstances;
+		private static InstanceList _instances;
 		public static InstanceList Instances 
 		{ 
 			get 
 			{ 
 				CheckLoaded();
-				return FInstances; 
+				return _instances; 
 			} 
 		}
 		
 		private static string GetInstanceDirectory()
 		{
-			string LResult = Path.Combine(PathUtility.CommonAppDataPath(String.Empty, VersionModifier.None), Server.CDefaultInstanceDirectory);
-			Directory.CreateDirectory(LResult);
-			return LResult;
+			string result = Path.Combine(PathUtility.CommonAppDataPath(String.Empty, VersionModifier.None), Server.DefaultInstanceDirectory);
+			Directory.CreateDirectory(result);
+			return result;
 		}
 		
 		private static string GetMachineInstanceConfigurationFileName()
 		{
-			return Path.Combine(GetInstanceDirectory(), CInstanceConfigurationFileName);
+			return Path.Combine(GetInstanceDirectory(), InstanceConfigurationFileName);
 		}
 		
 		private static InstanceConfiguration LoadMachineInstanceConfiguration()
@@ -52,9 +52,9 @@ namespace Alphora.Dataphor.DAE.Server
 			return InstanceConfiguration.Load(GetMachineInstanceConfigurationFileName());
 		}
 		
-		private static void SaveMachineInstanceConfiguration(InstanceConfiguration AConfiguration)
+		private static void SaveMachineInstanceConfiguration(InstanceConfiguration configuration)
 		{
-			AConfiguration.Save(GetMachineInstanceConfigurationFileName());
+			configuration.Save(GetMachineInstanceConfigurationFileName());
 		}
 		
 		public static void Load()
@@ -62,14 +62,14 @@ namespace Alphora.Dataphor.DAE.Server
 			Reset();
 
 			// Load Machine Instances
-			InstanceConfiguration LMachineConfiguration = LoadMachineInstanceConfiguration();
-			foreach (ServerConfiguration LInstance in LMachineConfiguration.Instances.Values)
-				FInstances.Add(LInstance);
+			InstanceConfiguration machineConfiguration = LoadMachineInstanceConfiguration();
+			foreach (ServerConfiguration instance in machineConfiguration.Instances.Values)
+				_instances.Add(instance);
 		}
 		
 		private static void CheckLoaded()
 		{
-			if (FInstances == null)
+			if (_instances == null)
 				throw new ServerException(ServerException.Codes.InstanceConfigurationNotLoaded);
 		}
 		
@@ -77,41 +77,41 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			CheckLoaded();
 			
-			InstanceConfiguration LMachineConfiguration = new InstanceConfiguration();
+			InstanceConfiguration machineConfiguration = new InstanceConfiguration();
 			
-			foreach (ServerConfiguration LInstance in FInstances.Values)
-				LMachineConfiguration.Instances.Add(LInstance);
+			foreach (ServerConfiguration instance in _instances.Values)
+				machineConfiguration.Instances.Add(instance);
 
-			SaveMachineInstanceConfiguration(LMachineConfiguration);
+			SaveMachineInstanceConfiguration(machineConfiguration);
 		}
 
 		private static void Reset()
 		{
-			FInstances = new InstanceList();
+			_instances = new InstanceList();
 		}
 		
-		public static ServerConfiguration GetInstance(string AInstanceName)
+		public static ServerConfiguration GetInstance(string instanceName)
 		{
-			if (FInstances == null)
+			if (_instances == null)
 				Load();
-			return Instances.GetInstance(AInstanceName);
+			return Instances.GetInstance(instanceName);
 		}
 		
 		public static InstanceConfiguration LoadConfiguration()
 		{
-			InstanceConfiguration LConfiguration = new InstanceConfiguration();
+			InstanceConfiguration configuration = new InstanceConfiguration();
 			Load();
-			foreach (ServerConfiguration LInstance in FInstances.Values)
-				LConfiguration.Instances.Add(LInstance);
-			return LConfiguration;
+			foreach (ServerConfiguration instance in _instances.Values)
+				configuration.Instances.Add(instance);
+			return configuration;
 		}
 		
-		public static void SaveConfiguration(InstanceConfiguration AConfiguration)
+		public static void SaveConfiguration(InstanceConfiguration configuration)
 		{
 			CheckLoaded();
-			FInstances.Clear();
-			foreach (ServerConfiguration LInstance in AConfiguration.Instances.Values)
-				FInstances.Add(LInstance);
+			_instances.Clear();
+			foreach (ServerConfiguration instance in configuration.Instances.Values)
+				_instances.Add(instance);
 			Save();
 		}
 	}
@@ -120,30 +120,30 @@ namespace Alphora.Dataphor.DAE.Server
 	[PublishDefaultList("Instances")]
 	public class InstanceConfiguration
 	{
-		private InstanceList FInstances = new InstanceList();
+		private InstanceList _instances = new InstanceList();
 		public InstanceList Instances
 		{
-			get { return FInstances; }
+			get { return _instances; }
 		}
 		
 		/// <summary> Loads a new Instance configuration. </summary>
 		/// <remarks> Creates a default Instance configuration if the file doesn't exist. </remarks>
-		public static InstanceConfiguration Load(string AFileName)
+		public static InstanceConfiguration Load(string fileName)
 		{
-			InstanceConfiguration LConfiguration = new InstanceConfiguration();
-			if (File.Exists(AFileName))
-				using (Stream LStream = File.OpenRead(AFileName))
+			InstanceConfiguration configuration = new InstanceConfiguration();
+			if (File.Exists(fileName))
+				using (Stream stream = File.OpenRead(fileName))
 				{
-					new Deserializer().Deserialize(LStream, LConfiguration);
+					new Deserializer().Deserialize(stream, configuration);
 				}
-			return LConfiguration;
+			return configuration;
 		}
 		
-		public void Save(string AFileName)
+		public void Save(string fileName)
 		{
-			using (Stream LStream = new FileStream(AFileName, FileMode.Create, FileAccess.Write))
+			using (Stream stream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
 			{
-				new Serializer().Serialize(LStream, this);
+				new Serializer().Serialize(stream, this);
 			}
 		}
 	}
@@ -154,39 +154,39 @@ namespace Alphora.Dataphor.DAE.Server
 	{
 		public InstanceList() : base(StringComparer.OrdinalIgnoreCase) {}
 
-		public override int Add(object AValue)
+		public override int Add(object tempValue)
 		{
-			ServerConfiguration LInstance = (ServerConfiguration)AValue;
-			Add(LInstance.Name, LInstance);
-			return IndexOf(LInstance.Name);
+			ServerConfiguration instance = (ServerConfiguration)tempValue;
+			Add(instance.Name, instance);
+			return IndexOf(instance.Name);
 		}
 		
-		public new ServerConfiguration this[string AInstanceName]
+		public new ServerConfiguration this[string instanceName]
 		{
 			get
 			{
-				ServerConfiguration LInstance = null;
-				TryGetValue(AInstanceName, out LInstance);
-				return LInstance;
+				ServerConfiguration instance = null;
+				TryGetValue(instanceName, out instance);
+				return instance;
 			}
 			set
 			{
-				base[AInstanceName] = value;
+				base[instanceName] = value;
 			}
 		}
 
-		public ServerConfiguration GetInstance(string AInstanceName)
+		public ServerConfiguration GetInstance(string instanceName)
 		{
-			ServerConfiguration LInstance;
-			if (!TryGetValue(AInstanceName, out LInstance))
-				throw new ServerException(ServerException.Codes.InstanceNotFound, AInstanceName);
+			ServerConfiguration instance;
+			if (!TryGetValue(instanceName, out instance))
+				throw new ServerException(ServerException.Codes.InstanceNotFound, instanceName);
 			else
-				return LInstance;
+				return instance;
 		}
 		
-		public bool HasInstance(string AInstanceName)
+		public bool HasInstance(string instanceName)
 		{
-			return ContainsKey(AInstanceName);
+			return ContainsKey(instanceName);
 		}
 	}
 }

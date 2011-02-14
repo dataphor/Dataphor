@@ -26,37 +26,37 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	[DesignerCategory("Data Controls")]
 	public class SearchColumn : Node, IWindowsSearchColumn
 	{
-		public const int CDefaultWidth = 15;
-		public const int CBorderWidth = 12;
+		public const int DefaultWidth = 15;
+		public const int BorderWidth = 12;
 
 		protected DAE.Client.Controls.IncrementalSearch SearchControl
 		{
 			get { return ((IWindowsSearch)Parent).SearchControl; }
 		}
 		
-		private DAE.Client.Controls.IncrementalSearchColumn FColumn;
+		private DAE.Client.Controls.IncrementalSearchColumn _column;
 		protected internal DAE.Client.Controls.IncrementalSearchColumn Column
 		{
-			get { return FColumn; }
+			get { return _column; }
 		}
 
 		[DefaultValue(false)]
 		[Browsable(false)]
 		public int PixelWidth
 		{
-			get { return CBorderWidth + (FWidth * ((IWindowsSearch)Parent).AverageCharPixelWidth); }
+			get { return BorderWidth + (_width * ((IWindowsSearch)Parent).AverageCharPixelWidth); }
 		}
 		
 		// Hint
 
 		// TODO: Support hint in SearchColumn - stubbed now because it's a derivation common property
-		private string FHint = String.Empty;
+		private string _hint = String.Empty;
 		[DefaultValue("")]
 		[Description("A hint to be displayed for this search column.")]
 		public string Hint
 		{
-			get { return FHint; }
-			set { FHint = value; }
+			get { return _hint; }
+			set { _hint = value; }
 		}
 		
 		// ReadOnly
@@ -72,19 +72,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// Title
 
-		private string FTitle = String.Empty;
+		private string _title = String.Empty;
 		[DefaultValue("")]
 		[Description("The title of the search column.")]
 		public string Title
 		{
-			get { return FTitle; }
+			get { return _title; }
 			set
 			{
 				if (value == null)
 					value = String.Empty;
-				if (FTitle != value)
+				if (_title != value)
 				{
-					FTitle = value;
+					_title = value;
 					if (Active)
 						UpdateColumn();
 				}
@@ -92,20 +92,20 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		}
 
 		// ColumnName
-		private string FColumnName = String.Empty;
+		private string _columnName = String.Empty;
 		[TypeConverter(typeof(ColumnNameConverter))]
 		[DefaultValue("")]
 		[Description("The name of the column within the data source.")]
 		public string ColumnName
 		{
-			get { return FColumnName; }
+			get { return _columnName; }
 			set
 			{
 				if (value == null)
 					value = String.Empty;
-				if (FColumnName != value)
+				if (_columnName != value)
 				{
-					FColumnName = value;
+					_columnName = value;
 					if (Active)
 						UpdateColumn();
 				}
@@ -114,17 +114,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// Width
 
-		private int FWidth = CDefaultWidth;
-        [DefaultValue(CDefaultWidth)]
+		private int _width = DefaultWidth;
+        [DefaultValue(DefaultWidth)]
 		[Description("The width in characters of the search column.")]
 		public int Width
 		{
-			get { return FWidth; }
+			get { return _width; }
 			set
 			{
-				if (FWidth != value)
+				if (_width != value)
 				{
-					FWidth = value;
+					_width = value;
 					if (Active)
 						UpdateColumn();
 				}
@@ -133,17 +133,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		// TextAlignment
 
-		private HorizontalAlignment FTextAlignment = HorizontalAlignment.Left;
+		private HorizontalAlignment _textAlignment = HorizontalAlignment.Left;
 		[DefaultValue(HorizontalAlignment.Left)]
 		[Description("The alignment of content within the search column.")]
 		public HorizontalAlignment TextAlignment
 		{
-			get { return FTextAlignment; }
+			get { return _textAlignment; }
 			set
 			{
-				if (FTextAlignment != value)
+				if (_textAlignment != value)
 				{
-					FTextAlignment = value;
+					_textAlignment = value;
 					if (Active)
 						UpdateColumn();
 				}
@@ -153,27 +153,27 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private void UpdateColumn()
 		{
 			// TODO: Mnemonics support in the incremental search control
-			FColumn.Title = 
+			_column.Title = 
 				(
-					FTitle.Length > 0 
+					_title.Length > 0 
 						? 
 						(
-							FTitle[0] == '~' 
-								? FTitle.Substring(1) 
-								: TitleUtility.RemoveAccellerators(FTitle)
+							_title[0] == '~' 
+								? _title.Substring(1) 
+								: TitleUtility.RemoveAccellerators(_title)
 						) 
 						: String.Empty
 				);
-			FColumn.ColumnName = FColumnName;
-			FColumn.ControlWidth = PixelWidth;
-			FColumn.TextAlignment = (WinForms.HorizontalAlignment)FTextAlignment;
+			_column.ColumnName = _columnName;
+			_column.ControlWidth = PixelWidth;
+			_column.TextAlignment = (WinForms.HorizontalAlignment)_textAlignment;
 		}
 
 		// Node
 
 		protected override void Activate()
 		{
-			FColumn = new DAE.Client.Controls.IncrementalSearchColumn();
+			_column = new DAE.Client.Controls.IncrementalSearchColumn();
 			try
 			{
 				UpdateColumn();
@@ -182,7 +182,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 			catch
 			{
-				FColumn = null;
+				_column = null;
 				throw;
 			}
 		}
@@ -195,17 +195,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 			finally
 			{
-				if (FColumn != null)
+				if (_column != null)
 				{
-					SearchControl.Columns.Remove(FColumn);
-					FColumn = null;
+					SearchControl.Columns.Remove(_column);
+					_column = null;
 				}
 			}
 		}
 
-		public override bool IsValidOwner(Type AOwnerType)
+		public override bool IsValidOwner(Type ownerType)
 		{
-			return typeof(ISearch).IsAssignableFrom(AOwnerType);
+			return typeof(ISearch).IsAssignableFrom(ownerType);
 		}
 	}
 
@@ -213,28 +213,28 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	[DesignerCategory("Data Controls")]
 	public class Search : ControlElement, IWindowsSearch
 	{
-		public const int CNaturalWidth = 40;
-		public const int CMinWidth = 20;
+		public const int NaturalWidth = 40;
+		public const int MinWidth = 20;
 
-		private int FAverageCharPixelWidth;
+		private int _averageCharPixelWidth;
 		[Browsable(false)]
 		public int AverageCharPixelWidth
 		{
-			get { return FAverageCharPixelWidth; }
+			get { return _averageCharPixelWidth; }
 		}
 
 		// TitleAlignment
 
-		private TitleAlignment FTitleAlignment = TitleAlignment.Left;
+		private TitleAlignment _titleAlignment = TitleAlignment.Left;
 		[DefaultValue(TitleAlignment.Left)]
 		public TitleAlignment TitleAlignment
 		{
-			get { return FTitleAlignment; }
+			get { return _titleAlignment; }
 			set
 			{
-				if (FTitleAlignment != value)
+				if (_titleAlignment != value)
 				{
-					FTitleAlignment = value;
+					_titleAlignment = value;
 					if (Active)
 					{
 						InternalUpdateTitleAlignment();
@@ -246,7 +246,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected void InternalUpdateTitleAlignment()
 		{
-			SearchControl.TitleAlignment = (DAE.Client.Controls.TitleAlignment)FTitleAlignment;
+			SearchControl.TitleAlignment = (DAE.Client.Controls.TitleAlignment)_titleAlignment;
 		}
 
 		// SearchControl
@@ -277,25 +277,25 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			SearchControl.BackColor = ((Session)HostNode.Session).Theme.ContainerColor;
 			SearchControl.NoValueBackColor = ((Session)HostNode.Session).Theme.NoValueBackColor;
 			SearchControl.InvalidValueBackColor = ((Session)HostNode.Session).Theme.InvalidValueBackColor;
-			FAverageCharPixelWidth = FormInterface.GetAverageCharPixelWidth(Control);
+			_averageCharPixelWidth = FormInterface.GetAverageCharPixelWidth(Control);
 			InternalUpdateTitleAlignment();
 			base.InitializeControl();
 		}
 
 		// Node
 		
-		public override bool IsValidChild(Type AChildType)
+		public override bool IsValidChild(Type childType)
 		{
-			if (typeof(ISearchColumn).IsAssignableFrom(AChildType))
+			if (typeof(ISearchColumn).IsAssignableFrom(childType))
 				return true;
-			return base.IsValidChild(AChildType);
+			return base.IsValidChild(childType);
 		}
 		
 		// Element
 
 		protected override Size InternalMinSize
 		{
-			get { return new Size(CMinWidth, SearchControl.NaturalHeight()); }
+			get { return new Size(MinWidth, SearchControl.NaturalHeight()); }
 		}
 		
 		protected override Size InternalMaxSize
@@ -309,7 +309,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			{
 				// In order for this to be based on the actual widths of the displayed search controls, it
 				// would be necessary re-layout when the search criteria changes (probably not a good thing).
-				return new Size(CNaturalWidth, SearchControl.NaturalHeight());
+				return new Size(NaturalWidth, SearchControl.NaturalHeight());
 			}
 		}
 	}

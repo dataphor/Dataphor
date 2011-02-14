@@ -20,15 +20,15 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		/// <summary> Required designer variable. </summary>
 		private System.ComponentModel.Container components = null;
 
-		public StatusForm(string AMessage)
+		public StatusForm(string message)
 		{
 			//
 			// Required for Windows Form Designer support
 			//
 			InitializeComponent();
 
-			if (AMessage != String.Empty)
-				label.Text = AMessage;
+			if (message != String.Empty)
+				label.Text = message;
 			Show();
 			Update();
 		}

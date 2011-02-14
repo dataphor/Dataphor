@@ -12,33 +12,33 @@ namespace Alphora.Dataphor.DAE.Debug
 {
 	public class CallStackEntry
 	{
-		public CallStackEntry(int AIndex, string ADescription, DebugLocator ALocator, string ALocation, string AStatement)
+		public CallStackEntry(int index, string description, DebugLocator locator, string location, string statement)
 		{
-			FIndex = AIndex;
-			FDescription = ADescription;
-			FLocator = ALocator;
-			FLocation = ALocation;
-			FStatement = AStatement;
+			_index = index;
+			_description = description;
+			_locator = locator;
+			_location = location;
+			_statement = statement;
 		}
 		
-		private int FIndex;
-		public int Index { get { return FIndex; } }
+		private int _index;
+		public int Index { get { return _index; } }
 		
-		private string FDescription;
-		public string Description { get { return FDescription; } }
+		private string _description;
+		public string Description { get { return _description; } }
 		
-		private DebugLocator FLocator;
-		public DebugLocator Locator { get { return FLocator; } }
+		private DebugLocator _locator;
+		public DebugLocator Locator { get { return _locator; } }
 		
-		private string FLocation;
-		public string Location { get { return FLocation; } }
+		private string _location;
+		public string Location { get { return _location; } }
 		
-		private string FStatement;
-		public string Statement { get { return FStatement; } }
+		private string _statement;
+		public string Statement { get { return _statement; } }
 
 		public override string ToString()
 		{
-			return String.Format("{0}:{1}", FIndex, FDescription);
+			return String.Format("{0}:{1}", _index, _description);
 		}
 	}
 	

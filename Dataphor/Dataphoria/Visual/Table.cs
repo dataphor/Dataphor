@@ -14,7 +14,7 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 {
 	public class Table : Control
 	{
-		public const int CMinAutoSize = 80;	// Minimum auto-size (after padding)
+		public const int MinAutoSize = 80;	// Minimum auto-size (after padding)
 
 		public Table() : base()
 		{
@@ -26,30 +26,30 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 			SetStyle(ControlStyles.SupportsTransparentBackColor, true);
 			TabStop = false;
 
-			FColumns = new TableColumns(this);
-			FRows = new TableRows(this);
-			FRowHeight = Font.Height + 8;
-			FHeaderFont = new Font(this.Font, FontStyle.Bold);
-			FHeaderForeColor = Color.Black;
-			FHeaderHeight = FHeaderFont.Height + 8;
+			_columns = new TableColumns(this);
+			_rows = new TableRows(this);
+			_rowHeight = Font.Height + 8;
+			_headerFont = new Font(this.Font, FontStyle.Bold);
+			_headerForeColor = Color.Black;
+			_headerHeight = _headerFont.Height + 8;
 
 			SuspendLayout();
 			try
 			{
-				FHScrollBar = new HScrollBar();
-				FHScrollBar.SmallChange = 1;
-				FHScrollBar.LargeChange = 1;
-				FHScrollBar.Minimum = 0;
-				FHScrollBar.TabStop = false;
-				FHScrollBar.Scroll += new ScrollEventHandler(HScrollBarScrolled);
-				Controls.Add(FHScrollBar);
+				_hScrollBar = new HScrollBar();
+				_hScrollBar.SmallChange = 1;
+				_hScrollBar.LargeChange = 1;
+				_hScrollBar.Minimum = 0;
+				_hScrollBar.TabStop = false;
+				_hScrollBar.Scroll += new ScrollEventHandler(HScrollBarScrolled);
+				Controls.Add(_hScrollBar);
 
-				FVScrollBar = new VScrollBar();
-				FVScrollBar.SmallChange = 1;
-				FVScrollBar.Minimum = 0;
-				FVScrollBar.TabStop = false;
-				FVScrollBar.Scroll += new ScrollEventHandler(VScrollBarScrolled);
-				Controls.Add(FVScrollBar);
+				_vScrollBar = new VScrollBar();
+				_vScrollBar.SmallChange = 1;
+				_vScrollBar.Minimum = 0;
+				_vScrollBar.TabStop = false;
+				_vScrollBar.Scroll += new ScrollEventHandler(VScrollBarScrolled);
+				Controls.Add(_vScrollBar);
 			}
 			finally
 			{
@@ -59,91 +59,91 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 
 		#region Cosmetic Properties
 
-		private int FRowHeight;
+		private int _rowHeight;
 		public int RowHeight
 		{
-			get { return FRowHeight; }
+			get { return _rowHeight; }
 			set
 			{
 				if (value < 1)
 					value = 1;
-				if (FRowHeight != value)
+				if (_rowHeight != value)
 				{
-					FRowHeight = value;
+					_rowHeight = value;
 					PerformLayout();
 					Invalidate(false);
 				}
 			}
 		}
 
-		private int FHeaderHeight;
+		private int _headerHeight;
 		public int HeaderHeight
 		{
-			get { return FHeaderHeight; }
+			get { return _headerHeight; }
 			set
 			{
 				if (value < 1)
 					value = 1;
-				if (FHeaderHeight != value)
+				if (_headerHeight != value)
 				{
-					FHeaderHeight = value;
+					_headerHeight = value;
 					PerformLayout();
 					Invalidate(false);
 				}
 			}
 		}
 
-		private Font FHeaderFont;
+		private Font _headerFont;
 		public Font HeaderFont
 		{
-			get { return FHeaderFont; }
+			get { return _headerFont; }
 			set 
 			{ 
-				FHeaderFont = value; 
+				_headerFont = value; 
 				InvalidateHeader();
 			}
 		}
 
-		private Color FHeaderForeColor;
+		private Color _headerForeColor;
 		public Color HeaderForeColor
 		{
-			get { return FHeaderForeColor; }
+			get { return _headerForeColor; }
 			set
 			{
-				FHeaderForeColor = value;
+				_headerForeColor = value;
 				InvalidateHeader();
 			}
 		}
 
-		private Color FShadowColor = Color.FromArgb(180, Color.Black);
+		private Color _shadowColor = Color.FromArgb(180, Color.Black);
 		public Color ShadowColor
 		{
-			get { return FShadowColor; }
+			get { return _shadowColor; }
 			set
 			{
-				FShadowColor = value;
+				_shadowColor = value;
 				InvalidateHeader();
 			}
 		}
 
-		private Color FLineColor = Color.White;
+		private Color _lineColor = Color.White;
 		public Color LineColor
 		{
-			get { return FLineColor; }
+			get { return _lineColor; }
 			set
 			{
-				FLineColor = value;
+				_lineColor = value;
 				InvalidateHeader();
 			}
 		}
 
-		private int FHorizontalPadding = 2;
+		private int _horizontalPadding = 2;
 		public int HorizontalPadding
 		{
-			get { return FHorizontalPadding; }
+			get { return _horizontalPadding; }
 			set 
 			{ 
-				FHorizontalPadding = value;
+				_horizontalPadding = value;
 				Invalidate(false);
 				PerformLayout();
 			}
@@ -151,230 +151,230 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 
 		private void InvalidateHeader()
 		{
-			Rectangle LBounds = base.DisplayRectangle;
-			LBounds.Height = FHeaderHeight;
-			Invalidate(LBounds, false);
+			Rectangle bounds = base.DisplayRectangle;
+			bounds.Height = _headerHeight;
+			Invalidate(bounds, false);
 		}
 
 		#endregion
 
 		#region Scrolling & Layout
 
-		private HScrollBar FHScrollBar;
-		private VScrollBar FVScrollBar;
+		private HScrollBar _hScrollBar;
+		private VScrollBar _vScrollBar;
 
-		private int FVisibleRows;
+		private int _visibleRows;
 
-		private void HScrollBarScrolled(object ASender, ScrollEventArgs AArgs)
+		private void HScrollBarScrolled(object sender, ScrollEventArgs args)
 		{
-			NavigateTo(new Point(AArgs.NewValue, FLocation.Y));
+			NavigateTo(new Point(args.NewValue, _location.Y));
 		}
 
-		private void VScrollBarScrolled(object ASender, ScrollEventArgs AArgs)
+		private void VScrollBarScrolled(object sender, ScrollEventArgs args)
 		{
-			NavigateTo(new Point(FLocation.X, AArgs.NewValue));
+			NavigateTo(new Point(_location.X, args.NewValue));
 		}
 
-		protected override bool ProcessDialogKey(Keys AKey)
+		protected override bool ProcessDialogKey(Keys key)
 		{
-			switch (AKey)
+			switch (key)
 			{
 				case Keys.Left :
-					NavigateTo(new Point(FLocation.X - 1, FLocation.Y));
+					NavigateTo(new Point(_location.X - 1, _location.Y));
 					break;
 				case Keys.Up :
-					NavigateTo(new Point(FLocation.X, FLocation.Y - 1));
+					NavigateTo(new Point(_location.X, _location.Y - 1));
 					break;
 				case Keys.Right :
-					NavigateTo(new Point(FLocation.X + 1, FLocation.Y));
+					NavigateTo(new Point(_location.X + 1, _location.Y));
 					break;
 				case Keys.Down :
-					NavigateTo(new Point(FLocation.X, FLocation.Y + 1));
+					NavigateTo(new Point(_location.X, _location.Y + 1));
 					break;
 				default :
-					return base.ProcessDialogKey(AKey);
+					return base.ProcessDialogKey(key);
 			}
 			return true;
 		}
 
-		private static int Constrain(int AValue, int AMin, int AMax)
+		private static int Constrain(int tempValue, int min, int max)
 		{
-			if (AValue > AMax)
-				AValue = AMax;
-			if (AValue < AMin)
-				AValue = AMin;
-			return AValue;
+			if (tempValue > max)
+				tempValue = max;
+			if (tempValue < min)
+				tempValue = min;
+			return tempValue;
 		}
 
-		private Point FLocation;
+		private Point _location;
 
-		private void NavigateTo(Point ALocation)
+		private void NavigateTo(Point location)
 		{
-			ALocation.X = Constrain(ALocation.X, FHScrollBar.Minimum, FHScrollBar.Maximum);
-			ALocation.Y = Constrain(ALocation.Y, FVScrollBar.Minimum, FVScrollBar.Maximum);
-			if (ALocation != FLocation)
+			location.X = Constrain(location.X, _hScrollBar.Minimum, _hScrollBar.Maximum);
+			location.Y = Constrain(location.Y, _vScrollBar.Minimum, _vScrollBar.Maximum);
+			if (location != _location)
 			{
-				Point LDelta = new Point(SumWidths(FLocation.X, ALocation.X), (FLocation.Y - ALocation.Y) * FRowHeight);
+				Point delta = new Point(SumWidths(_location.X, location.X), (_location.Y - location.Y) * _rowHeight);
 
-				FLocation = ALocation;
+				_location = location;
 				
-				FHScrollBar.Value = FLocation.X;
-				FVScrollBar.Value = FLocation.Y;
+				_hScrollBar.Value = _location.X;
+				_vScrollBar.Value = _location.Y;
 
 				// Scroll vertically (seperate from horizontal because it does not affect header
-				RECT LRect = UnsafeUtilities.RECTFromRectangle(DataRectangle);
-				UnsafeNativeMethods.ScrollWindowEx(this.Handle, 0, LDelta.Y, ref LRect, ref LRect, IntPtr.Zero, IntPtr.Zero, 2 /* SW_INVALIDATE */);
+				RECT rect = UnsafeUtilities.RECTFromRectangle(DataRectangle);
+				UnsafeNativeMethods.ScrollWindowEx(this.Handle, 0, delta.Y, ref rect, ref rect, IntPtr.Zero, IntPtr.Zero, 2 /* SW_INVALIDATE */);
 
 				// Scroll horizontally
-				LRect = UnsafeUtilities.RECTFromRectangle(DisplayRectangle);
-				UnsafeNativeMethods.ScrollWindowEx(this.Handle, LDelta.X, 0, ref LRect, ref LRect, IntPtr.Zero, IntPtr.Zero, 2 /* SW_INVALIDATE */);
+				rect = UnsafeUtilities.RECTFromRectangle(DisplayRectangle);
+				UnsafeNativeMethods.ScrollWindowEx(this.Handle, delta.X, 0, ref rect, ref rect, IntPtr.Zero, IntPtr.Zero, 2 /* SW_INVALIDATE */);
 
 				PerformLayout();
 			}
 		}
 
-		private int SumWidths(int AStartIndex, int AEndIndex)
+		private int SumWidths(int startIndex, int endIndex)
 		{
-			int LResult = 0;
-			int LPolarity = (AStartIndex > AEndIndex ? 1 : -1);
-			for (int i = AStartIndex; i != AEndIndex; i -= LPolarity)
-				LResult += FColumns[i].Width * LPolarity;
-			return LResult;
+			int result = 0;
+			int polarity = (startIndex > endIndex ? 1 : -1);
+			for (int i = startIndex; i != endIndex; i -= polarity)
+				result += _columns[i].Width * polarity;
+			return result;
 		}
 
 		/// <summary> The number of columns (starting from the last) that would completely fit in the display area. </summary>
 		private int FittingColumns()
 		{
-			Rectangle LBounds = DataRectangle;
-			int LExtentX = LBounds.X;
-			int LCount = 0;
-			for (int LX = FColumns.Count - 1; LX >= 0; LX--)
+			Rectangle bounds = DataRectangle;
+			int extentX = bounds.X;
+			int count = 0;
+			for (int x = _columns.Count - 1; x >= 0; x--)
 			{
-				LExtentX += FColumns[LX].Width;
-				if (LExtentX <= LBounds.Width)
-					LCount++;
+				extentX += _columns[x].Width;
+				if (extentX <= bounds.Width)
+					count++;
 				else
 					break;
 			}
-			return LCount;
+			return count;
 		}
 
-		public virtual void AutoSizeColumns(int AWidth)
+		public virtual void AutoSizeColumns(int width)
 		{
 			// Calculate the size (in excess of the min auto size for each auto-sized column
-			int[] LSizes = new int[FColumns.Count];
-			int LMax;
-			int LCurrent;
-			int LY;
-			using (Graphics LGraphics = CreateGraphics())
+			int[] sizes = new int[_columns.Count];
+			int max;
+			int current;
+			int y;
+			using (Graphics graphics = CreateGraphics())
 			{
-				for (int LX = 0; LX < FColumns.Count; LX++)
+				for (int x = 0; x < _columns.Count; x++)
 				{
-					LMax = 0;
-					if (FColumns[LX].AutoSize)
+					max = 0;
+					if (_columns[x].AutoSize)
 					{
-						for (LY = 0; LY < FRows.Count; LY++)
+						for (y = 0; y < _rows.Count; y++)
 						{
-							LCurrent = Size.Ceiling(LGraphics.MeasureString(GetValue(new Point(LX, LY)), Font)).Width + (FHorizontalPadding * 2);
-							if (LCurrent > LMax)
-								LMax = LCurrent;
+							current = Size.Ceiling(graphics.MeasureString(GetValue(new Point(x, y)), Font)).Width + (_horizontalPadding * 2);
+							if (current > max)
+								max = current;
 						}
-						LSizes[LX] = Math.Max(0, LMax - CMinAutoSize);
+						sizes[x] = Math.Max(0, max - MinAutoSize);
 					}
 				}
 			}
 
 			// Sum the column sizes
-			int LAutoSum = 0;	// Sum of auto sized columns excesses
-			int LFixedSum = 0;	// Sum of fixed sized columns widths
-			int LAutoCount = 0;	// Number of auto sized columns
-			for (int LX = 0; LX < FColumns.Count; LX++)
+			int autoSum = 0;	// Sum of auto sized columns excesses
+			int fixedSum = 0;	// Sum of fixed sized columns widths
+			int autoCount = 0;	// Number of auto sized columns
+			for (int x = 0; x < _columns.Count; x++)
 			{
-				if (FColumns[LX].AutoSize)
+				if (_columns[x].AutoSize)
 				{
-					LAutoSum += LSizes[LX];
-					LAutoCount++;
+					autoSum += sizes[x];
+					autoCount++;
 				}
 				else
-					LFixedSum += FColumns[LX].Width;
+					fixedSum += _columns[x].Width;
 			}
 
-			int LExcessWidth = Math.Max(0, AWidth - (LFixedSum + (LAutoCount * CMinAutoSize)));
+			int excessWidth = Math.Max(0, width - (fixedSum + (autoCount * MinAutoSize)));
 
 			// Distribute the excess to the scrunched auto-sized columns based on their size proportion over the minumum auto-size
-			for (int LX = 0; LX < FColumns.Count; LX++)
-				if (FColumns[LX].AutoSize)
-					FColumns[LX].FWidth = CMinAutoSize + (LAutoSum == 0 ? 0 : Math.Min(LSizes[LX], (int)(((double)LSizes[LX] / (double)LAutoSum) * LExcessWidth)));
+			for (int x = 0; x < _columns.Count; x++)
+				if (_columns[x].AutoSize)
+					_columns[x]._width = MinAutoSize + (autoSum == 0 ? 0 : Math.Min(sizes[x], (int)(((double)sizes[x] / (double)autoSum) * excessWidth)));
 		}
 
-		protected override void OnLayout(LayoutEventArgs AArgs)
+		protected override void OnLayout(LayoutEventArgs args)
 		{
 			// Don't call base
 
-			Rectangle LBounds = DataRectangle;
+			Rectangle bounds = DataRectangle;
 			
-			AutoSizeColumns(LBounds.Width);
+			AutoSizeColumns(bounds.Width);
 
-			FVisibleRows = (LBounds.Height / FRowHeight) + (((LBounds.Height % FRowHeight) == 0) ? 0 : 1);
-			FVScrollBar.LargeChange = Math.Max((FVisibleRows - 1), 1);
+			_visibleRows = (bounds.Height / _rowHeight) + (((bounds.Height % _rowHeight) == 0) ? 0 : 1);
+			_vScrollBar.LargeChange = Math.Max((_visibleRows - 1), 1);
 
-			LBounds = base.DisplayRectangle;
+			bounds = base.DisplayRectangle;
 
-			FHScrollBar.Maximum = Math.Max(0, FColumns.Count - Math.Max(FittingColumns(), 1));
-			FVScrollBar.Maximum = Math.Max(0, FRows.Count - 1);
+			_hScrollBar.Maximum = Math.Max(0, _columns.Count - Math.Max(FittingColumns(), 1));
+			_vScrollBar.Maximum = Math.Max(0, _rows.Count - 1);
 
 			// Scroll off wasted vertical space
-			Point LNew = 
+			Point newValue = 
 				new Point
 				(
-					Math.Min(FLocation.X, FHScrollBar.Maximum), 
-					Math.Max(0, Math.Min(FRows.Count, FLocation.Y + (FVisibleRows - 1)) - (FVisibleRows - 1))
+					Math.Min(_location.X, _hScrollBar.Maximum), 
+					Math.Max(0, Math.Min(_rows.Count, _location.Y + (_visibleRows - 1)) - (_visibleRows - 1))
 				);
-			if (LNew != FLocation)
-				NavigateTo(LNew);
+			if (newValue != _location)
+				NavigateTo(newValue);
 
-			FVScrollBar.Visible = (FVScrollBar.Maximum > 0) && (FVScrollBar.LargeChange <= FVScrollBar.Maximum);
-			FHScrollBar.Visible = (FHScrollBar.Maximum > 0);
+			_vScrollBar.Visible = (_vScrollBar.Maximum > 0) && (_vScrollBar.LargeChange <= _vScrollBar.Maximum);
+			_hScrollBar.Visible = (_hScrollBar.Maximum > 0);
 
-			FVScrollBar.Bounds =
+			_vScrollBar.Bounds =
 				new Rectangle
 				(
-					LBounds.Right - FVScrollBar.Width,
-					FHeaderHeight,
-					FVScrollBar.Width,
-					LBounds.Height - (FHeaderHeight + (FHScrollBar.Visible ? FHScrollBar.Height : 0))
+					bounds.Right - _vScrollBar.Width,
+					_headerHeight,
+					_vScrollBar.Width,
+					bounds.Height - (_headerHeight + (_hScrollBar.Visible ? _hScrollBar.Height : 0))
 				);
 
-			FHScrollBar.Top = LBounds.Bottom - FHScrollBar.Height;
-			FHScrollBar.Width = LBounds.Width - (FVScrollBar.Visible ? FVScrollBar.Width : 0);
+			_hScrollBar.Top = bounds.Bottom - _hScrollBar.Height;
+			_hScrollBar.Width = bounds.Width - (_vScrollBar.Visible ? _vScrollBar.Width : 0);
 
 			UpdateDesigners();
 
 			// Position the designers
-			LBounds = DataRectangle;
-			IElementDesigner LDesigner;
-			int LExtentX = LBounds.X;
-			TableColumn LColumn;
-			int LMaxY = Math.Min(FRows.Count, FLocation.Y + FVisibleRows);
-			for (int LX = FLocation.X; (LExtentX <= LBounds.Width) && (LX < FColumns.Count); LX++)
+			bounds = DataRectangle;
+			IElementDesigner designer;
+			int extentX = bounds.X;
+			TableColumn column;
+			int maxY = Math.Min(_rows.Count, _location.Y + _visibleRows);
+			for (int x = _location.X; (extentX <= bounds.Width) && (x < _columns.Count); x++)
 			{
-				LColumn = FColumns[LX];
+				column = _columns[x];
 
-				for (int LY = FLocation.Y; LY < LMaxY; LY++)
+				for (int y = _location.Y; y < maxY; y++)
 				{
-					LDesigner = (IElementDesigner)FDesigners[new Point(LX, LY)];
-					if (LDesigner != null)
-						LDesigner.Bounds =
+					designer = (IElementDesigner)_designers[new Point(x, y)];
+					if (designer != null)
+						designer.Bounds =
 							new Rectangle
 							(
-								LExtentX + FHorizontalPadding, 
-								LBounds.Y + ((LY - FLocation.Y) * FRowHeight), 
-								LColumn.Width - (FHorizontalPadding * 2), 
-								FRowHeight
+								extentX + _horizontalPadding, 
+								bounds.Y + ((y - _location.Y) * _rowHeight), 
+								column.Width - (_horizontalPadding * 2), 
+								_rowHeight
 							);
 				}
 
-				LExtentX += LColumn.Width;
+				extentX += column.Width;
 			}
 		}
 
@@ -382,12 +382,12 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 		{
 			get
 			{
-				Rectangle LBounds = base.DisplayRectangle;
-				if (FVScrollBar.Visible)
-					LBounds.Width -= FVScrollBar.Width;
-				if (FHScrollBar.Visible)
-					LBounds.Height -= FHScrollBar.Height;
-				return LBounds;
+				Rectangle bounds = base.DisplayRectangle;
+				if (_vScrollBar.Visible)
+					bounds.Width -= _vScrollBar.Width;
+				if (_hScrollBar.Visible)
+					bounds.Height -= _hScrollBar.Height;
+				return bounds;
 			}
 		}
 
@@ -395,25 +395,25 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 		{
 			get
 			{
-				Rectangle LBounds = DisplayRectangle;
-				LBounds.Y += FHeaderHeight;
-				LBounds.Height -= FHeaderHeight;
-				return LBounds;
+				Rectangle bounds = DisplayRectangle;
+				bounds.Y += _headerHeight;
+				bounds.Height -= _headerHeight;
+				return bounds;
 			}
 		}
 
-		private int FUpdateCount = 0;
+		private int _updateCount = 0;
 
 		public void BeginUpdate()
 		{
-			FUpdateCount++;
+			_updateCount++;
 			SuspendLayout();
 		}
 
 		public void EndUpdate()
 		{
-			FUpdateCount = Math.Max(0, FUpdateCount - 1);
-			if (IsHandleCreated && (FUpdateCount == 0))
+			_updateCount = Math.Max(0, _updateCount - 1);
+			if (IsHandleCreated && (_updateCount == 0))
 			{
 				Invalidate(false);
 				ResumeLayout(true);
@@ -427,65 +427,65 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 		#region Designers
 
 		// List of active designers by their cell coordinate
-		private Hashtable FDesigners = new Hashtable();
+		private Hashtable _designers = new Hashtable();
 
 		/// <summary> Reconciles the set of visible designers with the set of visible cells. </summary>
 		private void UpdateDesigners()
 		{
-			if (FUpdateCount == 0)
+			if (_updateCount == 0)
 			{
 				// List of unused designers (initially full)
-				ArrayList LDesigned = new ArrayList(FDesigners.Count);
-				LDesigned.AddRange(FDesigners.Keys);
-				IElementDesigner LDesigner;
+				ArrayList designed = new ArrayList(_designers.Count);
+				designed.AddRange(_designers.Keys);
+				IElementDesigner designer;
 
 				SuspendLayout();
 				try
 				{
-					Rectangle LBounds = DataRectangle;
-					int LExtentX = LBounds.X;
-					TableColumn LColumn;
-					int LMaxY = Math.Min(FRows.Count, FLocation.Y + FVisibleRows);
-					using (Graphics LGraphics = CreateGraphics())
+					Rectangle bounds = DataRectangle;
+					int extentX = bounds.X;
+					TableColumn column;
+					int maxY = Math.Min(_rows.Count, _location.Y + _visibleRows);
+					using (Graphics graphics = CreateGraphics())
 					{
-						for (int LX = FLocation.X; (LExtentX <= LBounds.Width) && (LX < FColumns.Count); LX++)
+						for (int x = _location.X; (extentX <= bounds.Width) && (x < _columns.Count); x++)
 						{
-							LColumn = FColumns[LX];
+							column = _columns[x];
 
-							for (int LY = FLocation.Y; LY < LMaxY; LY++)
+							for (int y = _location.Y; y < maxY; y++)
 							{
 								if
 								(
 									GetDesignerRequired
 									(
-										new Point(LX, LY),
-										LGraphics,
+										new Point(x, y),
+										graphics,
 										new Rectangle
 										(
-											LExtentX + FHorizontalPadding, 
-											LBounds.Y + ((LY - FLocation.Y) * FRowHeight), 
-											LColumn.Width - (FHorizontalPadding * 2), 
-											FRowHeight
+											extentX + _horizontalPadding, 
+											bounds.Y + ((y - _location.Y) * _rowHeight), 
+											column.Width - (_horizontalPadding * 2), 
+											_rowHeight
 										)
 									)
 								)
 								{
-									LDesigner = (IElementDesigner)FDesigners[new Point(LX, LY)];
-									if (LDesigner == null)
-										LDesigner = AddDesigner(new Point(LX, LY));
+									designer = (IElementDesigner)_designers[new Point(x, y)];
+									if (designer == null)
+										designer = AddDesigner(new Point(x, y));
 									else
-										LDesigned.Remove(new Point(LX, LY));
-									((Control)LDesigner).TabIndex = LX + (LY * FColumns.Count);
+										designed.Remove(new Point(x, y));
+									((Control)designer).TabIndex = x + (y * _columns.Count);
 								}
 							}
 
-							LExtentX += LColumn.Width;
+							extentX += column.Width;
 						}
 					}
 
 					// Remove unused designers
-					foreach (Point LCell in LDesigned)
-						RemoveDesigner(LCell);
+					foreach (Point cell in designed)
+						RemoveDesigner(cell);
 				}
 				finally
 				{
@@ -496,50 +496,50 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 
 		public event GetTableDesignerHandler OnGetDesigner;
 
-		protected virtual IElementDesigner GetDesigner(Point ACell)
+		protected virtual IElementDesigner GetDesigner(Point cell)
 		{
 			if (OnGetDesigner != null)
-				return OnGetDesigner(this, ACell);
+				return OnGetDesigner(this, cell);
 			else
 				return null;
 		}
 
 		public event GetTableDesignerRequiredHandler OnGetDesignerRequired;
 
-		protected virtual bool GetDesignerRequired(Point ACell, Graphics AGraphics, Rectangle ABounds)
+		protected virtual bool GetDesignerRequired(Point cell, Graphics graphics, Rectangle bounds)
 		{
 			if (OnGetDesignerRequired != null)
-				return OnGetDesignerRequired(this, ACell, AGraphics, ABounds);
+				return OnGetDesignerRequired(this, cell, graphics, bounds);
 			else
 				return false;
 		}
 
-		private IElementDesigner AddDesigner(Point ACell)
+		private IElementDesigner AddDesigner(Point cell)
 		{
-			IElementDesigner LDesigner = GetDesigner(ACell);
-			if (LDesigner != null)
+			IElementDesigner designer = GetDesigner(cell);
+			if (designer != null)
 			{
 				try
 				{
-					FDesigners.Add(ACell, LDesigner);
-					Controls.Add((Control)LDesigner);
+					_designers.Add(cell, designer);
+					Controls.Add((Control)designer);
 				}
 				catch
 				{
-					LDesigner.Dispose();
+					designer.Dispose();
 					throw;
 				}
 			}
-			return LDesigner;
+			return designer;
 		}
 
-		private void RemoveDesigner(Point ACell)
+		private void RemoveDesigner(Point cell)
 		{
-			IElementDesigner LDesigner = (IElementDesigner)FDesigners[ACell];
-			if (LDesigner != null)
+			IElementDesigner designer = (IElementDesigner)_designers[cell];
+			if (designer != null)
 			{
-				Controls.Remove((Control)LDesigner);
-				FDesigners.Remove(ACell);
+				Controls.Remove((Control)designer);
+				_designers.Remove(cell);
 			}
 		}
 
@@ -547,95 +547,95 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 
 		#region Painting
 
-		private StringFormat FHeaderStringFormat;
+		private StringFormat _headerStringFormat;
 		protected virtual StringFormat GetHeaderStringFormat()
 		{
-			if (FHeaderStringFormat == null)
+			if (_headerStringFormat == null)
 			{
-				FHeaderStringFormat = new StringFormat();
-				FHeaderStringFormat.Trimming = StringTrimming.EllipsisCharacter;
-				FHeaderStringFormat.FormatFlags &= ~StringFormatFlags.NoWrap;
+				_headerStringFormat = new StringFormat();
+				_headerStringFormat.Trimming = StringTrimming.EllipsisCharacter;
+				_headerStringFormat.FormatFlags &= ~StringFormatFlags.NoWrap;
 			}
-			return FHeaderStringFormat;
+			return _headerStringFormat;
 		}
 
-		private StringFormat FDataStringFormat;
+		private StringFormat _dataStringFormat;
 		protected virtual StringFormat GetDataStringFormat()
 		{
-			if (FDataStringFormat == null)
+			if (_dataStringFormat == null)
 			{
-				FDataStringFormat = new StringFormat();
-				FDataStringFormat.Trimming = StringTrimming.EllipsisCharacter;
-				FDataStringFormat.FormatFlags &= ~StringFormatFlags.NoWrap;
+				_dataStringFormat = new StringFormat();
+				_dataStringFormat.Trimming = StringTrimming.EllipsisCharacter;
+				_dataStringFormat.FormatFlags &= ~StringFormatFlags.NoWrap;
 			}
-			return FDataStringFormat;
+			return _dataStringFormat;
 		}
 
-		protected override void OnPaint(PaintEventArgs AArgs)
+		protected override void OnPaint(PaintEventArgs args)
 		{
-			base.OnPaint(AArgs);
+			base.OnPaint(args);
 
-			Rectangle LBounds = DisplayRectangle;
+			Rectangle bounds = DisplayRectangle;
 
-			using (Pen LPen = new Pen(LineColor))
+			using (Pen pen = new Pen(LineColor))
 			{
-				using (Pen LShadowPen = new Pen(ShadowColor))
+				using (Pen shadowPen = new Pen(ShadowColor))
 				{
-					using (SolidBrush LBrush = new SolidBrush(FHeaderForeColor))
+					using (SolidBrush brush = new SolidBrush(_headerForeColor))
 					{
-						int LExtentX = LBounds.X;
-						TableColumn LColumn;
-						int LMaxY = Math.Min(FRows.Count, FLocation.Y + FVisibleRows);
-						for (int LX = FLocation.X; (LExtentX <= LBounds.Width) && (LX < FColumns.Count); LX++)
+						int extentX = bounds.X;
+						TableColumn column;
+						int maxY = Math.Min(_rows.Count, _location.Y + _visibleRows);
+						for (int x = _location.X; (extentX <= bounds.Width) && (x < _columns.Count); x++)
 						{
-							LColumn = FColumns[LX];
+							column = _columns[x];
 
 							// Paint the header
-							LBrush.Color = FHeaderForeColor;
-							AArgs.Graphics.DrawString
+							brush.Color = _headerForeColor;
+							args.Graphics.DrawString
 							(
-								LColumn.Title, 
-								FHeaderFont, 
-								LBrush, 
+								column.Title, 
+								_headerFont, 
+								brush, 
 								new Rectangle
 								(
-									LExtentX + FHorizontalPadding, 
-									LBounds.Y + ((FHeaderHeight / 2) - (this.Font.Height / 2)),
-									LColumn.Width - (FHorizontalPadding * 2), 
+									extentX + _horizontalPadding, 
+									bounds.Y + ((_headerHeight / 2) - (this.Font.Height / 2)),
+									column.Width - (_horizontalPadding * 2), 
 									this.Font.Height
 								), 
 								GetHeaderStringFormat()
 							);
-							AArgs.Graphics.DrawLine(LPen, new Point(LExtentX, LBounds.Y + FHeaderHeight - 2), new Point(LExtentX + LColumn.Width - 2, LBounds.Y + FHeaderHeight - 2));
-							AArgs.Graphics.DrawLine(LShadowPen, new Point(LExtentX + 1, LBounds.Y + FHeaderHeight - 1), new Point(LExtentX + LColumn.Width - 1, LBounds.Y + FHeaderHeight - 1));
+							args.Graphics.DrawLine(pen, new Point(extentX, bounds.Y + _headerHeight - 2), new Point(extentX + column.Width - 2, bounds.Y + _headerHeight - 2));
+							args.Graphics.DrawLine(shadowPen, new Point(extentX + 1, bounds.Y + _headerHeight - 1), new Point(extentX + column.Width - 1, bounds.Y + _headerHeight - 1));
 
-							if (LX < (FColumns.Count - 1))
+							if (x < (_columns.Count - 1))
 							{
-								AArgs.Graphics.DrawLine(LPen, new Point(LExtentX + LColumn.Width - 2, LBounds.Y + FHeaderHeight), new Point(LExtentX + LColumn.Width - 2, LBounds.Y + FHeaderHeight + (LMaxY * FRowHeight) - 1));
-								AArgs.Graphics.DrawLine(LShadowPen, new Point(LExtentX + LColumn.Width - 1, LBounds.Y + FHeaderHeight + 1), new Point(LExtentX + LColumn.Width - 1, LBounds.Y + FHeaderHeight + (LMaxY * FRowHeight)));
+								args.Graphics.DrawLine(pen, new Point(extentX + column.Width - 2, bounds.Y + _headerHeight), new Point(extentX + column.Width - 2, bounds.Y + _headerHeight + (maxY * _rowHeight) - 1));
+								args.Graphics.DrawLine(shadowPen, new Point(extentX + column.Width - 1, bounds.Y + _headerHeight + 1), new Point(extentX + column.Width - 1, bounds.Y + _headerHeight + (maxY * _rowHeight)));
 							}
 
-							LBrush.Color = ForeColor;
+							brush.Color = ForeColor;
 							// Paint the data cells
-							for (int LY = FLocation.Y; LY < LMaxY; LY++)
+							for (int y = _location.Y; y < maxY; y++)
 							{
-								AArgs.Graphics.DrawString
+								args.Graphics.DrawString
 								(
-									GetValue(new Point(LX, LY)), 
+									GetValue(new Point(x, y)), 
 									this.Font, 
-									LBrush, 
+									brush, 
 									new Rectangle
 									(
-										LExtentX + FHorizontalPadding, 
-										LBounds.Y + FHeaderHeight + (((LY - FLocation.Y) * FRowHeight) + ((FRowHeight / 2) - (this.Font.Height / 2))), 
-										LColumn.Width - (FHorizontalPadding * 2), 
+										extentX + _horizontalPadding, 
+										bounds.Y + _headerHeight + (((y - _location.Y) * _rowHeight) + ((_rowHeight / 2) - (this.Font.Height / 2))), 
+										column.Width - (_horizontalPadding * 2), 
 										this.Font.Height
 									),
 									GetDataStringFormat()
 								);
 							}
 
-							LExtentX += LColumn.Width;
+							extentX += column.Width;
 						}
 					}
 				}
@@ -646,13 +646,13 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 
 		#region Columns
 
-		private TableColumns FColumns;
-		public TableColumns Columns { get { return FColumns; } }
+		private TableColumns _columns;
+		public TableColumns Columns { get { return _columns; } }
 
 		internal void ColumnChanged()
 		{
 			// NOTE: This control is not optimized for dynamic row/column changes
-			if (FUpdateCount == 0)
+			if (_updateCount == 0)
 			{
 				Invalidate(false);
 				PerformLayout();
@@ -663,22 +663,22 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 
 		#region Rows
 
-		private TableRows FRows;
-		public TableRows Rows { get { return FRows; } }
+		private TableRows _rows;
+		public TableRows Rows { get { return _rows; } }
 
 		public event GetTableValueHandler OnGetValue;
 
-		protected virtual string GetValue(Point ACell)
+		protected virtual string GetValue(Point cell)
 		{
 			if (OnGetValue != null)
-				return OnGetValue(this, ACell);
+				return OnGetValue(this, cell);
 			return String.Empty;
 		}
 
 		internal void RowChanged()
 		{
 			// NOTE: This control is not optimized for dynamic row/column changes
-			if (FUpdateCount == 0)
+			if (_updateCount == 0)
 			{
 				Invalidate(false);
 				PerformLayout();
@@ -696,92 +696,92 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 
 	public class TableColumns : NotifyingBaseList<TableColumn>
 	{
-		public TableColumns(Table ATable)
+		public TableColumns(Table table)
 		{
-			FTable = ATable;
+			_table = table;
 		}
 
-		private Table FTable;
+		private Table _table;
 
-		public TableColumn this[string AName]
+		public TableColumn this[string name]
 		{
 			get
 			{
 				for (int i = 0; i < Count; i++)
-					if (this[i].Name == AName)
+					if (this[i].Name == name)
 						return this[i];
 				return null;
 			}
 		}
 
-		protected override void Adding(TableColumn AValue, int AIndex)
+		protected override void Adding(TableColumn tempValue, int index)
 		{
-			base.Adding(AValue, AIndex);
-			FTable.ColumnChanged();
+			base.Adding(tempValue, index);
+			_table.ColumnChanged();
 		}
 
-		protected override void Removing(TableColumn AValue, int AIndex)
+		protected override void Removing(TableColumn tempValue, int index)
 		{
-			base.Removing(AValue, AIndex);
-			FTable.ColumnChanged();
+			base.Removing(tempValue, index);
+			_table.ColumnChanged();
 		}
 	}
 
 	public class TableColumn
 	{
-		public TableColumn(Table ATable)
+		public TableColumn(Table table)
 		{
-			FTable = ATable;
+			_table = table;
 		}
 
-		private Table FTable;
-		public Table Table { get { return FTable; } }
+		private Table _table;
+		public Table Table { get { return _table; } }
 
-		private string FName = String.Empty;
+		private string _name = String.Empty;
 		public string Name
 		{
-			get { return FName; }
-			set { FName = (value == null ? String.Empty : value); }
+			get { return _name; }
+			set { _name = (value == null ? String.Empty : value); }
 		}
 
-		private string FTitle = String.Empty;
+		private string _title = String.Empty;
 		public string Title
 		{
-			get { return FTitle; }
+			get { return _title; }
 			set 
 			{ 
-				if (value != FTitle)
+				if (value != _title)
 				{
-					FTitle = (value == null ? String.Empty : value);
-					FTable.ColumnChanged();
+					_title = (value == null ? String.Empty : value);
+					_table.ColumnChanged();
 				}
 			}
 		}
 
-		internal int FWidth = 100;
+		internal int _width = 100;
 		public int Width
 		{
-			get { return FWidth; }
+			get { return _width; }
 			set
 			{
-				if (value != FWidth)
+				if (value != _width)
 				{
-					FWidth = value;
-					FTable.ColumnChanged();
+					_width = value;
+					_table.ColumnChanged();
 				}
 			}
 		}
 
-		private bool FAutoSize = true;
+		private bool _autoSize = true;
 		public bool AutoSize
 		{
-			get { return FAutoSize; }
+			get { return _autoSize; }
 			set
 			{
-				if (value != FAutoSize)
+				if (value != _autoSize)
 				{
-					FAutoSize = value;
-					FTable.ColumnChanged();
+					_autoSize = value;
+					_table.ColumnChanged();
 				}
 			}
 		}
@@ -789,23 +789,23 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 
 	public class TableRows : List
 	{
-		public TableRows(Table ATable)
+		public TableRows(Table table)
 		{
-			FTable = ATable;
+			_table = table;
 		}
 
-		private Table FTable;
+		private Table _table;
 
-		protected override void Adding(object AValue, int AIndex)
+		protected override void Adding(object tempValue, int index)
 		{
-			base.Adding(AValue, AIndex);
-			FTable.RowChanged();
+			base.Adding(tempValue, index);
+			_table.RowChanged();
 		}
 
-		protected override void Removing(object AValue, int AIndex)
+		protected override void Removing(object tempValue, int index)
 		{
-			base.Removing(AValue, AIndex);
-			FTable.RowChanged();
+			base.Removing(tempValue, index);
+			_table.RowChanged();
 		}
 	}
 }

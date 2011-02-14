@@ -9,19 +9,19 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 {
     public partial class ConnectHost : UserControl
     {
-        public ConnectHost(ConnectWorkItem AWorkItem)
+        public ConnectHost(ConnectWorkItem workItem)
         {
-            DataContext = AWorkItem;
-            FWorkItem = AWorkItem;
+            DataContext = workItem;
+            _workItem = workItem;
             InitializeComponent();
         }
         
-        private ConnectWorkItem FWorkItem;
+        private ConnectWorkItem _workItem;
 
         private void ConnectClicked(object sender, System.Windows.RoutedEventArgs e)
         {
 			BindingUtility.UpdateTextBoxBindingSources(this);
-			FWorkItem.BeginLoadInstances();
+			_workItem.BeginLoadInstances();
         }
     }
 }

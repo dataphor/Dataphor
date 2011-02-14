@@ -9,17 +9,17 @@ namespace Alphora.Dataphor.BOP
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = true)]
 	public class PublishDefaultListAttribute : Attribute
 	{
-		public PublishDefaultListAttribute(string AMemberName)
+		public PublishDefaultListAttribute(string memberName)
 			: base()
 		{
-			FMemberName = AMemberName;
+			_memberName = memberName;
 		}
 
-		private string FMemberName;
+		private string _memberName;
 		public string MemberName
 		{
-			get { return FMemberName; }
-			set { FMemberName = value; }
+			get { return _memberName; }
+			set { _memberName = value; }
 		}
 	}
 
@@ -35,17 +35,17 @@ namespace Alphora.Dataphor.BOP
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
 	public class PublishDefaultConstructorAttribute : Attribute
 	{
-		public PublishDefaultConstructorAttribute(string AConstructorSignature)
+		public PublishDefaultConstructorAttribute(string constructorSignature)
 			: base()
 		{
-			FConstructorSignature = AConstructorSignature;
+			_constructorSignature = constructorSignature;
 		}
 
-		private string FConstructorSignature;
+		private string _constructorSignature;
 		public string ConstructorSignature
 		{
-			get { return FConstructorSignature; }
-			set { FConstructorSignature = value; }
+			get { return _constructorSignature; }
+			set { _constructorSignature = value; }
 		}
 	}
 
@@ -62,17 +62,17 @@ namespace Alphora.Dataphor.BOP
 	[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
 	public class PublishSourceAttribute : Attribute
 	{
-		public PublishSourceAttribute(string AMemberName)
+		public PublishSourceAttribute(string memberName)
 			: base()
 		{
-			FMemberName = AMemberName;
+			_memberName = memberName;
 		}
 
-		private string FMemberName;
+		private string _memberName;
 		public string MemberName
 		{
-			get { return FMemberName; }
-			set { FMemberName = value; }
+			get { return _memberName; }
+			set { _memberName = value; }
 		}
 	}
 
@@ -83,16 +83,16 @@ namespace Alphora.Dataphor.BOP
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = true)]
 	public class PublishNameAttribute : Attribute
 	{
-		public PublishNameAttribute(string AMemberName)
+		public PublishNameAttribute(string memberName)
 		{
-			FMemberName = AMemberName;
+			_memberName = memberName;
 		}
 
-		private string FMemberName;
+		private string _memberName;
 		public string MemberName
 		{
-			get { return FMemberName; }
-			set { FMemberName = value; }
+			get { return _memberName; }
+			set { _memberName = value; }
 		}
 	}
 
@@ -101,16 +101,16 @@ namespace Alphora.Dataphor.BOP
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Delegate, AllowMultiple = false, Inherited = true)]
 	public class DefaultValueMemberAttribute : Attribute
 	{
-		public DefaultValueMemberAttribute(string AMemberName)
+		public DefaultValueMemberAttribute(string memberName)
 		{
-			FMemberName = AMemberName;
+			_memberName = memberName;
 		}
 
-		private string FMemberName;
+		private string _memberName;
 		public string MemberName
 		{
-			get { return FMemberName; }
-			set { FMemberName = value; }
+			get { return _memberName; }
+			set { _memberName = value; }
 		}
 	}
 
@@ -121,16 +121,16 @@ namespace Alphora.Dataphor.BOP
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = true)]
 	public class PublishAsAttribute : Attribute
 	{
-		public PublishAsAttribute(string AClassName)
+		public PublishAsAttribute(string className)
 		{
-			FClassName = AClassName;
+			_className = className;
 		}
 
-		private string FClassName;
+		private string _className;
 		public string ClassName
 		{
-			get { return FClassName; }
-			set { FClassName = value; }
+			get { return _className; }
+			set { _className = value; }
 		}
 	}
 
@@ -168,17 +168,17 @@ namespace Alphora.Dataphor.BOP
 	{
 		public PublishAttribute() : base() { }
 
-		public PublishAttribute(PublishMethod AMethod)
+		public PublishAttribute(PublishMethod method)
 			: base()
 		{
-			FMethod = AMethod;
+			_method = method;
 		}
 
-		private PublishMethod FMethod = PublishMethod.Value;
+		private PublishMethod _method = PublishMethod.Value;
 		public PublishMethod Method
 		{
-			get { return FMethod; }
-			set { FMethod = value; }
+			get { return _method; }
+			set { _method = value; }
 		}
 	}
 }

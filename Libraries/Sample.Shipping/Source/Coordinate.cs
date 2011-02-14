@@ -62,24 +62,24 @@ namespace Alphora.Shipping
 	{
 		public CoordinateConveyor() : base() {}
 		
-		public unsafe override int GetSize(object AValue)
+		public unsafe override int GetSize(object tempValue)
 		{
 			return sizeof(Coordinate);
 		}
 
-		public unsafe override object Read(byte[] ABuffer, int AOffset)
+		public unsafe override object Read(byte[] buffer, int offset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* bufferPtr = &(buffer[offset]))
 			{
-				return *((Coordinate*)LBufferPtr);
+				return *((Coordinate*)bufferPtr);
 			}
 		}
 
-		public unsafe override void Write(object AValue, byte[] ABuffer, int AOffset)
+		public unsafe override void Write(object tempValue, byte[] buffer, int offset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* bufferPtr = &(buffer[offset]))
 			{
-				*((Coordinate*)LBufferPtr) = (Coordinate)AValue;
+				*((Coordinate*)bufferPtr) = (Coordinate)tempValue;
 			}
 		}
 	}
@@ -233,72 +233,72 @@ namespace Alphora.Shipping
 	// operator Coordinate(ALatitude : Degree, ALongitude : Degree) : Coordinate;
 	public class CoordinateSelector : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if ((AArgument1 == null) || (AArgument2 == null))
+			if ((argument1 == null) || (argument2 == null))
 				return null;
 			else
-				return new Coordinate((decimal)AArgument1, (decimal)AArgument2);
+				return new Coordinate((decimal)argument1, (decimal)argument2);
 		}
 	}
 	
 	// operator ReadLatitude(ACoordinate : Coordinate) : Degree;
 	public class LatitudeReadAccessor : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
-				return ((Coordinate)AArgument1).Latitude;
+				return ((Coordinate)argument1).Latitude;
 		}
 	}
 	
 	// operator WriteLatitude(ACoordinate : Coordinate, ALatitude : Degree) : Coordinate;
 	public class LatitudeWriteAccessor : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if ((AArgument1 == null) || (AArgument2 == null))
+			if ((argument1 == null) || (argument2 == null))
 				return null;
 			else
-				return new Coordinate((decimal)AArgument2, ((Coordinate)AArgument1).Longitude);
+				return new Coordinate((decimal)argument2, ((Coordinate)argument1).Longitude);
 		}
 	}
 	
 	// operator ReadLongitude(ACoordinate : Coordinate) : Degree;
 	public class LongitudeReadAccessor : UnaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
-			if (AArgument1 == null)
+			if (argument1 == null)
 				return null;
 			else
-				return ((Coordinate)AArgument1).Longitude;
+				return ((Coordinate)argument1).Longitude;
 		}
 	}
 	
 	// operator WriteLongitude(ACoordinate : Coordinate, ALongitude : Degree) : Coordinate;
 	public class LongitudeWriteAccessor : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if ((AArgument1 == null) || (AArgument2 == null))
+			if ((argument1 == null) || (argument2 == null))
 				return null;
 			else
-				return new Coordinate(((Coordinate)AArgument1).Latitude, (decimal)AArgument2);
+				return new Coordinate(((Coordinate)argument1).Latitude, (decimal)argument2);
 		}
 	}
 	
 	// operator iCompare(ACoordinate1 : Coordinate, ACoordinate2 : Coordinate) : integer;
 	public class CoordinateCompare : BinaryInstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
-			if ((AArgument1 == null) || (AArgument2 == null))
+			if ((argument1 == null) || (argument2 == null))
 				return null;
 			else
-				return ((Coordinate)AArgument1).CompareTo((Coordinate)AArgument2);
+				return ((Coordinate)argument1).CompareTo((Coordinate)argument2);
 		}
 	}
 	
@@ -506,30 +506,30 @@ namespace Alphora.Shipping
 	
 	public sealed class CoordinateUtility
 	{
-		public const string CInvalidCoordinateFormat = @"Coordinate string must be of the form: DDD MM'SS.SS""/DDD MM'SS.SS"".";
+		public const string InvalidCoordinateFormat = @"Coordinate string must be of the form: DDD MM'SS.SS""/DDD MM'SS.SS"".";
 		
-		public static decimal GetDegree(int ADegrees, int AMinutes, decimal ASeconds)
+		public static decimal GetDegree(int degrees, int minutes, decimal seconds)
 		{
-			return (decimal)ADegrees + ((decimal)AMinutes / 60m) + (ASeconds / 3600m);
+			return (decimal)degrees + ((decimal)minutes / 60m) + (seconds / 3600m);
 		}
 		
-		public static int GetDegrees(decimal AValue)
+		public static int GetDegrees(decimal tempValue)
 		{
-			return (int)Decimal.Truncate(AValue);
+			return (int)Decimal.Truncate(tempValue);
 		}
 
-		public static int GetMinutes(decimal AValue)
+		public static int GetMinutes(decimal tempValue)
 		{
-			return (int)Decimal.Truncate((AValue - Decimal.Truncate(AValue)) * 60m);
+			return (int)Decimal.Truncate((tempValue - Decimal.Truncate(tempValue)) * 60m);
 		}
 
-		public static decimal GetSeconds(decimal AValue)
+		public static decimal GetSeconds(decimal tempValue)
 		{
-			decimal LDecimalPart = AValue - Decimal.Truncate(AValue);
-			return Decimal.Round((LDecimalPart - ((decimal)GetMinutes(AValue) / 60m)) * 3600m, 2);
+			decimal decimalPart = tempValue - Decimal.Truncate(tempValue);
+			return Decimal.Round((decimalPart - ((decimal)GetMinutes(tempValue) / 60m)) * 3600m, 2);
 		}
 		
-		public static string CoordinateToString(Coordinate ACoordinate)
+		public static string CoordinateToString(Coordinate coordinate)
 		{
 			return 
 				String.Format
@@ -537,13 +537,13 @@ namespace Alphora.Shipping
 					@"{0}/{1}", 
 					new object[]
 					{
-						DegreeToString(ACoordinate.Latitude),
-						DegreeToString(ACoordinate.Longitude)
+						DegreeToString(coordinate.Latitude),
+						DegreeToString(coordinate.Longitude)
 					}
 				);
 		}
 		
-		public static string DegreeToString(decimal ADegree)
+		public static string DegreeToString(decimal degree)
 		{
 			return
 				String.Format
@@ -551,61 +551,61 @@ namespace Alphora.Shipping
 					@"{0} {1}'{2}""",
 					new object[]
 					{
-						GetDegrees(ADegree),
-						GetMinutes(ADegree),
-						GetSeconds(ADegree)
+						GetDegrees(degree),
+						GetMinutes(degree),
+						GetSeconds(degree)
 					}
 				);
 		}
 		
-		public static Coordinate StringToCoordinate(string AValue)
+		public static Coordinate StringToCoordinate(string tempValue)
 		{
-			string[] LValues = AValue.Split('/');
-			if (LValues.Length != 2)
-				throw new Exception(CInvalidCoordinateFormat);
+			string[] values = tempValue.Split('/');
+			if (values.Length != 2)
+				throw new Exception(InvalidCoordinateFormat);
 				
-			return new Coordinate(StringToDegree(LValues[0]), StringToDegree(LValues[1]));
+			return new Coordinate(StringToDegree(values[0]), StringToDegree(values[1]));
 		}
 		
-		public static Decimal StringToDegree(string AValue)
+		public static Decimal StringToDegree(string tempValue)
 		{
-			int LFirstIndex = AValue.IndexOf(" ");
-			if (LFirstIndex < 0)
-				throw new Exception(CInvalidCoordinateFormat);
+			int firstIndex = tempValue.IndexOf(" ");
+			if (firstIndex < 0)
+				throw new Exception(InvalidCoordinateFormat);
 
-			int LDegrees = Int32.Parse(AValue.Substring(0, LFirstIndex));
-			int LSecondIndex = AValue.IndexOf("'", LFirstIndex);
-			if (LSecondIndex < 0)
-				throw new Exception(CInvalidCoordinateFormat);
+			int degrees = Int32.Parse(tempValue.Substring(0, firstIndex));
+			int secondIndex = tempValue.IndexOf("'", firstIndex);
+			if (secondIndex < 0)
+				throw new Exception(InvalidCoordinateFormat);
 
-			LFirstIndex++;
-			int LMinutes = Int32.Parse(AValue.Substring(LFirstIndex, LSecondIndex - LFirstIndex));
-			LFirstIndex = LSecondIndex;
-			LSecondIndex = AValue.IndexOf("\"", LFirstIndex);
-			if (LSecondIndex < 0)
-				throw new Exception(CInvalidCoordinateFormat);
+			firstIndex++;
+			int minutes = Int32.Parse(tempValue.Substring(firstIndex, secondIndex - firstIndex));
+			firstIndex = secondIndex;
+			secondIndex = tempValue.IndexOf("\"", firstIndex);
+			if (secondIndex < 0)
+				throw new Exception(InvalidCoordinateFormat);
 			
-			LFirstIndex++;
-			decimal LSeconds = Decimal.Parse(AValue.Substring(LFirstIndex, LSecondIndex - LFirstIndex));
-			return GetDegree(LDegrees, LMinutes, LSeconds);
+			firstIndex++;
+			decimal seconds = Decimal.Parse(tempValue.Substring(firstIndex, secondIndex - firstIndex));
+			return GetDegree(degrees, minutes, seconds);
 		}
 				
-		public static decimal MilesToKM(decimal AMiles)
+		public static decimal MilesToKM(decimal miles)
 		{
-			return (AMiles * 1.609m);
+			return (miles * 1.609m);
 		}
 
-		public static decimal KMToMiles(decimal AKM)
+		public static decimal KMToMiles(decimal kM)
 		{
-			return (AKM * 0.621m);
+			return (kM * 0.621m);
 		}
 		
-		public static decimal CalculateDistance(Coordinate AFromCoordinate, Coordinate AToCoordinate)
+		public static decimal CalculateDistance(Coordinate fromCoordinate, Coordinate toCoordinate)
 		{
-			decimal LDeltaLatitude = AToCoordinate.Latitude - AFromCoordinate.Latitude;
-			decimal LDeltaLongitude = AToCoordinate.Longitude - AFromCoordinate.Latitude;
-			decimal LDistance = (decimal)Math.Sqrt((double)(LDeltaLatitude * LDeltaLatitude + LDeltaLongitude * LDeltaLongitude));
-			return KMToMiles(LDistance / 0.008987m);
+			decimal deltaLatitude = toCoordinate.Latitude - fromCoordinate.Latitude;
+			decimal deltaLongitude = toCoordinate.Longitude - fromCoordinate.Latitude;
+			decimal distance = (decimal)Math.Sqrt((double)(deltaLatitude * deltaLatitude + deltaLongitude * deltaLongitude));
+			return KMToMiles(distance / 0.008987m);
 		}
 	}
 }

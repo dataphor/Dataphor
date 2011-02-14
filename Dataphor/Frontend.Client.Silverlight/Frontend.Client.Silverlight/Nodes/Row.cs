@@ -9,16 +9,16 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 	{
 		// IHorizontalAlignedElement
 
-		private HorizontalAlignment FHorizontalAlignment = HorizontalAlignment.Left;
+		private HorizontalAlignment _horizontalAlignment = HorizontalAlignment.Left;
 		[DefaultValue(HorizontalAlignment.Left)]
 		public HorizontalAlignment HorizontalAlignment
 		{
-			get { return FHorizontalAlignment; }
+			get { return _horizontalAlignment; }
 			set
 			{
-				if (FHorizontalAlignment != value)
+				if (_horizontalAlignment != value)
 				{
-					FHorizontalAlignment = value;
+					_horizontalAlignment = value;
 					UpdateBinding(FrameworkElement.HorizontalAlignmentProperty);
 				}
 			}
@@ -26,7 +26,7 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		protected override object UIGetHorizontalAlignment()
 		{
-			return ConvertHorizontalAlignment(FHorizontalAlignment);
+			return ConvertHorizontalAlignment(_horizontalAlignment);
 		}
 
 		protected override string GetDefaultStyle()

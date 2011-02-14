@@ -19,14 +19,14 @@ namespace Alphora.Dataphor.DAE.Client
 	public class ClientServer : ClientObject, IRemoteServer
 	{
 		public ClientServer() { }
-		public ClientServer(string AHostName, string AInstanceName, int AOverridePortNumber, ConnectionSecurityMode ASecurityMode, int AOverrideListenerPortNumber, ConnectionSecurityMode AListenerSecurityMode)
+		public ClientServer(string hostName, string instanceName, int overridePortNumber, ConnectionSecurityMode securityMode, int overrideListenerPortNumber, ConnectionSecurityMode listenerSecurityMode)
 		{
-			FHostName = AHostName;
-			FInstanceName = AInstanceName;
-			FOverridePortNumber = AOverridePortNumber;
-			FSecurityMode = ASecurityMode;
-			FOverrideListenerPortNumber = AOverrideListenerPortNumber;
-			FListenerSecurityMode = AListenerSecurityMode;
+			_hostName = hostName;
+			_instanceName = instanceName;
+			_overridePortNumber = overridePortNumber;
+			_securityMode = securityMode;
+			_overrideListenerPortNumber = overrideListenerPortNumber;
+			_listenerSecurityMode = listenerSecurityMode;
 			
 			#if SILVERLIGHT
 			System.Net.WebRequest.RegisterPrefix("http://", System.Net.Browser.WebRequestCreator.ClientHttp);
@@ -36,75 +36,75 @@ namespace Alphora.Dataphor.DAE.Client
 			Open();
 		}
 		
-		private string FHostName;
+		private string _hostName;
 		public string HostName
 		{
-			get	{ return FHostName; }
+			get	{ return _hostName; }
 			set 
 			{
 				CheckInactive();
-				FHostName = value;
+				_hostName = value;
 			}
 		}
 		
-		private string FInstanceName;
+		private string _instanceName;
 		public string InstanceName
 		{
-			get { return FInstanceName; }
+			get { return _instanceName; }
 			set
 			{
 				CheckInactive();
-				FInstanceName = value;
+				_instanceName = value;
 			}
 		}
 		
-		private int FOverridePortNumber;
+		private int _overridePortNumber;
 		public int OverridePortNumber
 		{
-			get { return FOverridePortNumber; }
+			get { return _overridePortNumber; }
 			set
 			{
 				CheckInactive();
-				FOverridePortNumber = value; 
+				_overridePortNumber = value; 
 			}
 		}
 		
-		private ConnectionSecurityMode FSecurityMode;
+		private ConnectionSecurityMode _securityMode;
 		public ConnectionSecurityMode SecurityMode
 		{
-			get { return FSecurityMode; }
+			get { return _securityMode; }
 			set
 			{
 				CheckInactive();
-				FSecurityMode = value;
+				_securityMode = value;
 			}
 		}
 		
-		private int FOverrideListenerPortNumber;
+		private int _overrideListenerPortNumber;
 		public int OverrideListenerPortNumber
 		{
-			get { return FOverrideListenerPortNumber; }
+			get { return _overrideListenerPortNumber; }
 			set
 			{
 				CheckInactive();
-				FOverrideListenerPortNumber = value; 
+				_overrideListenerPortNumber = value; 
 			}
 		}
 		
-		private ConnectionSecurityMode FListenerSecurityMode;
+		private ConnectionSecurityMode _listenerSecurityMode;
 		public ConnectionSecurityMode ListenerSecurityMode
 		{
-			get { return FListenerSecurityMode; }
+			get { return _listenerSecurityMode; }
 			set
 			{
 				CheckInactive();
-				FListenerSecurityMode = value;
+				_listenerSecurityMode = value;
 			}
 		}
 		
-		private ChannelFactory<IClientDataphorService> FChannelFactory;
+		private ChannelFactory<IClientDataphorService> _channelFactory;
 		
-		public bool IsActive { get { return FChannelFactory != null; } }
+		public bool IsActive { get { return _channelFactory != null; } }
 		
 		private void CheckActive()
 		{
@@ -121,23 +121,23 @@ namespace Alphora.Dataphor.DAE.Client
 		public void Open()
 		{
 			if (!IsActive)
-				if (FOverridePortNumber == 0)
+				if (_overridePortNumber == 0)
 				{
-					Uri LUri = new Uri(ListenerFactory.GetInstanceURI(FHostName, FOverrideListenerPortNumber, FListenerSecurityMode, FInstanceName, FSecurityMode));
-					FChannelFactory =
+					Uri uri = new Uri(ListenerFactory.GetInstanceURI(_hostName, _overrideListenerPortNumber, _listenerSecurityMode, _instanceName, _securityMode));
+					_channelFactory =
 						new ChannelFactory<IClientDataphorService>
 						(
-							DataphorServiceUtility.GetBinding(LUri.Scheme == Uri.UriSchemeHttps), 
-							new EndpointAddress(LUri)
+							DataphorServiceUtility.GetBinding(uri.Scheme == Uri.UriSchemeHttps), 
+							new EndpointAddress(uri)
 						);
 				}
 				else
 				{
-					FChannelFactory = 
+					_channelFactory = 
 						new ChannelFactory<IClientDataphorService>
 						(
-							DataphorServiceUtility.GetBinding(FSecurityMode == ConnectionSecurityMode.Transport), 
-							new EndpointAddress(DataphorServiceUtility.BuildInstanceURI(FHostName, FOverridePortNumber, FSecurityMode == ConnectionSecurityMode.Transport, FInstanceName))
+							DataphorServiceUtility.GetBinding(_securityMode == ConnectionSecurityMode.Transport), 
+							new EndpointAddress(DataphorServiceUtility.BuildInstanceURI(_hostName, _overridePortNumber, _securityMode == ConnectionSecurityMode.Transport, _instanceName))
 						);
 				}
 		}
@@ -146,13 +146,13 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			if (IsActive)
 			{
-				if (FChannel != null)
-					CloseChannel(FChannel);
+				if (_channel != null)
+					CloseChannel(_channel);
 				SetChannel(null);
-				if (FChannelFactory != null)
+				if (_channelFactory != null)
 				{
 					CloseChannelFactory();
-					FChannelFactory = null;
+					_channelFactory = null;
 				}
 			}
 		}
@@ -162,86 +162,86 @@ namespace Alphora.Dataphor.DAE.Client
 			Close();
 		}
 		
-		private IClientDataphorService FChannel;
+		private IClientDataphorService _channel;
 		
-		private bool IsChannelFaulted(IClientDataphorService AChannel)
+		private bool IsChannelFaulted(IClientDataphorService channel)
 		{
-			return ((ICommunicationObject)AChannel).State == CommunicationState.Faulted;
+			return ((ICommunicationObject)channel).State == CommunicationState.Faulted;
 		}
 		
-		private bool IsChannelValid(IClientDataphorService AChannel)
+		private bool IsChannelValid(IClientDataphorService channel)
 		{
-			return ((ICommunicationObject)AChannel).State == CommunicationState.Opened;
+			return ((ICommunicationObject)channel).State == CommunicationState.Opened;
 		}
 		
-		private void CloseChannel(IClientDataphorService AChannel)
+		private void CloseChannel(IClientDataphorService channel)
 		{
-			ICommunicationObject LChannel = (ICommunicationObject)AChannel;
-			if (LChannel.State == CommunicationState.Opened)
-				LChannel.Close();
+			ICommunicationObject localChannel = (ICommunicationObject)channel;
+			if (localChannel.State == CommunicationState.Opened)
+				localChannel.Close();
 			else
-				LChannel.Abort();
+				localChannel.Abort();
 		}
 		
 		private void CloseChannelFactory()
 		{
-			if (FChannelFactory.State == CommunicationState.Opened)
-				FChannelFactory.Close();
+			if (_channelFactory.State == CommunicationState.Opened)
+				_channelFactory.Close();
 			else
-				FChannelFactory.Abort();
+				_channelFactory.Abort();
 		}
 		
-		private void SetChannel(IClientDataphorService AChannel)
+		private void SetChannel(IClientDataphorService channel)
 		{
-			if (FChannel != null)
-				((ICommunicationObject)FChannel).Faulted -= new EventHandler(ChannelFaulted);
-			FChannel = AChannel;
-			if (FChannel != null)
-				((ICommunicationObject)FChannel).Faulted += new EventHandler(ChannelFaulted);
+			if (_channel != null)
+				((ICommunicationObject)_channel).Faulted -= new EventHandler(ChannelFaulted);
+			_channel = channel;
+			if (_channel != null)
+				((ICommunicationObject)_channel).Faulted += new EventHandler(ChannelFaulted);
 		}
 		
-		private void ChannelFaulted(object ASender, EventArgs AArgs)
+		private void ChannelFaulted(object sender, EventArgs args)
 		{
-			((ICommunicationObject)ASender).Faulted -= new EventHandler(ChannelFaulted);
-			if (FChannel == ASender)
-				FChannel = null;
+			((ICommunicationObject)sender).Faulted -= new EventHandler(ChannelFaulted);
+			if (_channel == sender)
+				_channel = null;
 		}
 		
 		public IClientDataphorService GetServiceInterface()
 		{
 			CheckActive();
-			if ((FChannel == null) || !IsChannelValid(FChannel))
-				SetChannel(FChannelFactory.CreateChannel());
-			return FChannel;
+			if ((_channel == null) || !IsChannelValid(_channel))
+				SetChannel(_channelFactory.CreateChannel());
+			return _channel;
 		}
 
 		#region IRemoteServer Members
 
-		public IRemoteServerConnection Establish(string AConnectionName, string AHostName)
+		public IRemoteServerConnection Establish(string connectionName, string hostName)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginOpenConnection(AConnectionName, AHostName, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				return new ClientConnection(this, AConnectionName, AHostName, GetServiceInterface().EndOpenConnection(LResult));
+				IAsyncResult result = GetServiceInterface().BeginOpenConnection(connectionName, hostName, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				return new ClientConnection(this, connectionName, hostName, GetServiceInterface().EndOpenConnection(result));
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
-		public void Relinquish(IRemoteServerConnection AConnection)
+		public void Relinquish(IRemoteServerConnection connection)
 		{
 			try
 			{
-				IAsyncResult LResult = GetServiceInterface().BeginCloseConnection(((ClientConnection)AConnection).ConnectionHandle, null, null);
-				LResult.AsyncWaitHandle.WaitOne();
-				GetServiceInterface().EndCloseConnection(LResult);
+				IAsyncResult result = GetServiceInterface().BeginCloseConnection(((ClientConnection)connection).ConnectionHandle, null, null);
+				result.AsyncWaitHandle.WaitOne();
+				GetServiceInterface().EndCloseConnection(result);
 			}
-			catch (FaultException<DataphorFault> LFault)
+			catch (FaultException<DataphorFault> fault)
 			{
-				throw DataphorFaultUtility.FaultToException(LFault.Detail);
+				throw DataphorFaultUtility.FaultToException(fault.Detail);
 			}
 		}
 
@@ -255,13 +255,13 @@ namespace Alphora.Dataphor.DAE.Client
 			{ 
 				try
 				{
-					IAsyncResult LResult = GetServiceInterface().BeginGetServerName(null, null);
-					LResult.AsyncWaitHandle.WaitOne();
-					return GetServiceInterface().EndGetServerName(LResult);
+					IAsyncResult result = GetServiceInterface().BeginGetServerName(null, null);
+					result.AsyncWaitHandle.WaitOne();
+					return GetServiceInterface().EndGetServerName(result);
 				}
-				catch (FaultException<DataphorFault> LFault)
+				catch (FaultException<DataphorFault> fault)
 				{
-					throw DataphorFaultUtility.FaultToException(LFault.Detail);
+					throw DataphorFaultUtility.FaultToException(fault.Detail);
 				}
 			}
 		}
@@ -290,13 +290,13 @@ namespace Alphora.Dataphor.DAE.Client
 			{ 
 				try
 				{
-					IAsyncResult LResult = GetServiceInterface().BeginGetCacheTimeStamp(null, null);
-					LResult.AsyncWaitHandle.WaitOne();
-					return GetServiceInterface().EndGetCacheTimeStamp(LResult);
+					IAsyncResult result = GetServiceInterface().BeginGetCacheTimeStamp(null, null);
+					result.AsyncWaitHandle.WaitOne();
+					return GetServiceInterface().EndGetCacheTimeStamp(result);
 				}
-				catch (FaultException<DataphorFault> LFault)
+				catch (FaultException<DataphorFault> fault)
 				{
-					throw DataphorFaultUtility.FaultToException(LFault.Detail);
+					throw DataphorFaultUtility.FaultToException(fault.Detail);
 				}
 			}
 		}
@@ -307,13 +307,13 @@ namespace Alphora.Dataphor.DAE.Client
 			{ 
 				try
 				{
-					IAsyncResult LResult = GetServiceInterface().BeginGetDerivationTimeStamp(null, null);
-					LResult.AsyncWaitHandle.WaitOne();
-					return GetServiceInterface().EndGetDerivationTimeStamp(LResult);
+					IAsyncResult result = GetServiceInterface().BeginGetDerivationTimeStamp(null, null);
+					result.AsyncWaitHandle.WaitOne();
+					return GetServiceInterface().EndGetDerivationTimeStamp(result);
 				}
-				catch (FaultException<DataphorFault> LFault)
+				catch (FaultException<DataphorFault> fault)
 				{
-					throw DataphorFaultUtility.FaultToException(LFault.Detail);
+					throw DataphorFaultUtility.FaultToException(fault.Detail);
 				}
 			}
 		}

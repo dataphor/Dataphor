@@ -20,31 +20,31 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 {
 	public abstract class LookupBase : ControlContainer, ILookup
 	{
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 			Source = null;
 		}
 
 		#region Source
 
-		private ISource FSource;
+		private ISource _source;
 		[TypeConverter(typeof(NodeReferenceConverter))]
 		[Description("Specified the source node the control will be attached to.")]
 		public ISource Source
 		{
-			get { return FSource; }
+			get { return _source; }
 			set
 			{
-				if (FSource != null)
-					FSource.Disposed -= new EventHandler(SourceDisposed);
-				FSource = value;
-				if (FSource != null)
-					FSource.Disposed += new EventHandler(SourceDisposed);
+				if (_source != null)
+					_source.Disposed -= new EventHandler(SourceDisposed);
+				_source = value;
+				if (_source != null)
+					_source.Disposed += new EventHandler(SourceDisposed);
 			}
 		}
 		
-		protected virtual void SourceDisposed(object ASender, EventArgs AArgs)
+		protected virtual void SourceDisposed(object sender, EventArgs args)
 		{
 			Source = null;
 		}
@@ -53,17 +53,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		#region ReadOnly
 
-		private bool FReadOnly;
+		private bool _readOnly;
 		[DefaultValue(false)]
 		[Description("If set to true then this element will be made read only and will not update the source it is attached to.")]
 		public bool ReadOnly
 		{
-			get { return FReadOnly; }
+			get { return _readOnly; }
 			set 
 			{ 
-				if (FReadOnly != value)
+				if (_readOnly != value)
 				{
-					FReadOnly = value; 
+					_readOnly = value; 
 					if (Active)
 						InternalUpdateReadOnly();
 				}
@@ -72,7 +72,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public virtual bool GetReadOnly()
 		{
-			return FReadOnly;
+			return _readOnly;
 		}
 
 		protected virtual void InternalUpdateReadOnly()
@@ -84,17 +84,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		#region Document
 
-		private string FDocument = String.Empty;
+		private string _document = String.Empty;
 		[DefaultValue("")]
 		[Editor("Alphora.Dataphor.Dataphoria.DocumentExpressionUIEditor,Dataphoria", typeof(System.Drawing.Design.UITypeEditor))]
 		[DocumentExpressionOperator("Form")]
 		[Description("A document expression that returns a document used to display a form.")]
 		public string Document
 		{
-			get { return FDocument; }
+			get { return _document; }
 			set 
 			{ 
-				FDocument = (value == null ? String.Empty : value);
+				_document = (value == null ? String.Empty : value);
 				if (Active)
 					InternalUpdateEnabled();
 			}
@@ -102,7 +102,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public virtual bool GetEnabled()
 		{
-			return FDocument != String.Empty;
+			return _document != String.Empty;
 		}
 
 		protected virtual void InternalUpdateEnabled()
@@ -114,35 +114,35 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		#region AutoLookup
 
-		private bool FAutoLookup;
+		private bool _autoLookup;
 		[DefaultValue(false)]
 		[Description("When true, the control automatically invokes its lookup the first time focus reaches it.")]
 		public bool AutoLookup
 		{
-			get { return FAutoLookup; }
+			get { return _autoLookup; }
 			set 
 			{
-				if (FAutoLookup != value)
+				if (_autoLookup != value)
 				{
-					FAutoLookup = value;
+					_autoLookup = value;
 					if (Active)
 						InternalUpdateAutoLookup();
 				}
 			}
 		}
 
-		private bool FAutoLookupWhenNotNil;
+		private bool _autoLookupWhenNotNil;
 		[DefaultValue(false)]
 		[Description("When true, the control will still perform an auto-lookup even when there isn't at least one column that is not nil.")]
 		public bool AutoLookupWhenNotNil
 		{
-			get { return FAutoLookupWhenNotNil; }
-			set { FAutoLookupWhenNotNil = value; }
+			get { return _autoLookupWhenNotNil; }
+			set { _autoLookupWhenNotNil = value; }
 		}
 
 		protected virtual void InternalUpdateAutoLookup()
 		{
-			LookupControl.AutoLookup = FAutoLookup;
+			LookupControl.AutoLookup = _autoLookup;
 		}
 
 		public void ResetAutoLookup()
@@ -152,16 +152,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		}
 
 		/// <remarks> Only enable auto-lookup if one or more of the columns looked up by this control is nil. </remarks>
-		private bool ControlQueryAutoLookupEnabled(Alphora.Dataphor.DAE.Client.Controls.LookupBase APanel)
+		private bool ControlQueryAutoLookupEnabled(Alphora.Dataphor.DAE.Client.Controls.LookupBase panel)
 		{
 			if (Source != null)
 			{
-				if (Source.IsEmpty || FAutoLookupWhenNotNil)
+				if (Source.IsEmpty || _autoLookupWhenNotNil)
 					return true;
 
-				string[] LColumnNames = GetColumnNames().Split(DAE.Client.DataView.CColumnNameDelimiters);
-				foreach (string LColumnName in LColumnNames)
-					if (!Source[LColumnName].HasValue())
+				string[] columnNames = GetColumnNames().Split(DAE.Client.DataView.ColumnNameDelimiters);
+				foreach (string columnName in columnNames)
+					if (!Source[columnName].HasValue())
 						return true;
 			}
 			return false;
@@ -173,24 +173,24 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// MasterKeyNames
 
-		private string FMasterKeyNames = String.Empty;
+		private string _masterKeyNames = String.Empty;
 		[DefaultValue("")]
 		[Description("A set of keys (comma or semicolon seperated) which provide the values to filter the target set.  Used with DetailKeyNames to create a master detail filter on the lookup form data set.  Should also be set in the Document property if the lookup form is a derived page.")]
 		public string MasterKeyNames
 		{
-			get { return FMasterKeyNames; }
-			set { FMasterKeyNames = value == null ? String.Empty : value; }
+			get { return _masterKeyNames; }
+			set { _masterKeyNames = value == null ? String.Empty : value; }
 		}
 
 		// DetailKeyNames
 
-		private string FDetailKeyNames = String.Empty;
+		private string _detailKeyNames = String.Empty;
 		[DefaultValue("")]
 		[Description("A set of keys (comma or semicolon seperated) by which the target set will be filtered.  Used with MasterKeyNames to create a master detail filter on the lookup form data set.  Should also be set in the Document property if the lookup form is a derived page.")]
 		public string DetailKeyNames
 		{
-			get { return FDetailKeyNames; }
-			set { FDetailKeyNames = value == null ? String.Empty : value; }
+			get { return _detailKeyNames; }
+			set { _detailKeyNames = value == null ? String.Empty : value; }
 		}
 
 		public abstract string GetLookupColumnNames();
@@ -201,11 +201,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		#region Lookup
 
-		protected void DoLookup(object ASender, DAE.Client.Controls.LookupEventArgs AArgs)
+		protected void DoLookup(object sender, DAE.Client.Controls.LookupEventArgs args)
 		{
 			try
 			{
-				FLookupKey = AArgs.KeyData;
+				_lookupKey = args.KeyData;
 				LookupUtility.DoLookup(this, new FormInterfaceHandler(LookupAccepted), new FormInterfaceHandler(LookupRejected), null);
 			}
 			catch (Exception AException)
@@ -214,57 +214,57 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
-		public void LookupFormInitialize(IFormInterface AForm) 
+		public void LookupFormInitialize(IFormInterface form) 
 		{
-			IWindowsFormInterface LForm = (IWindowsFormInterface)AForm;
-			LForm.BeginUpdate();
+			IWindowsFormInterface localForm = (IWindowsFormInterface)form;
+			localForm.BeginUpdate();
 			try
 			{
-				LForm.Form.StartPosition = WinForms.FormStartPosition.Manual;
-				LForm.IsLookup = true;
+				localForm.Form.StartPosition = WinForms.FormStartPosition.Manual;
+				localForm.IsLookup = true;
 
-				IWindowsFormInterface LOwnerForm = (IWindowsFormInterface)FindParent(typeof(IWindowsFormInterface));
-				if (LOwnerForm != null)
+				IWindowsFormInterface ownerForm = (IWindowsFormInterface)FindParent(typeof(IWindowsFormInterface));
+				if (ownerForm != null)
 				{
-					LForm.Form.Owner = (WinForms.Form)LOwnerForm.Form;
+					localForm.Form.Owner = (WinForms.Form)ownerForm.Form;
 					// LForm.Form.ShowInTaskbar = false;  this would be okay, except that alt-tab doesn't seem to work unless the owned form is also in the task bar
 				}
 
-				Size LNatural = LForm.FormNaturalSize();
-				Rectangle LBounds =
+				Size natural = localForm.FormNaturalSize();
+				Rectangle bounds =
 					DAE.Client.Controls.LookupBoundsUtility.DetermineBounds
 					(
-						LNatural,
-						LForm.FormMinSize(),
+						natural,
+						localForm.FormMinSize(),
 						Control
 					);
-				LForm.Form.Bounds = LBounds;
-				if (LBounds.Size == LNatural)
-					LForm.Form.AutoResize = true;
-				LForm.Form.Activated += new EventHandler(LookupFormActivated);
+				localForm.Form.Bounds = bounds;
+				if (bounds.Size == natural)
+					localForm.Form.AutoResize = true;
+				localForm.Form.Activated += new EventHandler(LookupFormActivated);
 			}
 			finally
 			{
-				LForm.EndUpdate(false);
+				localForm.EndUpdate(false);
 			}
 		}
 
-		private Keys FLookupKey;
+		private Keys _lookupKey;
 
 		/// <remarks> Pass along the keystroke that initiated the lookup. </remarks>
-		private void LookupFormActivated(object ASender, EventArgs AArgs)
+		private void LookupFormActivated(object sender, EventArgs args)
 		{
 			// Detach our handler
-			((IBaseForm)ASender).Activated -= new EventHandler(LookupFormActivated);
+			((IBaseForm)sender).Activated -= new EventHandler(LookupFormActivated);
 
-			if (FLookupKey != Keys.None)
+			if (_lookupKey != Keys.None)
 			{
-				int LVirtualKeyCode = (int)FLookupKey & 0xFFFF;
-				UnsafeNativeMethods.PostMessage(ControlUtility.InnermostActiveControl((WinForms.ContainerControl)ASender).Handle, NativeMethods.WM_KEYDOWN, (IntPtr)LVirtualKeyCode, IntPtr.Zero);
+				int virtualKeyCode = (int)_lookupKey & 0xFFFF;
+				UnsafeNativeMethods.PostMessage(ControlUtility.InnermostActiveControl((WinForms.ContainerControl)sender).Handle, NativeMethods.WM_KEYDOWN, (IntPtr)virtualKeyCode, IntPtr.Zero);
 			}
 		}
 
-		private void LookupRejected(IFormInterface AForm) 
+		private void LookupRejected(IFormInterface form) 
 		{
 			FocusControl();
 		}
@@ -274,20 +274,20 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return !GetReadOnly() && (Source != null) && (Source.DataView != null);
 		}
 		
-		private void LookupAccepted(IFormInterface AForm) 
+		private void LookupAccepted(IFormInterface form) 
 		{
 			FocusControl();
 
 			if (CanModify())
 			{
-				string[] LLookupColumns = GetLookupColumnNames().Split(DAE.Client.DataView.CColumnNameDelimiters);
-				string[] LSourceColumns = GetColumnNames().Split(DAE.Client.DataView.CColumnNameDelimiters);
+				string[] lookupColumns = GetLookupColumnNames().Split(DAE.Client.DataView.ColumnNameDelimiters);
+				string[] sourceColumns = GetColumnNames().Split(DAE.Client.DataView.ColumnNameDelimiters);
 
 				// Assign the field values
-				for (int i = 0; i < LSourceColumns.Length; i++)
+				for (int i = 0; i < sourceColumns.Length; i++)
 				{
-					DAE.Client.DataField LField = AForm.MainSource.DataView.Fields[LLookupColumns[i].Trim()];
-					Source.DataView.Fields[LSourceColumns[i].Trim()].Value = LField.HasValue() ? LField.Value : null;
+					DAE.Client.DataField field = form.MainSource.DataView.Fields[lookupColumns[i].Trim()];
+					Source.DataView.Fields[sourceColumns[i].Trim()].Value = field.HasValue() ? field.Value : null;
 				}
 
 				// Move to the next control
@@ -327,22 +327,22 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	[DesignerCategory("Data Controls")]
 	public class QuickLookup : LookupBase, IQuickLookup
 	{
-		public const int CLabelVSpacing = 4;
-		public const int CLabelHSpacing = 2;
+		public const int LabelVSpacing = 4;
+		public const int LabelHSpacing = 2;
 
 		#region VerticalAlignment
 
-		protected VerticalAlignment FVerticalAlignment = VerticalAlignment.Top;
+		protected VerticalAlignment _verticalAlignment = VerticalAlignment.Top;
 		[DefaultValue(VerticalAlignment.Top)]
 		[Description("When this control is given more space than it can use, this property specifies where the control will be placed within it's space.")]
 		public VerticalAlignment VerticalAlignment
 		{
-			get { return FVerticalAlignment; }
+			get { return _verticalAlignment; }
 			set
 			{
-				if (FVerticalAlignment != value)
+				if (_verticalAlignment != value)
 				{
-					FVerticalAlignment = value;
+					_verticalAlignment = value;
 					UpdateLayout();
 				}
 			}
@@ -352,17 +352,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		#region TitleAlignment		
 
-		private TitleAlignment FTitleAlignment = TitleAlignment.Top;
+		private TitleAlignment _titleAlignment = TitleAlignment.Top;
 		[DefaultValue(TitleAlignment.Top)]
 		[Description("The alignment of the title relative to the control.")]
 		public TitleAlignment TitleAlignment
 		{
-			get { return FTitleAlignment; }
+			get { return _titleAlignment; }
 			set
 			{
-				if (FTitleAlignment != value)
+				if (_titleAlignment != value)
 				{
-					FTitleAlignment = value;
+					_titleAlignment = value;
 					UpdateLayout();
 				}
 			}
@@ -372,18 +372,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		#region ColumnName Properties
 
-		private string FColumnName = String.Empty;
+		private string _columnName = String.Empty;
 		[DefaultValue("")]
 		[TypeConverter(typeof(ColumnNameConverter))]
 		[Description("The name of the column in the data source this element is associated with.")]
 		public string ColumnName
 		{
-			get { return FColumnName; }
+			get { return _columnName; }
 			set
 			{
-				if (FColumnName != value)
+				if (_columnName != value)
 				{
-					FColumnName = value;
+					_columnName = value;
 					if (Active)
 						InternalUpdateColumnName();
 				}
@@ -403,41 +403,41 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// LookupColumnName
 
-		private string FLookupColumnName = String.Empty;
+		private string _lookupColumnName = String.Empty;
 		[DefaultValue("")]
 		[Description("The column that will be read from the lookup source.")]
 		public string LookupColumnName
 		{
-			get { return FLookupColumnName; }
-			set { FLookupColumnName = (value == null ? String.Empty : value); }
+			get { return _lookupColumnName; }
+			set { _lookupColumnName = (value == null ? String.Empty : value); }
 		}
 
 		public override string GetLookupColumnNames()
 		{
-			return FLookupColumnName;
+			return _lookupColumnName;
 		}
 
 		#endregion
 
 		#region Label
 
-		private ExtendedLabel FLabel;
+		private ExtendedLabel _label;
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
 		protected ExtendedLabel Label
 		{
-			get { return FLabel; }
+			get { return _label; }
 		}
 
 		private void CreateLabel()
 		{
-			FLabel = new ExtendedLabel();
+			_label = new ExtendedLabel();
 			try
 			{
-				FLabel.BackColor = ((Session)HostNode.Session).Theme.TextBackgroundColor;
-				FLabel.AutoSize = true;
-				FLabel.Parent = ((IWindowsContainerElement)Parent).Control;
-				FLabel.OnMnemonic += new EventHandler(LabelMnemonic);
+				_label.BackColor = ((Session)HostNode.Session).Theme.TextBackgroundColor;
+				_label.AutoSize = true;
+				_label.Parent = ((IWindowsContainerElement)Parent).Control;
+				_label.OnMnemonic += new EventHandler(LabelMnemonic);
 			}
 			catch
 			{
@@ -448,14 +448,14 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void DisposeLabel()
 		{
-			if (FLabel != null)
+			if (_label != null)
 			{
-				FLabel.Dispose();
-				FLabel = null;
+				_label.Dispose();
+				_label = null;
 			}
 		}
 
-		private void LabelMnemonic(object ASender, EventArgs AArgs)
+		private void LabelMnemonic(object sender, EventArgs args)
 		{
 			if ((Control != null) && Control.CanFocus)
 				Control.Focus();
@@ -477,12 +477,12 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		// AverageCharPixelWidth
 
-		private int FAverageCharPixelWidth;
+		private int _averageCharPixelWidth;
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
 		protected int AverageCharPixelWidth
 		{
-			get { return FAverageCharPixelWidth; }
+			get { return _averageCharPixelWidth; }
 		}
 
 		// Node
@@ -493,7 +493,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			try
 			{
 				base.Activate();
-				FAverageCharPixelWidth = Element.GetAverageCharPixelWidth(Control);
+				_averageCharPixelWidth = Element.GetAverageCharPixelWidth(Control);
 			}
 			catch
 			{
@@ -514,33 +514,33 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
-		protected override void AddChild(INode AChild)
+		protected override void AddChild(INode child)
 		{
-			base.AddChild(AChild);
-			((IWindowsElement)AChild).SuppressMargins = true;
+			base.AddChild(child);
+			((IWindowsElement)child).SuppressMargins = true;
 
 			// Remove the title from any titled element that is added
 			if (Active)
 			{
-				ITitledElement LElement = AChild as ITitledElement;
-				if (LElement != null)
-					LElement.TitleAlignment = TitleAlignment.None;
+				ITitledElement element = child as ITitledElement;
+				if (element != null)
+					element.TitleAlignment = TitleAlignment.None;
 			}
 		}
 
-		protected override void RemoveChild(INode AChild)
+		protected override void RemoveChild(INode child)
 		{
-			((IWindowsElement)AChild).SuppressMargins = false;
-			base.RemoveChild(AChild);
+			((IWindowsElement)child).SuppressMargins = false;
+			base.RemoveChild(child);
 		}
 
-		private Size FLabelPixelSize;
+		private Size _labelPixelSize;
 
-		protected override void SetControlText(string AText)
+		protected override void SetControlText(string text)
 		{
-			FLabel.Text = AText;
-			using (Graphics LGraphics = FLabel.CreateGraphics())
-				FLabelPixelSize = Size.Ceiling(LGraphics.MeasureString(FLabel.Text, FLabel.Font));
+			_label.Text = text;
+			using (Graphics graphics = _label.CreateGraphics())
+				_labelPixelSize = Size.Ceiling(graphics.MeasureString(_label.Text, _label.Font));
 		}
 
 		protected override void InternalUpdateTitle()
@@ -551,7 +551,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected override void InternalUpdateVisible() 
 		{
-			FLabel.Visible = GetVisible();
+			_label.Visible = GetVisible();
 			base.InternalUpdateVisible();
 		}
 
@@ -562,40 +562,40 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		#region Layout
 
-		protected override void LayoutControl(Rectangle ABounds)
+		protected override void LayoutControl(Rectangle bounds)
 		{
 			// Alignment within the allotted space
-			if (FVerticalAlignment != VerticalAlignment.Top)
+			if (_verticalAlignment != VerticalAlignment.Top)
 			{
-				int LDeltaX = Math.Max(0, ABounds.Height - MaxSize.Height);
-				if (FVerticalAlignment == VerticalAlignment.Middle)
-					LDeltaX /= 2;
-				ABounds.Y += LDeltaX;
-				ABounds.Height -= LDeltaX;
+				int deltaX = Math.Max(0, bounds.Height - MaxSize.Height);
+				if (_verticalAlignment == VerticalAlignment.Middle)
+					deltaX /= 2;
+				bounds.Y += deltaX;
+				bounds.Height -= deltaX;
 			}
 
 			// Title alignment
 			if (TitleAlignment != TitleAlignment.None)
 			{
-				FLabel.Location = ABounds.Location;
+				_label.Location = bounds.Location;
 				if (TitleAlignment == TitleAlignment.Top)
-					ABounds.Y += FLabelPixelSize.Height + CLabelVSpacing;
+					bounds.Y += _labelPixelSize.Height + LabelVSpacing;
 				else
-					ABounds.X += FLabelPixelSize.Width + CLabelHSpacing;
+					bounds.X += _labelPixelSize.Width + LabelHSpacing;
 			}
-			Control.Location = ABounds.Location;	// Only locate... don't size the LookupBox (it sizes itself)
+			Control.Location = bounds.Location;	// Only locate... don't size the LookupBox (it sizes itself)
 		}
 
-		protected override void LayoutChild(IWindowsElement AChild, Rectangle ABounds)
+		protected override void LayoutChild(IWindowsElement child, Rectangle bounds)
 		{
-			if ((AChild != null) && AChild.GetVisible())
+			if ((child != null) && child.GetVisible())
 			{
 				switch (TitleAlignment)
 				{
-					case TitleAlignment.Top : ABounds.Height -= FLabelPixelSize.Height + CLabelVSpacing; break;
-					case TitleAlignment.Left : ABounds.Width -= FLabelPixelSize.Width + CLabelHSpacing; break;
+					case TitleAlignment.Top : bounds.Height -= _labelPixelSize.Height + LabelVSpacing; break;
+					case TitleAlignment.Left : bounds.Width -= _labelPixelSize.Width + LabelHSpacing; break;
 				}
-				AChild.Layout(new Rectangle(Control.DisplayRectangle.Location, ABounds.Size - (Control.Size - Control.DisplayRectangle.Size)));
+				child.Layout(new Rectangle(Control.DisplayRectangle.Location, bounds.Size - (Control.Size - Control.DisplayRectangle.Size)));
 			}
 		}
 
@@ -603,20 +603,20 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		#region Sizing
 
-		private Size AdjustForAlignment(Size ASize)
+		private Size AdjustForAlignment(Size size)
 		{
 			switch (TitleAlignment)
 			{
 				case TitleAlignment.Top :
-					if (ASize.Width < FLabelPixelSize.Width)
-						ASize.Width = FLabelPixelSize.Width;
-					ASize.Height += FLabelPixelSize.Height + CLabelVSpacing;
+					if (size.Width < _labelPixelSize.Width)
+						size.Width = _labelPixelSize.Width;
+					size.Height += _labelPixelSize.Height + LabelVSpacing;
 					break;
 				case TitleAlignment.Left :
-					ASize.Width += FLabelPixelSize.Width + CLabelHSpacing;
+					size.Width += _labelPixelSize.Width + LabelHSpacing;
 					break;
 			}
-			return ASize;
+			return size;
 		}
 
 		protected override Size InternalMinSize
@@ -653,34 +653,34 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	{
 		#region ColumnName Properties
 
-		private string FColumnNames = String.Empty;
+		private string _columnNames = String.Empty;
 		[DefaultValue("")]
 		[Description("The columns (comma or semicolon seperated) that will be set by the lookup.")]
 		public string ColumnNames
 		{
-			get { return FColumnNames; }
-			set { FColumnNames = (value == null ? String.Empty : value); }
+			get { return _columnNames; }
+			set { _columnNames = (value == null ? String.Empty : value); }
 		}
 
 		public override string GetColumnNames()
 		{
-			return FColumnNames;
+			return _columnNames;
 		}
 
 		// LookupColumnNames
 
-		private string FLookupColumnNames = String.Empty;
+		private string _lookupColumnNames = String.Empty;
 		[DefaultValue("")]
 		[Description("The columns (comma or semicolon seperated) that will be read from the lookups' source.")]
 		public string LookupColumnNames
 		{
-			get { return FLookupColumnNames; }
-			set { FLookupColumnNames = (value == null ? String.Empty : value); }
+			get { return _lookupColumnNames; }
+			set { _lookupColumnNames = (value == null ? String.Empty : value); }
 		}
 
 		public override string GetLookupColumnNames()
 		{
-			return FLookupColumnNames;
+			return _lookupColumnNames;
 		}
 
 		#endregion
@@ -699,7 +699,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			((DAE.Client.Controls.LookupPanel)Control).ClearValue += new EventHandler(ControlClearValue);
 		}
 
-		protected void ControlGotFocus(object ASender, EventArgs AArgs)
+		protected void ControlGotFocus(object sender, EventArgs args)
 		{
 			FindParent(typeof(IFormInterface)).BroadcastEvent(new FocusChangedEvent(this));
 		}
@@ -708,14 +708,14 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			if (CanModify())
 			{
-				string[] LSourceColumns = GetColumnNames().Split(DAE.Client.DataView.CColumnNameDelimiters);
+				string[] sourceColumns = GetColumnNames().Split(DAE.Client.DataView.ColumnNameDelimiters);
 
 				// Clear the field values
-				for (int i = 0; i < LSourceColumns.Length; i++)
+				for (int i = 0; i < sourceColumns.Length; i++)
 				{
-					var LField = Source.DataView.Fields[LSourceColumns[i].Trim()];
-					if (LField.HasValue())
-						LField.ClearValue();
+					var field = Source.DataView.Fields[sourceColumns[i].Trim()];
+					if (field.HasValue())
+						field.ClearValue();
 				}
 			}
 		}
@@ -731,8 +731,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			get
 			{
-				if ((FChild != null) && FChild.GetVisible())
-					return FChild.MinSize;
+				if ((_child != null) && _child.GetVisible())
+					return _child.MinSize;
 				else
 					return new Size(0, LookupControl.MinDisplayHeight());
 			}

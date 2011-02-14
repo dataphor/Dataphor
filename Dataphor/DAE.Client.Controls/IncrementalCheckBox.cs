@@ -26,14 +26,14 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			this.CheckAlign = ContentAlignment.MiddleCenter;
 		}
 
-		public bool ExtractValue(DAE.Runtime.Data.Row ARow)
+		public bool ExtractValue(DAE.Runtime.Data.Row row)
 		{
 			try
 			{
 				if (HasValue)
-					((DAE.Runtime.Data.Scalar)ARow.GetValue(FColumnName)).AsBoolean = (base.CheckState == CheckState.Checked);
+					((DAE.Runtime.Data.Scalar)row.GetValue(_columnName)).AsBoolean = (base.CheckState == CheckState.Checked);
 				else
-					ARow.ClearValue(FColumnName);
+					row.ClearValue(_columnName);
 				return true;
 			}
 			catch
@@ -43,12 +43,12 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 
-		public void InjectValue(DAE.Runtime.Data.Row ARow, bool AOverwrite)
+		public void InjectValue(DAE.Runtime.Data.Row row, bool overwrite)
 		{
-			if (AOverwrite)
+			if (overwrite)
 			{
-				if (ARow.HasValue(ColumnName))
-					if (((DAE.Runtime.Data.Scalar)ARow.GetValue(ColumnName)).AsBoolean)
+				if (row.HasValue(ColumnName))
+					if (((DAE.Runtime.Data.Scalar)row.GetValue(ColumnName)).AsBoolean)
 						base.CheckState = CheckState.Checked;
 					else
 						base.CheckState = CheckState.Unchecked;
@@ -57,34 +57,34 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 
-		private string FColumnName;
+		private string _columnName;
 		public string ColumnName
 		{
-			get { return FColumnName; }
-			set { FColumnName = (value == null ? String.Empty : value); }
+			get { return _columnName; }
+			set { _columnName = (value == null ? String.Empty : value); }
 		}
 
-		private string FTitle = null;
+		private string _title = null;
 		public string Title
 		{
 			get 
 			{ 
-				if (FTitle == null)
+				if (_title == null)
 					return ColumnName;
 				else
-					return FTitle;
+					return _title;
 			}
 		}
 
-		public void Initialize(IncrementalSearchColumn AColumn)
+		public void Initialize(IncrementalSearchColumn column)
 		{
-			if ((AColumn.Title != null) && (AColumn.Title != String.Empty))
-				FTitle = AColumn.Title;
+			if ((column.Title != null) && (column.Title != String.Empty))
+				_title = column.Title;
 			else
-				FTitle = null;
+				_title = null;
 		}
 
-		public void UpdateStyle(IncrementalSearch ASearch)
+		public void UpdateStyle(IncrementalSearch search)
 		{
 			// Nothing
 		}
@@ -99,33 +99,33 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		public event EventHandler OnChanged;
 
-		protected override void OnCheckStateChanged(EventArgs AArgs)
+		protected override void OnCheckStateChanged(EventArgs args)
 		{
-			base.OnCheckStateChanged(AArgs);
+			base.OnCheckStateChanged(args);
 			ConversionFailed = false;
 			if (OnChanged != null)
-				OnChanged(this, AArgs);
+				OnChanged(this, args);
 		}
 
-		private bool FConversionFailed;
+		private bool _conversionFailed;
 		public bool ConversionFailed
 		{
-			get { return FConversionFailed; }
+			get { return _conversionFailed; }
 			set 
 			{
-				if (FConversionFailed != value)
+				if (_conversionFailed != value)
 				{
-					FConversionFailed = value;
+					_conversionFailed = value;
 					// TODO: Visually indicate failed conversion for IncrementalCheckBox
 				}
 			}
 		}
 
-		protected override void OnPaint(PaintEventArgs AArgs)
+		protected override void OnPaint(PaintEventArgs args)
 		{
-			base.OnPaint(AArgs);
+			base.OnPaint(args);
 			if (Focused)
-				ControlPaint.DrawFocusRectangle(AArgs.Graphics, DisplayRectangle);
+				ControlPaint.DrawFocusRectangle(args.Graphics, DisplayRectangle);
 		}
 	}
 }

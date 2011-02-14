@@ -65,47 +65,47 @@ namespace Alphora.Dataphor
 
 	public class ProperFractionConverter : TypeConverter
 	{
-		public override bool CanConvertFrom(ITypeDescriptorContext AContext, Type ASourceType)
+		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
-			if (ASourceType == typeof(string))
+			if (sourceType == typeof(string))
 				return true;
 			else
-				return base.CanConvertFrom(AContext, ASourceType);
+				return base.CanConvertFrom(context, sourceType);
 		}
 
-		public override bool CanConvertTo(ITypeDescriptorContext AContext, Type ATargetType)
+		public override bool CanConvertTo(ITypeDescriptorContext context, Type targetType)
 		{
-			if (ATargetType == typeof(string))
+			if (targetType == typeof(string))
 				return true;
 			else
-				return base.CanConvertTo(AContext, ATargetType);
+				return base.CanConvertTo(context, targetType);
 		}
 
-		public override object ConvertFrom(ITypeDescriptorContext AContext, CultureInfo ACulture, object AValue)
+		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
-			if (AValue is string)
+			if (value is string)
 			{
-				string LValue = ((string)AValue).Trim();
-				if (LValue.Length > 0)
+				string localValue = ((string)value).Trim();
+				if (localValue.Length > 0)
 				{
-					ProperFraction LResult = new ProperFraction();
-					char LFirst = LValue[0];
-					if (LFirst == '%')
-						LResult.Percent = Convert.ToDecimal(LValue.Substring(1));
+					ProperFraction result = new ProperFraction();
+					char first = localValue[0];
+					if (first == '%')
+						result.Percent = Convert.ToDecimal(localValue.Substring(1));
 					else
-						LResult.Decimal = Convert.ToDecimal(LValue.Substring(1));
-					return LResult;
+						result.Decimal = Convert.ToDecimal(localValue.Substring(1));
+					return result;
 				}
 			}
-			return base.ConvertFrom(AContext, ACulture, AValue);
+			return base.ConvertFrom(context, culture, value);
 		}
 
-		public override object ConvertTo(ITypeDescriptorContext AContext, CultureInfo ACulture, object AValue, Type ATargetType)
+		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type targetType)
 		{
-			if (ATargetType == typeof(string))
-				return Convert.ToString(((ProperFraction)AValue).Decimal);
+			if (targetType == typeof(string))
+				return Convert.ToString(((ProperFraction)value).Decimal);
 			else
-				return base.ConvertTo(AContext, ACulture, AValue, ATargetType);
+				return base.ConvertTo(context, culture, value, targetType);
 		}
 	}
 }

@@ -22,164 +22,164 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	
 	public abstract class ConditionedTable : Table
 	{
-		public ConditionedTable(ConditionedTableNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public ConditionedTable(ConditionedTableNode node, Program program) : base(node, program) {}
 		
-		public new ConditionedTableNode Node { get { return (ConditionedTableNode)FNode; } }
+		public new ConditionedTableNode Node { get { return (ConditionedTableNode)_node; } }
 
-		protected Table FLeftTable;
-		protected Table FRightTable;
-		protected Row FLeftRow;
-		protected Row FRightRow;
+		protected Table _leftTable;
+		protected Table _rightTable;
+		protected Row _leftRow;
+		protected Row _rightRow;
 
         protected override void InternalOpen()
         {
-			FLeftTable = (Table)Node.Nodes[0].Execute(Program);
-			FLeftRow = new Row(Manager, new Schema.RowType(Node.LeftKey.Columns));
-			FRightTable = (Table)Node.Nodes[1].Execute(Program);
-			FRightRow = new Row(Manager, new Schema.RowType(Node.RightKey.Columns));
+			_leftTable = (Table)Node.Nodes[0].Execute(Program);
+			_leftRow = new Row(Manager, new Schema.RowType(Node.LeftKey.Columns));
+			_rightTable = (Table)Node.Nodes[1].Execute(Program);
+			_rightRow = new Row(Manager, new Schema.RowType(Node.RightKey.Columns));
         }
         
         protected override void InternalClose()
         {
-			if (FLeftRow != null)
+			if (_leftRow != null)
 			{
-				FLeftRow.Dispose();
-				FLeftRow = null;
+				_leftRow.Dispose();
+				_leftRow = null;
 			}
 			
-			if (FLeftTable != null)
+			if (_leftTable != null)
 			{
-				FLeftTable.Dispose();
-				FLeftTable = null;
+				_leftTable.Dispose();
+				_leftTable = null;
 			}
 
-			if (FRightRow != null)
+			if (_rightRow != null)
 			{
-				FRightRow.Dispose();
-				FRightRow = null;
+				_rightRow.Dispose();
+				_rightRow = null;
 			}
 
-			if (FRightTable != null)
+			if (_rightTable != null)
 			{
-				FRightTable.Dispose();
-				FRightTable = null;
+				_rightTable.Dispose();
+				_rightTable = null;
 			}
         }
 
         protected override void InternalReset()
         {
-			FLeftTable.Reset();
-			FRightTable.Reset();
+			_leftTable.Reset();
+			_rightTable.Reset();
         }
 
         protected override bool InternalBOF()
         {
-            return FLeftTable.BOF();
+            return _leftTable.BOF();
         }
 
         protected override bool InternalEOF()
         {
-			if (FLeftTable.BOF())
+			if (_leftTable.BOF())
 			{
 				InternalNext();
-				if (FLeftTable.EOF())
+				if (_leftTable.EOF())
 					return true;
 				else
 				{
-					if (FLeftTable.Supports(CursorCapability.BackwardsNavigable))
-						FLeftTable.First();
+					if (_leftTable.Supports(CursorCapability.BackwardsNavigable))
+						_leftTable.First();
 					else
-						FLeftTable.Reset();
-					if (FRightTable.Supports(CursorCapability.BackwardsNavigable))
-						FRightTable.First();
+						_leftTable.Reset();
+					if (_rightTable.Supports(CursorCapability.BackwardsNavigable))
+						_rightTable.First();
 					else
-						FRightTable.Reset();
+						_rightTable.Reset();
 					return false;
 				}
 			}
-			return FLeftTable.EOF();
+			return _leftTable.EOF();
         }
         
         protected override void InternalLast()
         {
-			FLeftTable.Last();
-			FRightTable.Last();
+			_leftTable.Last();
+			_rightTable.Last();
         }
 
         protected override void InternalFirst()
         {
-			FLeftTable.First();
-			FRightTable.First();
+			_leftTable.First();
+			_rightTable.First();
         }
         
         protected bool IsMatch()
         {
-			return CompareKeys(FLeftRow, FRightRow) == 0;
+			return CompareKeys(_leftRow, _rightRow) == 0;
         }
 
-        protected int CompareKeyValues(object AKeyValue1, object AKeyValue2, PlanNode ACompareNode)
+        protected int CompareKeyValues(object keyValue1, object keyValue2, PlanNode compareNode)
         {
-			Program.Stack.Push(AKeyValue1);
-			Program.Stack.Push(AKeyValue2);
-			int LResult = (int)ACompareNode.Execute(Program);
+			Program.Stack.Push(keyValue1);
+			Program.Stack.Push(keyValue2);
+			int result = (int)compareNode.Execute(Program);
 			Program.Stack.Pop();
 			Program.Stack.Pop();
-			return LResult;
+			return result;
         }
         
-        protected int CompareKeys(Row AKey1, Row AKey2)
+        protected int CompareKeys(Row key1, Row key2)
         {
-			int LResult = 0;
-			for (int LIndex = 0; LIndex < Node.JoinOrder.Columns.Count; LIndex++)
+			int result = 0;
+			for (int index = 0; index < Node.JoinOrder.Columns.Count; index++)
 			{
-				if ((LIndex >= AKey1.DataType.Columns.Count) || !AKey1.HasValue(LIndex))
+				if ((index >= key1.DataType.Columns.Count) || !key1.HasValue(index))
 					return -1;
-				else if ((LIndex >= AKey2.DataType.Columns.Count) || !AKey2.HasValue(LIndex))
+				else if ((index >= key2.DataType.Columns.Count) || !key2.HasValue(index))
 					return 1;
 				else
 				{
-					LResult = CompareKeyValues(AKey1[LIndex], AKey2[LIndex], Node.JoinOrder.Columns[LIndex].Sort.CompareNode) * (Node.JoinOrder.Columns[LIndex].Ascending ? 1 : -1);
-					if (LResult != 0)
-						return LResult;
+					result = CompareKeyValues(key1[index], key2[index], Node.JoinOrder.Columns[index].Sort.CompareNode) * (Node.JoinOrder.Columns[index].Ascending ? 1 : -1);
+					if (result != 0)
+						return result;
 				}
 			}
-			return LResult;
+			return result;
         }
 
 		// Gets the right key row for the current left row		
 		protected void GetRightKey()
 		{
-			for (int LIndex = 0; LIndex < Node.LeftKey.Columns.Count; LIndex++)
-				if (FLeftRow.HasValue(LIndex))
-					FRightRow[LIndex] = FLeftRow[LIndex];
+			for (int index = 0; index < Node.LeftKey.Columns.Count; index++)
+				if (_leftRow.HasValue(index))
+					_rightRow[index] = _leftRow[index];
 				else
-					FRightRow.ClearValue(LIndex);
+					_rightRow.ClearValue(index);
 		}
 
 		// Gets the left key row for the current right row		
 		protected void GetLeftKey()
 		{
-			for (int LIndex = 0; LIndex < Node.RightKey.Columns.Count; LIndex++)
-				if (FRightRow.HasValue(LIndex))
-					FLeftRow[LIndex] = FRightRow[LIndex];
+			for (int index = 0; index < Node.RightKey.Columns.Count; index++)
+				if (_rightRow.HasValue(index))
+					_leftRow[index] = _rightRow[index];
 				else
-					FLeftRow.ClearValue(LIndex);
+					_leftRow.ClearValue(index);
 		}
 	}
 	
 	public abstract class SemiTable : ConditionedTable
 	{
-		public SemiTable(SemiTableNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public SemiTable(SemiTableNode node, Program program) : base(node, program) {}
 		
-        protected override void InternalSelect(Row ARow)
+        protected override void InternalSelect(Row row)
         {
-			FLeftTable.Select(ARow);
+			_leftTable.Select(row);
         }
 	}
 	
 	public abstract class HavingTable : SemiTable
 	{
-		public HavingTable(HavingNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public HavingTable(HavingNode node, Program program) : base(node, program) {}
 	}
 	
 	/*
@@ -192,15 +192,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	
 	public class SearchedHavingTable : HavingTable
 	{
-		public SearchedHavingTable(HavingNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public SearchedHavingTable(HavingNode node, Program program) : base(node, program) {}
 
 		protected override bool InternalNext()
 		{
-			while (FLeftTable.Next())
+			while (_leftTable.Next())
 			{
-				FLeftTable.Select(FLeftRow);
+				_leftTable.Select(_leftRow);
 				GetRightKey();
-				if (FRightTable.FindKey(FRightRow))
+				if (_rightTable.FindKey(_rightRow))
 					return true;
 			}
 			return false;
@@ -208,11 +208,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override bool InternalPrior()
 		{
-			while (FLeftTable.Prior())
+			while (_leftTable.Prior())
 			{
-				FLeftTable.Select(FLeftRow);
+				_leftTable.Select(_leftRow);
 				GetRightKey();
-				if (FRightTable.FindKey(FRightRow))
+				if (_rightTable.FindKey(_rightRow))
 					return true;
 			}
 			return false;
@@ -221,7 +221,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	
 	public abstract class WithoutTable : SemiTable
 	{
-		public WithoutTable(WithoutNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public WithoutTable(WithoutNode node, Program program) : base(node, program) {}
 	}
 	
 	/*
@@ -234,67 +234,67 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	
 	public class SearchedWithoutTable : WithoutTable
 	{
-		public SearchedWithoutTable(WithoutNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public SearchedWithoutTable(WithoutNode node, Program program) : base(node, program) {}
 
-		protected bool FBOF;
+		protected bool _bOF;
 
         protected override void InternalOpen()
         {
 			base.InternalOpen();
-			FBOF = true;
+			_bOF = true;
         }
 
         protected override void InternalReset()
         {
-			FLeftTable.Reset();
-			FBOF = true;
+			_leftTable.Reset();
+			_bOF = true;
         }
         
         protected override void InternalLast()
         {
-			FLeftTable.Last();
+			_leftTable.Last();
         }
         
         protected override bool InternalBOF()
         {
-			return FBOF;
+			return _bOF;
         }
         
         protected override bool InternalEOF()
         {
-			if (FBOF)
+			if (_bOF)
 			{
 				InternalNext();
-				if (FLeftTable.EOF())
+				if (_leftTable.EOF())
 					return true;
 				else
 				{
-					if (FLeftTable.Supports(CursorCapability.BackwardsNavigable))
-						FLeftTable.First();
+					if (_leftTable.Supports(CursorCapability.BackwardsNavigable))
+						_leftTable.First();
 					else
-						FLeftTable.Reset();
-					FBOF = true;
+						_leftTable.Reset();
+					_bOF = true;
 					return false;
 				}
 			}
-			return FLeftTable.EOF();
+			return _leftTable.EOF();
         }
         
         protected override void InternalFirst()
         {
-			FLeftTable.First();
-			FBOF = true;
+			_leftTable.First();
+			_bOF = true;
         }
 
 		protected override bool InternalNext()
 		{
-			while (FLeftTable.Next())
+			while (_leftTable.Next())
 			{
-				FLeftTable.Select(FLeftRow);
+				_leftTable.Select(_leftRow);
 				GetRightKey();
-				if (!FRightTable.FindKey(FRightRow))
+				if (!_rightTable.FindKey(_rightRow))
 				{
-					FBOF = false;
+					_bOF = false;
 					return true;
 				}
 			}
@@ -303,28 +303,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override bool InternalPrior()
 		{
-			while (FLeftTable.Prior())
+			while (_leftTable.Prior())
 			{
-				FLeftTable.Select(FLeftRow);
+				_leftTable.Select(_leftRow);
 				GetRightKey();
-				if (!FRightTable.FindKey(FRightRow))
+				if (!_rightTable.FindKey(_rightRow))
 					return true;
 			}
-			FBOF = true;
+			_bOF = true;
 			return false;
 		}
 	}
 
     public abstract class JoinTable : ConditionedTable
     {
-		public JoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public JoinTable(JoinNode node, Program program) : base(node, program) {}
 		
-		public new JoinNode Node { get { return (JoinNode)FNode; } }
+		public new JoinNode Node { get { return (JoinNode)_node; } }
 
-        protected override void InternalSelect(Row ARow)
+        protected override void InternalSelect(Row row)
         {
-			FLeftTable.Select(ARow);
-			FRightTable.Select(ARow);
+			_leftTable.Select(row);
+			_rightTable.Select(row);
         }
     }
     
@@ -332,48 +332,48 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     // left join key unique
     public class LeftUniqueNestedLoopJoinTable : JoinTable
     {
-		public LeftUniqueNestedLoopJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public LeftUniqueNestedLoopJoinTable(JoinNode node, Program program) : base(node, program) {}
 		
 		protected override bool InternalBOF()
 		{
-			return FRightTable.BOF();
+			return _rightTable.BOF();
 		}
 		
 		protected override bool InternalEOF()
 		{
-			if (FRightTable.BOF())
+			if (_rightTable.BOF())
 			{
 				InternalNext();
-				if (FRightTable.EOF())
+				if (_rightTable.EOF())
 					return true;
 				else
 				{
-					if (FRightTable.Supports(CursorCapability.BackwardsNavigable))
-						FRightTable.First();
+					if (_rightTable.Supports(CursorCapability.BackwardsNavigable))
+						_rightTable.First();
 					else
-						FRightTable.Reset();
-					if (FLeftTable.Supports(CursorCapability.BackwardsNavigable))
-						FLeftTable.First();
+						_rightTable.Reset();
+					if (_leftTable.Supports(CursorCapability.BackwardsNavigable))
+						_leftTable.First();
 					else
-						FLeftTable.Reset();
+						_leftTable.Reset();
 					return false;
 				}
 			}
-			return FRightTable.EOF();
+			return _rightTable.EOF();
 		}
 		
 		protected override bool InternalNext()
 		{
-			while (FRightTable.Next())
+			while (_rightTable.Next())
 			{
-				if (FLeftTable.Supports(CursorCapability.BackwardsNavigable))
-					FLeftTable.First();
+				if (_leftTable.Supports(CursorCapability.BackwardsNavigable))
+					_leftTable.First();
 				else
-					FLeftTable.Reset();
-				FRightTable.Select(FRightRow);
-				while (FLeftTable.Next())
+					_leftTable.Reset();
+				_rightTable.Select(_rightRow);
+				while (_leftTable.Next())
 				{
-					FLeftTable.Select(FLeftRow);
+					_leftTable.Select(_leftRow);
 					if (IsMatch())
 						return true;
 				}
@@ -383,13 +383,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override bool InternalPrior()
 		{
-			while (FRightTable.Prior())
+			while (_rightTable.Prior())
 			{
-				FLeftTable.Last();
-				FRightTable.Select(FRightRow);
-				while (FLeftTable.Prior())
+				_leftTable.Last();
+				_rightTable.Select(_rightRow);
+				while (_leftTable.Prior())
 				{
-					FLeftTable.Select(FLeftRow);
+					_leftTable.Select(_leftRow);
 					if (IsMatch())
 						return true;
 				}
@@ -402,20 +402,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// right join key unique
     public class RightUniqueNestedLoopJoinTable : JoinTable
     {
-		public RightUniqueNestedLoopJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public RightUniqueNestedLoopJoinTable(JoinNode node, Program program) : base(node, program) {}
 		
         protected override bool InternalNext()
         {
-			while (FLeftTable.Next())
+			while (_leftTable.Next())
 			{
-				if (FRightTable.Supports(CursorCapability.BackwardsNavigable))
-					FRightTable.First();
+				if (_rightTable.Supports(CursorCapability.BackwardsNavigable))
+					_rightTable.First();
 				else
-					FRightTable.Reset();
-				FLeftTable.Select(FLeftRow);
-				while (FRightTable.Next())
+					_rightTable.Reset();
+				_leftTable.Select(_leftRow);
+				while (_rightTable.Next())
 				{
-					FRightTable.Select(FRightRow);
+					_rightTable.Select(_rightRow);
 					if (IsMatch())
 						return true;
 				}
@@ -425,13 +425,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			
         protected override bool InternalPrior()
         {
-			while (FLeftTable.Prior())
+			while (_leftTable.Prior())
 			{
-				FRightTable.Last();
-				FLeftTable.Select(FLeftRow);
-				while (FRightTable.Prior())
+				_rightTable.Last();
+				_leftTable.Select(_leftRow);
+				while (_rightTable.Prior())
 				{
-					FRightTable.Select(FRightRow);
+					_rightTable.Select(_rightRow);
 					if (IsMatch())
 						return true;
 				}
@@ -443,51 +443,51 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// Non unique nested loop join algorithm, works on any input
     public class NonUniqueNestedLoopJoinTable : JoinTable
     {
-		public NonUniqueNestedLoopJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public NonUniqueNestedLoopJoinTable(JoinNode node, Program program) : base(node, program) {}
 
         protected override bool InternalNext()
         {
-			if (FLeftTable.BOF())
-				FLeftTable.Next();
+			if (_leftTable.BOF())
+				_leftTable.Next();
 				
-			while (!FLeftTable.EOF())
+			while (!_leftTable.EOF())
 			{
-				FLeftTable.Select(FLeftRow);
-				FRightTable.Next();
-				while (!FRightTable.EOF())
+				_leftTable.Select(_leftRow);
+				_rightTable.Next();
+				while (!_rightTable.EOF())
 				{
-					FRightTable.Select(FRightRow);
+					_rightTable.Select(_rightRow);
 					if (IsMatch())
 						return true;
-					FRightTable.Next();
+					_rightTable.Next();
 				}
-				FLeftTable.Next();
-				if (FRightTable.Supports(CursorCapability.BackwardsNavigable))
-					FRightTable.First();
+				_leftTable.Next();
+				if (_rightTable.Supports(CursorCapability.BackwardsNavigable))
+					_rightTable.First();
 				else
-					FRightTable.Reset();
+					_rightTable.Reset();
 			}
 			return false;
         }
         
         protected override bool InternalPrior()
         {
-			if (FLeftTable.EOF())
-				FLeftTable.Prior();
+			if (_leftTable.EOF())
+				_leftTable.Prior();
 				
-			while (!FLeftTable.BOF())
+			while (!_leftTable.BOF())
 			{
-				FLeftTable.Select(FLeftRow);
-				FRightTable.Prior();
-				while (!FRightTable.BOF())
+				_leftTable.Select(_leftRow);
+				_rightTable.Prior();
+				while (!_rightTable.BOF())
 				{
-					FRightTable.Select(FRightRow);
+					_rightTable.Select(_rightRow);
 					if (IsMatch())
 						return true;
-					FRightTable.Prior();
+					_rightTable.Prior();
 				}
-				FLeftTable.Prior();
-				FRightTable.Last();
+				_leftTable.Prior();
+				_rightTable.Last();
 			}
 			return false;
         }
@@ -496,40 +496,40 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// times algorithm, works on any input
     public class TimesTable : JoinTable
     {
-		public TimesTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public TimesTable(JoinNode node, Program program) : base(node, program) {}
 		
-		private bool FHitEOF;
-		private bool FHitBOF;
+		private bool _hitEOF;
+		private bool _hitBOF;
 		
 		protected override bool InternalNext()
 		{
-			if (FHitEOF)
+			if (_hitEOF)
 				return false;
 				
 			while (true)
 			{
-				if (FRightTable.Next())
+				if (_rightTable.Next())
 				{
-					if (FLeftTable.BOF())
+					if (_leftTable.BOF())
 					{
-						FHitEOF = !FLeftTable.Next();
-						if (!FHitEOF)
-							FHitBOF = false;
-						return !FHitEOF;
+						_hitEOF = !_leftTable.Next();
+						if (!_hitEOF)
+							_hitBOF = false;
+						return !_hitEOF;
 					}
-					FHitBOF = false;
+					_hitBOF = false;
 					return true;
 				}
 				else
 				{
-					if (FRightTable.Supports(CursorCapability.BackwardsNavigable))
-						FRightTable.First();
+					if (_rightTable.Supports(CursorCapability.BackwardsNavigable))
+						_rightTable.First();
 					else
-						FRightTable.Reset();
+						_rightTable.Reset();
 						
-					if (!FLeftTable.Next())
+					if (!_leftTable.Next())
 					{
-						FHitEOF = true;
+						_hitEOF = true;
 						return false;
 					}
 				}				
@@ -540,43 +540,43 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			while (true)
 			{
-				if (FHitBOF)
+				if (_hitBOF)
 					return false;
 					
-				if (FRightTable.Prior())
+				if (_rightTable.Prior())
 				{
-					if (FLeftTable.EOF())
+					if (_leftTable.EOF())
 					{
-						FHitBOF = !FLeftTable.Prior();
-						if (!FHitBOF)
-							FHitEOF = false;
-						return !FHitBOF;
+						_hitBOF = !_leftTable.Prior();
+						if (!_hitBOF)
+							_hitEOF = false;
+						return !_hitBOF;
 					}
-					FHitEOF = false;
+					_hitEOF = false;
 					return true;
 				}
 				else
 				{
-					FRightTable.Last();
+					_rightTable.Last();
 				
-					if (!FLeftTable.Prior())
+					if (!_leftTable.Prior())
 					{
-						FHitBOF = true;
+						_hitBOF = true;
 						return false;
 					}
 				}
 			}
 		}
 
-        protected override void InternalSelect(Row ARow)
+        protected override void InternalSelect(Row row)
         {
-			base.InternalSelect(ARow);
-			OuterJoinNode LOuterJoinNode = Node as OuterJoinNode;
-			if ((LOuterJoinNode != null) && LOuterJoinNode.RowExistsColumnIndex >= 0)
+			base.InternalSelect(row);
+			OuterJoinNode outerJoinNode = Node as OuterJoinNode;
+			if ((outerJoinNode != null) && outerJoinNode.RowExistsColumnIndex >= 0)
 			{
-				int LColumnIndex = ARow.DataType.Columns.IndexOfName(Node.DataType.Columns[LOuterJoinNode.RowExistsColumnIndex].Name);
-				if (LColumnIndex >= 0)
-					ARow[LColumnIndex] = true;
+				int columnIndex = row.DataType.Columns.IndexOfName(Node.DataType.Columns[outerJoinNode.RowExistsColumnIndex].Name);
+				if (columnIndex >= 0)
+					row[columnIndex] = true;
 			}
         }
     }
@@ -586,49 +586,49 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// left and right join keys are unique
     public class UniqueMergeJoinTable : JoinTable
     {
-		public UniqueMergeJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public UniqueMergeJoinTable(JoinNode node, Program program) : base(node, program) {}
 		
 		protected override bool InternalNext()
 		{
-			int LCompareValue;			
-			FLeftTable.Next();
-			FRightTable.Next();
-			while (!(FLeftTable.EOF() || FRightTable.EOF()))
+			int compareValue;			
+			_leftTable.Next();
+			_rightTable.Next();
+			while (!(_leftTable.EOF() || _rightTable.EOF()))
 			{
-				FLeftTable.Select(FLeftRow);
-				FRightTable.Select(FRightRow);
-				LCompareValue = CompareKeys(FLeftRow, FRightRow);
-				if (LCompareValue == 0)
+				_leftTable.Select(_leftRow);
+				_rightTable.Select(_rightRow);
+				compareValue = CompareKeys(_leftRow, _rightRow);
+				if (compareValue == 0)
 					return true;
-				else if (LCompareValue < 0)
-					FLeftTable.Next();
+				else if (compareValue < 0)
+					_leftTable.Next();
 				else
-					FRightTable.Next();
+					_rightTable.Next();
 			}
-			FLeftTable.Last();
-			FRightTable.Last();
+			_leftTable.Last();
+			_rightTable.Last();
 			return false;
 		}
 		
 		protected override bool InternalPrior()
 		{
-			int LCompareValue;
-			FLeftTable.Prior();
-			FRightTable.Prior();
-			while (!(FLeftTable.BOF() || FRightTable.BOF()))
+			int compareValue;
+			_leftTable.Prior();
+			_rightTable.Prior();
+			while (!(_leftTable.BOF() || _rightTable.BOF()))
 			{
-				FLeftTable.Select(FLeftRow);
-				FRightTable.Select(FRightRow);
-				LCompareValue = CompareKeys(FLeftRow, FRightRow);
-				if (LCompareValue == 0)
+				_leftTable.Select(_leftRow);
+				_rightTable.Select(_rightRow);
+				compareValue = CompareKeys(_leftRow, _rightRow);
+				if (compareValue == 0)
 					return true;
-				else if (LCompareValue < 0)
-					FRightTable.Prior();
+				else if (compareValue < 0)
+					_rightTable.Prior();
 				else
-					FLeftTable.Prior();
+					_leftTable.Prior();
 			}
-			FLeftTable.First();
-			FRightTable.First();
+			_leftTable.First();
+			_rightTable.First();
 			return false;
 		}
     }
@@ -638,55 +638,55 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// left key is unique, right key is non-unique
     public class LeftUniqueMergeJoinTable : JoinTable
     {
-		public LeftUniqueMergeJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public LeftUniqueMergeJoinTable(JoinNode node, Program program) : base(node, program) {}
 		
 		protected override bool InternalNext()
 		{
-			if (FLeftTable.BOF() && FLeftTable.Next())
-				FLeftTable.Select(FLeftRow);
-			FRightTable.Next();
-			int LCompareValue;
-			while (!(FLeftTable.EOF() || FRightTable.EOF()))
+			if (_leftTable.BOF() && _leftTable.Next())
+				_leftTable.Select(_leftRow);
+			_rightTable.Next();
+			int compareValue;
+			while (!(_leftTable.EOF() || _rightTable.EOF()))
 			{
-				FRightTable.Select(FRightRow);
-				LCompareValue = CompareKeys(FLeftRow, FRightRow);
-				if (LCompareValue == 0)
+				_rightTable.Select(_rightRow);
+				compareValue = CompareKeys(_leftRow, _rightRow);
+				if (compareValue == 0)
 					return true;
-				else if (LCompareValue < 0)
+				else if (compareValue < 0)
 				{
-					if (FLeftTable.Next())
-						FLeftTable.Select(FLeftRow);
+					if (_leftTable.Next())
+						_leftTable.Select(_leftRow);
 				}
 				else
-					FRightTable.Next();
+					_rightTable.Next();
 			}
-			FLeftTable.Last();
-			FRightTable.Last();
+			_leftTable.Last();
+			_rightTable.Last();
 			return false;
 		}
 		
 		protected override bool InternalPrior()
 		{
-			if (FLeftTable.EOF() && FLeftTable.Prior())
-				FLeftTable.Select(FLeftRow);
-			FRightTable.Prior();
-			int LCompareValue;
-			while (!(FLeftTable.BOF() || FRightTable.BOF()))
+			if (_leftTable.EOF() && _leftTable.Prior())
+				_leftTable.Select(_leftRow);
+			_rightTable.Prior();
+			int compareValue;
+			while (!(_leftTable.BOF() || _rightTable.BOF()))
 			{
-				FRightTable.Select(FRightRow);
-				LCompareValue = CompareKeys(FLeftRow, FRightRow);
-				if (LCompareValue == 0)
+				_rightTable.Select(_rightRow);
+				compareValue = CompareKeys(_leftRow, _rightRow);
+				if (compareValue == 0)
 					return true;
-				else if (LCompareValue < 0)
-					FRightTable.Prior();
+				else if (compareValue < 0)
+					_rightTable.Prior();
 				else
 				{
-					if (FLeftTable.Prior())
-						FLeftTable.Select(FLeftRow);
+					if (_leftTable.Prior())
+						_leftTable.Select(_leftRow);
 				}
 			}
-			FLeftTable.First();
-			FRightTable.First();
+			_leftTable.First();
+			_rightTable.First();
 			return false;
 		}
     }
@@ -696,94 +696,94 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// left key is non-unique, right key is unique
     public class RightUniqueMergeJoinTable : JoinTable
     {
-		public RightUniqueMergeJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public RightUniqueMergeJoinTable(JoinNode node, Program program) : base(node, program) {}
 		
 		protected override bool InternalNext()
 		{
-			if (FRightTable.BOF() && FRightTable.Next())
-				FRightTable.Select(FRightRow);
-			FLeftTable.Next();
-			int LCompareValue;
-			while (!(FLeftTable.EOF() || FRightTable.EOF()))
+			if (_rightTable.BOF() && _rightTable.Next())
+				_rightTable.Select(_rightRow);
+			_leftTable.Next();
+			int compareValue;
+			while (!(_leftTable.EOF() || _rightTable.EOF()))
 			{
-				FLeftTable.Select(FLeftRow);
-				LCompareValue = CompareKeys(FLeftRow, FRightRow);
-				if (LCompareValue == 0)
+				_leftTable.Select(_leftRow);
+				compareValue = CompareKeys(_leftRow, _rightRow);
+				if (compareValue == 0)
 					return true;
-				else if (LCompareValue < 0)
-					FLeftTable.Next();
+				else if (compareValue < 0)
+					_leftTable.Next();
 				else
 				{
-					if (FRightTable.Next())
-						FRightTable.Select(FRightRow);
+					if (_rightTable.Next())
+						_rightTable.Select(_rightRow);
 				}
 			}
-			FRightTable.Last();
-			FLeftTable.Last();
+			_rightTable.Last();
+			_leftTable.Last();
 			return false;
 		}
 		
 		protected override bool InternalPrior()
 		{
-			if (FRightTable.EOF() && FRightTable.Prior())
-				FRightTable.Select(FRightRow);
-			FLeftTable.Prior();
-			int LCompareValue;
-			while (!(FLeftTable.BOF() || FRightTable.BOF()))
+			if (_rightTable.EOF() && _rightTable.Prior())
+				_rightTable.Select(_rightRow);
+			_leftTable.Prior();
+			int compareValue;
+			while (!(_leftTable.BOF() || _rightTable.BOF()))
 			{
-				FLeftTable.Select(FLeftRow);
-				LCompareValue = CompareKeys(FLeftRow, FRightRow);
-				if (LCompareValue == 0)
+				_leftTable.Select(_leftRow);
+				compareValue = CompareKeys(_leftRow, _rightRow);
+				if (compareValue == 0)
 					return true;
-				else if (LCompareValue < 0)
+				else if (compareValue < 0)
 				{
-					if (FRightTable.Prior())
-						FRightTable.Select(FRightRow);
+					if (_rightTable.Prior())
+						_rightTable.Select(_rightRow);
 				}
 				else
-					FLeftTable.Prior();
+					_leftTable.Prior();
 			}
-			FRightTable.First();
-			FLeftTable.First();
+			_rightTable.First();
+			_leftTable.First();
 			return false;
 		}
     }
     
     public abstract class RightSearchedJoinTable : JoinTable
     {
-		public RightSearchedJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public RightSearchedJoinTable(JoinNode node, Program program) : base(node, program) {}
     }
     
     public abstract class LeftSearchedJoinTable : JoinTable
     {
-		public LeftSearchedJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public LeftSearchedJoinTable(JoinNode node, Program program) : base(node, program) {}
 		
         protected override bool InternalBOF()
         {
-            return FRightTable.BOF();
+            return _rightTable.BOF();
         }
         
         protected override bool InternalEOF()
         {
-			if (FRightTable.BOF())
+			if (_rightTable.BOF())
 			{
 				InternalNext();
-				if (FRightTable.EOF())
+				if (_rightTable.EOF())
 					return true;
 				else
 				{
-					if (FRightTable.Supports(CursorCapability.BackwardsNavigable))
-						FRightTable.First();
+					if (_rightTable.Supports(CursorCapability.BackwardsNavigable))
+						_rightTable.First();
 					else
-						FRightTable.Reset();
-					if (FLeftTable.Supports(CursorCapability.BackwardsNavigable))
-						FLeftTable.First();
+						_rightTable.Reset();
+					if (_leftTable.Supports(CursorCapability.BackwardsNavigable))
+						_leftTable.First();
 					else
-						FLeftTable.Reset();
+						_leftTable.Reset();
 					return false;
 				}
 			}
-			return FRightTable.EOF();
+			return _rightTable.EOF();
         }
     }
     
@@ -791,15 +791,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     // works when only the left input is ordered and the left key is unique
     public class LeftUniqueSearchedJoinTable : LeftSearchedJoinTable
     {
-		public LeftUniqueSearchedJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public LeftUniqueSearchedJoinTable(JoinNode node, Program program) : base(node, program) {}
 		
 		protected override bool InternalNext()
 		{
-			while (FRightTable.Next())
+			while (_rightTable.Next())
 			{
-				FRightTable.Select(FRightRow);
+				_rightTable.Select(_rightRow);
 				GetLeftKey();
-				if (FLeftTable.FindKey(FLeftRow))
+				if (_leftTable.FindKey(_leftRow))
 					return true;
 			}
 			return false;
@@ -807,11 +807,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override bool InternalPrior()
 		{
-			while (FRightTable.Prior())
+			while (_rightTable.Prior())
 			{
-				FRightTable.Select(FRightRow);
+				_rightTable.Select(_rightRow);
 				GetLeftKey();
-				if (FLeftTable.FindKey(FLeftRow))
+				if (_leftTable.FindKey(_leftRow))
 					return true;
 			}
 			return false;
@@ -822,15 +822,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// works when only the right input is ordered and the right key is unique
     public class RightUniqueSearchedJoinTable : RightSearchedJoinTable
     {
-		public RightUniqueSearchedJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public RightUniqueSearchedJoinTable(JoinNode node, Program program) : base(node, program) {}
 		
 		protected override bool InternalNext()
 		{
-			while (FLeftTable.Next())
+			while (_leftTable.Next())
 			{
-				FLeftTable.Select(FLeftRow);
+				_leftTable.Select(_leftRow);
 				GetRightKey();
-				if (FRightTable.FindKey(FRightRow))
+				if (_rightTable.FindKey(_rightRow))
 					return true;
 			}
 			return false;
@@ -838,11 +838,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override bool InternalPrior()
 		{
-			while (FLeftTable.Prior())
+			while (_leftTable.Prior())
 			{
-				FLeftTable.Select(FLeftRow);
+				_leftTable.Select(_leftRow);
 				GetRightKey();
-				if (FRightTable.FindKey(FRightRow))
+				if (_rightTable.FindKey(_rightRow))
 					return true;
 			}
 			return false;
@@ -853,60 +853,60 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     // works when only the right input is ordered and the right key is non-unique
     public class NonUniqueRightSearchedJoinTable : RightSearchedJoinTable
     {
-		public NonUniqueRightSearchedJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public NonUniqueRightSearchedJoinTable(JoinNode node, Program program) : base(node, program) {}
 		
 		protected bool OnRightRow()
 		{
-			if (FRightTable.BOF() || FRightTable.EOF())
+			if (_rightTable.BOF() || _rightTable.EOF())
 				return false;
 				
-			Row LCurrentKey = FRightTable.GetKey();
+			Row currentKey = _rightTable.GetKey();
 			try
 			{
-				return CompareKeys(LCurrentKey, FRightRow) == 0;
+				return CompareKeys(currentKey, _rightRow) == 0;
 			}
 			finally
 			{
-				LCurrentKey.Dispose();
+				currentKey.Dispose();
 			}
 		}
 
-		protected bool FindRightKey(bool AForward)
+		protected bool FindRightKey(bool forward)
 		{
-			FRightTable.FindNearest(FRightRow);
+			_rightTable.FindNearest(_rightRow);
 			if (OnRightRow())
 			{
-				if (AForward)
+				if (forward)
 				{
-					while (!FRightTable.BOF())
+					while (!_rightTable.BOF())
 					{
 						if (OnRightRow())
-							FRightTable.Prior();
+							_rightTable.Prior();
 						else
 						{
-							FRightTable.Next();
+							_rightTable.Next();
 							break;
 						}
 					}
 
-					if (FRightTable.BOF())
-						FRightTable.Next();
+					if (_rightTable.BOF())
+						_rightTable.Next();
 				}
 				else
 				{
-					while (!FRightTable.EOF())
+					while (!_rightTable.EOF())
 					{
 						if (OnRightRow())
-							FRightTable.Next();
+							_rightTable.Next();
 						else
 						{
-							FRightTable.Prior();
+							_rightTable.Prior();
 							break;
 						}
 					}
 
-					if (FRightTable.EOF())
-						FRightTable.Prior();
+					if (_rightTable.EOF())
+						_rightTable.Prior();
 				}
 				return true;
 			}
@@ -915,9 +915,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected bool NextLeft()
 		{
-			while (FLeftTable.Next())
+			while (_leftTable.Next())
 			{
-				FLeftTable.Select(FLeftRow);
+				_leftTable.Select(_leftRow);
 				GetRightKey();
 				if (FindRightKey(true))
 					return true;
@@ -927,9 +927,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected bool PriorLeft()
 		{
-			while (FLeftTable.Prior())
+			while (_leftTable.Prior())
 			{
-				FLeftTable.Select(FLeftRow);
+				_leftTable.Select(_leftRow);
 				GetRightKey();
 				if (FindRightKey(false))
 					return true;
@@ -939,13 +939,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override bool InternalNext()
 		{
-			if (FLeftTable.BOF())
+			if (_leftTable.BOF())
 				return NextLeft();
 			else
 			{
-				if (FRightTable.Next())
+				if (_rightTable.Next())
 				{
-					FRightTable.Select(FRightRow);
+					_rightTable.Select(_rightRow);
 					if (!IsMatch())
 						return NextLeft();
 					return true;
@@ -957,13 +957,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override bool InternalPrior()
 		{
-			if (FLeftTable.EOF())
+			if (_leftTable.EOF())
 				return PriorLeft();
 			else
 			{
-				if (FRightTable.Prior())
+				if (_rightTable.Prior())
 				{
-					FRightTable.Select(FRightRow);
+					_rightTable.Select(_rightRow);
 					if (!IsMatch())
 						return PriorLeft();
 					return true;
@@ -978,60 +978,60 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     // works when only the left input is ordered and the left key is non-unique
     public class NonUniqueLeftSearchedJoinTable : LeftSearchedJoinTable
     {
-		public NonUniqueLeftSearchedJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public NonUniqueLeftSearchedJoinTable(JoinNode node, Program program) : base(node, program) {}
 		
 		protected bool OnLeftRow()
 		{
-			if (FLeftTable.BOF() || FLeftTable.EOF())
+			if (_leftTable.BOF() || _leftTable.EOF())
 				return false;
 				
-			Row LCurrentKey = FLeftTable.GetKey();
+			Row currentKey = _leftTable.GetKey();
 			try
 			{
-				return CompareKeys(LCurrentKey, FLeftRow) == 0;
+				return CompareKeys(currentKey, _leftRow) == 0;
 			}
 			finally
 			{
-				LCurrentKey.Dispose();
+				currentKey.Dispose();
 			}
 		}
 
-		protected bool FindLeftKey(bool AForward)
+		protected bool FindLeftKey(bool forward)
 		{
-			FLeftTable.FindNearest(FLeftRow);
+			_leftTable.FindNearest(_leftRow);
 			if (OnLeftRow())
 			{
-				if (AForward)
+				if (forward)
 				{
-					while (!FLeftTable.BOF())
+					while (!_leftTable.BOF())
 					{
 						if (OnLeftRow())
-							FLeftTable.Prior();
+							_leftTable.Prior();
 						else
 						{
-							FLeftTable.Next();
+							_leftTable.Next();
 							break;
 						}
 					}
 					
-					if (FLeftTable.BOF())
-						FLeftTable.Next();
+					if (_leftTable.BOF())
+						_leftTable.Next();
 				}
 				else
 				{
-					while (!FLeftTable.EOF())
+					while (!_leftTable.EOF())
 					{
 						if (OnLeftRow())
-							FLeftTable.Next();
+							_leftTable.Next();
 						else
 						{
-							FLeftTable.Prior();
+							_leftTable.Prior();
 							break;
 						}
 					}
 					
-					if (FLeftTable.EOF())
-						FLeftTable.Prior();
+					if (_leftTable.EOF())
+						_leftTable.Prior();
 				}
 				return true;
 			}
@@ -1040,9 +1040,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected bool NextRight()
 		{
-			while (FRightTable.Next())
+			while (_rightTable.Next())
 			{
-				FRightTable.Select(FRightRow);
+				_rightTable.Select(_rightRow);
 				GetLeftKey();
 				if (FindLeftKey(true))
 					return true;
@@ -1052,9 +1052,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected bool PriorRight()
 		{
-			while (FRightTable.Prior())
+			while (_rightTable.Prior())
 			{
-				FRightTable.Select(FRightRow);
+				_rightTable.Select(_rightRow);
 				GetLeftKey();
 				if (FindLeftKey(false))
 					return true;
@@ -1064,13 +1064,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override bool InternalNext()
 		{
-			if (FRightTable.BOF())
+			if (_rightTable.BOF())
 				return NextRight();
 			else
 			{
-				if (FLeftTable.Next())
+				if (_leftTable.Next())
 				{
-					FLeftTable.Select(FLeftRow);
+					_leftTable.Select(_leftRow);
 					if (!IsMatch())
 						return NextRight();
 					return true;
@@ -1082,13 +1082,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override bool InternalPrior()
 		{
-			if (FRightTable.EOF())
+			if (_rightTable.EOF())
 				return PriorRight();
 			else
 			{
-				if (FLeftTable.Prior())
+				if (_leftTable.Prior())
 				{
-					FLeftTable.Select(FLeftRow);
+					_leftTable.Select(_leftRow);
 					if (!IsMatch())
 						return PriorRight();
 					return true;
@@ -1101,48 +1101,48 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     
     public abstract class OuterJoinTable : JoinTable
     {
-		public OuterJoinTable(OuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public OuterJoinTable(OuterJoinNode node, Program program) : base(node, program) {}
 		
 		/// <summary>Indicates that the current row in the right cursor is a match for the current row in the left cursor.</summary>
-		protected bool FRowFound;
+		protected bool _rowFound;
 		
 		/// <summary>Indicates that some right side match has been found for the current row of the left cursor.</summary>
-		protected bool FRowIncluded;
+		protected bool _rowIncluded;
 		
 		protected override void InternalReset()
 		{
 			base.InternalReset();
-			FRowFound = false;
-			FRowIncluded = false;
+			_rowFound = false;
+			_rowIncluded = false;
 		}
     }
     
     public abstract class LeftJoinTable : OuterJoinTable
     {
-		public LeftJoinTable(LeftOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public LeftJoinTable(LeftOuterJoinNode node, Program program) : base(node, program) {}
 
-		public new LeftOuterJoinNode Node { get { return (LeftOuterJoinNode)FNode; } }
+		public new LeftOuterJoinNode Node { get { return (LeftOuterJoinNode)_node; } }
         
-		protected override void InternalSelect(Row ARow)
+		protected override void InternalSelect(Row row)
         {
-			FLeftTable.Select(ARow);
+			_leftTable.Select(row);
 			if (Node.RowExistsColumnIndex >= 0)
 			{
-				int LColumnIndex = ARow.DataType.Columns.IndexOfName(Node.DataType.Columns[Node.RowExistsColumnIndex].Name);
-				if (LColumnIndex >= 0)
-					ARow[LColumnIndex] = FRowFound;
+				int columnIndex = row.DataType.Columns.IndexOfName(Node.DataType.Columns[Node.RowExistsColumnIndex].Name);
+				if (columnIndex >= 0)
+					row[columnIndex] = _rowFound;
 			}
 			
-			if (FRowFound)
-				FRightTable.Select(ARow);
+			if (_rowFound)
+				_rightTable.Select(row);
 			else
 			{
-				int LColumnIndex;
-				foreach (Schema.Column LColumn in FRightTable.DataType.Columns)
+				int columnIndex;
+				foreach (Schema.Column column in _rightTable.DataType.Columns)
 				{
-					LColumnIndex = ARow.DataType.Columns.IndexOfName(LColumn.Name);
-					if ((LColumnIndex >= 0) && (!Node.IsNatural || !Node.RightKey.Columns.ContainsName(LColumn.Name)))
-						ARow.ClearValue(LColumnIndex);
+					columnIndex = row.DataType.Columns.IndexOfName(column.Name);
+					if ((columnIndex >= 0) && (!Node.IsNatural || !Node.RightKey.Columns.ContainsName(column.Name)))
+						row.ClearValue(columnIndex);
 				}
 			}
         }
@@ -1152,25 +1152,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// right join key unique
     public class RightUniqueNestedLoopLeftJoinTable : LeftJoinTable
     {
-		public RightUniqueNestedLoopLeftJoinTable(LeftOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public RightUniqueNestedLoopLeftJoinTable(LeftOuterJoinNode node, Program program) : base(node, program) {}
 		
 		protected override bool InternalNext()
 		{
-			if (FLeftTable.Next())
+			if (_leftTable.Next())
 			{
-				FLeftTable.Select(FLeftRow);
-				FRowFound = false;
+				_leftTable.Select(_leftRow);
+				_rowFound = false;
 				
-				if (FRightTable.Supports(CursorCapability.BackwardsNavigable))
-					FRightTable.First();
+				if (_rightTable.Supports(CursorCapability.BackwardsNavigable))
+					_rightTable.First();
 				else
-					FRightTable.Reset();
-				while (FRightTable.Next())
+					_rightTable.Reset();
+				while (_rightTable.Next())
 				{
-					FRightTable.Select(FRightRow);
+					_rightTable.Select(_rightRow);
 					if (IsMatch())
 					{
-						FRowFound = true;
+						_rowFound = true;
 						return true;
 					}
 				}
@@ -1181,18 +1181,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override bool InternalPrior()
 		{
-			if (FLeftTable.Prior())
+			if (_leftTable.Prior())
 			{
-				FLeftTable.Select(FLeftRow);
-				FRowFound = false;
+				_leftTable.Select(_leftRow);
+				_rowFound = false;
 				
-				FRightTable.Last();
-				while (FRightTable.Prior())
+				_rightTable.Last();
+				while (_rightTable.Prior())
 				{
-					FRightTable.Select(FRightRow);
+					_rightTable.Select(_rightRow);
 					if (IsMatch())
 					{
-						FRowFound = true;
+						_rowFound = true;
 						return true;
 					}
 				}
@@ -1206,91 +1206,91 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// works on any inputs
     public class NonUniqueNestedLoopLeftJoinTable : LeftJoinTable
     {
-		public NonUniqueNestedLoopLeftJoinTable(LeftOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public NonUniqueNestedLoopLeftJoinTable(LeftOuterJoinNode node, Program program) : base(node, program) {}
 
         protected override bool InternalNext()
         {
-			if (FLeftTable.BOF())
+			if (_leftTable.BOF())
 			{
-				FLeftTable.Next();
-				FRowFound = false;
-				FRowIncluded = false;
+				_leftTable.Next();
+				_rowFound = false;
+				_rowIncluded = false;
 			}
 				
-			while (!FLeftTable.EOF())
+			while (!_leftTable.EOF())
 			{
-				if (!FRightTable.EOF())
+				if (!_rightTable.EOF())
 				{
-					FLeftTable.Select(FLeftRow);
-					FRightTable.Next();
-					while (!FRightTable.EOF())
+					_leftTable.Select(_leftRow);
+					_rightTable.Next();
+					while (!_rightTable.EOF())
 					{
-						FRightTable.Select(FRightRow);
+						_rightTable.Select(_rightRow);
 						if (IsMatch())
 						{
-							FRowFound = true;
-							FRowIncluded = true;
+							_rowFound = true;
+							_rowIncluded = true;
 							return true;
 						}
-						FRightTable.Next();
+						_rightTable.Next();
 					}
 				}
 						
-				if ((!FRowFound) && (!FRowIncluded))
+				if ((!_rowFound) && (!_rowIncluded))
 				{
-					FRowIncluded = true;
+					_rowIncluded = true;
 					return true;
 				}
 
-				FLeftTable.Next();
-				if (FRightTable.Supports(CursorCapability.BackwardsNavigable))
-					FRightTable.First();
+				_leftTable.Next();
+				if (_rightTable.Supports(CursorCapability.BackwardsNavigable))
+					_rightTable.First();
 				else
-					FRightTable.Reset();
-				FRowFound = false;
-				FRowIncluded = false;
+					_rightTable.Reset();
+				_rowFound = false;
+				_rowIncluded = false;
 			}
 			return false;
         }
         
         protected override bool InternalPrior()
         {
-			if (FLeftTable.EOF())
+			if (_leftTable.EOF())
 			{
-				FLeftTable.Prior();
-				FRowFound = false;
-				FRowIncluded = false;
+				_leftTable.Prior();
+				_rowFound = false;
+				_rowIncluded = false;
 			}
 				
-			while (!FLeftTable.BOF())
+			while (!_leftTable.BOF())
 			{
-				if (!FRightTable.BOF())
+				if (!_rightTable.BOF())
 				{
-					FLeftTable.Select(FLeftRow);
-					FRightTable.Prior();
-					while (!FRightTable.BOF())
+					_leftTable.Select(_leftRow);
+					_rightTable.Prior();
+					while (!_rightTable.BOF())
 					{
-						FRightTable.Select(FRightRow);
+						_rightTable.Select(_rightRow);
 						if (IsMatch())
 						{
-							FRowFound = true;
-							FRowIncluded = true;
+							_rowFound = true;
+							_rowIncluded = true;
 							return true;
 						}
-						FRightTable.Prior();
+						_rightTable.Prior();
 					}
 				}
 						
-				if ((!FRowFound) && (!FRowIncluded))
+				if ((!_rowFound) && (!_rowIncluded))
 				{
-					FRowIncluded = true;
+					_rowIncluded = true;
 					return true;
 				}
 
-				FLeftTable.Prior();
-				FRightTable.Last();
-				FRowFound = false;
-				FRowIncluded = false;
+				_leftTable.Prior();
+				_rightTable.Last();
+				_rowFound = false;
+				_rowIncluded = false;
 			}
 			return false;
         }
@@ -1301,85 +1301,85 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// left or right keys unique    
     public class MergeLeftJoinTable : LeftJoinTable
     {
-		public MergeLeftJoinTable(LeftOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public MergeLeftJoinTable(LeftOuterJoinNode node, Program program) : base(node, program) {}
 		
 		protected void NextLeft()
 		{
-			if (FLeftTable.Next())
-				FLeftTable.Select(FLeftRow);
-			FRowIncluded = false;
-			FRowFound = false;
+			if (_leftTable.Next())
+				_leftTable.Select(_leftRow);
+			_rowIncluded = false;
+			_rowFound = false;
 		}
 		
 		protected void PriorLeft()
 		{
-			if (FLeftTable.Prior())
-				FLeftTable.Select(FLeftRow);
-			FRowIncluded = false;
-			FRowFound = false;
+			if (_leftTable.Prior())
+				_leftTable.Select(_leftRow);
+			_rowIncluded = false;
+			_rowFound = false;
 		}
 		
 		protected void NextRight()
 		{
-			if (FRightTable.Next())
-				FRightTable.Select(FRightRow);
+			if (_rightTable.Next())
+				_rightTable.Select(_rightRow);
 		}
 		
 		protected void PriorRight()
 		{
-			if (FRightTable.Prior())
-				FRightTable.Select(FRightRow);
+			if (_rightTable.Prior())
+				_rightTable.Select(_rightRow);
 		}
 		
 		protected override bool InternalNext()
 		{
-			if (FLeftTable.BOF())
+			if (_leftTable.BOF())
 				NextLeft();
-			if (FRightTable.BOF())
+			if (_rightTable.BOF())
 				NextRight();
 				
-			if (FRowFound)
+			if (_rowFound)
 				if (Node.LeftKey.IsUnique)
 					NextRight();
 				else
 					NextLeft();
 				
-			int LCompareValue;
-			while (!FLeftTable.EOF())
+			int compareValue;
+			while (!_leftTable.EOF())
 			{
-				if (!FRightTable.EOF())
+				if (!_rightTable.EOF())
 				{
-					LCompareValue = CompareKeys(FLeftRow, FRightRow);
-					if (LCompareValue == 0)
+					compareValue = CompareKeys(_leftRow, _rightRow);
+					if (compareValue == 0)
 					{
-						FRowFound = true;
-						FRowIncluded = true;
+						_rowFound = true;
+						_rowIncluded = true;
 						return true;
 					}
-					else if (LCompareValue > 0)
+					else if (compareValue > 0)
 					{
 						NextRight();
 					}
 					else
 					{
-						if (FRowIncluded)
+						if (_rowIncluded)
 							NextLeft();
 						else
 						{
-							FRowFound = false;
-							FRowIncluded = true;
+							_rowFound = false;
+							_rowIncluded = true;
 							return true;
 						}
 					}
 				}
 				else
 				{
-					if (FRowIncluded)
+					if (_rowIncluded)
 						NextLeft();
 					else
 					{
-						FRowFound = false;
-						FRowIncluded = true;
+						_rowFound = false;
+						_rowIncluded = true;
 						return true;
 					}
 				}
@@ -1389,53 +1389,53 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override bool InternalPrior()
 		{
-			if (FLeftTable.EOF())
+			if (_leftTable.EOF())
 				PriorLeft();
-			if (FRightTable.EOF())
+			if (_rightTable.EOF())
 				PriorRight();
 				
-			if (FRowFound)
+			if (_rowFound)
 				if (Node.LeftKey.IsUnique)
 					PriorRight();				
 				else
 					PriorLeft();
 
-			int LCompareValue;
-			while (!FLeftTable.BOF())
+			int compareValue;
+			while (!_leftTable.BOF())
 			{
-				if (!FRightTable.BOF())
+				if (!_rightTable.BOF())
 				{
-					LCompareValue = CompareKeys(FLeftRow, FRightRow);
-					if (LCompareValue == 0)
+					compareValue = CompareKeys(_leftRow, _rightRow);
+					if (compareValue == 0)
 					{
-						FRowFound = true;
-						FRowIncluded = true;
+						_rowFound = true;
+						_rowIncluded = true;
 						return true;
 					}
-					else if (LCompareValue < 0)
+					else if (compareValue < 0)
 					{
 						PriorRight();
 					}
 					else
 					{
-						if (FRowIncluded)
+						if (_rowIncluded)
 							PriorLeft();
 						else
 						{
-							FRowFound = false;
-							FRowIncluded = true;
+							_rowFound = false;
+							_rowIncluded = true;
 							return true;
 						}
 					}
 				}
 				else
 				{
-					if (FRowIncluded)
+					if (_rowIncluded)
 						PriorLeft();
 					else
 					{
-						FRowFound = false;
-						FRowIncluded = true;
+						_rowFound = false;
+						_rowIncluded = true;
 						return true;
 					}
 				}
@@ -1446,7 +1446,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     
 	public abstract class SearchedLeftJoinTable : LeftJoinTable
 	{
-		public SearchedLeftJoinTable(LeftOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public SearchedLeftJoinTable(LeftOuterJoinNode node, Program program) : base(node, program) {}
 	}
 	
 	// right unique searched left join algorithm
@@ -1454,15 +1454,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// right join key is unique
 	public class RightUniqueSearchedLeftJoinTable : SearchedLeftJoinTable
 	{
-		public RightUniqueSearchedLeftJoinTable(LeftOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public RightUniqueSearchedLeftJoinTable(LeftOuterJoinNode node, Program program) : base(node, program) {}
 		
 		protected override bool InternalNext()
 		{
-			if (FLeftTable.Next())
+			if (_leftTable.Next())
 			{
-				FLeftTable.Select(FLeftRow);
+				_leftTable.Select(_leftRow);
 				GetRightKey();
-				FRowFound = FRightTable.FindKey(FRightRow);
+				_rowFound = _rightTable.FindKey(_rightRow);
 				return true;
 			}
 			return false;
@@ -1470,11 +1470,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override bool InternalPrior()
 		{
-			if (FLeftTable.Prior())
+			if (_leftTable.Prior())
 			{
-				FLeftTable.Select(FLeftRow);
+				_leftTable.Select(_leftRow);
 				GetRightKey();
-				FRowFound = FRightTable.FindKey(FRightRow);
+				_rowFound = _rightTable.FindKey(_rightRow);
 				return true;
 			}
 			return false;
@@ -1486,58 +1486,58 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// right join key is nonunique
 	public class NonUniqueSearchedLeftJoinTable : SearchedLeftJoinTable
 	{
-		public NonUniqueSearchedLeftJoinTable(LeftOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public NonUniqueSearchedLeftJoinTable(LeftOuterJoinNode node, Program program) : base(node, program) {}
 		
 		protected bool OnRightRow()
 		{
-			if (FRightTable.BOF() || FRightTable.EOF())
+			if (_rightTable.BOF() || _rightTable.EOF())
 				return false;
 				
-			Row LCurrentKey = FRightTable.GetKey();
+			Row currentKey = _rightTable.GetKey();
 			try
 			{
-				return CompareKeys(LCurrentKey, FRightRow) == 0;
+				return CompareKeys(currentKey, _rightRow) == 0;
 			}
 			finally
 			{
-				LCurrentKey.Dispose();
+				currentKey.Dispose();
 			}
 		}
 
-		protected bool FindRightKey(bool AForward)
+		protected bool FindRightKey(bool forward)
 		{
-			FRightTable.FindNearest(FRightRow);
+			_rightTable.FindNearest(_rightRow);
 			if (OnRightRow())
 			{
-				if (AForward)
+				if (forward)
 				{
-					while (!FRightTable.BOF())
+					while (!_rightTable.BOF())
 					{
 						if (OnRightRow())
-							FRightTable.Prior();
+							_rightTable.Prior();
 						else
 						{
-							FRightTable.Next();
+							_rightTable.Next();
 							break;
 						}
 					}
-					if (FRightTable.BOF())
-						FRightTable.Next();
+					if (_rightTable.BOF())
+						_rightTable.Next();
 				}
 				else
 				{
-					while (!FRightTable.EOF())
+					while (!_rightTable.EOF())
 					{
 						if (OnRightRow())
-							FRightTable.Next();
+							_rightTable.Next();
 						else
 						{
-							FRightTable.Prior();
+							_rightTable.Prior();
 							break;
 						}
 					}
-					if (FRightTable.EOF())
-						FRightTable.Prior();
+					if (_rightTable.EOF())
+						_rightTable.Prior();
 				}
 				return true;
 			}
@@ -1546,16 +1546,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected bool NextLeft()
 		{
-			if (FLeftTable.Next())
+			if (_leftTable.Next())
 			{
-				FRowFound = false;
-				FRowIncluded = false;
-				FLeftTable.Select(FLeftRow);
+				_rowFound = false;
+				_rowIncluded = false;
+				_leftTable.Select(_leftRow);
 				GetRightKey();
 				if (FindRightKey(true))
 				{
-					FRowFound = true;
-					FRowIncluded = true;
+					_rowFound = true;
+					_rowIncluded = true;
 				}
 				return true;
 			}
@@ -1564,16 +1564,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected bool PriorLeft()
 		{
-			if (FLeftTable.Prior())
+			if (_leftTable.Prior())
 			{
-				FRowFound = false;
-				FRowIncluded = false;
-				FLeftTable.Select(FLeftRow);
+				_rowFound = false;
+				_rowIncluded = false;
+				_leftTable.Select(_leftRow);
 				GetRightKey();
 				if (FindRightKey(false))
 				{
-					FRowFound = true;
-					FRowIncluded = true;
+					_rowFound = true;
+					_rowIncluded = true;
 				}
 				return true;
 			}
@@ -1582,14 +1582,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override bool InternalNext()
 		{
-			if (FLeftTable.BOF() || !FRowFound)
+			if (_leftTable.BOF() || !_rowFound)
 				return NextLeft();
 
-			if (FRowFound)
+			if (_rowFound)
 			{
-				while (FRightTable.Next())
+				while (_rightTable.Next())
 				{
-					FRightTable.Select(FRightRow);
+					_rightTable.Select(_rightRow);
 					if (IsMatch())
 						return true;
 					else
@@ -1602,14 +1602,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override bool InternalPrior()
 		{
-			if (FLeftTable.EOF() || !FRowFound)
+			if (_leftTable.EOF() || !_rowFound)
 				return PriorLeft();
 			
-			if (FRowFound)
+			if (_rowFound)
 			{
-				while (FRightTable.Prior())
+				while (_rightTable.Prior())
 				{
-					FRightTable.Select(FRightRow);
+					_rightTable.Select(_rightRow);
 					if (IsMatch())
 						return true;
 					else
@@ -1623,60 +1623,60 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public abstract class RightJoinTable : OuterJoinTable
     {
-		public RightJoinTable(RightOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public RightJoinTable(RightOuterJoinNode node, Program program) : base(node, program) {}
 		
-        public new RightOuterJoinNode Node { get { return (RightOuterJoinNode)FNode; } }
+        public new RightOuterJoinNode Node { get { return (RightOuterJoinNode)_node; } }
         
-        protected override void InternalSelect(Row ARow)
+        protected override void InternalSelect(Row row)
         {
-			FRightTable.Select(ARow);
+			_rightTable.Select(row);
 			if (Node.RowExistsColumnIndex >= 0)
 			{
-				int LColumnIndex = ARow.DataType.Columns.IndexOfName(Node.DataType.Columns[Node.RowExistsColumnIndex].Name);
-				if (LColumnIndex >= 0)
-					ARow[Node.DataType.Columns[Node.RowExistsColumnIndex].Name] = FRowFound;
+				int columnIndex = row.DataType.Columns.IndexOfName(Node.DataType.Columns[Node.RowExistsColumnIndex].Name);
+				if (columnIndex >= 0)
+					row[Node.DataType.Columns[Node.RowExistsColumnIndex].Name] = _rowFound;
 			}
 			
-			if (FRowFound)
-				FLeftTable.Select(ARow);
+			if (_rowFound)
+				_leftTable.Select(row);
 			else
 			{
-				int LColumnIndex;
-				foreach (Schema.Column LColumn in FLeftTable.DataType.Columns)
+				int columnIndex;
+				foreach (Schema.Column column in _leftTable.DataType.Columns)
 				{
-					LColumnIndex = ARow.DataType.Columns.IndexOfName(LColumn.Name);
-					if ((LColumnIndex >= 0) && (!Node.IsNatural || !Node.LeftKey.Columns.Contains(LColumn.Name)))
-						ARow.ClearValue(LColumnIndex);
+					columnIndex = row.DataType.Columns.IndexOfName(column.Name);
+					if ((columnIndex >= 0) && (!Node.IsNatural || !Node.LeftKey.Columns.Contains(column.Name)))
+						row.ClearValue(columnIndex);
 				}
 			}
         }
 
         protected override bool InternalBOF()
         {
-            return FRightTable.BOF();
+            return _rightTable.BOF();
         }
         
         protected override bool InternalEOF()
         {
-			if (FRightTable.BOF())
+			if (_rightTable.BOF())
 			{
 				InternalNext();
-				if (FRightTable.EOF())
+				if (_rightTable.EOF())
 					return true;
 				else
 				{
-					if (FRightTable.Supports(CursorCapability.BackwardsNavigable))
-						FRightTable.First();
+					if (_rightTable.Supports(CursorCapability.BackwardsNavigable))
+						_rightTable.First();
 					else
-						FRightTable.Reset();
-					if (FLeftTable.Supports(CursorCapability.BackwardsNavigable))
-						FLeftTable.First();
+						_rightTable.Reset();
+					if (_leftTable.Supports(CursorCapability.BackwardsNavigable))
+						_leftTable.First();
 					else
-						FLeftTable.Reset();
+						_leftTable.Reset();
 					return false;
 				}
 			}
-			return FRightTable.EOF();
+			return _rightTable.EOF();
         }
     }
 
@@ -1684,25 +1684,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// left join key unique
     public class LeftUniqueNestedLoopRightJoinTable : RightJoinTable
     {
-		public LeftUniqueNestedLoopRightJoinTable(RightOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public LeftUniqueNestedLoopRightJoinTable(RightOuterJoinNode node, Program program) : base(node, program) {}
 		
         protected override bool InternalNext()
         {
-			if (FRightTable.Next())
+			if (_rightTable.Next())
 			{
-				FRightTable.Select();
-				FRowFound = false;
-				if (FLeftTable.Supports(CursorCapability.BackwardsNavigable))
-					FLeftTable.First();
+				_rightTable.Select();
+				_rowFound = false;
+				if (_leftTable.Supports(CursorCapability.BackwardsNavigable))
+					_leftTable.First();
 				else
-					FLeftTable.Reset();
+					_leftTable.Reset();
 					
-				while (FLeftTable.Next())
+				while (_leftTable.Next())
 				{
-					FLeftTable.Select(FLeftRow);
+					_leftTable.Select(_leftRow);
 					if (IsMatch())
 					{
-						FRowFound = true;
+						_rowFound = true;
 						return true;
 					}
 				}
@@ -1713,18 +1713,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected override bool InternalPrior()
         {
-			if (FRightTable.Prior())
+			if (_rightTable.Prior())
 			{
-				FRightTable.Select();
-				FRowFound = false;
-				FLeftTable.Last();
+				_rightTable.Select();
+				_rowFound = false;
+				_leftTable.Last();
 				
-				while (FLeftTable.Prior())
+				while (_leftTable.Prior())
 				{
-					FLeftTable.Select(FLeftRow);
+					_leftTable.Select(_leftRow);
 					if (IsMatch())
 					{
-						FRowFound = true;
+						_rowFound = true;
 						return true;
 					}
 				}
@@ -1738,91 +1738,91 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// works on any inputs    
     public class NonUniqueNestedLoopRightJoinTable : RightJoinTable
     {
-		public NonUniqueNestedLoopRightJoinTable(RightOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram){}
+		public NonUniqueNestedLoopRightJoinTable(RightOuterJoinNode node, Program program) : base(node, program){}
 
         protected override bool InternalNext()
         {
-			if (FRightTable.BOF())
+			if (_rightTable.BOF())
 			{
-				FRightTable.Next();
-				FRowFound = false;
-				FRowIncluded = false;
+				_rightTable.Next();
+				_rowFound = false;
+				_rowIncluded = false;
 			}
 				
-			while (!FRightTable.EOF())
+			while (!_rightTable.EOF())
 			{
-				if (!FLeftTable.EOF())
+				if (!_leftTable.EOF())
 				{
-					FRightTable.Select(FRightRow);
-					FLeftTable.Next();
-					while (!FLeftTable.EOF())
+					_rightTable.Select(_rightRow);
+					_leftTable.Next();
+					while (!_leftTable.EOF())
 					{
-						FLeftTable.Select(FLeftRow);
+						_leftTable.Select(_leftRow);
 						if (IsMatch())
 						{
-							FRowFound = true;
-							FRowIncluded = true;
+							_rowFound = true;
+							_rowIncluded = true;
 							return true;
 						}
-						FLeftTable.Next();
+						_leftTable.Next();
 					}
 				}
 						
-				if ((!FRowFound) && (!FRowIncluded))
+				if ((!_rowFound) && (!_rowIncluded))
 				{
-					FRowIncluded = true;
+					_rowIncluded = true;
 					return true;
 				}
 				
-				FRightTable.Next();
-				if (FLeftTable.Supports(CursorCapability.BackwardsNavigable))
-					FLeftTable.First();
+				_rightTable.Next();
+				if (_leftTable.Supports(CursorCapability.BackwardsNavigable))
+					_leftTable.First();
 				else
-					FLeftTable.Reset();
-				FRowFound = false;
-				FRowIncluded = false;
+					_leftTable.Reset();
+				_rowFound = false;
+				_rowIncluded = false;
 			}
 			return false;
         }
         
         protected override bool InternalPrior()
         {
-			if (FRightTable.EOF())
+			if (_rightTable.EOF())
 			{
-				FRightTable.Prior();
-				FRowFound = false;
-				FRowIncluded = false;
+				_rightTable.Prior();
+				_rowFound = false;
+				_rowIncluded = false;
 			}
 				
-			while (!FRightTable.BOF())
+			while (!_rightTable.BOF())
 			{
-				if (!FLeftTable.BOF())
+				if (!_leftTable.BOF())
 				{
-					FRightTable.Select(FRightRow);
-					FLeftTable.Prior();
-					while (!FLeftTable.BOF())
+					_rightTable.Select(_rightRow);
+					_leftTable.Prior();
+					while (!_leftTable.BOF())
 					{
-						FLeftTable.Select(FLeftRow);
+						_leftTable.Select(_leftRow);
 						if (IsMatch())
 						{
-							FRowFound = true;
-							FRowIncluded = true;
+							_rowFound = true;
+							_rowIncluded = true;
 							return true;
 						}
-						FLeftTable.Prior();
+						_leftTable.Prior();
 					}
 				}
 					
-				if ((!FRowFound) && (!FRowIncluded))
+				if ((!_rowFound) && (!_rowIncluded))
 				{
-					FRowIncluded = true;
+					_rowIncluded = true;
 					return true;
 				}
 				
-				FRightTable.Prior();
-				FLeftTable.Last();
-				FRowFound = false;
-				FRowIncluded = false;
+				_rightTable.Prior();
+				_leftTable.Last();
+				_rowFound = false;
+				_rowIncluded = false;
 			}
 			return false;
         }
@@ -1833,85 +1833,85 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     // left or right join keys unique
     public class MergeRightJoinTable : RightJoinTable
     {
-		public MergeRightJoinTable(RightOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public MergeRightJoinTable(RightOuterJoinNode node, Program program) : base(node, program) {}
 
 		protected void NextRight()
 		{
-			if (FRightTable.Next())
-				FRightTable.Select(FRightRow);
-			FRowIncluded = false;
-			FRowFound = false;
+			if (_rightTable.Next())
+				_rightTable.Select(_rightRow);
+			_rowIncluded = false;
+			_rowFound = false;
 		}
 		
 		protected void PriorRight()
 		{
-			if (FRightTable.Prior())
-				FRightTable.Select(FRightRow);
-			FRowIncluded = false;
-			FRowFound = false;
+			if (_rightTable.Prior())
+				_rightTable.Select(_rightRow);
+			_rowIncluded = false;
+			_rowFound = false;
 		}
 		
 		protected void NextLeft()
 		{
-			if (FLeftTable.Next())
-				FLeftTable.Select(FLeftRow);
+			if (_leftTable.Next())
+				_leftTable.Select(_leftRow);
 		}
 		
 		protected void PriorLeft()
 		{
-			if (FLeftTable.Prior())
-				FLeftTable.Select(FLeftRow);
+			if (_leftTable.Prior())
+				_leftTable.Select(_leftRow);
 		}
 		
 		protected override bool InternalNext()
 		{
-			if (FRightTable.BOF())
+			if (_rightTable.BOF())
 				NextRight();
-			if (FLeftTable.BOF())
+			if (_leftTable.BOF())
 				NextLeft();
 				
-			if (FRowFound)
+			if (_rowFound)
 				if (Node.RightKey.IsUnique)
 					NextLeft();
 				else
 					NextRight();
 				
-			int LCompareValue;
-			while (!FRightTable.EOF())
+			int compareValue;
+			while (!_rightTable.EOF())
 			{
-				if (!FLeftTable.EOF())
+				if (!_leftTable.EOF())
 				{
-					LCompareValue = CompareKeys(FRightRow, FLeftRow);
-					if (LCompareValue == 0)
+					compareValue = CompareKeys(_rightRow, _leftRow);
+					if (compareValue == 0)
 					{
-						FRowFound = true;
-						FRowIncluded = true;
+						_rowFound = true;
+						_rowIncluded = true;
 						return true;
 					}
-					else if (LCompareValue > 0)
+					else if (compareValue > 0)
 					{
 						NextLeft();
 					}
 					else
 					{
-						if (FRowIncluded)
+						if (_rowIncluded)
 							NextRight();
 						else
 						{
-							FRowFound = false;
-							FRowIncluded = true;
+							_rowFound = false;
+							_rowIncluded = true;
 							return true;
 						}
 					}
 				}
 				else
 				{
-					if (FRowIncluded)
+					if (_rowIncluded)
 						NextRight();
 					else
 					{
-						FRowFound = false;
-						FRowIncluded = true;
+						_rowFound = false;
+						_rowIncluded = true;
 						return true;
 					}
 				}
@@ -1921,53 +1921,53 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override bool InternalPrior()
 		{
-			if (FRightTable.EOF())
+			if (_rightTable.EOF())
 				PriorRight();
-			if (FLeftTable.EOF())
+			if (_leftTable.EOF())
 				PriorLeft();
 				
-			if (FRowFound)
+			if (_rowFound)
 				if (Node.RightKey.IsUnique)
 					PriorLeft();				
 				else
 					PriorRight();
 
-			int LCompareValue;
-			while (!FRightTable.BOF())
+			int compareValue;
+			while (!_rightTable.BOF())
 			{
-				if (!FLeftTable.BOF())
+				if (!_leftTable.BOF())
 				{
-					LCompareValue = CompareKeys(FRightRow, FLeftRow);
-					if (LCompareValue == 0)
+					compareValue = CompareKeys(_rightRow, _leftRow);
+					if (compareValue == 0)
 					{
-						FRowFound = true;
-						FRowIncluded = true;
+						_rowFound = true;
+						_rowIncluded = true;
 						return true;
 					}
-					else if (LCompareValue < 0)
+					else if (compareValue < 0)
 					{
 						PriorLeft();
 					}
 					else
 					{
-						if (FRowIncluded)
+						if (_rowIncluded)
 							PriorRight();
 						else
 						{
-							FRowFound = false;
-							FRowIncluded = true;
+							_rowFound = false;
+							_rowIncluded = true;
 							return true;
 						}
 					}
 				}
 				else
 				{
-					if (FRowIncluded)
+					if (_rowIncluded)
 						PriorRight();
 					else
 					{
-						FRowFound = false;
-						FRowIncluded = true;
+						_rowFound = false;
+						_rowIncluded = true;
 						return true;
 					}
 				}
@@ -1978,21 +1978,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public class UniqueMergeRightJoinTable : RightJoinTable
     {
-		public UniqueMergeRightJoinTable(RightOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public UniqueMergeRightJoinTable(RightOuterJoinNode node, Program program) : base(node, program) {}
 
 		protected override bool InternalNext()
 		{
-			if (FRightTable.Next())
+			if (_rightTable.Next())
 			{
-				FRightTable.Select(FRightRow);
-				FRowFound = false;
+				_rightTable.Select(_rightRow);
+				_rowFound = false;
 
-				while (FLeftTable.Next())
+				while (_leftTable.Next())
 				{
-					FLeftTable.Select(FLeftRow);
+					_leftTable.Select(_leftRow);
 					if (IsMatch())
 					{
-						FRowFound = true;
+						_rowFound = true;
 						return true;
 					}
 				}
@@ -2003,17 +2003,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override bool InternalPrior()
 		{
-			if (FRightTable.Prior())
+			if (_rightTable.Prior())
 			{
-				FRightTable.Select(FRightRow);
-				FRowFound = false;
+				_rightTable.Select(_rightRow);
+				_rowFound = false;
 				
-				while (FLeftTable.Prior())
+				while (_leftTable.Prior())
 				{
-					FLeftTable.Select(FLeftRow);
+					_leftTable.Select(_leftRow);
 					if (IsMatch())
 					{
-						FRowFound = true;
+						_rowFound = true;
 						return true;
 					}
 				}
@@ -2028,50 +2028,50 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     // left join key is unique, right join key is not
 	public class LeftUniqueMergeRightJoinTable : RightJoinTable
 	{
-		public LeftUniqueMergeRightJoinTable(RightOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public LeftUniqueMergeRightJoinTable(RightOuterJoinNode node, Program program) : base(node, program) {}
 		
 		protected override bool InternalNext()
 		{
-			if (FRightTable.BOF())
-				if (FRightTable.Next())
+			if (_rightTable.BOF())
+				if (_rightTable.Next())
 				{
-					FRightTable.Select(FRightRow);
-					FRowFound = false;
-					FRowIncluded = false;
+					_rightTable.Select(_rightRow);
+					_rowFound = false;
+					_rowIncluded = false;
 				}
 				else
 					return false;
 					
-			if (!FRowFound && FRowIncluded)
+			if (!_rowFound && _rowIncluded)
 			{
-				if (FRightTable.Next())
+				if (_rightTable.Next())
 				{
-					FRightTable.Select(FRightRow);
+					_rightTable.Select(_rightRow);
 					if (IsMatch())
 					{
-						FRowFound = true;
-						FRowIncluded = true;
+						_rowFound = true;
+						_rowIncluded = true;
 						return true;
 					}
-					FRowFound = false;
-					FRowIncluded = false;
+					_rowFound = false;
+					_rowIncluded = false;
 				}
 			}
 
-			if (FLeftTable.Next())
+			if (_leftTable.Next())
 			{
-				FLeftTable.Select(FLeftRow);
+				_leftTable.Select(_leftRow);
 				if (IsMatch())
 				{
-					FRowFound = true;
-					FRowIncluded = true;
+					_rowFound = true;
+					_rowIncluded = true;
 					return true;
 				}
 			}
 			
-			if (!FRowIncluded)
+			if (!_rowIncluded)
 			{
-				FRowIncluded = true;
+				_rowIncluded = true;
 				return true;
 			}
 			return false;
@@ -2079,46 +2079,46 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override bool InternalPrior()
 		{
-			if (FRightTable.EOF())
-				if (FRightTable.Prior())
+			if (_rightTable.EOF())
+				if (_rightTable.Prior())
 				{
-					FRightTable.Select(FRightRow);
-					FRowFound = false;
-					FRowIncluded = false;
+					_rightTable.Select(_rightRow);
+					_rowFound = false;
+					_rowIncluded = false;
 				}
 				else
 					return false;
 					
-			if (!FRowFound && FRowIncluded)
+			if (!_rowFound && _rowIncluded)
 			{
-				if (FRightTable.Prior())
+				if (_rightTable.Prior())
 				{
-					FRightTable.Select(FRightRow);
+					_rightTable.Select(_rightRow);
 					if (IsMatch())
 					{
-						FRowFound = true;
-						FRowIncluded = true;
+						_rowFound = true;
+						_rowIncluded = true;
 						return true;
 					}
-					FRowFound = false;
-					FRowIncluded = false;
+					_rowFound = false;
+					_rowIncluded = false;
 				}
 			}
 
-			if (FLeftTable.Prior())
+			if (_leftTable.Prior())
 			{
-				FLeftTable.Select(FLeftRow);
+				_leftTable.Select(_leftRow);
 				if (IsMatch())
 				{
-					FRowFound = true;
-					FRowIncluded = true;
+					_rowFound = true;
+					_rowIncluded = true;
 					return true;
 				}
 			}
 			
-			if (!FRowIncluded)
+			if (!_rowIncluded)
 			{
-				FRowIncluded = true;
+				_rowIncluded = true;
 				return true;
 			}
 			return false;
@@ -2130,50 +2130,50 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     // right join key is unique, left join key is not
 	public class RightUniqueMergeRightJoinTable : RightJoinTable
 	{
-		public RightUniqueMergeRightJoinTable(RightOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public RightUniqueMergeRightJoinTable(RightOuterJoinNode node, Program program) : base(node, program) {}
 
 		protected override bool InternalNext()
 		{
-			if (FLeftTable.BOF())
-				if (FLeftTable.Next())
+			if (_leftTable.BOF())
+				if (_leftTable.Next())
 				{
-					FLeftTable.Select(FLeftRow);
-					FRowFound = false;
-					FRowIncluded = false;
+					_leftTable.Select(_leftRow);
+					_rowFound = false;
+					_rowIncluded = false;
 				}
 				else
 					return false;
 					
-			if (!FRowFound && FRowIncluded)
+			if (!_rowFound && _rowIncluded)
 			{
-				if (FLeftTable.Next())
+				if (_leftTable.Next())
 				{
-					FLeftTable.Select(FLeftRow);
+					_leftTable.Select(_leftRow);
 					if (IsMatch())
 					{
-						FRowFound = true;
-						FRowIncluded = true;
+						_rowFound = true;
+						_rowIncluded = true;
 						return true;
 					}
-					FRowFound = false;
-					FRowIncluded = false;
+					_rowFound = false;
+					_rowIncluded = false;
 				}
 			}
 
-			if (FRightTable.Next())
+			if (_rightTable.Next())
 			{
-				FRightTable.Select(FRightRow);
+				_rightTable.Select(_rightRow);
 				if (IsMatch())
 				{
-					FRowFound = true;
-					FRowIncluded = true;
+					_rowFound = true;
+					_rowIncluded = true;
 					return true;
 				}
 			}
 			
-			if (!FRowIncluded)
+			if (!_rowIncluded)
 			{
-				FRowIncluded = true;
+				_rowIncluded = true;
 				return true;
 			}
 			return false;
@@ -2181,46 +2181,46 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override bool InternalPrior()
 		{
-			if (FLeftTable.EOF())
-				if (FLeftTable.Prior())
+			if (_leftTable.EOF())
+				if (_leftTable.Prior())
 				{
-					FLeftTable.Select(FLeftRow);
-					FRowFound = false;
-					FRowIncluded = false;
+					_leftTable.Select(_leftRow);
+					_rowFound = false;
+					_rowIncluded = false;
 				}
 				else
 					return false;
 					
-			if (!FRowFound && FRowIncluded)
+			if (!_rowFound && _rowIncluded)
 			{
-				if (FLeftTable.Prior())
+				if (_leftTable.Prior())
 				{
-					FLeftTable.Select(FLeftRow);
+					_leftTable.Select(_leftRow);
 					if (IsMatch())
 					{
-						FRowFound = true;
-						FRowIncluded = true;
+						_rowFound = true;
+						_rowIncluded = true;
 						return true;
 					}
-					FRowFound = false;
-					FRowIncluded = false;
+					_rowFound = false;
+					_rowIncluded = false;
 				}
 			}
 
-			if (FRightTable.Prior())
+			if (_rightTable.Prior())
 			{
-				FRightTable.Select(FRightRow);
+				_rightTable.Select(_rightRow);
 				if (IsMatch())
 				{
-					FRowFound = true;
-					FRowIncluded = true;
+					_rowFound = true;
+					_rowIncluded = true;
 					return true;
 				}
 			}
 			
-			if (!FRowIncluded)
+			if (!_rowIncluded)
 			{
-				FRowIncluded = true;
+				_rowIncluded = true;
 				return true;
 			}
 			
@@ -2230,7 +2230,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     
 	public abstract class SearchedRightJoinTable : RightJoinTable
 	{
-		public SearchedRightJoinTable(RightOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public SearchedRightJoinTable(RightOuterJoinNode node, Program program) : base(node, program) {}
 	}
 	
     // left unique searched right join algorithm
@@ -2238,15 +2238,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     // left join key is unique
 	public class LeftUniqueSearchedRightJoinTable : SearchedRightJoinTable
 	{
-		public LeftUniqueSearchedRightJoinTable(RightOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public LeftUniqueSearchedRightJoinTable(RightOuterJoinNode node, Program program) : base(node, program) {}
 		
 		protected override bool InternalNext()
 		{
-			if (FRightTable.Next())
+			if (_rightTable.Next())
 			{
-				FRightTable.Select(FRightRow);
+				_rightTable.Select(_rightRow);
 				GetLeftKey();
-				FRowFound = FLeftTable.FindKey(FLeftRow);
+				_rowFound = _leftTable.FindKey(_leftRow);
 				return true;
 			}
 			return false;
@@ -2254,11 +2254,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override bool InternalPrior()
 		{
-			if (FRightTable.Prior())
+			if (_rightTable.Prior())
 			{
-				FRightTable.Select(FRightRow);
+				_rightTable.Select(_rightRow);
 				GetLeftKey();
-				FRowFound = FLeftTable.FindKey(FLeftRow);
+				_rowFound = _leftTable.FindKey(_leftRow);
 				return true;
 			}
 			return false;
@@ -2270,58 +2270,58 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     // left join key is nonunique
     public class NonUniqueSearchedRightJoinTable : SearchedRightJoinTable
     {
-		public NonUniqueSearchedRightJoinTable(RightOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
+		public NonUniqueSearchedRightJoinTable(RightOuterJoinNode node, Program program) : base(node, program) {}
 
 		protected bool OnLeftRow()
 		{
-			if (FLeftTable.BOF() || FLeftTable.EOF())
+			if (_leftTable.BOF() || _leftTable.EOF())
 				return false;
 				
-			Row LCurrentKey = FLeftTable.GetKey();
+			Row currentKey = _leftTable.GetKey();
 			try
 			{
-				return CompareKeys(LCurrentKey, FLeftRow) == 0;
+				return CompareKeys(currentKey, _leftRow) == 0;
 			}
 			finally
 			{
-				LCurrentKey.Dispose();
+				currentKey.Dispose();
 			}
 		}
 
-		protected bool FindLeftKey(bool AForward)
+		protected bool FindLeftKey(bool forward)
 		{
-			FLeftTable.FindNearest(FLeftRow);
+			_leftTable.FindNearest(_leftRow);
 			if (OnLeftRow())
 			{
-				if (AForward)
+				if (forward)
 				{
-					while (!FLeftTable.BOF())
+					while (!_leftTable.BOF())
 					{
 						if (OnLeftRow())
-							FLeftTable.Prior();
+							_leftTable.Prior();
 						else
 						{
-							FLeftTable.Next();
+							_leftTable.Next();
 							break;
 						}
 					}
-					if (FLeftTable.BOF())
-						FLeftTable.Next();
+					if (_leftTable.BOF())
+						_leftTable.Next();
 				}
 				else
 				{
-					while (!FLeftTable.EOF())
+					while (!_leftTable.EOF())
 					{
 						if (OnLeftRow())
-							FLeftTable.Next();
+							_leftTable.Next();
 						else
 						{
-							FLeftTable.Prior();
+							_leftTable.Prior();
 							break;
 						}
 					}
-					if (FLeftTable.EOF())
-						FLeftTable.Prior();
+					if (_leftTable.EOF())
+						_leftTable.Prior();
 				}
 				return true;
 			}
@@ -2330,16 +2330,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected bool NextRight()
 		{
-			if (FRightTable.Next())
+			if (_rightTable.Next())
 			{
-				FRowFound = false;
-				FRowIncluded = false;
-				FRightTable.Select(FRightRow);
+				_rowFound = false;
+				_rowIncluded = false;
+				_rightTable.Select(_rightRow);
 				GetLeftKey();
 				if (FindLeftKey(true))
 				{
-					FRowFound = true;
-					FRowIncluded = true;
+					_rowFound = true;
+					_rowIncluded = true;
 				}
 				return true;
 			}
@@ -2348,16 +2348,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected bool PriorRight()
 		{
-			if (FRightTable.Prior())
+			if (_rightTable.Prior())
 			{
-				FRowFound = false;
-				FRowIncluded = false;
-				FRightTable.Select(FRightRow);
+				_rowFound = false;
+				_rowIncluded = false;
+				_rightTable.Select(_rightRow);
 				GetLeftKey();
 				if (FindLeftKey(false))
 				{
-					FRowFound = true;
-					FRowIncluded = true;
+					_rowFound = true;
+					_rowIncluded = true;
 				}
 				return true;
 			}
@@ -2366,14 +2366,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override bool InternalNext()
 		{
-			if (FRightTable.BOF() || !FRowFound)
+			if (_rightTable.BOF() || !_rowFound)
 				return NextRight();
 
-			if (FRowFound)
+			if (_rowFound)
 			{
-				while (FLeftTable.Next())
+				while (_leftTable.Next())
 				{
-					FLeftTable.Select(FLeftRow);
+					_leftTable.Select(_leftRow);
 					if (IsMatch())
 						return true;
 					else
@@ -2386,14 +2386,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override bool InternalPrior()
 		{
-			if (FRightTable.EOF() || !FRowFound)
+			if (_rightTable.EOF() || !_rowFound)
 				return PriorRight();
 			
-			if (FRowFound)
+			if (_rowFound)
 			{
-				while (FLeftTable.Prior())
+				while (_leftTable.Prior())
 				{
-					FLeftTable.Select(FLeftRow);
+					_leftTable.Select(_leftRow);
 					if (IsMatch())
 						return true;
 					else

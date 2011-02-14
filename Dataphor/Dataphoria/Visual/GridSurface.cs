@@ -13,10 +13,10 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 {
 	public class GridSurface : Surface
 	{
-		public const int CCellWidth = 150;
-		public const int CCellHeight = 78;
-		public const int CGutterWidth = 30;
-		public const int CGutterHeight = 30;
+		public const int CellWidth = 150;
+		public const int CellHeight = 78;
+		public const int GutterWidth = 30;
+		public const int GutterHeight = 30;
 
 		public GridSurface()
 		{
@@ -25,21 +25,21 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 			SuspendLayout();
 			try
 			{
-				FHScrollBar = new HScrollBar();
-				FHScrollBar.SmallChange = 1;
-				FHScrollBar.Minimum = 0;
-				FHScrollBar.TabStop = false;
-				FHScrollBar.Scroll += new ScrollEventHandler(HScrollBarScrolled);
-				Controls.Add(FHScrollBar);
+				_hScrollBar = new HScrollBar();
+				_hScrollBar.SmallChange = 1;
+				_hScrollBar.Minimum = 0;
+				_hScrollBar.TabStop = false;
+				_hScrollBar.Scroll += new ScrollEventHandler(HScrollBarScrolled);
+				Controls.Add(_hScrollBar);
 
-				FVScrollBar = new VScrollBar();
-				FVScrollBar.SmallChange = 1;
-				FVScrollBar.Minimum = 0;
-				FVScrollBar.TabStop = false;
-				FVScrollBar.Scroll += new ScrollEventHandler(VScrollBarScrolled);
-				Controls.Add(FVScrollBar);
+				_vScrollBar = new VScrollBar();
+				_vScrollBar.SmallChange = 1;
+				_vScrollBar.Minimum = 0;
+				_vScrollBar.TabStop = false;
+				_vScrollBar.Scroll += new ScrollEventHandler(VScrollBarScrolled);
+				Controls.Add(_vScrollBar);
 
-				FInitialLocation = true;
+				_initialLocation = true;
 			}
 			finally
 			{
@@ -47,170 +47,170 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 			}
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
 			}
 			finally
 			{
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 
 		#region Sizing & Scrolling
 
-		private bool FInitialLocation;
-		private Rectangle FActiveRect = Rectangle.Empty;
-		private Rectangle FRange;
-		private HScrollBar FHScrollBar;
-		private VScrollBar FVScrollBar;
+		private bool _initialLocation;
+		private Rectangle _activeRect = Rectangle.Empty;
+		private Rectangle _range;
+		private HScrollBar _hScrollBar;
+		private VScrollBar _vScrollBar;
 
-		private void HScrollBarScrolled(object ASender, ScrollEventArgs AArgs)
+		private void HScrollBarScrolled(object sender, ScrollEventArgs args)
 		{
-			NavigateTo(new Point(AArgs.NewValue + FRange.X, FActiveRect.Y), false);
+			NavigateTo(new Point(args.NewValue + _range.X, _activeRect.Y), false);
 		}
 
-		private void VScrollBarScrolled(object ASender, ScrollEventArgs AArgs)
+		private void VScrollBarScrolled(object sender, ScrollEventArgs args)
 		{
-			NavigateTo(new Point(FActiveRect.X, AArgs.NewValue + FRange.Y), false);
+			NavigateTo(new Point(_activeRect.X, args.NewValue + _range.Y), false);
 		}
 
-		protected override bool ProcessDialogKey(Keys AKey)
+		protected override bool ProcessDialogKey(Keys key)
 		{
-			switch (AKey)
+			switch (key)
 			{
 				case Keys.Alt | Keys.Left :
-					NavigateTo(new Point(Math.Max(FRange.X, FActiveRect.X - 1), FActiveRect.Y), false);
+					NavigateTo(new Point(Math.Max(_range.X, _activeRect.X - 1), _activeRect.Y), false);
 					break;
 				case Keys.Alt | Keys.Up :
-					NavigateTo(new Point(FActiveRect.X, Math.Max(FRange.Y, FActiveRect.Y - 1)), false);
+					NavigateTo(new Point(_activeRect.X, Math.Max(_range.Y, _activeRect.Y - 1)), false);
 					break;
 				case Keys.Alt | Keys.Right :
-					NavigateTo(new Point(Math.Min(FRange.Right - FActiveRect.Width, FActiveRect.X + 1), FActiveRect.Y), false);
+					NavigateTo(new Point(Math.Min(_range.Right - _activeRect.Width, _activeRect.X + 1), _activeRect.Y), false);
 					break;
 				case Keys.Alt | Keys.Down :
-					NavigateTo(new Point(FActiveRect.X, Math.Min(FRange.Bottom - FActiveRect.Height, FActiveRect.Y + 1)), false);
+					NavigateTo(new Point(_activeRect.X, Math.Min(_range.Bottom - _activeRect.Height, _activeRect.Y + 1)), false);
 					break;
 				default :
-					return base.ProcessDialogKey(AKey);
+					return base.ProcessDialogKey(key);
 			}
 			return true;
 		}
 
-		private static int Constrain(int AValue, int AMin, int AMax)
+		private static int Constrain(int tempValue, int min, int max)
 		{
-			if (AValue > AMax)
-				AValue = AMax;
-			if (AValue < AMin)
-				AValue = AMin;
-			return AValue;
+			if (tempValue > max)
+				tempValue = max;
+			if (tempValue < min)
+				tempValue = min;
+			return tempValue;
 		}
 
-		private void NavigateTo(Point ALocation, bool ACenter)
+		private void NavigateTo(Point location, bool center)
 		{
-			if (ALocation != FActiveRect.Location)
+			if (location != _activeRect.Location)
 			{
-				FInitialLocation = false;
+				_initialLocation = false;
 				// Translate to center
-				if (ACenter)
+				if (center)
 				{
-					ALocation.X -= (FActiveRect.Width / 2);
-					ALocation.Y -= (FActiveRect.Height / 2);
+					location.X -= (_activeRect.Width / 2);
+					location.Y -= (_activeRect.Height / 2);
 				}
-				FActiveRect.Location = ALocation;
+				_activeRect.Location = location;
 				UpdateDesigners(true);	// even if layout weren't supressed, there is no guarantee that a layout will be performed
 				UpdateScrollBars();
 				PerformLayout();
 			}
 		}
 
-		private Point ClientToGrid(Point ALocation)
+		private Point ClientToGrid(Point location)
 		{
-			return new Point((ALocation.X / CCellWidth) + FActiveRect.X, (ALocation.Y / CCellHeight) + FActiveRect.Y);
+			return new Point((location.X / CellWidth) + _activeRect.X, (location.Y / CellHeight) + _activeRect.Y);
 		}
 
-		private Point GridToClient(Point ALocation)
+		private Point GridToClient(Point location)
 		{
-			return new Point((ALocation.X - FActiveRect.X) * CCellWidth, (ALocation.Y - FActiveRect.Y) * CCellHeight);
+			return new Point((location.X - _activeRect.X) * CellWidth, (location.Y - _activeRect.Y) * CellHeight);
 		}
 
-		protected override void OnResize(EventArgs AArgs)
+		protected override void OnResize(EventArgs args)
 		{
 			if (IsHandleCreated)
 				UpdateSurface();
-			base.OnResize(AArgs);
+			base.OnResize(args);
 		}
 
-		protected override void OnHandleCreated(EventArgs AArgs)
+		protected override void OnHandleCreated(EventArgs args)
 		{
-			base.OnHandleCreated(AArgs);
+			base.OnHandleCreated(args);
 			UpdateSurface();
 		}
 
-		protected override void OnLayout(LayoutEventArgs AArgs)
+		protected override void OnLayout(LayoutEventArgs args)
 		{
 			// Don't call base
 
-			if (FInitialLocation)
+			if (_initialLocation)
 			{
 				UpdateActiveSize();
 				UpdateRange();
-				FActiveRect.Location = 
+				_activeRect.Location = 
 					new Point
 					(
-						FRange.X + (FRange.Width / 2) - (FActiveRect.Width / 2), 
-						FRange.Y + (FRange.Height / 2) - (FActiveRect.Height / 2)
+						_range.X + (_range.Width / 2) - (_activeRect.Width / 2), 
+						_range.Y + (_range.Height / 2) - (_activeRect.Height / 2)
 					);
 				UpdateDesigners(true);
 				UpdateScrollBars();
 			}
 
-			IElementDesigner LDesigner;
-			foreach (DictionaryEntry LEntry in FDesigners)
+			IElementDesigner designer;
+			foreach (DictionaryEntry entry in _designers)
 			{
-				LDesigner = (IElementDesigner)LEntry.Value;
-				LDesigner.Bounds = 
+				designer = (IElementDesigner)entry.Value;
+				designer.Bounds = 
 					new Rectangle
 					(
-						GridToClient(FGrid.GetPosition(LDesigner.Element)) + 
-							new Size(CGutterWidth / 2, CGutterHeight / 2),
-						new Size(CCellWidth - CGutterWidth, CCellHeight - CGutterHeight)
+						GridToClient(_grid.GetPosition(designer.Element)) + 
+							new Size(GutterWidth / 2, GutterHeight / 2),
+						new Size(CellWidth - GutterWidth, CellHeight - GutterHeight)
 					);
 			}
-			Size LClientSize = ClientSize;
-			FVScrollBar.Left = LClientSize.Width - FVScrollBar.Width;
-			FVScrollBar.Height = LClientSize.Height - FHScrollBar.Height;
-			FHScrollBar.Top = LClientSize.Height - FHScrollBar.Height;
-			FHScrollBar.Width = LClientSize.Width - FVScrollBar.Width;
+			Size clientSize = ClientSize;
+			_vScrollBar.Left = clientSize.Width - _vScrollBar.Width;
+			_vScrollBar.Height = clientSize.Height - _hScrollBar.Height;
+			_hScrollBar.Top = clientSize.Height - _hScrollBar.Height;
+			_hScrollBar.Width = clientSize.Width - _vScrollBar.Width;
 		}
 
 		/// <summary> Determines the currently visible portion of the grid. </summary>
 		/// <remarks> Should be called any time the ClientSize changes. </remarks>
 		private void UpdateActiveSize()
 		{
-			Size LClientSize = ClientSize - new Size(FVScrollBar.Width, FHScrollBar.Height);
-			FActiveRect.Width = ((LClientSize.Width - 1) / CCellWidth) + 1;
-			FActiveRect.Height = ((LClientSize.Height - 1) / CCellHeight) + 1;
-			FHScrollBar.LargeChange = Math.Max(FActiveRect.Width, 1);
-			FVScrollBar.LargeChange = Math.Max(FActiveRect.Height, 1);
+			Size clientSize = ClientSize - new Size(_vScrollBar.Width, _hScrollBar.Height);
+			_activeRect.Width = ((clientSize.Width - 1) / CellWidth) + 1;
+			_activeRect.Height = ((clientSize.Height - 1) / CellHeight) + 1;
+			_hScrollBar.LargeChange = Math.Max(_activeRect.Width, 1);
+			_vScrollBar.LargeChange = Math.Max(_activeRect.Height, 1);
 		}
 
 		/// <summary> Updates the overall grid range. </summary>
 		/// <remarks> Called when the grid extremes, or the Active Size changes. </remarks>
 		private void UpdateRange()
 		{
-			FRange = FGrid.GetExtremes();
-			FRange.Inflate(new Size(FActiveRect.Width - 1, FActiveRect.Height - 1));	// Pad by visible size on all sides
+			_range = _grid.GetExtremes();
+			_range.Inflate(new Size(_activeRect.Width - 1, _activeRect.Height - 1));	// Pad by visible size on all sides
 			
-			FHScrollBar.Maximum = FRange.Width;
-			FVScrollBar.Maximum = FRange.Height;
+			_hScrollBar.Maximum = _range.Width;
+			_vScrollBar.Maximum = _range.Height;
 		}
 
 		private void UpdateScrollBars()
 		{
-			FHScrollBar.Value = Constrain(FActiveRect.X - FRange.X, FHScrollBar.Minimum, FHScrollBar.Maximum);
-			FVScrollBar.Value = Constrain(FActiveRect.Y - FRange.Y, FVScrollBar.Minimum, FVScrollBar.Maximum);
+			_hScrollBar.Value = Constrain(_activeRect.X - _range.X, _hScrollBar.Minimum, _hScrollBar.Maximum);
+			_vScrollBar.Value = Constrain(_activeRect.Y - _range.Y, _vScrollBar.Minimum, _vScrollBar.Maximum);
 		}
 
 		/// <summary> Updates the visible elements from the grid. </summary>
@@ -219,35 +219,35 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 		///		Will only cause a layout if a designer is added or removed and
 		///		  ASupressLayout is false.
 		/// </remarks>
-		private void UpdateDesigners(bool ASupressLayout)
+		private void UpdateDesigners(bool supressLayout)
 		{
-			object[] LDisplayObjects = (object[])FGrid.QueryRect(FActiveRect);
-			object[] LDesigned = new object[FDesigners.Count];
-			FDesigners.Keys.CopyTo(LDesigned, 0);	// Copy designers list for enumeration
-			bool LLayoutRequired = false;
+			object[] displayObjects = (object[])_grid.QueryRect(_activeRect);
+			object[] designed = new object[_designers.Count];
+			_designers.Keys.CopyTo(designed, 0);	// Copy designers list for enumeration
+			bool layoutRequired = false;
 
 			SuspendLayout();
 			try
 			{
 				// Remove designers that are no longer visible
-				foreach (object LElement in LDesigned)
-					if (Array.IndexOf(LDisplayObjects, LElement) < 0)
+				foreach (object element in designed)
+					if (Array.IndexOf(displayObjects, element) < 0)
 					{
-						RemoveDesigner(LElement);
-						LLayoutRequired = true;
+						RemoveDesigner(element);
+						layoutRequired = true;
 					}
 				
 				// Add designers that have come into view
-				foreach (object LElement in LDisplayObjects)
-					if (!FDesigners.Contains(LElement))
+				foreach (object element in displayObjects)
+					if (!_designers.Contains(element))
 					{
-						AddDesigner(LElement);
-						LLayoutRequired = true;
+						AddDesigner(element);
+						layoutRequired = true;
 					}
 			}
 			finally
 			{
-				ResumeLayout(!ASupressLayout && LLayoutRequired);
+				ResumeLayout(!supressLayout && layoutRequired);
 			}
 		}
 
@@ -263,58 +263,58 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 
 		#region Element Maintenance
 
-		private SparseGrid FGrid = new SparseGrid();
+		private SparseGrid _grid = new SparseGrid();
 		public SparseGrid Grid
 		{
-			get { return FGrid; }
+			get { return _grid; }
 		}
 
-		private Point InternalPlaceElement(object AElement)
+		private Point InternalPlaceElement(object element)
 		{
 			// TODO: Better element placement (vacancy detection to the SparseGrid FindNearestVacancy(x,y))
-			Point LPoint = Point.Empty;
-			while (FGrid[LPoint] != null)
+			Point point = Point.Empty;
+			while (_grid[point] != null)
 			{
-				if (LPoint.Y > 5)
+				if (point.Y > 5)
 				{
-					LPoint.Y = 0;
-					LPoint.X++;
+					point.Y = 0;
+					point.X++;
 				}
 				else
-					LPoint.Y++;
+					point.Y++;
 			}
-			InternalAddElement(AElement, LPoint);
-			return LPoint;
+			InternalAddElement(element, point);
+			return point;
 		}
 
-		private void InternalAddElement(object AElement, Point APoint)
+		private void InternalAddElement(object element, Point point)
 		{
-			Error.DebugAssertFail(FGrid[APoint] == null, "Attempting to add an Element to a non-vacant space");
-			FGrid[APoint] = AElement;
+			Error.DebugAssertFail(_grid[point] == null, "Attempting to add an Element to a non-vacant space");
+			_grid[point] = element;
 		}
 
-		public void PlaceElement(object AElement)
+		public void PlaceElement(object element)
 		{
-			if (FActiveRect.Contains(InternalPlaceElement(AElement)))
-				AddDesigner(AElement);
+			if (_activeRect.Contains(InternalPlaceElement(element)))
+				AddDesigner(element);
 		}
 
-		public void AddElement(object AElement, Point APoint)
+		public void AddElement(object element, Point point)
 		{
-			InternalAddElement(AElement, APoint);
-			if (FActiveRect.Contains(APoint))
-				AddDesigner(AElement);
+			InternalAddElement(element, point);
+			if (_activeRect.Contains(point))
+				AddDesigner(element);
 		}
 
-		private void InternalRemoveElement(object AElement)
+		private void InternalRemoveElement(object element)
 		{
-			FGrid.Remove(AElement);
+			_grid.Remove(element);
 		}
 
-		public void RemoveElement(object AElement)
+		public void RemoveElement(object element)
 		{
-			InternalRemoveElement(AElement);
-			RemoveDesigner(AElement);
+			InternalRemoveElement(element);
+			RemoveDesigner(element);
 		}
 
 		#endregion
@@ -322,131 +322,131 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 		#region Designers
 
 		// List of active designers by their element
-		private Hashtable FDesigners = new Hashtable();
+		private Hashtable _designers = new Hashtable();
 
 		public event GetDesignerHandler OnGetDesigner;
 
-		protected virtual IElementDesigner GetDesigner(object AElement)
+		protected virtual IElementDesigner GetDesigner(object element)
 		{
 			if (OnGetDesigner != null)
-				return OnGetDesigner(AElement);
+				return OnGetDesigner(element);
 			else
 				return null;
 		}
 
-		private void AddDesigner(object AElement)
+		private void AddDesigner(object element)
 		{
-			IElementDesigner LDesigner = GetDesigner(AElement);
-			if (LDesigner != null)
+			IElementDesigner designer = GetDesigner(element);
+			if (designer != null)
 			{
 				try
 				{
-					FDesigners.Add(AElement, LDesigner);
-					LDesigner.Disposed += new EventHandler(DesignerDisposed);
-					Controls.Add((Control)LDesigner);
+					_designers.Add(element, designer);
+					designer.Disposed += new EventHandler(DesignerDisposed);
+					Controls.Add((Control)designer);
 				}
 				catch
 				{
-					LDesigner.Dispose();
+					designer.Dispose();
 					throw;
 				}
 			}
 		}
 
-		private void RemoveDesigner(object AElement)
+		private void RemoveDesigner(object element)
 		{
-			IElementDesigner LDesigner = (IElementDesigner)FDesigners[AElement];
-			if (LDesigner != null)
+			IElementDesigner designer = (IElementDesigner)_designers[element];
+			if (designer != null)
 			{
-				Controls.Remove((Control)LDesigner);
-				FDesigners.Remove(AElement);
-				LDesigner.Disposed -= new EventHandler(DesignerDisposed);
+				Controls.Remove((Control)designer);
+				_designers.Remove(element);
+				designer.Disposed -= new EventHandler(DesignerDisposed);
 			}
 		}
 
-		private void DesignerDisposed(object ASender, EventArgs AArgs)
+		private void DesignerDisposed(object sender, EventArgs args)
 		{
-			FDesigners.Remove(ASender);
-			((IElementDesigner)ASender).Disposed -= new EventHandler(DesignerDisposed);
+			_designers.Remove(sender);
+			((IElementDesigner)sender).Disposed -= new EventHandler(DesignerDisposed);
 		}
 
 		#endregion
 
 		#region Drag & Drop
 
-		private bool FIsDragTarget;
-		private Point FDragLocation;	// In grid coords
+		private bool _isDragTarget;
+		private Point _dragLocation;	// In grid coords
 
-		private void SetDragState(bool AIsDragTarget, Point ADragLocation)
+		private void SetDragState(bool isDragTarget, Point dragLocation)
 		{
-			if ((AIsDragTarget != FIsDragTarget) || (FIsDragTarget && (FDragLocation != ADragLocation)))
+			if ((isDragTarget != _isDragTarget) || (_isDragTarget && (_dragLocation != dragLocation)))
 			{
-				if (FIsDragTarget)
-					Invalidate(GetCellRect(FDragLocation));
-				FIsDragTarget = AIsDragTarget;
-				if (FIsDragTarget)
+				if (_isDragTarget)
+					Invalidate(GetCellRect(_dragLocation));
+				_isDragTarget = isDragTarget;
+				if (_isDragTarget)
 				{
-					FDragLocation = ADragLocation;
-					Invalidate(GetCellRect(FDragLocation));
+					_dragLocation = dragLocation;
+					Invalidate(GetCellRect(_dragLocation));
 				}
 			}
 		}
 
-		private void GetDragState(ref bool AIsDragTarget, ref Point ADragLocation, DragEventArgs AArgs)
+		private void GetDragState(ref bool isDragTarget, ref Point dragLocation, DragEventArgs args)
 		{
-			ElementDesignerData LData = AArgs.Data as ElementDesignerData;
-			if (LData != null)
+			ElementDesignerData data = args.Data as ElementDesignerData;
+			if (data != null)
 			{
-				object LElement = 
-					FGrid
+				object element = 
+					_grid
 					[
-						ClientToGrid(PointToClient(new Point(AArgs.X, AArgs.Y)))
+						ClientToGrid(PointToClient(new Point(args.X, args.Y)))
 					];
-				if (LElement == null)
+				if (element == null)
 				{
-					ADragLocation = ClientToGrid(PointToClient(new Point(AArgs.X, AArgs.Y)));
-					AIsDragTarget = true;
+					dragLocation = ClientToGrid(PointToClient(new Point(args.X, args.Y)));
+					isDragTarget = true;
 				}
 			}
 		}
 
-		protected override void OnDragOver(DragEventArgs AArgs)
+		protected override void OnDragOver(DragEventArgs args)
 		{
-			base.OnDragEnter(AArgs);
+			base.OnDragEnter(args);
 
-			bool LIsDragTarget = false;
-			Point LDragLocation = Point.Empty;
-			GetDragState(ref LIsDragTarget, ref LDragLocation, AArgs);
-			if (LIsDragTarget)
-				AArgs.Effect = DragDropEffects.Move;
+			bool isDragTarget = false;
+			Point dragLocation = Point.Empty;
+			GetDragState(ref isDragTarget, ref dragLocation, args);
+			if (isDragTarget)
+				args.Effect = DragDropEffects.Move;
 			else
-				AArgs.Effect = DragDropEffects.None;
-			SetDragState(LIsDragTarget, LDragLocation);
+				args.Effect = DragDropEffects.None;
+			SetDragState(isDragTarget, dragLocation);
 		}
 
-		protected override void OnDragLeave(EventArgs AArgs)
+		protected override void OnDragLeave(EventArgs args)
 		{
-			base.OnDragLeave(AArgs);
+			base.OnDragLeave(args);
 
 			SetDragState(false, Point.Empty);
 		}
 
-		protected override void OnDragDrop(DragEventArgs AArgs)
+		protected override void OnDragDrop(DragEventArgs args)
 		{
-			base.OnDragDrop(AArgs);
+			base.OnDragDrop(args);
 
 			SetDragState(false, Point.Empty);
 
-			bool LIsDragTarget = false;
-			Point LDragLocation = Point.Empty;
-			GetDragState(ref LIsDragTarget, ref LDragLocation, AArgs);
-			if (LIsDragTarget)
+			bool isDragTarget = false;
+			Point dragLocation = Point.Empty;
+			GetDragState(ref isDragTarget, ref dragLocation, args);
+			if (isDragTarget)
 			{
-				ElementDesignerData LData = AArgs.Data as ElementDesignerData;
-				if (LData != null)
+				ElementDesignerData data = args.Data as ElementDesignerData;
+				if (data != null)
 				{
-					FGrid[FGrid.GetPosition(LData.Element)] = null;
-					FGrid[LDragLocation] = LData.Element;
+					_grid[_grid.GetPosition(data.Element)] = null;
+					_grid[dragLocation] = data.Element;
 					UpdateRange();
 					UpdateDesigners(true);
 					UpdateScrollBars();
@@ -459,27 +459,27 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 
 		#region Painting
 
-		private Rectangle GetCellRect(Point ALocation)
+		private Rectangle GetCellRect(Point location)
 		{
-			return new Rectangle(GridToClient(ALocation), new Size(CCellWidth, CCellHeight));
+			return new Rectangle(GridToClient(location), new Size(CellWidth, CellHeight));
 		}
 
-		protected override void OnPaint(PaintEventArgs AArgs)
+		protected override void OnPaint(PaintEventArgs args)
 		{
-			base.OnPaint(AArgs);
-			if (FIsDragTarget)
+			base.OnPaint(args);
+			if (_isDragTarget)
 			{
-				Rectangle LRect = GetCellRect(FDragLocation);
-				if (AArgs.Graphics.IsVisible(LRect))
+				Rectangle rect = GetCellRect(_dragLocation);
+				if (args.Graphics.IsVisible(rect))
 				{
-					LRect.Inflate(-(CGutterWidth / 2), -(CGutterHeight / 2));
-					using (SolidBrush LBrush = new SolidBrush(Color.FromArgb(70, Color.Gray)))
+					rect.Inflate(-(GutterWidth / 2), -(GutterHeight / 2));
+					using (SolidBrush brush = new SolidBrush(Color.FromArgb(70, Color.Gray)))
 					{
-						AArgs.Graphics.FillRectangle(LBrush, LRect);
+						args.Graphics.FillRectangle(brush, rect);
 					}
-					using (Pen LPen = new Pen(Color.Black))
+					using (Pen pen = new Pen(Color.Black))
 					{
-						AArgs.Graphics.DrawRectangle(LPen, LRect);
+						args.Graphics.DrawRectangle(pen, rect);
 					}
 				}
 			}
@@ -504,66 +504,66 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 	public class SparseGrid
 	{
 		/// <summary> Get or set the element at a specific point. </summary>
-		public object this[Point APoint]
+		public object this[Point point]
 		{
 			get 
 			{
-				KDTree.Node LNode = FTree.Query(APoint);
-				if (LNode != null)
-					return LNode.Object;
+				KDTree.Node node = _tree.Query(point);
+				if (node != null)
+					return node.Object;
 				else
 					return null;
 			}
 			set 
 			{
 				// Remove any item at this spot
-				KDTree.Node LNode = FTree.Query(APoint);
-				if (LNode != null)
+				KDTree.Node node = _tree.Query(point);
+				if (node != null)
 				{
-					FTree.Remove(LNode);
-					FNodes.Remove(LNode.Object);
+					_tree.Remove(node);
+					_nodes.Remove(node.Object);
 				}
 								
 				// Add the new item at the spot
 				if (value != null)
 				{
-					LNode = new KDTree.Node(APoint, value);
-					FTree.Add(LNode);
-					FNodes.Add(value, LNode);
+					node = new KDTree.Node(point, value);
+					_tree.Add(node);
+					_nodes.Add(value, node);
 				}
 			}
 		}
 
 		/// <summary> Get all objects within a given range of the plane. </summary>
-		public object[] QueryRect(Rectangle ARect)
+		public object[] QueryRect(Rectangle rect)
 		{
-			ArrayList LNodes = FTree.Query(ARect);
-			object[] LResult = new object[LNodes.Count];
-			for (int i = 0; i < LResult.Length; i++)
-				LResult[i] = ((KDTree.Node)LNodes[i]).Object;
-			return LResult;
+			ArrayList nodes = _tree.Query(rect);
+			object[] result = new object[nodes.Count];
+			for (int i = 0; i < result.Length; i++)
+				result[i] = ((KDTree.Node)nodes[i]).Object;
+			return result;
 		}
 
 		/// <summary> Get the position of a given object. </summary>
-		public Point GetPosition(object AElement)
+		public Point GetPosition(object element)
 		{
-			return ((KDTree.Node)FNodes[AElement]).Location;
+			return ((KDTree.Node)_nodes[element]).Location;
 		}
 
 		/// <summary> Removes the object at a given point. </summary>
-		public void Remove(object AElement)
+		public void Remove(object element)
 		{
-			KDTree.Node LNode = (KDTree.Node)FNodes[AElement];
-			FTree.Remove(LNode);
-			FNodes.Remove(AElement);
+			KDTree.Node node = (KDTree.Node)_nodes[element];
+			_tree.Remove(node);
+			_nodes.Remove(element);
 		}
 
-		private KDTree FTree = new KDTree();
-		private Hashtable FNodes = new Hashtable(10);
+		private KDTree _tree = new KDTree();
+		private Hashtable _nodes = new Hashtable(10);
 
 		public Rectangle GetExtremes()
 		{
-			return FTree.GetExtremes();
+			return _tree.GetExtremes();
 		}
 	}
 
@@ -571,258 +571,258 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 	/// <remarks> This tree is bucketless so no two nodes can occupy the same point. </remarks>
 	public class KDTree
 	{
-		public const int CDimensions = 2;
+		public const int Dimensions = 2;
 
-		public bool Add(Node ANode)
+		public bool Add(Node node)
 		{
-			if (FRoot == null)
+			if (_root == null)
 			{
-				FRoot = ANode;
+				_root = node;
 				return true;
 			}
 			else
 			{
-				Node LNode = FRoot;
-				int LDimension = 0;
+				Node localNode = _root;
+				int dimension = 0;
 				for (;;)
 				{
-					if (ANode.FLocation[LDimension] < LNode.FLocation[LDimension])
-						if (LNode.FLeft == null)
+					if (node._location[dimension] < localNode._location[dimension])
+						if (localNode._left == null)
 						{
-							LNode.FLeft = ANode;
+							localNode._left = node;
 							return true;
 						}
 						else
-							LNode = LNode.FLeft;
-					else if (ANode.FLocation[LDimension] >= LNode.FLocation[LDimension])
+							localNode = localNode._left;
+					else if (node._location[dimension] >= localNode._location[dimension])
 					{
-						if ((ANode.FLocation[0] == LNode.FLocation[0]) && (ANode.FLocation[1] == LNode.FLocation[1]))
+						if ((node._location[0] == localNode._location[0]) && (node._location[1] == localNode._location[1]))
 							return false;
 						else
-							if (LNode.FRight == null)
+							if (localNode._right == null)
 							{
-								LNode.FRight = ANode;
+								localNode._right = node;
 								return true;
 							}
 							else
-								LNode = LNode.FRight;
+								localNode = localNode._right;
 					}
-					LDimension = (LDimension + 1) % CDimensions;
+					dimension = (dimension + 1) % Dimensions;
 				}
 			}
 		}
 
 		/// <summary> Re-add broken branch of the tree. </summary>
-		private void Readd(Node ANode)
+		private void Readd(Node node)
 		{
-			if (ANode != null)
+			if (node != null)
 			{
-				Node LLeft = ANode.FLeft;
-				ANode.FLeft = null;
-				Node LRight = ANode.FRight;
-				ANode.FRight = null;
-				Add(ANode);
-				Readd(LLeft);
-				Readd(LRight);
+				Node left = node._left;
+				node._left = null;
+				Node right = node._right;
+				node._right = null;
+				Add(node);
+				Readd(left);
+				Readd(right);
 			}
 		}
 
 		/// <remarks> If the node is null or not found, nothing happens. </remarks>
-		public void Remove(Node ANode)
+		public void Remove(Node node)
 		{
-			if (ANode != null)
+			if (node != null)
 			{
-				if (FRoot == ANode)
+				if (_root == node)
 				{
-					FRoot = null;
-					Readd(ANode.FLeft);
-					Readd(ANode.FRight);
+					_root = null;
+					Readd(node._left);
+					Readd(node._right);
 				}
 				else
 				{
-					Node LNode = FRoot;
-					int LDimension = 0;
-					while (LNode != null)
+					Node localNode = _root;
+					int dimension = 0;
+					while (localNode != null)
 					{
-						if (ANode == LNode.FLeft)
+						if (node == localNode._left)
 						{
-							LNode.FLeft = null;
-							Readd(ANode.FLeft);
-							Readd(ANode.FRight);
+							localNode._left = null;
+							Readd(node._left);
+							Readd(node._right);
 							return;
 						}
-						if (ANode == LNode.FRight)
+						if (node == localNode._right)
 						{
-							LNode.FRight = null;
-							Readd(ANode.FLeft);
-							Readd(ANode.FRight);
+							localNode._right = null;
+							Readd(node._left);
+							Readd(node._right);
 							return;
 						}
-						if (ANode.FLocation[LDimension] < LNode.FLocation[LDimension])
-							LNode = LNode.FLeft;
+						if (node._location[dimension] < localNode._location[dimension])
+							localNode = localNode._left;
 						else
-							LNode = LNode.FRight;
-						LDimension = (LDimension + 1) % CDimensions;
+							localNode = localNode._right;
+						dimension = (dimension + 1) % Dimensions;
 					}
 				}
 			}
 		}
 
-		public Node Query(Point APoint)
+		public Node Query(Point point)
 		{
-			if (FRoot == null)
+			if (_root == null)
 				return null;
 			else
 			{
-				Node LNode = FRoot;
-				int[] LPoint = new int[2] {APoint.X, APoint.Y};
-				int LDimension = 0;
-				while (LNode != null)
+				Node node = _root;
+				int[] localPoint = new int[2] {point.X, point.Y};
+				int dimension = 0;
+				while (node != null)
 				{
-					if (LPoint[LDimension] < LNode.FLocation[LDimension])
-						LNode = LNode.FLeft;
-					else if (LPoint[LDimension] >= LNode.FLocation[LDimension])
+					if (localPoint[dimension] < node._location[dimension])
+						node = node._left;
+					else if (localPoint[dimension] >= node._location[dimension])
 					{
-						if ((LPoint[0] == LNode.FLocation[0]) && (LPoint[1] == LNode.FLocation[1]))
-							return LNode;
-						LNode = LNode.FRight;
+						if ((localPoint[0] == node._location[0]) && (localPoint[1] == node._location[1]))
+							return node;
+						node = node._right;
 					}
-					LDimension = (LDimension + 1) % CDimensions;
+					dimension = (dimension + 1) % Dimensions;
 				}
 				return null;
 			}
 		}
 
 		/// <remarks> Area must not be inverted. </remarks>
-		public ArrayList Query(Rectangle ARect)
+		public ArrayList Query(Rectangle rect)
 		{
-			ArrayList LResult = new ArrayList();
-			if (FRoot != null)
+			ArrayList result = new ArrayList();
+			if (_root != null)
 			{
 				Query
 				(
-					FRoot,
-					LResult,
-					new int[2] {ARect.X, ARect.Y},
-					new int[2] {ARect.Right - 1, ARect.Bottom - 1},
+					_root,
+					result,
+					new int[2] {rect.X, rect.Y},
+					new int[2] {rect.Right - 1, rect.Bottom - 1},
 					0
 				);
 			}
-			return LResult;
+			return result;
 		}
 
-		private void Query(Node ANode, ArrayList AList, int[] ALow, int[] AHigh, int ADimension)
+		private void Query(Node node, ArrayList list, int[] low, int[] high, int dimension)
 		{
-			if (ANode != null)
+			if (node != null)
 			{
-				int LNewDimension = (ADimension + 1) % CDimensions;
+				int newDimension = (dimension + 1) % Dimensions;
 				if		// current node is in range
 				(
-					(ALow[ADimension] <= ANode.FLocation[ADimension]) && 
-					(AHigh[ADimension] >= ANode.FLocation[ADimension])
+					(low[dimension] <= node._location[dimension]) && 
+					(high[dimension] >= node._location[dimension])
 				)
 				{
 					if 
 					(
-						(ALow[LNewDimension] <= ANode.FLocation[LNewDimension]) &&
-						(AHigh[LNewDimension] >= ANode.FLocation[LNewDimension])
+						(low[newDimension] <= node._location[newDimension]) &&
+						(high[newDimension] >= node._location[newDimension])
 					)
-						AList.Add(ANode);
-					Query(ANode.FLeft, AList, ALow, AHigh, LNewDimension);
-					Query(ANode.FRight, AList, ALow, AHigh, LNewDimension);
+						list.Add(node);
+					Query(node._left, list, low, high, newDimension);
+					Query(node._right, list, low, high, newDimension);
 				}
-				else if (AHigh[ADimension] < ANode.FLocation[ADimension])
-					Query(ANode.FLeft, AList, ALow, AHigh, LNewDimension);
+				else if (high[dimension] < node._location[dimension])
+					Query(node._left, list, low, high, newDimension);
 				else
-					Query(ANode.FRight, AList, ALow, AHigh, LNewDimension);
+					Query(node._right, list, low, high, newDimension);
 			}
 		}
 
 		public Rectangle GetExtremes()
 		{
-			if (FRoot != null)
+			if (_root != null)
 			{
-				Rectangle LResult = Rectangle.Empty;
+				Rectangle result = Rectangle.Empty;
 				
 				int i = Int32.MaxValue;
-				ChaseMin(FRoot, 0, 0, ref i);
-				LResult.X = i;
+				ChaseMin(_root, 0, 0, ref i);
+				result.X = i;
 
 				i = Int32.MaxValue;
-				ChaseMin(FRoot, 1, 0, ref i);
-				LResult.Y = i;
+				ChaseMin(_root, 1, 0, ref i);
+				result.Y = i;
 
 				i = Int32.MinValue;
-				ChaseMax(FRoot, 0, 0, ref i);
-				LResult.Width = (i - LResult.Left) + 1;
+				ChaseMax(_root, 0, 0, ref i);
+				result.Width = (i - result.Left) + 1;
 
 				i = Int32.MinValue;
-				ChaseMax(FRoot, 1, 0, ref i);
-				LResult.Height = (i - LResult.Top) + 1;
+				ChaseMax(_root, 1, 0, ref i);
+				result.Height = (i - result.Top) + 1;
 
-				return LResult;
+				return result;
 			}
 			else
 				return Rectangle.Empty;
 		}
 	
-		internal void ChaseMin(Node ANode, int ADimension, int ALevel, ref int AMin)
+		internal void ChaseMin(Node node, int dimension, int level, ref int min)
 		{
-			if (ANode != null)
+			if (node != null)
 			{
-				if (ANode.FLocation[ADimension] < AMin)
-					AMin = ANode.FLocation[ADimension];
-				if ((ALevel % CDimensions) == ADimension)
-					ChaseMin(ANode.FLeft, ADimension, ALevel + 1, ref AMin);
+				if (node._location[dimension] < min)
+					min = node._location[dimension];
+				if ((level % Dimensions) == dimension)
+					ChaseMin(node._left, dimension, level + 1, ref min);
 				else
 				{
-					ChaseMin(ANode.FLeft, ADimension, ALevel + 1, ref AMin);
-					ChaseMin(ANode.FRight, ADimension, ALevel + 1, ref AMin);
+					ChaseMin(node._left, dimension, level + 1, ref min);
+					ChaseMin(node._right, dimension, level + 1, ref min);
 				}
 			}
 		}
 
-		internal void ChaseMax(Node ANode, int ADimension, int ALevel, ref int AMax)
+		internal void ChaseMax(Node node, int dimension, int level, ref int max)
 		{
-			if (ANode != null)
+			if (node != null)
 			{
-				if (ANode.FLocation[ADimension] > AMax)
-					AMax = ANode.FLocation[ADimension];
-				if ((ALevel % CDimensions) == ADimension)
-					ChaseMax(ANode.FRight, ADimension, ALevel + 1, ref AMax);
+				if (node._location[dimension] > max)
+					max = node._location[dimension];
+				if ((level % Dimensions) == dimension)
+					ChaseMax(node._right, dimension, level + 1, ref max);
 				else
 				{
-					ChaseMax(ANode.FLeft, ADimension, ALevel + 1, ref AMax);
-					ChaseMax(ANode.FRight, ADimension, ALevel + 1, ref AMax);
+					ChaseMax(node._left, dimension, level + 1, ref max);
+					ChaseMax(node._right, dimension, level + 1, ref max);
 				}
 			}
 		}
 
-		private Node FRoot;
+		private Node _root;
 
 		public class Node
 		{
-			public Node(Point ALocation, object AElement)
+			public Node(Point location, object element)
 			{
-				FLocation = new int[2] {ALocation.X, ALocation.Y};
-				FObject = AElement;
+				_location = new int[2] {location.X, location.Y};
+				_object = element;
 			}
 
-			internal int[] FLocation;
+			internal int[] _location;
 
 			public Point Location
 			{
-				get { return new Point(FLocation[0], FLocation[1]); }
+				get { return new Point(_location[0], _location[1]); }
 			}
 
-			private object FObject;
+			private object _object;
 			public object Object
 			{
-				get { return FObject; }
+				get { return _object; }
 			}
 
-			internal Node FLeft;
-			internal Node FRight;
+			internal Node _left;
+			internal Node _right;
 
 		}
 

@@ -376,19 +376,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsBreakable = true;
 		}
 		
-		private bool FUnchecked = false;
-		public bool Unchecked { get { return FUnchecked; } }
+		private bool _unchecked = false;
+		public bool Unchecked { get { return _unchecked; } }
 		
-		protected override void DetermineModifiers(Plan APlan)
+		protected override void DetermineModifiers(Plan plan)
 		{
-			base.DetermineModifiers(APlan);
+			base.DetermineModifiers(plan);
 			if (Modifiers != null)
-				FUnchecked = Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "Unchecked", Unchecked.ToString()));
+				_unchecked = Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "Unchecked", Unchecked.ToString()));
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
+			DetermineModifiers(plan);
 		}
     }
 
@@ -396,23 +396,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// Nodes[1] - Target table variable
     public class InsertNode : DMLNode
     {
-		private bool FInsertedUpdate;
+		private bool _insertedUpdate;
 		public bool InsertedUpdate
 		{
-			get { return FInsertedUpdate; }
-			set { FInsertedUpdate = value; }
+			get { return _insertedUpdate; }
+			set { _insertedUpdate = value; }
 		}
 		
-		private string FUpdateColumnNames;
+		private string _updateColumnNames;
 		public string UpdateColumnNames
 		{
-			get { return FUpdateColumnNames; }
-			set { FUpdateColumnNames = value; }
+			get { return _updateColumnNames; }
+			set { _updateColumnNames = value; }
 		}
 		
-		protected override void DetermineModifiers(Plan APlan)
+		protected override void DetermineModifiers(Plan plan)
 		{
-			base.DetermineModifiers(APlan);
+			base.DetermineModifiers(plan);
 			if (Modifiers != null)
 			{
 				InsertedUpdate = Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "InsertedUpdate", InsertedUpdate.ToString()));
@@ -420,157 +420,157 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			APlan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable, CursorIsolation.None));
+			plan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable, CursorIsolation.None));
 			try
 			{
-				Nodes[0].DetermineBinding(APlan);
+				Nodes[0].DetermineBinding(plan);
 			}
 			finally
 			{
-				APlan.PopCursorContext();
+				plan.PopCursorContext();
 			}
 			
-			APlan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
+			plan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
 			try
 			{
-				bool LSaveIsInsert = APlan.IsInsert;
-				APlan.IsInsert = true;
+				bool saveIsInsert = plan.IsInsert;
+				plan.IsInsert = true;
 				try
 				{
-					Nodes[1].DetermineBinding(APlan);
+					Nodes[1].DetermineBinding(plan);
 				}
 				finally
 				{
-					APlan.IsInsert = LSaveIsInsert;
+					plan.IsInsert = saveIsInsert;
 				}
 			}
 			finally
 			{
-				APlan.PopCursorContext();
+				plan.PopCursorContext();
 			}
 		}
 		
-		public override void BindToProcess(Plan APlan)
+		public override void BindToProcess(Plan plan)
 		{
-			APlan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable, CursorIsolation.None));
+			plan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable, CursorIsolation.None));
 			try
 			{
-				Nodes[0].BindToProcess(APlan);
+				Nodes[0].BindToProcess(plan);
 			}
 			finally
 			{
-				APlan.PopCursorContext();
+				plan.PopCursorContext();
 			}
 
-			APlan.PushStatementContext(new StatementContext(StatementType.Insert));
+			plan.PushStatementContext(new StatementContext(StatementType.Insert));
 			try
 			{
-				APlan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
+				plan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
 				try
 				{
-					bool LSaveIsInsert = APlan.IsInsert;
-					APlan.IsInsert = true;
+					bool saveIsInsert = plan.IsInsert;
+					plan.IsInsert = true;
 					try
 					{
-						Nodes[1].BindToProcess(APlan);
+						Nodes[1].BindToProcess(plan);
 					}
 					finally
 					{
-						APlan.IsInsert = LSaveIsInsert;
+						plan.IsInsert = saveIsInsert;
 					}
 				}
 				finally
 				{
-					APlan.PopCursorContext();
+					plan.PopCursorContext();
 				}
 			}
 			finally
 			{
-				APlan.PopStatementContext();
+				plan.PopStatementContext();
 			}
 		}
 
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			if (AProgram.ServerProcess.IsReconciliationEnabled())
+			if (program.ServerProcess.IsReconciliationEnabled())
 			{
 				// Open a table for the source expression
 				// Open a table for the target expression
 				// Insert each row of the source expression into the target expression
-				object LSource = Nodes[0].Execute(AProgram);
+				object source = Nodes[0].Execute(program);
 
-				object LTarget;
-				bool LSaveIsInsert = AProgram.ServerProcess.IsInsert; 
-				bool LSaveIsOpeningInsertCursor = AProgram.ServerProcess.IsOpeningInsertCursor; 
-				AProgram.ServerProcess.IsInsert = true; // To indicate to application transactions that data should not be populated
-				AProgram.ServerProcess.IsOpeningInsertCursor = true; // To indicate to devices involved in the expression that it is not necessary to open the cursor
+				object target;
+				bool saveIsInsert = program.ServerProcess.IsInsert; 
+				bool saveIsOpeningInsertCursor = program.ServerProcess.IsOpeningInsertCursor; 
+				program.ServerProcess.IsInsert = true; // To indicate to application transactions that data should not be populated
+				program.ServerProcess.IsOpeningInsertCursor = true; // To indicate to devices involved in the expression that it is not necessary to open the cursor
 				try
 				{
-					LTarget = Nodes[1].Execute(AProgram);
+					target = Nodes[1].Execute(program);
 				}
 				finally
 				{
-					AProgram.ServerProcess.IsInsert = LSaveIsInsert;
-					AProgram.ServerProcess.IsOpeningInsertCursor = LSaveIsOpeningInsertCursor;
+					program.ServerProcess.IsInsert = saveIsInsert;
+					program.ServerProcess.IsOpeningInsertCursor = saveIsOpeningInsertCursor;
 				}
 
-				if (LSource is Row)
+				if (source is Row)
 				{
-					using (Row LRow = (Row)LSource)
+					using (Row row = (Row)source)
 					{
-						using (Table LTargetTable = (Table)LTarget)
+						using (Table targetTable = (Table)target)
 						{
 							if (InsertedUpdate)
 							{
-								Schema.RowType LOldRowType = new Schema.RowType();
-								Schema.RowType LNewRowType = new Schema.RowType();
-								for (int LIndex = 0; LIndex < LRow.DataType.Columns.Count; LIndex++)
-									if (Schema.Object.Qualifier(LRow.DataType.Columns[LIndex].Name) == Keywords.Old)
-										LOldRowType.Columns.Add(LRow.DataType.Columns[LIndex].CopyAndRename(Schema.Object.Dequalify(LRow.DataType.Columns[LIndex].Name)));
+								Schema.RowType oldRowType = new Schema.RowType();
+								Schema.RowType newRowType = new Schema.RowType();
+								for (int index = 0; index < row.DataType.Columns.Count; index++)
+									if (Schema.Object.Qualifier(row.DataType.Columns[index].Name) == Keywords.Old)
+										oldRowType.Columns.Add(row.DataType.Columns[index].CopyAndRename(Schema.Object.Dequalify(row.DataType.Columns[index].Name)));
 									else
-										LNewRowType.Columns.Add(LRow.DataType.Columns[LIndex].CopyAndRename(Schema.Object.Dequalify(LRow.DataType.Columns[LIndex].Name)));
+										newRowType.Columns.Add(row.DataType.Columns[index].CopyAndRename(Schema.Object.Dequalify(row.DataType.Columns[index].Name)));
 										
-								using (Row LOldRow = new Row(AProgram.ValueManager, LOldRowType))
+								using (Row oldRow = new Row(program.ValueManager, oldRowType))
 								{
-									using (Row LNewRow = new Row(AProgram.ValueManager, LNewRowType))
+									using (Row newRow = new Row(program.ValueManager, newRowType))
 									{
-										for (int LIndex = 0; LIndex < LRow.DataType.Columns.Count; LIndex++)
-											if (Schema.Object.Qualifier(LRow.DataType.Columns[LIndex].Name) == Keywords.Old)
-												LOldRow[Schema.Object.Dequalify(LRow.DataType.Columns[LIndex].Name)] = LRow[LIndex];
+										for (int index = 0; index < row.DataType.Columns.Count; index++)
+											if (Schema.Object.Qualifier(row.DataType.Columns[index].Name) == Keywords.Old)
+												oldRow[Schema.Object.Dequalify(row.DataType.Columns[index].Name)] = row[index];
 											else
-												LNewRow[Schema.Object.Dequalify(LRow.DataType.Columns[LIndex].Name)] = LRow[LIndex];
+												newRow[Schema.Object.Dequalify(row.DataType.Columns[index].Name)] = row[index];
 											
 										#if USEUPDATEVALUEFLAGS
-										BitArray LValueFlags = new BitArray(LNewRow.DataType.Columns.Count);
+										BitArray valueFlags = new BitArray(newRow.DataType.Columns.Count);
 										if (UpdateColumnNames != null)
 										{
-											string[] LUpdateColumnNames = UpdateColumnNames.Split(';');
-											Schema.Columns LUpdateColumns = new Schema.Columns();
-											for (int LIndex = 0; LIndex < LUpdateColumnNames.Length; LIndex++)
-												LUpdateColumns.Add(LNewRow.DataType.Columns[LUpdateColumnNames[LIndex]]);
-											for (int LIndex = 0; LIndex < LValueFlags.Length; LIndex++)
-												LValueFlags[LIndex] = LUpdateColumns.ContainsName(LNewRow.DataType.Columns[LIndex].Name);
+											string[] updateColumnNames = UpdateColumnNames.Split(';');
+											Schema.Columns updateColumns = new Schema.Columns();
+											for (int index = 0; index < updateColumnNames.Length; index++)
+												updateColumns.Add(newRow.DataType.Columns[updateColumnNames[index]]);
+											for (int index = 0; index < valueFlags.Length; index++)
+												valueFlags[index] = updateColumns.ContainsName(newRow.DataType.Columns[index].Name);
 										}
 										else
-											for (int LIndex = 0; LIndex < LValueFlags.Length; LIndex++)
-												LValueFlags[LIndex] = true;
+											for (int index = 0; index < valueFlags.Length; index++)
+												valueFlags[index] = true;
 
-										LTargetTable.Insert(LOldRow, LNewRow, LValueFlags, Unchecked);
+										targetTable.Insert(oldRow, newRow, valueFlags, Unchecked);
 										#else
-										LTargetTable.Insert(LOldRow, LNewRow, null, Unchecked);
+										targetTable.Insert(oldRow, newRow, null, Unchecked);
 										#endif
 									}
 								}
 							}
 							else
 							{
-								BitArray LValueFlags = new BitArray(LRow.DataType.Columns.Count);
-								for (int LIndex = 0; LIndex < LValueFlags.Length; LIndex++)
-									LValueFlags[LIndex] = true;
+								BitArray valueFlags = new BitArray(row.DataType.Columns.Count);
+								for (int index = 0; index < valueFlags.Length; index++)
+									valueFlags[index] = true;
 
-								LTargetTable.Insert(null, LRow, LValueFlags, Unchecked);
+								targetTable.Insert(null, row, valueFlags, Unchecked);
 							}
 
 							return null;
@@ -579,57 +579,57 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 				else
 				{
-					using (Table LSourceTable = ((Table)LSource))
+					using (Table sourceTable = ((Table)source))
 					{
-						using (Row LRow = new Row(AProgram.ValueManager, LSourceTable.DataType.RowType))
+						using (Row row = new Row(program.ValueManager, sourceTable.DataType.RowType))
 						{
-							using (Table LTargetTable = ((Table)LTarget))
+							using (Table targetTable = ((Table)target))
 							{
 								// TODO: Make sure LSource is static if it is referenced by the expression of LTarget
 								if (InsertedUpdate)
 								{
-									Schema.RowType LOldRowType = new Schema.RowType();
-									Schema.RowType LNewRowType = new Schema.RowType();
-									for (int LIndex = 0; LIndex < LRow.DataType.Columns.Count; LIndex++)
-										if (Schema.Object.Qualifier(LRow.DataType.Columns[LIndex].Name) == Keywords.Old)
-											LOldRowType.Columns.Add(LRow.DataType.Columns[LIndex].CopyAndRename(Schema.Object.Dequalify(LRow.DataType.Columns[LIndex].Name)));
+									Schema.RowType oldRowType = new Schema.RowType();
+									Schema.RowType newRowType = new Schema.RowType();
+									for (int index = 0; index < row.DataType.Columns.Count; index++)
+										if (Schema.Object.Qualifier(row.DataType.Columns[index].Name) == Keywords.Old)
+											oldRowType.Columns.Add(row.DataType.Columns[index].CopyAndRename(Schema.Object.Dequalify(row.DataType.Columns[index].Name)));
 										else
-											LNewRowType.Columns.Add(LRow.DataType.Columns[LIndex].CopyAndRename(Schema.Object.Dequalify(LRow.DataType.Columns[LIndex].Name)));
+											newRowType.Columns.Add(row.DataType.Columns[index].CopyAndRename(Schema.Object.Dequalify(row.DataType.Columns[index].Name)));
 											
-									using (Row LOldRow = new Row(AProgram.ValueManager, LOldRowType))
+									using (Row oldRow = new Row(program.ValueManager, oldRowType))
 									{
-										using (Row LNewRow = new Row(AProgram.ValueManager, LNewRowType))
+										using (Row newRow = new Row(program.ValueManager, newRowType))
 										{
 											#if USEUPDATEVALUEFLAGS
-											BitArray LValueFlags = new BitArray(LNewRow.DataType.Columns.Count);
+											BitArray valueFlags = new BitArray(newRow.DataType.Columns.Count);
 											if (UpdateColumnNames != null)
 											{
-												string[] LUpdateColumnNames = UpdateColumnNames.Split(';');
-												Schema.Columns LUpdateColumns = new Schema.Columns();
-												for (int LIndex = 0; LIndex < LUpdateColumnNames.Length; LIndex++)
-													LUpdateColumns.Add(LNewRow.DataType.Columns[LUpdateColumnNames[LIndex]]);
-												for (int LIndex = 0; LIndex < LValueFlags.Length; LIndex++)
-													LValueFlags[LIndex] = LUpdateColumns.ContainsName(LNewRow.DataType.Columns[LIndex].Name);
+												string[] updateColumnNames = UpdateColumnNames.Split(';');
+												Schema.Columns updateColumns = new Schema.Columns();
+												for (int index = 0; index < updateColumnNames.Length; index++)
+													updateColumns.Add(newRow.DataType.Columns[updateColumnNames[index]]);
+												for (int index = 0; index < valueFlags.Length; index++)
+													valueFlags[index] = updateColumns.ContainsName(newRow.DataType.Columns[index].Name);
 											}
 											else
-												for (int LIndex = 0; LIndex < LValueFlags.Length; LIndex++)
-													LValueFlags[LIndex] = true;
+												for (int index = 0; index < valueFlags.Length; index++)
+													valueFlags[index] = true;
 											#endif
 
-											while (LSourceTable.Next())
+											while (sourceTable.Next())
 											{
-												LSourceTable.Select(LRow);
+												sourceTable.Select(row);
 
-												for (int LIndex = 0; LIndex < LRow.DataType.Columns.Count; LIndex++)
-													if (Schema.Object.Qualifier(LRow.DataType.Columns[LIndex].Name) == Keywords.Old)
-														LOldRow[Schema.Object.Dequalify(LRow.DataType.Columns[LIndex].Name)] = LRow[LIndex];
+												for (int index = 0; index < row.DataType.Columns.Count; index++)
+													if (Schema.Object.Qualifier(row.DataType.Columns[index].Name) == Keywords.Old)
+														oldRow[Schema.Object.Dequalify(row.DataType.Columns[index].Name)] = row[index];
 													else
-														LNewRow[Schema.Object.Dequalify(LRow.DataType.Columns[LIndex].Name)] = LRow[LIndex];
+														newRow[Schema.Object.Dequalify(row.DataType.Columns[index].Name)] = row[index];
 														
 												#if USEUPDATEVALUEFLAGS
-												LTargetTable.Insert(LOldRow, LNewRow, LValueFlags, Unchecked);
+												targetTable.Insert(oldRow, newRow, valueFlags, Unchecked);
 												#else
-												LTargetTable.Insert(LOldRow, LNewRow, null, Unchecked);
+												targetTable.Insert(oldRow, newRow, null, Unchecked);
 												#endif
 											}
 										}
@@ -637,14 +637,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								}
 								else
 								{
-									BitArray LValueFlags = new BitArray(LRow.DataType.Columns.Count);
-									for (int LIndex = 0; LIndex < LValueFlags.Length; LIndex++)
-										LValueFlags[LIndex] = true;
+									BitArray valueFlags = new BitArray(row.DataType.Columns.Count);
+									for (int index = 0; index < valueFlags.Length; index++)
+										valueFlags[index] = true;
 
-									while (LSourceTable.Next())
+									while (sourceTable.Next())
 									{
-										LSourceTable.Select(LRow);
-										LTargetTable.Insert(null, LRow, LValueFlags, Unchecked);
+										sourceTable.Select(row);
+										targetTable.Insert(null, row, valueFlags, Unchecked);
 									}
 								}
 								return null;
@@ -657,13 +657,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return null;
 		}
 
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			InsertStatement LStatement = new InsertStatement();
-			LStatement.Modifiers = Modifiers;
-			LStatement.SourceExpression = (Expression)Nodes[0].EmitStatement(AMode);
-			LStatement.Target = (Expression)Nodes[1].EmitStatement(AMode);
-			return LStatement;
+			InsertStatement statement = new InsertStatement();
+			statement.Modifiers = Modifiers;
+			statement.SourceExpression = (Expression)Nodes[0].EmitStatement(mode);
+			statement.Target = (Expression)Nodes[1].EmitStatement(mode);
+			return statement;
 		}
     }
     
@@ -691,191 +691,191 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FColumnLocation = value; }
 		}
 		#else
-		public UpdateColumnNode(Schema.IDataType ADataType, string AColumnName, PlanNode ATargetValue) : base()
+		public UpdateColumnNode(Schema.IDataType dataType, string columnName, PlanNode targetValue) : base()
 		{
 			IgnoreUnsupported = true;
-			FDataType = ADataType;
-			ColumnName = AColumnName;
-			Nodes.Add(ATargetValue);
+			_dataType = dataType;
+			ColumnName = columnName;
+			Nodes.Add(targetValue);
 		}
 		
 		// ColumnName
 		public string ColumnName;
 		#endif
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			return Nodes[0].Execute(AProgram);
+			return Nodes[0].Execute(program);
 		}
     }
     
     public class UpdateNode : DMLNode
     {
-		protected bool FIsKeyAffected = false;
+		protected bool _isKeyAffected = false;
 		public bool IsKeyAffected
 		{
-			get { return FIsKeyAffected; }
-			set { FIsKeyAffected = value; }
+			get { return _isKeyAffected; }
+			set { _isKeyAffected = value; }
 		}
 		
-		protected PlanNode FTargetNode = null;
+		protected PlanNode _targetNode = null;
 		public PlanNode TargetNode
 		{
-			get { return FTargetNode; }
-			set { FTargetNode = value; }
+			get { return _targetNode; }
+			set { _targetNode = value; }
 		}
 		
-		protected PlanNode FConditionNode = null;
+		protected PlanNode _conditionNode = null;
 		public PlanNode ConditionNode
 		{
-			get { return FConditionNode; }
-			set { FConditionNode = value; }
+			get { return _conditionNode; }
+			set { _conditionNode = value; }
 		}
 
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			APlan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
+			plan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
 			try
 			{
-				Nodes[0].DetermineBinding(APlan);
+				Nodes[0].DetermineBinding(plan);
 				if (!(((TableNode)Nodes[0]).CursorType == CursorType.Static))
 				{
-					Nodes[0] = Compiler.EmitCopyNode(APlan, (TableNode)Nodes[0]);
-					ApplicationTransaction LTransaction = null;
-					if (APlan.ApplicationTransactionID != Guid.Empty)
-						LTransaction = APlan.GetApplicationTransaction();
+					Nodes[0] = Compiler.EmitCopyNode(plan, (TableNode)Nodes[0]);
+					ApplicationTransaction transaction = null;
+					if (plan.ApplicationTransactionID != Guid.Empty)
+						transaction = plan.GetApplicationTransaction();
 					try
 					{
-						if (LTransaction != null)
-							LTransaction.PushGlobalContext();
+						if (transaction != null)
+							transaction.PushGlobalContext();
 						try
 						{
-							((TableNode)Nodes[0]).InferPopulateNode(APlan);
-							Nodes[0].DetermineDevice(APlan);
+							((TableNode)Nodes[0]).InferPopulateNode(plan);
+							Nodes[0].DetermineDevice(plan);
 						}
 						finally
 						{
-							if (LTransaction != null)
-								LTransaction.PopGlobalContext();
+							if (transaction != null)
+								transaction.PopGlobalContext();
 						}
 					}
 					finally
 					{
-						if (LTransaction != null)
-							Monitor.Exit(LTransaction);
+						if (transaction != null)
+							Monitor.Exit(transaction);
 					}
 				}
 			}
 			finally
 			{
-				APlan.PopCursorContext();
+				plan.PopCursorContext();
 			}
 
-			APlan.EnterRowContext();
+			plan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(String.Empty, ((Schema.TableType)Nodes[0].DataType).RowType));
+				plan.Symbols.Push(new Symbol(String.Empty, ((Schema.TableType)Nodes[0].DataType).RowType));
 				try
 				{
-					for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
-						Nodes[LIndex].DetermineBinding(APlan);
+					for (int index = 1; index < Nodes.Count; index++)
+						Nodes[index].DetermineBinding(plan);
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 			finally
 			{
-				APlan.ExitRowContext();
+				plan.ExitRowContext();
 			}
 		}
 		
-		public override void BindToProcess(Plan APlan)
+		public override void BindToProcess(Plan plan)
 		{
-			APlan.PushStatementContext(new StatementContext(StatementType.Update));
+			plan.PushStatementContext(new StatementContext(StatementType.Update));
 			try
 			{
-				APlan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
+				plan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
 				try
 				{
-					Nodes[0].BindToProcess(APlan);
+					Nodes[0].BindToProcess(plan);
 				}
 				finally
 				{
-					APlan.PopCursorContext();
+					plan.PopCursorContext();
 				}
 			}
 			finally
 			{
-				APlan.PopStatementContext();
+				plan.PopStatementContext();
 			}
 
-			for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
-				Nodes[LIndex].BindToProcess(APlan);
+			for (int index = 1; index < Nodes.Count; index++)
+				Nodes[index].BindToProcess(plan);
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			if (AProgram.ServerProcess.IsReconciliationEnabled())
+			if (program.ServerProcess.IsReconciliationEnabled())
 			{
 				// Open a table for the expression
 				// for each row in the table, update the value of each column to the given expression
-				using (Table LTable = (Table)Nodes[0].Execute(AProgram))
+				using (Table table = (Table)Nodes[0].Execute(program))
 				{
-					Row LOldRow = new Row(AProgram.ValueManager, LTable.DataType.RowType);
+					Row oldRow = new Row(program.ValueManager, table.DataType.RowType);
 					try
 					{
-						Row LNewRow = new Row(AProgram.ValueManager, LTable.DataType.RowType);
+						Row newRow = new Row(program.ValueManager, table.DataType.RowType);
 						try
 						{
-							if (LTable.Next())
+							if (table.Next())
 							{
 								#if USEUPDATEVALUEFLAGS
-								BitArray LValueFlags = new BitArray(LNewRow.DataType.Columns.Count);
-								Schema.Columns LUpdateColumns = new Schema.Columns();
-								for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
-									LUpdateColumns.Add(LNewRow.DataType.Columns[((UpdateColumnNode)Nodes[LIndex]).ColumnName]);
-								for (int LIndex = 0; LIndex < LValueFlags.Length; LIndex++)
-									LValueFlags[LIndex] = LUpdateColumns.ContainsName(LNewRow.DataType.Columns[LIndex].Name);
+								BitArray valueFlags = new BitArray(newRow.DataType.Columns.Count);
+								Schema.Columns updateColumns = new Schema.Columns();
+								for (int index = 1; index < Nodes.Count; index++)
+									updateColumns.Add(newRow.DataType.Columns[((UpdateColumnNode)Nodes[index]).ColumnName]);
+								for (int index = 0; index < valueFlags.Length; index++)
+									valueFlags[index] = updateColumns.ContainsName(newRow.DataType.Columns[index].Name);
 								#endif
 									
 								while (true)
 								{
-									LTable.Select(LOldRow);
-									LTable.Select(LNewRow);
-									AProgram.Stack.Push(LOldRow);
+									table.Select(oldRow);
+									table.Select(newRow);
+									program.Stack.Push(oldRow);
 									try
 									{
-										for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
+										for (int index = 1; index < Nodes.Count; index++)
 										{
-											object LObject = Nodes[LIndex].Execute(AProgram);
+											object objectValue = Nodes[index].Execute(program);
 											try
 											{
 												#if USECOLUMNLOCATIONBINDING
-												LNewRow[((UpdateColumnNode)Nodes[LIndex]).ColumnLocation] = LObject;
+												newRow[((UpdateColumnNode)Nodes[index]).ColumnLocation] = objectValue;
 												#else
-												LNewRow[((UpdateColumnNode)Nodes[LIndex]).ColumnName] = LObject;
+												newRow[((UpdateColumnNode)Nodes[index]).ColumnName] = objectValue;
 												#endif
 											}
 											finally
 											{
-												DataValue.DisposeValue(AProgram.ValueManager, LObject);
+												DataValue.DisposeValue(program.ValueManager, objectValue);
 											}
 										}
 									}
 									finally
 									{
-										AProgram.Stack.Pop();
+										program.Stack.Pop();
 									}
 									
 									#if USEUPDATEVALUEFLAGS
-									LTable.Update(LNewRow, LValueFlags, Unchecked);
+									table.Update(newRow, valueFlags, Unchecked);
 									#else
-									LTable.Update(LNewRow, null, Unchecked);
+									table.Update(newRow, null, Unchecked);
 									#endif
 										
-									if (!LTable.Next())
+									if (!table.Next())
 										break;
 								}
 							}
@@ -884,12 +884,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						}
 						finally
 						{
-							LNewRow.Dispose();
+							newRow.Dispose();
 						}
 					}
 					finally
 					{
-						LOldRow.Dispose();
+						oldRow.Dispose();
 					}
 				}
 			}
@@ -897,274 +897,274 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return null;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			UpdateStatement LStatement = new UpdateStatement();
-			LStatement.Modifiers = Modifiers;
-			LStatement.Target = (Expression)FTargetNode.EmitStatement(AMode);
-			if (FConditionNode != null)
-				LStatement.Condition = (Expression)FConditionNode.EmitStatement(AMode);
-			Schema.TableType LDataType = (Schema.TableType)Nodes[0].DataType;
-			UpdateColumnNode LNode;
-			for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
+			UpdateStatement statement = new UpdateStatement();
+			statement.Modifiers = Modifiers;
+			statement.Target = (Expression)_targetNode.EmitStatement(mode);
+			if (_conditionNode != null)
+				statement.Condition = (Expression)_conditionNode.EmitStatement(mode);
+			Schema.TableType dataType = (Schema.TableType)Nodes[0].DataType;
+			UpdateColumnNode node;
+			for (int index = 1; index < Nodes.Count; index++)
 			{
-				LNode = (UpdateColumnNode)Nodes[LIndex];
+				node = (UpdateColumnNode)Nodes[index];
 				#if USECOLUMNLOCATIONBINDING
-				LStatement.Columns.Add(new UpdateColumnExpression(new IdentifierExpression(LDataType.Columns[LNode.ColumnLocation].Name), (Expression)LNode.Nodes[0].EmitStatement(AMode)));
+				statement.Columns.Add(new UpdateColumnExpression(new IdentifierExpression(dataType.Columns[node.ColumnLocation].Name), (Expression)node.Nodes[0].EmitStatement(AMode)));
 				#else
-				LStatement.Columns.Add(new UpdateColumnExpression(new IdentifierExpression(LNode.ColumnName), (Expression)LNode.Nodes[0].EmitStatement(AMode)));
+				statement.Columns.Add(new UpdateColumnExpression(new IdentifierExpression(node.ColumnName), (Expression)node.Nodes[0].EmitStatement(mode)));
 				#endif
 			}
-			return LStatement;
+			return statement;
 		}
     }
     
     public class UpdateRowNode : DMLNode
     {
-		private bool FIsGeneric;
-		public bool IsGeneric { get { return FIsGeneric; } }
+		private bool _isGeneric;
+		public bool IsGeneric { get { return _isGeneric; } }
 		
-		private UpdateColumnExpressions FColumnExpressions = new UpdateColumnExpressions();
-		public UpdateColumnExpressions ColumnExpressions { get { return FColumnExpressions; } }
+		private UpdateColumnExpressions _columnExpressions = new UpdateColumnExpressions();
+		public UpdateColumnExpressions ColumnExpressions { get { return _columnExpressions; } }
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
+			DetermineModifiers(plan);
 			if (!Nodes[0].DataType.IsGeneric)
 			{
-				APlan.EnterRowContext();
+				plan.EnterRowContext();
 				try
 				{
-					APlan.Symbols.Push(new Symbol(String.Empty, Nodes[0].DataType));
+					plan.Symbols.Push(new Symbol(String.Empty, Nodes[0].DataType));
 					try
 					{
-						foreach (UpdateColumnExpression LExpression in FColumnExpressions)
-							Nodes.Add(Compiler.CompileUpdateColumnExpression(APlan, LExpression));
+						foreach (UpdateColumnExpression expression in _columnExpressions)
+							Nodes.Add(Compiler.CompileUpdateColumnExpression(plan, expression));
 					}
 					finally
 					{
-						APlan.Symbols.Pop();
+						plan.Symbols.Pop();
 					}
 				}
 				finally
 				{
-					APlan.ExitRowContext();
+					plan.ExitRowContext();
 				}
 			}
 			else
 			{
-				FIsGeneric = true;
-				foreach (UpdateColumnExpression LExpression in FColumnExpressions)
-					Nodes.Add(Compiler.CompileExpression(APlan, LExpression.Expression));
+				_isGeneric = true;
+				foreach (UpdateColumnExpression expression in _columnExpressions)
+					Nodes.Add(Compiler.CompileExpression(plan, expression.Expression));
 			}
 		}
 
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			if (!FIsGeneric)
+			if (!_isGeneric)
 			{
-				Nodes[0].DetermineBinding(APlan);
-				APlan.EnterRowContext();
+				Nodes[0].DetermineBinding(plan);
+				plan.EnterRowContext();
 				try
 				{
-					APlan.Symbols.Push(new Symbol(String.Empty, Nodes[0].DataType));
+					plan.Symbols.Push(new Symbol(String.Empty, Nodes[0].DataType));
 					try
 					{
-						for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
-							Nodes[LIndex].DetermineBinding(APlan);
+						for (int index = 1; index < Nodes.Count; index++)
+							Nodes[index].DetermineBinding(plan);
 					}
 					finally
 					{
-						APlan.Symbols.Pop();
+						plan.Symbols.Pop();
 					}
 				}
 				finally
 				{
-					APlan.ExitRowContext();
+					plan.ExitRowContext();
 				}
 			}
 			else
-				base.InternalDetermineBinding(APlan);
+				base.InternalDetermineBinding(plan);
 		}
 
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
 			if (!IsGeneric)
 			{
-				Row LTarget = (Row)AProgram.Stack.Peek(((StackReferenceNode)Nodes[0]).Location);
-				AProgram.Stack.Push(LTarget);
+				Row target = (Row)program.Stack.Peek(((StackReferenceNode)Nodes[0]).Location);
+				program.Stack.Push(target);
 				try
 				{
-					for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
+					for (int index = 1; index < Nodes.Count; index++)
 					{
-						object LObject = Nodes[LIndex].Execute(AProgram);
+						object objectValue = Nodes[index].Execute(program);
 						try
 						{
 							#if USECOLUMNLOCATIONBINDING
-							LTarget[((UpdateColumnNode)Nodes[LIndex]).ColumnLocation] = LObject;
+							target[((UpdateColumnNode)Nodes[index]).ColumnLocation] = objectValue;
 							#else
-							LTarget[((UpdateColumnNode)Nodes[LIndex]).ColumnName] = LObject;
+							target[((UpdateColumnNode)Nodes[index]).ColumnName] = objectValue;
 							#endif
 						}
 						finally
 						{
-							DataValue.DisposeValue(AProgram.ValueManager, LObject);
+							DataValue.DisposeValue(program.ValueManager, objectValue);
 						}
 					}
 				}
 				finally
 				{
-					AProgram.Stack.Pop();
+					program.Stack.Pop();
 				}
 			}
 			else
 			{
-				Row LTarget = (Row)AProgram.Stack.Peek(((StackReferenceNode)Nodes[0]).Location);
-				UpdateColumnNode[] LColumnNodes = new UpdateColumnNode[FColumnExpressions.Count];
-				AProgram.Plan.EnterRowContext();
+				Row target = (Row)program.Stack.Peek(((StackReferenceNode)Nodes[0]).Location);
+				UpdateColumnNode[] columnNodes = new UpdateColumnNode[_columnExpressions.Count];
+				program.Plan.EnterRowContext();
 				try
 				{
-					AProgram.Plan.Symbols.Push(new Symbol(String.Empty, LTarget.DataType));
+					program.Plan.Symbols.Push(new Symbol(String.Empty, target.DataType));
 					try
 					{
-						for (int LIndex = 0; LIndex < FColumnExpressions.Count; LIndex++)
-							LColumnNodes[LIndex] = 
+						for (int index = 0; index < _columnExpressions.Count; index++)
+							columnNodes[index] = 
 								Compiler.EmitUpdateColumnNode
 								(
-									AProgram.Plan, 
-									FColumnExpressions[LIndex], 
+									program.Plan, 
+									_columnExpressions[index], 
 									new ValueNode
 									(
-										Nodes[LIndex + 1].DataType, 
-										Nodes[LIndex + 1].Execute(AProgram)
+										Nodes[index + 1].DataType, 
+										Nodes[index + 1].Execute(program)
 									)
 								);
 					}
 					finally
 					{
-						AProgram.Plan.Symbols.Pop();
+						program.Plan.Symbols.Pop();
 					}
 				}
 				finally
 				{
-					AProgram.Plan.ExitRowContext();
+					program.Plan.ExitRowContext();
 				}
 				
-				AProgram.Stack.Push(LTarget);
+				program.Stack.Push(target);
 				try
 				{
-					for (int LIndex = 0; LIndex < FColumnExpressions.Count; LIndex++)
+					for (int index = 0; index < _columnExpressions.Count; index++)
 					{
-						object LObject = LColumnNodes[LIndex].Execute(AProgram);
+						object objectValue = columnNodes[index].Execute(program);
 						try
 						{
-							LTarget[LColumnNodes[LIndex].ColumnName] = LObject;
+							target[columnNodes[index].ColumnName] = objectValue;
 						}
 						finally
 						{
-							DataValue.DisposeValue(AProgram.ValueManager, LObject);
+							DataValue.DisposeValue(program.ValueManager, objectValue);
 						}
 					}
 				}
 				finally
 				{
-					AProgram.Stack.Pop();
+					program.Stack.Pop();
 				}
 			}
 			return null;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			UpdateStatement LStatement = new UpdateStatement();
-			LStatement.Modifiers = Modifiers;
-			LStatement.Target = (Expression)Nodes[0].EmitStatement(AMode);
-			Schema.RowType LDataType = (Schema.RowType)Nodes[0].DataType;
-			LStatement.Columns.AddRange(FColumnExpressions);
-			return LStatement;
+			UpdateStatement statement = new UpdateStatement();
+			statement.Modifiers = Modifiers;
+			statement.Target = (Expression)Nodes[0].EmitStatement(mode);
+			Schema.RowType dataType = (Schema.RowType)Nodes[0].DataType;
+			statement.Columns.AddRange(_columnExpressions);
+			return statement;
 		}
     }
     
     public class DeleteNode : DMLNode
     {
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			APlan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
+			plan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
 			try
 			{
-				Nodes[0].DetermineBinding(APlan);
+				Nodes[0].DetermineBinding(plan);
 				if (!(((TableNode)Nodes[0]).CursorType == CursorType.Static))
 				{
-					Nodes[0] = Compiler.EmitCopyNode(APlan, (TableNode)Nodes[0]);
-					ApplicationTransaction LTransaction = null;
-					if (APlan.ApplicationTransactionID != Guid.Empty)
-						LTransaction = APlan.GetApplicationTransaction();
+					Nodes[0] = Compiler.EmitCopyNode(plan, (TableNode)Nodes[0]);
+					ApplicationTransaction transaction = null;
+					if (plan.ApplicationTransactionID != Guid.Empty)
+						transaction = plan.GetApplicationTransaction();
 					try
 					{
-						if (LTransaction != null)
-							LTransaction.PushGlobalContext();
+						if (transaction != null)
+							transaction.PushGlobalContext();
 						try
 						{
-							((TableNode)Nodes[0]).InferPopulateNode(APlan);
-							Nodes[0].DetermineDevice(APlan);
+							((TableNode)Nodes[0]).InferPopulateNode(plan);
+							Nodes[0].DetermineDevice(plan);
 						}
 						finally
 						{
-							if (LTransaction != null)
-								LTransaction.PopGlobalContext();
+							if (transaction != null)
+								transaction.PopGlobalContext();
 						}
 					}
 					finally
 					{
-						if (LTransaction != null)
-							Monitor.Exit(LTransaction);
+						if (transaction != null)
+							Monitor.Exit(transaction);
 					}
 				}
 			}
 			finally
 			{
-				APlan.PopCursorContext();
+				plan.PopCursorContext();
 			}
 		}
 		
-		public override void BindToProcess(Plan APlan)
+		public override void BindToProcess(Plan plan)
 		{
-			APlan.PushStatementContext(new StatementContext(StatementType.Delete));
+			plan.PushStatementContext(new StatementContext(StatementType.Delete));
 			try
 			{
-				APlan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
+				plan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
 				try
 				{
-					Nodes[0].BindToProcess(APlan);
+					Nodes[0].BindToProcess(plan);
 				}
 				finally
 				{
-					APlan.PopCursorContext();
+					plan.PopCursorContext();
 				}
 			}
 			finally
 			{
-				APlan.PopStatementContext();
+				plan.PopStatementContext();
 			}
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			if (AProgram.ServerProcess.IsReconciliationEnabled())
+			if (program.ServerProcess.IsReconciliationEnabled())
 			{
 				// Open a table for the expression
 				// delete all the rows
-				using (Table LTable = (Table)Nodes[0].Execute(AProgram))
+				using (Table table = (Table)Nodes[0].Execute(program))
 				{
-					if (LTable.Next())
+					if (table.Next())
 					{
 						while (true)
 						{
-							LTable.Delete(Unchecked);
-							if (LTable.CursorType == CursorType.Static)
-								LTable.Next();
+							table.Delete(Unchecked);
+							if (table.CursorType == CursorType.Static)
+								table.Next();
 								
-							if (LTable.EOF())
+							if (table.EOF())
 								break;
 						}
 					}
@@ -1176,106 +1176,106 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return null;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			DeleteStatement LStatement = new DeleteStatement();
-			LStatement.Modifiers = Modifiers;
-			LStatement.Target = (Expression)Nodes[0].EmitStatement(AMode);
-			return LStatement;
+			DeleteStatement statement = new DeleteStatement();
+			statement.Modifiers = Modifiers;
+			statement.Target = (Expression)Nodes[0].EmitStatement(mode);
+			return statement;
 		}
     }
 
     public class TableSelectorNode : TableNode
     {
-		public TableSelectorNode(Schema.ITableType ADataType) : base()
+		public TableSelectorNode(Schema.ITableType dataType) : base()
 		{
-			FDataType = ADataType;
-			FTableVar = new Schema.ResultTableVar(this);
+			_dataType = dataType;
+			_tableVar = new Schema.ResultTableVar(this);
 		}
 		
-		public override void DetermineCharacteristics(Plan APlan)
+		public override void DetermineCharacteristics(Plan plan)
 		{
-			FIsLiteral = true;
-			FIsFunctional = true;
-			FIsDeterministic = true;
-			FIsRepeatable = true;
-			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
+			_isLiteral = true;
+			_isFunctional = true;
+			_isDeterministic = true;
+			_isRepeatable = true;
+			for (int index = 0; index < NodeCount; index++)
 			{
-				FIsLiteral = FIsLiteral && Nodes[LIndex].IsLiteral;
-				FIsFunctional = FIsFunctional && Nodes[LIndex].IsFunctional;
-				FIsDeterministic = FIsDeterministic && Nodes[LIndex].IsDeterministic;
-				FIsRepeatable = FIsRepeatable && Nodes[LIndex].IsRepeatable;
+				_isLiteral = _isLiteral && Nodes[index].IsLiteral;
+				_isFunctional = _isFunctional && Nodes[index].IsFunctional;
+				_isDeterministic = _isDeterministic && Nodes[index].IsDeterministic;
+				_isRepeatable = _isRepeatable && Nodes[index].IsRepeatable;
 			} 
-			FTableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			FTableVar.Owner = APlan.User;
+			_tableVar.DetermineRemotable(plan.CatalogDeviceSession);
+			_tableVar.Owner = plan.User;
 			if (Order == null)
-				Order = Compiler.OrderFromKey(APlan, Compiler.FindClusteringKey(APlan, FTableVar));
+				Order = Compiler.OrderFromKey(plan, Compiler.FindClusteringKey(plan, _tableVar));
 		}
 		
-		public override void DetermineCursorBehavior(Plan APlan)
+		public override void DetermineCursorBehavior(Plan plan)
 		{
-			FCursorType = CursorType.Static;
-			FRequestedCursorType = APlan.CursorContext.CursorType;
-			FCursorCapabilities = CursorCapability.Navigable | CursorCapability.BackwardsNavigable | CursorCapability.Searchable | CursorCapability.Bookmarkable;
-			FCursorIsolation = CursorIsolation.None;
-			Order = Compiler.OrderFromKey(APlan, Compiler.FindClusteringKey(APlan, FTableVar));
+			_cursorType = CursorType.Static;
+			_requestedCursorType = plan.CursorContext.CursorType;
+			_cursorCapabilities = CursorCapability.Navigable | CursorCapability.BackwardsNavigable | CursorCapability.Searchable | CursorCapability.Bookmarkable;
+			_cursorIsolation = CursorIsolation.None;
+			Order = Compiler.OrderFromKey(plan, Compiler.FindClusteringKey(plan, _tableVar));
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			LocalTable LTable = new LocalTable(this, AProgram);
+			LocalTable table = new LocalTable(this, program);
 			try
 			{
-				LTable.Open();
+				table.Open();
 				// Insert each row from the arguments into this new table
-				for (int LIndex = 0; LIndex < NodeCount; LIndex++)
+				for (int index = 0; index < NodeCount; index++)
 				{
-					Row LRow = (Row)Nodes[LIndex].Execute(AProgram);
+					Row row = (Row)Nodes[index].Execute(program);
 					try
 					{
-						LTable.FNativeTable.Insert(AProgram.ValueManager, LRow); // Insert directly into the native table value to avoid the updatable capability check
+						table._nativeTable.Insert(program.ValueManager, row); // Insert directly into the native table value to avoid the updatable capability check
 					}
 					finally
 					{
-						LRow.Dispose();
+						row.Dispose();
 					}
 				}
 
-				LTable.First();
-				return LTable;
+				table.First();
+				return table;
 			}
 			catch
 			{
-				LTable.Dispose();
+				table.Dispose();
 				throw;
 			}
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			if (FDataType is Schema.ITableType)
+			if (_dataType is Schema.ITableType)
 			{
-				TableSelectorExpression LExpression = new TableSelectorExpression();
-				LExpression.TypeSpecifier = DataType.EmitSpecifier(AMode);
-				for (int LIndex = 0; LIndex < NodeCount; LIndex++)
-					LExpression.Expressions.Add(Nodes[LIndex].EmitStatement(AMode));
-				LExpression.Modifiers = Modifiers;
-				foreach (Schema.Key LKey in TableVar.Keys)
-					if (LKey.Columns.Count < TableVar.Columns.Count)
-						LExpression.Keys.Add(LKey.EmitStatement(AMode));
-				return LExpression;
+				TableSelectorExpression expression = new TableSelectorExpression();
+				expression.TypeSpecifier = DataType.EmitSpecifier(mode);
+				for (int index = 0; index < NodeCount; index++)
+					expression.Expressions.Add(Nodes[index].EmitStatement(mode));
+				expression.Modifiers = Modifiers;
+				foreach (Schema.Key key in TableVar.Keys)
+					if (key.Columns.Count < TableVar.Columns.Count)
+						expression.Keys.Add(key.EmitStatement(mode));
+				return expression;
 			}
 			else
 			{
-				PresentationSelectorExpression LExpression = new PresentationSelectorExpression();
-				LExpression.TypeSpecifier = DataType.EmitSpecifier(AMode);
-				for (int LIndex = 0; LIndex < NodeCount; LIndex++)
-					LExpression.Expressions.Add(Nodes[LIndex].EmitStatement(AMode));
-				LExpression.Modifiers = Modifiers;
-				foreach (Schema.Key LKey in TableVar.Keys)
-					if (LKey.Columns.Count < TableVar.Columns.Count)
-						LExpression.Keys.Add(LKey.EmitStatement(AMode));
-				return LExpression;
+				PresentationSelectorExpression expression = new PresentationSelectorExpression();
+				expression.TypeSpecifier = DataType.EmitSpecifier(mode);
+				for (int index = 0; index < NodeCount; index++)
+					expression.Expressions.Add(Nodes[index].EmitStatement(mode));
+				expression.Modifiers = Modifiers;
+				foreach (Schema.Key key in TableVar.Keys)
+					if (key.Columns.Count < TableVar.Columns.Count)
+						expression.Keys.Add(key.EmitStatement(mode));
+				return expression;
 			}
 		}
     }
@@ -1288,15 +1288,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IgnoreUnsupported = true;
 		}
 		
-		public TableToTableValueNode(TableNode ASourceNode) : base()
+		public TableToTableValueNode(TableNode sourceNode) : base()
 		{
 			IgnoreUnsupported = true;
-			Nodes.Add(ASourceNode);
+			Nodes.Add(sourceNode);
 		}
 		
 		public TableNode SourceNode { get { return (TableNode)Nodes[0]; } }
 		
-		public override void DetermineCharacteristics(Plan APlan)
+		public override void DetermineCharacteristics(Plan plan)
 		{
 			IsLiteral = SourceNode.IsLiteral;
 			IsFunctional = SourceNode.IsFunctional;
@@ -1305,45 +1305,45 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsNilable = SourceNode.IsLiteral;
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = SourceNode.DataType;
+			DetermineModifiers(plan);
+			_dataType = SourceNode.DataType;
 		}
 
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{	
-			Table LTable = SourceNode.Execute(AProgram) as Table;
-			LTable.Open();
+			Table table = SourceNode.Execute(program) as Table;
+			table.Open();
 			try
 			{
 				// We need to construct a new TableVar here because otherwise the native table
 				// will be constructed with the keys inferred for the source, resulting in
 				// incorrect access plans (see Defect #33978 for more).
-				Schema.ResultTableVar LTableVar = new Schema.ResultTableVar(SourceNode);
-				LTableVar.Owner = AProgram.Plan.User;
-				LTableVar.EnsureTableVarColumns();
-				AProgram.EnsureKey(LTableVar);
+				Schema.ResultTableVar tableVar = new Schema.ResultTableVar(SourceNode);
+				tableVar.Owner = program.Plan.User;
+				tableVar.EnsureTableVarColumns();
+				program.EnsureKey(tableVar);
 				
-				NativeTable LNativeTable = new NativeTable(AProgram.ValueManager, LTableVar);
-				while (LTable.Next())
+				NativeTable nativeTable = new NativeTable(program.ValueManager, tableVar);
+				while (table.Next())
 				{
-					using (Row LRow = LTable.Select())
+					using (Row row = table.Select())
 					{	
-						LNativeTable.Insert(AProgram.ValueManager, LRow);
+						nativeTable.Insert(program.ValueManager, row);
 					}
 				}
-				return new TableValue(AProgram.ValueManager, LNativeTable);
+				return new TableValue(program.ValueManager, nativeTable);
 			}
 			finally
 			{
-				LTable.Dispose();
+				table.Dispose();
 			}
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			return SourceNode.EmitStatement(AMode);
+			return SourceNode.EmitStatement(mode);
 		}
     }
     
@@ -1352,7 +1352,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public TableValueToTableNode() : base() {}
 		
-		public override void DetermineCharacteristics(Plan APlan)
+		public override void DetermineCharacteristics(Plan plan)
 		{
 			IsLiteral = Nodes[0].IsLiteral;
 			IsFunctional = Nodes[0].IsFunctional;
@@ -1361,96 +1361,96 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			IsNilable = Nodes[0].IsLiteral;
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = Nodes[0].DataType;
+			DetermineModifiers(plan);
+			_dataType = Nodes[0].DataType;
 			TableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
+			_tableVar.Owner = plan.User;
 			TableVar.EnsureTableVarColumns();
-			Compiler.EnsureKey(APlan, TableVar);
+			Compiler.EnsureKey(plan, TableVar);
 		}
 
-		public override void DetermineCursorBehavior(Plan APlan)
+		public override void DetermineCursorBehavior(Plan plan)
 		{
-			FCursorType = CursorType.Static;
-			FRequestedCursorType = APlan.CursorContext.CursorType;
-			FCursorCapabilities = CursorCapability.Navigable | CursorCapability.BackwardsNavigable | CursorCapability.Searchable | CursorCapability.Bookmarkable;
+			_cursorType = CursorType.Static;
+			_requestedCursorType = plan.CursorContext.CursorType;
+			_cursorCapabilities = CursorCapability.Navigable | CursorCapability.BackwardsNavigable | CursorCapability.Searchable | CursorCapability.Bookmarkable;
 			if (Nodes[0] is StackReferenceNode)
-				FCursorCapabilities |= CursorCapability.Updateable;
-			FCursorIsolation = CursorIsolation.None;
-			Order = Compiler.FindClusteringOrder(APlan, FTableVar);
+				_cursorCapabilities |= CursorCapability.Updateable;
+			_cursorIsolation = CursorIsolation.None;
+			Order = Compiler.FindClusteringOrder(plan, _tableVar);
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			TableScan LTable = new TableValueScan(this, Nodes[0].Execute(AProgram) as TableValue);
-			LTable.Open();
-			return LTable;
+			TableScan table = new TableValueScan(this, Nodes[0].Execute(program) as TableValue);
+			table.Open();
+			return table;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			return Nodes[0].EmitStatement(AMode);
+			return Nodes[0].EmitStatement(mode);
 		}
 		
-		protected NativeTable GetNativeTable(Program AProgram)
+		protected NativeTable GetNativeTable(Program program)
 		{
-			StackReferenceNode LNode = Nodes[0] as StackReferenceNode;
-			if (LNode != null)
+			StackReferenceNode node = Nodes[0] as StackReferenceNode;
+			if (node != null)
 			{
-				TableValue LTableValue = AProgram.Stack.Peek(LNode.Location) as TableValue;
-				if (LTableValue != null)
-					return LTableValue.AsNative as NativeTable;
+				TableValue tableValue = program.Stack.Peek(node.Location) as TableValue;
+				if (tableValue != null)
+					return tableValue.AsNative as NativeTable;
 			}
 			return null;
 		}
 
 		// TODO: Revisit update semantics here. Why are we updating what should be an rvalue?		
-		protected override void InternalExecuteInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected override void InternalExecuteInsert(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
-			NativeTable LNativeTable = GetNativeTable(AProgram);
-			if (LNativeTable != null)
-				LNativeTable.Insert(AProgram.ValueManager, ANewRow);
+			NativeTable nativeTable = GetNativeTable(program);
+			if (nativeTable != null)
+				nativeTable.Insert(program.ValueManager, newRow);
 			else
-				base.InternalExecuteInsert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+				base.InternalExecuteInsert(program, oldRow, newRow, valueFlags, uncheckedValue);
 		}
 		
-		protected override void InternalExecuteUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
 		{
 		
-			NativeTable LNativeTable = GetNativeTable(AProgram);
-			if (LNativeTable != null)
-				LNativeTable.Update(AProgram.ValueManager, AOldRow, ANewRow);
+			NativeTable nativeTable = GetNativeTable(program);
+			if (nativeTable != null)
+				nativeTable.Update(program.ValueManager, oldRow, newRow);
 			else
-				base.InternalExecuteUpdate(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+				base.InternalExecuteUpdate(program, oldRow, newRow, valueFlags, checkConcurrency, uncheckedValue);
 		}
 		
-		protected override void InternalExecuteDelete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteDelete(Program program, Row row, bool checkConcurrency, bool uncheckedValue)
 		{
-			NativeTable LNativeTable = GetNativeTable(AProgram);
-			if (LNativeTable != null)
-				LNativeTable.Delete(AProgram.ValueManager, ARow);
+			NativeTable nativeTable = GetNativeTable(program);
+			if (nativeTable != null)
+				nativeTable.Delete(program.ValueManager, row);
 			else
-				base.InternalExecuteDelete(AProgram, ARow, ACheckConcurrency, AUnchecked);
+				base.InternalExecuteDelete(program, row, checkConcurrency, uncheckedValue);
 		}
     }
     
     public abstract class TableVarNode : TableNode
     {
 		public TableVarNode() : base(){}
-		public TableVarNode(Schema.TableVar ATableVar) : base()
+		public TableVarNode(Schema.TableVar tableVar) : base()
 		{
-			FTableVar = ATableVar;
+			_tableVar = tableVar;
 		}
 		
-		public override void DetermineCharacteristics(Plan APlan)
+		public override void DetermineCharacteristics(Plan plan)
 		{
-			FIsLiteral = false;
-			FIsFunctional = true;
-			FIsDeterministic = true;
-			FIsRepeatable = true;
-			FTableVar.DetermineRemotable(APlan.CatalogDeviceSession);
+			_isLiteral = false;
+			_isFunctional = true;
+			_isDeterministic = true;
+			_isRepeatable = true;
+			_tableVar.DetermineRemotable(plan.CatalogDeviceSession);
 
 			/*
 			 * BTR 10/30/2009 -> This is totally wrong to do to a catalog table variable, 
@@ -1468,242 +1468,242 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			*/
 		}
 		
-		public virtual void DetermineVariableProperties(Plan APlan)
+		public virtual void DetermineVariableProperties(Plan plan)
 		{
-			switch (APlan.StatementContext.StatementType)
+			switch (plan.StatementContext.StatementType)
 			{
 				case StatementType.Insert : 
 				case StatementType.Update :
 				case StatementType.Delete :
 				case StatementType.Assignment :
-					if (FTableVar.IsConstant)
-						throw new CompilerException(CompilerException.Codes.ConstantObjectCannotBeAssigned, APlan.CurrentStatement(), FTableVar.DisplayName);
-					FTableVar.IsModified = true;
+					if (_tableVar.IsConstant)
+						throw new CompilerException(CompilerException.Codes.ConstantObjectCannotBeAssigned, plan.CurrentStatement(), _tableVar.DisplayName);
+					_tableVar.IsModified = true;
 				break;
 			}
 		}
 		
-		public virtual void DetermineRights(Plan APlan)
+		public virtual void DetermineRights(Plan plan)
 		{
-			FInsertRight = null;
-			FUpdateRight = null;
-			FDeleteRight = null;
+			_insertRight = null;
+			_updateRight = null;
+			_deleteRight = null;
 			
-			FHasInsertRight = false;
-			FHasUpdateRight = false;
-			FHasDeleteRight = false;
+			_hasInsertRight = false;
+			_hasUpdateRight = false;
+			_hasDeleteRight = false;
 			
-			Schema.TableVar LTableVar = null;
-			if (FTableVar.IsATObject)
+			Schema.TableVar tableVar = null;
+			if (_tableVar.IsATObject)
 			{
-				int LCatalogIndex = APlan.Catalog.IndexOfName(FTableVar.SourceTableName);
-				if (LCatalogIndex >= 0)
-					LTableVar = (Schema.TableVar)APlan.Catalog[LCatalogIndex];
+				int catalogIndex = plan.Catalog.IndexOfName(_tableVar.SourceTableName);
+				if (catalogIndex >= 0)
+					tableVar = (Schema.TableVar)plan.Catalog[catalogIndex];
 			}
 			else
-				LTableVar = FTableVar;
+				tableVar = _tableVar;
 				
-			if (LTableVar != null)
+			if (tableVar != null)
 			{
-				FInsertRight = LTableVar.GetRight(Schema.RightNames.Insert);
-				FUpdateRight = LTableVar.GetRight(Schema.RightNames.Update);
-				FDeleteRight = LTableVar.GetRight(Schema.RightNames.Delete);
+				_insertRight = tableVar.GetRight(Schema.RightNames.Insert);
+				_updateRight = tableVar.GetRight(Schema.RightNames.Update);
+				_deleteRight = tableVar.GetRight(Schema.RightNames.Delete);
 				
-				switch (APlan.StatementContext.StatementType)
+				switch (plan.StatementContext.StatementType)
 				{
 					case StatementType.Select : 
-						APlan.CheckRight(LTableVar.GetRight(Schema.RightNames.Select));
-						if ((APlan.CursorContext.CursorCapabilities & CursorCapability.Updateable) != 0)
+						plan.CheckRight(tableVar.GetRight(Schema.RightNames.Select));
+						if ((plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) != 0)
 						{
-							FHasInsertRight = APlan.HasRight(FInsertRight);
-							FHasUpdateRight = APlan.HasRight(FUpdateRight);
-							FHasDeleteRight = APlan.HasRight(FDeleteRight);
+							_hasInsertRight = plan.HasRight(_insertRight);
+							_hasUpdateRight = plan.HasRight(_updateRight);
+							_hasDeleteRight = plan.HasRight(_deleteRight);
 						}
 					break;
 					case StatementType.Insert : 
-						APlan.CheckRight(FInsertRight); 
-						FHasInsertRight = true;
-						FHasUpdateRight = APlan.HasRight(FUpdateRight);
-						FHasDeleteRight = APlan.HasRight(FDeleteRight);
+						plan.CheckRight(_insertRight); 
+						_hasInsertRight = true;
+						_hasUpdateRight = plan.HasRight(_updateRight);
+						_hasDeleteRight = plan.HasRight(_deleteRight);
 					break;
 					
 					case StatementType.Update : 
-						APlan.CheckRight(FUpdateRight); 
-						FHasInsertRight = APlan.HasRight(FInsertRight);
-						FHasUpdateRight = true;
-						FHasDeleteRight = APlan.HasRight(FDeleteRight);
+						plan.CheckRight(_updateRight); 
+						_hasInsertRight = plan.HasRight(_insertRight);
+						_hasUpdateRight = true;
+						_hasDeleteRight = plan.HasRight(_deleteRight);
 					break;
 
 					case StatementType.Delete : 
-						APlan.CheckRight(FDeleteRight); 
-						FHasInsertRight = APlan.HasRight(FInsertRight);
-						FHasUpdateRight = APlan.HasRight(FUpdateRight);
-						FHasDeleteRight = true;
+						plan.CheckRight(_deleteRight); 
+						_hasInsertRight = plan.HasRight(_insertRight);
+						_hasUpdateRight = plan.HasRight(_updateRight);
+						_hasDeleteRight = true;
 					break;
 					
 					case StatementType.Assignment : 
-						APlan.CheckRight(FDeleteRight);
-						APlan.CheckRight(FInsertRight);
-						FHasDeleteRight = true;
-						FHasUpdateRight = APlan.HasRight(FUpdateRight);
-						FHasInsertRight = true;
+						plan.CheckRight(_deleteRight);
+						plan.CheckRight(_insertRight);
+						_hasDeleteRight = true;
+						_hasUpdateRight = plan.HasRight(_updateRight);
+						_hasInsertRight = true;
 					break;
 				}
 			}
 			else
 			{
-				FHasInsertRight = true;
-				FHasUpdateRight = true;
-				FHasDeleteRight = true;
+				_hasInsertRight = true;
+				_hasUpdateRight = true;
+				_hasDeleteRight = true;
 			}
 		}
 		
-		protected string FInsertRight;
-		protected string FUpdateRight;
-		protected string FDeleteRight;
+		protected string _insertRight;
+		protected string _updateRight;
+		protected string _deleteRight;
 		
-		protected bool FHasInsertRight;
+		protected bool _hasInsertRight;
 		public bool HasInsertRight
 		{
-			get { return FHasInsertRight; }
-			set { FHasInsertRight = value; }
+			get { return _hasInsertRight; }
+			set { _hasInsertRight = value; }
 		}
 		
-		protected bool FHasUpdateRight;
+		protected bool _hasUpdateRight;
 		public bool HasUpdateRight
 		{
-			get { return FHasUpdateRight; }
-			set { FHasUpdateRight = value; }
+			get { return _hasUpdateRight; }
+			set { _hasUpdateRight = value; }
 		}
 		
-		protected bool FHasDeleteRight;
+		protected bool _hasDeleteRight;
 		public bool HasDeleteRight
 		{
-			get { return FHasDeleteRight; }
-			set { FHasDeleteRight = value; }
+			get { return _hasDeleteRight; }
+			set { _hasDeleteRight = value; }
 		}
 		
 		// PropagateInsert
-		private PropagateAction FPropagateInsert = PropagateAction.True;
+		private PropagateAction _propagateInsert = PropagateAction.True;
 		public PropagateAction PropagateInsert
 		{
-			get { return FPropagateInsert; }
-			set { FPropagateInsert = value; }
+			get { return _propagateInsert; }
+			set { _propagateInsert = value; }
 		}
 		
 		// PropagateUpdate
-		private bool FPropagateUpdate = true;
+		private bool _propagateUpdate = true;
 		public bool PropagateUpdate
 		{
-			get { return FPropagateUpdate; }
-			set { FPropagateUpdate = value; }
+			get { return _propagateUpdate; }
+			set { _propagateUpdate = value; }
 		}
 		
 		// PropagateDelete
-		private bool FPropagateDelete = true;
+		private bool _propagateDelete = true;
 		public bool PropagateDelete
 		{
-			get { return FPropagateDelete; }
-			set { FPropagateDelete = value; }
+			get { return _propagateDelete; }
+			set { _propagateDelete = value; }
 		}
 		
 		// PropagateDefault
-		private bool FPropagateDefault = true;
+		private bool _propagateDefault = true;
 		public bool PropagateDefault
 		{
-			get { return FPropagateDefault; }
-			set { FPropagateDefault = value; }
+			get { return _propagateDefault; }
+			set { _propagateDefault = value; }
 		}
 		
 		// PropagateValidate
-		private bool FPropagateValidate = true;
+		private bool _propagateValidate = true;
 		public bool PropagateValidate
 		{
-			get { return FPropagateValidate; }
-			set { FPropagateValidate = value; }
+			get { return _propagateValidate; }
+			set { _propagateValidate = value; }
 		}
 		
 		// PropagateChange
-		private bool FPropagateChange = true;
+		private bool _propagateChange = true;
 		public bool PropagateChange
 		{
-			get { return FPropagateChange; }
-			set { FPropagateChange = value; }
+			get { return _propagateChange; }
+			set { _propagateChange = value; }
 		}
 		
 		// ShouldTranslate
-		private bool FShouldTranslate = true;
+		private bool _shouldTranslate = true;
 		public bool ShouldTranslate
 		{
-			get { return FShouldTranslate; }
-			set { FShouldTranslate = value; }
+			get { return _shouldTranslate; }
+			set { _shouldTranslate = value; }
 		}
 		
 		// ShouldValidateKeyConstraints
-		protected override bool ShouldValidateKeyConstraints(Schema.Transition ATransition)
+		protected override bool ShouldValidateKeyConstraints(Schema.Transition transition)
 		{
-			switch (ATransition)
+			switch (transition)
 			{
-				case Schema.Transition.Insert: return (FPropagateInsert == PropagateAction.True);
-				case Schema.Transition.Update: return FPropagateUpdate;
-				default: return base.ShouldValidateKeyConstraints(ATransition);
+				case Schema.Transition.Insert: return (_propagateInsert == PropagateAction.True);
+				case Schema.Transition.Update: return _propagateUpdate;
+				default: return base.ShouldValidateKeyConstraints(transition);
 			}
 		}
 		
 		// Insert
-		public override void Insert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		public override void Insert(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
-			if (FPropagateInsert != PropagateAction.False)
+			if (_propagateInsert != PropagateAction.False)
 			{
-				base.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+				base.Insert(program, oldRow, newRow, valueFlags, uncheckedValue);
 			}
 		}
 
 		// Update
-		public override void Update(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		public override void Update(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
 		{
-			if (FPropagateUpdate)
+			if (_propagateUpdate)
 			{
-				base.Update(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+				base.Update(program, oldRow, newRow, valueFlags, checkConcurrency, uncheckedValue);
 			}
 		}
 
 		// Delete
-		public override void Delete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		public override void Delete(Program program, Row row, bool checkConcurrency, bool uncheckedValue)
 		{
-			if (FPropagateDelete)
+			if (_propagateDelete)
 			{
-				base.Delete(AProgram, ARow, ACheckConcurrency, AUnchecked);
+				base.Delete(program, row, checkConcurrency, uncheckedValue);
 			}
 		}
 
 		// Validate
-		public override bool Validate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		public override bool Validate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
-			if (FPropagateValidate)
-				return base.Validate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+			if (_propagateValidate)
+				return base.Validate(program, oldRow, newRow, valueFlags, columnName);
 			return false;
 		}
 		
 		// Change
-		public override bool Change(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		public override bool Change(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
-			if (FPropagateChange)
-				return base.Change(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+			if (_propagateChange)
+				return base.Change(program, oldRow, newRow, valueFlags, columnName);
 			return false;
 		}
 		
 		// Default
-		public override bool Default(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		public override bool Default(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
-			if (FPropagateDefault)
-				return base.Default(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+			if (_propagateDefault)
+				return base.Default(program, oldRow, newRow, valueFlags, columnName);
 			return false;
 		}
 
-		protected override void DetermineModifiers(Plan APlan)
+		protected override void DetermineModifiers(Plan plan)
 		{
-			base.DetermineModifiers(APlan);
+			base.DetermineModifiers(plan);
 
 			if (Modifiers != null)
 			{
@@ -1718,38 +1718,38 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Default
-		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
-			BitArray LValueFlags = ANewRow.GetValueFlags();
-			bool LChanged = DefaultColumns(AProgram, TableVar, ANewRow, AValueFlags, AColumnName);
-			if (AIsDescending && LChanged)
-				for (int LIndex = 0; LIndex < ANewRow.DataType.Columns.Count; LIndex++)
-					if (!LValueFlags[LIndex] && ANewRow.HasValue(LIndex))
-						Change(AProgram, AOldRow, ANewRow, AValueFlags, ANewRow.DataType.Columns[LIndex].Name);
-			return LChanged;
+			BitArray localValueFlags = newRow.GetValueFlags();
+			bool changed = DefaultColumns(program, TableVar, newRow, valueFlags, columnName);
+			if (isDescending && changed)
+				for (int index = 0; index < newRow.DataType.Columns.Count; index++)
+					if (!localValueFlags[index] && newRow.HasValue(index))
+						Change(program, oldRow, newRow, valueFlags, newRow.DataType.Columns[index].Name);
+			return changed;
 		}
 		
 		// ExplicitBind
-		private bool FExplicitBind;
+		private bool _explicitBind;
 		/// <summary>Indicates that this table var node is explicitly bound to the supporting variable for an application transaction and should not be re-bound to the actual table variable when re-compiled as part of a dynamic execution.</summary>
 		public bool ExplicitBind
 		{
-			get { return FExplicitBind; }
-			set { FExplicitBind = value; }
+			get { return _explicitBind; }
+			set { _explicitBind = value; }
 		}
 		
 		// Statement
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			Expression LExpression;
-			if ((FTableVar.SourceTableName != null) && ((AMode == EmitMode.ForRemote) || !FExplicitBind))
-				LExpression = new TableIdentifierExpression(Schema.Object.EnsureRooted(FTableVar.SourceTableName));
-			else if ((FTableVar.SessionObjectName != null) && (AMode != EmitMode.ForRemote))
-				LExpression = new TableIdentifierExpression(Schema.Object.EnsureRooted(FTableVar.SessionObjectName));
+			Expression expression;
+			if ((_tableVar.SourceTableName != null) && ((mode == EmitMode.ForRemote) || !_explicitBind))
+				expression = new TableIdentifierExpression(Schema.Object.EnsureRooted(_tableVar.SourceTableName));
+			else if ((_tableVar.SessionObjectName != null) && (mode != EmitMode.ForRemote))
+				expression = new TableIdentifierExpression(Schema.Object.EnsureRooted(_tableVar.SessionObjectName));
 			else
-				LExpression = new TableIdentifierExpression(Schema.Object.EnsureRooted(FTableVar.Name));
-			LExpression.Modifiers = Modifiers;
-			return LExpression;
+				expression = new TableIdentifierExpression(Schema.Object.EnsureRooted(_tableVar.Name));
+			expression.Modifiers = Modifiers;
+			return expression;
 		}
     }
     
@@ -1767,7 +1767,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			ShouldCheckConcurrency = true;
 		}
 		
-		public BaseTableVarNode(Schema.TableVar ATableVar) : base(ATableVar)
+		public BaseTableVarNode(Schema.TableVar tableVar) : base(tableVar)
 		{
 			ShouldCheckConcurrency = true;
 		}
@@ -1778,174 +1778,174 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { base.TableVar = value; } 
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = FTableVar.DataType;
-			DetermineRights(APlan);
-			DetermineVariableProperties(APlan);
+			DetermineModifiers(plan);
+			_dataType = _tableVar.DataType;
+			DetermineRights(plan);
+			DetermineVariableProperties(plan);
 		}
 		
-		public override void DetermineVariableProperties(Plan APlan)
+		public override void DetermineVariableProperties(Plan plan)
 		{
-			base.DetermineVariableProperties(APlan);
-			switch (APlan.StatementContext.StatementType)
+			base.DetermineVariableProperties(plan);
+			switch (plan.StatementContext.StatementType)
 			{
 				case StatementType.Insert : 
 				case StatementType.Update :
 				case StatementType.Delete :
 				case StatementType.Assignment :
-					APlan.SetIsFunctional(false);
+					plan.SetIsFunctional(false);
 				break;
 			}
 		}
 		
-		public override void DetermineDevice(Plan APlan)
+		public override void DetermineDevice(Plan plan)
 		{
-			PrepareJoinApplicationTransaction(APlan);
+			PrepareJoinApplicationTransaction(plan);
 
-			if (FTableVar is Schema.BaseTableVar)
-				FDevice = ((Schema.BaseTableVar)FTableVar).Device;
+			if (_tableVar is Schema.BaseTableVar)
+				_device = ((Schema.BaseTableVar)_tableVar).Device;
 			else
-				throw new CompilerException(CompilerException.Codes.InvalidRetrieveTarget, APlan.CurrentStatement());
+				throw new CompilerException(CompilerException.Codes.InvalidRetrieveTarget, plan.CurrentStatement());
 
-			if (FDevice != null)
+			if (_device != null)
 			{
-				APlan.EnsureDeviceStarted(FDevice);
-				Schema.DevicePlan LDevicePlan = FDevice.Prepare(APlan, this);
-				if (!LDevicePlan.IsSupported)
-					throw new RuntimeException(RuntimeException.Codes.NoSupportingDevice, FDevice.Name, FTableVar.DisplayName);
+				plan.EnsureDeviceStarted(_device);
+				Schema.DevicePlan devicePlan = _device.Prepare(plan, this);
+				if (!devicePlan.IsSupported)
+					throw new RuntimeException(RuntimeException.Codes.NoSupportingDevice, _device.Name, _tableVar.DisplayName);
 
-				APlan.AddDevicePlan(LDevicePlan);
-				FDeviceSupported = true;
-				CheckDeviceRights(APlan);
-				if ((FCursorCapabilities & CursorCapability.Updateable) != 0)
+				plan.AddDevicePlan(devicePlan);
+				_deviceSupported = true;
+				CheckDeviceRights(plan);
+				if ((_cursorCapabilities & CursorCapability.Updateable) != 0)
 				{
-					DetermineModifySupported(APlan);
-					FSymbols = Compiler.SnapshotSymbols(APlan);
+					DetermineModifySupported(plan);
+					_symbols = Compiler.SnapshotSymbols(plan);
 				}
 			}
 			else
-				FNoDevice = true;
+				_noDevice = true;
 		}
 		
-		protected void CheckDeviceRights(Plan APlan)
+		protected void CheckDeviceRights(Plan plan)
 		{
-			if ((Device != null) && !FTableVar.IsATObject)
+			if ((Device != null) && !_tableVar.IsATObject)
 			{
-				APlan.CheckRight(Device.GetRight(Schema.RightNames.Read));
-				if ((FCursorCapabilities & CursorCapability.Updateable) != 0)
-					APlan.CheckRight(Device.GetRight(Schema.RightNames.Write));
+				plan.CheckRight(Device.GetRight(Schema.RightNames.Read));
+				if ((_cursorCapabilities & CursorCapability.Updateable) != 0)
+					plan.CheckRight(Device.GetRight(Schema.RightNames.Write));
 			}
 		}
 		
-		public override void BindToProcess(Plan APlan)
+		public override void BindToProcess(Plan plan)
 		{
-			CheckDeviceRights(APlan);
-			DetermineRights(APlan);
-			APlan.EnsureApplicationTransactionTableVar(FTableVar);
-			base.BindToProcess(APlan);
+			CheckDeviceRights(plan);
+			DetermineRights(plan);
+			plan.EnsureApplicationTransactionTableVar(_tableVar);
+			base.BindToProcess(plan);
 		}
 		
 		// Execute		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
 			throw new RuntimeException(RuntimeException.Codes.NoSupportingDevice);
 		}
 		
-		protected void InternalInsert(Program AProgram, Row ARow, BitArray AValueFlags)
+		protected void InternalInsert(Program program, Row row, BitArray valueFlags)
 		{
-			if (!FHasInsertRight)
-				throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, AProgram.Plan.User.ID, FInsertRight);
-			AProgram.DeviceConnect(FDevice).InsertRow(AProgram, FTableVar, ARow, AValueFlags);
+			if (!_hasInsertRight)
+				throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, program.Plan.User.ID, _insertRight);
+			program.DeviceConnect(_device).InsertRow(program, _tableVar, row, valueFlags);
 		}
 		
 		// Insert
-		protected override void InternalExecuteInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected override void InternalExecuteInsert(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
 			switch (PropagateInsert)
 			{
 				case PropagateAction.True : 
-					InternalInsert(AProgram, ANewRow, AValueFlags); 
+					InternalInsert(program, newRow, valueFlags); 
 				break;
 				
 				case PropagateAction.Ensure :
 				case PropagateAction.Ignore :
-					using (Row LSourceRow = new Row(AProgram.ValueManager, DataType.RowType))
+					using (Row sourceRow = new Row(program.ValueManager, DataType.RowType))
 					{
-						ANewRow.CopyTo(LSourceRow);
-						using (Row LCurrentRow = Select(AProgram, LSourceRow))
+						newRow.CopyTo(sourceRow);
+						using (Row currentRow = Select(program, sourceRow))
 						{
-							if (LCurrentRow != null)
+							if (currentRow != null)
 							{
 								if (PropagateInsert == PropagateAction.Ensure)
-									InternalUpdate(AProgram, LCurrentRow, ANewRow, AValueFlags, false);
+									InternalUpdate(program, currentRow, newRow, valueFlags, false);
 							}
 							else
-								InternalInsert(AProgram, ANewRow, AValueFlags);
+								InternalInsert(program, newRow, valueFlags);
 						}
 					}
 				break;
 			}
 		}
 		
-		protected void InternalUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency)
+		protected void InternalUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool checkConcurrency)
 		{
-			if (!FHasUpdateRight)
-				throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, AProgram.Plan.User.ID, FUpdateRight);
-			AProgram.DeviceConnect(FDevice).UpdateRow(AProgram, FTableVar, AOldRow, ANewRow, AValueFlags);
+			if (!_hasUpdateRight)
+				throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, program.Plan.User.ID, _updateRight);
+			program.DeviceConnect(_device).UpdateRow(program, _tableVar, oldRow, newRow, valueFlags);
 		}
 		
 		// Update
-		protected override void InternalExecuteUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
 		{
 			if (PropagateUpdate)
-				InternalUpdate(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency);
+				InternalUpdate(program, oldRow, newRow, valueFlags, checkConcurrency);
 		}
 		
 		// Delete
-		protected override void InternalExecuteDelete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteDelete(Program program, Row row, bool checkConcurrency, bool uncheckedValue)
 		{
 			if (PropagateDelete)
 			{
-				if (!FHasDeleteRight)
-					throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, AProgram.Plan.User.ID, FDeleteRight);
-				AProgram.DeviceConnect(FDevice).DeleteRow(AProgram, FTableVar, ARow);
+				if (!_hasDeleteRight)
+					throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, program.Plan.User.ID, _deleteRight);
+				program.DeviceConnect(_device).DeleteRow(program, _tableVar, row);
 			}
 		}
 		
-		private PlanNode FJoinATNode;
+		private PlanNode _joinATNode;
 		
-		private void EnsureJoinATNode(Plan APlan, Schema.RowType ARowType)
+		private void EnsureJoinATNode(Plan plan, Schema.RowType rowType)
 		{
-			if (FJoinATNode == null)
+			if (_joinATNode == null)
 			{
-				Schema.RowType LKeyType = new Schema.RowType(Compiler.FindClusteringKey(APlan, FTableVar).Columns);
-				APlan.Symbols.Push(new Symbol("ATRow", ARowType));
+				Schema.RowType keyType = new Schema.RowType(Compiler.FindClusteringKey(plan, _tableVar).Columns);
+				plan.Symbols.Push(new Symbol("ATRow", rowType));
 				try
 				{
-					InsertStatement LInsertStatement =
+					InsertStatement insertStatement =
 						new InsertStatement
 						(
 							new RestrictExpression
 							(
-								new IdentifierExpression(Schema.Object.EnsureRooted(FTableVar.SourceTableName)), 
+								new IdentifierExpression(Schema.Object.EnsureRooted(_tableVar.SourceTableName)), 
 								Compiler.BuildKeyEqualExpression
 								(
-									APlan, 
+									plan, 
 									String.Empty, 
 									"ATRow", 
-									LKeyType.Columns,
-									LKeyType.Columns
+									keyType.Columns,
+									keyType.Columns
 								)
 							), 
-							new IdentifierExpression(Schema.Object.EnsureRooted(FTableVar.Name))
+							new IdentifierExpression(Schema.Object.EnsureRooted(_tableVar.Name))
 						);
 						
-					LInsertStatement.Modifiers = new LanguageModifiers();
-					LInsertStatement.Modifiers.Add(new LanguageModifier("Unchecked", "True"));
+					insertStatement.Modifiers = new LanguageModifiers();
+					insertStatement.Modifiers.Add(new LanguageModifier("Unchecked", "True"));
 
-					Statement LStatement = 
+					Statement statement = 
 						new IfStatement
 						(
 							new UnaryExpression
@@ -1956,73 +1956,73 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									Instructions.Exists, 
 									new RestrictExpression
 									(
-										new IdentifierExpression(Schema.Object.EnsureRooted(FTableVar.Name)), 
+										new IdentifierExpression(Schema.Object.EnsureRooted(_tableVar.Name)), 
 										Compiler.BuildKeyEqualExpression
 										(
-											APlan, 
+											plan, 
 											String.Empty, 
 											"ATRow", 
-											LKeyType.Columns, 
-											LKeyType.Columns
+											keyType.Columns, 
+											keyType.Columns
 										)
 									)
 								)
 							), 
-							LInsertStatement,
+							insertStatement,
 							null
 						);
-					ApplicationTransaction LTransaction = APlan.GetApplicationTransaction();
+					ApplicationTransaction transaction = plan.GetApplicationTransaction();
 					try
 					{
-						LTransaction.PushGlobalContext();
+						transaction.PushGlobalContext();
 						try
 						{
-							APlan.PushSecurityContext(new SecurityContext(FTableVar.Owner));
+							plan.PushSecurityContext(new SecurityContext(_tableVar.Owner));
 							try
 							{
-								FJoinATNode = Compiler.BindNode(APlan, Compiler.CompileStatement(APlan, LStatement));
-								APlan.CheckCompiled();
+								_joinATNode = Compiler.BindNode(plan, Compiler.CompileStatement(plan, statement));
+								plan.CheckCompiled();
 							}
 							finally
 							{
-								APlan.PopSecurityContext();
+								plan.PopSecurityContext();
 							}
 						}
 						finally
 						{
-							LTransaction.PopGlobalContext();
+							transaction.PopGlobalContext();
 						}
 					}
 					finally
 					{
-						Monitor.Exit(LTransaction);
+						Monitor.Exit(transaction);
 					}
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 		}
 
-		public override void JoinApplicationTransaction(Program AProgram, Row ARow) 
+		public override void JoinApplicationTransaction(Program program, Row row) 
 		{
 			/*
 				if this retrieve is from an ATTable
 					if not exists (ATTable where KeyColumns = ARow.KeyColumns)
 						insert with { Unchecked = "True" } SourceTable where KeyColumns = ARow.KeyColumns into ATTable
 			*/
-			if (FTableVar.SourceTableName != null)
+			if (_tableVar.SourceTableName != null)
 			{
-				EnsureJoinATNode(AProgram.Plan, (Schema.RowType)ARow.DataType);
-				AProgram.Stack.Push(ARow);
+				EnsureJoinATNode(program.Plan, (Schema.RowType)row.DataType);
+				program.Stack.Push(row);
 				try
 				{
-					FJoinATNode.Execute(AProgram);
+					_joinATNode.Execute(program);
 				}
 				finally
 				{
-					AProgram.Stack.Pop();
+					program.Stack.Pop();
 				}
 			}
 		}
@@ -2036,79 +2036,79 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     public class DerivedTableVarNode : TableVarNode
     {
 		public DerivedTableVarNode() : base(){}
-		public DerivedTableVarNode(Schema.TableVar ATableVar) : base(ATableVar){}
+		public DerivedTableVarNode(Schema.TableVar tableVar) : base(tableVar){}
 
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = FTableVar.DataType;
-			DetermineRights(APlan);
-			DetermineVariableProperties(APlan);
+			DetermineModifiers(plan);
+			_dataType = _tableVar.DataType;
+			DetermineRights(plan);
+			DetermineVariableProperties(plan);
 
 			// Compile the invocation expression for the view
-			APlan.PushSecurityContext(new SecurityContext(FTableVar.Owner));
+			plan.PushSecurityContext(new SecurityContext(_tableVar.Owner));
 			try
 			{
-				APlan.PushATCreationContext();
+				plan.PushATCreationContext();
 				try
 				{
-					Nodes.Add(Compiler.CompileExpression(APlan, ((Schema.DerivedTableVar)FTableVar).InvocationExpression));
+					Nodes.Add(Compiler.CompileExpression(plan, ((Schema.DerivedTableVar)_tableVar).InvocationExpression));
 				}
 				finally
 				{
-					APlan.PopATCreationContext();
+					plan.PopATCreationContext();
 				}
 			}
 			finally
 			{
-				APlan.PopSecurityContext();
+				plan.PopSecurityContext();
 			}
 		}
 		
-		public override void DetermineVariableProperties(Plan APlan)
+		public override void DetermineVariableProperties(Plan plan)
 		{
-			base.DetermineVariableProperties(APlan);
-			switch (APlan.StatementContext.StatementType)
+			base.DetermineVariableProperties(plan);
+			switch (plan.StatementContext.StatementType)
 			{
 				case StatementType.Insert : 
 				case StatementType.Update :
 				case StatementType.Delete :
 				case StatementType.Assignment :
-					APlan.SetIsFunctional(false);
+					plan.SetIsFunctional(false);
 				break;
 			}
 		}
 		
-		public override void DetermineCursorBehavior(Plan APlan)
+		public override void DetermineCursorBehavior(Plan plan)
 		{
-			FCursorType = SourceNode.CursorType;
-			FRequestedCursorType = APlan.CursorContext.CursorType;
-			FCursorCapabilities = SourceNode.CursorCapabilities;
+			_cursorType = SourceNode.CursorType;
+			_requestedCursorType = plan.CursorContext.CursorType;
+			_cursorCapabilities = SourceNode.CursorCapabilities;
 			if (TableVar.HasHandlers())
-				FCursorCapabilities |= CursorCapability.Updateable;
-			FCursorIsolation = SourceNode.CursorIsolation;
+				_cursorCapabilities |= CursorCapability.Updateable;
+			_cursorIsolation = SourceNode.CursorIsolation;
 			if (SourceNode.Order != null)
 				Order = CopyOrder(SourceNode.Order);
 			else
 				Order = null;
 		}
 		
-		public override void BindToProcess(Plan APlan)
+		public override void BindToProcess(Plan plan)
 		{
-			DetermineRights(APlan);
-			APlan.EnsureApplicationTransactionTableVar(FTableVar);
+			DetermineRights(plan);
+			plan.EnsureApplicationTransactionTableVar(_tableVar);
 
 			// Binding below the derived table variable should be based on the security context of the view owner
-			if (FTableVar.Owner != null)
-				APlan.PushSecurityContext(new SecurityContext(FTableVar.Owner));
+			if (_tableVar.Owner != null)
+				plan.PushSecurityContext(new SecurityContext(_tableVar.Owner));
 			try
 			{
-				base.BindToProcess(APlan); 
+				base.BindToProcess(plan); 
 			}
 			finally
 			{
-				if (FTableVar.Owner != null)
-					APlan.PopSecurityContext();
+				if (_tableVar.Owner != null)
+					plan.PopSecurityContext();
 			}
 		}
 		
@@ -2122,59 +2122,59 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public Schema.TableType SourceTableType { get { return (Schema.TableType)SourceNode.DataType; } }
 		
 		// Default
-		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
-			bool LChanged = false;
-			if (AIsDescending)
-				LChanged = SourceNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
-			return base.InternalDefault(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending) || LChanged;
+			bool changed = false;
+			if (isDescending)
+				changed = SourceNode.Default(program, oldRow, newRow, valueFlags, columnName);
+			return base.InternalDefault(program, oldRow, newRow, valueFlags, columnName, isDescending) || changed;
 		}
 		
 		// Validate
-		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
-			bool LChanged = false;
-			if (AIsDescending)
-				LChanged = SourceNode.Validate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
-			return base.InternalValidate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable) || LChanged;
+			bool changed = false;
+			if (isDescending)
+				changed = SourceNode.Validate(program, oldRow, newRow, valueFlags, columnName);
+			return base.InternalValidate(program, oldRow, newRow, valueFlags, columnName, isDescending, isProposable) || changed;
 		}
 		
 		// Change
-		protected override bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected override bool InternalChange(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
-			return SourceNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+			return SourceNode.Change(program, oldRow, newRow, valueFlags, columnName);
 		}
 		
 		// Insert
-		protected void InternalInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected void InternalInsert(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
-			if (!FHasInsertRight)
-				throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, AProgram.Plan.User.ID, FInsertRight);
-			SourceNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+			if (!_hasInsertRight)
+				throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, program.Plan.User.ID, _insertRight);
+			SourceNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue);
 		}
 		
-		protected override void InternalExecuteInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected override void InternalExecuteInsert(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
 			switch (PropagateInsert)
 			{
 				case PropagateAction.True : 
-					InternalInsert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+					InternalInsert(program, oldRow, newRow, valueFlags, uncheckedValue);
 				break;
 
 				case PropagateAction.Ensure :
 				case PropagateAction.Ignore :
-					using (Row LSourceRow = new Row(AProgram.ValueManager, SourceNode.DataType.RowType))
+					using (Row sourceRow = new Row(program.ValueManager, SourceNode.DataType.RowType))
 					{
-						ANewRow.CopyTo(LSourceRow);
-						using (Row LCurrentRow = SourceNode.Select(AProgram, LSourceRow))
+						newRow.CopyTo(sourceRow);
+						using (Row currentRow = SourceNode.Select(program, sourceRow))
 						{
-							if (LCurrentRow != null)
+							if (currentRow != null)
 							{
 								if (PropagateInsert == PropagateAction.Ensure)
-									InternalUpdate(AProgram, LCurrentRow, ANewRow, AValueFlags, false, AUnchecked);
+									InternalUpdate(program, currentRow, newRow, valueFlags, false, uncheckedValue);
 							}
 							else
-								InternalInsert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+								InternalInsert(program, oldRow, newRow, valueFlags, uncheckedValue);
 						}
 					}
 				break;
@@ -2182,38 +2182,38 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Update
-		protected void InternalUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected void InternalUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
 		{
-			if (!FHasUpdateRight)
-				throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, AProgram.Plan.User.ID, FUpdateRight);
-			SourceNode.Update(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+			if (!_hasUpdateRight)
+				throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, program.Plan.User.ID, _updateRight);
+			SourceNode.Update(program, oldRow, newRow, valueFlags, checkConcurrency, uncheckedValue);
 		}
 		
-		protected override void InternalExecuteUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
 		{
 			if (PropagateUpdate)
-				InternalUpdate(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+				InternalUpdate(program, oldRow, newRow, valueFlags, checkConcurrency, uncheckedValue);
 		}
 		
 		// Delete
-		protected override void InternalExecuteDelete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteDelete(Program program, Row row, bool checkConcurrency, bool uncheckedValue)
 		{
 			if (PropagateDelete)
 			{
-				if (!FHasDeleteRight)
-					throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, AProgram.Plan.User.ID, FDeleteRight);
-				SourceNode.Delete(AProgram, ARow, ACheckConcurrency, AUnchecked);
+				if (!_hasDeleteRight)
+					throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, program.Plan.User.ID, _deleteRight);
+				SourceNode.Delete(program, row, checkConcurrency, uncheckedValue);
 			}
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			return Nodes[0].Execute(AProgram);
+			return Nodes[0].Execute(program);
 		}
 
-		public override void JoinApplicationTransaction(Program AProgram, Row ARow) 
+		public override void JoinApplicationTransaction(Program program, Row row) 
 		{
-			SourceNode.JoinApplicationTransaction(AProgram, ARow);
+			SourceNode.JoinApplicationTransaction(program, row);
 		}
     }
     
@@ -2229,64 +2229,64 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public Schema.ITableType SourceTableType { get { return SourceNode.DataType; } }
 		
 		// PropagateInsert
-		private PropagateAction FPropagateInsert = PropagateAction.True;
+		private PropagateAction _propagateInsert = PropagateAction.True;
 		public PropagateAction PropagateInsert
 		{
-			get { return FPropagateInsert; }
-			set { FPropagateInsert = value; }
+			get { return _propagateInsert; }
+			set { _propagateInsert = value; }
 		}
 		
 		// PropagateUpdate
-		private bool FPropagateUpdate = true;
+		private bool _propagateUpdate = true;
 		public bool PropagateUpdate
 		{
-			get { return FPropagateUpdate; }
-			set { FPropagateUpdate = value; }
+			get { return _propagateUpdate; }
+			set { _propagateUpdate = value; }
 		}
 		
 		// PropagateDelete
-		private bool FPropagateDelete = true;
+		private bool _propagateDelete = true;
 		public bool PropagateDelete
 		{
-			get { return FPropagateDelete; }
-			set { FPropagateDelete = value; }
+			get { return _propagateDelete; }
+			set { _propagateDelete = value; }
 		}
 		
 		// PropagateDefault
-		private bool FPropagateDefault = true;
+		private bool _propagateDefault = true;
 		public bool PropagateDefault
 		{
-			get { return FPropagateDefault; }
-			set { FPropagateDefault = value; }
+			get { return _propagateDefault; }
+			set { _propagateDefault = value; }
 		}
 		
 		// PropagateValidate
-		private bool FPropagateValidate = true;
+		private bool _propagateValidate = true;
 		public bool PropagateValidate
 		{
-			get { return FPropagateValidate; }
-			set { FPropagateValidate = value; }
+			get { return _propagateValidate; }
+			set { _propagateValidate = value; }
 		}
 		
 		// PropagateChange
-		private bool FPropagateChange = true;
+		private bool _propagateChange = true;
 		public bool PropagateChange
 		{
-			get { return FPropagateChange; }
-			set { FPropagateChange = value; }
+			get { return _propagateChange; }
+			set { _propagateChange = value; }
 		}
 		
 		// ShouldTranslate
-		private bool FShouldTranslate = true;
+		private bool _shouldTranslate = true;
 		public bool ShouldTranslate
 		{
-			get { return FShouldTranslate; }
-			set { FShouldTranslate = value; }
+			get { return _shouldTranslate; }
+			set { _shouldTranslate = value; }
 		}
 		
-		protected override void DetermineModifiers(Plan APlan)
+		protected override void DetermineModifiers(Plan plan)
 		{
-			base.DetermineModifiers(APlan);
+			base.DetermineModifiers(plan);
 
 			if (Modifiers != null)
 			{
@@ -2300,95 +2300,95 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override void DetermineCharacteristics(Plan APlan)
+		public override void DetermineCharacteristics(Plan plan)
 		{
-			base.DetermineCharacteristics(APlan);
+			base.DetermineCharacteristics(plan);
 
-			bool LIsNilable = (PropagateInsert == PropagateAction.False || !PropagateUpdate);
+			bool isNilable = (PropagateInsert == PropagateAction.False || !PropagateUpdate);
 			
-			if (LIsNilable)
-				foreach (Schema.TableVarColumn LColumn in TableVar.Columns)
-					LColumn.IsNilable = LIsNilable;
+			if (isNilable)
+				foreach (Schema.TableVarColumn column in TableVar.Columns)
+					column.IsNilable = isNilable;
 		}
 		
-		public override void DetermineRemotable(Plan APlan)
+		public override void DetermineRemotable(Plan plan)
 		{
-			Schema.ResultTableVar LTableVar = (Schema.ResultTableVar)TableVar;
-			LTableVar.InferredIsDefaultRemotable = !PropagateDefault || SourceTableVar.IsDefaultRemotable;
-			LTableVar.InferredIsChangeRemotable = !PropagateChange || SourceTableVar.IsChangeRemotable;
-			LTableVar.InferredIsValidateRemotable = !PropagateValidate || SourceTableVar.IsValidateRemotable;
-			base.DetermineRemotable(APlan);
+			Schema.ResultTableVar tableVar = (Schema.ResultTableVar)TableVar;
+			tableVar.InferredIsDefaultRemotable = !PropagateDefault || SourceTableVar.IsDefaultRemotable;
+			tableVar.InferredIsChangeRemotable = !PropagateChange || SourceTableVar.IsChangeRemotable;
+			tableVar.InferredIsValidateRemotable = !PropagateValidate || SourceTableVar.IsValidateRemotable;
+			base.DetermineRemotable(plan);
 			
-			LTableVar.ShouldChange = PropagateChange && (LTableVar.ShouldChange || SourceTableVar.ShouldChange);
-			LTableVar.ShouldDefault = PropagateDefault && (LTableVar.ShouldDefault || SourceTableVar.ShouldDefault);
-			LTableVar.ShouldValidate = PropagateValidate && (LTableVar.ShouldValidate || SourceTableVar.ShouldValidate);
+			tableVar.ShouldChange = PropagateChange && (tableVar.ShouldChange || SourceTableVar.ShouldChange);
+			tableVar.ShouldDefault = PropagateDefault && (tableVar.ShouldDefault || SourceTableVar.ShouldDefault);
+			tableVar.ShouldValidate = PropagateValidate && (tableVar.ShouldValidate || SourceTableVar.ShouldValidate);
 			
-			foreach (Schema.TableVarColumn LColumn in LTableVar.Columns)
+			foreach (Schema.TableVarColumn column in tableVar.Columns)
 			{
-				int LSourceColumnIndex = SourceTableVar.Columns.IndexOfName(LColumn.Name);
-				if (LSourceColumnIndex >= 0)
+				int sourceColumnIndex = SourceTableVar.Columns.IndexOfName(column.Name);
+				if (sourceColumnIndex >= 0)
 				{
-					Schema.TableVarColumn LSourceColumn = SourceTableVar.Columns[LSourceColumnIndex];
+					Schema.TableVarColumn sourceColumn = SourceTableVar.Columns[sourceColumnIndex];
 
-					LColumn.ShouldChange = PropagateChange && (LColumn.ShouldChange || LSourceColumn.ShouldChange);
-					LTableVar.ShouldChange = LTableVar.ShouldChange || LColumn.ShouldChange;
+					column.ShouldChange = PropagateChange && (column.ShouldChange || sourceColumn.ShouldChange);
+					tableVar.ShouldChange = tableVar.ShouldChange || column.ShouldChange;
 
-					LColumn.ShouldDefault = PropagateDefault && (LColumn.ShouldDefault || LSourceColumn.ShouldDefault);
-					LTableVar.ShouldDefault = LTableVar.ShouldDefault || LColumn.ShouldDefault;
+					column.ShouldDefault = PropagateDefault && (column.ShouldDefault || sourceColumn.ShouldDefault);
+					tableVar.ShouldDefault = tableVar.ShouldDefault || column.ShouldDefault;
 
-					LColumn.ShouldValidate = PropagateValidate && (LColumn.ShouldValidate || LSourceColumn.ShouldValidate);
-					LTableVar.ShouldValidate = LTableVar.ShouldValidate || LColumn.ShouldValidate;
+					column.ShouldValidate = PropagateValidate && (column.ShouldValidate || sourceColumn.ShouldValidate);
+					tableVar.ShouldValidate = tableVar.ShouldValidate || column.ShouldValidate;
 				}
 			}
 		}
 		
 		// Default
-		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
-			if (AIsDescending && PropagateDefault)
-				return SourceNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
-			return base.InternalDefault(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending);
+			if (isDescending && PropagateDefault)
+				return SourceNode.Default(program, oldRow, newRow, valueFlags, columnName);
+			return base.InternalDefault(program, oldRow, newRow, valueFlags, columnName, isDescending);
 		}
 		
 		// Change
-		protected override bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected override bool InternalChange(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
 			if (PropagateChange)
-				return SourceNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
-			return base.InternalChange(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+				return SourceNode.Change(program, oldRow, newRow, valueFlags, columnName);
+			return base.InternalChange(program, oldRow, newRow, valueFlags, columnName);
 		}
 		
 		// Validate
-		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
-			if (AIsDescending && PropagateValidate)
-				return SourceNode.Validate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
-			return base.InternalValidate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable);
+			if (isDescending && PropagateValidate)
+				return SourceNode.Validate(program, oldRow, newRow, valueFlags, columnName);
+			return base.InternalValidate(program, oldRow, newRow, valueFlags, columnName, isDescending, isProposable);
 		}
 
 		// Insert
-		protected override void InternalExecuteInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected override void InternalExecuteInsert(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
 			switch (PropagateInsert)
 			{
 				case PropagateAction.True : 
-					SourceNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked); 
+					SourceNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue); 
 				break;
 
 				case PropagateAction.Ensure :
 				case PropagateAction.Ignore :
-					using (Row LSourceRow = new Row(AProgram.ValueManager, SourceNode.DataType.RowType))
+					using (Row sourceRow = new Row(program.ValueManager, SourceNode.DataType.RowType))
 					{
-						ANewRow.CopyTo(LSourceRow);
-						using (Row LCurrentRow = SourceNode.Select(AProgram, LSourceRow))
+						newRow.CopyTo(sourceRow);
+						using (Row currentRow = SourceNode.Select(program, sourceRow))
 						{
-							if (LCurrentRow != null)
+							if (currentRow != null)
 							{
 								if (PropagateInsert == PropagateAction.Ensure)
-									SourceNode.Update(AProgram, LCurrentRow, ANewRow, AValueFlags, false, AUnchecked);
+									SourceNode.Update(program, currentRow, newRow, valueFlags, false, uncheckedValue);
 							}
 							else
-								SourceNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
+								SourceNode.Insert(program, oldRow, newRow, valueFlags, uncheckedValue);
 						}
 					}
 				break;
@@ -2396,102 +2396,102 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Update
-		protected override void InternalExecuteUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
 		{
 			if (PropagateUpdate)
-				SourceNode.Update(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+				SourceNode.Update(program, oldRow, newRow, valueFlags, checkConcurrency, uncheckedValue);
 		}
 		
 		// Delete
-		protected override void InternalExecuteDelete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteDelete(Program program, Row row, bool checkConcurrency, bool uncheckedValue)
 		{
 			if (PropagateDelete)
-				SourceNode.Delete(AProgram, ARow, ACheckConcurrency, AUnchecked);
+				SourceNode.Delete(program, row, checkConcurrency, uncheckedValue);
 		}
 		
-		public override void JoinApplicationTransaction(Program AProgram, Row ARow) 
+		public override void JoinApplicationTransaction(Program program, Row row) 
 		{
-			SourceNode.JoinApplicationTransaction(AProgram, ARow);
+			SourceNode.JoinApplicationTransaction(program, row);
 		}
 	}
 	
 	// operator iOn(object)	: table{}
 	public class OnNode : TableNode
 	{
-		protected OnExpression FOnExpression;
+		protected OnExpression _onExpression;
 		public OnExpression OnExpression
 		{
-			get { return FOnExpression; }
-			set { FOnExpression = value; }
+			get { return _onExpression; }
+			set { _onExpression = value; }
 		}
 		
-		protected Schema.ServerLink FServerLink;
+		protected Schema.ServerLink _serverLink;
 		public Schema.ServerLink ServerLink
 		{
-			get { return FServerLink; }
-			set { FServerLink = value; }
+			get { return _serverLink; }
+			set { _serverLink = value; }
 		}
 		
-		protected string FExpression;
+		protected string _expression;
 		public string Expression
 		{
 			get
 			{
-				return FExpression;
+				return _expression;
 			}
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
+			DetermineModifiers(plan);
 			
 			// OnNode data type is copied, not reference because the plan is volatile.
-			Schema.Object LObject = Compiler.ResolveCatalogIdentifier(APlan, FOnExpression.ServerName);
-			if (LObject == null)
-				throw new CompilerException(CompilerException.Codes.UnknownIdentifier, FOnExpression, FOnExpression.ServerName);
+			Schema.Object objectValue = Compiler.ResolveCatalogIdentifier(plan, _onExpression.ServerName);
+			if (objectValue == null)
+				throw new CompilerException(CompilerException.Codes.UnknownIdentifier, _onExpression, _onExpression.ServerName);
 				
-			if (!(LObject is Schema.ServerLink))
-				throw new CompilerException(CompilerException.Codes.ServerLinkExpected, FOnExpression);
+			if (!(objectValue is Schema.ServerLink))
+				throw new CompilerException(CompilerException.Codes.ServerLinkExpected, _onExpression);
 				
-			FServerLink = (Schema.ServerLink)LObject;
+			_serverLink = (Schema.ServerLink)objectValue;
 			
-			CursorDefinition LCursorDefinition = FOnExpression.Expression as CursorDefinition;
-			if (LCursorDefinition == null)
-				LCursorDefinition = new CursorDefinition(FOnExpression.Expression);
-			FExpression = new D4TextEmitter().Emit(new SelectStatement(LCursorDefinition));
-			Schema.TableVar LTableVar = APlan.RemoteConnect(FServerLink).PrepareTableVar(APlan, FExpression, new DataParams());
+			CursorDefinition cursorDefinition = _onExpression.Expression as CursorDefinition;
+			if (cursorDefinition == null)
+				cursorDefinition = new CursorDefinition(_onExpression.Expression);
+			_expression = new D4TextEmitter().Emit(new SelectStatement(cursorDefinition));
+			Schema.TableVar tableVar = plan.RemoteConnect(_serverLink).PrepareTableVar(plan, _expression, new DataParams());
 			
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
-			FTableVar.InheritMetaData(LTableVar.MetaData);
-			CopyTableVarColumns(LTableVar.Columns);
-			CopyKeys(LTableVar.Keys);
-			CopyOrders(LTableVar.Orders);
-			FTableVar.IsRemotable = false;
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
+			_tableVar.InheritMetaData(tableVar.MetaData);
+			CopyTableVarColumns(tableVar.Columns);
+			CopyKeys(tableVar.Keys);
+			CopyOrders(tableVar.Orders);
+			_tableVar.IsRemotable = false;
 		}
 		
-		public override void DetermineDevice(Plan APlan)
+		public override void DetermineDevice(Plan plan)
 		{
-			FNoDevice = true;
+			_noDevice = true;
 		}
 
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			return FOnExpression;
+			return _onExpression;
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			LocalTable LTable = new LocalTable(this, AProgram, (TableValue)AProgram.RemoteConnect(FServerLink).Evaluate(FExpression, new DataParams()));
+			LocalTable table = new LocalTable(this, program, (TableValue)program.RemoteConnect(_serverLink).Evaluate(_expression, new DataParams()));
 			try
 			{
-				LTable.Open();
-				return LTable;
+				table.Open();
+				return table;
 			}
 			catch
 			{
-				LTable.Dispose();
+				table.Dispose();
 				throw;
 			}
 		}
@@ -2518,120 +2518,120 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public Schema.TableType RightTableType { get { return (Schema.TableType)RightNode.DataType; } }
 
 		// PropagateInsertLeft
-		private PropagateAction FPropagateInsertLeft = PropagateAction.True;
+		private PropagateAction _propagateInsertLeft = PropagateAction.True;
 		public PropagateAction PropagateInsertLeft
 		{
-			get { return FPropagateInsertLeft; }
-			set { FPropagateInsertLeft = value; }
+			get { return _propagateInsertLeft; }
+			set { _propagateInsertLeft = value; }
 		}
 		
 		// PropagateUpdateLeft
-		private bool FPropagateUpdateLeft = true;
+		private bool _propagateUpdateLeft = true;
 		public bool PropagateUpdateLeft
 		{
-			get { return FPropagateUpdateLeft; }
-			set { FPropagateUpdateLeft = value; }
+			get { return _propagateUpdateLeft; }
+			set { _propagateUpdateLeft = value; }
 		}
 		
 		// PropagateDeleteLeft
-		private bool FPropagateDeleteLeft = true;
+		private bool _propagateDeleteLeft = true;
 		public bool PropagateDeleteLeft
 		{
-			get { return FPropagateDeleteLeft; }
-			set { FPropagateDeleteLeft = value; }
+			get { return _propagateDeleteLeft; }
+			set { _propagateDeleteLeft = value; }
 		}
 		
 		// PropagateDefaultLeft
-		private bool FPropagateDefaultLeft = true;
+		private bool _propagateDefaultLeft = true;
 		public bool PropagateDefaultLeft
 		{
-			get { return FPropagateDefaultLeft; }
-			set { FPropagateDefaultLeft = value; }
+			get { return _propagateDefaultLeft; }
+			set { _propagateDefaultLeft = value; }
 		}
 		
 		// PropagateValidateLeft
-		private bool FPropagateValidateLeft = true;
+		private bool _propagateValidateLeft = true;
 		public bool PropagateValidateLeft
 		{
-			get { return FPropagateValidateLeft; }
-			set { FPropagateValidateLeft = value; }
+			get { return _propagateValidateLeft; }
+			set { _propagateValidateLeft = value; }
 		}
 		
 		// PropagateChangeLeft
-		private bool FPropagateChangeLeft = true;
+		private bool _propagateChangeLeft = true;
 		public bool PropagateChangeLeft
 		{
-			get { return FPropagateChangeLeft; }
-			set { FPropagateChangeLeft = value; }
+			get { return _propagateChangeLeft; }
+			set { _propagateChangeLeft = value; }
 		}
 		
 		// ShouldTranslateLeft
-		private bool FShouldTranslateLeft = true;
+		private bool _shouldTranslateLeft = true;
 		public bool ShouldTranslateLeft
 		{
-			get { return FShouldTranslateLeft; }
-			set { FShouldTranslateLeft = value; }
+			get { return _shouldTranslateLeft; }
+			set { _shouldTranslateLeft = value; }
 		}
 		
 		// PropagateInsertRight
-		private PropagateAction FPropagateInsertRight = PropagateAction.True;
+		private PropagateAction _propagateInsertRight = PropagateAction.True;
 		public PropagateAction PropagateInsertRight
 		{
-			get { return FPropagateInsertRight; }
-			set { FPropagateInsertRight = value; }
+			get { return _propagateInsertRight; }
+			set { _propagateInsertRight = value; }
 		}
 		
 		// PropagateUpdateRight
-		private bool FPropagateUpdateRight = true;
+		private bool _propagateUpdateRight = true;
 		public bool PropagateUpdateRight
 		{
-			get { return FPropagateUpdateRight; }
-			set { FPropagateUpdateRight = value; }
+			get { return _propagateUpdateRight; }
+			set { _propagateUpdateRight = value; }
 		}
 		
 		// PropagateDeleteRight
-		private bool FPropagateDeleteRight = true;
+		private bool _propagateDeleteRight = true;
 		public bool PropagateDeleteRight
 		{
-			get { return FPropagateDeleteRight; }
-			set { FPropagateDeleteRight = value; }
+			get { return _propagateDeleteRight; }
+			set { _propagateDeleteRight = value; }
 		}
 		
 		// PropagateDefaultRight
-		private bool FPropagateDefaultRight = true;
+		private bool _propagateDefaultRight = true;
 		public bool PropagateDefaultRight
 		{
-			get { return FPropagateDefaultRight; }
-			set { FPropagateDefaultRight = value; }
+			get { return _propagateDefaultRight; }
+			set { _propagateDefaultRight = value; }
 		}
 		
 		// PropagateValidateRight
-		private bool FPropagateValidateRight = true;
+		private bool _propagateValidateRight = true;
 		public bool PropagateValidateRight
 		{
-			get { return FPropagateValidateRight; }
-			set { FPropagateValidateRight = value; }
+			get { return _propagateValidateRight; }
+			set { _propagateValidateRight = value; }
 		}
 		
 		// PropagateChangeRight
-		private bool FPropagateChangeRight = true;
+		private bool _propagateChangeRight = true;
 		public bool PropagateChangeRight
 		{
-			get { return FPropagateChangeRight; }
-			set { FPropagateChangeRight = value; }
+			get { return _propagateChangeRight; }
+			set { _propagateChangeRight = value; }
 		}
 		
 		// ShouldTranslateRight
-		private bool FShouldTranslateRight = true;
+		private bool _shouldTranslateRight = true;
 		public bool ShouldTranslateRight
 		{
-			get { return FShouldTranslateRight; }
-			set { FShouldTranslateRight = value; }
+			get { return _shouldTranslateRight; }
+			set { _shouldTranslateRight = value; }
 		}
 		
-		protected override void DetermineModifiers(Plan APlan)
+		protected override void DetermineModifiers(Plan plan)
 		{
-			base.DetermineModifiers(APlan);
+			base.DetermineModifiers(plan);
 
 			if (Modifiers != null)
 			{
@@ -2652,63 +2652,63 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override void DetermineRemotable(Plan APlan)
+		public override void DetermineRemotable(Plan plan)
 		{
-			Schema.ResultTableVar LTableVar = (Schema.ResultTableVar)TableVar;
-			LTableVar.InferredIsDefaultRemotable = (!PropagateDefaultLeft || LeftTableVar.IsDefaultRemotable) && (!PropagateDefaultRight || RightTableVar.IsDefaultRemotable);
-			LTableVar.InferredIsChangeRemotable = (!PropagateChangeLeft || LeftTableVar.IsChangeRemotable) && (!PropagateChangeRight || RightTableVar.IsChangeRemotable);
-			LTableVar.InferredIsValidateRemotable = (!PropagateValidateLeft || LeftTableVar.IsValidateRemotable) && (!PropagateValidateRight || RightTableVar.IsValidateRemotable);
-			base.DetermineRemotable(APlan);
+			Schema.ResultTableVar tableVar = (Schema.ResultTableVar)TableVar;
+			tableVar.InferredIsDefaultRemotable = (!PropagateDefaultLeft || LeftTableVar.IsDefaultRemotable) && (!PropagateDefaultRight || RightTableVar.IsDefaultRemotable);
+			tableVar.InferredIsChangeRemotable = (!PropagateChangeLeft || LeftTableVar.IsChangeRemotable) && (!PropagateChangeRight || RightTableVar.IsChangeRemotable);
+			tableVar.InferredIsValidateRemotable = (!PropagateValidateLeft || LeftTableVar.IsValidateRemotable) && (!PropagateValidateRight || RightTableVar.IsValidateRemotable);
+			base.DetermineRemotable(plan);
 		}
 		
-		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
-		{
-			return false;
-		}
-		
-		protected override bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected override bool InternalDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
 			return false;
 		}
 		
-		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalChange(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
 			return false;
 		}
 		
-		protected override void InternalBeforeInsert(Program AProgram, Row ARow, BitArray AValueFlags)
+		protected override bool InternalValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
+		{
+			return false;
+		}
+		
+		protected override void InternalBeforeInsert(Program program, Row row, BitArray valueFlags)
 		{
 		}
 		
-		protected override void InternalAfterInsert(Program AProgram, Row ARow, BitArray AValueFlags)
+		protected override void InternalAfterInsert(Program program, Row row, BitArray valueFlags)
 		{
 		}
 		
-		protected override void InternalExecuteInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected override void InternalExecuteInsert(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool uncheckedValue)
 		{
 		}
 		
-		protected override void InternalBeforeUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+		protected override void InternalBeforeUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags)
 		{
 		}
 		
-		protected override void InternalAfterUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+		protected override void InternalAfterUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags)
 		{
 		}
 		
-		protected override void InternalExecuteUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteUpdate(Program program, Row oldRow, Row newRow, BitArray valueFlags, bool checkConcurrency, bool uncheckedValue)
 		{
 		}
 		
-		protected override void InternalBeforeDelete(Program AProgram, Row ARow)
+		protected override void InternalBeforeDelete(Program program, Row row)
 		{
 		}
 		
-		protected override void InternalAfterDelete(Program AProgram, Row ARow)
+		protected override void InternalAfterDelete(Program program, Row row)
 		{
 		}
 		
-		protected override void InternalExecuteDelete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteDelete(Program program, Row row, bool checkConcurrency, bool uncheckedValue)
 		{
 		}
 	}

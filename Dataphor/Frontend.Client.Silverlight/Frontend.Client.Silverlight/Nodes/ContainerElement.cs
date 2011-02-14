@@ -18,15 +18,15 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		}
 		
 		/// <remarks> This method is invoked on the main thread. </remarks>
-		public void InsertChild(int AIndex, FrameworkElement AChild)
+		public void InsertChild(int index, FrameworkElement child)
 		{
-			Panel.Children.Insert(Math.Min(AIndex, Panel.Children.Count), AChild);
+			Panel.Children.Insert(Math.Min(index, Panel.Children.Count), child);
 		}
 		
 		/// <remarks> This method is invoked on the main thread. </remarks>
-		public void RemoveChild(FrameworkElement AChild)
+		public void RemoveChild(FrameworkElement child)
 		{
-			Panel.Children.Remove(AChild);
+			Panel.Children.Remove(child);
 		}
 
 		// Element
@@ -58,11 +58,11 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 		// Node
 
-		public override bool IsValidChild(Type AChildType)
+		public override bool IsValidChild(Type childType)
 		{
-			if (typeof(IElement).IsAssignableFrom(AChildType))
+			if (typeof(IElement).IsAssignableFrom(childType))
 				return true;
-			return base.IsValidChild(AChildType);
+			return base.IsValidChild(childType);
 		}
 	}
 }

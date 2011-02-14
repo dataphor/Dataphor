@@ -58,20 +58,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	public class NativeRowTreeList : BaseList<NativeRowTree>
 	{
 	#endif
-		public int IndexOf(Schema.Order AKey)
+		public int IndexOf(Schema.Order key)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (AKey.Equivalent(this[LIndex].Key))
-					return LIndex;
+			for (int index = 0; index < Count; index++)
+				if (key.Equivalent(this[index].Key))
+					return index;
 			return -1;
 		}
 		
-		public bool Contains(Schema.Order AKey)
+		public bool Contains(Schema.Order key)
 		{
-			return IndexOf(AKey) >= 0;
+			return IndexOf(key) >= 0;
 		}
 		
-		public NativeRowTree this[Schema.Order AKey] { get { return this[IndexOf(AKey)]; } }
+		public NativeRowTree this[Schema.Order key] { get { return this[IndexOf(key)]; } }
 	}
 	
 	/// <remarks>
@@ -110,11 +110,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	
 	public class RowTreeNode : Disposable
 	{
-		public RowTreeNode(IValueManager AManager, NativeRowTree ATree, NativeRowTreeNode ANode, LockMode ALockMode)
+		public RowTreeNode(IValueManager manager, NativeRowTree tree, NativeRowTreeNode node, LockMode lockMode)
 		{
-			Manager = AManager;
-			Tree = ATree;
-			Node = ANode;
+			Manager = manager;
+			Tree = tree;
+			Node = node;
 			DataNode = Node as NativeRowTreeDataNode;
 			RoutingNode = Node as NativeRowTreeRoutingNode;
 			#if LOCKROWTREE
@@ -129,7 +129,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		public NativeRowTreeDataNode DataNode;
 		public NativeRowTreeRoutingNode RoutingNode;
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			if (Manager != null)
 			{
@@ -138,7 +138,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				#endif
 				Manager = null;
 			}
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
 		/// <summary>
@@ -146,113 +146,113 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		/// entry index in AEntryNumber, which is the index of the entry that was found if the method returns true,
 		/// otherwise it is the index where the key should be inserted if the method returns false.
 		/// </summary>
-		public bool NodeSearch(Schema.IRowType AKeyRowType, NativeRow AKey, out int AEntryNumber)
+		public bool NodeSearch(Schema.IRowType keyRowType, NativeRow key, out int entryNumber)
 		{
-			int LLo = (Node.NodeType == NativeRowTreeNodeType.Routing ? 1 : 0);
-			int LHi = Node.EntryCount - 1;
-			int LIndex = 0;
-			int LResult = -1;
+			int lo = (Node.NodeType == NativeRowTreeNodeType.Routing ? 1 : 0);
+			int hi = Node.EntryCount - 1;
+			int index = 0;
+			int result = -1;
 			
-			while (LLo <= LHi)
+			while (lo <= hi)
 			{
-				LIndex = (LLo + LHi) / 2;
-				LResult = Tree.Compare(Manager, Tree.KeyRowType, Node.Keys[LIndex], AKeyRowType, AKey);
-				if (LResult == 0)
+				index = (lo + hi) / 2;
+				result = Tree.Compare(Manager, Tree.KeyRowType, Node.Keys[index], keyRowType, key);
+				if (result == 0)
 					break;
-				else if (LResult > 0)
-					LHi = LIndex - 1;
+				else if (result > 0)
+					hi = index - 1;
 				else // if (LResult < 0) unnecessary
-					LLo = LIndex + 1;
+					lo = index + 1;
 			}
 			
-			if (LResult == 0)
-				AEntryNumber = LIndex;
+			if (result == 0)
+				entryNumber = index;
 			else
-				AEntryNumber = LLo;
+				entryNumber = lo;
 				
-			return LResult == 0;
+			return result == 0;
 		}
 
 		/// <summary>
 		/// The recursive portion of the find key algorithm invoked by the FindKey method of the parent Index.
 		/// </summary>
-		public bool FindKey(Schema.IRowType AKeyRowType, NativeRow AKey, RowTreeSearchPath ARowTreeSearchPath, out int AEntryNumber)
+		public bool FindKey(Schema.IRowType keyRowType, NativeRow key, RowTreeSearchPath rowTreeSearchPath, out int entryNumber)
 		{
-			ARowTreeSearchPath.Add(this);
+			rowTreeSearchPath.Add(this);
 			if (Node.NodeType == NativeRowTreeNodeType.Routing)
 			{
 				// Perform a binary search among the keys in this node to determine which streamid to follow for the next node
-				bool LResult = NodeSearch(AKeyRowType, AKey, out AEntryNumber);
+				bool result = NodeSearch(keyRowType, key, out entryNumber);
 
 				// If the key was found, use the given entry number, otherwise, use the one before the given entry
-				AEntryNumber = LResult ? AEntryNumber : (AEntryNumber - 1);
+				entryNumber = result ? entryNumber : (entryNumber - 1);
 				return
 					new RowTreeNode
 					(
 						Manager,
 						Tree, 
-						RoutingNode.Nodes[AEntryNumber],
+						RoutingNode.Nodes[entryNumber],
 						LockMode.Shared
 					).FindKey
 					(
-						AKeyRowType,
-						AKey, 
-						ARowTreeSearchPath, 
-						out AEntryNumber
+						keyRowType,
+						key, 
+						rowTreeSearchPath, 
+						out entryNumber
 					);
 			}
 			else
 			{
 				// Perform a binary search among the keys in this node to determine which entry, if any, is equal to the given key
-				return NodeSearch(AKeyRowType, AKey, out AEntryNumber);
+				return NodeSearch(keyRowType, key, out entryNumber);
 			}
 		}
 		
 		/// <summary>Inserts the given Key and Data streams into this node at the given index.</summary>
-		public void InsertData(NativeRow AKey, NativeRow AData, int AEntryNumber)
+		public void InsertData(NativeRow key, NativeRow data, int entryNumber)
 		{
-			DataNode.Insert(AKey, AData, AEntryNumber);
+			DataNode.Insert(key, data, entryNumber);
 			
-			Tree.RowsMoved(Node, AEntryNumber, Node.EntryCount - 2, Node, 1);
+			Tree.RowsMoved(Node, entryNumber, Node.EntryCount - 2, Node, 1);
 		}
 		
-		public void InsertRouting(NativeRow AKey, NativeRowTreeNode ANode, int AEntryNumber)
+		public void InsertRouting(NativeRow key, NativeRowTreeNode node, int entryNumber)
 		{
-			RoutingNode.Insert(AKey, ANode, AEntryNumber);
+			RoutingNode.Insert(key, node, entryNumber);
 			
-			Tree.RowsMoved(Node, AEntryNumber, Node.EntryCount - 2, Node, 1);
+			Tree.RowsMoved(Node, entryNumber, Node.EntryCount - 2, Node, 1);
 		}
 		
-		public void UpdateData(NativeRow AData, int AEntryNumber)
+		public void UpdateData(NativeRow data, int entryNumber)
 		{
-			Tree.DisposeData(Manager, DataNode.Rows[AEntryNumber]);
-			DataNode.Rows[AEntryNumber] = AData;
+			Tree.DisposeData(Manager, DataNode.Rows[entryNumber]);
+			DataNode.Rows[entryNumber] = data;
 		}
 		
-		public void UpdateRouting(NativeRowTreeNode ANode, int AEntryNumber)
+		public void UpdateRouting(NativeRowTreeNode node, int entryNumber)
 		{
-			RoutingNode.Nodes[AEntryNumber] = ANode;
+			RoutingNode.Nodes[entryNumber] = node;
 		}
 		
-		public void DeleteData(int AEntryNumber)
+		public void DeleteData(int entryNumber)
 		{
-			Tree.DisposeData(Manager, DataNode.Rows[AEntryNumber]);
-			Tree.DisposeKey(Manager, DataNode.Keys[AEntryNumber]);
+			Tree.DisposeData(Manager, DataNode.Rows[entryNumber]);
+			Tree.DisposeKey(Manager, DataNode.Keys[entryNumber]);
 			
-			DataNode.Delete(AEntryNumber);
+			DataNode.Delete(entryNumber);
 			
-			Tree.RowDeleted(Node, AEntryNumber);
-			Tree.RowsMoved(Node, AEntryNumber + 1, Node.EntryCount, Node, -1);
+			Tree.RowDeleted(Node, entryNumber);
+			Tree.RowsMoved(Node, entryNumber + 1, Node.EntryCount, Node, -1);
 		}
 		
-		public void DeleteRouting(int AEntryNumber)
+		public void DeleteRouting(int entryNumber)
 		{
-			Tree.DisposeKey(Manager, RoutingNode.Keys[AEntryNumber]);
+			Tree.DisposeKey(Manager, RoutingNode.Keys[entryNumber]);
 			
-			RoutingNode.Delete(AEntryNumber);
+			RoutingNode.Delete(entryNumber);
 			
-			Tree.RowDeleted(Node, AEntryNumber);
-			Tree.RowsMoved(Node, AEntryNumber + 1, Node.EntryCount, Node, -1);
+			Tree.RowDeleted(Node, entryNumber);
+			Tree.RowsMoved(Node, entryNumber + 1, Node.EntryCount, Node, -1);
 		}
 	}
 	
@@ -267,26 +267,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public NativeRowTree
 		(
-			Schema.Order AKey,
-			Schema.RowType AKeyRowType,
-			Schema.RowType ADataRowType,
-			int AFanout,
-			int ACapacity,
-			bool AIsClustered
+			Schema.Order key,
+			Schema.RowType keyRowType,
+			Schema.RowType dataRowType,
+			int fanout,
+			int capacity,
+			bool isClustered
 		) : base()
 		{
-			FKey = AKey;
+			_key = key;
 			#if DEBUG
-			for (int LIndex = 0; LIndex < FKey.Columns.Count; LIndex++)
-				if (FKey.Columns[LIndex].Sort == null)
+			for (int index = 0; index < _key.Columns.Count; index++)
+				if (_key.Columns[index].Sort == null)
 					Error.Fail("Sort is null");
 			#endif
 			
-			FKeyRowType = AKeyRowType;
-			FDataRowType = ADataRowType;
-			FFanout = AFanout < MinimumFanout ? MinimumFanout : AFanout;
-			FCapacity = ACapacity;
-			IsClustered = AIsClustered;
+			_keyRowType = keyRowType;
+			_dataRowType = dataRowType;
+			_fanout = fanout < MinimumFanout ? MinimumFanout : fanout;
+			_capacity = capacity;
+			IsClustered = isClustered;
 			Root = new NativeRowTreeDataNode(this);
 			Head = Root;
 			Tail = Root;
@@ -305,81 +305,81 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		/// <summary>The height of the tree.</summary>
 		public int Height;
 		
-		private int FFanout;		
+		private int _fanout;		
 		/// <summary>The number of entries per routing node in the tree.</summary>		
-		public int Fanout { get { return FFanout; } }
+		public int Fanout { get { return _fanout; } }
 
-		private int FCapacity;
+		private int _capacity;
 		/// <summary>The number of entries per data node in the tree.</summary>		
-		public int Capacity { get { return FCapacity; } }
+		public int Capacity { get { return _capacity; } }
 		
-		private Schema.Order FKey;
+		private Schema.Order _key;
 		/// <summary>The description of the order for the index.</summary>
-		public Schema.Order Key { get { return FKey; } }
+		public Schema.Order Key { get { return _key; } }
 
-		private Schema.RowType FKeyRowType;
+		private Schema.RowType _keyRowType;
 		/// <summary>The row type of the key for the index.</summary>
-		public Schema.RowType KeyRowType { get { return FKeyRowType; } }
+		public Schema.RowType KeyRowType { get { return _keyRowType; } }
 		
-		private Schema.RowType FDataRowType;
+		private Schema.RowType _dataRowType;
 		/// <summary>The row type for data for the index.</summary>
-		public Schema.RowType DataRowType { get { return FDataRowType; } }
+		public Schema.RowType DataRowType { get { return _dataRowType; } }
 		
 		public bool IsClustered;
 
-		public void Drop(IValueManager AManager)
+		public void Drop(IValueManager manager)
 		{
 			// Deallocate all nodes in the tree
-			DeallocateNode(AManager, Root);
+			DeallocateNode(manager, Root);
 			Root = null;
 			Tail = null;
 			Head = null;
 			Height = 0;
 		}
 		
-		protected RowTreeNode AllocateNode(IValueManager AManager, NativeRowTreeNodeType ANodeType)
+		protected RowTreeNode AllocateNode(IValueManager manager, NativeRowTreeNodeType nodeType)
 		{
-			return new RowTreeNode(AManager, this, ANodeType == NativeRowTreeNodeType.Routing ? (NativeRowTreeNode)new NativeRowTreeRoutingNode(this) : new NativeRowTreeDataNode(this), LockMode.Exclusive);
+			return new RowTreeNode(manager, this, nodeType == NativeRowTreeNodeType.Routing ? (NativeRowTreeNode)new NativeRowTreeRoutingNode(this) : new NativeRowTreeDataNode(this), LockMode.Exclusive);
 		}
 		
-		protected void DeallocateNode(IValueManager AManager, NativeRowTreeNode ANode)
+		protected void DeallocateNode(IValueManager manager, NativeRowTreeNode node)
 		{
-			using (RowTreeNode LNode = new RowTreeNode(AManager, this, ANode, LockMode.Exclusive))
+			using (RowTreeNode localNode = new RowTreeNode(manager, this, node, LockMode.Exclusive))
 			{
-				NativeRowTreeDataNode LDataNode = ANode as NativeRowTreeDataNode;
-				NativeRowTreeRoutingNode LRoutingNode = ANode as NativeRowTreeRoutingNode;
-				for (int LEntryIndex = 0; LEntryIndex < ANode.EntryCount; LEntryIndex++)
+				NativeRowTreeDataNode dataNode = node as NativeRowTreeDataNode;
+				NativeRowTreeRoutingNode routingNode = node as NativeRowTreeRoutingNode;
+				for (int entryIndex = 0; entryIndex < node.EntryCount; entryIndex++)
 				{
-					if (ANode.NodeType == NativeRowTreeNodeType.Routing)
+					if (node.NodeType == NativeRowTreeNodeType.Routing)
 					{
-						if (LEntryIndex > 0)
-							DisposeKey(AManager, ANode.Keys[LEntryIndex]);
-						DeallocateNode(AManager, LRoutingNode.Nodes[LEntryIndex]);
+						if (entryIndex > 0)
+							DisposeKey(manager, node.Keys[entryIndex]);
+						DeallocateNode(manager, routingNode.Nodes[entryIndex]);
 					}
 					else
 					{
-						DisposeKey(AManager, LDataNode.Keys[LEntryIndex]);
-						DisposeData(AManager, LDataNode.Rows[LEntryIndex]);
+						DisposeKey(manager, dataNode.Keys[entryIndex]);
+						DisposeData(manager, dataNode.Rows[entryIndex]);
 					}
 				}
 				
-				if (ANode.NextNode == null)
-					Tail = ANode.PriorNode;
+				if (node.NextNode == null)
+					Tail = node.PriorNode;
 				else
 				{
-					using (RowTreeNode LNextNode = new RowTreeNode(AManager, this, ANode.NextNode, LockMode.Exclusive))
+					using (RowTreeNode nextNode = new RowTreeNode(manager, this, node.NextNode, LockMode.Exclusive))
 					{
-						LNextNode.Node.PriorNode = ANode.PriorNode;
+						nextNode.Node.PriorNode = node.PriorNode;
 					}
 				}
 					
-				if (ANode.PriorNode == null)
-					Head = ANode.NextNode;
+				if (node.PriorNode == null)
+					Head = node.NextNode;
 				else
 				{
-					using (RowTreeNode LPriorNode = new RowTreeNode(AManager, this, ANode.PriorNode, LockMode.Exclusive))
+					using (RowTreeNode priorNode = new RowTreeNode(manager, this, node.PriorNode, LockMode.Exclusive))
 					{
-						LPriorNode.Node.NextNode = ANode.NextNode;
+						priorNode.Node.NextNode = node.NextNode;
 					}
 				}
 			}
@@ -389,197 +389,197 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		/// The given streams are copied into the index, so references within the streams 
 		/// are considered owned by the index after the insert.
 		/// </summary>
-		public void Insert(IValueManager AManager, NativeRow AKey, NativeRow AData)
+		public void Insert(IValueManager manager, NativeRow key, NativeRow data)
 		{
-			int LEntryNumber;
-			using (RowTreeSearchPath LRowTreeSearchPath = new RowTreeSearchPath())
+			int entryNumber;
+			using (RowTreeSearchPath rowTreeSearchPath = new RowTreeSearchPath())
 			{
-				bool LResult = FindKey(AManager, KeyRowType, AKey, LRowTreeSearchPath, out LEntryNumber);
-				if (LResult)
+				bool result = FindKey(manager, KeyRowType, key, rowTreeSearchPath, out entryNumber);
+				if (result)
 					throw new IndexException(IndexException.Codes.DuplicateKey);
 					
-				InternalInsert(AManager, LRowTreeSearchPath, LEntryNumber, AKey, AData);
+				InternalInsert(manager, rowTreeSearchPath, entryNumber, key, data);
 			}
 		}
 		
-		private int Split(NativeRowTreeNode ASourceNode, NativeRowTreeNode ATargetNode)
+		private int Split(NativeRowTreeNode sourceNode, NativeRowTreeNode targetNode)
 		{
-			int LEntryCount = ASourceNode.EntryCount;
-			int LEntryPivot = LEntryCount / 2;
-			if (ASourceNode.NodeType == NativeRowTreeNodeType.Data)
+			int entryCount = sourceNode.EntryCount;
+			int entryPivot = entryCount / 2;
+			if (sourceNode.NodeType == NativeRowTreeNodeType.Data)
 			{
-				NativeRowTreeDataNode LSourceDataNode = (NativeRowTreeDataNode)ASourceNode;
-				NativeRowTreeDataNode LTargetDataNode = (NativeRowTreeDataNode)ATargetNode;
+				NativeRowTreeDataNode sourceDataNode = (NativeRowTreeDataNode)sourceNode;
+				NativeRowTreeDataNode targetDataNode = (NativeRowTreeDataNode)targetNode;
 
 				// Insert the upper half of the entries from ASourceNode into ATargetNode
-				for (int LEntryIndex = LEntryPivot; LEntryIndex < LEntryCount; LEntryIndex++)
-					LTargetDataNode.Insert(LSourceDataNode.Keys[LEntryIndex], LSourceDataNode.Rows[LEntryIndex], LEntryIndex - LEntryPivot);
+				for (int entryIndex = entryPivot; entryIndex < entryCount; entryIndex++)
+					targetDataNode.Insert(sourceDataNode.Keys[entryIndex], sourceDataNode.Rows[entryIndex], entryIndex - entryPivot);
 
 				// Remove the upper half of the entries from ASourceNode					
-				for (int LEntryIndex = LEntryCount - 1; LEntryIndex >= LEntryPivot; LEntryIndex--)
-					LSourceDataNode.Delete(LEntryIndex); // Don't dispose the values here, this is a move
+				for (int entryIndex = entryCount - 1; entryIndex >= entryPivot; entryIndex--)
+					sourceDataNode.Delete(entryIndex); // Don't dispose the values here, this is a move
 			}
 			else
 			{
-				NativeRowTreeRoutingNode LSourceRoutingNode = (NativeRowTreeRoutingNode)ASourceNode;
-				NativeRowTreeRoutingNode LTargetRoutingNode = (NativeRowTreeRoutingNode)ATargetNode;
+				NativeRowTreeRoutingNode sourceRoutingNode = (NativeRowTreeRoutingNode)sourceNode;
+				NativeRowTreeRoutingNode targetRoutingNode = (NativeRowTreeRoutingNode)targetNode;
 	
 				// Insert the upper half of the entries from ASourceNode into ATargetNode
-				for (int LEntryIndex = LEntryPivot; LEntryIndex < LEntryCount; LEntryIndex++)
-					LTargetRoutingNode.Insert(LSourceRoutingNode.Keys[LEntryIndex], LSourceRoutingNode.Nodes[LEntryIndex], LEntryIndex - LEntryPivot);
+				for (int entryIndex = entryPivot; entryIndex < entryCount; entryIndex++)
+					targetRoutingNode.Insert(sourceRoutingNode.Keys[entryIndex], sourceRoutingNode.Nodes[entryIndex], entryIndex - entryPivot);
 					
 				// Remove the upper half of the entries from ASourceNode					
-				for (int LEntryIndex = LEntryCount - 1; LEntryIndex >= LEntryPivot; LEntryIndex--)
-					LSourceRoutingNode.Delete(LEntryIndex);
+				for (int entryIndex = entryCount - 1; entryIndex >= entryPivot; entryIndex--)
+					sourceRoutingNode.Delete(entryIndex);
 			}
 
 			// Notify index clients of the data change
-			RowsMoved(ASourceNode, LEntryPivot, LEntryCount - 1, ATargetNode, -LEntryPivot);
+			RowsMoved(sourceNode, entryPivot, entryCount - 1, targetNode, -entryPivot);
 			
-			return LEntryPivot;
+			return entryPivot;
 		}
 		
-		private void InternalInsert(IValueManager AManager, RowTreeSearchPath ARowTreeSearchPath, int AEntryNumber, NativeRow AKey, NativeRow AData)
+		private void InternalInsert(IValueManager manager, RowTreeSearchPath rowTreeSearchPath, int entryNumber, NativeRow key, NativeRow data)
 		{
 			// Walk back up the search path, inserting data and splitting pages as necessary
-			RowTreeNode LNewRowTreeNode;
-			NativeRowTreeNode LSplitNode = null;
-			for (int LIndex = ARowTreeSearchPath.Count - 1; LIndex >= 0; LIndex--)
+			RowTreeNode newRowTreeNode;
+			NativeRowTreeNode splitNode = null;
+			for (int index = rowTreeSearchPath.Count - 1; index >= 0; index--)
 			{
-				if (ARowTreeSearchPath[LIndex].Node.EntryCount >= Capacity)
+				if (rowTreeSearchPath[index].Node.EntryCount >= Capacity)
 				{
 					// Allocate a new node
-					using (LNewRowTreeNode = AllocateNode(AManager, ARowTreeSearchPath[LIndex].Node.NodeType))
+					using (newRowTreeNode = AllocateNode(manager, rowTreeSearchPath[index].Node.NodeType))
 					{
 						// Thread it into the list of leaves, if necessary
-						if (LNewRowTreeNode.Node.NodeType == NativeRowTreeNodeType.Data)
+						if (newRowTreeNode.Node.NodeType == NativeRowTreeNodeType.Data)
 						{
-							LNewRowTreeNode.Node.PriorNode = ARowTreeSearchPath[LIndex].Node;
-							LNewRowTreeNode.Node.NextNode = ARowTreeSearchPath[LIndex].Node.NextNode;
-							ARowTreeSearchPath[LIndex].Node.NextNode = LNewRowTreeNode.Node;
-							if (LNewRowTreeNode.Node.NextNode == null)
-								Tail = LNewRowTreeNode.Node;
+							newRowTreeNode.Node.PriorNode = rowTreeSearchPath[index].Node;
+							newRowTreeNode.Node.NextNode = rowTreeSearchPath[index].Node.NextNode;
+							rowTreeSearchPath[index].Node.NextNode = newRowTreeNode.Node;
+							if (newRowTreeNode.Node.NextNode == null)
+								Tail = newRowTreeNode.Node;
 							else
 							{
-								using (RowTreeNode LNextRowTreeNode = new RowTreeNode(AManager, this, LNewRowTreeNode.Node.NextNode, LockMode.Exclusive))
+								using (RowTreeNode nextRowTreeNode = new RowTreeNode(manager, this, newRowTreeNode.Node.NextNode, LockMode.Exclusive))
 								{
-									LNextRowTreeNode.Node.PriorNode = LNewRowTreeNode.Node;
+									nextRowTreeNode.Node.PriorNode = newRowTreeNode.Node;
 								}
 							}
 						}
 						
-						int LEntryPivot = Split(ARowTreeSearchPath[LIndex].Node, LNewRowTreeNode.Node);
+						int entryPivot = Split(rowTreeSearchPath[index].Node, newRowTreeNode.Node);
 						
 						// Insert the new entry into the appropriate node
-						if (AEntryNumber >= LEntryPivot)
-							if (LNewRowTreeNode.Node.NodeType == NativeRowTreeNodeType.Data)
-								LNewRowTreeNode.InsertData(AKey, AData, AEntryNumber - LEntryPivot);
+						if (entryNumber >= entryPivot)
+							if (newRowTreeNode.Node.NodeType == NativeRowTreeNodeType.Data)
+								newRowTreeNode.InsertData(key, data, entryNumber - entryPivot);
 							else
-								LNewRowTreeNode.InsertRouting(AKey, LSplitNode, AEntryNumber - LEntryPivot);
+								newRowTreeNode.InsertRouting(key, splitNode, entryNumber - entryPivot);
 						else
-							if (LNewRowTreeNode.Node.NodeType == NativeRowTreeNodeType.Data)
-								ARowTreeSearchPath[LIndex].InsertData(AKey, AData, AEntryNumber);
+							if (newRowTreeNode.Node.NodeType == NativeRowTreeNodeType.Data)
+								rowTreeSearchPath[index].InsertData(key, data, entryNumber);
 							else
-								ARowTreeSearchPath[LIndex].InsertRouting(AKey, LSplitNode, AEntryNumber);
+								rowTreeSearchPath[index].InsertRouting(key, splitNode, entryNumber);
 							
 						// Reset the AKey for the next round
 						// The key for the entry one level up is the first key for the newly allocated node
-						AKey = CopyKey(AManager, LNewRowTreeNode.Node.Keys[0]);
+						key = CopyKey(manager, newRowTreeNode.Node.Keys[0]);
 						
 						// Set LSplitNode to the newly allocated node
-						LSplitNode = LNewRowTreeNode.Node;
+						splitNode = newRowTreeNode.Node;
 					}
 
-					if (LIndex == 0)
+					if (index == 0)
 					{
 						// Allocate a new root node and grow the height of the tree by 1
-						using (LNewRowTreeNode = AllocateNode(AManager, NativeRowTreeNodeType.Routing))
+						using (newRowTreeNode = AllocateNode(manager, NativeRowTreeNodeType.Routing))
 						{
-							LNewRowTreeNode.InsertRouting(null, ARowTreeSearchPath[LIndex].Node, 0); // 1st key of a routing node is not used
-							LNewRowTreeNode.InsertRouting(AKey, LSplitNode, 1);
-							Root = LNewRowTreeNode.Node;
+							newRowTreeNode.InsertRouting(null, rowTreeSearchPath[index].Node, 0); // 1st key of a routing node is not used
+							newRowTreeNode.InsertRouting(key, splitNode, 1);
+							Root = newRowTreeNode.Node;
 							Height++;
 						}
 					}
 					else
 					{
 						// reset AEntryNumber for the next round
-						bool LResult = ARowTreeSearchPath[LIndex - 1].NodeSearch(KeyRowType, AKey, out AEntryNumber);
+						bool result = rowTreeSearchPath[index - 1].NodeSearch(KeyRowType, key, out entryNumber);
 
 						// At this point we should be guaranteed to have a routing key which does not exist in the parent node
-						if (LResult)
+						if (result)
 							throw new IndexException(IndexException.Codes.DuplicateRoutingKey);
 					}
 				}
 				else
 				{
-					if (ARowTreeSearchPath[LIndex].Node.NodeType == NativeRowTreeNodeType.Data)
-						ARowTreeSearchPath[LIndex].InsertData(AKey, AData, AEntryNumber);
+					if (rowTreeSearchPath[index].Node.NodeType == NativeRowTreeNodeType.Data)
+						rowTreeSearchPath[index].InsertData(key, data, entryNumber);
 					else
-						ARowTreeSearchPath[LIndex].InsertRouting(AKey, LSplitNode, AEntryNumber);
+						rowTreeSearchPath[index].InsertRouting(key, splitNode, entryNumber);
 					break;
 				}
 			}
 		}
 		
 		/// <summary>Updates the entry given by AOldKey to the stream given by ANewKey.  The data for the entry is moved to the new location.</summary>
-		public void Update(IValueManager AManager, NativeRow AOldKey, NativeRow ANewKey)
+		public void Update(IValueManager manager, NativeRow oldKey, NativeRow newKey)
 		{
-			Update(AManager, AOldKey, ANewKey, null);
+			Update(manager, oldKey, newKey, null);
 		}
 		
 		/// <summary>Updates the entry given by AOldKey to the entry given by ANewKey and ANewData.  If AOldKey == ANewKey, the data for the entry is updated in place, otherwise it is moved to the location given by ANewKey.</summary>
-		public void Update(IValueManager AManager, NativeRow AOldKey, NativeRow ANewKey, NativeRow ANewData)
+		public void Update(IValueManager manager, NativeRow oldKey, NativeRow newKey, NativeRow newData)
 		{
-			int LEntryNumber;
-			using (RowTreeSearchPath LRowTreeSearchPath = new RowTreeSearchPath())
+			int entryNumber;
+			using (RowTreeSearchPath rowTreeSearchPath = new RowTreeSearchPath())
 			{
-				bool LResult = FindKey(AManager, KeyRowType, AOldKey, LRowTreeSearchPath, out LEntryNumber);
-				if (!LResult)
+				bool result = FindKey(manager, KeyRowType, oldKey, rowTreeSearchPath, out entryNumber);
+				if (!result)
 					throw new IndexException(IndexException.Codes.KeyNotFound);
 					
-				if (Compare(AManager, KeyRowType, AOldKey, KeyRowType, ANewKey) == 0)
+				if (Compare(manager, KeyRowType, oldKey, KeyRowType, newKey) == 0)
 				{
-					if (ANewData != null)
-						LRowTreeSearchPath.DataNode.UpdateData(ANewData, LEntryNumber);
+					if (newData != null)
+						rowTreeSearchPath.DataNode.UpdateData(newData, entryNumber);
 				}
 				else
 				{
-					if (ANewData == null)
+					if (newData == null)
 					{
-						ANewData = LRowTreeSearchPath.DataNode.DataNode.Rows[LEntryNumber];
-						LRowTreeSearchPath.DataNode.DataNode.Delete(LEntryNumber); // Don't dispose here this is a move
+						newData = rowTreeSearchPath.DataNode.DataNode.Rows[entryNumber];
+						rowTreeSearchPath.DataNode.DataNode.Delete(entryNumber); // Don't dispose here this is a move
 					}
 					else
-						InternalDelete(AManager, LRowTreeSearchPath, LEntryNumber); // Dispose here this is not a move
+						InternalDelete(manager, rowTreeSearchPath, entryNumber); // Dispose here this is not a move
 
-					LRowTreeSearchPath.Dispose();
-					LResult = FindKey(AManager, KeyRowType, ANewKey, LRowTreeSearchPath, out LEntryNumber);
-					if (LResult)
+					rowTreeSearchPath.Dispose();
+					result = FindKey(manager, KeyRowType, newKey, rowTreeSearchPath, out entryNumber);
+					if (result)
 						throw new IndexException(IndexException.Codes.DuplicateKey);
 						
-					InternalInsert(AManager, LRowTreeSearchPath, LEntryNumber, ANewKey, ANewData);
+					InternalInsert(manager, rowTreeSearchPath, entryNumber, newKey, newData);
 				}
 			}
 		}
 		
-		private void InternalDelete(IValueManager AManager, RowTreeSearchPath ARowTreeSearchPath, int AEntryNumber)
+		private void InternalDelete(IValueManager manager, RowTreeSearchPath rowTreeSearchPath, int entryNumber)
 		{
-			ARowTreeSearchPath.DataNode.DeleteData(AEntryNumber);
+			rowTreeSearchPath.DataNode.DeleteData(entryNumber);
 		}
 		
 		// TODO: Asynchronous collapsed node recovery
 		/// <summary>Deletes the entry given by AKey.  The streams are disposed through the DisposeKey event, so it is the responsibility of the index user to dispose references within the streams.</summary>
-		public void Delete(IValueManager AManager, NativeRow AKey)
+		public void Delete(IValueManager manager, NativeRow key)
 		{
-			int LEntryNumber;
-			using (RowTreeSearchPath LRowTreeSearchPath = new RowTreeSearchPath())
+			int entryNumber;
+			using (RowTreeSearchPath rowTreeSearchPath = new RowTreeSearchPath())
 			{
-				bool LResult = FindKey(AManager, KeyRowType, AKey, LRowTreeSearchPath, out LEntryNumber);
-				if (!LResult)
+				bool result = FindKey(manager, KeyRowType, key, rowTreeSearchPath, out entryNumber);
+				if (!result)
 					throw new IndexException(IndexException.Codes.KeyNotFound);
 					
-				InternalDelete(AManager, LRowTreeSearchPath, LEntryNumber);
+				InternalDelete(manager, rowTreeSearchPath, entryNumber);
 			}
 		}
 
@@ -588,16 +588,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		/// location of the key in the index.  If the search is successful, the entry exists, otherwise 
 		/// the EntryNumber indicates where the entry should be placed for an insert.
 		/// </summary>
-		/// <param name="AKey">The key to be found.</param>
-		/// <param name="ARowTreeSearchPath">A <see cref="RowTreeSearchPath"/> which will contain the set of nodes along the search path to the key.</param>
-		/// <param name="AEntryNumber">The EntryNumber where the key either is, or should be, depending on the result of the find.</param>
+		/// <param name="key">The key to be found.</param>
+		/// <param name="rowTreeSearchPath">A <see cref="RowTreeSearchPath"/> which will contain the set of nodes along the search path to the key.</param>
+		/// <param name="entryNumber">The EntryNumber where the key either is, or should be, depending on the result of the find.</param>
 		/// <returns>A boolean value indicating the success or failure of the find.</returns>
-		public bool FindKey(IValueManager AManager, Schema.IRowType AKeyRowType, NativeRow AKey, RowTreeSearchPath ARowTreeSearchPath, out int AEntryNumber)
+		public bool FindKey(IValueManager manager, Schema.IRowType keyRowType, NativeRow key, RowTreeSearchPath rowTreeSearchPath, out int entryNumber)
 		{
-			return new RowTreeNode(AManager, this, Root, LockMode.Shared).FindKey(AKeyRowType, AKey, ARowTreeSearchPath, out AEntryNumber);
+			return new RowTreeNode(manager, this, Root, LockMode.Shared).FindKey(keyRowType, key, rowTreeSearchPath, out entryNumber);
 		}
 		
-		public int Compare(IValueManager AManager, Schema.IRowType AIndexKeyRowType, NativeRow AIndexKey, Schema.IRowType ACompareKeyRowType, NativeRow ACompareKey)
+		public int Compare(IValueManager manager, Schema.IRowType indexKeyRowType, NativeRow indexKey, Schema.IRowType compareKeyRowType, NativeRow compareKey)
 		{
 			// If AIndexKeyRowType is null, the index key must have the structure of an index key,
 			// Otherwise, the IndexKey row could be a subset of the actual index key.
@@ -613,70 +613,70 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			// is a subset of the IndexKey with order intact.
 			//Row LCompareKey = new Row(AManager, ACompareKeyRowType, ACompareKey);
 				
-			int LResult = 0;
-			for (int LIndex = 0; LIndex < AIndexKeyRowType.Columns.Count; LIndex++)
+			int result = 0;
+			for (int index = 0; index < indexKeyRowType.Columns.Count; index++)
 			{
-				if (LIndex >= ACompareKeyRowType.Columns.Count)
+				if (index >= compareKeyRowType.Columns.Count)
 					break;
 					
-				if ((AIndexKey.Values[LIndex] != null) && (ACompareKey.Values[LIndex] != null))
+				if ((indexKey.Values[index] != null) && (compareKey.Values[index] != null))
 				{
-					LResult = AManager.EvaluateSort(Key.Columns[LIndex], AIndexKey.Values[LIndex], ACompareKey.Values[LIndex]);
+					result = manager.EvaluateSort(Key.Columns[index], indexKey.Values[index], compareKey.Values[index]);
 				}
-				else if (AIndexKey.Values[LIndex] != null)
+				else if (indexKey.Values[index] != null)
 				{
-					LResult = Key.Columns[LIndex].Ascending ? 1 : -1;
+					result = Key.Columns[index].Ascending ? 1 : -1;
 				}
-				else if (ACompareKey.Values[LIndex] != null)
+				else if (compareKey.Values[index] != null)
 				{
-					LResult = Key.Columns[LIndex].Ascending ? -1 : 1;
+					result = Key.Columns[index].Ascending ? -1 : 1;
 				}
 				else
 				{
-					LResult = 0;
+					result = 0;
 				}
 				
-				if (LResult != 0)
+				if (result != 0)
 					break;
 			}
 			
 			//LIndexKey.Dispose();
 			//LCompareKey.Dispose();
-			return LResult;
+			return result;
 		}
 		
-		public NativeRow CopyKey(IValueManager AManager, NativeRow ASourceKey)
+		public NativeRow CopyKey(IValueManager manager, NativeRow sourceKey)
 		{
-			return (NativeRow)DataValue.CopyNative(AManager, KeyRowType, ASourceKey);
+			return (NativeRow)DataValue.CopyNative(manager, KeyRowType, sourceKey);
 		}
 		
-		public NativeRow CopyData(IValueManager AManager, NativeRow ASourceData)
+		public NativeRow CopyData(IValueManager manager, NativeRow sourceData)
 		{
-			return (NativeRow)DataValue.CopyNative(AManager, DataRowType, ASourceData);
+			return (NativeRow)DataValue.CopyNative(manager, DataRowType, sourceData);
 		}
 		
-		public void DisposeKey(IValueManager AManager, NativeRow AKey)
+		public void DisposeKey(IValueManager manager, NativeRow key)
 		{
-			DataValue.DisposeNative(AManager, KeyRowType, AKey);
+			DataValue.DisposeNative(manager, KeyRowType, key);
 		}
 		
-		public void DisposeData(IValueManager AManager, NativeRow AData)
+		public void DisposeData(IValueManager manager, NativeRow data)
 		{
-			DataValue.DisposeNative(AManager, DataRowType, AData);
+			DataValue.DisposeNative(manager, DataRowType, data);
 		}
 
 		public event NativeRowTreeRowsMovedHandler OnRowsMoved;
-		public void RowsMoved(NativeRowTreeNode AOldNode, int AOldEntryNumberMin, int AOldEntryNumberMax, NativeRowTreeNode ANewNode, int AEntryNumberDelta)
+		public void RowsMoved(NativeRowTreeNode oldNode, int oldEntryNumberMin, int oldEntryNumberMax, NativeRowTreeNode newNode, int entryNumberDelta)
 		{
 			if (OnRowsMoved != null)
-				OnRowsMoved(this, AOldNode, AOldEntryNumberMin, AOldEntryNumberMax, ANewNode, AEntryNumberDelta);
+				OnRowsMoved(this, oldNode, oldEntryNumberMin, oldEntryNumberMax, newNode, entryNumberDelta);
 		}
 		
 		public event NativeRowTreeRowDeletedHandler OnRowDeleted;
-		public void RowDeleted(NativeRowTreeNode ANode, int AEntryNumber)
+		public void RowDeleted(NativeRowTreeNode node, int entryNumber)
 		{
 			if (OnRowDeleted != null)
-				OnRowDeleted(this, ANode, AEntryNumber);
+				OnRowDeleted(this, node, entryNumber);
 		}
 	}
 
@@ -684,25 +684,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	
 	public class NativeRowTreeNode : System.Object
 	{
-		public NativeRowTreeNode(NativeRowTree ANativeRowTree)
+		public NativeRowTreeNode(NativeRowTree nativeRowTree)
 		{
-			FNativeRowTree = ANativeRowTree;
+			_nativeRowTree = nativeRowTree;
 			#if LOCKROWTREE
 			LockID = new LockID(Server.Server.CStreamManagerID, GetHashCode().ToString());
 			#endif
 		}
 		
-		protected NativeRowTree FNativeRowTree;
-		public NativeRowTree NativeRowTree { get { return FNativeRowTree; } }
+		protected NativeRowTree _nativeRowTree;
+		public NativeRowTree NativeRowTree { get { return _nativeRowTree; } }
 		
-		protected NativeRowTreeNodeType FNodeType;
-		public NativeRowTreeNodeType NodeType { get { return FNodeType; } }
+		protected NativeRowTreeNodeType _nodeType;
+		public NativeRowTreeNodeType NodeType { get { return _nodeType; } }
 		
-		protected NativeRow[] FKeys;
-		public NativeRow[] Keys { get { return FKeys; } }
+		protected NativeRow[] _keys;
+		public NativeRow[] Keys { get { return _keys; } }
 		
-		protected int FEntryCount = 0;
-		public int EntryCount { get { return FEntryCount; } }
+		protected int _entryCount = 0;
+		public int EntryCount { get { return _entryCount; } }
 		
 		public NativeRowTreeNode PriorNode;
 
@@ -715,75 +715,75 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	
 	public class NativeRowTreeRoutingNode : NativeRowTreeNode
 	{
-		public NativeRowTreeRoutingNode(NativeRowTree ANativeRowTree) : base(ANativeRowTree)
+		public NativeRowTreeRoutingNode(NativeRowTree nativeRowTree) : base(nativeRowTree)
 		{
-			FNodeType = NativeRowTreeNodeType.Routing;
-			FKeys = new NativeRow[FNativeRowTree.Fanout];
-			FNodes = new NativeRowTreeNode[FNativeRowTree.Fanout];
+			_nodeType = NativeRowTreeNodeType.Routing;
+			_keys = new NativeRow[_nativeRowTree.Fanout];
+			_nodes = new NativeRowTreeNode[_nativeRowTree.Fanout];
 		}
 		
-		private NativeRowTreeNode[] FNodes;
-		public NativeRowTreeNode[] Nodes { get { return FNodes; } }
+		private NativeRowTreeNode[] _nodes;
+		public NativeRowTreeNode[] Nodes { get { return _nodes; } }
 		
-		public void Insert(NativeRow AKey, NativeRowTreeNode ANode, int AEntryNumber)
+		public void Insert(NativeRow key, NativeRowTreeNode node, int entryNumber)
 		{
 			// Slide all entries above the insert index
-			Array.Copy(FKeys, AEntryNumber, FKeys, AEntryNumber + 1, FEntryCount - AEntryNumber);
-			Array.Copy(FNodes, AEntryNumber, FNodes, AEntryNumber + 1, FEntryCount - AEntryNumber);
+			Array.Copy(_keys, entryNumber, _keys, entryNumber + 1, _entryCount - entryNumber);
+			Array.Copy(_nodes, entryNumber, _nodes, entryNumber + 1, _entryCount - entryNumber);
 
 			// Set the new entry data			
-			FKeys[AEntryNumber] = AKey;
-			FNodes[AEntryNumber] = ANode;
+			_keys[entryNumber] = key;
+			_nodes[entryNumber] = node;
 
 			// Increment entry count			
-			FEntryCount++;
+			_entryCount++;
 		}
 		
-		public void Delete(int AEntryNumber)
+		public void Delete(int entryNumber)
 		{
 			// Slide all entries above the insert index
-			Array.Copy(FKeys, AEntryNumber + 1, FKeys, AEntryNumber, FEntryCount - AEntryNumber - 1);
-			Array.Copy(FNodes, AEntryNumber + 1, FNodes, AEntryNumber, FEntryCount - AEntryNumber - 1);
+			Array.Copy(_keys, entryNumber + 1, _keys, entryNumber, _entryCount - entryNumber - 1);
+			Array.Copy(_nodes, entryNumber + 1, _nodes, entryNumber, _entryCount - entryNumber - 1);
 			
 			// Decrement EntryCount
-			FEntryCount--;
+			_entryCount--;
 		}
 	}
 	
 	public class NativeRowTreeDataNode : NativeRowTreeNode
 	{
-		public NativeRowTreeDataNode(NativeRowTree ANativeRowTree) : base(ANativeRowTree)
+		public NativeRowTreeDataNode(NativeRowTree nativeRowTree) : base(nativeRowTree)
 		{
-			FNodeType = NativeRowTreeNodeType.Data;
-			FKeys = new NativeRow[FNativeRowTree.Capacity];
-			FRows = new NativeRow[FNativeRowTree.Capacity];
+			_nodeType = NativeRowTreeNodeType.Data;
+			_keys = new NativeRow[_nativeRowTree.Capacity];
+			_rows = new NativeRow[_nativeRowTree.Capacity];
 		}
 		
-		private NativeRow[] FRows;
-		public NativeRow[] Rows { get { return FRows; } }
+		private NativeRow[] _rows;
+		public NativeRow[] Rows { get { return _rows; } }
 
-		public void Insert(NativeRow AKey, NativeRow ARow, int AEntryNumber)
+		public void Insert(NativeRow key, NativeRow row, int entryNumber)
 		{
 			// Slide all entries above the insert index
-			Array.Copy(FKeys, AEntryNumber, FKeys, AEntryNumber + 1, FEntryCount - AEntryNumber);
-			Array.Copy(FRows, AEntryNumber, FRows, AEntryNumber + 1, FEntryCount - AEntryNumber);
+			Array.Copy(_keys, entryNumber, _keys, entryNumber + 1, _entryCount - entryNumber);
+			Array.Copy(_rows, entryNumber, _rows, entryNumber + 1, _entryCount - entryNumber);
 
 			// Set the new entry data			
-			FKeys[AEntryNumber] = AKey;
-			FRows[AEntryNumber] = ARow;
+			_keys[entryNumber] = key;
+			_rows[entryNumber] = row;
 
 			// Increment entry count			
-			FEntryCount++;
+			_entryCount++;
 		}
 		
-		public void Delete(int AEntryNumber)
+		public void Delete(int entryNumber)
 		{
 			// Slide all entries above the insert index
-			Array.Copy(FKeys, AEntryNumber + 1, FKeys, AEntryNumber, FEntryCount - AEntryNumber - 1);
-			Array.Copy(FRows, AEntryNumber + 1, FRows, AEntryNumber, FEntryCount - AEntryNumber - 1);
+			Array.Copy(_keys, entryNumber + 1, _keys, entryNumber, _entryCount - entryNumber - 1);
+			Array.Copy(_rows, entryNumber + 1, _rows, entryNumber, _entryCount - entryNumber - 1);
 			
 			// Decrement EntryCount
-			FEntryCount--;
+			_entryCount--;
 		}
 	}
 	

@@ -26,57 +26,57 @@ namespace Alphora.Dataphor.DAE.Schema
 	
 	public class CursorType : ICursorType
     {
-		public CursorType(ITableType ATableType) : base()
+		public CursorType(ITableType tableType) : base()
 		{
-			FTableType = ATableType;
+			_tableType = tableType;
 		}
 		
-		private ITableType FTableType;
+		private ITableType _tableType;
 		public ITableType TableType
 		{
-			get { return FTableType; }
-			set { FTableType = value; }
+			get { return _tableType; }
+			set { _tableType = value; }
 		}
 		
 		public string Name
 		{
 			get 
 			{ 
-				StringBuilder LBuilder = new StringBuilder(Keywords.Cursor);
+				StringBuilder builder = new StringBuilder(Keywords.Cursor);
 				if (!IsGeneric)
 				{
-					LBuilder.Append(Keywords.BeginGroup);
-					LBuilder.Append(FTableType.Name);
-					LBuilder.Append(Keywords.EndGroup);
+					builder.Append(Keywords.BeginGroup);
+					builder.Append(_tableType.Name);
+					builder.Append(Keywords.EndGroup);
 				}
-				return LBuilder.ToString();
+				return builder.ToString();
 			}
 			set { }
 		}
 		
 		// IsGeneric
 		// Indicates whether this data type is a generic data type (i.e. table, not table{})
-		private bool FIsGeneric;
+		private bool _isGeneric;
 		public bool IsGeneric
 		{
-			get { return FIsGeneric; }
-			set { FIsGeneric = value; }
+			get { return _isGeneric; }
+			set { _isGeneric = value; }
 		}
 		
 		public bool IsNil { get { return false; } }
 		
 		// IsDisposable
 		// Indicates whether the host representation for this data type must be disposed
-		private bool FIsDisposable = false;
+		private bool _isDisposable = false;
 		public bool IsDisposable
 		{
-			get { return FIsDisposable; }
-			set { FIsDisposable = value; }
+			get { return _isDisposable; }
+			set { _isDisposable = value; }
 		}
 
 		#if NATIVEROW
 		// ByteSize
-		public int GetByteSize(object AValue)
+		public int GetByteSize(object tempValue)
 		{
 			return 4; // sizeof(int)
 		}
@@ -90,55 +90,55 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		#endif
 		
-		public override bool Equals(object AObject)
+		public override bool Equals(object objectValue)
 		{
-			return (AObject is IDataType) && Equals((IDataType)AObject);
+			return (objectValue is IDataType) && Equals((IDataType)objectValue);
 		}
 		
 		public override int GetHashCode()
 		{
-			return FTableType.GetHashCode();
+			return _tableType.GetHashCode();
 		}
 
-		public bool Equivalent(IDataType ADataType)
+		public bool Equivalent(IDataType dataType)
 		{
-			return (ADataType is ICursorType) && FTableType.Equivalent(((ICursorType)ADataType).TableType);
+			return (dataType is ICursorType) && _tableType.Equivalent(((ICursorType)dataType).TableType);
 		}
 		
-		public bool Equals(IDataType ADataType)
+		public bool Equals(IDataType dataType)
 		{
-			return (ADataType is ICursorType) && FTableType.Equals(((ICursorType)ADataType).TableType);
+			return (dataType is ICursorType) && _tableType.Equals(((ICursorType)dataType).TableType);
 		}
 
-		public bool Is(IDataType ADataType)
+		public bool Is(IDataType dataType)
 		{
 			return 
-				(ADataType is IGenericType) ||
+				(dataType is IGenericType) ||
 				(
-					(ADataType is ICursorType) && 
+					(dataType is ICursorType) && 
 					(
-						ADataType.IsGeneric ||
-						FTableType.Is(((ICursorType)ADataType).TableType)
+						dataType.IsGeneric ||
+						_tableType.Is(((ICursorType)dataType).TableType)
 					)
 				);
 		}
 		
-		public bool Compatible(IDataType ADataType)
+		public bool Compatible(IDataType dataType)
 		{
-			return Is(ADataType) || ADataType.Is(this);
+			return Is(dataType) || dataType.Is(this);
 		}
 		
-		public TypeSpecifier EmitSpecifier(EmitMode AMode)
+		public TypeSpecifier EmitSpecifier(EmitMode mode)
 		{
-			CursorTypeSpecifier LSpecifier = new CursorTypeSpecifier();
-			LSpecifier.IsGeneric = IsGeneric;
-			LSpecifier.TypeSpecifier = TableType == null ? null : TableType.EmitSpecifier(AMode);
-			return LSpecifier;
+			CursorTypeSpecifier specifier = new CursorTypeSpecifier();
+			specifier.IsGeneric = IsGeneric;
+			specifier.TypeSpecifier = TableType == null ? null : TableType.EmitSpecifier(mode);
+			return specifier;
 		}
 		
-		public void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+		public void IncludeDependencies(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
 		{
-			TableType.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			TableType.IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
 		}
     }
 }

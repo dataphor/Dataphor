@@ -13,12 +13,12 @@ namespace Alphora.Dataphor.DAE.Server
 {
 	public class CachedPlanHeader
 	{
-		public CachedPlanHeader(string AStatement, string ALibraryName, int AContextHashCode, bool AInApplicationTransaction)
+		public CachedPlanHeader(string statement, string libraryName, int contextHashCode, bool inApplicationTransaction)
 		{
-			Statement = AStatement;
-			LibraryName = ALibraryName;
-			ContextHashCode = AContextHashCode;
-			InApplicationTransaction = AInApplicationTransaction;
+			Statement = statement;
+			LibraryName = libraryName;
+			ContextHashCode = contextHashCode;
+			InApplicationTransaction = inApplicationTransaction;
 		}
 		
 		public string Statement;
@@ -34,49 +34,49 @@ namespace Alphora.Dataphor.DAE.Server
 			return Statement.GetHashCode() ^ LibraryName.GetHashCode() ^ ContextHashCode ^ InApplicationTransaction.GetHashCode();
 		}
 		
-		public override bool Equals(object AObject)
+		public override bool Equals(object objectValue)
 		{
-			CachedPlanHeader LCachedPlanHeader = AObject as CachedPlanHeader;
+			CachedPlanHeader cachedPlanHeader = objectValue as CachedPlanHeader;
 			return 
-				(LCachedPlanHeader != null) 
-					&& (LCachedPlanHeader.Statement == Statement) 
-					&& (LCachedPlanHeader.LibraryName == LibraryName) 
-					&& (LCachedPlanHeader.ContextHashCode == ContextHashCode) 
-					&& (LCachedPlanHeader.InApplicationTransaction == InApplicationTransaction);
+				(cachedPlanHeader != null) 
+					&& (cachedPlanHeader.Statement == Statement) 
+					&& (cachedPlanHeader.LibraryName == LibraryName) 
+					&& (cachedPlanHeader.ContextHashCode == ContextHashCode) 
+					&& (cachedPlanHeader.InApplicationTransaction == InApplicationTransaction);
 		}
 	}
 	
 	public class CachedPlans : List
 	{
-		public new ServerPlan this[int AIndex]
+		public new ServerPlan this[int index]
 		{
-			get { return (ServerPlan)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (ServerPlan)base[index]; }
+			set { base[index] = value; }
 		}
 	}
 	
 	public class PlanCache : System.Object
 	{
-		public PlanCache(int ACacheSize) : base() 
+		public PlanCache(int cacheSize) : base() 
 		{
-			FSize = ACacheSize;
-			if (FSize > 1)
-				FPlans = new FixedSizeCache<CachedPlanHeader, CachedPlans>(FSize);
+			_size = cacheSize;
+			if (_size > 1)
+				_plans = new FixedSizeCache<CachedPlanHeader, CachedPlans>(_size);
 		}
 		
-		private int FSize;
-		public int Size { get { return FSize; } }
+		private int _size;
+		public int Size { get { return _size; } }
 		
-		public int Count { get { return FPlans == null ? 0 : FPlans.Count; } }
+		public int Count { get { return _plans == null ? 0 : _plans.Count; } }
 
-		private FixedSizeCache<CachedPlanHeader, CachedPlans> FPlans;
+		private FixedSizeCache<CachedPlanHeader, CachedPlans> _plans;
 		
-		private void DisposeCachedPlan(ServerProcess AProcess, ServerPlan APlan)
+		private void DisposeCachedPlan(ServerProcess process, ServerPlan plan)
 		{
 			try
 			{
-				APlan.BindToProcess(AProcess.ServerSession.Server.FSystemProcess);
-				APlan.Dispose();
+				plan.BindToProcess(process.ServerSession.Server._systemProcess);
+				plan.Dispose();
 			}
 			catch
 			{
@@ -84,15 +84,15 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		private void DisposeCachedPlans(ServerProcess AProcess, CachedPlans APlans)
+		private void DisposeCachedPlans(ServerProcess process, CachedPlans plans)
 		{
-			foreach (ServerPlan LPlan in APlans)
-				DisposeCachedPlan(AProcess, LPlan);
+			foreach (ServerPlan plan in plans)
+				DisposeCachedPlan(process, plan);
 		}
 		
-		private CachedPlanHeader GetPlanHeader(ServerProcess AProcess, string AStatement, int AContextHashCode)
+		private CachedPlanHeader GetPlanHeader(ServerProcess process, string statement, int contextHashCode)
 		{
-			return new CachedPlanHeader(AStatement, AProcess.ServerSession.CurrentLibrary.Name, AContextHashCode, AProcess.ApplicationTransactionID != Guid.Empty);
+			return new CachedPlanHeader(statement, process.ServerSession.CurrentLibrary.Name, contextHashCode, process.ApplicationTransactionID != Guid.Empty);
 		}
 
 		/// <summary>Gets a cached plan for the given statement, if available.</summary>
@@ -101,30 +101,30 @@ namespace Alphora.Dataphor.DAE.Server
 		/// The client must call Release to return the plan to the cache.
 		/// If no plan is found, null is returned and the cache is unaffected.
 		/// </remarks>
-		public ServerPlan Get(ServerProcess AProcess, string AStatement, int AContextHashCode)
+		public ServerPlan Get(ServerProcess process, string statement, int contextHashCode)
 		{
-			ServerPlan LPlan = null;
-			CachedPlanHeader LHeader = GetPlanHeader(AProcess, AStatement, AContextHashCode);
-			CachedPlans LBumped = null;
+			ServerPlan plan = null;
+			CachedPlanHeader header = GetPlanHeader(process, statement, contextHashCode);
+			CachedPlans bumped = null;
 			lock (this)
 			{
-				if (FPlans != null)
+				if (_plans != null)
 				{
-					CachedPlans LPlans;
-					if (FPlans.TryGetValue(LHeader, out LPlans))
+					CachedPlans plans;
+					if (_plans.TryGetValue(header, out plans))
 					{
-						for (int LPlanIndex = LPlans.Count - 1; LPlanIndex >= 0; LPlanIndex--)
+						for (int planIndex = plans.Count - 1; planIndex >= 0; planIndex--)
 						{
-							LPlan = LPlans[LPlanIndex];
-							LPlans.RemoveAt(LPlanIndex);
-							if (AProcess.Catalog.PlanCacheTimeStamp > LPlan.PlanCacheTimeStamp)
+							plan = plans[planIndex];
+							plans.RemoveAt(planIndex);
+							if (process.Catalog.PlanCacheTimeStamp > plan.PlanCacheTimeStamp)
 							{
-								DisposeCachedPlan(AProcess, LPlan);
-								LPlan = null;
+								DisposeCachedPlan(process, plan);
+								plan = null;
 							}
 							else
 							{
-								LBumped = FPlans.Reference(LHeader, LPlans);
+								bumped = _plans.Reference(header, plans);
 								break;
 							}
 						}
@@ -132,13 +132,13 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 			}
 			
-			if (LBumped != null)
-				DisposeCachedPlans(AProcess, LBumped);
+			if (bumped != null)
+				DisposeCachedPlans(process, bumped);
 
-			if (LPlan != null)
-				LPlan.BindToProcess(AProcess);
+			if (plan != null)
+				plan.BindToProcess(process);
 
-			return LPlan;
+			return plan;
 		}
 
 		/// <summary>Adds the given plan to the plan cache.</summary>		
@@ -146,26 +146,26 @@ namespace Alphora.Dataphor.DAE.Server
 		/// The plan is not contained within the cache after this call, it is assumed in use by the client.
 		/// This call simply reserves storage and marks the plan as referenced for the LRU.
 		/// </remarks>
-		public void Add(ServerProcess AProcess, string AStatement, int AContextHashCode, ServerPlan APlan)
+		public void Add(ServerProcess process, string statement, int contextHashCode, ServerPlan plan)
 		{
-			CachedPlans LBumped = null;
-			CachedPlanHeader LHeader = GetPlanHeader(AProcess, AStatement, AContextHashCode);
-			APlan.Header = LHeader;
-			APlan.PlanCacheTimeStamp = AProcess.Catalog.PlanCacheTimeStamp;
+			CachedPlans bumped = null;
+			CachedPlanHeader header = GetPlanHeader(process, statement, contextHashCode);
+			plan.Header = header;
+			plan.PlanCacheTimeStamp = process.Catalog.PlanCacheTimeStamp;
 
 			lock (this)
 			{
-				if (FPlans != null)
+				if (_plans != null)
 				{
-					CachedPlans LPlans;
-					if (!FPlans.TryGetValue(LHeader, out LPlans))
-						LPlans = new CachedPlans();
-					LBumped = FPlans.Reference(LHeader, LPlans);
+					CachedPlans plans;
+					if (!_plans.TryGetValue(header, out plans))
+						plans = new CachedPlans();
+					bumped = _plans.Reference(header, plans);
 				}
 			}
 			
-			if (LBumped != null)
-				DisposeCachedPlans(AProcess, LBumped);
+			if (bumped != null)
+				DisposeCachedPlans(process, bumped);
 		}
 		
 		/// <summary>Releases the given plan and returns whether or not it was returned to the cache.</summary>
@@ -173,19 +173,19 @@ namespace Alphora.Dataphor.DAE.Server
 		/// If the plan is returned to the cache, the client is no longer responsible for the plan, it is owned by the cache.
 		/// If the plan is not returned to the cache, the cache client is responsible for disposing the plan.
 		///	</remarks>
-		public bool Release(ServerProcess AProcess, ServerPlan APlan)
+		public bool Release(ServerProcess process, ServerPlan plan)
 		{
-			CachedPlanHeader LHeader = APlan.Header;
+			CachedPlanHeader header = plan.Header;
 
 			lock (this)
 			{
-				if (FPlans != null)
+				if (_plans != null)
 				{
-					CachedPlans LPlans;
-					if (FPlans.TryGetValue(LHeader, out LPlans))
+					CachedPlans plans;
+					if (_plans.TryGetValue(header, out plans))
 					{
-						APlan.UnbindFromProcess();
-						LPlans.Add(APlan);
+						plan.UnbindFromProcess();
+						plans.Add(plan);
 						return true;
 					}
 				}
@@ -194,16 +194,16 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		/// <summary>Clears the plan cache, disposing any plans it contains.</summary>		
-		public void Clear(ServerProcess AProcess)
+		public void Clear(ServerProcess process)
 		{
 			lock (this)
 			{
-				if (FPlans != null)
+				if (_plans != null)
 				{
-					foreach (CachedPlans LValue in (IEnumerable<CachedPlans>)FPlans)
-						DisposeCachedPlans(AProcess, LValue);
+					foreach (CachedPlans tempValue in (IEnumerable<CachedPlans>)_plans)
+						DisposeCachedPlans(process, tempValue);
 					
-					FPlans.Clear();
+					_plans.Clear();
 				}
 			}
 		}
@@ -212,19 +212,19 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <remarks>
 		/// Resizing the cache has the effect of clearing the entire cache.
 		/// </remarks>
-		public void Resize(ServerProcess AProcess, int ASize)
+		public void Resize(ServerProcess process, int size)
 		{
 			lock (this)
 			{
-				if (FPlans != null)
+				if (_plans != null)
 				{
-					Clear(AProcess);
-					FPlans = null;
+					Clear(process);
+					_plans = null;
 				}
 				
-				FSize = ASize;
-				if (FSize > 1)
-					FPlans = new FixedSizeCache<CachedPlanHeader, CachedPlans>(FSize);
+				_size = size;
+				if (_size > 1)
+					_plans = new FixedSizeCache<CachedPlanHeader, CachedPlans>(_size);
 			}
 		}
 	}

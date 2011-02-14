@@ -15,11 +15,11 @@ namespace Alphora.Dataphor.DAE.Runtime
 
 	public class RuntimeStackWindow : StackWindow
 	{
-		public RuntimeStackWindow(int ABase) : base(ABase) { }
-		public RuntimeStackWindow(int ABase, PlanNode AOriginator, DebugLocator ALocator) : base(ABase)
+		public RuntimeStackWindow(int baseValue) : base(baseValue) { }
+		public RuntimeStackWindow(int baseValue, PlanNode originator, DebugLocator locator) : base(baseValue)
 		{
-			Originator = AOriginator;
-			Locator = ALocator;
+			Originator = originator;
+			Locator = locator;
 		}
 		
 		public PlanNode Originator;
@@ -27,9 +27,9 @@ namespace Alphora.Dataphor.DAE.Runtime
 
 		public Schema.Operator GetOriginatingOperator()
 		{
-			InstructionNodeBase LInstructionNodeBase = Originator as InstructionNodeBase;
-			if (LInstructionNodeBase != null)
-				return LInstructionNodeBase.Operator;
+			InstructionNodeBase instructionNodeBase = Originator as InstructionNodeBase;
+			if (instructionNodeBase != null)
+				return instructionNodeBase.Operator;
 			
 			return ((AggregateCallNode)Originator).Operator;	
 		}

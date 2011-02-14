@@ -15,7 +15,7 @@ namespace Alphora.Dataphor.DAE.Store.SQLite
 {
     public class SQLiteStoreConnection : SQLStoreConnection
     {
-        public SQLiteStoreConnection(SQLiteStore AStore) : base(AStore) { }
+        public SQLiteStoreConnection(SQLiteStore store) : base(store) { }
 
 		#if USESQLCONNECTION
 		protected override SQLConnection InternalCreateConnection()
@@ -29,22 +29,22 @@ namespace Alphora.Dataphor.DAE.Store.SQLite
         }
         #endif
 
-        public override bool HasTable(string ATableName)
+        public override bool HasTable(string tableName)
         {
-            return Convert.ToInt32(this.ExecuteScalar(String.Format("select count(*) from SQLITE_MASTER where type = 'table' and name = '{0}'", ATableName))) != 0;
+            return Convert.ToInt32(this.ExecuteScalar(String.Format("select count(*) from SQLITE_MASTER where type = 'table' and name = '{0}'", tableName))) != 0;
         }
 
-		protected override SQLStoreCursor InternalOpenCursor(string ATableName, System.Collections.Generic.List<string> AColumns, SQLIndex AIndex, bool AIsUpdatable)
+		protected override SQLStoreCursor InternalOpenCursor(string tableName, System.Collections.Generic.List<string> columns, SQLIndex index, bool isUpdatable)
 		{
 
 			return
 				new SQLiteStoreCursor
 				(
 					this,
-					ATableName,
-					AColumns,
-					AIndex,
-					AIsUpdatable
+					tableName,
+					columns,
+					index,
+					isUpdatable
 				);
 		}
 		

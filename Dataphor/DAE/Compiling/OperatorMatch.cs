@@ -17,22 +17,22 @@ namespace Alphora.Dataphor.DAE.Compiling
     public class OperatorMatch : System.Object
     {
 		/// <summary>Constructs a potential match.</summary>
-		public OperatorMatch(OperatorSignature ASignature) : base()
+		public OperatorMatch(OperatorSignature signature) : base()
 		{
-			Signature = ASignature;
-			FConversionContexts = new ConversionContext[ASignature.Signature.Count];
-			FCanConvert = new BitArray(ASignature.Signature.Count);
-			for (int LIndex = 0; LIndex < FCanConvert.Length; LIndex++)
-				FCanConvert[LIndex] = true;
+			Signature = signature;
+			_conversionContexts = new ConversionContext[signature.Signature.Count];
+			_canConvert = new BitArray(signature.Signature.Count);
+			for (int index = 0; index < _canConvert.Length; index++)
+				_canConvert[index] = true;
 		}
 
 		/// <summary>Constructs an exact or partial match, depending on the value of AIsExact.</summary>		
-		public OperatorMatch(OperatorSignature ASignature, bool AIsExact) : base()
+		public OperatorMatch(OperatorSignature signature, bool isExact) : base()
 		{
-			Signature = ASignature;
-			FConversionContexts = new ConversionContext[ASignature.Signature.Count];
-			FCanConvert = new BitArray(ASignature.Signature.Count);
-			IsExact = AIsExact;
+			Signature = signature;
+			_conversionContexts = new ConversionContext[signature.Signature.Count];
+			_canConvert = new BitArray(signature.Signature.Count);
+			IsExact = isExact;
 			IsMatch = true;
 		}
 		
@@ -48,34 +48,34 @@ namespace Alphora.Dataphor.DAE.Compiling
 		/// <summary>Indicates that this signature is a match with the call signature but that casting or conversion is required.</summary>
 		public bool IsPartial { get { return IsMatch && !IsExact; } }
 
-		private BitArray FCanConvert;
+		private BitArray _canConvert;
 		/// <summary>For each parameter in the signature, indicates whether a potential conversion was found between the calling signature argument type and this signatures parameter type.</summary>
-		public BitArray CanConvert { get { return FCanConvert; } }
+		public BitArray CanConvert { get { return _canConvert; } }
 
-		private ConversionContext[] FConversionContexts;
+		private ConversionContext[] _conversionContexts;
 		/// <summary>Contains a potential conversion context for each parameter in the signature.  If the reference is null, if CanConvert is true, then no conversion is required, otherwise, the modifiers were not compatible.</summary>
-		public ConversionContext[] ConversionContexts { get { return FConversionContexts; } }
+		public ConversionContext[] ConversionContexts { get { return _conversionContexts; } }
 		
 		/// <summary>Indicates the total narrowing score for this match.  The narrowing score is the sum of the narrowing scores for all conversions in the match. </summary>
 		public int NarrowingScore
 		{
 			get
 			{
-				int LNarrowingScore = 0;
-				for (int LIndex = 0; LIndex < FConversionContexts.Length; LIndex++)
+				int narrowingScore = 0;
+				for (int index = 0; index < _conversionContexts.Length; index++)
 				{
-					if (FConversionContexts[LIndex] != null)
+					if (_conversionContexts[index] != null)
 					{
-						if (FConversionContexts[LIndex].CanConvert)
-							LNarrowingScore += FConversionContexts[LIndex].NarrowingScore;
+						if (_conversionContexts[index].CanConvert)
+							narrowingScore += _conversionContexts[index].NarrowingScore;
 						else
 						{
-							LNarrowingScore = Int32.MinValue;
+							narrowingScore = Int32.MinValue;
 							break;
 						}
 					}
 				}
-				return LNarrowingScore;
+				return narrowingScore;
 			}
 		}				  
 		
@@ -84,21 +84,21 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			get
 			{
-				int LPathLength = 0;
-				for (int LIndex = 0; LIndex < FConversionContexts.Length; LIndex++)
+				int pathLength = 0;
+				for (int index = 0; index < _conversionContexts.Length; index++)
 				{
-					if (FConversionContexts[LIndex] != null)
+					if (_conversionContexts[index] != null)
 					{
-						if (FConversionContexts[LIndex].CanConvert)
-							LPathLength += FConversionContexts[LIndex].PathLength;
+						if (_conversionContexts[index].CanConvert)
+							pathLength += _conversionContexts[index].PathLength;
 						else
 						{
-							LPathLength = Int32.MaxValue;
+							pathLength = Int32.MaxValue;
 							break;
 						}
 					}
 				}
-				return LPathLength;
+				return pathLength;
 			}
 		}
     }
@@ -124,48 +124,48 @@ namespace Alphora.Dataphor.DAE.Compiling
 	#else
 	public class OperatorMatchList : NonNullList<OperatorMatch>
 	{
-		protected override void Validate(OperatorMatch AValue)
+		protected override void Validate(OperatorMatch tempValue)
 		{
-			base.Validate(AValue);
-			if (IndexOf(AValue) >= 0)
-				throw new SchemaException(SchemaException.Codes.DuplicateOperatorMatch, AValue.Signature.Operator.Name);
+			base.Validate(tempValue);
+			if (IndexOf(tempValue) >= 0)
+				throw new SchemaException(SchemaException.Codes.DuplicateOperatorMatch, tempValue.Signature.Operator.Name);
 		}
 	#endif
 	
-		public int IndexOf(Operator AOperator)
+		public int IndexOf(Operator operatorValue)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
+			for (int index = 0; index < Count; index++)
 				if 
 				(
-					(String.Compare(this[LIndex].Signature.Operator.Name, AOperator.Name) == 0) ||
+					(String.Compare(this[index].Signature.Operator.Name, operatorValue.Name) == 0) ||
 					(
-						this[LIndex].Signature.Operator.IsATObject &&
-						(String.Compare(this[LIndex].Signature.Operator.SourceOperatorName, AOperator.OperatorName) == 0) &&
-						this[LIndex].Signature.Operator.Signature.Equals(AOperator.Signature)
+						this[index].Signature.Operator.IsATObject &&
+						(String.Compare(this[index].Signature.Operator.SourceOperatorName, operatorValue.OperatorName) == 0) &&
+						this[index].Signature.Operator.Signature.Equals(operatorValue.Signature)
 					) ||
 					(
-						AOperator.IsATObject &&
-						(String.Compare(this[LIndex].Signature.Operator.OperatorName, AOperator.SourceOperatorName) == 0) &&
-						this[LIndex].Signature.Operator.Signature.Equals(AOperator.Signature)
+						operatorValue.IsATObject &&
+						(String.Compare(this[index].Signature.Operator.OperatorName, operatorValue.SourceOperatorName) == 0) &&
+						this[index].Signature.Operator.Signature.Equals(operatorValue.Signature)
 					)
 				)
-					return LIndex;
+					return index;
 			return -1;
 		}
 		
-		public bool Contains(Operator AOperator)
+		public bool Contains(Operator operatorValue)
 		{
-			return IndexOf(AOperator) >= 0;
+			return IndexOf(operatorValue) >= 0;
 		}
 		
-		public int IndexOf(OperatorSignature ASignature)
+		public int IndexOf(OperatorSignature signature)
 		{
-			return IndexOf(ASignature.Operator);
+			return IndexOf(signature.Operator);
 		}
 		
-		public bool Contains(OperatorSignature ASignature)
+		public bool Contains(OperatorSignature signature)
 		{
-			return Contains(ASignature.Operator);
+			return Contains(signature.Operator);
 		}
 		
 		#if USETYPEDLIST
@@ -179,9 +179,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 			return Contains(AMatch.Signature.Operator);
 		}
 		#else
-		public override int IndexOf(OperatorMatch AMatch)
+		public override int IndexOf(OperatorMatch match)
 		{
-			return IndexOf(AMatch.Signature.Operator);
+			return IndexOf(match.Signature.Operator);
 		}
 		#endif
     }
@@ -207,60 +207,60 @@ namespace Alphora.Dataphor.DAE.Compiling
 				if (IsExact)
 					return false;
 					
-				int LBestMatchCount = 0;
-				foreach (OperatorMatch LMatch in FBestMatches)
-					if (LMatch.PathLength == FShortestPathLength)
-						LBestMatchCount++;
-				return LBestMatchCount > 1;
+				int bestMatchCount = 0;
+				foreach (OperatorMatch match in _bestMatches)
+					if (match.PathLength == _shortestPathLength)
+						bestMatchCount++;
+				return bestMatchCount > 1;
 			} 
 		}
 		
-		private OperatorMatch FMatch;
+		private OperatorMatch _match;
 		/// <summary>Returns the resolved signature for the calling signature.  Null if no match was found.</summary>
 		public OperatorMatch Match
 		{
 			get
 			{
-				if (!FIsMatchComputed)
+				if (!_isMatchComputed)
 				{
 					FindMatch();
-					FIsMatchComputed = true;
+					_isMatchComputed = true;
 				}
-				return FMatch;
+				return _match;
 			}
 		}
 		
-		private bool FIsMatchComputed;
+		private bool _isMatchComputed;
 		
 		private void FindMatch()
 		{
-			FMatch = null;
-			int LExactCount = 0;
-			foreach (OperatorMatch LMatch in FBestMatches)
+			_match = null;
+			int exactCount = 0;
+			foreach (OperatorMatch match in _bestMatches)
 			{
-				if (LMatch.IsExact)
+				if (match.IsExact)
 				{
-					LExactCount++;
-					if (LExactCount == 1)
-						FMatch = LMatch;
+					exactCount++;
+					if (exactCount == 1)
+						_match = match;
 					else
 					{
-						FMatch = null;
+						_match = null;
 						break;
 					}
 				}
-				else if (LMatch.IsPartial)
+				else if (match.IsPartial)
 				{
-					if (FMatch == null)
+					if (_match == null)
 					{
-						if (LMatch.PathLength == FShortestPathLength)
-							FMatch = LMatch;
+						if (match.PathLength == _shortestPathLength)
+							_match = match;
 					}
 					else
 					{
-						if (FMatch.PathLength == LMatch.PathLength)
+						if (_match.PathLength == match.PathLength)
 						{
-							FMatch = null;
+							_match = null;
 							break;
 						}
 					}
@@ -268,17 +268,17 @@ namespace Alphora.Dataphor.DAE.Compiling
 			}
 		}
 		
-		private int FBestNarrowingScore = Int32.MinValue;
+		private int _bestNarrowingScore = Int32.MinValue;
 		/// <summary>Returns the best narrowing score for the possible matches for the calling signature.</summary>
-		public int BestNarrowingScore { get { return FBestNarrowingScore; } }
+		public int BestNarrowingScore { get { return _bestNarrowingScore; } }
 		
-		private int FShortestPathLength = Int32.MaxValue;
+		private int _shortestPathLength = Int32.MaxValue;
 		/// <summary>Returns the shortest path length among the possible matches with the best narrowing score.</summary>
-		public int ShortestPathLength { get { return FShortestPathLength; } }
+		public int ShortestPathLength { get { return _shortestPathLength; } }
 		
-		private OperatorMatchList FBestMatches = new OperatorMatchList();
+		private OperatorMatchList _bestMatches = new OperatorMatchList();
 		/// <summary>Returns the set of possible matches with the best narrowing score.</summary>
-		public OperatorMatchList BestMatches { get { return FBestMatches; } }
+		public OperatorMatchList BestMatches { get { return _bestMatches; } }
 		
 		/// <summary>Returns the closest match for the given signature.</summary>
 		public OperatorMatch ClosestMatch
@@ -286,74 +286,74 @@ namespace Alphora.Dataphor.DAE.Compiling
 			get
 			{
 				// The most converting path with the least narrowing score and shortest path length
-				int LMatchCount = 0;
-				int LConversionCount = 0;
-				int LBestConversionCount = 0;
-				int LBestNarrowingScore = Int32.MinValue;
-				int LShortestPathLength = Int32.MaxValue;
-				OperatorMatch LClosestMatch = null;
-				foreach (OperatorMatch LMatch in this)
+				int matchCount = 0;
+				int conversionCount = 0;
+				int bestConversionCount = 0;
+				int bestNarrowingScore = Int32.MinValue;
+				int shortestPathLength = Int32.MaxValue;
+				OperatorMatch closestMatch = null;
+				foreach (OperatorMatch match in this)
 				{
-					LConversionCount = 0;
-					foreach (bool LCanConvert in LMatch.CanConvert)
-						if (LCanConvert)
-							LConversionCount++;
+					conversionCount = 0;
+					foreach (bool canConvert in match.CanConvert)
+						if (canConvert)
+							conversionCount++;
 
-					if ((LClosestMatch == null) || (LConversionCount > LBestConversionCount))
+					if ((closestMatch == null) || (conversionCount > bestConversionCount))
 					{
-						LBestConversionCount = LConversionCount;
-						LBestNarrowingScore = LMatch.NarrowingScore;
-						LShortestPathLength = LMatch.PathLength;
-						LClosestMatch = LMatch;
-						LMatchCount = 1;
+						bestConversionCount = conversionCount;
+						bestNarrowingScore = match.NarrowingScore;
+						shortestPathLength = match.PathLength;
+						closestMatch = match;
+						matchCount = 1;
 					}
-					else if (LConversionCount == LBestConversionCount)
+					else if (conversionCount == bestConversionCount)
 					{
-						if (LMatch.NarrowingScore > LBestNarrowingScore)
+						if (match.NarrowingScore > bestNarrowingScore)
 						{
-							LBestNarrowingScore = LMatch.NarrowingScore;
-							LShortestPathLength = LMatch.PathLength;
-							LClosestMatch = LMatch;
-							LMatchCount = 1;
+							bestNarrowingScore = match.NarrowingScore;
+							shortestPathLength = match.PathLength;
+							closestMatch = match;
+							matchCount = 1;
 						}
-						else if (LMatch.NarrowingScore == LBestNarrowingScore)
+						else if (match.NarrowingScore == bestNarrowingScore)
 						{
-							if (LMatch.PathLength < LShortestPathLength)
+							if (match.PathLength < shortestPathLength)
 							{
-								LShortestPathLength = LMatch.PathLength;
-								LClosestMatch = LMatch;
-								LMatchCount = 1;
+								shortestPathLength = match.PathLength;
+								closestMatch = match;
+								matchCount = 1;
 							}
 							else
-								LMatchCount++;
+								matchCount++;
 						}
 						else
-							LMatchCount++;
+							matchCount++;
 					}
 				}
 				
-				return LMatchCount == 1 ? LClosestMatch : null;
+				return matchCount == 1 ? closestMatch : null;
 			}
 		}
 		
 		private void ComputeBestNarrowingScore()
 		{
-			FBestNarrowingScore = Int32.MinValue;
-			foreach (OperatorMatch LMatch in this)
-				if (LMatch.IsMatch && (LMatch.NarrowingScore > FBestNarrowingScore))
-					FBestNarrowingScore = LMatch.NarrowingScore;
+			_bestNarrowingScore = Int32.MinValue;
+			foreach (OperatorMatch match in this)
+				if (match.IsMatch && (match.NarrowingScore > _bestNarrowingScore))
+					_bestNarrowingScore = match.NarrowingScore;
 		}
 		
 		private void ComputeBestMatches()
 		{
-			FBestMatches.Clear();
-			FShortestPathLength = Int32.MaxValue;
-			foreach (OperatorMatch LMatch in this)
-				if (LMatch.IsMatch && (LMatch.NarrowingScore == FBestNarrowingScore))
+			_bestMatches.Clear();
+			_shortestPathLength = Int32.MaxValue;
+			foreach (OperatorMatch match in this)
+				if (match.IsMatch && (match.NarrowingScore == _bestNarrowingScore))
 				{
-					FBestMatches.Add(LMatch);
-					if (LMatch.PathLength < FShortestPathLength)
-						FShortestPathLength = LMatch.PathLength;
+					_bestMatches.Add(match);
+					if (match.PathLength < _shortestPathLength)
+						_shortestPathLength = match.PathLength;
 				}
 		}
 		
@@ -362,59 +362,59 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			OperatorMatch LMatch = (OperatorMatch)AValue;
 		#else
-		protected override void Adding(OperatorMatch LMatch, int AIndex)
+		protected override void Adding(OperatorMatch LMatch, int index)
 		{
 		#endif
 			if (LMatch.IsMatch)
 			{
-				if (LMatch.NarrowingScore > FBestNarrowingScore)
+				if (LMatch.NarrowingScore > _bestNarrowingScore)
 				{
-					FBestNarrowingScore = LMatch.NarrowingScore;
+					_bestNarrowingScore = LMatch.NarrowingScore;
 					ComputeBestMatches();
 				}
-				else if (LMatch.NarrowingScore == FBestNarrowingScore)
+				else if (LMatch.NarrowingScore == _bestNarrowingScore)
 				{
-					FBestMatches.Add(LMatch);
-					if (LMatch.PathLength < FShortestPathLength)
-						FShortestPathLength = LMatch.PathLength;
+					_bestMatches.Add(LMatch);
+					if (LMatch.PathLength < _shortestPathLength)
+						_shortestPathLength = LMatch.PathLength;
 				}
 			}
 			
-			FIsMatchComputed = false;
+			_isMatchComputed = false;
 
 			//base.Adding(AValue, AIndex);
 		}
 
-		private bool FIsClearing;
+		private bool _isClearing;
 				
 		public override void Clear()
 		{
-			FIsClearing = true;
+			_isClearing = true;
 			try
 			{
 				base.Clear();
 			}
 			finally
 			{
-				FIsClearing = false;
+				_isClearing = false;
 			}
 
 			ComputeBestNarrowingScore();
 			ComputeBestMatches();
-			FIsMatchComputed = false;
+			_isMatchComputed = false;
 		}
 		
 		#if USETYPEDLIST
 		protected override void Removing(object AValue, int AIndex)
 		#else
-		protected override void Removing(OperatorMatch AValue, int AIndex)
+		protected override void Removing(OperatorMatch tempValue, int index)
 		#endif
 		{
-			if (!FIsClearing)
+			if (!_isClearing)
 			{
 				ComputeBestNarrowingScore();
 				ComputeBestMatches();
-				FIsMatchComputed = false;
+				_isMatchComputed = false;
 			}
 			//base.Removing(AValue, AIndex);
 		}

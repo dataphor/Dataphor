@@ -12,13 +12,13 @@ namespace Alphora.Dataphor.DAE.Streams
 	
 	public class MemoryStreamHeader : Disposable
 	{
-		public MemoryStreamHeader(StreamID AStreamID)
+		public MemoryStreamHeader(StreamID streamID)
 		{
-			StreamID = AStreamID;
+			StreamID = streamID;
 			Stream = new MemoryStream();
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			if (Stream != null)
 			{
@@ -26,7 +26,7 @@ namespace Alphora.Dataphor.DAE.Streams
 				Stream = null;
 			}
 
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 		
 		public StreamID StreamID;
@@ -37,9 +37,9 @@ namespace Alphora.Dataphor.DAE.Streams
 	{
 		public MemoryStreamHeaders() : base(){}
 		
-		public new MemoryStreamHeader this[StreamID AStreamID] 
+		public new MemoryStreamHeader this[StreamID streamID] 
 		{ 
-			get { return (MemoryStreamHeader)base[AStreamID]; } 
+			get { return (MemoryStreamHeader)base[streamID]; } 
 		}
 		
 		#if USEFINALIZER
@@ -61,82 +61,82 @@ namespace Alphora.Dataphor.DAE.Streams
 			Dispose(true);
 		}
 		
-		protected void Dispose(bool ADisposing)
+		protected void Dispose(bool disposing)
 		{
-			foreach (KeyValuePair<StreamID, MemoryStreamHeader> LEntry in this)
-				LEntry.Value.Dispose();
+			foreach (KeyValuePair<StreamID, MemoryStreamHeader> entry in this)
+				entry.Value.Dispose();
 			Clear();
 		}
 
-		public void Add(MemoryStreamHeader AStream)
+		public void Add(MemoryStreamHeader stream)
 		{
-			Add(AStream.StreamID, AStream);
+			Add(stream.StreamID, stream);
 		}
 	}
 	
 	public class MemoryStreamProvider : StreamProvider
 	{
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (FHeaders != null)
+			if (_headers != null)
 			{
-				FHeaders.Dispose();
-				FHeaders = null;
+				_headers.Dispose();
+				_headers = null;
 			}
 			
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 		
-		private MemoryStreamHeaders FHeaders = new MemoryStreamHeaders();
+		private MemoryStreamHeaders _headers = new MemoryStreamHeaders();
 		
-		public void Create(StreamID AID)
+		public void Create(StreamID iD)
 		{
 			lock (this)
 			{
-				FHeaders.Add(new MemoryStreamHeader(AID));
+				_headers.Add(new MemoryStreamHeader(iD));
 			}
 		}
 		
-		private MemoryStreamHeader GetStreamHeader(StreamID AStreamID)
+		private MemoryStreamHeader GetStreamHeader(StreamID streamID)
 		{
-			MemoryStreamHeader LHeader;
-			if (!FHeaders.TryGetValue(AStreamID, out LHeader))
-				throw new StreamsException(StreamsException.Codes.StreamIDNotFound, AStreamID.ToString());
-			return LHeader;
+			MemoryStreamHeader header;
+			if (!_headers.TryGetValue(streamID, out header))
+				throw new StreamsException(StreamsException.Codes.StreamIDNotFound, streamID.ToString());
+			return header;
 		}
 		
-		public override Stream Open(StreamID AStreamID)
+		public override Stream Open(StreamID streamID)
 		{
 			lock (this)
 			{
-				MemoryStreamHeader LHeader = GetStreamHeader(AStreamID);
-				return LHeader.Stream;
+				MemoryStreamHeader header = GetStreamHeader(streamID);
+				return header.Stream;
 			}
 		}
 		
-		public override void Close(StreamID AStreamID)
+		public override void Close(StreamID streamID)
 		{
 			// no cleanup to perform here
 		}
 		
-		public override void Destroy(StreamID AStreamID)
+		public override void Destroy(StreamID streamID)
 		{
 			lock (this)
 			{
-				MemoryStreamHeader LHeader = GetStreamHeader(AStreamID);
-				FHeaders.Remove(AStreamID);
-				LHeader.Dispose();
+				MemoryStreamHeader header = GetStreamHeader(streamID);
+				_headers.Remove(streamID);
+				header.Dispose();
 			}
 		}
 
-		public override void Reassign(StreamID AOldStreamID, StreamID ANewStreamID)
+		public override void Reassign(StreamID oldStreamID, StreamID newStreamID)
 		{
 			lock (this)
 			{
-				MemoryStreamHeader LHeader = GetStreamHeader(AOldStreamID);
-				FHeaders.Remove(AOldStreamID);
-				LHeader.StreamID = ANewStreamID;
-				FHeaders.Add(LHeader);
+				MemoryStreamHeader header = GetStreamHeader(oldStreamID);
+				_headers.Remove(oldStreamID);
+				header.StreamID = newStreamID;
+				_headers.Add(header);
 			}
 		}
 	}

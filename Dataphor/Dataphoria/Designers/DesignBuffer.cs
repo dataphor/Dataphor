@@ -18,38 +18,38 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 {
 	public abstract class DesignBuffer
 	{
-		public DesignBuffer(IDataphoria ADataphoria, DebugLocator ALocator)
+		public DesignBuffer(IDataphoria dataphoria, DebugLocator locator)
 		{
-			FDataphoria = ADataphoria;
-			FLocator = ALocator;
+			_dataphoria = dataphoria;
+			_locator = locator;
 		}
 
 		// Dataphoria
 
-		private IDataphoria FDataphoria;
+		private IDataphoria _dataphoria;
 		public IDataphoria Dataphoria
 		{
-			get { return FDataphoria; }
+			get { return _dataphoria; }
 		}
 
 		// Locator
 		
-		private DebugLocator FLocator;
+		private DebugLocator _locator;
 		public DebugLocator Locator
 		{
-			get { return FLocator; }
+			get { return _locator; }
 		}
 
 		public abstract string GetDescription();
 
-		public abstract void SaveData(string AData);
+		public abstract void SaveData(string data);
 
-		public abstract void SaveBinaryData(Stream AData);
+		public abstract void SaveBinaryData(Stream data);
 
 		public abstract string LoadData();
 
-		public abstract void LoadData(Stream AData);
+		public abstract void LoadData(Stream data);
 
-		public abstract bool LocatorNameMatches(string AName);
+		public abstract bool LocatorNameMatches(string name);
 	}
 }

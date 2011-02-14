@@ -31,50 +31,50 @@ namespace Alphora.Dataphor.DAE.Schema
     /// <remarks>This class is used to track dependencies for catalog objects while they are in the cache.</remarks>
     public class ObjectList : System.Object, ICollection<int>
     {
-		private List<int> FIDs = new List<int>(0);
+		private List<int> _iDs = new List<int>(0);
 		/// <summary>Provides access to the IDs of the objects in the list, by index.</summary>
-		public List<int> IDs { get { return FIDs; } }
+		public List<int> IDs { get { return _iDs; } }
 		
-		private List<Schema.Object> FObjects = new List<Schema.Object>(0);
+		private List<Schema.Object> _objects = new List<Schema.Object>(0);
 		/// <summary>Provides access to the references to the objects in the list, by index.</summary>
 		/// <remarks>Note that the object reference may be null if it has not yet been resolved to an actual object reference in the catalog.</remarks>
-		public List<Schema.Object> Objects { get { return FObjects; } }
+		public List<Schema.Object> Objects { get { return _objects; } }
 
 		/// <summary>Ensures that the given object ID and object reference is in the list. AObject may be a null reference.</summary>		
-		public void Ensure(int AID, Schema.Object AObject)
+		public void Ensure(int iD, Schema.Object objectValue)
 		{
-			if (!FIDs.Contains(AID))
+			if (!_iDs.Contains(iD))
 			{
-				FIDs.Add(AID);
-				FObjects.Add(AObject);
+				_iDs.Add(iD);
+				_objects.Add(objectValue);
 			}
 		}
 
 		/// <summary>Ensures that the given ID is in the list, adding it with a null reference if necessary.</summary>
-		public void Ensure(int AID)
+		public void Ensure(int iD)
 		{
-			Ensure(AID, null);
+			Ensure(iD, null);
 		}
 
 		/// <summary>Ensures that the given object is in the list by ID, adding the reference as well. AObject may not be a null reference.</summary>		
-		public void Ensure(Schema.Object AObject)
+		public void Ensure(Schema.Object objectValue)
 		{
-			Ensure(AObject.ID, AObject);
+			Ensure(objectValue.ID, objectValue);
 		}
 		
 		/// <summary>Adds the given ID and object reference to the list. If the list already has an entry for AID, an exception is raised. AObject may be a null reference.</summary>
-		public void Add(int AID, Schema.Object AObject)
+		public void Add(int iD, Schema.Object objectValue)
 		{
-			if (FIDs.Contains(AID))
-				throw new SchemaException(SchemaException.Codes.DuplicateObject, ErrorSeverity.System, AID);
-			FIDs.Add(AID);
-			FObjects.Add(AObject);
+			if (_iDs.Contains(iD))
+				throw new SchemaException(SchemaException.Codes.DuplicateObject, ErrorSeverity.System, iD);
+			_iDs.Add(iD);
+			_objects.Add(objectValue);
 		}
 		
 		/// <summary>Adds the given object to the list by ID, adding the reference as well. AObject may not be a null reference.</summary>
-		public void Add(Schema.Object AObject)
+		public void Add(Schema.Object objectValue)
 		{
-			Add(AObject.ID, AObject);
+			Add(objectValue.ID, objectValue);
 		}
 		
 		/// <summary>Retrieves the object reference for the object at the given index in this list.</summary>
@@ -83,44 +83,44 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// Otherwise, the given catalog device session is used to resolve the object 
 		/// reference by ID.
 		/// </remarks>
-		public Schema.Object ResolveObject(CatalogDeviceSession ASession, int AIndex)
+		public Schema.Object ResolveObject(CatalogDeviceSession session, int index)
 		{
-			Schema.Object LObject = FObjects[AIndex];
-			if (LObject == null)
+			Schema.Object objectValue = _objects[index];
+			if (objectValue == null)
 			{
-				LObject = ASession.ResolveObject(FIDs[AIndex]);
-				FObjects[AIndex] = LObject;
+				objectValue = session.ResolveObject(_iDs[index]);
+				_objects[index] = objectValue;
 			}
 			
-			return LObject;
+			return objectValue;
 		}
 		
 		/// <summary>Copies the contents of this object list to AObjectList.</summary>
-		public void CopyTo(ObjectList AObjectList)
+		public void CopyTo(ObjectList objectList)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				AObjectList.Add(FIDs[LIndex], FObjects[LIndex]);
+			for (int index = 0; index < Count; index++)
+				objectList.Add(_iDs[index], _objects[index]);
 		}
 		
 		#region ICollection<int> Members
 
 		/// <summary>Adds the given ID to the list with a null reference for the object. If the ID is already in the list, an exception is raised.</summary>
-		public void Add(int AID)
+		public void Add(int iD)
 		{
-			Add(AID, null);
+			Add(iD, null);
 		}
 
 		/// <summary>Clears the IDs and object references for this object list.</summary>		
 		public void Clear()
 		{
-			FIDs.Clear();
-			FObjects.Clear();
+			_iDs.Clear();
+			_objects.Clear();
 		}
 
 		/// <summary>Returns true if the list contains the given ID, false otherwise.</summary>
-		public bool Contains(int AID)
+		public bool Contains(int iD)
 		{
-			return FIDs.Contains(AID);
+			return _iDs.Contains(iD);
 		}
 
 		/// <summary>This method is not implemented, calling it will throw an exception.</summary>
@@ -132,7 +132,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// <summary>Returns the number of items in the list.</summary>
 		public int Count
 		{
-			get { return FIDs.Count; }
+			get { return _iDs.Count; }
 		}
 
 		/// <summary>Always returns false.</summary>
@@ -144,11 +144,11 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// <summary>Removes the given ID and its associated object reference, if any, from the list. Returns true if the object was in the list, false otherwise.</summary>
 		public bool Remove(int item)
 		{
-			int LIndex = FIDs.IndexOf(item);
-			if (LIndex >= 0)
+			int index = _iDs.IndexOf(item);
+			if (index >= 0)
 			{
-				FIDs.RemoveAt(LIndex);
-				FObjects.RemoveAt(LIndex);
+				_iDs.RemoveAt(index);
+				_objects.RemoveAt(index);
 				return true;
 			}
 			return false;
@@ -160,7 +160,7 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		public IEnumerator<int> GetEnumerator()
 		{
-			return FIDs.GetEnumerator();
+			return _iDs.GetEnumerator();
 		}
 
 		#endregion
@@ -169,7 +169,7 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return FIDs.GetEnumerator();
+			return _iDs.GetEnumerator();
 		}
 
 		#endregion
@@ -178,46 +178,46 @@ namespace Alphora.Dataphor.DAE.Schema
 	/// <summary>The abstract base class for all schema objects in the catalog cache.</summary>
 	public abstract class Object : System.Object, IMetaData
     {
-		public const int CMaxObjectNameLength = 200; // Maximum length of an object name
-		public const int CMaxDescriptionLength = 200; // Maximum length of the persisted description of an object
-		public const string CEllipsis = "..."; // Appended to a description that was truncated for persistence
-		public const int CMaxObjectIDLength = 10; // Int32.MaxValue.ToString().Length;
-		public const int CMaxGeneratedNameLength = CMaxObjectNameLength - CMaxObjectIDLength;
+		public const int MaxObjectNameLength = 200; // Maximum length of an object name
+		public const int MaxDescriptionLength = 200; // Maximum length of the persisted description of an object
+		public const string Ellipsis = "..."; // Appended to a description that was truncated for persistence
+		public const int MaxObjectIDLength = 10; // Int32.MaxValue.ToString().Length;
+		public const int MaxGeneratedNameLength = MaxObjectNameLength - MaxObjectIDLength;
 		
-		public Object(int AID, string AName) : base()
+		public Object(int iD, string name) : base()
 		{
-			FID = AID;
-			Name = AName;
+			_iD = iD;
+			Name = name;
 		}
 		
-		public Object(string AName) : base()
+		public Object(string name) : base()
 		{
-			FID = GetNextObjectID();
+			_iD = GetNextObjectID();
 			//FID = -1;
-			Name = AName;
+			Name = name;
 		}
 
 		// Name
-		private string FName;
+		private string _name;
 		/// <summary>The name of the object.</summary>
 		public virtual string Name
 		{
-			get { return FName; }
-			set { FName = value; }
+			get { return _name; }
+			set { _name = value; }
 		}
 		
 		// ID
-		protected int FID;
+		protected int _iD;
 		/// <summary>Auto generated surrogate key for the object.</summary>
-		public int ID { get { return FID; } }
+		public int ID { get { return _iD; } }
 		
 		// Library
 		[Reference]
-		protected LoadedLibrary FLibrary;
+		protected LoadedLibrary _library;
 		public LoadedLibrary Library
 		{
-			get { return FLibrary; }
-			set { FLibrary = value; }
+			get { return _library; }
+			set { _library = value; }
 		}
 
 		// CatalogObjectID
@@ -257,78 +257,78 @@ namespace Alphora.Dataphor.DAE.Schema
 		public virtual string Description { get { return DisplayName; } }
 		
 		// IsSystem
-		private bool FIsSystem;
+		private bool _isSystem;
 		/// <summary>Returns true if this object is part of the system catalog created and managed by the system, false otherwise.</summary>
 		public virtual bool IsSystem
 		{
-			get { return FIsSystem; }
-			set { FIsSystem = value; }
+			get { return _isSystem; }
+			set { _isSystem = value; }
 		}
 		
 		// Generator
 		[Reference]
-		private Schema.Object FGenerator;
+		private Schema.Object _generator;
 		/// <summary>A reference to the object that generated this object.</summary>
 		/// <remarks>Should only be accessed directly for management. To select the generator, use ResolveGenerator.</remarks>
 		public Schema.Object Generator
 		{
-			get { return FGenerator; }
+			get { return _generator; }
 			set
 			{
-				FGenerator = value;
-				FGeneratorID = value == null ? -1 : FGenerator.ID;
+				_generator = value;
+				_generatorID = value == null ? -1 : _generator.ID;
 			}
 		}
 		
-		public Schema.Object ResolveGenerator(CatalogDeviceSession ASession)
+		public Schema.Object ResolveGenerator(CatalogDeviceSession session)
 		{
-			if ((FGenerator == null) && (FGeneratorID >= 0))
-				FGenerator = ASession.ResolveObject(FGeneratorID);
-			return FGenerator;
+			if ((_generator == null) && (_generatorID >= 0))
+				_generator = session.ResolveObject(_generatorID);
+			return _generator;
 		}
 		
 		// GeneratorID
-		private int FGeneratorID = -1;
+		private int _generatorID = -1;
 		/// <summary>The ID of the object responsible for generating this object, if this is a generated object.</summary>
 		/// <remarks>
 		/// If this is a generated object, this will be the ID of the object that generated it. Otherwise, this property will be -1.
 		/// </remarks>
 		public int GeneratorID
 		{
-			get { return FGeneratorID; }
-			set { FGeneratorID = value; }
+			get { return _generatorID; }
+			set { _generatorID = value; }
 		}
 		
 		public void LoadGeneratorID()
 		{
-			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.GeneratorID");
-			if (LTag != Tag.None)
-				FGeneratorID = Int32.Parse(LTag.Value);
+			Tag tag = MetaData.RemoveTag(MetaData, "DAE.GeneratorID");
+			if (tag != Tag.None)
+				_generatorID = Int32.Parse(tag.Value);
 		}
 		
 		public void SaveGeneratorID()
 		{
-			if (FGeneratorID >= 0)
-				MetaData.Tags.AddOrUpdate("DAE.GeneratorID", FGeneratorID.ToString(), true);
+			if (_generatorID >= 0)
+				MetaData.Tags.AddOrUpdate("DAE.GeneratorID", _generatorID.ToString(), true);
 		}
 
 		public void RemoveGeneratorID()
 		{
-			if (FMetaData != null)
-				FMetaData.Tags.RemoveTag("DAE.GeneratorID");
+			if (_metaData != null)
+				_metaData.Tags.RemoveTag("DAE.GeneratorID");
 		}
 
 		public void LoadIsGenerated()
 		{
-			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.IsGenerated");
-			if (LTag != Tag.None)
-				FIsGenerated = Boolean.Parse(LTag.Value);
+			Tag tag = MetaData.RemoveTag(MetaData, "DAE.IsGenerated");
+			if (tag != Tag.None)
+				_isGenerated = Boolean.Parse(tag.Value);
 		}
 
 		public void SaveIsGenerated()
 		{
-			if (FIsGenerated)
-				MetaData.Tags.AddOrUpdate("DAE.IsGenerated", FIsGenerated.ToString(), true);
+			if (_isGenerated)
+				MetaData.Tags.AddOrUpdate("DAE.IsGenerated", _isGenerated.ToString(), true);
 		}
 		
 		public void RemoveIsGenerated()
@@ -338,12 +338,12 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 
 		// IsGenerated
-		private bool FIsGenerated;
+		private bool _isGenerated;
 		/// <summary>Returns true if this object was generated by the compiler, rather than explicitly created by a DDL statement, false otherwise.</summary>
 		public bool IsGenerated
 		{
-			get { return FIsGenerated; }
-			set { FIsGenerated = value; }
+			get { return _isGenerated; }
+			set { _isGenerated = value; }
 		}
 
 		/// <summary>Returns true if this is a session-specific object, false otherwise.</summary>		
@@ -357,105 +357,105 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		// Objects that this object depends on
 		[Reference]
-		private ObjectList FDependencies;
+		private ObjectList _dependencies;
 		public ObjectList Dependencies 
 		{ 
 			get 
 			{
-				if (FDependencies == null)
-					FDependencies = new ObjectList();
-				return FDependencies;
+				if (_dependencies == null)
+					_dependencies = new ObjectList();
+				return _dependencies;
 			} 
 		}
 		
 		public bool HasDependencies()
 		{
-			return (FDependencies != null) && (FDependencies.Count > 0);
+			return (_dependencies != null) && (_dependencies.Count > 0);
 		}
 
-		public void AddDependency(Object AObject)
+		public void AddDependency(Object objectValue)
 		{
-			Dependencies.Ensure(AObject.ID, AObject);
+			Dependencies.Ensure(objectValue.ID, objectValue);
 		}
 		
-		public void AddDependencies(ObjectList ADependencies)
+		public void AddDependencies(ObjectList dependencies)
 		{
-			for (int LIndex = 0; LIndex < ADependencies.Count; LIndex++)
-				Dependencies.Ensure(ADependencies.IDs[LIndex], ADependencies.Objects[LIndex]);
+			for (int index = 0; index < dependencies.Count; index++)
+				Dependencies.Ensure(dependencies.IDs[index], dependencies.Objects[index]);
 		}
 		
-		public void RemoveDependency(Object AObject)
+		public void RemoveDependency(Object objectValue)
 		{
-			if (FDependencies != null)
-				FDependencies.Remove(AObject.ID);
+			if (_dependencies != null)
+				_dependencies.Remove(objectValue.ID);
 		}
 		
-		public void LoadDependencies(CatalogDeviceSession ASession)
+		public void LoadDependencies(CatalogDeviceSession session)
 		{
-			Schema.DependentObjectHeaders LDependencies = ASession.SelectObjectDependencies(ID, false);
-			for (int LIndex = 0; LIndex < LDependencies.Count; LIndex++)
-				Dependencies.Ensure(LDependencies[LIndex].ID);
+			Schema.DependentObjectHeaders dependencies = session.SelectObjectDependencies(ID, false);
+			for (int index = 0; index < dependencies.Count; index++)
+				Dependencies.Ensure(dependencies[index].ID);
 		}
 
 		// MetaData
-		private MetaData FMetaData;
+		private MetaData _metaData;
 		/// <summary>The MetaData for this object.</summary>
 		public MetaData MetaData
 		{
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
 		}
 		
 		/// <summary>Merges all tags from the given MetaData into the metadata for this object.</summary>
-		public void MergeMetaData(MetaData AMetaData)
+		public void MergeMetaData(MetaData metaData)
 		{
-			if (AMetaData != null)
+			if (metaData != null)
 			{
-				if (FMetaData == null)
-					FMetaData = new MetaData();
+				if (_metaData == null)
+					_metaData = new MetaData();
 					
-				FMetaData.Merge(AMetaData);
+				_metaData.Merge(metaData);
 			}
 		}
 		
 		/// <summary>References each dynamic tag in the given metadata, if the metadata for this object does not already contain it.</summary>
-		public void InheritMetaData(MetaData AMetaData)
+		public void InheritMetaData(MetaData metaData)
 		{
-			if (AMetaData != null)
+			if (metaData != null)
 			{
-				if (FMetaData == null)
-					FMetaData = new MetaData();
+				if (_metaData == null)
+					_metaData = new MetaData();
 					
-				FMetaData.Inherit(AMetaData);
+				_metaData.Inherit(metaData);
 			}
 		}
 		
 		/// <summary>Joins each dynamic tag in the given meatadata to the metadata for this object, using copy semantics.</summary>
-		public void JoinMetaData(MetaData AMetaData)
+		public void JoinMetaData(MetaData metaData)
 		{
-			if (AMetaData != null)
+			if (metaData != null)
 			{
-				if (FMetaData == null)
-					FMetaData = new MetaData();
+				if (_metaData == null)
+					_metaData = new MetaData();
 					
-				FMetaData.Join(AMetaData);
+				_metaData.Join(metaData);
 			}
 		}
 		
 		/// <summary>Joins each dynamic tag in the given metadata to the metadata for this object, using reference semantics.</summary>
-		public void JoinInheritMetaData(MetaData AMetaData)
+		public void JoinInheritMetaData(MetaData metaData)
 		{
-			if (AMetaData != null)
+			if (metaData != null)
 			{
-				if (FMetaData == null)
-					FMetaData = new MetaData();
+				if (_metaData == null)
+					_metaData = new MetaData();
 					
-				FMetaData.JoinInherit(AMetaData);
+				_metaData.JoinInherit(metaData);
 			}
 		}
 		
 		// IsRemotable
-		private bool FIsRemotable = true;
+		private bool _isRemotable = true;
 		/// <summary>Determines whether this object can be transported across the remoting boundary.</summary>
 		/// <remarks>
 		/// A catalog object is considered remotable by default
@@ -482,37 +482,37 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// </remarks>
 		public bool IsRemotable
 		{
-			get { return FIsRemotable; }
-			set { FIsRemotable = value; }
+			get { return _isRemotable; }
+			set { _isRemotable = value; }
 		}
 		
-		public virtual void DetermineRemotable(CatalogDeviceSession ASession)
+		public virtual void DetermineRemotable(CatalogDeviceSession session)
 		{
-			if (FDependencies != null)
-				for (int LIndex = 0; LIndex < FDependencies.Count; LIndex++)
-					if (!FDependencies.ResolveObject(ASession, LIndex).IsRemotable)
+			if (_dependencies != null)
+				for (int index = 0; index < _dependencies.Count; index++)
+					if (!_dependencies.ResolveObject(session, index).IsRemotable)
 					{
-						FIsRemotable = false;
+						_isRemotable = false;
 						break;
 					}
 		}
         
-        public virtual void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+        public virtual void IncludeDependencies(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
         {
-			if (FDependencies != null)
-				for (int LIndex = 0; LIndex < FDependencies.Count; LIndex++)
-					FDependencies.ResolveObject(ASession, LIndex).IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			if (_dependencies != null)
+				for (int index = 0; index < _dependencies.Count; index++)
+					_dependencies.ResolveObject(session, index).IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
         }
         
-        public virtual void IncludeHandlers(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+        public virtual void IncludeHandlers(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
         {
         }
         
-        public bool HasDependentConstraints(CatalogDeviceSession ASession)
+        public bool HasDependentConstraints(CatalogDeviceSession session)
         {
-			List<Schema.DependentObjectHeader> LHeaders = ASession.SelectObjectDependents(ID, true);
-			for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
-				switch (LHeaders[LIndex].ObjectType)
+			List<Schema.DependentObjectHeader> headers = session.SelectObjectDependents(ID, true);
+			for (int index = 0; index < headers.Count; index++)
+				switch (headers[index].ObjectType)
 				{
 					case "ScalarTypeConstraint":
 					case "TableVarColumnConstraint":
@@ -525,43 +525,43 @@ namespace Alphora.Dataphor.DAE.Schema
 			return false;
         }
         
-        public bool HasDependents(CatalogDeviceSession ASession)
+        public bool HasDependents(CatalogDeviceSession session)
         {
-			List<Schema.DependentObjectHeader> LHeaders = ASession.SelectObjectDependents(ID, false);
-			return (LHeaders.Count > 0);
+			List<Schema.DependentObjectHeader> headers = session.SelectObjectDependents(ID, false);
+			return (headers.Count > 0);
         }
         
-        public static bool NamesEqual(string ALeftName, string ARightName)
+        public static bool NamesEqual(string leftName, string rightName)
         {
-			if (((ALeftName.Length > 0) && (ALeftName[0].Equals('.'))) || ((ARightName.Length > 0) && (ARightName[0].Equals('.'))))
+			if (((leftName.Length > 0) && (leftName[0].Equals('.'))) || ((rightName.Length > 0) && (rightName[0].Equals('.'))))
 				return 
 					String.Compare
 					(
-						ALeftName.Substring(ALeftName.IndexOf(Keywords.Qualifier) == 0 ? 1 : 0), 
-						ARightName.Substring(ARightName.IndexOf(Keywords.Qualifier) == 0 ? 1 : 0)
+						leftName.Substring(leftName.IndexOf(Keywords.Qualifier) == 0 ? 1 : 0), 
+						rightName.Substring(rightName.IndexOf(Keywords.Qualifier) == 0 ? 1 : 0)
 					) == 0;
 			else
 			{
-				int LLeftIndex = ALeftName.Length - 1;
-				int LRightIndex = ARightName.Length - 1;
+				int leftIndex = leftName.Length - 1;
+				int rightIndex = rightName.Length - 1;
 				
-				if (LLeftIndex >= LRightIndex)
+				if (leftIndex >= rightIndex)
 				{
 					while (true)
 					{
-						if (LRightIndex < 0)
+						if (rightIndex < 0)
 						{
-							if ((LLeftIndex < 0) || ALeftName[LLeftIndex].Equals('.'))
+							if ((leftIndex < 0) || leftName[leftIndex].Equals('.'))
 								return true;
 							else
 								return false;
 						}
 						
-						if (!ALeftName[LLeftIndex].Equals(ARightName[LRightIndex]))
+						if (!leftName[leftIndex].Equals(rightName[rightIndex]))
 							return false;
 						
-						LRightIndex--;
-						LLeftIndex--;
+						rightIndex--;
+						leftIndex--;
 					}
 				}
 
@@ -569,96 +569,96 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
         }
 
-		public static int GetQualifierCount(string AName)
+		public static int GetQualifierCount(string name)
 		{
-			int LResult = 0;
-			for (int LIndex = 0; LIndex < AName.Length; LIndex++)
-				if (AName[LIndex] == '.')
-					LResult++;
-			return LResult;
+			int result = 0;
+			for (int index = 0; index < name.Length; index++)
+				if (name[index] == '.')
+					result++;
+			return result;
 		}
 		
-        public static string Qualify(string AName, string ANameSpace)
+        public static string Qualify(string name, string nameSpace)
         {
-			if (AName.IndexOf(Keywords.Qualifier) == 0)
-				return AName.Substring(1);
-			else if (ANameSpace != String.Empty)
-				return String.Format("{0}{1}{2}", ANameSpace, Keywords.Qualifier, AName);
+			if (name.IndexOf(Keywords.Qualifier) == 0)
+				return name.Substring(1);
+			else if (nameSpace != String.Empty)
+				return String.Format("{0}{1}{2}", nameSpace, Keywords.Qualifier, name);
 			else
-				return AName;
+				return name;
         }
         
-        public static bool IsRooted(string AName)
+        public static bool IsRooted(string name)
         {
-			return AName.IndexOf(Keywords.Qualifier) == 0;
+			return name.IndexOf(Keywords.Qualifier) == 0;
         }
         
-        public static string EnsureRooted(string AName)
+        public static string EnsureRooted(string name)
         {
-			return String.Format("{0}{1}", AName.IndexOf(Keywords.Qualifier) == 0 ? String.Empty : Keywords.Qualifier, AName);
+			return String.Format("{0}{1}", name.IndexOf(Keywords.Qualifier) == 0 ? String.Empty : Keywords.Qualifier, name);
         }
         
-        public static string EnsureUnrooted(string AName)
+        public static string EnsureUnrooted(string name)
         {
-			return AName.IndexOf(Keywords.Qualifier) == 0 ? AName.Substring(1) : AName;
+			return name.IndexOf(Keywords.Qualifier) == 0 ? name.Substring(1) : name;
         }
         
         /// <summary>Replaces all qualifiers in the given name with an underscore.</summary>
-        public static string MangleQualifiers(string AName)
+        public static string MangleQualifiers(string name)
         {
-			return AName.Replace(Keywords.Qualifier, "_");
+			return name.Replace(Keywords.Qualifier, "_");
 		}
 
 		/// <summary>Removes one level of qualification from the given identifier.</summary>
-		public static string Dequalify(string AName)
+		public static string Dequalify(string name)
 		{
-			AName = EnsureUnrooted(AName);
-			int LIndex = AName.IndexOf(Keywords.Qualifier);
-			if ((LIndex > 0) && (LIndex < AName.Length - 1))
-				return AName.Substring(LIndex + 1);
+			name = EnsureUnrooted(name);
+			int index = name.IndexOf(Keywords.Qualifier);
+			if ((index > 0) && (index < name.Length - 1))
+				return name.Substring(index + 1);
 			else
-				return AName;
+				return name;
 		}
 		
 		/// <summary>Returns the unqualified identifier.</summary>
-		public static string Unqualify(string AName)
+		public static string Unqualify(string name)
 		{
-			int LIndex = AName.LastIndexOf(Keywords.Qualifier);
-			if ((LIndex > 0) && (LIndex < AName.Length - 1))
-				return AName.Substring(LIndex + 1);
+			int index = name.LastIndexOf(Keywords.Qualifier);
+			if ((index > 0) && (index < name.Length - 1))
+				return name.Substring(index + 1);
 			else
-				return AName;
+				return name;
 		}
 		
 		/// <summary>Returns the qualifier of the given name.  If the name does not contain a qualifier, the empty string is returned.</summary>
-		public static string Qualifier(string AName)
+		public static string Qualifier(string name)
 		{
-			AName = EnsureUnrooted(AName);
-			int LIndex = AName.IndexOf(Keywords.Qualifier);
-			if (LIndex >= 0)
-				return AName.Substring(0, LIndex);
+			name = EnsureUnrooted(name);
+			int index = name.IndexOf(Keywords.Qualifier);
+			if (index >= 0)
+				return name.Substring(0, index);
 			else
 				return String.Empty;
 		}
 		
 		/// <summary> Returns true if the given identifier isn't qualified (not including the root).</summary>
-		public static bool IsQualified(string AName)
+		public static bool IsQualified(string name)
 		{
-			AName = EnsureUnrooted(AName);
-			return AName.IndexOf(Keywords.Qualifier) >= 0;
+			name = EnsureUnrooted(name);
+			return name.IndexOf(Keywords.Qualifier) >= 0;
 		}
 		
 		/// <summary>Returns the given name with the given qualifier removed.  If the name does not begin with the given qualifier, the given name is returned unchanged.  If the name is equal to the given qualifier, the empty string is returned.</summary>
-		public static string RemoveQualifier(string AName, string AQualifier)
+		public static string RemoveQualifier(string name, string qualifier)
 		{
-			int LIndex = AName.IndexOf(AQualifier);
-			if (LIndex == 0)
-				if (AName.Length == AQualifier.Length)
+			int index = name.IndexOf(qualifier);
+			if (index == 0)
+				if (name.Length == qualifier.Length)
 					return String.Empty;
 				else
-					return AName.Substring(AQualifier.Length + 1);
+					return name.Substring(qualifier.Length + 1);
 			else
-				return AName;
+				return name;
 		}
 		
 		public static string GetUniqueName()
@@ -672,11 +672,11 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// 200 characters less the length of the ellipsis mark (...), or 197 characters, is returned with the ellipsis
 		/// mark appended. Otherwise, the description is returned unchanged.
 		/// </remarks>
-		public static string EnsureDescriptionLength(string ADescription)
+		public static string EnsureDescriptionLength(string description)
 		{
-			if (ADescription.Length > CMaxDescriptionLength)
-				return ADescription.Substring(0, CMaxDescriptionLength - CEllipsis.Length) + CEllipsis;
-			return ADescription;
+			if (description.Length > MaxDescriptionLength)
+				return description.Substring(0, MaxDescriptionLength - Ellipsis.Length) + Ellipsis;
+			return description;
 		}
 		
 		/// <summary>Ensures that the given name is not longer than the maximum object name length.</summary>
@@ -684,84 +684,84 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// If the given name is longer than the maximum object name length (200 characters), the first 200 characters of the
 		/// name are returned. Otheriwse, the name is returned unchanged.
 		/// </remarks>
-		public static string EnsureNameLength(string AName)
+		public static string EnsureNameLength(string name)
 		{
-			if (AName.Length > CMaxObjectNameLength)
-				return AName.Substring(0, CMaxObjectNameLength);
-			return AName;
+			if (name.Length > MaxObjectNameLength)
+				return name.Substring(0, MaxObjectNameLength);
+			return name;
 		}
 		
-		public static string GetGeneratedName(string ASeed, int AObjectID)
+		public static string GetGeneratedName(string seed, int objectID)
 		{
-			return String.Format("{0}{1}", ASeed.Length > CMaxGeneratedNameLength ? ASeed.Substring(0, CMaxGeneratedNameLength) : ASeed, AObjectID.ToString().PadLeft(CMaxObjectIDLength, '0'));
+			return String.Format("{0}{1}", seed.Length > MaxGeneratedNameLength ? seed.Substring(0, MaxGeneratedNameLength) : seed, objectID.ToString().PadLeft(MaxObjectIDLength, '0'));
 		}
 		
-		public static string NameFromGuid(Guid AID)
+		public static string NameFromGuid(Guid iD)
 		{
-			return String.Format("Object_{0}", AID.ToString().Replace("-", "_"));
+			return String.Format("Object_{0}", iD.ToString().Replace("-", "_"));
 		}
 
-		private static int FNextID = 0;		
+		private static int _nextID = 0;		
 		public static int GetNextObjectID()
 		{
-			return Interlocked.Increment(ref FNextID);
+			return Interlocked.Increment(ref _nextID);
 		}
 		
-		public static void SetNextObjectID(int ANextID)
+		public static void SetNextObjectID(int nextID)
 		{
 			lock (typeof(Schema.Object))
 			{
-				FNextID = ANextID;
+				_nextID = nextID;
 			}
 		}
 		
 		/// <summary>Gets the object id from the given meta data and removes the DAE.ObjectID tag, if it exists. Otherwise, returns the value of GetNextObjectID().</summary>
-		public static int GetObjectID(MetaData AMetaData)
+		public static int GetObjectID(MetaData metaData)
 		{
-			Tag LTag = MetaData.RemoveTag(AMetaData, "DAE.ObjectID");
-			if (LTag != Tag.None)
-				return Int32.Parse(LTag.Value);
+			Tag tag = MetaData.RemoveTag(metaData, "DAE.ObjectID");
+			if (tag != Tag.None)
+				return Int32.Parse(tag.Value);
 			return GetNextObjectID();
 		}
 
 		/// <summary>Ensures that the object has metadata and a DAE.ObjectID tag with the id of the object.</summary>		
 		public void SaveObjectID()
 		{
-			if (FMetaData == null)
-				FMetaData = new MetaData();
-			FMetaData.Tags.AddOrUpdate("DAE.ObjectID", FID.ToString(), true);
+			if (_metaData == null)
+				_metaData = new MetaData();
+			_metaData.Tags.AddOrUpdate("DAE.ObjectID", _iD.ToString(), true);
 		}
 		
 		public void RemoveObjectID()
 		{
-			if (FMetaData != null)
-				FMetaData.Tags.RemoveTag("DAE.ObjectID");
+			if (_metaData != null)
+				_metaData.Tags.RemoveTag("DAE.ObjectID");
 		}
 
         public override string ToString()
         {
-			return FName == String.Empty ? base.ToString() : FName;
+			return _name == String.Empty ? base.ToString() : _name;
         }
 
-        public override bool Equals(object AObject)
+        public override bool Equals(object objectValue)
         {
-			if ((AObject is Object) && ((((Object)AObject).Name != String.Empty) || Name != String.Empty))
-				return NamesEqual(((Object)AObject).Name, Name);
+			if ((objectValue is Object) && ((((Object)objectValue).Name != String.Empty) || Name != String.Empty))
+				return NamesEqual(((Object)objectValue).Name, Name);
 			else
-				return base.Equals(AObject);
+				return base.Equals(objectValue);
         }
 
         public override int GetHashCode()
         {
-			return Unqualify(FName).GetHashCode();
+			return Unqualify(_name).GetHashCode();
         }
         
-        public virtual Statement EmitStatement(EmitMode AMode)
+        public virtual Statement EmitStatement(EmitMode mode)
         {
 			throw new SchemaException(SchemaException.Codes.StatementCannotBeEmitted, GetType().Name);
         }
         
-        public virtual Statement EmitDropStatement(EmitMode AMode)
+        public virtual Statement EmitDropStatement(EmitMode mode)
         {
 			throw new SchemaException(SchemaException.Codes.DropStatementCannotBeEmitted, GetType().Name);
         }
@@ -771,140 +771,140 @@ namespace Alphora.Dataphor.DAE.Schema
 			return new ObjectHeader(this);
         }
         
-		public virtual Object GetObjectFromHeader(ObjectHeader AHeader)
+		public virtual Object GetObjectFromHeader(ObjectHeader header)
 		{
-			if (FID == AHeader.ID)
+			if (_iD == header.ID)
 				return this;
-			throw new Schema.SchemaException(Schema.SchemaException.Codes.CouldNotResolveObjectHeader, ErrorSeverity.System, AHeader.ID, AHeader.Name);
+			throw new Schema.SchemaException(Schema.SchemaException.Codes.CouldNotResolveObjectHeader, ErrorSeverity.System, header.ID, header.Name);
 		}
 	}
 	
 	/// <summary>ObjectHeader</summary>
 	public class ObjectHeader : System.Object
 	{
-		public ObjectHeader(Schema.Object AObject) : base()
+		public ObjectHeader(Schema.Object objectValue) : base()
 		{
-			FID = AObject.ID;
-			FName = AObject.Name;
-			FLibraryName = AObject.Library == null ? String.Empty : AObject.Library.Name;
-			FDisplayName = AObject.DisplayName;
-			FObjectType = AObject.GetType().Name;
-			FIsSystem = AObject.IsSystem;
-			FIsRemotable = AObject.IsRemotable;
-			FIsGenerated = AObject.IsGenerated;
-			FIsATObject = AObject.IsATObject;
-			FIsSessionObject = AObject.IsSessionObject;
-			FIsPersistent = AObject.IsPersistent;
-			FCatalogObjectID = AObject.CatalogObjectID;
-			FParentObjectID = AObject.ParentObjectID;
-			FGeneratorObjectID = AObject.GeneratorID;
+			_iD = objectValue.ID;
+			_name = objectValue.Name;
+			_libraryName = objectValue.Library == null ? String.Empty : objectValue.Library.Name;
+			_displayName = objectValue.DisplayName;
+			_objectType = objectValue.GetType().Name;
+			_isSystem = objectValue.IsSystem;
+			_isRemotable = objectValue.IsRemotable;
+			_isGenerated = objectValue.IsGenerated;
+			_isATObject = objectValue.IsATObject;
+			_isSessionObject = objectValue.IsSessionObject;
+			_isPersistent = objectValue.IsPersistent;
+			_catalogObjectID = objectValue.CatalogObjectID;
+			_parentObjectID = objectValue.ParentObjectID;
+			_generatorObjectID = objectValue.GeneratorID;
 		}
 		
 		public ObjectHeader
 		(
-			int AID,
-			string AName,
-			string ALibraryName,
-			string ADisplayName,
-			string AObjectType,
-			bool AIsSystem,
-			bool AIsRemotable,
-			bool AIsGenerated,
-			bool AIsATObject,
-			bool AIsSessionObject,
-			bool AIsPersistent,
-			int ACatalogObjectID,
-			int AParentObjectID,
-			int AGeneratorObjectID
+			int iD,
+			string name,
+			string libraryName,
+			string displayName,
+			string objectType,
+			bool isSystem,
+			bool isRemotable,
+			bool isGenerated,
+			bool isATObject,
+			bool isSessionObject,
+			bool isPersistent,
+			int catalogObjectID,
+			int parentObjectID,
+			int generatorObjectID
 		) : base()
 		{
-			FID = AID;
-			FName = AName;
-			FLibraryName = ALibraryName;
-			FDisplayName = ADisplayName;
-			FObjectType = AObjectType;
-			FIsSystem = AIsSystem;
-			FIsRemotable = AIsRemotable;
-			FIsGenerated = AIsGenerated;
-			FIsATObject = AIsATObject;
-			FIsSessionObject = AIsSessionObject;
-			FIsPersistent = AIsPersistent;
-			FCatalogObjectID = ACatalogObjectID;
-			FParentObjectID = AParentObjectID;
-			FGeneratorObjectID = AGeneratorObjectID;
+			_iD = iD;
+			_name = name;
+			_libraryName = libraryName;
+			_displayName = displayName;
+			_objectType = objectType;
+			_isSystem = isSystem;
+			_isRemotable = isRemotable;
+			_isGenerated = isGenerated;
+			_isATObject = isATObject;
+			_isSessionObject = isSessionObject;
+			_isPersistent = isPersistent;
+			_catalogObjectID = catalogObjectID;
+			_parentObjectID = parentObjectID;
+			_generatorObjectID = generatorObjectID;
 		}
 		
-		private int FID;
-		public int ID { get { return FID; } }
+		private int _iD;
+		public int ID { get { return _iD; } }
 		
-		private string FName;
-		public string Name { get { return FName; } }
+		private string _name;
+		public string Name { get { return _name; } }
 		
-		private string FLibraryName;
-		public string LibraryName { get { return FLibraryName; } }
+		private string _libraryName;
+		public string LibraryName { get { return _libraryName; } }
 		
-		private string FDisplayName;
-		public string DisplayName { get { return FDisplayName; } }
+		private string _displayName;
+		public string DisplayName { get { return _displayName; } }
 		
-		private string FObjectType;
-		public string ObjectType { get { return FObjectType; } }
+		private string _objectType;
+		public string ObjectType { get { return _objectType; } }
 		
-		private bool FIsSystem;
-		public bool IsSystem { get { return FIsSystem; } }
+		private bool _isSystem;
+		public bool IsSystem { get { return _isSystem; } }
 		
-		private bool FIsRemotable;
-		public bool IsRemotable { get { return FIsRemotable; } }
+		private bool _isRemotable;
+		public bool IsRemotable { get { return _isRemotable; } }
 		
-		private bool FIsGenerated;
-		public bool IsGenerated { get { return FIsGenerated; } }
+		private bool _isGenerated;
+		public bool IsGenerated { get { return _isGenerated; } }
 		
-		private bool FIsATObject;
-		public bool IsATObject { get { return FIsATObject; } }
+		private bool _isATObject;
+		public bool IsATObject { get { return _isATObject; } }
 		
-		private bool FIsSessionObject;
-		public bool IsSessionObject { get { return FIsSessionObject; } }
+		private bool _isSessionObject;
+		public bool IsSessionObject { get { return _isSessionObject; } }
 		
-		private bool FIsPersistent;
-		public bool IsPersistent { get { return FIsPersistent; } }
+		private bool _isPersistent;
+		public bool IsPersistent { get { return _isPersistent; } }
 		
-		private int FCatalogObjectID;
-		public int CatalogObjectID { get { return FCatalogObjectID; } }
+		private int _catalogObjectID;
+		public int CatalogObjectID { get { return _catalogObjectID; } }
 		
-		private int FParentObjectID;
-		public int ParentObjectID { get { return FParentObjectID; } }
+		private int _parentObjectID;
+		public int ParentObjectID { get { return _parentObjectID; } }
 		
-		private int FGeneratorObjectID;
-		public int GeneratorObjectID { get { return FGeneratorObjectID; } }
+		private int _generatorObjectID;
+		public int GeneratorObjectID { get { return _generatorObjectID; } }
 		
 		public override int GetHashCode()
 		{
-			return FID.GetHashCode();
+			return _iD.GetHashCode();
 		}
 
-		public override bool Equals(object AObject)
+		public override bool Equals(object objectValue)
 		{
-			ObjectHeader LObject = AObject as ObjectHeader;
-			return (LObject != null) && (FID == LObject.ID);
+			ObjectHeader localObjectValue = objectValue as ObjectHeader;
+			return (localObjectValue != null) && (_iD == localObjectValue.ID);
 		}
 		
 		[Reference]
-		private Schema.Object FObject;
-		public Schema.Object ResolveObject(CatalogDeviceSession ASession)
+		private Schema.Object _object;
+		public Schema.Object ResolveObject(CatalogDeviceSession session)
 		{
-			if (FObject == null)
-				FObject = ASession.ResolveObject(FID);
+			if (_object == null)
+				_object = session.ResolveObject(_iD);
 
-			return FObject;
+			return _object;
 		}
 	}
 	
 	public class DependentObjectHeaders : List<DependentObjectHeader>
 	{
 		/// <summary>Returns true if this list contains a header with the given ID.</summary>
-		public bool Contains(int AObjectID)
+		public bool Contains(int objectID)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (this[LIndex].ID == AObjectID)
+			for (int index = 0; index < Count; index++)
+				if (this[index].ID == objectID)
 					return true;
 			return false;
 		}
@@ -915,55 +915,55 @@ namespace Alphora.Dataphor.DAE.Schema
 	{
 		public DependentObjectHeader
 		(
-			int AID,
-			string AName,
-			string ALibraryName,
-			string ADisplayName,
-			string ADescription,
-			string AObjectType,
-			bool AIsSystem,
-			bool AIsRemotable,
-			bool AIsGenerated,
-			bool AIsATObject,
-			bool AIsSessionObject,
-			bool AIsPersistent,
-			int ACatalogObjectID,
-			int AParentObjectID,
-			int AGeneratorObjectID,
-			int ALevel,
-			int ASequence
+			int iD,
+			string name,
+			string libraryName,
+			string displayName,
+			string description,
+			string objectType,
+			bool isSystem,
+			bool isRemotable,
+			bool isGenerated,
+			bool isATObject,
+			bool isSessionObject,
+			bool isPersistent,
+			int catalogObjectID,
+			int parentObjectID,
+			int generatorObjectID,
+			int level,
+			int sequence
 		) 
 			: base
 			(
-				AID,
-				AName,
-				ALibraryName,
-				ADisplayName,
-				AObjectType,
-				AIsSystem,
-				AIsRemotable,
-				AIsGenerated,
-				AIsATObject,
-				AIsSessionObject,
-				AIsPersistent,
-				ACatalogObjectID,
-				AParentObjectID,
-				AGeneratorObjectID
+				iD,
+				name,
+				libraryName,
+				displayName,
+				objectType,
+				isSystem,
+				isRemotable,
+				isGenerated,
+				isATObject,
+				isSessionObject,
+				isPersistent,
+				catalogObjectID,
+				parentObjectID,
+				generatorObjectID
 			) 
 		{
-			FDescription = ADescription;
-			FLevel = ALevel;
-			FSequence = ASequence;
+			_description = description;
+			_level = level;
+			_sequence = sequence;
 		}
 		
-		private string FDescription;
-		public string Description { get { return FDescription; } }
+		private string _description;
+		public string Description { get { return _description; } }
 
-		private int FLevel;
-		public int Level { get { return FLevel; } }
+		private int _level;
+		public int Level { get { return _level; } }
 		
-		private int FSequence;
-		public int Sequence { get { return FSequence; } }		
+		private int _sequence;
+		public int Sequence { get { return _sequence; } }		
 	}
 	
 	public class PersistentObjectHeaders : List<PersistentObjectHeader> { }
@@ -972,64 +972,64 @@ namespace Alphora.Dataphor.DAE.Schema
 	{
 		public PersistentObjectHeader
 		(
-			int AID,
-			string AName,
-			string ALibraryName,
-			string AScript,
-			string ADisplayName,
-			string AObjectType,
-			bool AIsSystem,
-			bool AIsRemotable,
-			bool AIsGenerated,
-			bool AIsATObject,
-			bool AIsSessionObject
+			int iD,
+			string name,
+			string libraryName,
+			string script,
+			string displayName,
+			string objectType,
+			bool isSystem,
+			bool isRemotable,
+			bool isGenerated,
+			bool isATObject,
+			bool isSessionObject
 		) : base()
 		{
-			FID = AID;
-			FName = AName;
-			FLibraryName = ALibraryName;
-			FScript = AScript;
-			FDisplayName = ADisplayName;
-			FObjectType = AObjectType;
-			FIsSystem = AIsSystem;
-			FIsRemotable = AIsRemotable;
-			FIsGenerated = AIsGenerated;
-			FIsATObject = AIsATObject;
-			FIsSessionObject = AIsSessionObject;
+			_iD = iD;
+			_name = name;
+			_libraryName = libraryName;
+			_script = script;
+			_displayName = displayName;
+			_objectType = objectType;
+			_isSystem = isSystem;
+			_isRemotable = isRemotable;
+			_isGenerated = isGenerated;
+			_isATObject = isATObject;
+			_isSessionObject = isSessionObject;
 		}
 		
-		private int FID;
-		public int ID { get { return FID; } }
+		private int _iD;
+		public int ID { get { return _iD; } }
 		
-		private string FName;
-		public string Name { get { return FName; } }
+		private string _name;
+		public string Name { get { return _name; } }
 		
-		private string FLibraryName;
-		public string LibraryName { get { return FLibraryName; } }
+		private string _libraryName;
+		public string LibraryName { get { return _libraryName; } }
 		
-		private string FScript;
-		public string Script { get { return FScript; } }
+		private string _script;
+		public string Script { get { return _script; } }
 
-		private string FDisplayName;
-		public string DisplayName { get { return FDisplayName; } }
+		private string _displayName;
+		public string DisplayName { get { return _displayName; } }
 		
-		private string FObjectType;
-		public string ObjectType { get { return FObjectType; } }
+		private string _objectType;
+		public string ObjectType { get { return _objectType; } }
 		
-		private bool FIsSystem;
-		public bool IsSystem { get { return FIsSystem; } }
+		private bool _isSystem;
+		public bool IsSystem { get { return _isSystem; } }
 		
-		private bool FIsRemotable;
-		public bool IsRemotable { get { return FIsRemotable; } }
+		private bool _isRemotable;
+		public bool IsRemotable { get { return _isRemotable; } }
 		
-		private bool FIsGenerated;
-		public bool IsGenerated { get { return FIsGenerated; } }
+		private bool _isGenerated;
+		public bool IsGenerated { get { return _isGenerated; } }
 		
-		private bool FIsATObject;
-		public bool IsATObject { get { return FIsATObject; } }
+		private bool _isATObject;
+		public bool IsATObject { get { return _isATObject; } }
 		
-		private bool FIsSessionObject;
-		public bool IsSessionObject { get { return FIsSessionObject; } }
+		private bool _isSessionObject;
+		public bool IsSessionObject { get { return _isSessionObject; } }
 	}
 	
 	public class CatalogObjectHeaders : List<CatalogObjectHeader> { }
@@ -1038,71 +1038,71 @@ namespace Alphora.Dataphor.DAE.Schema
 	{
 		public CatalogObjectHeader
 		(
-			int AID,
-			string AName,
-			string ALibraryName,
-			string AOwnerID
+			int iD,
+			string name,
+			string libraryName,
+			string ownerID
 		) : base()
 		{
-			FID = AID;
-			FName = AName;
-			FLibraryName = ALibraryName;
-			FOwnerID = AOwnerID;
+			_iD = iD;
+			_name = name;
+			_libraryName = libraryName;
+			_ownerID = ownerID;
 		}
 		
-		private int FID;
-		public int ID { get { return FID; } }
+		private int _iD;
+		public int ID { get { return _iD; } }
 		
-		private string FName;
-		public string Name { get { return FName; } }
+		private string _name;
+		public string Name { get { return _name; } }
 		
-		private string FLibraryName;
-		public string LibraryName { get { return FLibraryName; } }
+		private string _libraryName;
+		public string LibraryName { get { return _libraryName; } }
 		
-		private string FOwnerID;
-		public string OwnerID { get { return FOwnerID; } }
+		private string _ownerID;
+		public string OwnerID { get { return _ownerID; } }
 	}
 	
 	public class ScalarTypeHeader : System.Object
 	{
-		public ScalarTypeHeader(int AID, int AUniqueSortID, int ASortID) : base()
+		public ScalarTypeHeader(int iD, int uniqueSortID, int sortID) : base()
 		{
-			FID = AID;
-			FUniqueSortID = AUniqueSortID;
-			FSortID = ASortID;
+			_iD = iD;
+			_uniqueSortID = uniqueSortID;
+			_sortID = sortID;
 		}
 		
-		private int FID;
-		public int ID { get { return FID; } }
+		private int _iD;
+		public int ID { get { return _iD; } }
 		
-		private int FUniqueSortID;
-		public int UniqueSortID { get { return FUniqueSortID; } }
+		private int _uniqueSortID;
+		public int UniqueSortID { get { return _uniqueSortID; } }
 		
-		private int FSortID;
-		public int SortID { get { return FSortID; } }
+		private int _sortID;
+		public int SortID { get { return _sortID; } }
 	}
 	
 	public class FullObjectHeaders : System.Object
 	{
-		private List<FullObjectHeader> FHeaders = new List<FullObjectHeader>();
+		private List<FullObjectHeader> _headers = new List<FullObjectHeader>();
 		
 		/// <summary>Stores the index of the header with a given ID.</summary>
-		private Dictionary<int, int> FHeaderHash = new Dictionary<int, int>();
+		private Dictionary<int, int> _headerHash = new Dictionary<int, int>();
 		
-		public void Add(FullObjectHeader AHeader)
+		public void Add(FullObjectHeader header)
 		{
-			FHeaders.Add(AHeader);
-			FHeaderHash.Add(AHeader.ID, FHeaders.Count - 1);
+			_headers.Add(header);
+			_headerHash.Add(header.ID, _headers.Count - 1);
 		}
 		
-		public int Count { get { return FHeaders.Count; } }
+		public int Count { get { return _headers.Count; } }
 		
-		public FullObjectHeader this[int AIndex] { get { return FHeaders[AIndex]; } }
+		public FullObjectHeader this[int index] { get { return _headers[index]; } }
 		
 		/// <summary>Returns true if this list contains a header with the given ID.</summary>
-		public bool Contains(int AObjectID)
+		public bool Contains(int objectID)
 		{
-			return FHeaderHash.ContainsKey(AObjectID);
+			return _headerHash.ContainsKey(objectID);
 		}
 	}
 	
@@ -1111,99 +1111,99 @@ namespace Alphora.Dataphor.DAE.Schema
 	{
 		public FullObjectHeader
 		(
-			int AID,
-			string AName,
-			string ALibraryName,
-			string AScript,
-			string ADisplayName,
-			string AObjectType,
-			bool AIsSystem,
-			bool AIsRemotable,
-			bool AIsGenerated,
-			bool AIsATObject,
-			bool AIsSessionObject,
-			bool AIsPersistent,
-			int ACatalogObjectID,
-			int AParentObjectID,
-			int AGeneratorObjectID
+			int iD,
+			string name,
+			string libraryName,
+			string script,
+			string displayName,
+			string objectType,
+			bool isSystem,
+			bool isRemotable,
+			bool isGenerated,
+			bool isATObject,
+			bool isSessionObject,
+			bool isPersistent,
+			int catalogObjectID,
+			int parentObjectID,
+			int generatorObjectID
 		) : base()
 		{
-			FID = AID;
-			FName = AName;
-			FLibraryName = ALibraryName;
-			FScript = AScript;
-			FDisplayName = ADisplayName;
-			FObjectType = AObjectType;
-			FIsSystem = AIsSystem;
-			FIsRemotable = AIsRemotable;
-			FIsGenerated = AIsGenerated;
-			FIsATObject = AIsATObject;
-			FIsSessionObject = AIsSessionObject;
-			FIsPersistent = AIsPersistent;
-			FCatalogObjectID = ACatalogObjectID;
-			FParentObjectID = AParentObjectID;
-			FGeneratorObjectID = AGeneratorObjectID;
+			_iD = iD;
+			_name = name;
+			_libraryName = libraryName;
+			_script = script;
+			_displayName = displayName;
+			_objectType = objectType;
+			_isSystem = isSystem;
+			_isRemotable = isRemotable;
+			_isGenerated = isGenerated;
+			_isATObject = isATObject;
+			_isSessionObject = isSessionObject;
+			_isPersistent = isPersistent;
+			_catalogObjectID = catalogObjectID;
+			_parentObjectID = parentObjectID;
+			_generatorObjectID = generatorObjectID;
 		}
 		
-		private int FID;
-		public int ID { get { return FID; } }
+		private int _iD;
+		public int ID { get { return _iD; } }
 		
-		private string FName;
-		public string Name { get { return FName; } }
+		private string _name;
+		public string Name { get { return _name; } }
 		
-		private string FLibraryName;
-		public string LibraryName { get { return FLibraryName; } }
+		private string _libraryName;
+		public string LibraryName { get { return _libraryName; } }
 		
-		private string FScript;
-		public string Script { get { return FScript; } }
+		private string _script;
+		public string Script { get { return _script; } }
 
-		private string FDisplayName;
-		public string DisplayName { get { return FDisplayName; } }
+		private string _displayName;
+		public string DisplayName { get { return _displayName; } }
 		
-		private string FObjectType;
-		public string ObjectType { get { return FObjectType; } }
+		private string _objectType;
+		public string ObjectType { get { return _objectType; } }
 		
-		private bool FIsSystem;
-		public bool IsSystem { get { return FIsSystem; } }
+		private bool _isSystem;
+		public bool IsSystem { get { return _isSystem; } }
 		
-		private bool FIsRemotable;
-		public bool IsRemotable { get { return FIsRemotable; } }
+		private bool _isRemotable;
+		public bool IsRemotable { get { return _isRemotable; } }
 		
-		private bool FIsGenerated;
-		public bool IsGenerated { get { return FIsGenerated; } }
+		private bool _isGenerated;
+		public bool IsGenerated { get { return _isGenerated; } }
 		
-		private bool FIsATObject;
-		public bool IsATObject { get { return FIsATObject; } }
+		private bool _isATObject;
+		public bool IsATObject { get { return _isATObject; } }
 		
-		private bool FIsSessionObject;
-		public bool IsSessionObject { get { return FIsSessionObject; } }
+		private bool _isSessionObject;
+		public bool IsSessionObject { get { return _isSessionObject; } }
 		
-		private bool FIsPersistent;
-		public bool IsPersistent { get { return FIsPersistent; } }
+		private bool _isPersistent;
+		public bool IsPersistent { get { return _isPersistent; } }
 		
-		private int FCatalogObjectID;
-		public int CatalogObjectID { get { return FCatalogObjectID; } }
+		private int _catalogObjectID;
+		public int CatalogObjectID { get { return _catalogObjectID; } }
 		
-		private int FParentObjectID;
-		public int ParentObjectID { get { return FParentObjectID; } }
+		private int _parentObjectID;
+		public int ParentObjectID { get { return _parentObjectID; } }
 		
-		private int FGeneratorObjectID;
-		public int GeneratorObjectID { get { return FGeneratorObjectID; } }
+		private int _generatorObjectID;
+		public int GeneratorObjectID { get { return _generatorObjectID; } }
 		
 		public override int GetHashCode()
 		{
-			return FID.GetHashCode();
+			return _iD.GetHashCode();
 		}
 
-		public override bool Equals(object AObject)
+		public override bool Equals(object objectValue)
 		{
-			FullObjectHeader LObject = AObject as FullObjectHeader;
-			return (LObject != null) && (FID == LObject.ID);
+			FullObjectHeader localObjectValue = objectValue as FullObjectHeader;
+			return (localObjectValue != null) && (_iD == localObjectValue.ID);
 		}
 
 		public override string ToString()
 		{
-			return String.Format("{0}: {1}", FID.ToString(), FDisplayName);
+			return String.Format("{0}: {1}", _iD.ToString(), _displayName);
 		}
 	}
 	
@@ -1211,26 +1211,26 @@ namespace Alphora.Dataphor.DAE.Schema
 	{
 		public FullCatalogObjectHeader
 		(
-			int AID,
-			string AName,
-			string ALibraryName,
-			string AOwnerID,
-			string AScript,
-			string ADisplayName,
-			string AObjectType,
-			bool AIsSystem,
-			bool AIsRemotable,
-			bool AIsGenerated,
-			bool AIsATObject,
-			bool AIsSessionObject,
-			int AGeneratorObjectID
-		) : base(AID, AName, ALibraryName, AScript, ADisplayName, AObjectType, AIsSystem, AIsRemotable, AIsGenerated, AIsATObject, AIsSessionObject, true, -1, -1, AGeneratorObjectID)
+			int iD,
+			string name,
+			string libraryName,
+			string ownerID,
+			string script,
+			string displayName,
+			string objectType,
+			bool isSystem,
+			bool isRemotable,
+			bool isGenerated,
+			bool isATObject,
+			bool isSessionObject,
+			int generatorObjectID
+		) : base(iD, name, libraryName, script, displayName, objectType, isSystem, isRemotable, isGenerated, isATObject, isSessionObject, true, -1, -1, generatorObjectID)
 		{
-			FOwnerID = AOwnerID;
+			_ownerID = ownerID;
 		}
 		
-		private string FOwnerID;
-		public string OwnerID { get { return FOwnerID; } }
+		private string _ownerID;
+		public string OwnerID { get { return _ownerID; } }
 	}
 	
 	public class IntegerList : BaseList<int> { }
@@ -1239,38 +1239,38 @@ namespace Alphora.Dataphor.DAE.Schema
 
     public class Objects : System.Object, IList
     {
-		private const int CDefaultInitialCapacity = 0;
-		private const int CDefaultLowerBoundGrowth = 1;
-		private const int CDefaultRolloverCount = 100;
+		private const int DefaultInitialCapacity = 0;
+		private const int DefaultLowerBoundGrowth = 1;
+		private const int DefaultRolloverCount = 100;
 		
-		private Object[] FItems;
-		private int FCount;
-		private int FInitialCapacity;
+		private Object[] _items;
+		private int _count;
+		private int _initialCapacity;
 		
 		public Objects() : base()
 		{
-			FInitialCapacity = CDefaultInitialCapacity;
+			_initialCapacity = DefaultInitialCapacity;
 		}
 		
-		public Objects(int AInitialCapacity) : base()
+		public Objects(int initialCapacity) : base()
 		{
-			FInitialCapacity = AInitialCapacity;
+			_initialCapacity = initialCapacity;
 		}
 		
-		public Object this[int AIndex] 
+		public Object this[int index] 
 		{ 
 			get
 			{ 
-				if ((AIndex < 0) || (AIndex >= Count))
-					throw new SchemaException(SchemaException.Codes.IndexOutOfRange, AIndex);
-				return FItems[AIndex];
+				if ((index < 0) || (index >= Count))
+					throw new SchemaException(SchemaException.Codes.IndexOutOfRange, index);
+				return _items[index];
 			} 
 			set
 			{ 
 				lock (this)
 				{
-					InternalRemoveAt(AIndex);
-					InternalInsert(AIndex, value);
+					InternalRemoveAt(index);
+					InternalInsert(index, value);
 				}
 			} 
 		}
@@ -1308,142 +1308,142 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { this[AName, String.Empty] = value; }
 		}
 		#else
-		public Object this[string AName]
+		public Object this[string name]
 		{
 			get
 			{
 				lock (this)
 				{
-					int LIndex = InternalIndexOf(AName, true);
-					if (LIndex >= 0)
-						return this[LIndex];
-					throw new SchemaException(SchemaException.Codes.ObjectNotFound, AName);
+					int index = InternalIndexOf(name, true);
+					if (index >= 0)
+						return this[index];
+					throw new SchemaException(SchemaException.Codes.ObjectNotFound, name);
 				}
 			}
 			set
 			{
 				lock (this)
 				{
-					int LIndex = InternalIndexOf(AName, true);
-					if (LIndex >= 0)
-						this[LIndex] = value;
-					throw new SchemaException(SchemaException.Codes.ObjectNotFound, AName);
+					int index = InternalIndexOf(name, true);
+					if (index >= 0)
+						this[index] = value;
+					throw new SchemaException(SchemaException.Codes.ObjectNotFound, name);
 				}
 			}
 		}
 		#endif
 
-		protected int InternalIndexOfName(string AName)
+		protected int InternalIndexOfName(string name)
 		{
-			if (AName.IndexOf(Keywords.Qualifier) == 0)
-				AName = AName.Substring(1);
+			if (name.IndexOf(Keywords.Qualifier) == 0)
+				name = name.Substring(1);
 
 			if (IsRolledOver)
 			{
-				var LIndex = GetNameIndexForDepth(0);
-				IntegerList LNameBucket;
-				if (LIndex.TryGetValue(AName, out LNameBucket))
-					return LNameBucket[0];
+				var index = GetNameIndexForDepth(0);
+				IntegerList nameBucket;
+				if (index.TryGetValue(name, out nameBucket))
+					return nameBucket[0];
 				else
 					return -1;
 			}
 			else
 			{
-				for (int LIndex = 0; LIndex < Count; LIndex++)
-					if (String.Compare(this[LIndex].Name, AName) == 0)
-						return LIndex;
+				for (int index = 0; index < Count; index++)
+					if (String.Compare(this[index].Name, name) == 0)
+						return index;
 				return -1;
 			}
 		}
 
-		public int IndexOfName(string AName)
+		public int IndexOfName(string name)
 		{
 			lock (this)
 			{
-				return InternalIndexOfName(AName);
+				return InternalIndexOfName(name);
 			}
 		}
 		
-		protected int InternalIndexOf(string AName, bool AThrowIfAmbiguous)
+		protected int InternalIndexOf(string name, bool throwIfAmbiguous)
 		{
-			List<string> LNames = new List<string>();
-			int LObjectIndex = InternalIndexOf(AName, LNames);
-			if ((LObjectIndex < 0) && (LNames.Count > 1) && AThrowIfAmbiguous)
-				throw new SchemaException(SchemaException.Codes.AmbiguousObjectReference, AName, ExceptionUtility.StringsToCommaList(LNames));
-			return LObjectIndex;
+			List<string> names = new List<string>();
+			int objectIndex = InternalIndexOf(name, names);
+			if ((objectIndex < 0) && (names.Count > 1) && throwIfAmbiguous)
+				throw new SchemaException(SchemaException.Codes.AmbiguousObjectReference, name, ExceptionUtility.StringsToCommaList(names));
+			return objectIndex;
 		}
 		
-		protected IntegerList InternalIndexesOf(string AName)
+		protected IntegerList InternalIndexesOf(string name)
 		{
-			int LObjectIndex;
-			IntegerList LIndexes = new IntegerList();
-			if ((AName.Length > 0) && (AName[0] == '.'))
+			int objectIndex;
+			IntegerList indexes = new IntegerList();
+			if ((name.Length > 0) && (name[0] == '.'))
 			{
-				LObjectIndex = InternalIndexOfName(AName);
-				if (LObjectIndex >= 0)
-					LIndexes.Add(LObjectIndex);
-				return LIndexes;
+				objectIndex = InternalIndexOfName(name);
+				if (objectIndex >= 0)
+					indexes.Add(objectIndex);
+				return indexes;
 			}
 
 			if (IsRolledOver)
 			{
-				int LDepth = Schema.Object.GetQualifierCount(AName);
-				if (LDepth > FNameIndex.Count)
-					return LIndexes;
+				int depth = Schema.Object.GetQualifierCount(name);
+				if (depth > _nameIndex.Count)
+					return indexes;
 					
-				for (int LIndex = FNameIndex.Count - 1 - LDepth; LIndex >= 0; LIndex--)
+				for (int index = _nameIndex.Count - 1 - depth; index >= 0; index--)
 				{
-					var LNameIndex = GetNameIndexForDepth(LIndex);
-					IntegerList LNameBucket;
-					if (LNameIndex.TryGetValue(AName, out LNameBucket))
-						LIndexes.AddRange(LNameBucket);
+					var nameIndex = GetNameIndexForDepth(index);
+					IntegerList nameBucket;
+					if (nameIndex.TryGetValue(name, out nameBucket))
+						indexes.AddRange(nameBucket);
 				}
-				return LIndexes;
+				return indexes;
 			}
 			else
 			{
-				for (int LIndex = 0; LIndex < Count; LIndex++)
-					if (Object.NamesEqual(this[LIndex].Name, AName))
-						LIndexes.Add(LIndex);
-				return LIndexes;
+				for (int index = 0; index < Count; index++)
+					if (Object.NamesEqual(this[index].Name, name))
+						indexes.Add(index);
+				return indexes;
 			}
 		}
 		
-		public IntegerList IndexesOf(string AName)
+		public IntegerList IndexesOf(string name)
 		{
 			lock (this)
 			{
-				return InternalIndexesOf(AName);
+				return InternalIndexesOf(name);
 			}
 		}
 		
-		protected int InternalIndexOf(string AName, List<String> ANames)
+		protected int InternalIndexOf(string name, List<String> names)
 		{
-			IntegerList LIndexes = InternalIndexesOf(AName);
-			for (int LIndex = 0; LIndex < LIndexes.Count; LIndex++)
-				ANames.Add(this[LIndexes[LIndex]].Name);
-			return (LIndexes.Count == 1) ? LIndexes[0] : -1;
+			IntegerList indexes = InternalIndexesOf(name);
+			for (int index = 0; index < indexes.Count; index++)
+				names.Add(this[indexes[index]].Name);
+			return (indexes.Count == 1) ? indexes[0] : -1;
 		}
 
-		public int IndexOf(string AName)
+		public int IndexOf(string name)
 		{
-			return IndexOf(AName, true);
+			return IndexOf(name, true);
 		}
 		
-		public int IndexOf(string AName, bool AThrowIfAmbiguous)
+		public int IndexOf(string name, bool throwIfAmbiguous)
 		{
-			List<string> LNames = new List<string>();
-			int LIndex = IndexOf(AName, LNames);
-			if ((LIndex < 0) && (LNames.Count > 1) && AThrowIfAmbiguous)
-				throw new SchemaException(SchemaException.Codes.AmbiguousObjectReference, AName, ExceptionUtility.StringsToCommaList(LNames));
-			return LIndex;
+			List<string> names = new List<string>();
+			int index = IndexOf(name, names);
+			if ((index < 0) && (names.Count > 1) && throwIfAmbiguous)
+				throw new SchemaException(SchemaException.Codes.AmbiguousObjectReference, name, ExceptionUtility.StringsToCommaList(names));
+			return index;
 		}
 
-		public int IndexOf(string AName, List<String> ANames)
+		public int IndexOf(string name, List<String> names)
 		{
 			lock (this)
 			{
-				return InternalIndexOf(AName, ANames);
+				return InternalIndexOf(name, names);
 			}
 		}
 		
@@ -1490,214 +1490,214 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		#endif
 		
-		public int ResolveName(string AName, NameResolutionPath APath, List<string> ANames)
+		public int ResolveName(string name, NameResolutionPath path, List<string> names)
 		{
 			lock (this)
 			{
-				IntegerList LIndexes = InternalIndexesOf(AName);
+				IntegerList indexes = InternalIndexesOf(name);
 				
-				if (!Schema.Object.IsRooted(AName))
+				if (!Schema.Object.IsRooted(name))
 				{
-					IntegerList LLevelIndexes = new IntegerList();
-					Schema.Object LObject;
+					IntegerList levelIndexes = new IntegerList();
+					Schema.Object objectValue;
 					
-					for (int LLevelIndex = 0; LLevelIndex < APath.Count; LLevelIndex++)
+					for (int levelIndex = 0; levelIndex < path.Count; levelIndex++)
 					{
-						if (LLevelIndex > 0)
-							LLevelIndexes.Clear();
+						if (levelIndex > 0)
+							levelIndexes.Clear();
 							
-						for (int LIndex = 0; LIndex < LIndexes.Count; LIndex++)
+						for (int index = 0; index < indexes.Count; index++)
 						{
-							LObject = this[LIndexes[LIndex]];
-							if ((LObject.Library == null) || APath[LLevelIndex].ContainsName(LObject.Library.Name))
-								LLevelIndexes.Add(LIndexes[LIndex]);
+							objectValue = this[indexes[index]];
+							if ((objectValue.Library == null) || path[levelIndex].ContainsName(objectValue.Library.Name))
+								levelIndexes.Add(indexes[index]);
 						}
 						
-						if (LLevelIndexes.Count > 0)
+						if (levelIndexes.Count > 0)
 						{
-							for (int LIndex = 0; LIndex < LLevelIndexes.Count; LIndex++)
-								ANames.Add(this[LLevelIndexes[LIndex]].Name);
+							for (int index = 0; index < levelIndexes.Count; index++)
+								names.Add(this[levelIndexes[index]].Name);
 								
-							return LLevelIndexes.Count == 1 ? LLevelIndexes[0] : -1;
+							return levelIndexes.Count == 1 ? levelIndexes[0] : -1;
 						}
 					}
 				}
 				
-				if (LIndexes.Count > 0)
+				if (indexes.Count > 0)
 				{
-					for (int LIndex = 0; LIndex < LIndexes.Count; LIndex++)
-						ANames.Add(this[LIndexes[LIndex]].Name);
+					for (int index = 0; index < indexes.Count; index++)
+						names.Add(this[indexes[index]].Name);
 						
-					return LIndexes.Count == 1 ? LIndexes[0] : -1;
+					return indexes.Count == 1 ? indexes[0] : -1;
 				}
 				
 				return -1;
 			}
 		}
 		
-		public int ResolveName(string AName, NameResolutionPath APath)
+		public int ResolveName(string name, NameResolutionPath path)
 		{
-			List<string> LNames = new List<string>();
-			int LIndex = ResolveName(AName, APath, LNames);
-			if ((LIndex < 0) && (LNames.Count > 1))
-				throw new SchemaException(SchemaException.Codes.AmbiguousObjectReference, AName, ExceptionUtility.StringsToCommaList(LNames));
-			return LIndex;
+			List<string> names = new List<string>();
+			int index = ResolveName(name, path, names);
+			if ((index < 0) && (names.Count > 1))
+				throw new SchemaException(SchemaException.Codes.AmbiguousObjectReference, name, ExceptionUtility.StringsToCommaList(names));
+			return index;
 		}
 		
-		protected int InternalIndexOf(Object AItem)
+		protected int InternalIndexOf(Object item)
 		{
-			return InternalIndexOfName(AItem.Name);
+			return InternalIndexOfName(item.Name);
 		}
 
-		public int IndexOf(Object AItem)
+		public int IndexOf(Object item)
 		{
 			lock (this)
 			{
-				return InternalIndexOf(AItem);
+				return InternalIndexOf(item);
 			}
 		}
 		
-		public bool Contains(string AName)
+		public bool Contains(string name)
 		{
-			return (IndexOf(AName) >= 0);
+			return (IndexOf(name) >= 0);
 		}
 		
-		public bool ContainsName(string AName)
+		public bool ContainsName(string name)
 		{
-			return (IndexOfName(AName) >= 0);
+			return (IndexOfName(name) >= 0);
 		}
 		
-		public bool Contains(Object AItem)
+		public bool Contains(Object item)
 		{
-			return IndexOf(AItem) >= 0;
+			return IndexOf(item) >= 0;
 		}
 		
-		public int Add(object AItem)
+		public int Add(object item)
 		{
 			lock (this)
 			{
-				int LIndex = Count;
-				InternalInsert(LIndex, AItem);
-				return LIndex;
+				int index = Count;
+				InternalInsert(index, item);
+				return index;
 			}
 		}
 		
-		public void AddRange(ICollection ACollection)
+		public void AddRange(ICollection collection)
 		{
-			foreach (object AObject in ACollection)
+			foreach (object AObject in collection)
 				Add(AObject);
 		}
 		
-		protected void InternalInsert(int AIndex, object AItem)
+		protected void InternalInsert(int index, object item)
 		{
-			Object LObject = AItem as Object;
-			if (LObject == null)
+			Object objectValue = item as Object;
+			if (objectValue == null)
 				throw new SchemaException(SchemaException.Codes.ObjectContainer);
 
 			#if USEOBJECTVALIDATE
-			Validate(LObject);
+			Validate(objectValue);
 			#endif
 			
-			if (FItems == null)
-				FItems = new Object[FInitialCapacity];
+			if (_items == null)
+				_items = new Object[_initialCapacity];
 			
-			if (FCount >= FItems.Length)
-				InternalSetCapacity(FItems.Length * 2);
-			for (int LIndex = FCount - 1; LIndex >= AIndex; LIndex--)
-				FItems[LIndex + 1] = FItems[LIndex];
-			FItems[AIndex] = LObject;
-			FCount++;
+			if (_count >= _items.Length)
+				InternalSetCapacity(_items.Length * 2);
+			for (int localIndex = _count - 1; localIndex >= index; localIndex--)
+				_items[localIndex + 1] = _items[localIndex];
+			_items[index] = objectValue;
+			_count++;
 
-			Adding(LObject, AIndex);
+			Adding(objectValue, index);
 		}
 		
-		public void Insert(int AIndex, object AItem)
+		public void Insert(int index, object item)
 		{
 			lock (this)
 			{
-				InternalInsert(AIndex, AItem);
+				InternalInsert(index, item);
 			}
 		}
 		
-		protected void InternalSetCapacity(int AValue)
+		protected void InternalSetCapacity(int tempValue)
 		{
-			if (AValue <= 0)
-				AValue = CDefaultLowerBoundGrowth;
+			if (tempValue <= 0)
+				tempValue = DefaultLowerBoundGrowth;
 				
-			if (FItems.Length != AValue)
+			if (_items.Length != tempValue)
 			{
-				Object[] LNewItems = new Object[AValue];
-				for (int LIndex = 0; LIndex < ((FCount > AValue) ? AValue : FCount); LIndex++)
-					LNewItems[LIndex] = FItems[LIndex];
+				Object[] newItems = new Object[tempValue];
+				for (int index = 0; index < ((_count > tempValue) ? tempValue : _count); index++)
+					newItems[index] = _items[index];
 
-				if (FCount > AValue)						
-					for (int LIndex = FCount - 1; LIndex > AValue; LIndex--)
-						RemoveAt(LIndex);
+				if (_count > tempValue)						
+					for (int index = _count - 1; index > tempValue; index--)
+						RemoveAt(index);
 						
-				FItems = LNewItems;
+				_items = newItems;
 			}
 		}
 		
 		public int Capacity
 		{
-			get { return FItems == null ? FInitialCapacity : FItems.Length; }
+			get { return _items == null ? _initialCapacity : _items.Length; }
 			set
 			{
 				lock (this)
 				{
-					if (FItems == null)
-						FItems = new Object[value];
+					if (_items == null)
+						_items = new Object[value];
 					InternalSetCapacity(value);
 				}
 			}
 		}
 		
-		protected void InternalRemoveAt(int AIndex)
+		protected void InternalRemoveAt(int index)
 		{
-			Removing(this[AIndex], AIndex);
+			Removing(this[index], index);
 
-			FCount--;			
-			for (int LIndex = AIndex; LIndex < FCount; LIndex++)
-				FItems[LIndex] = FItems[LIndex + 1];
-			FItems[FCount] = null; // Clear the last item to prevent a resource leak
+			_count--;			
+			for (int localIndex = index; localIndex < _count; localIndex++)
+				_items[localIndex] = _items[localIndex + 1];
+			_items[_count] = null; // Clear the last item to prevent a resource leak
 		}
 		
-		public void RemoveAt(int AIndex)
+		public void RemoveAt(int index)
 		{
 			lock (this)
 			{
-				InternalRemoveAt(AIndex);
+				InternalRemoveAt(index);
 			}
 		}
 		
-		public void Remove(Object AValue)
+		public void Remove(Object tempValue)
 		{
 			lock (this)
 			{
-				InternalRemoveAt(InternalIndexOf(AValue));
+				InternalRemoveAt(InternalIndexOf(tempValue));
 			}
 		}
 		
-		public void SafeRemove(Object AValue)
+		public void SafeRemove(Object tempValue)
 		{
-			if (AValue != null)
+			if (tempValue != null)
 			{
 				lock (this)
 				{
-					int LIndex = InternalIndexOf(AValue);
-					if (LIndex >= 0)
-						InternalRemoveAt(LIndex);
+					int index = InternalIndexOf(tempValue);
+					if (index >= 0)
+						InternalRemoveAt(index);
 				}
 			}
 		}
 		
-		public void SafeRemove(string AName)
+		public void SafeRemove(string name)
 		{
 			lock (this)
 			{
-				int LIndex = InternalIndexOfName(AName);
-				if (LIndex >= 0)
-					InternalRemoveAt(LIndex);
+				int index = InternalIndexOfName(name);
+				if (index >= 0)
+					InternalRemoveAt(index);
 			}
 		}
 		
@@ -1705,129 +1705,129 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			lock (this)
 			{
-				while (FCount > 0)
-					InternalRemoveAt(FCount - 1);
+				while (_count > 0)
+					InternalRemoveAt(_count - 1);
 			}
 		}
 		
-		protected virtual void Validate(Object AObject)
+		protected virtual void Validate(Object objectValue)
 		{
 			#if USEOBJECTVALIDATE
-			if (AObject.Name == String.Empty)
+			if (objectValue.Name == String.Empty)
 				throw new SchemaException(SchemaException.Codes.ObjectNameRequired);
 				
-			string LObjectName = AObject.Name;
+			string objectName = objectValue.Name;
 			#if DISALLOWAMBIGUOUSNAMES
-			int LIndex = InternalIndexOf(LObjectName, true);
+			int index = InternalIndexOf(objectName, true);
 			#else
-			int LIndex = InternalIndexOfName(LObjectName);
+			int index = InternalIndexOfName(objectName);
 			#endif
-			if (LIndex >= 0)
+			if (index >= 0)
 			{
-				if (String.Compare(this[LIndex].Name, LObjectName) == 0)
-					throw new SchemaException(SchemaException.Codes.DuplicateObjectName, LObjectName);
+				if (String.Compare(this[index].Name, objectName) == 0)
+					throw new SchemaException(SchemaException.Codes.DuplicateObjectName, objectName);
 				#if DISALLOWAMBIGUOUSNAMES
 				else
-					throw new SchemaException(SchemaException.Codes.AmbiguousObjectName, LObjectName, this[LIndex].Name);
+					throw new SchemaException(SchemaException.Codes.AmbiguousObjectName, objectName, this[index].Name);
 				#endif
 			}
 			#endif
 		
 			#if DISALLOWAMBIGUOUSNAMES
-			IntegerList LIndexes;
-			while (LObjectName.IndexOf(Keywords.Qualifier) >= 0)
+			IntegerList indexes;
+			while (objectName.IndexOf(Keywords.Qualifier) >= 0)
 			{
-				LObjectName = Schema.Object.Dequalify(LObjectName);
-				LIndexes = IndexesOf(LObjectName);
-				for (int LObjectIndex = 0; LObjectIndex < LIndexes.Count; LObjectIndex++)
-					if (String.Compare(this[LIndexes[LObjectIndex]].Name, LObjectName) == 0)
-						throw new SchemaException(SchemaException.Codes.CreatingAmbiguousObjectName, AObject.Name, LObjectName);
+				objectName = Schema.Object.Dequalify(objectName);
+				indexes = IndexesOf(objectName);
+				for (int objectIndex = 0; objectIndex < indexes.Count; objectIndex++)
+					if (String.Compare(this[indexes[objectIndex]].Name, objectName) == 0)
+						throw new SchemaException(SchemaException.Codes.CreatingAmbiguousObjectName, AObject.Name, objectName);
 			}
 			#endif
 		}
 		
-		public bool IsValidObjectName(string AName, List<string> ANames)
+		public bool IsValidObjectName(string name, List<string> names)
 		{
-			string LObjectName = AName;
+			string objectName = name;
 			
-			int LIndex = InternalIndexOf(LObjectName, true);
-			if (LIndex >= 0)
+			int index = InternalIndexOf(objectName, true);
+			if (index >= 0)
 			{
 				#if DISALLOWAMBIGUOUSNAMES
-				ANames.Add(this[LIndex].Name);
+				ANames.Add(this[index].Name);
 				return false;
 				#else
-				if (String.Compare(AName, this[LIndex].Name) == 0)
+				if (String.Compare(name, this[index].Name) == 0)
 				{
-					ANames.Add(this[LIndex].Name);
+					names.Add(this[index].Name);
 					return false;
 				}
 				#endif
 			}
 
 			#if DISALLOWAMBIGUOUSNAMES			
-			IntegerList LIndexes;
-			while (LObjectName.IndexOf(Keywords.Qualifier) >= 0)
+			IntegerList indexes;
+			while (objectName.IndexOf(Keywords.Qualifier) >= 0)
 			{
-				LObjectName = Schema.Object.Dequalify(LObjectName);
-				LIndexes = IndexesOf(LObjectName);
-				for (int LObjectIndex = 0; LObjectIndex < LIndexes.Count; LObjectIndex++)
-					if (String.Compare(this[LIndexes[LObjectIndex]].Name, LObjectName) == 0)
-						ANames.Add(LObjectName);
+				objectName = Schema.Object.Dequalify(objectName);
+				indexes = IndexesOf(objectName);
+				for (int objectIndex = 0; objectIndex < indexes.Count; objectIndex++)
+					if (String.Compare(this[indexes[objectIndex]].Name, objectName) == 0)
+						ANames.Add(objectName);
 			}
 			#endif
 			
-			return ANames.Count == 0;
+			return names.Count == 0;
 		}
 		
-		protected virtual void Adding(Object AObject, int AIndex)
+		protected virtual void Adding(Object objectValue, int index)
 		{
 			if (IsRolledOver)
 			{
-				for (int LIndex = AIndex + 1; LIndex < Count; LIndex++)
-					UpdateObjectIndex(this[LIndex], LIndex - 1, LIndex);
-				IndexObject(AObject, AIndex);
+				for (int localIndex = index + 1; localIndex < Count; localIndex++)
+					UpdateObjectIndex(this[localIndex], localIndex - 1, localIndex);
+				IndexObject(objectValue, index);
 			}
 			else
 				CheckRollover();
 		}
 		
-		protected virtual void Removing(Object AObject, int AIndex)
+		protected virtual void Removing(Object objectValue, int index)
 		{
 			if (IsRolledOver)
 			{
-				UnindexObject(AObject, AIndex);
-				for (int LIndex = AIndex + 1; LIndex < Count; LIndex++)
-					UpdateObjectIndex(this[LIndex], LIndex, LIndex - 1);
+				UnindexObject(objectValue, index);
+				for (int localIndex = index + 1; localIndex < Count; localIndex++)
+					UpdateObjectIndex(this[localIndex], localIndex, localIndex - 1);
 			}
 		}
 
-		protected Hashtables FNameIndex;
+		protected Hashtables _nameIndex;
 		
-		protected int FRolloverCount = CDefaultRolloverCount;
+		protected int _rolloverCount = DefaultRolloverCount;
 		/// <value>
 		/// An integer value indicating at what size to begin maintenance of secondary indexes on the objects in the list.  
 		/// A value of Int32.MaxValue indicates no maintenance is to be performed.  This value is defaulted to 20.
 		/// </value>
-		[DefaultValue(CDefaultRolloverCount)]
+		[DefaultValue(DefaultRolloverCount)]
 		public int RolloverCount
 		{
-			get { return FRolloverCount; }
+			get { return _rolloverCount; }
 			set
 			{
 				lock (this)
 				{
-					FRolloverCount = value;
+					_rolloverCount = value;
 					CheckRollover();
 				}
 			}
 		}
 		
-		public bool IsRolledOver { get { return FNameIndex != null; } }
+		public bool IsRolledOver { get { return _nameIndex != null; } }
 		
 		protected void CheckRollover()
 		{
-			if (Count > FRolloverCount)
+			if (Count > _rolloverCount)
 			{
 				if (!IsRolledOver)
 					Rollover();
@@ -1841,94 +1841,94 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		protected void Rollover()
 		{
-			FNameIndex = new Hashtables();
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				IndexObject(this[LIndex], LIndex);
+			_nameIndex = new Hashtables();
+			for (int index = 0; index < Count; index++)
+				IndexObject(this[index], index);
 		}
 		
 		protected void Rollunder()
 		{
-			FNameIndex = null;
+			_nameIndex = null;
 		}
 
-		protected Dictionary<string, IntegerList> GetNameIndexForDepth(int ADepth)
+		protected Dictionary<string, IntegerList> GetNameIndexForDepth(int depth)
 		{
-			while (ADepth > FNameIndex.Count - 1)
-				FNameIndex.Add(new Dictionary<string, IntegerList>());
-			return FNameIndex[ADepth];
+			while (depth > _nameIndex.Count - 1)
+				_nameIndex.Add(new Dictionary<string, IntegerList>());
+			return _nameIndex[depth];
 		}
 		
-		protected void IndexObject(Object AObject, int AIndex)
+		protected void IndexObject(Object objectValue, int index)
 		{
 			// Add the object to the name index
-			string LName = AObject.Name;
-			int LDepth = Schema.Object.GetQualifierCount(LName);
-			for (int LIndex = 0; LIndex <= LDepth; LIndex++)
+			string name = objectValue.Name;
+			int depth = Schema.Object.GetQualifierCount(name);
+			for (int localIndex = 0; localIndex <= depth; localIndex++)
 			{
-				Dictionary<string, IntegerList> LNameIndex = GetNameIndexForDepth(LIndex);
-				IntegerList LNameBucket;
-				if (!LNameIndex.TryGetValue(LName, out LNameBucket))
+				Dictionary<string, IntegerList> nameIndex = GetNameIndexForDepth(localIndex);
+				IntegerList nameBucket;
+				if (!nameIndex.TryGetValue(name, out nameBucket))
 				{
-					LNameBucket = new IntegerList();
-					LNameIndex.Add(LName, LNameBucket);
+					nameBucket = new IntegerList();
+					nameIndex.Add(name, nameBucket);
 				}
-				LNameBucket.Add(AIndex);
-				LName = Object.Dequalify(LName);
+				nameBucket.Add(index);
+				name = Object.Dequalify(name);
 			}
 		}
 		
-		protected void UnindexObject(Object AObject, int AIndex)
+		protected void UnindexObject(Object objectValue, int index)
 		{
 			// Remove the object from the name index
-			string LName = AObject.Name;
-			int LDepth = Schema.Object.GetQualifierCount(LName);
-			for (int LIndex = 0; LIndex <= LDepth; LIndex++)
+			string name = objectValue.Name;
+			int depth = Schema.Object.GetQualifierCount(name);
+			for (int localIndex = 0; localIndex <= depth; localIndex++)
 			{
-				Dictionary<string, IntegerList> LNameIndex = GetNameIndexForDepth(LIndex);
-				IntegerList LNameBucket;
-				if (!LNameIndex.TryGetValue(LName, out LNameBucket))
-					throw new SchemaException(SchemaException.Codes.IndexBucketNotFound, LName);
-				LNameBucket.Remove(AIndex);
-				if (LNameBucket.Count == 0)
-					LNameIndex.Remove(LName);
-				LName = Object.Dequalify(LName);
+				Dictionary<string, IntegerList> nameIndex = GetNameIndexForDepth(localIndex);
+				IntegerList nameBucket;
+				if (!nameIndex.TryGetValue(name, out nameBucket))
+					throw new SchemaException(SchemaException.Codes.IndexBucketNotFound, name);
+				nameBucket.Remove(index);
+				if (nameBucket.Count == 0)
+					nameIndex.Remove(name);
+				name = Object.Dequalify(name);
 			}
 		}
 		
-		protected void UpdateObjectIndex(Object AObject, int AOldIndex, int ANewIndex)
+		protected void UpdateObjectIndex(Object objectValue, int oldIndex, int newIndex)
 		{
 			// Update the objects index in the Name index
-			string LName = AObject.Name;
-			int LDepth = Schema.Object.GetQualifierCount(LName);
-			for (int LIndex = 0; LIndex <= LDepth; LIndex++)
+			string name = objectValue.Name;
+			int depth = Schema.Object.GetQualifierCount(name);
+			for (int index = 0; index <= depth; index++)
 			{
-				IntegerList LNameBucket;
-				Dictionary<string, IntegerList> LNameIndex = GetNameIndexForDepth(LIndex);
-				if (!LNameIndex.TryGetValue(LName, out LNameBucket))
-					throw new SchemaException(SchemaException.Codes.IndexBucketNotFound, LName);
-				LNameBucket.Remove(AOldIndex);
-				LNameBucket.Add(ANewIndex);
-				LName = Object.Dequalify(LName);
+				IntegerList nameBucket;
+				Dictionary<string, IntegerList> nameIndex = GetNameIndexForDepth(index);
+				if (!nameIndex.TryGetValue(name, out nameBucket))
+					throw new SchemaException(SchemaException.Codes.IndexBucketNotFound, name);
+				nameBucket.Remove(oldIndex);
+				nameBucket.Add(newIndex);
+				name = Object.Dequalify(name);
 			}
 		}
 		
 		// IList
-		object IList.this[int AIndex] { get { return this[AIndex]; } set { this[AIndex] = (Object)value; } }
-		int IList.IndexOf(object AItem) { return (AItem is Object) ? IndexOf((Object)AItem) : -1; }
-		bool IList.Contains(object AItem) { return (AItem is Object) ? Contains((Object)AItem) : false; }
-		void IList.Remove(object AItem) { RemoveAt(IndexOf((Object)AItem)); }
+		object IList.this[int index] { get { return this[index]; } set { this[index] = (Object)value; } }
+		int IList.IndexOf(object item) { return (item is Object) ? IndexOf((Object)item) : -1; }
+		bool IList.Contains(object item) { return (item is Object) ? Contains((Object)item) : false; }
+		void IList.Remove(object item) { RemoveAt(IndexOf((Object)item)); }
 		bool IList.IsFixedSize { get { return false; } }
 		bool IList.IsReadOnly { get { return false; } }
 		
 		// ICollection
-		public int Count { get { return FCount; } }
+		public int Count { get { return _count; } }
 		public bool IsSynchronized { get { return false; } }
 		public object SyncRoot { get { return this; } }
-		public void CopyTo(Array AArray, int AIndex)
+		public void CopyTo(Array array, int index)
 		{
-			IList LArray = (IList)AArray;
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				LArray[AIndex + LIndex] = this[LIndex];
+			IList localArray = (IList)array;
+			for (int localIndex = 0; localIndex < Count; localIndex++)
+				localArray[index + localIndex] = this[localIndex];
 		}
 
 		// IEnumerable
@@ -1944,35 +1944,35 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public class SchemaObjectEnumerator : IEnumerator
 		{
-			public SchemaObjectEnumerator(Objects AObjects) : base()
+			public SchemaObjectEnumerator(Objects objects) : base()
 			{
-				FObjects = AObjects;
+				_objects = objects;
 			}
 			
-			private Objects FObjects;
-			private int FCurrent =  -1;
+			private Objects _objects;
+			private int _current =  -1;
 
-			public Object Current { get { return FObjects[FCurrent]; } }
+			public Object Current { get { return _objects[_current]; } }
 			
 			object IEnumerator.Current { get { return Current; } }
 			
 			public bool MoveNext()
 			{
-				FCurrent++;
-				return (FCurrent < FObjects.Count);
+				_current++;
+				return (_current < _objects.Count);
 			}
 			
 			public void Reset()
 			{
-				FCurrent = -1;
+				_current = -1;
 			}
 		}
     }
 
 	public abstract class CatalogObject : Object
 	{
-		public CatalogObject(string AName) : base(AName) {}
-		public CatalogObject(int AID, string AName) : base(AID, AName) {}
+		public CatalogObject(string name) : base(name) {}
+		public CatalogObject(int iD, string name) : base(iD, name) {}
 		
 		// Name
 		public override string Name
@@ -1980,19 +1980,19 @@ namespace Alphora.Dataphor.DAE.Schema
 			get { return base.Name; }
 			set
 			{
-				if (value.Length > CMaxObjectNameLength)
-					throw new SchemaException(SchemaException.Codes.MaxObjectNameLengthExceeded, value, CMaxObjectNameLength);
+				if (value.Length > MaxObjectNameLength)
+					throw new SchemaException(SchemaException.Codes.MaxObjectNameLengthExceeded, value, MaxObjectNameLength);
 				base.Name = value;
 			}
 		}
 		
 		// Owner
 		[Reference]
-		protected User FOwner;
+		protected User _owner;
 		public User Owner
 		{
-			get { return FOwner; }
-			set { FOwner = value; }
+			get { return _owner; }
+			set { _owner = value; }
 		}
 		
 		// CatalogObjectID
@@ -2004,14 +2004,14 @@ namespace Alphora.Dataphor.DAE.Schema
 		// IsSystem
 		public override bool IsSystem 
 		{ 
-			get { return (FOwner != null) && (FOwner.ID == Server.Engine.CSystemUserID); }
+			get { return (_owner != null) && (_owner.ID == Server.Engine.SystemUserID); }
 			set { throw new RuntimeException(RuntimeException.Codes.InternalError, "Cannot set IsSystem for a Catalog Object"); } 
 		}
 		
 		/// <summary>Returns true if AUser is the owner of this object, or is a member of a parent Group of the owner of this object, recursively.</summary>
-		public bool IsOwner(User AUser)
+		public bool IsOwner(User user)
 		{
-			if ((AUser.ID == Server.Engine.CSystemUserID) || (AUser.ID == Server.Engine.CAdminUserID) || (AUser.ID == FOwner.ID)) 
+			if ((user.ID == Server.Engine.SystemUserID) || (user.ID == Server.Engine.AdminUserID) || (user.ID == _owner.ID)) 
 				return true;
 				
 			return false;
@@ -2022,48 +2022,48 @@ namespace Alphora.Dataphor.DAE.Schema
 			return new string[]{};
 		}
 		
-		public virtual string GetRight(string ARightName)
+		public virtual string GetRight(string rightName)
 		{
-			return Name + ARightName;
+			return Name + rightName;
 		}
 
 		// SessionObjectName
-		private string FSessionObjectName;
+		private string _sessionObjectName;
 		public string SessionObjectName
 		{
-			get { return FSessionObjectName; }
-			set { FSessionObjectName = value; }
+			get { return _sessionObjectName; }
+			set { _sessionObjectName = value; }
 		}
 
 		// SessionID
-		private int FSessionID;
+		private int _sessionID;
 		public int SessionID
 		{
-			get { return FSessionID; }
-			set { FSessionID = value; }
+			get { return _sessionID; }
+			set { _sessionID = value; }
 		}
 		
-		public override bool IsSessionObject { get { return FSessionObjectName != null; } }
+		public override bool IsSessionObject { get { return _sessionObjectName != null; } }
 		
 		/// <summary>Catalog objects are always persistent.</summary>
 		public override bool IsPersistent { get { return true; } }
 		
-		public override string DisplayName { get { return FSessionObjectName == null ? Name : FSessionObjectName; } }
+		public override string DisplayName { get { return _sessionObjectName == null ? Name : _sessionObjectName; } }
 	}
     
     public class SessionObject : Schema.Object
     {
-		public SessionObject(string AName) : base(AName) {}
-		public SessionObject(string AName, string AGlobalName) : base(AName)
+		public SessionObject(string name) : base(name) {}
+		public SessionObject(string name, string globalName) : base(name)
 		{
-			GlobalName = AGlobalName;
+			GlobalName = globalName;
 		}
 		
-		private string FGlobalName;
+		private string _globalName;
 		public string GlobalName
 		{
-			get { return FGlobalName; }
-			set { FGlobalName = value == null ? String.Empty : value; }
+			get { return _globalName; }
+			set { _globalName = value == null ? String.Empty : value; }
 		}
     }
 }

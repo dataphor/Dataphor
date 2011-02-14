@@ -39,9 +39,9 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			set { SetValue(IsAcceptRejectProperty, value); }
 		}
 		
-		private static void IsAcceptRejectChanged(DependencyObject ASender, DependencyPropertyChangedEventArgs AArgs)
+		private static void IsAcceptRejectChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
 		{
-			((BreadCrumbFormItem)ASender).UpdateState(true);
+			((BreadCrumbFormItem)sender).UpdateState(true);
 		}
 
 		public static readonly DependencyProperty IsFormEnabledProperty = DependencyProperty.Register("IsFormEnabled", typeof(bool), typeof(BreadCrumbFormItem), new PropertyMetadata(false, new PropertyChangedCallback(IsFormEnabledChanged)));
@@ -53,9 +53,9 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			set { SetValue(IsFormEnabledProperty, value); }
 		}
 		
-		private static void IsFormEnabledChanged(DependencyObject ASender, DependencyPropertyChangedEventArgs AArgs)
+		private static void IsFormEnabledChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
 		{
-			((BreadCrumbFormItem)ASender).UpdateState(true);
+			((BreadCrumbFormItem)sender).UpdateState(true);
 		}
 
 		public static readonly DependencyProperty FormProperty = DependencyProperty.Register("Form", typeof(FormControl), typeof(BreadCrumbFormItem), new PropertyMetadata(null, new PropertyChangedCallback(FormChanged)));
@@ -67,24 +67,24 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			set { SetValue(FormProperty, value); }
 		}
 		
-		private static void FormChanged(DependencyObject ASender, DependencyPropertyChangedEventArgs AArgs)
+		private static void FormChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
 		{
 		}
 		
-		private ButtonBase FAcceptButton;
+		private ButtonBase _acceptButton;
 		
 		public ButtonBase AcceptButton
 		{
-			get { return FAcceptButton; }
+			get { return _acceptButton; }
 			set
 			{
-				if (FAcceptButton != value)
+				if (_acceptButton != value)
 				{
-					if (FAcceptButton != null)
-						FAcceptButton.Click -= AcceptButtonClick;
-					FAcceptButton = value;
-					if (FAcceptButton != null)
-						FAcceptButton.Click += AcceptButtonClick;
+					if (_acceptButton != null)
+						_acceptButton.Click -= AcceptButtonClick;
+					_acceptButton = value;
+					if (_acceptButton != null)
+						_acceptButton.Click += AcceptButtonClick;
 				}
 			}
 		}
@@ -95,20 +95,20 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				Form.RequestClose(CloseBehavior.AcceptOrClose);
 		}
 		
-		private ButtonBase FRejectButton;
+		private ButtonBase _rejectButton;
 		
 		public ButtonBase RejectButton
 		{
-			get { return FRejectButton; }
+			get { return _rejectButton; }
 			set
 			{
-				if (FRejectButton != value)
+				if (_rejectButton != value)
 				{
-					if (FRejectButton != null)
-						FRejectButton.Click -= RejectButtonClick;
-					FRejectButton = value;
-					if (FRejectButton != null)
-						FRejectButton.Click += RejectButtonClick;
+					if (_rejectButton != null)
+						_rejectButton.Click -= RejectButtonClick;
+					_rejectButton = value;
+					if (_rejectButton != null)
+						_rejectButton.Click += RejectButtonClick;
 				}
 			}
 		}
@@ -119,20 +119,20 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 				Form.RequestClose(CloseBehavior.RejectOrClose);
 		}
 		
-		private ButtonBase FCloseButton;
+		private ButtonBase _closeButton;
 		
 		public ButtonBase CloseButton
 		{
-			get { return FCloseButton; }
+			get { return _closeButton; }
 			set
 			{
-				if (FCloseButton != value)
+				if (_closeButton != value)
 				{
-					if (FCloseButton != null)
-						FCloseButton.Click -= CloseButtonClick;
-					FCloseButton = value;
-					if (FCloseButton != null)
-						FCloseButton.Click += CloseButtonClick;
+					if (_closeButton != null)
+						_closeButton.Click -= CloseButtonClick;
+					_closeButton = value;
+					if (_closeButton != null)
+						_closeButton.Click += CloseButtonClick;
 				}
 			}
 		}
@@ -154,17 +154,17 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			UpdateState(false);
 		}
 
-		private void UpdateState(bool AUseAnimations)
+		private void UpdateState(bool useAnimations)
 		{
 			if (IsAcceptReject)
-				VisualStateManager.GoToState(this, "AcceptReject", AUseAnimations);
+				VisualStateManager.GoToState(this, "AcceptReject", useAnimations);
 			else
-				VisualStateManager.GoToState(this, "Close", AUseAnimations);
+				VisualStateManager.GoToState(this, "Close", useAnimations);
 
 			if (IsFormEnabled)
-				VisualStateManager.GoToState(this, "Enabled", AUseAnimations);
+				VisualStateManager.GoToState(this, "Enabled", useAnimations);
 			else
-				VisualStateManager.GoToState(this, "Disabled", AUseAnimations);
+				VisualStateManager.GoToState(this, "Disabled", useAnimations);
 		}
 	}
 }

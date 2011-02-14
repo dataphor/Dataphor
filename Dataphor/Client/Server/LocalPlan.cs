@@ -23,283 +23,283 @@ namespace Alphora.Dataphor.DAE.Server
 {
     public class LocalPlan : LocalServerChildObject, IServerPlan
     {
-		public LocalPlan(LocalProcess AProcess, IRemoteServerPlan APlan, PlanDescriptor APlanDescriptor) : base()
+		public LocalPlan(LocalProcess process, IRemoteServerPlan plan, PlanDescriptor planDescriptor) : base()
 		{
-			FProcess = AProcess;
-			FPlan = APlan;
-			FDescriptor = APlanDescriptor;
+			_process = process;
+			_plan = plan;
+			_descriptor = planDescriptor;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			FDescriptor = null;
-			FProcess = null;
-			FPlan = null;
-			base.Dispose(ADisposing);
+			_descriptor = null;
+			_process = null;
+			_plan = null;
+			base.Dispose(disposing);
 		}
 		
-		private IRemoteServerPlan FPlan;
+		private IRemoteServerPlan _plan;
 		
-		protected PlanDescriptor FDescriptor;
+		protected PlanDescriptor _descriptor;
 		
-		protected internal LocalProcess FProcess;
+		protected internal LocalProcess _process;
         /// <value>Returns the <see cref="IServerProcess"/> instance for this plan.</value>
-        public IServerProcess Process { get { return FProcess; } } 
+        public IServerProcess Process { get { return _process; } } 
 
-		public LocalServer LocalServer { get { return FProcess.FSession.FServer; } }
+		public LocalServer LocalServer { get { return _process._session._server; } }
 		
-		public Guid ID { get { return FDescriptor.ID; } }
+		public Guid ID { get { return _descriptor.ID; } }
 		
-		private CompilerMessages FMessages;
+		private CompilerMessages _messages;
 		public CompilerMessages Messages
 		{
 			get
 			{
-				if (FMessages == null)
+				if (_messages == null)
 				{
-					FMessages = new CompilerMessages();
-					foreach (DataphorFault LFault in FDescriptor.Messages)
-						FMessages.Add(DataphorFaultUtility.FaultToException(LFault));
+					_messages = new CompilerMessages();
+					foreach (DataphorFault fault in _descriptor.Messages)
+						_messages.Add(DataphorFaultUtility.FaultToException(fault));
 				}
-				return FMessages;
+				return _messages;
 			}
 		}
 		
 		public void CheckCompiled()
 		{
-			FPlan.CheckCompiled();
+			_plan.CheckCompiled();
 		}
 		
 		// Statistics
-		internal bool FPlanStatisticsCached = true;
+		internal bool _planStatisticsCached = true;
 		public PlanStatistics PlanStatistics 
 		{ 
 			get 
 			{ 
-				if (!FPlanStatisticsCached)
+				if (!_planStatisticsCached)
 				{
-					FDescriptor.Statistics = FPlan.PlanStatistics;
-					FPlanStatisticsCached = true;
+					_descriptor.Statistics = _plan.PlanStatistics;
+					_planStatisticsCached = true;
 				}
-				return FDescriptor.Statistics; 
+				return _descriptor.Statistics; 
 			} 
 		}
 		
-		internal bool FProgramStatisticsCached = true;
-		internal ProgramStatistics FProgramStatistics = new ProgramStatistics();
+		internal bool _programStatisticsCached = true;
+		internal ProgramStatistics _programStatistics = new ProgramStatistics();
 		public ProgramStatistics ProgramStatistics 
 		{ 
 			get 
 			{ 
-				if (!FProgramStatisticsCached)
+				if (!_programStatisticsCached)
 				{
-					FProgramStatistics = FPlan.ProgramStatistics; 
-					FProgramStatisticsCached = true;
+					_programStatistics = _plan.ProgramStatistics; 
+					_programStatisticsCached = true;
 				}
-				return FProgramStatistics;
+				return _programStatistics;
 			}
 		}
 	}
     
     public class LocalExpressionPlan : LocalPlan, IServerExpressionPlan
     {
-		public LocalExpressionPlan(LocalProcess AProcess, IRemoteServerExpressionPlan APlan, PlanDescriptor APlanDescriptor, DataParams AParams, ProgramStatistics AExecuteTime) : this(AProcess, APlan, APlanDescriptor, AParams)
+		public LocalExpressionPlan(LocalProcess process, IRemoteServerExpressionPlan plan, PlanDescriptor planDescriptor, DataParams paramsValue, ProgramStatistics executeTime) : this(process, plan, planDescriptor, paramsValue)
 		{
-			FProgramStatistics = AExecuteTime;
-			FProgramStatisticsCached = true;
+			_programStatistics = executeTime;
+			_programStatisticsCached = true;
 		}
 		
-		public LocalExpressionPlan(LocalProcess AProcess, IRemoteServerExpressionPlan APlan, PlanDescriptor APlanDescriptor, DataParams AParams) : base(AProcess, APlan, APlanDescriptor)
+		public LocalExpressionPlan(LocalProcess process, IRemoteServerExpressionPlan plan, PlanDescriptor planDescriptor, DataParams paramsValue) : base(process, plan, planDescriptor)
 		{
-			FPlan = APlan;
-			FParams = AParams;
-			FInternalPlan = new Plan(FProcess.FInternalProcess);
+			_plan = plan;
+			_params = paramsValue;
+			_internalPlan = new Plan(_process._internalProcess);
 			GetDataType();
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
-				if (FDataType != null)
+				if (_dataType != null)
 					DropDataType();
 			}
 			finally
 			{
-				if (FInternalPlan != null)
+				if (_internalPlan != null)
 				{
-					FInternalPlan.Dispose();
-					FInternalPlan = null;
+					_internalPlan.Dispose();
+					_internalPlan = null;
 				}
 
-				FPlan = null;
-				FParams = null;
-				FDataType = null;
-				base.Dispose(ADisposing);
+				_plan = null;
+				_params = null;
+				_dataType = null;
+				base.Dispose(disposing);
 			}
 		}
 
-		protected DataParams FParams;
-		protected IRemoteServerExpressionPlan FPlan;
-		public IRemoteServerExpressionPlan RemotePlan { get { return FPlan; } }
+		protected DataParams _params;
+		protected IRemoteServerExpressionPlan _plan;
+		public IRemoteServerExpressionPlan RemotePlan { get { return _plan; } }
 
-		private Plan FInternalPlan;
+		private Plan _internalPlan;
 		
 		// Isolation
-		public CursorIsolation Isolation { get { return FDescriptor.CursorIsolation; } }
+		public CursorIsolation Isolation { get { return _descriptor.CursorIsolation; } }
 		
 		// CursorType
-		public CursorType CursorType { get { return FDescriptor.CursorType; } }
+		public CursorType CursorType { get { return _descriptor.CursorType; } }
 		
 		// Capabilities		
-		public CursorCapability Capabilities { get { return FDescriptor.Capabilities; } }
+		public CursorCapability Capabilities { get { return _descriptor.Capabilities; } }
 
-		public bool Supports(CursorCapability ACapability)
+		public bool Supports(CursorCapability capability)
 		{
-			return (Capabilities & ACapability) != 0;
+			return (Capabilities & capability) != 0;
 		}
 		
-		public DataValue Evaluate(DataParams AParams)
+		public DataValue Evaluate(DataParams paramsValue)
 		{
-			RemoteParamData LParams = FProcess.DataParamsToRemoteParamData(AParams);
-			byte[] LResult = FPlan.Evaluate(ref LParams, out FProgramStatistics, FProcess.GetProcessCallInfo());
-			FProgramStatisticsCached = false;
-			FProcess.RemoteParamDataToDataParams(AParams, LParams);
-			return LResult == null ? null : DataValue.FromPhysical(FProcess.ValueManager, DataType, LResult, 0);
+			RemoteParamData localParamsValue = _process.DataParamsToRemoteParamData(paramsValue);
+			byte[] result = _plan.Evaluate(ref localParamsValue, out _programStatistics, _process.GetProcessCallInfo());
+			_programStatisticsCached = false;
+			_process.RemoteParamDataToDataParams(paramsValue, localParamsValue);
+			return result == null ? null : DataValue.FromPhysical(_process.ValueManager, DataType, result, 0);
 		}
 
         /// <summary>Opens a server-side cursor based on the prepared statement this plan represents.</summary>        
         /// <returns>An <see cref="IServerCursor"/> instance for the prepared statement.</returns>
-        public IServerCursor Open(DataParams AParams)
+        public IServerCursor Open(DataParams paramsValue)
         {
-			RemoteParamData LParams = ((LocalProcess)FProcess).DataParamsToRemoteParamData(AParams);
-			IRemoteServerCursor LServerCursor;
-			LocalCursor LCursor;
-			if (FProcess.ProcessInfo.FetchAtOpen && (FProcess.ProcessInfo.FetchCount > 1) && Supports(CursorCapability.Bookmarkable))
+			RemoteParamData localParamsValue = ((LocalProcess)_process).DataParamsToRemoteParamData(paramsValue);
+			IRemoteServerCursor serverCursor;
+			LocalCursor cursor;
+			if (_process.ProcessInfo.FetchAtOpen && (_process.ProcessInfo.FetchCount > 1) && Supports(CursorCapability.Bookmarkable))
 			{
-				Guid[] LBookmarks;
-				RemoteFetchData LFetchData;
-				LServerCursor = FPlan.Open(ref LParams, out FProgramStatistics, out LBookmarks, FProcess.ProcessInfo.FetchCount, out LFetchData, FProcess.GetProcessCallInfo());
-				FProgramStatisticsCached = false;
-				LCursor = new LocalCursor(this, LServerCursor);
-				LCursor.ProcessFetchData(LFetchData, LBookmarks, true);
+				Guid[] bookmarks;
+				RemoteFetchData fetchData;
+				serverCursor = _plan.Open(ref localParamsValue, out _programStatistics, out bookmarks, _process.ProcessInfo.FetchCount, out fetchData, _process.GetProcessCallInfo());
+				_programStatisticsCached = false;
+				cursor = new LocalCursor(this, serverCursor);
+				cursor.ProcessFetchData(fetchData, bookmarks, true);
 			}
 			else
 			{
-				LServerCursor = FPlan.Open(ref LParams, out FProgramStatistics, FProcess.GetProcessCallInfo());
-				FProgramStatisticsCached = false;
-				LCursor = new LocalCursor(this, LServerCursor);
+				serverCursor = _plan.Open(ref localParamsValue, out _programStatistics, _process.GetProcessCallInfo());
+				_programStatisticsCached = false;
+				cursor = new LocalCursor(this, serverCursor);
 			}
-			((LocalProcess)FProcess).RemoteParamDataToDataParams(AParams, LParams);
-			return LCursor;
+			((LocalProcess)_process).RemoteParamDataToDataParams(paramsValue, localParamsValue);
+			return cursor;
 		}
 		
         /// <summary>Closes a server-side cursor previously created using Open.</summary>
-        /// <param name="ACursor">The cursor to close.</param>
-        public void Close(IServerCursor ACursor)
+        /// <param name="cursor">The cursor to close.</param>
+        public void Close(IServerCursor cursor)
         {
 			try
 			{
-				FPlan.Close(((LocalCursor)ACursor).RemoteCursor, FProcess.GetProcessCallInfo());
+				_plan.Close(((LocalCursor)cursor).RemoteCursor, _process.GetProcessCallInfo());
 			}
 			catch
 			{
 				// ignore exceptions here
 			}
-			((LocalCursor)ACursor).Dispose();
+			((LocalCursor)cursor).Dispose();
 		}
 		
 		private void DropDataType()
 		{
-			if (FTableVar is Schema.DerivedTableVar)
+			if (_tableVar is Schema.DerivedTableVar)
 			{
-				LocalServer.AcquireCacheLock(FProcess, LockMode.Exclusive);
+				LocalServer.AcquireCacheLock(_process, LockMode.Exclusive);
 				try
 				{
-					Program LProgram = new Program(FProcess.FInternalProcess);
-					LProgram.Code = new DropViewNode((Schema.DerivedTableVar)FTableVar);
-					LProgram.Execute(null);
+					Program program = new Program(_process._internalProcess);
+					program.Code = new DropViewNode((Schema.DerivedTableVar)_tableVar);
+					program.Execute(null);
 				}
 				finally
 				{
-					LocalServer.ReleaseCacheLock(FProcess, LockMode.Exclusive);
+					LocalServer.ReleaseCacheLock(_process, LockMode.Exclusive);
 				}
 			}
 		}
 		
 		private Schema.IDataType GetDataType()
 		{
-			bool LTimeStampSet = false;
+			bool timeStampSet = false;
 			try
 			{
-				LocalServer.WaitForCacheTimeStamp(FProcess, FDescriptor.CacheChanged ? FDescriptor.ClientCacheTimeStamp - 1 : FDescriptor.ClientCacheTimeStamp);
-				LocalServer.AcquireCacheLock(FProcess, FDescriptor.CacheChanged ? LockMode.Exclusive : LockMode.Shared);
+				LocalServer.WaitForCacheTimeStamp(_process, _descriptor.CacheChanged ? _descriptor.ClientCacheTimeStamp - 1 : _descriptor.ClientCacheTimeStamp);
+				LocalServer.AcquireCacheLock(_process, _descriptor.CacheChanged ? LockMode.Exclusive : LockMode.Shared);
 				try
 				{
-					if (FDescriptor.CacheChanged)
+					if (_descriptor.CacheChanged)
 					{
-						LocalServer.EnsureCacheConsistent(FDescriptor.CacheTimeStamp);
+						LocalServer.EnsureCacheConsistent(_descriptor.CacheTimeStamp);
 						try
 						{
-							if (FDescriptor.Catalog != String.Empty)
+							if (_descriptor.Catalog != String.Empty)
 							{
-								IServerScript LScript = ((IServerProcess)FProcess.FInternalProcess).PrepareScript(FDescriptor.Catalog);
+								IServerScript script = ((IServerProcess)_process._internalProcess).PrepareScript(_descriptor.Catalog);
 								try
 								{
-									LScript.Execute(FParams);
+									script.Execute(_params);
 								}
 								finally
 								{
-									((IServerProcess)FProcess.FInternalProcess).UnprepareScript(LScript);
+									((IServerProcess)_process._internalProcess).UnprepareScript(script);
 								}
 							}
 						}
 						finally
 						{
-							LocalServer.SetCacheTimeStamp(FProcess, FDescriptor.ClientCacheTimeStamp);
-							LTimeStampSet = true;
+							LocalServer.SetCacheTimeStamp(_process, _descriptor.ClientCacheTimeStamp);
+							timeStampSet = true;
 						}
 					}
 					
-					if (LocalServer.Catalog.ContainsName(FDescriptor.ObjectName))
+					if (LocalServer.Catalog.ContainsName(_descriptor.ObjectName))
 					{
-						Schema.Object LObject = LocalServer.Catalog[FDescriptor.ObjectName];
-						if (LObject is Schema.TableVar)
+						Schema.Object objectValue = LocalServer.Catalog[_descriptor.ObjectName];
+						if (objectValue is Schema.TableVar)
 						{
-							FTableVar = (Schema.TableVar)LObject;
-							Plan LPlan = new Plan(FProcess.FInternalProcess);
+							_tableVar = (Schema.TableVar)objectValue;
+							Plan plan = new Plan(_process._internalProcess);
 							try
 							{
-								if (FParams != null)
-									foreach (DataParam LParam in FParams)
-										LPlan.Symbols.Push(new Symbol(LParam.Name, LParam.DataType));
+								if (_params != null)
+									foreach (DataParam param in _params)
+										plan.Symbols.Push(new Symbol(param.Name, param.DataType));
 										
-								foreach (DataParam LParam in FProcess.FInternalProcess.ProcessLocals)
-									LPlan.Symbols.Push(new Symbol(LParam.Name, LParam.DataType));
+								foreach (DataParam param in _process._internalProcess.ProcessLocals)
+									plan.Symbols.Push(new Symbol(param.Name, param.DataType));
 										
-								FTableNode = (TableNode)Compiler.EmitTableVarNode(LPlan, FTableVar);
+								_tableNode = (TableNode)Compiler.EmitTableVarNode(plan, _tableVar);
 							}
 							finally
 							{
-								LPlan.Dispose();
+								plan.Dispose();
 							}
-							FDataType = FTableVar.DataType;			
+							_dataType = _tableVar.DataType;			
 						}
 						else
-							FDataType = (Schema.IDataType)LObject;
+							_dataType = (Schema.IDataType)objectValue;
 					}
 					else
 					{
 						try
 						{
-							Plan LPlan = new Plan(FProcess.FInternalProcess);
+							Plan plan = new Plan(_process._internalProcess);
 							try
 							{
-								FDataType = Compiler.CompileTypeSpecifier(LPlan, new DAE.Language.D4.Parser().ParseTypeSpecifier(FDescriptor.ObjectName));
+								_dataType = Compiler.CompileTypeSpecifier(plan, new DAE.Language.D4.Parser().ParseTypeSpecifier(_descriptor.ObjectName));
 							}
 							finally
 							{
-								LPlan.Dispose();
+								plan.Dispose();
 							}
 						}
 						catch
@@ -310,25 +310,25 @@ namespace Alphora.Dataphor.DAE.Server
 						}
 					}
 					
-					return FDataType;
+					return _dataType;
 				}
 				finally
 				{
-					LocalServer.ReleaseCacheLock(FProcess, FDescriptor.CacheChanged ? LockMode.Exclusive : LockMode.Shared);
+					LocalServer.ReleaseCacheLock(_process, _descriptor.CacheChanged ? LockMode.Exclusive : LockMode.Shared);
 				}
 			}
 			catch (Exception E)
 			{
 				// Notify the server that the client cache is out of sync
 				Process.Execute(".System.UpdateTimeStamps();", null);
-				E = new ServerException(ServerException.Codes.CacheDeserializationError, E, FDescriptor.ClientCacheTimeStamp);
-				LocalServer.FInternalServer.LogError(E);
+				E = new ServerException(ServerException.Codes.CacheDeserializationError, E, _descriptor.ClientCacheTimeStamp);
+				LocalServer._internalServer.LogError(E);
 				throw E;
 			}
 			finally
 			{
-				if (!LTimeStampSet)
-					LocalServer.SetCacheTimeStamp(FProcess, FDescriptor.ClientCacheTimeStamp);
+				if (!timeStampSet)
+					LocalServer.SetCacheTimeStamp(_process, _descriptor.ClientCacheTimeStamp);
 			}
 		}
 		
@@ -336,53 +336,53 @@ namespace Alphora.Dataphor.DAE.Server
 		{ 
 			get 
 			{ 
-				if (FDataType == null)
+				if (_dataType == null)
 					GetDataType();
 				return LocalServer.Catalog;
 			} 
 		}
 
-		protected Schema.TableVar FTableVar;		
+		protected Schema.TableVar _tableVar;		
 		public Schema.TableVar TableVar
 		{
 			get
 			{
-				if (FDataType == null)
+				if (_dataType == null)
 					GetDataType();
-				return FTableVar;
+				return _tableVar;
 			}
 		}
 		
-		protected TableNode FTableNode;
+		protected TableNode _tableNode;
 		public TableNode TableNode
 		{
 			get
 			{
-				if (FDataType == null)
+				if (_dataType == null)
 					GetDataType();
-				return FTableNode;
+				return _tableNode;
 			}
 		}
 		
-		protected Schema.IDataType FDataType;
+		protected Schema.IDataType _dataType;
 		public Schema.IDataType DataType
 		{
 			get
 			{
-				if (FDataType == null)
+				if (_dataType == null)
 					return GetDataType(); 
-				return FDataType;
+				return _dataType;
 			}
 		}
 
-		private Schema.Order FOrder;
+		private Schema.Order _order;
 		public Schema.Order Order
         {
 			get 
 			{
-				if ((FOrder == null) && (FDescriptor.Order != String.Empty))
-					FOrder = Compiler.CompileOrderDefinition(FInternalPlan, TableVar, new Parser().ParseOrderDefinition(FDescriptor.Order), false);
-				return FOrder; 
+				if ((_order == null) && (_descriptor.Order != String.Empty))
+					_order = Compiler.CompileOrderDefinition(_internalPlan, TableVar, new Parser().ParseOrderDefinition(_descriptor.Order), false);
+				return _order; 
 			}
 		}
 		
@@ -393,38 +393,38 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public Row RequestRow()
 		{
-			return new Row(FProcess.ValueManager, TableVar.DataType.RowType);
+			return new Row(_process.ValueManager, TableVar.DataType.RowType);
 		}
 		
-		public void ReleaseRow(Row ARow)
+		public void ReleaseRow(Row row)
 		{
-			ARow.Dispose();
+			row.Dispose();
 		}
     }
     
     public class LocalStatementPlan : LocalPlan, IServerStatementPlan
     {
-		public LocalStatementPlan(LocalProcess AProcess, IRemoteServerStatementPlan APlan, PlanDescriptor APlanDescriptor) : base(AProcess, APlan, APlanDescriptor)
+		public LocalStatementPlan(LocalProcess process, IRemoteServerStatementPlan plan, PlanDescriptor planDescriptor) : base(process, plan, planDescriptor)
 		{
-			FPlan = APlan;
+			_plan = plan;
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			FPlan = null;
-			base.Dispose(ADisposing);
+			_plan = null;
+			base.Dispose(disposing);
 		}
 
-		protected IRemoteServerStatementPlan FPlan;
-		public IRemoteServerStatementPlan RemotePlan { get { return FPlan; } }
+		protected IRemoteServerStatementPlan _plan;
+		public IRemoteServerStatementPlan RemotePlan { get { return _plan; } }
 		
         /// <summary>Executes the prepared statement this plan represents.</summary>
-        public void Execute(DataParams AParams)
+        public void Execute(DataParams paramsValue)
         {
-			RemoteParamData LParams = FProcess.DataParamsToRemoteParamData(AParams);
-			FPlan.Execute(ref LParams, out FProgramStatistics, FProcess.GetProcessCallInfo());
-			FProgramStatisticsCached = false;
-			FProcess.RemoteParamDataToDataParams(AParams, LParams);
+			RemoteParamData localParamsValue = _process.DataParamsToRemoteParamData(paramsValue);
+			_plan.Execute(ref localParamsValue, out _programStatistics, _process.GetProcessCallInfo());
+			_programStatisticsCached = false;
+			_process.RemoteParamDataToDataParams(paramsValue, localParamsValue);
 		}
     }
 }

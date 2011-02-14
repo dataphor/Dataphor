@@ -14,77 +14,77 @@ namespace Alphora.Dataphor.BOP
 	public class DilxDocument
 	{
 		// Do not localize
-		public const string CDilxElementName = "dilx";
-		public const string CDilxNamespace = "http://www.alphora.com/schemas/dilx";
-		public const string CAncestorElementName = "ancestor";
-		public const string CAncestorDocumentAttributeName = "document";
-		public const string CDocumentElementName = "document";
+		public const string DilxElementName = "dilx";
+		public const string DilxNamespace = "http://www.alphora.com/schemas/dilx";
+		public const string AncestorElementName = "ancestor";
+		public const string AncestorDocumentAttributeName = "document";
+		public const string DocumentElementName = "document";
 
 		public DilxDocument()
 		{
-			FAncestors = new Ancestors();
+			_ancestors = new Ancestors();
 		}
 
-		private void InternalRead(XmlReader AReader)
+		private void InternalRead(XmlReader reader)
 		{
-			FAncestors.Clear();
-			AReader.MoveToContent();
-			AReader.ReadStartElement(CDilxElementName, CDilxNamespace);
-			while (AReader.MoveToContent() == XmlNodeType.Element)
+			_ancestors.Clear();
+			reader.MoveToContent();
+			reader.ReadStartElement(DilxElementName, DilxNamespace);
+			while (reader.MoveToContent() == XmlNodeType.Element)
 			{
 				if
 				(
-					String.Equals(AReader.Name, CAncestorElementName, StringComparison.OrdinalIgnoreCase) &&
-					String.Equals(AReader.NamespaceURI, CDilxNamespace, StringComparison.OrdinalIgnoreCase)
+					String.Equals(reader.Name, AncestorElementName, StringComparison.OrdinalIgnoreCase) &&
+					String.Equals(reader.NamespaceURI, DilxNamespace, StringComparison.OrdinalIgnoreCase)
 				)
 				{
-					if (!AReader.MoveToAttribute(CAncestorDocumentAttributeName))
-						throw new BOPException(BOPException.Codes.InvalidNode, AReader.Name);
-					FAncestors.Add(AReader.Value);
-					AReader.Skip();
+					if (!reader.MoveToAttribute(AncestorDocumentAttributeName))
+						throw new BOPException(BOPException.Codes.InvalidNode, reader.Name);
+					_ancestors.Add(reader.Value);
+					reader.Skip();
 				}
 				else if
 				(
-					String.Equals(AReader.Name, CDocumentElementName, StringComparison.OrdinalIgnoreCase) &&
-					String.Equals(AReader.NamespaceURI, CDilxNamespace, StringComparison.OrdinalIgnoreCase)
+					String.Equals(reader.Name, DocumentElementName, StringComparison.OrdinalIgnoreCase) &&
+					String.Equals(reader.NamespaceURI, DilxNamespace, StringComparison.OrdinalIgnoreCase)
 				)
 				{
-					AReader.ReadStartElement();
+					reader.ReadStartElement();
 					// Support either CDATA (new method) or direct embedding of the interface (for backwards compatability)
-					if (AReader.MoveToContent() == XmlNodeType.CDATA)
-						FContent = AReader.ReadContentAsString();
+					if (reader.MoveToContent() == XmlNodeType.CDATA)
+						_content = reader.ReadContentAsString();
 					else
-						FContent = AReader.ReadOuterXml();
+						_content = reader.ReadOuterXml();
 
 					// Strip out the dilx namespace due to embedding of document withing outer document
 					// TODO: Refactor this to actually parse the arguments
-					string LDefaultNamespace = String.Format("xmlns=\"{0}\"", CDilxNamespace);
-					int LContentIndex = FContent.IndexOf(LDefaultNamespace);
-					if (LContentIndex >= 0)
-						FContent = FContent.Remove(LContentIndex, LDefaultNamespace.Length);
+					string defaultNamespace = String.Format("xmlns=\"{0}\"", DilxNamespace);
+					int contentIndex = _content.IndexOf(defaultNamespace);
+					if (contentIndex >= 0)
+						_content = _content.Remove(contentIndex, defaultNamespace.Length);
 					
 					// Make sure there is nothing after the document node
-					AReader.Skip();
-					while (AReader.MoveToContent() == XmlNodeType.EndElement)
-						AReader.Skip();
-					if (!AReader.EOF)
+					reader.Skip();
+					while (reader.MoveToContent() == XmlNodeType.EndElement)
+						reader.Skip();
+					if (!reader.EOF)
 						throw new BOPException(BOPException.Codes.DocumentElementLast);
 
 					return;
 				}
 				else
-					throw new BOPException(BOPException.Codes.InvalidNode, AReader.Name);
+					throw new BOPException(BOPException.Codes.InvalidNode, reader.Name);
 			}
 			throw new BOPException(BOPException.Codes.DocumentElementRequired);
 		}
 
-		public void Read(string AData)
+		public void Read(string data)
 		{
 			InternalRead
 			(
 				XmlReader.Create
 				(
-					new StringReader(AData), 
+					new StringReader(data), 
 					new XmlReaderSettings() { IgnoreWhitespace = true }
 				)
 			);
@@ -92,13 +92,13 @@ namespace Alphora.Dataphor.BOP
 
 		/// <summary> Reads the DILX document from a stream containing the XML. </summary>
 		/// <remarks> The document is cleared first. </remarks>
-		public void Read(Stream AStream)
+		public void Read(Stream stream)
 		{
 			InternalRead
 			(
 				XmlReader.Create
 				(
-					AStream,
+					stream,
 					new XmlReaderSettings() { IgnoreWhitespace = true }
 				)
 			);
@@ -110,66 +110,66 @@ namespace Alphora.Dataphor.BOP
 		}
 
 		/// <summary> Writes the DILX document to a stream in an XML format. </summary>
-		public void Write(Stream AStream)
+		public void Write(Stream stream)
 		{
-			InternalWrite(XmlWriter.Create(AStream, GetXmlWriterSettings()));
+			InternalWrite(XmlWriter.Create(stream, GetXmlWriterSettings()));
 		}
 
 		public string Write()
 		{
-			StringWriter LWriter = new StringWriter();
-			InternalWrite(XmlWriter.Create(LWriter, GetXmlWriterSettings()));
-			return LWriter.ToString();
+			StringWriter writer = new StringWriter();
+			InternalWrite(XmlWriter.Create(writer, GetXmlWriterSettings()));
+			return writer.ToString();
 		}
 
-		private void InternalWrite(XmlWriter AWriter)
+		private void InternalWrite(XmlWriter writer)
 		{
-			AWriter.WriteStartDocument(true);
+			writer.WriteStartDocument(true);
 
-			AWriter.WriteStartElement(CDilxElementName, CDilxNamespace);
+			writer.WriteStartElement(DilxElementName, DilxNamespace);
 
 			// Write ancestor(s)
-			foreach (string LAncestor in FAncestors)
+			foreach (string ancestor in _ancestors)
 			{
-				AWriter.WriteStartElement(CAncestorElementName);
-				AWriter.WriteAttributeString(CAncestorDocumentAttributeName, LAncestor);
-				AWriter.WriteEndElement();
+				writer.WriteStartElement(AncestorElementName);
+				writer.WriteAttributeString(AncestorDocumentAttributeName, ancestor);
+				writer.WriteEndElement();
 			}
 
 			// Write document element
-			AWriter.WriteStartElement(CDocumentElementName);
-			AWriter.WriteCData(FContent);
-			AWriter.WriteFullEndElement();
+			writer.WriteStartElement(DocumentElementName);
+			writer.WriteCData(_content);
+			writer.WriteFullEndElement();
 
-			AWriter.WriteEndElement();
-			AWriter.Flush(); // this must be here or nothing winds up on the stream.
+			writer.WriteEndElement();
+			writer.Flush(); // this must be here or nothing winds up on the stream.
 		}
 
 		/// <summary> Clears the DILX document.</summary>
 		public void Clear()
 		{
-			FContent = String.Empty;
-			FAncestors.Clear();
+			_content = String.Empty;
+			_ancestors.Clear();
 		}
 
-		private String FContent = String.Empty;
+		private String _content = String.Empty;
 		/// <summary> The embedded DIL document Content. </summary>
 		public String Content
 		{
-			get { return FContent; }
-			set { FContent = (value == null ? String.Empty : value); }
+			get { return _content; }
+			set { _content = (value == null ? String.Empty : value); }
 		}
 
-		private Ancestors FAncestors;
+		private Ancestors _ancestors;
 		/// <summary> Collection of ancestor document expressions. </summary>
 		public Ancestors Ancestors
 		{
-			get { return FAncestors; }
+			get { return _ancestors; }
 			set 
 			{
 				if (value == null)
 					throw new ArgumentNullException("Ancestors");
-				FAncestors = value;
+				_ancestors = value;
 			}
 		}
 	}

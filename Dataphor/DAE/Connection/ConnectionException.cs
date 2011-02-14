@@ -66,81 +66,81 @@ namespace Alphora.Dataphor.DAE.Connection
 		}
 		
 		// Resource manager for this exception class.
-		private static ResourceManager FResourceManager = new ResourceManager("Alphora.Dataphor.DAE.Connection.ConnectionException", typeof(ConnectionException).Assembly);
+		private static ResourceManager _resourceManager = new ResourceManager("Alphora.Dataphor.DAE.Connection.ConnectionException", typeof(ConnectionException).Assembly);
 
 		// Constructors
-		public ConnectionException(Codes AErrorCode) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, null) {}
-		public ConnectionException(Codes AErrorCode, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, AParams) {}
-		public ConnectionException(Codes AErrorCode, Exception AInnerException) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, null) {}
-		public ConnectionException(Codes AErrorCode, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, AParams) {}
-		public ConnectionException(Codes AErrorCode, ErrorSeverity ASeverity) : base(FResourceManager, (int)AErrorCode, ASeverity, null, null) {}
-		public ConnectionException(Codes AErrorCode, ErrorSeverity ASeverity, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, null, AParams) {}
-		public ConnectionException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, null) {}
-		public ConnectionException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, AParams) {}
+		public ConnectionException(Codes errorCode) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, null, null) {}
+		public ConnectionException(Codes errorCode, params object[] paramsValue) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, null, paramsValue) {}
+		public ConnectionException(Codes errorCode, Exception innerException) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, innerException, null) {}
+		public ConnectionException(Codes errorCode, Exception innerException, params object[] paramsValue) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, innerException, paramsValue) {}
+		public ConnectionException(Codes errorCode, ErrorSeverity severity) : base(_resourceManager, (int)errorCode, severity, null, null) {}
+		public ConnectionException(Codes errorCode, ErrorSeverity severity, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, null, paramsValue) {}
+		public ConnectionException(Codes errorCode, ErrorSeverity severity, Exception innerException) : base(_resourceManager, (int)errorCode, severity, innerException, null) {}
+		public ConnectionException(Codes errorCode, ErrorSeverity severity, Exception innerException, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, innerException, paramsValue) {}
 
-		public ConnectionException(Codes AErrorCode, string AStatement) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, null) 
+		public ConnectionException(Codes errorCode, string statement) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, null, null) 
 		{
-			FStatement = AStatement;
-		}
-
-		public ConnectionException(Codes AErrorCode, string AStatement, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, AParams) 
-		{
-			FStatement = AStatement;
-		}
-		
-		public ConnectionException(Codes AErrorCode, Exception AInnerException, string AStatement) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, null) 
-		{
-			FStatement = AStatement;
-		}
-		
-		public ConnectionException(Codes AErrorCode, Exception AInnerException, string AStatement, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, AParams) 
-		{
-			FStatement = AStatement;
-		}
-		
-		public ConnectionException(Codes AErrorCode, ErrorSeverity ASeverity, string AStatement) : base(FResourceManager, (int)AErrorCode, ASeverity, null, null) 
-		{
-			FStatement = AStatement;
-		}
-		
-		public ConnectionException(Codes AErrorCode, ErrorSeverity ASeverity, string AStatement, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, null, AParams) 
-		{
-			FStatement = AStatement;
-		}
-		
-		public ConnectionException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, string AStatement) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, null) 
-		{
-			FStatement = AStatement;
-		}
-		
-		public ConnectionException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, string AStatement, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, AParams) 
-		{
-			FStatement = AStatement;
-		}
-		
-		protected ConnectionException(ResourceManager AResourceManager, int AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, params object[] AParams) : base(AResourceManager, AErrorCode, ASeverity, AInnerException, AParams) {}
-		
-		public override void GetObjectData(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext)
-		{
-			base.GetObjectData(AInfo, AContext);
-			AInfo.AddValue("Statement", FStatement);
+			_statement = statement;
 		}
 
-		private string FStatement;
-		public string Statement { get { return FStatement; } }
+		public ConnectionException(Codes errorCode, string statement, params object[] paramsValue) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, null, paramsValue) 
+		{
+			_statement = statement;
+		}
+		
+		public ConnectionException(Codes errorCode, Exception innerException, string statement) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, innerException, null) 
+		{
+			_statement = statement;
+		}
+		
+		public ConnectionException(Codes errorCode, Exception innerException, string statement, params object[] paramsValue) : base(_resourceManager, (int)errorCode, ErrorSeverity.Application, innerException, paramsValue) 
+		{
+			_statement = statement;
+		}
+		
+		public ConnectionException(Codes errorCode, ErrorSeverity severity, string statement) : base(_resourceManager, (int)errorCode, severity, null, null) 
+		{
+			_statement = statement;
+		}
+		
+		public ConnectionException(Codes errorCode, ErrorSeverity severity, string statement, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, null, paramsValue) 
+		{
+			_statement = statement;
+		}
+		
+		public ConnectionException(Codes errorCode, ErrorSeverity severity, Exception innerException, string statement) : base(_resourceManager, (int)errorCode, severity, innerException, null) 
+		{
+			_statement = statement;
+		}
+		
+		public ConnectionException(Codes errorCode, ErrorSeverity severity, Exception innerException, string statement, params object[] paramsValue) : base(_resourceManager, (int)errorCode, severity, innerException, paramsValue) 
+		{
+			_statement = statement;
+		}
+		
+		protected ConnectionException(ResourceManager resourceManager, int errorCode, ErrorSeverity severity, Exception innerException, params object[] paramsValue) : base(resourceManager, errorCode, severity, innerException, paramsValue) {}
+		
+		public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
+		{
+			base.GetObjectData(info, context);
+			info.AddValue("Statement", _statement);
+		}
+
+		private string _statement;
+		public string Statement { get { return _statement; } }
 		
 		public override string GetDetails()
 		{
-			if (FStatement != String.Empty)
-				return String.Format(@"Exceptions occurred while executing SQL command: ""{0}""", FStatement);
+			if (_statement != String.Empty)
+				return String.Format(@"Exceptions occurred while executing SQL command: ""{0}""", _statement);
 				
 			return base.GetDetails();
 		}
 		
-		public ConnectionException(ErrorSeverity ASeverity, int ACode, string AMessage, string ADetails, string AServerContext, string AStatement, DataphorException AInnerException) 
-			: base(ASeverity, ACode, AMessage, ADetails, AServerContext, AInnerException)
+		public ConnectionException(ErrorSeverity severity, int code, string message, string details, string serverContext, string statement, DataphorException innerException) 
+			: base(severity, code, message, details, serverContext, innerException)
 		{
-			FStatement = AStatement;
+			_statement = statement;
 		}
 	}
 }

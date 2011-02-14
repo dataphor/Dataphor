@@ -15,13 +15,13 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 	public class StatusForm : System.Windows.Forms.Form
 	{
 		private System.Windows.Forms.Panel panel1;
-		private System.Windows.Forms.Label FLabel;
+		private System.Windows.Forms.Label _label;
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
 		private System.ComponentModel.Container components = null;
 
-		public StatusForm(string AMessage, Form AParent)
+		public StatusForm(string message, Form parent)
 		{
 			//
 			// Required for Windows Form Designer support
@@ -29,12 +29,12 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 			InitializeComponent();
 
 			Size = new Size(450, 60);
-			int LXPos = (AParent.Size.Width / 2) + AParent.DesktopLocation.X - (Size.Width / 2);
-			int LYPos = (AParent.Size.Height / 2) + AParent.DesktopLocation.Y - (Size.Height / 2);
-			DesktopLocation = new Point(LXPos, LYPos);
+			int xPos = (parent.Size.Width / 2) + parent.DesktopLocation.X - (Size.Width / 2);
+			int yPos = (parent.Size.Height / 2) + parent.DesktopLocation.Y - (Size.Height / 2);
+			DesktopLocation = new Point(xPos, yPos);
 
-			if (AMessage != String.Empty)
-				FLabel.Text = AMessage;
+			if (message != String.Empty)
+				_label.Text = message;
 			Show();
 			Update();
 		}
@@ -63,7 +63,7 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 		{
 			System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(StatusForm));
 			this.panel1 = new System.Windows.Forms.Panel();
-			this.FLabel = new System.Windows.Forms.Label();
+			this._label = new System.Windows.Forms.Label();
 			this.panel1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -71,21 +71,21 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 			// 
 			this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this.panel1.Controls.AddRange(new System.Windows.Forms.Control[] {
-																				 this.FLabel});
+																				 this._label});
 			this.panel1.Name = "panel1";
 			this.panel1.Size = new System.Drawing.Size(450, 60);
 			this.panel1.TabIndex = 0;
 			// 
 			// FLabel
 			// 
-			this.FLabel.Image = ((System.Drawing.Bitmap)(resources.GetObject("FLabel.Image")));
-			this.FLabel.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.FLabel.Location = new System.Drawing.Point(8, 16);
-			this.FLabel.Name = "FLabel";
-			this.FLabel.Size = new System.Drawing.Size(432, 32);
-			this.FLabel.TabIndex = 3;
-			this.FLabel.Text = "Processing...";
-			this.FLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+			this._label.Image = ((System.Drawing.Bitmap)(resources.GetObject("FLabel.Image")));
+			this._label.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this._label.Location = new System.Drawing.Point(8, 16);
+			this._label.Name = "FLabel";
+			this._label.Size = new System.Drawing.Size(432, 32);
+			this._label.TabIndex = 3;
+			this._label.Text = "Processing...";
+			this._label.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
 			// 
 			// StatusForm
 			// 
@@ -109,8 +109,8 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 
 		public string Label
 		{
-			get { return FLabel.Text; }
-			set { FLabel.Text = value; }
+			get { return _label.Text; }
+			set { _label.Text = value; }
 		}
 	}
 }

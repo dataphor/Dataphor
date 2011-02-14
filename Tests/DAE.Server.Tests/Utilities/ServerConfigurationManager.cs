@@ -68,7 +68,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests.Utilities
 			CheckTestConfiguration();
 			
 			// Delete the instance directory
-			string LInstanceDirectory = Path.Combine(Path.Combine(PathUtility.CommonAppDataPath(string.Empty, VersionModifier.None), Server.CDefaultInstanceDirectory), FTestConfiguration.Name);
+			string LInstanceDirectory = Path.Combine(Path.Combine(PathUtility.CommonAppDataPath(string.Empty, VersionModifier.None), Server.DefaultInstanceDirectory), FTestConfiguration.Name);
 			if (Directory.Exists(LInstanceDirectory))
 				Directory.Delete(LInstanceDirectory, true);
 		}

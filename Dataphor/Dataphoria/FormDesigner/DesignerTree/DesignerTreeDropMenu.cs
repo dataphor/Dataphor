@@ -5,32 +5,32 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree
 {
     public class DesignerTreeDropMenu : ContextMenu
     {
-        public DesignerTreeDropMenu(DesignerNode ASource, DesignerNode ATarget, DropLinePosition APosition, DropOperation ASupportedOperations)
+        public DesignerTreeDropMenu(DesignerNode source, DesignerNode target, DropLinePosition position, DropOperation supportedOperations)
         {
-            FSource = ASource;
-            FTarget = ATarget;
-            FPosition = APosition;
+            _source = source;
+            _target = target;
+            _position = position;
 
-            if ((ASupportedOperations & DropOperation.Copy) != 0)
+            if ((supportedOperations & DropOperation.Copy) != 0)
                 MenuItems.Add(new MenuItem(Strings.DropMenu_Copy, new EventHandler(CopyClick)));
-            if ((ASupportedOperations & DropOperation.Move) != 0)
+            if ((supportedOperations & DropOperation.Move) != 0)
                 MenuItems.Add(new MenuItem(Strings.DropMenu_Move, new EventHandler(MoveClick)));
             MenuItems.Add(new MenuItem("-"));
             MenuItems.Add(new MenuItem(Strings.DropMenu_Cancel));
         }
 
-        private DesignerNode FSource;
-        private DesignerNode FTarget;
-        DropLinePosition FPosition;
+        private DesignerNode _source;
+        private DesignerNode _target;
+        DropLinePosition _position;
 
-        private void CopyClick(object ASender, EventArgs AArgs)
+        private void CopyClick(object sender, EventArgs args)
         {
-            FTarget.CopyFromNode(FSource, FPosition);
+            _target.CopyFromNode(_source, _position);
         }
 
-        private void MoveClick(object ASender, EventArgs AArgs)
+        private void MoveClick(object sender, EventArgs args)
         {
-            FTarget.MoveFromNode(FSource, FPosition);
+            _target.MoveFromNode(_source, _position);
         }
     }
 }

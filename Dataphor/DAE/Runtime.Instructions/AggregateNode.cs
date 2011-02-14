@@ -25,30 +25,30 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // operator iAggregate(table{}) : table{}
 	public class AggregateNode : UnaryTableNode
 	{
-		private ColumnExpressions FColumns;
+		private ColumnExpressions _columns;
 		public ColumnExpressions Columns
 		{
-			get { return FColumns; }
-			set { FColumns = value; }
+			get { return _columns; }
+			set { _columns = value; }
 		}
 		
-		private AggregateColumnExpressions FComputeColumns;
+		private AggregateColumnExpressions _computeColumns;
 		public AggregateColumnExpressions ComputeColumns
 		{
-			get { return FComputeColumns; }
-			set { FComputeColumns = value; }
+			get { return _computeColumns; }
+			set { _computeColumns = value; }
 		}
 		
-		protected int FAggregateColumnOffset;		
+		protected int _aggregateColumnOffset;		
 		public int AggregateColumnOffset
 		{
-			get { return FAggregateColumnOffset; }
-			set { FAggregateColumnOffset = value; }
+			get { return _aggregateColumnOffset; }
+			set { _aggregateColumnOffset = value; }
 		}
 		
 		// The original source node
-		protected PlanNode FSourceNode;
-		public PlanNode OriginalSourceNode { get { return FSourceNode; } }
+		protected PlanNode _sourceNode;
+		public PlanNode OriginalSourceNode { get { return _sourceNode; } }
 		
 		// AggregateNode
 		//		Nodes[0] = Project over {by Columns}
@@ -58,33 +58,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		//				Nodes[0] = Restrict
 		//					Nodes[0] = ASourceNode
 		//					Nodes[1] = Condition over the first key in the project of the aggregate source (AggregateNode.Nodes[0]);
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
-			FTableVar.InheritMetaData(SourceTableVar.MetaData);
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
+			_tableVar.InheritMetaData(SourceTableVar.MetaData);
 
-			FSourceNode = SourceNode;
+			_sourceNode = SourceNode;
 			
 			// TODO: Aggregation source is required to be deterministic because it is long handed, we should do something that allows non-deterministic sources for aggregation
-			if (!FSourceNode.IsRepeatable)
-				throw new CompilerException(CompilerException.Codes.InvalidAggregationSource, APlan.CurrentStatement());
+			if (!_sourceNode.IsRepeatable)
+				throw new CompilerException(CompilerException.Codes.InvalidAggregationSource, plan.CurrentStatement());
 
-			if (FColumns.Count > 0)
+			if (_columns.Count > 0)
 			{
-				ProjectNode LProjectNode = (ProjectNode)Compiler.EmitProjectNode(APlan, SourceNode, FColumns, true);
-				Nodes[0] = LProjectNode;
+				ProjectNode projectNode = (ProjectNode)Compiler.EmitProjectNode(plan, SourceNode, _columns, true);
+				Nodes[0] = projectNode;
 			}
 			else
 			{
-				Schema.TableType LTableType = new Schema.TableType();
-				TableSelectorNode LNode = new TableSelectorNode(LTableType);
-				LNode.TableVar.Keys.Add(new Schema.Key());
-				LNode.Nodes.Add(new RowSelectorNode(new Schema.RowType()));
-				LNode.DetermineCharacteristics(APlan);
-				Nodes[0] = LNode;
+				Schema.TableType tableType = new Schema.TableType();
+				TableSelectorNode node = new TableSelectorNode(tableType);
+				node.TableVar.Keys.Add(new Schema.Key());
+				node.Nodes.Add(new RowSelectorNode(new Schema.RowType()));
+				node.DetermineCharacteristics(plan);
+				Nodes[0] = node;
 			}
 			
 			CopyTableVarColumns(SourceTableVar.Columns);
@@ -93,153 +93,153 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (SourceNode.Order != null)
 				Order = CopyOrder(SourceNode.Order);
 			#if UseReferenceDerivation
-			CopySourceReferences(APlan, SourceTableVar.SourceReferences);
-			CopyTargetReferences(APlan, SourceTableVar.TargetReferences);
+			CopySourceReferences(plan, SourceTableVar.SourceReferences);
+			CopyTargetReferences(plan, SourceTableVar.TargetReferences);
 			#endif
 			
-			FAggregateColumnOffset = TableVar.Columns.Count;
+			_aggregateColumnOffset = TableVar.Columns.Count;
 
-			Schema.Key LCompareKey = Compiler.FindClusteringKey(APlan, TableVar);
+			Schema.Key compareKey = Compiler.FindClusteringKey(plan, TableVar);
 			
 			// Add the computed columns
-			APlan.EnterRowContext();
+			plan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(String.Empty, DataType.CreateRowType(Keywords.Source)));
+				plan.Symbols.Push(new Symbol(String.Empty, DataType.CreateRowType(Keywords.Source)));
 				try
 				{
-					Schema.RowType LRowType = new Schema.RowType(LCompareKey.Columns);
-					Schema.RowType LSourceRowType = new Schema.RowType(LCompareKey.Columns, Keywords.Source);
-					Schema.TableVarColumn LNewColumn;
-					foreach (AggregateColumnExpression LExpression in FComputeColumns)
+					Schema.RowType rowType = new Schema.RowType(compareKey.Columns);
+					Schema.RowType sourceRowType = new Schema.RowType(compareKey.Columns, Keywords.Source);
+					Schema.TableVarColumn newColumn;
+					foreach (AggregateColumnExpression expression in _computeColumns)
 					{
-						PlanNode LSourceNode = null;
-						string[] LColumnNames = new string[LExpression.Columns.Count];
-						for (int LIndex = 0; LIndex < LExpression.Columns.Count; LIndex++)
-							LColumnNames[LIndex] = LExpression.Columns[LIndex].ColumnName;
+						PlanNode sourceNode = null;
+						string[] columnNames = new string[expression.Columns.Count];
+						for (int index = 0; index < expression.Columns.Count; index++)
+							columnNames[index] = expression.Columns[index].ColumnName;
 
-						if (LExpression.Distinct)
-							LSourceNode = Compiler.EmitProjectNode(APlan, FSourceNode, LColumnNames, true);
+						if (expression.Distinct)
+							sourceNode = Compiler.EmitProjectNode(plan, _sourceNode, columnNames, true);
 						else
-							LSourceNode = FSourceNode;
+							sourceNode = _sourceNode;
 							
-						for (int LIndex = 0; LIndex < LColumnNames.Length; LIndex++)
-							if (((TableNode)LSourceNode).TableVar.Columns.IndexOf(LColumnNames[LIndex]) < 0)
-								throw new Schema.SchemaException(Schema.SchemaException.Codes.ObjectNotFound, LColumnNames[LIndex]);
+						for (int index = 0; index < columnNames.Length; index++)
+							if (((TableNode)sourceNode).TableVar.Columns.IndexOf(columnNames[index]) < 0)
+								throw new Schema.SchemaException(Schema.SchemaException.Codes.ObjectNotFound, columnNames[index]);
 							
-						OperatorBindingContext LContext = new OperatorBindingContext(LExpression, LExpression.AggregateOperator, APlan.NameResolutionPath, Compiler.AggregateSignatureFromArguments(LSourceNode, LColumnNames, true), false);
-						PlanNode LAggregateNode = Compiler.EmitAggregateCallNode(APlan, LContext, LSourceNode, LColumnNames, LExpression.HasByClause ? LExpression.OrderColumns : null);
-						Compiler.CheckOperatorResolution(APlan, LContext);
-						LSourceNode = LAggregateNode.Nodes[0]; // Make sure to preserve any conversion and casting done by the operator resolution
+						OperatorBindingContext context = new OperatorBindingContext(expression, expression.AggregateOperator, plan.NameResolutionPath, Compiler.AggregateSignatureFromArguments(sourceNode, columnNames, true), false);
+						PlanNode aggregateNode = Compiler.EmitAggregateCallNode(plan, context, sourceNode, columnNames, expression.HasByClause ? expression.OrderColumns : null);
+						Compiler.CheckOperatorResolution(plan, context);
+						sourceNode = aggregateNode.Nodes[0]; // Make sure to preserve any conversion and casting done by the operator resolution
 						
-						int LStackDisplacement = ((AggregateCallNode)LAggregateNode).Operator.Initialization.StackDisplacement + 1; // add 1 to account for the result variable
-						LStackDisplacement += LColumnNames.Length;
-						for (int LIndex = 0; LIndex < LStackDisplacement; LIndex++)
-							APlan.Symbols.Push(new Symbol(String.Empty, APlan.DataTypes.SystemScalar));
+						int stackDisplacement = ((AggregateCallNode)aggregateNode).Operator.Initialization.StackDisplacement + 1; // add 1 to account for the result variable
+						stackDisplacement += columnNames.Length;
+						for (int index = 0; index < stackDisplacement; index++)
+							plan.Symbols.Push(new Symbol(String.Empty, plan.DataTypes.SystemScalar));
 						try
 						{
 							// Walk LSourceNode (assuming an n-length list of unary table operators) until FSourceNode is found
 							// Insert a restriction between it and a recompile of FSourceNode (to account for possible context changes)
 							
-							if (LSourceNode == FSourceNode)
-								LSourceNode = Compiler.EmitRestrictNode(APlan, Compiler.CompileExpression(APlan, (Expression)FSourceNode.EmitStatement(EmitMode.ForCopy)), Compiler.BuildRowEqualExpression(APlan, LSourceRowType.Columns, LRowType.Columns));
+							if (sourceNode == _sourceNode)
+								sourceNode = Compiler.EmitRestrictNode(plan, Compiler.CompileExpression(plan, (Expression)_sourceNode.EmitStatement(EmitMode.ForCopy)), Compiler.BuildRowEqualExpression(plan, sourceRowType.Columns, rowType.Columns));
 							else
 							{
-								PlanNode LCurrentNode = LSourceNode;
-								while (LCurrentNode != null)
+								PlanNode currentNode = sourceNode;
+								while (currentNode != null)
 								{
-									if (LCurrentNode.NodeCount >= 1)
+									if (currentNode.NodeCount >= 1)
 									{
-										if (LCurrentNode.Nodes[0] == FSourceNode)
+										if (currentNode.Nodes[0] == _sourceNode)
 										{
-											LCurrentNode.Nodes[0] = Compiler.EmitRestrictNode(APlan, Compiler.CompileExpression(APlan, (Expression)FSourceNode.EmitStatement(EmitMode.ForCopy)), Compiler.BuildRowEqualExpression(APlan, LSourceRowType.Columns, LRowType.Columns));
+											currentNode.Nodes[0] = Compiler.EmitRestrictNode(plan, Compiler.CompileExpression(plan, (Expression)_sourceNode.EmitStatement(EmitMode.ForCopy)), Compiler.BuildRowEqualExpression(plan, sourceRowType.Columns, rowType.Columns));
 											break;
 										}
-										LCurrentNode = LCurrentNode.Nodes[0];
+										currentNode = currentNode.Nodes[0];
 									}
 									else
 										Error.Fail("Internal Error: Original source node not found in aggregate invocation argument.");
 								}
 							}
 							
-							if (LExpression.HasByClause)
-								LSourceNode = Compiler.EmitOrderNode(APlan, (TableNode)LSourceNode, Compiler.CompileOrderColumnDefinitions(APlan, ((TableNode)LSourceNode).TableVar, LExpression.OrderColumns, null, false), false);
-							LAggregateNode.Nodes[0] = LSourceNode; //Compiler.BindNode(APlan, Compiler.OptimizeNode(APlan, LSourceNode));
+							if (expression.HasByClause)
+								sourceNode = Compiler.EmitOrderNode(plan, (TableNode)sourceNode, Compiler.CompileOrderColumnDefinitions(plan, ((TableNode)sourceNode).TableVar, expression.OrderColumns, null, false), false);
+							aggregateNode.Nodes[0] = sourceNode; //Compiler.BindNode(APlan, Compiler.OptimizeNode(APlan, LSourceNode));
 						}
 						finally
 						{
-							for (int LIndex = 0; LIndex < LStackDisplacement; LIndex++)
-								APlan.Symbols.Pop();
+							for (int index = 0; index < stackDisplacement; index++)
+								plan.Symbols.Pop();
 						}
 						
-						LNewColumn = 
+						newColumn = 
 							new Schema.TableVarColumn
 							(
 								new Schema.Column
 								(
-									LExpression.ColumnAlias, 
-									LAggregateNode.DataType
+									expression.ColumnAlias, 
+									aggregateNode.DataType
 								),
-								LExpression.MetaData, 
+								expression.MetaData, 
 								Schema.TableVarColumnType.Virtual
 							);
 
-						DataType.Columns.Add(LNewColumn.Column);
-						TableVar.Columns.Add(LNewColumn);
-						LNewColumn.IsNilable = LAggregateNode.IsNilable;
-						Nodes.Add(LAggregateNode);
+						DataType.Columns.Add(newColumn.Column);
+						TableVar.Columns.Add(newColumn);
+						newColumn.IsNilable = aggregateNode.IsNilable;
+						Nodes.Add(aggregateNode);
 					}
 					
-					DetermineRemotable(APlan);
+					DetermineRemotable(plan);
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 			finally
 			{
-				APlan.ExitRowContext();
+				plan.ExitRowContext();
 			}
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			Nodes[0].DetermineBinding(APlan);
+			Nodes[0].DetermineBinding(plan);
 			
 			// Add the computed columns
-			APlan.EnterRowContext();
+			plan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(String.Empty, SourceTableType.CreateRowType(Keywords.Source)));
+				plan.Symbols.Push(new Symbol(String.Empty, SourceTableType.CreateRowType(Keywords.Source)));
 				try
 				{
-					for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)	
-						Nodes[LIndex].DetermineBinding(APlan);
+					for (int index = 1; index < Nodes.Count; index++)	
+						Nodes[index].DetermineBinding(plan);
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 			finally
 			{
-				APlan.ExitRowContext();
+				plan.ExitRowContext();
 			}
 		}
 		
-		public override void DetermineCursorBehavior(Plan APlan)
+		public override void DetermineCursorBehavior(Plan plan)
 		{
-			FCursorType = SourceNode.CursorType;
-			FRequestedCursorType = APlan.CursorContext.CursorType;
-			FCursorCapabilities = 
+			_cursorType = SourceNode.CursorType;
+			_requestedCursorType = plan.CursorContext.CursorType;
+			_cursorCapabilities = 
 				CursorCapability.Navigable |
 				(SourceNode.CursorCapabilities & (CursorCapability.BackwardsNavigable | CursorCapability.Bookmarkable | CursorCapability.Searchable | CursorCapability.Countable)) |
 				(
-					(APlan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
+					(plan.CursorContext.CursorCapabilities & CursorCapability.Updateable) & 
 					(SourceNode.CursorCapabilities & CursorCapability.Updateable)
 				);
-			FCursorIsolation = APlan.CursorContext.CursorIsolation;
+			_cursorIsolation = plan.CursorContext.CursorIsolation;
 			
 			if (SourceNode.Order != null)
 				Order = CopyOrder(SourceNode.Order);
@@ -247,69 +247,69 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Order = null;
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			AggregateExpression LExpression = new AggregateExpression();
-			LExpression.Expression = (Expression)FSourceNode.EmitStatement(AMode);
-			LExpression.ByColumns.AddRange(FColumns);
-			LExpression.ComputeColumns.AddRange(FComputeColumns);
-			LExpression.Modifiers = Modifiers;
-			return LExpression;
+			AggregateExpression expression = new AggregateExpression();
+			expression.Expression = (Expression)_sourceNode.EmitStatement(mode);
+			expression.ByColumns.AddRange(_columns);
+			expression.ComputeColumns.AddRange(_computeColumns);
+			expression.Modifiers = Modifiers;
+			return expression;
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			AggregateTable LTable = new AggregateTable(this, AProgram);
+			AggregateTable table = new AggregateTable(this, program);
 			try
 			{
-				LTable.Open();
-				return LTable;
+				table.Open();
+				return table;
 			}
 			catch
 			{
-				LTable.Dispose();
+				table.Dispose();
 				throw;
 			}
 		}
 		
-		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending)
 		{
-			if ((AColumnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(AColumnName))
-				return base.InternalDefault(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending);
+			if ((columnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(columnName))
+				return base.InternalDefault(program, oldRow, newRow, valueFlags, columnName, isDescending);
 			return false;
 		}
 		
-		protected override bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected override bool InternalChange(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName)
 		{
-			if ((AColumnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(AColumnName))
-				return base.InternalChange(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+			if ((columnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(columnName))
+				return base.InternalChange(program, oldRow, newRow, valueFlags, columnName);
 			return false;
 		}
 		
-		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program program, Row oldRow, Row newRow, BitArray valueFlags, string columnName, bool isDescending, bool isProposable)
 		{
-			if ((AColumnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(AColumnName))
-				return base.InternalValidate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable);
+			if ((columnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(columnName))
+				return base.InternalValidate(program, oldRow, newRow, valueFlags, columnName, isDescending, isProposable);
 			return false;
 		}
 		
-		public override void JoinApplicationTransaction(Program AProgram, Row ARow)
+		public override void JoinApplicationTransaction(Program program, Row row)
 		{
 			// Exclude any columns from AKey which were included by this node
-			Schema.RowType LRowType = new Schema.RowType();
-			foreach (Schema.Column LColumn in ARow.DataType.Columns)
-				if (SourceNode.DataType.Columns.ContainsName(LColumn.Name))
-					LRowType.Columns.Add(LColumn.Copy());
+			Schema.RowType rowType = new Schema.RowType();
+			foreach (Schema.Column column in row.DataType.Columns)
+				if (SourceNode.DataType.Columns.ContainsName(column.Name))
+					rowType.Columns.Add(column.Copy());
 					
-			Row LRow = new Row(AProgram.ValueManager, LRowType);
+			Row localRow = new Row(program.ValueManager, rowType);
 			try
 			{
-				ARow.CopyTo(LRow);
-				SourceNode.JoinApplicationTransaction(AProgram, LRow);
+				row.CopyTo(localRow);
+				SourceNode.JoinApplicationTransaction(program, localRow);
 			}
 			finally
 			{
-				LRow.Dispose();
+				localRow.Dispose();
 			}
 		}
 	}

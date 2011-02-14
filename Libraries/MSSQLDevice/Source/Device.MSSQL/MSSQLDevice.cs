@@ -52,7 +52,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 
     public class MSSQLDevice : SQLDevice
     {
-        public const string CMSSQLBinaryScalarType = "SQLDevice.MSSQLBinary";
+        public const string MSSQLBinaryScalarType = "SQLDevice.MSSQLBinary";
 
         public static string CEnsureDatabase =
             @"
@@ -60,18 +60,18 @@ if not exists (select * from sysdatabases where name = '{0}')
 	create database {0}
 			";
 
-        protected string FApplicationName = "Dataphor Server";
-        protected string FDatabaseName = String.Empty;
+        protected string _applicationName = "Dataphor Server";
+        protected string _databaseName = String.Empty;
 
-        private int FMajorVersion = 8; // default to SQL Server 2000 (pending detection)
-        protected string FServerName = String.Empty;
-        protected bool FShouldDetermineVersion = true;
-        protected bool FShouldEnsureDatabase = true;
-        protected bool FShouldEnsureOperators = true;
-        protected bool FShouldReconcileRowGUIDCol;
-        protected bool FUseIntegratedSecurity;
+        private int _majorVersion = 8; // default to SQL Server 2000 (pending detection)
+        protected string _serverName = String.Empty;
+        protected bool _shouldDetermineVersion = true;
+        protected bool _shouldEnsureDatabase = true;
+        protected bool _shouldEnsureOperators = true;
+        protected bool _shouldReconcileRowGUIDCol;
+        protected bool _useIntegratedSecurity;
 
-        public MSSQLDevice(int AID, string AName) : base(AID, AName)
+        public MSSQLDevice(int iD, string name) : base(iD, name)
         {
             IsOrderByInContext = false;
             // T-SQL allows items in the order by list to reference the column aliases used in the query
@@ -81,8 +81,8 @@ if not exists (select * from sysdatabases where name = '{0}')
 
         public int MajorVersion
         {
-            get { return FMajorVersion; }
-            set { FMajorVersion = value; }
+            get { return _majorVersion; }
+            set { _majorVersion = value; }
         }
 
         public bool IsMSSQL70
@@ -90,9 +90,9 @@ if not exists (select * from sysdatabases where name = '{0}')
             set
             {
                 if (value)
-                    FMajorVersion = 7;
+                    _majorVersion = 7;
             }
-            get { return FMajorVersion == 7; }
+            get { return _majorVersion == 7; }
         }
 
         public bool IsAccess { set; get; }
@@ -100,248 +100,248 @@ if not exists (select * from sysdatabases where name = '{0}')
         /// <value>Indicates whether the device should auto-determine the version of the target system.</value>
         public bool ShouldDetermineVersion
         {
-            get { return FShouldDetermineVersion; }
-            set { FShouldDetermineVersion = value; }
+            get { return _shouldDetermineVersion; }
+            set { _shouldDetermineVersion = value; }
         }
 
         /// <value>Indicates whether the device should create the database if it does not already exist.</value>
         public bool ShouldEnsureDatabase
         {
             // maybe check and throw to see if it is access because can't create (at least I don't think so) an access database;
-            get { return FShouldEnsureDatabase; }
-            set { FShouldEnsureDatabase = value; }
+            get { return _shouldEnsureDatabase; }
+            set { _shouldEnsureDatabase = value; }
         }
 
         /// <value>Indicates whether the device should reconcile columns that are marked as ROWGUIDCOL in SQLServer.</value>
         public bool ShouldReconcileRowGUIDCol
         {
-            get { return FShouldReconcileRowGUIDCol; }
-            set { FShouldReconcileRowGUIDCol = value; }
+            get { return _shouldReconcileRowGUIDCol; }
+            set { _shouldReconcileRowGUIDCol = value; }
         }
 
         /// <value>Indicates whether the device should create the DAE support operators if they do not already exist.</value>
         /// <remarks>The value of this property is only valid if IsMSSQL70 is false.</remarks>
         public bool ShouldEnsureOperators
         {
-            get { return FShouldEnsureOperators; }
-            set { FShouldEnsureOperators = value; }
+            get { return _shouldEnsureOperators; }
+            set { _shouldEnsureOperators = value; }
         }
 
         public string ServerName
         {
-            get { return FServerName; }
-            set { FServerName = value == null ? String.Empty : value; }
+            get { return _serverName; }
+            set { _serverName = value == null ? String.Empty : value; }
         }
 
         public string DatabaseName
         {
-            get { return FDatabaseName; }
-            set { FDatabaseName = value == null ? String.Empty : value; }
+            get { return _databaseName; }
+            set { _databaseName = value == null ? String.Empty : value; }
         }
 
         public string ApplicationName
         {
-            get { return FApplicationName; }
-            set { FApplicationName = value == null ? "Dataphor Server" : value; }
+            get { return _applicationName; }
+            set { _applicationName = value == null ? "Dataphor Server" : value; }
         }
 
         public bool UseIntegratedSecurity
         {
-            get { return FUseIntegratedSecurity; }
-            set { FUseIntegratedSecurity = value; }
+            get { return _useIntegratedSecurity; }
+            set { _useIntegratedSecurity = value; }
         }
 
         protected override void SetMaxIdentifierLength()
         {
-            FMaxIdentifierLength = 128;
+            _maxIdentifierLength = 128;
         }
 
-        protected override void InternalStarted(ServerProcess AProcess)
+        protected override void InternalStarted(ServerProcess process)
         {
-            string LOnExecuteConnectStatement = OnExecuteConnectStatement;
+            string onExecuteConnectStatement = OnExecuteConnectStatement;
             OnExecuteConnectStatement = null;
             try
             {
                 if (ShouldDetermineVersion)
-                    DetermineVersion(AProcess);
+                    DetermineVersion(process);
 
-                base.InternalStarted(AProcess);
+                base.InternalStarted(process);
 
-                InitializeDatabase(AProcess);
+                InitializeDatabase(process);
             }
             finally
             {
-                OnExecuteConnectStatement = LOnExecuteConnectStatement;
+                OnExecuteConnectStatement = onExecuteConnectStatement;
             }
         }
 
-        protected override void RegisterSystemObjectMaps(ServerProcess AProcess)
+        protected override void RegisterSystemObjectMaps(ServerProcess process)
         {
-            base.RegisterSystemObjectMaps(AProcess);
+            base.RegisterSystemObjectMaps(process);
 
             // Perform system type and operator mapping registration
-            using (Stream LStream = GetType().Assembly.GetManifestResourceStream("SystemCatalog.d4"))
+            using (Stream stream = GetType().Assembly.GetManifestResourceStream("SystemCatalog.d4"))
             {
 #if USEISTRING
-				RunScript(AProcess, String.Format(new StreamReader(LStream).ReadToEnd(), Name, IsCaseSensitive.ToString().ToLower(), IsMSSQL70.ToString().ToLower(), IsAccess.ToString().ToLower()));
+				RunScript(AProcess, String.Format(new StreamReader(stream).ReadToEnd(), Name, IsCaseSensitive.ToString().ToLower(), IsMSSQL70.ToString().ToLower(), IsAccess.ToString().ToLower()));
 #else
-                RunScript(AProcess,
-                          String.Format(new StreamReader(LStream).ReadToEnd(), Name, "false",
+                RunScript(process,
+                          String.Format(new StreamReader(stream).ReadToEnd(), Name, "false",
                                         IsMSSQL70.ToString().ToLower(), IsAccess.ToString().ToLower()));
 #endif
             }
         }
 
-        protected void EnsureDatabase(ServerProcess AProcess)
+        protected void EnsureDatabase(ServerProcess process)
         {
-            string LDatabaseName = DatabaseName;
+            string databaseName = DatabaseName;
             DatabaseName = "master";
             try
             {
-                var LDeviceSession = (SQLDeviceSession) Connect(AProcess, AProcess.ServerSession.SessionInfo);
+                var deviceSession = (SQLDeviceSession) Connect(process, process.ServerSession.SessionInfo);
                 try
                 {
-                    LDeviceSession.Connection.Execute(String.Format(CEnsureDatabase, LDatabaseName));
+                    deviceSession.Connection.Execute(String.Format(CEnsureDatabase, databaseName));
                 }
                 finally
                 {
-                    Disconnect(LDeviceSession);
+                    Disconnect(deviceSession);
                 }
             }
             finally
             {
-                DatabaseName = LDatabaseName;
+                DatabaseName = databaseName;
             }
         }
 
-        protected void DetermineVersion(ServerProcess AProcess)
+        protected void DetermineVersion(ServerProcess process)
         {
-            string LDatabaseName = DatabaseName;
+            string databaseName = DatabaseName;
             DatabaseName = "master";
             try
             {
-                var LDeviceSession = (SQLDeviceSession) Connect(AProcess, AProcess.ServerSession.SessionInfo);
+                var deviceSession = (SQLDeviceSession) Connect(process, process.ServerSession.SessionInfo);
                 try
                 {
-                    SQLCursor LCursor = LDeviceSession.Connection.Open("exec xp_msver");
+                    SQLCursor cursor = deviceSession.Connection.Open("exec xp_msver");
                     try
                     {
-                        string LVersion = String.Empty;
-                        while (LCursor.Next())
-                            if (Convert.ToString(LCursor[1]) == "ProductVersion")
+                        string version = String.Empty;
+                        while (cursor.Next())
+                            if (Convert.ToString(cursor[1]) == "ProductVersion")
                             {
-                                LVersion = Convert.ToString(LCursor[3]);
+                                version = Convert.ToString(cursor[3]);
                                 break;
                             }
 
-                        if (LVersion.Length > 0)
-                            FMajorVersion = Convert.ToInt32(LVersion.Substring(0, LVersion.IndexOf('.')));
+                        if (version.Length > 0)
+                            _majorVersion = Convert.ToInt32(version.Substring(0, version.IndexOf('.')));
                     }
                     finally
                     {
-                        LCursor.Command.Connection.Close(LCursor);
+                        cursor.Command.Connection.Close(cursor);
                     }
                 }
                 finally
                 {
-                    Disconnect(LDeviceSession);
+                    Disconnect(deviceSession);
                 }
             }
             finally
             {
-                DatabaseName = LDatabaseName;
+                DatabaseName = databaseName;
             }
         }
 
-        protected void InitializeDatabase(ServerProcess AProcess)
+        protected void InitializeDatabase(ServerProcess process)
         {
             // access checks should go here maybe?
 
             // Create the database, if necessary
             if (ShouldEnsureDatabase)
-                EnsureDatabase(AProcess);
+                EnsureDatabase(process);
 
             // Run the initialization script, if specified
             if ((!IsMSSQL70) && ShouldEnsureOperators)
-                EnsureOperators(AProcess);
+                EnsureOperators(process);
         }
 
-        protected void EnsureOperators(ServerProcess AProcess)
+        protected void EnsureOperators(ServerProcess process)
         {
             // no access
-            var LDeviceSession = (SQLDeviceSession) Connect(AProcess, AProcess.ServerSession.SessionInfo);
+            var deviceSession = (SQLDeviceSession) Connect(process, process.ServerSession.SessionInfo);
             try
             {
-                SQLConnection LConnection = LDeviceSession.Connection;
-                if (!LConnection.InTransaction)
-                    LConnection.BeginTransaction(SQLIsolationLevel.Serializable);
+                SQLConnection connection = deviceSession.Connection;
+                if (!connection.InTransaction)
+                    connection.BeginTransaction(SQLIsolationLevel.Serializable);
                 try
                 {
-                    using (SQLCommand LCommand = LConnection.CreateCommand(false))
+                    using (SQLCommand command = connection.CreateCommand(false))
                     {
-                        using (Stream LStream = GetType().Assembly.GetManifestResourceStream("SystemCatalog.sql"))
+                        using (Stream stream = GetType().Assembly.GetManifestResourceStream("SystemCatalog.sql"))
                         {
                             foreach (
-                                string LBatch in SQLUtility.ProcessBatches(new StreamReader(LStream).ReadToEnd(), "go"))
+                                string batch in SQLUtility.ProcessBatches(new StreamReader(stream).ReadToEnd(), "go"))
                             {
-                                LCommand.Statement = LBatch;
-                                LCommand.Execute();
+                                command.Statement = batch;
+                                command.Execute();
                             }
                         }
                     }
-                    LConnection.CommitTransaction();
+                    connection.CommitTransaction();
                 }
                 catch
                 {
-                    LConnection.RollbackTransaction();
+                    connection.RollbackTransaction();
                     throw;
                 }
             }
             finally
             {
-                Disconnect(LDeviceSession);
+                Disconnect(deviceSession);
             }
         }
 
-        protected override DeviceSession InternalConnect(ServerProcess AServerProcess,
-                                                         DeviceSessionInfo ADeviceSessionInfo)
+        protected override DeviceSession InternalConnect(ServerProcess serverProcess,
+                                                         DeviceSessionInfo deviceSessionInfo)
         {
-            return new MSSQLDeviceSession(this, AServerProcess, ADeviceSessionInfo);
+            return new MSSQLDeviceSession(this, serverProcess, deviceSessionInfo);
         }
 
-        protected override Statement TranslateDropIndex(SQLDevicePlan APlan, TableVar ATableVar, Key AKey)
+        protected override Statement TranslateDropIndex(SQLDevicePlan plan, TableVar tableVar, Key key)
         {
-            var LStatement = new DropIndexStatement();
-            LStatement.TableSchema = MetaData.GetTag(ATableVar.MetaData, "Storage.Schema", Schema);
-            LStatement.TableName = ToSQLIdentifier(ATableVar);
-            LStatement.IndexSchema = MetaData.GetTag(AKey.MetaData, "Storage.Schema", String.Empty);
-            LStatement.IndexName = GetIndexName(LStatement.TableName, AKey);
-            return LStatement;
+            var statement = new DropIndexStatement();
+            statement.TableSchema = MetaData.GetTag(tableVar.MetaData, "Storage.Schema", Schema);
+            statement.TableName = ToSQLIdentifier(tableVar);
+            statement.IndexSchema = MetaData.GetTag(key.MetaData, "Storage.Schema", String.Empty);
+            statement.IndexName = GetIndexName(statement.TableName, key);
+            return statement;
         }
 
-        protected override Statement TranslateDropIndex(SQLDevicePlan APlan, TableVar ATableVar, Order AOrder)
+        protected override Statement TranslateDropIndex(SQLDevicePlan plan, TableVar tableVar, Order order)
         {
-            var LStatement = new DropIndexStatement();
-            LStatement.TableSchema = MetaData.GetTag(ATableVar.MetaData, "Storage.Schema", Schema);
-            LStatement.TableName = ToSQLIdentifier(ATableVar);
-            LStatement.IndexSchema = MetaData.GetTag(AOrder.MetaData, "Storage.Schema", String.Empty);
-            LStatement.IndexName = GetIndexName(LStatement.TableName, AOrder);
-            return LStatement;
+            var statement = new DropIndexStatement();
+            statement.TableSchema = MetaData.GetTag(tableVar.MetaData, "Storage.Schema", Schema);
+            statement.TableName = ToSQLIdentifier(tableVar);
+            statement.IndexSchema = MetaData.GetTag(order.MetaData, "Storage.Schema", String.Empty);
+            statement.IndexName = GetIndexName(statement.TableName, order);
+            return statement;
         }
 
         public override TableSpecifier GetDummyTableSpecifier()
         {
-            var LSelectExpression = new SelectExpression();
-            LSelectExpression.SelectClause = new SelectClause();
-            LSelectExpression.SelectClause.Columns.Add(new ColumnExpression(new ValueExpression(0), "dummy1"));
-            return new TableSpecifier(LSelectExpression, "dummy1");
+            var selectExpression = new SelectExpression();
+            selectExpression.SelectClause = new SelectClause();
+            selectExpression.SelectClause.Columns.Add(new ColumnExpression(new ValueExpression(0), "dummy1"));
+            return new TableSpecifier(selectExpression, "dummy1");
         }
 
         // ShouldIncludeColumn
-        public override bool ShouldIncludeColumn(Plan APlan, string ATableName, string AColumnName,
-                                                 string ADomainName)
+        public override bool ShouldIncludeColumn(Plan plan, string tableName, string columnName,
+                                                 string domainName)
         {
-            switch (ADomainName.ToLower())
+            switch (domainName.ToLower())
             {
                 case "bit":
                 case "tinyint":
@@ -375,43 +375,43 @@ if not exists (select * from sysdatabases where name = '{0}')
         }
 
         // FindScalarType
-        public override ScalarType FindScalarType(Plan APlan, string ADomainName, int ALength, MetaData AMetaData)
+        public override ScalarType FindScalarType(Plan plan, string domainName, int length, MetaData metaData)
         {
-            switch (ADomainName.ToLower())
+            switch (domainName.ToLower())
             {
                 case "bit":
-                    return APlan.DataTypes.SystemBoolean;
+                    return plan.DataTypes.SystemBoolean;
                 case "tinyint":
-                    return APlan.DataTypes.SystemByte;
+                    return plan.DataTypes.SystemByte;
                 case "smallint":
-                    return APlan.DataTypes.SystemShort;
+                    return plan.DataTypes.SystemShort;
                 case "int":
                 case "integer":
-                    return APlan.DataTypes.SystemInteger;
+                    return plan.DataTypes.SystemInteger;
                 case "bigint":
-                    return APlan.DataTypes.SystemLong;
+                    return plan.DataTypes.SystemLong;
                 case "decimal":
                 case "numeric":
                 case "float":
                 case "real":
-                    return APlan.DataTypes.SystemDecimal;
+                    return plan.DataTypes.SystemDecimal;
                 case "datetime":
                 case "smalldatetime":
-                    return APlan.DataTypes.SystemDateTime;
+                    return plan.DataTypes.SystemDateTime;
                 case "money":
                 case "smallmoney":
-                    return APlan.DataTypes.SystemMoney;
+                    return plan.DataTypes.SystemMoney;
                 case "uniqueidentifier":
-                    return APlan.DataTypes.SystemGuid;
+                    return plan.DataTypes.SystemGuid;
                 case "char":
                 case "varchar":
                 case "nchar":
                 case "nvarchar":
-                    AMetaData.Tags.Add(new Tag("Storage.Length", ALength.ToString()));
+                    metaData.Tags.Add(new Tag("Storage.Length", length.ToString()));
 #if USEISTRING
 					return IsCaseSensitive ? APlan.DataTypes.SystemString : APlan.DataTypes.SystemIString;
 #else
-                    return APlan.DataTypes.SystemString;
+                    return plan.DataTypes.SystemString;
 #endif
 #if USEISTRING
 				case "text":
@@ -419,19 +419,19 @@ if not exists (select * from sysdatabases where name = '{0}')
 #else
                 case "text":
                 case "ntext":
-                    return (ScalarType) Compiler.ResolveCatalogIdentifier(APlan, CSQLTextScalarType, true);
+                    return (ScalarType) Compiler.ResolveCatalogIdentifier(plan, SQLTextScalarType, true);
 #endif
                 case "binary":
                 case "timestamp":
-                    AMetaData.Tags.Add(new Tag("Storage.Length", ALength.ToString()));
-                    return (ScalarType) Compiler.ResolveCatalogIdentifier(APlan, CMSSQLBinaryScalarType, true);
+                    metaData.Tags.Add(new Tag("Storage.Length", length.ToString()));
+                    return (ScalarType) Compiler.ResolveCatalogIdentifier(plan, MSSQLBinaryScalarType, true);
                 case "varbinary":
-                    AMetaData.Tags.Add(new Tag("Storage.Length", ALength.ToString()));
-                    return APlan.DataTypes.SystemBinary;
+                    metaData.Tags.Add(new Tag("Storage.Length", length.ToString()));
+                    return plan.DataTypes.SystemBinary;
                 case "image":
-                    return APlan.DataTypes.SystemBinary;
+                    return plan.DataTypes.SystemBinary;
                 default:
-                    throw new SQLException(SQLException.Codes.UnsupportedImportType, ADomainName);
+                    throw new SQLException(SQLException.Codes.UnsupportedImportType, domainName);
             }
         }
 
@@ -441,12 +441,12 @@ if not exists (select * from sysdatabases where name = '{0}')
             return new TSQLTextEmitter();
         }
 
-        protected override string GetDeviceTablesExpression(TableVar ATableVar)
+        protected override string GetDeviceTablesExpression(TableVar tableVar)
         {
             return
                 DeviceTablesExpression != String.Empty
                     ?
-                        base.GetDeviceTablesExpression(ATableVar)
+                        base.GetDeviceTablesExpression(tableVar)
                     :
                         String.Format
                             (
@@ -487,21 +487,21 @@ if not exists (select * from sysdatabases where name = '{0}')
 								
 								"
                             ),
-                            ATableVar == null
+                            tableVar == null
                                 ? String.Empty
-                                : String.Format("and so.name = '{0}'", ToSQLIdentifier(ATableVar)),
-                            FShouldReconcileRowGUIDCol
+                                : String.Format("and so.name = '{0}'", ToSQLIdentifier(tableVar)),
+                            _shouldReconcileRowGUIDCol
                                 ? String.Empty
                                 : "and COLUMNPROPERTY(so.id, sc.name, 'IsRowGUIDCol') = 0"
                             );
         }
 
-        protected override string GetDeviceIndexesExpression(TableVar ATableVar)
+        protected override string GetDeviceIndexesExpression(TableVar tableVar)
         {
             return
                 DeviceIndexesExpression != String.Empty
                     ?
-                        base.GetDeviceIndexesExpression(ATableVar)
+                        base.GetDeviceIndexesExpression(tableVar)
                     :
                         String.Format
                             (
@@ -534,18 +534,18 @@ if not exists (select * from sysdatabases where name = '{0}')
                             IsMSSQL70
                                 ? String.Empty
                                 : "and INDEXKEY_PROPERTY(so.id, si.indid, sik.keyno, 'IsDescending') is not null",
-                            ATableVar == null
+                            tableVar == null
                                 ? String.Empty
-                                : String.Format("and so.name = '{0}'", ToSQLIdentifier(ATableVar))
+                                : String.Format("and so.name = '{0}'", ToSQLIdentifier(tableVar))
                             );
         }
 
-        protected override string GetDeviceForeignKeysExpression(TableVar ATableVar)
+        protected override string GetDeviceForeignKeysExpression(TableVar tableVar)
         {
             return
                 DeviceForeignKeysExpression != String.Empty
                     ?
-                        base.GetDeviceForeignKeysExpression(ATableVar)
+                        base.GetDeviceForeignKeysExpression(tableVar)
                     :
                         String.Format
                             (
@@ -573,33 +573,33 @@ if not exists (select * from sysdatabases where name = '{0}')
 									{0}
 								order by ConstraintSchema, ConstraintName, OrdinalPosition
 						",
-                            ATableVar == null ? String.Empty : "and so.name = '" + ToSQLIdentifier(ATableVar) + "'"
+                            tableVar == null ? String.Empty : "and so.name = '" + ToSQLIdentifier(tableVar) + "'"
                             );
         }
 
-        public override void DetermineCursorBehavior(Plan APlan, TableNode ATableNode)
+        public override void DetermineCursorBehavior(Plan plan, TableNode tableNode)
         {
-            base.DetermineCursorBehavior(APlan, ATableNode);
+            base.DetermineCursorBehavior(plan, tableNode);
             // TODO: This will actually only be static if the ADOConnection is used because the DotNet providers do not support a method for obtaining a static cursor.
         }
 
         // ServerName		
 
-        public override SelectStatement TranslateOrder(DevicePlan ADevicePlan, TableNode ANode,
-                                                       SelectStatement AStatement)
+        public override SelectStatement TranslateOrder(DevicePlan devicePlan, TableNode node,
+                                                       SelectStatement statement)
         {
-            if (AStatement.Modifiers == null)
-                AStatement.Modifiers = new LanguageModifiers();
-            AStatement.Modifiers.Add(new LanguageModifier("OptimizerHints", "option (fast 1)"));
-            return base.TranslateOrder(ADevicePlan, ANode, AStatement);
+            if (statement.Modifiers == null)
+                statement.Modifiers = new LanguageModifiers();
+            statement.Modifiers.Add(new LanguageModifier("OptimizerHints", "option (fast 1)"));
+            return base.TranslateOrder(devicePlan, node, statement);
         }
     }
 
     public class MSSQLDeviceSession : SQLDeviceSession
     {
-        public MSSQLDeviceSession(MSSQLDevice ADevice, ServerProcess AServerProcess,
-                                  DeviceSessionInfo ADeviceSessionInfo)
-            : base(ADevice, AServerProcess, ADeviceSessionInfo)
+        public MSSQLDeviceSession(MSSQLDevice device, ServerProcess serverProcess,
+                                  DeviceSessionInfo deviceSessionInfo)
+            : base(device, serverProcess, deviceSessionInfo)
         {
         }
 
@@ -658,7 +658,7 @@ if not exists (select * from sysdatabases where name = '{0}')
 					works fine, so we are switching to that provider until further notice.
 			*/
 
-            var LClassDefinition =
+            var classDefinition =
                 new ClassDefinition
 				(
                     Device.ConnectionClass == String.Empty
@@ -675,7 +675,7 @@ if not exists (select * from sysdatabases where name = '{0}')
 	                    : Device.ConnectionClass
 				);
 
-            var LBuilderClass =
+            var builderClass =
                 new ClassDefinition
 				(
                     Device.ConnectionStringBuilderClass == String.Empty
@@ -692,33 +692,33 @@ if not exists (select * from sysdatabases where name = '{0}')
 						: Device.ConnectionStringBuilderClass
                     );
 
-            var LConnectionStringBuilder = 
+            var connectionStringBuilder = 
 				(ConnectionStringBuilder)ServerProcess.CreateObject
 				(
-					LBuilderClass, 
+					builderClass, 
 					new object[] {}
 				);
 
-            var LTags = new Tags();
-            LTags.AddOrUpdate("ServerName", Device.ServerName);
-            LTags.AddOrUpdate("DatabaseName", Device.DatabaseName);
-            LTags.AddOrUpdate("ApplicationName", Device.ApplicationName);
+            var tags = new Tags();
+            tags.AddOrUpdate("ServerName", Device.ServerName);
+            tags.AddOrUpdate("DatabaseName", Device.DatabaseName);
+            tags.AddOrUpdate("ApplicationName", Device.ApplicationName);
             if (Device.UseIntegratedSecurity)
-                LTags.AddOrUpdate("IntegratedSecurity", "true");
+                tags.AddOrUpdate("IntegratedSecurity", "true");
             else
             {
-                LTags.AddOrUpdate("UserName", DeviceSessionInfo.UserName);
-                LTags.AddOrUpdate("Password", DeviceSessionInfo.Password);
+                tags.AddOrUpdate("UserName", DeviceSessionInfo.UserName);
+                tags.AddOrUpdate("Password", DeviceSessionInfo.Password);
             }
 
-            LTags = LConnectionStringBuilder.Map(LTags);
-            Device.GetConnectionParameters(LTags, DeviceSessionInfo);
-            string LConnectionString = SQLDevice.TagsToString(LTags);
+            tags = connectionStringBuilder.Map(tags);
+            Device.GetConnectionParameters(tags, DeviceSessionInfo);
+            string connectionString = SQLDevice.TagsToString(tags);
             return
                 (SQLConnection)ServerProcess.CreateObject
                 (
-					LClassDefinition, 
-					new object[] { LConnectionString }
+					classDefinition, 
+					new object[] { connectionString }
 				);
         }
     }

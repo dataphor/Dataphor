@@ -31,25 +31,25 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			UpdateStates(false);
 		}
 		
-		private ScrollPresenter FScrollPresenter;
+		private ScrollPresenter _scrollPresenter;
 		
 		public ScrollPresenter ScrollPresenter
 		{
-			get { return FScrollPresenter; }
+			get { return _scrollPresenter; }
 			set
 			{
-				if (FScrollPresenter != value)
+				if (_scrollPresenter != value)
 				{
-					if (FScrollPresenter != null)
+					if (_scrollPresenter != null)
 					{
-						FScrollPresenter.MeasurementsChanged -= ScrollPresenterMeasurementsOrOffsetsChanged;
-						FScrollPresenter.OffsetsChanged -= ScrollPresenterMeasurementsOrOffsetsChanged;
+						_scrollPresenter.MeasurementsChanged -= ScrollPresenterMeasurementsOrOffsetsChanged;
+						_scrollPresenter.OffsetsChanged -= ScrollPresenterMeasurementsOrOffsetsChanged;
 					}
-					FScrollPresenter = value;
-					if (FScrollPresenter != null)
+					_scrollPresenter = value;
+					if (_scrollPresenter != null)
 					{
-						FScrollPresenter.MeasurementsChanged += ScrollPresenterMeasurementsOrOffsetsChanged;
-						FScrollPresenter.OffsetsChanged += ScrollPresenterMeasurementsOrOffsetsChanged;
+						_scrollPresenter.MeasurementsChanged += ScrollPresenterMeasurementsOrOffsetsChanged;
+						_scrollPresenter.OffsetsChanged += ScrollPresenterMeasurementsOrOffsetsChanged;
 					}
 				}
 			}
@@ -60,80 +60,80 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 			InvalidateMeasure();
 		}
 		
-		private void ScrollPresenterMeasurementsOrOffsetsChanged(object ASender, EventArgs AArgs)
+		private void ScrollPresenterMeasurementsOrOffsetsChanged(object sender, EventArgs args)
 		{
 			InvalidateMeasure();
 		}
 
 		protected override Size MeasureOverride(Size availableSize)
 		{
-			var LResult = base.MeasureOverride(availableSize);
+			var result = base.MeasureOverride(availableSize);
 			UpdateStates(false);
-			return LResult;			
+			return result;			
 		}
 		
-		protected void UpdateStates(bool AUseTransitions)
+		protected void UpdateStates(bool useTransitions)
 		{
-			if (FScrollPresenter != null)
+			if (_scrollPresenter != null)
 			{
-				if (FScrollPresenter.ExtentWidth - FScrollPresenter.HorizontalOffset > FScrollPresenter.ViewportWidth)
-					VisualStateManager.GoToState(this, "RightEnabled", AUseTransitions);
+				if (_scrollPresenter.ExtentWidth - _scrollPresenter.HorizontalOffset > _scrollPresenter.ViewportWidth)
+					VisualStateManager.GoToState(this, "RightEnabled", useTransitions);
 				else
-					VisualStateManager.GoToState(this, "RightDisabled", AUseTransitions);
+					VisualStateManager.GoToState(this, "RightDisabled", useTransitions);
 
-				if (FScrollPresenter.HorizontalOffset > 0)
-					VisualStateManager.GoToState(this, "LeftEnabled", AUseTransitions);
+				if (_scrollPresenter.HorizontalOffset > 0)
+					VisualStateManager.GoToState(this, "LeftEnabled", useTransitions);
 				else
-					VisualStateManager.GoToState(this, "LeftDisabled", AUseTransitions);
+					VisualStateManager.GoToState(this, "LeftDisabled", useTransitions);
 			}
 		}
 
-		private ButtonBase FLeftButton;
+		private ButtonBase _leftButton;
 		
 		public ButtonBase LeftButton
 		{
-			get { return FLeftButton; }
+			get { return _leftButton; }
 			set
 			{
-				if (FLeftButton != value)
+				if (_leftButton != value)
 				{
-					if (FLeftButton != null)
-						FLeftButton.Click -= LeftButtonClick;
-					FLeftButton = value;
-					if (FLeftButton != null)
-						FLeftButton.Click += LeftButtonClick;
+					if (_leftButton != null)
+						_leftButton.Click -= LeftButtonClick;
+					_leftButton = value;
+					if (_leftButton != null)
+						_leftButton.Click += LeftButtonClick;
 				}
 			}
 		}
 		
-		private void LeftButtonClick(object ASender, RoutedEventArgs AArgs)
+		private void LeftButtonClick(object sender, RoutedEventArgs args)
 		{
-			if (FScrollPresenter != null)
-				FScrollPresenter.ScrollToHorizontalOffset(FScrollPresenter.HorizontalOffset - 16);
+			if (_scrollPresenter != null)
+				_scrollPresenter.ScrollToHorizontalOffset(_scrollPresenter.HorizontalOffset - 16);
 		}
 
-		private ButtonBase FRightButton;
+		private ButtonBase _rightButton;
 		
 		public ButtonBase RightButton
 		{
-			get { return FRightButton; }
+			get { return _rightButton; }
 			set
 			{
-				if (FRightButton != value)
+				if (_rightButton != value)
 				{
-					if (FRightButton != null)
-						FRightButton.Click -= RightButtonClick;
-					FRightButton = value;
-					if (FRightButton != null)
-						FRightButton.Click += RightButtonClick;
+					if (_rightButton != null)
+						_rightButton.Click -= RightButtonClick;
+					_rightButton = value;
+					if (_rightButton != null)
+						_rightButton.Click += RightButtonClick;
 				}
 			}
 		}
 		
-		private void RightButtonClick(object ASender, RoutedEventArgs AArgs)
+		private void RightButtonClick(object sender, RoutedEventArgs args)
 		{
-			if (FScrollPresenter != null)
-				FScrollPresenter.ScrollToHorizontalOffset(FScrollPresenter.HorizontalOffset + 10);
+			if (_scrollPresenter != null)
+				_scrollPresenter.ScrollToHorizontalOffset(_scrollPresenter.HorizontalOffset + 10);
 		}
 	}
 }

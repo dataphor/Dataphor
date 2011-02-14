@@ -30,9 +30,9 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 
 	public class FormStack : ObservableCollectionView<FormControl>
 	{
-		public void Push(FormControl AForm)
+		public void Push(FormControl form)
 		{
-			Add(AForm);
+			Add(form);
 			MoveCurrentToLast();
 		}
 		
@@ -40,19 +40,19 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		{
 			if (Count > 0)
 			{
-				var LPopped = this[Count - 1];
+				var popped = this[Count - 1];
 				if (CurrentPosition == Count - 1)
 					MoveCurrentToPrevious();
 				RemoveAt(Count - 1);
-				return LPopped;
+				return popped;
 			}
 			else
 				return null;
 		}
 
-		public bool TopMatches(FormControl AFormControl)
+		public bool TopMatches(FormControl formControl)
 		{
-			return Count > 0 && this[Count - 1] == AFormControl;
+			return Count > 0 && this[Count - 1] == formControl;
 		}
 	}
 }

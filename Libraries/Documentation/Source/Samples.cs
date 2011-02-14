@@ -37,11 +37,11 @@ namespace DocSamples
 	/// </summary>
 	public class DocCatalogObject : Instructions.InstructionNode
 	{
-		public const string CFilenameExpected = @"Filename expected";
-		public const string CExpressionExpected = @"Expression expected";
-		protected string FTitle = "";
+		public const string FilenameExpected = @"Filename expected";
+		public const string ExpressionExpected = @"Expression expected";
+		protected string _title = "";
 		
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			// AArguments[0] is template name, may be blank
 			// AArguments[1] is the title
@@ -49,76 +49,76 @@ namespace DocSamples
 			//	throw new RuntimeException(CFilenameExpected); // output filename
 			//if (AArguments[2].Value == null)
 			//	throw new RuntimeException(CExpressionExpected); // expression to "export"
-			FTitle = (string)AArguments[1];
-			if (FTitle == "")
-				FTitle = "Catalog Objects Documentation";
+			_title = (string)arguments[1];
+			if (_title == "")
+				_title = "Catalog Objects Documentation";
 
-			if (AArguments.Length == 4)
+			if (arguments.Length == 4)
 				ProcessTable
 				(
-					AProgram.ServerProcess, 
-					(string)AArguments[0], // template
-					(string)AArguments[2], // output file name
-					AProgram.CursorManager.GetCursor(((CursorValue)AArguments[3]).ID).Table
+					program.ServerProcess, 
+					(string)arguments[0], // template
+					(string)arguments[2], // output file name
+					program.CursorManager.GetCursor(((CursorValue)arguments[3]).ID).Table
 				);
 			else
 				ProcessTable
 				(
-					AProgram.ServerProcess, 
+					program.ServerProcess, 
 					"", 
-					(string)AArguments[2], // Output file name
-					AProgram.CursorManager.GetCursor(((CursorValue)AArguments[3]).ID).Table
+					(string)arguments[2], // Output file name
+					program.CursorManager.GetCursor(((CursorValue)arguments[3]).ID).Table
 				);
 
 			return(null);
 			// goal is to walk through the expression and extract metadata from the catalog for each item
 		}
 
-		protected virtual void ProcessTable(ServerProcess AProcess, string ATemplateName, string AOutputFileName, Table ATable)
+		protected virtual void ProcessTable(ServerProcess process, string templateName, string outputFileName, Table table)
 		{
 			// ServerProcess is the connection to the Server and context of what is going on in this layer
-			Row LRow;
-			StreamWriter LOutputFile = File.CreateText(AOutputFileName);
+			Row row;
+			StreamWriter outputFile = File.CreateText(outputFileName);
 			try
 			{
-				switch(ATemplateName)
+				switch(templateName)
 				{
 					case "TopicXML":
-						WriteTopicXMLHeader(AProcess, LOutputFile);
+						WriteTopicXMLHeader(process, outputFile);
 						break;
 					case "Docbook":
-						WriteDocbookHeader(AProcess, LOutputFile);
+						WriteDocbookHeader(process, outputFile);
 						break;
 					default:
 						break;
 				}
 
 				// the burden of ordering AND selecting the data on the cursor parameter
-				while(ATable.Next())
+				while(table.Next())
 				{
-					LRow = ATable.Select();
+					row = table.Select();
 					// select the row in the Catalog Objects table and write it out
-					switch(ATemplateName)
+					switch(templateName)
 					{
 						case "TopicXML":
-							WriteTopicXMLData(AProcess, AOutputFileName.Substring(0,AOutputFileName.LastIndexOf("\\")), LOutputFile, ATable, LRow);
+							WriteTopicXMLData(process, outputFileName.Substring(0,outputFileName.LastIndexOf("\\")), outputFile, table, row);
 							break;
 						case "Docbook":
-							WriteDocbookData(AProcess, AOutputFileName.Substring(0,AOutputFileName.LastIndexOf("\\")), LOutputFile, ATable, LRow);
+							WriteDocbookData(process, outputFileName.Substring(0,outputFileName.LastIndexOf("\\")), outputFile, table, row);
 							break;
 						default:
-							WriteData(AProcess, AOutputFileName.Substring(0,AOutputFileName.LastIndexOf("\\")), LOutputFile, ATable, LRow);
+							WriteData(process, outputFileName.Substring(0,outputFileName.LastIndexOf("\\")), outputFile, table, row);
 							break;
 					}
 				}
 			
-				switch(ATemplateName)
+				switch(templateName)
 				{
 					case "TopicXML":
-						WriteTopicXMLFooter(AProcess, LOutputFile);
+						WriteTopicXMLFooter(process, outputFile);
 						break;
 					case "Docbook":
-						WriteDocbookFooter(AProcess, LOutputFile);
+						WriteDocbookFooter(process, outputFile);
 						break;
 					default:
 						break;
@@ -126,97 +126,97 @@ namespace DocSamples
 			}
 			finally
 			{
-				LOutputFile.Close();
+				outputFile.Close();
 			}
 		}
 
-		protected virtual void WriteData(ServerProcess AProcess, string AFilepath, StreamWriter AOutputFile, Table ATable, Row ARow)
+		protected virtual void WriteData(ServerProcess process, string filepath, StreamWriter outputFile, Table table, Row row)
 		{
 			// non-formatted output is name \n comment \n\n
 
 			//Schema.Object LObject = AProcess.Catalog[ARow["ID"].ToGuid()];
-			Schema.Object LObject = AProcess.Catalog.Objects[(string)ARow["Name"]];
+			Schema.Object objectValue = process.Catalog.Objects[(string)row["Name"]];
 
 			// get the metadata for the row and print it
 
-			AOutputFile.WriteLine(LObject.Name);
+			outputFile.WriteLine(objectValue.Name);
 			//AOutputFile.WriteLine(LObject.MetaData == null ? String.Empty : LObject.MetaData.Comment);
 			try
 			{
-				AOutputFile.WriteLine(MetaData.GetTag(LObject.MetaData, "Catalog.Comment", String.Empty));
+				outputFile.WriteLine(MetaData.GetTag(objectValue.MetaData, "Catalog.Comment", String.Empty));
 			}
 			catch
 			{
 				// do nothing
 			}
-			AOutputFile.WriteLine("");
+			outputFile.WriteLine("");
 		}
 
-		protected virtual void WriteTopicXMLHeader(ServerProcess AProcess, StreamWriter AOutputFile)
+		protected virtual void WriteTopicXMLHeader(ServerProcess process, StreamWriter outputFile)
 		{
-			AOutputFile.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
-			AOutputFile.WriteLine("<AlphoraTopic>");
-			AOutputFile.WriteLine("	<topics>");
+			outputFile.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
+			outputFile.WriteLine("<AlphoraTopic>");
+			outputFile.WriteLine("	<topics>");
 		}
 
-		protected virtual void WriteTopicXMLFooter(ServerProcess AProcess, StreamWriter AOutputFile)
+		protected virtual void WriteTopicXMLFooter(ServerProcess process, StreamWriter outputFile)
 		{
-			AOutputFile.WriteLine("	</topics>");
-			AOutputFile.WriteLine("</AlphoraTopics>");
+			outputFile.WriteLine("	</topics>");
+			outputFile.WriteLine("</AlphoraTopics>");
 		}
 
-		protected virtual void WriteTopicXMLData(ServerProcess AProcess, string AFilepath, StreamWriter AOutputFile, Table ATable, Row ARow)
+		protected virtual void WriteTopicXMLData(ServerProcess process, string filepath, StreamWriter outputFile, Table table, Row row)
 		{
 			//Schema.Object LObject = AProcess.Catalog[ARow["ID"].ToGuid()];
-			Schema.Object LObject = AProcess.Catalog.Objects[(string)ARow["Name"]];
+			Schema.Object objectValue = process.Catalog.Objects[(string)row["Name"]];
 
-			AOutputFile.WriteLine("		<topic name=\"{0}\">", LObject.Name);
-			AOutputFile.WriteLine("			<title>{0}</title>", LObject.Name);
-			AOutputFile.WriteLine("			<summary>");
+			outputFile.WriteLine("		<topic name=\"{0}\">", objectValue.Name);
+			outputFile.WriteLine("			<title>{0}</title>", objectValue.Name);
+			outputFile.WriteLine("			<summary>");
 			//AOutputFile.WriteLine("				{0}", (LObject.MetaData == null ? String.Empty : LObject.MetaData.Comment));
 			try
 			{
-				AOutputFile.WriteLine("				{0}", (MetaData.GetTag( LObject.MetaData, "Catalog.Comment", String.Empty)));
+				outputFile.WriteLine("				{0}", (MetaData.GetTag( objectValue.MetaData, "Catalog.Comment", String.Empty)));
 			}
 			catch
 			{
 				// do nothing;
 			}
-			AOutputFile.WriteLine("			</summary>");
-			AOutputFile.WriteLine("		</topic>");
+			outputFile.WriteLine("			</summary>");
+			outputFile.WriteLine("		</topic>");
 		}
 
-		protected virtual void WriteDocbookHeader(ServerProcess AProcess, StreamWriter AOutputFile)
+		protected virtual void WriteDocbookHeader(ServerProcess process, StreamWriter outputFile)
 		{
-			AOutputFile.WriteLine("<sect1 id='{0}'>",FTitle.Replace(" ",""));
-			AOutputFile.WriteLine("<title><indexterm><primary>{0}</primary></indexterm>{0}</title>", FTitle);
+			outputFile.WriteLine("<sect1 id='{0}'>",_title.Replace(" ",""));
+			outputFile.WriteLine("<title><indexterm><primary>{0}</primary></indexterm>{0}</title>", _title);
 		}
 
-		protected virtual void WriteDocbookFooter(ServerProcess AProcess, StreamWriter AOutputFile)
+		protected virtual void WriteDocbookFooter(ServerProcess process, StreamWriter outputFile)
 		{
-			AOutputFile.WriteLine("</sect1>");
+			outputFile.WriteLine("</sect1>");
 		}
 
-		protected virtual void WriteDocbookData(ServerProcess AProcess, string AFilepath, StreamWriter AOutputFile, Table ATable, Row ARow)
+		protected virtual void WriteDocbookData(ServerProcess process, string filepath, StreamWriter outputFile, Table table, Row row)
 		{
 			//Schema.Object LObject = AProcess.Catalog[ARow["ID"].ToGuid()];
-			Schema.Object LObject = AProcess.Catalog.Objects[(string)ARow["Name"]];
-			AOutputFile.WriteLine("		<title><indexterm><primary>{0}</primary></indexterm>{0}</title>", LObject.Name);
-			AOutputFile.WriteLine("		<para>");
+			Schema.Object objectValue = process.Catalog.Objects[(string)row["Name"]];
+			outputFile.WriteLine("		<title><indexterm><primary>{0}</primary></indexterm>{0}</title>", objectValue.Name);
+			outputFile.WriteLine("		<para>");
 			//AOutputFile.WriteLine("			{0}", (LObject.MetaData == null ? String.Empty : LObject.MetaData.Comment));
 			try
 			{
-				AOutputFile.WriteLine("			{0}", (MetaData.GetTag(LObject.MetaData, "Catalog.Comment", String.Empty)));
+				outputFile.WriteLine("			{0}", (MetaData.GetTag(objectValue.MetaData, "Catalog.Comment", String.Empty)));
 			}
 			catch
 			{
 				// do nothing
 
 			}
-			AOutputFile.WriteLine("		</para>");
-			AOutputFile.WriteLine("		<bridgehead renderas='sect4'>Overloads</bridgehead>");
-			AOutputFile.WriteLine("		</programlisting>");
-			AOutputFile.WriteLine("	</sect2>");
+			outputFile.WriteLine("		</para>");
+			outputFile.WriteLine("		<bridgehead renderas='sect4'>Overloads</bridgehead>");
+			outputFile.WriteLine("		</programlisting>");
+			outputFile.WriteLine("	</sect2>");
 		}
 
 	}
@@ -239,10 +239,10 @@ namespace DocSamples
 	/// </summary>
 	public class DocOperator : DocCatalogObject
 	{
-		protected override void WriteData(ServerProcess AProcess, string AFilepath, StreamWriter AOutputFile, Table ATable, Row ARow)
+		protected override void WriteData(ServerProcess process, string filepath, StreamWriter outputFile, Table table, Row row)
 		{
 			//Schema.Object LObject = AProcess.Catalog[ARow["ID"].ToGuid()];
-			Schema.Object LObject = AProcess.Catalog.Objects[(string)ARow["Name"]];
+			Schema.Object objectValue = process.Catalog.Objects[(string)row["Name"]];
 
 			// todo: see if it is an operator, in which case may check IsBuiltin
 
@@ -250,251 +250,251 @@ namespace DocSamples
 			//{
 				D4TextEmitter Emitter = new D4TextEmitter();
 
-				string LString = Emitter.Emit(LObject.EmitStatement(Alphora.Dataphor.DAE.Language.D4.EmitMode.ForCopy));
+				string stringValue = Emitter.Emit(objectValue.EmitStatement(Alphora.Dataphor.DAE.Language.D4.EmitMode.ForCopy));
 
-				AOutputFile.WriteLine(LString);
-				AOutputFile.WriteLine("");
+				outputFile.WriteLine(stringValue);
+				outputFile.WriteLine("");
 			//}
 		}
 
-		protected override void WriteTopicXMLData(ServerProcess AProcess, string AFilepath, StreamWriter AOutputFile, Table ATable, Row ARow)
+		protected override void WriteTopicXMLData(ServerProcess process, string filepath, StreamWriter outputFile, Table table, Row row)
 		{
 			
 			//Schema.Object LObject = AProcess.Catalog[ARow["ID"].ToGuid()];			
-			Schema.Object LObject = AProcess.Catalog.Objects[(string)ARow["Name"]];
+			Schema.Object objectValue = process.Catalog.Objects[(string)row["Name"]];
 			// todo: see if it is an operator, in which case may check IsBuiltin
 			//if (LOperator.IsSystem && ! LOperator.IsBuiltin)
 			//{
-				string LName;
-				string LFilename;
+				string name;
+				string filename;
 
-				if (LObject.Name.IndexOf("(") > -1)
-					LName = LObject.Name.Substring(0,LObject.Name.IndexOf("("));
+				if (objectValue.Name.IndexOf("(") > -1)
+					name = objectValue.Name.Substring(0,objectValue.Name.IndexOf("("));
 				else
-					LName = LObject.Name;
+					name = objectValue.Name;
 
-				AOutputFile.WriteLine("		<entry name=\"{0}\" href=\"{1}\\{2}.dxt\" topic=\"//topic[@id='{3}']\" />", LName,AFilepath, LObject.ID.ToString().Replace("-",""), LObject.ID.ToString());
+				outputFile.WriteLine("		<entry name=\"{0}\" href=\"{1}\\{2}.dxt\" topic=\"//topic[@id='{3}']\" />", name,filepath, objectValue.ID.ToString().Replace("-",""), objectValue.ID.ToString());
 
-				LFilename = AFilepath + "\\" + LObject.ID.ToString().Replace("-","") + ".dxt";
-				if (System.IO.File.Exists(LFilename))
-					LFilename = AFilepath + "\\" + LObject.ID.ToString().Replace("-","") + ".new.dxt";
+				filename = filepath + "\\" + objectValue.ID.ToString().Replace("-","") + ".dxt";
+				if (System.IO.File.Exists(filename))
+					filename = filepath + "\\" + objectValue.ID.ToString().Replace("-","") + ".new.dxt";
 
-				StreamWriter LOutputFile = File.CreateText(LFilename);
+				StreamWriter localOutputFile = File.CreateText(filename);
 
 				try
 				{
-					WriteTopicFile(AProcess, AFilepath, LOutputFile, ATable, ARow);
+					WriteTopicFile(process, filepath, localOutputFile, table, row);
 				}
 				finally
 				{
-					LOutputFile.Close();
+					localOutputFile.Close();
 				}
 			//}
 
 		}
 		
 
-		protected override void WriteTopicXMLHeader(ServerProcess AProcess, StreamWriter AOutputFile)
+		protected override void WriteTopicXMLHeader(ServerProcess process, StreamWriter outputFile)
 		{
-			AOutputFile.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
-			AOutputFile.WriteLine("<AlphoraDoc>");
-			AOutputFile.WriteLine("	<entries>");
+			outputFile.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
+			outputFile.WriteLine("<AlphoraDoc>");
+			outputFile.WriteLine("	<entries>");
 		}
 
-		protected override void WriteTopicXMLFooter(ServerProcess AProcess, StreamWriter AOutputFile)
+		protected override void WriteTopicXMLFooter(ServerProcess process, StreamWriter outputFile)
 		{
-			AOutputFile.WriteLine("	</entries>");
-			AOutputFile.WriteLine("</AlphoraDoc>");
+			outputFile.WriteLine("	</entries>");
+			outputFile.WriteLine("</AlphoraDoc>");
 		}
 
-		protected void WriteTopicFile(ServerProcess AProcess, string AFilepath, StreamWriter AOutputFile, Table ATable, Row ARow)
+		protected void WriteTopicFile(ServerProcess process, string filepath, StreamWriter outputFile, Table table, Row row)
 		{
 			D4TextEmitter Emitter = new D4TextEmitter();
 			//Schema.Object LObject = AProcess.Catalog[ARow["ID"].ToGuid()];
-			Schema.Object LObject = AProcess.Catalog.Objects[(string)ARow["Name"]];
-			string LString = Emitter.Emit(LObject.EmitStatement(Alphora.Dataphor.DAE.Language.D4.EmitMode.ForCopy));
+			Schema.Object objectValue = process.Catalog.Objects[(string)row["Name"]];
+			string stringValue = Emitter.Emit(objectValue.EmitStatement(Alphora.Dataphor.DAE.Language.D4.EmitMode.ForCopy));
 			
-			string LName;
+			string name;
 
-			if (LObject.Name.IndexOf("(") > -1)
-				LName = LObject.Name.Substring(0,LObject.Name.IndexOf("("));
+			if (objectValue.Name.IndexOf("(") > -1)
+				name = objectValue.Name.Substring(0,objectValue.Name.IndexOf("("));
 			else
-				LName = LObject.Name;
+				name = objectValue.Name;
 
-			AOutputFile.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
-			AOutputFile.WriteLine("<AlphoraTopic>");
-			AOutputFile.WriteLine("	<topics>");
-			AOutputFile.WriteLine("		<topic name=\"{0}\" id=\"{1}\">",LName,LObject.ID.ToString());
-			AOutputFile.WriteLine("			<title>{0}</title>",LName);
-			AOutputFile.WriteLine("			<summary>");
-			AOutputFile.WriteLine("				<!-- provide a brief description of the operator -->");
-			AOutputFile.WriteLine("			</summary>");
+			outputFile.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
+			outputFile.WriteLine("<AlphoraTopic>");
+			outputFile.WriteLine("	<topics>");
+			outputFile.WriteLine("		<topic name=\"{0}\" id=\"{1}\">",name,objectValue.ID.ToString());
+			outputFile.WriteLine("			<title>{0}</title>",name);
+			outputFile.WriteLine("			<summary>");
+			outputFile.WriteLine("				<!-- provide a brief description of the operator -->");
+			outputFile.WriteLine("			</summary>");
 
-			AOutputFile.WriteLine("			<part name=\"Syntax\">");
-			AOutputFile.WriteLine("				<title>Syntax</title>");
-			AOutputFile.WriteLine("				<para>");
-			AOutputFile.WriteLine("					<code>");
-			AOutputFile.WriteLine("{0}",LString.Trim());
-			AOutputFile.WriteLine("					</code>");
-			AOutputFile.WriteLine("				</para>");
-			AOutputFile.WriteLine("			</part>");
+			outputFile.WriteLine("			<part name=\"Syntax\">");
+			outputFile.WriteLine("				<title>Syntax</title>");
+			outputFile.WriteLine("				<para>");
+			outputFile.WriteLine("					<code>");
+			outputFile.WriteLine("{0}",stringValue.Trim());
+			outputFile.WriteLine("					</code>");
+			outputFile.WriteLine("				</para>");
+			outputFile.WriteLine("			</part>");
 			
-			AOutputFile.WriteLine("			<part name=\"Parameters\">");
-			AOutputFile.WriteLine("				<title>Parameters</title>");
-			AOutputFile.WriteLine("				<!-- each parameter should be described using one of the following parameter markups -->");
-			AOutputFile.WriteLine("				<!-- examples:");
-			AOutputFile.WriteLine("				<param name=\"paramname\">param description</param>");
-			AOutputFile.WriteLine("				<parameter name=\"paramname\" type=\"paratype,fullyqualified\" optional=\"0|1\" direction=\"in|out\" />");
-			AOutputFile.WriteLine("				-->");
-			AOutputFile.WriteLine("			</part>");
+			outputFile.WriteLine("			<part name=\"Parameters\">");
+			outputFile.WriteLine("				<title>Parameters</title>");
+			outputFile.WriteLine("				<!-- each parameter should be described using one of the following parameter markups -->");
+			outputFile.WriteLine("				<!-- examples:");
+			outputFile.WriteLine("				<param name=\"paramname\">param description</param>");
+			outputFile.WriteLine("				<parameter name=\"paramname\" type=\"paratype,fullyqualified\" optional=\"0|1\" direction=\"in|out\" />");
+			outputFile.WriteLine("				-->");
+			outputFile.WriteLine("			</part>");
 
-			AOutputFile.WriteLine("			<part name=\"Return\">");
-			AOutputFile.WriteLine("				<title>Return</title>");
-			AOutputFile.WriteLine("				<para>");
-			AOutputFile.WriteLine("				<!-- describe the return value -->");
-			AOutputFile.WriteLine("				</para>");
-			AOutputFile.WriteLine("			</part>");
+			outputFile.WriteLine("			<part name=\"Return\">");
+			outputFile.WriteLine("				<title>Return</title>");
+			outputFile.WriteLine("				<para>");
+			outputFile.WriteLine("				<!-- describe the return value -->");
+			outputFile.WriteLine("				</para>");
+			outputFile.WriteLine("			</part>");
 
-			AOutputFile.WriteLine("			<part name=\"Remarks\">");
-			AOutputFile.WriteLine("				<title>Remarks</title>");
-			AOutputFile.WriteLine("				<para>");
-			AOutputFile.WriteLine("				<!-- describe other feature of the operator, exceptions that may occur, unexpected side effects, etc. -->");
-			AOutputFile.WriteLine("				</para>");
-			AOutputFile.WriteLine("			</part>");
+			outputFile.WriteLine("			<part name=\"Remarks\">");
+			outputFile.WriteLine("				<title>Remarks</title>");
+			outputFile.WriteLine("				<para>");
+			outputFile.WriteLine("				<!-- describe other feature of the operator, exceptions that may occur, unexpected side effects, etc. -->");
+			outputFile.WriteLine("				</para>");
+			outputFile.WriteLine("			</part>");
 
-			AOutputFile.WriteLine("			<part name=\"Example\">");
-			AOutputFile.WriteLine("				<title>Example</title>");
-			AOutputFile.WriteLine("				<para>");
-			AOutputFile.WriteLine("				<!-- provide a code sample or more showing use of the operator -->");
-			AOutputFile.WriteLine("				</para>");
-			AOutputFile.WriteLine("			</part>");
+			outputFile.WriteLine("			<part name=\"Example\">");
+			outputFile.WriteLine("				<title>Example</title>");
+			outputFile.WriteLine("				<para>");
+			outputFile.WriteLine("				<!-- provide a code sample or more showing use of the operator -->");
+			outputFile.WriteLine("				</para>");
+			outputFile.WriteLine("			</part>");
 
-			AOutputFile.WriteLine("		</topic>");
-			AOutputFile.WriteLine("	</topics>");
-			AOutputFile.WriteLine("</AlphoraTopic>");
+			outputFile.WriteLine("		</topic>");
+			outputFile.WriteLine("	</topics>");
+			outputFile.WriteLine("</AlphoraTopic>");
 		}
 
-		protected override void WriteDocbookHeader(ServerProcess AProcess, StreamWriter AOutputFile)
+		protected override void WriteDocbookHeader(ServerProcess process, StreamWriter outputFile)
 		{
-			AOutputFile.WriteLine("<sect1 id='SLR{0}'>", FTitle.Replace(" ",""));
-			AOutputFile.WriteLine("<title><indexterm><primary>{0}</primary></indexterm>{0}</title>", FTitle);
+			outputFile.WriteLine("<sect1 id='SLR{0}'>", _title.Replace(" ",""));
+			outputFile.WriteLine("<title><indexterm><primary>{0}</primary></indexterm>{0}</title>", _title);
 		}
 
-		protected override void WriteDocbookFooter(ServerProcess AProcess, StreamWriter AOutputFile)
+		protected override void WriteDocbookFooter(ServerProcess process, StreamWriter outputFile)
 		{
-			AOutputFile.WriteLine("</sect1>");
+			outputFile.WriteLine("</sect1>");
 		}
 
-		protected string GetJustName(Schema.Object AObject)
+		protected string GetJustName(Schema.Object objectValue)
 		{
-			if (AObject is Schema.Operator)
-				return(((Schema.Operator)AObject).OperatorName);
+			if (objectValue is Schema.Operator)
+				return(((Schema.Operator)objectValue).OperatorName);
 			else
-				return(AObject.Name);
+				return(objectValue.Name);
 		}
 
-		protected override void WriteDocbookData(ServerProcess AProcess, string AFilepath, StreamWriter AOutputFile, Table ATable, Row ARow)
+		protected override void WriteDocbookData(ServerProcess process, string filepath, StreamWriter outputFile, Table table, Row row)
 		{
 			//Schema.Object LObject = AProcess.Catalog[ARow["ID"].ToGuid()];
-			Schema.Object LObject = AProcess.Catalog.Objects[(string)ARow["Name"]];
-			string LFilename = "c:\\src\\Alphora\\Docs\\DocbookManuals\\OperatorDocs\\" + GetJustName(LObject) + ".xml";
+			Schema.Object objectValue = process.Catalog.Objects[(string)row["Name"]];
+			string filename = "c:\\src\\Alphora\\Docs\\DocbookManuals\\OperatorDocs\\" + GetJustName(objectValue) + ".xml";
 			
-			if (System.IO.File.Exists(LFilename))
+			if (System.IO.File.Exists(filename))
 			{
-				if (LObject.IsSystem /*&& ! LObject.IsBuiltin*/)
+				if (objectValue.IsSystem /*&& ! LObject.IsBuiltin*/)
 				{
-					AOutputFile.WriteLine("		<sect2 id=\"SLR{0}\">", GetJustName(LObject));
-					AOutputFile.WriteLine("			<title><indexterm><primary>{0}</primary></indexterm><indexterm><primary>D4 Operators</primary><secondary>{0}</secondary></indexterm>{0}</title>", GetJustName(LObject));
-					AOutputFile.WriteLine("			<para>");
+					outputFile.WriteLine("		<sect2 id=\"SLR{0}\">", GetJustName(objectValue));
+					outputFile.WriteLine("			<title><indexterm><primary>{0}</primary></indexterm><indexterm><primary>D4 Operators</primary><secondary>{0}</secondary></indexterm>{0}</title>", GetJustName(objectValue));
+					outputFile.WriteLine("			<para>");
 					//AOutputFile.WriteLine("				{0}", (LObject.MetaData == null ? String.Empty : LObject.MetaData.Comment));
 					try
 					{
-						AOutputFile.WriteLine("				{0}", (MetaData.GetTag(LObject.MetaData, "Catalog.Comment", String.Empty)));
+						outputFile.WriteLine("				{0}", (MetaData.GetTag(objectValue.MetaData, "Catalog.Comment", String.Empty)));
 					}
 					catch
 					{
 						// do nothing
 					}
-					AOutputFile.WriteLine("			</para>");
-					AOutputFile.WriteLine("			<bridgehead renderas='sect4'>Declarations</bridgehead>");
-					AOutputFile.WriteLine("			<programlisting>");
+					outputFile.WriteLine("			</para>");
+					outputFile.WriteLine("			<bridgehead renderas='sect4'>Declarations</bridgehead>");
+					outputFile.WriteLine("			<programlisting>");
 					// here walk the table for all of the same name (overloads)
-					WriteDocbookDeclarations(AProcess, AOutputFile, ATable, LObject);
+					WriteDocbookDeclarations(process, outputFile, table, objectValue);
 
-					AOutputFile.WriteLine("			</programlisting>");
+					outputFile.WriteLine("			</programlisting>");
 
 					// here merge the external docs
-					WriteMergeExtDocs(AProcess, AOutputFile, LObject);
+					WriteMergeExtDocs(process, outputFile, objectValue);
 
-					AOutputFile.WriteLine("		</sect2>");
+					outputFile.WriteLine("		</sect2>");
 				}
 			}
 		}
 
-		protected void WriteDocbookDeclarations(ServerProcess AProcess, StreamWriter AOutputFile, Table ATable, Schema.Object AObject)
+		protected void WriteDocbookDeclarations(ServerProcess process, StreamWriter outputFile, Table table, Schema.Object objectValue)
 		{
 			// walk the table until the name of the object no longer matches, place the syntax in the outputfile for each overload
-			Row LRow;
+			Row row;
 			D4TextEmitter Emitter = new D4TextEmitter();
-			Schema.Object LObject = null;
-			string LString = "";
+			Schema.Object localObjectValue = null;
+			string stringValue = "";
 
 			// write the definition of the current object
-			LString = Emitter.Emit(AObject.EmitStatement(Alphora.Dataphor.DAE.Language.D4.EmitMode.ForCopy));
-			AOutputFile.WriteLine("{0}", LString.TrimEnd(null));
+			stringValue = Emitter.Emit(objectValue.EmitStatement(Alphora.Dataphor.DAE.Language.D4.EmitMode.ForCopy));
+			outputFile.WriteLine("{0}", stringValue.TrimEnd(null));
 
 			// write the definitions for all the overloads
-			while (ATable.Next())
+			while (table.Next())
 			{
-				LRow = ATable.Select();
+				row = table.Select();
 				//LObject = AProcess.Catalog[LRow["ID"].ToGuid()];
-				LObject = AProcess.Catalog.Objects[(string)LRow["Name"]];
-				if (GetJustName(LObject) == GetJustName(AObject))
+				localObjectValue = process.Catalog.Objects[(string)row["Name"]];
+				if (GetJustName(localObjectValue) == GetJustName(objectValue))
 				{
-					LString = Emitter.Emit(LObject.EmitStatement(Alphora.Dataphor.DAE.Language.D4.EmitMode.ForCopy));
-					AOutputFile.WriteLine("");
-					AOutputFile.WriteLine("{0}", LString.TrimEnd(null));
+					stringValue = Emitter.Emit(localObjectValue.EmitStatement(Alphora.Dataphor.DAE.Language.D4.EmitMode.ForCopy));
+					outputFile.WriteLine("");
+					outputFile.WriteLine("{0}", stringValue.TrimEnd(null));
 				}
 				else
 				{
-					ATable.Prior();
+					table.Prior();
 					break;
 				}
 			}
 		}
 
-		protected void WriteMergeExtDocs(ServerProcess AProcess, StreamWriter AOutputFile, Schema.Object AObject)
+		protected void WriteMergeExtDocs(ServerProcess process, StreamWriter outputFile, Schema.Object objectValue)
 		{
 			// load the external file, remove title, stuff innerxml into the outputfile
-			XmlDocument LRemarks = null;
-			XmlNode LTitle = null;
-			XmlNode LSect2 = null;
+			XmlDocument remarks = null;
+			XmlNode title = null;
+			XmlNode sect2 = null;
 
 			// magic directory used on the docs merge machine, (should be a parameter?...)
-			string LFilename = "c:\\src\\Alphora\\Docs\\DocbookManuals\\OperatorDocs\\" + GetJustName(AObject) + ".xml";
+			string filename = "c:\\src\\Alphora\\Docs\\DocbookManuals\\OperatorDocs\\" + GetJustName(objectValue) + ".xml";
 			
-			if (System.IO.File.Exists(LFilename))
+			if (System.IO.File.Exists(filename))
 			{
-				System.IO.FileStream LStream = new System.IO.FileStream(LFilename,System.IO.FileMode.Open,FileAccess.Read, FileShare.Read);
-				LRemarks = new XmlDocument();
-				LRemarks.Load(LStream);
+				System.IO.FileStream stream = new System.IO.FileStream(filename,System.IO.FileMode.Open,FileAccess.Read, FileShare.Read);
+				remarks = new XmlDocument();
+				remarks.Load(stream);
 				try
 				{
-					LSect2 = LRemarks.SelectSingleNode("//sect2");
-					if (LSect2 != null)
+					sect2 = remarks.SelectSingleNode("//sect2");
+					if (sect2 != null)
 					{
-						LTitle = LSect2.SelectSingleNode("./title");
-						if (LTitle != null)
-							LSect2.RemoveChild(LTitle);
-						LTitle = LSect2.SelectSingleNode("./sect2info");
-						if (LTitle != null)
-							LSect2.RemoveChild(LTitle);
-						AOutputFile.Write(LSect2.InnerXml);
+						title = sect2.SelectSingleNode("./title");
+						if (title != null)
+							sect2.RemoveChild(title);
+						title = sect2.SelectSingleNode("./sect2info");
+						if (title != null)
+							sect2.RemoveChild(title);
+						outputFile.Write(sect2.InnerXml);
 					}
 				}
 				finally
 				{
-					LStream.Close();
+					stream.Close();
 				}
 			}
 		}
@@ -569,14 +569,14 @@ namespace DocSamples
 
 		/// <summary>The main navigator which keeps track of where we
 		/// are in the document.</summary>
-		DAEClient.DataSession FDataSession;
+		DAEClient.DataSession _dataSession;
 		XPathNavigator FxPathNavigator;
-		string FExtDocPath;
-		bool FTraceOn;
-		StreamWriter FTrace;
+		string _extDocPath;
+		bool _traceOn;
+		StreamWriter _trace;
 
 
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
 			//if (AArguments[0].Value == null)
 			//	throw new RuntimeException(CExpressionExpected); // library name to doc
@@ -590,23 +590,23 @@ namespace DocSamples
 
 			// todo: consider append/overwrite flag and write direct to disk
 			
-			string LLibraryName = (string)AArguments[0];
-			string LTemplateFile = (string)AArguments[1];
-			string LFilename = LLibraryName + ".xml";
-			string LOutputPath = (string)AArguments[3]; // assumes trailing backslash
-			string LOutputFilename = Path.Combine(LOutputPath, LFilename);
+			string libraryName = (string)arguments[0];
+			string templateFile = (string)arguments[1];
+			string filename = libraryName + ".xml";
+			string outputPath = (string)arguments[3]; // assumes trailing backslash
+			string outputFilename = Path.Combine(outputPath, filename);
 
-			FExtDocPath = (string)AArguments[2];
-			if (AArguments[4] == null)
-				FTraceOn = false;
+			_extDocPath = (string)arguments[2];
+			if (arguments[4] == null)
+				_traceOn = false;
 			else
-				FTraceOn = ((string)AArguments[4]).Equals("on");
+				_traceOn = ((string)arguments[4]).Equals("on");
 
-			System.IO.FileStream LStream = new System.IO.FileStream(LTemplateFile,System.IO.FileMode.Open,FileAccess.Read, FileShare.Read);
+			System.IO.FileStream stream = new System.IO.FileStream(templateFile,System.IO.FileMode.Open,FileAccess.Read, FileShare.Read);
 			XmlDocument LxmlTemplate = new XmlDocument();
-			LxmlTemplate.Load(LStream);
-			if (FTraceOn)
-				FTrace = File.CreateText(LOutputFilename + ".trc");
+			LxmlTemplate.Load(stream);
+			if (_traceOn)
+				_trace = File.CreateText(outputFilename + ".trc");
 
 			try
 			{
@@ -614,230 +614,230 @@ namespace DocSamples
 				FxPathNavigator = LxmlTemplate.CreateNavigator();
 
 				// new dataconnection
-				FDataSession = new DAEClient.DataSession();
-				FDataSession.SessionInfo.UserID = AProgram.ServerProcess.ServerSession.SessionInfo.UserID;
-				FDataSession.SessionInfo.Password = AProgram.ServerProcess.ServerSession.SessionInfo.Password;
+				_dataSession = new DAEClient.DataSession();
+				_dataSession.SessionInfo.UserID = program.ServerProcess.ServerSession.SessionInfo.UserID;
+				_dataSession.SessionInfo.Password = program.ServerProcess.ServerSession.SessionInfo.Password;
 				//FDataSession.ServerConnection = new DAEClient.ServerConnection(AProgram.ServerProcess.ServerSession.Server);
-				FDataSession.Open();
+				_dataSession.Open();
 
-				ProcessTemplate(AProgram.ServerProcess, LOutputFilename);
+				ProcessTemplate(program.ServerProcess, outputFilename);
 
-				FDataSession.Close();
+				_dataSession.Close();
 				return(null);
 			}
 			finally
 			{
-				LStream.Close();
-				if (FTraceOn)
-					FTrace.Close();
+				stream.Close();
+				if (_traceOn)
+					_trace.Close();
 			}
 			
 
 		}
 
-		protected void UpdateParams(DAEClient.DataView LDataView, Row ARow, string AParams)
+		protected void UpdateParams(DAEClient.DataView LDataView, Row row, string paramsValue)
 		{
-			if (ARow != null && AParams != "")
+			if (row != null && paramsValue != "")
 			{
-				DAEClient.DataSetParamGroup LParamGroup = new DAEClient.DataSetParamGroup();
-				DAEClient.DataSetParam LParam;
-				string[] LParams = AParams.Split(new char[] {';', ',', '\n', '\r'});
-				string LParamName;
-				string LColumnName;
-				int LPos;
+				DAEClient.DataSetParamGroup paramGroup = new DAEClient.DataSetParamGroup();
+				DAEClient.DataSetParam param;
+				string[] localParamsValue = paramsValue.Split(new char[] {';', ',', '\n', '\r'});
+				string paramName;
+				string columnName;
+				int pos;
 
-				LParamGroup.Source = null;
+				paramGroup.Source = null;
 
-				foreach(String LParamStr in LParams)
+				foreach(String paramStr in localParamsValue)
 				{
-					LPos = LParamStr.IndexOf('=');
-					if (LPos >= 0)
+					pos = paramStr.IndexOf('=');
+					if (pos >= 0)
 					{
-						LColumnName = LParamStr.Substring(LPos + 1).Trim();
-						LParamName = LParamStr.Substring(0, LPos).Trim();
+						columnName = paramStr.Substring(pos + 1).Trim();
+						paramName = paramStr.Substring(0, pos).Trim();
 					}
 					else
 					{
-						LColumnName = LParamStr;
-						LParamName = LParamStr;
+						columnName = paramStr;
+						paramName = paramStr;
 					}
 					
-					LParam = new DAEClient.DataSetParam();
-					LParam.Name = LParamName;
-					LParam.Modifier =  Alphora.Dataphor.DAE.Language.Modifier.Const;
-					LParam.DataType = ARow.DataType.Columns[LColumnName].DataType;
-					LParam.Value = ARow[LColumnName];
+					param = new DAEClient.DataSetParam();
+					param.Name = paramName;
+					param.Modifier =  Alphora.Dataphor.DAE.Language.Modifier.Const;
+					param.DataType = row.DataType.Columns[columnName].DataType;
+					param.Value = row[columnName];
 					//LParam.ColumnName = LColumnName;
-					LParamGroup.Params.Add(LParam);
+					paramGroup.Params.Add(param);
 				}
-				LDataView.ParamGroups.Add(LParamGroup);
+				LDataView.ParamGroups.Add(paramGroup);
 			}
 		}
 
-		protected DAEClient.DataView GetParamDataView(string AExpression, Row ARow)
+		protected DAEClient.DataView GetParamDataView(string expression, Row row)
 		{
-			string LParamStr;
-			string LExpression = AExpression;
-			int LSpacePos = AExpression.IndexOf(";");
+			string paramStr;
+			string localExpression = expression;
+			int spacePos = expression.IndexOf(";");
 
-			if (LSpacePos > 0)
+			if (spacePos > 0)
 			{
-				LParamStr = LExpression.Substring(LSpacePos + 1);
-				LExpression = LExpression.Substring(0, LSpacePos);
+				paramStr = localExpression.Substring(spacePos + 1);
+				localExpression = localExpression.Substring(0, spacePos);
 			}
 			else
-				LParamStr = String.Empty;
+				paramStr = String.Empty;
 
 			// todo: how to create a new process for the evaluation
 			// todo: how does getting a new process fit into this?
 			//ServerProcess LProcess = (ServerProcess)FDataphorConnection.ServerSession.StartProcess(new ProcessInfo(AProcess.ServerSession.SessionInfo));
 
-			DAEClient.DataView LDataView = new DAEClient.DataView();
-			LDataView.Session = FDataSession;
-			LDataView.Expression = LExpression;
-			LDataView.IsReadOnly = true;
-			LDataView.CursorType = CursorType.Static;
+			DAEClient.DataView dataView = new DAEClient.DataView();
+			dataView.Session = _dataSession;
+			dataView.Expression = localExpression;
+			dataView.IsReadOnly = true;
+			dataView.CursorType = CursorType.Static;
 			// attach parameters from row to the new view
-			UpdateParams(LDataView, ARow, LParamStr);
-			LDataView.Open(DAEClient.DataSetState.Browse);
+			UpdateParams(dataView, row, paramStr);
+			dataView.Open(DAEClient.DataSetState.Browse);
 
-			return (LDataView);
+			return (dataView);
 		}
 
-		protected string D4ExpressionField(ServerProcess AProcess, Row ARow, string AParamsString)
+		protected string D4ExpressionField(ServerProcess process, Row row, string paramsString)
 		{
 			// assumes the processing instruction is the current node
 			// AParamString should be this format: <fieldname> <expression>
 
-			DAEClient.DataView LDataView;
-			string LExpression;
-			string LFieldName = AParamsString;
-			int LSpacePos = LFieldName.IndexOf(" ");
-			LExpression = LFieldName.Substring(LSpacePos + 1);
-			LFieldName = LFieldName.Substring(0, LSpacePos);
+			DAEClient.DataView dataView;
+			string expression;
+			string fieldName = paramsString;
+			int spacePos = fieldName.IndexOf(" ");
+			expression = fieldName.Substring(spacePos + 1);
+			fieldName = fieldName.Substring(0, spacePos);
 			
 
-			LDataView = GetParamDataView(LExpression, ARow);
+			dataView = GetParamDataView(expression, row);
 			try
 			{
-				LDataView.First();
-				if (! LDataView.EOF)
-					return D4Field(LFieldName, LDataView.ActiveRow);
+				dataView.First();
+				if (! dataView.EOF)
+					return D4Field(fieldName, dataView.ActiveRow);
 				else
-					return String.Format("Message: No data from D4ExpressionField: {0}", LExpression);
+					return String.Format("Message: No data from D4ExpressionField: {0}", expression);
 
 			}
 			finally
 			{
-				LDataView.Dispose();
+				dataView.Dispose();
 			}
 		}
 
-		protected bool D4ExpressionIf(ServerProcess AProcess, Row ARow, string AParamsString)
+		protected bool D4ExpressionIf(ServerProcess process, Row row, string paramsString)
 		{
 			// assumes the processing instruction is the current node
 			// AParamString should be this format: <expression>
 			//   where expression is of the form: TableDee add { <expression> Result }
 			//     and the result is boolean, True is required for the block to process
 
-			DAEClient.DataView LDataView;
+			DAEClient.DataView dataView;
 			
-			LDataView = GetParamDataView(AParamsString, ARow);
+			dataView = GetParamDataView(paramsString, row);
 			try
 			{
-				LDataView.First();
-				if (! LDataView.EOF)
-					return D4Field("Result", LDataView.ActiveRow) == "True";
+				dataView.First();
+				if (! dataView.EOF)
+					return D4Field("Result", dataView.ActiveRow) == "True";
 				else
 					return false;
 			}
 			finally
 			{
-				LDataView.Dispose();
+				dataView.Dispose();
 			}
 		}
 
-		protected bool ProcessBlockNode(ServerProcess AProcess, XPathNavigator ATemplate, XmlTextWriter AOutput, string ARowTag, DAEClient.DataView ADataView)
+		protected bool ProcessBlockNode(ServerProcess process, XPathNavigator template, XmlTextWriter output, string rowTag, DAEClient.DataView dataView)
 		{
 
-			XPathNavigator LNav;
+			XPathNavigator nav;
 			
-			bool LParentContainsRowTag = ((IHasXmlNode)ATemplate).GetNode().SelectNodes(String.Format(".//{0}",ARowTag)).Count > 0;
-			bool LContainsPI;
+			bool parentContainsRowTag = ((IHasXmlNode)template).GetNode().SelectNodes(String.Format(".//{0}",rowTag)).Count > 0;
+			bool containsPI;
 				
-			if (FTraceOn)
-				FTrace.WriteLine(String.Format("Process BlockNode Tag = {0} ContainsRowTag = {1}",ATemplate.LocalName, LParentContainsRowTag.ToString()));
+			if (_traceOn)
+				_trace.WriteLine(String.Format("Process BlockNode Tag = {0} ContainsRowTag = {1}",template.LocalName, parentContainsRowTag.ToString()));
 
-			ProcessNode(AProcess, ATemplate, AOutput, ADataView.ActiveRow, ! LParentContainsRowTag);
+			ProcessNode(process, template, output, dataView.ActiveRow, ! parentContainsRowTag);
 
-			if (LParentContainsRowTag)
+			if (parentContainsRowTag)
 			{
 
-				if (ATemplate.HasChildren)
+				if (template.HasChildren)
 				{
-					ATemplate.MoveToFirstChild();
+					template.MoveToFirstChild();
 					do 
 					{
-						LContainsPI = ((IHasXmlNode)ATemplate).GetNode().SelectNodes(".//processing-instruction('DocLib')").Count > 0;
-						if (FTraceOn)
-							FTrace.WriteLine(String.Format("Process BlockNode child Tag = {0} ContainsProcessing Instruction = {1}",ATemplate.LocalName, LContainsPI.ToString()));
+						containsPI = ((IHasXmlNode)template).GetNode().SelectNodes(".//processing-instruction('DocLib')").Count > 0;
+						if (_traceOn)
+							_trace.WriteLine(String.Format("Process BlockNode child Tag = {0} ContainsProcessing Instruction = {1}",template.LocalName, containsPI.ToString()));
 
-						if (LContainsPI)
+						if (containsPI)
 						{
-							if (ARowTag.Equals(ATemplate.LocalName))
+							if (rowTag.Equals(template.LocalName))
 							{
-								LNav = ATemplate.Clone();
-								while(! ADataView.EOF)
+								nav = template.Clone();
+								while(! dataView.EOF)
 								{
-									ProcessNode(AProcess, LNav, AOutput, ADataView.ActiveRow, true);
-									ADataView.Next();
-									LNav.MoveTo(ATemplate); // move to the first tag of the fragment
+									ProcessNode(process, nav, output, dataView.ActiveRow, true);
+									dataView.Next();
+									nav.MoveTo(template); // move to the first tag of the fragment
 								}
 							}
 							else
-								ProcessBlockNode(AProcess, ATemplate, AOutput, ARowTag, ADataView);
+								ProcessBlockNode(process, template, output, rowTag, dataView);
 						}
 						else
-							ProcessNode(AProcess, ATemplate, AOutput, ADataView.ActiveRow, true);
+							ProcessNode(process, template, output, dataView.ActiveRow, true);
 
-					} while(ATemplate.MoveToNext());
+					} while(template.MoveToNext());
 
-					ATemplate.MoveToParent();
+					template.MoveToParent();
 				}
 		
-				if (FTraceOn)
-					FTrace.WriteLine(String.Format("Closing BlockNode Tag = {0}",ATemplate.LocalName));
-				AOutput.WriteEndElement();
+				if (_traceOn)
+					_trace.WriteLine(String.Format("Closing BlockNode Tag = {0}",template.LocalName));
+				output.WriteEndElement();
 			}
 
 			return(true);
 		}
 
-		protected bool D4ExpressionBlock(ServerProcess AProcess, XPathNavigator ATemplate, XmlTextWriter AOutput, Row ARow, string AParamsString)
+		protected bool D4ExpressionBlock(ServerProcess process, XPathNavigator template, XmlTextWriter output, Row row, string paramsString)
 		{
 			// assumes the processing instruction is the current node
 			// AParamString should be this format: <rowtag> <expression>
 
 			
-			XPathNavigator LNav;
-			DAEClient.DataView LDataView;
-			int LSpacePos;
-			string LRowTag;
-			string LExpression = AParamsString;
+			XPathNavigator nav;
+			DAEClient.DataView dataView;
+			int spacePos;
+			string rowTag;
+			string expression = paramsString;
 
 		
-			LSpacePos = LExpression.IndexOf(" ");
-			LRowTag = LExpression.Substring(0, LSpacePos);
-			LExpression =  LExpression.Substring(LSpacePos + 1);
+			spacePos = expression.IndexOf(" ");
+			rowTag = expression.Substring(0, spacePos);
+			expression =  expression.Substring(spacePos + 1);
 			
-			LDataView = GetParamDataView(LExpression, ARow);
+			dataView = GetParamDataView(expression, row);
 			try
 			{
-				LDataView.First();
-				ATemplate.MoveToNext();
+				dataView.First();
+				template.MoveToNext();
 
-				if (FTraceOn)
-					FTrace.WriteLine(String.Format("D4ExpressionBlock: LRowTag='{0}' LExpression='{1}' FollowingTag='{2}'", LRowTag, LExpression, ATemplate.LocalName));
+				if (_traceOn)
+					_trace.WriteLine(String.Format("D4ExpressionBlock: LRowTag='{0}' LExpression='{1}' FollowingTag='{2}'", rowTag, expression, template.LocalName));
 
 				/*
 				 * if there is the row tag, then a sub block is repeated for each row
@@ -847,180 +847,180 @@ namespace DocSamples
 				 * allows all libraries, for example, to be processed by a D4ExpressionBlock and a ExtDoc combination
 				 * of tags.
 				 */
-				if (! LDataView.EOF)
+				if (! dataView.EOF)
 				{
-					if (LRowTag.Equals("*"))
+					if (rowTag.Equals("*"))
 					{
-						LNav = ATemplate.Clone();
-						LDataView.First();
-						while(! LDataView.EOF)
+						nav = template.Clone();
+						dataView.First();
+						while(! dataView.EOF)
 						{
 							// process the template
-							ProcessNode(AProcess, LNav, AOutput, LDataView.ActiveRow, true);
-							LDataView.Next();
-							LNav.MoveTo(ATemplate); // move to the first tag of the fragment
+							ProcessNode(process, nav, output, dataView.ActiveRow, true);
+							dataView.Next();
+							nav.MoveTo(template); // move to the first tag of the fragment
 						}
 					}
 					else
-						if (((IHasXmlNode)ATemplate).GetNode().SelectNodes(String.Format(".//{0}",LRowTag)).Count > 0)
-							ProcessBlockNode(AProcess, ATemplate, AOutput, LRowTag, LDataView);
+						if (((IHasXmlNode)template).GetNode().SelectNodes(String.Format(".//{0}",rowTag)).Count > 0)
+							ProcessBlockNode(process, template, output, rowTag, dataView);
 						else
 						{
-							AOutput.WriteComment(String.Format("Error: D4Expression Block missing row tag name [ {0} ]", LRowTag));
-							AOutput.WriteComment(String.Format("Expression: {0}", LExpression));
+							output.WriteComment(String.Format("Error: D4Expression Block missing row tag name [ {0} ]", rowTag));
+							output.WriteComment(String.Format("Expression: {0}", expression));
 						}
 				}
 				else
-					AOutput.WriteComment(String.Format("Message: No data from D4ExpressionBlock: {0}", LExpression));
+					output.WriteComment(String.Format("Message: No data from D4ExpressionBlock: {0}", expression));
 
 			}
 			finally
 			{
-				LDataView.Dispose();
+				dataView.Dispose();
 			}
 			return (true);
 			
 		}
 
-		protected string D4Field(string AParamString, Row ARow)
+		protected string D4Field(string paramString, Row row)
 		{
 			// data assumed to be simple text to be inserted into the file
 			// AParamString should be this format: <fieldname>
-			if (ARow != null)
-				return((string)ARow[AParamString]);
+			if (row != null)
+				return((string)row[paramString]);
 			else
 				return(String.Empty);
 		}
 
-		protected bool D4ExtDoc(ServerProcess AProcess, XPathNavigator ATemplate, XmlTextWriter AOutput, string AParamsString, Row ARow)
+		protected bool D4ExtDoc(ServerProcess process, XPathNavigator template, XmlTextWriter output, string paramsString, Row row)
 		{
 			// assumes the processing instruction is the current node
 			// AParamString should be this format: <inner | outer> droptags="tag,tag,.." <fieldname> <expression>
 			// may use the extdoc path passed in with the filename for finding the file
 
-			int LSpacePos;
-			string LSelection;
-			string LDropTags;
-			string LPassThrough = AParamsString;
-			XmlDocument LTemplate = null;
-			XmlNode LNode;
-			XmlNode LTopNode;
+			int spacePos;
+			string selection;
+			string dropTags;
+			string passThrough = paramsString;
+			XmlDocument localTemplate = null;
+			XmlNode node;
+			XmlNode topNode;
 
 			XPathNavigator LxPathNavigator;
 
-			LSpacePos = LPassThrough.IndexOf(" ");
-			LSelection = LPassThrough.Substring(0, LSpacePos);
-			LPassThrough = LPassThrough.Substring(LSpacePos + 1);
-			LSpacePos = LPassThrough.IndexOf("droptags=\"");
-			LDropTags = LPassThrough.Substring(LSpacePos + 10);
-			LSpacePos = LDropTags.IndexOf("\"");
-			LPassThrough = LDropTags.Substring(LSpacePos + 1);
-			LDropTags = LDropTags.Substring(0, LSpacePos);
-			LPassThrough =  LPassThrough.Trim();
+			spacePos = passThrough.IndexOf(" ");
+			selection = passThrough.Substring(0, spacePos);
+			passThrough = passThrough.Substring(spacePos + 1);
+			spacePos = passThrough.IndexOf("droptags=\"");
+			dropTags = passThrough.Substring(spacePos + 10);
+			spacePos = dropTags.IndexOf("\"");
+			passThrough = dropTags.Substring(spacePos + 1);
+			dropTags = dropTags.Substring(0, spacePos);
+			passThrough =  passThrough.Trim();
 			
 
-			string LTemplateStr = D4ExpressionField(AProcess, ARow, LPassThrough);
+			string templateStr = D4ExpressionField(process, row, passThrough);
 
-			if (LTemplateStr != "")
+			if (templateStr != "")
 			{
-				LTemplate = new XmlDocument();
-				LTemplate.LoadXml(LTemplateStr);
+				localTemplate = new XmlDocument();
+				localTemplate.LoadXml(templateStr);
 
 				
 				// process LDropTags
 				string delimStr = " ,";
 				char [] delimiter = delimStr.ToCharArray();
 
-				string [] LTags = null;
-				LTags = LDropTags.Split(delimiter);
+				string [] tags = null;
+				tags = dropTags.Split(delimiter);
 
-				if (FTraceOn)
-					FTrace.WriteLine(String.Format("D4Extdoc: xml.{0} drop='{1}' passthrough='{2}'", LSelection, LDropTags, LPassThrough));
+				if (_traceOn)
+					_trace.WriteLine(String.Format("D4Extdoc: xml.{0} drop='{1}' passthrough='{2}'", selection, dropTags, passThrough));
 
-				LTopNode = LTemplate.FirstChild;
-				while (LTopNode.NodeType != XmlNodeType.Element)
-					LTopNode = LTopNode.NextSibling;
+				topNode = localTemplate.FirstChild;
+				while (topNode.NodeType != XmlNodeType.Element)
+					topNode = topNode.NextSibling;
 
-				foreach(string LTag in LTags)
+				foreach(string tag in tags)
 				{
-					if (LTag != "")
+					if (tag != "")
 					{
-						LNode = LTopNode.SelectSingleNode(String.Format("./{0}",LTag));
-						if (FTraceOn)
-							FTrace.WriteLine(String.Format("	droptag {0} from {1} (can do? {2}", LTag, LTopNode.LocalName, LTopNode.IsReadOnly));
-						if (LNode != null)
+						node = topNode.SelectSingleNode(String.Format("./{0}",tag));
+						if (_traceOn)
+							_trace.WriteLine(String.Format("	droptag {0} from {1} (can do? {2}", tag, topNode.LocalName, topNode.IsReadOnly));
+						if (node != null)
 						{
-							if (FTraceOn)
-								FTrace.WriteLine("		dropped");
-							LTopNode.RemoveChild(LNode);
+							if (_traceOn)
+								_trace.WriteLine("		dropped");
+							topNode.RemoveChild(node);
 						}
 					}
 				}
 
 				// navigate to the first node: Root(), FirstChild() that is an element not a PI
-				LxPathNavigator = LTemplate.CreateNavigator();
+				LxPathNavigator = localTemplate.CreateNavigator();
 				LxPathNavigator.MoveToRoot();
 				LxPathNavigator.MoveToFirstChild();
 				while (LxPathNavigator.NodeType != XPathNodeType.Element)
 					LxPathNavigator.MoveToNext();
 
 				//  process through ProcessNode so external documents can use DocLib processing instructions
-				if (LSelection.Equals("inner"))
+				if (selection.Equals("inner"))
 				{
 					LxPathNavigator.MoveToFirstChild();
 					do 
 					{
-						ProcessNode(AProcess, LxPathNavigator, AOutput, ARow, true);
+						ProcessNode(process, LxPathNavigator, output, row, true);
 					} while(LxPathNavigator.MoveToNext());
 				}
 				else
-					ProcessNode(AProcess, LxPathNavigator, AOutput, ARow, true);
+					ProcessNode(process, LxPathNavigator, output, row, true);
 			}
 
 			return(true);
 		}
 
-		protected bool ExtDoc(ServerProcess AProcess, XPathNavigator ATemplate, XmlTextWriter AOutput, string AParamsString, Row ARow)
+		protected bool ExtDoc(ServerProcess process, XPathNavigator template, XmlTextWriter output, string paramsString, Row row)
 		{
 			// assumes the processing instruction is the current node
 			// AParamString should be this format: <inner | outer> droptags="tag,tag,.." <filename>
 			// may use the extdoc path passed in with the filename for finding the file
 
-			int LSpacePos;
-			string LSelection;
-			string LDropTags;
-			string LFilename = AParamsString;
-			XmlDocument LRemarks = null;
-			XmlNode LNode;
-			XmlNode LTopNode;
+			int spacePos;
+			string selection;
+			string dropTags;
+			string filename = paramsString;
+			XmlDocument remarks = null;
+			XmlNode node;
+			XmlNode topNode;
 
 			XPathNavigator LxPathNavigator;
 
-			LSpacePos = LFilename.IndexOf(" ");
-			LSelection = LFilename.Substring(0, LSpacePos);
-			LFilename = LFilename.Substring(LSpacePos + 1);
-			LSpacePos = LFilename.IndexOf("droptags=\"");
-			LDropTags = LFilename.Substring(LSpacePos + 10);
-			LSpacePos = LDropTags.IndexOf("\"");
-			LFilename = LDropTags.Substring(LSpacePos + 1);
-			LDropTags = LDropTags.Substring(0, LSpacePos);
-			LFilename =  LFilename.Trim();
+			spacePos = filename.IndexOf(" ");
+			selection = filename.Substring(0, spacePos);
+			filename = filename.Substring(spacePos + 1);
+			spacePos = filename.IndexOf("droptags=\"");
+			dropTags = filename.Substring(spacePos + 10);
+			spacePos = dropTags.IndexOf("\"");
+			filename = dropTags.Substring(spacePos + 1);
+			dropTags = dropTags.Substring(0, spacePos);
+			filename =  filename.Trim();
 			
 			// load the external file, remove title, stuff innerxml into the outputfile
 
-			if (! System.IO.File.Exists(LFilename))
+			if (! System.IO.File.Exists(filename))
 			{
-				if (System.IO.File.Exists(Path.Combine(FExtDocPath,  LFilename)))
-					LFilename = Path.Combine(FExtDocPath, LFilename);
+				if (System.IO.File.Exists(Path.Combine(_extDocPath,  filename)))
+					filename = Path.Combine(_extDocPath, filename);
 			}
 
-			if(System.IO.File.Exists(LFilename))
+			if(System.IO.File.Exists(filename))
 			{
-				System.IO.FileStream LStream = new System.IO.FileStream(LFilename,System.IO.FileMode.Open,FileAccess.Read, FileShare.Read);
-				LRemarks = new XmlDocument();
+				System.IO.FileStream stream = new System.IO.FileStream(filename,System.IO.FileMode.Open,FileAccess.Read, FileShare.Read);
+				remarks = new XmlDocument();
 				
 				// assumes the document is a fragment and that the first element child of the root is what is wanted
-				LRemarks.Load(LStream);
+				remarks.Load(stream);
 
 				try
 				{
@@ -1028,206 +1028,206 @@ namespace DocSamples
 					string delimStr = " ,";
 					char [] delimiter = delimStr.ToCharArray();
 
-					string [] LTags = null;
-					LTags = LDropTags.Split(delimiter);
+					string [] tags = null;
+					tags = dropTags.Split(delimiter);
 
-					if (FTraceOn)
-						FTrace.WriteLine(String.Format("Extdoc: xml.{0} drop='{1}' filename='{2}'", LSelection, LDropTags, LFilename));
+					if (_traceOn)
+						_trace.WriteLine(String.Format("Extdoc: xml.{0} drop='{1}' filename='{2}'", selection, dropTags, filename));
 
-					LTopNode = LRemarks.FirstChild;
-					while (LTopNode.NodeType != XmlNodeType.Element)
-						LTopNode = LTopNode.NextSibling;
+					topNode = remarks.FirstChild;
+					while (topNode.NodeType != XmlNodeType.Element)
+						topNode = topNode.NextSibling;
 
-					foreach(string LTag in LTags)
+					foreach(string tag in tags)
 					{
-						LNode = LTopNode.SelectSingleNode(String.Format("./{0}",LTag));
-						if (FTraceOn)
-							FTrace.WriteLine(String.Format("	droptag {0} from {1} (can do? {2}", LTag, LTopNode.LocalName, LTopNode.IsReadOnly));
-						if (LNode != null)
+						node = topNode.SelectSingleNode(String.Format("./{0}",tag));
+						if (_traceOn)
+							_trace.WriteLine(String.Format("	droptag {0} from {1} (can do? {2}", tag, topNode.LocalName, topNode.IsReadOnly));
+						if (node != null)
 						{
-							if (FTraceOn)
-								FTrace.WriteLine("		dropped");
-							LTopNode.RemoveChild(LNode);
+							if (_traceOn)
+								_trace.WriteLine("		dropped");
+							topNode.RemoveChild(node);
 						}
 					}
 
 					// navigate to the first node: Root(), FirstChild() that is an element not a PI
-					LxPathNavigator = LRemarks.CreateNavigator();
+					LxPathNavigator = remarks.CreateNavigator();
 					LxPathNavigator.MoveToRoot();
 					LxPathNavigator.MoveToFirstChild();
 					while (LxPathNavigator.NodeType != XPathNodeType.Element)
 						LxPathNavigator.MoveToNext();
 
 					//  process through ProcessNode so external documents can use DocLib processing instructions
-					if (LSelection.Equals("inner"))
+					if (selection.Equals("inner"))
 					{
 						LxPathNavigator.MoveToFirstChild();
 						do 
 						{
-							ProcessNode(AProcess, LxPathNavigator, AOutput, ARow, true);
+							ProcessNode(process, LxPathNavigator, output, row, true);
 						} while(LxPathNavigator.MoveToNext());
 					}
 					else
-						ProcessNode(AProcess, LxPathNavigator, AOutput, ARow, true);
+						ProcessNode(process, LxPathNavigator, output, row, true);
 				}
 				finally
 				{
-					LStream.Close();
+					stream.Close();
 				}
 			}
 
 			return(true);
 		}
 		
-		protected bool WriteNodeWithAttr(XPathNavigator ATemplate, XmlTextWriter AOutput, Row ARow)
+		protected bool WriteNodeWithAttr(XPathNavigator template, XmlTextWriter output, Row row)
 		{
-			XmlNode LNode = ((IHasXmlNode)ATemplate).GetNode();
-			AOutput.WriteStartElement(LNode.LocalName);
+			XmlNode node = ((IHasXmlNode)template).GetNode();
+			output.WriteStartElement(node.LocalName);
 
 			// preserve node attributes from the template
-			foreach (XmlAttribute LAttribute in LNode.Attributes)
+			foreach (XmlAttribute attribute in node.Attributes)
 			{
 				// todo: implement processing instructions with "parameters" (D4Field, D4ExpressionField) probably use ? ? as delimiter in Value rather than <? ?> illegal
-				if (LAttribute.Value.IndexOf("DocLib:D4Field_") == 0)
+				if (attribute.Value.IndexOf("DocLib:D4Field_") == 0)
 				{
-					AOutput.WriteAttributeString(LAttribute.LocalName, D4Field(LAttribute.Value.Substring(15), ARow));
+					output.WriteAttributeString(attribute.LocalName, D4Field(attribute.Value.Substring(15), row));
 				}
 				else
-					AOutput.WriteAttributeString(LAttribute.LocalName, LAttribute.Value);
+					output.WriteAttributeString(attribute.LocalName, attribute.Value);
 			}
 			return(true);
 		}
 
-		protected bool ProcessNode(ServerProcess AProcess, XPathNavigator ATemplate, XmlTextWriter AOutput, Row ARow, bool AProcessChildren)
+		protected bool ProcessNode(ServerProcess process, XPathNavigator template, XmlTextWriter output, Row row, bool processChildren)
 		{
-			XPathNodeType LNodeType = ATemplate.NodeType;
-			XmlProcessingInstruction LPI = null;
-			int LSpacePos;
-			string LPICommand;
-			string LPIData;
+			XPathNodeType nodeType = template.NodeType;
+			XmlProcessingInstruction pI = null;
+			int spacePos;
+			string pICommand;
+			string pIData;
 
-			if (FTraceOn)
-				FTrace.WriteLine(String.Format("Process Node {0} {1}",ATemplate.LocalName,LNodeType.ToString()));
+			if (_traceOn)
+				_trace.WriteLine(String.Format("Process Node {0} {1}",template.LocalName,nodeType.ToString()));
 
-			switch(LNodeType)
+			switch(nodeType)
 			{
 				case XPathNodeType.ProcessingInstruction:
 					// execute DocLib instruction
-					LPI = (XmlProcessingInstruction)((IHasXmlNode)ATemplate).GetNode();
-					if (LPI.Target.Equals("DocLib"))
+					pI = (XmlProcessingInstruction)((IHasXmlNode)template).GetNode();
+					if (pI.Target.Equals("DocLib"))
 					{
 						// get the command from the text of the processing instruction
-						LPIData = LPI.Data;
-						LSpacePos = LPIData.IndexOf(" ");
-						LPICommand = LPIData.Substring(0, LSpacePos);
-						LPIData = LPIData.Substring(LSpacePos + 1);
+						pIData = pI.Data;
+						spacePos = pIData.IndexOf(" ");
+						pICommand = pIData.Substring(0, spacePos);
+						pIData = pIData.Substring(spacePos + 1);
 
-						if (FTraceOn)
-							FTrace.WriteLine(String.Format("Process PI {0} = {1}", LPICommand, LPIData));
+						if (_traceOn)
+							_trace.WriteLine(String.Format("Process PI {0} = {1}", pICommand, pIData));
 
-						switch(LPICommand)
+						switch(pICommand)
 						{
 							case "D4ExpressionField":
-								AOutput.WriteString(D4ExpressionField(AProcess, ARow, LPIData));
+								output.WriteString(D4ExpressionField(process, row, pIData));
 								break;
 							case "D4ExpressionBlock":
-								D4ExpressionBlock(AProcess, ATemplate, AOutput, ARow, LPIData);
+								D4ExpressionBlock(process, template, output, row, pIData);
 								break;
 							case "D4ExpressionIf":
 								// TableDee add { <expression> Result }
-								if (! D4ExpressionIf(AProcess, ARow, LPIData) )
+								if (! D4ExpressionIf(process, row, pIData) )
 								{
 									// skip to next
-									ATemplate.MoveToNext();
+									template.MoveToNext();
 									// if next isn't an element, skip to the element
-									if (ATemplate.NodeType != XPathNodeType.Element)
+									if (template.NodeType != XPathNodeType.Element)
 									{
-										while (ATemplate.NodeType != XPathNodeType.Element)
+										while (template.NodeType != XPathNodeType.Element)
 										{
-											ATemplate.MoveToNext();
+											template.MoveToNext();
 										}
 									}
 								}
 								break;
 							case "D4Field": // illegal at this point?
-								AOutput.WriteString(D4Field(LPIData, ARow));
+								output.WriteString(D4Field(pIData, row));
 								break;
 							case "D4ExtDoc":
-								D4ExtDoc(AProcess, ATemplate, AOutput, LPIData, ARow);
+								D4ExtDoc(process, template, output, pIData, row);
 								break;
 							case "ExtDoc":
-								ExtDoc(AProcess, ATemplate, AOutput, LPIData, ARow);
+								ExtDoc(process, template, output, pIData, row);
 								break;
 							default:
 								// passthrough unknown commands
-								AOutput.WriteProcessingInstruction(LPI.Target, LPI.Data);
+								output.WriteProcessingInstruction(pI.Target, pI.Data);
 								break;
 						}
 					}
 					else
 					{
 						// preserve other processing instructions
-						AOutput.WriteProcessingInstruction(LPI.Target, LPI.Data);
+						output.WriteProcessingInstruction(pI.Target, pI.Data);
 					}
 					break;
 				case XPathNodeType.Text:
-					AOutput.WriteString(ATemplate.Value);
+					output.WriteString(template.Value);
 					break;
 				case XPathNodeType.Comment:
-					AOutput.WriteComment(ATemplate.Value);
+					output.WriteComment(template.Value);
 					break;
 				case XPathNodeType.Element:
 					// write out regular nodes and process children
-					WriteNodeWithAttr(ATemplate, AOutput, ARow);
-					if (AProcessChildren)
+					WriteNodeWithAttr(template, output, row);
+					if (processChildren)
 					{
-						if (ATemplate.HasChildren)
+						if (template.HasChildren)
 						{
-							ATemplate.MoveToFirstChild();
+							template.MoveToFirstChild();
 							do 
 							{
-								ProcessNode(AProcess, ATemplate, AOutput, ARow, true);
-							} while(ATemplate.MoveToNext());
+								ProcessNode(process, template, output, row, true);
+							} while(template.MoveToNext());
 
-							ATemplate.MoveToParent();
+							template.MoveToParent();
 						}
-						AOutput.WriteEndElement();
+						output.WriteEndElement();
 					}
 					else
-						if (ATemplate.IsEmptyElement)
-							AOutput.WriteEndElement();
+						if (template.IsEmptyElement)
+							output.WriteEndElement();
 
 					break;
 			}
 			return(true);
 		}
 
-		protected bool ProcessTemplate(ServerProcess AProcess, string AOutputFilename)
+		protected bool ProcessTemplate(ServerProcess process, string outputFilename)
 		{
 			// create a writer and move to the starting node
-			XmlTextWriter LDocbookWriter  = new XmlTextWriter(new MemoryStream(), System.Text.Encoding.UTF8);
-			LDocbookWriter.Formatting = System.Xml.Formatting.Indented;
-			LDocbookWriter.IndentChar = '\t';
-			LDocbookWriter.Indentation = 1;
+			XmlTextWriter docbookWriter  = new XmlTextWriter(new MemoryStream(), System.Text.Encoding.UTF8);
+			docbookWriter.Formatting = System.Xml.Formatting.Indented;
+			docbookWriter.IndentChar = '\t';
+			docbookWriter.Indentation = 1;
 
 			FxPathNavigator.MoveToRoot();
 			FxPathNavigator.MoveToFirstChild(); // moves to first tag, as this is a fragment probably the right node?
 
 			do
 			{
-				ProcessNode(AProcess, FxPathNavigator, LDocbookWriter, null, true); // assumes one top ` like chapter, not 2 chapters at once
+				ProcessNode(process, FxPathNavigator, docbookWriter, null, true); // assumes one top ` like chapter, not 2 chapters at once
 			} while(FxPathNavigator.MoveToNext());
 
-			return(EmitXml(LDocbookWriter, AOutputFilename));
+			return(EmitXml(docbookWriter, outputFilename));
 		}
 
-		protected bool EmitXml(XmlTextWriter AData, string AOutputFilename)
+		protected bool EmitXml(XmlTextWriter data, string outputFilename)
 		{
 
-			StreamWriter sw = File.CreateText(AOutputFilename);
+			StreamWriter sw = File.CreateText(outputFilename);
 			Stream fs = sw.BaseStream;
-			AData.Flush();
-			MemoryStream ms = (MemoryStream)AData.BaseStream;
+			data.Flush();
+			MemoryStream ms = (MemoryStream)data.BaseStream;
 			ms.Position = 0;
 			fs.Write(ms.GetBuffer(), 0, (int)ms.Length);
 			fs.Close();

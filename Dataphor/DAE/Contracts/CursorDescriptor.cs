@@ -15,32 +15,32 @@ namespace Alphora.Dataphor.DAE.Contracts
 	{
 		public CursorDescriptor
 		(
-			int AHandle,
-			CursorCapability ACapabilities,
-			CursorType ACursorType,
-			CursorIsolation ACursorIsolation
+			int handle,
+			CursorCapability capabilities,
+			CursorType cursorType,
+			CursorIsolation cursorIsolation
 		) : base()
 		{
-			FHandle = AHandle;
-			FCapabilities = ACapabilities;
-			FCursorType = ACursorType;
-			FCursorIsolation = ACursorIsolation;
+			_handle = handle;
+			_capabilities = capabilities;
+			_cursorType = cursorType;
+			_cursorIsolation = cursorIsolation;
 		}
 		
 		[DataMember]
-		internal int FHandle;
-		public int Handle { get { return FHandle; } }
+		internal int _handle;
+		public int Handle { get { return _handle; } }
 
 		[DataMember]
-		internal CursorCapability FCapabilities;
-		public CursorCapability Capabilities { get { return FCapabilities; } }
+		internal CursorCapability _capabilities;
+		public CursorCapability Capabilities { get { return _capabilities; } }
 		
 		[DataMember]
-		internal CursorType FCursorType;
-		public CursorType CursorType { get { return FCursorType; } }
+		internal CursorType _cursorType;
+		public CursorType CursorType { get { return _cursorType; } }
 
 		[DataMember]
-		internal CursorIsolation FCursorIsolation;
-		public CursorIsolation CursorIsolation { get { return FCursorIsolation; } }
+		internal CursorIsolation _cursorIsolation;
+		public CursorIsolation CursorIsolation { get { return _cursorIsolation; } }
 	}
 }

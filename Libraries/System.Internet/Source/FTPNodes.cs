@@ -22,29 +22,29 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator FTPDownloadBinary(AURL : String, AUser : String, APassword : String) : Binary
 	public class FTPDownloadBinaryNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			FtpWebRequest LRequest = (FtpWebRequest)WebRequest.Create((string)AArguments[0]);
-			if (AArguments.Length > 1)
-				LRequest.Credentials = new NetworkCredential((string)AArguments[1], (string)AArguments[2]);
+			FtpWebRequest request = (FtpWebRequest)WebRequest.Create((string)arguments[0]);
+			if (arguments.Length > 1)
+				request.Credentials = new NetworkCredential((string)arguments[1], (string)arguments[2]);
 			
 			// HACK: Apparently there is a defect in the framework that results in an error under certain timing if the following line isn't here:
-			LRequest.UsePassive = false;
+			request.UsePassive = false;
 			// Details: The error: "The remote server returned an error: 227 Entering Passive Mode (208,186,252,59,8,103)"
 			
-			FtpWebResponse LResponse = (FtpWebResponse)LRequest.GetResponse();
-			Stream LResponseStream = LResponse.GetResponseStream();
+			FtpWebResponse response = (FtpWebResponse)request.GetResponse();
+			Stream responseStream = response.GetResponseStream();
 			try
 			{
-				MemoryStream LCopyStream = new MemoryStream((int)LResponse.ContentLength > 0 ? (int)LResponse.ContentLength : 1024);
-				StreamUtility.CopyStream(LResponseStream, LCopyStream);
-				byte[] LData = new byte[LCopyStream.Length];
-				Buffer.BlockCopy(LCopyStream.GetBuffer(), 0, LData, 0, LData.Length);
-				return LData;
+				MemoryStream copyStream = new MemoryStream((int)response.ContentLength > 0 ? (int)response.ContentLength : 1024);
+				StreamUtility.CopyStream(responseStream, copyStream);
+				byte[] data = new byte[copyStream.Length];
+				Buffer.BlockCopy(copyStream.GetBuffer(), 0, data, 0, data.Length);
+				return data;
 			}
 			finally
 			{
-				LResponseStream.Close();
+				responseStream.Close();
 			}
 		}
 	}
@@ -53,23 +53,23 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator FTPDownloadText(AURL : String, AUser : String, APassword : String) : String
 	public class FTPDownloadTextNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			FtpWebRequest LRequest = (FtpWebRequest)WebRequest.Create((string)AArguments[0]);
-			if (AArguments.Length > 1)
-				LRequest.Credentials = new NetworkCredential((string)AArguments[1], (string)AArguments[2]);
+			FtpWebRequest request = (FtpWebRequest)WebRequest.Create((string)arguments[0]);
+			if (arguments.Length > 1)
+				request.Credentials = new NetworkCredential((string)arguments[1], (string)arguments[2]);
 			// HACK: Apparently there is a defect in the framework that results in an error under certain timing if the following line isn't here:
-			LRequest.UsePassive = false;
-			FtpWebResponse LResponse = (FtpWebResponse)LRequest.GetResponse();
-			Stream LResponseStream = LResponse.GetResponseStream();
+			request.UsePassive = false;
+			FtpWebResponse response = (FtpWebResponse)request.GetResponse();
+			Stream responseStream = response.GetResponseStream();
 			try
 			{
-				StreamReader LReader = new StreamReader(LResponseStream);
-				return LReader.ReadToEnd();
+				StreamReader reader = new StreamReader(responseStream);
+				return reader.ReadToEnd();
 			}
 			finally
 			{
-				LResponseStream.Close();
+				responseStream.Close();
 			}
 		}
 	}
@@ -80,31 +80,31 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator FTPUploadText(AURL : String, AData : String, AUser : String, APassword : String)
 	public class FTPUploadNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			FtpWebRequest LRequest = (FtpWebRequest)WebRequest.Create((string)AArguments[0]);
-			if (AArguments.Length > 2)
-				LRequest.Credentials = new NetworkCredential((string)AArguments[2], (string)AArguments[3]);
-			LRequest.Method = WebRequestMethods.Ftp.UploadFile;
-			LRequest.Proxy = null;
+			FtpWebRequest request = (FtpWebRequest)WebRequest.Create((string)arguments[0]);
+			if (arguments.Length > 2)
+				request.Credentials = new NetworkCredential((string)arguments[2], (string)arguments[3]);
+			request.Method = WebRequestMethods.Ftp.UploadFile;
+			request.Proxy = null;
 			// HACK: Apparently there is a defect in the framework that results in an error under certain timing if the following line isn't here:
-			LRequest.UsePassive = false;
-			Stream LRequestStream = LRequest.GetRequestStream();
+			request.UsePassive = false;
+			Stream requestStream = request.GetRequestStream();
 			try
 			{
-				if (Operator.Operands[1].DataType.Is(AProgram.DataTypes.SystemString))
-					using (StreamWriter LWriter = new StreamWriter(LRequestStream))
-						LWriter.Write((string)AArguments[1]);
+				if (Operator.Operands[1].DataType.Is(program.DataTypes.SystemString))
+					using (StreamWriter writer = new StreamWriter(requestStream))
+						writer.Write((string)arguments[1]);
 				else
 				{
-					byte[] LValue = AArguments[1] is byte[] ? (byte[])AArguments[1] : new Scalar(AProgram.ValueManager, (Schema.IScalarType)Operator.Operands[1].DataType, AArguments[1]).AsByteArray;
-					LRequestStream.Write(LValue, 0, LValue.Length);
+					byte[] tempValue = arguments[1] is byte[] ? (byte[])arguments[1] : new Scalar(program.ValueManager, (Schema.IScalarType)Operator.Operands[1].DataType, arguments[1]).AsByteArray;
+					requestStream.Write(tempValue, 0, tempValue.Length);
 				}
-				((FtpWebResponse)LRequest.GetResponse()).Close();
+				((FtpWebResponse)request.GetResponse()).Close();
 			}
 			finally
 			{
-				LRequestStream.Close();
+				requestStream.Close();
 			}
 			return null;
 		}
@@ -116,62 +116,62 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator FTPList(AURL : String, AUser : String, APassword : String) : table { Name : String }
 	public class FTPListNode : TableNode
 	{
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.TableType();
-			FTableVar = new Schema.ResultTableVar(this);
-			FTableVar.Owner = APlan.User;
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
 
-			DataType.Columns.Add(new Schema.Column("Name", APlan.DataTypes.SystemString));
-			foreach (Schema.Column LColumn in DataType.Columns)
-				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
+			DataType.Columns.Add(new Schema.Column("Name", plan.DataTypes.SystemString));
+			foreach (Schema.Column column in DataType.Columns)
+				TableVar.Columns.Add(new Schema.TableVarColumn(column));
 
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Name"] }));
 
-			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = Compiler.FindClusteringOrder(APlan, TableVar);
+			TableVar.DetermineRemotable(plan.CatalogDeviceSession);
+			Order = Compiler.FindClusteringOrder(plan, TableVar);
 
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			string LUser = "";
-			string LPassword = "";
+			string user = "";
+			string password = "";
 			if (Nodes.Count > 1)
 			{
-				LUser = (string)Nodes[1].Execute(AProgram);
-				LPassword = (string)Nodes[2].Execute(AProgram);
+				user = (string)Nodes[1].Execute(program);
+				password = (string)Nodes[2].Execute(program);
 			}
-			string LListing = GetDirectoryListing((string)Nodes[0].Execute(AProgram), LUser, LPassword);
+			string listing = GetDirectoryListing((string)Nodes[0].Execute(program), user, password);
 
-			LocalTable LResult = new LocalTable(this, AProgram);
+			LocalTable result = new LocalTable(this, program);
 			try
 			{
-				LResult.Open();
+				result.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
+				Row row = new Row(program.ValueManager, result.DataType.RowType);
 				try
 				{
-					LRow.ValuesOwned = false;
+					row.ValuesOwned = false;
 
-					int LOffset = 0;
-					while (LOffset < LListing.Length)
+					int offset = 0;
+					while (offset < listing.Length)
 					{
-						int LNextOffset = LListing.IndexOf('\n', LOffset + 1);
-						if (LNextOffset < 0)
-							LNextOffset = LListing.Length;
-						LRow[0] = LListing.Substring(LOffset, LNextOffset - LOffset).Trim(new char[] { '\r', '\n', ' ' });
-						LOffset = LNextOffset;
+						int nextOffset = listing.IndexOf('\n', offset + 1);
+						if (nextOffset < 0)
+							nextOffset = listing.Length;
+						row[0] = listing.Substring(offset, nextOffset - offset).Trim(new char[] { '\r', '\n', ' ' });
+						offset = nextOffset;
 
-						if (((string)LRow[0]).Trim() != "")
+						if (((string)row[0]).Trim() != "")
 							try
 							{
-								LResult.Insert(LRow);
+								result.Insert(row);
 							}
 							catch (IndexException)
 							{
@@ -181,38 +181,38 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 				}
 				finally
 				{
-					LRow.Dispose();
+					row.Dispose();
 				}
 
-				LResult.First();
+				result.First();
 
-				return LResult;
+				return result;
 			}
 			catch
 			{
-				LResult.Dispose();
+				result.Dispose();
 				throw;
 			}
 		}
 
-		internal static string GetDirectoryListing(string AURL, string AUser, string APassword)
+		internal static string GetDirectoryListing(string uRL, string user, string password)
 		{
-			FtpWebRequest LRequest = (FtpWebRequest)WebRequest.Create(AURL);
-			if (AUser != "")
-				LRequest.Credentials = new NetworkCredential(AUser, APassword);
-			LRequest.Method = WebRequestMethods.Ftp.ListDirectory;
+			FtpWebRequest request = (FtpWebRequest)WebRequest.Create(uRL);
+			if (user != "")
+				request.Credentials = new NetworkCredential(user, password);
+			request.Method = WebRequestMethods.Ftp.ListDirectory;
 			// HACK: Apparently there is a defect in the framework that results in an error under certain timing if the following line isn't here:
-			LRequest.UsePassive = false;
-			FtpWebResponse LResponse = (FtpWebResponse)LRequest.GetResponse();
-			Stream LResponseStream = LResponse.GetResponseStream();
+			request.UsePassive = false;
+			FtpWebResponse response = (FtpWebResponse)request.GetResponse();
+			Stream responseStream = response.GetResponseStream();
 			try
 			{
-				StreamReader LReader = new StreamReader(LResponseStream);
-				return LReader.ReadToEnd();
+				StreamReader reader = new StreamReader(responseStream);
+				return reader.ReadToEnd();
 			}
 			finally
 			{
-				LResponseStream.Close();
+				responseStream.Close();
 			}
 		}
 	}
@@ -221,16 +221,16 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator FTPRename(AURL : String, ANewName : String, AUser : String, APassword : String)
 	public class FTPRenameNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			FtpWebRequest LRequest = (FtpWebRequest)WebRequest.Create((string)AArguments[0]);
-			if (AArguments.Length > 2)
-				LRequest.Credentials = new NetworkCredential((string)AArguments[2], (string)AArguments[3]);
-			LRequest.Method = WebRequestMethods.Ftp.Rename;
-			LRequest.RenameTo = (string)AArguments[1];
+			FtpWebRequest request = (FtpWebRequest)WebRequest.Create((string)arguments[0]);
+			if (arguments.Length > 2)
+				request.Credentials = new NetworkCredential((string)arguments[2], (string)arguments[3]);
+			request.Method = WebRequestMethods.Ftp.Rename;
+			request.RenameTo = (string)arguments[1];
 			// HACK: Apparently there is a defect in the framework that results in an error under certain timing if the following line isn't here:
-			LRequest.UsePassive = false;
-			((FtpWebResponse)LRequest.GetResponse()).Close();
+			request.UsePassive = false;
+			((FtpWebResponse)request.GetResponse()).Close();
 			return null;
 		}
 	}
@@ -239,12 +239,12 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator FTPDeleteFile(AURL : String, AUser : String, APassword : String)
 	public class FTPDeleteFileNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			if (AArguments.Length > 1)
-				FTPHelper.CallSimpleFTP((string)AArguments[0], WebRequestMethods.Ftp.DeleteFile, (string)AArguments[1], (string)AArguments[2]);
+			if (arguments.Length > 1)
+				FTPHelper.CallSimpleFTP((string)arguments[0], WebRequestMethods.Ftp.DeleteFile, (string)arguments[1], (string)arguments[2]);
 			else
-				FTPHelper.CallSimpleFTP((string)AArguments[0], WebRequestMethods.Ftp.DeleteFile);
+				FTPHelper.CallSimpleFTP((string)arguments[0], WebRequestMethods.Ftp.DeleteFile);
 			return null;
 		}
 	}
@@ -253,12 +253,12 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator FTPMakeDirectory(AURL : String, AUser : String, APassword : String)
 	public class FTPMakeDirectoryNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			if (AArguments.Length > 1)
-				FTPHelper.CallSimpleFTP((string)AArguments[0], WebRequestMethods.Ftp.MakeDirectory, (string)AArguments[1], (string)AArguments[2]);
+			if (arguments.Length > 1)
+				FTPHelper.CallSimpleFTP((string)arguments[0], WebRequestMethods.Ftp.MakeDirectory, (string)arguments[1], (string)arguments[2]);
 			else
-				FTPHelper.CallSimpleFTP((string)AArguments[0], WebRequestMethods.Ftp.MakeDirectory);
+				FTPHelper.CallSimpleFTP((string)arguments[0], WebRequestMethods.Ftp.MakeDirectory);
 			return null;
 		}
 	}
@@ -267,35 +267,35 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator FTPRemoveDirectory(AURL : String, AUser : String, APassword : String)
 	public class FTPRemoveDirectoryNode : InstructionNode
 	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
+		public override object InternalExecute(Program program, object[] arguments)
 		{
-			if (AArguments.Length > 1)
-				FTPHelper.CallSimpleFTP((string)AArguments[0], WebRequestMethods.Ftp.RemoveDirectory, (string)AArguments[1], (string)AArguments[2]);
+			if (arguments.Length > 1)
+				FTPHelper.CallSimpleFTP((string)arguments[0], WebRequestMethods.Ftp.RemoveDirectory, (string)arguments[1], (string)arguments[2]);
 			else
-				FTPHelper.CallSimpleFTP((string)AArguments[0], WebRequestMethods.Ftp.RemoveDirectory);
+				FTPHelper.CallSimpleFTP((string)arguments[0], WebRequestMethods.Ftp.RemoveDirectory);
 			return null;
 		}
 	}
 
 	internal sealed class FTPHelper
 	{
-		public static void CallSimpleFTP(string AURL, string AMethod)
+		public static void CallSimpleFTP(string uRL, string method)
 		{
-			FtpWebRequest LRequest = (FtpWebRequest)WebRequest.Create(AURL);
-			LRequest.Method = AMethod;
+			FtpWebRequest request = (FtpWebRequest)WebRequest.Create(uRL);
+			request.Method = method;
 			// HACK: Apparently there is a defect in the framework that results in an error under certain timing if the following line isn't here:
-			LRequest.UsePassive = false;
-			((FtpWebResponse)LRequest.GetResponse()).Close();
+			request.UsePassive = false;
+			((FtpWebResponse)request.GetResponse()).Close();
 		}
 
-		public static void CallSimpleFTP(string AURL, string AMethod, string AUserName, string APassword)
+		public static void CallSimpleFTP(string uRL, string method, string userName, string password)
 		{
-			FtpWebRequest LRequest = (FtpWebRequest)WebRequest.Create(AURL);
-			LRequest.Credentials = new NetworkCredential(AUserName, APassword);
-			LRequest.Method = AMethod;
+			FtpWebRequest request = (FtpWebRequest)WebRequest.Create(uRL);
+			request.Credentials = new NetworkCredential(userName, password);
+			request.Method = method;
 			// HACK: Apparently there is a defect in the framework that results in an error under certain timing if the following line isn't here:
-			LRequest.UsePassive = false;
-			((FtpWebResponse)LRequest.GetResponse()).Close();
+			request.UsePassive = false;
+			((FtpWebResponse)request.GetResponse()).Close();
 		}
 	}
 }

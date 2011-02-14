@@ -4,22 +4,22 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree
 {
     public class DesignerNodeData : DataObject
     {
-        public DesignerNodeData(DesignerNode ATreeNode)
+        public DesignerNodeData(DesignerNode treeNode)
         {
-            FTreeNode = ATreeNode;
-            FRightButton = Control.MouseButtons == MouseButtons.Right;
+            _treeNode = treeNode;
+            _rightButton = Control.MouseButtons == MouseButtons.Right;
         }
 
-        private DesignerNode FTreeNode;
+        private DesignerNode _treeNode;
         public DesignerNode TreeNode
         {
-            get { return FTreeNode; }
+            get { return _treeNode; }
         }
 
-        private bool FRightButton;
+        private bool _rightButton;
         public bool RightButton
         {
-            get { return FRightButton; }
+            get { return _rightButton; }
         }
     }
 }

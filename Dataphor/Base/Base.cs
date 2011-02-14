@@ -35,8 +35,8 @@ namespace Alphora.Dataphor
 
 		/// <summary> Virtual dispose method allows descendents to perform cleanup. </summary>
 		/// <remarks> Notifies other objects of the disposal. </remarks>
-		/// <param name="ADisposing"> True if being called from Dispose() instead of finallizer. </param>
-		protected virtual void Dispose(bool ADisposing)
+		/// <param name="disposing"> True if being called from Dispose() instead of finallizer. </param>
+		protected virtual void Dispose(bool disposing)
 		{
 			if (Disposed != null)
 				Disposed(this, EventArgs.Empty);
@@ -58,9 +58,9 @@ namespace Alphora.Dataphor
 
 	public sealed class MathUtility
 	{
-		public static int IntegerCeilingDivide(int ADividend, int ADivisor)
+		public static int IntegerCeilingDivide(int dividend, int divisor)
 		{
-			return (ADividend / ADivisor) + ((ADividend % ADivisor) == 0 ? 0 : 1);
+			return (dividend / divisor) + ((dividend % divisor) == 0 ? 0 : 1);
 		}
 	}
 
@@ -75,21 +75,21 @@ namespace Alphora.Dataphor
 
 		public override string ToString()
 		{
-			int LSize = 0;
-			foreach (Exception LException in this)
+			int size = 0;
+			foreach (Exception exception in this)
 			{
-				if (LSize > 0)
-					LSize += 4;	// CRLFCRLF
-				LSize += LException.Message.Length;
+				if (size > 0)
+					size += 4;	// CRLFCRLF
+				size += exception.Message.Length;
 			}
-			System.Text.StringBuilder LResult = new System.Text.StringBuilder(LSize);
-			foreach (Exception LException in this)
+			System.Text.StringBuilder result = new System.Text.StringBuilder(size);
+			foreach (Exception exception in this)
 			{
-				if (LResult.Length > 0)
-					LResult.Append("\r\n\r\n");
-				LResult.Append(LException.Message);
+				if (result.Length > 0)
+					result.Append("\r\n\r\n");
+				result.Append(exception.Message);
 			}
-			return LResult.ToString();
+			return result.ToString();
 		}
 	}
 }

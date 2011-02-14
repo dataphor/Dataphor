@@ -17,77 +17,77 @@ namespace Alphora.Dataphor.DAE.Server
 	// RemoteServerConnection
 	public class RemoteServerConnection : RemoteServerChildObject, IRemoteServerConnection
 	{
-		internal RemoteServerConnection(RemoteServer AServer, string AConnectionName, string AHostName)
+		internal RemoteServerConnection(RemoteServer server, string connectionName, string hostName)
 		{
-			FServer = AServer;
-			FHostName = AHostName;
-			FConnectionName = AConnectionName;
-			FSessions = new RemoteServerSessions(false);
-			FLastActivityTime = DateTime.Now;
+			_server = server;
+			_hostName = hostName;
+			_connectionName = connectionName;
+			_sessions = new RemoteServerSessions(false);
+			_lastActivityTime = DateTime.Now;
 		}
 		
-		protected bool FDisposed;
-		protected override void Dispose(bool ADisposing)
+		protected bool _disposed;
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
 				try
 				{
-					FSessions.Dispose();
-					FSessions = null;
+					_sessions.Dispose();
+					_sessions = null;
 				}
 				finally
 				{
-					FServer.CatalogCaches.RemoveCache(FConnectionName);
+					_server.CatalogCaches.RemoveCache(_connectionName);
 				}
 			}
 			finally
 			{
-				FServer = null;
-				FDisposed = true;
-				base.Dispose(ADisposing);
+				_server = null;
+				_disposed = true;
+				base.Dispose(disposing);
 			}
 		}
 
 		// Server
-		private RemoteServer FServer;
-		public RemoteServer Server { get { return FServer; } }
+		private RemoteServer _server;
+		public RemoteServer Server { get { return _server; } }
 		
 		// Sessions
-		private RemoteServerSessions FSessions;
-		public RemoteServerSessions Sessions { get { return FSessions; } }
+		private RemoteServerSessions _sessions;
+		public RemoteServerSessions Sessions { get { return _sessions; } }
 		
 		// ConnectionName
-		private string FConnectionName;
-		public string ConnectionName { get { return FConnectionName; } }
+		private string _connectionName;
+		public string ConnectionName { get { return _connectionName; } }
 		
 		// HostName
-		private string FHostName;
-		public string HostName { get { return FHostName; } }
+		private string _hostName;
+		public string HostName { get { return _hostName; } }
 		
 		// Execution
-		private object FSyncHandle = new System.Object();
+		private object _syncHandle = new System.Object();
 		private void BeginCall()
 		{
-			Monitor.Enter(FSyncHandle);
+			Monitor.Enter(_syncHandle);
 		}
 		
 		private void EndCall()
 		{
-			Monitor.Exit(FSyncHandle);
+			Monitor.Exit(_syncHandle);
 		}
 		
 		// IRemoteServer.Connect
-		public IRemoteServerSession Connect(SessionInfo ASessionInfo)
+		public IRemoteServerSession Connect(SessionInfo sessionInfo)
 		{
 			BeginCall();
 			try
 			{
-				RemoteServerSession LSession = new RemoteServerSession(FServer, (ServerSession)FServer.Server.Connect(ASessionInfo));
-				if (ASessionInfo.CatalogCacheName != String.Empty)
-					FServer.CatalogCaches.AddSession(LSession);
-				FSessions.Add(LSession);
-				return LSession;
+				RemoteServerSession session = new RemoteServerSession(_server, (ServerSession)_server.Server.Connect(sessionInfo));
+				if (sessionInfo.CatalogCacheName != String.Empty)
+					_server.CatalogCaches.AddSession(session);
+				_sessions.Add(session);
+				return session;
 			}
 			finally
 			{
@@ -96,14 +96,14 @@ namespace Alphora.Dataphor.DAE.Server
 		}
         
 		// IRemoteServer.Disconnect
-		public void Disconnect(IRemoteServerSession ASession)
+		public void Disconnect(IRemoteServerSession session)
 		{
 			BeginCall();
 			try
 			{
-				RemoteServerSession LSession = ASession as RemoteServerSession;
-				if (ASession != null)
-					LSession.Dispose();
+				RemoteServerSession localSession = session as RemoteServerSession;
+				if (session != null)
+					localSession.Dispose();
 			}
 			finally
 			{
@@ -113,18 +113,18 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		internal void CloseSessions()
 		{
-			if (FSessions != null)
+			if (_sessions != null)
 			{
-				while (FSessions.Count > 0)
+				while (_sessions.Count > 0)
 				{
-					RemoteServerSession LSession = (RemoteServerSession)FSessions.DisownAt(0);
+					RemoteServerSession session = (RemoteServerSession)_sessions.DisownAt(0);
 					try
 					{
-						LSession.Dispose();
+						session.Dispose();
 					}
 					catch (Exception E)
 					{
-						FServer.Server.LogError(E);
+						_server.Server.LogError(E);
 					}
 				}
 			}
@@ -138,28 +138,28 @@ namespace Alphora.Dataphor.DAE.Server
 			 mechanism is necessary; the client ensures that the server recognizes that it is responsive.
 		*/
 
-		public const int CInitialLeaseTimeSeconds = 300;	// 5 Minutes... must be longer than the client side ping
-		public const int CRenewOnCallTimeSeconds = 300;
+		public const int InitialLeaseTimeSeconds = 300;	// 5 Minutes... must be longer than the client side ping
+		public const int RenewOnCallTimeSeconds = 300;
 
 		public override object InitializeLifetimeService()
 		{
-			ILease LLease = (ILease)base.InitializeLifetimeService();
-			if (LLease.CurrentState == LeaseState.Initial)
+			ILease lease = (ILease)base.InitializeLifetimeService();
+			if (lease.CurrentState == LeaseState.Initial)
 			{
-				LLease.InitialLeaseTime = TimeSpan.FromSeconds(CInitialLeaseTimeSeconds);
-				LLease.SponsorshipTimeout = TimeSpan.Zero;
-				LLease.RenewOnCallTime = TimeSpan.FromSeconds(CRenewOnCallTimeSeconds);
+				lease.InitialLeaseTime = TimeSpan.FromSeconds(InitialLeaseTimeSeconds);
+				lease.SponsorshipTimeout = TimeSpan.Zero;
+				lease.RenewOnCallTime = TimeSpan.FromSeconds(RenewOnCallTimeSeconds);
 			}
-			return LLease;
+			return lease;
 		}
 		
-		private DateTime FLastActivityTime;
-		public DateTime LastActivityTime { get { return FLastActivityTime; } }
+		private DateTime _lastActivityTime;
+		public DateTime LastActivityTime { get { return _lastActivityTime; } }
 
 		/// <remarks> Provides a way to check that the session is still available (the message will reset the server's keep alive timeout). </remarks>
 		public void Ping()
 		{
-			FLastActivityTime = DateTime.Now;
+			_lastActivityTime = DateTime.Now;
 		}
 
 		#endregion
@@ -169,18 +169,18 @@ namespace Alphora.Dataphor.DAE.Server
 	public class RemoteServerConnections : RemoteServerChildObjects
 	{		
 		public RemoteServerConnections() : base() {}
-		public RemoteServerConnections(bool AIsOwner) : base(AIsOwner) {}
+		public RemoteServerConnections(bool isOwner) : base(isOwner) {}
 		
-		protected override void Validate(RemoteServerChildObject AObject)
+		protected override void Validate(RemoteServerChildObject objectValue)
 		{
-			if (!(AObject is RemoteServerConnection))
+			if (!(objectValue is RemoteServerConnection))
 				throw new ServerException(ServerException.Codes.TypedObjectContainer, "RemoteServerConnection");
 		}
 		
-		public new RemoteServerConnection this[int AIndex]
+		public new RemoteServerConnection this[int index]
 		{
-			get { return (RemoteServerConnection)base[AIndex]; } 
-			set { base[AIndex] = value; } 
+			get { return (RemoteServerConnection)base[index]; } 
+			set { base[index] = value; } 
 		}
 	}
 }

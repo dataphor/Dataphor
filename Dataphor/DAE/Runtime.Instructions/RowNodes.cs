@@ -31,122 +31,122 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public new Schema.IRowType DataType
 		{
-			get { return (Schema.IRowType)FDataType; }
-			set { FDataType = value; }
+			get { return (Schema.IRowType)_dataType; }
+			set { _dataType = value; }
 		}
 		
-		private Schema.IRowType FSpecifiedRowType;		
+		private Schema.IRowType _specifiedRowType;		
 		/// <summary>If this is a specified row selector, this is the specified subset of the row selector.</summary>
 		public Schema.IRowType SpecifiedRowType
 		{
-			get { return FSpecifiedRowType; }
-			set { FSpecifiedRowType = value; }
+			get { return _specifiedRowType; }
+			set { _specifiedRowType = value; }
 		}
 
-		public override void DetermineCharacteristics(Plan APlan)
+		public override void DetermineCharacteristics(Plan plan)
 		{
-			FIsLiteral = true;
-			FIsFunctional = true;
-			FIsDeterministic = true;
-			FIsRepeatable = true;
-			FIsNilable = false;
-			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
+			_isLiteral = true;
+			_isFunctional = true;
+			_isDeterministic = true;
+			_isRepeatable = true;
+			_isNilable = false;
+			for (int index = 0; index < NodeCount; index++)
 			{
-				FIsLiteral = FIsLiteral && Nodes[LIndex].IsLiteral;
-				FIsFunctional = FIsFunctional && Nodes[LIndex].IsFunctional;
-				FIsDeterministic = FIsDeterministic && Nodes[LIndex].IsDeterministic;
-				FIsRepeatable = FIsRepeatable && Nodes[LIndex].IsRepeatable;
+				_isLiteral = _isLiteral && Nodes[index].IsLiteral;
+				_isFunctional = _isFunctional && Nodes[index].IsFunctional;
+				_isDeterministic = _isDeterministic && Nodes[index].IsDeterministic;
+				_isRepeatable = _isRepeatable && Nodes[index].IsRepeatable;
 			} 
 		}
 		
 		// Evaluate
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			Row LRow = new Row(AProgram.ValueManager, DataType);
+			Row row = new Row(program.ValueManager, DataType);
 			try
 			{
-				if (FSpecifiedRowType != null)
+				if (_specifiedRowType != null)
 				{
-					for (int LIndex = 0; LIndex < FSpecifiedRowType.Columns.Count; LIndex++)
+					for (int index = 0; index < _specifiedRowType.Columns.Count; index++)
 					{
-						object LObject = Nodes[LIndex].Execute(AProgram);
-						if (LObject != null)
+						object objectValue = Nodes[index].Execute(program);
+						if (objectValue != null)
 						{
 							try
 							{
-								if (FSpecifiedRowType.Columns[LIndex].DataType is Schema.ScalarType)
-									LObject = ValueUtility.ValidateValue(AProgram, (Schema.ScalarType)FSpecifiedRowType.Columns[LIndex].DataType, LObject);
-								LRow[DataType.Columns.IndexOfName(FSpecifiedRowType.Columns[LIndex].Name)] = LObject;
+								if (_specifiedRowType.Columns[index].DataType is Schema.ScalarType)
+									objectValue = ValueUtility.ValidateValue(program, (Schema.ScalarType)_specifiedRowType.Columns[index].DataType, objectValue);
+								row[DataType.Columns.IndexOfName(_specifiedRowType.Columns[index].Name)] = objectValue;
 							}
 							finally
 							{
-								DataValue.DisposeValue(AProgram.ValueManager, LObject);
+								DataValue.DisposeValue(program.ValueManager, objectValue);
 							}
 						}
 					}
 				}
 				else
 				{
-					for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
+					for (int index = 0; index < DataType.Columns.Count; index++)
 					{
-						object LObject = Nodes[LIndex].Execute(AProgram);
-						if (LObject != null)
+						object objectValue = Nodes[index].Execute(program);
+						if (objectValue != null)
 						{
 							try
 							{
-								if (DataType.Columns[LIndex].DataType is Schema.ScalarType)
-									LObject = ValueUtility.ValidateValue(AProgram, (Schema.ScalarType)DataType.Columns[LIndex].DataType, LObject);
-								LRow[LIndex] = LObject;
+								if (DataType.Columns[index].DataType is Schema.ScalarType)
+									objectValue = ValueUtility.ValidateValue(program, (Schema.ScalarType)DataType.Columns[index].DataType, objectValue);
+								row[index] = objectValue;
 							}
 							finally
 							{
-								DataValue.DisposeValue(AProgram.ValueManager, LObject);
+								DataValue.DisposeValue(program.ValueManager, objectValue);
 							}
 						}
 					}
 				}
-				return LRow;
+				return row;
 			}
 			catch
 			{
-				LRow.Dispose();
+				row.Dispose();
 				throw;
 			}
 		}
 		
 		// Statement
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			if (FDataType is Schema.RowType)
+			if (_dataType is Schema.RowType)
 			{
-				RowSelectorExpression LExpression = new RowSelectorExpression();
-				if (FSpecifiedRowType != null)
-					LExpression.TypeSpecifier = DataType.EmitSpecifier(AMode);
-				Schema.IRowType LRowType = FSpecifiedRowType != null ? FSpecifiedRowType : DataType;
-				for (int LIndex = 0; LIndex < LRowType.Columns.Count; LIndex++)
-					LExpression.Expressions.Add(new NamedColumnExpression((Expression)Nodes[LIndex].EmitStatement(AMode), LRowType.Columns[LIndex].Name));
-				LExpression.Modifiers = Modifiers;
-				return LExpression;
+				RowSelectorExpression expression = new RowSelectorExpression();
+				if (_specifiedRowType != null)
+					expression.TypeSpecifier = DataType.EmitSpecifier(mode);
+				Schema.IRowType rowType = _specifiedRowType != null ? _specifiedRowType : DataType;
+				for (int index = 0; index < rowType.Columns.Count; index++)
+					expression.Expressions.Add(new NamedColumnExpression((Expression)Nodes[index].EmitStatement(mode), rowType.Columns[index].Name));
+				expression.Modifiers = Modifiers;
+				return expression;
 			}
 			else
 			{
-				EntrySelectorExpression LExpression = new EntrySelectorExpression();
-				for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
-					LExpression.Expressions.Add(new NamedColumnExpression((Expression)Nodes[LIndex].EmitStatement(AMode), DataType.Columns[LIndex].Name));
-				LExpression.Modifiers = Modifiers;
-				return LExpression;
+				EntrySelectorExpression expression = new EntrySelectorExpression();
+				for (int index = 0; index < DataType.Columns.Count; index++)
+					expression.Expressions.Add(new NamedColumnExpression((Expression)Nodes[index].EmitStatement(mode), DataType.Columns[index].Name));
+				expression.Modifiers = Modifiers;
+				return expression;
 			}
 		}
 	}
 
     public class RowSelectorNode : RowNode
     {
-		public RowSelectorNode(Schema.IRowType ADataType) : base()
+		public RowSelectorNode(Schema.IRowType dataType) : base()
 		{
-			FDataType = ADataType;
+			_dataType = dataType;
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
 			Error.Fail("Unimplemented RowSelectorNode.DetermineDataType");
 		}
@@ -154,156 +154,156 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
     public class RowExtendNode : UnaryRowNode
     {
-		protected int FExtendColumnOffset;		
-		public int ExtendColumnOffset { get { return FExtendColumnOffset; } }
+		protected int _extendColumnOffset;		
+		public int ExtendColumnOffset { get { return _extendColumnOffset; } }
 		
-		private NamedColumnExpressions FExpressions;
+		private NamedColumnExpressions _expressions;
 		public NamedColumnExpressions Expressions
 		{
-			get { return FExpressions; }
-			set { FExpressions = value; }
+			get { return _expressions; }
+			set { _expressions = value; }
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.RowType();
+			DetermineModifiers(plan);
+			_dataType = new Schema.RowType();
 
-			foreach (Schema.Column LColumn in SourceRowType.Columns)
-				DataType.Columns.Add(LColumn.Copy());
-			FExtendColumnOffset = DataType.Columns.Count;
+			foreach (Schema.Column column in SourceRowType.Columns)
+				DataType.Columns.Add(column.Copy());
+			_extendColumnOffset = DataType.Columns.Count;
 
-			APlan.EnterRowContext();
+			plan.EnterRowContext();
 			try
 			{			
-				APlan.Symbols.Push(new Symbol(String.Empty, SourceRowType));
+				plan.Symbols.Push(new Symbol(String.Empty, SourceRowType));
 				try
 				{
 					// Add a column for each expression
-					PlanNode LPlanNode;
-					Schema.Column LNewColumn;
-					foreach (NamedColumnExpression LColumn in FExpressions)
+					PlanNode planNode;
+					Schema.Column newColumn;
+					foreach (NamedColumnExpression column in _expressions)
 					{
-						LPlanNode = Compiler.CompileExpression(APlan, LColumn.Expression);
+						planNode = Compiler.CompileExpression(plan, column.Expression);
 
-						LNewColumn = 
+						newColumn = 
 							new Schema.Column
 							(
-								LColumn.ColumnAlias, 
-								LPlanNode.DataType
+								column.ColumnAlias, 
+								planNode.DataType
 							);
 							
-						DataType.Columns.Add(LNewColumn);
-						Nodes.Add(LPlanNode);
+						DataType.Columns.Add(newColumn);
+						Nodes.Add(planNode);
 					}
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 			finally
 			{
-				APlan.ExitRowContext();
+				plan.ExitRowContext();
 			}
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			Nodes[0].DetermineBinding(APlan);
-			APlan.EnterRowContext();
+			Nodes[0].DetermineBinding(plan);
+			plan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(String.Empty, SourceRowType));
+				plan.Symbols.Push(new Symbol(String.Empty, SourceRowType));
 				try
 				{
-					for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
-						Nodes[LIndex].DetermineBinding(APlan);
+					for (int index = 1; index < Nodes.Count; index++)
+						Nodes[index].DetermineBinding(plan);
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 			finally
 			{
-				APlan.ExitRowContext();
+				plan.ExitRowContext();
 			}
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			ExtendExpression LExpression = new ExtendExpression();
-			LExpression.Expression = (Expression)Nodes[0].EmitStatement(AMode);
-			for (int LIndex = ExtendColumnOffset; LIndex < DataType.Columns.Count; LIndex++)
-				LExpression.Expressions.Add(new NamedColumnExpression((Expression)Nodes[LIndex - ExtendColumnOffset + 1].EmitStatement(AMode), DataType.Columns[LIndex].Name));
-			LExpression.Modifiers = Modifiers;
-			return LExpression;
+			ExtendExpression expression = new ExtendExpression();
+			expression.Expression = (Expression)Nodes[0].EmitStatement(mode);
+			for (int index = ExtendColumnOffset; index < DataType.Columns.Count; index++)
+				expression.Expressions.Add(new NamedColumnExpression((Expression)Nodes[index - ExtendColumnOffset + 1].EmitStatement(mode), DataType.Columns[index].Name));
+			expression.Modifiers = Modifiers;
+			return expression;
 		}
 
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			return null; // Not called, required override due to abstract
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			object LResult;
-			Row LSourceRow = (Row)Nodes[0].Execute(AProgram);
+			object result;
+			Row sourceRow = (Row)Nodes[0].Execute(program);
 			#if NILPROPOGATION
-			if ((LSourceRow == null) || LSourceRow.IsNil)
+			if ((sourceRow == null) || sourceRow.IsNil)
 				return null;
 			#endif
 			try
 			{
-				Row LNewRow = new Row(AProgram.ValueManager, DataType);
+				Row newRow = new Row(program.ValueManager, DataType);
 				try
 				{
-					AProgram.Stack.Push(LSourceRow);
+					program.Stack.Push(sourceRow);
 					try
 					{
-						LSourceRow.CopyTo(LNewRow);
+						sourceRow.CopyTo(newRow);
 						
-						for (int LIndex = FExtendColumnOffset; LIndex < LNewRow.DataType.Columns.Count; LIndex++)
+						for (int index = _extendColumnOffset; index < newRow.DataType.Columns.Count; index++)
 						{
-							LResult = Nodes[LIndex - FExtendColumnOffset + 1].Execute(AProgram);
-							if (LResult != null)
+							result = Nodes[index - _extendColumnOffset + 1].Execute(program);
+							if (result != null)
 							{
 								try
 								{
-									LNewRow[LIndex] = LResult;
+									newRow[index] = result;
 								}
 								finally
 								{
-									DataValue.DisposeValue(AProgram.ValueManager, LResult);
+									DataValue.DisposeValue(program.ValueManager, result);
 								}
 							}
 						}
 					}
 					finally
 					{
-						AProgram.Stack.Pop();
+						program.Stack.Pop();
 					}
-					return LNewRow;
+					return newRow;
 				}
 				catch
 				{
-					LNewRow.Dispose();
+					newRow.Dispose();
 					throw;
 				}
 			}
 			finally
 			{
-				LSourceRow.Dispose();
+				sourceRow.Dispose();
 			}
 		}
 
-		public override bool IsContextLiteral(int ALocation)
+		public override bool IsContextLiteral(int location)
 		{
-			if (!Nodes[0].IsContextLiteral(ALocation))
+			if (!Nodes[0].IsContextLiteral(location))
 				return false;
-			for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
-				if (!Nodes[LIndex].IsContextLiteral(ALocation + 1))
+			for (int index = 1; index < Nodes.Count; index++)
+				if (!Nodes[index].IsContextLiteral(location + 1))
 					return false;
 			return true;
 		}
@@ -311,174 +311,174 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
 	public class RowRedefineNode : UnaryRowNode
 	{
-		protected int[] FRedefineColumnOffsets;		
+		protected int[] _redefineColumnOffsets;		
 		public int[] RedefineColumnOffsets
 		{
-			get { return FRedefineColumnOffsets; }
-			set { FRedefineColumnOffsets = value; }
+			get { return _redefineColumnOffsets; }
+			set { _redefineColumnOffsets = value; }
 		}
 		
-		private NamedColumnExpressions FExpressions;
+		private NamedColumnExpressions _expressions;
 		public NamedColumnExpressions Expressions
 		{
-			get { return FExpressions; }
-			set { FExpressions = value; }
+			get { return _expressions; }
+			set { _expressions = value; }
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.RowType();
+			DetermineModifiers(plan);
+			_dataType = new Schema.RowType();
 
-			foreach (Schema.Column LColumn in SourceRowType.Columns)
-				DataType.Columns.Add(LColumn.Copy());
+			foreach (Schema.Column column in SourceRowType.Columns)
+				DataType.Columns.Add(column.Copy());
 
-			int LIndex = 0;			
-			FRedefineColumnOffsets = new int[FExpressions.Count];
-			APlan.EnterRowContext();
+			int index = 0;			
+			_redefineColumnOffsets = new int[_expressions.Count];
+			plan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(String.Empty, SourceRowType));
+				plan.Symbols.Push(new Symbol(String.Empty, SourceRowType));
 				try
 				{
 					// Add a column for each expression
-					PlanNode LPlanNode;
-					Schema.Column LSourceColumn;
-					Schema.Column LNewColumn;
-					foreach (NamedColumnExpression LColumn in FExpressions)
+					PlanNode planNode;
+					Schema.Column sourceColumn;
+					Schema.Column newColumn;
+					foreach (NamedColumnExpression column in _expressions)
 					{
-						int LSourceColumnIndex = DataType.Columns.IndexOf(LColumn.ColumnAlias);
-						if (LSourceColumnIndex < 0)
-							throw new CompilerException(CompilerException.Codes.UnknownIdentifier, LColumn, LColumn.ColumnAlias);
+						int sourceColumnIndex = DataType.Columns.IndexOf(column.ColumnAlias);
+						if (sourceColumnIndex < 0)
+							throw new CompilerException(CompilerException.Codes.UnknownIdentifier, column, column.ColumnAlias);
 							
-						LSourceColumn = DataType.Columns[LSourceColumnIndex];
-						LPlanNode = Compiler.CompileExpression(APlan, LColumn.Expression);
-						LNewColumn = new Schema.Column(LSourceColumn.Name, LPlanNode.DataType);
-						DataType.Columns[LSourceColumnIndex] = LNewColumn;
-						FRedefineColumnOffsets[LIndex] = LSourceColumnIndex;
-						Nodes.Add(LPlanNode);
-						LIndex++;
+						sourceColumn = DataType.Columns[sourceColumnIndex];
+						planNode = Compiler.CompileExpression(plan, column.Expression);
+						newColumn = new Schema.Column(sourceColumn.Name, planNode.DataType);
+						DataType.Columns[sourceColumnIndex] = newColumn;
+						_redefineColumnOffsets[index] = sourceColumnIndex;
+						Nodes.Add(planNode);
+						index++;
 					}
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 			finally
 			{
-				APlan.ExitRowContext();
+				plan.ExitRowContext();
 			}
 		}
 		
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			RedefineExpression LExpression = new RedefineExpression();
-			LExpression.Expression = (Expression)Nodes[0].EmitStatement(AMode);
-			for (int LIndex = 0; LIndex < FRedefineColumnOffsets.Length; LIndex++)
-				LExpression.Expressions.Add(new NamedColumnExpression((Expression)Nodes[LIndex + 1].EmitStatement(AMode), DataType.Columns[FRedefineColumnOffsets[LIndex]].Name));
-			LExpression.Modifiers = Modifiers;
-			return LExpression;
+			RedefineExpression expression = new RedefineExpression();
+			expression.Expression = (Expression)Nodes[0].EmitStatement(mode);
+			for (int index = 0; index < _redefineColumnOffsets.Length; index++)
+				expression.Expressions.Add(new NamedColumnExpression((Expression)Nodes[index + 1].EmitStatement(mode), DataType.Columns[_redefineColumnOffsets[index]].Name));
+			expression.Modifiers = Modifiers;
+			return expression;
 		}
 		
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			Nodes[0].DetermineBinding(APlan);
-			APlan.EnterRowContext();
+			Nodes[0].DetermineBinding(plan);
+			plan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new Symbol(String.Empty, SourceRowType));
+				plan.Symbols.Push(new Symbol(String.Empty, SourceRowType));
 				try
 				{
-					for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
-						Nodes[LIndex].DetermineBinding(APlan);
+					for (int index = 1; index < Nodes.Count; index++)
+						Nodes[index].DetermineBinding(plan);
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 			finally
 			{
-				APlan.ExitRowContext();
+				plan.ExitRowContext();
 			}
 		}
 		
-		public override object InternalExecute(Program AProgram, object AArgument1)
+		public override object InternalExecute(Program program, object argument1)
 		{
 			return null; // Not called, required override due to abstract
 		}
 		
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program)
 		{
-			Row LSourceRow = (Row)Nodes[0].Execute(AProgram);
+			Row sourceRow = (Row)Nodes[0].Execute(program);
 			#if NILPROPOGATION
-			if ((LSourceRow == null) || LSourceRow.IsNil)
+			if ((sourceRow == null) || sourceRow.IsNil)
 				return null;
 			#endif
 			try
 			{
-				AProgram.Stack.Push(LSourceRow);
+				program.Stack.Push(sourceRow);
 				try
 				{
-					Row LNewRow = new Row(AProgram.ValueManager, DataType);
+					Row newRow = new Row(program.ValueManager, DataType);
 					try
 					{
-						int LColumnIndex;
-						for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
+						int columnIndex;
+						for (int index = 0; index < DataType.Columns.Count; index++)
 						{
-							if (!((IList)FRedefineColumnOffsets).Contains(LIndex))
+							if (!((IList)_redefineColumnOffsets).Contains(index))
 							{
-								LColumnIndex = LSourceRow.DataType.Columns.IndexOfName(DataType.Columns[LIndex].Name);
-								if (LSourceRow.HasValue(LColumnIndex))
-									LNewRow[LIndex] = LSourceRow[LColumnIndex];
+								columnIndex = sourceRow.DataType.Columns.IndexOfName(DataType.Columns[index].Name);
+								if (sourceRow.HasValue(columnIndex))
+									newRow[index] = sourceRow[columnIndex];
 								else
-									LNewRow.ClearValue(LIndex);
+									newRow.ClearValue(index);
 							}
 						}
 						
-						for (int LIndex = 0; LIndex < FRedefineColumnOffsets.Length; LIndex++)
+						for (int index = 0; index < _redefineColumnOffsets.Length; index++)
 						{
-							object LResult = Nodes[LIndex + 1].Execute(AProgram);
-							if ((LResult != null))
+							object result = Nodes[index + 1].Execute(program);
+							if ((result != null))
 							{
 								try
 								{
-									LNewRow[FRedefineColumnOffsets[LIndex]] = LResult;
+									newRow[_redefineColumnOffsets[index]] = result;
 								}
 								finally
 								{
-									DataValue.DisposeValue(AProgram.ValueManager, LResult);
+									DataValue.DisposeValue(program.ValueManager, result);
 								}
 							}
 							else
-								LNewRow.ClearValue(FRedefineColumnOffsets[LIndex]);
+								newRow.ClearValue(_redefineColumnOffsets[index]);
 						}
-						return LNewRow;
+						return newRow;
 					}
 					catch
 					{
-						LNewRow.Dispose();
+						newRow.Dispose();
 						throw;
 					}
 				}
 				finally
 				{
-					AProgram.Stack.Pop();
+					program.Stack.Pop();
 				}
 			}
 			finally
 			{
-				LSourceRow.Dispose();
+				sourceRow.Dispose();
 			}
 		}
 		
-		public override bool IsContextLiteral(int ALocation)
+		public override bool IsContextLiteral(int location)
 		{
-			if (!Nodes[0].IsContextLiteral(ALocation))
+			if (!Nodes[0].IsContextLiteral(location))
 				return false;
-			for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
-				if (!Nodes[LIndex].IsContextLiteral(ALocation + 1))
+			for (int index = 1; index < Nodes.Count; index++)
+				if (!Nodes[index].IsContextLiteral(location + 1))
 					return false;
 			return true;
 		}
@@ -487,256 +487,256 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Rename(row) : row
 	public class RowRenameNode : UnaryRowNode
 	{
-		private string FRowAlias;
+		private string _rowAlias;
 		public string RowAlias
 		{
-			get { return FRowAlias; }
-			set { FRowAlias = value; }
+			get { return _rowAlias; }
+			set { _rowAlias = value; }
 		}
 		
-		private MetaData FMetaData;
+		private MetaData _metaData;
 		public MetaData MetaData
 		{
-			get { return FMetaData; }
-			set { FMetaData = value; }
+			get { return _metaData; }
+			set { _metaData = value; }
 		}
 
-		private RenameColumnExpressions FExpressions;		
+		private RenameColumnExpressions _expressions;		
 		public RenameColumnExpressions Expressions
 		{
-			get { return FExpressions; }
-			set { FExpressions = value; }
+			get { return _expressions; }
+			set { _expressions = value; }
 		}
 
 		// Indicates whether this row rename should be emitted
 		// This is used by the table-indexer compilation process to
 		// ensure that the row rename portion is not re-emitted
 		// as part of the expression
-		private bool FShouldEmit = true;
+		private bool _shouldEmit = true;
 		public bool ShouldEmit
 		{
-			get { return FShouldEmit; }
-			set { FShouldEmit = value; }
+			get { return _shouldEmit; }
+			set { _shouldEmit = value; }
 		}
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.RowType();
+			DetermineModifiers(plan);
+			_dataType = new Schema.RowType();
 
-			if (FExpressions == null)
+			if (_expressions == null)
 			{
 				// Inherit columns
-				foreach (Schema.Column LColumn in SourceRowType.Columns)
-					DataType.Columns.Add(new Schema.Column(Schema.Object.Qualify(LColumn.Name, FRowAlias), LColumn.DataType));
+				foreach (Schema.Column column in SourceRowType.Columns)
+					DataType.Columns.Add(new Schema.Column(Schema.Object.Qualify(column.Name, _rowAlias), column.DataType));
 			}
 			else
 			{
-				bool LColumnAdded;
-				Schema.Column LColumn;
-				int LRenameColumnIndex;
-				for (int LIndex = 0; LIndex < SourceRowType.Columns.Count; LIndex++)
+				bool columnAdded;
+				Schema.Column column;
+				int renameColumnIndex;
+				for (int index = 0; index < SourceRowType.Columns.Count; index++)
 				{
-					LColumnAdded = false;
-					foreach (RenameColumnExpression LRenameColumn in FExpressions)
+					columnAdded = false;
+					foreach (RenameColumnExpression renameColumn in _expressions)
 					{
-						LRenameColumnIndex = SourceRowType.Columns.IndexOf(LRenameColumn.ColumnName);
-						if (LRenameColumnIndex < 0)
-							throw new Schema.SchemaException(Schema.SchemaException.Codes.ObjectNotFound, LRenameColumn.ColumnName);
-						else if (LRenameColumnIndex == LIndex)
+						renameColumnIndex = SourceRowType.Columns.IndexOf(renameColumn.ColumnName);
+						if (renameColumnIndex < 0)
+							throw new Schema.SchemaException(Schema.SchemaException.Codes.ObjectNotFound, renameColumn.ColumnName);
+						else if (renameColumnIndex == index)
 						{
-							LColumn = new Schema.Column(LRenameColumn.ColumnAlias, SourceRowType.Columns[LIndex].DataType);
-							DataType.Columns.Add(LColumn);
-							LColumnAdded = true;
+							column = new Schema.Column(renameColumn.ColumnAlias, SourceRowType.Columns[index].DataType);
+							DataType.Columns.Add(column);
+							columnAdded = true;
 							break;
 						}
 					}
-					if (!LColumnAdded)
-						DataType.Columns.Add(SourceRowType.Columns[LIndex].Copy());
+					if (!columnAdded)
+						DataType.Columns.Add(SourceRowType.Columns[index].Copy());
 				}
 			}
 		}
 		
-		public override object InternalExecute(Program AProgram, object AArgument)
+		public override object InternalExecute(Program program, object argument)
 		{
-			Row LSourceRow = (Row)AArgument;
+			Row sourceRow = (Row)argument;
 			#if NILPROPOGATION
-			if ((LSourceRow == null) || LSourceRow.IsNil)
+			if ((sourceRow == null) || sourceRow.IsNil)
 				return null;
 			#endif
 			try
 			{
-				Row LNewRow = new Row(AProgram.ValueManager, DataType);
+				Row newRow = new Row(program.ValueManager, DataType);
 				try
 				{
-					for (int LIndex = 0; LIndex < LSourceRow.DataType.Columns.Count; LIndex++)
-						if (LSourceRow.HasValue(LIndex) && (LIndex < LNewRow.DataType.Columns.Count))
-							LNewRow[LIndex] = LSourceRow[LIndex];
+					for (int index = 0; index < sourceRow.DataType.Columns.Count; index++)
+						if (sourceRow.HasValue(index) && (index < newRow.DataType.Columns.Count))
+							newRow[index] = sourceRow[index];
 					
-					return LNewRow;
+					return newRow;
 				}
 				catch
 				{
-					LNewRow.Dispose();
+					newRow.Dispose();
 					throw;
 				}
 			}
 			finally
 			{
-				LSourceRow.Dispose();
+				sourceRow.Dispose();
 			}
 		}
 
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
 			if (ShouldEmit && (DataType.Columns.Count > 0))
 			{
-				RenameExpression LExpression = new RenameExpression();
-				LExpression.Expression = (Expression)Nodes[0].EmitStatement(AMode);
-				for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
-					LExpression.Expressions.Add(new RenameColumnExpression(Schema.Object.EnsureRooted(SourceRowType.Columns[LIndex].Name), DataType.Columns[LIndex].Name));
-				LExpression.Modifiers = Modifiers;
-				return LExpression;
+				RenameExpression expression = new RenameExpression();
+				expression.Expression = (Expression)Nodes[0].EmitStatement(mode);
+				for (int index = 0; index < DataType.Columns.Count; index++)
+					expression.Expressions.Add(new RenameColumnExpression(Schema.Object.EnsureRooted(SourceRowType.Columns[index].Name), DataType.Columns[index].Name));
+				expression.Modifiers = Modifiers;
+				return expression;
 			}
 			else
-				return Nodes[0].EmitStatement(AMode);
+				return Nodes[0].EmitStatement(mode);
 		}
 	}
 	
 	public class RowJoinNode : BinaryInstructionNode
 	{
-		private PlanNode FEqualNode;
+		private PlanNode _equalNode;
 
-		public new Schema.RowType DataType { get { return (Schema.RowType)FDataType; } }
+		public new Schema.RowType DataType { get { return (Schema.RowType)_dataType; } }
 		public Schema.RowType LeftRowType { get { return (Schema.RowType)Nodes[0].DataType; } }
 		public Schema.RowType RightRowType { get { return (Schema.RowType)Nodes[1].DataType; } }
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			base.DetermineDataType(APlan);
-			FDataType = new Schema.RowType();
-			Expression LExpression = null;
-			int LRightIndex;
-			for (int LLeftIndex = 0; LLeftIndex < LeftRowType.Columns.Count; LLeftIndex++)
+			base.DetermineDataType(plan);
+			_dataType = new Schema.RowType();
+			Expression expression = null;
+			int rightIndex;
+			for (int leftIndex = 0; leftIndex < LeftRowType.Columns.Count; leftIndex++)
 			{
-				LRightIndex = RightRowType.Columns.IndexOfName(LeftRowType.Columns[LLeftIndex].Name);
-				if (LRightIndex >= 0)
+				rightIndex = RightRowType.Columns.IndexOfName(LeftRowType.Columns[leftIndex].Name);
+				if (rightIndex >= 0)
 				{
-					Expression LEqualExpression = 
+					Expression equalExpression = 
 						new BinaryExpression
 						(
-							new IdentifierExpression(Schema.Object.Qualify(LeftRowType.Columns[LLeftIndex].Name, Keywords.Left)), 
+							new IdentifierExpression(Schema.Object.Qualify(LeftRowType.Columns[leftIndex].Name, Keywords.Left)), 
 							Instructions.Equal, 
-							new IdentifierExpression(Schema.Object.Qualify(RightRowType.Columns[LRightIndex].Name, Keywords.Right))
+							new IdentifierExpression(Schema.Object.Qualify(RightRowType.Columns[rightIndex].Name, Keywords.Right))
 						);
 						
-					if (LExpression != null)
-						LExpression = new BinaryExpression(LExpression, Instructions.And, LEqualExpression);
+					if (expression != null)
+						expression = new BinaryExpression(expression, Instructions.And, equalExpression);
 					else
-						LExpression = LEqualExpression;
+						expression = equalExpression;
 				}
-				DataType.Columns.Add(LeftRowType.Columns[LLeftIndex].Copy());
+				DataType.Columns.Add(LeftRowType.Columns[leftIndex].Copy());
 			}
 			
-			for (int LIndex = 0; LIndex < RightRowType.Columns.Count; LIndex++)
-				if (!LeftRowType.Columns.ContainsName(RightRowType.Columns[LIndex].Name))
-					DataType.Columns.Add(RightRowType.Columns[LIndex].Copy());
+			for (int index = 0; index < RightRowType.Columns.Count; index++)
+				if (!LeftRowType.Columns.ContainsName(RightRowType.Columns[index].Name))
+					DataType.Columns.Add(RightRowType.Columns[index].Copy());
 			
-			if (LExpression != null)
+			if (expression != null)
 			{
-				APlan.EnterRowContext();
+				plan.EnterRowContext();
 				try
 				{
 					#if USENAMEDROWVARIABLES
 					APlan.Symbols.Push(new Symbol(Keywords.Left, LeftRowType));
 					#else
-					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(LeftRowType.Columns, Keywords.Left)));
+					plan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(LeftRowType.Columns, Keywords.Left)));
 					#endif
 					try
 					{
 						#if USENAMEDROWVARIABLES
 						APlan.Symbols.Push(new Symbol(Keywords.Right, RightRowType));
 						#else
-						APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(RightRowType.Columns, Keywords.Right)));
+						plan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(RightRowType.Columns, Keywords.Right)));
 						#endif
 						try
 						{
-							FEqualNode = Compiler.CompileExpression(APlan, LExpression);
+							_equalNode = Compiler.CompileExpression(plan, expression);
 						}
 						finally
 						{
-							APlan.Symbols.Pop();
+							plan.Symbols.Pop();
 						}
 					}
 					finally
 					{
-						APlan.Symbols.Pop();
+						plan.Symbols.Pop();
 					}
 				}
 				finally
 				{
-					APlan.ExitRowContext();
+					plan.ExitRowContext();
 				}
 			}
 			else
-				FEqualNode = null;
+				_equalNode = null;
 		}
 		
-		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program program, object argument1, object argument2)
 		{
 			#if NILPROPOGATION
-			if (AArgument1 == null || AArgument2 == null)
+			if (argument1 == null || argument2 == null)
 				return null;
 			#endif
-			if (FEqualNode != null)
+			if (_equalNode != null)
 			{
-				AProgram.Stack.Push(AArgument1);
+				program.Stack.Push(argument1);
 				try
 				{
-					AProgram.Stack.Push(AArgument2);
+					program.Stack.Push(argument2);
 					try
 					{
-						object LValue = FEqualNode.Execute(AProgram);
-						if ((LValue == null) || !(bool)LValue)
+						object tempValue = _equalNode.Execute(program);
+						if ((tempValue == null) || !(bool)tempValue)
 							throw new RuntimeException(RuntimeException.Codes.InvalidRowJoin);
 					}
 					finally
 					{
-						AProgram.Stack.Pop();
+						program.Stack.Pop();
 					}
 				}
 				finally
 				{
-					AProgram.Stack.Pop();
+					program.Stack.Pop();
 				}
 			}
-			Row LResult = new Row(AProgram.ValueManager, DataType);
+			Row result = new Row(program.ValueManager, DataType);
 			try
 			{
-				((Row)AArgument1).CopyTo(LResult);
-				((Row)AArgument2).CopyTo(LResult);
-				return LResult;
+				((Row)argument1).CopyTo(result);
+				((Row)argument2).CopyTo(result);
+				return result;
 			}
 			catch
 			{	
-				LResult.Dispose();
+				result.Dispose();
 				throw;
 			}
 		}
 
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			InnerJoinExpression LExpression = new InnerJoinExpression();
-			LExpression.LeftExpression = (Expression)Nodes[0].EmitStatement(AMode);
-			LExpression.RightExpression = (Expression)Nodes[1].EmitStatement(AMode);
-			LExpression.Modifiers = Modifiers;
-			return LExpression;
+			InnerJoinExpression expression = new InnerJoinExpression();
+			expression.LeftExpression = (Expression)Nodes[0].EmitStatement(mode);
+			expression.RightExpression = (Expression)Nodes[1].EmitStatement(mode);
+			expression.Modifiers = Modifiers;
+			return expression;
 		}
 	}
 	
 	public abstract class UnaryRowNode : UnaryInstructionNode
 	{
-		public new Schema.RowType DataType { get { return (Schema.RowType)FDataType; } }
+		public new Schema.RowType DataType { get { return (Schema.RowType)_dataType; } }
 		public Schema.RowType SourceRowType { get { return (Schema.RowType)Nodes[0].DataType; } }
 	}
 	
@@ -747,26 +747,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected TypedList FColumnNames = new TypedList(typeof(string), false);
 		public TypedList ColumnNames { get { return FColumnNames; } }
 		#else
-		protected BaseList<string> FColumnNames = new BaseList<string>();
-		public BaseList<string> ColumnNames { get { return FColumnNames; } }
+		protected BaseList<string> _columnNames = new BaseList<string>();
+		public BaseList<string> ColumnNames { get { return _columnNames; } }
 		#endif
 		
-		public override object InternalExecute(Program AProgram, object AArgument)
+		public override object InternalExecute(Program program, object argument)
 		{
 			#if NILPROPOGATION
-			if (AArgument == null)
+			if (argument == null)
 				return null;
 			#endif
 			
-			Row LRow = new Row(AProgram.ValueManager, DataType);
+			Row row = new Row(program.ValueManager, DataType);
 			try
 			{
-				((Row)AArgument).CopyTo(LRow);
-				return LRow;
+				((Row)argument).CopyTo(row);
+				return row;
 			}
 			catch
 			{
-				LRow.Dispose();
+				row.Dispose();
 				throw;
 			}
 		}
@@ -774,48 +774,48 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public class RowProjectNode : RowProjectNodeBase
 	{
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.RowType();
-			foreach (string LColumnName in FColumnNames)
-				DataType.Columns.Add(SourceRowType.Columns[LColumnName].Copy());
+			DetermineModifiers(plan);
+			_dataType = new Schema.RowType();
+			foreach (string columnName in _columnNames)
+				DataType.Columns.Add(SourceRowType.Columns[columnName].Copy());
 		}
 
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			ProjectExpression LExpression = new ProjectExpression();
-			LExpression.Expression = (Expression)Nodes[0].EmitStatement(AMode);
-			foreach (Schema.Column LColumn in DataType.Columns)
-				LExpression.Columns.Add(new ColumnExpression(Schema.Object.EnsureRooted(LColumn.Name)));
-			LExpression.Modifiers = Modifiers;
-			return LExpression;
+			ProjectExpression expression = new ProjectExpression();
+			expression.Expression = (Expression)Nodes[0].EmitStatement(mode);
+			foreach (Schema.Column column in DataType.Columns)
+				expression.Columns.Add(new ColumnExpression(Schema.Object.EnsureRooted(column.Name)));
+			expression.Modifiers = Modifiers;
+			return expression;
 		}
 	}
 	
 	public class RowRemoveNode : RowProjectNodeBase
 	{
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = new Schema.RowType();
+			DetermineModifiers(plan);
+			_dataType = new Schema.RowType();
 			
-			foreach (Schema.Column LColumn in SourceRowType.Columns)
-				DataType.Columns.Add(LColumn.Copy());
+			foreach (Schema.Column column in SourceRowType.Columns)
+				DataType.Columns.Add(column.Copy());
 				
-			foreach (string LColumnName in FColumnNames)
-				DataType.Columns.Remove(DataType.Columns[LColumnName]);
+			foreach (string columnName in _columnNames)
+				DataType.Columns.Remove(DataType.Columns[columnName]);
 		}
 
-		public override Statement EmitStatement(EmitMode AMode)
+		public override Statement EmitStatement(EmitMode mode)
 		{
-			RemoveExpression LExpression = new RemoveExpression();
-			LExpression.Expression = (Expression)Nodes[0].EmitStatement(AMode);
-			foreach (Schema.Column LColumn in SourceRowType.Columns)
-				if (!DataType.Columns.ContainsName(LColumn.Name))
-					LExpression.Columns.Add(new ColumnExpression(Schema.Object.EnsureRooted(LColumn.Name)));
-			LExpression.Modifiers = Modifiers;
-			return LExpression;
+			RemoveExpression expression = new RemoveExpression();
+			expression.Expression = (Expression)Nodes[0].EmitStatement(mode);
+			foreach (Schema.Column column in SourceRowType.Columns)
+				if (!DataType.Columns.ContainsName(column.Name))
+					expression.Columns.Add(new ColumnExpression(Schema.Object.EnsureRooted(column.Name)));
+			expression.Modifiers = Modifiers;
+			return expression;
 		}
 	}
 }

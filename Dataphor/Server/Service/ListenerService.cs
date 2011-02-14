@@ -24,60 +24,60 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 			try
 			{
-				InstanceConfiguration LConfiguration = InstanceManager.LoadConfiguration();
-				string[] LResult = new string[LConfiguration.Instances.Count];
-				for (int LIndex = 0; LIndex < LConfiguration.Instances.Count; LIndex++)
-					LResult[LIndex] = LConfiguration.Instances[LIndex].Name;
-				return LResult;
+				InstanceConfiguration configuration = InstanceManager.LoadConfiguration();
+				string[] result = new string[configuration.Instances.Count];
+				for (int index = 0; index < configuration.Instances.Count; index++)
+					result[index] = configuration.Instances[index].Name;
+				return result;
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw new FaultException<ListenerFault>(ListenerFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<ListenerFault>(ListenerFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 		
-		private string GetInstanceURI(string AHostName, string AInstanceName, ConnectionSecurityMode ASecurityMode, bool AUseNative)
+		private string GetInstanceURI(string hostName, string instanceName, ConnectionSecurityMode securityMode, bool useNative)
 		{
 			try
 			{
-				ServerConfiguration LServer = InstanceManager.LoadConfiguration().Instances[AInstanceName];
+				ServerConfiguration server = InstanceManager.LoadConfiguration().Instances[instanceName];
 					
-				bool LSecure = false;
-				switch (ASecurityMode)
+				bool secure = false;
+				switch (securityMode)
 				{
 					case ConnectionSecurityMode.Default : 
-						LSecure = LServer.RequireSecureConnection;
+						secure = server.RequireSecureConnection;
 					break;
 					
 					case ConnectionSecurityMode.None :
-						if (LServer.RequireSecureConnection)
+						if (server.RequireSecureConnection)
 							throw new NotSupportedException("The URI cannot be determined because the instance does not support unsecured connections.");
 					break;
 
 					case ConnectionSecurityMode.Transport :
-						LSecure = true;
+						secure = true;
 					break;
 				}
 					
-				if (AUseNative)
-					return DataphorServiceUtility.BuildNativeInstanceURI(AHostName, LServer.PortNumber, LSecure, LServer.Name);
+				if (useNative)
+					return DataphorServiceUtility.BuildNativeInstanceURI(hostName, server.PortNumber, secure, server.Name);
 				
-				return DataphorServiceUtility.BuildInstanceURI(AHostName, LServer.PortNumber, LSecure, LServer.Name);
+				return DataphorServiceUtility.BuildInstanceURI(hostName, server.PortNumber, secure, server.Name);
 			}
-			catch (Exception LException)
+			catch (Exception exception)
 			{
-				throw new FaultException<ListenerFault>(ListenerFaultUtility.ExceptionToFault(LException), LException.Message);
+				throw new FaultException<ListenerFault>(ListenerFaultUtility.ExceptionToFault(exception), exception.Message);
 			}
 		}
 		
-		public string GetInstanceURI(string AHostName, string AInstanceName, ConnectionSecurityMode ASecurityMode)
+		public string GetInstanceURI(string hostName, string instanceName, ConnectionSecurityMode securityMode)
 		{
-			return GetInstanceURI(AHostName, AInstanceName, ASecurityMode, false);
+			return GetInstanceURI(hostName, instanceName, securityMode, false);
 		}
 		
-		public string GetNativeInstanceURI(string AHostName, string AInstanceName, ConnectionSecurityMode ASecurityMode)
+		public string GetNativeInstanceURI(string hostName, string instanceName, ConnectionSecurityMode securityMode)
 		{
-			return GetInstanceURI(AHostName, AInstanceName, ASecurityMode, true);
+			return GetInstanceURI(hostName, instanceName, securityMode, true);
 		}
 	}
 }

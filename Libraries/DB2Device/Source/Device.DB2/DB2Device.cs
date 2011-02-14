@@ -69,7 +69,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			#else
 			using (Stream LStream = GetType().Assembly.GetManifestResourceStream("SystemCatalog.d4"))
 			{
-				RunScript(AProcess, String.Format(new StreamReader(LStream).ReadToEnd(), Name, "false", (FProduct == DB2.DB2TextEmitter.CISeries).ToString().ToLower()));
+				RunScript(AProcess, String.Format(new StreamReader(LStream).ReadToEnd(), Name, "false", (FProduct == DB2.DB2TextEmitter.ISeries).ToString().ToLower()));
 			}
 			#endif
 		}	
@@ -86,7 +86,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			switch (Product)
 			{
 				default:
-				case DB2.DB2TextEmitter.CUDB:
+				case DB2.DB2TextEmitter.UDB:
 					return
 						String.Format
 						(
@@ -115,7 +115,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 							ATableVar == null ? String.Empty : String.Format("and t.tabname = '{0}'", ToSQLIdentifier(ATableVar))
 						);
 
-				case DB2.DB2TextEmitter.CISeries:
+				case DB2.DB2TextEmitter.ISeries:
 					return
 						String.Format
 						(
@@ -152,7 +152,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			switch (Product)
 			{
 				default:
-				case DB2.DB2TextEmitter.CUDB: // UDB is the default
+				case DB2.DB2TextEmitter.UDB: // UDB is the default
 					return 
 						String.Format
 						(
@@ -176,7 +176,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 							ATableVar == null ? String.Empty : String.Format("and t.tabname = '{0}'", ToSQLIdentifier(ATableVar))
 						);
 
-				case DB2.DB2TextEmitter.CISeries:
+				case DB2.DB2TextEmitter.ISeries:
 					return 
 						String.Format
 						(
@@ -231,7 +231,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 
 		protected override void SetMaxIdentifierLength()
 		{
-			FMaxIdentifierLength = 30;
+			_maxIdentifierLength = 30;
 		}
 
 		private int CMaxIndexNameLength = 18;
@@ -262,7 +262,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 				FProduct = value;
 				// iSeries CAE does not use statement terminators
 				// V4R4 does not support nested from clause or sub-selects in the select clause
-				if (FProduct == DB2.DB2TextEmitter.CISeries)
+				if (FProduct == DB2.DB2TextEmitter.ISeries)
 				{
 					UseStatementTerminator = false;
 					SupportsNestedFrom = false;
@@ -270,7 +270,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 					IsOrderByInContext = false;
 					UseValuesClauseInInsert = false;
 				}
-				else if (FProduct == DB2.DB2TextEmitter.CUDB)
+				else if (FProduct == DB2.DB2TextEmitter.UDB)
 				{
 					UseTransactions = false;
 				}
@@ -356,7 +356,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 				#if USEISTRING
 				case "clob": return (ScalarType)(IsCaseSensitive ? APlan.Catalog[CSQLTextScalarType] : APlan.Catalog[CSQLITextScalarType]);
 				#else
-				case "clob": return (ScalarType)Compiler.ResolveCatalogIdentifier(APlan, CSQLTextScalarType, true);
+				case "clob": return (ScalarType)Compiler.ResolveCatalogIdentifier(APlan, SQLTextScalarType, true);
 				#endif
 				case "blob": return APlan.DataTypes.SystemBinary;
 				default: throw new SQLException(SQLException.Codes.UnsupportedImportType, ADomainName);
@@ -397,7 +397,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 				new D4.ClassDefinition
 				(
 					Device.ConnectionClass == String.Empty ? 
-						Device.Product == DB2.DB2TextEmitter.CUDB ?
+						Device.Product == DB2.DB2TextEmitter.UDB ?
 							"DB2Connection.DB2Connection" :
 							"DB2400Connection.DB2400Connection" :
 						//"ODBCConnection.ODBCConnection" : 
@@ -408,7 +408,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 				new D4.ClassDefinition
 				(
 					Device.ConnectionStringBuilderClass == String.Empty ?
-						Device.Product == DB2.DB2TextEmitter.CUDB ?
+						Device.Product == DB2.DB2TextEmitter.UDB ?
 							"DB2Device.DB2DB2ConnectionStringBuilder" :
 							"DB2Device.DB2DB2400ConnectionStringBuilder" :
 						//"DB2Device.DB2ODBCConnectionStringBuilder" :
@@ -458,9 +458,9 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	{
 		public DB2DB2ConnectionStringBuilder()
 		{
-			FLegend.AddOrUpdate("DataSource", "Server");
-			FLegend.AddOrUpdate("UserName", "User ID");
-			FLegend.AddOrUpdate("Password", "Password");
+			_legend.AddOrUpdate("DataSource", "Server");
+			_legend.AddOrUpdate("UserName", "User ID");
+			_legend.AddOrUpdate("Password", "Password");
 		}
 	}
 	
@@ -468,10 +468,10 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	{
 		public DB2DB2400ConnectionStringBuilder()
 		{
-			FLegend.AddOrUpdate("DataSource", "DataSource");
-			FLegend.AddOrUpdate("Database", "DefaultCollection");
-			FLegend.AddOrUpdate("UserName", "User ID");
-			FLegend.AddOrUpdate("Password", "Password");
+			_legend.AddOrUpdate("DataSource", "DataSource");
+			_legend.AddOrUpdate("Database", "DefaultCollection");
+			_legend.AddOrUpdate("UserName", "User ID");
+			_legend.AddOrUpdate("Password", "Password");
 		}
 	}
 
@@ -479,9 +479,9 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	{
 		public DB2ODBCConnectionStringBuilder()
 		{
-			FLegend.AddOrUpdate("DataSource", "DSN");
-			FLegend.AddOrUpdate("UserName", "UID");
-			FLegend.AddOrUpdate("Password", "PWD");
+			_legend.AddOrUpdate("DataSource", "DSN");
+			_legend.AddOrUpdate("UserName", "UID");
+			_legend.AddOrUpdate("Password", "PWD");
 		}
 	}
 
@@ -489,10 +489,10 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	{
 		public DB2OLEDBConnectionStringBuilder()
 		{
-			FParameters.AddOrUpdate("Provider", "MSDASQL");
-			FLegend.AddOrUpdate("DataSource", "DSN");
-			FLegend.AddOrUpdate("UserName", "UID");
-			FLegend.AddOrUpdate("Password", "PWD");
+			_parameters.AddOrUpdate("Provider", "MSDASQL");
+			_legend.AddOrUpdate("DataSource", "DSN");
+			_legend.AddOrUpdate("UserName", "UID");
+			_legend.AddOrUpdate("Password", "PWD");
 		}
 	}
 

@@ -24,39 +24,39 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 
 	public class Analyzer : BaseForm, Alphora.Dataphor.Dataphoria.Designers.IDesigner, IToolBarClient
 	{
-		private AnalyzerControl FAnalyzerControl;
+		private AnalyzerControl _analyzerControl;
 		private MenuStrip MenuStip;
-		private ToolStrip FToolStrip;
+		private ToolStrip _toolStrip;
 		private ToolStripButton toolStripButton1;
-		private ToolStripButton FExpandOnDemand;
+		private ToolStripButton _expandOnDemand;
 
 		public Analyzer()	// dummy constructor for MDI menu merging?
 		{
 			InitializeComponent();
 		}
 
-		public Analyzer(IDataphoria ADataphoria, string ADesignerID)
+		public Analyzer(IDataphoria dataphoria, string designerID)
 		{
 			InitializeComponent();
 
-			FDesignerID = ADesignerID;
+			_designerID = designerID;
 
-			InitializeService(ADataphoria);
+			InitializeService(dataphoria);
 
-			SetExpandOnDemand((bool)ADataphoria.Settings.GetSetting("Analyzer.ExpandOnDemand", typeof(bool), true));
+			SetExpandOnDemand((bool)dataphoria.Settings.GetSetting("Analyzer.ExpandOnDemand", typeof(bool), true));
 		}
 
-		protected override void Dispose(bool ADisposed)
+		protected override void Dispose(bool disposed)
 		{
 			if (!IsDisposed && (Dataphoria != null))
 			{
 				try
 				{
-					Dataphoria.Settings.SetSetting("Analyzer.ExpandOnDemand", FAnalyzerControl.MainSurface.ExpandOnDemand);
+					Dataphoria.Settings.SetSetting("Analyzer.ExpandOnDemand", _analyzerControl.MainSurface.ExpandOnDemand);
 				}
 				finally
 				{
-					base.Dispose(ADisposed);
+					base.Dispose(disposed);
 				}
 			}
 		}
@@ -66,7 +66,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 		[Browsable(false)]
 		public IDataphoria Dataphoria
 		{
-			get { return (FService == null ? null : FService.Dataphoria); }
+			get { return (_service == null ? null : _service.Dataphoria); }
 		}
 
 		#region Windows Form Designer generated code
@@ -90,10 +90,10 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			System.Windows.Forms.ToolStripButton toolStripButton4;
 			System.Windows.Forms.ToolStripButton toolStripButton5;
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Analyzer));
-			this.FExpandOnDemand = new System.Windows.Forms.ToolStripButton();
-			this.FAnalyzerControl = new Alphora.Dataphor.Dataphoria.Analyzer.AnalyzerControl();
+			this._expandOnDemand = new System.Windows.Forms.ToolStripButton();
+			this._analyzerControl = new Alphora.Dataphor.Dataphoria.Analyzer.AnalyzerControl();
 			this.MenuStip = new System.Windows.Forms.MenuStrip();
-			this.FToolStrip = new System.Windows.Forms.ToolStrip();
+			this._toolStrip = new System.Windows.Forms.ToolStrip();
 			this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
 			toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
 			saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -109,7 +109,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			toolStripButton4 = new System.Windows.Forms.ToolStripButton();
 			toolStripButton5 = new System.Windows.Forms.ToolStripButton();
 			this.MenuStip.SuspendLayout();
-			this.FToolStrip.SuspendLayout();
+			this._toolStrip.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// FBottomToolStripPanel
@@ -257,23 +257,23 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			// 
 			// FExpandOnDemand
 			// 
-			this.FExpandOnDemand.Checked = true;
-			this.FExpandOnDemand.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.FExpandOnDemand.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.FExpandOnDemand.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.ExpandOnDemand;
-			this.FExpandOnDemand.ImageTransparentColor = System.Drawing.Color.Magenta;
-			this.FExpandOnDemand.Name = "FExpandOnDemand";
-			this.FExpandOnDemand.Size = new System.Drawing.Size(23, 22);
-			this.FExpandOnDemand.Text = "Expand On &Demand";
-			this.FExpandOnDemand.Click += new System.EventHandler(this.ExpandOnDemandClicked);
+			this._expandOnDemand.Checked = true;
+			this._expandOnDemand.CheckState = System.Windows.Forms.CheckState.Checked;
+			this._expandOnDemand.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this._expandOnDemand.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.ExpandOnDemand;
+			this._expandOnDemand.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this._expandOnDemand.Name = "FExpandOnDemand";
+			this._expandOnDemand.Size = new System.Drawing.Size(23, 22);
+			this._expandOnDemand.Text = "Expand On &Demand";
+			this._expandOnDemand.Click += new System.EventHandler(this.ExpandOnDemandClicked);
 			// 
 			// FAnalyzerControl
 			// 
-			this.FAnalyzerControl.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.FAnalyzerControl.Location = new System.Drawing.Point(0, 0);
-			this.FAnalyzerControl.Name = "FAnalyzerControl";
-			this.FAnalyzerControl.Size = new System.Drawing.Size(687, 518);
-			this.FAnalyzerControl.TabIndex = 4;
+			this._analyzerControl.Dock = System.Windows.Forms.DockStyle.Fill;
+			this._analyzerControl.Location = new System.Drawing.Point(0, 0);
+			this._analyzerControl.Name = "FAnalyzerControl";
+			this._analyzerControl.Size = new System.Drawing.Size(687, 518);
+			this._analyzerControl.TabIndex = 4;
 			// 
 			// MenuStip
 			// 
@@ -288,18 +288,18 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			// 
 			// FToolStrip
 			// 
-			this.FToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this._toolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton1,
             toolStripButton2,
             toolStripButton3,
             toolStripButton4,
             toolStripButton5,
-            this.FExpandOnDemand});
-			this.FToolStrip.Location = new System.Drawing.Point(0, 0);
-			this.FToolStrip.Name = "FToolStrip";
-			this.FToolStrip.Size = new System.Drawing.Size(687, 25);
-			this.FToolStrip.TabIndex = 10;
-			this.FToolStrip.Visible = false;
+            this._expandOnDemand});
+			this._toolStrip.Location = new System.Drawing.Point(0, 0);
+			this._toolStrip.Name = "FToolStrip";
+			this._toolStrip.Size = new System.Drawing.Size(687, 25);
+			this._toolStrip.TabIndex = 10;
+			this._toolStrip.Visible = false;
 			// 
 			// toolStripButton1
 			// 
@@ -317,93 +317,93 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.CausesValidation = false;
 			this.ClientSize = new System.Drawing.Size(687, 518);
-			this.Controls.Add(this.FToolStrip);
-			this.Controls.Add(this.FAnalyzerControl);
+			this.Controls.Add(this._toolStrip);
+			this.Controls.Add(this._analyzerControl);
 			this.Controls.Add(this.MenuStip);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MainMenuStrip = this.MenuStip;
 			this.Name = "Analyzer";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
 			this.Controls.SetChildIndex(this.MenuStip, 0);
-			this.Controls.SetChildIndex(this.FAnalyzerControl, 0);
-			this.Controls.SetChildIndex(this.FToolStrip, 0);
+			this.Controls.SetChildIndex(this._analyzerControl, 0);
+			this.Controls.SetChildIndex(this._toolStrip, 0);
 			this.Controls.SetChildIndex(this.FBottomToolStripPanel, 0);
 			this.MenuStip.ResumeLayout(false);
 			this.MenuStip.PerformLayout();
-			this.FToolStrip.ResumeLayout(false);
-			this.FToolStrip.PerformLayout();
+			this._toolStrip.ResumeLayout(false);
+			this._toolStrip.PerformLayout();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
 		}
 		#endregion
 
-		protected override void OnClosing(System.ComponentModel.CancelEventArgs AArgs) 
+		protected override void OnClosing(System.ComponentModel.CancelEventArgs args) 
 		{
-			base.OnClosing(AArgs);
+			base.OnClosing(args);
 			try
 			{
-				FService.CheckModified();
+				_service.CheckModified();
 			}
 			catch
 			{
-				AArgs.Cancel = true;
+				args.Cancel = true;
 				throw;
 			}
 		}
 
-		public virtual void MergeToolbarWith(ToolStrip AParentToolStrip)
+		public virtual void MergeToolbarWith(ToolStrip parentToolStrip)
 		{
-			ToolStripManager.Merge(FToolStrip, AParentToolStrip);
+			ToolStripManager.Merge(_toolStrip, parentToolStrip);
 		}
 
 		#region Service
 
-		public void InitializeService(IDataphoria ADataphoria)
+		public void InitializeService(IDataphoria dataphoria)
 		{
-			FService = new DesignService(ADataphoria, this);
-			FService.OnModifiedChanged += new EventHandler(NameOrModifiedChanged);
-			FService.OnNameChanged += new EventHandler(NameOrModifiedChanged);
-			FService.OnRequestLoad += new RequestHandler(RequestLoad);
-			FService.OnRequestSave += new RequestHandler(RequestSave);
+			_service = new DesignService(dataphoria, this);
+			_service.OnModifiedChanged += new EventHandler(NameOrModifiedChanged);
+			_service.OnNameChanged += new EventHandler(NameOrModifiedChanged);
+			_service.OnRequestLoad += new RequestHandler(RequestLoad);
+			_service.OnRequestSave += new RequestHandler(RequestSave);
 		}
 
-		private IDesignService FService;
+		private IDesignService _service;
 		[Browsable(false)]
 		public IDesignService Service
 		{
-			get { return FService; }
+			get { return _service; }
 		}
 
-		private void NameOrModifiedChanged(object ASender, EventArgs AArgs)
+		private void NameOrModifiedChanged(object sender, EventArgs args)
 		{
 			UpdateTitle();
 		}
 
-		protected virtual void RequestLoad(DesignService AService, DesignBuffer ABuffer)
+		protected virtual void RequestLoad(DesignService service, DesignBuffer buffer)
 		{
-			LoadPlan(ABuffer.LoadData());
+			LoadPlan(buffer.LoadData());
 		}
 
-		protected virtual void RequestSave(DesignService AService, DesignBuffer ABuffer)
+		protected virtual void RequestSave(DesignService service, DesignBuffer buffer)
 		{
-			ABuffer.SaveData(SavePlan());
+			buffer.SaveData(SavePlan());
 		}
 
 		#endregion
 
 		#region IDesigner, New, Loading, Saving
 
-		private string FDesignerID;
+		private string _designerID;
 		[Browsable(false)]
 		public string DesignerID
 		{
-			get { return FDesignerID; }
+			get { return _designerID; }
 		}
 
-		public void Open(DesignBuffer ABuffer)
+		public void Open(DesignBuffer buffer)
 		{
-			FService.Open(ABuffer);
+			_service.Open(buffer);
 		}
 
 		/// <remarks> 
@@ -419,17 +419,17 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 
 		public virtual void New()
 		{
-			FAnalyzerControl.Clear();
+			_analyzerControl.Clear();
 		}
 
-		public virtual void LoadPlan(string APlan)
+		public virtual void LoadPlan(string plan)
 		{
-			FAnalyzerControl.Load(APlan);
+			_analyzerControl.Load(plan);
 		}
 
 		public virtual string SavePlan()
 		{
-			return FAnalyzerControl.Save();
+			return _analyzerControl.Save();
 		}
 
 		public bool CloseSafely()
@@ -440,33 +440,33 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 
 		public void Save()
 		{
-			FService.Save();
+			_service.Save();
 		}
 
 		public void SaveAsFile()
 		{
-			FService.SaveAsFile();
+			_service.SaveAsFile();
 		}
 
 		public void SaveAsDocument()
 		{
-			FService.SaveAsDocument();
+			_service.SaveAsDocument();
 		}
 
-		protected void InternalNew(IHost AHost, bool AOwner)
+		protected void InternalNew(IHost host, bool owner)
 		{
-			FService.SetBuffer(null);
-			FService.SetModified(false);
+			_service.SetBuffer(null);
+			_service.SetModified(false);
 		}
 
-		public void New(IHost AHost)
+		public void New(IHost host)
 		{
-			InternalNew(AHost, false);
+			InternalNew(host, false);
 		}
 
 		private void UpdateTitle()
 		{
-			Text = FService.GetDescription() + (FService.IsModified ? "*" : "");
+			Text = _service.GetDescription() + (_service.IsModified ? "*" : "");
 		}
 		
 		#endregion
@@ -475,28 +475,28 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 
 		private void ZoomIn()
 		{
-			FAnalyzerControl.ZoomIn();
+			_analyzerControl.ZoomIn();
 		}
 
 		private void ZoomOut()
 		{
-			FAnalyzerControl.ZoomOut();
+			_analyzerControl.ZoomOut();
 		}
 
-		private void SetExpandOnDemand(bool AValue)
+		private void SetExpandOnDemand(bool tempValue)
 		{
-			FAnalyzerControl.MainSurface.ExpandOnDemand = AValue;
-			FExpandOnDemand.Checked = AValue;
+			_analyzerControl.MainSurface.ExpandOnDemand = tempValue;
+			_expandOnDemand.Checked = tempValue;
 		}
 
 		private void ToggleExpandOnDemand()
 		{
-			SetExpandOnDemand(!FAnalyzerControl.MainSurface.ExpandOnDemand);
+			SetExpandOnDemand(!_analyzerControl.MainSurface.ExpandOnDemand);
 		}
 
-		protected override void OnHelpRequested(HelpEventArgs AArgs)
+		protected override void OnHelpRequested(HelpEventArgs args)
 		{
-			base.OnHelpRequested(AArgs);
+			base.OnHelpRequested(args);
 			Dataphoria.InvokeHelp("Analyzer");
 			
 		}

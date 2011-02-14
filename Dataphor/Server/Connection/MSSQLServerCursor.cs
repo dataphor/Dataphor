@@ -15,82 +15,82 @@ namespace Alphora.Dataphor.DAE.Connection
 {
 	public class MSSQLServerCursor : DotNetCursor
 	{
-		public MSSQLServerCursor(MSSQLCommand ACommand, IDataReader ACursor) : base(ACommand, ACursor) { }
+		public MSSQLServerCursor(MSSQLCommand command, IDataReader cursor) : base(command, cursor) { }
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
-			if (FCursor != null)
+			if (_cursor != null)
 			{
 				// If most recent open or fetch indicates EOF, then the server cursor is already closed.  In order to determine this, 
 				//  however, we must get the result param which can only be obtained after closing the current reader.  Additionally,
 				//  if the current reader is from the open, we must fetch the server cursor handle so that we have a handle to close.
 				CloseAndProcessFetchResult();
 
-				if (!FEOF)
+				if (!_eOF)
 				{
 					// The most recent open or fetch did not indicate EOF, so the server cursor remains open.  Use "our" connection 
 					//  to close the server cursor now that the latest reader is closed.
-					if (FCursorHandle != 0)
+					if (_cursorHandle != 0)
 					{
-						((MSSQLCommand)FCommand).CloseServerCursor(FCursorHandle);
-						FCursorHandle = 0;
+						((MSSQLCommand)_command).CloseServerCursor(_cursorHandle);
+						_cursorHandle = 0;
 					}
 				}
 			}
 
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
-		private int FCursorHandle;
-		private bool FEOF;	// Indicates that the end of the current fetch cursor is know to be the end of the entire dataset
+		private int _cursorHandle;
+		private bool _eOF;	// Indicates that the end of the current fetch cursor is know to be the end of the entire dataset
 
 		protected override bool InternalNext()
 		{
-			bool LGotRow = FCursor.Read();
-			if (!LGotRow)
+			bool gotRow = _cursor.Read();
+			if (!gotRow)
 			{
 				// Either we are at the end of the data set or we are just at the end of the current fetch buffer.  We must close the
 				//  current reader so that we can get the output params and determine the server cursor handle and the EOF flag.
 				CloseAndProcessFetchResult();
 
 				// The EOF flag has been updated, so we can tell whether or not to proceed with a fetch
-				if (!FEOF)
+				if (!_eOF)
 				{
-					FCursor = ((MSSQLCommand)FCommand).FetchServerCursor(FCursorHandle);
-					FRecord = (IDataRecord)FCursor;
+					_cursor = ((MSSQLCommand)_command).FetchServerCursor(_cursorHandle);
+					_record = (IDataRecord)_cursor;
 
 					// Attempt to read the first row
-					LGotRow = FCursor.Read();
+					gotRow = _cursor.Read();
 				}
 			}
-			return LGotRow;
+			return gotRow;
 		}
 
 		/// <summary> Closes the current reader and examines the EOF and server cursor handle output parameters. </summary>
 		private void CloseAndProcessFetchResult()
 		{
-			if (FCursor != null)
+			if (_cursor != null)
 			{
-				FCursor.Dispose();
-				FCursor = null;
+				_cursor.Dispose();
+				_cursor = null;
 			}
 
 			// Indicate to the command that now is the time to read any output (user) parameters
-			MSSQLCommand LCommand = (MSSQLCommand)FCommand;
-			LCommand.ParametersAreAvailable();	
+			MSSQLCommand command = (MSSQLCommand)_command;
+			command.ParametersAreAvailable();	
 
 			// Determine if there are additional fetches to do, or if this is it
-			if (LCommand.ContainsParameter("@retval"))
-				switch ((int)LCommand.GetParameterValue("@retval"))
+			if (command.ContainsParameter("@retval"))
+				switch ((int)command.GetParameterValue("@retval"))
 				{
-					case 16: FEOF = true; break;
-					case 0: FEOF = false; break;
+					case 16: _eOF = true; break;
+					case 0: _eOF = false; break;
 					default: throw new ConnectionException(ConnectionException.Codes.UnableToOpenCursor);
 				}
 			
 			// If we have not yet obtained the cursor, retrieve it (should only happen after reading the row of the open cursor call).
-			if ((FCursorHandle == 0) && LCommand.ContainsParameter("@cursor"))
-				FCursorHandle = (int)LCommand.GetParameterValue("@cursor");
+			if ((_cursorHandle == 0) && command.ContainsParameter("@cursor"))
+				_cursorHandle = (int)command.GetParameterValue("@cursor");
 		}
 
 /*

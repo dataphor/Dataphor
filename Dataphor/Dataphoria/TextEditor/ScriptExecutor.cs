@@ -12,93 +12,93 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 	/// <remarks> Should not be used multiple times (discard and create another instance). </remarks>
 	internal class ScriptExecutor : Object
 	{
-		public const int CStopTimeout = 10000; // ten seconds to synchronously stop
+		public const int StopTimeout = 10000; // ten seconds to synchronously stop
 
-		private bool FIsRunning = false;
-		private IServerProcess FProcess;
-		private int FProcessID;
-		private Thread FAsyncThread;
+		private bool _isRunning = false;
+		private IServerProcess _process;
+		private int _processID;
+		private Thread _asyncThread;
 
-		private IServerSession FSession;
-		private string FScript;
-		private ExecuteFinishedHandler FExecuteFinished;
-		private ReportScriptProgressHandler FExecuteProgress;
-		private DebugLocator FLocator;
+		private IServerSession _session;
+		private string _script;
+		private ExecuteFinishedHandler _executeFinished;
+		private ReportScriptProgressHandler _executeProgress;
+		private DebugLocator _locator;
 		
 		public ScriptExecutor
 		(
-			IServerSession ASession, 
-			String AScript, 
-			ReportScriptProgressHandler AExecuteProgress,
-			ExecuteFinishedHandler AExecuteFinished,
-			DebugLocator ALocator
+			IServerSession session, 
+			String script, 
+			ReportScriptProgressHandler executeProgress,
+			ExecuteFinishedHandler executeFinished,
+			DebugLocator locator
 		)
 		{
-			FSession = ASession;
-			FScript = AScript;
-			FExecuteFinished = AExecuteFinished;
-			FExecuteProgress = AExecuteProgress;
-			FLocator = ALocator;
+			_session = session;
+			_script = script;
+			_executeFinished = executeFinished;
+			_executeProgress = executeProgress;
+			_locator = locator;
 		}
 
 		public bool IsRunning
 		{
-			get { return FIsRunning; }
+			get { return _isRunning; }
 		}
 
 		public void Start()
 		{
-			if (!FIsRunning)
+			if (!_isRunning)
 			{
 				CleanupProcess();
-				FProcess = FSession.StartProcess(new ProcessInfo(FSession.SessionInfo));
-				FProcessID = FProcess.ProcessID;
-				FIsRunning = true;
-				FAsyncThread = new Thread(ExecuteAsync);
-				FAsyncThread.Start();
+				_process = _session.StartProcess(new ProcessInfo(_session.SessionInfo));
+				_processID = _process.ProcessID;
+				_isRunning = true;
+				_asyncThread = new Thread(ExecuteAsync);
+				_asyncThread.Start();
 			}
 		}
 
 		private void CleanupProcess()
 		{
-			if (FProcess != null)
+			if (_process != null)
 			{
 				try
 				{
-					FSession.StopProcess(FProcess);
+					_session.StopProcess(_process);
 				}
 				catch
 				{
 					// Don't rethrow, the session may have already been stopped
 				}
-				FProcess = null;
-				FProcessID = 0;
+				_process = null;
+				_processID = 0;
 			}
 		}
 
 		public void Stop()
 		{
-			if (FIsRunning)
+			if (_isRunning)
 			{
-				FIsRunning = false;
+				_isRunning = false;
 
 				// Asyncronously request that the server process be stopped
-				new AsyncStopHandler(AsyncStop).BeginInvoke(FProcessID, FSession, null, null);
-				FProcess = null;
-				FProcessID = 0;
+				new AsyncStopHandler(AsyncStop).BeginInvoke(_processID, _session, null, null);
+				_process = null;
+				_processID = 0;
 			}
 		}
 
-		private void AsyncStop(int AProcessID, IServerSession ASession)
+		private void AsyncStop(int processID, IServerSession session)
 		{
-			IServerProcess LProcess = ASession.StartProcess(new ProcessInfo(FSession.SessionInfo));
+			IServerProcess process = session.StartProcess(new ProcessInfo(_session.SessionInfo));
 			try
 			{
-				LProcess.Execute("StopProcess(" + AProcessID + ")", null);
+				process.Execute("StopProcess(" + processID + ")", null);
 			}
 			finally
 			{
-				ASession.StopProcess(LProcess);
+				session.StopProcess(process);
 			}
 		}
 
@@ -106,30 +106,30 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		{
 			try
 			{
-				ErrorList LErrors = null;
-				TimeSpan LElapsed = TimeSpan.Zero;
+				ErrorList errors = null;
+				TimeSpan elapsed = TimeSpan.Zero;
 
 				try
 				{
 					ScriptExecutionUtility.ExecuteScript
 					(
-						FProcess,
-						FScript,
+						_process,
+						_script,
 						ScriptExecuteOption.All,
-						out LErrors,
-						out LElapsed,
+						out errors,
+						out elapsed,
 						(AStatistics, AResults) => 
 							Session.SafelyInvoke
 							(
 								new ReportScriptProgressHandler(AsyncProgress),
 								new object[] {AStatistics, AResults}
 							),
-						FLocator
+						_locator
 					);
 				}
 				finally
 				{
-					Session.SafelyInvoke(new ExecuteFinishedHandler(AsyncFinish), new object[] {LErrors, LElapsed});
+					Session.SafelyInvoke(new ExecuteFinishedHandler(AsyncFinish), new object[] {errors, elapsed});
 				}
 			}
 			catch
@@ -138,17 +138,17 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			}
 		}
 
-		private void AsyncProgress(PlanStatistics AStatistics, string AResults)
+		private void AsyncProgress(PlanStatistics statistics, string results)
 		{
 			// Return what results we got even if stopped.
-			FExecuteProgress(AStatistics, AResults);
+			_executeProgress(statistics, results);
 		}
 
-		private void AsyncFinish(ErrorList AErrors, TimeSpan AElapsedTime)
+		private void AsyncFinish(ErrorList errors, TimeSpan elapsedTime)
 		{
 			CleanupProcess();
-			if (FIsRunning)
-				FExecuteFinished(AErrors, AElapsedTime);
+			if (_isRunning)
+				_executeFinished(errors, elapsedTime);
 		}
 
 		#region Nested type: AsyncStopHandler

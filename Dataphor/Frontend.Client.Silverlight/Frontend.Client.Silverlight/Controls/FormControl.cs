@@ -33,18 +33,18 @@ namespace Alphora.Dataphor.Frontend.Client.Silverlight
 		
 		public event CloseHandler CloseRequested;
 		
-		public void RequestClose(CloseBehavior ABehavior)
+		public void RequestClose(CloseBehavior behavior)
 		{
 			if (CloseRequested != null)
-				CloseRequested(this, ABehavior);
+				CloseRequested(this, behavior);
 		}
 		
-		private Menu FMenu;
+		private Menu _menu;
 		
 		public Menu Menu
 		{
-			get { return FMenu; }
-			set { FMenu = value; }
+			get { return _menu; }
+			set { _menu = value; }
 		}
 
 		public override void OnApplyTemplate()

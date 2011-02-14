@@ -28,49 +28,49 @@ namespace Alphora.Dataphor.DAE.Schema
 	public class Column : Schema.Object
     {
 		// constructor
-		public Column(string AName, IDataType ADataType) : base(AName)
+		public Column(string name, IDataType dataType) : base(name)
 		{
-			FDataType = ADataType;
+			_dataType = dataType;
 		}
 		
 		// DataType		
 		[Reference]
-		private IDataType FDataType;
+		private IDataType _dataType;
 		public IDataType DataType 
 		{ 
-			get { return FDataType; } 
-			set { FDataType = value; }
+			get { return _dataType; } 
+			set { _dataType = value; }
 		}
 
 		// Equals
-		public override bool Equals(object AObject)
+		public override bool Equals(object objectValue)
 		{
-			Column LColumn = AObject as Column;
+			Column column = objectValue as Column;
 			return
-				(LColumn != null) &&
-				(String.Compare(Name, LColumn.Name) == 0) &&
+				(column != null) &&
+				(String.Compare(Name, column.Name) == 0) &&
 				(
-					((FDataType == null) && (LColumn.DataType == null)) ||
-					((FDataType != null) && FDataType.Equals(LColumn.DataType))
+					((_dataType == null) && (column.DataType == null)) ||
+					((_dataType != null) && _dataType.Equals(column.DataType))
 				);
 		}
 
 		// GetHashCode
 		public override int GetHashCode()
 		{
-			return Name.GetHashCode() ^ (FDataType == null ? 0 : FDataType.GetHashCode());
+			return Name.GetHashCode() ^ (_dataType == null ? 0 : _dataType.GetHashCode());
 		}
 
         // ToString
         public override string ToString()
         {
-			StringBuilder LBuilder = new StringBuilder(Name);
-			if (FDataType != null)
+			StringBuilder builder = new StringBuilder(Name);
+			if (_dataType != null)
 			{
-				LBuilder.Append(Keywords.TypeSpecifier);
-				LBuilder.Append(FDataType.Name);
+				builder.Append(Keywords.TypeSpecifier);
+				builder.Append(_dataType.Name);
 			}
-			return LBuilder.ToString();
+			return builder.ToString();
         }
         
         public Column Copy()
@@ -78,14 +78,14 @@ namespace Alphora.Dataphor.DAE.Schema
 			return new Column(Name, DataType);
 		}
 
-		public Column Copy(string APrefix)
+		public Column Copy(string prefix)
 		{
-			return new Column(Schema.Object.Qualify(Name, APrefix), DataType);
+			return new Column(Schema.Object.Qualify(Name, prefix), DataType);
 		}
 		
-		public Column CopyAndRename(string AName)
+		public Column CopyAndRename(string name)
 		{
-			return new Column(AName, DataType);
+			return new Column(name, DataType);
 		}
 	}
 
@@ -96,13 +96,13 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		// Column lists are equal if they contain the same number of columns and all columns in the left
 		// list are also in the right list
-        public override bool Equals(object AObject)
+        public override bool Equals(object objectValue)
         {
-			Columns LColumns = AObject as Columns;
-			if ((LColumns != null) && (Count == LColumns.Count))
+			Columns columns = objectValue as Columns;
+			if ((columns != null) && (Count == columns.Count))
 			{
-				foreach (Column LColumn in this)
-					if (!LColumns.Contains(LColumn))
+				foreach (Column column in this)
+					if (!columns.Contains(column))
 						return false;
 				return true;
 			}
@@ -114,21 +114,21 @@ namespace Alphora.Dataphor.DAE.Schema
         {
 			get
 			{
-				string[] LResult = new string[Count];
-				for (int LIndex = 0; LIndex < Count; LIndex++)
-					LResult[LIndex] = this[LIndex].Name;
-				return LResult;
+				string[] result = new string[Count];
+				for (int index = 0; index < Count; index++)
+					result[index] = this[index].Name;
+				return result;
 			}
         }
 
 		// Column lists are equivalent if they contain the same number of columns and the columns are equal, left to right
 		// This is an internal notion for use in physical contexts only
-        public bool Equivalent(Columns AColumns)
+        public bool Equivalent(Columns columns)
         {
-			if (Count == AColumns.Count)
+			if (Count == columns.Count)
 			{
-				for (int LIndex = 0; LIndex < Count; LIndex++)
-					if (!this[LIndex].Equals(AColumns[LIndex]))
+				for (int index = 0; index < Count; index++)
+					if (!this[index].Equals(columns[index]))
 						return false;
 				return true;
 			}
@@ -137,31 +137,31 @@ namespace Alphora.Dataphor.DAE.Schema
 
         public override int GetHashCode()
         {
-			int LHashCode = 0;
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				LHashCode ^= this[LIndex].GetHashCode();
-			return LHashCode;
+			int hashCode = 0;
+			for (int index = 0; index < Count; index++)
+				hashCode ^= this[index].GetHashCode();
+			return hashCode;
         }
 
-        public virtual bool Compatible(object AObject)
+        public virtual bool Compatible(object objectValue)
         {
-			return Is(AObject) && ((Columns)AObject).Is(this);
+			return Is(objectValue) && ((Columns)objectValue).Is(this);
         }
 
-        public virtual bool Is(object AObject)
+        public virtual bool Is(object objectValue)
         {
 			// A column list is another column list if they both have the same number of columns
 			// and the is of the datatypes for all columns evaluates to true by name
-			Columns LColumns = AObject as Columns;
-			if ((LColumns != null) && (Count == LColumns.Count))
+			Columns columns = objectValue as Columns;
+			if ((columns != null) && (Count == columns.Count))
 			{
-				int LColumnIndex;
-				for (int LIndex = 0; LIndex < Count; LIndex++)
+				int columnIndex;
+				for (int index = 0; index < Count; index++)
 				{
-					LColumnIndex = LColumns.IndexOfName(this[LIndex].Name);
-					if (LColumnIndex >= 0)
+					columnIndex = columns.IndexOfName(this[index].Name);
+					if (columnIndex >= 0)
 					{
-						if (!this[LIndex].DataType.Is(LColumns[LColumnIndex].DataType))
+						if (!this[index].DataType.Is(columns[columnIndex].DataType))
 							return false;
 					}
 					else
@@ -173,120 +173,120 @@ namespace Alphora.Dataphor.DAE.Schema
 				return false;
         }
 
-		public bool IsSubsetOf(Columns AColumns)
+		public bool IsSubsetOf(Columns columns)
 		{
 			// true if every column in this set of columns is in AColumns
-			foreach (Column LColumn in this)
-				if (!AColumns.ContainsName(LColumn.Name))
+			foreach (Column column in this)
+				if (!columns.ContainsName(column.Name))
 					return false;
 			return true;
 		}
 		
-		public bool IsProperSubsetOf(Columns AColumns)
+		public bool IsProperSubsetOf(Columns columns)
 		{
 			// true if every column in this set of columns is in AColumns and AColumns is strictly larger
-			return IsSubsetOf(AColumns) && (Count < AColumns.Count);
+			return IsSubsetOf(columns) && (Count < columns.Count);
 		}
 
-		public bool IsSupersetOf(Columns AColumns)
+		public bool IsSupersetOf(Columns columns)
 		{
 			// true if every column in AColumnNames is in this set of columns
-			foreach (Column LColumn in AColumns)
-				if (!ContainsName(LColumn.Name))
+			foreach (Column column in columns)
+				if (!ContainsName(column.Name))
 					return false;
 			return true;
 		}
 		
-		public bool IsProperSupersetOf(Columns AColumns)
+		public bool IsProperSupersetOf(Columns columns)
 		{
 			// true if every column in AColumnNames is in this set of columns and this set of columns is strictly larger
-			return IsSupersetOf(AColumns) && (Count > AColumns.Count);
+			return IsSupersetOf(columns) && (Count > columns.Count);
 		}
 
-		public bool IsSubsetOf(TableVarColumnsBase AColumns)
+		public bool IsSubsetOf(TableVarColumnsBase columns)
 		{
 			// true if every column in this set of columns is in AColumns
-			foreach (Column LColumn in this)
-				if (!AColumns.ContainsName(LColumn.Name))
+			foreach (Column column in this)
+				if (!columns.ContainsName(column.Name))
 					return false;
 			return true;
 		}
 		
-		public bool IsProperSubsetOf(TableVarColumnsBase AColumns)
+		public bool IsProperSubsetOf(TableVarColumnsBase columns)
 		{
 			// true if every column in this set of columns is in AColumns and AColumns is strictly larger
-			return IsSubsetOf(AColumns) && (Count < AColumns.Count);
+			return IsSubsetOf(columns) && (Count < columns.Count);
 		}
 
-		public bool IsSupersetOf(TableVarColumnsBase AColumns)
+		public bool IsSupersetOf(TableVarColumnsBase columns)
 		{
 			// true if every column in AColumnNames is in this set of columns
-			foreach (TableVarColumn LColumn in AColumns)
-				if (!ContainsName(LColumn.Name))
+			foreach (TableVarColumn column in columns)
+				if (!ContainsName(column.Name))
 					return false;
 			return true;
 		}
 		
-		public bool IsProperSupersetOf(TableVarColumnsBase AColumns)
+		public bool IsProperSupersetOf(TableVarColumnsBase columns)
 		{
 			// true if every column in AColumnNames is in this set of columns and this set of columns is strictly larger
-			return IsSupersetOf(AColumns) && (Count > AColumns.Count);
+			return IsSupersetOf(columns) && (Count > columns.Count);
 		}
 
-        public new Column this[int AIndex]
+        public new Column this[int index]
         {
-            get { return (Column)(base[AIndex]); }
-            set { base[AIndex] = value; }
+            get { return (Column)(base[index]); }
+            set { base[index] = value; }
         }
 
-        public new Column this[string AColumnName]
+        public new Column this[string columnName]
         {
-			get { return (Column)base[AColumnName]; }
-			set { base[AColumnName] = value; }
+			get { return (Column)base[columnName]; }
+			set { base[columnName] = value; }
         }
         
-        public Column this[Column AColumn]
+        public Column this[Column column]
         {
-			get { return this[IndexOfName(AColumn.Name)]; }
-			set { this[IndexOfName(AColumn.Name)] = value; }
+			get { return this[IndexOfName(column.Name)]; }
+			set { this[IndexOfName(column.Name)] = value; }
 		}
         
 		/// <summary>Returns the index of the given column name, resolving first for the full name, then for a partial match.</summary>
-		public int IndexOfColumn(string AColumnName)
+		public int IndexOfColumn(string columnName)
 		{
-			int LColumnIndex = IndexOfName(AColumnName);
-			if (LColumnIndex < 0)
-				LColumnIndex = IndexOf(AColumnName);
-			return LColumnIndex;
+			int columnIndex = IndexOfName(columnName);
+			if (columnIndex < 0)
+				columnIndex = IndexOf(columnName);
+			return columnIndex;
 		}
 
 		///	<summary>Returns the index of the given column name, resolving first for the full name, then for a partial match.  Throws an exception if the column name is not found.</summary>
-		public int GetIndexOfColumn(string AColumnName)
+		public int GetIndexOfColumn(string columnName)
 		{
-			int LColumnIndex = IndexOfName(AColumnName);
-			if (LColumnIndex < 0)
-				LColumnIndex = IndexOf(AColumnName);
-			if (LColumnIndex < 0)
-				throw new Schema.SchemaException(Schema.SchemaException.Codes.ColumnNotFound, AColumnName);
-			return LColumnIndex;
+			int columnIndex = IndexOfName(columnName);
+			if (columnIndex < 0)
+				columnIndex = IndexOf(columnName);
+			if (columnIndex < 0)
+				throw new Schema.SchemaException(Schema.SchemaException.Codes.ColumnNotFound, columnName);
+			return columnIndex;
 		}
 		
 		// ToString
         public override string ToString()
         {
-			StringBuilder LString = new StringBuilder();
-			foreach (Column LColumn in this)
+			StringBuilder stringValue = new StringBuilder();
+			foreach (Column column in this)
 			{
-				if (LString.Length != 0)
+				if (stringValue.Length != 0)
 				{
-					LString.Append(Keywords.ListSeparator);
-					LString.Append(" ");
+					stringValue.Append(Keywords.ListSeparator);
+					stringValue.Append(" ");
 				}
-				LString.Append(LColumn.ToString());
+				stringValue.Append(column.ToString());
 			}
-			LString.Insert(0, Keywords.BeginList);
-			LString.Append(Keywords.EndList);
-			return LString.ToString();
+			stringValue.Insert(0, Keywords.BeginList);
+			stringValue.Append(Keywords.EndList);
+			return stringValue.ToString();
         }
     }
 }

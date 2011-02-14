@@ -30,295 +30,295 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// A row is equal to another row if it has the same number of columns and all columns by name have equal values
 	public class RowEqualNode : InstructionNode
 	{
-		protected PlanNode FComparisonNode;
+		protected PlanNode _comparisonNode;
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = APlan.DataTypes.SystemBoolean;
+			DetermineModifiers(plan);
+			_dataType = plan.DataTypes.SystemBoolean;
 			
 			if (!Nodes[0].DataType.IsGeneric && !Nodes[1].DataType.IsGeneric) // Generic row comparison must be done at run-time
 			{
 				if (Nodes[0].DataType.Is(Nodes[1].DataType))
-					Nodes[0] = Compiler.Upcast(APlan, Nodes[0], Nodes[1].DataType);
+					Nodes[0] = Compiler.Upcast(plan, Nodes[0], Nodes[1].DataType);
 				else if (Nodes[1].DataType.Is(Nodes[0].DataType))
-					Nodes[1] = Compiler.Upcast(APlan, Nodes[1], Nodes[0].DataType);
+					Nodes[1] = Compiler.Upcast(plan, Nodes[1], Nodes[0].DataType);
 				else
 				{
-					ConversionContext LContext = Compiler.FindConversionPath(APlan, Nodes[0].DataType, Nodes[1].DataType);
-					if (LContext.CanConvert)
-						Nodes[0] = Compiler.Upcast(APlan, Compiler.ConvertNode(APlan, Nodes[0], LContext), Nodes[1].DataType);
+					ConversionContext context = Compiler.FindConversionPath(plan, Nodes[0].DataType, Nodes[1].DataType);
+					if (context.CanConvert)
+						Nodes[0] = Compiler.Upcast(plan, Compiler.ConvertNode(plan, Nodes[0], context), Nodes[1].DataType);
 					else
 					{
-						LContext = Compiler.FindConversionPath(APlan, Nodes[1].DataType, Nodes[0].DataType);
-						Compiler.CheckConversionContext(APlan, LContext);
-						Nodes[1] = Compiler.Upcast(APlan, Compiler.ConvertNode(APlan, Nodes[1], LContext), Nodes[0].DataType);
+						context = Compiler.FindConversionPath(plan, Nodes[1].DataType, Nodes[0].DataType);
+						Compiler.CheckConversionContext(plan, context);
+						Nodes[1] = Compiler.Upcast(plan, Compiler.ConvertNode(plan, Nodes[1], context), Nodes[0].DataType);
 					}
 				}
 
-				APlan.EnterRowContext();
+				plan.EnterRowContext();
 				try
 				{
 					#if USENAMEDROWVARIABLES
-					APlan.Symbols.Push(new Symbol(Keywords.Left, (Schema.RowType)Nodes[0].DataType));
+					plan.Symbols.Push(new Symbol(Keywords.Left, (Schema.RowType)Nodes[0].DataType));
 					#else
-					Schema.RowType LLeftRowType = new Schema.RowType(((Schema.RowType)Nodes[0].DataType).Columns, Keywords.Left);
-					APlan.Symbols.Push(new Symbol(String.Empty, LLeftRowType));
+					Schema.RowType leftRowType = new Schema.RowType(((Schema.RowType)Nodes[0].DataType).Columns, Keywords.Left);
+					APlan.Symbols.Push(new Symbol(String.Empty, leftRowType));
 					#endif
 					try
 					{
 						#if USENAMEDROWVARIABLES
-						APlan.Symbols.Push(new Symbol(Keywords.Right, (Schema.RowType)Nodes[1].DataType));
+						plan.Symbols.Push(new Symbol(Keywords.Right, (Schema.RowType)Nodes[1].DataType));
 						#else
-						Schema.RowType LRightRowType = new Schema.RowType(((Schema.RowType)Nodes[1].DataType).Columns, Keywords.Right);
-						APlan.Symbols.Push(new Symbol(String.Empty, LRightRowType));
+						Schema.RowType rightRowType = new Schema.RowType(((Schema.RowType)Nodes[1].DataType).Columns, Keywords.Right);
+						APlan.Symbols.Push(new Symbol(String.Empty, rightRowType));
 						#endif
 						try
 						{
-							FComparisonNode = 
+							_comparisonNode = 
 								#if USENAMEDROWVARIABLES
-								Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, Keywords.Left, Keywords.Right, ((Schema.RowType)Nodes[0].DataType).Columns, ((Schema.RowType)Nodes[1].DataType).Columns));
+								Compiler.CompileExpression(plan, Compiler.BuildRowEqualExpression(plan, Keywords.Left, Keywords.Right, ((Schema.RowType)Nodes[0].DataType).Columns, ((Schema.RowType)Nodes[1].DataType).Columns));
 								#else
-								Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, LLeftRowType.Columns, LRightRowType.Columns));
+								Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, leftRowType.Columns, rightRowType.Columns));
 								#endif
 						}
 						finally
 						{
-							APlan.Symbols.Pop();
+							plan.Symbols.Pop();
 						}
 					}
 					finally
 					{
-						APlan.Symbols.Pop();
+						plan.Symbols.Pop();
 					}
 				}
 				finally
 				{
-					APlan.ExitRowContext();
+					plan.ExitRowContext();
 				}
 			}
 		}
 
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			Nodes[0].DetermineBinding(APlan);
-			Nodes[1].DetermineBinding(APlan);
-			if (FComparisonNode != null)
+			Nodes[0].DetermineBinding(plan);
+			Nodes[1].DetermineBinding(plan);
+			if (_comparisonNode != null)
 			{
-				APlan.EnterRowContext();
+				plan.EnterRowContext();
 				try
 				{
 					#if USENAMEDROWVARIABLES
-					APlan.Symbols.Push(new Symbol(Keywords.Left, (Schema.RowType)Nodes[0].DataType));
+					plan.Symbols.Push(new Symbol(Keywords.Left, (Schema.RowType)Nodes[0].DataType));
 					#else
 					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(((Schema.RowType)Nodes[0].DataType).Columns, Keywords.Left)));
 					#endif
 					try
 					{
 						#if USENAMEDROWVARIABLES
-						APlan.Symbols.Push(new Symbol(Keywords.Right, (Schema.RowType)Nodes[1].DataType));
+						plan.Symbols.Push(new Symbol(Keywords.Right, (Schema.RowType)Nodes[1].DataType));
 						#else
 						APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(((Schema.RowType)Nodes[1].DataType).Columns, Keywords.Right)));
 						#endif
 						try
 						{
-							FComparisonNode.DetermineBinding(APlan);
+							_comparisonNode.DetermineBinding(plan);
 						}
 						finally
 						{
-							APlan.Symbols.Pop();
+							plan.Symbols.Pop();
 						}
 					}
 					finally
 					{
-						APlan.Symbols.Pop();
+						plan.Symbols.Pop();
 					}
 				}
 				finally
 				{
-					APlan.ExitRowContext();
+					plan.ExitRowContext();
 				}
 			}
 		}
 		
-		public override object InternalExecute(Program AProgram, object[] AArguments) { return null; }
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program, object[] arguments) { return null; }
+		public override object InternalExecute(Program program)
 		{
-			object LLeftValue = Nodes[0].Execute(AProgram);
-			object LRightValue = Nodes[1].Execute(AProgram);
+			object leftValue = Nodes[0].Execute(program);
+			object rightValue = Nodes[1].Execute(program);
 			
 			#if NILPROPOGATION
-			if ((LLeftValue == null) || (LRightValue == null))
+			if ((leftValue == null) || (rightValue == null))
 				return null;
 			#endif
 
-			if (FComparisonNode != null)
+			if (_comparisonNode != null)
 			{
-				AProgram.Stack.Push(LLeftValue);
+				program.Stack.Push(leftValue);
 				try
 				{
-					AProgram.Stack.Push(LRightValue);
+					program.Stack.Push(rightValue);
 					try
 					{
-						return FComparisonNode.Execute(AProgram);
+						return _comparisonNode.Execute(program);
 					}
 					finally
 					{
-						AProgram.Stack.Pop();
+						program.Stack.Pop();
 					}
 				}
 				finally
 				{
-					AProgram.Stack.Pop();
+					program.Stack.Pop();
 				}
 			}
 			else
 			{
-				RowEqualNode LNode = new RowEqualNode();
-				LNode.Nodes.Add(new ValueNode(((Row)LLeftValue).DataType, LLeftValue));
-				LNode.Nodes.Add(new ValueNode(((Row)LRightValue).DataType, LRightValue));
-				LNode.DetermineDataType(AProgram.Plan);
-				return LNode.Execute(AProgram);
+				RowEqualNode node = new RowEqualNode();
+				node.Nodes.Add(new ValueNode(((Row)leftValue).DataType, leftValue));
+				node.Nodes.Add(new ValueNode(((Row)rightValue).DataType, rightValue));
+				node.DetermineDataType(program.Plan);
+				return node.Execute(program);
 			}
 		}
 	}
 
 	public class CompoundScalarEqualNode : InstructionNode
 	{
-		protected PlanNode FComparisonNode;
+		protected PlanNode _comparisonNode;
 		
-		public override void DetermineDataType(Plan APlan)
+		public override void DetermineDataType(Plan plan)
 		{
-			DetermineModifiers(APlan);
-			FDataType = APlan.DataTypes.SystemBoolean;
+			DetermineModifiers(plan);
+			_dataType = plan.DataTypes.SystemBoolean;
 			
 			if (Nodes[0].DataType.Is(Nodes[1].DataType))
-				Nodes[0] = Compiler.Upcast(APlan, Nodes[0], Nodes[1].DataType);
+				Nodes[0] = Compiler.Upcast(plan, Nodes[0], Nodes[1].DataType);
 			else if (Nodes[1].DataType.Is(Nodes[0].DataType))
-				Nodes[1] = Compiler.Upcast(APlan, Nodes[1], Nodes[0].DataType);
+				Nodes[1] = Compiler.Upcast(plan, Nodes[1], Nodes[0].DataType);
 			else
 			{
-				ConversionContext LContext = Compiler.FindConversionPath(APlan, Nodes[0].DataType, Nodes[1].DataType);
-				if (LContext.CanConvert)
-					Nodes[0] = Compiler.Upcast(APlan, Compiler.ConvertNode(APlan, Nodes[0], LContext), Nodes[1].DataType);
+				ConversionContext context = Compiler.FindConversionPath(plan, Nodes[0].DataType, Nodes[1].DataType);
+				if (context.CanConvert)
+					Nodes[0] = Compiler.Upcast(plan, Compiler.ConvertNode(plan, Nodes[0], context), Nodes[1].DataType);
 				else
 				{
-					LContext = Compiler.FindConversionPath(APlan, Nodes[1].DataType, Nodes[0].DataType);
-					Compiler.CheckConversionContext(APlan, LContext);
-					Nodes[1] = Compiler.Upcast(APlan, Compiler.ConvertNode(APlan, Nodes[1], LContext), Nodes[0].DataType);
+					context = Compiler.FindConversionPath(plan, Nodes[1].DataType, Nodes[0].DataType);
+					Compiler.CheckConversionContext(plan, context);
+					Nodes[1] = Compiler.Upcast(plan, Compiler.ConvertNode(plan, Nodes[1], context), Nodes[0].DataType);
 				}
 			}
 
-			APlan.EnterRowContext();
+			plan.EnterRowContext();
 			try
 			{
 				#if USENAMEDROWVARIABLES
-				APlan.Symbols.Push(new Symbol(Keywords.Left, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType));
+				plan.Symbols.Push(new Symbol(Keywords.Left, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType));
 				#else
-				Schema.RowType LLeftRowType = new Schema.RowType(((Schema.ScalarType)Nodes[0].DataType).CompoundRowType.Columns, Keywords.Left);
-				APlan.Symbols.Push(new Symbol(String.Empty, LLeftRowType));
+				Schema.RowType leftRowType = new Schema.RowType(((Schema.ScalarType)Nodes[0].DataType).CompoundRowType.Columns, Keywords.Left);
+				APlan.Symbols.Push(new Symbol(String.Empty, leftRowType));
 				#endif
 				try
 				{
 					#if USENAMEDROWVARIABLES
-					APlan.Symbols.Push(new Symbol(String.Empty, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType));
+					plan.Symbols.Push(new Symbol(String.Empty, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType));
 					#else
-					Schema.RowType LRightRowType = new Schema.RowType(((Schema.ScalarType)Nodes[1].DataType).CompoundRowType.Columns, Keywords.Right);
-					APlan.Symbols.Push(new Symbol(String.Empty, LRightRowType));
+					Schema.RowType rightRowType = new Schema.RowType(((Schema.ScalarType)Nodes[1].DataType).CompoundRowType.Columns, Keywords.Right);
+					APlan.Symbols.Push(new Symbol(String.Empty, rightRowType));
 					#endif
 					try
 					{
-						FComparisonNode = 
+						_comparisonNode = 
 							#if USENAMEDROWVARIABLES
-							Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, Keywords.Left, Keywords.Right, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType.Columns, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType.Columns));
+							Compiler.CompileExpression(plan, Compiler.BuildRowEqualExpression(plan, Keywords.Left, Keywords.Right, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType.Columns, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType.Columns));
 							#else
-							Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, LLeftRowType.Columns, LRightRowType.Columns));
+							Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, leftRowType.Columns, rightRowType.Columns));
 							#endif
 					}
 					finally
 					{
-						APlan.Symbols.Pop();
+						plan.Symbols.Pop();
 					}
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 			finally
 			{
-				APlan.ExitRowContext();
+				plan.ExitRowContext();
 			}
 		}
 
-		public override void InternalDetermineBinding(Plan APlan)
+		public override void InternalDetermineBinding(Plan plan)
 		{
-			Nodes[0].DetermineBinding(APlan);
-			Nodes[1].DetermineBinding(APlan);
-			APlan.EnterRowContext();
+			Nodes[0].DetermineBinding(plan);
+			Nodes[1].DetermineBinding(plan);
+			plan.EnterRowContext();
 			try
 			{
 				#if USENAMEDROWVARIABLES
-				APlan.Symbols.Push(new Symbol(Keywords.Left, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType));
+				plan.Symbols.Push(new Symbol(Keywords.Left, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType));
 				#else
 				APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(((Schema.ScalarType)Nodes[0].DataType).CompoundRowType.Columns, Keywords.Left)));
 				#endif
 				try
 				{
 					#if USENAMEDROWVARIABLES
-					APlan.Symbols.Push(new Symbol(Keywords.Right, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType));
+					plan.Symbols.Push(new Symbol(Keywords.Right, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType));
 					#else
 					APlan.Symbols.Push(new Symbol(String.Empty, new Schema.RowType(((Schema.ScalarType)Nodes[1].DataType).CompoundRowType.Columns, Keywords.Right)));
 					#endif
 					try
 					{
-						FComparisonNode.DetermineBinding(APlan);
+						_comparisonNode.DetermineBinding(plan);
 					}
 					finally
 					{
-						APlan.Symbols.Pop();
+						plan.Symbols.Pop();
 					}
 				}
 				finally
 				{
-					APlan.Symbols.Pop();
+					plan.Symbols.Pop();
 				}
 			}
 			finally
 			{
-				APlan.ExitRowContext();
+				plan.ExitRowContext();
 			}
 		}
 		
-		public override object InternalExecute(Program AProgram, object[] AArguments) { return null; }
-		public override object InternalExecute(Program AProgram)
+		public override object InternalExecute(Program program, object[] arguments) { return null; }
+		public override object InternalExecute(Program program)
 		{
-			object LLeftVar = Nodes[0].Execute(AProgram);
-			object LRightVar = Nodes[1].Execute(AProgram);
+			object leftVar = Nodes[0].Execute(program);
+			object rightVar = Nodes[1].Execute(program);
 			
 			#if NILPROPOGATION
-			if ((LLeftVar == null) || (LRightVar == null))
+			if ((leftVar == null) || (rightVar == null))
 				return null;
 			#endif
 			
-			object LLeftValue = DataValue.FromNative(AProgram.ValueManager, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType, LLeftVar);
-			object LRightValue = DataValue.FromNative(AProgram.ValueManager, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType, LRightVar);
-			AProgram.Stack.Push(LLeftValue);
+			object leftValue = DataValue.FromNative(program.ValueManager, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType, leftVar);
+			object rightValue = DataValue.FromNative(program.ValueManager, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType, rightVar);
+			program.Stack.Push(leftValue);
 			try
 			{
-				AProgram.Stack.Push(LRightValue);
+				program.Stack.Push(rightValue);
 				try
 				{
-					return FComparisonNode.Execute(AProgram);
+					return _comparisonNode.Execute(program);
 				}
 				finally
 				{
-					AProgram.Stack.Pop();
+					program.Stack.Pop();
 				}
 			}
 			finally
 			{
-				AProgram.Stack.Pop();
+				program.Stack.Pop();
 			}
 		}
 	}

@@ -22,145 +22,145 @@ namespace Alphora.Dataphor.DAE.Server
 
 	public class ServerTransaction : Disposable
 	{
-		public ServerTransaction(ServerProcess AProcess, IsolationLevel AIsolationLevel) : base()
+		public ServerTransaction(ServerProcess process, IsolationLevel isolationLevel) : base()
 		{
-			FProcess = AProcess;
-			FIsolationLevel = AIsolationLevel;
-			FStartTime = DateTime.Now;
+			_process = process;
+			_isolationLevel = isolationLevel;
+			_startTime = DateTime.Now;
 		}
 		
 		protected void UnprepareDeferredHandlers()
 		{
-			Program LProgram = new Program(Process);
-			LProgram.Start(null);
+			Program program = new Program(Process);
+			program.Start(null);
 			try
 			{
-				for (int LIndex = FHandlers.Count - 1; LIndex >= 0; LIndex--)
+				for (int index = _handlers.Count - 1; index >= 0; index--)
 				{
-					FHandlers[LIndex].Deallocate(LProgram);
-					FHandlers.RemoveAt(LIndex);
+					_handlers[index].Deallocate(program);
+					_handlers.RemoveAt(index);
 				}
 			}
 			finally
 			{
-				LProgram.Stop(null);
+				program.Stop(null);
 			}
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
 				try
 				{
-					if (FHandlers != null)
+					if (_handlers != null)
 					{
 						UnprepareDeferredHandlers();
-						FHandlers = null;
+						_handlers = null;
 					}
 				}
 				finally
 				{
-					if (FCatalogConstraints != null)
+					if (_catalogConstraints != null)
 					{
-						FCatalogConstraints.Clear();
-						FCatalogConstraints = null;
+						_catalogConstraints.Clear();
+						_catalogConstraints = null;
 					}
 				}
 			}
 			finally
 			{
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 		
-		private ServerProcess FProcess;
-		public ServerProcess Process { get { return FProcess; } }
+		private ServerProcess _process;
+		public ServerProcess Process { get { return _process; } }
 		
-		private IsolationLevel FIsolationLevel;
-		public IsolationLevel IsolationLevel { get { return FIsolationLevel; } }
+		private IsolationLevel _isolationLevel;
+		public IsolationLevel IsolationLevel { get { return _isolationLevel; } }
 
-		private DateTime FStartTime;
-		public DateTime StartTime { get { return FStartTime; } }
+		private DateTime _startTime;
+		public DateTime StartTime { get { return _startTime; } }
 
-		private bool FPrepared;
+		private bool _prepared;
 		public bool Prepared 
 		{
-			get { return FPrepared; } 
-			set { FPrepared = value; } 
+			get { return _prepared; } 
+			set { _prepared = value; } 
 		}
 		
-		private bool FInRollback;
+		private bool _inRollback;
 		public bool InRollback
 		{
-			get { return FInRollback; }
-			set { FInRollback = value; }
+			get { return _inRollback; }
+			set { _inRollback = value; }
 		}
 		
-		private ServerTableVars FTableVars = new ServerTableVars();
-		public ServerTableVars TableVars { get { return FTableVars; } }
+		private ServerTableVars _tableVars = new ServerTableVars();
+		public ServerTableVars TableVars { get { return _tableVars; } }
 
-		public void InvokeDeferredHandlers(Program AProgram)
+		public void InvokeDeferredHandlers(Program program)
 		{
-			if (FHandlers.Count > 0)
+			if (_handlers.Count > 0)
 			{
-				AProgram.ServerProcess.InternalBeginTransaction(IsolationLevel.Isolated);
+				program.ServerProcess.InternalBeginTransaction(IsolationLevel.Isolated);
 				try
 				{
-					foreach (ServerHandler LHandler in FHandlers)
-						LHandler.Invoke(AProgram);
-					AProgram.ServerProcess.InternalCommitTransaction();
+					foreach (ServerHandler handler in _handlers)
+						handler.Invoke(program);
+					program.ServerProcess.InternalCommitTransaction();
 				}
-				catch (Exception LException)
+				catch (Exception exception)
 				{
-					if (AProgram.ServerProcess.InTransaction)
+					if (program.ServerProcess.InTransaction)
 					{
 						try
 						{
-							AProgram.ServerProcess.InternalRollbackTransaction();
+							program.ServerProcess.InternalRollbackTransaction();
 						}
-						catch (Exception LRollbackException)
+						catch (Exception rollbackException)
 						{
-							throw new ServerException(ServerException.Codes.RollbackError, LException, LRollbackException.ToString());
+							throw new ServerException(ServerException.Codes.RollbackError, exception, rollbackException.ToString());
 						}
 					}
-					throw LException;
+					throw exception;
 				}
 			}
 		}
 		
-		private Schema.CatalogConstraints FCatalogConstraints = new Schema.CatalogConstraints();
-		public Schema.CatalogConstraints CatalogConstraints { get { return FCatalogConstraints; } }
+		private Schema.CatalogConstraints _catalogConstraints = new Schema.CatalogConstraints();
+		public Schema.CatalogConstraints CatalogConstraints { get { return _catalogConstraints; } }
 		
-		public void RemoveCatalogConstraintCheck(Schema.CatalogConstraint AConstraint)
+		public void RemoveCatalogConstraintCheck(Schema.CatalogConstraint constraint)
 		{
-			int LIndex = FCatalogConstraints.IndexOf(AConstraint.Name);
-			if (LIndex >= 0)
-				FCatalogConstraints.RemoveAt(LIndex);
+			int index = _catalogConstraints.IndexOf(constraint.Name);
+			if (index >= 0)
+				_catalogConstraints.RemoveAt(index);
 		}
 		
-		private ServerHandlers FHandlers = new ServerHandlers();
+		private ServerHandlers _handlers = new ServerHandlers();
 		
-		public void AddInsertHandler(Schema.TableVarEventHandler AHandler, Row ARow)
+		public void AddInsertHandler(Schema.TableVarEventHandler handler, Row row)
 		{
-			FHandlers.Add(new ServerInsertHandler(AHandler, ARow));
+			_handlers.Add(new ServerInsertHandler(handler, row));
 		}
 		
-		public void AddUpdateHandler(Schema.TableVarEventHandler AHandler, Row AOldRow, Row ANewRow)
+		public void AddUpdateHandler(Schema.TableVarEventHandler handler, Row oldRow, Row newRow)
 		{
-			FHandlers.Add(new ServerUpdateHandler(AHandler, AOldRow, ANewRow));
+			_handlers.Add(new ServerUpdateHandler(handler, oldRow, newRow));
 		}
 		
-		public void AddDeleteHandler(Schema.TableVarEventHandler AHandler, Row ARow)
+		public void AddDeleteHandler(Schema.TableVarEventHandler handler, Row row)
 		{
-			FHandlers.Add(new ServerDeleteHandler(AHandler, ARow));
+			_handlers.Add(new ServerDeleteHandler(handler, row));
 		}
 		
-		public void RemoveDeferredHandlers(Schema.EventHandler AHandler)
+		public void RemoveDeferredHandlers(Schema.EventHandler handler)
 		{
-			for (int LIndex = FHandlers.Count - 1; LIndex >= 0; LIndex--)
-				if (FHandlers[LIndex].Handler.Equals(AHandler))
-					FHandlers.RemoveAt(LIndex);
+			for (int index = _handlers.Count - 1; index >= 0; index--)
+				if (_handlers[index].Handler.Equals(handler))
+					_handlers.RemoveAt(index);
 		}
 	}
 
@@ -179,18 +179,18 @@ namespace Alphora.Dataphor.DAE.Server
 	public class ServerTransactions : DisposableList<ServerTransaction>
 	{
 	#endif
-		public ServerTransaction BeginTransaction(ServerProcess AProcess, IsolationLevel AIsolationLevel)
+		public ServerTransaction BeginTransaction(ServerProcess process, IsolationLevel isolationLevel)
 		{
-			return this[Add(new ServerTransaction(AProcess, AIsolationLevel))];
+			return this[Add(new ServerTransaction(process, isolationLevel))];
 		}
 		
-		public void EndTransaction(bool ASuccess)
+		public void EndTransaction(bool success)
 		{
 			// On successful transaction commit, remove constraint checks that have been completed.
 			// On failure, constraint checks that were logged by the transaction will be rolled back with the rest of the transaction.
-			if (ASuccess)
-				foreach (ServerTableVar LTableVar in this[Count - 1].TableVars.Values)
-					LTableVar.DeleteCheckTableChecks(Count - 1);
+			if (success)
+				foreach (ServerTableVar tableVar in this[Count - 1].TableVars.Values)
+					tableVar.DeleteCheckTableChecks(Count - 1);
 			RemoveAt(Count - 1);
 		}
 		
@@ -204,100 +204,100 @@ namespace Alphora.Dataphor.DAE.Server
 			return this[0];
 		}
 
-		public void ValidateDeferredConstraints(Program AProgram)
+		public void ValidateDeferredConstraints(Program program)
 		{
-			foreach (ServerTableVar LTableVar in this[Count - 1].TableVars.Values)
-				LTableVar.Validate(AProgram, Count - 1);
+			foreach (ServerTableVar tableVar in this[Count - 1].TableVars.Values)
+				tableVar.Validate(program, Count - 1);
 		}
 		
 		public void UnprepareDeferredConstraintChecks()
 		{
-			if (FTableVars != null)
+			if (_tableVars != null)
 			{
-				Exception LException = null;
-				while (FTableVars.Count > 0)
+				Exception exception = null;
+				while (_tableVars.Count > 0)
 					try
 					{
-						foreach (Schema.TableVar LTableVar in FTableVars.Keys)
+						foreach (Schema.TableVar tableVar in _tableVars.Keys)
 						{
-							RemoveDeferredConstraintChecks(LTableVar);
+							RemoveDeferredConstraintChecks(tableVar);
 							break;
 						}
 					}
 					catch (Exception E)
 					{
-						LException = E;
+						exception = E;
 					}
 					
-				FTableVars = null;
-				if (LException != null)
-					throw LException;
+				_tableVars = null;
+				if (exception != null)
+					throw exception;
 			}
 		}
 		
-		private ServerTableVars FTableVars = new ServerTableVars();
-		public ServerTableVars TableVars { get { return FTableVars; } }
+		private ServerTableVars _tableVars = new ServerTableVars();
+		public ServerTableVars TableVars { get { return _tableVars; } }
 		
-		private ServerTableVar EnsureServerTableVar(Schema.TableVar ATableVar)
+		private ServerTableVar EnsureServerTableVar(Schema.TableVar tableVar)
 		{
-			ServerTableVar LServerTableVar = null;
-			ServerTransaction LCurrentTransaction = CurrentTransaction();
+			ServerTableVar serverTableVar = null;
+			ServerTransaction currentTransaction = CurrentTransaction();
 
-			if (!FTableVars.ContainsKey(ATableVar))
+			if (!_tableVars.ContainsKey(tableVar))
 			{
-				LServerTableVar = new ServerTableVar(LCurrentTransaction.Process, ATableVar);
-				FTableVars.Add(ATableVar, LServerTableVar);
+				serverTableVar = new ServerTableVar(currentTransaction.Process, tableVar);
+				_tableVars.Add(tableVar, serverTableVar);
 			}
 			else
-				LServerTableVar = FTableVars[ATableVar];
+				serverTableVar = _tableVars[tableVar];
 
-			if (!LCurrentTransaction.TableVars.ContainsKey(ATableVar))
-				LCurrentTransaction.TableVars.Add(ATableVar, LServerTableVar);
+			if (!currentTransaction.TableVars.ContainsKey(tableVar))
+				currentTransaction.TableVars.Add(tableVar, serverTableVar);
 				
-			return LServerTableVar;
+			return serverTableVar;
 		}
 
-		public void AddInsertTableVarCheck(Schema.TableVar ATableVar, Row ARow)
+		public void AddInsertTableVarCheck(Schema.TableVar tableVar, Row row)
 		{
-			EnsureServerTableVar(ATableVar).AddInsertTableVarCheck(Count - 1, ARow);
+			EnsureServerTableVar(tableVar).AddInsertTableVarCheck(Count - 1, row);
 		}
 		
-		public void AddUpdateTableVarCheck(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+		public void AddUpdateTableVarCheck(Schema.TableVar tableVar, Row oldRow, Row newRow, BitArray valueFlags)
 		{
-			EnsureServerTableVar(ATableVar).AddUpdateTableVarCheck(Count - 1, AOldRow, ANewRow, AValueFlags);
+			EnsureServerTableVar(tableVar).AddUpdateTableVarCheck(Count - 1, oldRow, newRow, valueFlags);
 		}
 		
-		public void AddDeleteTableVarCheck(Schema.TableVar ATableVar, Row ARow)
+		public void AddDeleteTableVarCheck(Schema.TableVar tableVar, Row row)
 		{
-			EnsureServerTableVar(ATableVar).AddDeleteTableVarCheck(Count - 1, ARow);
+			EnsureServerTableVar(tableVar).AddDeleteTableVarCheck(Count - 1, row);
 		}
 		
-		public void RemoveDeferredConstraintChecks(Schema.TableVar ATableVar)
+		public void RemoveDeferredConstraintChecks(Schema.TableVar tableVar)
 		{
-			if (FTableVars != null)
+			if (_tableVars != null)
 			{
-				ServerTableVar LTableVar;
-				if (FTableVars.TryGetValue(ATableVar, out LTableVar))
+				ServerTableVar localTableVar;
+				if (_tableVars.TryGetValue(tableVar, out localTableVar))
 				{
-					foreach (ServerTransaction LTransaction in this)
-						if (LTransaction.TableVars.ContainsKey(ATableVar))
-							LTransaction.TableVars.Remove(ATableVar);
-					FTableVars.Remove(ATableVar);
-					LTableVar.Dispose();
+					foreach (ServerTransaction transaction in this)
+						if (transaction.TableVars.ContainsKey(tableVar))
+							transaction.TableVars.Remove(tableVar);
+					_tableVars.Remove(tableVar);
+					localTableVar.Dispose();
 				}
 			}
 		}
 		
-		public void RemoveDeferredHandlers(Schema.EventHandler AHandler)
+		public void RemoveDeferredHandlers(Schema.EventHandler handler)
 		{
-			foreach (ServerTransaction LTransaction in this)
-				LTransaction.RemoveDeferredHandlers(AHandler);
+			foreach (ServerTransaction transaction in this)
+				transaction.RemoveDeferredHandlers(handler);
 		}
 		
-		public void RemoveCatalogConstraintCheck(Schema.CatalogConstraint AConstraint)
+		public void RemoveCatalogConstraintCheck(Schema.CatalogConstraint constraint)
 		{
-			foreach (ServerTransaction LTransaction in this)
-				LTransaction.RemoveCatalogConstraintCheck(AConstraint);
+			foreach (ServerTransaction transaction in this)
+				transaction.RemoveCatalogConstraintCheck(constraint);
 		}
 	}
 	
@@ -305,19 +305,19 @@ namespace Alphora.Dataphor.DAE.Server
 	{
 		static ServerTableVar()
 		{
-			FTransactionIndexColumnName = Schema.Object.GetUniqueName();
-			FTransitionColumnName = Schema.Object.GetUniqueName();
-			FOldRowColumnName = Schema.Object.GetUniqueName();
-			FNewRowColumnName = Schema.Object.GetUniqueName();
+			_transactionIndexColumnName = Schema.Object.GetUniqueName();
+			_transitionColumnName = Schema.Object.GetUniqueName();
+			_oldRowColumnName = Schema.Object.GetUniqueName();
+			_newRowColumnName = Schema.Object.GetUniqueName();
 		}
 		
-		public ServerTableVar(ServerProcess AProcess, Schema.TableVar ATableVar) : base()
+		public ServerTableVar(ServerProcess process, Schema.TableVar tableVar) : base()
 		{
-			FProcess = AProcess;
-			FTableVar = ATableVar;
+			_process = process;
+			_tableVar = tableVar;
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
@@ -325,50 +325,50 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 			finally
 			{
-				FTableVar = null;
-				base.Dispose(ADisposing);
+				_tableVar = null;
+				base.Dispose(disposing);
 			}
 		}
 		
-		protected ServerProcess FProcess;
-		public ServerProcess Process { get { return FProcess; } }
+		protected ServerProcess _process;
+		public ServerProcess Process { get { return _process; } }
 		
-		protected Schema.TableVar FTableVar;
-		public Schema.TableVar TableVar { get { return FTableVar; } }
+		protected Schema.TableVar _tableVar;
+		public Schema.TableVar TableVar { get { return _tableVar; } }
 		
-		public override bool Equals(object AObject)
+		public override bool Equals(object objectValue)
 		{
-			return (AObject is ServerTableVar) && Schema.Object.NamesEqual(FTableVar.Name, ((ServerTableVar)AObject).TableVar.Name);
+			return (objectValue is ServerTableVar) && Schema.Object.NamesEqual(_tableVar.Name, ((ServerTableVar)objectValue).TableVar.Name);
 		}
 
 		public override int GetHashCode()
 		{
-			return FTableVar.GetHashCode();
+			return _tableVar.GetHashCode();
 		}
 
-		private string FCheckTableName;
-		private static string FTransactionIndexColumnName;
-		private static string FTransitionColumnName;
-		private static string FOldRowColumnName;
-		private static string FNewRowColumnName;
-		private Schema.TableVar FCheckTable;
-		private Schema.Key FCheckTableKey;
-		private Schema.RowType FCheckRowType;
+		private string _checkTableName;
+		private static string _transactionIndexColumnName;
+		private static string _transitionColumnName;
+		private static string _oldRowColumnName;
+		private static string _newRowColumnName;
+		private Schema.TableVar _checkTable;
+		private Schema.Key _checkTableKey;
+		private Schema.RowType _checkRowType;
 
-		private Schema.IRowType FNewRowType;
-		public Schema.IRowType NewRowType { get { return FNewRowType; } }
+		private Schema.IRowType _newRowType;
+		public Schema.IRowType NewRowType { get { return _newRowType; } }
 
-		private Schema.IRowType FOldRowType;
-		public Schema.IRowType OldRowType { get { return FOldRowType; } }
+		private Schema.IRowType _oldRowType;
+		public Schema.IRowType OldRowType { get { return _oldRowType; } }
 
-		private IServerExpressionPlan FPlan;
-		private IServerExpressionPlan FTransactionPlan;
-		private DataParams FTransactionParams;
-		private DataParam FTransactionParam;
+		private IServerExpressionPlan _plan;
+		private IServerExpressionPlan _transactionPlan;
+		private DataParams _transactionParams;
+		private DataParam _transactionParam;
 
 		private void CreateCheckTable()
 		{
-			FCheckTableName = Schema.Object.GetUniqueName();
+			_checkTableName = Schema.Object.GetUniqueName();
 
 			/*
 				create session table <check table name> in System.Temp
@@ -383,46 +383,46 @@ namespace Alphora.Dataphor.DAE.Server
 				};
 			*/
 
-			StringBuilder LBuilder = new StringBuilder();
-			LBuilder.AppendFormat("{0} {1} {2} {3} {4} {5} {{ ", Keywords.Create, Keywords.Session, Keywords.Table, FCheckTableName, Keywords.In, Process.ServerSession.Server.TempDevice.Name);
-			bool LHasColumns = false;
-			Schema.Key LKey = FTableVar.Keys.MinimumKey(false, false);
-			for (int LIndex = 0; LIndex < LKey.Columns.Count; LIndex++)
+			StringBuilder builder = new StringBuilder();
+			builder.AppendFormat("{0} {1} {2} {3} {4} {5} {{ ", Keywords.Create, Keywords.Session, Keywords.Table, _checkTableName, Keywords.In, Process.ServerSession.Server.TempDevice.Name);
+			bool hasColumns = false;
+			Schema.Key key = _tableVar.Keys.MinimumKey(false, false);
+			for (int index = 0; index < key.Columns.Count; index++)
 			{
-				if (LHasColumns)
-					LBuilder.AppendFormat("{0} ", Keywords.ListSeparator);
+				if (hasColumns)
+					builder.AppendFormat("{0} ", Keywords.ListSeparator);
 				else
-					LHasColumns = true;
-				LBuilder.AppendFormat("{0} {1} {2}", LKey.Columns[LIndex].Name, Keywords.TypeSpecifier, LKey.Columns[LIndex].Column.DataType.Name);
+					hasColumns = true;
+				builder.AppendFormat("{0} {1} {2}", key.Columns[index].Name, Keywords.TypeSpecifier, key.Columns[index].Column.DataType.Name);
 			}
-			if (LHasColumns)
-				LBuilder.AppendFormat("{0} ", Keywords.ListSeparator);
-			LBuilder.AppendFormat("{0} : Integer, ", FTransactionIndexColumnName);
-			LBuilder.AppendFormat("{0} : String static tags {{ DAE.StaticByteSize = '16' }}, ", FTransitionColumnName);
-			LBuilder.AppendFormat("{0} : generic row {{ nil }}, ", FOldRowColumnName);
-			LBuilder.AppendFormat("{0} : generic row {{ nil }}, key {{ ", FNewRowColumnName);
-			for (int LIndex = 0; LIndex < LKey.Columns.Count; LIndex++)
+			if (hasColumns)
+				builder.AppendFormat("{0} ", Keywords.ListSeparator);
+			builder.AppendFormat("{0} : Integer, ", _transactionIndexColumnName);
+			builder.AppendFormat("{0} : String static tags {{ DAE.StaticByteSize = '16' }}, ", _transitionColumnName);
+			builder.AppendFormat("{0} : generic row {{ nil }}, ", _oldRowColumnName);
+			builder.AppendFormat("{0} : generic row {{ nil }}, key {{ ", _newRowColumnName);
+			for (int index = 0; index < key.Columns.Count; index++)
 			{
-				if (LIndex > 0)
-					LBuilder.AppendFormat("{0} ", Keywords.ListSeparator);
-				LBuilder.Append(LKey.Columns[LIndex].Name);
+				if (index > 0)
+					builder.AppendFormat("{0} ", Keywords.ListSeparator);
+				builder.Append(key.Columns[index].Name);
 			}
-			LBuilder.Append(" }, order { ");
-			LBuilder.Append(FTransactionIndexColumnName);
-			for (int LIndex = 0; LIndex < LKey.Columns.Count; LIndex++)
-				LBuilder.AppendFormat("{0} {1}", Keywords.ListSeparator, LKey.Columns[LIndex].Name);
-			LBuilder.Append("} };");
+			builder.Append(" }, order { ");
+			builder.Append(_transactionIndexColumnName);
+			for (int index = 0; index < key.Columns.Count; index++)
+				builder.AppendFormat("{0} {1}", Keywords.ListSeparator, key.Columns[index].Name);
+			builder.Append("} };");
 
-			ApplicationTransaction LTransaction = null;
+			ApplicationTransaction transaction = null;
 			if (Process.ApplicationTransactionID != Guid.Empty)
-				LTransaction = Process.GetApplicationTransaction();
+				transaction = Process.GetApplicationTransaction();
 			try
 			{
-				if (LTransaction != null)
-					LTransaction.PushGlobalContext();
+				if (transaction != null)
+					transaction.PushGlobalContext();
 				try
 				{
-					bool LSaveUsePlanCache = Process.ServerSession.SessionInfo.UsePlanCache;
+					bool saveUsePlanCache = Process.ServerSession.SessionInfo.UsePlanCache;
 					Process.ServerSession.SessionInfo.UsePlanCache = false;
 					try
 					{
@@ -430,14 +430,14 @@ namespace Alphora.Dataphor.DAE.Server
 						Process.PushLoadingContext(new LoadingContext(Process.ServerSession.User, true));
 						try
 						{
-							IServerStatementPlan LPlan = ((IServerProcess)Process).PrepareStatement(LBuilder.ToString(), null);
+							IServerStatementPlan plan = ((IServerProcess)Process).PrepareStatement(builder.ToString(), null);
 							try
 							{
-								LPlan.Execute(null);
+								plan.Execute(null);
 							}
 							finally
 							{
-								((IServerProcess)Process).UnprepareStatement(LPlan);
+								((IServerProcess)Process).UnprepareStatement(plan);
 							}
 						}
 						finally
@@ -447,193 +447,193 @@ namespace Alphora.Dataphor.DAE.Server
 					}
 					finally
 					{
-						Process.ServerSession.SessionInfo.UsePlanCache = LSaveUsePlanCache;
+						Process.ServerSession.SessionInfo.UsePlanCache = saveUsePlanCache;
 					}
 				}
 				finally
 				{
-					if (LTransaction != null)
-						LTransaction.PopGlobalContext();
+					if (transaction != null)
+						transaction.PopGlobalContext();
 				}
 			}
 			finally
 			{
-				if (LTransaction != null)
-					Monitor.Exit(LTransaction);
+				if (transaction != null)
+					Monitor.Exit(transaction);
 			}
 			
-			Schema.SessionObject LSessionObject = (Schema.SessionObject)Process.ServerSession.SessionObjects[FCheckTableName];
-			LSessionObject.IsGenerated = true;
-			FCheckTable = Process.Catalog[LSessionObject.GlobalName] as Schema.TableVar;
-			FCheckTable.IsGenerated = true;
-			FCheckTableKey = FCheckTable.Keys.MinimumKey(true);
-			FCheckRowType = new Schema.RowType(FCheckTable.DataType.Columns);
+			Schema.SessionObject sessionObject = (Schema.SessionObject)Process.ServerSession.SessionObjects[_checkTableName];
+			sessionObject.IsGenerated = true;
+			_checkTable = Process.Catalog[sessionObject.GlobalName] as Schema.TableVar;
+			_checkTable.IsGenerated = true;
+			_checkTableKey = _checkTable.Keys.MinimumKey(true);
+			_checkRowType = new Schema.RowType(_checkTable.DataType.Columns);
 		}
 		
-		private void CopyKeyValues(Row ASourceRow, Row ATargetRow)
+		private void CopyKeyValues(Row sourceRow, Row targetRow)
 		{
-			int LColumnIndex;
-			for (int LIndex = 0; LIndex < FCheckTableKey.Columns.Count; LIndex++)
+			int columnIndex;
+			for (int index = 0; index < _checkTableKey.Columns.Count; index++)
 			{
-				LColumnIndex = ASourceRow.IndexOfColumn(FCheckTableKey.Columns[LIndex].Name);
-				if (ASourceRow.HasValue(LColumnIndex))
-					ATargetRow[LIndex] = ASourceRow[LColumnIndex];
+				columnIndex = sourceRow.IndexOfColumn(_checkTableKey.Columns[index].Name);
+				if (sourceRow.HasValue(columnIndex))
+					targetRow[index] = sourceRow[columnIndex];
 				else
-					ATargetRow.ClearValue(LIndex);
+					targetRow.ClearValue(index);
 			}
 		}
 
 		private void DeleteCheckTableChecks()
 		{
-			if (FPlan != null)
+			if (_plan != null)
 			{
-				IServerCursor LCursor = FPlan.Open(null);
+				IServerCursor cursor = _plan.Open(null);
 				try
 				{
-					LCursor.Next();
-					Row LRow = FPlan.RequestRow();
+					cursor.Next();
+					Row row = _plan.RequestRow();
 					try
 					{
-						while (!LCursor.EOF())
+						while (!cursor.EOF())
 						{
-							LCursor.Select(LRow);
-							if (LRow.HasValue(FOldRowColumnName))
-								DataValue.DisposeNative(Process.ValueManager, OldRowType, ((NativeRow)LRow.AsNative).Values[LRow.DataType.Columns.IndexOfName(FOldRowColumnName)]);
-							if (LRow.HasValue(FNewRowColumnName))
-								DataValue.DisposeNative(Process.ValueManager, NewRowType, ((NativeRow)LRow.AsNative).Values[LRow.DataType.Columns.IndexOfName(FNewRowColumnName)]);
-							LCursor.Delete();
+							cursor.Select(row);
+							if (row.HasValue(_oldRowColumnName))
+								DataValue.DisposeNative(Process.ValueManager, OldRowType, ((NativeRow)row.AsNative).Values[row.DataType.Columns.IndexOfName(_oldRowColumnName)]);
+							if (row.HasValue(_newRowColumnName))
+								DataValue.DisposeNative(Process.ValueManager, NewRowType, ((NativeRow)row.AsNative).Values[row.DataType.Columns.IndexOfName(_newRowColumnName)]);
+							cursor.Delete();
 						}
 					}
 					finally
 					{
-						FPlan.ReleaseRow(LRow);
+						_plan.ReleaseRow(row);
 					}
 				}
 				finally
 				{
-					FPlan.Close(LCursor);
+					_plan.Close(cursor);
 				}
 			}
 		}
 		
-		public void DeleteCheckTableChecks(int ATransactionIndex)
+		public void DeleteCheckTableChecks(int transactionIndex)
 		{
-			IServerCursor LCursor = FTransactionPlan.Open(GetTransactionParams(ATransactionIndex));
+			IServerCursor cursor = _transactionPlan.Open(GetTransactionParams(transactionIndex));
 			try
 			{
-				LCursor.Next();
-				Row LRow = FTransactionPlan.RequestRow();
+				cursor.Next();
+				Row row = _transactionPlan.RequestRow();
 				try
 				{
-					while (!LCursor.EOF())
+					while (!cursor.EOF())
 					{
-						LCursor.Select(LRow);
-						if (LRow.HasValue(FOldRowColumnName))
-							DataValue.DisposeNative(Process.ValueManager, OldRowType, ((NativeRow)LRow.AsNative).Values[LRow.DataType.Columns.IndexOfName(FOldRowColumnName)]);
-						if (LRow.HasValue(FNewRowColumnName))
-							DataValue.DisposeNative(Process.ValueManager, NewRowType, ((NativeRow)LRow.AsNative).Values[LRow.DataType.Columns.IndexOfName(FNewRowColumnName)]);
-						LCursor.Delete();
+						cursor.Select(row);
+						if (row.HasValue(_oldRowColumnName))
+							DataValue.DisposeNative(Process.ValueManager, OldRowType, ((NativeRow)row.AsNative).Values[row.DataType.Columns.IndexOfName(_oldRowColumnName)]);
+						if (row.HasValue(_newRowColumnName))
+							DataValue.DisposeNative(Process.ValueManager, NewRowType, ((NativeRow)row.AsNative).Values[row.DataType.Columns.IndexOfName(_newRowColumnName)]);
+						cursor.Delete();
 					}
 				}
 				finally
 				{
-					FTransactionPlan.ReleaseRow(LRow);
+					_transactionPlan.ReleaseRow(row);
 				}
 			}
 			finally
 			{
-				FTransactionPlan.Close(LCursor);
+				_transactionPlan.Close(cursor);
 			}
 		}
 		
-		private DataParams GetTransactionParams(int ATransactionIndex)
+		private DataParams GetTransactionParams(int transactionIndex)
 		{
-			FTransactionParam.Value = ATransactionIndex;
-			return FTransactionParams;
+			_transactionParam.Value = transactionIndex;
+			return _transactionParams;
 		}
 		
 		private void OpenCheckTable()
 		{
-			ApplicationTransaction LTransaction = null;
+			ApplicationTransaction transaction = null;
 			if (Process.ApplicationTransactionID != Guid.Empty)
-				LTransaction = Process.GetApplicationTransaction();
+				transaction = Process.GetApplicationTransaction();
 			try
 			{
-				if (LTransaction != null)
-					LTransaction.PushGlobalContext();
+				if (transaction != null)
+					transaction.PushGlobalContext();
 				try
 				{
-					bool LSaveUsePlanCache = Process.ServerSession.SessionInfo.UsePlanCache;
+					bool saveUsePlanCache = Process.ServerSession.SessionInfo.UsePlanCache;
 					Process.ServerSession.SessionInfo.UsePlanCache = false;
 					try
 					{
-						FPlan = ((IServerProcess)Process).PrepareExpression(String.Format("select {0} capabilities {{ navigable, searchable, updateable }} type dynamic;", FCheckTableName), null);
-						FTransactionParams = new DataParams();
-						FTransactionParam = new DataParam("ATransactionIndex", Process.DataTypes.SystemInteger, Modifier.In, 0);
-						FTransactionParams.Add(FTransactionParam);
-						FTransactionPlan = ((IServerProcess)Process).PrepareExpression(String.Format("select {0} where {1} = ATransactionIndex capabilities {{ navigable, searchable, updateable }} type dynamic;", FCheckTableName, FTransactionIndexColumnName), FTransactionParams);
+						_plan = ((IServerProcess)Process).PrepareExpression(String.Format("select {0} capabilities {{ navigable, searchable, updateable }} type dynamic;", _checkTableName), null);
+						_transactionParams = new DataParams();
+						_transactionParam = new DataParam("ATransactionIndex", Process.DataTypes.SystemInteger, Modifier.In, 0);
+						_transactionParams.Add(_transactionParam);
+						_transactionPlan = ((IServerProcess)Process).PrepareExpression(String.Format("select {0} where {1} = ATransactionIndex capabilities {{ navigable, searchable, updateable }} type dynamic;", _checkTableName, _transactionIndexColumnName), _transactionParams);
 					}
 					finally
 					{
-						Process.ServerSession.SessionInfo.UsePlanCache = LSaveUsePlanCache;
+						Process.ServerSession.SessionInfo.UsePlanCache = saveUsePlanCache;
 					}
 				}
 				finally
 				{
-					if (LTransaction != null)
-						LTransaction.PopGlobalContext();
+					if (transaction != null)
+						transaction.PopGlobalContext();
 				}
 			}
 			finally
 			{
-				if (LTransaction != null)
-					Monitor.Exit(LTransaction);
+				if (transaction != null)
+					Monitor.Exit(transaction);
 			}
 		}
 		
 		private void CloseCheckTable()
 		{
-			if (FPlan != null)
+			if (_plan != null)
 			{
-				((IServerProcess)Process).UnprepareExpression(FPlan);
-				FPlan = null;
+				((IServerProcess)Process).UnprepareExpression(_plan);
+				_plan = null;
 			}
 			
-			if (FTransactionPlan != null)
+			if (_transactionPlan != null)
 			{
-				((IServerProcess)Process).UnprepareExpression(FTransactionPlan);
-				FTransactionPlan = null;
+				((IServerProcess)Process).UnprepareExpression(_transactionPlan);
+				_transactionPlan = null;
 			}
 		}
 		
 		private void DropCheckTable()
 		{
-			if (FCheckTable != null)
+			if (_checkTable != null)
 			{
-				ApplicationTransaction LTransaction = null;
+				ApplicationTransaction transaction = null;
 				if (Process.ApplicationTransactionID != Guid.Empty)
-					LTransaction = Process.GetApplicationTransaction();
+					transaction = Process.GetApplicationTransaction();
 				try
 				{
-					if (LTransaction != null)
-						LTransaction.PushGlobalContext();
+					if (transaction != null)
+						transaction.PushGlobalContext();
 					try
 					{
-						Plan LPlan = new Plan(Process);
+						Plan plan = new Plan(Process);
 						try
 						{
-							LPlan.EnterTimeStampSafeContext();
+							plan.EnterTimeStampSafeContext();
 							try
 							{
 								// Push a loading context to prevent the DDL from being logged.
 								Process.PushLoadingContext(new LoadingContext(Process.ServerSession.User, true));
 								try
 								{
-									PlanNode LPlanNode = Compiler.BindNode(LPlan, Compiler.CompileStatement(LPlan, new DropTableStatement(FCheckTableName)));
-									LPlan.CheckCompiled();
-									Program LProgram = new Program(Process);
-									LProgram.Code = LPlanNode;
-									LProgram.Execute(null);
+									PlanNode planNode = Compiler.BindNode(plan, Compiler.CompileStatement(plan, new DropTableStatement(_checkTableName)));
+									plan.CheckCompiled();
+									Program program = new Program(Process);
+									program.Code = planNode;
+									program.Execute(null);
 								}
 								finally
 								{
@@ -642,31 +642,31 @@ namespace Alphora.Dataphor.DAE.Server
 							}
 							finally
 							{
-								LPlan.ExitTimeStampSafeContext();
+								plan.ExitTimeStampSafeContext();
 							}
 						}
 						finally
 						{
-							LPlan.Dispose();
+							plan.Dispose();
 						}
 					}
 					finally
 					{
-						if (LTransaction != null)
-							LTransaction.PopGlobalContext();
+						if (transaction != null)
+							transaction.PopGlobalContext();
 					}
 				}
 				finally
 				{
-					if (LTransaction != null)
-						Monitor.Exit(LTransaction);
+					if (transaction != null)
+						Monitor.Exit(transaction);
 				}
 			}
 		}
 		
 		private void PrepareCheckTable()
 		{
-			if (FCheckTable == null)
+			if (_checkTable == null)
 			{
 				try
 				{
@@ -675,8 +675,8 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				catch (Exception E)
 				{
-					DataphorException LDataphorException = E as DataphorException;
-					throw new ServerException(ServerException.Codes.CouldNotCreateCheckTable, LDataphorException != null ? LDataphorException.Severity : ErrorSeverity.System, E, FTableVar == null ? "<unknown>" : FTableVar.DisplayName);
+					DataphorException dataphorException = E as DataphorException;
+					throw new ServerException(ServerException.Codes.CouldNotCreateCheckTable, dataphorException != null ? dataphorException.Severity : ErrorSeverity.System, E, _tableVar == null ? "<unknown>" : _tableVar.DisplayName);
 				}
 			}
 		}
@@ -688,46 +688,46 @@ namespace Alphora.Dataphor.DAE.Server
 			DropCheckTable();
 		}
 		
-		public void AddInsertTableVarCheck(int ATransactionIndex, Row ARow)
+		public void AddInsertTableVarCheck(int transactionIndex, Row row)
 		{
 			PrepareCheckTable();
-			if (FNewRowType == null)
-				FNewRowType = ARow.DataType;
+			if (_newRowType == null)
+				_newRowType = row.DataType;
 
 			// Log ARow as an insert transition.
-			Row LCheckRow = FPlan.RequestRow();
+			Row checkRow = _plan.RequestRow();
 			try
 			{
-				IServerCursor LCursor = FPlan.Open(null);
+				IServerCursor cursor = _plan.Open(null);
 				try
 				{
-					CopyKeyValues(ARow, LCheckRow);
-					LCheckRow[FTransactionIndexColumnName] = ATransactionIndex;
-					LCheckRow[FTransitionColumnName] = Keywords.Insert;
-					LCheckRow[FNewRowColumnName] = ARow;
+					CopyKeyValues(row, checkRow);
+					checkRow[_transactionIndexColumnName] = transactionIndex;
+					checkRow[_transitionColumnName] = Keywords.Insert;
+					checkRow[_newRowColumnName] = row;
 
-					if (LCursor.FindKey(LCheckRow))
-						LCursor.Delete();
+					if (cursor.FindKey(checkRow))
+						cursor.Delete();
 
-					LCursor.Insert(LCheckRow);
+					cursor.Insert(checkRow);
 				}
 				finally
 				{
-					FPlan.Close(LCursor);
+					_plan.Close(cursor);
 				}
 			}
 			finally
 			{
-				FPlan.ReleaseRow(LCheckRow);
+				_plan.ReleaseRow(checkRow);
 			}
 		}
 		
-		private bool UpdateInvolvesKey(BitArray AValueFlags)
+		private bool UpdateInvolvesKey(BitArray valueFlags)
 		{
-			if (AValueFlags != null)
+			if (valueFlags != null)
 			{
-				for (int LIndex = 0; LIndex < AValueFlags.Count; LIndex++)
-					if (AValueFlags[LIndex] && FCheckTableKey.Columns.ContainsName(FOldRowType.Columns[LIndex].Name))
+				for (int index = 0; index < valueFlags.Count; index++)
+					if (valueFlags[index] && _checkTableKey.Columns.ContainsName(_oldRowType.Columns[index].Name))
 						return true;
 				return false;
 			}
@@ -736,209 +736,209 @@ namespace Alphora.Dataphor.DAE.Server
 			return true;
 		}
 		
-		public void AddUpdateTableVarCheck(int ATransactionIndex, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+		public void AddUpdateTableVarCheck(int transactionIndex, Row oldRow, Row newRow, BitArray valueFlags)
 		{
 			PrepareCheckTable();
-			if (FOldRowType == null)
-				FOldRowType = AOldRow.DataType;
-			if (FNewRowType == null)
-				FNewRowType = ANewRow.DataType;
+			if (_oldRowType == null)
+				_oldRowType = oldRow.DataType;
+			if (_newRowType == null)
+				_newRowType = newRow.DataType;
 
 			// If the update involves the key of the check table, log it as a delete of AOldRow, followed by an insert of ANewRow
-			if (UpdateInvolvesKey(AValueFlags))
+			if (UpdateInvolvesKey(valueFlags))
 			{
-				AddDeleteTableVarCheck(ATransactionIndex, AOldRow);
-				AddInsertTableVarCheck(ATransactionIndex, ANewRow);
+				AddDeleteTableVarCheck(transactionIndex, oldRow);
+				AddInsertTableVarCheck(transactionIndex, newRow);
 			}
 			else
 			{
-				IServerCursor LCursor = FPlan.Open(null);
+				IServerCursor cursor = _plan.Open(null);
 				try
 				{
 					// If there is an existing insert transition check for AOldRow, delete it and log ANewRow as an insert transition.
 					// If there is an existing update transition check for AOldRow, delete it and log AOldRow from the existing check and ANewRow from the new check as an update transition.
 					// Else log AOldRow, ANewRow as an update transition.
-					Row LCheckRow = FPlan.RequestRow();
+					Row checkRow = _plan.RequestRow();
 					try
 					{
 						// delete <check table name> where <key names> = <old key values>;
-						CopyKeyValues(AOldRow, LCheckRow);
-						if (LCursor.FindKey(LCheckRow))
+						CopyKeyValues(oldRow, checkRow);
+						if (cursor.FindKey(checkRow))
 						{
-							using (Row LRow = LCursor.Select())
+							using (Row row = cursor.Select())
 							{
-								if (LRow.HasValue(FOldRowColumnName))
-									AOldRow = (Row)LRow[FOldRowColumnName];
+								if (row.HasValue(_oldRowColumnName))
+									oldRow = (Row)row[_oldRowColumnName];
 								else
-									AOldRow = null;
+									oldRow = null;
 							}
-							LCursor.Delete();
+							cursor.Delete();
 						}
 
-						CopyKeyValues(ANewRow, LCheckRow);
-						LCheckRow[FTransactionIndexColumnName] = ATransactionIndex;
-						if (AOldRow != null)
+						CopyKeyValues(newRow, checkRow);
+						checkRow[_transactionIndexColumnName] = transactionIndex;
+						if (oldRow != null)
 						{
-							LCheckRow[FTransitionColumnName] = Keywords.Update;
-							LCheckRow[FOldRowColumnName] = AOldRow;
+							checkRow[_transitionColumnName] = Keywords.Update;
+							checkRow[_oldRowColumnName] = oldRow;
 						}
 						else
-							LCheckRow[FTransitionColumnName] = Keywords.Insert;
+							checkRow[_transitionColumnName] = Keywords.Insert;
 
-						LCheckRow[FNewRowColumnName] = ANewRow;
-						LCursor.Insert(LCheckRow);
+						checkRow[_newRowColumnName] = newRow;
+						cursor.Insert(checkRow);
 					}
 					finally
 					{
-						FPlan.ReleaseRow(LCheckRow);
+						_plan.ReleaseRow(checkRow);
 					}
 				}
 				finally
 				{
-					FPlan.Close(LCursor);
+					_plan.Close(cursor);
 				}
 			}
 		}
 
-		public void AddDeleteTableVarCheck(int ATransactionIndex, Row ARow)
+		public void AddDeleteTableVarCheck(int transactionIndex, Row row)
 		{
 			PrepareCheckTable();
-			if (FOldRowType == null)
-				FOldRowType = ARow.DataType;
-			IServerCursor LCursor = FPlan.Open(null);
+			if (_oldRowType == null)
+				_oldRowType = row.DataType;
+			IServerCursor cursor = _plan.Open(null);
 			try
 			{
 				// If there is an existing insert transition for ARow, delete it and don't log anything.
 				// If there is an existing update transition for ARow, delete it and log AOldRow from the update transition as a delete transition.
 				// Else log ARow as a delete transition.
-				Row LCheckRow = FPlan.RequestRow();
+				Row checkRow = _plan.RequestRow();
 				try
 				{
 					// delete <check table name> where <key names> = <key values>;
-					CopyKeyValues(ARow, LCheckRow);
-					if (LCursor.FindKey(LCheckRow))
+					CopyKeyValues(row, checkRow);
+					if (cursor.FindKey(checkRow))
 					{
-						using (Row LRow = LCursor.Select())
+						using (Row localRow = cursor.Select())
 						{
-							if (LRow.HasValue(FOldRowColumnName))
-								ARow = (Row)LRow[FOldRowColumnName];
+							if (localRow.HasValue(_oldRowColumnName))
+								row = (Row)localRow[_oldRowColumnName];
 							else
-								ARow = null;
+								row = null;
 						}
-						LCursor.Delete();
+						cursor.Delete();
 					}
 
-					if (ARow != null)
+					if (row != null)
 					{
-						LCheckRow[FTransactionIndexColumnName] = ATransactionIndex;
-						LCheckRow[FTransitionColumnName] = Keywords.Delete;
-						LCheckRow[FOldRowColumnName] = ARow;
-						LCursor.Insert(LCheckRow);
+						checkRow[_transactionIndexColumnName] = transactionIndex;
+						checkRow[_transitionColumnName] = Keywords.Delete;
+						checkRow[_oldRowColumnName] = row;
+						cursor.Insert(checkRow);
 					}
 				}
 				finally
 				{
-					FPlan.ReleaseRow(LCheckRow);
+					_plan.ReleaseRow(checkRow);
 				}
 			}
 			finally
 			{
-				FPlan.Close(LCursor);
+				_plan.Close(cursor);
 			}
 		}
 		
-		public void Validate(Program AProgram, int ATransactionIndex)
+		public void Validate(Program program, int transactionIndex)
 		{
 			// cursor through each check and validate all constraints for each check
-			IServerCursor LCursor = FTransactionPlan.Open(GetTransactionParams(ATransactionIndex));
+			IServerCursor cursor = _transactionPlan.Open(GetTransactionParams(transactionIndex));
 			try
 			{
-				Row LCheckRow = FTransactionPlan.RequestRow();
+				Row checkRow = _transactionPlan.RequestRow();
 				try
 				{
-					while (LCursor.Next())
+					while (cursor.Next())
 					{
-						LCursor.Select(LCheckRow);
-						switch ((string)LCheckRow[FTransitionColumnName])
+						cursor.Select(checkRow);
+						switch ((string)checkRow[_transitionColumnName])
 						{
 							case Keywords.Insert :
 							{
-								Row LRow = (Row)LCheckRow[FNewRowColumnName];
+								Row row = (Row)checkRow[_newRowColumnName];
 								try
 								{
-									AProgram.Stack.Push(LRow);
+									program.Stack.Push(row);
 									try
 									{
-										ValidateCheck(AProgram, Schema.Transition.Insert);
+										ValidateCheck(program, Schema.Transition.Insert);
 									}
 									finally
 									{
-										AProgram.Stack.Pop();
+										program.Stack.Pop();
 									}
 								}
 								finally
 								{
-									LRow.Dispose();
+									row.Dispose();
 								}
 							}
 							break;
 							
 							case Keywords.Update :
 							{
-								Row LOldRow = (Row)LCheckRow[FOldRowColumnName];
+								Row oldRow = (Row)checkRow[_oldRowColumnName];
 								try
 								{
-									AProgram.Stack.Push(LOldRow);
+									program.Stack.Push(oldRow);
 									try
 									{
-										Row LNewRow = (Row)LCheckRow[FNewRowColumnName];
+										Row newRow = (Row)checkRow[_newRowColumnName];
 										try
 										{
-											AProgram.Stack.Push(LNewRow);
+											program.Stack.Push(newRow);
 											try
 											{
-												ValidateCheck(AProgram, Schema.Transition.Update);
+												ValidateCheck(program, Schema.Transition.Update);
 											}
 											finally
 											{
-												AProgram.Stack.Pop();
+												program.Stack.Pop();
 											}
 										}
 										finally
 										{
-											LNewRow.Dispose();
+											newRow.Dispose();
 										}
 									}
 									finally
 									{
-										AProgram.Stack.Pop();
+										program.Stack.Pop();
 									}
 								}
 								finally
 								{
-									LOldRow.Dispose();
+									oldRow.Dispose();
 								}
 							}
 							break;
 							
 							case Keywords.Delete :
 							{
-								Row LRow = (Row)LCheckRow[FOldRowColumnName];
+								Row row = (Row)checkRow[_oldRowColumnName];
 								try
 								{
-									AProgram.Stack.Push(LRow);
+									program.Stack.Push(row);
 									try
 									{
-										ValidateCheck(AProgram, Schema.Transition.Delete);
+										ValidateCheck(program, Schema.Transition.Delete);
 									}
 									finally
 									{
-										AProgram.Stack.Pop();
+										program.Stack.Pop();
 									}
 								}
 								finally
 								{
-									LRow.Dispose();
+									row.Dispose();
 								}
 							}
 							break;
@@ -947,79 +947,79 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FTransactionPlan.ReleaseRow(LCheckRow);
+					_transactionPlan.ReleaseRow(checkRow);
 				}
 			}
 			finally
 			{
-				FTransactionPlan.Close(LCursor);
+				_transactionPlan.Close(cursor);
 			}
 		}
 		
-		public void ValidateCheck(Program AProgram, Schema.Transition ATransition)
+		public void ValidateCheck(Program program, Schema.Transition transition)
 		{
-			switch (ATransition)
+			switch (transition)
 			{
 				case Schema.Transition.Insert :
 				{
-					Row LNewRow = new Row(AProgram.ValueManager, this.TableVar.DataType.RowType, (NativeRow)((Row)AProgram.Stack.Peek(0)).AsNative);
+					Row newRow = new Row(program.ValueManager, this.TableVar.DataType.RowType, (NativeRow)((Row)program.Stack.Peek(0)).AsNative);
 					try
 					{
-						AProgram.Stack.Push(LNewRow);
+						program.Stack.Push(newRow);
 						try
 						{
-							foreach (Schema.RowConstraint LConstraint in FTableVar.RowConstraints)
-								if (LConstraint.Enforced && LConstraint.IsDeferred)
-									LConstraint.Validate(AProgram, ATransition);
+							foreach (Schema.RowConstraint constraint in _tableVar.RowConstraints)
+								if (constraint.Enforced && constraint.IsDeferred)
+									constraint.Validate(program, transition);
 						}
 						finally
 						{
-							AProgram.Stack.Pop();
+							program.Stack.Pop();
 						}
 					}
 					finally
 					{
-						LNewRow.Dispose();
+						newRow.Dispose();
 					}
 
-					foreach (Schema.TransitionConstraint LConstraint in FTableVar.InsertConstraints)
-						if (LConstraint.Enforced && LConstraint.IsDeferred)
-							LConstraint.Validate(AProgram, Schema.Transition.Insert);
+					foreach (Schema.TransitionConstraint constraint in _tableVar.InsertConstraints)
+						if (constraint.Enforced && constraint.IsDeferred)
+							constraint.Validate(program, Schema.Transition.Insert);
 				}
 				break;
 
 				case Schema.Transition.Update :
 				{
-					Row LNewRow = new Row(AProgram.ValueManager, this.TableVar.DataType.RowType, (NativeRow)((Row)AProgram.Stack.Peek(0)).AsNative);
+					Row newRow = new Row(program.ValueManager, this.TableVar.DataType.RowType, (NativeRow)((Row)program.Stack.Peek(0)).AsNative);
 					try
 					{
-						AProgram.Stack.Push(LNewRow);
+						program.Stack.Push(newRow);
 						try
 						{
-							foreach (Schema.RowConstraint LConstraint in FTableVar.RowConstraints)
-								if (LConstraint.Enforced && LConstraint.IsDeferred)
-									LConstraint.Validate(AProgram, Schema.Transition.Update);
+							foreach (Schema.RowConstraint constraint in _tableVar.RowConstraints)
+								if (constraint.Enforced && constraint.IsDeferred)
+									constraint.Validate(program, Schema.Transition.Update);
 						}
 						finally
 						{
-							AProgram.Stack.Pop();
+							program.Stack.Pop();
 						}
 					}
 					finally
 					{
-						LNewRow.Dispose();
+						newRow.Dispose();
 					}
 							
-					foreach (Schema.TransitionConstraint LConstraint in FTableVar.UpdateConstraints)
-						if (LConstraint.Enforced && LConstraint.IsDeferred)
-							LConstraint.Validate(AProgram, Schema.Transition.Update);
+					foreach (Schema.TransitionConstraint constraint in _tableVar.UpdateConstraints)
+						if (constraint.Enforced && constraint.IsDeferred)
+							constraint.Validate(program, Schema.Transition.Update);
 				}
 				break;
 
 				case Schema.Transition.Delete :
-					foreach (Schema.TransitionConstraint LConstraint in FTableVar.DeleteConstraints)
-						if (LConstraint.Enforced && LConstraint.IsDeferred)
-							LConstraint.Validate(AProgram, Schema.Transition.Delete);
+					foreach (Schema.TransitionConstraint constraint in _tableVar.DeleteConstraints)
+						if (constraint.Enforced && constraint.IsDeferred)
+							constraint.Validate(program, Schema.Transition.Delete);
 				break;
 			}
 		}
@@ -1031,67 +1031,67 @@ namespace Alphora.Dataphor.DAE.Server
 	
 	public abstract class ServerHandler : System.Object
 	{
-		public ServerHandler(Schema.TableVarEventHandler AHandler) : base() 
+		public ServerHandler(Schema.TableVarEventHandler handler) : base() 
 		{
-			FHandler = AHandler;
+			_handler = handler;
 		}
 		
-		protected Schema.IRowType FNewRowType;
-		protected Schema.IRowType FOldRowType;
+		protected Schema.IRowType _newRowType;
+		protected Schema.IRowType _oldRowType;
 		
-		protected Schema.TableVarEventHandler FHandler;
-		public Schema.TableVarEventHandler Handler { get { return FHandler; } }
+		protected Schema.TableVarEventHandler _handler;
+		public Schema.TableVarEventHandler Handler { get { return _handler; } }
 		
-		public abstract void Invoke(Program AProgram);
+		public abstract void Invoke(Program program);
 		
-		public abstract void Deallocate(Program AProgram);
+		public abstract void Deallocate(Program program);
 	}
 	
 	public class ServerHandlers : List<ServerHandler>
 	{
-		public void Deallocate(Program AProgram)
+		public void Deallocate(Program program)
 		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				this[LIndex].Deallocate(AProgram);
+			for (int index = 0; index < Count; index++)
+				this[index].Deallocate(program);
 		}
 	}
 	
 	public class ServerInsertHandler : ServerHandler
 	{
-		public ServerInsertHandler(Schema.TableVarEventHandler AHandler, Row ARow) : base(AHandler)
+		public ServerInsertHandler(Schema.TableVarEventHandler handler, Row row) : base(handler)
 		{
-			FNewRowType = ARow.DataType;
-			NativeRow = (NativeRow)ARow.CopyNative();
+			_newRowType = row.DataType;
+			NativeRow = (NativeRow)row.CopyNative();
 		}
 		
 		public NativeRow NativeRow;
 		
-		public override void Invoke(Program AProgram)
+		public override void Invoke(Program program)
 		{
-			Row LRow = new Row(AProgram.ValueManager, FNewRowType, NativeRow);
+			Row row = new Row(program.ValueManager, _newRowType, NativeRow);
 			try
 			{
-				AProgram.Stack.Push(LRow);
+				program.Stack.Push(row);
 				try
 				{
-					FHandler.PlanNode.Execute(AProgram);
+					_handler.PlanNode.Execute(program);
 				}
 				finally
 				{
-					AProgram.Stack.Pop();
+					program.Stack.Pop();
 				}
 			}
 			finally
 			{
-				LRow.Dispose();
+				row.Dispose();
 			}
 		}
 		
-		public override void Deallocate(Program AProgram)
+		public override void Deallocate(Program program)
 		{
 			if (NativeRow != null)
 			{
-				DataValue.DisposeNative(AProgram.ValueManager, FNewRowType, NativeRow);
+				DataValue.DisposeNative(program.ValueManager, _newRowType, NativeRow);
 				NativeRow = null;
 			}
 		}
@@ -1099,65 +1099,65 @@ namespace Alphora.Dataphor.DAE.Server
 	
 	public class ServerUpdateHandler : ServerHandler
 	{
-		public ServerUpdateHandler(Schema.TableVarEventHandler AHandler, Row AOldRow, Row ANewRow) : base(AHandler)
+		public ServerUpdateHandler(Schema.TableVarEventHandler handler, Row oldRow, Row newRow) : base(handler)
 		{
-			FNewRowType = ANewRow.DataType;
-			FOldRowType = AOldRow.DataType;
-			OldNativeRow = (NativeRow)AOldRow.CopyNative();
-			NewNativeRow = (NativeRow)ANewRow.CopyNative();
+			_newRowType = newRow.DataType;
+			_oldRowType = oldRow.DataType;
+			OldNativeRow = (NativeRow)oldRow.CopyNative();
+			NewNativeRow = (NativeRow)newRow.CopyNative();
 		}
 		
 		public NativeRow OldNativeRow;
 		public NativeRow NewNativeRow;
 
-		public override void Invoke(Program AProgram)
+		public override void Invoke(Program program)
 		{
-			Row LOldRow = new Row(AProgram.ValueManager, FOldRowType, OldNativeRow);
+			Row oldRow = new Row(program.ValueManager, _oldRowType, OldNativeRow);
 			try
 			{
-				Row LNewRow = new Row(AProgram.ValueManager, FNewRowType, NewNativeRow);
+				Row newRow = new Row(program.ValueManager, _newRowType, NewNativeRow);
 				try
 				{
-					AProgram.Stack.Push(LOldRow);
+					program.Stack.Push(oldRow);
 					try
 					{
-						AProgram.Stack.Push(LNewRow);
+						program.Stack.Push(newRow);
 						try
 						{
-							FHandler.PlanNode.Execute(AProgram);
+							_handler.PlanNode.Execute(program);
 						}
 						finally
 						{
-							AProgram.Stack.Pop();
+							program.Stack.Pop();
 						}
 					}
 					finally
 					{
-						AProgram.Stack.Pop();
+						program.Stack.Pop();
 					}
 				}
 				finally
 				{
-					LNewRow.Dispose();
+					newRow.Dispose();
 				}
 			}
 			finally
 			{
-				LOldRow.Dispose();
+				oldRow.Dispose();
 			}
 		}
 		
-		public override void Deallocate(Program AProgram)
+		public override void Deallocate(Program program)
 		{
 			if (OldNativeRow != null)
 			{
-				DataValue.DisposeNative(AProgram.ValueManager, FOldRowType, OldNativeRow);
+				DataValue.DisposeNative(program.ValueManager, _oldRowType, OldNativeRow);
 				OldNativeRow = null;
 			}
 
 			if (NewNativeRow != null)
 			{
-				DataValue.DisposeNative(AProgram.ValueManager, FNewRowType, NewNativeRow);
+				DataValue.DisposeNative(program.ValueManager, _newRowType, NewNativeRow);
 				NewNativeRow = null;
 			}
 		}
@@ -1165,40 +1165,40 @@ namespace Alphora.Dataphor.DAE.Server
 	
 	public class ServerDeleteHandler : ServerHandler
 	{
-		public ServerDeleteHandler(Schema.TableVarEventHandler AHandler, Row ARow) : base(AHandler)
+		public ServerDeleteHandler(Schema.TableVarEventHandler handler, Row row) : base(handler)
 		{
-			FOldRowType = ARow.DataType;
-			NativeRow = (NativeRow)ARow.CopyNative();
+			_oldRowType = row.DataType;
+			NativeRow = (NativeRow)row.CopyNative();
 		}
 		
 		public NativeRow NativeRow;
 
-		public override void Invoke(Program AProgram)
+		public override void Invoke(Program program)
 		{
-			Row LRow = new Row(AProgram.ValueManager, FOldRowType, NativeRow);
+			Row row = new Row(program.ValueManager, _oldRowType, NativeRow);
 			try
 			{
-				AProgram.Stack.Push(LRow);
+				program.Stack.Push(row);
 				try
 				{
-					FHandler.PlanNode.Execute(AProgram);
+					_handler.PlanNode.Execute(program);
 				}
 				finally
 				{
-					AProgram.Stack.Pop();
+					program.Stack.Pop();
 				}
 			}
 			finally
 			{
-				LRow.Dispose();
+				row.Dispose();
 			}
 		}
 		
-		public override void Deallocate(Program AProgram)
+		public override void Deallocate(Program program)
 		{
 			if (NativeRow != null)
 			{
-				DataValue.DisposeNative(AProgram.ValueManager, FOldRowType, NativeRow);
+				DataValue.DisposeNative(program.ValueManager, _oldRowType, NativeRow);
 				NativeRow = null;
 			}
 		}

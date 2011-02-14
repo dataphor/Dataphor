@@ -17,53 +17,53 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 	{
 		public DBRadioButtonGroup()
 		{
-			FLink = new DAEClient.FieldDataLink();
-			FLink.OnFieldChanged += new DAEClient.DataLinkFieldHandler(FieldChanged);
-			FLink.OnUpdateReadOnly += new EventHandler(UpdateReadOnly);
-			FLink.OnSaveRequested += new DAEClient.DataLinkHandler(SaveRequested);
-			FLink.OnFocusControl += new DataLinkFieldHandler(FocusControl);
-			FAutoUpdateInterval = 200;
-			FAutoUpdateTimer = new System.Windows.Forms.Timer();
-			FAutoUpdateTimer.Interval = FAutoUpdateInterval;
-			FAutoUpdateTimer.Tick += new EventHandler(AutoUpdateElapsed);
-			FAutoUpdateTimer.Enabled = false;
+			_link = new DAEClient.FieldDataLink();
+			_link.OnFieldChanged += new DAEClient.DataLinkFieldHandler(FieldChanged);
+			_link.OnUpdateReadOnly += new EventHandler(UpdateReadOnly);
+			_link.OnSaveRequested += new DAEClient.DataLinkHandler(SaveRequested);
+			_link.OnFocusControl += new DataLinkFieldHandler(FocusControl);
+			_autoUpdateInterval = 200;
+			_autoUpdateTimer = new System.Windows.Forms.Timer();
+			_autoUpdateTimer.Interval = _autoUpdateInterval;
+			_autoUpdateTimer.Tick += new EventHandler(AutoUpdateElapsed);
+			_autoUpdateTimer.Enabled = false;
 			UpdateReadOnly(this, EventArgs.Empty);
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
-				FAutoUpdateTimer.Tick -= new EventHandler(AutoUpdateElapsed);
-				FAutoUpdateTimer.Dispose();
-				FAutoUpdateTimer = null;
+				_autoUpdateTimer.Tick -= new EventHandler(AutoUpdateElapsed);
+				_autoUpdateTimer.Dispose();
+				_autoUpdateTimer = null;
 			}
 			finally
 			{
-				if (FLink != null)
+				if (_link != null)
 				{
-					FLink.Dispose();
-					FLink = null;
+					_link.Dispose();
+					_link = null;
 				}
 			}
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
-		private DAEClient.FieldDataLink FLink;
-		protected DAEClient.FieldDataLink Link { get { return FLink; } }
+		private DAEClient.FieldDataLink _link;
+		protected DAEClient.FieldDataLink Link { get { return _link; } }
 
-		private int FAutoUpdateInterval;
+		private int _autoUpdateInterval;
 		/// <summary> Determines the amount of time to wait before updating a DataField's value. </summary>
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBRadioButtonGroup.dxd"/>
 		[DefaultValue(200)]
 		[Category("Behavior")]
 		public int AutoUpdateInterval
 		{
-			get { return FAutoUpdateInterval; }
+			get { return _autoUpdateInterval; }
 			set
 			{
-				if (FAutoUpdateInterval != value)
-					FAutoUpdateInterval = value;
+				if (_autoUpdateInterval != value)
+					_autoUpdateInterval = value;
 			}
 		}
 		
@@ -71,24 +71,24 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Category("Behavior")]
 		public bool ReadOnly 
 		{
-			get { return FLink.ReadOnly; }
-			set { FLink.ReadOnly = value; }
+			get { return _link.ReadOnly; }
+			set { _link.ReadOnly = value; }
 		}
 		
-		private System.Windows.Forms.Timer FAutoUpdateTimer;
+		private System.Windows.Forms.Timer _autoUpdateTimer;
 
-		private bool FAutoUpdate;
+		private bool _autoUpdate;
 		/// <summary> Determines if the control should automatically update the DataField's value on a given interval. </summary>
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBRadioButtonGroup.dxd"/>
 		[DefaultValue(false)]
 		[Category("Behavior")]
 		public bool AutoUpdate
 		{
-			get { return FAutoUpdate; }
+			get { return _autoUpdate; }
 			set
 			{
-				if (FAutoUpdate != value)
-					FAutoUpdate = value;
+				if (_autoUpdate != value)
+					_autoUpdate = value;
 			}
 		}
 
@@ -97,8 +97,8 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Editor(typeof(Alphora.Dataphor.DAE.Client.Design.ColumnNameEditor), typeof(System.Drawing.Design.UITypeEditor))]
 		public string ColumnName
 		{
-			get { return FLink.ColumnName; }
-			set { FLink.ColumnName = value; }
+			get { return _link.ColumnName; }
+			set { _link.ColumnName = value; }
 		}
 
 		[Category("Data")]
@@ -106,13 +106,13 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[RefreshProperties(RefreshProperties.All)]
 		public DAEClient.DataSource Source
 		{
-			get { return FLink.Source; }
-			set { FLink.Source = value;	 }
+			get { return _link.Source; }
+			set { _link.Source = value;	 }
 		}
 
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public DAEClient.DataField DataField { get { return FLink.DataField; } }
+		public DAEClient.DataField DataField { get { return _link.DataField; } }
 
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -125,28 +125,28 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				{
 					EnsureEdit();
 					base.SelectedIndex = value;
-					FLink.SaveRequested();
+					_link.SaveRequested();
 				}
 			}
 		}
 
 		private void EnsureEdit()
 		{
-			if (!FLink.Edit())
+			if (!_link.Edit())
 				throw new ControlsException(ControlsException.Codes.InvalidViewState);
 		}
 
-		private bool FEnabled = true;
+		private bool _enabled = true;
 		[DefaultValue(true)]
 		[Category("Behavior")]
 		public new bool Enabled
 		{
-			get { return FEnabled; }
+			get { return _enabled; }
 			set 
 			{
-				if (FEnabled != value)
+				if (_enabled != value)
 				{
-					FEnabled = value; 
+					_enabled = value; 
 					UpdateEnabled();
 				}
 			}
@@ -154,7 +154,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		public virtual bool GetEnabled()
 		{
-			return FEnabled && !FLink.ReadOnly;
+			return _enabled && !_link.ReadOnly;
 		}
 
 		protected virtual void UpdateEnabled()
@@ -162,116 +162,116 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			base.Enabled = GetEnabled();
 		}
 		
-		protected void UpdateReadOnly(object ASender, EventArgs AArgs)
+		protected void UpdateReadOnly(object sender, EventArgs args)
 		{
 			UpdateEnabled();
 		}
 		
-		private string[] FValues = new string[] {};
+		private string[] _values = new string[] {};
 		[Category("Data")]
 		[Description("Values for the Items.")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
 		public virtual string[] Values
 		{
-			get { return FValues; }
+			get { return _values; }
 			set
 			{
-				if (FValues != value)
+				if (_values != value)
 				{
 					if (value == null)
-						FValues = new string[] {};
+						_values = new string[] {};
 					else
-						FValues = value;
+						_values = value;
 					UpdateSelectedIndex();
 				}
 			}
 		}
 
-		private string FDataValue;
+		private string _dataValue;
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public string DataValue
 		{
-			get { return FDataValue; }
+			get { return _dataValue; }
 			set 
 			{ 
-				if (FDataValue != value)
+				if (_dataValue != value)
 				{
-					FDataValue = value;
+					_dataValue = value;
 					UpdateSelectedIndex();
 				}
 			}
 		}
 
-		private bool FSettingSelectedIndex;
+		private bool _settingSelectedIndex;
 		protected virtual void UpdateSelectedIndex()
 		{
-			FSettingSelectedIndex = true;
+			_settingSelectedIndex = true;
 			try
 			{
-				if (FDataValue == null)
+				if (_dataValue == null)
 					base.SelectedIndex = -1;
 				else
 				{
-					int LIndex = -1;
-					for (int i = 0; i < FValues.Length; i++)
-						if (FValues[i] == FDataValue)
+					int index = -1;
+					for (int i = 0; i < _values.Length; i++)
+						if (_values[i] == _dataValue)
 						{
-							LIndex = i;
+							index = i;
 							break;
 						}
-					base.SelectedIndex = LIndex;
+					base.SelectedIndex = index;
 				}
 			}
 			finally
 			{
-				FSettingSelectedIndex = false;	
+				_settingSelectedIndex = false;	
 			}
 		}
 
-		protected virtual void FieldChanged(DAEClient.DataLink ADataLink, DAEClient.DataSet ADataSet, DAEClient.DataField AField)
+		protected virtual void FieldChanged(DAEClient.DataLink dataLink, DAEClient.DataSet dataSet, DAEClient.DataField field)
 		{
-			if ((FLink.DataField != null) && FLink.DataField.HasValue())
-				DataValue = FLink.DataField.AsString;
+			if ((_link.DataField != null) && _link.DataField.HasValue())
+				DataValue = _link.DataField.AsString;
 			else
 				DataValue = null;
 		}
 
-		protected virtual void SaveRequested(DAEClient.DataLink ALink, DAEClient.DataSet ADataSet)
+		protected virtual void SaveRequested(DAEClient.DataLink link, DAEClient.DataSet dataSet)
 		{
-			if (FLink.DataField != null)
+			if (_link.DataField != null)
 			{
-				if (FDataValue == null)
-					FLink.DataField.ClearValue();
+				if (_dataValue == null)
+					_link.DataField.ClearValue();
 				else
-					FLink.DataField.AsString = FDataValue;
+					_link.DataField.AsString = _dataValue;
 			}
 		}
 
 		/// <summary> Called when the AutoUpdateTimer has elapsed. </summary>
-		/// <param name="ASender"> The object whose delegate is called. </param>
-		/// <param name="AArgs"> An EventArgs that contains data related to this event. </param>
+		/// <param name="sender"> The object whose delegate is called. </param>
+		/// <param name="args"> An EventArgs that contains data related to this event. </param>
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBRadioButtonGroup.dxd"/>
-		protected virtual void AutoUpdateElapsed(object ASender, EventArgs AArgs)
+		protected virtual void AutoUpdateElapsed(object sender, EventArgs args)
 		{
-			FAutoUpdateTimer.Stop();
-			FLink.SaveRequested();
+			_autoUpdateTimer.Stop();
+			_link.SaveRequested();
 		}
 		
-		protected override void OnSelectedChange(EventArgs AArgs)
+		protected override void OnSelectedChange(EventArgs args)
 		{
-			base.OnSelectedChange(AArgs);
-			if (!FSettingSelectedIndex && (SelectedIndex >= 0) && (SelectedIndex < FValues.Length))
+			base.OnSelectedChange(args);
+			if (!_settingSelectedIndex && (SelectedIndex >= 0) && (SelectedIndex < _values.Length))
 			{
-				FDataValue = FValues[SelectedIndex];
-				if (FAutoUpdate)
+				_dataValue = _values[SelectedIndex];
+				if (_autoUpdate)
 				{
-					if (FAutoUpdateInterval <= 0)
-						FLink.SaveRequested();
+					if (_autoUpdateInterval <= 0)
+						_link.SaveRequested();
 					else
 					{
-						FAutoUpdateTimer.Interval = FAutoUpdateInterval;
-						FAutoUpdateTimer.Start();
+						_autoUpdateTimer.Interval = _autoUpdateInterval;
+						_autoUpdateTimer.Start();
 					}
 				}
 			}
@@ -279,54 +279,54 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		protected override bool CanChange()
 		{
-			if (FSettingSelectedIndex)
+			if (_settingSelectedIndex)
 				return true;
 			else
-				return FLink.Edit();
+				return _link.Edit();
 		}
 
-		protected override bool IsInputKey(Keys AKeyData)
+		protected override bool IsInputKey(Keys keyData)
 		{
-			switch (AKeyData) 
+			switch (keyData) 
 			{
 				case Keys.Escape:
-					if (FLink.Modified)
+					if (_link.Modified)
 						return true;
 					break;
 			}
-			return base.IsInputKey(AKeyData);
+			return base.IsInputKey(keyData);
 		}
 
-		protected override void OnKeyDown(KeyEventArgs AArgs)
+		protected override void OnKeyDown(KeyEventArgs args)
 		{
-			base.OnKeyDown(AArgs);
-			switch (AArgs.KeyData)
+			base.OnKeyDown(args);
+			switch (args.KeyData)
 			{
 				case Keys.Escape :
-					FLink.Reset();
-					AArgs.Handled = true;
+					_link.Reset();
+					args.Handled = true;
 					break;
 			}
 		}
 
-		protected override void OnLeave(EventArgs AEventArgs)
+		protected override void OnLeave(EventArgs eventArgs)
 		{
-			if (FLink != null)
+			if (_link != null)
 				try
 				{
-					FLink.SaveRequested();
+					_link.SaveRequested();
 				}
 				catch
 				{
 					Focus();
 					throw;
 				}
-			base.OnLeave(AEventArgs);
+			base.OnLeave(eventArgs);
 		}
 
-		private void FocusControl(DataLink ALink, DataSet ADataSet, DataField AField)
+		private void FocusControl(DataLink link, DataSet dataSet, DataField field)
 		{
-			if (AField == DataField)
+			if (field == DataField)
 				Focus();
 		}
 	}

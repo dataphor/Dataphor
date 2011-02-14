@@ -12,39 +12,39 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 {
     public class PostgreSQLRetrieve : SQLRetrieve
     {
-        public PostgreSQLRetrieve(int AID, string AName) : base(AID, AName) { }
+        public PostgreSQLRetrieve(int iD, string name) : base(iD, name) { }
 		
-		public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+		public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
 		{
-            SQLDevicePlan LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            TableVar LTableVar = ((TableVarNode)APlanNode).TableVar;
+            SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
+            TableVar tableVar = ((TableVarNode)planNode).TableVar;
 
-            if (LTableVar is BaseTableVar)
+            if (tableVar is BaseTableVar)
             {
-                SQLRangeVar LRangeVar = new SQLRangeVar(LDevicePlan.GetNextTableAlias());
-                LDevicePlan.CurrentQueryContext().RangeVars.Add(LRangeVar);
-                var LSelectExpression = new SelectExpression();
-                string LSQLIdentifier = LDevicePlan.Device.ToSQLIdentifier(LTableVar);
-                string LTag = D4.MetaData.GetTag(LTableVar.MetaData, "Storage.Schema", LDevicePlan.Device.Schema);
-                var LTableExpression = new TableExpression(LTag,LSQLIdentifier);
-                var LTableSpecifier = new TableSpecifier(LTableExpression, LRangeVar.Name);
-                LSelectExpression.FromClause = new AlgebraicFromClause(LTableSpecifier);
-                LSelectExpression.SelectClause = new SelectClause();
-                foreach (TableVarColumn LColumn in LTableVar.Columns)
+                SQLRangeVar rangeVar = new SQLRangeVar(localDevicePlan.GetNextTableAlias());
+                localDevicePlan.CurrentQueryContext().RangeVars.Add(rangeVar);
+                var selectExpression = new SelectExpression();
+                string sQLIdentifier = localDevicePlan.Device.ToSQLIdentifier(tableVar);
+                string tag = D4.MetaData.GetTag(tableVar.MetaData, "Storage.Schema", localDevicePlan.Device.Schema);
+                var tableExpression = new TableExpression(tag,sQLIdentifier);
+                var tableSpecifier = new TableSpecifier(tableExpression, rangeVar.Name);
+                selectExpression.FromClause = new AlgebraicFromClause(tableSpecifier);
+                selectExpression.SelectClause = new SelectClause();
+                foreach (TableVarColumn column in tableVar.Columns)
                 {
-                    SQLRangeVarColumn LRangeVarColumn = new SQLRangeVarColumn(LColumn, LRangeVar.Name, LDevicePlan.Device.ToSQLIdentifier(LColumn), LDevicePlan.Device.ToSQLIdentifier(LColumn.Name));
-                    LRangeVar.Columns.Add(LRangeVarColumn);
-                    LSelectExpression.SelectClause.Columns.Add(LRangeVarColumn.GetColumnExpression());
+                    SQLRangeVarColumn rangeVarColumn = new SQLRangeVarColumn(column, rangeVar.Name, localDevicePlan.Device.ToSQLIdentifier(column), localDevicePlan.Device.ToSQLIdentifier(column.Name));
+                    rangeVar.Columns.Add(rangeVarColumn);
+                    selectExpression.SelectClause.Columns.Add(rangeVarColumn.GetColumnExpression());
                 }
 
-                LSelectExpression.SelectClause.Distinct =
-                    (LTableVar.Keys.Count == 1) &&
-                    Convert.ToBoolean(D4.MetaData.GetTag(LTableVar.Keys[0].MetaData, "Storage.IsImposedKey", "false"));
+                selectExpression.SelectClause.Distinct =
+                    (tableVar.Keys.Count == 1) &&
+                    Convert.ToBoolean(D4.MetaData.GetTag(tableVar.Keys[0].MetaData, "Storage.IsImposedKey", "false"));
 
-                return LSelectExpression;
+                return selectExpression;
             }
             else
-                return LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
+                return localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
 		   // return base.Translate(ADevicePlan, APlanNode);
 		}
  
@@ -52,12 +52,12 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
     public class PostgreSQLToday : SQLDeviceOperator
     {
-        public PostgreSQLToday(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLToday(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
             return new CallExpression("Round",
                                       new Expression[]
@@ -71,28 +71,28 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
     public class PostgreSQLSubString : SQLDeviceOperator
     {
-        public PostgreSQLSubString(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLSubString(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new CallExpression
                     (
                     "Substring",
                     new[]
                         {
-                            LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+                            localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
                             new BinaryExpression
                                 (
-                                LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false),
+                                localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false),
                                 "iAddition",
                                 new ValueExpression(1, TokenType.Integer)
                                 ),
-                            LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[2], false)
+                            localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[2], false)
                         }
                     );
         }
@@ -101,14 +101,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
     // Pos(ASubString, AString) ::= case when ASubstring = '' then 1 else CharIndex(ASubstring, AString) end - 1
     public class PostgreSQLPos : SQLDeviceOperator
     {
-        public PostgreSQLPos(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLPos(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new BinaryExpression
                     (
@@ -120,7 +120,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                                     (
                                     new BinaryExpression
                                         (
-                                        LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+                                        localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
                                         "iEqual",
                                         new ValueExpression(String.Empty, TokenType.String)
                                         ),
@@ -134,8 +134,8 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                                 "CharIndex",
                                 new[]
                                     {
-                                        LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
-                                        LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false)
+                                        localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
+                                        localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false)
                                     }
                                 )
                             )
@@ -149,14 +149,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
     // IndexOf(AString, ASubString) ::= case when ASubstring = '' then 1 else CharIndex(ASubstring, AString) end - 1
     public class PostgreSQLIndexOf : SQLDeviceOperator
     {
-        public PostgreSQLIndexOf(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLIndexOf(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new BinaryExpression
                     (
@@ -168,7 +168,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                                     (
                                     new BinaryExpression
                                         (
-                                        LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false),
+                                        localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false),
                                         "iEqual",
                                         new ValueExpression(String.Empty, TokenType.String)
                                         ),
@@ -182,8 +182,8 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                                 "CharIndex",
                                 new[]
                                     {
-                                        LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false),
-                                        LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false)
+                                        localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false),
+                                        localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false)
                                     }
                                 )
                             )
@@ -197,14 +197,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
     // CompareText(ALeftValue, ARightValue) ::= case when Upper(ALeftValue) = Upper(ARightValue) then 0 when Upper(ALeftValue) < Upper(ARightValue) then -1 else 1 end
     public class PostgreSQLCompareText : SQLDeviceOperator
     {
-        public PostgreSQLCompareText(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLCompareText(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new CaseExpression
                     (
@@ -217,16 +217,16 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                                     new CallExpression("Upper",
                                                        new[]
                                                            {
-                                                               LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                      APlanNode.Nodes[0],
+                                                               localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                      planNode.Nodes[0],
                                                                                                       false)
                                                            }),
                                     "iEqual",
                                     new CallExpression("Upper",
                                                        new[]
                                                            {
-                                                               LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                      APlanNode.Nodes[1],
+                                                               localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                      planNode.Nodes[1],
                                                                                                       false)
                                                            })
                                     ),
@@ -239,16 +239,16 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                                     new CallExpression("Upper",
                                                        new[]
                                                            {
-                                                               LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                      APlanNode.Nodes[0],
+                                                               localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                      planNode.Nodes[0],
                                                                                                       false)
                                                            }),
                                     "iLess",
                                     new CallExpression("Upper",
                                                        new[]
                                                            {
-                                                               LDevicePlan.Device.TranslateExpression(LDevicePlan,
-                                                                                                      APlanNode.Nodes[1],
+                                                               localDevicePlan.Device.TranslateExpression(localDevicePlan,
+                                                                                                      planNode.Nodes[1],
                                                                                                       false)
                                                            })
                                     ),
@@ -264,14 +264,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
     // ToString(AValue) ::= Convert(varchar, AValue)
     public class PostgreSQLToString : SQLDeviceOperator
     {
-        public PostgreSQLToString(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLToString(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new CallExpression
                     (
@@ -279,7 +279,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                     new[]
                         {
                             new IdentifierExpression("varchar"),
-                            LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false)
+                            localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false)
                         }
                     );
         }
@@ -287,14 +287,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
     public class PostgreSQLToBit : SQLDeviceOperator
     {
-        public PostgreSQLToBit(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLToBit(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new CallExpression
                     (
@@ -302,7 +302,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                     new[]
                         {
                             new IdentifierExpression("bit"),
-                            LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false)
+                            localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false)
                         }
                     );
         }
@@ -310,14 +310,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
     public class PostgreSQLToTinyInt : SQLDeviceOperator
     {
-        public PostgreSQLToTinyInt(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLToTinyInt(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new CallExpression
                     (
@@ -325,7 +325,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                     new[]
                         {
                             new IdentifierExpression("tinyint"),
-                            LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false)
+                            localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false)
                         }
                     );
         }
@@ -334,14 +334,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
     // ToByte(AValue) ::= convert(tinyint, AValue & (power(2, 8) - 1))	
     public class PostgreSQLToByte : SQLDeviceOperator
     {
-        public PostgreSQLToByte(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLToByte(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new CallExpression
                     (
@@ -351,7 +351,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                             new IdentifierExpression("tinyint"),
                             new BinaryExpression
                                 (
-                                LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+                                localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
                                 "iBitwiseAnd",
                                 new BinaryExpression
                                     (
@@ -375,14 +375,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
     public class PostgreSQLToSmallInt : SQLDeviceOperator
     {
-        public PostgreSQLToSmallInt(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLToSmallInt(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new CallExpression
                     (
@@ -390,7 +390,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                     new[]
                         {
                             new IdentifierExpression("smallint"),
-                            LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false)
+                            localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false)
                         }
                     );
         }
@@ -399,14 +399,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
     // ToSByte(AValue) ::= convert(smallint, ((AValue & (power(2, 8) - 1) & ~power(2, 7)) - (power(2, 7) & AValue)))
     public class PostgreSQLToSByte : SQLDeviceOperator
     {
-        public PostgreSQLToSByte(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLToSByte(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new CallExpression
                     (
@@ -420,7 +420,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                                     (
                                     new BinaryExpression
                                         (
-                                        LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+                                        localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
                                         "iBitwiseAnd",
                                         new BinaryExpression
                                             (
@@ -465,7 +465,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                                             }
                                         ),
                                     "iBitwiseAnd",
-                                    LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false)
+                                    localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false)
                                     )
                                 )
                         }
@@ -476,14 +476,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
     // ToShort(AValue) ::= convert(smallint, ((AValue & (power(2, 16) - 1) & ~power(2, 15)) - (power(2, 15) & AValue)))
     public class PostgreSQLToShort : SQLDeviceOperator
     {
-        public PostgreSQLToShort(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLToShort(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new CallExpression
                     (
@@ -497,7 +497,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                                     (
                                     new BinaryExpression
                                         (
-                                        LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+                                        localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
                                         "iBitwiseAnd",
                                         new BinaryExpression
                                             (
@@ -542,7 +542,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                                             }
                                         ),
                                     "iBitwiseAnd",
-                                    LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false)
+                                    localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false)
                                     )
                                 )
                         }
@@ -552,14 +552,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
     public class PostgreSQLToInt : SQLDeviceOperator
     {
-        public PostgreSQLToInt(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLToInt(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new CallExpression
                     (
@@ -567,7 +567,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                     new[]
                         {
                             new IdentifierExpression("int"),
-                            LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false)
+                            localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false)
                         }
                     );
         }
@@ -576,14 +576,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
     // ToUShort(AValue) ::= convert(int, AValue & (power(2, 16) - 1))	
     public class PostgreSQLToUShort : SQLDeviceOperator
     {
-        public PostgreSQLToUShort(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLToUShort(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new CallExpression
                     (
@@ -593,7 +593,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                             new IdentifierExpression("int"),
                             new BinaryExpression
                                 (
-                                LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+                                localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
                                 "iBitwiseAnd",
                                 new BinaryExpression
                                     (
@@ -618,14 +618,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
     // ToInteger(AValue) ::= convert(int, ((AValue & ((power(convert(bigint, 2), 32) - 1) & ~(power(convert(bigint, 2), 31)) - (power(convert(bigint, 2), 31) & AValue)))
     public class PostgreSQLToInteger : SQLDeviceOperator
     {
-        public PostgreSQLToInteger(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLToInteger(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new CallExpression
                     (
@@ -639,7 +639,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                                     (
                                     new BinaryExpression
                                         (
-                                        LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+                                        localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
                                         "iBitwiseAnd",
                                         new BinaryExpression
                                             (
@@ -708,7 +708,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                                             }
                                         ),
                                     "iBitwiseAnd",
-                                    LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false)
+                                    localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false)
                                     )
                                 )
                         }
@@ -718,14 +718,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
     public class PostgreSQLToBigInt : SQLDeviceOperator
     {
-        public PostgreSQLToBigInt(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLToBigInt(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new CallExpression
                     (
@@ -733,7 +733,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                     new[]
                         {
                             new IdentifierExpression("bigint"),
-                            LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false)
+                            localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false)
                         }
                     );
         }
@@ -742,14 +742,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
     // ToUInteger(AValue) ::= convert(bigint, AValue & (power(convert(bigint, 2), 32) - 1))	
     public class PostgreSQLToUInteger : SQLDeviceOperator
     {
-        public PostgreSQLToUInteger(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLToUInteger(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new CallExpression
                     (
@@ -759,7 +759,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                             new IdentifierExpression("bigint"),
                             new BinaryExpression
                                 (
-                                LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+                                localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
                                 "iBitwiseAnd",
                                 new BinaryExpression
                                     (
@@ -792,14 +792,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
     // ToLong(AValue) ::= convert(bigint, ((AValue & ((power(2, 64) * 1) - 1) & ~power(2, 63)) - (power(2, 63) & AValue)))
     public class PostgreSQLToLong : SQLDeviceOperator
     {
-        public PostgreSQLToLong(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLToLong(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new CallExpression
                     (
@@ -813,7 +813,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                                     (
                                     new BinaryExpression
                                         (
-                                        LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+                                        localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
                                         "iBitwiseAnd",
                                         new BinaryExpression
                                             (
@@ -863,7 +863,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                                             }
                                         ),
                                     "iBitwiseAnd",
-                                    LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false)
+                                    localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false)
                                     )
                                 )
                         }
@@ -873,14 +873,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
     public class PostgreSQLToDecimal20 : SQLDeviceOperator
     {
-        public PostgreSQLToDecimal20(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLToDecimal20(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new CallExpression
                     (
@@ -888,7 +888,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                     new[]
                         {
                             new IdentifierExpression("decimal(20, 0)"),
-                            LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false)
+                            localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false)
                         }
                     );
         }
@@ -896,14 +896,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
     public class PostgreSQLToDecimal288 : SQLDeviceOperator
     {
-        public PostgreSQLToDecimal288(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLToDecimal288(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new CallExpression
                     (
@@ -911,7 +911,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                     new[]
                         {
                             new IdentifierExpression("decimal(28, 8)"),
-                            LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false)
+                            localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false)
                         }
                     );
         }
@@ -920,14 +920,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
     // ToULong(AValue) ::= convert(decimal(20, 0), AValue & (power(2, 64) - 1))	
     public class PostgreSQLToULong : SQLDeviceOperator
     {
-        public PostgreSQLToULong(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLToULong(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new CallExpression
                     (
@@ -937,7 +937,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                             new IdentifierExpression("decimal(20, 0)"),
                             new BinaryExpression
                                 (
-                                LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+                                localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
                                 "iBitwiseAnd",
                                 new BinaryExpression
                                     (
@@ -961,14 +961,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
     public class PostgreSQLToDecimal : SQLDeviceOperator
     {
-        public PostgreSQLToDecimal(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLToDecimal(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new CallExpression
                     (
@@ -976,7 +976,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                     new[]
                         {
                             new IdentifierExpression("decimal"),
-                            LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false)
+                            localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false)
                         }
                     );
         }
@@ -984,14 +984,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
     public class PostgreSQLToMoney : SQLDeviceOperator
     {
-        public PostgreSQLToMoney(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLToMoney(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new CallExpression
                     (
@@ -999,7 +999,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                     new[]
                         {
                             new IdentifierExpression("money"),
-                            LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false)
+                            localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false)
                         }
                     );
         }
@@ -1007,14 +1007,14 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
     public class PostgreSQLToUniqueIdentifier : SQLDeviceOperator
     {
-        public PostgreSQLToUniqueIdentifier(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLToUniqueIdentifier(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new CallExpression
                     (
@@ -1022,7 +1022,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
                     new[]
                         {
                             new IdentifierExpression("uniqueidentifier"),
-                            LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false)
+                            localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false)
                         }
                     );
         }
@@ -1031,113 +1031,113 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
     // Class to put all of the static math operators that will be reused.
     public class PostgreSQLMath
     {
-        public static Expression Truncate(Expression AExpression)
+        public static Expression Truncate(Expression expression)
         {
-            return new CallExpression("Round", new[] { AExpression, new ValueExpression(0), new ValueExpression(1) });
+            return new CallExpression("Round", new[] { expression, new ValueExpression(0), new ValueExpression(1) });
         }
 
-        public static Expression Frac(Expression AExpression, Expression AExpressionCopy)
+        public static Expression Frac(Expression expression, Expression expressionCopy)
         // note that it takes two different refrences to the same value
         {
-            Expression LRounded = new CallExpression("Round",
+            Expression rounded = new CallExpression("Round",
                                                      new[]
                                                          {
-                                                             AExpressionCopy, new ValueExpression(0),
+                                                             expressionCopy, new ValueExpression(0),
                                                              new ValueExpression(1)
                                                          });
-            return new BinaryExpression(AExpression, "iSubtraction", LRounded);
+            return new BinaryExpression(expression, "iSubtraction", rounded);
         }
     }
 
     public class PostgreSQLTimeSpan
     {
-        public static Expression ReadMillisecond(Expression AValue)
+        public static Expression ReadMillisecond(Expression tempValue)
         {
-            Expression LToFrac = new BinaryExpression(AValue, "iDivision", new ValueExpression(10000000));
-            Expression LToFracCopy = new BinaryExpression(AValue, "iDivision", new ValueExpression(10000000));
-            Expression LFromFrac = PostgreSQLMath.Frac(LToFrac, LToFracCopy);
-            Expression LToTrunc = new BinaryExpression(LFromFrac, "iMultiplication", new ValueExpression(1000));
-            return PostgreSQLMath.Truncate(LToTrunc);
+            Expression toFrac = new BinaryExpression(tempValue, "iDivision", new ValueExpression(10000000));
+            Expression toFracCopy = new BinaryExpression(tempValue, "iDivision", new ValueExpression(10000000));
+            Expression fromFrac = PostgreSQLMath.Frac(toFrac, toFracCopy);
+            Expression toTrunc = new BinaryExpression(fromFrac, "iMultiplication", new ValueExpression(1000));
+            return PostgreSQLMath.Truncate(toTrunc);
         }
 
-        public static Expression ReadSecond(Expression AValue)
+        public static Expression ReadSecond(Expression tempValue)
         {
-            Expression LToFrac = new BinaryExpression(AValue, "iDivision", new ValueExpression(600000000));
-            Expression LToFracCopy = new BinaryExpression(AValue, "iDivision", new ValueExpression(600000000));
-            Expression LFromFrac = PostgreSQLMath.Frac(LToFrac, LToFracCopy);
-            Expression LToTrunc = new BinaryExpression(LFromFrac, "iMultiplication", new ValueExpression(60));
-            return PostgreSQLMath.Truncate(LToTrunc);
+            Expression toFrac = new BinaryExpression(tempValue, "iDivision", new ValueExpression(600000000));
+            Expression toFracCopy = new BinaryExpression(tempValue, "iDivision", new ValueExpression(600000000));
+            Expression fromFrac = PostgreSQLMath.Frac(toFrac, toFracCopy);
+            Expression toTrunc = new BinaryExpression(fromFrac, "iMultiplication", new ValueExpression(60));
+            return PostgreSQLMath.Truncate(toTrunc);
         }
 
-        public static Expression ReadMinute(Expression AValue)
+        public static Expression ReadMinute(Expression tempValue)
         {
-            Expression LToFrac = new BinaryExpression(AValue, "iDivision", new ValueExpression(36000000000));
-            Expression LToFracCopy = new BinaryExpression(AValue, "iDivision", new ValueExpression(36000000000));
-            Expression LFromFrac = PostgreSQLMath.Frac(LToFrac, LToFracCopy);
-            Expression LToTrunc = new BinaryExpression(LFromFrac, "iMultiplication", new ValueExpression(60));
-            return PostgreSQLMath.Truncate(LToTrunc);
+            Expression toFrac = new BinaryExpression(tempValue, "iDivision", new ValueExpression(36000000000));
+            Expression toFracCopy = new BinaryExpression(tempValue, "iDivision", new ValueExpression(36000000000));
+            Expression fromFrac = PostgreSQLMath.Frac(toFrac, toFracCopy);
+            Expression toTrunc = new BinaryExpression(fromFrac, "iMultiplication", new ValueExpression(60));
+            return PostgreSQLMath.Truncate(toTrunc);
         }
 
-        public static Expression ReadHour(Expression AValue)
+        public static Expression ReadHour(Expression tempValue)
         {
-            Expression LToFrac = new BinaryExpression(AValue, "iDivision", new ValueExpression(864000000000));
-            Expression LToFracCopy = new BinaryExpression(AValue, "iDivision", new ValueExpression(864000000000));
-            Expression LFromFrac = PostgreSQLMath.Frac(LToFrac, LToFracCopy);
-            Expression LToTrunc = new BinaryExpression(LFromFrac, "iMultiplication", new ValueExpression(24));
-            return PostgreSQLMath.Truncate(LToTrunc);
+            Expression toFrac = new BinaryExpression(tempValue, "iDivision", new ValueExpression(864000000000));
+            Expression toFracCopy = new BinaryExpression(tempValue, "iDivision", new ValueExpression(864000000000));
+            Expression fromFrac = PostgreSQLMath.Frac(toFrac, toFracCopy);
+            Expression toTrunc = new BinaryExpression(fromFrac, "iMultiplication", new ValueExpression(24));
+            return PostgreSQLMath.Truncate(toTrunc);
         }
 
-        public static Expression ReadDay(Expression AValue)
+        public static Expression ReadDay(Expression tempValue)
         {
-            Expression LToTrunc = new BinaryExpression(AValue, "iDivision", new ValueExpression(864000000000));
-            return PostgreSQLMath.Truncate(LToTrunc);
+            Expression toTrunc = new BinaryExpression(tempValue, "iDivision", new ValueExpression(864000000000));
+            return PostgreSQLMath.Truncate(toTrunc);
         }
     }
 
     public class PostgreSQLDateTimeFunctions
     {
-        public static Expression WriteMonth(Expression ADateTime, Expression ADateTimeCopy, Expression APart)
+        public static Expression WriteMonth(Expression dateTime, Expression dateTimeCopy, Expression part)
         {
-            string LPartString = "mm";
-            Expression LOldPart = new CallExpression("DatePart",
+            string partString = "mm";
+            Expression oldPart = new CallExpression("DatePart",
                                                      new[]
                                                          {
-                                                             new ValueExpression(LPartString, TokenType.Symbol),
-                                                             ADateTimeCopy
+                                                             new ValueExpression(partString, TokenType.Symbol),
+                                                             dateTimeCopy
                                                          });
-            Expression LParts = new BinaryExpression(APart, "iSubtraction", LOldPart);
+            Expression parts = new BinaryExpression(part, "iSubtraction", oldPart);
             return new CallExpression("DateAdd",
-                                      new[] { new ValueExpression(LPartString, TokenType.Symbol), LParts, ADateTime });
+                                      new[] { new ValueExpression(partString, TokenType.Symbol), parts, dateTime });
         }
 
-        public static Expression WriteDay(Expression ADateTime, Expression ADateTimeCopy, Expression APart)
+        public static Expression WriteDay(Expression dateTime, Expression dateTimeCopy, Expression part)
         //pass the DateTime twice
         {
-            string LPartString = "dd";
-            Expression LOldPart = new CallExpression("DatePart",
+            string partString = "dd";
+            Expression oldPart = new CallExpression("DatePart",
                                                      new[]
                                                          {
-                                                             new ValueExpression(LPartString, TokenType.Symbol),
-                                                             ADateTimeCopy
+                                                             new ValueExpression(partString, TokenType.Symbol),
+                                                             dateTimeCopy
                                                          });
-            Expression LParts = new BinaryExpression(APart, "iSubtraction", LOldPart);
+            Expression parts = new BinaryExpression(part, "iSubtraction", oldPart);
             return new CallExpression("DateAdd",
-                                      new[] { new ValueExpression(LPartString, TokenType.Symbol), LParts, ADateTime });
+                                      new[] { new ValueExpression(partString, TokenType.Symbol), parts, dateTime });
         }
 
-        public static Expression WriteYear(Expression ADateTime, Expression ADateTimeCopy, Expression APart)
+        public static Expression WriteYear(Expression dateTime, Expression dateTimeCopy, Expression part)
         //pass the DateTime twice
         {
-            string LPartString = "yyyy";
-            Expression LOldPart = new CallExpression("DatePart",
+            string partString = "yyyy";
+            Expression oldPart = new CallExpression("DatePart",
                                                      new[]
                                                          {
-                                                             new ValueExpression(LPartString, TokenType.Symbol),
-                                                             ADateTimeCopy
+                                                             new ValueExpression(partString, TokenType.Symbol),
+                                                             dateTimeCopy
                                                          });
-            Expression LParts = new BinaryExpression(APart, "iSubtraction", LOldPart);
+            Expression parts = new BinaryExpression(part, "iSubtraction", oldPart);
             return new CallExpression("DateAdd",
-                                      new[] { new ValueExpression(LPartString, TokenType.Symbol), LParts, ADateTime });
+                                      new[] { new ValueExpression(partString, TokenType.Symbol), parts, dateTime });
         }
     }
 
@@ -1146,22 +1146,22 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
     // Math
     public class PostgreSQLPower : SQLDeviceOperator
     {
-        public PostgreSQLPower(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLPower(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
             return
                 new CallExpression
                     (
                     "Power",
                     new[]
                         {
-                            LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
-                            LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false)
+                            localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false),
+                            localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false)
                         }
                     );
         }
@@ -1169,532 +1169,532 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
     public class PostgreSQLTruncate : SQLDeviceOperator
     {
-        public PostgreSQLTruncate(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLTruncate(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LValue = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            return PostgreSQLMath.Truncate(LValue);
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression tempValue = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            return PostgreSQLMath.Truncate(tempValue);
         }
     }
 
     public class PostgreSQLFrac : SQLDeviceOperator
     {
-        public PostgreSQLFrac(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLFrac(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LValue = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LValueCopy = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            return PostgreSQLMath.Frac(LValue, LValueCopy);
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression tempValue = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression valueCopy = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            return PostgreSQLMath.Frac(tempValue, valueCopy);
         }
     }
 
     public class PostgreSQLLogB : SQLDeviceOperator
     {
-        public PostgreSQLLogB(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLLogB(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LValue = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LBase = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false);
-            LValue = new CallExpression("Log", new[] { LValue });
-            LBase = new CallExpression("Log", new[] { LBase });
-            return new BinaryExpression(LValue, "iDivision", LBase);
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression tempValue = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression baseValue = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false);
+            tempValue = new CallExpression("Log", new[] { tempValue });
+            baseValue = new CallExpression("Log", new[] { baseValue });
+            return new BinaryExpression(tempValue, "iDivision", baseValue);
         }
     }
 
     // TimeSpan
     public class PostgreSQLTimeSpanReadMillisecond : SQLDeviceOperator
     {
-        public PostgreSQLTimeSpanReadMillisecond(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLTimeSpanReadMillisecond(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LValue = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            return PostgreSQLTimeSpan.ReadMillisecond(LValue);
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression tempValue = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            return PostgreSQLTimeSpan.ReadMillisecond(tempValue);
         }
     }
 
     public class PostgreSQLTimeSpanReadSecond : SQLDeviceOperator
     {
-        public PostgreSQLTimeSpanReadSecond(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLTimeSpanReadSecond(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LValue = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            return PostgreSQLTimeSpan.ReadSecond(LValue);
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression tempValue = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            return PostgreSQLTimeSpan.ReadSecond(tempValue);
         }
     }
 
     public class PostgreSQLTimeSpanReadMinute : SQLDeviceOperator
     {
-        public PostgreSQLTimeSpanReadMinute(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLTimeSpanReadMinute(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LValue = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            return PostgreSQLTimeSpan.ReadMinute(LValue);
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression tempValue = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            return PostgreSQLTimeSpan.ReadMinute(tempValue);
         }
     }
 
     public class PostgreSQLTimeSpanReadHour : SQLDeviceOperator
     {
-        public PostgreSQLTimeSpanReadHour(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLTimeSpanReadHour(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LValue = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            return PostgreSQLTimeSpan.ReadHour(LValue);
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression tempValue = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            return PostgreSQLTimeSpan.ReadHour(tempValue);
         }
     }
 
     public class PostgreSQLTimeSpanReadDay : SQLDeviceOperator
     {
-        public PostgreSQLTimeSpanReadDay(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLTimeSpanReadDay(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LValue = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            return PostgreSQLTimeSpan.ReadDay(LValue);
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression tempValue = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            return PostgreSQLTimeSpan.ReadDay(tempValue);
         }
     }
 
     public class PostgreSQLTimeSpanWriteMillisecond : SQLDeviceOperator
     {
-        public PostgreSQLTimeSpanWriteMillisecond(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLTimeSpanWriteMillisecond(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LTimeSpan = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LTimeSpanCopy = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LPart = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false);
-            Expression LFromPart = PostgreSQLTimeSpan.ReadMillisecond(LTimeSpanCopy);
-            Expression LParts = new BinaryExpression(LPart, "iSubtraction", LFromPart);
-            LPart = new BinaryExpression(LParts, "iMultiplication", new ValueExpression(10000));
-            return new BinaryExpression(LTimeSpan, "iAddition", LPart);
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression timeSpan = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression timeSpanCopy = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression part = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false);
+            Expression fromPart = PostgreSQLTimeSpan.ReadMillisecond(timeSpanCopy);
+            Expression parts = new BinaryExpression(part, "iSubtraction", fromPart);
+            part = new BinaryExpression(parts, "iMultiplication", new ValueExpression(10000));
+            return new BinaryExpression(timeSpan, "iAddition", part);
         }
     }
 
     public class PostgreSQLTimeSpanWriteSecond : SQLDeviceOperator
     {
-        public PostgreSQLTimeSpanWriteSecond(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLTimeSpanWriteSecond(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LTimeSpan = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LTimeSpanCopy = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LPart = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false);
-            Expression LFromPart = PostgreSQLTimeSpan.ReadSecond(LTimeSpanCopy);
-            Expression LParts = new BinaryExpression(LPart, "iSubtraction", LFromPart);
-            LPart = new BinaryExpression(LParts, "iMultiplication", new ValueExpression(10000000));
-            return new BinaryExpression(LTimeSpan, "iAddition", LPart);
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression timeSpan = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression timeSpanCopy = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression part = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false);
+            Expression fromPart = PostgreSQLTimeSpan.ReadSecond(timeSpanCopy);
+            Expression parts = new BinaryExpression(part, "iSubtraction", fromPart);
+            part = new BinaryExpression(parts, "iMultiplication", new ValueExpression(10000000));
+            return new BinaryExpression(timeSpan, "iAddition", part);
         }
     }
 
     public class PostgreSQLTimeSpanWriteMinute : SQLDeviceOperator
     {
-        public PostgreSQLTimeSpanWriteMinute(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLTimeSpanWriteMinute(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LTimeSpan = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LTimeSpanCopy = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LPart = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false);
-            Expression LFromPart = PostgreSQLTimeSpan.ReadMinute(LTimeSpanCopy);
-            Expression LParts = new BinaryExpression(LPart, "iSubtraction", LFromPart);
-            LPart = new BinaryExpression(LParts, "iMultiplication", new ValueExpression(600000000));
-            return new BinaryExpression(LTimeSpan, "iAddition", LPart);
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression timeSpan = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression timeSpanCopy = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression part = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false);
+            Expression fromPart = PostgreSQLTimeSpan.ReadMinute(timeSpanCopy);
+            Expression parts = new BinaryExpression(part, "iSubtraction", fromPart);
+            part = new BinaryExpression(parts, "iMultiplication", new ValueExpression(600000000));
+            return new BinaryExpression(timeSpan, "iAddition", part);
         }
     }
 
     public class PostgreSQLTimeSpanWriteHour : SQLDeviceOperator
     {
-        public PostgreSQLTimeSpanWriteHour(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLTimeSpanWriteHour(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LTimeSpan = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LTimeSpanCopy = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LPart = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false);
-            Expression LFromPart = PostgreSQLTimeSpan.ReadHour(LTimeSpanCopy);
-            Expression LParts = new BinaryExpression(LPart, "iSubtraction", LFromPart);
-            LPart = new BinaryExpression(LParts, "iMultiplication", new ValueExpression(36000000000));
-            return new BinaryExpression(LTimeSpan, "iAddition", LPart);
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression timeSpan = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression timeSpanCopy = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression part = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false);
+            Expression fromPart = PostgreSQLTimeSpan.ReadHour(timeSpanCopy);
+            Expression parts = new BinaryExpression(part, "iSubtraction", fromPart);
+            part = new BinaryExpression(parts, "iMultiplication", new ValueExpression(36000000000));
+            return new BinaryExpression(timeSpan, "iAddition", part);
         }
     }
 
     public class PostgreSQLTimeSpanWriteDay : SQLDeviceOperator
     {
-        public PostgreSQLTimeSpanWriteDay(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLTimeSpanWriteDay(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LTimeSpan = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LTimeSpanCopy = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LPart = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false);
-            Expression LFromPart = PostgreSQLTimeSpan.ReadDay(LTimeSpanCopy);
-            Expression LParts = new BinaryExpression(LPart, "iSubtraction", LFromPart);
-            LPart = new BinaryExpression(LParts, "iMultiplication", new ValueExpression(864000000000));
-            return new BinaryExpression(LTimeSpan, "iAddition", LPart);
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression timeSpan = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression timeSpanCopy = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression part = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false);
+            Expression fromPart = PostgreSQLTimeSpan.ReadDay(timeSpanCopy);
+            Expression parts = new BinaryExpression(part, "iSubtraction", fromPart);
+            part = new BinaryExpression(parts, "iMultiplication", new ValueExpression(864000000000));
+            return new BinaryExpression(timeSpan, "iAddition", part);
         }
     }
 
 
     public class PostgreSQLAddMonths : SQLDeviceOperator
     {
-        public PostgreSQLAddMonths(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLAddMonths(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LDateTime = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LMonths = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false);
-            return new CallExpression("DateAdd", new[] { new ValueExpression("mm", TokenType.Symbol), LMonths, LDateTime });
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression dateTime = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression months = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false);
+            return new CallExpression("DateAdd", new[] { new ValueExpression("mm", TokenType.Symbol), months, dateTime });
         }
     }
 
     public class PostgreSQLAddYears : SQLDeviceOperator
     {
-        public PostgreSQLAddYears(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLAddYears(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LDateTime = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LMonths = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false);
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression dateTime = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression months = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false);
             return new CallExpression("DateAdd",
-                                      new[] { new ValueExpression("yyyy", TokenType.Symbol), LMonths, LDateTime });
+                                      new[] { new ValueExpression("yyyy", TokenType.Symbol), months, dateTime });
         }
     }
 
     public class PostgreSQLDayOfWeek : SQLDeviceOperator
     // TODO: do for removal as replaced with Storage.TranslationString in SystemCatalog.d4
     {
-        public PostgreSQLDayOfWeek(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLDayOfWeek(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LDateTime = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            return new CallExpression("DatePart", new[] { new ValueExpression("dw", TokenType.Symbol), LDateTime });
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression dateTime = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            return new CallExpression("DatePart", new[] { new ValueExpression("dw", TokenType.Symbol), dateTime });
         }
     }
 
     public class PostgreSQLDayOfYear : SQLDeviceOperator
     {
-        public PostgreSQLDayOfYear(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLDayOfYear(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LDateTime = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            return new CallExpression("DatePart", new[] { new ValueExpression("dy", TokenType.Symbol), LDateTime });
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression dateTime = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            return new CallExpression("DatePart", new[] { new ValueExpression("dy", TokenType.Symbol), dateTime });
         }
     }
 
     public class PostgreSQLDateTimeReadHour : SQLDeviceOperator
     {
-        public PostgreSQLDateTimeReadHour(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLDateTimeReadHour(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LDateTime = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            return new CallExpression("DatePart", new[] { new ValueExpression("hh", TokenType.Symbol), LDateTime });
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression dateTime = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            return new CallExpression("DatePart", new[] { new ValueExpression("hh", TokenType.Symbol), dateTime });
         }
     }
 
     public class PostgreSQLDateTimeReadMinute : SQLDeviceOperator
     {
-        public PostgreSQLDateTimeReadMinute(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLDateTimeReadMinute(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LDateTime = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            return new CallExpression("DatePart", new[] { new ValueExpression("mi", TokenType.Symbol), LDateTime });
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression dateTime = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            return new CallExpression("DatePart", new[] { new ValueExpression("mi", TokenType.Symbol), dateTime });
         }
     }
 
     public class PostgreSQLDateTimeReadSecond : SQLDeviceOperator
     {
-        public PostgreSQLDateTimeReadSecond(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLDateTimeReadSecond(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LDateTime = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            return new CallExpression("DatePart", new[] { new ValueExpression("ss", TokenType.Symbol), LDateTime });
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression dateTime = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            return new CallExpression("DatePart", new[] { new ValueExpression("ss", TokenType.Symbol), dateTime });
         }
     }
 
     public class PostgreSQLDateTimeReadMillisecond : SQLDeviceOperator
     {
-        public PostgreSQLDateTimeReadMillisecond(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLDateTimeReadMillisecond(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LDateTime = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            return new CallExpression("DatePart", new[] { new ValueExpression("ms", TokenType.Symbol), LDateTime });
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression dateTime = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            return new CallExpression("DatePart", new[] { new ValueExpression("ms", TokenType.Symbol), dateTime });
         }
     }
 
     public class PostgreSQLDateTimeWriteMillisecond : SQLDeviceOperator
     {
-        public PostgreSQLDateTimeWriteMillisecond(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLDateTimeWriteMillisecond(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            string LPartString = "ms";
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LDateTime = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LPart = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false);
-            Expression LOldPart = new CallExpression("DatePart",
-                                                     new[] { new ValueExpression(LPartString, TokenType.Symbol), LDateTime });
-            LDateTime = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LParts = new BinaryExpression(LPart, "iSubtraction", LOldPart);
+            string partString = "ms";
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression dateTime = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression part = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false);
+            Expression oldPart = new CallExpression("DatePart",
+                                                     new[] { new ValueExpression(partString, TokenType.Symbol), dateTime });
+            dateTime = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression parts = new BinaryExpression(part, "iSubtraction", oldPart);
             return new CallExpression("DateAdd",
-                                      new[] { new ValueExpression(LPartString, TokenType.Symbol), LParts, LDateTime });
+                                      new[] { new ValueExpression(partString, TokenType.Symbol), parts, dateTime });
         }
     }
 
     public class PostgreSQLDateTimeWriteSecond : SQLDeviceOperator
     {
-        public PostgreSQLDateTimeWriteSecond(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLDateTimeWriteSecond(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            string LPartString = "ss";
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LDateTime = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LPart = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false);
-            Expression LOldPart = new CallExpression("DatePart",
-                                                     new[] { new ValueExpression(LPartString, TokenType.Symbol), LDateTime });
-            LDateTime = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LParts = new BinaryExpression(LPart, "iSubtraction", LOldPart);
+            string partString = "ss";
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression dateTime = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression part = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false);
+            Expression oldPart = new CallExpression("DatePart",
+                                                     new[] { new ValueExpression(partString, TokenType.Symbol), dateTime });
+            dateTime = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression parts = new BinaryExpression(part, "iSubtraction", oldPart);
             return new CallExpression("DateAdd",
-                                      new[] { new ValueExpression(LPartString, TokenType.Symbol), LParts, LDateTime });
+                                      new[] { new ValueExpression(partString, TokenType.Symbol), parts, dateTime });
         }
     }
 
     public class PostgreSQLDateTimeWriteMinute : SQLDeviceOperator
     {
-        public PostgreSQLDateTimeWriteMinute(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLDateTimeWriteMinute(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            string LPartString = "mi";
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LDateTime = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LPart = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false);
-            Expression LOldPart = new CallExpression("DatePart",
-                                                     new[] { new ValueExpression(LPartString, TokenType.Symbol), LDateTime });
-            LDateTime = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LParts = new BinaryExpression(LPart, "iSubtraction", LOldPart);
+            string partString = "mi";
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression dateTime = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression part = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false);
+            Expression oldPart = new CallExpression("DatePart",
+                                                     new[] { new ValueExpression(partString, TokenType.Symbol), dateTime });
+            dateTime = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression parts = new BinaryExpression(part, "iSubtraction", oldPart);
             return new CallExpression("DateAdd",
-                                      new[] { new ValueExpression(LPartString, TokenType.Symbol), LParts, LDateTime });
+                                      new[] { new ValueExpression(partString, TokenType.Symbol), parts, dateTime });
         }
     }
 
     public class PostgreSQLDateTimeWriteHour : SQLDeviceOperator
     {
-        public PostgreSQLDateTimeWriteHour(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLDateTimeWriteHour(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            string LPartString = "hh";
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LDateTime = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LPart = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false);
-            Expression LOldPart = new CallExpression("DatePart",
-                                                     new[] { new ValueExpression(LPartString, TokenType.Symbol), LDateTime });
-            LDateTime = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LParts = new BinaryExpression(LPart, "iSubtraction", LOldPart);
+            string partString = "hh";
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression dateTime = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression part = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false);
+            Expression oldPart = new CallExpression("DatePart",
+                                                     new[] { new ValueExpression(partString, TokenType.Symbol), dateTime });
+            dateTime = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression parts = new BinaryExpression(part, "iSubtraction", oldPart);
             return new CallExpression("DateAdd",
-                                      new[] { new ValueExpression(LPartString, TokenType.Symbol), LParts, LDateTime });
+                                      new[] { new ValueExpression(partString, TokenType.Symbol), parts, dateTime });
         }
     }
 
     public class PostgreSQLDateTimeWriteDay : SQLDeviceOperator
     {
-        public PostgreSQLDateTimeWriteDay(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLDateTimeWriteDay(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LDateTime = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LDateTimeCopy = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LPart = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false);
-            return PostgreSQLDateTimeFunctions.WriteDay(LDateTime, LDateTimeCopy, LPart);
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression dateTime = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression dateTimeCopy = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression part = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false);
+            return PostgreSQLDateTimeFunctions.WriteDay(dateTime, dateTimeCopy, part);
         }
     }
 
     public class PostgreSQLDateTimeWriteMonth : SQLDeviceOperator
     {
-        public PostgreSQLDateTimeWriteMonth(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLDateTimeWriteMonth(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LDateTime = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LDateTimeCopy = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LPart = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false);
-            return PostgreSQLDateTimeFunctions.WriteMonth(LDateTime, LDateTimeCopy, LPart);
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression dateTime = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression dateTimeCopy = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression part = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false);
+            return PostgreSQLDateTimeFunctions.WriteMonth(dateTime, dateTimeCopy, part);
         }
     }
 
     public class PostgreSQLDateTimeWriteYear : SQLDeviceOperator
     {
-        public PostgreSQLDateTimeWriteYear(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLDateTimeWriteYear(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LDateTime = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LDateTimeCopy = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LPart = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false);
-            return PostgreSQLDateTimeFunctions.WriteYear(LDateTime, LDateTimeCopy, LPart);
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression dateTime = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression dateTimeCopy = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression part = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[1], false);
+            return PostgreSQLDateTimeFunctions.WriteYear(dateTime, dateTimeCopy, part);
         }
     }
 
     public class PostgreSQLDateTimeDatePart : SQLDeviceOperator
     {
-        public PostgreSQLDateTimeDatePart(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLDateTimeDatePart(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LDateTime = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LFromConvert = new CallExpression("Convert",
-                                                         new[] { new ValueExpression("Float", TokenType.Symbol), LDateTime });
-            Expression LFromMath = new CallExpression("Floor", new[] { LFromConvert });
-            return new CallExpression("Convert", new[] { new ValueExpression("DateTime", TokenType.Symbol), LDateTime });
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression dateTime = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression fromConvert = new CallExpression("Convert",
+                                                         new[] { new ValueExpression("Float", TokenType.Symbol), dateTime });
+            Expression fromMath = new CallExpression("Floor", new[] { fromConvert });
+            return new CallExpression("Convert", new[] { new ValueExpression("DateTime", TokenType.Symbol), dateTime });
         }
     }
 
     public class PostgreSQLDateTimeTimePart : SQLDeviceOperator
     {
-        public PostgreSQLDateTimeTimePart(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLDateTimeTimePart(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            Expression LDateTime = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
-            Expression LFromConvert = new CallExpression("Convert",
-                                                         new[] { new ValueExpression("Float", TokenType.Symbol), LDateTime });
-            Expression LFromConvertCopy = new CallExpression("Convert",
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            Expression dateTime = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[0], false);
+            Expression fromConvert = new CallExpression("Convert",
+                                                         new[] { new ValueExpression("Float", TokenType.Symbol), dateTime });
+            Expression fromConvertCopy = new CallExpression("Convert",
                                                              new[]
                                                                  {
                                                                      new ValueExpression("Float", TokenType.Symbol),
-                                                                     LDateTime
+                                                                     dateTime
                                                                  });
-            Expression LFromMath = PostgreSQLMath.Frac(LFromConvert, LFromConvertCopy);
-            return new CallExpression("Convert", new[] { new ValueExpression("DateTime", TokenType.Symbol), LDateTime });
+            Expression fromMath = PostgreSQLMath.Frac(fromConvert, fromConvertCopy);
+            return new CallExpression("Convert", new[] { new ValueExpression("DateTime", TokenType.Symbol), dateTime });
         }
     }
 
@@ -1705,78 +1705,78 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
     /// </summary>
     public class PostgreSQLDateTimeSelector : SQLDeviceOperator
     {
-        public PostgreSQLDateTimeSelector(int AID, string AName)
-            : base(AID, AName)
+        public PostgreSQLDateTimeSelector(int iD, string name)
+            : base(iD, name)
         {
         }
 
-        public static Expression DateTimeSelector(Expression AYear, Expression AMonth, Expression ADay,
-                                                  Expression AHours, Expression AMinutes, Expression ASeconds,
-                                                  Expression AMilliseconds)
+        public static Expression DateTimeSelector(Expression year, Expression month, Expression day,
+                                                  Expression hours, Expression minutes, Expression seconds,
+                                                  Expression milliseconds)
         {
-            Expression LExpression =
+            Expression expression =
                 new BinaryExpression(
-                    new CallExpression("Convert", new[] { new ValueExpression("VarChar", TokenType.Symbol), AYear }), "+",
+                    new CallExpression("Convert", new[] { new ValueExpression("VarChar", TokenType.Symbol), year }), "+",
                     new ValueExpression("-"));
-            LExpression = new BinaryExpression(LExpression, "+",
+            expression = new BinaryExpression(expression, "+",
                                                new CallExpression("Convert",
                                                                   new[]
                                                                       {
                                                                           new ValueExpression("VarChar",
                                                                                               TokenType.Symbol),
-                                                                          AMonth
+                                                                          month
                                                                       }));
-            LExpression = new BinaryExpression(LExpression, "+", new ValueExpression("-"));
-            LExpression = new BinaryExpression(LExpression, "+",
+            expression = new BinaryExpression(expression, "+", new ValueExpression("-"));
+            expression = new BinaryExpression(expression, "+",
                                                new CallExpression("Convert",
                                                                   new[]
                                                                       {
                                                                           new ValueExpression("VarChar",
                                                                                               TokenType.Symbol),
-                                                                          ADay
+                                                                          day
                                                                       }));
-            if (AHours != null)
+            if (hours != null)
             {
-                LExpression = new BinaryExpression(LExpression, "+", new ValueExpression(" "));
-                LExpression = new BinaryExpression(LExpression, "+",
+                expression = new BinaryExpression(expression, "+", new ValueExpression(" "));
+                expression = new BinaryExpression(expression, "+",
                                                    new CallExpression("Convert",
                                                                       new[]
                                                                           {
                                                                               new ValueExpression("VarChar",
                                                                                                   TokenType.Symbol),
-                                                                              AHours
+                                                                              hours
                                                                           }));
-                LExpression = new BinaryExpression(LExpression, "+", new ValueExpression(":"));
-                LExpression = new BinaryExpression(LExpression, "+",
+                expression = new BinaryExpression(expression, "+", new ValueExpression(":"));
+                expression = new BinaryExpression(expression, "+",
                                                    new CallExpression("Convert",
                                                                       new[]
                                                                           {
                                                                               new ValueExpression("VarChar",
                                                                                                   TokenType.Symbol),
-                                                                              AMinutes
+                                                                              minutes
                                                                           }));
-                if (ASeconds != null)
+                if (seconds != null)
                 {
-                    LExpression = new BinaryExpression(LExpression, "+", new ValueExpression(":"));
-                    LExpression = new BinaryExpression(LExpression, "+",
+                    expression = new BinaryExpression(expression, "+", new ValueExpression(":"));
+                    expression = new BinaryExpression(expression, "+",
                                                        new CallExpression("Convert",
                                                                           new[]
                                                                               {
                                                                                   new ValueExpression("VarChar",
                                                                                                       TokenType.Symbol),
-                                                                                  ASeconds
+                                                                                  seconds
                                                                               }));
-                    if (AMilliseconds != null)
+                    if (milliseconds != null)
                     {
-                        LExpression = new BinaryExpression(LExpression, "+", new ValueExpression("."));
-                        LExpression = new BinaryExpression(LExpression, "+",
+                        expression = new BinaryExpression(expression, "+", new ValueExpression("."));
+                        expression = new BinaryExpression(expression, "+",
                                                            new CallExpression("Convert",
                                                                               new[]
                                                                                   {
                                                                                       new ValueExpression("VarChar",
                                                                                                           TokenType.
                                                                                                               Symbol),
-                                                                                      AMilliseconds
+                                                                                      milliseconds
                                                                                   }));
                     }
                 }
@@ -1785,30 +1785,30 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
             return new CallExpression("Convert",
                                       new[]
                                           {
-                                              new ValueExpression("DateTime", TokenType.Symbol), LExpression,
+                                              new ValueExpression("DateTime", TokenType.Symbol), expression,
                                               new ValueExpression(121)
                                           });
         }
 
-        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        public override Statement Translate(DevicePlan devicePlan, PlanNode planNode)
         {
-            var LDevicePlan = (SQLDevicePlan)ADevicePlan;
-            var LArguments = new Expression[APlanNode.Nodes.Count];
-            for (int LIndex = 0; LIndex < APlanNode.Nodes.Count; LIndex++)
-                LArguments[LIndex] = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[LIndex], false);
-            switch (APlanNode.Nodes.Count)
+            var localDevicePlan = (SQLDevicePlan)devicePlan;
+            var arguments = new Expression[planNode.Nodes.Count];
+            for (int index = 0; index < planNode.Nodes.Count; index++)
+                arguments[index] = localDevicePlan.Device.TranslateExpression(localDevicePlan, planNode.Nodes[index], false);
+            switch (planNode.Nodes.Count)
             {
                 case 7:
-                    return DateTimeSelector(LArguments[0], LArguments[1], LArguments[2], LArguments[3], LArguments[4],
-                                            LArguments[5], LArguments[6]);
+                    return DateTimeSelector(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4],
+                                            arguments[5], arguments[6]);
                 case 6:
-                    return DateTimeSelector(LArguments[0], LArguments[1], LArguments[2], LArguments[3], LArguments[4],
-                                            LArguments[5], null);
+                    return DateTimeSelector(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4],
+                                            arguments[5], null);
                 case 5:
-                    return DateTimeSelector(LArguments[0], LArguments[1], LArguments[2], LArguments[3], LArguments[4],
+                    return DateTimeSelector(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4],
                                             null, null);
                 case 3:
-                    return DateTimeSelector(LArguments[0], LArguments[1], LArguments[2], null, null, null, null);
+                    return DateTimeSelector(arguments[0], arguments[1], arguments[2], null, null, null, null);
                 default:
                     return null;
             }

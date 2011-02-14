@@ -24,48 +24,48 @@ namespace Alphora.Dataphor.DAE.Store.MSSQL
 		/// <summary>Initializes the store, ensuring that an instance of the server is running and a database is attached.</summary>
         protected override void InternalInitialize()
 		{
-			DbConnectionStringBuilder LBuilder = new DbConnectionStringBuilder();
-			LBuilder.ConnectionString = ConnectionString;
+			DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
+			builder.ConnectionString = ConnectionString;
 
-			if (LBuilder.ContainsKey("MultipleActiveResultSets"))
+			if (builder.ContainsKey("MultipleActiveResultSets"))
 			{
-				FSupportsMARS = "True" == ((string)LBuilder["MultipleActiveResultSets"]);
+				_supportsMARS = "True" == ((string)builder["MultipleActiveResultSets"]);
 			}
 
 			
-            FSupportsUpdatableCursor = false;
+            _supportsUpdatableCursor = false;
             
-            if (FShouldEnsureDatabase)
+            if (_shouldEnsureDatabase)
             {
-				string LDatabaseName = null;
-				if (LBuilder.ContainsKey("Initial Catalog"))
+				string databaseName = null;
+				if (builder.ContainsKey("Initial Catalog"))
 				{
-					LDatabaseName = (string)LBuilder["Initial Catalog"];
-					LBuilder["Initial Catalog"] = "master";
+					databaseName = (string)builder["Initial Catalog"];
+					builder["Initial Catalog"] = "master";
 				}
-				else if (LBuilder.ContainsKey("Database"))
+				else if (builder.ContainsKey("Database"))
 				{
-					LDatabaseName = (string)LBuilder["Database"];
-					LBuilder["Database"] = "master";
+					databaseName = (string)builder["Database"];
+					builder["Database"] = "master";
 				}
 				
-				if (!String.IsNullOrEmpty(LDatabaseName))
+				if (!String.IsNullOrEmpty(databaseName))
 				{
-					if (!Parser.IsValidIdentifier(LDatabaseName))
+					if (!Parser.IsValidIdentifier(databaseName))
 						throw new ArgumentException("Database name specified in store connection string is not a valid identifier.");
 						
 					try
 					{
 						#if USESQLCONNECTION
-						MSSQLConnection LConnection = new MSSQLConnection(LBuilder.ConnectionString);
-						LConnection.Execute(String.Format("if not exists (select * from sysdatabases where name = '{0}') create database {0}", LDatabaseName));
+						MSSQLConnection connection = new MSSQLConnection(builder.ConnectionString);
+						connection.Execute(String.Format("if not exists (select * from sysdatabases where name = '{0}') create database {0}", databaseName));
 						#else
-						SqlConnection LConnection = new SqlConnection(LBuilder.ConnectionString);
-						LConnection.Open();
-						SqlCommand LCommand = LConnection.CreateCommand();
-						LCommand.CommandType = CommandType.Text;
-						LCommand.CommandText = String.Format("if not exists (select * from sysdatabases where name = '{0}') create database {0}", LDatabaseName);
-						LCommand.ExecuteNonQuery();
+						SqlConnection connection = new SqlConnection(builder.ConnectionString);
+						connection.Open();
+						SqlCommand command = connection.CreateCommand();
+						command.CommandType = CommandType.Text;
+						command.CommandText = String.Format("if not exists (select * from sysdatabases where name = '{0}') create database {0}", databaseName);
+						command.ExecuteNonQuery();
 						#endif
 					}
 					catch
@@ -76,11 +76,11 @@ namespace Alphora.Dataphor.DAE.Store.MSSQL
 			}
 		}
 		
-		private bool FShouldEnsureDatabase = true;
+		private bool _shouldEnsureDatabase = true;
 		public bool ShouldEnsureDatabase
 		{
-			get { return FShouldEnsureDatabase; }
-			set { FShouldEnsureDatabase = value; }
+			get { return _shouldEnsureDatabase; }
+			set { _shouldEnsureDatabase = value; }
 		}
 
 	    public override SQLConnection GetSQLConnection()

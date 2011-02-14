@@ -45,105 +45,105 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 	[Serializable]
 	public class NativeCLIException : Exception
 	{
-		public NativeCLIException(string AMessage) : base(AMessage) { }
-		public NativeCLIException(string AMessage, Exception AInnerException) : base(AMessage, AInnerException) { }
+		public NativeCLIException(string message) : base(message) { }
+		public NativeCLIException(string message, Exception innerException) : base(message, innerException) { }
 		
-		public NativeCLIException(string AMessage, int ACode, ErrorSeverity ASeverity) : base(AMessage)
+		public NativeCLIException(string message, int code, ErrorSeverity severity) : base(message)
 		{
-			FCode = ACode;
-			FSeverity = ASeverity;
+			_code = code;
+			_severity = severity;
 		}
 		
-		public NativeCLIException(string AMessage, int ACode, ErrorSeverity ASeverity, Exception AInnerException) : base(AMessage, AInnerException)
+		public NativeCLIException(string message, int code, ErrorSeverity severity, Exception innerException) : base(message, innerException)
 		{
-			FCode = ACode;
-			FSeverity = ASeverity;
+			_code = code;
+			_severity = severity;
 		}
 		
-		public NativeCLIException(string AMessage, int ACode, ErrorSeverity ASeverity, string ADetails, string AServerContext) : base(AMessage)
+		public NativeCLIException(string message, int code, ErrorSeverity severity, string details, string serverContext) : base(message)
 		{
-			FCode = ACode;
-			FSeverity = ASeverity;
-			FDetails = ADetails;
-			FServerContext = AServerContext;
+			_code = code;
+			_severity = severity;
+			_details = details;
+			_serverContext = serverContext;
 		}
 		
-		public NativeCLIException(string AMessage, int ACode, ErrorSeverity ASeverity, string ADetails, string AServerContext, Exception AInnerException) : base(AMessage, AInnerException)
+		public NativeCLIException(string message, int code, ErrorSeverity severity, string details, string serverContext, Exception innerException) : base(message, innerException)
 		{
-			FCode = ACode;
-			FSeverity = ASeverity;
-			FDetails = ADetails;
-			FServerContext = AServerContext;
+			_code = code;
+			_severity = severity;
+			_details = details;
+			_serverContext = serverContext;
 		}
 		
-		public NativeCLIException(SerializationInfo AInfo, StreamingContext AContext) : base(AInfo, AContext) 
+		public NativeCLIException(SerializationInfo info, StreamingContext context) : base(info, context) 
 		{
-			FCode = AInfo.GetInt32("Code");
-			FSeverity = (ErrorSeverity)AInfo.GetInt32("Severity");
-			FDetails = AInfo.GetString("Details");
-			FServerContext = AInfo.GetString("ServerContext");
+			_code = info.GetInt32("Code");
+			_severity = (ErrorSeverity)info.GetInt32("Severity");
+			_details = info.GetString("Details");
+			_serverContext = info.GetString("ServerContext");
 		}
 		
-		public override void GetObjectData(SerializationInfo AInfo, StreamingContext AContext)
+		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			base.GetObjectData(AInfo, AContext);
-			AInfo.AddValue("Code", FCode);
-			AInfo.AddValue("Severity", (int)FSeverity);
-			AInfo.AddValue("Details", FDetails);
-			AInfo.AddValue("ServerContext", FServerContext);
+			base.GetObjectData(info, context);
+			info.AddValue("Code", _code);
+			info.AddValue("Severity", (int)_severity);
+			info.AddValue("Details", _details);
+			info.AddValue("ServerContext", _serverContext);
 		}
 		
-		private int FCode;
+		private int _code;
 		public int Code 
 		{ 
-			get { return FCode; } 
-			set { FCode = value; }
+			get { return _code; } 
+			set { _code = value; }
 		}
 		
-		private ErrorSeverity FSeverity;
+		private ErrorSeverity _severity;
 		public ErrorSeverity Severity
 		{
-			get { return FSeverity; }
-			set { FSeverity = value; }
+			get { return _severity; }
+			set { _severity = value; }
 		}
 		
-		private string FDetails;
+		private string _details;
 		public string Details
 		{
-			get { return FDetails; }
-			set { FDetails = value; }
+			get { return _details; }
+			set { _details = value; }
 		}
 		
-		private string FServerContext;
+		private string _serverContext;
 		public string ServerContext
 		{
-			get { return FServerContext; }
-			set { FServerContext = value; }
+			get { return _serverContext; }
+			set { _serverContext = value; }
 		}
 
 		public string CombinedMessages
 		{
 			get
 			{
-				string LMessage = String.Empty;
-				Exception LException = this;
-				while (LException != null)
+				string message = String.Empty;
+				Exception exception = this;
+				while (exception != null)
 				{
-					LMessage += LException.InnerException != null ? LException.Message + ", " : LException.Message;
-					LException = LException.InnerException;
+					message += exception.InnerException != null ? exception.Message + ", " : exception.Message;
+					exception = exception.InnerException;
 				}
-				return LMessage;
+				return message;
 			}
 		}
 		
 		public virtual string GetDetails()
 		{
-			return FDetails != null ? FDetails : String.Empty;
+			return _details != null ? _details : String.Empty;
 		}
 		
 		public string GetServerContext()
 		{
-			return FServerContext != null ? FServerContext : (StackTrace != null ? StackTrace : String.Empty);
+			return _serverContext != null ? _serverContext : (StackTrace != null ? StackTrace : String.Empty);
 		}
 	}
 }

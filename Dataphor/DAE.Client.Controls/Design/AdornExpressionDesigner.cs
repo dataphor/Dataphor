@@ -17,103 +17,103 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 {
 	public class TagCollectionEditor : CollectionEditor
 	{
-		public TagCollectionEditor(Type AItemType) : base(AItemType){}
-		protected override object CreateInstance(Type AItemType)
+		public TagCollectionEditor(Type itemType) : base(itemType){}
+		protected override object CreateInstance(Type itemType)
 		{
-			if (typeof(Alphora.Dataphor.DAE.Language.D4.Tag).IsAssignableFrom(AItemType))
+			if (typeof(Alphora.Dataphor.DAE.Language.D4.Tag).IsAssignableFrom(itemType))
 			{
 				NameValueEdit FNameValueEdit = new NameValueEdit();
 				FNameValueEdit.ShowDialog();
 				if (FNameValueEdit.DialogResult == DialogResult.OK)
-					return new Tag(FNameValueEdit.FTextBoxName.Text,FNameValueEdit.FTextBoxValue.Text);
+					return new Tag(FNameValueEdit._textBoxName.Text,FNameValueEdit._textBoxValue.Text);
 				else
 					throw new  DesignException(DesignException.Codes.AddTagCancelled);
 			}
 			else
-				return base.CreateInstance(AItemType);
+				return base.CreateInstance(itemType);
 		}
 	}
 	
 	public class NameValueEdit : Form
 	{
-		public const int CTagFormWidth = 300;
-		public const int CTagFormHeight = 200;
-		public TextBox FTextBoxName;
-		public TextBox FTextBoxValue;
-		public Label FLabelName;
-		public Label FLabelValue;
-		public Button FButtonOK;
-		public Button FButtonCancel;
+		public const int TagFormWidth = 300;
+		public const int TagFormHeight = 200;
+		public TextBox _textBoxName;
+		public TextBox _textBoxValue;
+		public Label _labelName;
+		public Label _labelValue;
+		public Button _buttonOK;
+		public Button _buttonCancel;
 
 		public NameValueEdit()
 		{
-			Size = new System.Drawing.Size(CTagFormWidth,CTagFormHeight);
+			Size = new System.Drawing.Size(TagFormWidth,TagFormHeight);
 			Text = "Tag Editor Dialog";
 			SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
-			FLabelName = new Label();
-			FLabelName.Parent = this;
-			FLabelName.Text = "Name";
-			FLabelName.Left = 20;
-			FLabelName.Top = 10;
-			FTextBoxName = new TextBox();
-			FTextBoxName.Parent = this;
-			FTextBoxName.Left = 20;
-			FTextBoxName.Top = 35;
-			FTextBoxName.Width = 150;
-			FLabelValue = new Label();
-			FLabelValue.Parent = this;
-			FLabelValue.Text = "Value";
-			FLabelValue.Left = 20;
-			FLabelValue.Top = 70;
-			FTextBoxValue = new TextBox();
-			FTextBoxValue.Parent = this;
-			FTextBoxValue.Left = 20;
-			FTextBoxValue.Top = 95;
-			FTextBoxValue.Width = 150;
-			FButtonOK = new Button();
-			FButtonOK.Parent = this;
-			FButtonOK.Left = 200;
-			FButtonOK.Top = 20;
-			FButtonOK.Text = "OK";
-			FButtonOK.DialogResult = DialogResult.OK;
-			FButtonCancel = new Button();
-			FButtonCancel.Parent = this;
-			FButtonCancel.Left = 200;
-			FButtonCancel.Top = 50;
-			FButtonCancel.Text = "Cancel";
-			FButtonCancel.DialogResult = DialogResult.Cancel;
-			FButtonCancel.Click += new EventHandler(DoButtonCancelClick);
-			FButtonOK.Click += new EventHandler(DoButtonOKClick);
+			_labelName = new Label();
+			_labelName.Parent = this;
+			_labelName.Text = "Name";
+			_labelName.Left = 20;
+			_labelName.Top = 10;
+			_textBoxName = new TextBox();
+			_textBoxName.Parent = this;
+			_textBoxName.Left = 20;
+			_textBoxName.Top = 35;
+			_textBoxName.Width = 150;
+			_labelValue = new Label();
+			_labelValue.Parent = this;
+			_labelValue.Text = "Value";
+			_labelValue.Left = 20;
+			_labelValue.Top = 70;
+			_textBoxValue = new TextBox();
+			_textBoxValue.Parent = this;
+			_textBoxValue.Left = 20;
+			_textBoxValue.Top = 95;
+			_textBoxValue.Width = 150;
+			_buttonOK = new Button();
+			_buttonOK.Parent = this;
+			_buttonOK.Left = 200;
+			_buttonOK.Top = 20;
+			_buttonOK.Text = "OK";
+			_buttonOK.DialogResult = DialogResult.OK;
+			_buttonCancel = new Button();
+			_buttonCancel.Parent = this;
+			_buttonCancel.Left = 200;
+			_buttonCancel.Top = 50;
+			_buttonCancel.Text = "Cancel";
+			_buttonCancel.DialogResult = DialogResult.Cancel;
+			_buttonCancel.Click += new EventHandler(DoButtonCancelClick);
+			_buttonOK.Click += new EventHandler(DoButtonOKClick);
 		}
 
-		private bool FDisposed;
-		protected override void Dispose(bool ADisposing)
+		private bool _disposed;
+		protected override void Dispose(bool disposing)
 		{
-			if (!FDisposed)
+			if (!_disposed)
 			{
 				try
 				{
-					FButtonCancel.Click -= new EventHandler(DoButtonCancelClick);
-					FButtonOK.Click -= new EventHandler(DoButtonOKClick);
-					FLabelName.Dispose();
-					FLabelValue.Dispose();
-					FTextBoxName.Dispose();
-					FTextBoxValue.Dispose();
-					FButtonOK.Dispose();
-					FButtonCancel.Dispose();
+					_buttonCancel.Click -= new EventHandler(DoButtonCancelClick);
+					_buttonOK.Click -= new EventHandler(DoButtonOKClick);
+					_labelName.Dispose();
+					_labelValue.Dispose();
+					_textBoxName.Dispose();
+					_textBoxValue.Dispose();
+					_buttonOK.Dispose();
+					_buttonCancel.Dispose();
 				}
 				finally
 				{
-					FDisposed = true;
+					_disposed = true;
 				}
 			}
 		}
 
-		protected virtual void DoButtonCancelClick(object sender, EventArgs AArgs)
+		protected virtual void DoButtonCancelClick(object sender, EventArgs args)
 		{
 			Close();
 		}
-		protected virtual void DoButtonOKClick(object sender, EventArgs AArgs)
+		protected virtual void DoButtonOKClick(object sender, EventArgs args)
 		{
 			Close();
 		}
@@ -121,26 +121,26 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 	 	 
 	public class MetaDataEditor : System.Drawing.Design.UITypeEditor 
 	{
-		private IWindowsFormsEditorService FEditorService = null;
+		private IWindowsFormsEditorService _editorService = null;
 
-		public override object EditValue(ITypeDescriptorContext AContext, IServiceProvider provider, object AValue) 
+		public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object tempValue) 
 		{	 
-			MetaDataEditForm LMetaDataEditForm = new MetaDataEditForm((MetaData)AValue); 
+			MetaDataEditForm metaDataEditForm = new MetaDataEditForm((MetaData)tempValue); 
 			try
 			{
-				FEditorService = provider.GetService(typeof(IWindowsFormsEditorService)) as IWindowsFormsEditorService;
-				FEditorService.ShowDialog(LMetaDataEditForm);
-				if (LMetaDataEditForm.DialogResult == DialogResult.OK)
-					AValue = LMetaDataEditForm.MetaData;
+				_editorService = provider.GetService(typeof(IWindowsFormsEditorService)) as IWindowsFormsEditorService;
+				_editorService.ShowDialog(metaDataEditForm);
+				if (metaDataEditForm.DialogResult == DialogResult.OK)
+					tempValue = metaDataEditForm.MetaData;
 			}
 			finally
 			{
-				LMetaDataEditForm.Dispose();
+				metaDataEditForm.Dispose();
 			}
-			return AValue;
+			return tempValue;
 		}
 	 
-		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext AContext) 
+		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) 
 		{ 
 			return UITypeEditorEditStyle.Modal;
 		}
@@ -148,193 +148,193 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 
 	public class MetaDataEditForm : Form
 	{
-		public const int CTagFormWidth = 323;
-		public const int CTagFormHeight = 300;
-		public CheckBox FCheckBox;
-		public RadioButton FRadioButtonNone;
-		public RadioButton FRadioButtonMetadata;
-		public GroupBox FGroupMetaData;
-		public Label FLabelComment;
-		public TextBox FTextBoxComment;
-		public Label FLabelTags;
-		public ListView FListView;
-		public Panel FButtonPanel;
-		public Button FButtonAdd;
-		public Button FButtonEdit;
-		public Button FButtonDelete;
-		public Panel FPanelDivide;
-		public Button FButtonOK;
-		public Button FButtonCancel;
-		public TagCollectionEditor FTagCollectionEditor;
-		public NameValueEdit FNameValueEdit;
-		private MetaData FOriginalMetaData;
+		public const int TagFormWidth = 323;
+		public const int TagFormHeight = 300;
+		public CheckBox _checkBox;
+		public RadioButton _radioButtonNone;
+		public RadioButton _radioButtonMetadata;
+		public GroupBox _groupMetaData;
+		public Label _labelComment;
+		public TextBox _textBoxComment;
+		public Label _labelTags;
+		public ListView _listView;
+		public Panel _buttonPanel;
+		public Button _buttonAdd;
+		public Button _buttonEdit;
+		public Button _buttonDelete;
+		public Panel _panelDivide;
+		public Button _buttonOK;
+		public Button _buttonCancel;
+		public TagCollectionEditor _tagCollectionEditor;
+		public NameValueEdit _nameValueEdit;
+		private MetaData _originalMetaData;
 
-		public MetaDataEditForm(MetaData AValue)
+		public MetaDataEditForm(MetaData tempValue)
 		{
-			Size = new System.Drawing.Size(CTagFormWidth,CTagFormHeight);
+			Size = new System.Drawing.Size(TagFormWidth,TagFormHeight);
 			Text = "Metadata Edit";
-			FRadioButtonNone = new RadioButton();
-			FRadioButtonNone.Text = "None";
-			FRadioButtonNone.Parent = this;
-			FRadioButtonNone.Location = new Point(16,8);
-			FRadioButtonNone.Checked = true;
-			FRadioButtonMetadata = new RadioButton();
-			FRadioButtonMetadata.Text = "Metadata";
-			FRadioButtonMetadata.Parent = this;
-			FRadioButtonMetadata.Width = 75;
-			FRadioButtonMetadata.Location = new Point(16,32);
-			FGroupMetaData = new GroupBox();
-			FGroupMetaData.Parent = this;
-			FGroupMetaData.Location = new Point(8,36);
-			FGroupMetaData.Size = new System.Drawing.Size(299,190);
-			FGroupMetaData.Anchor = (((System.Windows.Forms.AnchorStyles.Top | 
+			_radioButtonNone = new RadioButton();
+			_radioButtonNone.Text = "None";
+			_radioButtonNone.Parent = this;
+			_radioButtonNone.Location = new Point(16,8);
+			_radioButtonNone.Checked = true;
+			_radioButtonMetadata = new RadioButton();
+			_radioButtonMetadata.Text = "Metadata";
+			_radioButtonMetadata.Parent = this;
+			_radioButtonMetadata.Width = 75;
+			_radioButtonMetadata.Location = new Point(16,32);
+			_groupMetaData = new GroupBox();
+			_groupMetaData.Parent = this;
+			_groupMetaData.Location = new Point(8,36);
+			_groupMetaData.Size = new System.Drawing.Size(299,190);
+			_groupMetaData.Anchor = (((System.Windows.Forms.AnchorStyles.Top | 
 										System.Windows.Forms.AnchorStyles.Bottom) | 
 										System.Windows.Forms.AnchorStyles.Left) | 
 										System.Windows.Forms.AnchorStyles.Right);
-			FGroupMetaData.Enabled = false;
-			FLabelComment = new Label();
-			FLabelComment.Parent = FGroupMetaData;
-			FLabelComment.Location = new Point(8,20);
-			FLabelComment.Height = 15;
-			FLabelComment.Text = "Comment";
-			FTextBoxComment = new TextBox();
-			FTextBoxComment.Parent = FGroupMetaData;
-			FTextBoxComment.Location = new Point(8,43);
-			FTextBoxComment.Width = 200;
-			FTextBoxComment.Anchor = (((System.Windows.Forms.AnchorStyles.Top | 
+			_groupMetaData.Enabled = false;
+			_labelComment = new Label();
+			_labelComment.Parent = _groupMetaData;
+			_labelComment.Location = new Point(8,20);
+			_labelComment.Height = 15;
+			_labelComment.Text = "Comment";
+			_textBoxComment = new TextBox();
+			_textBoxComment.Parent = _groupMetaData;
+			_textBoxComment.Location = new Point(8,43);
+			_textBoxComment.Width = 200;
+			_textBoxComment.Anchor = (((System.Windows.Forms.AnchorStyles.Top | 
 										System.Windows.Forms.AnchorStyles.Bottom) | 
 										System.Windows.Forms.AnchorStyles.Left) | 
 										System.Windows.Forms.AnchorStyles.Right);
-			FLabelTags = new Label();
-			FLabelTags.Parent = FGroupMetaData;
-			FLabelTags.Location = new Point(8,74);
-			FLabelTags.Height = 15;
-			FLabelTags.Text = "Tags";
-			FListView = new ListView();
-			FListView.Parent = FGroupMetaData;
-			FListView.Location = new Point(8,97);
-			FListView.Size = new System.Drawing.Size(200,85);
-			FListView.Anchor = (((System.Windows.Forms.AnchorStyles.Top | 
+			_labelTags = new Label();
+			_labelTags.Parent = _groupMetaData;
+			_labelTags.Location = new Point(8,74);
+			_labelTags.Height = 15;
+			_labelTags.Text = "Tags";
+			_listView = new ListView();
+			_listView.Parent = _groupMetaData;
+			_listView.Location = new Point(8,97);
+			_listView.Size = new System.Drawing.Size(200,85);
+			_listView.Anchor = (((System.Windows.Forms.AnchorStyles.Top | 
 								  System.Windows.Forms.AnchorStyles.Bottom) | 
 								  System.Windows.Forms.AnchorStyles.Left) | 
 								  System.Windows.Forms.AnchorStyles.Right);
-			FListView.View = View.Details;
-			FListView.GridLines = false;
-			FListView.Columns.Add("Name", 98, HorizontalAlignment.Left);
-			FListView.Columns.Add("Value", 1500, HorizontalAlignment.Left);
-			FListView.Scrollable = true;
-			FListView.FullRowSelect = true;
-			FButtonPanel = new Panel();
-			FButtonPanel.Parent = FGroupMetaData;
-			FButtonPanel.Location = new Point(216,97);
-			FButtonPanel.Size = new System.Drawing.Size(75,85);
-			FButtonPanel.Anchor = (((System.Windows.Forms.AnchorStyles.Bottom | 
+			_listView.View = View.Details;
+			_listView.GridLines = false;
+			_listView.Columns.Add("Name", 98, HorizontalAlignment.Left);
+			_listView.Columns.Add("Value", 1500, HorizontalAlignment.Left);
+			_listView.Scrollable = true;
+			_listView.FullRowSelect = true;
+			_buttonPanel = new Panel();
+			_buttonPanel.Parent = _groupMetaData;
+			_buttonPanel.Location = new Point(216,97);
+			_buttonPanel.Size = new System.Drawing.Size(75,85);
+			_buttonPanel.Anchor = (((System.Windows.Forms.AnchorStyles.Bottom | 
 									 System.Windows.Forms.AnchorStyles.Right)));
-			FButtonAdd = new Button();
-			FButtonAdd.Parent = FButtonPanel;
-			FButtonAdd.Location = new Point(0,0);
-			FButtonAdd.Text = "&Add...";
-			FButtonEdit = new Button();
-			FButtonEdit.Parent = FButtonPanel;
-			FButtonEdit.Location = new Point(0,31);
-			FButtonEdit.Text = "&Edit...";
-			FButtonDelete = new Button();
-			FButtonDelete.Parent = FButtonPanel;
-			FButtonDelete.Location = new Point(0,62);
-			FButtonDelete.Text = "&Delete";
-			FButtonOK = new Button();
-			FButtonOK.Parent = this;
-			FButtonOK.Location = new Point(141,234);
-			FButtonOK.Text = "&OK";
-			FButtonOK.DialogResult = DialogResult.OK;
-			FButtonOK.Anchor = (((System.Windows.Forms.AnchorStyles.Bottom | 
+			_buttonAdd = new Button();
+			_buttonAdd.Parent = _buttonPanel;
+			_buttonAdd.Location = new Point(0,0);
+			_buttonAdd.Text = "&Add...";
+			_buttonEdit = new Button();
+			_buttonEdit.Parent = _buttonPanel;
+			_buttonEdit.Location = new Point(0,31);
+			_buttonEdit.Text = "&Edit...";
+			_buttonDelete = new Button();
+			_buttonDelete.Parent = _buttonPanel;
+			_buttonDelete.Location = new Point(0,62);
+			_buttonDelete.Text = "&Delete";
+			_buttonOK = new Button();
+			_buttonOK.Parent = this;
+			_buttonOK.Location = new Point(141,234);
+			_buttonOK.Text = "&OK";
+			_buttonOK.DialogResult = DialogResult.OK;
+			_buttonOK.Anchor = (((System.Windows.Forms.AnchorStyles.Bottom | 
 								  System.Windows.Forms.AnchorStyles.Right)));
-			FButtonCancel = new Button();
-			FButtonCancel.Parent = this;
-			FButtonCancel.Location = new Point(224,234);
-			FButtonCancel.Text = "&Cancel";
-			FButtonCancel.DialogResult = DialogResult.Cancel;
-			FButtonCancel.Anchor = (((System.Windows.Forms.AnchorStyles.Bottom | 
+			_buttonCancel = new Button();
+			_buttonCancel.Parent = this;
+			_buttonCancel.Location = new Point(224,234);
+			_buttonCancel.Text = "&Cancel";
+			_buttonCancel.DialogResult = DialogResult.Cancel;
+			_buttonCancel.Anchor = (((System.Windows.Forms.AnchorStyles.Bottom | 
 									  System.Windows.Forms.AnchorStyles.Right)));
-			FButtonCancel.Click += new EventHandler(DoButtonCancelClick);
-			FButtonOK.Click += new EventHandler(DoButtonOKClick);
-			FButtonAdd.Click += new EventHandler(DoButtonAddClick);
-			FButtonEdit.Click += new EventHandler(DoButtonEditClick);
-			FButtonDelete.Click += new EventHandler(DoButtonDeleteClick);
-			FRadioButtonMetadata.Click += new EventHandler(DoRadioButtonMetadataClick);
-			FRadioButtonNone.Click += new EventHandler(DoRadioButtonNoneClick);
+			_buttonCancel.Click += new EventHandler(DoButtonCancelClick);
+			_buttonOK.Click += new EventHandler(DoButtonOKClick);
+			_buttonAdd.Click += new EventHandler(DoButtonAddClick);
+			_buttonEdit.Click += new EventHandler(DoButtonEditClick);
+			_buttonDelete.Click += new EventHandler(DoButtonDeleteClick);
+			_radioButtonMetadata.Click += new EventHandler(DoRadioButtonMetadataClick);
+			_radioButtonNone.Click += new EventHandler(DoRadioButtonNoneClick);
 
-			FMetaData = AValue;
-			if ( AValue != null	)
+			_metaData = tempValue;
+			if ( tempValue != null	)
 			{
 				//FTextBoxComment.Text = FMetaData.Comment;
 				Changed();
 			}
 		}
 
-		private bool FDisposed;
-		protected override void Dispose(bool ADisposing)
+		private bool _disposed;
+		protected override void Dispose(bool disposing)
 		{
-			if(!FDisposed)
+			if(!_disposed)
 			{
 				try
 				{
-					FButtonAdd.Dispose();
-					FButtonEdit.Dispose();
-					FButtonDelete.Dispose();
-					FButtonOK.Dispose();
-					FButtonCancel.Dispose();
-					FLabelComment.Dispose();
-					FTextBoxComment.Dispose();
-					FLabelTags.Dispose();
-					FListView.Dispose();
-					FGroupMetaData.Dispose();
-					FButtonPanel.Dispose();
-					FRadioButtonNone.Dispose();
-					FRadioButtonMetadata.Dispose();
-					FButtonCancel.Click -= new EventHandler(DoButtonCancelClick);
-					FButtonOK.Click -= new EventHandler(DoButtonOKClick);
-					FButtonAdd.Click -= new EventHandler(DoButtonAddClick);
-					FButtonEdit.Click -= new EventHandler(DoButtonEditClick);
-					FButtonDelete.Click -= new EventHandler(DoButtonDeleteClick);
-					FRadioButtonMetadata.Click -= new EventHandler(DoRadioButtonMetadataClick);
-					FRadioButtonNone.Click -= new EventHandler(DoRadioButtonNoneClick);
+					_buttonAdd.Dispose();
+					_buttonEdit.Dispose();
+					_buttonDelete.Dispose();
+					_buttonOK.Dispose();
+					_buttonCancel.Dispose();
+					_labelComment.Dispose();
+					_textBoxComment.Dispose();
+					_labelTags.Dispose();
+					_listView.Dispose();
+					_groupMetaData.Dispose();
+					_buttonPanel.Dispose();
+					_radioButtonNone.Dispose();
+					_radioButtonMetadata.Dispose();
+					_buttonCancel.Click -= new EventHandler(DoButtonCancelClick);
+					_buttonOK.Click -= new EventHandler(DoButtonOKClick);
+					_buttonAdd.Click -= new EventHandler(DoButtonAddClick);
+					_buttonEdit.Click -= new EventHandler(DoButtonEditClick);
+					_buttonDelete.Click -= new EventHandler(DoButtonDeleteClick);
+					_radioButtonMetadata.Click -= new EventHandler(DoRadioButtonMetadataClick);
+					_radioButtonNone.Click -= new EventHandler(DoRadioButtonNoneClick);
 					 
 				}
 				finally
 				{
-					FDisposed = true;
+					_disposed = true;
 				}
 			}
 		}
 
-		protected virtual void DoRadioButtonMetadataClick(object sender, EventArgs AArgs)
+		protected virtual void DoRadioButtonMetadataClick(object sender, EventArgs args)
 		{
 			 if	(MetaData == null)
 				 MetaData = new MetaData();
-			 else if (FOriginalMetaData != null)
-				 MetaData = FOriginalMetaData.Copy();	
+			 else if (_originalMetaData != null)
+				 MetaData = _originalMetaData.Copy();	
 		}
 
-		protected virtual void DoRadioButtonNoneClick(object sender, EventArgs AArgs)
+		protected virtual void DoRadioButtonNoneClick(object sender, EventArgs args)
 		{
-			MetaData LMetaData = FMetaData;
+			MetaData metaData = _metaData;
 			MetaData = null;
-			if (LMetaData != null)
-				LMetaData = null;
+			if (metaData != null)
+				metaData = null;
 		}
 		
 
-		protected virtual void DoButtonAddClick(object sender, EventArgs AArgs)
+		protected virtual void DoButtonAddClick(object sender, EventArgs args)
 		{
-			NameValueEdit LNameValueEdit = new NameValueEdit();
+			NameValueEdit nameValueEdit = new NameValueEdit();
 			try
 			{
-				LNameValueEdit.ShowDialog();
-				if (LNameValueEdit.DialogResult == DialogResult.OK)
+				nameValueEdit.ShowDialog();
+				if (nameValueEdit.DialogResult == DialogResult.OK)
 				{
-					Tag LTag = new  Tag(LNameValueEdit.FTextBoxName.Text,LNameValueEdit.FTextBoxValue.Text);
-					FMetaData.Tags.Add(LTag);
+					Tag tag = new  Tag(nameValueEdit._textBoxName.Text,nameValueEdit._textBoxValue.Text);
+					_metaData.Tags.Add(tag);
 					Changed();
 				}
 				else
@@ -342,19 +342,19 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			}
 			finally
 			{
-				LNameValueEdit.Dispose();
+				nameValueEdit.Dispose();
 			}
 		}
 
-		protected virtual void DoButtonEditClick(object sender, EventArgs AArgs)
+		protected virtual void DoButtonEditClick(object sender, EventArgs args)
 		{
 			try
 			{
-				if(FListView.SelectedItems.Count == 0 && FMetaData.Tags.Count > 0)
+				if(_listView.SelectedItems.Count == 0 && _metaData.Tags.Count > 0)
 				{
 					throw new DesignException(DesignException.Codes.NoTagSelected);
 				}
-				else if (FMetaData.Tags.Count == 0) {}
+				else if (_metaData.Tags.Count == 0) {}
 				else
 				{
 					/*
@@ -377,7 +377,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			}
 			finally{}
 		}
-		protected virtual void DoButtonDeleteClick(object sender, EventArgs AArgs)
+		protected virtual void DoButtonDeleteClick(object sender, EventArgs args)
 		{
 /*
 			try
@@ -397,30 +397,30 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 */
 		}
 
-		protected virtual void DoButtonCancelClick(object sender, EventArgs AArgs)
+		protected virtual void DoButtonCancelClick(object sender, EventArgs args)
 		{
 			Close();
 		}
-		protected virtual void DoButtonOKClick(object sender, EventArgs AArgs)
+		protected virtual void DoButtonOKClick(object sender, EventArgs args)
 		{
 			//if (FMetaData != null)
 			//	MetaData.Comment = FTextBoxComment.Text;
 			Close();
 		}
 
-		private MetaData FMetaData;
+		private MetaData _metaData;
 		public MetaData MetaData
 		{
-			get { return FMetaData; }
+			get { return _metaData; }
 			set 
 			{
-				if(FMetaData != value)
+				if(_metaData != value)
 				{
 					if (value != null)
-						FOriginalMetaData = value.Copy();
+						_originalMetaData = value.Copy();
 					else
-						FOriginalMetaData = null;
-					FMetaData = value;
+						_originalMetaData = null;
+					_metaData = value;
 					Changed();
 				}
 			}
@@ -428,40 +428,40 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 		 
 		protected void Changed()
 		{
-			if(FMetaData != null)
+			if(_metaData != null)
 			{
-				FRadioButtonNone.Checked = false;
-				FRadioButtonMetadata.Checked = true;
-				FGroupMetaData.Enabled = true;
-				FButtonPanel.Enabled = true;
-				FListView.BackColor = SystemColors.Window;
-				FListView.Items.Clear();
+				_radioButtonNone.Checked = false;
+				_radioButtonMetadata.Checked = true;
+				_groupMetaData.Enabled = true;
+				_buttonPanel.Enabled = true;
+				_listView.BackColor = SystemColors.Window;
+				_listView.Items.Clear();
 				int i = 0;
 				#if USEHASHTABLEFORTAGS
-				foreach (Tag LTag in FMetaData.Tags)
+				foreach (Tag tag in FMetaData.Tags)
 				{ 
 				#else
-				Tag LTag;
-				for (int LIndex = 0; LIndex < FMetaData.Tags.Count; LIndex++)
+				Tag tag;
+				for (int index = 0; index < _metaData.Tags.Count; index++)
 				{
-					LTag = FMetaData.Tags[LIndex];
+					tag = _metaData.Tags[index];
 				#endif
-					FListView.Items.Add(new ListViewItem());
-					FListView.Items[i].Text = LTag.Name;
-					FListView.Items[i].SubItems.Add(LTag.Value);
+					_listView.Items.Add(new ListViewItem());
+					_listView.Items[i].Text = tag.Name;
+					_listView.Items[i].SubItems.Add(tag.Value);
 					i = i + 1;
 				}
 			}
 			else
 			{
-				FTextBoxComment.Clear();
-				FListView.Items.Clear();
-				FListView.Columns.Add("Name", 98, HorizontalAlignment.Left);
-				FListView.Columns.Add("Value", 1500, HorizontalAlignment.Left);
-				FRadioButtonNone.Checked = true;
-				FRadioButtonMetadata.Checked = false;
-				FGroupMetaData.Enabled = false;
-				FListView.BackColor = SystemColors.Control;
+				_textBoxComment.Clear();
+				_listView.Items.Clear();
+				_listView.Columns.Add("Name", 98, HorizontalAlignment.Left);
+				_listView.Columns.Add("Value", 1500, HorizontalAlignment.Left);
+				_radioButtonNone.Checked = true;
+				_radioButtonMetadata.Checked = false;
+				_groupMetaData.Enabled = false;
+				_listView.BackColor = SystemColors.Control;
 			}
 		}	 
 	}	 

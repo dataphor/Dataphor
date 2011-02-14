@@ -30,15 +30,15 @@ namespace Alphora.Dataphor.DAE.Compiling
 	// Plan provides compile time state	for the compiler.
 	public class Plan : Disposable
 	{
-		public Plan(ServerProcess AServerProcess) : base()
+		public Plan(ServerProcess serverProcess) : base()
 		{
-			SetServerProcess(AServerProcess);
-			FSymbols = new Symbols(FServerProcess.ServerSession.SessionInfo.DefaultMaxStackDepth, FServerProcess.ServerSession.SessionInfo.DefaultMaxCallDepth);
-			PushSecurityContext(new SecurityContext(FServerProcess.ServerSession.User));
+			SetServerProcess(serverProcess);
+			_symbols = new Symbols(_serverProcess.ServerSession.SessionInfo.DefaultMaxStackDepth, _serverProcess.ServerSession.SessionInfo.DefaultMaxCallDepth);
+			PushSecurityContext(new SecurityContext(_serverProcess.ServerSession.User));
 			PushStatementContext(new StatementContext(StatementType.Select));
 		}
 		
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			try
 			{
@@ -48,29 +48,29 @@ namespace Alphora.Dataphor.DAE.Compiling
 					{
 						try
 						{
-							if (FStatementContexts.Count > 0)
+							if (_statementContexts.Count > 0)
 								PopStatementContext();
 								
 						}
 						finally
 						{
-							if (FSecurityContexts.Count > 0)
+							if (_securityContexts.Count > 0)
 								PopSecurityContext();
 						}
 					}
 					finally
 					{
-						if (FSymbols != null)
-							FSymbols = null;
+						if (_symbols != null)
+							_symbols = null;
 					}
 				}
 				finally
 				{
-					if (FDevicePlans != null)
+					if (_devicePlans != null)
 					{
-						foreach (KeyValuePair<PlanNode, Schema.DevicePlan> LEntry in FDevicePlans)
-							LEntry.Value.Device.Unprepare(LEntry.Value);
-						FDevicePlans = null;
+						foreach (KeyValuePair<PlanNode, Schema.DevicePlan> entry in _devicePlans)
+							entry.Value.Device.Unprepare(entry.Value);
+						_devicePlans = null;
 					}
 				}
 			}
@@ -78,22 +78,22 @@ namespace Alphora.Dataphor.DAE.Compiling
 			{
 				SetServerProcess(null);
 
-				base.Dispose(ADisposing);
+				base.Dispose(disposing);
 			}
 		}
 
 		// Process        
-		protected ServerProcess FServerProcess;
-		public ServerProcess ServerProcess { get { return FServerProcess; } }
+		protected ServerProcess _serverProcess;
+		public ServerProcess ServerProcess { get { return _serverProcess; } }
 		
-		private void SetServerProcess(ServerProcess AServerProcess)
+		private void SetServerProcess(ServerProcess serverProcess)
 		{
 			#if USEPROCESSDISPOSED
 			if (FServerProcess != null)
 				FServerProcess.Disposed -= new EventHandler(ServerProcessDisposed);
 			#endif	
 			
-			FServerProcess = AServerProcess;
+			_serverProcess = serverProcess;
 
 			#if USEPROCESSDISPOSED
 			if (FServerProcess != null)
@@ -101,30 +101,30 @@ namespace Alphora.Dataphor.DAE.Compiling
 			#endif
 		}
 		
-		private void ServerProcessDisposed(object ASender, EventArgs AArgs)
+		private void ServerProcessDisposed(object sender, EventArgs args)
 		{
 			SetServerProcess(null);
 		}
 		
-		private Program FInternalProgram;
+		private Program _internalProgram;
 		protected Program InternalProgram
 		{
 			get
 			{
-				if (FInternalProgram == null)
-					FInternalProgram = new Program(FServerProcess);
-				return FInternalProgram;
+				if (_internalProgram == null)
+					_internalProgram = new Program(_serverProcess);
+				return _internalProgram;
 			}
 		}
 		
-		public void BindToProcess(ServerProcess AProcess)
+		public void BindToProcess(ServerProcess process)
 		{
 			PopSecurityContext();
-			PushSecurityContext(new SecurityContext(AProcess.ServerSession.User));
+			PushSecurityContext(new SecurityContext(process.ServerSession.User));
 			
-			SetServerProcess(AProcess);
-			if (FInternalProgram != null)
-				FInternalProgram.BindToProcess(AProcess, this);
+			SetServerProcess(process);
+			if (_internalProgram != null)
+				_internalProgram.BindToProcess(process, this);
 			
 			// Reset execution statistics
 			//FStatistics.ExecuteTime = TimeSpan.Zero;
@@ -142,137 +142,137 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public void CheckCompiled()
 		{
-			if (FMessages.HasErrors)
-				throw FMessages.FirstError;
+			if (_messages.HasErrors)
+				throw _messages.FirstError;
 			// TODO: throw an AggregateException if there is more than 1 error
 		}
 		
 		// Statistics
-		private PlanStatistics FStatistics = new PlanStatistics();
-		public PlanStatistics Statistics { get { return FStatistics; } }
+		private PlanStatistics _statistics = new PlanStatistics();
+		public PlanStatistics Statistics { get { return _statistics; } }
 		
 		// DevicePlans
-		private Dictionary<PlanNode, Schema.DevicePlan> FDevicePlans = new Dictionary<PlanNode, Schema.DevicePlan>();
+		private Dictionary<PlanNode, Schema.DevicePlan> _devicePlans = new Dictionary<PlanNode, Schema.DevicePlan>();
 
 		// GetDevicePlan
-		public Schema.DevicePlan GetDevicePlan(PlanNode APlanNode)
+		public Schema.DevicePlan GetDevicePlan(PlanNode planNode)
 		{
-			Schema.DevicePlan LDevicePlan;
-			if (!FDevicePlans.TryGetValue(APlanNode, out LDevicePlan))
+			Schema.DevicePlan devicePlan;
+			if (!_devicePlans.TryGetValue(planNode, out devicePlan))
 			{
-				EnsureDeviceStarted(APlanNode.Device);
-				Schema.DevicePlan LNewDevicePlan = APlanNode.Device.Prepare(this, APlanNode);
-				AddDevicePlan(LNewDevicePlan);
-				return LNewDevicePlan;
+				EnsureDeviceStarted(planNode.Device);
+				Schema.DevicePlan newDevicePlan = planNode.Device.Prepare(this, planNode);
+				AddDevicePlan(newDevicePlan);
+				return newDevicePlan;
 			}
-			return LDevicePlan;
+			return devicePlan;
 		}
 		
 		// AddDevicePlan
-		public void AddDevicePlan(Schema.DevicePlan ADevicePlan)
+		public void AddDevicePlan(Schema.DevicePlan devicePlan)
 		{
-			if (!FDevicePlans.ContainsKey(ADevicePlan.Node))
-				FDevicePlans.Add(ADevicePlan.Node, ADevicePlan);
+			if (!_devicePlans.ContainsKey(devicePlan.Node))
+				_devicePlans.Add(devicePlan.Node, devicePlan);
 		}
 		
-		public void EnsureDeviceStarted(Schema.Device ADevice)
+		public void EnsureDeviceStarted(Schema.Device device)
 		{
-			FServerProcess.EnsureDeviceStarted(ADevice);
+			_serverProcess.EnsureDeviceStarted(device);
 		}
 		
-		public void CheckDeviceReconcile(Schema.BaseTableVar ATableVar)
+		public void CheckDeviceReconcile(Schema.BaseTableVar tableVar)
 		{
-			ATableVar.Device.CheckReconcile(FServerProcess, ATableVar);
+			tableVar.Device.CheckReconcile(_serverProcess, tableVar);
 		}
 		
-		public Schema.DeviceSession DeviceConnect(Schema.Device ADevice)
+		public Schema.DeviceSession DeviceConnect(Schema.Device device)
 		{
-			return FServerProcess.DeviceConnect(ADevice);
+			return _serverProcess.DeviceConnect(device);
 		}
 		
-		public RemoteSession RemoteConnect(Schema.ServerLink ALink)
+		public RemoteSession RemoteConnect(Schema.ServerLink link)
 		{
-			return FServerProcess.RemoteConnect(ALink);
+			return _serverProcess.RemoteConnect(link);
 		}
 		
 		/// <summary>
 		/// Used to evaluate literal arguments at compile-time. The given node must be literal, or an exception is raised.
 		/// </summary>
-		public object EvaluateLiteralArgument(PlanNode ANode, string AArgumentName)
+		public object EvaluateLiteralArgument(PlanNode node, string argumentName)
 		{
-			if (!ANode.IsLiteral)
-				throw new CompilerException(CompilerException.Codes.LiteralArgumentRequired, CompilerErrorLevel.NonFatal, AArgumentName);
+			if (!node.IsLiteral)
+				throw new CompilerException(CompilerException.Codes.LiteralArgumentRequired, CompilerErrorLevel.NonFatal, argumentName);
 				
-			InternalProgram.Code = ANode;
+			InternalProgram.Code = node;
 			return InternalProgram.Execute(null);
 		}
 		
 		/// <summary>
 		/// Used to execute arbitrary plan nodes at compile-time.
 		/// </summary>
-		public object ExecuteNode(PlanNode ANode)
+		public object ExecuteNode(PlanNode node)
 		{
-			InternalProgram.Code = ANode;
+			InternalProgram.Code = node;
 			return InternalProgram.Execute(null);
 		}
 		
 		// Symbols        
-		protected Symbols FSymbols;
-		public Symbols Symbols { get { return FSymbols; } }
+		protected Symbols _symbols;
+		public Symbols Symbols { get { return _symbols; } }
 		
-		protected List<Symbol> FNewSymbols;
-		public List<Symbol> NewSymbols { get { return FNewSymbols; } }
+		protected List<Symbol> _newSymbols;
+		public List<Symbol> NewSymbols { get { return _newSymbols; } }
 		
 		public void ReportProcessSymbols()
 		{
-			FNewSymbols = new List<Symbol>();
-			for (int LIndex = FSymbols.FrameCount - 1; LIndex >= 0; LIndex--)
-				FNewSymbols.Add(FSymbols[LIndex]);
+			_newSymbols = new List<Symbol>();
+			for (int index = _symbols.FrameCount - 1; index >= 0; index--)
+				_newSymbols.Add(_symbols[index]);
 		}
 		
 		// InErrorContext
-		protected int FErrorContextCount;
-		public bool InErrorContext { get { return FErrorContextCount > 0; } }
+		protected int _errorContextCount;
+		public bool InErrorContext { get { return _errorContextCount > 0; } }
 		
 		public void EnterErrorContext()
 		{
-			FErrorContextCount++;
+			_errorContextCount++;
 		}
 		
 		public void ExitErrorContext()
 		{
-			FErrorContextCount--;
+			_errorContextCount--;
 		}
         
 		// LoopContext
-		protected int FLoopCount;
-		public bool InLoop { get { return FLoopCount > 0; } }
+		protected int _loopCount;
+		public bool InLoop { get { return _loopCount > 0; } }
         
 		public void EnterLoop() 
 		{ 
-			FLoopCount++; 
+			_loopCount++; 
 		}
         
 		public void ExitLoop() 
 		{ 
-			FLoopCount--; 
+			_loopCount--; 
 		}
 		
 		// RowContext
-		public bool InRowContext { get { return FSymbols.InRowContext; } }
+		public bool InRowContext { get { return _symbols.InRowContext; } }
 		
 		public void EnterRowContext()
 		{
-			FSymbols.PushFrame(true);
+			_symbols.PushFrame(true);
 		}
 		
 		public void ExitRowContext()
 		{
-			FSymbols.PopFrame();
+			_symbols.PopFrame();
 		}
 		
 		// ATCreationContext
-		private int FATCreationContext;
+		private int _aTCreationContext;
 		/// <summary>Indicates whether the current plan is executing a statement to create an A/T translated object.</summary>
 		/// <remarks>
 		/// This context is needed because it is not always the case that A/T objects will be being created (or recreated 
@@ -280,143 +280,143 @@ namespace Alphora.Dataphor.DAE.Compiling
 		/// that things that should not be checked for A/T objects (such as errors about derived references not existing in
 		/// adorn expressions, etc.,.) will not occur.
 		/// </remarks>
-		public bool InATCreationContext { get { return FATCreationContext > 0; } }
+		public bool InATCreationContext { get { return _aTCreationContext > 0; } }
 		
 		public void PushATCreationContext()
 		{
-			FATCreationContext++;
+			_aTCreationContext++;
 		}
 		
 		public void PopATCreationContext()
 		{
-			FATCreationContext--;
+			_aTCreationContext--;
 		}
 		
 		// ApplicationTransactionID
-		public Guid ApplicationTransactionID { get { return FServerProcess.ApplicationTransactionID; } }
+		public Guid ApplicationTransactionID { get { return _serverProcess.ApplicationTransactionID; } }
 		
 		public ApplicationTransaction GetApplicationTransaction()
 		{
-			return FServerProcess.GetApplicationTransaction();
+			return _serverProcess.GetApplicationTransaction();
 		}
 		
 		public bool IsInsert 
 		{
-			get { return FServerProcess.IsInsert; } 
-			set { FServerProcess.IsInsert = true; }
+			get { return _serverProcess.IsInsert; } 
+			set { _serverProcess.IsInsert = true; }
 		}
 		
-		public void EnsureApplicationTransactionOperator(Schema.Operator AOperator)
+		public void EnsureApplicationTransactionOperator(Schema.Operator operatorValue)
 		{
-			if (ApplicationTransactionID != Guid.Empty && AOperator.IsATObject)
+			if (ApplicationTransactionID != Guid.Empty && operatorValue.IsATObject)
 			{
-				ApplicationTransaction LTransaction = GetApplicationTransaction();
+				ApplicationTransaction transaction = GetApplicationTransaction();
 				try
 				{
-					LTransaction.EnsureATOperatorMapped(FServerProcess, AOperator);
+					transaction.EnsureATOperatorMapped(_serverProcess, operatorValue);
 				}
 				finally
 				{
-					Monitor.Exit(LTransaction);
+					Monitor.Exit(transaction);
 				}
 			}
 		}
 		
-		public void EnsureApplicationTransactionTableVar(Schema.TableVar ATableVar)
+		public void EnsureApplicationTransactionTableVar(Schema.TableVar tableVar)
 		{
-			if (ApplicationTransactionID != Guid.Empty && ATableVar.IsATObject)
+			if (ApplicationTransactionID != Guid.Empty && tableVar.IsATObject)
 			{
-				ApplicationTransaction LTransaction = GetApplicationTransaction();
+				ApplicationTransaction transaction = GetApplicationTransaction();
 				try
 				{
-					LTransaction.EnsureATTableVarMapped(FServerProcess, ATableVar);
+					transaction.EnsureATTableVarMapped(_serverProcess, tableVar);
 				}
 				finally
 				{
-					Monitor.Exit(LTransaction);
+					Monitor.Exit(transaction);
 				}
 			}
 		}
 		
 		/// <summary>Indicates whether time stamps should be affected by alter and drop table variable and operator statements.</summary>
-		public bool ShouldAffectTimeStamp { get { return FServerProcess.ShouldAffectTimeStamp; } }
+		public bool ShouldAffectTimeStamp { get { return _serverProcess.ShouldAffectTimeStamp; } }
 		
 		public void EnterTimeStampSafeContext()
 		{
-			FServerProcess.EnterTimeStampSafeContext();
+			_serverProcess.EnterTimeStampSafeContext();
 		}
 		
 		public void ExitTimeStampSafeContext()
 		{
-			FServerProcess.ExitTimeStampSafeContext();
+			_serverProcess.ExitTimeStampSafeContext();
 		}
 		
-		protected int FTypeOfCount;
-		public bool InTypeOfContext { get { return FTypeOfCount > 0; } }
+		protected int _typeOfCount;
+		public bool InTypeOfContext { get { return _typeOfCount > 0; } }
 		
 		public void PushTypeOfContext()
 		{
-			FTypeOfCount++;
+			_typeOfCount++;
 		}
 		
 		public void PopTypeOfContext()
 		{
-			FTypeOfCount--;
+			_typeOfCount--;
 		}
 		
 		// TypeContext
-		protected System.Collections.Generic.Stack<Schema.IDataType> FTypeStack = new System.Collections.Generic.Stack<Schema.IDataType>();
+		protected System.Collections.Generic.Stack<Schema.IDataType> _typeStack = new System.Collections.Generic.Stack<Schema.IDataType>();
 		
-		public void PushTypeContext(Schema.IDataType ADataType)
+		public void PushTypeContext(Schema.IDataType dataType)
 		{
-			FTypeStack.Push(ADataType);
+			_typeStack.Push(dataType);
 		}
 		
-		public void PopTypeContext(Schema.IDataType ADataType)
+		public void PopTypeContext(Schema.IDataType dataType)
 		{
-			Error.AssertFail(FTypeStack.Count > 0, "Type stack underflow");
-			FTypeStack.Pop();
+			Error.AssertFail(_typeStack.Count > 0, "Type stack underflow");
+			_typeStack.Pop();
 		}
 		
 		public bool InScalarTypeContext()
 		{
-			return (FTypeStack.Count > 0) && (FTypeStack.Peek() is Schema.IScalarType);
+			return (_typeStack.Count > 0) && (_typeStack.Peek() is Schema.IScalarType);
 		}
 		
 		public bool InRowTypeContext()
 		{
-			return (FTypeStack.Count > 0) && (FTypeStack.Peek() is Schema.IRowType);
+			return (_typeStack.Count > 0) && (_typeStack.Peek() is Schema.IRowType);
 		}
 		
 		public bool InTableTypeContext()
 		{
-			return (FTypeStack.Count > 0) && (FTypeStack.Peek() is Schema.ITableType);
+			return (_typeStack.Count > 0) && (_typeStack.Peek() is Schema.ITableType);
 		}
 
 		public bool InListTypeContext()
 		{
-			return (FTypeStack.Count > 0) && (FTypeStack.Peek() is Schema.IListType);
+			return (_typeStack.Count > 0) && (_typeStack.Peek() is Schema.IListType);
 		}
 		
 		// CurrentStatement
-		protected System.Collections.Generic.Stack<Statement> FStatementStack = new System.Collections.Generic.Stack<Statement>();
+		protected System.Collections.Generic.Stack<Statement> _statementStack = new System.Collections.Generic.Stack<Statement>();
 		
-		public void PushStatement(Statement AStatement)
+		public void PushStatement(Statement statement)
 		{
-			FStatementStack.Push(AStatement);
+			_statementStack.Push(statement);
 		}
 		
 		public void PopStatement()
 		{
-			Error.AssertFail(FStatementStack.Count > 0, "Statement stack underflow");
-			FStatementStack.Pop();
+			Error.AssertFail(_statementStack.Count > 0, "Statement stack underflow");
+			_statementStack.Pop();
 		}
 		
 		/// <remarks>Returns the current statement in the abstract syntax tree being compiled.  Will return null if no statement is on the statement stack.</remarks>
 		public Statement CurrentStatement()
 		{
-			if (FStatementStack.Count > 0)
-				return FStatementStack.Peek();
+			if (_statementStack.Count > 0)
+				return _statementStack.Peek();
 			return null;
 		}
 		
@@ -425,23 +425,23 @@ namespace Alphora.Dataphor.DAE.Compiling
 		/// </summary>
 		public LineInfo GetCurrentLineInfo()
 		{
-			foreach (Statement LStatement in FStatementStack)
-				if (LStatement.Line != -1)
-					return LStatement.LineInfo;
+			foreach (Statement statement in _statementStack)
+				if (statement.Line != -1)
+					return statement.LineInfo;
 					
 			return null;
 		}
 
 		// CursorContext
-		protected CursorContexts FCursorContexts = new CursorContexts();
-		public void PushCursorContext(CursorContext AContext)
+		protected CursorContexts _cursorContexts = new CursorContexts();
+		public void PushCursorContext(CursorContext context)
 		{
-			FCursorContexts.Add(AContext);
+			_cursorContexts.Add(context);
 		}
         
 		public void PopCursorContext()
 		{
-			FCursorContexts.RemoveAt(FCursorContexts.Count - 1);
+			_cursorContexts.RemoveAt(_cursorContexts.Count - 1);
 		}
         
 		public CursorContext GetDefaultCursorContext()
@@ -453,23 +453,23 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			get
 			{
-				if (FCursorContexts.Count > 0)
-					return FCursorContexts[FCursorContexts.Count - 1];
+				if (_cursorContexts.Count > 0)
+					return _cursorContexts[_cursorContexts.Count - 1];
 				else
 					return GetDefaultCursorContext();
 			}
 		}
 		
 		// StatementContext
-		protected StatementContexts FStatementContexts = new StatementContexts();
-		public void PushStatementContext(StatementContext AContext)
+		protected StatementContexts _statementContexts = new StatementContexts();
+		public void PushStatementContext(StatementContext context)
 		{
-			FStatementContexts.Add(AContext);
+			_statementContexts.Add(context);
 		}
 		
 		public void PopStatementContext()
 		{
-			FStatementContexts.RemoveAt(FStatementContexts.Count - 1);
+			_statementContexts.RemoveAt(_statementContexts.Count - 1);
 		}
 		
 		public StatementContext GetDefaultStatementContext()
@@ -477,275 +477,275 @@ namespace Alphora.Dataphor.DAE.Compiling
 			return new StatementContext(StatementType.Select);
 		}
 		
-		public bool HasStatementContext { get { return FStatementContexts.Count > 0; } }
+		public bool HasStatementContext { get { return _statementContexts.Count > 0; } }
 
-		public StatementContext StatementContext { get { return FStatementContexts[FStatementContexts.Count - 1]; } }
+		public StatementContext StatementContext { get { return _statementContexts[_statementContexts.Count - 1]; } }
 		
 		// SecurityContext
-		protected SecurityContexts FSecurityContexts = new SecurityContexts();
-		public void PushSecurityContext(SecurityContext AContext)
+		protected SecurityContexts _securityContexts = new SecurityContexts();
+		public void PushSecurityContext(SecurityContext context)
 		{
-			FSecurityContexts.Add(AContext);
+			_securityContexts.Add(context);
 		}
 		
 		public void PopSecurityContext()
 		{
-			FSecurityContexts.RemoveAt(FSecurityContexts.Count - 1);
+			_securityContexts.RemoveAt(_securityContexts.Count - 1);
 		}
 		
-		public bool HasSecurityContext { get { return FSecurityContexts.Count > 0; } }
+		public bool HasSecurityContext { get { return _securityContexts.Count > 0; } }
 		
-		public SecurityContext SecurityContext { get { return FSecurityContexts[FSecurityContexts.Count - 1]; } }
+		public SecurityContext SecurityContext { get { return _securityContexts[_securityContexts.Count - 1]; } }
 		
-		public void UpdateSecurityContexts(Schema.User AUser)
+		public void UpdateSecurityContexts(Schema.User user)
 		{
-			for (int LIndex = 0; LIndex < FSecurityContexts.Count; LIndex++)
-				if (FSecurityContexts[LIndex].User.ID == AUser.ID)
-					FSecurityContexts[LIndex].SetUser(AUser);
+			for (int index = 0; index < _securityContexts.Count; index++)
+				if (_securityContexts[index].User.ID == user.ID)
+					_securityContexts[index].SetUser(user);
 		}
 		
 		// LoadingContext
-		public void PushLoadingContext(LoadingContext AContext)
+		public void PushLoadingContext(LoadingContext context)
 		{
-			FServerProcess.PushLoadingContext(AContext);
+			_serverProcess.PushLoadingContext(context);
 		}
 		
 		public void PopLoadingContext()
 		{
-			FServerProcess.PopLoadingContext();
+			_serverProcess.PopLoadingContext();
 		}
 		
 		public LoadingContext CurrentLoadingContext()
 		{
-			return FServerProcess.CurrentLoadingContext();
+			return _serverProcess.CurrentLoadingContext();
 		}
 		
 		public bool IsLoading()
 		{
-			return FServerProcess.IsLoading();
+			return _serverProcess.IsLoading();
 		}
 		
 		public bool InLoadingContext()
 		{
-			return FServerProcess.InLoadingContext();
+			return _serverProcess.InLoadingContext();
 		}
 		
 		// A Temporary catalog where catalog objects are registered during compilation
-		protected Schema.Catalog FPlanCatalog;
+		protected Schema.Catalog _planCatalog;
 		public Schema.Catalog PlanCatalog
 		{
 			get
 			{
-				if (FPlanCatalog == null)
-					FPlanCatalog = new Schema.Catalog();
-				return FPlanCatalog;
+				if (_planCatalog == null)
+					_planCatalog = new Schema.Catalog();
+				return _planCatalog;
 			}
 		}
 		
 		// A temporary list of session table variables created during compilation
-		protected Schema.Objects FPlanSessionObjects;
+		protected Schema.Objects _planSessionObjects;
 		public Schema.Objects PlanSessionObjects 
 		{
 			get
 			{
-				if (FPlanSessionObjects  == null)
-					FPlanSessionObjects = new Schema.Objects();
-				return FPlanSessionObjects;
+				if (_planSessionObjects  == null)
+					_planSessionObjects = new Schema.Objects();
+				return _planSessionObjects;
 			}
 		}
 		
-		protected Schema.Objects FPlanSessionOperators;
+		protected Schema.Objects _planSessionOperators;
 		public Schema.Objects PlanSessionOperators
 		{
 			get
 			{
-				if (FPlanSessionOperators == null)
-					FPlanSessionOperators = new Schema.Objects();
-				return FPlanSessionOperators;
+				if (_planSessionOperators == null)
+					_planSessionOperators = new Schema.Objects();
+				return _planSessionOperators;
 			}
 		}
 		
 		// SessionObjects
-		public Schema.Objects SessionObjects { get { return FServerProcess.ServerSession.SessionObjects; } }
+		public Schema.Objects SessionObjects { get { return _serverProcess.ServerSession.SessionObjects; } }
 		
-		public Schema.Objects SessionOperators { get { return FServerProcess.ServerSession.SessionOperators; } }
+		public Schema.Objects SessionOperators { get { return _serverProcess.ServerSession.SessionOperators; } }
 		
-		public int SessionID { get { return FServerProcess.ServerSession.SessionID; } }
+		public int SessionID { get { return _serverProcess.ServerSession.SessionID; } }
 		
 		// Catalog		
-		public bool IsEngine { get { return FServerProcess.ServerSession.Server.IsEngine; } }
+		public bool IsEngine { get { return _serverProcess.ServerSession.Server.IsEngine; } }
 		
-		public Schema.Catalog Catalog { get { return FServerProcess.ServerSession.Server.Catalog; } }
+		public Schema.Catalog Catalog { get { return _serverProcess.ServerSession.Server.Catalog; } }
 		
-		public Schema.DataTypes DataTypes { get { return FServerProcess.DataTypes; } }
+		public Schema.DataTypes DataTypes { get { return _serverProcess.DataTypes; } }
 		
-		public QueryLanguage Language { get { return FServerProcess.ServerSession.SessionInfo.Language; } }
+		public QueryLanguage Language { get { return _serverProcess.ServerSession.SessionInfo.Language; } }
 		
-		public bool ShouldEmitIL { get { return FServerProcess.ServerSession.SessionInfo.ShouldEmitIL; } }
+		public bool ShouldEmitIL { get { return _serverProcess.ServerSession.SessionInfo.ShouldEmitIL; } }
 		
 		public bool SuppressWarnings
 		{
-			get { return FServerProcess.SuppressWarnings; }
-			set { FServerProcess.SuppressWarnings = value; }
+			get { return _serverProcess.SuppressWarnings; }
+			set { _serverProcess.SuppressWarnings = value; }
 		}
 		
-		public CatalogDeviceSession CatalogDeviceSession { get { return FServerProcess.CatalogDeviceSession; } }
+		public CatalogDeviceSession CatalogDeviceSession { get { return _serverProcess.CatalogDeviceSession; } }
 		
 		public Schema.User User { get { return SecurityContext.User; } }
 		
-		public Schema.LoadedLibrary CurrentLibrary { get { return FServerProcess.ServerSession.CurrentLibrary; } }
+		public Schema.LoadedLibrary CurrentLibrary { get { return _serverProcess.ServerSession.CurrentLibrary; } }
 		
-		public Schema.NameResolutionPath NameResolutionPath { get { return FServerProcess.ServerSession.NameResolutionPath; } }
+		public Schema.NameResolutionPath NameResolutionPath { get { return _serverProcess.ServerSession.NameResolutionPath; } }
 		
-		public IStreamManager StreamManager { get { return FServerProcess.StreamManager; } }
+		public IStreamManager StreamManager { get { return _serverProcess.StreamManager; } }
 		
-		public IValueManager ValueManager { get { return FServerProcess.ValueManager; } }
+		public IValueManager ValueManager { get { return _serverProcess.ValueManager; } }
 
-		public Schema.Device TempDevice { get { return FServerProcess.ServerSession.Server.TempDevice; } }
+		public Schema.Device TempDevice { get { return _serverProcess.ServerSession.Server.TempDevice; } }
 		
-		public CursorManager CursorManager { get { return FServerProcess.ServerSession.CursorManager; } }
+		public CursorManager CursorManager { get { return _serverProcess.ServerSession.CursorManager; } }
 
 		public string DefaultTagNameSpace { get { return String.Empty; } }
 		
-		public string DefaultDeviceName { get { return GetDefaultDeviceName(FServerProcess.ServerSession.CurrentLibrary.Name, false); } }
+		public string DefaultDeviceName { get { return GetDefaultDeviceName(_serverProcess.ServerSession.CurrentLibrary.Name, false); } }
 		
-		public string GetDefaultDeviceName(string ALibraryName, bool AShouldThrow)
+		public string GetDefaultDeviceName(string libraryName, bool shouldThrow)
 		{
-			return GetDefaultDeviceName(Catalog.Libraries[ALibraryName], AShouldThrow);
+			return GetDefaultDeviceName(Catalog.Libraries[libraryName], shouldThrow);
 		}
 
-		private SourceContexts FSourceContexts;
+		private SourceContexts _sourceContexts;
 				
 		public SourceContext SourceContext 
 		{ 
 			get 
 			{ 
-				if (FSourceContexts == null)
+				if (_sourceContexts == null)
 					return null;
 					
-				if (FSourceContexts.Count == 0)
+				if (_sourceContexts.Count == 0)
 					return null;
 					
-				return FSourceContexts.Peek();
+				return _sourceContexts.Peek();
 			}
 		}
 		
-		public void PushSourceContext(SourceContext ASourceContext)
+		public void PushSourceContext(SourceContext sourceContext)
 		{
-			if (FSourceContexts == null)
-				FSourceContexts = new SourceContexts();
+			if (_sourceContexts == null)
+				_sourceContexts = new SourceContexts();
 				
-			FSourceContexts.Push(ASourceContext);
+			_sourceContexts.Push(sourceContext);
 		}
 		
 		public void PopSourceContext()
 		{
-			FSourceContexts.Pop();
+			_sourceContexts.Pop();
 		}
 		
-		protected string GetDefaultDeviceName(Schema.Library ALibrary, bool AShouldThrow)
+		protected string GetDefaultDeviceName(Schema.Library library, bool shouldThrow)
 		{
-			if (ALibrary.DefaultDeviceName != String.Empty)
-				return ALibrary.DefaultDeviceName;
+			if (library.DefaultDeviceName != String.Empty)
+				return library.DefaultDeviceName;
 			
-			Schema.Libraries LLibraries = new Schema.Libraries();
-			LLibraries.Add(ALibrary);
-			return GetDefaultDeviceName(LLibraries, AShouldThrow);
+			Schema.Libraries libraries = new Schema.Libraries();
+			libraries.Add(library);
+			return GetDefaultDeviceName(libraries, shouldThrow);
 		}
 		
-		protected string GetDefaultDeviceName(Schema.Libraries ALibraries, bool AShouldThrow)
+		protected string GetDefaultDeviceName(Schema.Libraries libraries, bool shouldThrow)
 		{
-			while (ALibraries.Count > 0)
+			while (libraries.Count > 0)
 			{
-				Schema.Library LLibrary = ALibraries[0];
-				ALibraries.RemoveAt(0);
+				Schema.Library library = libraries[0];
+				libraries.RemoveAt(0);
 				
-				string LDefaultDeviceName = String.Empty;
-				Schema.Library LRequiredLibrary;
-				foreach (Schema.LibraryReference LLibraryReference in LLibrary.Libraries)
+				string defaultDeviceName = String.Empty;
+				Schema.Library requiredLibrary;
+				foreach (Schema.LibraryReference libraryReference in library.Libraries)
 				{
-					LRequiredLibrary = Catalog.Libraries[LLibraryReference.Name];
-					if (LRequiredLibrary.DefaultDeviceName != String.Empty)
+					requiredLibrary = Catalog.Libraries[libraryReference.Name];
+					if (requiredLibrary.DefaultDeviceName != String.Empty)
 					{
-						if (LDefaultDeviceName != String.Empty)
-							if (AShouldThrow)
-								throw new Schema.SchemaException(Schema.SchemaException.Codes.AmbiguousDefaultDeviceName, LLibrary.Name);
+						if (defaultDeviceName != String.Empty)
+							if (shouldThrow)
+								throw new Schema.SchemaException(Schema.SchemaException.Codes.AmbiguousDefaultDeviceName, library.Name);
 							else
 								return String.Empty;
-						LDefaultDeviceName = LRequiredLibrary.DefaultDeviceName;
+						defaultDeviceName = requiredLibrary.DefaultDeviceName;
 					}
 					else
-						if (!ALibraries.Contains(LRequiredLibrary))
-							ALibraries.Add(LRequiredLibrary);
+						if (!libraries.Contains(requiredLibrary))
+							libraries.Add(requiredLibrary);
 				}
 					
-				if (LDefaultDeviceName != String.Empty)
-					return LDefaultDeviceName;
+				if (defaultDeviceName != String.Empty)
+					return defaultDeviceName;
 			}
 			
 			return String.Empty;
 		}
 
-		public void CheckRight(string ARight)
+		public void CheckRight(string right)
 		{
 			if (!InATCreationContext)
-				FServerProcess.CatalogDeviceSession.CheckUserHasRight(SecurityContext.User.ID, ARight);
+				_serverProcess.CatalogDeviceSession.CheckUserHasRight(SecurityContext.User.ID, right);
 		}
 		
-		public bool HasRight(string ARight)
+		public bool HasRight(string right)
 		{
-			return InATCreationContext || CatalogDeviceSession.UserHasRight(SecurityContext.User.ID, ARight);
+			return InATCreationContext || CatalogDeviceSession.UserHasRight(SecurityContext.User.ID, right);
 		}
 
 		/// <summary>Raises an error if the current user is not authorized to administer the given user.</summary>		
-		public void CheckAuthorized(string AUserID)
+		public void CheckAuthorized(string userID)
 		{
-			if (!User.IsAdminUser() || !User.IsSystemUser() || (!String.Equals(AUserID, User.ID, StringComparison.OrdinalIgnoreCase)))
+			if (!User.IsAdminUser() || !User.IsSystemUser() || (!String.Equals(userID, User.ID, StringComparison.OrdinalIgnoreCase)))
 				CheckRight(Schema.RightNames.AlterUser);
 		}
 		
 		// During compilation, the creation object stack maintains a context for the
 		// object currently being created.  References into the catalog register dependencies
 		// against this object as they are encountered by the compiler.
-		protected List<Schema.Object> FCreationObjects;
-		protected List<LineInfo> FCompilingOffsets;
+		protected List<Schema.Object> _creationObjects;
+		protected List<LineInfo> _compilingOffsets;
 
-		public void PushCreationObject(Schema.Object AObject, LineInfo ALineInfo)
+		public void PushCreationObject(Schema.Object objectValue, LineInfo lineInfo)
 		{
-			if (FCreationObjects == null)
-				FCreationObjects = new List<Schema.Object>();
-			FCreationObjects.Add(AObject);
-			if (FCompilingOffsets == null)
-				FCompilingOffsets = new List<LineInfo>();
-			FCompilingOffsets.Add(ALineInfo);
+			if (_creationObjects == null)
+				_creationObjects = new List<Schema.Object>();
+			_creationObjects.Add(objectValue);
+			if (_compilingOffsets == null)
+				_compilingOffsets = new List<LineInfo>();
+			_compilingOffsets.Add(lineInfo);
 		}
 		
-		public void PushCreationObject(Schema.Object AObject)
+		public void PushCreationObject(Schema.Object objectValue)
 		{
-			PushCreationObject(AObject, new LineInfo(LineInfo.StartingOffset));
+			PushCreationObject(objectValue, new LineInfo(LineInfo.StartingOffset));
 		}
 		
 		public void PopCreationObject()
 		{
-			FCreationObjects.RemoveAt(FCreationObjects.Count - 1);
-			FCompilingOffsets.RemoveAt(FCompilingOffsets.Count - 1);
+			_creationObjects.RemoveAt(_creationObjects.Count - 1);
+			_compilingOffsets.RemoveAt(_compilingOffsets.Count - 1);
 		}
 		
 		public LineInfo CompilingOffset
 		{
 			get
 			{
-				if ((FCompilingOffsets == null) || (FCompilingOffsets.Count == 0))
+				if ((_compilingOffsets == null) || (_compilingOffsets.Count == 0))
 					return null;
-				return FCompilingOffsets[FCompilingOffsets.Count - 1];
+				return _compilingOffsets[_compilingOffsets.Count - 1];
 			}
 		}
 		
 		public Schema.Object CurrentCreationObject()
 		{
-			if ((FCreationObjects == null) || (FCreationObjects.Count == 0))
+			if ((_creationObjects == null) || (_creationObjects.Count == 0))
 				return null;
-			return FCreationObjects[FCreationObjects.Count - 1];
+			return _creationObjects[_creationObjects.Count - 1];
 		}
 		
 		public bool IsOperatorCreationContext
@@ -753,146 +753,146 @@ namespace Alphora.Dataphor.DAE.Compiling
 			get
 			{
 				return 
-					(FCreationObjects != null) && 
-					(FCreationObjects.Count > 0) && 
-					(FCreationObjects[FCreationObjects.Count - 1] is Schema.Operator);
+					(_creationObjects != null) && 
+					(_creationObjects.Count > 0) && 
+					(_creationObjects[_creationObjects.Count - 1] is Schema.Operator);
 			}
 		}
 		
-		public void CheckClassDependency(ClassDefinition AClassDefinition)
+		public void CheckClassDependency(ClassDefinition classDefinition)
 		{
-			if ((FCreationObjects != null) && (FCreationObjects.Count > 0))
+			if ((_creationObjects != null) && (_creationObjects.Count > 0))
 			{
-				Schema.Object LCreationObject = (Schema.Object)FCreationObjects[FCreationObjects.Count - 1];
+				Schema.Object creationObject = (Schema.Object)_creationObjects[_creationObjects.Count - 1];
 				if 
 				(
-					(LCreationObject is Schema.CatalogObject) && 
-					(((Schema.CatalogObject)LCreationObject).Library != null) &&
-					(((Schema.CatalogObject)LCreationObject).SessionObjectName == null) && 
+					(creationObject is Schema.CatalogObject) && 
+					(((Schema.CatalogObject)creationObject).Library != null) &&
+					(((Schema.CatalogObject)creationObject).SessionObjectName == null) && 
 					(
-						!(LCreationObject is Schema.TableVar) || 
-						(((Schema.TableVar)LCreationObject).SourceTableName == null)
+						!(creationObject is Schema.TableVar) || 
+						(((Schema.TableVar)creationObject).SourceTableName == null)
 					)
 				)
 				{
-					CheckClassDependency(((Schema.CatalogObject)LCreationObject).Library, AClassDefinition);
+					CheckClassDependency(((Schema.CatalogObject)creationObject).Library, classDefinition);
 				}
 			}
 		}
 		
 		[Conditional("CHECKCLASSDEPENDENCY")]
-		public void CheckClassDependency(Schema.LoadedLibrary ALibrary, ClassDefinition AClassDefinition)
+		public void CheckClassDependency(Schema.LoadedLibrary library, ClassDefinition classDefinition)
 		{
-			Schema.RegisteredClass LClass = Catalog.ClassLoader.GetClass(CatalogDeviceSession, AClassDefinition);
-			if (!ALibrary.IsRequiredLibrary(LClass.Library))
-				throw new Schema.SchemaException(Schema.SchemaException.Codes.NonRequiredClassDependency, LClass.Name, ALibrary.Name, LClass.Library.Name); // TODO: Better exception
+			Schema.RegisteredClass classValue = Catalog.ClassLoader.GetClass(CatalogDeviceSession, classDefinition);
+			if (!library.IsRequiredLibrary(classValue.Library))
+				throw new Schema.SchemaException(Schema.SchemaException.Codes.NonRequiredClassDependency, classValue.Name, library.Name, classValue.Library.Name); // TODO: Better exception
 		}
 		
-		public void AttachDependencies(Schema.ObjectList ADependencies)
+		public void AttachDependencies(Schema.ObjectList dependencies)
 		{
-			for (int LIndex = 0; LIndex < ADependencies.Count; LIndex++)
-				AttachDependency(ADependencies.ResolveObject(CatalogDeviceSession, LIndex));
+			for (int index = 0; index < dependencies.Count; index++)
+				AttachDependency(dependencies.ResolveObject(CatalogDeviceSession, index));
 		}
 		
-		public void AttachDependency(Schema.Object AObject)
+		public void AttachDependency(Schema.Object objectValue)
 		{
-			if (FCreationObjects == null)
-				FCreationObjects = new List<Schema.Object>();
-			if (FCreationObjects.Count > 0)
+			if (_creationObjects == null)
+				_creationObjects = new List<Schema.Object>();
+			if (_creationObjects.Count > 0)
 			{
 				// If this is a generated object, attach the dependency to the generator, rather than the object directly.
 				// Unless it is a device object, in which case the dependency should be attached to the generated object.
-				if (AObject.IsGenerated && !(AObject is Schema.DeviceObject) && (AObject.GeneratorID >= 0))
-					AObject = AObject.ResolveGenerator(CatalogDeviceSession);
+				if (objectValue.IsGenerated && !(objectValue is Schema.DeviceObject) && (objectValue.GeneratorID >= 0))
+					objectValue = objectValue.ResolveGenerator(CatalogDeviceSession);
 					
-				if (AObject is Schema.Property)
-					AObject = ((Schema.Property)AObject).Representation;
+				if (objectValue is Schema.Property)
+					objectValue = ((Schema.Property)objectValue).Representation;
 					
-				Schema.Object LObject = (Schema.Object)FCreationObjects[FCreationObjects.Count - 1];
-				if ((LObject != AObject) && (!(AObject is Schema.Reference) || (LObject is Schema.TableVar)) && (!LObject.HasDependencies() || !LObject.Dependencies.Contains(AObject.ID)))
+				Schema.Object localObjectValue = (Schema.Object)_creationObjects[_creationObjects.Count - 1];
+				if ((localObjectValue != objectValue) && (!(objectValue is Schema.Reference) || (localObjectValue is Schema.TableVar)) && (!localObjectValue.HasDependencies() || !localObjectValue.Dependencies.Contains(objectValue.ID)))
 				{
-					if (!FServerProcess.ServerSession.Server.IsEngine)
+					if (!_serverProcess.ServerSession.Server.IsEngine)
 					{
 						if 
 						(
-							(LObject.Library != null) &&
-							!LObject.IsSessionObject &&
-							!LObject.IsATObject
+							(localObjectValue.Library != null) &&
+							!localObjectValue.IsSessionObject &&
+							!localObjectValue.IsATObject
 						)
 						{
-							Schema.LoadedLibrary LLibrary = LObject.Library;
-							Schema.LoadedLibrary LDependentLibrary = AObject.Library;
-							if (LDependentLibrary == null)
-								throw new Schema.SchemaException(Schema.SchemaException.Codes.NonLibraryDependency, LObject.Name, LLibrary.Name, AObject.Name);
-							if (!LLibrary.IsRequiredLibrary(LDependentLibrary) && (!String.Equals(LDependentLibrary.Name, Engine.CSystemLibraryName, StringComparison.OrdinalIgnoreCase))) // Ignore dependencies to the system library, these are implicitly available
-								throw new Schema.SchemaException(Schema.SchemaException.Codes.NonRequiredLibraryDependency, LObject.Name, LLibrary.Name, AObject.Name, LDependentLibrary.Name);
+							Schema.LoadedLibrary library = localObjectValue.Library;
+							Schema.LoadedLibrary dependentLibrary = objectValue.Library;
+							if (dependentLibrary == null)
+								throw new Schema.SchemaException(Schema.SchemaException.Codes.NonLibraryDependency, localObjectValue.Name, library.Name, objectValue.Name);
+							if (!library.IsRequiredLibrary(dependentLibrary) && (!String.Equals(dependentLibrary.Name, Engine.SystemLibraryName, StringComparison.OrdinalIgnoreCase))) // Ignore dependencies to the system library, these are implicitly available
+								throw new Schema.SchemaException(Schema.SchemaException.Codes.NonRequiredLibraryDependency, localObjectValue.Name, library.Name, objectValue.Name, dependentLibrary.Name);
 						}
 						
 						// if LObject is not a session object or an AT object, AObject cannot be a session object
-						if ((LObject is Schema.CatalogObject) && !LObject.IsSessionObject && !LObject.IsATObject && AObject.IsSessionObject)
-							throw new Schema.SchemaException(Schema.SchemaException.Codes.SessionObjectDependency, LObject.Name, ((Schema.CatalogObject)AObject).SessionObjectName);
+						if ((localObjectValue is Schema.CatalogObject) && !localObjectValue.IsSessionObject && !localObjectValue.IsATObject && objectValue.IsSessionObject)
+							throw new Schema.SchemaException(Schema.SchemaException.Codes.SessionObjectDependency, localObjectValue.Name, ((Schema.CatalogObject)objectValue).SessionObjectName);
 								
 						// if LObject is not a generated or an AT object or a plan object (Name == SessionObjectName), AObject cannot be an AT object
-						if (((LObject is Schema.CatalogObject) && (((Schema.CatalogObject)LObject).SessionObjectName != LObject.Name)) && !LObject.IsGenerated && !LObject.IsATObject && AObject.IsATObject)
-							if (AObject is Schema.TableVar)
-								throw new Schema.SchemaException(Schema.SchemaException.Codes.ApplicationTransactionObjectDependency, LObject.Name, ((Schema.TableVar)AObject).SourceTableName);
+						if (((localObjectValue is Schema.CatalogObject) && (((Schema.CatalogObject)localObjectValue).SessionObjectName != localObjectValue.Name)) && !localObjectValue.IsGenerated && !localObjectValue.IsATObject && objectValue.IsATObject)
+							if (objectValue is Schema.TableVar)
+								throw new Schema.SchemaException(Schema.SchemaException.Codes.ApplicationTransactionObjectDependency, localObjectValue.Name, ((Schema.TableVar)objectValue).SourceTableName);
 							else
-								throw new Schema.SchemaException(Schema.SchemaException.Codes.ApplicationTransactionObjectDependency, LObject.Name, ((Schema.Operator)AObject).SourceOperatorName);
+								throw new Schema.SchemaException(Schema.SchemaException.Codes.ApplicationTransactionObjectDependency, localObjectValue.Name, ((Schema.Operator)objectValue).SourceOperatorName);
 					}
 							
-					Error.AssertFail(AObject.ID > 0, "Object {0} does not have an object id and cannot be tracked as a dependency.", AObject.Name);
-					LObject.AddDependency(AObject);
+					Error.AssertFail(objectValue.ID > 0, "Object {0} does not have an object id and cannot be tracked as a dependency.", objectValue.Name);
+					localObjectValue.AddDependency(objectValue);
 				}
 			}
 		}
 		
-		public void SetIsLiteral(bool AIsLiteral)
+		public void SetIsLiteral(bool isLiteral)
 		{		
-			if ((FCreationObjects != null) && (FCreationObjects.Count > 0))
+			if ((_creationObjects != null) && (_creationObjects.Count > 0))
 			{
-				Schema.Operator LOperator = FCreationObjects[FCreationObjects.Count - 1] as Schema.Operator;
-				if (LOperator != null)
-					LOperator.IsLiteral = LOperator.IsLiteral && AIsLiteral;
+				Schema.Operator operatorValue = _creationObjects[_creationObjects.Count - 1] as Schema.Operator;
+				if (operatorValue != null)
+					operatorValue.IsLiteral = operatorValue.IsLiteral && isLiteral;
 			}
 		}
 		
-		public void SetIsFunctional(bool AIsFunctional)
+		public void SetIsFunctional(bool isFunctional)
 		{
-			if ((FCreationObjects != null) && (FCreationObjects.Count > 0))
+			if ((_creationObjects != null) && (_creationObjects.Count > 0))
 			{
-				Schema.Operator LOperator = FCreationObjects[FCreationObjects.Count - 1] as Schema.Operator;
-				if (LOperator != null)
-					LOperator.IsFunctional = LOperator.IsFunctional && AIsFunctional;
+				Schema.Operator operatorValue = _creationObjects[_creationObjects.Count - 1] as Schema.Operator;
+				if (operatorValue != null)
+					operatorValue.IsFunctional = operatorValue.IsFunctional && isFunctional;
 			}
 		}
 		
-		public void SetIsDeterministic(bool AIsDeterministic)
+		public void SetIsDeterministic(bool isDeterministic)
 		{
-			if ((FCreationObjects != null) && (FCreationObjects.Count > 0))
+			if ((_creationObjects != null) && (_creationObjects.Count > 0))
 			{
-				Schema.Operator LOperator = FCreationObjects[FCreationObjects.Count - 1] as Schema.Operator;
-				if (LOperator != null)
-					LOperator.IsDeterministic = LOperator.IsDeterministic && AIsDeterministic;
+				Schema.Operator operatorValue = _creationObjects[_creationObjects.Count - 1] as Schema.Operator;
+				if (operatorValue != null)
+					operatorValue.IsDeterministic = operatorValue.IsDeterministic && isDeterministic;
 			}
 		}
 		
-		public void SetIsRepeatable(bool AIsRepeatable)
+		public void SetIsRepeatable(bool isRepeatable)
 		{
-			if ((FCreationObjects != null) && (FCreationObjects.Count > 0))
+			if ((_creationObjects != null) && (_creationObjects.Count > 0))
 			{
-				Schema.Operator LOperator = FCreationObjects[FCreationObjects.Count - 1] as Schema.Operator;
-				if (LOperator != null)
-					LOperator.IsRepeatable = LOperator.IsRepeatable && AIsRepeatable;
+				Schema.Operator operatorValue = _creationObjects[_creationObjects.Count - 1] as Schema.Operator;
+				if (operatorValue != null)
+					operatorValue.IsRepeatable = operatorValue.IsRepeatable && isRepeatable;
 			}
 		}
 		
-		public void SetIsNilable(bool AIsNilable)
+		public void SetIsNilable(bool isNilable)
 		{
-			if ((FCreationObjects != null) && (FCreationObjects.Count > 0))
+			if ((_creationObjects != null) && (_creationObjects.Count > 0))
 			{
-				Schema.Operator LOperator = FCreationObjects[FCreationObjects.Count - 1] as Schema.Operator;
-				if (LOperator != null)
-					LOperator.IsNilable = LOperator.IsNilable || AIsNilable;
+				Schema.Operator operatorValue = _creationObjects[_creationObjects.Count - 1] as Schema.Operator;
+				if (operatorValue != null)
+					operatorValue.IsNilable = operatorValue.IsNilable || isNilable;
 			}
 		}
 		
@@ -906,22 +906,22 @@ namespace Alphora.Dataphor.DAE.Compiling
 		}
 		
 		// Messages
-		private CompilerMessages FMessages = new CompilerMessages();
-		public CompilerMessages Messages { get { return FMessages; } }
+		private CompilerMessages _messages = new CompilerMessages();
+		public CompilerMessages Messages { get { return _messages; } }
 		
 		#if ACCUMULATOR
 		// Performance Tracking
 		public long Accumulator = 0;
 		#endif
 
-		public Type CreateType(ClassDefinition AClassDefinition)
+		public Type CreateType(ClassDefinition classDefinition)
 		{
-			return Catalog.ClassLoader.CreateType(CatalogDeviceSession, AClassDefinition);
+			return Catalog.ClassLoader.CreateType(CatalogDeviceSession, classDefinition);
 		}
 		
-		public object CreateObject(ClassDefinition AClassDefinition, object[] AActualParameters)
+		public object CreateObject(ClassDefinition classDefinition, object[] actualParameters)
 		{
-			return Catalog.ClassLoader.CreateObject(CatalogDeviceSession, AClassDefinition, AActualParameters);
+			return Catalog.ClassLoader.CreateObject(CatalogDeviceSession, classDefinition, actualParameters);
 		}
 	}
 }

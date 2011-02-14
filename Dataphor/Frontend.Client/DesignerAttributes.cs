@@ -11,15 +11,15 @@ namespace Alphora.Dataphor.Frontend.Client
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = true)]
 	public class ListInDesignerAttribute : Attribute
 	{
-		public ListInDesignerAttribute(bool AIsListed) : base()
+		public ListInDesignerAttribute(bool isListed) : base()
 		{
-			FIsListed = AIsListed;
+			_isListed = isListed;
 		}
 
-		private bool FIsListed;
+		private bool _isListed;
 		public bool IsListed
 		{
-			get { return FIsListed; }
+			get { return _isListed; }
 			set { IsListed = value; }
 		}
 	}
@@ -28,16 +28,16 @@ namespace Alphora.Dataphor.Frontend.Client
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = true)]
 	public class DesignerImageAttribute : Attribute
 	{
-		public DesignerImageAttribute(string AImageExpression) : base()
+		public DesignerImageAttribute(string imageExpression) : base()
 		{
-			FImageExpression = AImageExpression;
+			_imageExpression = imageExpression;
 		}
 
-		private string FImageExpression;
+		private string _imageExpression;
 		public string ImageExpression
 		{
-			get { return FImageExpression; }
-			set { FImageExpression = value; }
+			get { return _imageExpression; }
+			set { _imageExpression = value; }
 		}
 	}
 
@@ -45,16 +45,16 @@ namespace Alphora.Dataphor.Frontend.Client
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
 	public class DocumentExpressionOperatorAttribute : Attribute
 	{
-		public DocumentExpressionOperatorAttribute(string AOperatorName)
+		public DocumentExpressionOperatorAttribute(string operatorName)
 		{
-			FOperatorName = AOperatorName;
+			_operatorName = operatorName;
 		}
 
-		private string FOperatorName;
+		private string _operatorName;
 		public string OperatorName
 		{
-			get { return FOperatorName; }
-			set { FOperatorName = value; }
+			get { return _operatorName; }
+			set { _operatorName = value; }
 		}
 	}
 }

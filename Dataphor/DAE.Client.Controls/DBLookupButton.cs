@@ -20,38 +20,38 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		/// <summary> Initializes a new instance of DBLookupButton. </summary>
 		public DBLookupButton()	: base()
 		{
-			FLink = new DAEClient.FieldDataLink();
-			FLink.OnDataChanged += new DAEClient.DataLinkHandler(SyncEnabled);
-			FLink.OnActiveChanged += new DAEClient.DataLinkHandler(SyncEnabled);
-			FLink.OnFocusControl += new DataLinkFieldHandler(FocusControl);
+			_link = new DAEClient.FieldDataLink();
+			_link.OnDataChanged += new DAEClient.DataLinkHandler(SyncEnabled);
+			_link.OnActiveChanged += new DAEClient.DataLinkHandler(SyncEnabled);
+			_link.OnFocusControl += new DataLinkFieldHandler(FocusControl);
 			Size = new System.Drawing.Size (21, 19);
 			Image = ResourceBitmap(typeof(DBLookupButton), "Alphora.Dataphor.DAE.Client.Controls.Images.Lookup.bmp");
 		}
 
-		protected override void Dispose(bool ADisposing)
+		protected override void Dispose(bool disposing)
 		{
 			if (!IsDisposed)
 			{
-				FLink.OnDataChanged -= new DAEClient.DataLinkHandler(SyncEnabled);
-				FLink.OnActiveChanged -= new DAEClient.DataLinkHandler(SyncEnabled);
-				FLink.Dispose();
-				FLink = null;
+				_link.OnDataChanged -= new DAEClient.DataLinkHandler(SyncEnabled);
+				_link.OnActiveChanged -= new DAEClient.DataLinkHandler(SyncEnabled);
+				_link.Dispose();
+				_link = null;
 			}
-			base.Dispose(ADisposing);
+			base.Dispose(disposing);
 		}
 
-		private DAEClient.FieldDataLink FLink;
+		private DAEClient.FieldDataLink _link;
 		protected DAEClient.FieldDataLink Link
 		{
-			get { return FLink;	}
+			get { return _link;	}
 		}
 
 		[DefaultValue(false)]
 		[Category("Behavior")]
 		public bool ReadOnly
 		{
-			get { return FLink.ReadOnly; }
-			set	{ FLink.ReadOnly = value; }
+			get { return _link.ReadOnly; }
+			set	{ _link.ReadOnly = value; }
 		}
 
 		[DefaultValue("")]
@@ -59,8 +59,8 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[Editor(typeof(Alphora.Dataphor.DAE.Client.Design.ColumnNameEditor), typeof(System.Drawing.Design.UITypeEditor))]
 		public string ColumnName
 		{
-			get { return FLink.ColumnName; }
-			set { FLink.ColumnName = value; }
+			get { return _link.ColumnName; }
+			set { _link.ColumnName = value; }
 		}
 
 		[Category("Data")]
@@ -68,58 +68,58 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		[RefreshProperties(RefreshProperties.All)]
 		public DAEClient.DataSource Source
 		{
-			get { return FLink.Source; }
-			set { FLink.Source = value;	}
+			get { return _link.Source; }
+			set { _link.Source = value;	}
 		}
 
 		[Browsable(false)]
 		public DAEClient.DataField DataField
 		{
-			get { return FLink.DataField; }
+			get { return _link.DataField; }
 		}
 
-		private bool FAutoNextControl;
+		private bool _autoNextControl;
 		[DefaultValue(false)]
 		[Category("Behavior")]
 		public virtual bool AutoNextControl
 		{
-			get { return FAutoNextControl; }
+			get { return _autoNextControl; }
 			set	
 			{
-				if (FAutoNextControl != value)
-					FAutoNextControl = value;
+				if (_autoNextControl != value)
+					_autoNextControl = value;
 			}
 		}
 
-		protected virtual void SyncEnabled(DAEClient.DataLink ADataLink, DAEClient.DataSet ADataSet)
+		protected virtual void SyncEnabled(DAEClient.DataLink dataLink, DAEClient.DataSet dataSet)
 		{
 			if (!DesignMode)
-				Enabled = FLink.Active && FLink.CanModify();
+				Enabled = _link.Active && _link.CanModify();
 		}
 
 		protected Form ParentForm
 		{
 			get
 			{
-				Control LParent = Parent;
-				while ((LParent != null) && !(LParent is Form))
-					LParent = LParent.Parent;
-				return (Form)LParent;
+				Control parent = Parent;
+				while ((parent != null) && !(parent is Form))
+					parent = parent.Parent;
+				return (Form)parent;
 			}
 		}
 
-		protected override void OnClick(EventArgs AEventArgs)
+		protected override void OnClick(EventArgs eventArgs)
 		{
 			
 			Lookup();
-			base.OnClick(AEventArgs);
-			if (FAutoNextControl)
+			base.OnClick(eventArgs);
+			if (_autoNextControl)
 			{
 				if (ParentForm != null)
 				{
-					Control LNextControl = ParentForm.GetNextControl(this, true);
-					if (LNextControl != null)
-						LNextControl.Focus();
+					Control nextControl = ParentForm.GetNextControl(this, true);
+					if (nextControl != null)
+						nextControl.Focus();
 				}
 			}
 		}
@@ -133,9 +133,9 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				OnLookup(this, EventArgs.Empty);
 		}
 
-		private void FocusControl(DataLink ALink, DataSet ADataSet, DataField AField)
+		private void FocusControl(DataLink link, DataSet dataSet, DataField field)
 		{
-			if (AField == DataField)
+			if (field == DataField)
 				Focus();
 		}
 	}

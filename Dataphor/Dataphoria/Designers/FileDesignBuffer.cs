@@ -6,36 +6,36 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 {
 	public class FileDesignBuffer : DesignBuffer
 	{
-		public FileDesignBuffer(IDataphoria ADataphoria, string AFileName)
-			: this(ADataphoria, FileDesignBuffer.GetLocatorName(AFileName))
+		public FileDesignBuffer(IDataphoria dataphoria, string fileName)
+			: this(dataphoria, FileDesignBuffer.GetLocatorName(fileName))
 		{ }
 
-		public FileDesignBuffer(IDataphoria ADataphoria, DebugLocator ALocator)
-			: base(ADataphoria, ALocator)
+		public FileDesignBuffer(IDataphoria dataphoria, DebugLocator locator)
+			: base(dataphoria, locator)
 		{
-			FFileName = ALocator.Locator.Substring(FileDesignBuffer.CFileLocatorPrefix.Length);
+			_fileName = locator.Locator.Substring(FileDesignBuffer.FileLocatorPrefix.Length);
 		}
 
 		// FileName
 
-		private string FFileName;
+		private string _fileName;
 		public string FileName
 		{
-			get { return FFileName; }
+			get { return _fileName; }
 		}
 
 		public override string GetDescription()
 		{
-			return Path.GetFileName(FFileName);
+			return Path.GetFileName(_fileName);
 		}
 
-		public override bool Equals(object AObject)
+		public override bool Equals(object objectValue)
 		{
-			FileDesignBuffer LBuffer = AObject as FileDesignBuffer;
-			if (LBuffer != null && String.Equals(LBuffer.FileName, FileName, StringComparison.OrdinalIgnoreCase))
+			FileDesignBuffer buffer = objectValue as FileDesignBuffer;
+			if (buffer != null && String.Equals(buffer.FileName, FileName, StringComparison.OrdinalIgnoreCase))
 				return true;
 			else
-				return base.Equals(AObject);
+				return base.Equals(objectValue);
 		}
 
 		public override int GetHashCode()
@@ -43,57 +43,57 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 			return FileName.ToLowerInvariant().GetHashCode();	// may not be in case-insensitive hashtable so make insensitive through ToLower()
 		}
 
-		public FileDesignBuffer PromptForBuffer(IDesigner ADesigner)
+		public FileDesignBuffer PromptForBuffer(IDesigner designer)
 		{
-			return Dataphoria.PromptForFileBuffer(ADesigner, FileName);
+			return Dataphoria.PromptForFileBuffer(designer, FileName);
 		}
 
 		// Data
 
-		private void EnsureWritable(string AFileName)
+		private void EnsureWritable(string fileName)
 		{
-			if (File.Exists(AFileName))
+			if (File.Exists(fileName))
 			{
-				FileAttributes LAttributes = File.GetAttributes(AFileName);
-				if ((LAttributes & FileAttributes.ReadOnly) != 0)
-					File.SetAttributes(FFileName, LAttributes & ~FileAttributes.ReadOnly);
+				FileAttributes attributes = File.GetAttributes(fileName);
+				if ((attributes & FileAttributes.ReadOnly) != 0)
+					File.SetAttributes(_fileName, attributes & ~FileAttributes.ReadOnly);
 			}
 		}
 
-		public override void SaveData(string AData)
+		public override void SaveData(string data)
 		{
 			EnsureWritable(FileName);
-			using (StreamWriter LWriter = new StreamWriter(new FileStream(FileName, FileMode.Create, FileAccess.Write)))
+			using (StreamWriter writer = new StreamWriter(new FileStream(FileName, FileMode.Create, FileAccess.Write)))
 			{
-				LWriter.Write(AData);
+				writer.Write(data);
 			}
 		}
 
-		public override void SaveBinaryData(Stream AData)
+		public override void SaveBinaryData(Stream data)
 		{
 			EnsureWritable(FileName);
-			using (Stream LStream = new FileStream(FileName, FileMode.Create, FileAccess.Write))
+			using (Stream stream = new FileStream(FileName, FileMode.Create, FileAccess.Write))
 			{
-				AData.Position = 0;
-				StreamUtility.CopyStream(AData, LStream);
+				data.Position = 0;
+				StreamUtility.CopyStream(data, stream);
 			}
 
 		}
 
 		public override string LoadData()
 		{
-			using (Stream LStream = File.OpenRead(FileName))
+			using (Stream stream = File.OpenRead(FileName))
 			{
-				return new StreamReader(LStream).ReadToEnd();
+				return new StreamReader(stream).ReadToEnd();
 			}
 		}
 
-		public override void LoadData(Stream AData)
+		public override void LoadData(Stream data)
 		{
-			using (Stream LStream = File.OpenRead(FileName))
+			using (Stream stream = File.OpenRead(FileName))
 			{
-				AData.Position = 0;
-				StreamUtility.CopyStream(LStream, AData);
+				data.Position = 0;
+				StreamUtility.CopyStream(stream, data);
 			}
 		}
 		
@@ -103,24 +103,24 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 				SaveData(String.Empty);
 		}
 
-		public const string CFileLocatorPrefix = "file:";
+		public const string FileLocatorPrefix = "file:";
 		
-		public override bool LocatorNameMatches(string AName)
+		public override bool LocatorNameMatches(string name)
 		{
 			return
-				AName != null
-					&& AName.StartsWith(CFileLocatorPrefix)
-					&& String.Equals(FFileName, AName.Substring(CFileLocatorPrefix.Length), StringComparison.OrdinalIgnoreCase);
+				name != null
+					&& name.StartsWith(FileLocatorPrefix)
+					&& String.Equals(_fileName, name.Substring(FileLocatorPrefix.Length), StringComparison.OrdinalIgnoreCase);
 		}
 		
-		public static bool IsFileLocator(string AName)
+		public static bool IsFileLocator(string name)
 		{
-			return AName.StartsWith(CFileLocatorPrefix);
+			return name.StartsWith(FileLocatorPrefix);
 		}
 
-		public static DebugLocator GetLocatorName(string AFileName)
+		public static DebugLocator GetLocatorName(string fileName)
 		{
-			return new DebugLocator(CFileLocatorPrefix + AFileName, 1, 1);
+			return new DebugLocator(FileLocatorPrefix + fileName, 1, 1);
 		}
 	}
 }

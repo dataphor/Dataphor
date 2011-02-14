@@ -30,45 +30,45 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			get { return NumberFormatInfo.CurrentInfo; }   
 		}
 		
-		protected override bool IsInputChar(char AChar)
+		protected override bool IsInputChar(char charValue)
 		{
 			return 
 				(
-					!Char.IsLetter(AChar)
-						|| (FormatInfo.PositiveSign.IndexOf(AChar) > -1)
-						|| (FormatInfo.NegativeSign.IndexOf(AChar) > -1)
-						|| (FormatInfo.NumberDecimalSeparator.IndexOf(AChar) > -1)
+					!Char.IsLetter(charValue)
+						|| (FormatInfo.PositiveSign.IndexOf(charValue) > -1)
+						|| (FormatInfo.NegativeSign.IndexOf(charValue) > -1)
+						|| (FormatInfo.NumberDecimalSeparator.IndexOf(charValue) > -1)
 				)
-					&& base.IsInputChar(AChar);
+					&& base.IsInputChar(charValue);
 		}
 
 		/// <summary>Filters out all key input except for 0 to 9, - and ..</summary>
-		protected override void OnKeyPress(System.Windows.Forms.KeyPressEventArgs AArgs)
+		protected override void OnKeyPress(System.Windows.Forms.KeyPressEventArgs args)
 		{
 			if 
 			(
-				(AArgs.KeyChar >= (char)32) 
-					&& (AArgs.KeyChar <= (char)255)
+				(args.KeyChar >= (char)32) 
+					&& (args.KeyChar <= (char)255)
 					&&
 					(
-						(!((AArgs.KeyChar >= (char)48) && (AArgs.KeyChar <= (char)57))) &&
-						(!(FormatInfo.PositiveSign.IndexOf(AArgs.KeyChar) > -1)) &&
-						(!(FormatInfo.NegativeSign.IndexOf(AArgs.KeyChar) > -1)) &&
-						(!(FormatInfo.NumberDecimalSeparator.IndexOf(AArgs.KeyChar) > -1))
+						(!((args.KeyChar >= (char)48) && (args.KeyChar <= (char)57))) &&
+						(!(FormatInfo.PositiveSign.IndexOf(args.KeyChar) > -1)) &&
+						(!(FormatInfo.NegativeSign.IndexOf(args.KeyChar) > -1)) &&
+						(!(FormatInfo.NumberDecimalSeparator.IndexOf(args.KeyChar) > -1))
 					)
 			)
 			{
-				AArgs.Handled = true;
+				args.Handled = true;
 				UnsafeNativeMethods.MessageBeep(-1);
 			}
-			base.OnKeyPress(AArgs);
+			base.OnKeyPress(args);
 		}
 
-		private bool CheckPaste(IDataObject AObject)
+		private bool CheckPaste(IDataObject objectValue)
 		{
 			try
 			{
-				Convert.ToDecimal(AObject.GetData(DataFormats.Text,true));
+				Convert.ToDecimal(objectValue.GetData(DataFormats.Text,true));
 			}
 			catch
 			{
@@ -83,20 +83,20 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			return CheckPaste(Clipboard.GetDataObject());
 		}
 
-		protected override void OnGotFocus(EventArgs AArgs)
+		protected override void OnGotFocus(EventArgs args)
 		{
-			base.OnGotFocus(AArgs);
+			base.OnGotFocus(args);
 			SelectAll();
 		}
 
-		protected override void WndProc(ref Message AMessage)
+		protected override void WndProc(ref Message message)
 		{
-			if (AMessage.Msg == NativeMethods.WM_PASTE)
+			if (message.Msg == NativeMethods.WM_PASTE)
 			{
 				if(!WMPaste())
 					return; 
 			}
-			base.WndProc(ref AMessage);
+			base.WndProc(ref message);
 		}
 	}
  

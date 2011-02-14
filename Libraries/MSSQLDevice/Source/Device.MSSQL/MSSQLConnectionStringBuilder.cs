@@ -24,7 +24,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 		public MSSQLOLEDBConnectionStringBuilder()
 		{
 #if USESQLOLEDB
-			FParameters.AddOrUpdate("Provider", "SQLOLEDB");
+			_parameters.AddOrUpdate("Provider", "SQLOLEDB");
 #else
 		FParameters.AddOrUpdate("Provider", "MSDASQL");
 #endif
@@ -32,23 +32,23 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 #if !USECONNECTIONPOOLING
 		FParameters.AddOrUpdate("OLE DB Services", "-2"); // Turn off OLEDB resource pooling
 #endif
-			FLegend.AddOrUpdate("ServerName", "Data source");
-			FLegend.AddOrUpdate("DatabaseName", "initial catalog");
-			FLegend.AddOrUpdate("UserName", "user id");
-			FLegend.AddOrUpdate("Password", "password");
-			FLegend.AddOrUpdate("ApplicationName", "app name");
+			_legend.AddOrUpdate("ServerName", "Data source");
+			_legend.AddOrUpdate("DatabaseName", "initial catalog");
+			_legend.AddOrUpdate("UserName", "user id");
+			_legend.AddOrUpdate("Password", "password");
+			_legend.AddOrUpdate("ApplicationName", "app name");
 		}
 
-		public override Tags Map(Tags ATags)
+		public override Tags Map(Tags tags)
 		{
-			Tags LTags = base.Map(ATags);
-			Tag LTag = LTags.GetTag("IntegratedSecurity");
-			if (LTag != Tag.None)
+			Tags localTags = base.Map(tags);
+			Tag tag = localTags.GetTag("IntegratedSecurity");
+			if (tag != Tag.None)
 			{
-				LTags.Remove(LTag);
-				LTags.AddOrUpdate("Integrated Security", "SSPI");
+				localTags.Remove(tag);
+				localTags.AddOrUpdate("Integrated Security", "SSPI");
 			}
-			return LTags;
+			return localTags;
 		}
 	}
 
@@ -56,12 +56,12 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	{
 		public MSSQLADODotNetConnectionStringBuilder()
 		{
-			FLegend.AddOrUpdate("ServerName", "server");
-			FLegend.AddOrUpdate("DatabaseName", "database");
-			FLegend.AddOrUpdate("UserName", "user id");
-			FLegend.AddOrUpdate("Password", "password");
-			FLegend.AddOrUpdate("IntegratedSecurity", "integrated security");
-			FLegend.AddOrUpdate("ApplicationName", "application name");
+			_legend.AddOrUpdate("ServerName", "server");
+			_legend.AddOrUpdate("DatabaseName", "database");
+			_legend.AddOrUpdate("UserName", "user id");
+			_legend.AddOrUpdate("Password", "password");
+			_legend.AddOrUpdate("IntegratedSecurity", "integrated security");
+			_legend.AddOrUpdate("ApplicationName", "application name");
 		}
 	}
 
@@ -69,32 +69,32 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	{
 		public MSSQLODBCConnectionStringBuilder()
 		{
-			FLegend.AddOrUpdate("ServerName", "DSN");
-			FLegend.AddOrUpdate("DatabaseName", "Database");
-			FLegend.AddOrUpdate("UserName", "UID");
-			FLegend.AddOrUpdate("Password", "PWD");
-			FLegend.AddOrUpdate("ApplicationName", "APPNAME");
+			_legend.AddOrUpdate("ServerName", "DSN");
+			_legend.AddOrUpdate("DatabaseName", "Database");
+			_legend.AddOrUpdate("UserName", "UID");
+			_legend.AddOrUpdate("Password", "PWD");
+			_legend.AddOrUpdate("ApplicationName", "APPNAME");
 		}
 
-		public override Tags Map(Tags ATags)
+		public override Tags Map(Tags tags)
 		{
-			Tags LTags = base.Map(ATags);
-			Tag LTag = LTags.GetTag("IntegratedSecurity");
-			if (LTag != Tag.None)
+			Tags localTags = base.Map(tags);
+			Tag tag = localTags.GetTag("IntegratedSecurity");
+			if (tag != Tag.None)
 			{
-				LTags.Remove(LTag.Name);
-				LTags.AddOrUpdate("Trusted_Connection", "Yes");
+				localTags.Remove(tag.Name);
+				localTags.AddOrUpdate("Trusted_Connection", "Yes");
 			}
-			return LTags;
+			return localTags;
 		}
 	}
 
 	public class AccessConnectionStringBuilder : ConnectionStringBuilder
 	{
-		public override Tags Map(Tags ATags)
+		public override Tags Map(Tags tags)
 		{
-			Tags LTags = base.Map(ATags);
-			return LTags;
+			Tags localTags = base.Map(tags);
+			return localTags;
 		}
 	}
 }

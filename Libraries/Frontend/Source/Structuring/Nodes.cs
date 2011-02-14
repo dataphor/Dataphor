@@ -14,15 +14,15 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 	{
 		public LayoutNode() : base()
 		{
-			FChildren = new LayoutNodes(this);
+			_children = new LayoutNodes(this);
 		}
 
-		internal LayoutNode FParent;
-		public LayoutNode Parent { get { return FParent; } }
-		public LayoutNode Root { get { return FParent == null ? this : FParent.Root; } }
+		internal LayoutNode _parent;
+		public LayoutNode Parent { get { return _parent; } }
+		public LayoutNode Root { get { return _parent == null ? this : _parent.Root; } }
 		
-		private LayoutNodes FChildren;
-		public LayoutNodes Children { get { return FChildren; } }
+		private LayoutNodes _children;
+		public LayoutNodes Children { get { return _children; } }
 	}
 	
 	#if USETYPEDLIST
@@ -33,18 +33,18 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 	#else
 	public class LayoutNodes : ValidatingBaseList<LayoutNode>
 	{
-		public LayoutNodes(LayoutNode AContainer) : base()
+		public LayoutNodes(LayoutNode container) : base()
 		{
 	#endif
-			FContainer = AContainer;
+			_container = container;
 		}
 		
-		private LayoutNode FContainer;
+		private LayoutNode _container;
 		
-		public new LayoutNode this[int AIndex]
+		public new LayoutNode this[int index]
 		{
-			get { return (LayoutNode)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return (LayoutNode)base[index]; }
+			set { base[index] = value; }
 		}
 		
 		#if USETYPEDLIST
@@ -63,17 +63,17 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 			base.Removing(AItem, AIndex);
 		}
 		#else
-		protected override void Adding(LayoutNode AValue, int AIndex)
+		protected override void Adding(LayoutNode tempValue, int index)
 		{
 			//base.Adding(AValue, AIndex);
-			if (AValue.Parent != null)
-				AValue.Parent.Children.Remove(AValue);
-			AValue.FParent = FContainer;
+			if (tempValue.Parent != null)
+				tempValue.Parent.Children.Remove(tempValue);
+			tempValue._parent = _container;
 		}
 		
-		protected override void Removing(LayoutNode AValue, int AIndex)
+		protected override void Removing(LayoutNode tempValue, int index)
 		{
-			AValue.FParent = null;
+			tempValue._parent = null;
 			//base.Removing(AItem, AIndex);
 		}
 		#endif
@@ -85,13 +85,13 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 	
 	public class ElementNode : LayoutNode 
 	{
-		public ElementNode(Element AElement) : base()
+		public ElementNode(Element element) : base()
 		{
-			FElement = AElement;
+			_element = element;
 		}
 
-		private Element FElement;
-		public Element Element { get { return FElement; } }
+		private Element _element;
+		public Element Element { get { return _element; } }
 	}
 }
 

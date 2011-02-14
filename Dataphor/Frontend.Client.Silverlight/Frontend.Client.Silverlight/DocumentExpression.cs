@@ -22,98 +22,98 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	/// </remarks>
 	public class DocumentExpression
 	{
-		public DocumentExpression(string AExpression)
+		public DocumentExpression(string expression)
 		{
-			Expression = AExpression;
+			Expression = expression;
 		}
 
 		public DocumentExpression() {}
 
-		private DocumentType FType = DocumentType.None;
+		private DocumentType _type = DocumentType.None;
 		public DocumentType Type
 		{
-			get	{ return FType;	}
+			get	{ return _type;	}
 			set 
 			{ 
-				if (FType != value)
+				if (_type != value)
 				{
-					FOtherExpression = null;
-					FDocumentArgs = null;
-					FDeriveArgs = null;
-					FType = value;
+					_otherExpression = null;
+					_documentArgs = null;
+					_deriveArgs = null;
+					_type = value;
 					switch (value)       
 					{         
 						case DocumentType.Document:
-							FDocumentArgs = new DocumentArgs();
+							_documentArgs = new DocumentArgs();
 							break;
 						case DocumentType.Derive:
-							FDeriveArgs = new DeriveArgs();
+							_deriveArgs = new DeriveArgs();
 							break; 
 						case DocumentType.Other: 
-							FOtherExpression = String.Empty;
+							_otherExpression = String.Empty;
 							break;
 					}
 				}
 			}
 		}
 
-		private DocumentArgs FDocumentArgs;
+		private DocumentArgs _documentArgs;
 		public DocumentArgs DocumentArgs 
 		{ 
-			get { return FDocumentArgs; } 
+			get { return _documentArgs; } 
 		}
 		
-		private DeriveArgs FDeriveArgs;
+		private DeriveArgs _deriveArgs;
 		public DeriveArgs DeriveArgs
 		{
-			get { return FDeriveArgs; }
+			get { return _deriveArgs; }
 		}	
 
-		private string FOtherExpression;
+		private string _otherExpression;
 		
 		public string Expression
 		{
 			get
 			{
-				switch (FType)
+				switch (_type)
 				{
 					case DocumentType.Derive :
-						CallExpression LCallExpression = 
+						CallExpression callExpression = 
 							new CallExpression
 							(
 								"Derive", 
 								new Expression[] 
 								{
-									new ValueExpression(FDeriveArgs.Query)
+									new ValueExpression(_deriveArgs.Query)
 								}
 							);
-						if (FDeriveArgs.PageType != String.Empty)
-							LCallExpression.Expressions.Add(new ValueExpression(FDeriveArgs.PageType));
-						if ((FDeriveArgs.MasterKeyNames != String.Empty) && (FDeriveArgs.DetailKeyNames != String.Empty))
+						if (_deriveArgs.PageType != String.Empty)
+							callExpression.Expressions.Add(new ValueExpression(_deriveArgs.PageType));
+						if ((_deriveArgs.MasterKeyNames != String.Empty) && (_deriveArgs.DetailKeyNames != String.Empty))
 						{
-							LCallExpression.Expressions.Add(new ValueExpression(FDeriveArgs.MasterKeyNames));
-							LCallExpression.Expressions.Add(new ValueExpression(FDeriveArgs.DetailKeyNames));
+							callExpression.Expressions.Add(new ValueExpression(_deriveArgs.MasterKeyNames));
+							callExpression.Expressions.Add(new ValueExpression(_deriveArgs.DetailKeyNames));
 						}
-						if (FDeriveArgs.Elaborate != DeriveArgs.CDefaultElaborate)
-							LCallExpression.Expressions.Add(new ValueExpression(FDeriveArgs.Elaborate));
+						if (_deriveArgs.Elaborate != DeriveArgs.DefaultElaborate)
+							callExpression.Expressions.Add(new ValueExpression(_deriveArgs.Elaborate));
 
-						return new Alphora.Dataphor.DAE.Language.D4.D4TextEmitter().Emit(LCallExpression);	
+						return new Alphora.Dataphor.DAE.Language.D4.D4TextEmitter().Emit(callExpression);	
 					case DocumentType.Document :
 						return 
 							new Alphora.Dataphor.DAE.Language.D4.D4TextEmitter().Emit
 							(
 								new CallExpression
 								(
-									FDocumentArgs.OperatorName, 
+									_documentArgs.OperatorName, 
 									new Expression[]
 									{
-										new ValueExpression(FDocumentArgs.LibraryName), 
-										new ValueExpression(FDocumentArgs.DocumentName)
+										new ValueExpression(_documentArgs.LibraryName), 
+										new ValueExpression(_documentArgs.DocumentName)
 									}
 								)
 							);
 					case DocumentType.Other :
-						return FOtherExpression;
+						return _otherExpression;
 					default :
 						return String.Empty;
 				}
@@ -124,79 +124,79 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					Type = DocumentType.None;
 				else
 				{
-					Expression LParsedExpression;
-					CallExpression LCallExpression;
+					Expression parsedExpression;
+					CallExpression callExpression;
 				
-					Alphora.Dataphor.DAE.Language.D4.Parser LParser = new Alphora.Dataphor.DAE.Language.D4.Parser();
-					LParsedExpression = LParser.ParseExpression(value);
+					Alphora.Dataphor.DAE.Language.D4.Parser parser = new Alphora.Dataphor.DAE.Language.D4.Parser();
+					parsedExpression = parser.ParseExpression(value);
 					
 					//check to see if its a qulifier expression first				
-					if (LParsedExpression is QualifierExpression)
+					if (parsedExpression is QualifierExpression)
 					{
-						QualifierExpression LQualifierExpression;
-						LQualifierExpression = LParsedExpression as QualifierExpression;
-						if ((((IdentifierExpression)LQualifierExpression.LeftExpression).Identifier) == "Frontend" || 
-							(((IdentifierExpression)LQualifierExpression.LeftExpression).Identifier) == ".Frontend")
+						QualifierExpression qualifierExpression;
+						qualifierExpression = parsedExpression as QualifierExpression;
+						if ((((IdentifierExpression)qualifierExpression.LeftExpression).Identifier) == "Frontend" || 
+							(((IdentifierExpression)qualifierExpression.LeftExpression).Identifier) == ".Frontend")
 						{
-							LCallExpression = LQualifierExpression.RightExpression as CallExpression;
+							callExpression = qualifierExpression.RightExpression as CallExpression;
 						}
 						else 
-							LCallExpression = LParsedExpression as CallExpression;
+							callExpression = parsedExpression as CallExpression;
 					}
 					else 
-						LCallExpression = LParsedExpression as CallExpression;
+						callExpression = parsedExpression as CallExpression;
 					
-					if (LCallExpression == null)	//if the LCallExpression is null then we don't know what it is - it is OTHER
+					if (callExpression == null)	//if the LCallExpression is null then we don't know what it is - it is OTHER
 					{
 						Type = DocumentType.Other;
-						FOtherExpression = value;
+						_otherExpression = value;
 					}
-					else if (IsDocumentIdentifier(LCallExpression.Identifier))  //Check If the parsed expression is a document and assign FDocumentArgs
+					else if (IsDocumentIdentifier(callExpression.Identifier))  //Check If the parsed expression is a document and assign FDocumentArgs
 					{
 						Type = DocumentType.Document;
-						FDocumentArgs.OperatorName = LCallExpression.Identifier;
-						FDocumentArgs.LibraryName = ((ValueExpression)LCallExpression.Expressions[0]).Value.ToString();
-						FDocumentArgs.DocumentName = ((ValueExpression)LCallExpression.Expressions[1]).Value.ToString();
+						_documentArgs.OperatorName = callExpression.Identifier;
+						_documentArgs.LibraryName = ((ValueExpression)callExpression.Expressions[0]).Value.ToString();
+						_documentArgs.DocumentName = ((ValueExpression)callExpression.Expressions[1]).Value.ToString();
 					}
-					else if ((LCallExpression.Identifier) == "Derive")  //Check if the parsed expression is a Derive call and assign FDeriveArgs
+					else if ((callExpression.Identifier) == "Derive")  //Check if the parsed expression is a Derive call and assign FDeriveArgs
 					{
 						Type = DocumentType.Derive;
-						FDeriveArgs.Query = ((ValueExpression)LCallExpression.Expressions[0]).Value.ToString();
-						if (LCallExpression.Expressions.Count >= 2)
+						_deriveArgs.Query = ((ValueExpression)callExpression.Expressions[0]).Value.ToString();
+						if (callExpression.Expressions.Count >= 2)
 						{
 							if 
 							(
-								((ValueExpression)LCallExpression.Expressions[1]).Value.ToString() != "True" || 
-								((ValueExpression)LCallExpression.Expressions[1]).Value.ToString() != "False"
+								((ValueExpression)callExpression.Expressions[1]).Value.ToString() != "True" || 
+								((ValueExpression)callExpression.Expressions[1]).Value.ToString() != "False"
 							)
 							{
-								FDeriveArgs.PageType = ((ValueExpression)LCallExpression.Expressions[1]).Value.ToString();
-								if (LCallExpression.Expressions.Count == 3)
-									FDeriveArgs.Elaborate = (bool)((ValueExpression)LCallExpression.Expressions[2]).Value;
-								else if (LCallExpression.Expressions.Count >= 4)
+								_deriveArgs.PageType = ((ValueExpression)callExpression.Expressions[1]).Value.ToString();
+								if (callExpression.Expressions.Count == 3)
+									_deriveArgs.Elaborate = (bool)((ValueExpression)callExpression.Expressions[2]).Value;
+								else if (callExpression.Expressions.Count >= 4)
 								{
-									FDeriveArgs.MasterKeyNames = ((ValueExpression)LCallExpression.Expressions[2]).Value.ToString();
-									FDeriveArgs.DetailKeyNames = ((ValueExpression)LCallExpression.Expressions[3]).Value.ToString();
-									if (LCallExpression.Expressions.Count == 5)
-										FDeriveArgs.Elaborate = (bool)((ValueExpression)LCallExpression.Expressions[4]).Value;
+									_deriveArgs.MasterKeyNames = ((ValueExpression)callExpression.Expressions[2]).Value.ToString();
+									_deriveArgs.DetailKeyNames = ((ValueExpression)callExpression.Expressions[3]).Value.ToString();
+									if (callExpression.Expressions.Count == 5)
+										_deriveArgs.Elaborate = (bool)((ValueExpression)callExpression.Expressions[4]).Value;
 								}
 							}
 							else
-								FDeriveArgs.Elaborate = (bool)((ValueExpression)LCallExpression.Expressions[1]).Value;
+								_deriveArgs.Elaborate = (bool)((ValueExpression)callExpression.Expressions[1]).Value;
 						}
 					}
 					else
 					{
 						Type = DocumentType.Other;
-						FOtherExpression = value;
+						_otherExpression = value;
 					}					
 				}
 			}
 		}	
 
-		private bool IsDocumentIdentifier(string AIdentifier)
+		private bool IsDocumentIdentifier(string identifier)
 		{
-			switch (AIdentifier)
+			switch (identifier)
 			{
 				case "Form" :
 				case "Load" :
@@ -212,68 +212,68 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 	public class DocumentArgs
 	{
-		public const string CDefaultOperatorName = "Load";
+		public const string DefaultOperatorName = "Load";
 
-		private string FOperatorName = CDefaultOperatorName;
+		private string _operatorName = DefaultOperatorName;
 		public string OperatorName
 		{
-			get { return FOperatorName; }
-			set { FOperatorName = (value == null ? String.Empty : value); }
+			get { return _operatorName; }
+			set { _operatorName = (value == null ? String.Empty : value); }
 		}
 		
-		private string FLibraryName = String.Empty;
+		private string _libraryName = String.Empty;
 		public string LibraryName
 		{
-			get { return FLibraryName; }
-			set { FLibraryName = (value == null ? String.Empty : value); }
+			get { return _libraryName; }
+			set { _libraryName = (value == null ? String.Empty : value); }
 		}
 
-		private string FDocumentName = String.Empty;
+		private string _documentName = String.Empty;
 		public string DocumentName
 		{
-			get { return FDocumentName; }
-			set { FDocumentName = (value == null ? String.Empty : value); }
+			get { return _documentName; }
+			set { _documentName = (value == null ? String.Empty : value); }
 		}
 	}
 
 	public class DeriveArgs
 	{
-		public const string CDefaultPageType = "Browse";
-		public const bool CDefaultElaborate = true;
+		public const string DefaultPageType = "Browse";
+		public const bool DefaultElaborate = true;
 
-		private string FQuery = String.Empty;
+		private string _query = String.Empty;
 		public string Query
 		{
-			get { return FQuery; }
-			set { FQuery = (value == null ? String.Empty : value); }
+			get { return _query; }
+			set { _query = (value == null ? String.Empty : value); }
 		}
 		
-		private string FPageType = CDefaultPageType;
+		private string _pageType = DefaultPageType;
 		public string PageType
 		{
-			get { return FPageType; }
-			set { FPageType = (value == null ? String.Empty : value); }
+			get { return _pageType; }
+			set { _pageType = (value == null ? String.Empty : value); }
 		}
 		
-		private string FMasterKeyNames = String.Empty;
+		private string _masterKeyNames = String.Empty;
 		public string MasterKeyNames
 		{
-			get { return FMasterKeyNames; }
-			set { FMasterKeyNames = (value == null ? String.Empty : value); }
+			get { return _masterKeyNames; }
+			set { _masterKeyNames = (value == null ? String.Empty : value); }
 		}
 		
-		private string FDetailKeyNames = String.Empty;
+		private string _detailKeyNames = String.Empty;
 		public string DetailKeyNames
 		{
-			get { return FDetailKeyNames; }
-			set { FDetailKeyNames = (value == null ? String.Empty : value); }
+			get { return _detailKeyNames; }
+			set { _detailKeyNames = (value == null ? String.Empty : value); }
 		}
 		
-		private bool FElaborate = CDefaultElaborate;
+		private bool _elaborate = DefaultElaborate;
 		public bool Elaborate
 		{
-			get { return FElaborate; }
-			set { FElaborate = value; }
+			get { return _elaborate; }
+			set { _elaborate = value; }
 		}
 	}
 

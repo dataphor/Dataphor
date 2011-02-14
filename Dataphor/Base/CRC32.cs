@@ -60,22 +60,22 @@ namespace Alphora.Dataphor
 		///		wish to perform the CRC on only a portion of the stream, use a WrapperStream to limit
 		///		the bounds of this operation.
 		///	</remarks>
-		public static uint GetCRC32(Stream AStream)
+		public static uint GetCRC32(Stream stream)
 		{
-			uint LResult = 0xFFFFFFFF;
-			int LCurrent;
-			while ((LCurrent = AStream.ReadByte()) != -1)
-				LResult = (LResult >> 8) ^ CCRC32Lookup[(LResult & 0xFF) ^ (byte)LCurrent];
-			return ~LResult;
+			uint result = 0xFFFFFFFF;
+			int current;
+			while ((current = stream.ReadByte()) != -1)
+				result = (result >> 8) ^ CCRC32Lookup[(result & 0xFF) ^ (byte)current];
+			return ~result;
 		}
 
 		/// <summary> Calculates a 32 bit Cyclic Redundancy Check hash for the given byte array. </summary>
-		public static uint GetCRC32(byte[] ABytes)
+		public static uint GetCRC32(byte[] bytes)
 		{
-			uint LResult = 0xFFFFFFFF;
-			for (int i = 0; i < ABytes.Length; i++)
-				LResult = (LResult >> 8) ^ CCRC32Lookup[(LResult & 0xFF) ^ ABytes[i]];
-			return ~LResult;
+			uint result = 0xFFFFFFFF;
+			for (int i = 0; i < bytes.Length; i++)
+				result = (result >> 8) ^ CCRC32Lookup[(result & 0xFF) ^ bytes[i]];
+			return ~result;
 		}
 
 		#if USE_UNSAFE
@@ -90,12 +90,12 @@ namespace Alphora.Dataphor
 		#endif
 
 		/// <summary> Computes a CRC32 given an existing CRC32 value and amended data in a byte array. </summary>
-		public static uint GetAmendedCRC32(uint ACRC32, byte[] ABytes)
+		public static uint GetAmendedCRC32(uint cRC32, byte[] bytes)
 		{
-			uint LResult = ~ACRC32;
-			for (int i = 0; i < ABytes.Length; i++)
-				LResult = (LResult >> 8) ^ CCRC32Lookup[(LResult & 0xFF) ^ ABytes[i]];
-			return ~LResult;
+			uint result = ~cRC32;
+			for (int i = 0; i < bytes.Length; i++)
+				result = (result >> 8) ^ CCRC32Lookup[(result & 0xFF) ^ bytes[i]];
+			return ~result;
 		}
 
 		#if USE_UNSAFE
@@ -110,21 +110,21 @@ namespace Alphora.Dataphor
 		#endif
 
 		/// <summary> Calculates a 32 bit Cyclic Redundancy Check hash for a range within the given byte array. </summary>
-		public static uint GetCRC32(byte[] ABytes, int AOffset, int ACount)
+		public static uint GetCRC32(byte[] bytes, int offset, int count)
 		{
-			uint LResult = 0xFFFFFFFF;
-			for (int i = AOffset; i < (AOffset + ACount); i++)
-				LResult = (LResult >> 8) ^ CCRC32Lookup[(LResult & 0xFF) ^ ABytes[i]];
-			return ~LResult;
+			uint result = 0xFFFFFFFF;
+			for (int i = offset; i < (offset + count); i++)
+				result = (result >> 8) ^ CCRC32Lookup[(result & 0xFF) ^ bytes[i]];
+			return ~result;
 		}
 
 		/// <summary> Computes a CRC32 given an existing CRC32 value and amended data in a byte array. </summary>
-		public static uint GetAmendedCRC32(uint ACRC32, byte[] ABytes, int AOffset, int ACount)
+		public static uint GetAmendedCRC32(uint cRC32, byte[] bytes, int offset, int count)
 		{
-			uint LResult = ~ACRC32;
-			for (int i = AOffset; i < (AOffset + ACount); i++)
-				LResult = (LResult >> 8) ^ CCRC32Lookup[(LResult & 0xFF) ^ ABytes[i]];
-			return ~LResult;
+			uint result = ~cRC32;
+			for (int i = offset; i < (offset + count); i++)
+				result = (result >> 8) ^ CCRC32Lookup[(result & 0xFF) ^ bytes[i]];
+			return ~result;
 		}
 	}
 }

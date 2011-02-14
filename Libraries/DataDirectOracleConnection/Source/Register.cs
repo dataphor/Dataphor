@@ -15,11 +15,11 @@ namespace Alphora.Dataphor.DAE.Connection.DataDirect.Oracle
 	{
 		public static SettingsList GetClasses()
 		{
-			SettingsList LClasses = new SettingsList();
+			SettingsList classes = new SettingsList();
 			
-			LClasses.Add(new SettingsItem("Alphora.Dataphor.DAE.Connection.DataDirect.Oracle.OracleConnection,Alphora.Dataphor.DAE.Connection.DataDirect.Oracle", typeof(OracleConnection).AssemblyQualifiedName));
+			classes.Add(new SettingsItem("Alphora.Dataphor.DAE.Connection.DataDirect.Oracle.OracleConnection,Alphora.Dataphor.DAE.Connection.DataDirect.Oracle", typeof(OracleConnection).AssemblyQualifiedName));
 			
-			return LClasses;
+			return classes;
 		}
 	}
 }

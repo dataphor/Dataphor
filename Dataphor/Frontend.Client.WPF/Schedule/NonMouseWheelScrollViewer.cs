@@ -7,9 +7,9 @@ namespace Alphora.Dataphor.Frontend.Client.WPF
 	{
 		protected override void OnMouseWheel(System.Windows.Input.MouseWheelEventArgs e)
 		{
-			var LHandled = e.Handled;
+			var handled = e.Handled;
 			base.OnMouseWheel(e);
-			e.Handled = LHandled;	// Don't handle the mouse wheel
+			e.Handled = handled;	// Don't handle the mouse wheel
 		}
 	}
 }

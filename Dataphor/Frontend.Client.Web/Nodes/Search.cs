@@ -21,202 +21,202 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		// Title
 
-		private string FTitle = String.Empty;
+		private string _title = String.Empty;
 		[DefaultValue("")]
 		public string Title
 		{
-			get { return FTitle; }
-			set { FTitle = value == null ? String.Empty : value; }
+			get { return _title; }
+			set { _title = value == null ? String.Empty : value; }
 		}
 
 		// Hint
 
-		private string FHint = String.Empty;
+		private string _hint = String.Empty;
 		[DefaultValue("")]
 		public string Hint
 		{
-			get { return FHint; }
-			set { FHint = value; }
+			get { return _hint; }
+			set { _hint = value; }
 		}
 
 		// ReadOnly
 
-		private bool FReadOnly;
+		private bool _readOnly;
 		[DefaultValue(false)]
 		public bool ReadOnly
 		{
-			get { return FReadOnly; }
-			set { FReadOnly = value; }
+			get { return _readOnly; }
+			set { _readOnly = value; }
 		}
 
 		// ColumnName
 
-		private string FColumnName = String.Empty;
+		private string _columnName = String.Empty;
 		[DefaultValue("")]
 		public string ColumnName
 		{
-			get { return FColumnName; }
-			set { FColumnName = (value == null ? String.Empty : value); }
+			get { return _columnName; }
+			set { _columnName = (value == null ? String.Empty : value); }
 		}
 
 		// Width
 
-		private int FWidth = 15;
+		private int _width = 15;
 		[DefaultValue(15)]
 		public int Width
 		{
-			get { return FWidth; }
-			set { FWidth = value; }
+			get { return _width; }
+			set { _width = value; }
 		}
 		
 		// TextAlignment
 
-		private HorizontalAlignment FTextAlignment = HorizontalAlignment.Left;
+		private HorizontalAlignment _textAlignment = HorizontalAlignment.Left;
 		[DefaultValue(HorizontalAlignment.Left)]
 		public HorizontalAlignment TextAlignment
 		{
-			get { return FTextAlignment; }
-			set { FTextAlignment = value; }
+			get { return _textAlignment; }
+			set { _textAlignment = value; }
 		}
 	}
 
 	internal class SearchControl
 	{
-		public SearchControl(string AID)
+		public SearchControl(string iD)
 		{
-			FID = AID;
+			_iD = iD;
 		}
 
-		private string FID;
+		private string _iD;
 
 		// Source
 
-		private ISource FSource;
+		private ISource _source;
 		public ISource Source
 		{
-			get { return FSource; }
-			set { FSource = value; }
+			get { return _source; }
+			set { _source = value; }
 		}
 		
 		// ColumnName
 
-		private string FColumnName = String.Empty;
+		private string _columnName = String.Empty;
 		public string ColumnName
 		{
-			get { return FColumnName; }
-			set { FColumnName = (value == null ? String.Empty : value); }
+			get { return _columnName; }
+			set { _columnName = (value == null ? String.Empty : value); }
 		}
 
 		// Value
 
-		private string FValue = null;
+		private string _value = null;
 		public string Value
 		{
-			get { return FValue; }
+			get { return _value; }
 		}
 
 		public void Reset()
 		{
-			FValue = null;
-			FConversionFailed = false;
+			_value = null;
+			_conversionFailed = false;
 		}
 
-		public bool ExtractValue(DAE.Runtime.Data.Row ARow)
+		public bool ExtractValue(DAE.Runtime.Data.Row row)
 		{
 			try
 			{
-				if (FValue != null)
-					((DAE.Runtime.Data.Scalar)ARow.GetValue(FColumnName)).AsString = FValue;
+				if (_value != null)
+					((DAE.Runtime.Data.Scalar)row.GetValue(_columnName)).AsString = _value;
 				else
-					((DAE.Runtime.Data.Scalar)ARow.GetValue(FColumnName)).AsString = String.Empty;	// Assume that if we are included in the search, that we are blank
-				FConversionFailed = false;
+					((DAE.Runtime.Data.Scalar)row.GetValue(_columnName)).AsString = String.Empty;	// Assume that if we are included in the search, that we are blank
+				_conversionFailed = false;
 				return true;
 			}
 			catch
 			{
-				FConversionFailed = true;
+				_conversionFailed = true;
 				return false;
 			}
 		}
 
 		// ConversionFailed
 
-		private bool FConversionFailed;
+		private bool _conversionFailed;
 
 		// SearchColumn
 
-		private SearchColumn FColumn;
+		private SearchColumn _column;
 		/// <summary> The search control can optionally be associated with a SearchColumn. </summary>
 		public SearchColumn Column
 		{
-			get { return FColumn; }
-			set { FColumn = value; }
+			get { return _column; }
+			set { _column = value; }
 		}
 
 		public string GetTitle()
 		{
-			if ((FColumn == null) || (FColumn.Title == String.Empty))
-				return FColumnName;
+			if ((_column == null) || (_column.Title == String.Empty))
+				return _columnName;
 			else
-				return FColumn.Title;
+				return _column.Title;
 		}
 
 		private HorizontalAlignment GetTextAlignment()
 		{
-			if (FColumn == null)
+			if (_column == null)
 				return HorizontalAlignment.Left;
 			else
-				return FColumn.TextAlignment;
+				return _column.TextAlignment;
 		}
 
 		private int GetWidth()
 		{
-			if (FColumn == null)
+			if (_column == null)
 				return 15;
 			else
-				return FColumn.Width;
+				return _column.Width;
 		}
 
 		// PreProcessing
 
-		public void PreprocessRequest(HttpContext AContext) // Do not implement IWebPrehandler, the Search node calls this directly
+		public void PreprocessRequest(HttpContext context) // Do not implement IWebPrehandler, the Search node calls this directly
 		{
-			string LValue = AContext.Request.Form[FID];
-			if ((LValue != null) && (LValue != String.Empty))	// Treats blank as null
-				FValue = LValue;
+			string tempValue = context.Request.Form[_iD];
+			if ((tempValue != null) && (tempValue != String.Empty))	// Treats blank as null
+				_value = tempValue;
 			else
-				FValue = null;
+				_value = null;
 		}
 
 		// Render
 
-		public virtual void Render(HtmlTextWriter AWriter) 
+		public virtual void Render(HtmlTextWriter writer) 
 		{
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Type, "text");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Name, FID);
-			string LClass;
-			if (FValue != null)
+			writer.AddAttribute(HtmlTextWriterAttribute.Type, "text");
+			writer.AddAttribute(HtmlTextWriterAttribute.Name, _iD);
+			string classValue;
+			if (_value != null)
 			{
-				if (FConversionFailed)
-					LClass = "textboxfailed";
+				if (_conversionFailed)
+					classValue = "textboxfailed";
 				else
-					LClass = "textbox";
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Value, FValue);
+					classValue = "textbox";
+				writer.AddAttribute(HtmlTextWriterAttribute.Value, _value);
 			}
 			else
-				LClass = "textboxnull";
-			FConversionFailed = false;
-			if (LClass != "textbox")
+				classValue = "textboxnull";
+			_conversionFailed = false;
+			if (classValue != "textbox")
 			{
-				AWriter.AddAttribute("onchange", "NotNull(this, null, 'textbox')");
-				AWriter.AddAttribute("onkeypress", "NotNull(this, null, 'textbox')");
+				writer.AddAttribute("onchange", "NotNull(this, null, 'textbox')");
+				writer.AddAttribute("onkeypress", "NotNull(this, null, 'textbox')");
 			}
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, LClass);
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, classValue);
 
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Size, GetWidth().ToString());
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Style, "textalign: " + GetTextAlignment().ToString().ToLower());
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Input);
-			AWriter.RenderEndTag();
+			writer.AddAttribute(HtmlTextWriterAttribute.Size, GetWidth().ToString());
+			writer.AddAttribute(HtmlTextWriterAttribute.Style, "textalign: " + GetTextAlignment().ToString().ToLower());
+			writer.RenderBeginTag(HtmlTextWriterTag.Input);
+			writer.RenderEndTag();
 		}
 	}
 
@@ -225,71 +225,71 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 	{
 		// TitleAlignment
 
-		private TitleAlignment FTitleAlignment = TitleAlignment.Left;
+		private TitleAlignment _titleAlignment = TitleAlignment.Left;
 		[DefaultValue(TitleAlignment.Left)]
 		public TitleAlignment TitleAlignment
 		{
-			get { return FTitleAlignment; }
-			set { FTitleAlignment = value; }
+			get { return _titleAlignment; }
+			set { _titleAlignment = value; }
 		}
 
 		#region Search Controls
 
-		private ArrayList FSearchControls = new ArrayList();
+		private ArrayList _searchControls = new ArrayList();
 
-		private SearchColumn FindSearchColumn(string AColumnName)
+		private SearchColumn FindSearchColumn(string columnName)
 		{
-			foreach (SearchColumn LNode in Children) 
-				if (LNode.ColumnName == AColumnName)
-					return LNode;
+			foreach (SearchColumn node in Children) 
+				if (node.ColumnName == columnName)
+					return node;
 			return null;
 		}
 
-		private SearchControl FindSearchControl(string AColumnName)
+		private SearchControl FindSearchControl(string columnName)
 		{
-			foreach (SearchControl LControl in FSearchControls)
-				if (LControl.ColumnName == AColumnName)
-					return LControl;
+			foreach (SearchControl control in _searchControls)
+				if (control.ColumnName == columnName)
+					return control;
 			return null;
 		}
 
-		private SearchControl CreateSearchControl(DAE.Schema.OrderColumn AColumn)
+		private SearchControl CreateSearchControl(DAE.Schema.OrderColumn column)
 		{
-			SearchControl LControl = new SearchControl(Session.GenerateID());
-			LControl.Column = FindSearchColumn(AColumn.Column.Name);
-			LControl.ColumnName = AColumn.Column.Name;
-			LControl.Source = Source;
-			return LControl;
+			SearchControl control = new SearchControl(Session.GenerateID());
+			control.Column = FindSearchColumn(column.Column.Name);
+			control.ColumnName = column.Column.Name;
+			control.Source = Source;
+			return control;
 		}
 
 		protected void UpdateControls()
 		{
-			FSearchControls.Clear();
+			_searchControls.Clear();
 			if ((Source != null) && (Source.DataView != null) && (Source.DataView.Order != null))
 			{
-				foreach (DAE.Schema.OrderColumn LColumn in Source.DataView.Order.Columns) 
+				foreach (DAE.Schema.OrderColumn column in Source.DataView.Order.Columns) 
 				{
-					if (!((DAE.Client.TableDataSet)Source.DataSource.DataSet).IsDetailKey(LColumn.Column.Name))
-						FSearchControls.Add(CreateSearchControl(LColumn));
+					if (!((DAE.Client.TableDataSet)Source.DataSource.DataSet).IsDetailKey(column.Column.Name))
+						_searchControls.Add(CreateSearchControl(column));
 				}
 			}
 		}
 
 		// IWebPrehandler
 
-		public virtual void PreprocessRequest(HttpContext AContext)
+		public virtual void PreprocessRequest(HttpContext context)
 		{
-			foreach (SearchControl LControl in FSearchControls)
-				LControl.PreprocessRequest(AContext);
+			foreach (SearchControl control in _searchControls)
+				control.PreprocessRequest(context);
 		}
 
 		#endregion
 
 		#region Data Source
 
-		protected override void SourceChanged(ISource AOldSource) 
+		protected override void SourceChanged(ISource oldSource) 
 		{
-			if (AOldSource != null) 
+			if (oldSource != null) 
 			{
 				Source.ActiveChanged -= new DAE.Client.DataLinkHandler(DataActiveChange);
 				Source.DataChanged -= new DAE.Client.DataLinkHandler(DataChange);
@@ -301,40 +301,40 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			}
 		}
 
-		private Order FOrder;
+		private Order _order;
 
-		private void SetOrder(Order AOrder)
+		private void SetOrder(Order order)
 		{
-			if (AOrder != FOrder)
+			if (order != _order)
 			{
-				FOrder = AOrder;
+				_order = order;
 				UpdateControls();
 			}
 		}
 
-		protected virtual void DataActiveChange(DAE.Client.DataLink ADataLink, DAE.Client.DataSet ADataSet)
+		protected virtual void DataActiveChange(DAE.Client.DataLink dataLink, DAE.Client.DataSet dataSet)
 		{
-			if (ADataLink.Active && (ADataSet is DAE.Client.TableDataSet))
-				SetOrder(((DAE.Client.TableDataSet)ADataSet).Order);
+			if (dataLink.Active && (dataSet is DAE.Client.TableDataSet))
+				SetOrder(((DAE.Client.TableDataSet)dataSet).Order);
 			else
 				SetOrder(null);
 		}
 
 		public void Reset()
 		{
-			foreach (SearchControl LControl in FSearchControls)
-				LControl.Reset();
+			foreach (SearchControl control in _searchControls)
+				control.Reset();
 		}
 
-		protected virtual void DataChange(DAE.Client.DataLink ADataLink, DAE.Client.DataSet ADataSet)
+		protected virtual void DataChange(DAE.Client.DataLink dataLink, DAE.Client.DataSet dataSet)
 		{
-			if (ADataLink.Active && (ADataSet is DAE.Client.TableDataSet))
+			if (dataLink.Active && (dataSet is DAE.Client.TableDataSet))
 			{
-				DAE.Client.TableDataSet LTable = (DAE.Client.TableDataSet)ADataSet;
-				if (FOrder != LTable.Order)
-					SetOrder(LTable.Order);
+				DAE.Client.TableDataSet table = (DAE.Client.TableDataSet)dataSet;
+				if (_order != table.Order)
+					SetOrder(table.Order);
 				else
-					if (!FSearching)
+					if (!_searching)
 						Reset();
 			}
 		}
@@ -343,24 +343,24 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		#region Searching
 
-		private bool FSearching;
+		private bool _searching;
 
 		private void PerformSearch()
 		{
 			if ((Source != null) && (Source.DataView != null) && !Source.DataView.IsEmpty())
 			{
-				using (DAE.Runtime.Data.Row LRow = CreateSearchRow())
+				using (DAE.Runtime.Data.Row row = CreateSearchRow())
 				{
-					if (LRow == null)
+					if (row == null)
 						return;
-					FSearching = true;
+					_searching = true;
 					try
 					{
-						Source.DataView.FindNearest(LRow);
+						Source.DataView.FindNearest(row);
 					}
 					finally
 					{
-						FSearching = false;
+						_searching = false;
 					}
 				}
 			}
@@ -369,46 +369,46 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		private DAE.Runtime.Data.Row CreateSearchRow()
 		{
 			// Determine the last search control with a search value
-			SearchControl LPendingIncremental = null;
-			SearchControl LControl;
-			for (int i = FSearchControls.Count - 1; i >= 0; i--)
+			SearchControl pendingIncremental = null;
+			SearchControl control;
+			for (int i = _searchControls.Count - 1; i >= 0; i--)
 			{
-				LControl = (SearchControl)FSearchControls[i];
-				if (LControl.Value != null)
+				control = (SearchControl)_searchControls[i];
+				if (control.Value != null)
 				{
-					LPendingIncremental = LControl;
+					pendingIncremental = control;
 					break;
 				}
 			}
 
-			if (LPendingIncremental != null)
+			if (pendingIncremental != null)
 			{
 				// FROM WINDOWS CLIENT
 
 				// Build a row consisting of order columns up to and including the pending control
-				RowType LRowType = new RowType();	
-				foreach (OrderColumn LColumn in FOrder.Columns)
+				RowType rowType = new RowType();	
+				foreach (OrderColumn column in _order.Columns)
 				{
-					LRowType.Columns.Add(new DAE.Schema.Column(LColumn.Column.Name, LColumn.Column.DataType));
-					if (LColumn.Column.Name == LPendingIncremental.ColumnName)
+					rowType.Columns.Add(new DAE.Schema.Column(column.Column.Name, column.Column.DataType));
+					if (column.Column.Name == pendingIncremental.ColumnName)
 						break;
 				}
 
-				DAE.Runtime.Data.Row LRow = new DAE.Runtime.Data.Row(Source.Process.ValueManager, LRowType);
+				DAE.Runtime.Data.Row row = new DAE.Runtime.Data.Row(Source.Process.ValueManager, rowType);
 				try
 				{
-					Source.DataView.InitializeFromMaster(LRow);
-					foreach (DAE.Schema.Column LColumn in LRowType.Columns)
+					Source.DataView.InitializeFromMaster(row);
+					foreach (DAE.Schema.Column column in rowType.Columns)
 					{
-						if (!Source.DataView.IsDetailKey(LColumn.Name))
-							if (!FindSearchControl(LColumn.Name).ExtractValue(LRow))
+						if (!Source.DataView.IsDetailKey(column.Name))
+							if (!FindSearchControl(column.Name).ExtractValue(row))
 								return null;
 					}
-					return LRow;
+					return row;
 				}
 				catch
 				{
-					LRow.Dispose();
+					row.Dispose();
 					throw;
 				}
 
@@ -422,28 +422,28 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// IWebHandler
 
-		public override bool ProcessRequest(HttpContext AContext)
+		public override bool ProcessRequest(HttpContext context)
 		{
-			if (base.ProcessRequest(AContext))
+			if (base.ProcessRequest(context))
 				return true;
 			else
 			{
 				try
 				{
-					if (Session.IsActionLink(AContext, ID + "Search"))
+					if (Session.IsActionLink(context, ID + "Search"))
 						PerformSearch();
-					else if (Session.IsActionLink(AContext, ID + "SortBy"))
+					else if (Session.IsActionLink(context, ID + "SortBy"))
 					{
-						string LSort = AContext.Request.QueryString["Sort"];
-						if ((LSort != null) && (LSort != String.Empty))
-							Source.OrderString = LSort;
+						string sort = context.Request.QueryString["Sort"];
+						if ((sort != null) && (sort != String.Empty))
+							Source.OrderString = sort;
 					}
 					else
 						return false;
 				}
-				catch (Exception LException)
+				catch (Exception exception)
 				{
-					HandleElementException(LException);
+					HandleElementException(exception);
 				}
 				return true;
 			}
@@ -451,139 +451,139 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// Node
 
-		public override bool IsValidChild(Type AChildType)
+		public override bool IsValidChild(Type childType)
 		{
-			if (typeof(ISearchColumn).IsAssignableFrom(AChildType))
+			if (typeof(ISearchColumn).IsAssignableFrom(childType))
 				return true;
-			return base.IsValidChild(AChildType);
+			return base.IsValidChild(childType);
 		}
 
 		#region Rendering
 
-		protected override void InternalRender(HtmlTextWriter AWriter)
+		protected override void InternalRender(HtmlTextWriter writer)
 		{
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "search");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Border, "0");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "0");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "2");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Width, "auto");
-			string LHint = GetHint();
-			if (LHint != String.Empty)
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Title, LHint, true);
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Table);
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "search");
+			writer.AddAttribute(HtmlTextWriterAttribute.Border, "0");
+			writer.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "0");
+			writer.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "2");
+			writer.AddAttribute(HtmlTextWriterAttribute.Width, "auto");
+			string hint = GetHint();
+			if (hint != String.Empty)
+				writer.AddAttribute(HtmlTextWriterAttribute.Title, hint, true);
+			writer.RenderBeginTag(HtmlTextWriterTag.Table);
 
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
+			writer.RenderBeginTag(HtmlTextWriterTag.Tr);
 
-			bool LFirst = true;
-			foreach (SearchControl LControl in FSearchControls)
+			bool first = true;
+			foreach (SearchControl control in _searchControls)
 			{
-				if (LFirst)
-					LFirst = false;
+				if (first)
+					first = false;
 				else
 				{
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Valign, "middle");
-					AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Src, "images/searcharrow.gif");
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Width, "16");
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Height, "10");
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Border, "0");
-					AWriter.RenderBeginTag(HtmlTextWriterTag.Img);
-					AWriter.RenderEndTag();
-					AWriter.RenderEndTag();
+					writer.AddAttribute(HtmlTextWriterAttribute.Valign, "middle");
+					writer.RenderBeginTag(HtmlTextWriterTag.Td);
+					writer.AddAttribute(HtmlTextWriterAttribute.Src, "images/searcharrow.gif");
+					writer.AddAttribute(HtmlTextWriterAttribute.Width, "16");
+					writer.AddAttribute(HtmlTextWriterAttribute.Height, "10");
+					writer.AddAttribute(HtmlTextWriterAttribute.Border, "0");
+					writer.RenderBeginTag(HtmlTextWriterTag.Img);
+					writer.RenderEndTag();
+					writer.RenderEndTag();
 				}
 
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Valign, "bottom");
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
-				AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
+				writer.AddAttribute(HtmlTextWriterAttribute.Valign, "bottom");
+				writer.AddAttribute(HtmlTextWriterAttribute.Nowrap, null);
+				writer.RenderBeginTag(HtmlTextWriterTag.Td);
 
-				if (FTitleAlignment != TitleAlignment.None)
+				if (_titleAlignment != TitleAlignment.None)
 				{
-					AWriter.Write(HttpUtility.HtmlEncode(Session.RemoveAccellerator(LControl.GetTitle())));
-					if (FTitleAlignment != TitleAlignment.Top)
-						Session.RenderDummyImage(AWriter, "4px", "0");
+					writer.Write(HttpUtility.HtmlEncode(Session.RemoveAccellerator(control.GetTitle())));
+					if (_titleAlignment != TitleAlignment.Top)
+						Session.RenderDummyImage(writer, "4px", "0");
 				}
 
-				if (FTitleAlignment == TitleAlignment.Top)
-					AWriter.Write("<br>");
+				if (_titleAlignment == TitleAlignment.Top)
+					writer.Write("<br>");
 
-				LControl.Render(AWriter);
+				control.Render(writer);
 
-				AWriter.RenderEndTag();
+				writer.RenderEndTag();
 			}
 
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Align, "right");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Valign, "bottom");
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
+			writer.AddAttribute(HtmlTextWriterAttribute.Align, "right");
+			writer.AddAttribute(HtmlTextWriterAttribute.Valign, "bottom");
+			writer.RenderBeginTag(HtmlTextWriterTag.Td);
 			
-			Session.RenderDummyImage(AWriter, "5", "1");
+			Session.RenderDummyImage(writer, "5", "1");
 			
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Type, "button");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Value, Strings.Get("FindButtonText"));
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, Session.GetActionLink(Session.Get(this).Context, ID + "Search"));
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Input);
-			AWriter.RenderEndTag();
+			writer.AddAttribute(HtmlTextWriterAttribute.Type, "button");
+			writer.AddAttribute(HtmlTextWriterAttribute.Value, Strings.Get("FindButtonText"));
+			writer.AddAttribute(HtmlTextWriterAttribute.Onclick, Session.GetActionLink(Session.Get(this).Context, ID + "Search"));
+			writer.RenderBeginTag(HtmlTextWriterTag.Input);
+			writer.RenderEndTag();
 
-			Session.RenderDummyImage(AWriter, "5", "1");
+			Session.RenderDummyImage(writer, "5", "1");
 			
-			AWriter.RenderEndTag();	// TD
+			writer.RenderEndTag();	// TD
 
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Valign, "bottom");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Align, "right");
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
+			writer.AddAttribute(HtmlTextWriterAttribute.Valign, "bottom");
+			writer.AddAttribute(HtmlTextWriterAttribute.Align, "right");
+			writer.RenderBeginTag(HtmlTextWriterTag.Td);
 			
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Src, "images/lookup.png");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, "ShowDropDown('" + ID + "SearchBy', GetParentTable(this))", true);
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Img);
-			AWriter.RenderEndTag();
+			writer.AddAttribute(HtmlTextWriterAttribute.Src, "images/lookup.png");
+			writer.AddAttribute(HtmlTextWriterAttribute.Onclick, "ShowDropDown('" + ID + "SearchBy', GetParentTable(this))", true);
+			writer.RenderBeginTag(HtmlTextWriterTag.Img);
+			writer.RenderEndTag();
 
-			Session.RenderDummyImage(AWriter, "5", "1");
+			Session.RenderDummyImage(writer, "5", "1");
 			
-			AWriter.RenderEndTag();	// TD
-			AWriter.RenderEndTag();	// TR
-			AWriter.RenderEndTag();	// TABLE
+			writer.RenderEndTag();	// TD
+			writer.RenderEndTag();	// TR
+			writer.RenderEndTag();	// TABLE
 
 			// Render search-by drop-down
 			if (Source != null)
 			{
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Class, "searchby");
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Style, "display: none");
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Id, ID + "SearchBy");
-				AWriter.RenderBeginTag(HtmlTextWriterTag.Div);
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "searchby");
+				writer.AddAttribute(HtmlTextWriterAttribute.Style, "display: none");
+				writer.AddAttribute(HtmlTextWriterAttribute.Id, ID + "SearchBy");
+				writer.RenderBeginTag(HtmlTextWriterTag.Div);
 
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "0");
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Border, "0");
-				AWriter.RenderBeginTag(HtmlTextWriterTag.Table);
+				writer.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "0");
+				writer.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
+				writer.AddAttribute(HtmlTextWriterAttribute.Border, "0");
+				writer.RenderBeginTag(HtmlTextWriterTag.Table);
 
 				// Construct the a complete list of possible orderings including non-sparse keys
-				Orders LOrders = new Orders();
-				LOrders.AddRange(Source.TableVar.Orders);
-				DAE.Schema.Order LOrderForKey;
-				foreach (Key LKey in Source.TableVar.Keys)
-					if (!LKey.IsSparse)
+				Orders orders = new Orders();
+				orders.AddRange(Source.TableVar.Orders);
+				DAE.Schema.Order orderForKey;
+				foreach (Key key in Source.TableVar.Keys)
+					if (!key.IsSparse)
 					{
-						LOrderForKey = new Order(LKey);
-						if (!LOrders.Contains(LOrderForKey))
-							LOrders.Add(LOrderForKey);
+						orderForKey = new Order(key);
+						if (!orders.Contains(orderForKey))
+							orders.Add(orderForKey);
 					}
 
-				foreach (Order LOrder in LOrders)
-					if (IsOrderVisible(LOrder) && !LOrder.Equals(Source.Order))
+				foreach (Order order in orders)
+					if (IsOrderVisible(order) && !order.Equals(Source.Order))
 					{
-						AWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, String.Format("Submit('{0}?ActionID={1}&Sort={2}',event)", (string)Session.Get(this).Context.Session["DefaultPage"], ID + "SortBy", HttpUtility.UrlEncode(LOrder.ToString())), true);
-						AWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
-						AWriter.AddAttribute("onmouseover", @"className='highlightedmenuitem'");
-						AWriter.AddAttribute("onmouseout", @"className=''");
-						AWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-						AWriter.Write(HttpUtility.HtmlEncode(GetOrderTitle(LOrder)));
-						AWriter.RenderEndTag();	// TD
-						AWriter.RenderEndTag();	// TR
+						writer.AddAttribute(HtmlTextWriterAttribute.Onclick, String.Format("Submit('{0}?ActionID={1}&Sort={2}',event)", (string)Session.Get(this).Context.Session["DefaultPage"], ID + "SortBy", HttpUtility.UrlEncode(order.ToString())), true);
+						writer.RenderBeginTag(HtmlTextWriterTag.Tr);
+						writer.AddAttribute("onmouseover", @"className='highlightedmenuitem'");
+						writer.AddAttribute("onmouseout", @"className=''");
+						writer.RenderBeginTag(HtmlTextWriterTag.Td);
+						writer.Write(HttpUtility.HtmlEncode(GetOrderTitle(order)));
+						writer.RenderEndTag();	// TD
+						writer.RenderEndTag();	// TR
 					}
 				
 
-				AWriter.RenderEndTag();	// TABLE
+				writer.RenderEndTag();	// TABLE
 
-				AWriter.RenderEndTag();	// DIV
+				writer.RenderEndTag();	// DIV
 			}
 		}
 
@@ -593,62 +593,62 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// FROM WINDOWS CLIENT
 
-		private string GetDefaultOrderTitle(Order AOrder)
+		private string GetDefaultOrderTitle(Order order)
 		{
-			System.Text.StringBuilder LName = new System.Text.StringBuilder();
-			foreach (OrderColumn LColumn in AOrder.Columns)
+			System.Text.StringBuilder name = new System.Text.StringBuilder();
+			foreach (OrderColumn column in order.Columns)
 			{
-				if (IsColumnVisible(LColumn.Column) && !Source.DataView.IsDetailKey(LColumn.Column.Name))
+				if (IsColumnVisible(column.Column) && !Source.DataView.IsDetailKey(column.Column.Name))
 				{
-					if (LName.Length > 0)
-						LName.Append(", ");
-					LName.Append(GetColumnTitle(LColumn.Column));
-					if (!LColumn.Ascending)
-						LName.Append(" (descending)");	// TODO: localize
+					if (name.Length > 0)
+						name.Append(", ");
+					name.Append(GetColumnTitle(column.Column));
+					if (!column.Ascending)
+						name.Append(" (descending)");	// TODO: localize
 				}
 			}
-			return "by " + LName.ToString();
+			return "by " + name.ToString();
 		}
 
-		private string GetOrderTitle(Order AOrder)
+		private string GetOrderTitle(Order order)
 		{
-			return DAE.Language.D4.MetaData.GetTag(AOrder.MetaData, "Frontend.Title", GetDefaultOrderTitle(AOrder));
+			return DAE.Language.D4.MetaData.GetTag(order.MetaData, "Frontend.Title", GetDefaultOrderTitle(order));
 		}
 
-		protected bool IsOrderVisible(Order AOrder)
+		protected bool IsOrderVisible(Order order)
 		{
-			bool LIsVisible = Convert.ToBoolean(DAE.Language.D4.MetaData.GetTag(AOrder.MetaData, "Frontend.Visible", "true"));
-			bool LHasVisibleColumns = false;
-			if (LIsVisible)
+			bool isVisible = Convert.ToBoolean(DAE.Language.D4.MetaData.GetTag(order.MetaData, "Frontend.Visible", "true"));
+			bool hasVisibleColumns = false;
+			if (isVisible)
 			{
-				bool LIsColumnVisible;
-				bool LHasInvisibleColumns = false;
-				foreach (OrderColumn LColumn in AOrder.Columns)
+				bool isColumnVisible;
+				bool hasInvisibleColumns = false;
+				foreach (OrderColumn column in order.Columns)
 				{
-					LIsColumnVisible = IsColumnVisible(LColumn.Column);
-					if (LIsColumnVisible)
-						LHasVisibleColumns = true;
-					if (LHasInvisibleColumns && LIsColumnVisible)
+					isColumnVisible = IsColumnVisible(column.Column);
+					if (isColumnVisible)
+						hasVisibleColumns = true;
+					if (hasInvisibleColumns && isColumnVisible)
 					{
-						LIsVisible = false;
+						isVisible = false;
 						break;
 					}
 					
-					if (!LIsColumnVisible)
-						LHasInvisibleColumns = true;
+					if (!isColumnVisible)
+						hasInvisibleColumns = true;
 				}
 			}
-			return LHasVisibleColumns && LIsVisible;
+			return hasVisibleColumns && isVisible;
 		}
 
-		private static string GetColumnTitle(TableVarColumn AColumn)
+		private static string GetColumnTitle(TableVarColumn column)
 		{
-			return DAE.Language.D4.MetaData.GetTag(AColumn.MetaData, "Frontend.Title", DAE.Schema.Object.Unqualify(AColumn.Name));
+			return DAE.Language.D4.MetaData.GetTag(column.MetaData, "Frontend.Title", DAE.Schema.Object.Unqualify(column.Name));
 		}
 		
-		public static bool IsColumnVisible(TableVarColumn AColumn)
+		public static bool IsColumnVisible(TableVarColumn column)
 		{
-			return Convert.ToBoolean(DAE.Language.D4.MetaData.GetTag(AColumn.MetaData, "Frontend.Visible", "true"));
+			return Convert.ToBoolean(DAE.Language.D4.MetaData.GetTag(column.MetaData, "Frontend.Visible", "true"));
 		}
 		// END FROM WINDOWS CLIENT
 

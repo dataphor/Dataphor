@@ -40,7 +40,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private Label label6;
 		private Label label10;
 		private ComboBox cbInstanceName;
-		private ComboBox FCbInProcessInstanceName;
+		private ComboBox _cbInProcessInstanceName;
 		private Button EditInstanceButton;
 		private Button NewInstanceButton;
 		private System.Windows.Forms.CheckBox cbEmbedded;
@@ -58,11 +58,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			InitializeComponent();
 
-			SessionInfoPropertyGrid.SelectedObject = FSessionInfo;
+			SessionInfoPropertyGrid.SelectedObject = _sessionInfo;
 
 			// so that the prop grid gets hidden.
-			Size LSize = ClientSize;
-			ClientSize = new Size(LSize.Width, LSize.Height - (SessionInfoPropertyGrid.Height + 12));
+			Size size = ClientSize;
+			ClientSize = new Size(size.Width, size.Height - (SessionInfoPropertyGrid.Height + 12));
 			SessionInfoPropertyGrid.Visible = false;
 			AdvancedButton.Text = Strings.CAdvancedButton;
 			FStatusBar.Visible = false;
@@ -114,7 +114,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.cbEmbedded = new System.Windows.Forms.CheckBox();
 			this.EditInstanceButton = new System.Windows.Forms.Button();
 			this.NewInstanceButton = new System.Windows.Forms.Button();
-			this.FCbInProcessInstanceName = new System.Windows.Forms.ComboBox();
+			this._cbInProcessInstanceName = new System.Windows.Forms.ComboBox();
 			this.label10 = new System.Windows.Forms.Label();
 			this.label11 = new System.Windows.Forms.Label();
 			this.cbListenerSecurityMode = new System.Windows.Forms.ComboBox();
@@ -311,7 +311,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.tpInProcessAlias.Controls.Add(this.cbEmbedded);
 			this.tpInProcessAlias.Controls.Add(this.EditInstanceButton);
 			this.tpInProcessAlias.Controls.Add(this.NewInstanceButton);
-			this.tpInProcessAlias.Controls.Add(this.FCbInProcessInstanceName);
+			this.tpInProcessAlias.Controls.Add(this._cbInProcessInstanceName);
 			this.tpInProcessAlias.Controls.Add(this.label10);
 			this.tpInProcessAlias.Controls.Add(this.label11);
 			this.tpInProcessAlias.Location = new System.Drawing.Point(4, 22);
@@ -354,12 +354,12 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			// 
 			// FCbInProcessInstanceName
 			// 
-			this.FCbInProcessInstanceName.FormattingEnabled = true;
-			this.FCbInProcessInstanceName.Location = new System.Drawing.Point(82, 45);
-			this.FCbInProcessInstanceName.Name = "FCbInProcessInstanceName";
-			this.FCbInProcessInstanceName.Size = new System.Drawing.Size(155, 21);
-			this.FCbInProcessInstanceName.TabIndex = 47;
-			this.FCbInProcessInstanceName.DropDown += new System.EventHandler(this.cbInProcessInstanceName_DropDown);
+			this._cbInProcessInstanceName.FormattingEnabled = true;
+			this._cbInProcessInstanceName.Location = new System.Drawing.Point(82, 45);
+			this._cbInProcessInstanceName.Name = "FCbInProcessInstanceName";
+			this._cbInProcessInstanceName.Size = new System.Drawing.Size(155, 21);
+			this._cbInProcessInstanceName.TabIndex = 47;
+			this._cbInProcessInstanceName.DropDown += new System.EventHandler(this.cbInProcessInstanceName_DropDown);
 			// 
 			// label10
 			// 
@@ -442,25 +442,25 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return ExecuteEdit(new ConnectionAlias());	// create from a defaulted alias
 		}
 
-		public static ServerAlias ExecuteEdit(ServerAlias AAlias)
+		public static ServerAlias ExecuteEdit(ServerAlias alias)
 		{
-			using (EditAliasForm LForm = new EditAliasForm())
+			using (EditAliasForm form = new EditAliasForm())
 			{
-				LForm.SetFromAlias(AAlias);
-				if (LForm.ShowDialog() != DialogResult.OK)
+				form.SetFromAlias(alias);
+				if (form.ShowDialog() != DialogResult.OK)
 					throw new AbortException();
-				return LForm.CreateAlias();
+				return form.CreateAlias();
 			}
 		}
 
-		private DAE.SessionInfo FSessionInfo = new DAE.SessionInfo();
+		private DAE.SessionInfo _sessionInfo = new DAE.SessionInfo();
 
 		public int OverridePortNumber
 		{
 			get 
 			{
-				int LPortNumber;
-				return Int32.TryParse(tbOverridePortNumber.Text, out LPortNumber) ? LPortNumber : 0;
+				int portNumber;
+				return Int32.TryParse(tbOverridePortNumber.Text, out portNumber) ? portNumber : 0;
 			}
 			set { tbOverridePortNumber.Text = value.ToString(); }
 		}
@@ -475,8 +475,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			get
 			{
-				int LPortNumber;
-				return Int32.TryParse(tbOverrideListenerPortNumber.Text, out LPortNumber) ? LPortNumber : 0;
+				int portNumber;
+				return Int32.TryParse(tbOverrideListenerPortNumber.Text, out portNumber) ? portNumber : 0;
 			}
 			set { tbOverrideListenerPortNumber.Text = value.ToString(); }
 		}
@@ -487,170 +487,170 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			set { cbListenerSecurityMode.SelectedIndex = (int)value; }
 		}
 
-		public void SetFromAlias(ServerAlias AAlias)
+		public void SetFromAlias(ServerAlias alias)
 		{
-			tbAliasName.Text = AAlias.Name;
-			CopyInstance(AAlias.SessionInfo, FSessionInfo);
+			tbAliasName.Text = alias.Name;
+			CopyInstance(alias.SessionInfo, _sessionInfo);
 			SessionInfoPropertyGrid.Refresh();
-			cbIsUserAlias.Checked = AAlias.IsUserAlias;
+			cbIsUserAlias.Checked = alias.IsUserAlias;
 
-			InProcessAlias LInProcess = AAlias as InProcessAlias;
-			ConnectionAlias LConnection = AAlias as ConnectionAlias;
-			if (LInProcess != null)
+			InProcessAlias inProcess = alias as InProcessAlias;
+			ConnectionAlias connection = alias as ConnectionAlias;
+			if (inProcess != null)
 			{
 				tcAliasType.SelectedTab = tpInProcessAlias;
-				FCbInProcessInstanceName.Text = LInProcess.InstanceName;
-				cbEmbedded.Checked = LInProcess.IsEmbedded;
+				_cbInProcessInstanceName.Text = inProcess.InstanceName;
+				cbEmbedded.Checked = inProcess.IsEmbedded;
 			}
 			else
 			{
 				tcAliasType.SelectedTab = tpConnectionAlias;
-				tbHost.Text = LConnection.HostName;
-				cbInstanceName.Text = LConnection.InstanceName;
-				OverridePortNumber = LConnection.OverridePortNumber;
-				SecurityMode = LConnection.SecurityMode;
-				OverrideListenerPortNumber = LConnection.OverrideListenerPortNumber;
-				ListenerSecurityMode = LConnection.ListenerSecurityMode;
-				cbClientSideLogging.Checked = LConnection.ClientSideLoggingEnabled;
+				tbHost.Text = connection.HostName;
+				cbInstanceName.Text = connection.InstanceName;
+				OverridePortNumber = connection.OverridePortNumber;
+				SecurityMode = connection.SecurityMode;
+				OverrideListenerPortNumber = connection.OverrideListenerPortNumber;
+				ListenerSecurityMode = connection.ListenerSecurityMode;
+				cbClientSideLogging.Checked = connection.ClientSideLoggingEnabled;
 			}
 		}
 		
 		public ServerAlias CreateAlias()
 		{
-			ServerAlias LResult;
+			ServerAlias result;
 			if (tcAliasType.SelectedTab == tpInProcessAlias)
 			{
-				InProcessAlias LInProcess = new InProcessAlias();
-				LInProcess.InstanceName = FCbInProcessInstanceName.Text;
-				LInProcess.IsEmbedded = cbEmbedded.Checked;
-				LResult = LInProcess;
+				InProcessAlias inProcess = new InProcessAlias();
+				inProcess.InstanceName = _cbInProcessInstanceName.Text;
+				inProcess.IsEmbedded = cbEmbedded.Checked;
+				result = inProcess;
 			}
 			else
 			{
-				ConnectionAlias LConnection = new ConnectionAlias();
-				LConnection.HostName = tbHost.Text;
-				LConnection.InstanceName = cbInstanceName.Text;
-				LConnection.OverridePortNumber = OverridePortNumber;
-				LConnection.SecurityMode = SecurityMode;
-				LConnection.OverrideListenerPortNumber = OverrideListenerPortNumber;
-				LConnection.ListenerSecurityMode = ListenerSecurityMode;
-				LConnection.ClientSideLoggingEnabled = cbClientSideLogging.Checked;
-				LResult = LConnection;
+				ConnectionAlias connection = new ConnectionAlias();
+				connection.HostName = tbHost.Text;
+				connection.InstanceName = cbInstanceName.Text;
+				connection.OverridePortNumber = OverridePortNumber;
+				connection.SecurityMode = SecurityMode;
+				connection.OverrideListenerPortNumber = OverrideListenerPortNumber;
+				connection.ListenerSecurityMode = ListenerSecurityMode;
+				connection.ClientSideLoggingEnabled = cbClientSideLogging.Checked;
+				result = connection;
 			}
 			
-			LResult.Name = tbAliasName.Text;
-			LResult.IsUserAlias = cbIsUserAlias.Checked;
-			CopyInstance(FSessionInfo, LResult.SessionInfo);
+			result.Name = tbAliasName.Text;
+			result.IsUserAlias = cbIsUserAlias.Checked;
+			CopyInstance(_sessionInfo, result.SessionInfo);
 
-			return LResult;
+			return result;
 		}
 
-		private void CopyInstance(object ASource, object ADestination)
+		private void CopyInstance(object source, object destination)
 		{
-			System.Xml.Linq.XDocument LDocument = new System.Xml.Linq.XDocument();
-			new BOP.Serializer().Serialize(LDocument, ASource);
-			new BOP.Deserializer().Deserialize(LDocument, ADestination);
+			System.Xml.Linq.XDocument document = new System.Xml.Linq.XDocument();
+			new BOP.Serializer().Serialize(document, source);
+			new BOP.Deserializer().Deserialize(document, destination);
 		}
 
 		private void AdvancedButton_Click(object sender, System.EventArgs e)
 		{
-			Size LSize = ClientSize;
+			Size size = ClientSize;
 			if (SessionInfoPropertyGrid.Visible)
 			{
-				ClientSize = new Size(LSize.Width, LSize.Height - (SessionInfoPropertyGrid.Height + 12));
+				ClientSize = new Size(size.Width, size.Height - (SessionInfoPropertyGrid.Height + 12));
 				SessionInfoPropertyGrid.Visible = false;
 				AdvancedButton.Text = Strings.CAdvancedButton;
 			}
 			else
 			{
 				SessionInfoPropertyGrid.Visible = true;
-				ClientSize = new Size(LSize.Width, LSize.Height + (SessionInfoPropertyGrid.Height + 12));
+				ClientSize = new Size(size.Width, size.Height + (SessionInfoPropertyGrid.Height + 12));
 				AdvancedButton.Text = Strings.CBasicButton;
 			}		
 		}
 
-		private bool FInstancesEnumerated;
+		private bool _instancesEnumerated;
 
 		private void cbInstanceName_DropDown(object sender, EventArgs e)
 		{
-			if ((tbHost.Text != String.Empty) && (!FInstancesEnumerated))
+			if ((tbHost.Text != String.Empty) && (!_instancesEnumerated))
 			{
 				try
 				{
-					FInstancesEnumerated = true;
+					_instancesEnumerated = true;
 					cbInstanceName.Items.Clear();
-					string[] LInstanceNames = ListenerFactory.EnumerateInstances(tbHost.Text, OverrideListenerPortNumber, ListenerSecurityMode);
-					for (int LIndex = 0; LIndex < LInstanceNames.Length; LIndex++)
-						cbInstanceName.Items.Add(LInstanceNames[LIndex]);
+					string[] instanceNames = ListenerFactory.EnumerateInstances(tbHost.Text, OverrideListenerPortNumber, ListenerSecurityMode);
+					for (int index = 0; index < instanceNames.Length; index++)
+						cbInstanceName.Items.Add(instanceNames[index]);
 				}
-				catch (Exception LException)
+				catch (Exception exception)
 				{
-					FInstancesEnumerated = false;
-					MessageBox.Show(String.Format("Could not enumerate instances for host \"{0}\".\r\n{1}", tbHost.Text, LException.Message));
+					_instancesEnumerated = false;
+					MessageBox.Show(String.Format("Could not enumerate instances for host \"{0}\".\r\n{1}", tbHost.Text, exception.Message));
 				}
 			}
 		}
 
 		private void tbHost_TextChanged(object sender, EventArgs e)
 		{
-			FInstancesEnumerated = false;
+			_instancesEnumerated = false;
 		}
 		
-		private bool FLocalInstancesEnumerated;
+		private bool _localInstancesEnumerated;
 		
-		private void LoadInstances(InstanceConfiguration AConfiguration)
+		private void LoadInstances(InstanceConfiguration configuration)
 		{
-			FLocalInstancesEnumerated = true;
-		    InstanceList LInstances = AConfiguration.Instances;
-            FCbInProcessInstanceName.Items.Clear();
-		    for (int LIndex = 0; LIndex < LInstances.Count; LIndex++)
+			_localInstancesEnumerated = true;
+		    InstanceList instances = configuration.Instances;
+            _cbInProcessInstanceName.Items.Clear();
+		    for (int index = 0; index < instances.Count; index++)
 			{
-			    FCbInProcessInstanceName.Items.Add(LInstances[LIndex].Name);
+			    _cbInProcessInstanceName.Items.Add(instances[index].Name);
 			}
 		}
 
 		private void cbInProcessInstanceName_DropDown(object sender, EventArgs e)
 		{
-			if (!FLocalInstancesEnumerated)
+			if (!_localInstancesEnumerated)
 				LoadInstances(InstanceManager.LoadConfiguration());
 		}
 
 		private void NewInstanceButton_Click(object sender, EventArgs e)
 		{
-			ServerConfiguration LInstance = EditInstanceForm.ExecuteAdd();
-			InstanceConfiguration LConfiguration = InstanceManager.LoadConfiguration();
-			LConfiguration.Instances.Add(LInstance);
-			InstanceManager.SaveConfiguration(LConfiguration);
+			ServerConfiguration instance = EditInstanceForm.ExecuteAdd();
+			InstanceConfiguration configuration = InstanceManager.LoadConfiguration();
+			configuration.Instances.Add(instance);
+			InstanceManager.SaveConfiguration(configuration);
 
-			FLocalInstancesEnumerated = false;
-			LoadInstances(LConfiguration);
+			_localInstancesEnumerated = false;
+			LoadInstances(configuration);
 
-			FCbInProcessInstanceName.Text = LInstance.Name;
+			_cbInProcessInstanceName.Text = instance.Name;
 		}
 
 		private void EditInstanceButton_Click(object sender, EventArgs e)
 		{
-			if (!String.IsNullOrEmpty(FCbInProcessInstanceName.Text))
+			if (!String.IsNullOrEmpty(_cbInProcessInstanceName.Text))
 			{
-				InstanceConfiguration LConfiguration = InstanceManager.LoadConfiguration();
-				ServerConfiguration LInstance = LConfiguration.Instances[FCbInProcessInstanceName.Text];
-				if (LInstance == null)
+				InstanceConfiguration configuration = InstanceManager.LoadConfiguration();
+				ServerConfiguration instance = configuration.Instances[_cbInProcessInstanceName.Text];
+				if (instance == null)
 				{
-					LInstance = new ServerConfiguration();
-					LInstance.Name = FCbInProcessInstanceName.Text;
+					instance = new ServerConfiguration();
+					instance.Name = _cbInProcessInstanceName.Text;
 				}
 				else
-					LConfiguration.Instances.Remove(LInstance.Name);
+					configuration.Instances.Remove(instance.Name);
 				
-				LInstance = EditInstanceForm.ExecuteEdit(LInstance);
+				instance = EditInstanceForm.ExecuteEdit(instance);
 				
-				LConfiguration.Instances.Add(LInstance);
-				InstanceManager.SaveConfiguration(LConfiguration);
+				configuration.Instances.Add(instance);
+				InstanceManager.SaveConfiguration(configuration);
 
-				FLocalInstancesEnumerated = false;
-				LoadInstances(LConfiguration);
+				_localInstancesEnumerated = false;
+				LoadInstances(configuration);
 				
-				FCbInProcessInstanceName.Text = LInstance.Name;
+				_cbInProcessInstanceName.Text = instance.Name;
 			}
 		}
 	}

@@ -30,31 +30,31 @@ namespace Alphora.Dataphor.DAE.Streams
 		public virtual bool IsStreaming { get { return false; } }
 
 		/// <summary>Returns the size in bytes required to store the given value.</summary>		
-		public virtual int GetSize(object AValue)
+		public virtual int GetSize(object tempValue)
 		{
 			throw new NotSupportedException();
 		}
 
 		/// <summary>Returns the native representation of the value stored in the buffer given by ABuffer, beginning at the offset given by AOffset.</summary>
-		public virtual object Read(byte[] ABuffer, int AOffset)
+		public virtual object Read(byte[] buffer, int offset)
 		{
 			throw new NotSupportedException();
 		}
 		
 		/// <summary>Writes the physical representation of AValue into the buffer given by ABuffer beginning at the offset given by AOffset</summary>		
-		public virtual void Write(object AValue, byte[] ABuffer, int AOffset)
+		public virtual void Write(object tempValue, byte[] buffer, int offset)
 		{
 			throw new NotSupportedException();
 		}
 
 		/// <summary>Returns the native representation of the value stored in the stream given by AStream.</summary>
-		public virtual object Read(Stream AStream)
+		public virtual object Read(Stream stream)
 		{
 			throw new NotSupportedException();
 		}
 		
 		/// <summary>Writes the physical representation of the value given by AValue into the stream given by AStream.</summary>
-		public virtual void Write(object AValue, Stream AStream)
+		public virtual void Write(object tempValue, Stream stream)
 		{
 			throw new NotSupportedException();
 		}
@@ -64,19 +64,19 @@ namespace Alphora.Dataphor.DAE.Streams
     {
 		public BooleanConveyor() : base() {}
 		
-		public override int GetSize(object AValue)
+		public override int GetSize(object tempValue)
 		{
 			return (sizeof(bool));
 		}
 
-		public override object Read(byte[] ABuffer, int AOffset)
+		public override object Read(byte[] buffer, int offset)
 		{
-			return ABuffer[AOffset] != 0;
+			return buffer[offset] != 0;
 		}
 
-		public override void Write(object AValue, byte[] ABuffer, int AOffset)
+		public override void Write(object tempValue, byte[] buffer, int offset)
 		{
-			ABuffer[AOffset] = (byte)((bool)AValue ? 1 : 0);
+			buffer[offset] = (byte)((bool)tempValue ? 1 : 0);
 		}
     }
     
@@ -84,19 +84,19 @@ namespace Alphora.Dataphor.DAE.Streams
     {
 		public ByteConveyor() : base() {}
 		
-		public override int GetSize(object AValue)
+		public override int GetSize(object tempValue)
 		{
 			return (sizeof(byte));
 		}
 
-		public override object Read(byte[] ABuffer, int AOffset)
+		public override object Read(byte[] buffer, int offset)
 		{
-			return ABuffer[AOffset];
+			return buffer[offset];
 		}
 
-		public override void Write(object AValue, byte[] ABuffer, int AOffset)
+		public override void Write(object tempValue, byte[] buffer, int offset)
 		{
-			ABuffer[AOffset] = (byte)AValue;
+			buffer[offset] = (byte)tempValue;
 		}
     }
     
@@ -104,7 +104,7 @@ namespace Alphora.Dataphor.DAE.Streams
     {
 		public Int16Conveyor() : base() {}
 		
-		public override int GetSize(object AValue)
+		public override int GetSize(object tempValue)
 		{
 			return (sizeof(short));
 		}
@@ -129,14 +129,14 @@ namespace Alphora.Dataphor.DAE.Streams
 		
 		#else
 		
-		public override object Read(byte[] ABuffer, int AOffset)
+		public override object Read(byte[] buffer, int offset)
 		{
-			return ByteArrayUtility.ReadInt16(ABuffer, AOffset);
+			return ByteArrayUtility.ReadInt16(buffer, offset);
 		}
 
-		public override void Write(object AValue, byte[] ABuffer, int AOffset)
+		public override void Write(object tempValue, byte[] buffer, int offset)
 		{
-			ByteArrayUtility.WriteInt16(ABuffer, AOffset, (short)AValue);
+			ByteArrayUtility.WriteInt16(buffer, offset, (short)tempValue);
 		}
 		
 		#endif		
@@ -146,7 +146,7 @@ namespace Alphora.Dataphor.DAE.Streams
     {
 		public Int32Conveyor() : base() {}
 		
-		public override int GetSize(object AValue)
+		public override int GetSize(object tempValue)
 		{
 			return (sizeof(int));
 		}
@@ -171,14 +171,14 @@ namespace Alphora.Dataphor.DAE.Streams
 		
 		#else
 
-		public override object Read(byte[] ABuffer, int AOffset)
+		public override object Read(byte[] buffer, int offset)
 		{
-			return ByteArrayUtility.ReadInt32(ABuffer, AOffset);
+			return ByteArrayUtility.ReadInt32(buffer, offset);
 		}
 
-		public override void Write(object AValue, byte[] ABuffer, int AOffset)
+		public override void Write(object tempValue, byte[] buffer, int offset)
 		{
-			ByteArrayUtility.WriteInt32(ABuffer, AOffset, (int)AValue);
+			ByteArrayUtility.WriteInt32(buffer, offset, (int)tempValue);
 		}
 
 		#endif
@@ -188,7 +188,7 @@ namespace Alphora.Dataphor.DAE.Streams
     {
 		public Int64Conveyor() : base() {}
 		
-		public override int GetSize(object AValue)
+		public override int GetSize(object tempValue)
 		{
 			return (sizeof(long));
 		}
@@ -213,14 +213,14 @@ namespace Alphora.Dataphor.DAE.Streams
 		
 		#else
 
-		public override object Read(byte[] ABuffer, int AOffset)
+		public override object Read(byte[] buffer, int offset)
 		{
-			return ByteArrayUtility.ReadInt64(ABuffer, AOffset);
+			return ByteArrayUtility.ReadInt64(buffer, offset);
 		}
 
-		public override void Write(object AValue, byte[] ABuffer, int AOffset)
+		public override void Write(object tempValue, byte[] buffer, int offset)
 		{
-			ByteArrayUtility.WriteInt64(ABuffer, AOffset, (long)AValue);
+			ByteArrayUtility.WriteInt64(buffer, offset, (long)tempValue);
 		}
 
 		#endif
@@ -230,7 +230,7 @@ namespace Alphora.Dataphor.DAE.Streams
     {
 		public DecimalConveyor() : base() {}
 		
-		public override int GetSize(object AValue)
+		public override int GetSize(object tempValue)
 		{
 			return (sizeof(decimal));
 		}
@@ -255,14 +255,14 @@ namespace Alphora.Dataphor.DAE.Streams
 		
 		#else
 
-		public override object Read(byte[] ABuffer, int AOffset)
+		public override object Read(byte[] buffer, int offset)
 		{
-			return ByteArrayUtility.ReadDecimal(ABuffer, AOffset);
+			return ByteArrayUtility.ReadDecimal(buffer, offset);
 		}
 
-		public override void Write(object AValue, byte[] ABuffer, int AOffset)
+		public override void Write(object tempValue, byte[] buffer, int offset)
 		{
-			ByteArrayUtility.WriteDecimal(ABuffer, AOffset, (decimal)AValue);
+			ByteArrayUtility.WriteDecimal(buffer, offset, (decimal)tempValue);
 		}
 
 		#endif
@@ -272,9 +272,9 @@ namespace Alphora.Dataphor.DAE.Streams
     {
 		public StringConveyor() : base() {}
 		
-		public override int GetSize(object AValue)
+		public override int GetSize(object tempValue)
 		{
-			return sizeof(int) + (((string)AValue).Length * 2); 
+			return sizeof(int) + (((string)tempValue).Length * 2); 
 		}
 
 		#if USE_UNSAFE
@@ -322,14 +322,14 @@ namespace Alphora.Dataphor.DAE.Streams
 		
 		#else
 
-		public override object Read(byte[] ABuffer, int AOffset)
+		public override object Read(byte[] buffer, int offset)
 		{
-			return ByteArrayUtility.ReadString(ABuffer, AOffset);
+			return ByteArrayUtility.ReadString(buffer, offset);
 		}
 
-		public override void Write(object AValue, byte[] ABuffer, int AOffset)
+		public override void Write(object tempValue, byte[] buffer, int offset)
 		{
-			ByteArrayUtility.WriteString(ABuffer, AOffset, (String)AValue);
+			ByteArrayUtility.WriteString(buffer, offset, (String)tempValue);
 		}
 		
 		#endif
@@ -339,7 +339,7 @@ namespace Alphora.Dataphor.DAE.Streams
     {
 		public DateTimeConveyor() : base() {}
 		
-		public override int GetSize(object AValue)
+		public override int GetSize(object tempValue)
 		{
 			return (sizeof(long));
 		}
@@ -364,14 +364,14 @@ namespace Alphora.Dataphor.DAE.Streams
 	
 		#else
 		
-		public override object Read(byte[] ABuffer, int AOffset)
+		public override object Read(byte[] buffer, int offset)
 		{
-			return new DateTime(ByteArrayUtility.ReadInt64(ABuffer, AOffset));
+			return new DateTime(ByteArrayUtility.ReadInt64(buffer, offset));
 		}
 
-		public override void Write(object AValue, byte[] ABuffer, int AOffset)
+		public override void Write(object tempValue, byte[] buffer, int offset)
 		{
-			ByteArrayUtility.WriteInt64(ABuffer, AOffset, ((DateTime)AValue).Ticks);
+			ByteArrayUtility.WriteInt64(buffer, offset, ((DateTime)tempValue).Ticks);
 		}
 
 		#endif		
@@ -381,7 +381,7 @@ namespace Alphora.Dataphor.DAE.Streams
     {
 		public TimeSpanConveyor() : base() {}
 		
-		public override int GetSize(object AValue)
+		public override int GetSize(object tempValue)
 		{
 			return sizeof(long);
 		}
@@ -406,14 +406,14 @@ namespace Alphora.Dataphor.DAE.Streams
 
 		#else
 
-		public override object Read(byte[] ABuffer, int AOffset)
+		public override object Read(byte[] buffer, int offset)
 		{
-			return ByteArrayUtility.ReadInt64(ABuffer, AOffset);
+			return ByteArrayUtility.ReadInt64(buffer, offset);
 		}
 
-		public override void Write(object AValue, byte[] ABuffer, int AOffset)
+		public override void Write(object tempValue, byte[] buffer, int offset)
 		{
-			ByteArrayUtility.WriteInt64(ABuffer, AOffset, ((TimeSpan)AValue).Ticks);
+			ByteArrayUtility.WriteInt64(buffer, offset, ((TimeSpan)tempValue).Ticks);
 		}
 
 		#endif
@@ -423,7 +423,7 @@ namespace Alphora.Dataphor.DAE.Streams
     {
 		public GuidConveyor() : base() {}
 		
-		public override int GetSize(object AValue)
+		public override int GetSize(object tempValue)
 		{
 			return 16;
 		}
@@ -448,14 +448,14 @@ namespace Alphora.Dataphor.DAE.Streams
 
 		#else
 
-		public override object Read(byte[] ABuffer, int AOffset)
+		public override object Read(byte[] buffer, int offset)
 		{
-			return ByteArrayUtility.ReadGuid(ABuffer, AOffset);
+			return ByteArrayUtility.ReadGuid(buffer, offset);
 		}
 
-		public override void Write(object AValue, byte[] ABuffer, int AOffset)
+		public override void Write(object tempValue, byte[] buffer, int offset)
 		{
-			ByteArrayUtility.WriteGuid(ABuffer, AOffset, (Guid)AValue);
+			ByteArrayUtility.WriteGuid(buffer, offset, (Guid)tempValue);
 		}
 
 		#endif
@@ -467,17 +467,17 @@ namespace Alphora.Dataphor.DAE.Streams
 		
 		public override bool IsStreaming { get { return base.IsStreaming; } }
 		
-		private Serializer FSerializer = new Serializer();
-		private Deserializer FDeserializer = new Deserializer();
+		private Serializer _serializer = new Serializer();
+		private Deserializer _deserializer = new Deserializer();
 		
-		public override object Read(Stream AStream)
+		public override object Read(Stream stream)
 		{
-			return FDeserializer.Deserialize(AStream, null);
+			return _deserializer.Deserialize(stream, null);
 		}
 		
-		public override void Write(object AValue, Stream AStream)
+		public override void Write(object tempValue, Stream stream)
 		{
-			FSerializer.Serialize(AStream, AValue);
+			_serializer.Serialize(stream, tempValue);
 		}
 	}
 
@@ -485,17 +485,17 @@ namespace Alphora.Dataphor.DAE.Streams
 	{
 		public override bool IsStreaming { get { return true; } }
 		
-		public override object Read(Stream AStream)
+		public override object Read(Stream stream)
 		{
-			byte[] LData = new byte[AStream.Length];
-			AStream.Read(LData, 0, (int)AStream.Length);
-			return LData;
+			byte[] data = new byte[stream.Length];
+			stream.Read(data, 0, (int)stream.Length);
+			return data;
 		}
 		
-		public override void Write(object AValue, Stream AStream)
+		public override void Write(object tempValue, Stream stream)
 		{
-			byte[] LValue = (byte[])AValue;
-			AStream.Write(LValue, 0, LValue.Length);
+			byte[] localTempValue = (byte[])tempValue;
+			stream.Write(localTempValue, 0, localTempValue.Length);
 		}
 	}
 }

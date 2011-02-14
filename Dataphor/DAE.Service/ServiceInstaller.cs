@@ -18,52 +18,52 @@ namespace Alphora.Dataphor.DAE.Service
 	[RunInstaller(true)]
 	public class ProjectInstaller : System.Configuration.Install.Installer
 	{
-		private ServiceProcessInstaller FServiceProcessInstaller;
-		private ServiceInstaller FServiceInstaller;
-		private string FInstanceName;
+		private ServiceProcessInstaller _serviceProcessInstaller;
+		private ServiceInstaller _serviceInstaller;
+		private string _instanceName;
 		
 		public ProjectInstaller()
 		{
-			FServiceProcessInstaller = new ServiceProcessInstaller();
-			FServiceProcessInstaller.Account = ServiceAccount.LocalSystem;
+			_serviceProcessInstaller = new ServiceProcessInstaller();
+			_serviceProcessInstaller.Account = ServiceAccount.LocalSystem;
 
-			FServiceInstaller = new ServiceInstaller();
-			FServiceInstaller.StartType = ServiceStartMode.Automatic;
+			_serviceInstaller = new ServiceInstaller();
+			_serviceInstaller.StartType = ServiceStartMode.Automatic;
 
 			//Add installers to the collection.
-			Installers.AddRange(new Installer[] { FServiceInstaller, FServiceProcessInstaller });
+			Installers.AddRange(new Installer[] { _serviceInstaller, _serviceProcessInstaller });
 		}
 
 		private void Prepare()
 		{
-			FInstanceName = Context.Parameters["InstanceName"];
-			if (FInstanceName == null)
-				FInstanceName = Server.Engine.CDefaultServerName;
+			_instanceName = Context.Parameters["InstanceName"];
+			if (_instanceName == null)
+				_instanceName = Server.Engine.DefaultServerName;
 				
-			string LServiceName = ServiceUtility.GetServiceName(FInstanceName);
+			string serviceName = ServiceUtility.GetServiceName(_instanceName);
 
-			FServiceInstaller.DisplayName = LServiceName;
-			FServiceInstaller.ServiceName = LServiceName;
-			FServiceInstaller.Description = "Provides platform services for Dataphor applications.";
+			_serviceInstaller.DisplayName = serviceName;
+			_serviceInstaller.ServiceName = serviceName;
+			_serviceInstaller.Description = "Provides platform services for Dataphor applications.";
 		}
 
-		public override void Install(IDictionary AStateSaver)
+		public override void Install(IDictionary stateSaver)
 		{
 			Prepare();
-			base.Install(AStateSaver);
+			base.Install(stateSaver);
 			
-			string LServiceKey = String.Format("HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\{0}", FServiceInstaller.ServiceName);
-			string LImagePath = Registry.GetValue(LServiceKey, "ImagePath", null) as String;
-			if (LImagePath != null)
-				Registry.SetValue(LServiceKey, "ImagePath", String.Format("{0} -name \"{1}\"", LImagePath, FInstanceName));
+			string serviceKey = String.Format("HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\{0}", _serviceInstaller.ServiceName);
+			string imagePath = Registry.GetValue(serviceKey, "ImagePath", null) as String;
+			if (imagePath != null)
+				Registry.SetValue(serviceKey, "ImagePath", String.Format("{0} -name \"{1}\"", imagePath, _instanceName));
 			else
 				throw new InvalidOperationException("Could not retrieve service ImagePath from registry.");
 		}
 
-		public override void Uninstall(IDictionary ASavedState)
+		public override void Uninstall(IDictionary savedState)
 		{
 			Prepare();
-			base.Uninstall(ASavedState);
+			base.Uninstall(savedState);
 		}
 	}
 }

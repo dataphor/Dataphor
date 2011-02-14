@@ -19,25 +19,25 @@ namespace Alphora.Dataphor.DAE.Service
 {
 	public class CrossDomainServiceHost : IDisposable
 	{
-		public CrossDomainServiceHost(string AHostName, int APortNumber, int ASecurePortNumber, bool ARequireSecureConnection)
+		public CrossDomainServiceHost(string hostName, int portNumber, int securePortNumber, bool requireSecureConnection)
 		{
-			List<Uri> LBaseAddresses = new List<Uri>();
-			LBaseAddresses.Add(new Uri(DataphorServiceUtility.BuildCrossDomainServiceURI(AHostName, ASecurePortNumber, true)));
+			List<Uri> baseAddresses = new List<Uri>();
+			baseAddresses.Add(new Uri(DataphorServiceUtility.BuildCrossDomainServiceURI(hostName, securePortNumber, true)));
 			
-			if (!ARequireSecureConnection)
-				LBaseAddresses.Add(new Uri(DataphorServiceUtility.BuildCrossDomainServiceURI(AHostName, APortNumber, false)));
+			if (!requireSecureConnection)
+				baseAddresses.Add(new Uri(DataphorServiceUtility.BuildCrossDomainServiceURI(hostName, portNumber, false)));
 				
-			FServiceHost = new WebServiceHost(typeof(CrossDomainService), LBaseAddresses.ToArray());
+			_serviceHost = new WebServiceHost(typeof(CrossDomainService), baseAddresses.ToArray());
 			
-			FServiceHost.AddServiceEndpoint
+			_serviceHost.AddServiceEndpoint
 			(
 				typeof(ICrossDomainService),
 				new WebHttpBinding(WebHttpSecurityMode.Transport),
 				""
 			);
 		
-			if (!ARequireSecureConnection)
-				FServiceHost.AddServiceEndpoint
+			if (!requireSecureConnection)
+				_serviceHost.AddServiceEndpoint
 				(
 					typeof(ICrossDomainService), 
 					new WebHttpBinding(),
@@ -46,7 +46,7 @@ namespace Alphora.Dataphor.DAE.Service
 				
 			try
 			{
-				FServiceHost.Open();
+				_serviceHost.Open();
 			}
 			catch
 			{
@@ -58,16 +58,16 @@ namespace Alphora.Dataphor.DAE.Service
 
 		public void Dispose()
 		{
-			if (FServiceHost != null)
+			if (_serviceHost != null)
 			{
-				if (FServiceHost.State == CommunicationState.Opened)
-					FServiceHost.Close();
-				FServiceHost = null;
+				if (_serviceHost.State == CommunicationState.Opened)
+					_serviceHost.Close();
+				_serviceHost = null;
 			}
 		}
 
 		#endregion
 
-		private ServiceHost FServiceHost;
+		private ServiceHost _serviceHost;
 	}
 }

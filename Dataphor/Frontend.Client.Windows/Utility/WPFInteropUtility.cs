@@ -10,17 +10,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		/// <summary> Convert from a WinForms bitmap to a WPF ImageSource. </summary>
 		/// <remarks> Credits: http://stackoverflow.com/questions/1118496/using-image-control-in-wpf-to-display-system-drawing-bitmap/1118557#1118557 </remarks>
-		public static BitmapSource ImageToBitmapSource(System.Drawing.Image ASource)
+		public static BitmapSource ImageToBitmapSource(System.Drawing.Image source)
 		{
-			var LSource = ASource as System.Drawing.Bitmap;
-			if (LSource != null)
+			var localSource = source as System.Drawing.Bitmap;
+			if (localSource != null)
 			{
-				IntPtr LHandle = LSource.GetHbitmap();
+				IntPtr handle = localSource.GetHbitmap();
 				try
 				{
 					return System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap
 					(
-						LHandle,
+						handle,
 						IntPtr.Zero,
 						System.Windows.Int32Rect.Empty,
 						System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions()
@@ -28,7 +28,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				}
 				finally
 				{
-					DeleteObject(LHandle);
+					DeleteObject(handle);
 				}
 			}
 			else

@@ -21,15 +21,15 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 {
     public class CustomFormDesigner : FormDesigner
     {
-        private Container FComponents;
-        private Ancestors FAncestors;
+        private Container _components;
+        private Ancestors _ancestors;
 
         public CustomFormDesigner() // dummy constructor for MDI menu merging?
         {
             InitializeComponent();
         }
 
-        public CustomFormDesigner(IDataphoria ADataphoria, string ADesignerID) : base(ADataphoria, ADesignerID)
+        public CustomFormDesigner(IDataphoria dataphoria, string designerID) : base(dataphoria, designerID)
         {
             InitializeComponent();
         }
@@ -37,187 +37,187 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
         [Browsable(false)]
         public Ancestors Ancestors
         {
-            get { return FAncestors; }
+            get { return _ancestors; }
         }
 
-        protected override void Dispose(bool ADisposing)
+        protected override void Dispose(bool disposing)
         {
-            if (ADisposing)
+            if (disposing)
             {
-                if (FComponents != null)
+                if (_components != null)
                 {
-                    FComponents.Dispose();
+                    _components.Dispose();
                 }
             }
-            base.Dispose(ADisposing);
+            base.Dispose(disposing);
         }
 
         public override void New()
         {
-            var LAncestors = new Ancestors();
-            var LDocumentExpression = new DocumentExpression();
-            LDocumentExpression.Type = DocumentType.Document;
-            LDocumentExpression.DocumentArgs.OperatorName = ".Frontend.Form";
-            LAncestors.Add(DocumentExpressionForm.Execute(LDocumentExpression));
-            New(LAncestors);
+            var ancestors = new Ancestors();
+            var documentExpression = new DocumentExpression();
+            documentExpression.Type = DocumentType.Document;
+            documentExpression.DocumentArgs.OperatorName = ".Frontend.Form";
+            ancestors.Add(DocumentExpressionForm.Execute(documentExpression));
+            New(ancestors);
         }
 
         /// <summary> Initializes the designer from a list of ancestor document expressions. </summary>
-        /// <param name="AAncestors"> List of ancestor document expressions. Must be non-empty. </param>
-        public void New(Ancestors AAncestors)
+        /// <param name="ancestors"> List of ancestor document expressions. Must be non-empty. </param>
+        public void New(Ancestors ancestors)
         {
-            XDocument LAncestor = MergeAncestors(AAncestors);
-            InternalNew(HostFromDocumentData(LAncestor, String.Empty), true);
-            UpdateReadOnly(LAncestor);
-            FAncestors = AAncestors;
+            XDocument ancestor = MergeAncestors(ancestors);
+            InternalNew(HostFromDocumentData(ancestor, String.Empty), true);
+            UpdateReadOnly(ancestor);
+            _ancestors = ancestors;
         }
 
-        public void CheckHostsDocument(IHost AHost)
+        public void CheckHostsDocument(IHost host)
         {
-            if ((AHost.Document == null) || (AHost.Document == String.Empty))
+            if ((host.Document == null) || (host.Document == String.Empty))
                 throw new DataphoriaException(DataphoriaException.Codes.CannotCustomizeDocument);
         }
 
-        public new void New(IHost AHost)
+        public new void New(IHost host)
         {
-            CheckHostsDocument(AHost);
-            InternalNew(AHost, false);
-            FAncestors = new Ancestors();
-            FAncestors.Add(AHost.Document);
-            UpdateReadOnly(MergeAncestors(FAncestors));
+            CheckHostsDocument(host);
+            InternalNew(host, false);
+            _ancestors = new Ancestors();
+            _ancestors.Add(host.Document);
+            UpdateReadOnly(MergeAncestors(_ancestors));
         }
 
-        public override void Open(IHost AHost)
+        public override void Open(IHost host)
         {
-            CheckHostsDocument(AHost);
-            DocumentDesignBuffer LBuffer = BufferFromHost(AHost);
-            Service.ValidateBuffer(LBuffer);
-            var LDocument = new DilxDocument();
-            LDocument.Read(LBuffer.LoadData());
-            XDocument LMergedAncestors = MergeAncestors(LDocument.Ancestors); // do this first in case of errors
-            SetDesignHost(AHost, false);
-            Service.SetBuffer(LBuffer);
+            CheckHostsDocument(host);
+            DocumentDesignBuffer buffer = BufferFromHost(host);
+            Service.ValidateBuffer(buffer);
+            var document = new DilxDocument();
+            document.Read(buffer.LoadData());
+            XDocument mergedAncestors = MergeAncestors(document.Ancestors); // do this first in case of errors
+            SetDesignHost(host, false);
+            Service.SetBuffer(buffer);
             Service.SetModified(false);
-            FAncestors = LDocument.Ancestors;
-            UpdateReadOnly(LMergedAncestors);
+            _ancestors = document.Ancestors;
+            UpdateReadOnly(mergedAncestors);
         }
 
-        protected override void RequestLoad(DesignService AService, DesignBuffer ABuffer)
+        protected override void RequestLoad(DesignService service, DesignBuffer buffer)
         {
-            var LDocument = new DilxDocument();
-            LDocument.Read(ABuffer.LoadData());
+            var document = new DilxDocument();
+            document.Read(buffer.LoadData());
 
-            Ancestors LAncestors;
-            IHost LHost;
-            XDocument LAncestor = null;
-            if (LDocument.Ancestors.Count >= 1)
+            Ancestors ancestors;
+            IHost host;
+            XDocument ancestor = null;
+            if (document.Ancestors.Count >= 1)
             {
-                LAncestors = LDocument.Ancestors;
-                LAncestor = MergeAncestors(LAncestors);
-                var LMerge = XDocument.Load(new StringReader(LDocument.Content));
-                var LCurrent = new XDocument();
-                LCurrent.Add(new XElement(LAncestor.Root));
-                Inheritance.Merge(LCurrent, LMerge);
-                LHost = HostFromDocumentData(LCurrent, GetDocumentExpression(ABuffer));
+                ancestors = document.Ancestors;
+                ancestor = MergeAncestors(ancestors);
+                var merge = XDocument.Load(new StringReader(document.Content));
+                var current = new XDocument();
+                current.Add(new XElement(ancestor.Root));
+                Inheritance.Merge(current, merge);
+                host = HostFromDocumentData(current, GetDocumentExpression(buffer));
             }
             else
             {
-                LHost = HostFromDocumentData(LDocument.Content, GetDocumentExpression(ABuffer));
-                LAncestors = null;
+                host = HostFromDocumentData(document.Content, GetDocumentExpression(buffer));
+                ancestors = null;
             }
-            SetDesignHost(LHost, true);
-            UpdateReadOnly(LAncestor);
-            FAncestors = LAncestors;
+            SetDesignHost(host, true);
+            UpdateReadOnly(ancestor);
+            _ancestors = ancestors;
         }
 
-        private XDocument MergeAncestors(Ancestors AAncestors)
+        private XDocument MergeAncestors(Ancestors ancestors)
         {
-            XDocument LDocument = null;
+            XDocument document = null;
             // Process any ancestors
-            foreach (string LAncestor in AAncestors)
+            foreach (string ancestor in ancestors)
             {
-                if (LDocument == null)
-                    LDocument = LoadDocument(LAncestor);
+                if (document == null)
+                    document = LoadDocument(ancestor);
                 else
-                    Inheritance.Merge(LDocument, LoadDocument(LAncestor));
+                    Inheritance.Merge(document, LoadDocument(ancestor));
             }
-            return LDocument;
+            return document;
         }
 
-        private XDocument LoadDocument(string ADocument)
+        private XDocument LoadDocument(string document)
         {
-            using (Scalar LResultData = FrontendSession.Pipe.RequestDocument(ADocument))
+            using (Scalar resultData = FrontendSession.Pipe.RequestDocument(document))
             {
                 try
                 {
-                    return XDocument.Load(new StringReader(LResultData.AsString));
+                    return XDocument.Load(new StringReader(resultData.AsString));
                 }
-                catch (Exception LException)
+                catch (Exception exception)
                 {
-                    throw new DataphoriaException(DataphoriaException.Codes.InvalidXMLDocument, LException,
-                                                  LResultData.ToString());
+                    throw new DataphoriaException(DataphoriaException.Codes.InvalidXMLDocument, exception,
+                                                  resultData.ToString());
                 }
             }
         }
 
-        private static string XDocumentToString(XDocument ADocument)
+        private static string XDocumentToString(XDocument document)
         {
-            var LWriter = new StringWriter();
-            ADocument.Save(LWriter);
-            return LWriter.ToString();
+            var writer = new StringWriter();
+            document.Save(writer);
+            return writer.ToString();
         }
 
-        protected override void RequestSave(DesignService AService, DesignBuffer ABuffer)
+        protected override void RequestSave(DesignService service, DesignBuffer buffer)
         {
-            var LDocument = new DilxDocument();
-            if (FAncestors != null)
-                LDocument.Ancestors = FAncestors;
+            var document = new DilxDocument();
+            if (_ancestors != null)
+                document.Ancestors = _ancestors;
 
-            var LContent = new XDocument();
-            Serializer LSerializer = FrontendSession.CreateSerializer();
-            LSerializer.Serialize(LContent, DesignHost.Children[0]);
-            Dataphoria.Warnings.AppendErrors(this, LSerializer.Errors, true);
+            var content = new XDocument();
+            Serializer serializer = FrontendSession.CreateSerializer();
+            serializer.Serialize(content, DesignHost.Children[0]);
+            Dataphoria.Warnings.AppendErrors(this, serializer.Errors, true);
 
-            if (FAncestors != null)
-                LContent = Inheritance.Diff(MergeAncestors(LDocument.Ancestors), LContent);
-            LDocument.Content = LContent.Root.ToString(); // only the document node
+            if (_ancestors != null)
+                content = Inheritance.Diff(MergeAncestors(document.Ancestors), content);
+            document.Content = content.Root.ToString(); // only the document node
 
-            ABuffer.SaveData(LDocument.Write());
-            UpdateHostsDocument(ABuffer);
+            buffer.SaveData(document.Write());
+            UpdateHostsDocument(buffer);
         }
 
-        private void UpdateReadOnly(XDocument AAncestor)
+        private void UpdateReadOnly(XDocument ancestor)
         {
-            var LRootNode = (DesignerNode)FNodesTree.Nodes[0];
-            if (AAncestor != null)
+            var rootNode = (DesignerNode)FNodesTree.Nodes[0];
+            if (ancestor != null)
             {
-                var LNodesByName = new Hashtable(StringComparer.OrdinalIgnoreCase);
-                BuildNodesByName(LNodesByName, LRootNode);
-                if (AAncestor.Root != null)
-                    foreach (XElement LNode in AAncestor.Root.Elements()) // (skips root interface)
-                        UpdateNodeReadOnly(LNode, LNodesByName);
+                var nodesByName = new Hashtable(StringComparer.OrdinalIgnoreCase);
+                BuildNodesByName(nodesByName, rootNode);
+                if (ancestor.Root != null)
+                    foreach (XElement node in ancestor.Root.Elements()) // (skips root interface)
+                        UpdateNodeReadOnly(node, nodesByName);
             }
         }
 
-        private static void BuildNodesByName(Hashtable ANodesByName, DesignerNode ANode)
+        private static void BuildNodesByName(Hashtable nodesByName, DesignerNode node)
         {
-            if (ANode.Node.Name != String.Empty)
-                ANodesByName.Add(ANode.Node.Name, ANode);
-            foreach (DesignerNode LNode in ANode.Nodes)
-                BuildNodesByName(ANodesByName, LNode);
+            if (node.Node.Name != String.Empty)
+                nodesByName.Add(node.Node.Name, node);
+            foreach (DesignerNode localNode in node.Nodes)
+                BuildNodesByName(nodesByName, localNode);
         }
 
-        private static void UpdateNodeReadOnly(XElement ANode, Hashtable ANodesByName)
+        private static void UpdateNodeReadOnly(XElement node, Hashtable nodesByName)
         {
-            XAttribute LName = ANode.Attribute(Persistence.CXmlBOPName);
-            if (LName != null)
+            XAttribute name = node.Attribute(Persistence.XmlBOPName);
+            if (name != null)
             {
-                var LDesignerNode = (DesignerNode)ANodesByName[LName.Value];
-                if (LDesignerNode != null)
-                    LDesignerNode.SetReadOnly(true, false);
+                var designerNode = (DesignerNode)nodesByName[name.Value];
+                if (designerNode != null)
+                    designerNode.SetReadOnly(true, false);
             }
-            foreach (XElement LNode in ANode.Elements())
-                UpdateNodeReadOnly(LNode, ANodesByName);
+            foreach (XElement localNode in node.Elements())
+                UpdateNodeReadOnly(localNode, nodesByName);
         }
 
         #region Windows Form Designer generated code
@@ -228,7 +228,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
         /// </summary>
         private void InitializeComponent()
         {
-            this.FComponents = new System.ComponentModel.Container();
+            this._components = new System.ComponentModel.Container();
             this.Size = new System.Drawing.Size(300, 300);
             this.Text = "CustomFormDesigner";
         }

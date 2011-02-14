@@ -27,50 +27,50 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 	/// </remarks>
 	public class DAEDataReader : DbDataReader, IEnumerable, IDataReader, IDisposable, IDataRecord
 	{
-		public const string CMetaDataNamespace = "DAEDataReader";
-		public const string CNativeTypeTag = "NativeType";
-		public const string CColumnSizeTag = "ColumnSize";
-		public const string CIsReadOnlyTag = "IsReadOnly";
-		public const string CIsAutoIncrementTag = "IsAutoIncrement";
-		public const string CIsLongTag = "IsLong";
-		public const string CNumericPrecisionTag = "NumericPrecision";
-		public const string CNumericScaleTag = "NumericScale";
-		public const int CDefaultNumericPrecision = 28;
-		public const int CDefaultNumericScale = 4;
+		public const string MetaDataNamespace = "DAEDataReader";
+		public const string NativeTypeTag = "NativeType";
+		public const string ColumnSizeTag = "ColumnSize";
+		public const string IsReadOnlyTag = "IsReadOnly";
+		public const string IsAutoIncrementTag = "IsAutoIncrement";
+		public const string IsLongTag = "IsLong";
+		public const string NumericPrecisionTag = "NumericPrecision";
+		public const string NumericScaleTag = "NumericScale";
+		public const int DefaultNumericPrecision = 28;
+		public const int DefaultNumericScale = 4;
 
-		protected internal DAEDataReader(IServerCursor ACursor, DAECommand ACommand)
+		protected internal DAEDataReader(IServerCursor cursor, DAECommand command)
 		{
-			FCursor = ACursor;
-			FCommand = ACommand;
+			_cursor = cursor;
+			_command = command;
 
 			// Cache native types
-			FNativeTypes = new ArrayList();
-			foreach (TableVarColumn LColumn in FCursor.Plan.TableVar.Columns)
-				FNativeTypes.Add(GetNativeType(LColumn.DataType, LColumn, FCursor.Plan.Process.DataTypes));
+			_nativeTypes = new ArrayList();
+			foreach (TableVarColumn column in _cursor.Plan.TableVar.Columns)
+				_nativeTypes.Add(GetNativeType(column.DataType, column, _cursor.Plan.Process.DataTypes));
 		}
 
 		/// <summary>
 		/// A special reader that returns 1 for records affected.
 		/// When records affected is required for an execute statement.
 		/// </summary>
-		/// <param name="ACommand"></param>
-		protected internal DAEDataReader(DAECommand ACommand)
+		/// <param name="command"></param>
+		protected internal DAEDataReader(DAECommand command)
 		{
-			FCommand = ACommand;
-			FRowCount = 1; //Records effected is always one when the reader is in a non-cursor.
-			FNativeTypes = new ArrayList();
+			_command = command;
+			_rowCount = 1; //Records effected is always one when the reader is in a non-cursor.
+			_nativeTypes = new ArrayList();
 		}
 
-		private DAECommand FCommand;
-		private IServerCursor FCursor;
-		private int FRowCount;
-		private ArrayList FNativeTypes;
+		private DAECommand _command;
+		private IServerCursor _cursor;
+		private int _rowCount;
+		private ArrayList _nativeTypes;
 
-		public static Type GetNativeType(IDataType ADataType, DataTypes ADataTypes)
+		public static Type GetNativeType(IDataType dataType, DataTypes dataTypes)
 		{
-			if (ADataType.Is(ADataTypes.SystemBoolean))
+			if (dataType.Is(dataTypes.SystemBoolean))
 				return typeof(bool);
-			else if (ADataType.Is(ADataTypes.SystemByte))
+			else if (dataType.Is(dataTypes.SystemByte))
 				return typeof(byte);
 			#if UseUnsignedIntegers
 			else if (ADataType.Is(ADataTypes.SystemPByte))
@@ -90,45 +90,45 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			else if (ADataType.Is(ADataTypes.SystemULong))
 				return typeof(ulong);
 			#endif
-			else if (ADataType.Is(ADataTypes.SystemShort))
+			else if (dataType.Is(dataTypes.SystemShort))
 				return typeof(short);
-			else if (ADataType.Is(ADataTypes.SystemInteger))
+			else if (dataType.Is(dataTypes.SystemInteger))
 				return typeof(int);
-			else if (ADataType.Is(ADataTypes.SystemLong))
+			else if (dataType.Is(dataTypes.SystemLong))
 				return typeof(long);
-			else if (ADataType.Is(ADataTypes.SystemDateTime) || ADataType.Is(ADataTypes.SystemDate) || ADataType.Is(ADataTypes.SystemTime))
+			else if (dataType.Is(dataTypes.SystemDateTime) || dataType.Is(dataTypes.SystemDate) || dataType.Is(dataTypes.SystemTime))
 				return typeof(DateTime);
-			else if (ADataType.Is(ADataTypes.SystemTimeSpan))
+			else if (dataType.Is(dataTypes.SystemTimeSpan))
 				return typeof(TimeSpan);
-			else if (ADataType.Is(ADataTypes.SystemDecimal) || ADataType.Is(ADataTypes.SystemMoney))
+			else if (dataType.Is(dataTypes.SystemDecimal) || dataType.Is(dataTypes.SystemMoney))
 				return typeof(decimal);
-			else if (ADataType.Is(ADataTypes.SystemGuid))
+			else if (dataType.Is(dataTypes.SystemGuid))
 				return typeof(System.Guid);
 			#if USEISTRING
 			else if (ADataType.Is(ADataTypes.SystemString) || ADataType.Is(ADataTypes.SystemName) || ADataType.Is(ADataTypes.SystemIString))
 			#else
-			else if (ADataType.Is(ADataTypes.SystemString) || ADataType.Is(ADataTypes.SystemName))
+			else if (dataType.Is(dataTypes.SystemString) || dataType.Is(dataTypes.SystemName))
 			#endif
 				return typeof(string);
 			else
 				return typeof(byte[]);	// All others -> byte array.
 		}
 
-		public static Type GetNativeType(IDataType ADataType, TableVarColumn AColumn, Schema.DataTypes ADataTypes)
+		public static Type GetNativeType(IDataType dataType, TableVarColumn column, Schema.DataTypes dataTypes)
 		{
-			DAE.Language.D4.Tag LTag = AColumn.MetaData.Tags.GetTag("DAEDataReader.NativeType");
-            if (LTag != Tag.None)
-				return Type.GetType(LTag.Value, true, true);
+			DAE.Language.D4.Tag tag = column.MetaData.Tags.GetTag("DAEDataReader.NativeType");
+            if (tag != Tag.None)
+				return Type.GetType(tag.Value, true, true);
 			else
-				return GetNativeType(ADataType, ADataTypes);
+				return GetNativeType(dataType, dataTypes);
 		}
 		
 		public override IEnumerator GetEnumerator()
 		{
-			return new System.Data.Common.DbEnumerator(this, FCommand.Behavior == CommandBehavior.CloseConnection);
+			return new System.Data.Common.DbEnumerator(this, _command.Behavior == CommandBehavior.CloseConnection);
 		}
 
-		public override bool HasRows { get { return (FCursor != null) && !(FCursor.BOF() && FCursor.EOF()); } }
+		public override bool HasRows { get { return (_cursor != null) && !(_cursor.BOF() && _cursor.EOF()); } }
 
 		public override int Depth
 		{
@@ -137,12 +137,12 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 
 		public override bool IsClosed
 		{
-			get { return FCursor == null; }
+			get { return _cursor == null; }
 		}
 
 		public override int RecordsAffected
 		{
-			get { return FRowCount; }
+			get { return _rowCount; }
 		}
 
 		public override void Close()
@@ -157,81 +157,81 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 				{
 					try
 					{
-						FCursor.Plan.Close(FCursor);
+						_cursor.Plan.Close(_cursor);
 					}
 					finally
 					{
-						FCursor = null;
+						_cursor = null;
 					}
 				}
 			}
 		}
 
-		private Column GetInternalColumn(int AIndex)
+		private Column GetInternalColumn(int index)
 		{
-			return ((TableType)FCursor.Plan.DataType).Columns[AIndex];
+			return ((TableType)_cursor.Plan.DataType).Columns[index];
 		}
 
-		private int GetColumnSize(TableVarColumn AColumn)
+		private int GetColumnSize(TableVarColumn column)
 		{
-			DAE.Language.D4.Tag LTag = AColumn.MetaData.Tags.GetTag("DAEDataReader.ColumnSize");
-			if (LTag != null)
-				return System.Convert.ToInt32(LTag.Value);
+			DAE.Language.D4.Tag tag = column.MetaData.Tags.GetTag("DAEDataReader.ColumnSize");
+			if (tag != null)
+				return System.Convert.ToInt32(tag.Value);
 			else
 				return System.Int32.MaxValue;
 		}
 
-		private bool GetIsLong(TableVarColumn AColumn, Schema.DataTypes ADataTypes)
+		private bool GetIsLong(TableVarColumn column, Schema.DataTypes dataTypes)
 		{
-			DAE.Language.D4.Tag LTag = AColumn.MetaData.Tags.GetTag("DAEDataReader.IsLong");
-			if (LTag != null)
-				return LTag.Value.ToLower() == "true";
+			DAE.Language.D4.Tag tag = column.MetaData.Tags.GetTag("DAEDataReader.IsLong");
+			if (tag != null)
+				return tag.Value.ToLower() == "true";
 			else
-				return (GetNativeType(AColumn.DataType, AColumn, ADataTypes) == typeof(byte[]));
+				return (GetNativeType(column.DataType, column, dataTypes) == typeof(byte[]));
 		}
 
-		private bool GetIsReadOnly(TableVarColumn AColumn)
+		private bool GetIsReadOnly(TableVarColumn column)
 		{
-			DAE.Language.D4.Tag LTag = AColumn.MetaData.Tags.GetTag("DAEDataReader.IsReadOnly");
-			if (LTag != null)
-				return LTag.Value.ToLower() == "true";
-			else
-				return false;
-		}
-
-		private bool GetIsAutoIncrement(TableVarColumn AColumn)
-		{
-			DAE.Language.D4.Tag LTag = AColumn.MetaData.Tags.GetTag("DAEDataReader.IsAutoIncrement");
-			if (LTag != null)
-				return LTag.Value.ToLower() == "true";
+			DAE.Language.D4.Tag tag = column.MetaData.Tags.GetTag("DAEDataReader.IsReadOnly");
+			if (tag != null)
+				return tag.Value.ToLower() == "true";
 			else
 				return false;
 		}
 
-		private int GetNumericPrecision(TableVarColumn AColumn)
+		private bool GetIsAutoIncrement(TableVarColumn column)
 		{
-			DAE.Language.D4.Tag LTag = AColumn.MetaData.Tags.GetTag("DAEDataReader.NumericPrecision");
-			if (LTag != null)
-				return System.Convert.ToInt32(LTag.Value);
+			DAE.Language.D4.Tag tag = column.MetaData.Tags.GetTag("DAEDataReader.IsAutoIncrement");
+			if (tag != null)
+				return tag.Value.ToLower() == "true";
 			else
-				return CDefaultNumericPrecision;
+				return false;
 		}
 
-		private int GetNumericScale(TableVarColumn AColumn)
+		private int GetNumericPrecision(TableVarColumn column)
 		{
-			DAE.Language.D4.Tag LTag = AColumn.MetaData.Tags.GetTag("DAEDataReader.NumericScale");
-			if (LTag != null)
-				return System.Convert.ToInt32(LTag.Value);
+			DAE.Language.D4.Tag tag = column.MetaData.Tags.GetTag("DAEDataReader.NumericPrecision");
+			if (tag != null)
+				return System.Convert.ToInt32(tag.Value);
 			else
-				return CDefaultNumericScale;
+				return DefaultNumericPrecision;
 		}
 
-		private DataColumn CreateSchemaColumn(string AColumnName, Type ADataType)
+		private int GetNumericScale(TableVarColumn column)
 		{
-			DataColumn LColumn = new DataColumn(AColumnName, ADataType);
+			DAE.Language.D4.Tag tag = column.MetaData.Tags.GetTag("DAEDataReader.NumericScale");
+			if (tag != null)
+				return System.Convert.ToInt32(tag.Value);
+			else
+				return DefaultNumericScale;
+		}
+
+		private DataColumn CreateSchemaColumn(string columnName, Type dataType)
+		{
+			DataColumn column = new DataColumn(columnName, dataType);
 			//We don't need the DataTable to enforce these
-			LColumn.AllowDBNull = true;
-			return LColumn;
+			column.AllowDBNull = true;
+			return column;
 		}
 
 		/// <summary> Returns a DataTable that describes the column metadata of the IDataReader. </summary>
@@ -251,65 +251,65 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 		/// <returns> A DataTable that describes the column metadata. </returns>
 		public override DataTable GetSchemaTable()
 		{
-			DataTable LResult = new DataTable("SchemaTable");
+			DataTable result = new DataTable("SchemaTable");
 
-			LResult.Columns.Add(CreateSchemaColumn("ColumnName", typeof(String)));
-			LResult.Columns.Add(CreateSchemaColumn("ColumnOrdinal", typeof(Int32)));
-			LResult.Columns.Add(CreateSchemaColumn("ColumnSize", typeof(Int32)));
-			LResult.Columns.Add(CreateSchemaColumn("NumericPrecision", typeof(Int32)));
-			LResult.Columns.Add(CreateSchemaColumn("NumericScale", typeof(Int32)));
-			LResult.Columns.Add(CreateSchemaColumn("DataType", typeof(Type)));
-			LResult.Columns.Add(CreateSchemaColumn("ProviderType", typeof(Type)));
-			LResult.Columns.Add(CreateSchemaColumn("IsLong", typeof(Boolean)));
-			LResult.Columns.Add(CreateSchemaColumn("AllowDBNull", typeof(Boolean)));
-			LResult.Columns.Add(CreateSchemaColumn("IsReadOnly", typeof(Boolean)));
-			LResult.Columns.Add(CreateSchemaColumn("IsRowVersion", typeof(Boolean)));
-			LResult.Columns.Add(CreateSchemaColumn("IsUnique", typeof(Boolean)));
-			LResult.Columns.Add(CreateSchemaColumn("IsKeyColumn", typeof(Boolean)));
-			LResult.Columns.Add(CreateSchemaColumn("IsAutoIncrement", typeof(Boolean)));
-			LResult.Columns.Add(CreateSchemaColumn("BaseSchemaName", typeof(String)));
-			LResult.Columns.Add(CreateSchemaColumn("BaseCatalogName", typeof(String)));
-			LResult.Columns.Add(CreateSchemaColumn("BaseTableName", typeof(String)));
-			LResult.Columns.Add(CreateSchemaColumn("BaseColumnName", typeof(String)));
+			result.Columns.Add(CreateSchemaColumn("ColumnName", typeof(String)));
+			result.Columns.Add(CreateSchemaColumn("ColumnOrdinal", typeof(Int32)));
+			result.Columns.Add(CreateSchemaColumn("ColumnSize", typeof(Int32)));
+			result.Columns.Add(CreateSchemaColumn("NumericPrecision", typeof(Int32)));
+			result.Columns.Add(CreateSchemaColumn("NumericScale", typeof(Int32)));
+			result.Columns.Add(CreateSchemaColumn("DataType", typeof(Type)));
+			result.Columns.Add(CreateSchemaColumn("ProviderType", typeof(Type)));
+			result.Columns.Add(CreateSchemaColumn("IsLong", typeof(Boolean)));
+			result.Columns.Add(CreateSchemaColumn("AllowDBNull", typeof(Boolean)));
+			result.Columns.Add(CreateSchemaColumn("IsReadOnly", typeof(Boolean)));
+			result.Columns.Add(CreateSchemaColumn("IsRowVersion", typeof(Boolean)));
+			result.Columns.Add(CreateSchemaColumn("IsUnique", typeof(Boolean)));
+			result.Columns.Add(CreateSchemaColumn("IsKeyColumn", typeof(Boolean)));
+			result.Columns.Add(CreateSchemaColumn("IsAutoIncrement", typeof(Boolean)));
+			result.Columns.Add(CreateSchemaColumn("BaseSchemaName", typeof(String)));
+			result.Columns.Add(CreateSchemaColumn("BaseCatalogName", typeof(String)));
+			result.Columns.Add(CreateSchemaColumn("BaseTableName", typeof(String)));
+			result.Columns.Add(CreateSchemaColumn("BaseColumnName", typeof(String)));
 
-			TableType LType = (TableType)FCursor.Plan.DataType;
-			TableVar LVar = FCursor.Plan.TableVar;
-			DataTypes LDataTypes = FCursor.Plan.Process.DataTypes;
-			int LOrdinal = 1;
-			foreach (TableVarColumn LSourceColumn in LVar.Columns)
+			TableType type = (TableType)_cursor.Plan.DataType;
+			TableVar var = _cursor.Plan.TableVar;
+			DataTypes dataTypes = _cursor.Plan.Process.DataTypes;
+			int ordinal = 1;
+			foreach (TableVarColumn sourceColumn in var.Columns)
 			{
-				DataRow LTargetRow = LResult.NewRow();
-				LTargetRow["ColumnName"] = LSourceColumn.Name;
-				LTargetRow["ColumnOrdinal"] = LOrdinal;
+				DataRow targetRow = result.NewRow();
+				targetRow["ColumnName"] = sourceColumn.Name;
+				targetRow["ColumnOrdinal"] = ordinal;
 				//If only it were so simple.
-				LTargetRow["ColumnSize"] = GetColumnSize(LSourceColumn);
-				if (LSourceColumn.DataType.Is(FCursor.Plan.Process.DataTypes.SystemDecimal))
+				targetRow["ColumnSize"] = GetColumnSize(sourceColumn);
+				if (sourceColumn.DataType.Is(_cursor.Plan.Process.DataTypes.SystemDecimal))
 				{
-					LTargetRow["NumericPrecision"] = GetNumericPrecision(LSourceColumn);
-					LTargetRow["NumericScale"] = GetNumericScale(LSourceColumn);
+					targetRow["NumericPrecision"] = GetNumericPrecision(sourceColumn);
+					targetRow["NumericScale"] = GetNumericScale(sourceColumn);
 				}
 				else
 				{
-					LTargetRow["NumericPrecision"] = DBNull.Value;
-					LTargetRow["NumericScale"] = DBNull.Value;
+					targetRow["NumericPrecision"] = DBNull.Value;
+					targetRow["NumericScale"] = DBNull.Value;
 				}
-				Type LNativeType = (Type)FNativeTypes[LOrdinal - 1];
-				LTargetRow["DataType"] = LNativeType;
-				LTargetRow["ProviderType"] = LSourceColumn.DataType;
-				LTargetRow["IsLong"] = GetIsLong(LSourceColumn, LDataTypes);
+				Type nativeType = (Type)_nativeTypes[ordinal - 1];
+				targetRow["DataType"] = nativeType;
+				targetRow["ProviderType"] = sourceColumn.DataType;
+				targetRow["IsLong"] = GetIsLong(sourceColumn, dataTypes);
 				// No way to determine whether the column is read-only at this point (read only to Dataphor means that some operator will reject an update)
-				LTargetRow["IsReadOnly"] = GetIsReadOnly(LSourceColumn);
+				targetRow["IsReadOnly"] = GetIsReadOnly(sourceColumn);
 
-				bool LIsUnique = false;
-				bool LIsKeyColumn = false;
-				foreach (Key LKey in LVar.Keys)
+				bool isUnique = false;
+				bool isKeyColumn = false;
+				foreach (Key key in var.Keys)
 				{
-					if (LKey.Columns.Contains(LSourceColumn.Name))
+					if (key.Columns.Contains(sourceColumn.Name))
 					{
-						LIsKeyColumn = true;
-						if (LKey.Columns.Count == 1)
+						isKeyColumn = true;
+						if (key.Columns.Count == 1)
 						{
-							LIsUnique = true;
+							isUnique = true;
 							break;
 						}
 					}
@@ -317,25 +317,25 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 
 				// IsUnique only makes sense at the column level if a key is composed 
 				//  of exclusively this column... so look for that.
-				LTargetRow["IsUnique"] = LIsUnique;
+				targetRow["IsUnique"] = isUnique;
 				// Whatever "row version" means... according to the SqlReader IsRowVersion equals IsUnique.
-				LTargetRow["IsRowVersion"] = LIsUnique;
+				targetRow["IsRowVersion"] = isUnique;
 				// Look for a key which contains this column
-				LTargetRow["IsKeyColumn"] = LIsKeyColumn;
+				targetRow["IsKeyColumn"] = isKeyColumn;
 				// Allow for DAE provider.
-				LTargetRow["AllowDBNull"] = !LIsUnique;
+				targetRow["AllowDBNull"] = !isUnique;
 				// If only it was so simple  :-)
-				LTargetRow["IsAutoIncrement"] = GetIsAutoIncrement(LSourceColumn);
+				targetRow["IsAutoIncrement"] = GetIsAutoIncrement(sourceColumn);
 				// Doesn't really map well into Dataphor's metaphor
-				LTargetRow["BaseSchemaName"] = DBNull.Value;
-				LTargetRow["BaseCatalogName"] = DBNull.Value;
+				targetRow["BaseSchemaName"] = DBNull.Value;
+				targetRow["BaseCatalogName"] = DBNull.Value;
 				// Once again these are overly simplistic as this column could come from any mapping into the base tables
-				LTargetRow["BaseTableName"] = DBNull.Value;
-				LResult.Rows.Add(LTargetRow);
-				LOrdinal++;
+				targetRow["BaseTableName"] = DBNull.Value;
+				result.Rows.Add(targetRow);
+				ordinal++;
 			}
 
-			return LResult;
+			return result;
 		}
 
 		public override bool NextResult()
@@ -344,37 +344,37 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			return false;
 		}
 
-		private DAE.Runtime.Data.Row FInternalRow;
+		private DAE.Runtime.Data.Row _internalRow;
 
 		private DAE.Runtime.Data.Row InternalRow
 		{
 			get
 			{
-				if (FInternalRow == null)
+				if (_internalRow == null)
 					throw new ProviderException(ProviderException.Codes.CursorEOForBOF);
-				return FInternalRow;
+				return _internalRow;
 			}
 		}
 
 		private void DisposeRow()
 		{
-			if (FInternalRow != null)
+			if (_internalRow != null)
 			{
-				FInternalRow.Dispose();
-				FInternalRow = null;
+				_internalRow.Dispose();
+				_internalRow = null;
 			}
 		}
 
 		public override bool Read()
 		{
-			if (FCursor.Next())
+			if (_cursor.Next())
 			{
-				if (FInternalRow == null)
-					FInternalRow = new DAE.Runtime.Data.Row(FCursor.Plan.Process.ValueManager, ((TableType)FCursor.Plan.DataType).RowType);
-				FCursor.Select(FInternalRow);
-				if (!FCursor.EOF())
-					FRowCount++;
-				return !FCursor.EOF();
+				if (_internalRow == null)
+					_internalRow = new DAE.Runtime.Data.Row(_cursor.Plan.Process.ValueManager, ((TableType)_cursor.Plan.DataType).RowType);
+				_cursor.Select(_internalRow);
+				if (!_cursor.EOF())
+					_rowCount++;
+				return !_cursor.EOF();
 			}
 			else
 				return false;
@@ -386,168 +386,168 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 		{
 			get
 			{
-				if (FInternalRow == null)
-					return FNativeTypes.Count;
+				if (_internalRow == null)
+					return _nativeTypes.Count;
 				else
-					return ((TableType)FCursor.Plan.DataType).Columns.Count;
+					return ((TableType)_cursor.Plan.DataType).Columns.Count;
 			}
 		}
 
-		public override object this[string AColumnName] { get { return this[GetOrdinal(AColumnName)]; } }
+		public override object this[string columnName] { get { return this[GetOrdinal(columnName)]; } }
 
-		public object GetNativeValue(int AIndex)
+		public object GetNativeValue(int index)
 		{
-			DAE.Runtime.Data.Row LRow = InternalRow;
-			if (!LRow.HasValue(AIndex))
+			DAE.Runtime.Data.Row row = InternalRow;
+			if (!row.HasValue(index))
 				return DBNull.Value;
 			else
-				return LRow[AIndex];
+				return row[index];
 		}
 
-		public override object this[int AIndex] { get { return GetNativeValue(AIndex); } }
+		public override object this[int index] { get { return GetNativeValue(index); } }
 
-		public override bool GetBoolean(int AIndex)
+		public override bool GetBoolean(int index)
 		{
-			return (bool)InternalRow[AIndex];
+			return (bool)InternalRow[index];
 		}
 
-		public override byte GetByte(int AIndex)
+		public override byte GetByte(int index)
 		{
-			return (byte)InternalRow[AIndex];
+			return (byte)InternalRow[index];
 		}
 
-		public sbyte GetSByte(int AIndex)
+		public sbyte GetSByte(int index)
 		{
-			return Convert.ToSByte((byte)InternalRow[AIndex]);
+			return Convert.ToSByte((byte)InternalRow[index]);
 		}
 
-		public override long GetBytes(int AIndex, long ASourceOffset, byte[] ATarget, int ATargetOffset, int ACount)
+		public override long GetBytes(int index, long sourceOffset, byte[] target, int targetOffset, int count)
 		{
-			Stream LStream = InternalRow.GetValue(AIndex).OpenStream();
+			Stream stream = InternalRow.GetValue(index).OpenStream();
 			try
 			{
-				LStream.Position = ASourceOffset;
-				return LStream.Read(ATarget, ATargetOffset, ACount);
+				stream.Position = sourceOffset;
+				return stream.Read(target, targetOffset, count);
 			}
 			finally
 			{
-				LStream.Close();
+				stream.Close();
 			}
 		}
 
-		public override char GetChar(int AIndex)
+		public override char GetChar(int index)
 		{
-			return ((string)InternalRow[AIndex])[0];
+			return ((string)InternalRow[index])[0];
 		}
 
-		public override long GetChars(int AIndex, long ASourceOffset, char[] ATarget, int ATargetOffset, int ACount)
+		public override long GetChars(int index, long sourceOffset, char[] target, int targetOffset, int count)
 		{
-			string LValue = (string)InternalRow[AIndex];
-			LValue.CopyTo((int)ASourceOffset, ATarget, ATargetOffset, ACount);
-			return ATarget.Length;
+			string value = (string)InternalRow[index];
+			value.CopyTo((int)sourceOffset, target, targetOffset, count);
+			return target.Length;
 		}
 
-		public override string GetDataTypeName(int AIndex)
+		public override string GetDataTypeName(int index)
 		{
-			return GetInternalColumn(AIndex).DataType.Name;
+			return GetInternalColumn(index).DataType.Name;
 		}
 
-		public override DateTime GetDateTime(int AIndex)
+		public override DateTime GetDateTime(int index)
 		{
-			return (DateTime)InternalRow[AIndex];
+			return (DateTime)InternalRow[index];
 		}
 
-		public TimeSpan GetTimeSpan(int AIndex)
+		public TimeSpan GetTimeSpan(int index)
 		{
-			return (TimeSpan)InternalRow[AIndex];
+			return (TimeSpan)InternalRow[index];
 		}
 
-		public override Decimal GetDecimal(int AIndex)
+		public override Decimal GetDecimal(int index)
 		{
-			return (decimal)InternalRow[AIndex];
+			return (decimal)InternalRow[index];
 		}
 
-		public override Double GetDouble(int AIndex)
+		public override Double GetDouble(int index)
 		{
-			return Convert.ToDouble((decimal)InternalRow[AIndex]);
+			return Convert.ToDouble((decimal)InternalRow[index]);
 		}
 
-		public override Type GetFieldType(int AIndex)
+		public override Type GetFieldType(int index)
 		{
-			return (Type)FNativeTypes[AIndex];
+			return (Type)_nativeTypes[index];
 		}
 
-		public override Single GetFloat(int AIndex)
+		public override Single GetFloat(int index)
 		{
-			return Convert.ToSingle((decimal)InternalRow[AIndex]);
+			return Convert.ToSingle((decimal)InternalRow[index]);
 		}
 
-		public override Guid GetGuid(int AIndex)
+		public override Guid GetGuid(int index)
 		{
-			return (Guid)InternalRow[AIndex];
+			return (Guid)InternalRow[index];
 		}
 
-		public override Int16 GetInt16(int AIndex)
+		public override Int16 GetInt16(int index)
 		{
-			return (short)InternalRow[AIndex];
+			return (short)InternalRow[index];
 		}
 
-		public UInt16 GetUInt16(int AIndex)
+		public UInt16 GetUInt16(int index)
 		{
-			return Convert.ToUInt16((short)InternalRow[AIndex]);
+			return Convert.ToUInt16((short)InternalRow[index]);
 		}
 
-		public override Int32 GetInt32(int AIndex)
+		public override Int32 GetInt32(int index)
 		{
-			return (int)InternalRow[AIndex];
+			return (int)InternalRow[index];
 		}
 
-		public UInt32 GetUInt32(int AIndex)
+		public UInt32 GetUInt32(int index)
 		{
-			return Convert.ToUInt32((int)InternalRow[AIndex]);
+			return Convert.ToUInt32((int)InternalRow[index]);
 		}
 
-		public override Int64 GetInt64(int AIndex)
+		public override Int64 GetInt64(int index)
 		{
-			return (long)InternalRow[AIndex];
+			return (long)InternalRow[index];
 		}
 
-		public UInt64 GetUInt64(int AIndex)
+		public UInt64 GetUInt64(int index)
 		{
-			return Convert.ToUInt64((long)InternalRow[AIndex]);
+			return Convert.ToUInt64((long)InternalRow[index]);
 		}
 
-		public override string GetName(int AIndex)
+		public override string GetName(int index)
 		{
-			return GetInternalColumn(AIndex).Name;
+			return GetInternalColumn(index).Name;
 		}
 
-		public override int GetOrdinal(string AName)
+		public override int GetOrdinal(string name)
 		{
-			return ((TableType)FCursor.Plan.DataType).Columns.IndexOf(AName);
+			return ((TableType)_cursor.Plan.DataType).Columns.IndexOf(name);
 		}
 
-		public override string GetString(int AIndex)
+		public override string GetString(int index)
 		{
-			return (string)InternalRow[AIndex];
+			return (string)InternalRow[index];
 		}
 
-		public override object GetValue(int AIndex)
+		public override object GetValue(int index)
 		{
-			return GetNativeValue(AIndex);
+			return GetNativeValue(index);
 		}
 
-		public override int GetValues(object[] AValues)
+		public override int GetValues(object[] values)
 		{
 			int i;
 			for (i = 0; i < FieldCount; i++)
-				AValues[i] = GetValue(i);
+				values[i] = GetValue(i);
 			return i;
 		}
 
-		public override bool IsDBNull(int AIndex)
+		public override bool IsDBNull(int index)
 		{
-			return !InternalRow.HasValue(AIndex);
+			return !InternalRow.HasValue(index);
 		}
 	}
 }

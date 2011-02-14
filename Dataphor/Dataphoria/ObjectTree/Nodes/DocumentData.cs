@@ -7,48 +7,48 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 {
     public class DocumentData : DataObject
     {
-        public DocumentData(DocumentNode ANode)
+        public DocumentData(DocumentNode node)
         {
-            FNode = ANode;
+            _node = node;
         }
 
-        private DocumentNode FNode;
+        private DocumentNode _node;
         public DocumentNode Node
         {
-            get { return FNode; }
+            get { return _node; }
         }
 
-        public override object GetData(string AFormat)
+        public override object GetData(string format)
         {
-            if (AFormat == DataFormats.FileDrop)
+            if (format == DataFormats.FileDrop)
             {
                 // produce a file for copy move operation
                 // TODO: figure out how to delete this file after the caller is done with it (if they don't move it)
-                DocumentDesignBuffer LBuffer = new DocumentDesignBuffer(FNode.Dataphoria, FNode.LibraryName, FNode.DocumentName);
-                string LFileName = String.Format("{0}{1}.{2}", Path.GetTempPath(), LBuffer.DocumentName, FNode.DocumentType);
-                using (FileStream LStream = new FileStream(LFileName, FileMode.Create, FileAccess.Write))
+                DocumentDesignBuffer buffer = new DocumentDesignBuffer(_node.Dataphoria, _node.LibraryName, _node.DocumentName);
+                string fileName = String.Format("{0}{1}.{2}", Path.GetTempPath(), buffer.DocumentName, _node.DocumentType);
+                using (FileStream stream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
                 {
-                    LBuffer.LoadData(LStream);
+                    buffer.LoadData(stream);
                 }
-                return new string[] {LFileName};
+                return new string[] {fileName};
             }
             else
                 return null;
         }
 
-        public override object GetData(string AFormat, bool AAutoConvert)
+        public override object GetData(string format, bool autoConvert)
         {
-            return GetData(AFormat);
+            return GetData(format);
         }
 
-        public override bool GetDataPresent(string AFormat)
+        public override bool GetDataPresent(string format)
         {
-            return AFormat == DataFormats.FileDrop;
+            return format == DataFormats.FileDrop;
         }
 
-        public override bool GetDataPresent(string AFormat, bool AAutoConvert)
+        public override bool GetDataPresent(string format, bool autoConvert)
         {
-            return GetDataPresent(AFormat);
+            return GetDataPresent(format);
         }
 
         public override string[] GetFormats()
@@ -56,7 +56,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
             return new string[] {DataFormats.FileDrop};
         }
 
-        public override string[] GetFormats(bool AAutoConvert)
+        public override string[] GetFormats(bool autoConvert)
         {
             return GetFormats();
         }

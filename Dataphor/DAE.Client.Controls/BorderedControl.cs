@@ -21,8 +21,8 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		{
 			SetStyle(ControlStyles.SupportsTransparentBackColor, true);
 			CausesValidation = false;
-			FBorderStyle = BorderStyle.Fixed3D;
-			FUpdateCount = 0;
+			_borderStyle = BorderStyle.Fixed3D;
+			_updateCount = 0;
 		}
 
 		/// <summary> Added support for <c>BorderStyle</c> property. </summary>
@@ -31,52 +31,52 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		{
 			get
 			{
-				CreateParams LParams = base.CreateParams;
-				switch (FBorderStyle)
+				CreateParams paramsValue = base.CreateParams;
+				switch (_borderStyle)
 				{
 					case BorderStyle.Fixed3D :
-						LParams.ExStyle |= NativeMethods.WS_EX_CLIENTEDGE;
+						paramsValue.ExStyle |= NativeMethods.WS_EX_CLIENTEDGE;
 						break;
 					case BorderStyle.FixedSingle :
-						LParams.Style |= NativeMethods.WS_BORDER;
+						paramsValue.Style |= NativeMethods.WS_BORDER;
 						break;
 				}
-				return LParams;
+				return paramsValue;
 			}
 		}
 
-		private BorderStyle FBorderStyle;
+		private BorderStyle _borderStyle;
 		/// <summary> Type of border for the control. </summary>
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\BorderedControl.dxd"/>
 		[Category("Appearance")]
 		[DefaultValue(BorderStyle.Fixed3D)]
 		public BorderStyle BorderStyle
 		{
-			get { return FBorderStyle; }
+			get { return _borderStyle; }
 			set
 			{
-				if (FBorderStyle != value)
+				if (_borderStyle != value)
 				{
-					FBorderStyle = value;
+					_borderStyle = value;
 					if (IsHandleCreated)
 						RecreateHandle();
 				}
 			}
 		}
 
-		private int FUpdateCount;
+		private int _updateCount;
 		/// <summary> Determines the update state of the control. </summary>
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\BorderedControl.dxd"/>
 		protected bool InUpdate
 		{
-			get { return FUpdateCount > 0; }
+			get { return _updateCount > 0; }
 		}
 
 		/// <summary> Suspends painting of the control until <c>EndUpdate</c> is called. </summary>
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\BorderedControl.dxd"/>
 		public void BeginUpdate()
 		{
-			if (++FUpdateCount == 1)
+			if (++_updateCount == 1)
 				SetUpdateState(true);
 		}
 
@@ -84,17 +84,17 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\BorderedControl.dxd"/>
 		public void EndUpdate()
 		{
-			if (--FUpdateCount <= 0)
+			if (--_updateCount <= 0)
 			{
-				FUpdateCount = 0;
+				_updateCount = 0;
 				SetUpdateState(false);
 			}
 		}
 
-		private void SetUpdateState(bool AUpdating)
+		private void SetUpdateState(bool updating)
 		{
-			UnsafeNativeMethods.SendMessage(Handle, NativeMethods.WM_SETREDRAW, !AUpdating, IntPtr.Zero);
-			if (!AUpdating)
+			UnsafeNativeMethods.SendMessage(Handle, NativeMethods.WM_SETREDRAW, !updating, IntPtr.Zero);
+			if (!updating)
 			{
 				Invalidate();
 				Invalidate(true);

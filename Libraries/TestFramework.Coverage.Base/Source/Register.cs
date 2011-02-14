@@ -17,34 +17,34 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 	{
 		public static SettingsList GetClasses()
 		{
-			SettingsList LClasses = new SettingsList();
+			SettingsList classes = new SettingsList();
 			
-			Type[] LTypes = typeof(DAERegister).Assembly.GetTypes();
+			Type[] types = typeof(DAERegister).Assembly.GetTypes();
 
-			foreach (Type LType in LTypes)
+			foreach (Type type in types)
 			{
 				// Nodes
-				if (LType.IsSubclassOf(typeof(PlanNode)))
-					LClasses.Add(new SettingsItem(String.Format("{0},{1}", LType.FullName, AssemblyNameUtility.GetName(LType.Assembly.FullName)), LType.AssemblyQualifiedName));
+				if (type.IsSubclassOf(typeof(PlanNode)))
+					classes.Add(new SettingsItem(String.Format("{0},{1}", type.FullName, AssemblyNameUtility.GetName(type.Assembly.FullName)), type.AssemblyQualifiedName));
 				
 				// Devices
-				if (LType.IsSubclassOf(typeof(Schema.Device)))
-					LClasses.Add(new SettingsItem(String.Format("{0},{1}", LType.FullName, AssemblyNameUtility.GetName(LType.Assembly.FullName)), LType.AssemblyQualifiedName));
+				if (type.IsSubclassOf(typeof(Schema.Device)))
+					classes.Add(new SettingsItem(String.Format("{0},{1}", type.FullName, AssemblyNameUtility.GetName(type.Assembly.FullName)), type.AssemblyQualifiedName));
 				
 				// Conveyors
-				if (LType.IsSubclassOf(typeof(Conveyor)))
-					LClasses.Add(new SettingsItem(String.Format("{0},{1}", LType.FullName, AssemblyNameUtility.GetName(LType.Assembly.FullName)), LType.AssemblyQualifiedName));
+				if (type.IsSubclassOf(typeof(Conveyor)))
+					classes.Add(new SettingsItem(String.Format("{0},{1}", type.FullName, AssemblyNameUtility.GetName(type.Assembly.FullName)), type.AssemblyQualifiedName));
 				
 				// DeviceOperator
-				if (LType.IsSubclassOf(typeof(Schema.DeviceOperator)))
-					LClasses.Add(new SettingsItem(String.Format("{0},{1}", LType.FullName, AssemblyNameUtility.GetName(LType.Assembly.FullName)), LType.AssemblyQualifiedName));
+				if (type.IsSubclassOf(typeof(Schema.DeviceOperator)))
+					classes.Add(new SettingsItem(String.Format("{0},{1}", type.FullName, AssemblyNameUtility.GetName(type.Assembly.FullName)), type.AssemblyQualifiedName));
 					
 				// DeviceScalarType
-				if (LType.IsSubclassOf(typeof(Schema.DeviceScalarType)))
-					LClasses.Add(new SettingsItem(String.Format("{0},{1}", LType.FullName, AssemblyNameUtility.GetName(LType.Assembly.FullName)), LType.AssemblyQualifiedName));
+				if (type.IsSubclassOf(typeof(Schema.DeviceScalarType)))
+					classes.Add(new SettingsItem(String.Format("{0},{1}", type.FullName, AssemblyNameUtility.GetName(type.Assembly.FullName)), type.AssemblyQualifiedName));
 			}
 			
-			return LClasses;
+			return classes;
 		}
 	}
 }
