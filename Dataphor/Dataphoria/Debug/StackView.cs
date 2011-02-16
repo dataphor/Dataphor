@@ -66,55 +66,55 @@ namespace Alphora.Dataphor.Dataphoria
 			{
 				// Save old postion
 				Row old = null;
-				if (FStackDataView.Active && !FStackDataView.IsEmpty())
-					old = FStackDataView.ActiveRow;
+				if (_stackDataView.Active && !_stackDataView.IsEmpty())
+					old = _stackDataView.ActiveRow;
 
 				// Update the selected process
 				_processIDParam.Value = _dataphoria.Debugger.SelectedProcessID;
 				_callStackIndexParam.Value = _dataphoria.Debugger.SelectedCallStackIndex;
-				FStackDataView.Open();
+				_stackDataView.Open();
 
 				// Attempt to seek to old position
 				if (old != null)
-					FStackDataView.Refresh(old);
+					_stackDataView.Refresh(old);
 			}
 			else
-				FStackDataView.Close();
+				_stackDataView.Close();
 		}
 
 		private void FDataphoria_Disconnected(object sender, EventArgs e)
 		{
-			FStackDataView.Close();
-			FStackDataView.Session = null;
+			_stackDataView.Close();
+			_stackDataView.Session = null;
 			DeinitializeParamGroup();
 		}
 
 		private void FDataphoria_Connected(object sender, EventArgs e)
 		{
-			FStackDataView.Session = _dataphoria.DataSession;
+			_stackDataView.Session = _dataphoria.DataSession;
 			InitializeParamGroup();
 		}
 
 		private void FRefreshButton_Click(object sender, EventArgs e)
 		{
-			if (FStackDataView.Active)
-				FStackDataView.Refresh();
+			if (_stackDataView.Active)
+				_stackDataView.Refresh();
 		}
 
 		private void FCopyMenuItem_Click(object sender, EventArgs e)
 		{
-			Clipboard.SetData(DataFormats.UnicodeText, FStackDataView["Value"].AsString);
+			Clipboard.SetData(DataFormats.UnicodeText, _stackDataView["Value"].AsString);
 		}
 
-		private void FStackDataView_DataChanged(object sender, EventArgs e)
+		private void _stackDataView_DataChanged(object sender, EventArgs e)
 		{
 			UpdateButtonsEnabled();
 		}
 
 		private void UpdateButtonsEnabled()
 		{
-			FRefreshButton.Enabled = FStackDataView.Active;
-			FCopyButton.Enabled = FStackDataView.Active && !FStackDataView.IsEmpty();
+			FRefreshButton.Enabled = _stackDataView.Active;
+			FCopyButton.Enabled = _stackDataView.Active && !_stackDataView.IsEmpty();
 		}
 
 		private void InitializeParamGroup()
@@ -126,7 +126,7 @@ namespace Alphora.Dataphor.Dataphoria
 				_group.Params.Add(_processIDParam);
 				_callStackIndexParam = new DataSetParam() { Name = "ACallStackIndex", DataType = _dataphoria.UtilityProcess.DataTypes.SystemInteger };
 				_group.Params.Add(_callStackIndexParam);
-				FStackDataView.ParamGroups.Add(_group);
+				_stackDataView.ParamGroups.Add(_group);
 			}
 		}
 
@@ -134,7 +134,7 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 			if (_group != null)
 			{
-				FStackDataView.ParamGroups.Remove(_group);
+				_stackDataView.ParamGroups.Remove(_group);
 				_group.Dispose();
 				_group = null;
 			}

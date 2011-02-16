@@ -29,8 +29,8 @@
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			this.FStackSource = new Alphora.Dataphor.DAE.Client.DataSource(this.components);
-			this.FStackDataView = new Alphora.Dataphor.DAE.Client.DataView(this.components);
+			this._stackSource = new Alphora.Dataphor.DAE.Client.DataSource(this.components);
+			this._stackDataView = new Alphora.Dataphor.DAE.Client.DataView(this.components);
 			this.FToolStrip = new System.Windows.Forms.ToolStrip();
 			this.FRefreshButton = new System.Windows.Forms.ToolStripButton();
 			this.dbGrid1 = new Alphora.Dataphor.DAE.Client.Controls.DBGrid();
@@ -39,7 +39,7 @@
 			this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
 			this.FCopyButton = new System.Windows.Forms.ToolStripButton();
 			this.FCopyMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			((System.ComponentModel.ISupportInitialize)(this.FStackDataView)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this._stackDataView)).BeginInit();
 			this.FToolStrip.SuspendLayout();
 			this.FContextMenu.SuspendLayout();
 			this.toolStripContainer1.ContentPanel.SuspendLayout();
@@ -47,19 +47,19 @@
 			this.toolStripContainer1.SuspendLayout();
 			this.SuspendLayout();
 			// 
-			// FStackSource
+			// _stackSource
 			// 
-			this.FStackSource.DataSet = this.FStackDataView;
+			this._stackSource.DataSet = this._stackDataView;
 			// 
-			// FStackDataView
+			// _stackDataView
 			// 
-			this.FStackDataView.Expression = ".System.Debug.GetStack(AProcessID, ACallStackIndex) \r\n\tbrowse by { Index }";
-			this.FStackDataView.IsReadOnly = true;
-			this.FStackDataView.RequestedCapabilities = ((Alphora.Dataphor.DAE.CursorCapability)((((Alphora.Dataphor.DAE.CursorCapability.Navigable | Alphora.Dataphor.DAE.CursorCapability.BackwardsNavigable)
+			this._stackDataView.Expression = ".System.Debug.GetStack(AProcessID, ACallStackIndex) \r\n\tbrowse by { Index }";
+			this._stackDataView.IsReadOnly = true;
+			this._stackDataView.RequestedCapabilities = ((Alphora.Dataphor.DAE.CursorCapability)((((Alphora.Dataphor.DAE.CursorCapability.Navigable | Alphora.Dataphor.DAE.CursorCapability.BackwardsNavigable)
 						| Alphora.Dataphor.DAE.CursorCapability.Bookmarkable)
 						| Alphora.Dataphor.DAE.CursorCapability.Searchable)));
-			this.FStackDataView.SessionName = "";
-			this.FStackDataView.DataChanged += new System.EventHandler(this.FStackDataView_DataChanged);
+			this._stackDataView.SessionName = "";
+			this._stackDataView.DataChanged += new System.EventHandler(this._stackDataView_DataChanged);
 			// 
 			// FToolStrip
 			// 
@@ -90,7 +90,7 @@
 			this.dbGrid1.Location = new System.Drawing.Point(0, 0);
 			this.dbGrid1.Name = "dbGrid1";
 			this.dbGrid1.Size = new System.Drawing.Size(869, 231);
-			this.dbGrid1.Source = this.FStackSource;
+			this.dbGrid1.Source = this._stackSource;
 			this.dbGrid1.TabIndex = 0;
 			this.dbGrid1.Text = "dbGrid1";
 			// 
@@ -156,7 +156,7 @@
 			this.Controls.Add(this.toolStripContainer1);
 			this.Name = "StackView";
 			this.Size = new System.Drawing.Size(869, 256);
-			((System.ComponentModel.ISupportInitialize)(this.FStackDataView)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this._stackDataView)).EndInit();
 			this.FToolStrip.ResumeLayout(false);
 			this.FToolStrip.PerformLayout();
 			this.FContextMenu.ResumeLayout(false);
@@ -171,8 +171,8 @@
 
 		#endregion
 
-		private Alphora.Dataphor.DAE.Client.DataSource FStackSource;
-		private Alphora.Dataphor.DAE.Client.DataView FStackDataView;
+		private Alphora.Dataphor.DAE.Client.DataSource _stackSource;
+		private Alphora.Dataphor.DAE.Client.DataView _stackDataView;
 		private System.Windows.Forms.ToolStrip FToolStrip;
 		private System.Windows.Forms.ToolStripButton FRefreshButton;
 		private Alphora.Dataphor.DAE.Client.Controls.DBGrid dbGrid1;

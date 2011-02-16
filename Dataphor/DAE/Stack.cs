@@ -101,7 +101,7 @@ namespace Alphora.Dataphor.DAE
 				throw new BaseException(BaseException.Codes.InvalidStackIndex, offset.ToString());
 			return _stack[index];
 			#else
-			return FStack[FCount - 1 - AOffset]; // same code as the indexer, duplicated for performance
+			return _stack[_count - 1 - offset]; // same code as the indexer, duplicated for performance
 			#endif
 		}
 		
@@ -113,7 +113,7 @@ namespace Alphora.Dataphor.DAE
 				throw new BaseException(BaseException.Codes.InvalidStackIndex, offset.ToString());
 			_stack[index] = item;
 			#else
-			FStack[FCount - 1 - AOffset] = AItem; // same code as the indexer, duplicated for performance
+			_stack[_count - 1 - offset] = item; // same code as the indexer, duplicated for performance
 			#endif
 		}
 		
@@ -127,7 +127,7 @@ namespace Alphora.Dataphor.DAE
 					throw new BaseException(BaseException.Codes.InvalidStackIndex, index.ToString());
 				return _stack[localIndex];
 				#else
-				return FStack[FCount - 1 - AIndex]; 
+				return _stack[_count - 1 - index]; 
 				#endif
 			} 
 			set
@@ -138,7 +138,7 @@ namespace Alphora.Dataphor.DAE
 					throw new BaseException(BaseException.Codes.InvalidStackIndex, index.ToString());
 				_stack[localIndex] = value;
 				#else
-				FStack[FCount - 1 - AIndex] = value; 
+				_stack[_count - 1 - index] = value; 
 				#endif
 			}
 		} // same code as peek and poke, duplicated for performance

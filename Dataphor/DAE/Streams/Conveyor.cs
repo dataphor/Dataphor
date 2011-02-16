@@ -35,13 +35,13 @@ namespace Alphora.Dataphor.DAE.Streams
 			throw new NotSupportedException();
 		}
 
-		/// <summary>Returns the native representation of the value stored in the buffer given by ABuffer, beginning at the offset given by AOffset.</summary>
+		/// <summary>Returns the native representation of the value stored in the buffer given by ABuffer, beginning at the offset given by offset.</summary>
 		public virtual object Read(byte[] buffer, int offset)
 		{
 			throw new NotSupportedException();
 		}
 		
-		/// <summary>Writes the physical representation of AValue into the buffer given by ABuffer beginning at the offset given by AOffset</summary>		
+		/// <summary>Writes the physical representation of AValue into the buffer given by ABuffer beginning at the offset given by offset</summary>		
 		public virtual void Write(object tempValue, byte[] buffer, int offset)
 		{
 			throw new NotSupportedException();
@@ -111,17 +111,17 @@ namespace Alphora.Dataphor.DAE.Streams
 
 		#if USE_UNSAFE
 		
-		public unsafe override object Read(byte[] ABuffer, int AOffset)
+		public unsafe override object Read(byte[] ABuffer, int offset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				return *((short*)LBufferPtr);
 			}
 		}
 
-		public unsafe override void Write(object AValue, byte[] ABuffer, int AOffset)
+		public unsafe override void Write(object AValue, byte[] ABuffer, int offset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				*((short*)LBufferPtr) = (short)AValue;
 			}
@@ -153,17 +153,17 @@ namespace Alphora.Dataphor.DAE.Streams
 
 		#if USE_UNSAFE
 		
-		public unsafe override object Read(byte[] ABuffer, int AOffset)
+		public unsafe override object Read(byte[] ABuffer, int offset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				return *((int*)LBufferPtr);
 			}
 		}
 
-		public unsafe override void Write(object AValue, byte[] ABuffer, int AOffset)
+		public unsafe override void Write(object AValue, byte[] ABuffer, int offset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				*((int*)LBufferPtr) = (int)AValue;
 			}
@@ -195,17 +195,17 @@ namespace Alphora.Dataphor.DAE.Streams
 
 		#if USE_UNSAFE
 		
-		public unsafe override object Read(byte[] ABuffer, int AOffset)
+		public unsafe override object Read(byte[] ABuffer, int offset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				return *((long*)LBufferPtr);
 			}
 		}
 
-		public unsafe override void Write(object AValue, byte[] ABuffer, int AOffset)
+		public unsafe override void Write(object AValue, byte[] ABuffer, int offset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				*((long*)LBufferPtr) = (long)AValue;
 			}
@@ -237,17 +237,17 @@ namespace Alphora.Dataphor.DAE.Streams
 
 		#if USE_UNSAFE
 		
-		public unsafe override object Read(byte[] ABuffer, int AOffset)
+		public unsafe override object Read(byte[] ABuffer, int offset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				return *((decimal*)LBufferPtr);
 			}
 		}
 
-		public unsafe override void Write(object AValue, byte[] ABuffer, int AOffset)
+		public unsafe override void Write(object AValue, byte[] ABuffer, int offset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				*((decimal*)LBufferPtr) = (decimal)AValue;
 			}
@@ -279,17 +279,17 @@ namespace Alphora.Dataphor.DAE.Streams
 
 		#if USE_UNSAFE
 		
-		public unsafe override object Read(byte[] ABuffer, int AOffset)
+		public unsafe override object Read(byte[] ABuffer, int offset)
 		{
 			int LLength = 0;
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				LLength = *((int*)LBufferPtr);				
 			}
 			
 			if (LLength > 0)
 			{
-				fixed (byte* LBufferPtr = &(ABuffer[AOffset + sizeof(int)]))
+				fixed (byte* LBufferPtr = &(ABuffer[offset + sizeof(int)]))
 				{
 					return new String((char*)LBufferPtr, 0, LLength);
 				}
@@ -298,17 +298,17 @@ namespace Alphora.Dataphor.DAE.Streams
 			return String.Empty;
 		}
 
-		public unsafe override void Write(object AValue, byte[] ABuffer, int AOffset)
+		public unsafe override void Write(object AValue, byte[] ABuffer, int offset)
 		{
 			string LString = (String)AValue;
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				*((int*)LBufferPtr) = LString.Length;
 			}
 			
 			if (LString.Length > 0)
 			{
-				fixed (byte* LBufferPtr = &(ABuffer[AOffset + sizeof(int)]))
+				fixed (byte* LBufferPtr = &(ABuffer[offset + sizeof(int)]))
 				{
 					char* LCurrentPtr = (char*)LBufferPtr;
 					for (int LIndex = 0; LIndex < LString.Length; LIndex++)
@@ -346,17 +346,17 @@ namespace Alphora.Dataphor.DAE.Streams
 
 		#if USE_UNSAFE
 		
-		public unsafe override object Read(byte[] ABuffer, int AOffset)
+		public unsafe override object Read(byte[] ABuffer, int offset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				return new DateTime(*((long*)LBufferPtr));
 			}
 		}
 
-		public unsafe override void Write(object AValue, byte[] ABuffer, int AOffset)
+		public unsafe override void Write(object AValue, byte[] ABuffer, int offset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				*((long*)LBufferPtr) = ((DateTime)AValue).Ticks;
 			}
@@ -388,17 +388,17 @@ namespace Alphora.Dataphor.DAE.Streams
 
 		#if USE_UNSAFE
 		
-		public unsafe override object Read(byte[] ABuffer, int AOffset)
+		public unsafe override object Read(byte[] ABuffer, int offset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				return new TimeSpan(*((long*)LBufferPtr));
 			}
 		}
 
-		public unsafe override void Write(object AValue, byte[] ABuffer, int AOffset)
+		public unsafe override void Write(object AValue, byte[] ABuffer, int offset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				*((long*)LBufferPtr) = ((TimeSpan)AValue).Ticks;
 			}
@@ -430,17 +430,17 @@ namespace Alphora.Dataphor.DAE.Streams
 
 		#if USE_UNSAFE
 		
-		public unsafe override object Read(byte[] ABuffer, int AOffset)
+		public unsafe override object Read(byte[] ABuffer, int offset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				return *((Guid*)LBufferPtr);
 			}
 		}
 
-		public unsafe override void Write(object AValue, byte[] ABuffer, int AOffset)
+		public unsafe override void Write(object AValue, byte[] ABuffer, int offset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				*((Guid*)LBufferPtr) = (Guid)AValue;
 			}

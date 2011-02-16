@@ -19,10 +19,10 @@ namespace Alphora.Dataphor.DAE.Streams
 		bool CanRead { get; }
 		bool CanSeek { get; }
 		bool CanWrite { get; }
-		int Read([Out] byte[] ABuffer, int AOffset, int ACount);
+		int Read([Out] byte[] ABuffer, int offset, int ACount);
 		int ReadByte();
-		long Seek(long AOffset, SeekOrigin AOrigin);
-		void Write([In] byte[] ABuffer, int AOffset, int ACount);
+		long Seek(long offset, SeekOrigin AOrigin);
+		void Write([In] byte[] ABuffer, int offset, int ACount);
 		void WriteByte(byte AByte);
 		void Close();
 	}

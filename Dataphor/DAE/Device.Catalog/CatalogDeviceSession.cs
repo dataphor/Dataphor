@@ -1713,7 +1713,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				// if the object is already in the cache (by name), then it must be there as a result of some error
 				// and the best course of action in a production scenario is to just replace it with the new object
 				#if !DEBUG
-				int index = Catalog.IndexOfName(AObject.Name);
+				int index = Catalog.IndexOfName(objectValue.Name);
 				if (index >= 0)
 					ClearCatalogObject((Schema.CatalogObject)Catalog[index]);
 				#endif

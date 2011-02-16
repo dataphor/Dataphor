@@ -221,8 +221,8 @@ namespace Alphora.Dataphor
 	///		long Length { get; }
 	///		void SetLength(long ALength);
 	///		long Position { get; set; }
-	///		int Read(byte[] ABuffer, int AOffset, int ACount);
-	///		void Write(byte[] ABuffer, int AOffset, int ACount);
+	///		int Read(byte[] ABuffer, int offset, int ACount);
+	///		void Write(byte[] ABuffer, int offset, int ACount);
 	/// </remarks>
 	public abstract class StreamBase : Stream
 	{

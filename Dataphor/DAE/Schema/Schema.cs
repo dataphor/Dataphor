@@ -1584,8 +1584,8 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public void AddRange(ICollection collection)
 		{
-			foreach (object AObject in collection)
-				Add(AObject);
+			foreach (object lObject in collection)
+				Add(lObject);
 		}
 		
 		protected void InternalInsert(int index, object item)

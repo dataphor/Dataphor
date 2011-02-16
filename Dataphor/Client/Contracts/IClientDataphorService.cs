@@ -1002,12 +1002,12 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// Seeks on a stream.
 		/// </summary>
 		/// <param name="AStreamHandle">The handle of the stream to be navigated.</param>
-		/// <param name="AOffset">The number of bytes to seek.</param>
+		/// <param name="offset">The number of bytes to seek.</param>
 		/// <param name="AOrigin">The origin of the seek.</param>
 		/// <returns>The new position of the stream.</returns>
 		[OperationContract(AsyncPattern = true)]
 		[FaultContract(typeof(DataphorFault))]
-		IAsyncResult BeginSeekStream(int AStreamHandle, long AOffset, SeekOrigin AOrigin, AsyncCallback ACallback, object AState);
+		IAsyncResult BeginSeekStream(int AStreamHandle, long offset, SeekOrigin AOrigin, AsyncCallback ACallback, object AState);
 		long EndSeekStream(IAsyncResult AResult);
 
 		/// <summary>

@@ -153,7 +153,7 @@ namespace Alphora.Dataphor.DAE.Streams
 		{
 			long length = Length;
 			if ((_count != 0) && (count + _position > length))
-				count = (int)(length - _position); // This cast is safe because FCount - Position < ACount <= int.MaxValue
+				count = (int)(length - _position); // This cast is safe because _count - Position < ACount <= int.MaxValue
 			
 			#if USECONCURRENTCOVERSTREAM
 			lock (FSource)

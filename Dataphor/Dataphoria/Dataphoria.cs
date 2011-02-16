@@ -1953,7 +1953,7 @@ namespace Alphora.Dataphor.Dataphoria
 			{
 				_stackView = new StackView();
 				_stackView.Dataphoria = this;
-				_stackView.Name = "FStackView";
+				_stackView.Name = "_stackView";
 				_stackView.Dock = DockStyle.Fill;
 
 				_dockContentStackView = new DockContent();

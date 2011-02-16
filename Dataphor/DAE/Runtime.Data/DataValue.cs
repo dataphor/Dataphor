@@ -166,7 +166,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			throw new NotSupportedException();
 		}
 		
-		/// <summary>Writes the physical representation of this value into the byte array given in ABuffer, beginning at the offset given by AOffset.</summary>		
+		/// <summary>Writes the physical representation of this value into the byte array given in ABuffer, beginning at the offset given by offset.</summary>		
 		public virtual void WriteToPhysical(byte[] buffer, int offset, bool expandStreams)
 		{
 			throw new NotSupportedException();
@@ -178,7 +178,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			throw new NotSupportedException();
 		}
 		
-		/// <summary>Sets the native representation of this value by reading the physical representation from the byte array given in ABuffer, beginning at the offset given by AOffset.</summary>
+		/// <summary>Sets the native representation of this value by reading the physical representation from the byte array given in ABuffer, beginning at the offset given by offset.</summary>
 		public virtual void ReadFromPhysical(byte[] buffer, int offset)
 		{
 			throw new NotSupportedException();

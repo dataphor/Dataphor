@@ -250,17 +250,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 		#if USE_UNSAFE
 		
-		public static unsafe VersionNumber Read(byte[] ABuffer, int AOffset)
+		public static unsafe VersionNumber Read(byte[] ABuffer, int offset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				return *((VersionNumber*)LBufferPtr);
 			}
 		}
 
-		public unsafe void Write(byte[] ABuffer, int AOffset)
+		public unsafe void Write(byte[] ABuffer, int offset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				*((VersionNumber*)LBufferPtr) = this;
 			}
@@ -268,24 +268,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	
 		#else
 
-		public static VersionNumber Read(byte[] ABuffer, int AOffset)
+		public static VersionNumber Read(byte[] ABuffer, int offset)
 		{
 			return 
 				new VersionNumber
 				(
-					ByteArrayUtility.ReadInt32(ABuffer, AOffset), 
-					ByteArrayUtility.ReadInt32(ABuffer, AOffset + sizeof(int)),
-					ByteArrayUtility.ReadInt32(ABuffer, AOffset + sizeof(int) * 2),
-					ByteArrayUtility.ReadInt32(ABuffer, AOffset + sizeof(int) * 3)
+					ByteArrayUtility.ReadInt32(ABuffer, offset), 
+					ByteArrayUtility.ReadInt32(ABuffer, offset + sizeof(int)),
+					ByteArrayUtility.ReadInt32(ABuffer, offset + sizeof(int) * 2),
+					ByteArrayUtility.ReadInt32(ABuffer, offset + sizeof(int) * 3)
 				);
 		}
 
-		public void Write(byte[] ABuffer, int AOffset)
+		public void Write(byte[] ABuffer, int offset)
 		{
-			ByteArrayUtility.WriteInt32(ABuffer, AOffset, Major);
-			ByteArrayUtility.WriteInt32(ABuffer, AOffset + sizeof(int), Minor);
-			ByteArrayUtility.WriteInt32(ABuffer, AOffset + sizeof(int) * 2, Revision);
-			ByteArrayUtility.WriteInt32(ABuffer, AOffset + sizeof(int) * 3, Build);
+			ByteArrayUtility.WriteInt32(ABuffer, offset, Major);
+			ByteArrayUtility.WriteInt32(ABuffer, offset + sizeof(int), Minor);
+			ByteArrayUtility.WriteInt32(ABuffer, offset + sizeof(int) * 2, Revision);
+			ByteArrayUtility.WriteInt32(ABuffer, offset + sizeof(int) * 3, Build);
 		}
 		
 		#endif

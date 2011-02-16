@@ -37,7 +37,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 #if DEBUG
 			_expanded = true;
 #else
-			FExpanded = false;
+			_expanded = false;
 #endif
 		}
 

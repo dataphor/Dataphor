@@ -96,7 +96,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				throw new BaseException(BaseException.Codes.InvalidStackIndex, offset.ToString());
 			_stack[index].FIsModified = true;
 			#else
-			FStack[FCount - 1 - AOffset].FIsModified = true;
+			_stack[_count - 1 - offset].FIsModified = true;
 			#endif
 		}
 
@@ -109,9 +109,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 			for (int index = _count - 1; index >= (AllowExtraWindowAccess ? 0 : Base); index--)
 			{
 				#if DISALLOWAMBIGUOUSNAMES
-				if (Schema.Object.NamesEqual(FStack[index].Name, AIdentifier) || Schema.Object.NamesEqual(AIdentifier, FStack[index].Name))
+				if (Schema.Object.NamesEqual(_stack[index].Name, AIdentifier) || Schema.Object.NamesEqual(AIdentifier, _stack[index].Name))
 				{
-					ANames.Add(FStack[index].Name);
+					ANames.Add(_stack[index].Name);
 					return false;
 				}
 				#else

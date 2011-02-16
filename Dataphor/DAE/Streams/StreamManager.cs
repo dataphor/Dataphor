@@ -85,17 +85,17 @@ namespace Alphora.Dataphor.DAE.Streams
 
 		#if USE_UNSAFE
 		
-		public unsafe void Write(byte[] ABuffer, int AOffset)
+		public unsafe void Write(byte[] ABuffer, int offset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				*((StreamID*)LBufferPtr) = (StreamID)Value;
 			}
 		}
 		
-		public static unsafe StreamID Read(byte[] ABuffer, int AOffset)
+		public static unsafe StreamID Read(byte[] ABuffer, int offset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				return *((StreamID*)LBufferPtr);
 			}
@@ -103,14 +103,14 @@ namespace Alphora.Dataphor.DAE.Streams
 		
 		#else
 
-		public void Write(byte[] ABuffer, int AOffset)
+		public void Write(byte[] ABuffer, int offset)
 		{
-			ByteArrayUtility.WriteInt64(ABuffer, AOffset, (long)Value);
+			ByteArrayUtility.WriteInt64(ABuffer, offset, (long)Value);
 		}
 
-		public static StreamID Read(byte[] ABuffer, int AOffset)
+		public static StreamID Read(byte[] ABuffer, int offset)
 		{
-			return new StreamID((ulong)ByteArrayUtility.ReadInt64(ABuffer, AOffset));
+			return new StreamID((ulong)ByteArrayUtility.ReadInt64(ABuffer, offset));
 		}
 		
 		#endif

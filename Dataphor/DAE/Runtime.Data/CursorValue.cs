@@ -32,17 +32,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 		#if USE_UNSAFE 
 
-		public unsafe override void WriteToPhysical(byte[] ABuffer, int AOffset, bool AExpandStreams)
+		public unsafe override void WriteToPhysical(byte[] ABuffer, int offset, bool AExpandStreams)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				*((int*)LBufferPtr) = FID;
 			}
 		}
 		
-		public unsafe override void ReadFromPhysical(byte[] ABuffer, int AOffset)
+		public unsafe override void ReadFromPhysical(byte[] ABuffer, int offset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			fixed (byte* LBufferPtr = &(ABuffer[offset]))
 			{
 				FID = *((int*)LBufferPtr);
 			}
