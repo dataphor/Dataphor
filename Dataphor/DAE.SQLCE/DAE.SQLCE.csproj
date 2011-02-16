@@ -56,9 +56,10 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
-    <Reference Include="System.Data.SqlServerCe, Version=3.5.8080.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL" >
-      <HintPath>..\bin\System.Data.SqlServerCe.dll</HintPath>
+    <Reference Include="System.Data.SqlServerCe, Version=4.0.8482.1, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\bin\System.Data.SqlServerCe.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -110,46 +111,40 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <Content Include="AMD64\sqlceca35.dll">
+    <Content Include="amd64\sqlceca40.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="AMD64\sqlcecompact35.dll">
+    <Content Include="amd64\sqlcecompact40.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="AMD64\sqlceer35EN.dll">
+    <Content Include="amd64\sqlceer40EN.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="AMD64\sqlceme35.dll">
+    <Content Include="amd64\sqlceme40.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="AMD64\sqlceoledb35.dll">
+    <Content Include="amd64\sqlceqp40.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="AMD64\sqlceqp35.dll">
+    <Content Include="amd64\sqlcese40.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="AMD64\sqlcese35.dll">
+    <Content Include="x86\sqlceca40.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="X86\sqlceca35.dll">
+    <Content Include="x86\sqlcecompact40.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="X86\sqlcecompact35.dll">
+    <Content Include="x86\sqlceer40EN.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="X86\sqlceer35EN.dll">
+    <Content Include="x86\sqlceme40.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="X86\sqlceme35.dll">
+    <Content Include="x86\sqlceqp40.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="X86\sqlceoledb35.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="X86\sqlceqp35.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="X86\sqlcese35.dll">
+    <Content Include="x86\sqlcese40.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
