@@ -56,7 +56,7 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
-    <Reference Include="System.Data.SqlServerCe, Version=3.5.8080.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL" />
+    <Reference Include="System.Data.SqlServerCe, Version=3.5.8080.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL" >
       <HintPath>..\bin\System.Data.SqlServerCe.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
