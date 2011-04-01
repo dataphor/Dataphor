@@ -10,10 +10,12 @@
 				<Directory Id="INSTALLDIR" Name="Dataphor">
 					<Directory Id="Documentation" Name="Documentation">
 						<Component Id="DocumentationFiles" Guid="0F9B9D65-4CC3-47B7-96D5-D30C1BF40F8C" DiskId="1">
+							<CreateFolder/>
 						</Component>
 					</Directory>
 					<Directory Id="Bin" Name="Bin">
 						<Component Id="BinFiles" Guid="C94BE2EE-E916-4f32-B289-DEA9ED5DD009" DiskId="1">
+							<CreateFolder/>
 						</Component>
 						<Component Id="WebClientService" Guid="3C36E6AE-039B-42d8-8D62-451D612A868E" DiskId="1">
 							<ServiceInstall Id="DataphorServiceInstall" Name="Alphora Dataphor [ShortVersion]" DisplayName="Alphora Dataphor Server [ProductVersion]" Type="ownProcess" Start="auto" ErrorControl="normal" Description="Alphora Dataphor Server" Account="[ServiceAccount]" />
@@ -23,10 +25,12 @@
 					</Directory>
 					<Directory Id="Libraries" Name="Libraries">
 						<Component Id="LibraryFiles" Guid="B8AF005A-94BE-4d9e-8926-4CDD31CA5127" DiskId="1">
+							<CreateFolder/>
 						</Component>
 					</Directory>
 					<Directory Id="WebClient" Name="Web Client">
 						<Component Id="WebClientFiles" Guid="33C2127E-AD18-478a-BE0E-318D531E2CA3" DiskId="1">
+							<CreateFolder/>
 						</Component>
 					</Directory>
 				</Directory>
