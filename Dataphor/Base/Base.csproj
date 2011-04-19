@@ -110,6 +110,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyNameUtility.cs" />
+    <Compile Include="BitArrayEqualityComparer.cs" />
     <Compile Include="BOP\Attributes.cs" />
     <Compile Include="BOP\Deserializer.cs" />
     <Compile Include="BOP\Persistence.cs" />

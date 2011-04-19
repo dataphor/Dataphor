@@ -86,6 +86,9 @@
     <Compile Include="..\Base\BaseList.cs">
       <Link>Base\BaseList.cs</Link>
     </Compile>
+    <Compile Include="..\Base\BitArrayEqualityComparer.cs">
+      <Link>Base\BitArrayEqualityComparer.cs</Link>
+    </Compile>
     <Compile Include="..\Base\BOP\Attributes.cs">
       <Link>BOP\Attributes.cs</Link>
     </Compile>

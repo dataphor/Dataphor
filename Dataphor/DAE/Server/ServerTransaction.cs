@@ -300,10 +300,10 @@ namespace Alphora.Dataphor.DAE.Server
 				transaction.RemoveCatalogConstraintCheck(constraint);
 		}
 	}
-	
-	public class ServerTableVar : Disposable
+
+	public class ServerCheckTable : Disposable
 	{
-		static ServerTableVar()
+		static ServerCheckTable()
 		{
 			_transactionIndexColumnName = Schema.Object.GetUniqueName();
 			_transitionColumnName = Schema.Object.GetUniqueName();
@@ -311,10 +311,22 @@ namespace Alphora.Dataphor.DAE.Server
 			_newRowColumnName = Schema.Object.GetUniqueName();
 		}
 		
-		public ServerTableVar(ServerProcess process, Schema.TableVar tableVar) : base()
+		public ServerCheckTable
+		(
+			ServerProcess process, 
+			Schema.TableVar tableVar, 
+			Schema.Key checkKey, 
+			Schema.Constraints insertConstraints, 
+			Schema.Constraints updateConstraints, 
+			Schema.Constraints deleteConstraints
+		) : base()
 		{
 			_process = process;
 			_tableVar = tableVar;
+			_checkKey = checkKey;
+			_insertConstraints = insertConstraints;
+			_updateConstraints = updateConstraints;
+			_deleteConstraints = deleteConstraints;
 		}
 		
 		protected override void Dispose(bool disposing)
@@ -326,25 +338,32 @@ namespace Alphora.Dataphor.DAE.Server
 			finally
 			{
 				_tableVar = null;
+				_checkKey = null;
+				_insertConstraints = null;
+				_updateConstraints = null;
+				_deleteConstraints = null;
 				base.Dispose(disposing);
+				_process = null;
 			}
 		}
-		
+
 		protected ServerProcess _process;
 		public ServerProcess Process { get { return _process; } }
 		
 		protected Schema.TableVar _tableVar;
 		public Schema.TableVar TableVar { get { return _tableVar; } }
-		
-		public override bool Equals(object objectValue)
-		{
-			return (objectValue is ServerTableVar) && Schema.Object.NamesEqual(_tableVar.Name, ((ServerTableVar)objectValue).TableVar.Name);
-		}
 
-		public override int GetHashCode()
-		{
-			return _tableVar.GetHashCode();
-		}
+		protected Schema.Key _checkKey;
+		public Schema.Key CheckKey { get { return _checkKey; } }
+
+		protected Schema.Constraints _insertConstraints;
+		public Schema.Constraints InsertConstraints { get { return _insertConstraints; } }
+
+		protected Schema.Constraints _updateConstraints;
+		public Schema.Constraints UpdateConstraints { get { return _updateConstraints; } }
+
+		protected Schema.Constraints _deleteConstraints;
+		public Schema.Constraints DeleteConstraints { get { return _deleteConstraints; } }
 
 		private string _checkTableName;
 		private static string _transactionIndexColumnName;
@@ -354,6 +373,9 @@ namespace Alphora.Dataphor.DAE.Server
 		private Schema.TableVar _checkTable;
 		private Schema.Key _checkTableKey;
 		private Schema.RowType _checkRowType;
+		#if INCLUDEKEYVALUECOMPARISON
+		private Program _checkKeyEqualityProgram;
+		#endif
 
 		private Schema.IRowType _newRowType;
 		public Schema.IRowType NewRowType { get { return _newRowType; } }
@@ -386,7 +408,7 @@ namespace Alphora.Dataphor.DAE.Server
 			StringBuilder builder = new StringBuilder();
 			builder.AppendFormat("{0} {1} {2} {3} {4} {5} {{ ", Keywords.Create, Keywords.Session, Keywords.Table, _checkTableName, Keywords.In, Process.ServerSession.Server.TempDevice.Name);
 			bool hasColumns = false;
-			Schema.Key key = _tableVar.Keys.MinimumKey(false, false);
+			Schema.Key key = _checkKey;
 			for (int index = 0; index < key.Columns.Count; index++)
 			{
 				if (hasColumns)
@@ -468,8 +490,60 @@ namespace Alphora.Dataphor.DAE.Server
 			_checkTable.IsGenerated = true;
 			_checkTableKey = _checkTable.Keys.MinimumKey(true);
 			_checkRowType = new Schema.RowType(_checkTable.DataType.Columns);
+			#if INCLUDEKEYVALUECOMPARISON
+			_checkKeyEqualityProgram = CompileCheckTableKeyEqualityProgram();
+			#endif
 		}
 		
+		private Program CompileCheckTableKeyEqualityProgram()
+		{
+			var plan = new Plan(Process);
+			try
+			{
+				plan.Symbols.Push(new Symbol(Keywords.Old, _checkRowType));
+				try
+				{
+					plan.Symbols.Push(new Symbol(Keywords.New, _checkRowType));
+					try
+					{
+						var equalNode =
+							Compiler.BindNode
+							(
+								plan, 
+								Compiler.CompileExpression
+								(
+									plan, 
+									Compiler.BuildKeyEqualExpression
+									(
+										plan, 
+										Keywords.Old, 
+										Keywords.New, 
+										_checkTableKey.Columns, 
+										_checkTableKey.Columns
+									)
+								)
+							);
+						plan.CheckCompiled();
+						var program = new Program(Process);
+						program.Code = equalNode;
+						return program;
+					}
+					finally
+					{
+						plan.Symbols.Pop();
+					}
+				}
+				finally
+				{
+					plan.Symbols.Pop();
+				}
+			}
+			finally
+			{
+				plan.Dispose();
+			}
+		}
+
 		private void CopyKeyValues(Row sourceRow, Row targetRow)
 		{
 			int columnIndex;
@@ -735,6 +809,43 @@ namespace Alphora.Dataphor.DAE.Server
 			// If we cannot determine if the update involves a key, we must assume that it does.			
 			return true;
 		}
+
+		#if INCLUDEKEYVALUECOMPARISON
+		private bool KeyValuesDifferent(Row oldRow, Row newRow)
+		{
+			_checkKeyEqualityProgram.Stack.PushWindow(0);
+			try
+			{
+				_checkKeyEqualityProgram.Stack.Push(oldRow);
+				try
+				{
+					_checkKeyEqualityProgram.Stack.Push(newRow);
+					try
+					{
+						// NOTE: Cannot call Execute on the program because that pushes a Window,
+						// Should probably be using an actual ExpressionPlan from the process, but
+						// the problem is that to do that, I have to use named variables to do the
+						// compilation, when what I'm passing in the actual execution context is
+						// unnamed row variables. The binding should still work, but it's more of
+						// a hack than I'm comfortable with.
+						return !(bool)_checkKeyEqualityProgram.Code.Execute(_checkKeyEqualityProgram);
+					}
+					finally
+					{
+						_checkKeyEqualityProgram.Stack.Pop();
+					}
+				}
+				finally
+				{
+					_checkKeyEqualityProgram.Stack.Pop();
+				}
+			}
+			finally
+			{
+				_checkKeyEqualityProgram.Stack.PopWindow();
+			}
+		}
+		#endif
 		
 		public void AddUpdateTableVarCheck(int transactionIndex, Row oldRow, Row newRow, BitArray valueFlags)
 		{
@@ -745,7 +856,11 @@ namespace Alphora.Dataphor.DAE.Server
 				_newRowType = newRow.DataType;
 
 			// If the update involves the key of the check table, log it as a delete of AOldRow, followed by an insert of ANewRow
+			#if INCLUDEKEYVALUECOMPARISON
+			if (UpdateInvolvesKey(valueFlags) && KeyValuesDifferent(oldRow, newRow))
+			#else
 			if (UpdateInvolvesKey(valueFlags))
+			#endif
 			{
 				AddDeleteTableVarCheck(transactionIndex, oldRow);
 				AddInsertTableVarCheck(transactionIndex, newRow);
@@ -956,7 +1071,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public void ValidateCheck(Program program, Schema.Transition transition)
+		protected void ValidateCheck(Program program, Schema.Transition transition)
 		{
 			switch (transition)
 			{
@@ -968,8 +1083,8 @@ namespace Alphora.Dataphor.DAE.Server
 						program.Stack.Push(newRow);
 						try
 						{
-							foreach (Schema.RowConstraint constraint in _tableVar.RowConstraints)
-								if (constraint.Enforced && constraint.IsDeferred)
+							foreach (Schema.Constraint constraint in _insertConstraints)
+								if (constraint.Enforced && constraint.IsDeferred && constraint is Schema.RowConstraint)
 									constraint.Validate(program, transition);
 						}
 						finally
@@ -982,8 +1097,8 @@ namespace Alphora.Dataphor.DAE.Server
 						newRow.Dispose();
 					}
 
-					foreach (Schema.TransitionConstraint constraint in _tableVar.InsertConstraints)
-						if (constraint.Enforced && constraint.IsDeferred)
+					foreach (Schema.Constraint constraint in _insertConstraints)
+						if (constraint.Enforced && constraint.IsDeferred && constraint is Schema.TransitionConstraint)
 							constraint.Validate(program, Schema.Transition.Insert);
 				}
 				break;
@@ -996,8 +1111,8 @@ namespace Alphora.Dataphor.DAE.Server
 						program.Stack.Push(newRow);
 						try
 						{
-							foreach (Schema.RowConstraint constraint in _tableVar.RowConstraints)
-								if (constraint.Enforced && constraint.IsDeferred)
+							foreach (Schema.Constraint constraint in _updateConstraints)
+								if (constraint.Enforced && constraint.IsDeferred && constraint is Schema.RowConstraint)
 									constraint.Validate(program, Schema.Transition.Update);
 						}
 						finally
@@ -1010,21 +1125,276 @@ namespace Alphora.Dataphor.DAE.Server
 						newRow.Dispose();
 					}
 							
-					foreach (Schema.TransitionConstraint constraint in _tableVar.UpdateConstraints)
-						if (constraint.Enforced && constraint.IsDeferred)
+					foreach (Schema.Constraint constraint in _updateConstraints)
+						if (constraint.Enforced && constraint.IsDeferred && constraint is Schema.TransitionConstraint)
 							constraint.Validate(program, Schema.Transition.Update);
 				}
 				break;
 
 				case Schema.Transition.Delete :
-					foreach (Schema.TransitionConstraint constraint in _tableVar.DeleteConstraints)
-						if (constraint.Enforced && constraint.IsDeferred)
+					foreach (Schema.Constraint constraint in _deleteConstraints)
+						if (constraint.Enforced && constraint.IsDeferred && constraint is Schema.TransitionConstraint)
 							constraint.Validate(program, Schema.Transition.Delete);
 				break;
 			}
 		}
 	}
 	
+	public class ServerCheckTables : Dictionary<Schema.Key, ServerCheckTable>
+	{
+	}
+
+	public class ServerConstraintKeys : Dictionary<Schema.Key, Schema.Constraints>
+	{
+		public ServerConstraintKeys() : base()
+		{
+			keysByValueFlags = new Dictionary<BitArray, Schema.Keys>(BitArrayEqualityComparer.Default);
+		}
+
+		public void AddConstraintToKey(Schema.Key constraintKey, Schema.Constraint constraint)
+		{
+			var constraints = GetConstraintsForKey(constraintKey);
+
+			if (!constraints.Contains(constraint))
+				constraints.Add(constraint);
+		}
+
+		public Schema.Constraints GetConstraintsForKey(Schema.Key constraintKey)
+		{
+			Schema.Constraints constraints = null;
+			if (!TryGetValue(constraintKey, out constraints))
+			{
+				constraints = new Schema.Constraints();
+				Add(constraintKey, constraints);
+			}
+
+			return constraints;
+		}
+
+		private Dictionary<BitArray, Schema.Keys> keysByValueFlags;
+
+		public Schema.Keys GetKeys(BitArray valueFlags)
+		{
+			Schema.Keys keys = null;
+
+			if (valueFlags == null)
+			{
+				keys = new Schema.Keys();
+				keys.AddRange(Keys);
+				return keys;
+			}
+
+			if (!keysByValueFlags.TryGetValue(valueFlags, out keys))
+			{
+				keys = new Schema.Keys();
+				keysByValueFlags.Add(valueFlags, keys);
+
+				foreach (var entry in this)
+				{
+					foreach (Schema.Constraint constraint in entry.Value)
+					{
+						var rowConstraint = constraint as Schema.RowConstraint;
+						if (rowConstraint != null && rowConstraint.ShouldValidate(valueFlags, Schema.Transition.Update))
+						{
+							if (!keys.Contains(entry.Key))
+								keys.Add(entry.Key);
+							break;
+						}
+
+						var transitionConstraint = constraint as Schema.TransitionConstraint;
+						if (transitionConstraint != null && transitionConstraint.ShouldValidate(valueFlags, Schema.Transition.Update))
+						{
+							if (!keys.Contains(entry.Key))
+								keys.Add(entry.Key);
+							break;
+						}
+					}
+				}
+			}
+
+			return keys;
+		}
+	}
+	
+	public class ServerTableVar : Disposable
+	{
+		public ServerTableVar(ServerProcess process, Schema.TableVar tableVar) : base()
+		{
+			_process = process;
+			_tableVar = tableVar;
+			_checkTables = new ServerCheckTables();
+		}
+		
+		protected override void Dispose(bool disposing)
+		{
+			try
+			{
+				UnprepareCheckTables();
+			}
+			finally
+			{
+				_tableVar = null;
+				base.Dispose(disposing);
+			}
+		}
+
+		protected ServerProcess _process;
+		public ServerProcess Process { get { return _process; } }
+		
+		protected Schema.TableVar _tableVar;
+		public Schema.TableVar TableVar { get { return _tableVar; } }
+
+		protected ServerCheckTables _checkTables;
+		public ServerCheckTables CheckTables { get { return _checkTables; } }
+		
+		public override bool Equals(object objectValue)
+		{
+			return (objectValue is ServerTableVar) && Schema.Object.NamesEqual(_tableVar.Name, ((ServerTableVar)objectValue).TableVar.Name);
+		}
+
+		public override int GetHashCode()
+		{
+			return _tableVar.GetHashCode();
+		}
+
+		protected void UnprepareCheckTables()
+		{
+			if (_checkTables != null)
+			{
+				foreach (var checkTable in _checkTables.Values)
+				{
+					checkTable.Dispose();
+				}
+
+				_checkTables = null;
+			}
+		}
+
+		private ServerConstraintKeys _insertConstraints;
+		private ServerConstraintKeys _updateConstraints;
+		private ServerConstraintKeys _deleteConstraints;
+
+		private Schema.TableVarColumnsBase GetColumns(BitArray columnFlags)
+		{
+			var result = new Schema.TableVarColumnsBase();
+
+			for (int i = 0; i < _tableVar.Columns.Count; i++)
+				if (columnFlags[i])
+					result.Add(_tableVar.Columns[i]);
+			return result;
+		}
+
+		private Schema.Key DetermineConstraintKey(Schema.Constraint constraint, BitArray columnFlags)
+		{
+			Schema.Key key = null;
+
+			if (columnFlags != null)
+				key = _tableVar.Keys.MinimumSubsetKey(GetColumns(columnFlags), false, false);
+
+			if (key == null)
+				key = _tableVar.Keys.MinimumKey(false, false);
+
+			return key;
+		}
+
+		private void DetermineConstraintKeys()
+		{
+			// NOTE: Constraint keys must all be determined immediately due to the possibility that an update
+			// transition may be checked as delete/insert.
+
+			if (_insertConstraints == null)
+			{
+				_insertConstraints = new ServerConstraintKeys();
+				_updateConstraints = new ServerConstraintKeys();
+				_deleteConstraints = new ServerConstraintKeys();
+
+				foreach (Schema.RowConstraint constraint in _tableVar.RowConstraints)
+				{
+					if (constraint.IsDeferred)
+					{
+						var constraintKey = DetermineConstraintKey(constraint, constraint.ColumnFlags);
+						_insertConstraints.AddConstraintToKey(constraintKey, constraint);
+						_updateConstraints.AddConstraintToKey(constraintKey, constraint);
+					}
+				}
+
+				foreach (Schema.TransitionConstraint constraint in _tableVar.InsertConstraints)
+					if (constraint.IsDeferred)
+						_insertConstraints.AddConstraintToKey(DetermineConstraintKey(constraint, constraint.InsertColumnFlags), constraint);
+
+				foreach (Schema.TransitionConstraint constraint in _tableVar.UpdateConstraints)
+					if (constraint.IsDeferred)
+						_updateConstraints.AddConstraintToKey(DetermineConstraintKey(constraint, constraint.UpdateColumnFlags), constraint);
+
+				foreach (Schema.TransitionConstraint constraint in _tableVar.DeleteConstraints)
+					if (constraint.IsDeferred)
+						_deleteConstraints.AddConstraintToKey(DetermineConstraintKey(constraint, constraint.DeleteColumnFlags), constraint);
+			}
+		}
+
+		private ServerCheckTable EnsureCheckTable(Schema.Key checkKey)
+		{
+			ServerCheckTable checkTable;
+			if (!_checkTables.TryGetValue(checkKey, out checkTable))
+			{
+				checkTable = 
+					new ServerCheckTable
+					(
+						_process, 
+						_tableVar, 
+						checkKey, 
+						_insertConstraints.GetConstraintsForKey(checkKey), 
+						_updateConstraints.GetConstraintsForKey(checkKey), 
+						_deleteConstraints.GetConstraintsForKey(checkKey)
+					);
+
+				_checkTables.Add(checkKey, checkTable);
+			}
+
+			return checkTable;
+		}
+
+		// TODO: This will need to be reviewed for potential caching issues under constraint alteration
+		public void AddInsertTableVarCheck(int transactionIndex, Row row)
+		{
+			DetermineConstraintKeys();
+			foreach (var key in _insertConstraints.Keys)
+			{
+				EnsureCheckTable(key).AddInsertTableVarCheck(transactionIndex, row);
+			}
+		}
+
+		public void AddUpdateTableVarCheck(int transactionIndex, Row oldRow, Row newRow, BitArray valueFlags)
+		{
+			DetermineConstraintKeys();
+			foreach (var key in _updateConstraints.GetKeys(valueFlags))
+			{
+				EnsureCheckTable(key).AddUpdateTableVarCheck(transactionIndex, oldRow, newRow, valueFlags);
+			}
+		}
+
+		public void AddDeleteTableVarCheck(int transactionIndex, Row row)
+		{
+			DetermineConstraintKeys();
+			foreach (var key in _deleteConstraints.Keys)
+			{
+				EnsureCheckTable(key).AddDeleteTableVarCheck(transactionIndex, row);
+			}
+		}
+
+		public void Validate(Program program, int transactionIndex)
+		{
+			foreach (var checkTable in _checkTables.Values)
+				checkTable.Validate(program, transactionIndex);
+		}
+
+		public void DeleteCheckTableChecks(int transactionIndex)
+		{
+			foreach (var checkTable in _checkTables.Values)
+				checkTable.DeleteCheckTableChecks(transactionIndex);
+		}
+	}
+
 	public class ServerTableVars : Dictionary<Schema.TableVar, ServerTableVar>
 	{
 	}

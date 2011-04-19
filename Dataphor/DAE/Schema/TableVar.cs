@@ -1654,6 +1654,38 @@ namespace Alphora.Dataphor.DAE.Schema
 					return true;
 			return false;
         }
+
+		public Key SuperKey(bool allowSparse, bool allowNilable)
+		{
+			var isValid = false;
+			var superKey = new Key();
+
+			for (int index = 0; index < Count; index++)
+			{
+				if ((allowNilable || !this[index].IsNilable) && (allowSparse || !this[index].IsSparse))
+				{
+					isValid = true;
+
+					for (int columnIndex = 0; columnIndex < this[index].Columns.Count; columnIndex++)
+					{
+						if (!superKey.Columns.ContainsName(this[index].Columns[columnIndex].Name))
+							superKey.Columns.Add(this[index].Columns[columnIndex]);
+					}
+				}
+			}
+
+			if (!isValid)
+			{
+				if (allowSparse && allowNilable)
+					throw new SchemaException(SchemaException.Codes.NoKeysAvailable, _tableVar == null ? "<unknown>" : _tableVar.DisplayName);
+				else if (allowNilable)
+					throw new SchemaException(SchemaException.Codes.NoNonSparseKeysAvailable, _tableVar == null ? "<unknown>" : _tableVar.DisplayName);
+				else
+					throw new SchemaException(SchemaException.Codes.NoNonNilableKeysAvailable, _tableVar == null ? "<unknown>" : _tableVar.DisplayName);
+			}
+
+			return superKey;
+		}
         
         public Key MinimumKey(bool allowSparse, bool allowNilable)
         {
@@ -1684,21 +1716,32 @@ namespace Alphora.Dataphor.DAE.Schema
 			return MinimumKey(allowSparse, true);
         }
         
-        public Key MinimumSubsetKey(TableVarColumnsBase columns)
+        public Key MinimumSubsetKey(TableVarColumnsBase columns, bool allowSparse, bool allowNilable)
         {
 			Key minimumKey = null;
 			for (int index = Count - 1; index >= 0; index--)
 			{
-				if (this[index].Columns.IsSubsetOf(columns))
-					if (minimumKey == null)
-						minimumKey = this[index];
-					else
-						if (this[index].Columns.Count < minimumKey.Columns.Count)
+				if ((allowNilable || !this[index].IsNilable) && (allowSparse || !this[index].IsSparse))
+					if (this[index].Columns.IsSubsetOf(columns))
+						if (minimumKey == null)
 							minimumKey = this[index];
+						else
+							if (this[index].Columns.Count < minimumKey.Columns.Count)
+								minimumKey = this[index];
 			}
 
 			return minimumKey;
         }
+
+		public Key MinimumSubsetKey(TableVarColumnsBase columns, bool allowSparse)
+		{
+			return MinimumSubsetKey(columns, allowSparse, true);
+		}
+
+		public Key MinimumSubsetKey(TableVarColumnsBase columns)
+		{
+			return MinimumSubsetKey(columns, true, true);
+		}
         
         // ToString
         public override string ToString()

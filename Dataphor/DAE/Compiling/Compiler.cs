@@ -7308,7 +7308,12 @@ namespace Alphora.Dataphor.DAE.Compiling
 			}
 				
 			if (reference.DeleteReferenceAction == ReferenceAction.Require)
+			{
 				CompileTargetDeleteConstraintNodeForReference(plan, reference, constraint);
+				constraint.DeleteColumnFlags = new BitArray(reference.TargetTable.DataType.Columns.Count);
+				for (int index = 0; index < constraint.DeleteColumnFlags.Length; index++)
+					constraint.DeleteColumnFlags[index] = reference.TargetKey.Columns.ContainsName(reference.TargetTable.DataType.Columns[index].Name);
+			}
 				
 			return constraint;
 		}
