@@ -1,0 +1,11 @@
+create table A { X : Integer, key { X } };
+create table B { X : Integer, Y : Integer, Z : Integer, key { X, Y }, key { X, Z }, reference B_A { X } references A { X } };
+create table C { X : Integer, Y : Integer, key { X, Y }, reference C_B { X, Y } references B { X, Y } };
+insert row { 1 X } into A;
+insert row { 1 X, 1 Y, 1 Z } into B;
+insert row { 1 X, 1 Y } into C;
+try
+	update B set { X := 1, Z := 2 } where X = 1;
+	update B set { X := 1, Y := 2 } where X = 1;
+	update C set { Y := 2 } where X = 1;
+commit;

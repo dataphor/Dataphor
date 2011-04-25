@@ -1,0 +1,14 @@
+select Columns(row { 1 ID });
+select Columns(TableVars);
+select ColumnDefaults(TableVars);
+select ColumnConstraints(TableVars);
+select ColumnEventHandlers(TableVars);
+select Keys(TableVars);
+select KeyColumns(TableVars);
+select Orders(TableVars);
+select OrderColumns(TableVars);
+select Constraints(TableVars);
+select EventHandlers(TableVars);
+select References(TableVars);
+select References(TableVars join BaseTableVars);
+select ReferenceColumns(TableVars);

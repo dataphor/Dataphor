@@ -1952,6 +1952,33 @@ begin
 		end;
 	end;
 
+	create operator Columns(const ARow : row) : table class "System.RowColumnsNode";
+	create operator Columns(const ATable : table) : table class "System.TableColumnsNode";
+	create operator ColumnDefaults(const ATable : table) : table class "System.ColumnDefaultsNode";
+	create operator ColumnConstraints(const ATable : table) : table class "System.ColumnConstraintsNode";
+	create operator ColumnEventHandlers(const ATable : table) : table class "System.ColumnEventHandlersNode";
+	create operator Keys(const ATable : table) : table class "System.KeysNode";
+	create operator KeyColumns(const ATable : table) : table class "System.KeyColumnsNode";
+	create operator Orders(const ATable : table) : table class "System.OrdersNode";
+	create operator OrderColumns(const ATable : table) : table class "System.OrderColumnsNode";
+	create operator Constraints(const ATable : table) : table class "System.ConstraintsNode";
+	create operator EventHandlers(const ATable : table) : table class "System.EventHandlersNode";
+	create operator References(const ATable : table) : table class "System.ReferencesNode";
+	create operator ReferenceColumns(const ATable : table) : table class "System.ReferenceColumnsNode";
+	grant usage on Columns(row) to role User;
+	grant usage on Columns(table) to role User;
+	grant usage on ColumnDefaults(table) to role User;
+	grant usage on ColumnConstraints(table) to role User;
+	grant usage on ColumnEventHandlers(table) to role User;
+	grant usage on Keys(table) to role User;
+	grant usage on KeyColumns(table) to role User;
+	grant usage on Orders(table) to role User;
+	grant usage on OrderColumns(table) to role User;
+	grant usage on Constraints(table) to role User;
+	grant usage on EventHandlers(table) to role User;
+	grant usage on References(table) to role User;
+	grant usage on ReferenceColumns(table) to role User;
+
 	grant usage on Abs(Decimal) to role User;                                                                                            
 	grant usage on Abs(Integer) to role User;                                                                                            
 	grant usage on Abs(Money) to role User;                                                                                            

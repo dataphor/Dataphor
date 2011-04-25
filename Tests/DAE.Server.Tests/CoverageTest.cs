@@ -64,6 +64,7 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[Test] public void ExecuteDML() { ExecuteScript("Coverage.Scripts", "DML"); }
 		[Test] public void ExecuteCursors() { ExecuteScript("Coverage.Scripts", "Cursors"); }
 		[Test] public void ExecuteTransitionConstraintWithNamedRowVariables() { ExecuteScript("Coverage.Scripts", "TransitionConstraintWithNamedRowVariables"); }
+		[Test] public void ExecuteDeferredConstraintsWithKeys() { ExecuteScript("Coverage.Scripts", "DeferredConstraintsWithKeys"); }
 
 		[Test]
 		public void ExecuteSecurityLibrary()
@@ -108,5 +109,6 @@ namespace Alphora.Dataphor.DAE.Server.Tests
 		[Test] public void ExecutePlanCache() { ExecuteScript("Coverage.Scripts", "PlanCache"); }
 		[Test] public void ExecuteOperatorText() { ExecuteScript("Coverage.Scripts", "OperatorText"); }
 		[Test] public void ExecuteDeferredConstraintChecking() { ExecuteScript("Coverage.Scripts", "DeferredConstraintChecking"); }
+		[Test] public void ExecuteSystemCatalogOperators() { ExecuteScript("Coverage.Scripts", "SystemCatalogOperators"); }
 	}
 }
