@@ -248,6 +248,26 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
+		// AppointmentBackgroundColorColumn
+
+		private string _appointmentBackgroundColorColumn = String.Empty;
+		[DefaultValue("")]
+		[TypeConverter(typeof(ColumnNameConverter))]
+		[ColumnNameSourceProperty("AppointmentSource")]
+		[Description("The column in the appointment source that represents the BackgroundColor.")]
+		public string AppointmentBackgroundColorColumn
+		{
+			get { return _appointmentBackgroundColorColumn; }
+			set
+			{
+				if (_appointmentBackgroundColorColumn != value)
+				{
+					_appointmentBackgroundColorColumn = value;
+					UpdateAppointmentData();
+				}
+			}
+		}
+
 		// AppointmentData
 		
 		protected void UpdateAppointmentData()
@@ -288,7 +308,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 							Group = (String.IsNullOrEmpty(_appointmentGroupColumn) ? null : ((Scalar)row.GetValue(_appointmentGroupColumn)).AsNative),
 							Image = (String.IsNullOrEmpty(_appointmentImageColumn) || !row.HasValue(_appointmentImageColumn) 
 								? null 
-								: LoadImage((Scalar)row.GetValue(_appointmentImageColumn)))
+								: LoadImage((Scalar)row.GetValue(_appointmentImageColumn))),
+							BackgroundColor = (String.IsNullOrEmpty(_appointmentBackgroundColorColumn) || !row.HasValue(_appointmentBackgroundColorColumn)
+								? String.Empty
+								: ((Scalar)row.GetValue(_appointmentBackgroundColorColumn)).AsString)
 						};
 					items[i] = item;
 					if (i == _appointmentSourceLink.ActiveOffset)
@@ -1256,6 +1279,20 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				}
 			}
 		}
+
+		private string _backgroundColor;
+		public string BackgroundColor
+		{
+			get { return _backgroundColor; }
+			set
+			{
+				if (_backgroundColor != value)
+				{
+					_backgroundColor = value;
+					NotifyPropertyChanged("BackgroundColor");
+				}
+			}
+		}
 	}
 	
 	public class ScheduleShiftData : ScheduleData
@@ -1290,12 +1327,93 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 	public class BooleanToBorderBrushConverter : IValueConverter
 	{
+		private static SolidColorBrush greenBrush;
+		public static SolidColorBrush GreenBrush
+		{
+			get
+			{
+				if (greenBrush == null)			
+					greenBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0x30, 0x5E, 0x09)); 			
+				return greenBrush;
+			}
+		}
+
+		private static SolidColorBrush blueBrush;
+		public static SolidColorBrush BlueBrush
+		{
+			get
+			{
+				if (blueBrush == null)				
+					blueBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0x55, 0x55, 0xFF)); 	
+				return blueBrush;
+			}
+		}
+		
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{
-			var brush = new SolidColorBrush(Color.FromArgb(0xFF, 0x55, 0x55, 0xFF));
+			//Note: If you can find a way to know which background color is set, the respective borders are below.
+			// I tried passing in the parameter, but it can't be a Binding.  I also tried passing in the Border and comparing, but the parameter is a string.
+			//SolidColorBrush brush = (((Border)parameter).Background.Equals(StringToBorderBackgroundBrushConverter.GreenBrush)) ? GreenBrush : BlueBrush;
+
+			SolidColorBrush brush = new SolidColorBrush(Color.FromArgb(0xFF, 0x00, 0x00, 0x00));
 			if (!(bool)value)
 				brush.Opacity = 0d;
 			return brush;
+		}
+
+		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+		{
+			throw new NotImplementedException();
+		}	   
+	} 
+	
+	public class StringToBorderBackgroundBrushConverter : IValueConverter
+	{
+		private static LinearGradientBrush greenBrush;
+		public static LinearGradientBrush GreenBrush
+		{
+			get 
+			{
+				if (greenBrush == null)
+				{
+					greenBrush = new LinearGradientBrush();
+					greenBrush.EndPoint = new Point(0.5, 1);
+					greenBrush.StartPoint = new Point(0.5, 0);
+					greenBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0xFF, 0x8D, 0xC6, 0x3F), 1));
+				}
+				return greenBrush;
+			}
+		}
+
+		private static LinearGradientBrush blueBrush;
+		public static LinearGradientBrush BlueBrush
+		{
+			get
+			{
+				if (blueBrush == null)
+				{
+					blueBrush = new LinearGradientBrush();
+					blueBrush.EndPoint = new Point(0.5, 1);
+					blueBrush.StartPoint = new Point(0.5, 0);
+					blueBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0xFF, 0x9B, 0xA5, 0xDA), 1));
+					blueBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0xFF, 0xBC, 0xC1, 0xE8), 0));
+					blueBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0xFF, 0xB0, 0xB8, 0xE4), 0.935));
+					blueBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0xFF, 0xAA, 0xB4, 0xE6), 0.069));
+				}
+				return blueBrush;
+			}
+		}
+
+		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+		{  			
+			//Note: I've hard coded two colors.  If additional colors are needed, this should be changed to a config.
+			switch (((string)value).ToUpper())
+			{
+				case "GREEN":
+					return GreenBrush; 								
+				default:
+					return BlueBrush;					
+			} 
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
