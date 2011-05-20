@@ -1326,35 +1326,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	}
 
 	public class BooleanToBorderBrushConverter : IValueConverter
-	{
-		private static SolidColorBrush greenBrush;
-		public static SolidColorBrush GreenBrush
-		{
-			get
-			{
-				if (greenBrush == null)			
-					greenBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0x30, 0x5E, 0x09)); 			
-				return greenBrush;
-			}
-		}
-
-		private static SolidColorBrush blueBrush;
-		public static SolidColorBrush BlueBrush
-		{
-			get
-			{
-				if (blueBrush == null)				
-					blueBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0x55, 0x55, 0xFF)); 	
-				return blueBrush;
-			}
-		}
-		
+	{  	
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{
-			//Note: If you can find a way to know which background color is set, the respective borders are below.
-			// I tried passing in the parameter, but it can't be a Binding.  I also tried passing in the Border and comparing, but the parameter is a string.
-			//SolidColorBrush brush = (((Border)parameter).Background.Equals(StringToBorderBackgroundBrushConverter.GreenBrush)) ? GreenBrush : BlueBrush;
-
+			//TODO: investigate programmatically creating the Binding so the BackgroundColor can be passed as the parameter and the Border can be set to an opacity of the BackgroundColor.
 			SolidColorBrush brush = new SolidColorBrush(Color.FromArgb(0xFF, 0x00, 0x00, 0x00));
 			if (!(bool)value)
 				brush.Opacity = 0d;
@@ -1369,51 +1344,48 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	
 	public class StringToBorderBackgroundBrushConverter : IValueConverter
 	{
-		private static LinearGradientBrush greenBrush;
-		public static LinearGradientBrush GreenBrush
+		public const string DefaultBrush = "#9BA5DA";
+		static StringToBorderBackgroundBrushConverter()
 		{
-			get 
-			{
-				if (greenBrush == null)
-				{
-					greenBrush = new LinearGradientBrush();
-					greenBrush.EndPoint = new Point(0.5, 1);
-					greenBrush.StartPoint = new Point(0.5, 0);
-					greenBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0xFF, 0x8D, 0xC6, 0x3F), 1));
-				}
-				return greenBrush;
-			}
+		   Brushes.Add(DefaultBrush, GetBrush(DefaultBrush));
 		}
 
-		private static LinearGradientBrush blueBrush;
-		public static LinearGradientBrush BlueBrush
+		public static LinearGradientBrush GetBrush(string color)
 		{
-			get
+			LinearGradientBrush brush = new LinearGradientBrush(); 
+			try
 			{
-				if (blueBrush == null)
-				{
-					blueBrush = new LinearGradientBrush();
-					blueBrush.EndPoint = new Point(0.5, 1);
-					blueBrush.StartPoint = new Point(0.5, 0);
-					blueBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0xFF, 0x9B, 0xA5, 0xDA), 1));
-					blueBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0xFF, 0xBC, 0xC1, 0xE8), 0));
-					blueBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0xFF, 0xB0, 0xB8, 0xE4), 0.935));
-					blueBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0xFF, 0xAA, 0xB4, 0xE6), 0.069));
-				}
-				return blueBrush;
-			}
-		}
+				byte red = System.Convert.ToByte(color.Substring(1, 2), 16);
+				byte green = System.Convert.ToByte(color.Substring(3, 2), 16);
+				byte blue = System.Convert.ToByte(color.Substring(5, 2), 16);					
+				
+				brush.EndPoint = new Point(0.5, 1);
+				brush.StartPoint = new Point(0.5, 0);
+				brush.GradientStops.Add(new GradientStop(Color.FromArgb(0xFF, red, green, blue), 1)); 			
+				//TODO: investigate putting three gradients back in.  The default color example is below:
+				//brush.GradientStops.Add(new GradientStop(Color.FromArgb(0xFF, 0xBC, 0xC1, 0xE8), 0));
+				//brush.GradientStops.Add(new GradientStop(Color.FromArgb(0xFF, 0xB0, 0xB8, 0xE4), 0.935));
+				//brush.GradientStops.Add(new GradientStop(Color.FromArgb(0xFF, 0xAA, 0xB4, 0xE6), 0.069));
 
+			}
+			catch
+			{
+				return GetBrush(DefaultBrush);
+			}
+			return brush;
+		}	 
+		
+		private static Dictionary<string, LinearGradientBrush> Brushes = new Dictionary<string, LinearGradientBrush>();
+	
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{  			
-			//Note: I've hard coded two colors.  If additional colors are needed, this should be changed to a config.
-			switch (((string)value).ToUpper())
+			string color = (String)value;
+			if (!Brushes.ContainsKey(color))
 			{
-				case "GREEN":
-					return GreenBrush; 								
-				default:
-					return BlueBrush;					
-			} 
+				Brushes.Add(color, GetBrush(color));
+			}	  		           
+
+			return Brushes[color]; 
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
