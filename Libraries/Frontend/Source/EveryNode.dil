@@ -3,6 +3,7 @@
         <dataargument columns="dfsa=12" bop:name="DataArgument1" />
     </source>
     <blockaction text="&amp;Block" enabled="False" hint="Block of actions" imageuri="Derivation.Image.Add.aspx" bop:name="BlockAction" />
+    <dataconditionalaction Condition="false" text="&amp;Conditional" enabled="False" hint="Conditional action" imageuri="Derivation.Image.Add.aspx" bop:name="DataConditionalAction" />
     <callaction action="BlockAction" text="Call Action Text" enabled="False" hint="Call Action Hint" imageuri="Derivation.Image.Add.aspx" bop:name="CallAction" />
     <clearnextrequestaction text="&amp;ClearNext" enabled="False" hint="Clears the chained UI" imageuri="Derivation.Image.Add.aspx" bop:name="ClearNextRequest" />
     <datascriptaction script="EnsureGenerators();" text="DataScriptAction Text" enabled="False" hint="DataScriptAction Hint" imageuri="Derivation.Image.Add.aspx" bop:name="DataScriptAction">

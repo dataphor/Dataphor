@@ -13,6 +13,7 @@ using DAE = Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Client;
 using System.Collections.Generic;
 using Alphora.Dataphor.DAE.Language;
+using Alphora.Dataphor.DAE.Runtime.Data;
 
 namespace Alphora.Dataphor.Frontend.Client
 {
@@ -331,6 +332,84 @@ namespace Alphora.Dataphor.Frontend.Client
 
 				BaseArgument.ApplyArguments(this, localParamsValue);
 			}
+		}
+	}
+
+	[Description("Executes an action if the D4 condition evaluates to true.")]
+	public class DataConditionalAction : Action, IDataConditionalAction
+	{
+		private string _condition = String.Empty;
+		[DefaultValue("")]
+		[Description("The D4 condition to evaluate.  This script will be parameterized by any parameters specified using DataArgument child nodes.")]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
+		[DAE.Client.Design.EditorDocumentType("d4")]
+		public string Condition
+		{
+			get { return _condition; }
+			set { _condition = (value == null ? String.Empty : value); }
+		}
+
+		/// <remarks> Only one IAction is allowed as a child action. </remarks>
+		public override bool IsValidChild(Type childType)
+		{		
+			if (childType == typeof(IAction))
+				foreach (Node localNode in Children)
+					if (localNode is IAction)
+						return false;
+					
+			if (typeof(IAction).IsAssignableFrom(childType))
+				return true;
+			return base.IsValidChild(childType);
+		}
+
+		/// <summary> Executes the IAction child conditionally. </summary>
+		protected override void InternalExecute(INode sender, EventParams paramsValue)
+		{	foreach (Node localNode in Children)
+				if (localNode is IAction && EvaluateCondition())
+					((IAction)localNode).Execute(this, paramsValue);
+		}
+
+		private bool EvaluateCondition()
+		{
+			bool result = false;
+			if (_condition != String.Empty)
+			{
+				DAE.Runtime.DataParams localParamsValue = BaseArgument.CollectArguments(this);
+				DAE.IServerProcess process = HostNode.Session.DataSession.ServerSession.StartProcess(new DAE.ProcessInfo(HostNode.Session.DataSession.ServerSession.SessionInfo));
+				try
+				{
+					ErrorList errors = new ErrorList();
+					DAE.IServerScript script = process.PrepareScript(String.Format("select {0}", _condition));
+					try
+					{
+						DAE.IServerBatch batch = script.Batches[0];
+						DAE.IServerExpressionPlan plan = batch.PrepareExpression(localParamsValue);
+						try
+						{
+							errors.AddRange(plan.Messages);
+							using (DataValue dataValue = plan.Evaluate(localParamsValue))
+								result = (bool)dataValue.AsNative;
+						}
+						finally
+						{
+							batch.UnprepareExpression(plan);
+						}
+					}
+					finally
+					{
+						process.UnprepareScript(script);
+					}
+
+					HostNode.Session.ReportErrors(HostNode, errors);
+				}
+				finally
+				{
+					HostNode.Session.DataSession.ServerSession.StopProcess(process);
+				}
+
+				BaseArgument.ApplyArguments(this, localParamsValue);
+			}
+			return result;
 		}
 	}
 
