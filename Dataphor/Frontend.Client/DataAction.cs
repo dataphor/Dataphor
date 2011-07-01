@@ -356,10 +356,7 @@ namespace Alphora.Dataphor.Frontend.Client
 				foreach (Node localNode in Children)
 					if (localNode is IAction)
 						return false;
-					
-			if (typeof(IAction).IsAssignableFrom(childType))
-				return true;
-			return base.IsValidChild(childType);
+			return (typeof(IAction).IsAssignableFrom(childType)) || typeof(IBaseArgument).IsAssignableFrom(childType) || base.IsValidChild(childType);					
 		}
 
 		/// <summary> Executes the IAction child conditionally. </summary>
