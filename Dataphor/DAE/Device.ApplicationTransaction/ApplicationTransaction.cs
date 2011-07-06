@@ -1771,6 +1771,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				statement.MetaData = new MetaData();
 			statement.MetaData.Tags.SafeRemove("DAE.GlobalObjectName");
 			statement.MetaData.Tags.AddOrUpdate("DAE.SourceOperatorName", operatorMap.Name, true);
+			statement.MetaData.Tags.AddOrUpdate("DAE.SourceObjectName", operatorValue.Name, true);
 
 			Plan plan = new Plan(process);
 			try

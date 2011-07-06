@@ -483,7 +483,10 @@ namespace Alphora.Dataphor.DAE.Schema
 		public override void IncludeDependencies(CatalogDeviceSession session, Catalog sourceCatalog, Catalog targetCatalog, EmitMode mode)
 		{
 			if ((SourceOperatorName != null) && (mode == EmitMode.ForRemote))
-				sourceCatalog[SourceOperatorName].IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
+			{
+				var sourceObjectName = MetaData.GetTag(MetaData, "DAE.SourceObjectName", SourceOperatorName);
+				sourceCatalog[sourceObjectName].IncludeDependencies(session, sourceCatalog, targetCatalog, mode);
+			}
 			else
 			{
 				if (!targetCatalog.Contains(this))
