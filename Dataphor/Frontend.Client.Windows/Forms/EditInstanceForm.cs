@@ -73,11 +73,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			FInstanceNameTextBox.Text = configuration.Name;
 			FPortNumberTextBox.Text = configuration.PortNumber.ToString();
-			FSecurePortNumberTextBox.Text = configuration.SecurePortNumber.ToString();
 			FRequireSecureConnectionComboBox.Checked = configuration.RequireSecureConnection;
 			FShouldListenComboBox.Checked = configuration.ShouldListen;
 			FOverrideListenerPortNumberTextBox.Text = configuration.OverrideListenerPortNumber.ToString();
-			FOverrideSecureListenerPortNumberTextBox.Text = configuration.OverrideSecureListenerPortNumber.ToString();
 			FRequireSecureListenerConnectionComboBox.Checked = configuration.RequireSecureListenerConnection;
 			FAllowSilverlightClientsComboBox.Checked = configuration.AllowSilverlightClients;
 			FInstanceDirectoryTextBox.Text = configuration.InstanceDirectory;
@@ -100,11 +98,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			ServerConfiguration result = new ServerConfiguration();
 			result.Name = FInstanceNameTextBox.Text;
 			result.PortNumber = Int32.Parse(FPortNumberTextBox.Text);
-			result.SecurePortNumber = Int32.Parse(FSecurePortNumberTextBox.Text);
 			result.RequireSecureConnection = FRequireSecureConnectionComboBox.Checked;
 			result.ShouldListen = FShouldListenComboBox.Checked;
 			result.OverrideListenerPortNumber = Int32.Parse(FOverrideListenerPortNumberTextBox.Text);
-			result.OverrideSecureListenerPortNumber = Int32.Parse(FOverrideSecureListenerPortNumberTextBox.Text);
 			result.RequireSecureListenerConnection = FRequireSecureListenerConnectionComboBox.Checked;
 			result.AllowSilverlightClients = FAllowSilverlightClientsComboBox.Checked;
 			result.InstanceDirectory = FInstanceDirectoryTextBox.Text;

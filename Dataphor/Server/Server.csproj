@@ -74,7 +74,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Contracts\ICrossDomainService.cs" />
     <Compile Include="Contracts\IDataphorService.cs" />
     <Compile Include="Connection\DotNetCommand.cs" />
     <Compile Include="Connection\DotNetConnection.cs" />
@@ -101,8 +100,6 @@
     <Compile Include="Schema\LibraryUtility.cs" />
     <Compile Include="Server\CatalogCache.cs" />
     <Compile Include="Server\InstanceManager.cs" />
-    <Compile Include="Service\CrossDomainService.cs" />
-    <Compile Include="Service\CrossDomainServiceHost.cs" />
     <Compile Include="Service\ListenerService.cs" />
     <Compile Include="NativeCLI\NativeCLIUtility.cs" />
     <Compile Include="NativeCLI\NativeMarshal.cs" />

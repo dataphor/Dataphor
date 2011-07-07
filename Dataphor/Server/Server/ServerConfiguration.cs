@@ -18,10 +18,8 @@ namespace Alphora.Dataphor.DAE.Server
 	public class ServerConfiguration
 	{
 		public const int DefaultPortNumber = 8061;
-		public const int DefaultSecurePortNumber = 8601;
 		public const string DefaultLocalInstanceName = "LocalInstance";
 		public const int DefaultLocalPortNumber = 8062;
-		public const int DefaultLocalSecurePortNumber = 8602;
 		
 		private string _name;
 		public string Name
@@ -35,13 +33,6 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			get { return _portNumber; }
 			set { _portNumber = value; }
-		}
-		
-		private int _securePortNumber;
-		public int SecurePortNumber
-		{
-			get { return _securePortNumber; }
-			set { _securePortNumber = value; }
 		}
 		
 		private bool _requireSecureConnection;
@@ -69,14 +60,6 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			get { return _overrideListenerPortNumber; }
 			set { _overrideListenerPortNumber = value; }
-		}
-		
-		private int _overrideSecureListenerPortNumber;
-		[DefaultValue(0)]
-		public int OverrideSecureListenerPortNumber
-		{
-			get { return _overrideSecureListenerPortNumber; }
-			set { _overrideSecureListenerPortNumber = value; }
 		}
 		
 		private bool _requireSecureListenerConnection;
@@ -144,7 +127,6 @@ namespace Alphora.Dataphor.DAE.Server
 			ServerConfiguration instance = new ServerConfiguration();
 			instance.Name = String.IsNullOrEmpty(instanceName) ? Engine.DefaultServerName : instanceName;
 			instance.PortNumber = DefaultPortNumber;
-			instance.SecurePortNumber = DefaultSecurePortNumber;
 			instance.LibraryDirectories = Path.Combine(PathUtility.GetInstallationDirectory(), Server.DefaultLibraryDirectory);
 			return instance;
 		}
@@ -154,7 +136,6 @@ namespace Alphora.Dataphor.DAE.Server
 			ServerConfiguration instance = new ServerConfiguration();
 			instance.Name = DefaultLocalInstanceName;
 			instance.PortNumber = DefaultLocalPortNumber; // don't use the same default port as the service
-			instance.SecurePortNumber = DefaultLocalSecurePortNumber;
 			instance.LibraryDirectories = Path.Combine(PathUtility.GetInstallationDirectory(), Server.DefaultLibraryDirectory);
 			return instance;
 		}

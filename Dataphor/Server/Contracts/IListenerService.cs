@@ -28,13 +28,13 @@ namespace Alphora.Dataphor.DAE.Contracts
 		/// </summary>
 		[OperationContract]
 		[FaultContract(typeof(ListenerFault))]
-		string GetInstanceURI(string AHostName, string AInstanceName, ConnectionSecurityMode ASecurityMode);
+		string GetInstanceURI(string AHostName, string AInstanceName);
 		
 		/// <summary>
 		/// Returns the URI for the native CLI of an instance.
 		/// </summary>
 		[OperationContract]
 		[FaultContract(typeof(ListenerFault))]
-		string GetNativeInstanceURI(string AHostName, string AInstanceName, ConnectionSecurityMode ASecurityMode);
+		string GetNativeInstanceURI(string AHostName, string AInstanceName);
 	}
 }

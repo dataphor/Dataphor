@@ -35,8 +35,7 @@ namespace Alphora.Dataphor.DAE.Service
 		private NativeCLIService _nativeService;
 		private ServiceHost _nativeServiceHost;
 		private ListenerServiceHost _listenerServiceHost;
-		private CrossDomainServiceHost _crossDomainServiceHost;
-		
+				
 		public bool IsActive { get { return _server != null; } }
 		
 		private void CheckInactive()
@@ -96,19 +95,11 @@ namespace Alphora.Dataphor.DAE.Service
 						_server.LogMessage("Configuring Service Host...");
 						_serviceHost = new ServiceHost(_service);
 						
-						if (!instance.RequireSecureConnection)
-							_serviceHost.AddServiceEndpoint
-							(
-								typeof(IDataphorService), 
-								DataphorServiceUtility.GetBinding(false), 
-								DataphorServiceUtility.BuildInstanceURI(Environment.MachineName, instance.PortNumber, false, instance.Name)
-							);
-
 						_serviceHost.AddServiceEndpoint
 						(
 							typeof(IDataphorService), 
-							DataphorServiceUtility.GetBinding(true), 
-							DataphorServiceUtility.BuildInstanceURI(Environment.MachineName, instance.SecurePortNumber, true, instance.Name)
+							DataphorServiceUtility.GetBinding(), 
+							DataphorServiceUtility.BuildInstanceURI(Environment.MachineName, instance.PortNumber, instance.Name)
 						);
 
 						_server.LogMessage("Opening Service Host...");
@@ -117,19 +108,11 @@ namespace Alphora.Dataphor.DAE.Service
 						_server.LogMessage("Configuring Native CLI Service Host...");
 						_nativeServiceHost = new ServiceHost(_nativeService);
 						
-						if (!instance.RequireSecureConnection)
-							_nativeServiceHost.AddServiceEndpoint
-							(
-								typeof(INativeCLIService),
-								DataphorServiceUtility.GetBinding(false), 
-								DataphorServiceUtility.BuildNativeInstanceURI(Environment.MachineName, instance.PortNumber, false, instance.Name)
-							);
-						
 						_nativeServiceHost.AddServiceEndpoint
 						(
 							typeof(INativeCLIService),
-							DataphorServiceUtility.GetBinding(true), 
-							DataphorServiceUtility.BuildNativeInstanceURI(Environment.MachineName, instance.SecurePortNumber, true, instance.Name)
+							DataphorServiceUtility.GetBinding(), 
+							DataphorServiceUtility.BuildNativeInstanceURI(Environment.MachineName, instance.PortNumber, instance.Name)
 						);
 					
 						_server.LogMessage("Opening Native CLI Service Host...");
@@ -139,17 +122,8 @@ namespace Alphora.Dataphor.DAE.Service
 						if (instance.ShouldListen)
 						{
 							_server.LogMessage("Starting Listener Service...");
-							_listenerServiceHost = new ListenerServiceHost(instance.OverrideListenerPortNumber, instance.OverrideSecureListenerPortNumber, instance.RequireSecureListenerConnection, instance.AllowSilverlightClients);
-						}
-						
-						// Start the CrossDomainServer
-						// This is required in order to serve a ClientAccessPolicy to enable cross-domain access in a sliverlight application.
-						// Without this, the Silverlight client will not work correctly.
-						if (instance.AllowSilverlightClients)
-						{
-							_server.LogMessage("Starting Cross Domain Service...");
-							_crossDomainServiceHost = new CrossDomainServiceHost(Environment.MachineName, instance.PortNumber, instance.SecurePortNumber, instance.RequireSecureConnection);
-						}
+							_listenerServiceHost = new ListenerServiceHost(instance.OverrideListenerPortNumber, instance.RequireSecureListenerConnection, instance.AllowSilverlightClients);
+						}							
 					}
 					catch (Exception exception)
 					{
@@ -167,12 +141,6 @@ namespace Alphora.Dataphor.DAE.Service
 		
 		public void Stop()
 		{
-			if (_crossDomainServiceHost != null)
-			{
-				_crossDomainServiceHost.Dispose();
-				_crossDomainServiceHost = null;
-			}
-			
 			if (_listenerServiceHost != null)
 			{
 				_listenerServiceHost.Dispose();

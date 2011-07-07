@@ -123,11 +123,11 @@ namespace Alphora.Dataphor.DAE.Client
 			if (!IsActive)
 				if (_overridePortNumber == 0)
 				{
-					Uri uri = new Uri(ListenerFactory.GetInstanceURI(_hostName, _overrideListenerPortNumber, _listenerSecurityMode, _instanceName, _securityMode));
+					Uri uri = new Uri(ListenerFactory.GetInstanceURI(_hostName, _overrideListenerPortNumber, _instanceName));
 					_channelFactory =
 						new ChannelFactory<IClientDataphorService>
 						(
-							DataphorServiceUtility.GetBinding(uri.Scheme == Uri.UriSchemeHttps), 
+							DataphorServiceUtility.GetBinding(), 
 							new EndpointAddress(uri)
 						);
 				}
@@ -136,8 +136,8 @@ namespace Alphora.Dataphor.DAE.Client
 					_channelFactory = 
 						new ChannelFactory<IClientDataphorService>
 						(
-							DataphorServiceUtility.GetBinding(_securityMode == ConnectionSecurityMode.Transport), 
-							new EndpointAddress(DataphorServiceUtility.BuildInstanceURI(_hostName, _overridePortNumber, _securityMode == ConnectionSecurityMode.Transport, _instanceName))
+							DataphorServiceUtility.GetBinding(), 
+							new EndpointAddress(DataphorServiceUtility.BuildInstanceURI(_hostName, _overridePortNumber, _instanceName))
 						);
 				}
 		}

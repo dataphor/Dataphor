@@ -16,30 +16,30 @@ namespace Alphora.Dataphor.DAE.Listener
 	{
 		public static string[] EnumerateInstances(string hostName)
 		{
-			return EnumerateInstances(hostName, 0, ConnectionSecurityMode.None);
+			return EnumerateInstances(hostName, 0);
 		}
 		
-		public static string[] EnumerateInstances(string hostName, int overrideListenerPortNumber, ConnectionSecurityMode listenerSecurityMode)
+		public static string[] EnumerateInstances(string hostName, int overrideListenerPortNumber)
 		{
-			using (ListenerClient client = new ListenerClient(hostName, overrideListenerPortNumber, listenerSecurityMode))
+			using (ListenerClient client = new ListenerClient(hostName, overrideListenerPortNumber))
 			{
 				return client.EnumerateInstances();
 			}
 		}
 		
-		public static string GetInstanceURI(string hostName, int overrideListenerPortNumber, ConnectionSecurityMode listenerSecurityMode, string instanceName, ConnectionSecurityMode securityMode)
+		public static string GetInstanceURI(string hostName, int overrideListenerPortNumber, string instanceName)
 		{
-			return GetInstanceURI(hostName, overrideListenerPortNumber, listenerSecurityMode, instanceName, securityMode, false);
+			return GetInstanceURI(hostName, overrideListenerPortNumber, instanceName, false);
 		}
 		
-		public static string GetInstanceURI(string hostName, int overrideListenerPortNumber, ConnectionSecurityMode listenerSecurityMode, string instanceName, ConnectionSecurityMode securityMode, bool useNative)
+		public static string GetInstanceURI(string hostName, int overrideListenerPortNumber, string instanceName, bool useNative)
 		{
-			using (ListenerClient client = new ListenerClient(hostName, overrideListenerPortNumber, listenerSecurityMode))
+			using (ListenerClient client = new ListenerClient(hostName, overrideListenerPortNumber))
 			{
 				if (useNative)
-					return client.GetNativeInstanceURI(instanceName, securityMode);
+					return client.GetNativeInstanceURI(instanceName);
 				else
-					return client.GetInstanceURI(instanceName, securityMode);
+					return client.GetInstanceURI(instanceName);
 			}
 		}
 	}

@@ -36,33 +36,16 @@ namespace Alphora.Dataphor.DAE.Service
 			}
 		}
 		
-		private string GetInstanceURI(string hostName, string instanceName, ConnectionSecurityMode securityMode, bool useNative)
+		private string GetInstanceURI(string hostName, string instanceName, bool useNative)
 		{
 			try
 			{
 				ServerConfiguration server = InstanceManager.LoadConfiguration().Instances[instanceName];
 					
-				bool secure = false;
-				switch (securityMode)
-				{
-					case ConnectionSecurityMode.Default : 
-						secure = server.RequireSecureConnection;
-					break;
-					
-					case ConnectionSecurityMode.None :
-						if (server.RequireSecureConnection)
-							throw new NotSupportedException("The URI cannot be determined because the instance does not support unsecured connections.");
-					break;
-
-					case ConnectionSecurityMode.Transport :
-						secure = true;
-					break;
-				}
-					
 				if (useNative)
-					return DataphorServiceUtility.BuildNativeInstanceURI(hostName, server.PortNumber, secure, server.Name);
+					return DataphorServiceUtility.BuildNativeInstanceURI(hostName, server.PortNumber, server.Name);
 				
-				return DataphorServiceUtility.BuildInstanceURI(hostName, server.PortNumber, secure, server.Name);
+				return DataphorServiceUtility.BuildInstanceURI(hostName, server.PortNumber, server.Name);
 			}
 			catch (Exception exception)
 			{
@@ -70,14 +53,14 @@ namespace Alphora.Dataphor.DAE.Service
 			}
 		}
 		
-		public string GetInstanceURI(string hostName, string instanceName, ConnectionSecurityMode securityMode)
+		public string GetInstanceURI(string hostName, string instanceName)
 		{
-			return GetInstanceURI(hostName, instanceName, securityMode, false);
+			return GetInstanceURI(hostName, instanceName, false);
 		}
 		
-		public string GetNativeInstanceURI(string hostName, string instanceName, ConnectionSecurityMode securityMode)
+		public string GetNativeInstanceURI(string hostName, string instanceName)
 		{
-			return GetInstanceURI(hostName, instanceName, securityMode, true);
+			return GetInstanceURI(hostName, instanceName, true);
 		}
 	}
 }

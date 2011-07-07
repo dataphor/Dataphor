@@ -15,7 +15,7 @@ namespace Alphora.Dataphor.DAE.Listener
 {
 	public class ListenerClient : ServiceClient<IClientListenerService>
 	{
-		public ListenerClient(string hostName, int overridePortNumber, ConnectionSecurityMode securityMode) : base(DataphorServiceUtility.BuildListenerURI(hostName, overridePortNumber, securityMode)) 
+		public ListenerClient(string hostName, int overridePortNumber) : base(DataphorServiceUtility.BuildListenerURI(hostName, overridePortNumber)) 
 		{ 
 			_hostName = hostName;
 		}
@@ -37,11 +37,11 @@ namespace Alphora.Dataphor.DAE.Listener
 			}
 		}
 		
-		public string GetInstanceURI(string instanceName, ConnectionSecurityMode securityMode)
+		public string GetInstanceURI(string instanceName)
 		{
 			try
 			{
-				IAsyncResult result = GetInterface().BeginGetInstanceURI(_hostName, instanceName, securityMode, null, null);
+				IAsyncResult result = GetInterface().BeginGetInstanceURI(_hostName, instanceName, null, null);
 				result.AsyncWaitHandle.WaitOne();
 				return GetInterface().EndGetInstanceURI(result);
 			}
@@ -51,11 +51,11 @@ namespace Alphora.Dataphor.DAE.Listener
 			}
 		}
 		
-		public string GetNativeInstanceURI(string instanceName, ConnectionSecurityMode securityMode)
+		public string GetNativeInstanceURI(string instanceName)
 		{
 			try
 			{
-				IAsyncResult result = GetInterface().BeginGetNativeInstanceURI(_hostName, instanceName, securityMode, null, null);
+				IAsyncResult result = GetInterface().BeginGetNativeInstanceURI(_hostName, instanceName, null, null);
 				result.AsyncWaitHandle.WaitOne();
 				return GetInterface().EndGetNativeInstanceURI(result);
 			}

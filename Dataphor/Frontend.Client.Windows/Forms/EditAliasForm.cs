@@ -579,7 +579,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				{
 					_instancesEnumerated = true;
 					cbInstanceName.Items.Clear();
-					string[] instanceNames = ListenerFactory.EnumerateInstances(tbHost.Text, OverrideListenerPortNumber, ListenerSecurityMode);
+					string[] instanceNames = ListenerFactory.EnumerateInstances(tbHost.Text, OverrideListenerPortNumber);
 					for (int index = 0; index < instanceNames.Length; index++)
 						cbInstanceName.Items.Add(instanceNames[index]);
 				}

@@ -21,7 +21,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		public NativeCLIClient(string hostName) : this(hostName, DefaultInstanceName, 0, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default) { }
 		public NativeCLIClient(string hostName, string instanceName) : this(hostName, instanceName, 0, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default) { }
 		public NativeCLIClient(string hostName, string instanceName, int overridePortNumber, ConnectionSecurityMode securityMode) : this(hostName, instanceName, 0, ConnectionSecurityMode.Default, 0, ConnectionSecurityMode.Default) { }
-		public NativeCLIClient(string hostName, string instanceName, int overridePortNumber, ConnectionSecurityMode securityMode, int overrideListenerPortNumber, ConnectionSecurityMode listenerSecurityMode) : base(GetNativeServerURI(hostName, instanceName, overridePortNumber, securityMode, overrideListenerPortNumber, listenerSecurityMode))
+		public NativeCLIClient(string hostName, string instanceName, int overridePortNumber, ConnectionSecurityMode securityMode, int overrideListenerPortNumber, ConnectionSecurityMode listenerSecurityMode) : base(GetNativeServerURI(hostName, instanceName, overridePortNumber, overrideListenerPortNumber))
 		{
 			_hostName = hostName;
 			_instanceName = instanceName;
@@ -49,12 +49,12 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		private ConnectionSecurityMode _listenerSecurityMode;
 		public ConnectionSecurityMode ListenerSecurityMode { get { return _listenerSecurityMode; } }
 		
-		public static string GetNativeServerURI(string hostName, string instanceName, int overridePortNumber, ConnectionSecurityMode securityMode, int overrideListenerPortNumber, ConnectionSecurityMode listenerSecurityMode)
+		public static string GetNativeServerURI(string hostName, string instanceName, int overridePortNumber, int overrideListenerPortNumber)
 		{
 			if (overridePortNumber > 0)
-				return DataphorServiceUtility.BuildNativeInstanceURI(hostName, overridePortNumber, securityMode == ConnectionSecurityMode.Transport, instanceName);
+				return DataphorServiceUtility.BuildNativeInstanceURI(hostName, overridePortNumber, instanceName);
 			else
-				return ListenerFactory.GetInstanceURI(hostName, overrideListenerPortNumber, listenerSecurityMode, instanceName, securityMode, true);
+				return ListenerFactory.GetInstanceURI(hostName, overrideListenerPortNumber, instanceName, true);
 		}
 	}
 	

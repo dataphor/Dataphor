@@ -19,27 +19,18 @@ namespace Alphora.Dataphor.DAE.Service
 {
 	public class ListenerServiceHost : IDisposable
 	{
-		public ListenerServiceHost(int overridePortNumber, int overrideSecurePortNumber, bool requireSecureConnection, bool useCrossDomainService)
+		public ListenerServiceHost(int overridePortNumber, bool requireSecureConnection, bool useCrossDomainService)
 		{
 			int listenerPort = overridePortNumber == 0 ? DataphorServiceUtility.DefaultListenerPortNumber : overridePortNumber;
-			int secureListenerPort = overrideSecurePortNumber == 0 ? DataphorServiceUtility.DefaultSecureListenerPortNumber : overrideSecurePortNumber;
 				
 			_listenerHost = new ServiceHost(typeof(ListenerService));
 			
-			if (!requireSecureConnection)
-				_listenerHost.AddServiceEndpoint
-				(
-					typeof(IListenerService), 
-					DataphorServiceUtility.GetBinding(false), 
-					DataphorServiceUtility.BuildListenerURI(Environment.MachineName, listenerPort, false)
-				);
-				
 			_listenerHost.AddServiceEndpoint
 			(
 				typeof(IListenerService), 
-				DataphorServiceUtility.GetBinding(true), 
-				DataphorServiceUtility.BuildListenerURI(Environment.MachineName, secureListenerPort, true)
-			);
+				DataphorServiceUtility.GetBinding(), 
+				DataphorServiceUtility.BuildListenerURI(Environment.MachineName, listenerPort)
+			);	 
 
 			try
 			{
@@ -48,22 +39,13 @@ namespace Alphora.Dataphor.DAE.Service
 			catch
 			{
 				// An error indicates the service could not be started because there is already a listener running in another process.
-			}
-			
-			if (useCrossDomainService)
-				_crossDomainServiceHost = new CrossDomainServiceHost(Environment.MachineName, listenerPort, secureListenerPort, requireSecureConnection);
+			}	 			
 		}
 
 		#region IDisposable Members
 
 		public void Dispose()
-		{
-			if (_crossDomainServiceHost != null)
-			{
-				_crossDomainServiceHost.Dispose();
-				_crossDomainServiceHost = null;
-			}
-			
+		{				
 			if (_listenerHost != null)
 			{
 				if (_listenerHost.State == CommunicationState.Opened)
@@ -74,8 +56,6 @@ namespace Alphora.Dataphor.DAE.Service
 
 		#endregion
 
-		private ServiceHost _listenerHost;
-		private CrossDomainServiceHost _crossDomainServiceHost;
-		
+		private ServiceHost _listenerHost;	   		
 	}
 }
