@@ -81,7 +81,10 @@ go
 create function DAE_TSReadMillisecond(@ATimeSpan bigint)
 returns integer
 begin
-	return dbo.DAE_Trunc(dbo.DAE_Frac(@ATimeSpan / (10000.0 * 1000)) * 1000);
+	declare @value decimal(28, 16), @fraction decimal(28, 28)
+	set @value = @ATimeSpan / (10000.0 * 1000)
+	set @fraction = @value - Round(@value,0,1) 
+	return dbo.DAE_Trunc(@fraction * 1000);
 end
 go
 
@@ -96,7 +99,10 @@ go
 create function DAE_TSReadSecond(@ATimeSpan bigint)
 returns integer
 begin
-	return dbo.DAE_Trunc(dbo.DAE_Frac(@ATimeSpan / (10000000.0 * 60)) * 60);
+	declare @value decimal(28, 17), @fraction decimal(28, 28)
+	set @value = @ATimeSpan / (10000000.0 * 60)
+	set @fraction = @value - Round(@value,0,1) 
+	return dbo.DAE_Trunc(@fraction * 60);
 end
 go
 
@@ -111,7 +117,10 @@ go
 create function DAE_TSReadMinute(@ATimeSpan bigint)
 returns integer
 begin
-	return dbo.DAE_Trunc(dbo.DAE_Frac(@ATimeSpan / (600000000.0 * 60)) * 60);
+	declare @value decimal(28, 18), @fraction decimal(28, 28)
+	set @value = @ATimeSpan / (600000000.0 * 60)
+	set @fraction = @value - Round(@value,0,1) 
+	return dbo.DAE_Trunc(@fraction * 60);
 end
 go
 
@@ -126,7 +135,10 @@ go
 create function DAE_TSReadHour(@ATimeSpan bigint)
 returns integer
 begin
-	return dbo.DAE_Trunc(dbo.DAE_Frac(@ATimeSpan / (36000000000.0 * 24)) * 24);
+	declare @value decimal(28, 20), @fraction decimal(28, 28)
+	set @value = @ATimeSpan / (36000000000.0 * 24)
+	set @fraction = @value - Round(@value,0,1) 
+	return dbo.DAE_Trunc(@fraction * 24);
 end
 go
 
