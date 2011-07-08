@@ -483,21 +483,6 @@ go
 grant execute on DAE_DTWriteMonth to public
 go
 
--- DAE_DTWriteMillisecond
-if exists (select * from sysobjects where id = Object_ID('DAE_DTWriteMillisecond'))
-	drop function DAE_DTWriteMillisecond
-go
-
-create function DAE_DTWriteMillisecond(@ADate datetime, @APart int)
-returns datetime
-begin
-	return DateAdd(ms,@APart - DatePart(ms,@ADate),@ADate);
-end
-go
-
-grant execute on DAE_DTWriteMillisecond to public
-go
-
 -- DAE_DTWriteYear
 if exists (select * from sysobjects where id = Object_ID('DAE_DTWriteYear'))
 	drop function DAE_DTWriteYear
@@ -686,7 +671,7 @@ go
 grant execute on DAE_VersionNumberRevisionSelector to public
 go
 
--- DAE_VerionNumberBuildSelector
+-- DAE_VersionNumberBuildSelector
 if exists (select * from sysobjects where name = 'DAE_VersionNumberBuildSelector')
 	drop function DAE_VersionNumberBuildSelector
 go
