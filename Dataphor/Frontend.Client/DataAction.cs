@@ -336,47 +336,29 @@ namespace Alphora.Dataphor.Frontend.Client
 	}
 
 	[Description("Executes an action if the D4 condition evaluates to true.")]
-	public class DataConditionalAction : Action, IDataConditionalAction
+	public class DataConditionalAction : BaseConditionalAction
 	{
-		private string _condition = String.Empty;
 		[DefaultValue("")]
-		[Description("The D4 condition to evaluate.  This script will be parameterized by any parameters specified using DataArgument child nodes.")]
+		[Description("@The boolean expression to evaluate.  This script will be parameterized by any parameters specified using DataArgument child nodes.")]
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
-		public string Condition
+		public override string Condition
 		{
-			get { return _condition; }
-			set { _condition = (value == null ? String.Empty : value); }
+			get { return base.Condition; }
+			set { base.Condition = value; }
 		}
-
-		/// <remarks> Only one IAction is allowed as a child action. </remarks>
-		public override bool IsValidChild(Type childType)
-		{		
-			if (childType == typeof(IAction))
-				foreach (Node localNode in Children)
-					if (localNode is IAction)
-						return false;
-			return (typeof(IAction).IsAssignableFrom(childType)) || typeof(IBaseArgument).IsAssignableFrom(childType) || base.IsValidChild(childType);					
-		}
-
-		/// <summary> Executes the IAction child conditionally. </summary>
-		protected override void InternalExecute(INode sender, EventParams paramsValue)
-		{	foreach (Node localNode in Children)
-				if (localNode is IAction && EvaluateCondition())
-					((IAction)localNode).Execute(this, paramsValue);
-		}
-
-		private bool EvaluateCondition()
+		
+		protected override bool EvaluateCondition()
 		{
 			bool result = false;
-			if (_condition != String.Empty)
+			if (Condition != String.Empty)
 			{
 				DAE.Runtime.DataParams localParamsValue = BaseArgument.CollectArguments(this);
 				DAE.IServerProcess process = HostNode.Session.DataSession.ServerSession.StartProcess(new DAE.ProcessInfo(HostNode.Session.DataSession.ServerSession.SessionInfo));
 				try
 				{
 					ErrorList errors = new ErrorList();
-					DAE.IServerScript script = process.PrepareScript(String.Format("select {0}", _condition));
+					DAE.IServerScript script = process.PrepareScript(String.Format("select {0}", Condition));
 					try
 					{
 						DAE.IServerBatch batch = script.Batches[0];

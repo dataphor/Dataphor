@@ -422,6 +422,57 @@ namespace Alphora.Dataphor.Frontend.Client
 		}
 	}
 
+	[Description("Executes an action if the script condition evaluates to true.")]
+	public class ConditionalAction : BaseConditionalAction
+	{
+		private ScriptAction _scriptAction;
+		private ScriptAction ScriptAction
+		{
+			get 
+			{ 
+				if (_scriptAction == null) 			
+					_scriptAction = new ScriptAction();	 					
+			
+				return _scriptAction; 
+			}
+		}
+
+		// Language
+		[DefaultValue(ScriptLanguages.CSharp)]
+		[Description("Specified the language for the script.")]
+		public ScriptLanguages Language
+		{
+			get { return ScriptAction.Language; }
+			set { ScriptAction.Language = value; }
+		}
+		
+		// CompileWithDebug
+		[Description("When true, the script will be compiled with debug information.")]
+		[DefaultValue(false)]
+		public bool CompileWithDebug
+		{
+			get { return ScriptAction.CompileWithDebug; }
+			set { ScriptAction.CompileWithDebug = value; }
+		}
+
+		protected override bool EvaluateCondition()
+		{
+			if (Condition != String.Empty)
+			{
+				ScriptAction.Script = String.Format("{0}.Result = {1};", Name, Condition);
+				// temporarily set Ownership to provide dependencies, but remove to prevent ScriptAction from appearing as a dependent.
+				ScriptAction.Owner = this;
+				ScriptAction.Execute();
+				ScriptAction.Owner = null;		
+			}
+			return Result;
+		}
+		  
+		[Browsable(false)]
+		[DesignerSerializationVisibility(	DesignerSerializationVisibility.Hidden)]
+		public bool Result { get; set; } 
+	}
+
 	// The ScriptBase class could potentially be defined by each client allowing a set of "common" 
 	// functions such as "ShowMessage" to work appropriately in each client
 	/// <summary> Internal class from which executed scripts descend. </summary>

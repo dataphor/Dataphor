@@ -108,7 +108,7 @@ namespace Alphora.Dataphor.Frontend.Client
 	/// of the the ConditionalAction will be executed if the Condition evaluates to true.</remarks>
 	/// <example> An example can be seen in the Sample.Components library
 	/// in the Sample07 [dfd] document.</example>
-	public interface IDataConditionalAction : IAction
+	public interface IConditionalAction : IAction
 	{
 		// Published
 		/// <summary> Condition to be evaluated on upon executing. </summary> <doc/>
