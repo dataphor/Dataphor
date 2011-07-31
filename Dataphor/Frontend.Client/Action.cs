@@ -491,7 +491,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// Condition
 		private string _condition;
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
-		[Description(@"The script condition to evaluate.")]
+		[Description("The boolean expression to evaluate.")]
 		public virtual string Condition
 		{
 			get { return _condition; }
@@ -502,16 +502,6 @@ namespace Alphora.Dataphor.Frontend.Client
 					_condition = (value == null ? String.Empty : value);
 				}
 			}
-		}
-		
-		/// <remarks> Only one IAction is allowed as a child action. </remarks>
-		public override bool IsValidChild(Type childType)
-		{
-			if (childType == typeof(IAction))
-				foreach (Node localNode in Children)
-					if (localNode is IAction)
-						return false;
-			return (typeof(IAction).IsAssignableFrom(childType)) || typeof(IBaseArgument).IsAssignableFrom(childType) || base.IsValidChild(childType);
 		}
 
 		/// <summary> Executes the IAction child conditionally. </summary>

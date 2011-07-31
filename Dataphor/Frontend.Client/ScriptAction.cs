@@ -455,15 +455,26 @@ namespace Alphora.Dataphor.Frontend.Client
 			set { ScriptAction.CompileWithDebug = value; }
 		}
 
+		/// <remarks> Only one IAction is allowed as a child action (other than the internal ScriptAction). </remarks>
+		public override bool IsValidChild(Type childType)
+		{
+			if (_settingOwner)
+				return true;
+			return typeof(IAction).IsAssignableFrom(childType) && Children.Count < 1;	 			
+		}	 		
+
+		private bool _settingOwner;
 		protected override bool EvaluateCondition()
 		{
 			if (Condition != String.Empty)
 			{
 				ScriptAction.Script = String.Format("{0}.Result = {1};", Name, Condition);
-				// temporarily set Ownership to provide dependencies, but remove to prevent ScriptAction from appearing as a dependent.
+				// temporarily set Owner to provide Execute dependencies, but immediately remove to prevent ScriptAction from appearing as a dependent.
+				_settingOwner = true;
 				ScriptAction.Owner = this;
+				_settingOwner = false;
 				ScriptAction.Execute();
-				ScriptAction.Owner = null;		
+				ScriptAction.Owner = null;		 					
 			}
 			return Result;
 		}
