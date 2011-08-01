@@ -338,7 +338,6 @@ namespace Alphora.Dataphor.Frontend.Client
 	[Description("Executes an action if the D4 condition evaluates to true.")]
 	public class DataConditionalAction : BaseConditionalAction
 	{
-		[DefaultValue("")]
 		[Description("The boolean expression to evaluate.  This script will be parameterized by any parameters specified using DataArgument child nodes.")]
 		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		[DAE.Client.Design.EditorDocumentType("d4")]
@@ -356,7 +355,7 @@ namespace Alphora.Dataphor.Frontend.Client
 				foreach (Node localNode in Children)
 					if (localNode is IAction)
 						return false;
-			return (typeof(IAction).IsAssignableFrom(childType)) || typeof(IBaseArgument).IsAssignableFrom(childType) || base.IsValidChild(childType);
+			return (typeof(IAction).IsAssignableFrom(childType)) || typeof(IBaseArgument).IsAssignableFrom(childType);
 		}	  
 		
 		protected override bool EvaluateCondition()

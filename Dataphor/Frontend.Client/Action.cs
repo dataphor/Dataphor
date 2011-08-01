@@ -489,9 +489,7 @@ namespace Alphora.Dataphor.Frontend.Client
 	public abstract class BaseConditionalAction : Action, IConditionalAction
 	{
 		// Condition
-		private string _condition;
-		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
-		[Description("The boolean expression to evaluate.")]
+		private string _condition = String.Empty;
 		public virtual string Condition
 		{
 			get { return _condition; }

@@ -425,6 +425,9 @@ namespace Alphora.Dataphor.Frontend.Client
 	[Description("Executes an action if the script condition evaluates to true.")]
 	public class ConditionalAction : BaseConditionalAction
 	{
+		public const string MultiStatementExpressionTemplate = "{0}.Evaluate += () => {{ {1} }};";
+		public const string SingleExpressionTemplate = "{0}.Evaluate += () => {{ return {1}; }};";
+
 		private ScriptAction _scriptAction;
 		private ScriptAction ScriptAction
 		{
@@ -435,6 +438,15 @@ namespace Alphora.Dataphor.Frontend.Client
 			
 				return _scriptAction; 
 			}
+		}
+						 		
+		[Editor(typeof(Alphora.Dataphor.DAE.Client.Controls.Design.MultiLineEditor), typeof(System.Drawing.Design.UITypeEditor))]
+		[Description("The boolean expression to evaluate.  The expression can either be a single expression or a compound statement ending in an expression. The latter must include the keyword for returning the result.")]
+		[DAE.Client.Design.EditorDocumentType("cs")]
+		public override string Condition
+		{
+			get { return base.Condition; }
+			set { base.Condition = value; }
 		}
 
 		// Language
@@ -461,27 +473,34 @@ namespace Alphora.Dataphor.Frontend.Client
 			if (_settingOwner)
 				return true;
 			return typeof(IAction).IsAssignableFrom(childType) && Children.Count < 1;	 			
-		}	 		
+		}	
 
 		private bool _settingOwner;
 		protected override bool EvaluateCondition()
 		{
-			if (Condition != String.Empty)
-			{
-				ScriptAction.Script = String.Format("{0}.Result = {1};", Name, Condition);
-				// temporarily set Owner to provide Execute dependencies, but immediately remove to prevent ScriptAction from appearing as a dependent.
-				_settingOwner = true;
-				ScriptAction.Owner = this;
-				_settingOwner = false;
-				ScriptAction.Execute();
-				ScriptAction.Owner = null;		 					
+			if (String.IsNullOrEmpty(Condition))
+				return false;
+			
+			string template = Condition.IndexOf("return ") > -1 ? MultiStatementExpressionTemplate : SingleExpressionTemplate; 
+			// temporarily set Owner to provide Execute dependencies, but immediately remove to prevent ScriptAction from appearing as a dependent.
+			ScriptAction.Script = String.Format(template, Name, Condition);
+			
+			_settingOwner = true;
+			ScriptAction.Owner = this;
+			_settingOwner = false; 	
+			try
+			{			
+				ScriptAction.Execute();				
 			}
-			return Result;
+			finally
+			{
+				ScriptAction.Owner = null;
+			}
+			return Evaluate();	
 		}
 		  
-		[Browsable(false)]
-		[DesignerSerializationVisibility(	DesignerSerializationVisibility.Hidden)]
-		public bool Result { get; set; } 
+		public delegate bool OnEvaluate();
+		public event OnEvaluate Evaluate;
 	}
 
 	// The ScriptBase class could potentially be defined by each client allowing a set of "common" 
