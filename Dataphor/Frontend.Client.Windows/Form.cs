@@ -309,7 +309,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			get
 			{
 				return 
-					ForceAcceptReject 
+					AcceptEnabled
+					&&
+					(
+						ForceAcceptReject 
 						|| (_mode != FormMode.None) 
 						|| 
 						(
@@ -319,15 +322,24 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 								(MainSource.DataView.State == DAE.Client.DataSetState.Edit) || 
 								(MainSource.DataView.State == DAE.Client.DataSetState.Insert)
 							)
-						);
+						)
+					);
 			}
 		}
 
-		[DefaultValue(true)]	
+		private bool _acceptEnabled = true;
+		[DefaultValue(true)]
 		public bool AcceptEnabled
 		{
-			get { return _form.AcceptEnabled; }
-			set { _form.AcceptEnabled = value; }
+			get { return _acceptEnabled; }
+			set
+			{
+				if (_acceptEnabled != value)
+				{
+					_acceptEnabled = value;
+					AcceptRejectChanged();
+				}
+			}
 		}
 
 		// OnBeforeAccept
