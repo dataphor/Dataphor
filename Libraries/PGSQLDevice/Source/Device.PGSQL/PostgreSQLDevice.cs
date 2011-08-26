@@ -438,6 +438,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 								case when is_nullable = 'NO' then 0 else 1 end as IsNullable,
 								case when data_type in ('text', 'bytea') then 1 else 0 end as IsDeferred
 								from information_schema.columns 
+								where 1 = 1
 								{0} {1}
 								order by table_schema, table_name, ordinal_position
 						"
@@ -470,6 +471,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 								from pg_attribute,pg_statio_all_indexes,pg_index
 								where pg_attribute.attrelid = pg_statio_all_indexes.relid
 								and pg_index.indexrelid=pg_statio_all_indexes.indexrelid
+								and pg_statio_all_indexes.schemaname <> 'pg_toast'
 									{0}
 									{1}
 								order by pg_statio_all_indexes.schemaname, pg_statio_all_indexes.relname, pg_statio_all_indexes.indexrelname, pg_attribute.attname
