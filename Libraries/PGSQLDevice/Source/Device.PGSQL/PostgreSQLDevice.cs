@@ -111,7 +111,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 
         protected override void SetMaxIdentifierLength()
         {
-            _maxIdentifierLength = 128;
+            _maxIdentifierLength = 63; // Anything above 63 would be truncated
         }
 
         protected override void InternalStarted(ServerProcess process)
@@ -425,7 +425,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 					DeviceTablesExpression == String.Empty
 						?
 							@"
-								select 
+								select
 								table_schema as TableSchema,
 								table_name as TableName,
 								column_name as ColumnName,
@@ -434,12 +434,15 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 								column_name as ColumnTitle,
 								data_type as NativeDomainName,
 								data_type as DomainName,
-								character_maximum_length as Length,
+								case when character_maximum_length is not null then character_maximum_length
+									when numeric_precision is not null then numeric_precision
+									when datetime_precision is not null then datetime_precision
+									else 0
+								end as Length,
 								case when is_nullable = 'NO' then 0 else 1 end as IsNullable,
 								case when data_type in ('text', 'bytea') then 1 else 0 end as IsDeferred
-								from information_schema.columns 
-								where 1 = 1
-								{0} {1}
+								from information_schema.columns
+								where true {0} {1}
 								order by table_schema, table_name, ordinal_position
 						"
 						:
@@ -459,7 +462,7 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 					DeviceIndexesExpression == String.Empty
 						?
 							@"
-							select 
+							select
 								pg_statio_all_indexes.schemaname as TableSchema,
 								pg_statio_all_indexes.relname as TableName,
 								pg_statio_all_indexes.indexrelname IndexName,
@@ -467,7 +470,6 @@ namespace Alphora.Dataphor.DAE.Device.PGSQL
 								pg_attribute.attnum as OrdinalPosition,
 								pg_index.indisunique as IsUnique,
 								case when indoption[0]=3  then TRUE else FALSE end as IsDescending
-
 								from pg_attribute,pg_statio_all_indexes,pg_index
 								where pg_attribute.attrelid = pg_statio_all_indexes.relid
 								and pg_index.indexrelid=pg_statio_all_indexes.indexrelid
