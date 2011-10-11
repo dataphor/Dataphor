@@ -683,4 +683,22 @@ SafeDrop('A');
 SafeDrop('B');
 SafeDrop('C');
 
+//*
+// Verify that selecting from a table variable after it has been inserted into
+// in an A/T correctly populates the other data from the table.
+SafeDrop('T');
+create table T { ID : Integer, key { ID } };
+insert row { 1 ID } into T;
+insert row { 2 ID } into T;
+insert row { 3 ID } into T;
 
+var ATID := BeginApplicationTransaction(true, false);
+try
+	insert row { 4 ID } into T;
+	if Count(T) <> 4 then
+		raise Error("A/T reference did not join properly after insert.");
+finally
+	RollbackApplicationTransaction(ATID);
+end;
+
+SafeDrop('T');

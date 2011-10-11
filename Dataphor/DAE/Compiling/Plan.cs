@@ -303,7 +303,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public bool IsInsert 
 		{
 			get { return _serverProcess.IsInsert; } 
-			set { _serverProcess.IsInsert = true; }
+			set { _serverProcess.IsInsert = value; }
 		}
 		
 		public void EnsureApplicationTransactionOperator(Schema.Operator operatorValue)
