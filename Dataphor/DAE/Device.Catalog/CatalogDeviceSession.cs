@@ -1411,12 +1411,15 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			base.InternalCommitTransaction();
 
 			#if LOGDDLINSTRUCTIONS
-			for (int index = _instructions.Count - 1; index >= 0; index--)
-				if (_instructions[index] is BeginTransactionInstruction)
-				{
-					_instructions.RemoveAt(index);
-					break;
-				}
+			if (Transactions.Count > 1)
+				for (int index = _instructions.Count - 1; index >= 0; index--)
+					if (_instructions[index] is BeginTransactionInstruction)
+					{
+						_instructions.RemoveAt(index);
+						break;
+					}
+			else
+				_instructions.Clear();
 			#endif
 
 			InternalAfterCommitTransaction();

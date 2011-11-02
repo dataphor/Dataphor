@@ -345,6 +345,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				DoCacheClearing();
 				Schema.Catalog catalog = _internalServer.Catalog;
+				var catalogDevice = _internalServer.CatalogDevice;
 				_internalServer.ClearCatalog();
 				foreach (Schema.RegisteredAssembly assembly in catalog.ClassLoader.Assemblies)
 					if (assembly.Library.Name != Engine.SystemLibraryName)
@@ -359,6 +360,8 @@ namespace Alphora.Dataphor.DAE.Server
 					if (session.User.ID == _internalServer.AdminUser.ID)
 						session.SetUser(_internalServer.AdminUser);
 					session.SessionObjects.Clear();
+					foreach (ServerProcess process in session.Processes)
+						process.DeviceDisconnect(catalogDevice);
 				}
 				_serverCacheTimeStamp = serverCacheTimeStamp;
 				DoCacheCleared();
