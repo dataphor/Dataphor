@@ -1,0 +1,39 @@
+create operator ReproOperator(ID : Integer)
+begin
+ 
+end;
+create table ReproContextTable
+{
+ ID : Integer,
+ key { ID }
+};
+create table ReproTable
+{
+ ID : Integer,
+ TableName : String,
+ key { ID }
+}; 
+create operator ReproOnInsert(const ARow : typeof(ReproTable[]))
+begin
+ var LStatement := 
+  'create operator ' + ARow.TableName + 'OnInsertOrDelete(const ARow : typeof(' + ARow.TableName + '[]))
+  begin
+   ReproOperator(' + ARow.ID.ToString() + ');  
+  end;
+  attach operator ' + ARow.TableName + 'OnInsertOrDelete to ' + ARow.TableName + ' on { after insert, after delete };';
+ Execute(LStatement);
+end;
+attach operator ReproOnInsert to ReproTable on after insert;
+//With this insert:
+insert
+ table of { ID : Integer, TableName : String }
+ {
+  row { 1 ID, 'ReproContextTable' TableName }, 
+  key { .ID }
+ }  into ReproTable with { PropagateInsert = "Ensure" };
+//And this cleanup:
+SafeDrop('ReproOperator(Integer)');
+SafeDrop('ReproOnInsert(const typeof(ReproTable[]))');
+SafeDrop('ReproTable');
+SafeDrop('ReproContextTableOnInsertOrDelete(const typeof(ReproContextTable[]))');
+SafeDrop('ReproContextTable');
