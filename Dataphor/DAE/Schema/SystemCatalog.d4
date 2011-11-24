@@ -23,7 +23,7 @@ begin
 	create operator ToBoolean(const AValue : Short) : Boolean class "System.ShortToBooleanNode";
 	create operator ToBoolean(const AValue : Integer) : Boolean class "System.IntegerToBooleanNode";
 	create operator ToBoolean(const AValue : Long) : Boolean class "System.LongToBooleanNode";
-	create operator ToString(const AValue : generic) : String class "System.ObjectToStringNode";
+	//create operator ToString(const AValue : generic) : String class "System.ObjectToStringNode";
 	create operator ToString(const AValue : Boolean) : String class "System.BooleanToStringNode" static tags { DAE.IsOrderPreserving = "True" };
 	create operator ToString(const AValue : Byte) : String class "System.ByteToStringNode";
 	create operator ToString(const AValue : Short) : String class "System.ShortToStringNode";
@@ -791,6 +791,7 @@ begin
 	create operator CommitApplicationTransaction(const AID : Guid) class "System.CommitApplicationTransactionNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator RollbackApplicationTransaction(const AID : Guid) class "System.RollbackApplicationTransactionNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator SaveLibraryCatalog(const ALibraryName : Name) class "System.SystemSaveLibraryCatalogNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+	create operator Diagnostics.ToDebugString(const AValue : generic) : String class "System.ObjectToStringNode";
 	create operator Diagnostics.EnableErrorLogging() class "System.SystemEnableErrorLoggingNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator Diagnostics.DisableErrorLogging() class "System.SystemDisableErrorLoggingNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator Diagnostics.LogError(const AError : Error) class "System.SystemLogErrorNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
@@ -2622,7 +2623,7 @@ begin
 	grant usage on ToShort(Integer) to role User;                                                                                        
 	grant usage on ToShort(Long) to role User;                                                                                           
 	grant usage on ToShort(String) to role User;                                                                                         
-	grant usage on ToString(generic) to role User;                                                                                       
+	//grant usage on ToString(generic) to role User;                                                                                       
 	grant usage on ToString(Boolean) to role User;                                                                                       
 	grant usage on ToString(Byte) to role User;                                                                                          
 	grant usage on ToString(Date) to role User;                                                                                          
