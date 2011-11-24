@@ -1567,7 +1567,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			SQLDevicePlan localDevicePlan = (SQLDevicePlan)devicePlan;
 			if (planNode.Nodes[0].DataType is Schema.IScalarType)
 			{
-				if (planNode.Nodes[0].DataType.Is(devicePlan.Plan.ServerProcess.DataTypes.SystemBoolean))
+				if (planNode.Nodes[0].DataType.Is(devicePlan.Plan.ServerProcess.DataTypes.SystemBoolean) && !((planNode.Nodes[0] is StackReferenceNode || planNode.Nodes[0] is StackColumnReferenceNode)))
 				{
 					localDevicePlan.IsSupported = false;
 					localDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because there is no SQL equivalent of IsNil() for a boolean-valued expression. Consider rewriting the D4 using a conditional expression.", planNode));
