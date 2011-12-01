@@ -23,7 +23,7 @@ begin
 	create operator ToBoolean(const AValue : Short) : Boolean class "System.ShortToBooleanNode";
 	create operator ToBoolean(const AValue : Integer) : Boolean class "System.IntegerToBooleanNode";
 	create operator ToBoolean(const AValue : Long) : Boolean class "System.LongToBooleanNode";
-	//create operator ToString(const AValue : generic) : String class "System.ObjectToStringNode";
+	create operator GenericToString(const AValue : generic) : String class "System.ObjectToStringNode";
 	create operator ToString(const AValue : Boolean) : String class "System.BooleanToStringNode" static tags { DAE.IsOrderPreserving = "True" };
 	create operator ToString(const AValue : Byte) : String class "System.ByteToStringNode";
 	create operator ToString(const AValue : Short) : String class "System.ShortToStringNode";
@@ -2623,7 +2623,7 @@ begin
 	grant usage on ToShort(Integer) to role User;                                                                                        
 	grant usage on ToShort(Long) to role User;                                                                                           
 	grant usage on ToShort(String) to role User;                                                                                         
-	grant usage on ToDebugString(generic) to role User;                                                                                         er;                                                                                       
+	grant usage on GenericToString(generic) to role User;                                                                                    
 	grant usage on ToString(Boolean) to role User;                                                                                       
 	grant usage on ToString(Byte) to role User;                                                                                          
 	grant usage on ToString(Date) to role User;                                                                                          
