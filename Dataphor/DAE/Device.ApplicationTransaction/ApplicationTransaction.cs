@@ -188,7 +188,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					plan.PushATCreationContext();
 					try
 					{
-						populateNode = (TableNode)Compiler.CompileExpression(plan, (Expression)sourceNode.EmitStatement(EmitMode.ForCopy));
+						populateNode = Compiler.EnsureTableNode(plan, Compiler.CompileExpression(plan, (Expression)sourceNode.EmitStatement(EmitMode.ForCopy)));
 					}
 					finally
 					{
