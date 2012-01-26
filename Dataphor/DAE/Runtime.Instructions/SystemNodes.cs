@@ -4,6 +4,7 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
+#define UseReferenceDerivation
 #define NILPROPOGATION
 
 using System;
@@ -2093,7 +2094,52 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return null;
 		}
 	}
-	
+
+    public class TableAsNode : UnaryTableNode
+    {
+        public override object InternalExecute(Program program)
+        {
+            return SourceNode.Execute(program);
+        }
+
+		public override void DetermineCharacteristics(Plan plan)
+		{
+			IsLiteral = Nodes[0].IsLiteral;
+			IsFunctional = Nodes[0].IsFunctional;
+			IsDeterministic = Nodes[0].IsDeterministic;
+			IsRepeatable = Nodes[0].IsRepeatable;
+			IsNilable = Nodes[0].IsNilable;
+		}
+		
+		public override void DetermineDataType(Plan plan)
+		{
+			DetermineModifiers(plan);
+			_dataType = new Schema.TableType();
+			_tableVar = new Schema.ResultTableVar(this);
+			_tableVar.Owner = plan.User;
+			_tableVar.InheritMetaData(SourceTableVar.MetaData);
+			
+			CopyTableVarColumns(SourceTableVar.Columns);
+			CopyPreservedKeys(SourceTableVar.Keys);
+			CopyPreservedOrders(SourceTableVar.Orders);
+
+			Order = CopyOrder(SourceNode.Order);
+
+			if ((Order != null) && !TableVar.Orders.Contains(Order))
+				TableVar.Orders.Add(Order);
+
+			#if UseReferenceDerivation
+			CopySourceReferences(plan, SourceTableVar.SourceReferences);
+			CopyTargetReferences(plan, SourceTableVar.TargetReferences);
+			#endif
+		}
+
+		public override Statement EmitStatement(EmitMode mode)
+		{
+			return new AsExpression((Expression)Nodes[0].EmitStatement(mode), _dataType.EmitSpecifier(mode));
+		}
+    }
+
 	// operator iAs(const AValue : generic, const ADataType : System.Type) : generic
 	public class AsNode : PlanNode
 	{

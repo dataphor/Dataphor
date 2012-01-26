@@ -14386,14 +14386,28 @@ indicative of other problems, a reference will never be attached as an explicit 
 		
 		public static PlanNode CompileAsExpression(Plan plan, AsExpression expression)
 		{
-			AsNode result = new AsNode();
 			PlanNode node = CompileExpression(plan, expression.Expression);
-			result.DataType = CompileTypeSpecifier(plan, expression.TypeSpecifier);
-			if (!result.DataType.Is(node.DataType))
-				throw new CompilerException(CompilerException.Codes.InvalidCast, expression, node.DataType.Name, result.DataType.Name);
-			result.Nodes.Add(Downcast(plan, node, result.DataType));
-			result.DetermineCharacteristics(plan);
-			return result;
+			if (node.DataType is Schema.ITableType)
+			{
+				TableAsNode result = new TableAsNode();
+				var asType = CompileTypeSpecifier(plan, expression.TypeSpecifier);
+				if (!asType.Is(node.DataType))
+					throw new CompilerException(CompilerException.Codes.InvalidCast, expression, node.DataType.Name, asType.Name);
+				result.Nodes.Add(Downcast(plan, node, asType));
+				result.DetermineDataType(plan);
+				result.DetermineCharacteristics(plan);
+				return result;
+			}
+			else
+			{
+				AsNode result = new AsNode();
+				result.DataType = CompileTypeSpecifier(plan, expression.TypeSpecifier);
+				if (!result.DataType.Is(node.DataType))
+					throw new CompilerException(CompilerException.Codes.InvalidCast, expression, node.DataType.Name, result.DataType.Name);
+				result.Nodes.Add(Downcast(plan, node, result.DataType));
+				result.DetermineCharacteristics(plan);
+				return result;
+			}
 		}
 		
 		#if CALCULESQUE

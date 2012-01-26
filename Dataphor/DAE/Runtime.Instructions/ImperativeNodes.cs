@@ -1404,6 +1404,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				_allocateResultNode = new VariableNode(Keywords.Result, _dataType);
 				_allocateResultNode.IsBreakable = false;
 			}
+
+			if (plan.IsEngine && (Modifiers != null))
+			{
+				var tableType = LanguageModifiers.GetModifier(Modifiers, "TableType", String.Empty);
+
+				if (!String.IsNullOrEmpty(tableType))
+				{
+					_dataType = Compiler.CompileTypeSpecifier(plan, new Parser().ParseTypeSpecifier(tableType)) as Schema.TableType;
+					if (_dataType == null)
+						throw new CompilerException(CompilerException.Codes.TableTypeExpected);
+				}
+			}
 		}
 		
 		public override void InternalDetermineBinding(Plan plan)

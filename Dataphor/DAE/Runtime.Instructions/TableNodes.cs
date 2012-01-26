@@ -1368,6 +1368,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			TableVar = new Schema.ResultTableVar(this);
 			_tableVar.Owner = plan.User;
 			TableVar.EnsureTableVarColumns();
+
+			// If the source node has a Modifier named KeyInfo, compile it into a key for the table var.
+			if (Nodes[0].Modifiers != null)
+			{
+				var keyDefinition = LanguageModifiers.GetModifier(Nodes[0].Modifiers, "KeyInfo", String.Empty);
+				if (keyDefinition != null)
+				{
+					_tableVar.Keys.Add(Compiler.CompileKeyDefinition(plan, _tableVar, new Parser().ParseKeyDefinition(keyDefinition)));
+				}
+			}
+
 			Compiler.EnsureKey(plan, TableVar);
 		}
 
