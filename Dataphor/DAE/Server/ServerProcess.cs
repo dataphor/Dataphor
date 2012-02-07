@@ -1579,9 +1579,15 @@ namespace Alphora.Dataphor.DAE.Server
 			int nestingLevel = BeginTransactionalCall();
 			try
 			{
-				ApplicationTransactionUtility.LeaveApplicationTransaction(this);
-				_applicationTransactionID = Guid.Empty;
-				_isInsert = false;
+				try
+				{
+					ApplicationTransactionUtility.LeaveApplicationTransaction(this);
+				}
+				finally
+				{
+					_applicationTransactionID = Guid.Empty;
+					_isInsert = false;
+				}
 			}
 			catch (Exception E)
 			{

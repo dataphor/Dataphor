@@ -2240,8 +2240,14 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 
 		protected override void InternalRollbackTransaction()
 		{
-			InternalRollbackTransaction(_transactions.CurrentTransaction());
-			_transactions.EndTransaction(false);
+			try
+			{
+				InternalRollbackTransaction(_transactions.CurrentTransaction());
+			}
+			finally
+			{
+				_transactions.EndTransaction(false);
+			}
 		}
 
 		private TableMap GetTableMap(TableVar tableVar)
@@ -2364,7 +2370,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		protected override void InternalDeleteRow(Program program, TableVar tableVar, Row row)
 		{
 			if (Transaction.Closed)
-				throw new ApplicationTransactionException(ApplicationTransactionException.Codes.ApplicationTransactionClosed);
+				throw new ApplicationTransactionException(ApplicationTransactionException.Codes.ApplicationTransactionClosed, Transaction.ID);
 
 			base.InternalDeleteRow(program, tableVar, row);
 			Transaction.Prepared = false;
