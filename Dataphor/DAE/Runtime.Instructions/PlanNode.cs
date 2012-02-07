@@ -18,6 +18,7 @@ using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Compiling;
 using Alphora.Dataphor.DAE.Server;	
 using Alphora.Dataphor.DAE.Runtime.Data;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
@@ -58,15 +59,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					
 	*/
 	
-	public delegate object ExecuteDelegate(Program AProgram);
+	public delegate object ExecuteDelegate(Program program);
         
 	/// <summary> PlanNode </summary>	
 	public abstract class PlanNode : System.Object
 	{
 		public PlanNode() : base()
 		{
+			SurrogateExecute = InternalExecute;
  		}
 		
+        // Nodes
+        private PlanNodes _nodes;
+        public PlanNodes Nodes
+        {
+			get
+			{
+				if (_nodes == null)
+					_nodes = new PlanNodes();
+				return _nodes;
+			}
+		}
+		
+		public int NodeCount { get { return _nodes == null ? 0 : _nodes.Count; } }
+
+        #region Characteristics
+
         // IsLiteral
         protected bool _isLiteral = true;
         public bool IsLiteral
@@ -118,10 +136,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return stringValue.ToString();
 		}
 
-        // IsOrderPreserving (see the sargability discussion in RestrictNode.cs for a description of this characteristic)
-        protected bool _isOrderPreserving = false;
-        public bool IsOrderPreserving
-        {
+		// IsOrderPreserving (see the sargability discussion in RestrictNode.cs for a description of this characteristic)
+		protected bool _isOrderPreserving = false;
+		public bool IsOrderPreserving
+		{
 			get { return _isOrderPreserving; }
 			set { _isOrderPreserving = value; }
 		}
@@ -136,6 +154,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return true;
 		}
 		
+		// DetermineCharacteristics        
+		public virtual void DetermineCharacteristics(Plan plan) {}
+
+		#endregion
+
+		#region Modifiers
+		
 		// Modifiers
 		protected LanguageModifiers _modifiers;
 		public LanguageModifiers Modifiers
@@ -144,6 +169,43 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { _modifiers = value; }
 		}
         
+		// IgnoreUnsupported -- only applies if DataType is not null
+		private bool _ignoreUnsupported;
+		public bool IgnoreUnsupported
+		{
+			get { return _ignoreUnsupported; }
+			set { _ignoreUnsupported = value; }
+		}
+		
+		private bool _shouldSupport = true;
+		public bool ShouldSupport
+		{
+			get { return _shouldSupport; }
+			set { _shouldSupport = value; }
+		}
+		
+		private bool _shouldEmitIL = false;
+		public bool ShouldEmitIL
+		{
+			get { return _shouldEmitIL; }
+			set { _shouldEmitIL = value; }
+		}
+		
+        // DetermineModifiers
+        protected virtual void DetermineModifiers(Plan plan) 
+        {
+			if (Modifiers != null)
+			{
+				IgnoreUnsupported = Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "IgnoreUnsupported", IgnoreUnsupported.ToString()));
+				ShouldSupport = Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "ShouldSupport", ShouldSupport.ToString()));
+				ShouldEmitIL = _shouldEmitIL && (Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "ShouldEmitIL", ShouldEmitIL.ToString())));
+			}
+        }
+
+		#endregion
+
+		#region Device Determination
+		
         // Device
 		[Reference]
         protected Schema.Device _device;
@@ -177,6 +239,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { _deviceSupported = value; }
         }
         
+		private bool _couldSupport = false;
+		/// <summary>Set by the device to indicate that the node could be supported if necessary, but only by parameterization.</summary>
+		public bool CouldSupport
+		{
+			get { return _couldSupport; }
+			set { _couldSupport = value; }
+		}
+		
         // DeviceMessages
         // Set by the device during the prepare phase.
         // Will be null if this node has not been prepared, so test all access to this reference.
@@ -260,131 +330,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			else
 				_deviceSupported = false;
-		}
-		
-		// IgnoreUnsupported -- only applies if DataType is not null
-		private bool _ignoreUnsupported;
-		public bool IgnoreUnsupported
-		{
-			get { return _ignoreUnsupported; }
-			set { _ignoreUnsupported = value; }
-		}
-		
-		private bool _couldSupport = false;
-		/// <summary>Set by the device to indicate that the node could be supported if necessary, but only by parameterization.</summary>
-		public bool CouldSupport
-		{
-			get { return _couldSupport; }
-			set { _couldSupport = value; }
-		}
-		
-		private bool _shouldSupport = true;
-		public bool ShouldSupport
-		{
-			get { return _shouldSupport; }
-			set { _shouldSupport = value; }
-		}
-		
-		private bool _shouldEmitIL = false;
-		public bool ShouldEmitIL
-		{
-			get { return _shouldEmitIL; }
-			set { _shouldEmitIL = value; }
-		}
-		
-		private bool _isBreakable = false;
-		public bool IsBreakable
-		{
-			get { return _isBreakable; }
-			set { _isBreakable = value; }
-		}
-		
-		private LineInfo _lineInfo;
-		public LineInfo LineInfo
-		{
-			get { return _lineInfo; }
-			set { _lineInfo = value; }
-		}
-		
-		public void SetLineInfo(Plan plan, LineInfo lineInfo)
-		{
-			if (lineInfo != null)
+
+			if (_deviceSupported)
 			{
-				if (_lineInfo == null)
-					_lineInfo = new LineInfo();
-				
-				if (plan.CompilingOffset != null)
-				{
-					_lineInfo.Line = lineInfo.Line - plan.CompilingOffset.Line;
-					_lineInfo.LinePos = lineInfo.LinePos - ((plan.CompilingOffset.Line == lineInfo.Line) ? plan.CompilingOffset.LinePos : 0);
-					_lineInfo.EndLine = lineInfo.EndLine - plan.CompilingOffset.Line;
-					_lineInfo.EndLinePos = lineInfo.EndLinePos - ((plan.CompilingOffset.Line == lineInfo.EndLine) ? plan.CompilingOffset.LinePos : 0);
-				}
-				else
-				{
-					_lineInfo.SetFromLineInfo(lineInfo);
-				}
+				SurrogateExecute = InternalDeviceExecute;
 			}
 		}
 
-		public int Line 
-		{ 
-			get { return _lineInfo == null ? -1 : _lineInfo.Line; } 
-			set
-			{
-				if (_lineInfo == null)
-					_lineInfo = new LineInfo();
-				_lineInfo.Line = value;
-			}
-		}
+		#endregion
 		
-		public int LinePos
-		{
-			get { return _lineInfo == null ? -1 : _lineInfo.LinePos; }
-			set
-			{
-				if (_lineInfo == null)
-					_lineInfo = new LineInfo();
-				_lineInfo.LinePos = value;
-			}
-		}
+		#region Generation
 		
-		public int EndLine
-		{
-			get { return _lineInfo == null ? -1 : _lineInfo.EndLine; }
-			set
-			{
-				if (_lineInfo == null)
-					_lineInfo = new LineInfo();
-				_lineInfo.EndLine = value;
-			}
-		}
-		
-		public int EndLinePos
-		{
-			get { return _lineInfo == null ? -1 : _lineInfo.EndLinePos; }
-			set
-			{
-				if (_lineInfo == null)
-					_lineInfo = new LineInfo();
-				_lineInfo.EndLinePos = value;
-			}
-		}
-		
-        // Nodes
-        private PlanNodes _nodes;
-        public PlanNodes Nodes
-        {
-			get
-			{
-				if (_nodes == null)
-					_nodes = new PlanNodes();
-				return _nodes;
-			}
-		}
-		
-		public int NodeCount { get { return _nodes == null ? 0 : _nodes.Count; } }
-
 		// IL Generation        
         public void EmitIL(Plan plan, bool parentEmitted) 
         {
@@ -423,7 +379,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (DataType == null)
 				generator.Emit(OpCodes.Ldnull);
 			generator.Emit(OpCodes.Ret);
-			ILExecute = (ExecuteDelegate)execute.CreateDelegate(typeof(ExecuteDelegate), this);
+			SurrogateExecute = (ExecuteDelegate)execute.CreateDelegate(typeof(ExecuteDelegate), this);
 		}
 		
 		public object TestExecute(Program program)
@@ -508,7 +464,87 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				EndEmitIL(execute, generator);
 			} 
 		}
+
+		#endregion
+
+		#region Line info
+
+		private LineInfo _lineInfo;
+		public LineInfo LineInfo
+		{
+			get { return _lineInfo; }
+			set { _lineInfo = value; }
+		}
 		
+		public void SetLineInfo(Plan plan, LineInfo lineInfo)
+		{
+			if (lineInfo != null)
+			{
+				if (_lineInfo == null)
+					_lineInfo = new LineInfo();
+				
+				if (plan.CompilingOffset != null)
+				{
+					_lineInfo.Line = lineInfo.Line - plan.CompilingOffset.Line;
+					_lineInfo.LinePos = lineInfo.LinePos - ((plan.CompilingOffset.Line == lineInfo.Line) ? plan.CompilingOffset.LinePos : 0);
+					_lineInfo.EndLine = lineInfo.EndLine - plan.CompilingOffset.Line;
+					_lineInfo.EndLinePos = lineInfo.EndLinePos - ((plan.CompilingOffset.Line == lineInfo.EndLine) ? plan.CompilingOffset.LinePos : 0);
+				}
+				else
+				{
+					_lineInfo.SetFromLineInfo(lineInfo);
+				}
+			}
+		}
+
+		public int Line 
+		{ 
+			get { return _lineInfo == null ? -1 : _lineInfo.Line; } 
+			set
+			{
+				if (_lineInfo == null)
+					_lineInfo = new LineInfo();
+				_lineInfo.Line = value;
+			}
+		}
+		
+		public int LinePos
+		{
+			get { return _lineInfo == null ? -1 : _lineInfo.LinePos; }
+			set
+			{
+				if (_lineInfo == null)
+					_lineInfo = new LineInfo();
+				_lineInfo.LinePos = value;
+			}
+		}
+		
+		public int EndLine
+		{
+			get { return _lineInfo == null ? -1 : _lineInfo.EndLine; }
+			set
+			{
+				if (_lineInfo == null)
+					_lineInfo = new LineInfo();
+				_lineInfo.EndLine = value;
+			}
+		}
+		
+		public int EndLinePos
+		{
+			get { return _lineInfo == null ? -1 : _lineInfo.EndLinePos; }
+			set
+			{
+				if (_lineInfo == null)
+					_lineInfo = new LineInfo();
+				_lineInfo.EndLinePos = value;
+			}
+		}
+
+		#endregion
+
+		#region Statement Emission
+
 		// Statement
 		public virtual Statement EmitStatement(EmitMode mode)
 		{
@@ -565,6 +601,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
+		#endregion
+
+		#region Compilation
+
 		// DataType
 		[Reference] // TODO: This should be a reference for scalar types, but owned for all other types
 		protected Schema.IDataType _dataType;
@@ -576,21 +616,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
         // DetermineDataType
         public virtual void DetermineDataType(Plan plan) {}
-        
-        // DetermineModifiers
-        protected virtual void DetermineModifiers(Plan plan) 
-        {
-			if (Modifiers != null)
-			{
-				IgnoreUnsupported = Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "IgnoreUnsupported", IgnoreUnsupported.ToString()));
-				ShouldSupport = Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "ShouldSupport", ShouldSupport.ToString()));
-				ShouldEmitIL = _shouldEmitIL && (Boolean.Parse(LanguageModifiers.GetModifier(Modifiers, "ShouldEmitIL", ShouldEmitIL.ToString())));
-			}
-        }
 
-		// DetermineCharacteristics        
-		public virtual void DetermineCharacteristics(Plan plan) {}
-		
+		#endregion
+
+		#region Binding
+        
         // DetermineBinding
         public virtual void DetermineBinding(Plan plan)
         {
@@ -623,9 +653,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				for (int index = 0; index < Nodes.Count; index++)
 					Nodes[index].BindToProcess(plan);
 		}
+
+		#endregion
+
+		#region Execution
 		
-        // ILExecute
-        protected ExecuteDelegate ILExecute;
+		private bool _isBreakable = false;
+		public bool IsBreakable
+		{
+			get { return _isBreakable; }
+			set { _isBreakable = value; }
+		}
+
+        // SurrogateExecute
+        protected ExecuteDelegate SurrogateExecute;
 
 		// BeforeExecute        
         protected virtual void InternalBeforeExecute(Program program) { }
@@ -642,12 +683,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				else
 					program.CheckAborted();
 
-				if (ILExecute != null)
-					return ILExecute(program);
+				// TODO: Compile this call, the TableNode is the only node that uses this hook
 				InternalBeforeExecute(program);
-				if (_deviceSupported)
-					return program.DeviceExecute(_device, this);
-				return InternalExecute(program);
+				return SurrogateExecute(program);
 
 			#if WRAPRUNTIMEEXCEPTIONS
 			}
@@ -715,6 +753,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
         public abstract object InternalExecute(Program program);
+
+		public virtual object InternalDeviceExecute(Program program)
+		{
+			return program.DeviceExecute(_device, this);
+		}
+
+		#endregion
         
 		#region ShowPlan
 
@@ -800,7 +845,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		#endregion
 	}
 	
-	public class PlanNodes : System.Object, IList
+	public class PlanNodes : System.Object, IList<PlanNode>, IEnumerable<PlanNode>
 	{
 		public const int InitialCapacity = 0;
 		
@@ -835,8 +880,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				PlanNode[] FNewNodes = new PlanNode[Math.Max(_nodes == null ? 0 : _nodes.Length, 1) * 2];
 				if (_nodes != null)
-					for (int index = 0; index < _nodes.Length; index++)
-						FNewNodes[index] = _nodes[index];
+					_nodes.CopyTo(FNewNodes, 0);
 				_nodes = FNewNodes;
 			}
         }
@@ -852,8 +896,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         public void Insert(int index, PlanNode tempValue)
         {
 			EnsureCapacity(_count);
-			for (int localIndex = _count - 1; localIndex >= index; localIndex--)
-				_nodes[localIndex + 1] = _nodes[localIndex];
+			Array.Copy(_nodes, index, _nodes, index + 1, _count - 1 - index);
 			_nodes[index] = tempValue;
 			_count++;
         }
@@ -867,8 +910,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         {
 			PlanNode node = _nodes[index];
 			_count--;
-			for (int localIndex = index; localIndex < _count; localIndex++)
-				_nodes[localIndex] = _nodes[localIndex + 1];
+			Array.Copy(_nodes, index + 1, _nodes, index, _count - index);
 			_nodes[_count] = null; // Clear the last item to prevent a resource leak
 			return node;
         }
@@ -884,7 +926,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return IndexOf(tempValue) >= 0;
         }
 
-        public int IndexOf(object tempValue)
+        public int IndexOf(PlanNode tempValue)
         {
 			for (int index = 0; index < _count; index++)
 				if (_nodes[index] == tempValue)
@@ -894,18 +936,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
         public int Count { get { return _count; } }
 
-        // IEnumerable interface
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-        
-        public PlanNodeEnumerator GetEnumerator()
+        public IEnumerator<PlanNode> GetEnumerator()
         {
 			return new PlanNodeEnumerator(this);
         }
 
-        public class PlanNodeEnumerator : IEnumerator
+        public class PlanNodeEnumerator : IEnumerator<PlanNode>
         {
             public PlanNodeEnumerator(PlanNodes planNodes) : base()
             {
@@ -916,8 +952,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
             private PlanNodes _planNodes;
 
             public PlanNode Current { get { return _planNodes[_current]; } }
-            
-            object IEnumerator.Current { get { return _planNodes[_current]; } }
 
             public void Reset()
             {
@@ -929,57 +963,46 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				_current++;
 				return _current < _planNodes.Count;
             }
-        }
+
+			void IDisposable.Dispose()
+			{
+				Reset();
+			}
+
+			object IEnumerator.Current { get { return _planNodes[_current]; } }
+		}
         
-        // ICollection
-        void ICollection.CopyTo(System.Array array, int index)
-        {
-			IList list = (IList)array;
-			for (int localIndex = 0; localIndex < Count; localIndex++)
-				list[index + localIndex] = this[localIndex];
-        }
-        
-        bool ICollection.IsSynchronized { get { return false; } }
-        
-        object ICollection.SyncRoot { get { return this; } }
-        
-        // IList
-        int IList.Add(object tempValue)
-        {
-			return Add((PlanNode)tempValue);
-        }
-        
-        bool IList.Contains(object tempValue)
-        {
-			return IndexOf(tempValue) >= 0;
-        }
-        
-        void IList.Insert(int index, object tempValue)
-        {
-			Insert(index, (PlanNode)tempValue);
-        }
-        
-        bool IList.IsFixedSize { get { return false; } }
-        
-        bool IList.IsReadOnly { get { return false; } }
-        
-        void IList.Remove(object tempValue)
-        {
-			Remove((PlanNode)tempValue);
-        }
-        
-        void IList.RemoveAt(int index)
-        {
-			RemoveAt(index);
-        }
-        
-        object IList.this[int index]
-        {
-			get { return this[index]; }
-			set { this[index] = (PlanNode)value; }
-        }
+		void ICollection<PlanNode>.Add(PlanNode item)
+		{
+			this.Add(item);
+		}
+
+		public void CopyTo(PlanNode[] array, int index)
+		{
+			Array.Copy(_nodes, 0, array, index, _count);
+		}
+
+		bool ICollection<PlanNode>.IsReadOnly
+		{
+			get { return false; }
+		}
+
+		bool ICollection<PlanNode>.Remove(PlanNode item)
+		{
+			return this.Remove(item) != null;
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return this.GetEnumerator();
+		}
+
+		void IList<PlanNode>.RemoveAt(int index)
+		{
+			this.RemoveAt(index);
+		}
 	}
-	
+
 	public class DevicePlanNode : System.Object
 	{
 		public DevicePlanNode(PlanNode node) : base()

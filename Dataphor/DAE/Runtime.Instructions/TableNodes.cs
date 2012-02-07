@@ -1829,6 +1829,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 				plan.AddDevicePlan(devicePlan);
 				_deviceSupported = true;
+				SurrogateExecute = InternalDeviceExecute;
 				CheckDeviceRights(plan);
 				if ((_cursorCapabilities & CursorCapability.Updateable) != 0)
 				{
