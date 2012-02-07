@@ -85,7 +85,7 @@ namespace Alphora.Dataphor
 			InternalBriefDescription(builder, exception);
 			return builder.ToString();
 			#else
-			Exception current = AException;
+			Exception current = exception;
 			while (current != null)
 			{
 				if (builder.Length > 0)
@@ -134,11 +134,11 @@ namespace Alphora.Dataphor
 			#else
 			try
 			{
-				return AException.ToString();
+				return exception.ToString();
 			}
 			catch
 			{
-				return BriefDescription(AException);
+				return BriefDescription(exception);
 			}
 			#endif
 		}
@@ -189,9 +189,9 @@ namespace Alphora.Dataphor
 				builder.Append("\t");
 				
 			#if USEDETAILEDEXCEPTIONDESCRIPTION
-			ABuilder.AppendFormat("{0}\r\n", ExceptionUtility.DetailedDescription(AException));
+			builder.AppendLine(ExceptionUtility.DetailedDescription(exception));
 			#else
-			builder.AppendFormat("{0}\r\n", exception.Message);
+			builder.AppendLine(exception.Message);
 			#endif
 			if (exception.InnerException != null)
 				AppendMessage(builder, indent + 1, exception.InnerException);
@@ -202,7 +202,7 @@ namespace Alphora.Dataphor
 			for (int index = 0; index < indent; index++)
 				builder.Append("\t");
 				
-			builder.AppendFormat("{0}\r\n", message);
+			builder.AppendLine(message);
 		}
 	}
 }
