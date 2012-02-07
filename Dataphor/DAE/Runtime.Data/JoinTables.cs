@@ -500,6 +500,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		private bool _hitEOF;
 		private bool _hitBOF;
+
+		protected override void InternalReset()
+		{
+			base.InternalReset();
+			_hitBOF = false;
+			_hitEOF = false;
+		}
+
+		protected override void InternalFirst()
+		{
+			base.InternalFirst();
+			_hitBOF = true;
+			_hitEOF = false;
+		}
+
+		protected override void InternalLast()
+		{
+			base.InternalLast();
+			_hitEOF = true;
+			_hitBOF = false;
+		}
 		
 		protected override bool InternalNext()
 		{
